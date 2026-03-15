@@ -1,0 +1,16 @@
+{
+  "name": "goal-ai-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GOAL AI — Cloudflare Worker (API Proxy + Token Management)",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:production": "wrangler deploy --env production",
+    "token:create": "node scripts/create-token.js"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0"
+  }
+}

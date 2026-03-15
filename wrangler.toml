@@ -1,0 +1,38 @@
+name = "goal-ai-worker"
+main = "src/worker.js"
+compatibility_date = "2024-12-01"
+
+# ── 開発用 ──
+[dev]
+port = 8787
+
+# ── KV Namespace ──
+# 作成コマンド:
+#   wrangler kv namespace create TOKEN_KV
+#   wrangler kv namespace create TOKEN_KV --preview
+[[kv_namespaces]]
+binding = "TOKEN_KV"
+id = "a5c45e6d1b454d27be42020a802e4cdd"
+preview_id = "f6f98222ca8a4d0fb1e9e1335725b37c"
+
+# ── 環境変数（非機密） ──
+[vars]
+ALLOWED_ORIGINS = "https://goal-ai-frontend.pages.dev,https://delicate-bienenstitch-b734d6.netlify.app,http://localhost:3000,http://localhost:8080"
+
+# ── Secrets（CLI で設定） ──
+# wrangler secret put ANTHROPIC_API_KEY
+# wrangler secret put OPENAI_API_KEY
+# wrangler secret put GEMINI_API_KEY
+# wrangler secret put TOKEN_SECRET
+
+# ── ステージング環境 ──
+[env.staging]
+name = "goal-ai-worker-staging"
+[env.staging.vars]
+ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:8080"
+
+# ── 本番環境 ──
+[env.production]
+name = "goal-ai-worker"
+[env.production.vars]
+ALLOWED_ORIGINS = "https://goal-ai-frontend.pages.dev,https://delicate-bienenstitch-b734d6.netlify.app"
