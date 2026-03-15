@@ -175,6 +175,25 @@ LAUNCH30(30日), INVITE2026(14日), BETA3MONTH(90日), GOALPRO7(7日)
 - Annual: price_1TAJzX4084X0uakaYYYYYYYY（実際のIDに置換すること）
 → Stripe Price IDはworker.js内のSTRIPE_PRICE_IDS定数を参照
 
+## 完了済み機能（Phase 1）
+- 4. AI理解度可視化
+- 7. 壁打ちモード
+- 8. マイルストーン演出＆シェア
+- 9. 音声要約→タスク変換
+- 11. 今日の1%マイクロタスク
+- 13. トリセツPDF出力（html2canvas+jsPDF）
+- 18. 外部ツールエクスポート（ics/Markdown/テキスト）
+
+## プラン別AIモデル
+| プラン | Claude | GPT | Gemini |
+|-------|--------|-----|--------|
+| Free/Pro | claude-sonnet-4-20250514 | gpt-4o-mini | gemini-2.0-flash |
+| Premium | claude-opus-4-20250514 | gpt-4o | gemini-1.5-pro |
+
+## GitHub
+- リポジトリ: https://github.com/Trippy-gitcode/goal-ai-worker（プライベート）
+- .dev.varsはgitignore済み
+
 ## テスト手順
 1. デプロイ後は必ず https://goal-ai-frontend.pages.dev で動作確認
 2. チャットが動くか（AUTH_TOKENが有効か）

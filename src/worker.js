@@ -273,7 +273,7 @@ async function handleChat(request, env, ctx) {
     ]));
   }
 
-  return jsonRes(data, 200, { 'X-RateLimit-Remaining': String(rl.remaining) });
+  return jsonRes(data, 200, { 'X-RateLimit-Remaining': String(rl.remaining), 'X-Model-Used': claudeModel });
 }
 
 async function handleChatStream(request, env) {
@@ -315,6 +315,7 @@ async function handleChatStream(request, env) {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
+      'X-Model-Used': claudeModel,
     },
   });
 }
@@ -358,7 +359,7 @@ async function handleDeepOpenAI(request, env) {
   if (!res.ok) {
     return jsonRes({ error: data.error?.message || 'OpenAI API error' }, res.status);
   }
-  return jsonRes(data);
+  return jsonRes(data, 200, { 'X-Model-Used': openaiModel });
 }
 
 async function handleDeepGemini(request, env) {
@@ -393,7 +394,7 @@ async function handleDeepGemini(request, env) {
   if (!res.ok) {
     return jsonRes({ error: data.error?.message || 'Gemini API error' }, res.status);
   }
-  return jsonRes(data);
+  return jsonRes(data, 200, { 'X-Model-Used': geminiModel });
 }
 
 async function handleDeepClaude(request, env) {
@@ -435,7 +436,7 @@ async function handleDeepClaude(request, env) {
   if (!res.ok) {
     return jsonRes({ error: data.error?.message || 'Claude API error' }, res.status);
   }
-  return jsonRes(data);
+  return jsonRes(data, 200, { 'X-Model-Used': claudeModel });
 }
 
 async function handleDeepClaudeStream(request, env) {
@@ -473,6 +474,7 @@ async function handleDeepClaudeStream(request, env) {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
+      'X-Model-Used': claudeModel,
     },
   });
 }
@@ -1312,7 +1314,7 @@ function corsResponse(env, response, request) {
   if (requestOrigin && allowedOrigins.includes(requestOrigin)) { headers.set('Access-Control-Allow-Origin', requestOrigin); } else { headers.set('Access-Control-Allow-Origin', '*'); }
   headers.set('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
   headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Secret');
-  headers.set('Access-Control-Expose-Headers', 'X-RateLimit-Remaining');
+  headers.set('Access-Control-Expose-Headers', 'X-RateLimit-Remaining, X-Model-Used');
   headers.set('Access-Control-Max-Age', '86400');
 
   return new Response(response.body, {
