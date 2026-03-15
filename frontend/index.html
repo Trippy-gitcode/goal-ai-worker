@@ -5066,10 +5066,63 @@ async function chatStream({ system, messages, maxTokens, innerEl, scrollEl, onDo
   const inner = typeof innerEl === 'string' ? document.getElementById(innerEl) : innerEl;
   const scroll = typeof scrollEl === 'string' ? document.getElementById(scrollEl) : scrollEl;
   const { bub } = mkStreamBubble(inner, scroll);
+  let _csRouteDetected = false;
   await streamAI(
     { system, messages, maxTokens: maxTokens || 500 },
-    (t) => { streamAppend(bub, t); if (scroll) scroll.scrollTop = 99999; },
-    (t) => { streamFinalize(bub, t); if (onDone) onDone(t); },
+    (t) => {
+      // ストリーミング中のルーティングJSON検知
+      const trimmed = t.trim();
+      if(!_csRouteDetected && trimmed.length > 5 && trimmed.length < 150 && /^\s*\{\s*"route"\s*:/.test(trimmed)){
+        _csRouteDetected = true;
+        const r = parseRoute(trimmed);
+        if(r.route === 'gemini' || r.route === 'gpt'){
+          bub.innerHTML = r.route === 'gemini' ? '🔍 リサーチ中...' : '💡 アイデアを生成中...';
+          bub.style.cssText += 'color:var(--amber);font-size:13px;';
+          bub._routeData = r;
+          return;
+        }
+        _csRouteDetected = false;
+      }
+      if(!_csRouteDetected){ streamAppend(bub, t); if (scroll) scroll.scrollTop = 99999; }
+    },
+    async (t) => {
+      // 完了時にも検知（チャンク分割で漏れた場合）
+      if(!_csRouteDetected){
+        const finalTrimmed = t.trim();
+        if(/^\s*\{\s*"route"\s*:\s*"(gemini|gpt)"/.test(finalTrimmed)){
+          _csRouteDetected = true;
+          bub._routeData = parseRoute(finalTrimmed);
+          bub.innerHTML = bub._routeData.route === 'gemini' ? '🔍 リサーチ中...' : '💡 アイデアを生成中...';
+          bub.style.cssText += 'color:var(--amber);font-size:13px;';
+        }
+      }
+      if(_csRouteDetected && bub._routeData){
+        // ルーティング先AIに転送
+        try{
+          const ctx = buildAIContextCached();
+          const q = bub._routeData.query || '';
+          let result;
+          if(bub._routeData.route === 'gemini'){
+            result = await callGemini(q, `ユーザーの質問に簡潔かつ正確に答えてください。日本語で回答。\n\nユーザー背景：${ctx}`);
+          } else {
+            result = await callOpenAI(q, `ユーザーのリクエストに創造的かつ実用的に応えてください。日本語で回答。\n\nユーザー背景：${ctx}`, 800);
+          }
+          bub.innerHTML = renderMsgContent(result);
+          bub.classList.remove('stream-bubble');
+          bub.style.cssText = '';
+          if(onDone) onDone(result);
+        }catch(e){
+          // フォールバック: 元のテキスト表示
+          bub.style.cssText = '';
+          bub.innerHTML = renderMsgContent('申し訳ありません。外部AIへの接続に失敗しました。もう一度お試しください。');
+          bub.classList.remove('stream-bubble');
+          if(onError) onError(e);
+        }
+      } else {
+        streamFinalize(bub, t);
+        if (onDone) onDone(t);
+      }
+    },
     (e) => { bub.classList.remove('stream-bubble'); bub.textContent = 'エラーが発生しました。'; if (onError) onError(e); }
   );
 }
@@ -5652,11 +5705,20 @@ ${buildAIContextCached()}`;
       }
     },
     async (t) => {
+      // ストリーミング完了時にも最終テキストでルーティング検知（チャンク分割で漏れた場合のフォールバック）
+      if(!routeDetected){
+        const finalTrimmed = t.trim();
+        const finalRouteMatch = finalTrimmed.match(/^\s*\{\s*"route"\s*:\s*"(gemini|gpt)"[\s\S]*?\}/);
+        if(finalRouteMatch){
+          routeDetected = parseRoute(finalTrimmed);
+          bub.innerHTML = routeDetected.route === 'gemini' ? '🔍 リサーチ中...' : '💡 アイデアを生成中...';
+          bub.style.cssText += 'color:var(--amber);font-size:13px;';
+          bub._dotsRemoved = true;
+        }
+      }
       if(routeDetected){
-        // ルーティング先AIに転送
         await executeRoute(routeDetected, text, today, inner, scroll, bub);
       } else {
-        // 通常のClaude応答完了
         streamFinalize(bub, t);
         homeMsgs.push({role:'ai',content:t,time:now(),date:today});
         homeHistory.push({role:'assistant',content:t});
