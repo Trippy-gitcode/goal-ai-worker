@@ -3369,6 +3369,7 @@ let mencareMode = false;
 let mencareEndTime = null;
 let mencareTimerInterval = null;
 let curPage = 'chat';
+// Legacy — kept for backward compatibility with applyModeUI references
 let msgs = [];
 let history = [];
 let isLoading = false;
@@ -3850,15 +3851,8 @@ function mkTdpMsg(m){
   return wrap;
 }
 
-function showTdpTyping(){
-  const chat = document.getElementById('tdp-chat');
-  const d = document.createElement('div');
-  d.id='tdp-typing';d.className='tdp-msg ai';
-  d.innerHTML=`<div class="tdp-av ai">${getLogoSVG(14)}</div><div class="tdp-bubble" style="padding:8px 13px;"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
-  chat.appendChild(d);
-  chat.scrollTop = chat.scrollHeight;
-}
-function hideTdpTyping(){ const e=document.getElementById('tdp-typing');if(e)e.remove(); }
+function showTdpTyping() { showChatTyping(document.getElementById('tdp-chat'), 'tdp-typing', getLogoSVG(14), 'tdp-msg ai'); }
+function hideTdpTyping() { hideChatTyping('tdp-typing'); }
 
 async function sendTaskMsg(){
   if(!selectedTask || taskChatLoading) return;
@@ -3915,8 +3909,8 @@ async function sendTaskMsg(){
   taskChatLoading = false;
 }
 
-function tdpResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
-function tdpKey(e){if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!_isComposing){e.preventDefault();sendTaskMsg();}}
+function tdpResize(el) { chatResize(el, 80); }
+function tdpKey(e) { chatKey(sendTaskMsg, e); }
 
 
 
@@ -4241,9 +4235,9 @@ function applyModeUI(mode) {
     spartan: 'スパルタモードをONにしました。\n\n甘えは禁止です。結果だけで判断します。今から何を変えますか？',
     kabeuchi: '壁打ちモードをONにしました。\n\n答えは出しません。あなた自身の中にある答えを、質問で引き出します。\nさて、今一番頭にあることは何ですか？',
   };
-  if(msgs.length > 0) {
-    msgs.push({role:'ai', content: notices[mode], time: now()});
-    renderMsgs();
+  if(homeMsgs.length > 0) {
+    homeMsgs.push({role:'ai', content: notices[mode], time: now()});
+    renderHomeMsgs();
     showPage('home');
   }
 }
@@ -4269,195 +4263,18 @@ function updateMencareTimer(){
 
 
 // ════════ CHAT ════════
-function renderMsgs() {
-  const c=document.getElementById('home-chat-inner'); if(!c) return; c.innerHTML='';
-  msgs.forEach(m=>c.appendChild(mkMsg(m)));
-  scrollDown();
-}
-
 function getLogoSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 100 100"><defs><linearGradient id="lg${size}" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M26 70 L32 40 L42 55 L50 24 L58 55 L68 40 L74 70 Z" fill="url(#lg${size})"/></svg>`;}
 function getUserAvatarText(){const n=USER_PROFILE.nickname||USER_PROFILE.name||'';return n?n.charAt(0):'';}
-function mkMsg(m) {
-  const wrap=document.createElement('div'); wrap.className=`msg ${m.role}`;
-  const av=document.createElement('div'); av.className=`msg-av ${m.role}`;
-  if(m.role==='ai'){av.innerHTML=getLogoSVG(14);}else{const ut=getUserAvatarText();if(ut)av.textContent=ut;else av.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>';}
-  const body=document.createElement('div'); body.className='msg-body';
-  const bub=document.createElement('div'); bub.className='bubble';
-  bub.innerHTML=m.content.replace(/\n/g,'<br>');
-
-  if(m.hasRoadmap&&m.roadmap) bub.appendChild(mkRoadmapCard(m.roadmap));
-  if(m.hasForecast&&m.forecast) {
-    bub.appendChild(mkForecastCard(m.forecast));
-    if(m.afterForecast){const p=document.createElement('p');p.style.cssText='margin-top:10px;font-size:12.5px;';p.textContent=m.afterForecast;bub.appendChild(p);}
-  }
-  if(m.hasTradeoff&&m.tradeoff) bub.appendChild(mkTradeoffCard(m.tradeoff));
-  if(m.options){
-    const g=document.createElement('div');g.className='opts';
-    m.options.forEach(o=>{const b=document.createElement('button');b.className='opt-btn';b.textContent=o;b.onclick=()=>quickReply(o);g.appendChild(b);});
-    bub.appendChild(g);
-  }
-
-  const t=document.createElement('div');t.className='msg-time';t.textContent=m.time||'';
-  body.appendChild(bub);body.appendChild(t);
-  wrap.appendChild(av);wrap.appendChild(body);
-  return wrap;
-}
-
-function mkRoadmapCard(rm) {
-  const c=document.createElement('div');c.className='card rm-card';
-  c.innerHTML='<div class="card-hd">📍 ロードマップ</div>';
-  rm.steps.forEach(s=>{
-    const r=document.createElement('div');r.className='rm-row';
-    r.innerHTML=`<div class="step-n ${s.status}">${s.num}</div><div><div class="step-title">${s.title}</div><div class="step-period">${s.period}</div></div>`;
-    c.appendChild(r);
-  });
-  return c;
-}
-
-function mkForecastCard(fc) {
-  const cm={red:'var(--red)',amber:'var(--amber)',green:'var(--green)'};
-  const bm={red:'var(--red-d)',amber:'var(--amber-d)',green:'var(--green-d)'};
-  const c=document.createElement('div');c.className='card fc-card';
-  c.innerHTML='<div class="card-hd">📅 このペースが続くと…</div>';
-  fc.scenarios.forEach(s=>{
-    const r=document.createElement('div');r.className='fc-row';
-    r.innerHTML=`<div class="fc-dot" style="background:${cm[s.color]||'#888'}"></div><div class="fc-scenario">${s.label}</div><div class="fc-date">${s.date}</div><div class="fc-badge" style="background:${bm[s.color]};color:${cm[s.color]}">${s.delta}</div>`;
-    c.appendChild(r);
-  });
-  return c;
-}
-
-function mkTradeoffCard(to) {
-  const c=document.createElement('div');c.className='card to-card';
-  c.innerHTML='<div class="card-hd">⚖️ 何かを諦めれば、これだけ進む</div>';
-  to.items.forEach(item=>{
-    const r=document.createElement('div');r.className='to-row';
-    r.innerHTML=`<div style="font-size:18px;flex-shrink:0">✂️</div><div class="to-give"><div class="to-give-title">「${item.give}」を諦める</div><div class="to-give-detail">${item.detail}</div><span class="to-gain">→ ${item.gain}</span></div>`;
-    c.appendChild(r);
-  });
-  return c;
-}
-
-function showTyping(){
-  const c=document.getElementById('home-chat-inner'); if(!c) return;
-  const d=document.createElement('div');d.id='typing-indicator';d.className='msg ai';
-  d.innerHTML=`<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="padding:0;"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
-  c.appendChild(d);scrollDown();
-}
-function hideTyping(){const e=document.getElementById('typing-indicator');if(e)e.remove();}
-
-async function callAPI(userMsg) {
-  history.push({role:'user',content:userMsg});
-  const ctx = buildAIContext();
-  const modeExtra = mencareMode
-    ? '\n【メンケアモード】進捗の話は自分からしない。気持ちを最優先に。小さな一歩だけ提案。'
-    : spartanMode
-    ? '\n【スパルタモード】断定的。共感不要。数字と事実から始める。トレードオフを必ず提示。'
-    : '';
-  const sys = `あなたはGOAL AIというAIコーチです。ユーザーと一緒にゴールを形作り、達成を伴走します。\n\n${ctx}${modeExtra}
-
-【対話の原則】
-- ユーザーがまだ漠然としたビジョンを話しているなら、すぐ提案せず「なぜそう思った？」「実現したらどうなる？」と掘り下げる
-- ゴールの輪郭が見えてきたら「こういうゴールにまとめてみない？」と提案する
-- ゴールが確定して初めてタスクやアクションの話に入る
-- 2〜3文で返す。質問は1回に1つだけ
-
-【JSON出力（ゴール確定後、必要な場合のみ）】
-ロードマップ: \`\`\`json\n{"type":"roadmap","steps":[{"num":1,"title":"ステップ名","period":"期間","status":"done|current|todo"}]}\`\`\`
-期間延長予測: \`\`\`json\n{"type":"forecast","scenarios":[{"label":"ラベル","date":"YYYY年MM月末","delta":"+Xヶ月","color":"red|amber|green"}]}\`\`\`
-トレードオフ: \`\`\`json\n{"type":"tradeoff","items":[{"give":"諦めること","detail":"詳細","gain":"効果"}]}\`\`\``;
-  const r=await fetch(`${WORKER_URL}/api/chat`,{
-    method:'POST',
-    headers:getAuthHeaders(),
-    body:JSON.stringify({system:sys,messages:history,maxTokens:1000})
-  });
-  const d=await r.json();
-  const text=d.content?.map(b=>b.text||'').join('')||'エラーが発生しました';
-  history.push({role:'assistant',content:text});
-  return text;
-}
-
-function parseResponse(text) {
-  const m={role:'ai',content:text,time:now()};
-  const matches=[...text.matchAll(/```json\n([\s\S]*?)\n```/g)];
-  m.content=text.replace(/```json\n[\s\S]*?\n```/g,'').trim();
-  matches.forEach(match=>{
-    try{
-      const p=JSON.parse(match[1]);
-      if(p.type==='roadmap'){m.hasRoadmap=true;m.roadmap=p;}
-      if(p.type==='forecast'){m.hasForecast=true;m.forecast=p;}
-      if(p.type==='tradeoff'){m.hasTradeoff=true;m.tradeoff=p;}
-    }catch(e){}
-  });
-  return m;
-}
-
-async function sendMsg() {
-  const inp=document.getElementById('msg-in');
-  const text=inp.value.trim();
-  if(!text||isLoading)return;
-  inp.value=''; autoResize(inp);
-  msgs.push({role:'user',content:text,time:now()});
-  renderMsgs(); isLoading=true; showTyping();
-
-  // Build system same as callAPI
-  const _ctx2 = buildAIContextCached();
-  const _modeExtra2 = mencareMode
-    ? '\n【メンケアモード】進捗の話は自分からしない。気持ちを最優先に。小さな一歩だけ提案。'
-    : spartanMode
-    ? '\n【スパルタモード】断定的。共感不要。数字と事実から始める。トレードオフを必ず提示。'
-    : '';
-  const _sys2 = `あなたはGOAL AIというAIコーチです。ユーザーと一緒にゴールを形作り、達成を伴走します。\n\n${_ctx2}${_modeExtra2}
-
-【対話の原則】
-- ユーザーがまだ漠然としたビジョンを話しているなら、すぐ提案せず「なぜそう思った？」「実現したらどうなる？」と掘り下げる
-- ゴールの輪郭が見えてきたら「こういうゴールにまとめてみない？」と提案する
-- ゴールが確定して初めてタスクやアクションの話に入る
-- 2〜3文で返す。質問は1回に1つだけ
-
-【JSON出力（ゴール確定後、必要な場合のみ）】
-ロードマップ: \`\`\`json
-{"type":"roadmap","steps":[{"num":1,"title":"ステップ名","period":"期間","status":"done|current|todo"}]}\`\`\`
-期間延長予測: \`\`\`json
-{"type":"forecast","scenarios":[{"label":"ラベル","date":"YYYY年MM月末","delta":"+Xヶ月","color":"red|amber|green"}]}\`\`\`
-トレードオフ: \`\`\`json
-{"type":"tradeoff","items":[{"give":"諦めること","detail":"詳細","gain":"効果"}]}\`\`\``;
-
-  const _msgHistory2 = history.slice(-20);
-  hideTyping();
-  const _inner = document.getElementById('home-chat-inner');
-  const _wrap  = document.getElementById('home-chat-wrap');
-  const { bub: _sBub } = mkStreamBubble(_inner, _wrap);
-
-  await streamAI(
-    { system: _sys2, messages: _msgHistory2, maxTokens: 1000 },
-    (t) => { _sBub.innerHTML = renderMsgContent(t); if(_wrap) _wrap.scrollTop=99999; },
-    (t) => {
-      _sBub.classList.remove('stream-bubble');
-      const parsed = parseResponse(t);
-      msgs.push(parsed);
-      history.push({ role:'assistant', content:t });
-      renderMsgs();
-    },
-    (e) => {
-      _sBub.classList.remove('stream-bubble');
-      msgs.push({ role:'ai', content:'エラーが発生しました。', time:now() });
-      history.push({ role:'assistant', content:'エラーが発生しました。' });
-      renderMsgs();
-    }
-  );
-  isLoading=false;
-}
-
-function quickReply(t){document.getElementById('msg-in').value=t;sendMsg();}
+function showTyping() { showChatTyping(document.getElementById('home-chat-inner'), 'typing-indicator'); }
+function hideTyping() { hideChatTyping('typing-indicator'); }
 
 function startReview() {
   showPage('home');
   const reviewMsg = spartanMode
     ? 'スパルタレビューを開始します。今月の進捗と遅延理由を正直に報告してください。'
     : '月次レビューを始めましょう。今月どうでしたか？';
-  document.getElementById('msg-in').value = reviewMsg;
-  sendMsg();
+  document.getElementById('home-msg-in').value = reviewMsg;
+  sendHomeMsg();
 }
 
 // ════════ WELCOME / NEW GOAL ════════
@@ -4730,7 +4547,7 @@ async function sendCalMsg(){
   }
   calChatLoading=false;
 }
-function calMsgKey(e){if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!_isComposing){e.preventDefault();sendCalMsg();}}
+function calMsgKey(e) { chatKey(sendCalMsg, e); }
 
 // ════════ VOICE INPUT（ハイブリッド：Web Speech API + Whisper + 音量連動）════════
 let homeRecording = false;
@@ -5168,6 +4985,59 @@ function toast(msg){
   setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3000);
 }
 
+// ════════ SHARED CHAT ENGINE ════════
+const CHAT_CONFIG = {
+  maxResizeHeight: { home: 110, hub: 110, task: 80, cal: 80, worries: 80, htp: 80 },
+};
+
+function chatResize(el, maxH) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, maxH || 110) + 'px';
+}
+
+function chatKey(sendFn, e) {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && !_isComposing) {
+    e.preventDefault();
+    sendFn();
+  }
+}
+
+function showChatTyping(chatEl, typingId, avatarHtml, bubbleClass) {
+  const d = document.createElement('div');
+  d.id = typingId;
+  d.className = bubbleClass || 'msg ai';
+  d.style.marginBottom = '16px';
+  d.innerHTML = `<div class="${bubbleClass === 'tdp-msg ai' ? 'tdp-av ai' : 'msg-av ai'}">${avatarHtml || getLogoSVG(14)}</div><div class="${bubbleClass === 'tdp-msg ai' ? 'tdp-bubble' : 'msg-body'}" style="${bubbleClass === 'tdp-msg ai' ? '' : ''}"><div class="${bubbleClass === 'tdp-msg ai' ? '' : 'bubble'}" style="padding:0;"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
+  chatEl.appendChild(d);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+function hideChatTyping(typingId) {
+  const e = document.getElementById(typingId);
+  if (e) e.remove();
+}
+
+// ════════ SHARED API CALL ════════
+async function apiCall(endpoint, method, body) {
+  const opts = { method, headers: getAuthHeaders() };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const res = await fetch(`${WORKER_URL}${endpoint}`, opts);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'サーバーエラー' }));
+      if (res.status === 401) { toast('認証エラー。ページを再読み込みしてください'); }
+      else if (res.status === 429) { toast('利用制限に達しました。しばらくお待ちください'); }
+      else { toast(err.error || 'エラーが発生しました'); }
+      return null;
+    }
+    return await res.json();
+  } catch (e) {
+    if (!navigator.onLine) toast('ネットワークに接続されていません');
+    else toast('通信エラーが発生しました');
+    return null;
+  }
+}
+
 // ════════ UTILS ════════
 function now(){return new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});}
 function scrollDown(){
@@ -5197,8 +5067,8 @@ function scrollToLatest(){const w=document.getElementById('home-chat-wrap');if(w
     if(w) w.addEventListener('scroll',()=>{if(!_scrollTick){_scrollTick=true;requestAnimationFrame(()=>{checkScrollBtn();_scrollTick=false;});}});
   });
 })();
-function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';}
-function handleKey(e){if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!_isComposing){e.preventDefault();sendMsg();}}
+function autoResize(el) { chatResize(el, 110); }
+function handleKey(e) { chatKey(sendHomeMsg, e); }
 
 // ════════ PROFILE MODAL ════════
 function openProfile(){
@@ -5360,8 +5230,8 @@ function editWorriesSummary(){
   document.getElementById('worries-input-row').style.display = '';
 }
 
-function worriesResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,80)+'px'; }
-function worriesKey(e){ if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!_isComposing){ e.preventDefault(); sendWorriesMsg(); } }
+function worriesResize(el) { chatResize(el, 80); }
+function worriesKey(e) { chatKey(sendWorriesMsg, e); }
 
 function saveProfile(){
   toast('プロフィールを保存しました ✓');
@@ -5542,10 +5412,6 @@ const SYS_HOME = `あなたはGOAL AIの「ゴール形成パートナー」で�
 - ユーザーが納得して明確に同意するまで次のフェーズに進まない
 - AIが勝手に「では次に進みましょう」と進めることを禁止する`;
 
-function loadHomeMsgs(){
-  // データはinit()でSupabaseから読み込み済み
-}
-
 function saveHomeMsgs(){
   // 最後の2メッセージ（user + ai）をSupabaseに保存
   if (!AUTH_TOKEN || homeMsgs.length < 2) return;
@@ -5634,13 +5500,8 @@ function mkHomeMsg(m){
   return wrap;
 }
 
-function showHomeTyping(){
-  const c=document.getElementById('home-chat-inner');
-  const d=document.createElement('div'); d.id='home-typing'; d.className='msg ai'; d.style.marginBottom='16px';
-  d.innerHTML=`<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="padding:0;"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
-  c.appendChild(d); document.getElementById('home-chat-wrap').scrollTop=99999;
-}
-function hideHomeTyping(){ const e=document.getElementById('home-typing'); if(e)e.remove(); }
+function showHomeTyping() { showChatTyping(document.getElementById('home-chat-inner'), 'home-typing'); }
+function hideHomeTyping() { hideChatTyping('home-typing'); }
 
 async function sendHomeMsg(){
   if(homeLoading)return;
@@ -5965,7 +5826,11 @@ function renderSidebarChatRecords(){
     </div>`).join('');
 }
 
-function homeResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,110)+'px'; const btn=document.getElementById('home-send-btn'); if(btn&&!homeLoading) btn.disabled=!el.value.trim()&&!homeImageData; }
+function homeResize(el) {
+  chatResize(el, 110);
+  const btn = document.getElementById('home-send-btn');
+  if (btn) btn.disabled = !el.value.trim() && !homeImageData;
+}
 function homeSendRestore(){ const b=document.getElementById('home-send-btn'); if(b){b.classList.remove('sending');b.disabled=false;} }
 
 // ═══ CHAT HISTORY PANEL ═══
@@ -6048,7 +5913,7 @@ if(window.visualViewport){
     } else if(hel) { hel.style.transform = ''; }
   });
 }
-function homeKey(e){ if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!_isComposing){ e.preventDefault(); sendHomeMsg(); } }
+function homeKey(e) { chatKey(sendHomeMsg, e); }
 
 // ─ Summary strip ─
 function renderHomeSummary(){
@@ -6287,8 +6152,8 @@ ${buildAIContextCached()}
   htpLoading = false;
 }
 
-function htpResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,80)+'px'; }
-function htpKey(e){ if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!_isComposing){ e.preventDefault(); sendHtpMsg(); } }
+function htpResize(el) { chatResize(el, 80); }
+function htpKey(e) { chatKey(sendHtpMsg, e); }
 
 
 async function refreshQuote(){
@@ -6496,16 +6361,11 @@ async function sendHubMsg(){
   );
   hubChatLoading = false;
 }
-function hubMsgResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,110)+'px'; }
-function hubMsgKey(e){ if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!_isComposing){ e.preventDefault(); sendHubMsg(); } }
+function hubMsgResize(el) { chatResize(el, 110); }
+function hubMsgKey(e) { chatKey(sendHubMsg, e); }
 
-function showHubTyping(){
-  const c=document.getElementById('hub-chat-inner');
-  const d=document.createElement('div'); d.id='hub-typing'; d.className='msg ai'; d.style.marginBottom='16px';
-  d.innerHTML=`<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="padding:0;"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
-  c.appendChild(d); document.getElementById('hub-chat-wrap').scrollTop=99999;
-}
-function hideHubTyping(){ const e=document.getElementById('hub-typing'); if(e)e.remove(); }
+function showHubTyping() { showChatTyping(document.getElementById('hub-chat-inner'), 'hub-typing'); }
+function hideHubTyping() { hideChatTyping('hub-typing'); }
 
 // ─ Hub Tasks ─
 function renderHubTasks(){
@@ -8905,9 +8765,7 @@ document.addEventListener('click', e=>{
 });
 
 async function init(){
-  msgs=[];
-  history=[];
-  renderMsgs();
+  // Legacy chat vars cleared
   initHomePlaceholder();
   renderMembershipUI();
   updateNotifSettingUI();
