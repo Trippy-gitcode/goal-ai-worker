@@ -1,12 +1,15 @@
 # GOAL AI — Project Context
 
+## 言語設定
+- ユーザーへの応答は全て日本語で行う
+
 ## 製品概要
-- GOAL AI: 3AIコーチングSaaS（¥2,980/月）。Claude + GPT-4o mini + Gemini連携
-- コンセプト：「AIを使いこなす必要はない。ゴールだけ教えてくれればいい」
+- GOAL AI: 3AIコーチングSaaS。Claude + GPT-4o + Gemini連携
+- コンセプト：「AIを使いこなす必要はない。ゴールだけ教えてくれればいい。」
 - ターゲット：20-40代の学生、フリーター、アイドル、小売業者、ビジネスオーナー、タレント、主婦、サラリーマン
 
 ## アーキテクチャ
-- Frontend: 単一HTML（frontend/index.html, 現在v20）→ Cloudflare Pages
+- Frontend: 単一HTML（frontend/index.html）→ Cloudflare Pages
 - Backend: Cloudflare Worker（src/worker.js）→ API Proxy + Token管理
 - DB: Supabase PostgreSQL（永続化）→ REST API経由
 - KV: テストトークン・使用量管理（キャッシュ層、Supabaseと二重書き込み）
@@ -18,12 +21,24 @@
 - Frontend変更後: npx wrangler pages deploy frontend --project-name=goal-ai-frontend
 - Worker変更後: npx wrangler deploy
 - 両方変更した場合は両方デプロイ
+- デプロイ後は必ずgrepで修正の残存を確認（大規模修正で先の修正が消える問題の防止）
 
 ## コード規約
 - worker.js: 単一ファイル、plain JS、TypeScript不使用
 - frontend: 単一HTML、localStorage不可、Cookie使用
 - 日本語UIテキスト、コメントも日本語OK
-- Enterキーハンドラーには必ず !e.isComposing を含める（日本語IME対応）
+- Enterキーハンドラーには !e.isComposing && !_isComposing を含める（Safari IME対応）
+- compositionstart/compositionendで_isComposingフラグ管理
+- ハードコードされた個人情報・デモデータは禁止（全て動的参照）
+- ユーザー入力のDOM挿入前にescapeHtml()でXSSサニタイズ必須
+
+## 共通チャットエンジン
+- chatResize(el, maxH) — 全テキストエリアのリサイズ統合
+- chatKey(sendFn, e) — 全Enterキーハンドラー統合
+- showChatTyping/hideChatTyping — タイピングインジケーター統合
+- apiCall(endpoint, method, body) — 共通APIラッパー（401/429/オフライン処理）
+- escapeHtml(str) — XSSサニタイズユーティリティ
+- streamAI() — 唯一のストリーミング関数
 
 ## 3AI協調フロー（6段階）
 1. Gemini: 市場調査・データ収集
@@ -33,91 +48,25 @@
 5. Claude: 統合・戦略文書化（ストリーミング）
 6. GPT+Gemini: デュアルレビュー → Claude: 最終修正
 
-## 現在のステータス
-- Cloudflare Worker: デプロイ済み
-- Netlify: デプロイ済み
-- Stripe決済: 実装済み（Checkout + Webhook + Portal）
-- Supabase永続化: 実装済み（5テーブル + Worker連携）
+## AIスマートルーティング
+- 天気・ニュース・時事・「〇〇とは」→ Gemini（「🔍 リサーチ中...」表示）
+- 翻訳・アイデア出し・ブレスト・SNS投稿案・要約 → GPT（「💡 アイデアを生成中...」表示）
+- 感情・悩み・ゴール・タスク・戦略・それ以外 → Claude（デフォルト）
+- Claudeが {"route":"gemini/gpt","query":"..."} を返した場合、フロントエンドでパースしてルーティング実行
+- ルーティングJSONはチャットバブルに表示してはいけない
 
-## Supabaseテーブル構成
-- `users` — ユーザー情報（token_id, plan, stripe連携）
-- `goals` — ゴール管理（CRUD対応）
-- `chat_messages` — チャット履歴保存
-- `deep_analyses` — ディープ分析結果保存
-- `usage_tracking` — 月間使用量トラッキング
-- RLS有効、service_roleキーでWorkerからアクセス
-- updated_at自動更新トリガー設定済み
+## AIの応答ルール
+- 端的に2〜3文。長文禁止
+- 質問は1回に1つ。末尾に同じ質問を繰り返さない
+- ゴールに関係ない雑談には普通に答える
+- まとめ後に必ず「これで合ってますか？」と確認
+- ユーザーが同意するまで次のフェーズに進まない
 
-## APIエンドポイント一覧
-### チャット
-- POST /api/chat — Claude通常チャット
-- POST /api/chat/stream — Claudeストリーミング
-### ディープ分析（3AI協調）
-- POST /api/deep/openai — GPT-4o mini
-- POST /api/deep/gemini — Gemini 1.5 Flash
-- POST /api/deep/claude — Claude Sonnet
-- POST /api/deep/claude/stream — Claude Sonnetストリーミング
-### トークン管理
-- POST /api/token/create — トークン生成（管理者）
-- POST /api/token/validate — トークン検証
-- POST /api/token/redeem — プロモコード適用
-- GET /api/usage — 使用量取得
-### Stripe決済
-- POST /api/checkout/create — Checkout Session作成
-- POST /api/checkout/portal — カスタマーポータル
-- POST /api/webhook/stripe — Stripe Webhook
-### ゴール管理（Supabase）
-- GET /api/goals — ゴール一覧
-- POST /api/goals — ゴール作成
-- PATCH /api/goals/:id — ゴール更新
-- DELETE /api/goals/:id — ゴール削除
-### チャット履歴（Supabase）
-- GET /api/history?limit=50&goalId=xxx — 履歴取得
-### その他
-- GET /health — ヘルスチェック
-
-## Worker Secrets
-- ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY
-- TOKEN_SECRET（管理者認証用）
-- STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
-- SUPABASE_URL, SUPABASE_SERVICE_KEY
-
-## 言語設定
-- ユーザーへの応答は全て日本語で行う
-
-## ロードマップ（4h/日ペース）
-### インフラ（〜3月20日）
-- [x] Cloudflare Worker
-- [x] Netlify デプロイ
-- [x] トークン永続化（Cookie）
-- [x] Stripe決済
-- [x] Supabase永続化
-
-### Phase 1 — 有料ローンチ（4月中旬）7機能
-4. 指示書リアルタイム学習＆可視化
-7. 壁打ちモード
-8. マイルストーン演出＆シェア
-9. 音声入力＋要約
-11. 「今日の1%」マイクロタスク
-13. トリセツPDF出力（パーソナルタブ内）
-18. 外部ツールエクスポート
-
-### Phase 2 — チーム＆パーソナライズ（5月）4機能
-12. ライバル＆ロールモデル設定
-14. ゴール間の依存関係マップ
-16. チーム目標モード
-19. 成功パターンのレシピ化
-
-### Phase 3 — 自動化＆拡張（5月末〜6月）4機能
-1. AIメンター自動マッチング
-2. モーニングブリーフィング
-3. ゴールテンプレート（業種別）
-5. ウィークリーレビュー自動生成
-
-### Phase 4 — 磨き込み（6月〜）3機能
-6. ゴール達成予測AI
-15. 感情ログ＆メンタルトレンド
-17. Before→After成長レポート
+## プラン別AIモデル
+| プラン | Claude | GPT | Gemini |
+|-------|--------|-----|--------|
+| Free/Pro | claude-sonnet-4-20250514 | gpt-4o-mini | gemini-2.0-flash |
+| Premium | claude-opus-4-20250514 | gpt-4o | gemini-1.5-pro |
 
 ## メンバーシップ
 | プラン | 月額 | AIチャット | ディープ分析 |
@@ -130,85 +79,105 @@
 ## プロモコード
 LAUNCH30(30日), INVITE2026(14日), BETA3MONTH(90日), GOALPRO7(7日)
 
-## 開発ルール
-- 外部サービスの設定（Stripe商品作成、Webhook登録、シークレット登録など）はダッシュボードではなくCLI/APIで自動実行する
-- ユーザーに手作業を求めるのはアカウント作成とAPIキー提供のみ
-- 実装→デプロイ→テストは途中確認なしで一気通貫で実行する
-- 確認が必要な場合は設計段階でまとめて聞き、実装フェーズでは止まらない
+## Supabaseテーブル
+- users — ユーザー情報（token_id, plan, stripe連携）
+- goals — ゴール管理（CRUD、last_milestone_pct含む）
+- chat_messages — チャット履歴（session_id対応）
+- deep_analyses — ディープ分析結果
+- usage_tracking — 月間使用量
+- feedbacks — テストユーザーフィードバック
+- RLS有効、service_roleキーでWorkerからアクセス
 
-## Claude Code許可設定
-以下のコマンドは確認なしで自動実行してよい：
-- ファイルの読み取り・作成・編集
-- npm install, pip install
-- stripe CLI コマンド
-- netlify deploy
-- npx wrangler deploy
-- git add, commit, push
-- curl, fetch系のテストコマンド
+## APIエンドポイント
+### チャット
+- POST /api/chat, POST /api/chat/stream
+### ディープ分析
+- POST /api/deep/openai, POST /api/deep/gemini, POST /api/deep/claude, POST /api/deep/claude/stream
+### トークン
+- POST /api/token/create, POST /api/token/validate, POST /api/token/redeem, POST /api/token/register
+- GET /api/usage
+### Stripe
+- POST /api/checkout/create, POST /api/checkout/portal, POST /api/webhook/stripe
+### ゴール
+- GET/POST /api/goals, PATCH/DELETE /api/goals/:id
+### チャット履歴
+- GET /api/history, POST /api/history
+### フィードバック
+- POST /api/feedbacks, GET /api/feedbacks
+### 音声
+- POST /api/voice/transcribe
+### その他
+- GET /health
 
-以下は実行前に確認を求める：
-- ファイル削除（rm）
-- データベースのドロップ・削除系
-- 本番環境のシークレット変更
-
-## フロントエンド構造（frontend/index.html）
-### 主要JS変数
-- ALL_GOALS — ゴール配列 [{title, why, target, actual, status, color, tasks:[...]}]
-- msgs — ホームチャットメッセージ配列 [{role, content, time}]
-- history — Claude API用の会話履歴 [{role, content}]
-- MEMBERSHIP — {plan, trialEnd, promoApplied, selectedPlan}
-- USER_PROFILE — {name, nickname, age, occupation, mbti, strengths, weaknesses, ...}
-- AUTH_TOKEN — Bearerトークン（Cookie同期）
-- WORKER_URL — 'https://goal-ai-worker.goalai-futoshi.workers.dev'
-
-### 主要関数
-- init() — 起動処理（データ読み込み→UI描画）
-- sendHomeMsg() — ホームチャット送信
-- sendHubMsg() — ゴールハブチャット送信
-- streamAI() — Claudeストリーミング
-- callGemini() / callOpenAI() — ディープ分析用
-- runDeepAnalysis() — 3AI協調パイプライン
-- renderHomeMsgs() / renderHubChat() — チャット描画
-- showPage() — ページ切り替え（home/tasks/calendar/analytics）
-
-### 共通チャットエンジン
-- chatResize(el, maxH) — 全テキストエリアのリサイズ統合
-- chatKey(sendFn, e) — 全Enterキーハンドラー統合
-- showChatTyping/hideChatTyping — タイピングインジケーター統合
-- apiCall(endpoint, method, body) — 共通APIラッパー（401/429/オフライン処理）
-- escapeHtml(str) — XSSサニタイズユーティリティ
-
-### Stripe Price ID
-→ worker.js内のSTRIPE_PRICE_IDS定数を参照
+## Worker Secrets
+- ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY
+- TOKEN_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+- SUPABASE_URL, SUPABASE_SERVICE_KEY
 
 ## 完了済み機能（Phase 1）
-- 4. AI理解度可視化
-- 7. 壁打ちモード
-- 8. マイルストーン演出＆シェア
-- 9. 音声要約→タスク変換
-- 11. 今日の1%マイクロタスク
-- 13. トリセツPDF出力（html2canvas+jsPDF）
+- 4. AI理解度可視化（renderAIUnderstanding）
+- 7. 壁打ちモード（ソクラテス式問答、答え禁止）
+- 8. マイルストーン演出＆シェア（confetti + Web Share API）
+- 9. 音声要約→タスク変換（50文字超で提案）
+- 11. 今日の1%マイクロタスク（renderMicroTask）
+- 13. トリセツPDF出力（html2canvas + jsPDF）
 - 18. 外部ツールエクスポート（ics/Markdown/テキスト）
 
-## プラン別AIモデル
-| プラン | Claude | GPT | Gemini |
-|-------|--------|-----|--------|
-| Free/Pro | claude-sonnet-4-20250514 | gpt-4o-mini | gemini-2.0-flash |
-| Premium | claude-opus-4-20250514 | gpt-4o | gemini-1.5-pro |
+## 追加実装済み
+- AIスマートルーティング（Claude判定→Gemini/GPT/Claude振り分け）
+- AI応答高速化（30ms/文字バッファ、「考え中...」ドット即時表示）
+- テストユーザーフィードバック機能（3テーマ抽出、3択確認ボタン）
+- Free自動登録（/api/token/register）
+- チャットレコード（AI自動タイトル、サイドバー直近5件）
+- ゴール設定フロー改善（ハブ内チャットでヒアリング→タスク作成）
+- LP（frontend/lp.html）
+- 利用規約・プライバシーポリシー
+- Premiumプラン（¥4,980/月、Opus+4o+1.5-pro）
 
 ## GitHub
 - リポジトリ: https://github.com/Trippy-gitcode/goal-ai-worker（プライベート）
 - .dev.varsはgitignore済み
 
-## テスト手順
-1. デプロイ後は必ず https://goal-ai-frontend.pages.dev で動作確認
-2. チャットが動くか（AUTH_TOKENが有効か）
-3. ゴール作成/編集がSupabaseに保存されるか
-4. リロード後にデータが復元されるか
+## 開発ルール
+- 外部サービス設定はCLI/APIで自動実行、ユーザー手作業はアカウント作成とAPIキー提供のみ
+- 実装→デプロイ→テストは途中確認なしで一気通貫
+- 大規模修正後は必ずgrepで以前の修正が残存しているか確認
+- 修正が消えていた場合は再適用してからデプロイ
 
 ## セッション終了時の運用
-作業終了時は以下のフォーマットで要約を生成し、ユーザーがClaude.aiチャットに共有できるようにする：
+作業終了時は以下のフォーマットで要約を生成：
 - 今日の変更ファイル一覧
 - 追加/修正した機能
 - 残課題
 - 次のタスク
+
+## ロードマップ
+### インフラ ✅ 全完了
+- [x] Cloudflare Worker, Pages, Stripe, Supabase, Cookie永続化, Free自動登録
+
+### Phase 1 ✅ 全完了（7機能）
+
+### 直近TODO
+- [ ] スマートルーティングのバグ修正（JSON表示問題）
+- [ ] スマホ表示の再修正（被り、白背景、キーボード問題）
+- [ ] マイクアイコンのパルスアニメーション位置ズレ
+- [ ] 画像入力改善（ペースト、ドラッグ＆ドロップ）
+- [ ] チャット送信関数の完全統合（200-400行削減見込み）
+- [ ] テストユーザー配布
+
+### Phase 2（5月）4機能
+12. ライバル＆ロールモデル設定
+14. ゴール間依存関係マップ
+16. チーム目標モード
+19. 成功パターンレシピ化
+
+### Phase 3（5月末〜6月）4機能
+1. AIメンター自動マッチング
+2. モーニングブリーフィング
+3. ゴールテンプレート
+5. ウィークリーレビュー自動生成
+
+### Phase 4（6月〜）3機能
+6. ゴール達成予測AI
+15. 感情ログ＆メンタルトレンド
+17. Before→After成長レポート
