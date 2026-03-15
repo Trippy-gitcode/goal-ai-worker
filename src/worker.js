@@ -18,7 +18,7 @@
 // ═══════ CONFIG ═══════
 
 const PLAN_LIMITS = {
-  free:    { deep: 3,    chat: 50   },
+  free:    { deep: 3,    chat: 5    },
   trial:   { deep: 5,    chat: 100  },
   pro:     { deep: 30,   chat: 500  },
   premium: { deep: 99999, chat: 99999 },
@@ -60,8 +60,8 @@ const STRIPE_PRICE_IDS = {
   annual:  'price_1TAJUm4084X0uakakFD0smoF',
 };
 
-const STRIPE_SUCCESS_URL = 'https://delicate-bienenstitch-b734d6.netlify.app?checkout=success';
-const STRIPE_CANCEL_URL  = 'https://delicate-bienenstitch-b734d6.netlify.app?checkout=cancel';
+const STRIPE_SUCCESS_URL = 'https://goal-ai-frontend.pages.dev?checkout=success';
+const STRIPE_CANCEL_URL  = 'https://goal-ai-frontend.pages.dev?checkout=cancel';
 
 // ═══════ ROUTER ═══════
 
@@ -166,6 +166,9 @@ export default {
       return corsResponse(env, jsonRes({ error: 'Not found' }, 404));
     } catch (e) {
       console.error('Worker error:', e);
+      if (e instanceof SyntaxError) {
+        return corsResponse(env, jsonRes({ error: 'Invalid JSON in request body' }, 400));
+      }
       return corsResponse(env, jsonRes({ error: 'Internal server error' }, 500));
     }
   }
@@ -359,6 +362,7 @@ async function handleDeepOpenAI(request, env) {
   if (!res.ok) {
     return jsonRes({ error: data.error?.message || 'OpenAI API error' }, res.status);
   }
+  await incrementDeepUsage(env, auth.userId);
   return jsonRes(data, 200, { 'X-Model-Used': openaiModel });
 }
 
@@ -394,6 +398,7 @@ async function handleDeepGemini(request, env) {
   if (!res.ok) {
     return jsonRes({ error: data.error?.message || 'Gemini API error' }, res.status);
   }
+  await incrementDeepUsage(env, auth.userId);
   return jsonRes(data, 200, { 'X-Model-Used': geminiModel });
 }
 
@@ -1311,7 +1316,7 @@ function corsResponse(env, response, request) {
   const requestOrigin = request ? (request.headers.get('Origin') || '') : ''; // request origin を直接参照できないのでワイルドカード or 固定
   const headers = new Headers(response.headers);
   // プロダクションでは特定オリジンに変更
-  if (requestOrigin && allowedOrigins.includes(requestOrigin)) { headers.set('Access-Control-Allow-Origin', requestOrigin); } else { headers.set('Access-Control-Allow-Origin', '*'); }
+  if (requestOrigin && allowedOrigins.includes(requestOrigin)) { headers.set('Access-Control-Allow-Origin', requestOrigin); } else if (!requestOrigin) { headers.set('Access-Control-Allow-Origin', allowedOrigins[0] || 'https://goal-ai-frontend.pages.dev'); } else { headers.set('Access-Control-Allow-Origin', 'null'); }
   headers.set('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
   headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Secret');
   headers.set('Access-Control-Expose-Headers', 'X-RateLimit-Remaining, X-Model-Used');

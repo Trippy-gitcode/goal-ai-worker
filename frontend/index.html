@@ -2,7 +2,12 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta property="og:title" content="GOAL AI - AIゴールコーチング">
+<meta property="og:description" content="ゴールだけ教えてくれればいい。3つのAIがあなたの目標達成をサポートします。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://goal-ai-frontend.pages.dev">
+<meta name="description" content="GOAL AI - 3つのAIによるゴールコーチングSaaS。目標設定から達成まで、AIがあなたの伴走者になります。">
 <title>GOAL AI</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='100%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%23c8920a'/%3E%3Cstop offset='100%25' stop-color='%23f5d380'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M26 70 L32 40 L42 55 L50 24 L58 55 L68 40 L74 70 Z' fill='url(%23g)'/%3E%3C/svg%3E">
 <!-- system fonts only — no external load needed -->
@@ -176,7 +181,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
   .msg{gap:8px;margin-bottom:14px}
   .msg-av{width:22px;height:22px;font-size:9px}
   .msg-body{max-width:88%}
-  .bubble{padding:12px 16px;font-size:15px;line-height:1.75;border-radius:16px}
+  .bubble{padding:12px 16px;font-size:16px;line-height:1.75;border-radius:16px}
   .msg.ai .bubble{border-radius:4px 16px 16px 16px}
   .msg.user .bubble{border-radius:16px 4px 16px 16px}
 
@@ -843,7 +848,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
 
 /* Task content */
 .task-content{flex:1;padding:12px 12px 12px 2px;min-width:0}
-.task-title{font-size:12.5px;color:var(--cream);font-weight:500;line-height:1.4}
+.task-title{font-size:12.5px;color:var(--cream);font-weight:500;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .task-row.done-row .task-title{text-decoration:line-through;color:var(--muted)}
 .task-meta-row{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap}
 .task-due{font-size:10px;color:var(--muted);font-family:var(--fm)}
@@ -3177,7 +3182,7 @@ document.addEventListener('compositionend', () => { setTimeout(() => { _isCompos
 // Cookie helpers for token persistence
 function setCookie(name, value, days) {
   const d = new Date(); d.setTime(d.getTime() + days * 86400000);
-  document.cookie = `${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/;SameSite=Strict`;
+  document.cookie = `${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/;SameSite=Strict;Secure`;
 }
 function getCookie(name) {
   const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
@@ -3488,7 +3493,7 @@ function renderTaskTimeView(view){
       const sc = {done:'var(--green)',current:'var(--amber)',todo:'var(--muted2)',blocked:'var(--red)'};
       row.innerHTML = `
         <div class="tv-status-dot" style="background:${sc[task.status]||'var(--muted2)'}"></div>
-        <div class="tv-task-name ${task.status==='done'?'done':''}">${task.title}</div>
+        <div class="tv-task-name ${task.status==='done'?'done':''}">${escapeHtml(task.title)}</div>
         <div class="tv-goal-tag" style="background:${goal.color}22;color:${goal.color};border:1px solid ${goal.color}44">${goal.title.slice(0,8)}…</div>
         <div class="tv-due">${task.due||''}</div>`;
       row.onclick = () => openTaskDetail(task, phase, goal);
@@ -3516,7 +3521,7 @@ function renderGoalSelectorBar(){
   ALL_GOALS.forEach((g, i) => {
     const chip = document.createElement('div');
     chip.className = 'goal-sel-chip' + (i===activeGoalIdx?' active':'');
-    chip.innerHTML = `<span class="goal-sel-dot" style="background:${g.color}"></span>${g.title}`;
+    chip.innerHTML = `<span class="goal-sel-dot" style="background:${g.color}"></span>${escapeHtml(g.title)}`;
     chip.onclick = () => {
       activeGoalIdx = i;
       if(taskView === 'gantt'){ renderGoalSelectorBar(); renderGantt(); }
@@ -3689,7 +3694,7 @@ function mkTaskRow(task, phase, idx, goal){
 
   // In today view, show goal name badge; in goal view, show phase badge
   const contextBadge = goal
-    ? `<span class="task-goal-label" style="background:${goal.color}22;color:${goal.color}">${goal.title}</span>`
+    ? `<span class="task-goal-label" style="background:${goal.color}22;color:${goal.color}">${escapeHtml(goal.title)}</span>`
     : `<span class="task-tag" style="background:${phase.phaseColor}1a;color:${phase.phaseColor}">Phase ${phase.phase}</span>`;
 
   row.innerHTML = `
@@ -3701,7 +3706,7 @@ function mkTaskRow(task, phase, idx, goal){
       </div>
     </div>
     <div class="task-content">
-      <div class="task-title">${task.title}</div>
+      <div class="task-title">${escapeHtml(task.title)}</div>
       <div class="task-meta-row">
         ${task.due?`<span class="task-due${isOverdue?' overdue':''}">${task.due}${isOverdue?' ⚠':''}</span>`:''}
         ${contextBadge}
@@ -4658,7 +4663,7 @@ function startVoiceLevelAnim(stream){
     }
     voiceAnimFrame = requestAnimationFrame(tick);
   }catch(e){
-    console.log('AudioContext unavailable for level animation');
+    // AudioContext unavailable for level animation
   }
 }
 
@@ -4823,7 +4828,7 @@ async function toggleHomeVoice(){
         };
         recognition.onerror = (e)=>{
           if(e.error !== 'no-speech' && e.error !== 'aborted'){
-            console.log('Web Speech error:', e.error);
+            // Web Speech error (non-critical)
           }
         };
         recognition.onend = ()=>{
@@ -4831,7 +4836,7 @@ async function toggleHomeVoice(){
         };
         recognition.start();
       }catch(e){
-        console.log('Web Speech unavailable, using Whisper only');
+        // Web Speech unavailable, using Whisper only
       }
     }
   }catch(e){
@@ -4977,9 +4982,11 @@ function saveGoal(){
 }
 
 // ════════ TOAST ════════
+function escapeHtml(s){if(!s)return '';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function toast(msg){
   const existing=document.getElementById('toast');if(existing)existing.remove();
   const t=document.createElement('div');t.id='toast';
+  t.setAttribute('role','status');t.setAttribute('aria-live','polite');
   t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e2333;border:1px solid rgba(255,255,255,.15);color:var(--cream);padding:9px 18px;border-radius:8px;font-size:12px;z-index:9999;animation:fadeUp .3s ease;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)';
   t.textContent=msg;document.body.appendChild(t);
   setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3000);
@@ -5327,7 +5334,7 @@ function renderGantt(){
       lbl.className = 'gantt-label';
       const statusDot = task.status==='done'?'✓':task.status==='current'?'●':'○';
       const statusColor = task.status==='done'?'var(--green)':task.status==='current'?'var(--amber)':'var(--muted2)';
-      lbl.innerHTML = `<span style="color:${statusColor};font-size:10px;flex-shrink:0">${statusDot}</span><span title="${task.title}">${task.title}</span>`;
+      lbl.innerHTML = `<span style="color:${statusColor};font-size:10px;flex-shrink:0">${statusDot}</span><span title="${escapeHtml(task.title)}">${escapeHtml(task.title)}</span>`;
 
       // Bar track
       const track = document.createElement('div');
@@ -5822,7 +5829,7 @@ function renderSidebarChatRecords(){
   el.innerHTML = recent.map(r => `
     <div onclick="loadChatSession('${r.sessionId}')" style="padding:6px 16px;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
       <svg width="12" height="12" style="color:var(--muted2);flex-shrink:0" class="svg-ic"><use href="#ic-chat"/></svg>
-      <div style="font-size:11px;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.title}</div>
+      <div style="font-size:11px;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(r.title)}</div>
     </div>`).join('');
 }
 
@@ -5933,7 +5940,7 @@ function renderHomeSummary(){
     ALL_GOALS.filter(g=>!g.archived).forEach(g=>{
       const isOk=g.actual>=g.target;
       const row=document.createElement('div'); row.className='hs-goal-row';
-      row.innerHTML=`<div class="hs-goal-name">${g.title}</div>
+      row.innerHTML=`<div class="hs-goal-name">${escapeHtml(g.title)}</div>
         <div class="hs-goal-bar">
           <div class="hs-goal-actual" style="width:${g.actual}%;background:${isOk?'var(--green)':'var(--red)'}"></div>
           <div class="hs-goal-marker" style="left:${g.target}%"></div>
@@ -5957,7 +5964,7 @@ function renderHomeSummary(){
       const urgColor = item.urgency==='urgent'?'var(--red)':item.urgency==='in-progress'?'var(--amber)':'var(--muted2)';
       row.innerHTML = `
         <div class="hs-task-check ${isDone?'done':''}" onclick="event.stopPropagation();hsToggleTask('${item.task.id}',this)">${isDone?'✓':''}</div>
-        <div class="hs-task-title ${isDone?'done':''}" style="flex:1">${item.task.title}</div>
+        <div class="hs-task-title ${isDone?'done':''}" style="flex:1">${escapeHtml(item.task.title)}</div>
         <div style="width:5px;height:5px;border-radius:50%;background:${urgColor};flex-shrink:0;margin-left:4px"></div>`;
       row.addEventListener('click', ()=>openHomeTaskPanel(item));
       todayEl.appendChild(row);
@@ -6027,7 +6034,7 @@ function renderHsTaskList(el, tab){
     row.innerHTML = `
       <div class="hs-task-check ${isDone?'done':''}"
         onclick="event.stopPropagation();hsToggleTask('${item.task.id}',this)">${isDone?'✓':''}</div>
-      <div class="hs-task-title ${isDone?'done':''}" style="flex:1">${item.task.title}</div>
+      <div class="hs-task-title ${isDone?'done':''}" style="flex:1">${escapeHtml(item.task.title)}</div>
       <div style="width:5px;height:5px;border-radius:50%;background:${urgColor};flex-shrink:0;margin-left:4px"></div>`;
     row.addEventListener('click', () => openHomeTaskPanel(item));
     el.appendChild(row);
@@ -6057,7 +6064,7 @@ function recalcGoalProgress(goal){
   (goal.phases||[]).forEach(ph=>{
     (ph.tasks||[]).forEach(t=>{total++;if(t.status==='done')done++;});
   });
-  if(total>0) goal.actual = Math.round(done/total*100);
+  if(total>0) goal.actual = Math.max(0, Math.min(100, Math.round(done/total*100)));
 }
 
 // ════════ HOME TASK PANEL ════════
@@ -6085,7 +6092,7 @@ function openHomeTaskPanel(item){
   chat.innerHTML = '';
   const intro = document.createElement('div');
   intro.className = 'tdp-msg ai';
-  intro.innerHTML = `<div class="tdp-bubble">「<strong>${htpTask.title}</strong>」について、何でも聞いてください。進め方・詰まりの相談・タスク分解など対応します。</div>`;
+  intro.innerHTML = `<div class="tdp-bubble">「<strong>${escapeHtml(htpTask.title)}</strong>」について、何でも聞いてください。進め方・詰まりの相談・タスク分解など対応します。</div>`;
   chat.appendChild(intro);
 
   document.getElementById('home-task-panel').classList.add('open');
@@ -6276,8 +6283,8 @@ function renderHubChat(){
   inner.innerHTML = '';
   if(msgs.length === 0){
     inner.innerHTML = `<div style="text-align:center;padding:60px 0 20px;color:var(--muted2);font-size:12px;line-height:2;">
-      <div style="font-size:36px;margin-bottom:8px;opacity:.4">${goal.title[0]}</div>
-      「${goal.title}」についてのチャット専用スペースです。<br>進め方・詰まり・アイデアなど何でも話せます。</div>`;
+      <div style="font-size:36px;margin-bottom:8px;opacity:.4">${escapeHtml(goal.title[0])}</div>
+      「${escapeHtml(goal.title)}」についてのチャット専用スペースです。<br>進め方・詰まり・アイデアなど何でも話せます。</div>`;
     return;
   }
   msgs.forEach(m => {
@@ -6371,7 +6378,7 @@ function hideHubTyping() { hideChatTyping('hub-typing'); }
 function renderHubTasks(){
   const goal = ALL_GOALS[hubGoalIdx];
   const inner = document.getElementById('hub-tasks-inner');
-  inner.innerHTML = `<div class="section-hd" style="margin-bottom:16px">${goal.title} — タスク一覧</div>`;
+  inner.innerHTML = `<div class="section-hd" style="margin-bottom:16px">${escapeHtml(goal.title)} — タスク一覧</div>`;
   goal.phases.forEach(phase => {
     const ph = document.createElement('div');
     ph.style.marginBottom = '20px';
@@ -6392,7 +6399,7 @@ function renderHubTasks(){
       row.onmouseout  = () => row.style.borderColor = 'var(--border)';
       row.innerHTML = `
         <div style="width:7px;height:7px;border-radius:50%;background:${statusColors[task.status]||'var(--muted2)'};flex-shrink:0;"></div>
-        <div style="flex:1;font-size:12px;color:var(--cream);${task.status==='done'?'text-decoration:line-through;opacity:.5':''}">${task.title}</div>
+        <div style="flex:1;font-size:12px;color:var(--cream);${task.status==='done'?'text-decoration:line-through;opacity:.5':''}">${escapeHtml(task.title)}</div>
         <div style="font-size:9px;font-family:var(--fm);color:${statusColors[task.status]||'var(--muted2)'}">${statusLabels[task.status]||''}</div>
         <div style="font-size:9px;color:var(--muted2);font-family:var(--fm)">${task.due||''}</div>`;
       ph.appendChild(row);
@@ -6411,7 +6418,7 @@ function renderHubAnalytics(){
   const projectedDays = diff > 0 ? Math.ceil(daysLeft * (100 - goal.actual) / (100 - goal.target + 0.01)) : daysLeft;
 
   inner.innerHTML = `
-    <div class="section-hd" style="margin-bottom:20px">${goal.title} — 解析</div>
+    <div class="section-hd" style="margin-bottom:20px">${escapeHtml(goal.title)} — 解析</div>
 
     <!-- 3 stat tiles -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
@@ -8898,7 +8905,7 @@ function showMilestoneCard(goal, pct){
   card.className = 'milestone-card';
   card.innerHTML = `
     <div style="font-size:28px;margin-bottom:8px;">${pct===100?'🏆':'🎯'}</div>
-    <div style="font-size:16px;font-weight:600;color:var(--cream);margin-bottom:4px;">${goal.title}</div>
+    <div style="font-size:16px;font-weight:600;color:var(--cream);margin-bottom:4px;">${escapeHtml(goal.title)}</div>
     <div style="font-size:13px;color:var(--amber);margin-bottom:4px;">${pct}% 達成！</div>
     <div style="font-size:12px;color:var(--muted);">${msgs[pct]}</div>
     <div class="share-btns">
