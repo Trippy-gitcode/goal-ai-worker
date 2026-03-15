@@ -124,6 +124,7 @@
 |-------|------|-----------|------------|
 | Free | 無料 | 5回/月 | 3回/月 |
 | Pro | ¥2,980 | 無制限 | 30回/月 |
+| Premium | ¥9,800 | 無制限 | 無制限 |
 | Annual | ¥29,800/年 | 無制限 | 60回/月 |
 
 ## プロモコード
@@ -167,13 +168,18 @@ LAUNCH30(30日), INVITE2026(14日), BETA3MONTH(90日), GOALPRO7(7日)
 - streamAI() — Claudeストリーミング
 - callGemini() / callOpenAI() — ディープ分析用
 - runDeepAnalysis() — 3AI協調パイプライン
-- renderMsgs() / renderHomeMsgs() — チャット描画
+- renderHomeMsgs() / renderHubChat() — チャット描画
 - showPage() — ページ切り替え（home/tasks/calendar/analytics）
 
+### 共通チャットエンジン
+- chatResize(el, maxH) — 全テキストエリアのリサイズ統合
+- chatKey(sendFn, e) — 全Enterキーハンドラー統合
+- showChatTyping/hideChatTyping — タイピングインジケーター統合
+- apiCall(endpoint, method, body) — 共通APIラッパー（401/429/オフライン処理）
+- escapeHtml(str) — XSSサニタイズユーティリティ
+
 ### Stripe Price ID
-- Pro月額: price_1TAJzX4084X0uakaXXXXXXXX（実際のIDに置換すること）
-- Annual: price_1TAJzX4084X0uakaYYYYYYYY（実際のIDに置換すること）
-→ Stripe Price IDはworker.js内のSTRIPE_PRICE_IDS定数を参照
+→ worker.js内のSTRIPE_PRICE_IDS定数を参照
 
 ## 完了済み機能（Phase 1）
 - 4. AI理解度可視化
