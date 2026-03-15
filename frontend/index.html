@@ -5547,131 +5547,26 @@ async function sendHomeMsg(){
 }
 
 // ════════ AI SMART ROUTING ════════
-const ROUTE_SYS = `あなたはルーティングAIです。ユーザーのメッセージを分析し、最適なAIに振り分けてください。
-
-以下に該当する場合はJSON**のみ**を返してください（他のテキスト不可）：
-{"route":"gemini","query":"検索クエリ"} — リアルタイム情報、天気、ニュース、「〇〇とは」、URL分析、事実確認、データ調査
-{"route":"gpt","query":"タスク内容"} — 翻訳、アイデア出し、ブレスト、SNS投稿案、コピーライティング、要約、リスト作成
-
-該当しない場合（感情、悩み、ゴール、タスク、戦略、日常会話、その他全て）は以下を返してください：
-{"route":"claude"}
-
-必ずJSON1行のみを返すこと。`;
-
 function parseRoute(text){
   try{
     const t = text.trim();
-    // JSON行を探す
-    const m = t.match(/\{[\s]*"route"[\s]*:[\s]*"(gemini|gpt|claude)".*?\}/);
+    const m = t.match(/\{\s*"route"\s*:\s*"(gemini|gpt|claude)".*?\}/);
     if(m){
       const obj = JSON.parse(m[0]);
       if(obj.route === 'gemini' || obj.route === 'gpt') return obj;
-      return { route:'claude' };
     }
   }catch(e){}
   return { route:'claude' };
 }
 
-function showRouteIndicator(container, scrollEl, type){
-  const wrap = document.createElement('div');
-  wrap.id = 'route-indicator';
-  wrap.className = 'msg ai';
-  wrap.style.marginBottom = '16px';
-  const av = document.createElement('div');
-  av.className = 'msg-av ai'; av.innerHTML = getLogoSVG(14);
-  const body = document.createElement('div');
-  body.className = 'msg-body';
-  const bub = document.createElement('div');
-  bub.className = 'bubble';
-  bub.style.cssText = 'color:var(--amber);font-size:13px;padding:10px 16px;';
-  if(type === 'gemini'){
-    bub.innerHTML = '🔍 リサーチ中...';
-  } else {
-    bub.innerHTML = '💡 アイデアを生成中...';
-  }
-  body.appendChild(bub);
-  wrap.appendChild(av); wrap.appendChild(body);
-  container.appendChild(wrap);
-  if(scrollEl) scrollEl.scrollTop = 99999;
-  return wrap;
-}
-
 async function homeSmartRoute(text, today, homeInner, homeWrap){
-  // Step 1: ルーティング判定（Claude non-streaming）
-  let route = { route:'claude' };
-  if(text && text.length > 2){
-    try{
-      const res = await fetch(`${WORKER_URL}/api/chat`, {
-        method:'POST', headers:getAuthHeaders(),
-        body:JSON.stringify({
-          system: ROUTE_SYS,
-          messages:[{role:'user',content:text}],
-          maxTokens:80
-        })
-      });
-      const data = await res.json();
-      const routeText = data.content?.map(b=>b.text||'').join('') || '';
-      route = parseRoute(routeText);
-    }catch(e){
-      route = { route:'claude' };
-    }
-  }
+  // ストリーミングでClaude応答を開始し、JSONルーティング応答を検知したら切り替え
+  const inner = typeof homeInner === 'string' ? document.getElementById(homeInner) : homeInner;
+  const scroll = typeof homeWrap === 'string' ? document.getElementById(homeWrap) : homeWrap;
+  const { bub } = mkStreamBubble(inner, scroll);
+  let routeDetected = null;
+  let fullText = '';
 
-  // Step 2: ルートに応じて処理
-  if(route.route === 'gemini'){
-    const indicator = showRouteIndicator(homeInner, homeWrap, 'gemini');
-    try{
-      const ctx = buildAIContextCached();
-      const result = await callGemini(
-        route.query || text,
-        `ユーザーの質問に簡潔かつ正確に答えてください。日本語で回答。\n\nユーザー背景：${ctx}`
-      );
-      indicator.remove();
-      // Geminiの結果をバブルに表示
-      const { bub } = mkStreamBubble(homeInner, homeWrap);
-      bub.innerHTML = renderMsgContent(result);
-      bub.classList.remove('stream-bubble');
-      homeMsgs.push({role:'ai',content:result,time:now(),date:today});
-      homeHistory.push({role:'assistant',content:result});
-      saveHomeMsgs();
-      // Claude補足コメント
-      await addRouteFollowUp(text, result, 'Gemini', today, homeInner, homeWrap);
-    }catch(e){
-      indicator.remove();
-      // フォールバック → Claude直接
-      await homeClaudeStream(today, homeInner, homeWrap);
-    }
-
-  } else if(route.route === 'gpt'){
-    const indicator = showRouteIndicator(homeInner, homeWrap, 'gpt');
-    try{
-      const ctx = buildAIContextCached();
-      const result = await callOpenAI(
-        route.query || text,
-        `ユーザーのリクエストに創造的かつ実用的に応えてください。日本語で回答。\n\nユーザー背景：${ctx}`,
-        800
-      );
-      indicator.remove();
-      const { bub } = mkStreamBubble(homeInner, homeWrap);
-      bub.innerHTML = renderMsgContent(result);
-      bub.classList.remove('stream-bubble');
-      homeMsgs.push({role:'ai',content:result,time:now(),date:today});
-      homeHistory.push({role:'assistant',content:result});
-      saveHomeMsgs();
-      // Claude補足コメント
-      await addRouteFollowUp(text, result, 'GPT', today, homeInner, homeWrap);
-    }catch(e){
-      indicator.remove();
-      await homeClaudeStream(today, homeInner, homeWrap);
-    }
-
-  } else {
-    // Claude直接応答（デフォルト）
-    await homeClaudeStream(today, homeInner, homeWrap);
-  }
-}
-
-async function homeClaudeStream(today, homeInner, homeWrap){
   let sys = SYS_HOME + `\n\n${buildAIContextCached()}`;
   if(kabeuchiMode){
     sys = `あなたはGOAL AIの「壁打ちパートナー」です。ソクラテス式問答法で対話します。
@@ -5680,8 +5575,6 @@ async function homeClaudeStream(today, homeInner, homeWrap){
 - 答え・提案・アドバイスを一切出してはならない
 - 必ず質問だけで返す（1回に1〜2問）
 - ユーザーの思考を深掘りする問いかけのみ
-- 「なぜ？」「それが実現したら？」「逆に〜だったら？」「具体的には？」「他には？」のバリエーション
-- 相手の発言を短くオウム返ししてから問いかけると効果的
 
 【スタイル】
 - 端的に。1〜3文で
@@ -5690,11 +5583,87 @@ async function homeClaudeStream(today, homeInner, homeWrap){
 
 ${buildAIContextCached()}`;
   }
+
+  // ルーティング指示をシステムプロンプトに組み込み（1回のAPI呼び出しで判定+応答）
+  const routeSys = sys + `
+
+【特別ルール：AIルーティング】
+以下に該当する場合はJSON1行のみを返してください（他のテキスト一切不可）：
+{"route":"gemini","query":"検索クエリ"} — リアルタイム情報、天気、ニュース、事実確認、データ調査
+{"route":"gpt","query":"タスク内容"} — 翻訳、アイデア出し、ブレスト、SNS投稿案、コピーライティング
+該当しない場合は普通に日本語で回答してください（JSONを返さないこと）。`;
+
+  await streamAI(
+    { system: routeSys, messages: homeHistory.slice(-10), maxTokens: 500 },
+    (t) => {
+      fullText = t;
+      // 最初の応答でルーティングJSON検知
+      const trimmed = t.trim();
+      if(!routeDetected && trimmed.length > 5 && trimmed.length < 120){
+        const routeMatch = trimmed.match(/^\s*\{\s*"route"\s*:\s*"(gemini|gpt)"[\s\S]*?\}/);
+        if(routeMatch){
+          routeDetected = parseRoute(trimmed);
+          // JSONを非表示にしてインジケーター表示
+          bub.innerHTML = routeDetected.route === 'gemini' ? '🔍 リサーチ中...' : '💡 アイデアを生成中...';
+          bub.style.cssText += 'color:var(--amber);font-size:13px;';
+          return;
+        }
+      }
+      if(!routeDetected){
+        streamAppend(bub, t); if(scroll) scroll.scrollTop = 99999;
+      }
+    },
+    async (t) => {
+      if(routeDetected){
+        // ルーティング先AIに転送
+        await executeRoute(routeDetected, text, today, inner, scroll, bub);
+      } else {
+        // 通常のClaude応答完了
+        streamFinalize(bub, t);
+        homeMsgs.push({role:'ai',content:t,time:now(),date:today});
+        homeHistory.push({role:'assistant',content:t});
+        saveHomeMsgs();
+      }
+    },
+    (e) => { bub.classList.remove('stream-bubble'); bub.innerHTML='<span style="color:var(--red)">エラーが発生しました。</span><button onclick="retryLastHomeMsg()" style="margin-left:8px;padding:4px 12px;background:var(--amber-d);border:1px solid var(--amber);border-radius:6px;color:var(--amber);font-size:11px;cursor:pointer;">もう一度試す</button>'; }
+  );
+}
+
+async function executeRoute(route, text, today, inner, scroll, indicatorBub){
+  const ctx = buildAIContextCached();
+  const query = route.query || text;
+  try{
+    let result;
+    if(route.route === 'gemini'){
+      result = await callGemini(query, `ユーザーの質問に簡潔かつ正確に答えてください。日本語で回答。\n\nユーザー背景：${ctx}`);
+    } else {
+      result = await callOpenAI(query, `ユーザーのリクエストに創造的かつ実用的に応えてください。日本語で回答。\n\nユーザー背景：${ctx}`, 800);
+    }
+    // インジケーターバブルを結果で置換
+    indicatorBub.innerHTML = renderMsgContent(result);
+    indicatorBub.classList.remove('stream-bubble');
+    indicatorBub.style.cssText = '';
+    homeMsgs.push({role:'ai',content:result,time:now(),date:today});
+    homeHistory.push({role:'assistant',content:result});
+    saveHomeMsgs();
+    // Claude補足コメント
+    await addRouteFollowUp(text, result, route.route==='gemini'?'Gemini':'GPT', today, inner, scroll);
+  }catch(e){
+    // フォールバック: Claudeで直接回答
+    indicatorBub.innerHTML = '';
+    indicatorBub.style.cssText = '';
+    indicatorBub.classList.remove('stream-bubble');
+    indicatorBub.parentElement?.remove();
+    await homeClaudeStream(today, inner, scroll);
+  }
+}
+
+async function homeClaudeStream(today, homeInner, homeWrap){
+  const sys = SYS_HOME + `\n\n${buildAIContextCached()}`;
   await chatStream({
     system: sys, messages: homeHistory.slice(-10), maxTokens: 500,
     innerEl: homeInner, scrollEl: homeWrap,
-    onDone(t){ homeMsgs.push({role:'ai',content:t,time:now(),date:today}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs(); },
-    onError(e){ /* error shown by chatStream default */ }
+    onDone(t){ homeMsgs.push({role:'ai',content:t,time:now(),date:today}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs(); }
   });
 }
 
