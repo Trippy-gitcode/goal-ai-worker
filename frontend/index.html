@@ -3856,31 +3856,23 @@ function mkTdpMsg(m){
   return wrap;
 }
 
-function showTdpTyping() { showChatTyping(document.getElementById('tdp-chat'), 'tdp-typing', getLogoSVG(14), 'tdp-msg ai'); }
-function hideTdpTyping() { hideChatTyping('tdp-typing'); }
-
 async function sendTaskMsg(){
   if(!selectedTask || taskChatLoading) return;
   const inp = document.getElementById('task-msg-in');
-  const text = inp.value.trim();
-  if(!text) return;
+  const text = inp.value.trim(); if(!text) return;
   inp.value = ''; tdpResize(inp);
 
-  const userMsg = {role:'user', content:text};
   if(!selectedTask.chatLog) selectedTask.chatLog = [];
-  selectedTask.chatLog.push(userMsg);
+  selectedTask.chatLog.push({role:'user', content:text});
 
   const chat = document.getElementById('tdp-chat');
   chat.innerHTML = '';
   if(selectedTask.chatLog.length === 1){
-    const intro = {role:'ai',content:`「${selectedTask.title}」について話しましょう。\n\nこのタスクに関してAIがサポートできます。`};
-    chat.appendChild(mkTdpMsg(intro));
+    chat.appendChild(mkTdpMsg({role:'ai',content:`「${selectedTask.title}」について話しましょう。\n\nこのタスクに関してAIがサポートできます。`}));
   }
   selectedTask.chatLog.forEach(m=>chat.appendChild(mkTdpMsg(m)));
   chat.scrollTop = chat.scrollHeight;
-
   taskChatLoading = true;
-  showTdpTyping();
 
   const taskSys = `あなたはGOAL AIのタスクコーチです。
 ゴール：${curGoal}
@@ -3894,22 +3886,16 @@ async function sendTaskMsg(){
 日本語・簡潔・現場の言葉で。一度に聞く質問は1つ。`;
   const taskHistory = (selectedTask.chatLog||[]).map(m=>({role:m.role==='ai'?'assistant':m.role, content:m.content}));
 
-  hideTdpTyping();
-  // tdp uses custom bubble style
-  const tdpWrap2 = document.createElement('div'); tdpWrap2.className = 'tdp-msg ai';
-  const tdpBub2 = document.createElement('div'); tdpBub2.className = 'tdp-bubble stream-bubble';
-  tdpWrap2.appendChild(tdpBub2); chat.appendChild(tdpWrap2); chat.scrollTop = chat.scrollHeight;
-  let tFull = '';
+  // Custom bubble (tdp style, not standard msg)
+  const tdpWrap = document.createElement('div'); tdpWrap.className = 'tdp-msg ai';
+  const tdpBub = document.createElement('div'); tdpBub.className = 'tdp-bubble stream-bubble';
+  tdpWrap.appendChild(tdpBub); chat.appendChild(tdpWrap); chat.scrollTop = chat.scrollHeight;
+
   await streamAI(
     { system: taskSys, messages: taskHistory, maxTokens: 800 },
-    (text) => { tdpBub2.innerHTML = text.replace(/\n/g,'<br>'); chat.scrollTop = chat.scrollHeight; },
-    (text) => {
-      tFull = text; tdpBub2.classList.remove('stream-bubble');
-      const aiMsg = { role:'ai', content:tFull };
-      selectedTask.chatLog.push(aiMsg);
-      renderTasks();
-    },
-    (e) => { tdpBub2.classList.remove('stream-bubble'); tdpBub2.textContent = 'エラーが発生しました。'; }
+    (t) => { tdpBub.innerHTML = renderMsgContent(t); chat.scrollTop = chat.scrollHeight; },
+    (t) => { tdpBub.classList.remove('stream-bubble'); selectedTask.chatLog.push({role:'ai',content:t}); renderTasks(); },
+    (e) => { tdpBub.classList.remove('stream-bubble'); tdpBub.textContent = 'エラーが発生しました。'; }
   );
   taskChatLoading = false;
 }
@@ -4337,24 +4323,19 @@ async function startGoal(){
   hubChatMsgs[goalObj.id] = [];
 
   // Send initial AI message
-  const hubInner = document.getElementById('hub-chat-inner');
-  const hubWrap = document.getElementById('hub-chat-wrap');
   hubChatLoading = true;
-  const { bub } = mkStreamBubble(hubInner, hubWrap);
   try {
-    await streamAI(
-      { system: hearingSys, messages:[{role:'user',content:`「${v}」をゴールにしたい`}], maxTokens:300 },
-      (t) => { bub.innerHTML = renderMsgContent(t); hubWrap.scrollTop = 99999; },
-      (t) => {
-        bub.classList.remove('stream-bubble');
+    await chatStream({
+      system: hearingSys, messages:[{role:'user',content:`「${v}」をゴールにしたい`}], maxTokens:300,
+      innerEl: 'hub-chat-inner', scrollEl: 'hub-chat-wrap',
+      onDone(t){
         hubChatMsgs[goalObj.id].push({role:'ai',content:t,time:now()});
         hubChatHistories[goalObj.id].push({role:'user',content:`「${v}」をゴールにしたい`});
         hubChatHistories[goalObj.id].push({role:'assistant',content:t});
         renderHubChat();
         if(goalObj.supabaseId) apiSaveMessages([{role:'assistant',content:t,goalId:goalObj.supabaseId,aiModel:'claude',messageType:'hub_chat'}]);
-      },
-      (e) => { bub.classList.remove('stream-bubble'); bub.textContent='エラーが発生しました。'; }
-    );
+      }
+    });
   }catch(e){}
   hubChatLoading = false;
 }
@@ -4528,25 +4509,22 @@ async function sendCalMsg(){
   calChatHistory[calPanelKey].push({role:'user',content:text});
   renderCalChat(calPanelKey); calChatLoading=true;
   const chat=document.getElementById('cal-chat');
-  const typ=document.createElement('div'); typ.className='tdp-msg ai'; typ.id='cal-typing';
-  typ.innerHTML=`<div class="tdp-bubble" style="padding:0"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
-  chat.appendChild(typ); chat.scrollTop=99999;
+  const allEv=(getCalEvents()[calPanelKey]||[]).concat(calPersonalEvents[calPanelKey]||[]);
+  const evSummary=allEv.map(e=>e.text).join('、')||'予定なし';
+  const calSys=`${buildAIContextCached()}\n\n対象日：${document.getElementById('cal-panel-date').textContent}\n予定：${evSummary}\n\nこの日の予定・スケジュール調整・方針についてのチャット。日程変更の提案は具体的に。3〜4文で。`;
+
+  // Custom bubble (tdp style)
+  const cWrap=document.createElement('div'); cWrap.className='tdp-msg ai';
+  const cBub=document.createElement('div'); cBub.className='tdp-bubble stream-bubble';
+  cWrap.appendChild(cBub); chat.appendChild(cWrap); chat.scrollTop=99999;
   try{
-    const allEv=(getCalEvents()[calPanelKey]||[]).concat(calPersonalEvents[calPanelKey]||[]);
-    const evSummary=allEv.map(e=>e.text).join('、')||'予定なし';
-    document.getElementById('cal-typing')?.remove();
-    const cWrap2=document.createElement('div'); cWrap2.className='tdp-msg ai';
-    const cBub2=document.createElement('div'); cBub2.className='tdp-bubble stream-bubble';
-    cWrap2.appendChild(cBub2); chat.appendChild(cWrap2); chat.scrollTop=99999;
     await streamAI(
-      { system:`${buildAIContextCached()}\n\n対象日：${document.getElementById('cal-panel-date').textContent}\n予定：${evSummary}\n\nこの日の予定・スケジュール調整・方針についてのチャット。日程変更の提案は具体的に。3〜4文で。`,
-        messages:calChatHistory[calPanelKey].slice(-12), maxTokens:400 },
-      (text)=>{ cBub2.innerHTML=text.replace(/\n/g,'<br>'); chat.scrollTop=99999; },
-      (text)=>{ cBub2.classList.remove('stream-bubble'); calChatHistory[calPanelKey].push({role:'ai',content:text}); renderCalChat(calPanelKey); },
-      (e)=>{ cBub2.classList.remove('stream-bubble'); calChatHistory[calPanelKey].push({role:'ai',content:'エラーが発生しました。'}); renderCalChat(calPanelKey); }
+      { system:calSys, messages:calChatHistory[calPanelKey].slice(-12), maxTokens:400 },
+      (t)=>{ cBub.innerHTML=renderMsgContent(t); chat.scrollTop=99999; },
+      (t)=>{ cBub.classList.remove('stream-bubble'); calChatHistory[calPanelKey].push({role:'ai',content:t}); renderCalChat(calPanelKey); },
+      (e)=>{ cBub.classList.remove('stream-bubble'); calChatHistory[calPanelKey].push({role:'ai',content:'エラーが発生しました。'}); renderCalChat(calPanelKey); }
     );
   }catch(e){
-    document.getElementById('cal-typing')?.remove();
     calChatHistory[calPanelKey].push({role:'ai',content:'エラーが発生しました。'});
     renderCalChat(calPanelKey);
   }
@@ -5045,6 +5023,19 @@ async function apiCall(endpoint, method, body) {
   }
 }
 
+// ════════ UNIFIED CHAT STREAM ════════
+async function chatStream({ system, messages, maxTokens, innerEl, scrollEl, onDone, onError }) {
+  const inner = typeof innerEl === 'string' ? document.getElementById(innerEl) : innerEl;
+  const scroll = typeof scrollEl === 'string' ? document.getElementById(scrollEl) : scrollEl;
+  const { bub } = mkStreamBubble(inner, scroll);
+  await streamAI(
+    { system, messages, maxTokens: maxTokens || 500 },
+    (t) => { streamAppend(bub, t); if (scroll) scroll.scrollTop = 99999; },
+    (t) => { streamFinalize(bub, t); if (onDone) onDone(t); },
+    (e) => { bub.classList.remove('stream-bubble'); bub.textContent = 'エラーが発生しました。'; if (onError) onError(e); }
+  );
+}
+
 // ════════ UTILS ════════
 function now(){return new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});}
 function scrollDown(){
@@ -5143,67 +5134,47 @@ function appendWorryBubble(m){
   chat.scrollTop = chat.scrollHeight;
 }
 
-function showWorriesTyping(){
-  const chat = document.getElementById('worries-chat');
-  const d = document.createElement('div');
-  d.id = 'worries-typing';
-  d.style.cssText = 'display:flex;gap:8px;animation:fadeUp .3s ease both';
-  d.innerHTML = `<div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#252a40,#323855);display:flex;align-items:center;justify-content:center;color:var(--mencare);border:1px solid var(--mencare-d)">${getLogoSVG(12)}</div><div style="padding:8px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:3px 11px 11px 11px;"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
-  chat.appendChild(d);
-  chat.scrollTop = chat.scrollHeight;
-}
-function hideWorriesTyping(){ const e=document.getElementById('worries-typing'); if(e) e.remove(); }
-
 async function sendWorriesMsg(){
   if(worriesLoading) return;
   const inp = document.getElementById('worries-in');
-  const text = inp.value.trim();
-  if(!text) return;
+  const text = inp.value.trim(); if(!text) return;
   inp.value = ''; worriesResize(inp);
 
   appendWorryBubble({role:'user', content:text});
   worriesHistory.push({role:'user', content:text});
   worriesTurnCount++;
   worriesLoading = true;
-  showWorriesTyping();
 
-  const wChat2 = document.getElementById('worries-chat');
-  hideWorriesTyping();
+  const wChat = document.getElementById('worries-chat');
   // Streaming bubble (inline worries style)
-  const wWrap2 = document.createElement('div');
-  wWrap2.style.cssText = 'display:flex;gap:8px;animation:fadeUp .3s ease both';
-  const wAv2 = document.createElement('div');
-  wAv2.style.cssText = 'width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;background:linear-gradient(135deg,#252a40,#323855);color:var(--mencare);border:1px solid var(--mencare-d)';
-  wAv2.innerHTML = getLogoSVG(12);
-  const wBub2 = document.createElement('div');
-  wBub2.className = 'stream-bubble';
-  wBub2.style.cssText = 'max-width:85%;padding:9px 13px;border-radius:3px 11px 11px 11px;font-size:12px;line-height:1.75;background:var(--bg3);border:1px solid var(--border);color:var(--cream)';
-  wWrap2.appendChild(wAv2); wWrap2.appendChild(wBub2);
-  wChat2.appendChild(wWrap2); wChat2.scrollTop = wChat2.scrollHeight;
+  const wWrap = document.createElement('div');
+  wWrap.style.cssText = 'display:flex;gap:8px;animation:fadeUp .3s ease both';
+  const wAv = document.createElement('div');
+  wAv.style.cssText = 'width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;background:linear-gradient(135deg,#252a40,#323855);color:var(--mencare);border:1px solid var(--mencare-d)';
+  wAv.innerHTML = getLogoSVG(12);
+  const wBub = document.createElement('div');
+  wBub.className = 'stream-bubble';
+  wBub.style.cssText = 'max-width:85%;padding:9px 13px;border-radius:3px 11px 11px 11px;font-size:12px;line-height:1.75;background:var(--bg3);border:1px solid var(--border);color:var(--cream)';
+  wWrap.appendChild(wAv); wWrap.appendChild(wBub);
+  wChat.appendChild(wWrap); wChat.scrollTop = wChat.scrollHeight;
 
   await streamAI(
     { system: WORRIES_SYS, messages: worriesHistory, maxTokens: 600 },
-    (text) => { wBub2.innerHTML = text.replace(/\n/g,'<br>'); wChat2.scrollTop = wChat2.scrollHeight; },
+    (t) => { wBub.innerHTML = renderMsgContent(t); wChat.scrollTop = wChat.scrollHeight; },
     (raw) => {
-      wBub2.classList.remove('stream-bubble');
+      wBub.classList.remove('stream-bubble');
       worriesHistory.push({ role:'assistant', content:raw });
-
       // Check for summary JSON
       const match = raw.match(/```json\n([\s\S]*?)\n```/);
       if(match){
         try{
           const parsed = JSON.parse(match[1]);
           if(parsed.type === 'worries_summary'){
-            const displayText = raw.replace(/```json\n[\s\S]*?\n```/,'').trim();
-            wBub2.innerHTML = displayText.replace(/\n/g,'<br>');
-            // Show summary box
+            wBub.innerHTML = renderMsgContent(raw.replace(/```json\n[\s\S]*?\n```/,'').trim());
             document.getElementById('worries-summary-text').textContent = parsed.text;
             document.getElementById('worries-summary-box').style.display = 'block';
-            // Hide input
             document.getElementById('worries-input-row').style.display = 'none';
-            setTimeout(()=>{
-              appendWorryBubble({role:'ai', content:'整理しました。この内容はコーチングの参考として保存されます。必要なときはいつでも編集できます。'});
-            }, 400);
+            setTimeout(()=>appendWorryBubble({role:'ai', content:'整理しました。この内容はコーチングの参考として保存されます。必要なときはいつでも編集できます。'}), 400);
             worriesLoading = false; return;
           }
         }catch(e){}
@@ -5211,8 +5182,8 @@ async function sendWorriesMsg(){
       worriesLoading = false;
     },
     (e) => {
-      wBub2.classList.remove('stream-bubble');
-      wBub2.textContent = '通信エラーが発生しました。もう一度お試しください。';
+      wBub.classList.remove('stream-bubble');
+      wBub.textContent = '通信エラーが発生しました。もう一度お試しください。';
       worriesLoading = false;
     }
   );
@@ -5507,9 +5478,6 @@ function mkHomeMsg(m){
   return wrap;
 }
 
-function showHomeTyping() { showChatTyping(document.getElementById('home-chat-inner'), 'home-typing'); }
-function hideHomeTyping() { hideChatTyping('home-typing'); }
-
 async function sendHomeMsg(){
   if(homeLoading)return;
   if(!navigator.onLine){ toast('ネットワークに接続されていません'); return; }
@@ -5704,7 +5672,6 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
 }
 
 async function homeClaudeStream(today, homeInner, homeWrap){
-  const { bub } = mkStreamBubble(homeInner, homeWrap);
   let sys = SYS_HOME + `\n\n${buildAIContextCached()}`;
   if(kabeuchiMode){
     sys = `あなたはGOAL AIの「壁打ちパートナー」です。ソクラテス式問答法で対話します。
@@ -5723,18 +5690,12 @@ async function homeClaudeStream(today, homeInner, homeWrap){
 
 ${buildAIContextCached()}`;
   }
-  await streamAI(
-    { system: sys,
-      messages: homeHistory.slice(-10), maxTokens: 500 },
-    (t) => { streamAppend(bub, t); homeWrap.scrollTop = 99999; },
-    (t) => {
-      streamFinalize(bub, t);
-      homeMsgs.push({role:'ai',content:t,time:now(),date:today});
-      homeHistory.push({role:'assistant',content:t});
-      saveHomeMsgs();
-    },
-    (e) => { bub.classList.remove('stream-bubble'); bub.innerHTML='<span style="color:var(--red)">エラーが発生しました。</span><button onclick="retryLastHomeMsg()" style="margin-left:8px;padding:4px 12px;background:var(--amber-d);border:1px solid var(--amber);border-radius:6px;color:var(--amber);font-size:11px;cursor:pointer;">もう一度試す</button>'; }
-  );
+  await chatStream({
+    system: sys, messages: homeHistory.slice(-10), maxTokens: 500,
+    innerEl: homeInner, scrollEl: homeWrap,
+    onDone(t){ homeMsgs.push({role:'ai',content:t,time:now(),date:today}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs(); },
+    onError(e){ /* error shown by chatStream default */ }
+  });
 }
 
 function retryLastHomeMsg(){
@@ -5752,26 +5713,16 @@ function retryLastHomeMsg(){
 
 async function addRouteFollowUp(userText, aiResult, source, today, homeInner, homeWrap){
   try{
-    const ctx = buildAIContextCached();
-    const { bub } = mkStreamBubble(homeInner, homeWrap);
-    let full = '';
-    await streamAI(
-      { system: `あなたはGOAL AIのコーチです。${source}が回答した内容を踏まえ、ユーザーのゴールや文脈に絡めて一言だけ補足してください。1〜2文で短く。\n\n${ctx}`,
-        messages:[
-          {role:'user',content:userText},
-          {role:'assistant',content:`[${source}の回答]\n${aiResult.slice(0,500)}`},
-          {role:'user',content:'この回答について、私のゴールの観点から一言補足して。'}
-        ],
-        maxTokens: 150 },
-      (t) => { streamAppend(bub, t); homeWrap.scrollTop = 99999; },
-      (t) => {
-        streamFinalize(bub, t);
-        homeMsgs.push({role:'ai',content:t,time:now(),date:today});
-        homeHistory.push({role:'assistant',content:t});
-        saveHomeMsgs();
-      },
-      (e) => { bub.classList.remove('stream-bubble'); }
-    );
+    await chatStream({
+      system: `あなたはGOAL AIのコーチです。${source}が回答した内容を踏まえ、ユーザーのゴールや文脈に絡めて一言だけ補足してください。1〜2文で短く。\n\n${buildAIContextCached()}`,
+      messages:[
+        {role:'user',content:userText},
+        {role:'assistant',content:`[${source}の回答]\n${aiResult.slice(0,500)}`},
+        {role:'user',content:'この回答について、私のゴールの観点から一言補足して。'}
+      ],
+      maxTokens: 150, innerEl: homeInner, scrollEl: homeWrap,
+      onDone(t){ homeMsgs.push({role:'ai',content:t,time:now(),date:today}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs(); }
+    });
   }catch(e){}
 }
 
@@ -6123,18 +6074,11 @@ async function sendHtpMsg(){
   inp.value = ''; htpResize(inp);
 
   const chat = document.getElementById('htp-chat');
-  // User bubble
   const uBub = document.createElement('div'); uBub.className = 'tdp-msg user';
-  uBub.innerHTML = `<div class="tdp-bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  uBub.innerHTML = `<div class="tdp-bubble">${renderMsgContent(text)}</div>`;
   chat.appendChild(uBub); chat.scrollTop = 99999;
-
   htpHistory.push({role:'user', content:text});
   htpLoading = true;
-
-  // Typing
-  const typ = document.createElement('div'); typ.className = 'tdp-msg ai'; typ.id = 'htp-typing';
-  typ.innerHTML = `<div class="tdp-bubble" style="padding:0"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
-  chat.appendChild(typ); chat.scrollTop = 99999;
 
   const htpSys = `あなたはGOAL AIのタスク専門コーチです。
 タスク：「${htpTask.title}」| フェーズ：${htpPhase?.phaseTitle||''} | ステータス：${htpTask.status} | 期限：${htpTask.due||'未設定'}
@@ -6142,19 +6086,17 @@ async function sendHtpMsg(){
 ${buildAIContextCached()}
 
 このタスクに特化した具体的・実践的なアドバイスを3〜5文で。${USER_PROFILE.weaknesses[0]||'先延ばし'}対策を意識して。`;
-  document.getElementById('htp-typing')?.remove();
-  const htpWrap2 = document.createElement('div'); htpWrap2.className = 'tdp-msg ai';
-  const htpBub2 = document.createElement('div'); htpBub2.className = 'tdp-bubble stream-bubble';
-  htpWrap2.appendChild(htpBub2); chat.appendChild(htpWrap2); chat.scrollTop = 99999;
-  let hpFull = '';
+
+  // Custom bubble (tdp style)
+  const htpWrap = document.createElement('div'); htpWrap.className = 'tdp-msg ai';
+  const htpBub = document.createElement('div'); htpBub.className = 'tdp-bubble stream-bubble';
+  htpWrap.appendChild(htpBub); chat.appendChild(htpWrap); chat.scrollTop = 99999;
+
   await streamAI(
     { system: htpSys, messages: htpHistory.slice(-12), maxTokens: 400 },
-    (text) => { htpBub2.innerHTML = text.replace(/\n/g,'<br>'); chat.scrollTop = 99999; },
-    (text) => {
-      hpFull = text; htpBub2.classList.remove('stream-bubble');
-      htpHistory.push({ role:'assistant', content:hpFull });
-    },
-    (e) => { htpBub2.classList.remove('stream-bubble'); htpBub2.textContent = 'エラーが発生しました。'; }
+    (t) => { htpBub.innerHTML = renderMsgContent(t); chat.scrollTop = 99999; },
+    (t) => { htpBub.classList.remove('stream-bubble'); htpHistory.push({role:'assistant',content:t}); },
+    (e) => { htpBub.classList.remove('stream-bubble'); htpBub.textContent = 'エラーが発生しました。'; }
   );
   htpLoading = false;
 }
@@ -6308,20 +6250,16 @@ async function sendHubMsg(){
   const text = inp.value.trim(); if(!text) return;
   inp.value = ''; hubMsgResize(inp);
   const goal = ALL_GOALS[hubGoalIdx];
+  const goalId = goal.supabaseId || null;
 
   hubChatMsgs[goal.id].push({role:'user', content:text, time:now()});
   hubChatHistories[goal.id].push({role:'user', content:text});
   renderHubChat(); hubChatLoading = true;
+  apiSaveMessages([{ role:'user', content:text, goalId, messageType:'hub_chat' }]);
 
-  // ユーザーメッセージをSupabaseに保存
-  const hubGoalId = goal.supabaseId || null;
-  apiSaveMessages([{ role:'user', content:text, goalId:hubGoalId, messageType:'hub_chat' }]);
+  const hubSys = `あなたはGOAL AIのゴール専用コーチです。\n\n${buildAIContextCached()}\n\n現在のゴール「${goal.title}」に特化して具体的に。3〜5文で簡潔に。`;
 
-  document.getElementById('hub-typing')?.remove();
-  const hubInner = document.getElementById('hub-chat-inner');
-  const hubWrap  = document.getElementById('hub-chat-wrap');
-
-  // ── Deep analysis check ──
+  // Deep analysis check
   if (isDeepAnalysisNeeded(text) && AUTH_TOKEN) {
     showDeepConfirm('hub-chat-inner', 'hub-chat-wrap',
       async () => {
@@ -6330,49 +6268,30 @@ async function sendHubMsg(){
             renderDeepResult('hub-chat-inner', 'hub-chat-wrap', results, text);
             hubChatMsgs[goal.id].push({ role:'ai', content:results.finalOutput.slice(0,300)+'…', time:now() });
             hubChatHistories[goal.id].push({ role:'assistant', content:results.finalOutput });
-            apiSaveMessages([{ role:'assistant', content:results.finalOutput, goalId:hubGoalId, aiModel:'deep', messageType:'hub_chat' }]);
+            apiSaveMessages([{ role:'assistant', content:results.finalOutput, goalId, aiModel:'deep', messageType:'hub_chat' }]);
           }
           hubChatLoading = false;
         });
       },
       async () => {
-        const { bub: hBub } = mkStreamBubble(hubInner, hubWrap);
-        const hubSys = `あなたはGOAL AIのゴール専用コーチです。\n\n${buildAIContextCached()}\n\n現在のゴール「${goal.title}」に特化して具体的に。3〜5文で簡潔に。`;
-        await streamAI(
-          { system: hubSys, messages: hubChatHistories[goal.id].slice(-20), maxTokens: 500 },
-          (t) => { hBub.innerHTML = renderMsgContent(t); hubWrap.scrollTop = 99999; },
-          (t) => { hBub.classList.remove('stream-bubble'); hubChatMsgs[goal.id].push({role:'ai',content:t,time:now()}); hubChatHistories[goal.id].push({role:'assistant',content:t}); renderHubChat(); apiSaveMessages([{role:'assistant',content:t,goalId:hubGoalId,aiModel:'claude',messageType:'hub_chat'}]); },
-          (e) => { hBub.classList.remove('stream-bubble'); hBub.textContent='エラーが発生しました。'; }
-        );
+        await chatStream({ system:hubSys, messages:hubChatHistories[goal.id].slice(-20), maxTokens:500,
+          innerEl:'hub-chat-inner', scrollEl:'hub-chat-wrap',
+          onDone(t){ hubChatMsgs[goal.id].push({role:'ai',content:t,time:now()}); hubChatHistories[goal.id].push({role:'assistant',content:t}); renderHubChat(); apiSaveMessages([{role:'assistant',content:t,goalId,aiModel:'claude',messageType:'hub_chat'}]); }
+        });
         hubChatLoading = false;
       }
     );
     return;
   }
 
-  // ── Normal response ──
-  const hubSys = `あなたはGOAL AIのゴール専用コーチです。\n\n${buildAIContextCached()}\n\n現在のゴール「${goal.title}」に特化して具体的に。3〜5文で簡潔に。`;
-  const { bub: hBub } = mkStreamBubble(hubInner, hubWrap);
-  let hFull = '';
-  await streamAI(
-    { system: hubSys, messages: hubChatHistories[goal.id].slice(-20), maxTokens: 500 },
-    (t) => { hBub.innerHTML = renderMsgContent(t); hubWrap.scrollTop = 99999; },
-    (t) => {
-      hFull = t; hBub.classList.remove('stream-bubble');
-      hubChatMsgs[goal.id].push({ role:'ai', content:hFull, time:now() });
-      hubChatHistories[goal.id].push({ role:'assistant', content:hFull });
-      renderHubChat();
-      apiSaveMessages([{ role:'assistant', content:hFull, goalId:hubGoalId, aiModel:'claude', messageType:'hub_chat' }]);
-    },
-    (e) => { hBub.classList.remove('stream-bubble'); hBub.textContent = 'エラーが発生しました。'; }
-  );
+  await chatStream({ system:hubSys, messages:hubChatHistories[goal.id].slice(-20), maxTokens:500,
+    innerEl:'hub-chat-inner', scrollEl:'hub-chat-wrap',
+    onDone(t){ hubChatMsgs[goal.id].push({role:'ai',content:t,time:now()}); hubChatHistories[goal.id].push({role:'assistant',content:t}); renderHubChat(); apiSaveMessages([{role:'assistant',content:t,goalId,aiModel:'claude',messageType:'hub_chat'}]); }
+  });
   hubChatLoading = false;
 }
 function hubMsgResize(el) { chatResize(el, 110); }
 function hubMsgKey(e) { chatKey(sendHubMsg, e); }
-
-function showHubTyping() { showChatTyping(document.getElementById('hub-chat-inner'), 'hub-typing'); }
-function hideHubTyping() { hideChatTyping('hub-typing'); }
 
 // ─ Hub Tasks ─
 function renderHubTasks(){
