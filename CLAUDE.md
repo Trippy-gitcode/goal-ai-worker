@@ -4,7 +4,7 @@
 - ユーザーへの応答は全て日本語で行う
 
 ## 製品概要
-- GOAL AI: 3AIコーチングSaaS。Claude + GPT-4o + Gemini連携
+- GOAL AI: 3AIコーチングSaaS。Claude + GPT-5 + Gemini連携
 - コンセプト：「AIを使いこなす必要はない。ゴールだけ教えてくれればいい。」
 - ターゲット：20-40代の学生、フリーター、アイドル、小売業者、ビジネスオーナー、タレント、主婦、サラリーマン
 
@@ -53,13 +53,12 @@
 
 ## AIスマートルーティング（GPT-5 mini判定）
 - ルーティング判定: 全プラン共通でGPT-5 miniが1単語で分類
-- gemini: 天気・ニュース・検索・最新情報・長文要約（500文字超）→ Gemini 2.5 Flash（「🔍 Geminiでリサーチ中...」+ バッジ）
-- gpt: 翻訳・SNS投稿案・キャッチコピー・短い要約・アイデア出し → GPT-5 mini（「💡 GPTでアイデア生成中...」+ バッジ）
+- gemini: 天気・ニュース・検索・最新情報・長文要約（500文字超）→ Gemini 2.5 Flash（「🔍 Geminiでリサーチ中...」+バッジ）
+- gpt: 翻訳・SNS投稿案・キャッチコピー・短い要約・アイデア出し → GPT-5 mini（「💡 GPTでアイデア生成中...」+バッジ）
 - gpt-simple: 相槌・短い返事（ありがとう、OK等）→ GPT-5 mini軽量応答（ラベルなし、Claudeを呼ばない）
-- claude: 感情・悩み・ゴール・戦略・コーチング → Claude Sonnet/Opus（「🧠 Claude」バッジ）
-- ルーティング先AIの結果上部にバッジ表示
-- Geminiクォータ超過時はClaudeにフォールバック
-- /api/chat/gpt-simple エンドポイント追加（deep使用量カウントなし）
+- claude: 感情・悩み・ゴール・戦略・コーチング → Claude Sonnet/Opus（バッジなし）
+- ルーティングJSONはチャットバブルに表示してはいけない
+- /api/chat/gpt-simple エンドポイント追加
 
 ## AIの応答ルール
 - 端的に2〜3文。長文禁止
@@ -73,6 +72,8 @@
 |-------|--------|-----|--------|------------|
 | Free/Pro | claude-sonnet-4-20250514 | gpt-5-mini | gemini-2.5-flash | gpt-5-mini |
 | Premium | claude-opus-4-20250514 | gpt-5-mini | gemini-2.5-flash | gpt-5-mini |
+
+※ Haiku完全廃止。gpt-4o-mini, gpt-4o, gemini-2.0-flash, gemini-1.5-pro は全て廃止済み
 
 ## メンバーシップ
 | プラン | 月額 | AIチャット | ディープ分析 |
@@ -97,7 +98,7 @@ LAUNCH30(30日), INVITE2026(14日), BETA3MONTH(90日), GOALPRO7(7日)
 
 ## APIエンドポイント
 ### チャット
-- POST /api/chat, POST /api/chat/stream
+- POST /api/chat, POST /api/chat/stream, POST /api/chat/gpt-simple
 ### ディープ分析
 - POST /api/deep/openai, POST /api/deep/gemini, POST /api/deep/claude, POST /api/deep/claude/stream
 ### トークン
@@ -134,7 +135,7 @@ LAUNCH30(30日), INVITE2026(14日), BETA3MONTH(90日), GOALPRO7(7日)
 - 18. 外部ツールエクスポート（ics/Markdown/テキスト）
 
 ## 追加実装済み
-- AIスマートルーティング（Claude判定→Gemini/GPT/Claude振り分け＋AIバッジ表示）
+- AIスマートルーティング（GPT-5 mini判定→Gemini/GPT/Claude振り分け＋AIバッジ＋gpt-simple軽量応答）
 - AI応答高速化（30ms/文字バッファ、「考え中...」ドット即時表示）
 - テストユーザーフィードバック機能（3テーマ抽出、3択確認ボタン）
 - Free自動登録（/api/token/register）
@@ -186,17 +187,18 @@ grep -c "transcribeAudio\|whisper\|MediaRecorder" frontend/index.html → 1以�
 ```
 grep -c "handleRouting\|routeResponse" frontend/index.html     → 1以上
 grep -c "Geminiでリサーチ\|GPTでアイデア" frontend/index.html  → 2以上（AI表示）
-grep -c "getModel\|X-Model-Used" src/worker.js                 → 1以上（プラン別モデル）
+grep -c "gpt-simple" frontend/index.html                       → 1以上（簡単応答ルート）
 ```
 
 ### AIモデル確認
 ```
-grep "gpt-5-mini" src/worker.js                                → 1以上（ルーティング+応答）
-grep "gemini-2.5-flash" src/worker.js                          → 1以上（全プラン共通）
+grep "gpt-5-mini" src/worker.js                                → 1以上
+grep "gemini-2.5-flash" src/worker.js                          → 1以上
 grep -c "gpt-4o-mini\|gpt-4o" src/worker.js                   → 0（旧モデルなし）
 grep -c "gemini-2.0-flash\|gemini-1.5" src/worker.js           → 0（旧モデルなし）
 grep -c "haiku" src/worker.js                                  → 0（Haiku廃止）
 grep "gpt-simple" src/worker.js                                → 1以上（簡単応答ルート）
+grep -c "getModel\|X-Model-Used" src/worker.js                 → 1以上（プラン別モデル）
 ```
 
 ### フィードバック・認証・決済確認
@@ -248,11 +250,12 @@ ls frontend/lp.html frontend/terms.html frontend/privacy.html  → 3ファイル
 grep -c "og:title\|og:description" frontend/index.html         → 1以上（OGP）
 ```
 
-### AI選択肢・指示書・メモリー確認
+### AI選択肢・指示書・メモリー・ルーティング確認
 ```
 grep -c "choicePopup\|選択肢\|popup.*choice" frontend/index.html → 1以上
 grep -c "viewSystemPrompt\|指示書を見る" frontend/index.html   → 1以上
 grep -c "autoUpdateProfile\|メモリー\|学習" frontend/index.html → 1以上
+grep -c "gpt-simple" frontend/index.html                       → 1以上（簡単応答ルート）
 ```
 
 上記のいずれかが期待値と異なる場合、その機能を再実装してからデプロイすること。
