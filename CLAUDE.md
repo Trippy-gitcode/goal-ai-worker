@@ -70,19 +70,31 @@
 ## プラン別AIモデル
 | プラン | Claude | GPT | Gemini | ルーティング |
 |-------|--------|-----|--------|------------|
-| Free/Pro | claude-sonnet-4-20250514 | gpt-5-mini | gemini-2.5-flash | gpt-5-mini |
-| Premium | claude-opus-4-20250514 | gpt-5-mini | gemini-2.5-flash | gpt-5-mini |
+| Free | claude-sonnet-4-20250514 | gpt-5-nano | gemini-2.5-flash | gpt-5-nano |
+| Pro | claude-sonnet-4-20250514 | gpt-5-mini | gemini-2.5-flash | gpt-5-mini |
+| Premium | claude-opus-4-20250514 | gpt-5 | gemini-2.5-pro | gpt-5-mini |
+| Max | claude-opus-4-20250514 | gpt-5 | gemini-2.5-pro | gpt-5-mini |
 
 ※ Haiku完全廃止。gpt-4o-mini, gpt-4o, gemini-2.0-flash, gemini-1.5-pro は全て廃止済み
 
 ## メンバーシップ
-| プラン | 月額 | AIチャット | ディープ分析 |
-|-------|------|-----------|------------|
-| Free | 無料 | 5回/月 | 3回/月 |
-| Pro | ¥2,980 | 無制限 | 30回/月 |
-| Premium | ¥4,980 | 無制限 | 無制限 |
-| Annual | ¥29,800/年 | 無制限 | 60回/月 |
-| Premium Annual | ¥49,800/年 | 無制限 | 無制限 |
+| プラン | 月額 | 年間 | AIチャット | ディープ分析 |
+|-------|------|------|-----------|------------|
+| Free | 無料 | — | 5回/日 | 3回/月 |
+| Pro | ¥2,980 | ¥29,800 | 無制限* | 30回/月 |
+| Premium | ¥4,980 | ¥49,800 | 無制限* | 60回/月 |
+| Max | ¥12,800 | ¥128,000 | 無制限* | 無制限 |
+*フェアユースポリシー適用（1h30回/1d100回超で速度制限）
+
+## 14日間トライアル
+- 初回登録時にPro全機能を14日間体験（カード不要）
+- 14日後に自動でFreeに戻る
+- 「Pro体験中（残りN日）」と表示
+
+## 友達紹介プログラム
+- 紹介する側: 有料プラン＋支払い実績1回以上
+- 紹介される側: Pro以上選択+カード登録で初月75%OFF（¥745）
+- 紹介者特典: 1つ上のグレード1ヶ月無料
 
 ## プロモコード
 LAUNCH30(30日), INVITE2026(14日), BETA3MONTH(90日), GOALPRO7(7日)
