@@ -7484,7 +7484,7 @@ function streamAppend(bub, fullText){
 function streamFinalize(bub, fullText){
   bub._streamDone = true;
   if(bub._animTimer){ clearInterval(bub._animTimer); bub._animTimer = null; }
-  bub.innerHTML = renderMsgContent(fullText);
+  bub.innerHTML = `<div style="font-size:9px;color:var(--amber);font-family:var(--fm);margin-bottom:6px;opacity:.7;">🧠 Claude</div>${renderMsgContent(fullText)}`;
   // Check for numbered selection list
   checkAndShowSelections(bub, fullText);
   bub.classList.remove('stream-bubble');
