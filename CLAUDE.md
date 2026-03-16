@@ -1,299 +1,276 @@
-# GOAL AI — Project Context
+# GOAL AI — CLAUDE.md（Claude Code専用）
+> 最終更新：2026-03-16
+> 方針・ルール → goal_ai_project_v5.4.md｜履歴・スキーマ → goal_ai_reference.md
 
-## 言語設定
-- ユーザーへの応答は全て日本語で行う
+---
 
-## 製品概要
-- GOAL AI: 3AIコーチングSaaS。Claude + GPT-5 + Gemini連携
-- コンセプト：「AIを使いこなす必要はない。ゴールだけ教えてくれればいい。」
-- ターゲット：20-40代の学生、フリーター、アイドル、小売業者、ビジネスオーナー、タレント、主婦、サラリーマン
+## 【鉄則】毎回必ず守ること
 
-## アーキテクチャ
-- Frontend: 単一HTML（frontend/index.html）→ Cloudflare Pages
-- Backend: Cloudflare Worker（src/worker.js）→ API Proxy + Token管理
-- DB: Supabase PostgreSQL（永続化）→ REST API経由
-- KV: テストトークン・使用量管理（キャッシュ層、Supabaseと二重書き込み）
-- 本番URL: https://goal-ai-frontend.pages.dev
-- Worker URL: https://goal-ai-worker.goalai-futoshi.workers.dev
-- Supabase: https://wrvwcfilokfcjudspizp.supabase.co（プロジェクト: goal-ai、リージョン: ap-southeast-1）
+### 実装前
+1. 対象箇所を **grep で場所特定**してから編集（行番号把握後にstr_replace）
+2. 削除指示は「〇〇というテキストから〇〇というテキストまでを削除」と**範囲で明示**
+3. `index.html` は9,000行超 → 修正前に対象セクションを **view で確認**
 
-## デプロイ
-- Frontend変更後: npx wrangler pages deploy frontend --project-name=goal-ai-frontend
-- Worker変更後: npx wrangler deploy
-- 両方変更した場合は両方デプロイ
-- デプロイ前に必ず「デプロイ前チェックリスト」を実行すること
+### 実装後・デプロイ前
+4. 末尾の**全体確認grep**を全項目実行 → 1件でも失敗したら再修正してからデプロイ
+5. 以下の**保全確認grep**で過去修正が消えていないか確認
 
-## コード規約
-- worker.js: 単一ファイル、plain JS、TypeScript不使用
-- frontend: 単一HTML、localStorage不可、Cookie使用
-- 日本語UIテキスト、コメントも日本語OK
-- Enterキーハンドラーには !e.isComposing && !_isComposing を含める（Safari IME対応）
-- compositionstart/compositionendで_isComposingフラグ管理
-- ハードコードされた個人情報・デモデータは禁止（全て動的参照）
-- ユーザー入力のDOM挿入前にescapeHtml()でXSSサニタイズ必須
+```bash
+grep -c "escapeHtml" frontend/index.html            # 5以上（XSS対策）
+grep -c "Secure" frontend/index.html                # 1以上（Cookie）
+grep -c "console.log" frontend/index.html           # 0件（本番汚染防止）
+grep "chat.*5\b" src/worker.js                      # Free制限5回/日
+grep "goal-ai-frontend.pages.dev" src/worker.js     # Stripe URL
+grep -c "overscroll-behavior" frontend/index.html   # 1以上
+grep -c "renderAIUnderstanding" frontend/index.html # 1以上（Phase1機能）
+grep -c "kabeuchi\|壁打ち" frontend/index.html      # 1以上
+grep -c "launchConfetti\|checkMilestone" frontend/index.html # 2以上
+grep -c "transcribeAudio\|MediaRecorder" frontend/index.html # 1以上
+```
 
-## 共通チャットエンジン
-- sendChatMsg(config) — 全チャット画面の統合送信関数
-  config = { channel, inputEl, chatEl, systemPrompt, history, goalId, onDone }
-- renderChatMsgs(config) — 全チャット画面の統合描画関数
-- chatResize(el, maxH) — 全テキストエリアのリサイズ統合
-- chatKey(sendFn, e) — 全Enterキーハンドラー統合
-- showChatTyping/hideChatTyping — タイピングインジケーター統合
-- apiCall(endpoint, method, body) — 共通APIラッパー（401/429/オフライン処理）
-- escapeHtml(str) — XSSサニタイズユーティリティ
-- streamAI() — 唯一のストリーミング関数（TextDecoder stream、日本語対応）
+### デプロイ禁止条件
+- 保全確認grepで1件でも失敗 → デプロイしない
+- 確認grepを実行していない → デプロイしない
 
-## 3AI協調フロー（6段階）
-1. Gemini: 市場調査・データ収集
-2. GPT: アイデア生成・仮説構築
-3. Gemini: GPTのアイデアをデータ検証
-4. GPT: アイデア精錬・アクションプラン化
-5. Claude: 統合・戦略文書化（ストリーミング）
-6. GPT+Gemini: デュアルレビュー → Claude: 最終修正
+---
 
-## AIスマートルーティング（GPT-5 mini判定）
-- ルーティング判定: 全プラン共通でGPT-5 miniが1単語で分類
-- gemini: 天気・ニュース・検索・最新情報・長文要約（500文字超）→ Gemini 2.5 Flash（「🔍 Geminiでリサーチ中...」+バッジ）
-- gpt: 翻訳・SNS投稿案・キャッチコピー・短い要約・アイデア出し → GPT-5 mini（「💡 GPTでアイデア生成中...」+バッジ）
-- gpt-simple: 相槌・短い返事（ありがとう、OK等）→ GPT-5 mini軽量応答（ラベルなし、Claudeを呼ばない）
-- claude: 感情・悩み・ゴール・戦略・コーチング → Claude Sonnet/Opus（バッジなし）
-- ルーティングJSONはチャットバブルに表示してはいけない
-- /api/chat/gpt-simple エンドポイント追加
+## 技術スタック
 
-## AIの応答ルール
-- 端的に2〜3文。長文禁止
-- 質問は1回に1つ。末尾に同じ質問を繰り返さない
-- ゴールに関係ない雑談には普通に答える
-- まとめ後に必ず「これで合ってますか？」と確認
-- ユーザーが同意するまで次のフェーズに進まない
+| レイヤー | 採用技術 | 状態 |
+|---------|---------|------|
+| フロントエンド | Vite + ES Modules（移行予定） | 🔄 移行中 |
+| ホスティング | Cloudflare Pages（goal-ai-frontend.pages.dev） | ✅ 稼働中 |
+| APIプロキシ | Cloudflare Workers（goal-ai-worker.goalai-futoshi.workers.dev） | ✅ 稼働中 |
+| メインAI | Claude Sonnet 4.6 / Opus 4.6 | ✅ 稼働中 |
+| サブAI① | GPT-5 nano / mini / 5 | ✅ 稼働中 |
+| サブAI② | Gemini 2.5 Flash / Pro | ✅ 稼働中 |
+| 決済 | Stripe（Checkout + Webhook + Portal + Coupon） | ✅ 稼働中 |
+| 永続化 | Supabase PostgreSQL（8テーブル） | ✅ 稼働中 |
+| KVキャッシュ | Cloudflare KV | ✅ 稼働中 |
 
-## プラン別AIモデル
-| プラン | Claude | GPT | Gemini | ルーティング |
-|-------|--------|-----|--------|------------|
-| Free | claude-sonnet-4-20250514 | gpt-5-nano | gemini-2.5-flash | gpt-5-nano |
-| Pro | claude-sonnet-4-20250514 | gpt-5-mini | gemini-2.5-flash | gpt-5-mini |
-| Premium | claude-opus-4-20250514 | gpt-5 | gemini-2.5-pro | gpt-5-mini |
-| Max | claude-opus-4-20250514 | gpt-5 | gemini-2.5-pro | gpt-5-mini |
+---
 
-※ Haiku完全廃止。gpt-4o-mini, gpt-4o, gemini-2.0-flash, gemini-1.5-pro は全て廃止済み
+## AIモデル割り当て（プラン別）
 
-## メンバーシップ
-| プラン | 月額 | 年間 | AIチャット | ディープ分析 |
-|-------|------|------|-----------|------------|
-| Free | 無料 | — | 5回/日 | 3回/月 |
-| Pro | ¥2,980 | ¥29,800 | 無制限* | 30回/月 |
-| Premium | ¥4,980 | ¥49,800 | 無制限* | 60回/月 |
-| Max | ¥12,800 | ¥128,000 | 無制限* | 無制限 |
-*フェアユースポリシー適用（1h30回/1d100回超で速度制限）
+| プラン | Claude | GPT | Gemini |
+|-------|--------|-----|--------|
+| Free | Sonnet 4.6 | GPT-5 nano | 2.5 Flash |
+| Pro | Sonnet 4.6 | GPT-5 mini | 2.5 Flash |
+| Premium | Opus 4.6 | GPT-5 | 2.5 Pro |
+| Max | Opus 4.6 | GPT-5 | 2.5 Pro |
 
-## 14日間トライアル
-- 初回登録時にPro全機能を14日間体験（カード不要）
-- 14日後に自動でFreeに戻る
-- 「Pro体験中（残りN日）」と表示
+### AIルーティング4カテゴリ
+- **gemini**: 天気・ニュース・検索・アイデア・長文要約 → 「🔍 リサーチ中...」バッジ
+- **gpt**: 翻訳・SNSコピー・短い要約 → 「💡 アイデアを生成中...」バッジ
+- **gpt-simple**: 相槌・短い返事 → バッジなし
+- **claude**: コーチング・戦略・感情・それ以外 → バッジなし（デフォルト）
 
-## 友達紹介プログラム
-- 紹介する側: 有料プラン＋支払い実績1回以上
-- 紹介される側: Pro以上選択+カード登録で初月75%OFF（¥745）
-- 紹介者特典: 1つ上のグレード1ヶ月無料
+---
 
-## プロモコード
-LAUNCH30(30日), INVITE2026(14日), BETA3MONTH(90日), GOALPRO7(7日)
+## プラン制限
 
-## Supabaseテーブル
-- users — ユーザー情報（token_id, plan, stripe連携）
-- goals — ゴール管理（CRUD、last_milestone_pct含む）
-- chat_messages — チャット履歴（session_id対応、ユーザー+AI両方保存）
-- deep_analyses — ディープ分析結果
-- usage_tracking — 月間使用量
-- feedbacks — テストユーザーフィードバック
-- RLS有効、service_roleキーでWorkerからアクセス
+| プラン | チャット | ディープ分析 |
+|-------|---------|------------|
+| free | 5回/日 | 3回/月 |
+| pro | 無制限* | 30回/月 |
+| premium | 無制限* | 60回/月 |
+| max | 無制限 | 無制限 |
 
-## APIエンドポイント
-### チャット
-- POST /api/chat, POST /api/chat/stream, POST /api/chat/gpt-simple
-### ディープ分析
-- POST /api/deep/openai, POST /api/deep/gemini, POST /api/deep/claude, POST /api/deep/claude/stream
-### トークン
-- POST /api/token/create, POST /api/token/validate, POST /api/token/redeem, POST /api/token/register
-- GET /api/usage
-### Stripe
-- POST /api/checkout/create, POST /api/checkout/portal, POST /api/webhook/stripe
-### ゴール
-- GET/POST /api/goals, PATCH/DELETE /api/goals/:id
-### チャット履歴
-- GET /api/history, POST /api/history
-### フィードバック
-- POST /api/feedbacks, GET /api/feedbacks
-### 音声
-- POST /api/voice/transcribe
-### その他
-- GET /health
+*フェアユース: 1時間30回・1日100回超過で速度低下
 
-## Stripe Price IDs
-→ worker.js内のSTRIPE_PRICE_IDS定数を参照
+---
+
+## APIエンドポイント一覧
+
+```
+POST /api/chat
+POST /api/chat/stream
+POST /api/chat/gpt-simple
+
+POST /api/referral/create
+POST /api/referral/apply
+GET  /api/referral/status
+
+POST /api/deep/openai
+POST /api/deep/gemini
+POST /api/deep/claude
+POST /api/deep/claude/stream
+
+POST /api/token/create（管理者）
+POST /api/token/validate
+POST /api/token/redeem
+POST /api/token/register（Free自動登録）
+GET  /api/usage
+
+POST /api/checkout/create
+POST /api/checkout/portal
+POST /api/webhook/stripe
+
+GET  /api/goals
+POST /api/goals
+PATCH  /api/goals/:id
+DELETE /api/goals/:id
+
+GET  /api/history
+POST /api/history
+
+POST /api/feedbacks
+GET  /api/feedbacks（管理者用）
+
+POST /api/voice/transcribe
+```
+
+---
 
 ## Worker Secrets
-- ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY
-- TOKEN_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
-- SUPABASE_URL, SUPABASE_SERVICE_KEY
 
-## 完了済み機能（Phase 1）
-- 4. AI理解度可視化（renderAIUnderstanding）
-- 7. 壁打ちモード（ソクラテス式問答、答え禁止）
-- 8. マイルストーン演出＆シェア（confetti + Web Share API）
-- 9. 音声要約→タスク変換（50文字超で提案）
-- 11. 今日の1%マイクロタスク（renderMicroTask）
-- 13. トリセツPDF出力（html2canvas + jsPDF）
-- 18. 外部ツールエクスポート（ics/Markdown/テキスト）
-
-## 追加実装済み
-- AIスマートルーティング（GPT-5 mini判定→Gemini/GPT/Claude振り分け＋AIバッジ＋gpt-simple軽量応答）
-- AI応答高速化（30ms/文字バッファ、「考え中...」ドット即時表示）
-- テストユーザーフィードバック機能（3テーマ抽出、3択確認ボタン）
-- Free自動登録（/api/token/register）
-- チャットレコード（AI自動タイトル、サイドバー直近5件）
-- ゴール設定フロー改善（ハブ内チャットでヒアリング→タスク作成）
-- LP（frontend/lp.html）
-- 利用規約・プライバシーポリシー
-- Premiumプラン（¥4,980/月、Opus+4o+1.5-pro）
-- Premium Annualプラン（¥49,800/年）
-- AI選択肢ポップアップUI
-- AIへの指示書分離・参照機能
-- メモリー生成（対話からUSER_PROFILE自動更新）
-
-## GitHub
-- リポジトリ: https://github.com/Trippy-gitcode/goal-ai-worker（プライベート）
-- .dev.varsはgitignore済み
-
-## 開発ルール
-- 外部サービス設定はCLI/APIで自動実行、ユーザー手作業はアカウント作成とAPIキー提供のみ
-- 実装→デプロイ→テストは途中確認なしで一気通貫
-- 大規模修正後は必ず「デプロイ前チェックリスト」を実行
-- 修正が消えていた場合は再適用してからデプロイ
-
-## セッション終了時の運用
-作業終了時は以下のフォーマットで要約を生成：
-- 今日の変更ファイル一覧
-- 追加/修正した機能
-- 残課題
-- 次のタスク
+```
+ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY
+TOKEN_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+SUPABASE_URL, SUPABASE_SERVICE_KEY
+```
 
 ---
 
-## デプロイ前チェックリスト（必須）
-大規模修正後は必ず以下のgrepを実行し、既存機能が消えていないか確認すること。
-1つでも欠けていたら再実装してからデプロイ。
+## フロントエンド：主要関数・変数
 
-### Phase 1 機能の存在確認
-```
-grep -c "renderAIUnderstanding" frontend/index.html           → 1以上（AI理解度可視化）
-grep -c "kabeuchi\|壁打ち\|ソクラテス" frontend/index.html    → 1以上（壁打ちモード）
-grep -c "launchConfetti\|checkMilestone" frontend/index.html   → 2以上（マイルストーン演出）
-grep -c "exportTorisetsuPDF\|html2canvas" frontend/index.html  → 1以上（トリセツPDF）
-grep -c "openExportModal\|\.ics" frontend/index.html           → 1以上（エクスポート）
-grep -c "renderMicroTask\|今日の1%" frontend/index.html        → 1以上（マイクロタスク）
-grep -c "transcribeAudio\|whisper\|MediaRecorder" frontend/index.html → 1以上（音声入力）
-```
+### 共通チャットエンジン
+- `chatResize(el, maxH)` — テキストエリアリサイズ
+- `chatKey(sendFn, e)` — Enterキーハンドラー（IME対応）
+- `showChatTyping()` / `hideChatTyping()` — タイピングインジケーター
+- `apiCall(endpoint, method, body)` — 共通APIラッパー（401/429/オフライン処理）
+- `escapeHtml(str)` — XSSサニタイズ（innerHTML使用時は必須）
+- `streamAI()` — ストリーミング関数（TextDecoder、日本語対応）
 
-### スマートルーティング確認
-```
-grep -c "handleRouting\|routeResponse" frontend/index.html     → 1以上
-grep -c "Geminiでリサーチ\|GPTでアイデア" frontend/index.html  → 2以上（AI表示）
-grep -c "gpt-simple" frontend/index.html                       → 1以上（簡単応答ルート）
-```
+### 主要グローバル変数
+- `AUTH_TOKEN` — Bearerトークン（Cookie同期）
+- `MEMBERSHIP` — プラン・トライアル情報
+- `USER_PROFILE` — パーソナルプロフィール
+- `ALL_GOALS` — ゴール配列（Supabaseから読み込み）
+- `msgs` — ホームチャットメッセージ配列
+- `history` — Claude API用会話履歴
+- `_isComposing` — IME状態フラグ
 
-### AIモデル確認
-```
-grep "gpt-5-mini" src/worker.js                                → 1以上
-grep "gemini-2.5-flash" src/worker.js                          → 1以上
-grep -c "gpt-4o-mini\|gpt-4o" src/worker.js                   → 0（旧モデルなし）
-grep -c "gemini-2.0-flash\|gemini-1.5" src/worker.js           → 0（旧モデルなし）
-grep -c "haiku" src/worker.js                                  → 0（Haiku廃止）
-grep "gpt-simple" src/worker.js                                → 1以上（簡単応答ルート）
-grep -c "getModel\|X-Model-Used" src/worker.js                 → 1以上（プラン別モデル）
-```
-
-### フィードバック・認証・決済確認
-```
-grep -c "openFeedback\|fbChat\|feedbackModal" frontend/index.html → 1以上
-grep -c "token/register" frontend/index.html                   → 1以上（Free自動登録）
-grep -c "checkout/create" frontend/index.html                  → 1以上（Stripe）
-grep -c "feedbacks" src/worker.js                              → 1以上
-grep -c "handleTokenRegister" src/worker.js                    → 1以上
-grep -c "handleCheckout" src/worker.js                         → 1以上
-```
-
-### チャット共通化・履歴確認
-```
-grep -c "sendChatMsg" frontend/index.html                      → 5以上（共通化）
-grep -c "session_id\|sessionId" frontend/index.html            → 3以上（履歴管理）
-grep -c "closeSidebar" frontend/index.html                     → 2以上
-```
-
-### IME・XSS・セキュリティ確認
-```
-grep -c "_isComposing" frontend/index.html                     → 3以上
-grep -c "compositionstart" frontend/index.html                 → 1以上
-grep -c "escapeHtml" frontend/index.html                       → 5以上
-grep -c "Secure" frontend/index.html                           → 1以上（Cookie）
-grep -c "console.log" frontend/index.html                      → 0（デバッグ出力なし）
-```
-
-### スマホ表示確認
-```
-grep -c "flex-shrink:0" frontend/index.html                    → 2以上
-grep -c "visualViewport" frontend/index.html                   → 0（削除されていること）
-grep -c "overflow-x:hidden" frontend/index.html                → 1以上（サイドバー）
-```
-
-### 画像入力・音声確認
-```
-grep -c "clipboard\|paste.*image\|dragover" frontend/index.html → 1以上
-grep -c "position:relative.*voice\|voice.*position:relative" frontend/index.html → 1以上
-```
-
-### 価格・URL・ファイル確認
-```
-grep "4980" frontend/index.html                                → Premium ¥4,980あり
-grep "4980" src/worker.js                                      → 同上
-grep "chat.*5\b" src/worker.js                                 → Free制限5回
-grep "goal-ai-frontend.pages.dev" src/worker.js                → Stripe URL正しい
-ls frontend/lp.html frontend/terms.html frontend/privacy.html  → 3ファイル存在
-grep -c "og:title\|og:description" frontend/index.html         → 1以上（OGP）
-```
-
-### AI選択肢・指示書・メモリー・ルーティング確認
-```
-grep -c "choicePopup\|選択肢\|popup.*choice" frontend/index.html → 1以上
-grep -c "viewSystemPrompt\|指示書を見る" frontend/index.html   → 1以上
-grep -c "autoUpdateProfile\|メモリー\|学習" frontend/index.html → 1以上
-grep -c "gpt-simple" frontend/index.html                       → 1以上（簡単応答ルート）
-```
-
-上記のいずれかが期待値と異なる場合、その機能を再実装してからデプロイすること。
+### コード規約
+- localStorage不可・Cookie使用（Secure属性必須）
+- IME対応: `!e.isComposing && !_isComposing`
+- XSS: `escapeHtml()` 必須・innerHTML使用時はサニタイズ確認
+- ハードコードされた個人情報・デモデータ禁止
+- `console.log` 本番禁止
 
 ---
 
-## テスト手順
-1. デプロイ後は必ず https://goal-ai-frontend.pages.dev で動作確認
-2. チャットが動くか（AUTH_TOKENが有効か）
-3. スマホ表示が崩れないか（iPhone Safari + Android Chrome）
-4. ゴール作成→チャット→リロード→データ復元の一連を確認
+## ファイル構成
 
-## ロードマップ
-### Phase 2（5月）4機能
-12. ライバル＆ロールモデル設定
-14. ゴール間依存関係マップ
-16. チーム目標モード
-19. 成功パターンレシピ化
+### 移行後（目標）
+```
+goal-ai-worker/
+├── CLAUDE.md
+├── wrangler.toml
+├── vite.config.js
+├── package.json
+├── .dev.vars
+├── src/
+│   └── worker.js
+├── frontend/
+│   ├── index.html          # HTML骨格のみ（〜300行）
+│   ├── style.css
+│   ├── js/
+│   │   ├── globals.js      # 全グローバル変数（export）
+│   │   ├── api.js          # API通信・escapeHtml
+│   │   ├── chat.js         # チャット・ルーティング・履歴
+│   │   ├── goals.js        # ゴール・タスク・マイルストーン
+│   │   ├── profile.js      # プロフィール・デザインセッション
+│   │   ├── ui.js           # toast・modal・sidebar・テーマ
+│   │   └── app.js          # init()・エントリーポイント
+│   ├── lp.html
+│   ├── terms.html
+│   └── privacy.html
+├── frontend-dist/
+└── scripts/
+    └── create-token.js
+```
 
-### Phase 3（5月末〜6月）4機能
-1. AIメンター自動マッチング
-2. モーニングブリーフィング
-3. ゴールテンプレート
-5. ウィークリーレビュー自動生成
+### 移行前（現状）
+```
+frontend/
+└── index.html    # 9,500行超（移行完了後に削除）
+```
 
-### Phase 4（6月〜）3機能
-6. ゴール達成予測AI
-15. 感情ログ＆メンタルトレンド
-17. Before→After成長レポート
+---
+
+## 本番URL
+
+- フロントエンド: https://goal-ai-frontend.pages.dev
+- Worker: https://goal-ai-worker.goalai-futoshi.workers.dev
+- GitHub: https://github.com/Trippy-gitcode/goal-ai-worker（プライベート）
+
+---
+
+## デプロイコマンド
+
+```bash
+# Worker
+npx wrangler deploy
+
+# フロントエンド（移行前）
+npx wrangler pages deploy frontend --project-name goal-ai-frontend
+
+# フロントエンド（移行後・Viteビルド後）
+npm run build
+npx wrangler pages deploy frontend-dist --project-name goal-ai-frontend
+```
+
+---
+
+## 全体確認grep（デプロイ前に全項目実行）
+
+```bash
+# AIモデル
+grep "gpt-5-mini\|gpt-5-nano\|gpt-5\"" src/worker.js   # 各1以上
+grep "gemini-2.5-flash\|gemini-2.5-pro" src/worker.js  # 各1以上
+grep "gpt-4o\|gemini-2.0\|gemini-1.5" src/worker.js    # 0件（旧モデルなし）
+
+# セキュリティ
+grep -c "escapeHtml" frontend/index.html                # 5以上
+grep -c "Secure" frontend/index.html                    # 1以上
+grep -c "console.log" frontend/index.html               # 0件
+grep -c "overscroll-behavior" frontend/index.html       # 1以上
+grep -c "og:title\|og:description" frontend/index.html  # 1以上
+grep "maximum-scale" frontend/index.html                # 1以上
+grep -c "_isComposing" frontend/index.html              # 3以上
+
+# プラン・機能
+grep "chat.*5\b" src/worker.js                          # Free制限5回/日
+grep "goal-ai-frontend.pages.dev" src/worker.js         # Stripe URL
+grep "4980" frontend/index.html                         # Premium ¥4,980
+grep -c "gpt-simple" frontend/index.html                # 1以上
+grep -c "visualViewport" frontend/index.html            # 1以上
+grep -c "billing-toggle\|planBilling" frontend/index.html # 2以上
+grep -c "Pro 年間プラン" frontend/index.html            # 0件（削除確認）
+grep -c "2ヶ月無料" frontend/index.html                 # 1以上
+grep -c "session_id\|sessionId" frontend/index.html     # 3以上
+grep -c "closeSidebar" frontend/index.html              # 2以上
+
+# クーポン・フィードバック
+grep -c "used_coupons" src/worker.js                    # 2以上
+grep -c "sentiment" src/worker.js                       # 3以上
+grep -c "show_nps" src/worker.js                        # 2以上
+grep -c "churn_feedback" src/worker.js                  # 2以上
+grep -c "is_beta" src/worker.js                         # 2以上
+
+# Phase 1機能（消えていないか）
+grep -c "renderAIUnderstanding" frontend/index.html     # 1以上
+grep -c "kabeuchi\|壁打ち\|ソクラテス" frontend/index.html # 1以上
+grep -c "launchConfetti\|checkMilestone" frontend/index.html # 2以上
+grep -c "transcribeAudio\|MediaRecorder" frontend/index.html # 1以上
+grep -c "handleRouting\|routeResponse" frontend/index.html   # 1以上
+grep -c "openFeedback\|feedbackModal" frontend/index.html    # 1以上
+grep -c "token/register" frontend/index.html            # 1以上
+grep -c "checkout/create" frontend/index.html           # 1以上
+grep -c "sendChatMsg" frontend/index.html               # 5以上
+grep -c "clipboard\|dragover" frontend/index.html       # 1以上
+
+# ファイル存在
+ls frontend/lp.html frontend/terms.html frontend/privacy.html
+```
