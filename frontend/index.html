@@ -1307,6 +1307,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
 .plan-badge-pro{background:var(--amber-g);border:1px solid rgba(228,184,106,.4);color:var(--amber);padding:2px 8px;border-radius:4px;font-size:9px;font-family:var(--fm);letter-spacing:.06em;}
 .plan-badge-premium{background:linear-gradient(90deg,rgba(228,184,106,.2),rgba(228,184,106,.08));border:1px solid rgba(228,184,106,.6);color:var(--amber);padding:2px 8px;border-radius:4px;font-size:9px;font-family:var(--fm);letter-spacing:.06em;font-weight:600;}
 .plan-badge-trial{background:rgba(93,184,150,.1);border:1px solid rgba(93,184,150,.3);color:var(--green);padding:2px 8px;border-radius:4px;font-size:9px;font-family:var(--fm);letter-spacing:.06em;}
+.plan-badge-max{background:linear-gradient(90deg,rgba(228,184,106,.25),rgba(228,184,106,.1));border:1px solid rgba(228,184,106,.7);color:var(--amber);padding:2px 8px;border-radius:4px;font-size:9px;font-family:var(--fm);letter-spacing:.06em;font-weight:700;}
 /* ─ Upgrade nudge strip ─ */
 .upgrade-nudge{padding:8px 12px;background:var(--amber-g);border:1px solid rgba(228,184,106,.3);border-radius:8px;cursor:pointer;transition:background .15s;margin:8px 0;}
 .upgrade-nudge:hover{background:rgba(228,184,106,.12);}
@@ -2913,6 +2914,20 @@ input,textarea,select{font-family:var(--ff);outline:none}
                 <textarea class="field-input" rows="2" placeholder="例：転職した、子供が生まれた…"></textarea>
               </div>
               <button class="btn-save" onclick="toast('現況を保存しました')">保存</button>
+            </div>
+          </div>
+
+          <!-- Referral -->
+          <div class="settings-card full" id="referral-card" style="display:none;">
+            <div class="sc-hd"><span class="sc-hd-icon">🎁</span><div class="sc-hd-title">友達を紹介</div></div>
+            <div class="sc-body">
+              <div style="font-size:12px;color:var(--cream);margin-bottom:8px;">あなたの紹介コード</div>
+              <div id="referral-code" style="font-size:18px;font-family:var(--fm);color:var(--amber);letter-spacing:2px;margin-bottom:12px;padding:10px;background:var(--bg2);border:1px dashed var(--amber);border-radius:8px;text-align:center;user-select:all;"></div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.6;">
+                紹介された方: Pro初月75%OFF（¥745）<br>
+                あなた: 1つ上のグレード1ヶ月無料
+              </div>
+              <button onclick="copyReferralCode()" style="margin-top:10px;padding:8px 16px;background:var(--amber);border:none;border-radius:8px;color:var(--bg);font-size:12px;cursor:pointer;font-family:var(--ff);">コードをコピー</button>
             </div>
           </div>
 
@@ -5749,8 +5764,8 @@ async function sendHomeMsg(){
 
 // ════════ AI SMART ROUTING (GPT-5 mini判定) ════════
 const ROUTE_PROMPT = `ユーザーのメッセージを分類せよ。以下の1単語のみ返せ。
-gemini: 天気、ニュース、検索、最新情報、長文の要約依頼
-gpt: 翻訳、SNS投稿案、キャッチコピー、短い要約、アイデア出し、ブレスト
+gemini: 天気、ニュース、検索、最新情報、長文の要約依頼（500文字超）
+gpt: 翻訳、SNS投稿案、キャッチコピー、短い要約（500文字以下）、アイデア出し、ブレスト
 gpt-simple: 相槌や短い返事（ありがとう、OK、うん、了解、いいね等）
 claude: 上記以外（感情、悩み、ゴール、戦略、コーチング、雑談で深い対話が必要なもの）`;
 
@@ -7811,8 +7826,10 @@ function scheduleNotif(title, body, delayMs) {
 // ── Usage limits per plan ──
 const DEEP_LIMITS = {
   free:    3,    // Free: 3回/月
-  trial:   5,    // テストユーザー/Trial: 5回/月
+  trial:   5,    // テストユーザー/Trial: 5回/日
   pro:    30,    // Pro: 30回/月
+  premium: 60,   // Premium: 60回/月
+  max:   9999,   // Max: 無制限
   annual: 60,    // 年間Pro: 60回/月
 };
 
@@ -8537,6 +8554,7 @@ function getMembershipLabel(){
     const days = Math.ceil((new Date(MEMBERSHIP.trialEnd)-new Date())/86400000);
     return {badge:'trial', text:'無料体験中', sub:`残 ${days}日`};
   }
+  if(MEMBERSHIP.plan==='max') return {badge:'max', text:'Max', sub:null};
   if(MEMBERSHIP.plan==='premium') return {badge:'premium', text:'Premium', sub:null};
   if(MEMBERSHIP.plan==='pro') return {badge:'pro', text:'Pro', sub:null};
   if(MEMBERSHIP.plan==='annual') return {badge:'pro', text:'Pro 年間', sub:null};
@@ -8552,7 +8570,7 @@ function renderMembershipUI(){
 
   if(badge){
     badge.className = `plan-badge-${lbl.badge}`;
-    badge.textContent = (lbl.badge==='pro'||lbl.badge==='premium')?'▲ '+lbl.text:lbl.text;
+    badge.textContent = (lbl.badge==='pro'||lbl.badge==='premium'||lbl.badge==='max')?'▲ '+lbl.text:lbl.text;
   }
   if(trialEl){
     if(lbl.sub && lbl.badge==='trial'){
@@ -8579,6 +8597,22 @@ function renderMembershipUI(){
   const avEl = document.getElementById('sb-avatar');
   const avName = USER_PROFILE.nickname || USER_PROFILE.name || '';
   if(avEl) avEl.textContent = avName ? avName.charAt(0) : '?';
+
+  // Referral card — show only for paid users
+  const refCard = document.getElementById('referral-card');
+  if(refCard){
+    const isPaidPlan = MEMBERSHIP.plan==='pro'||MEMBERSHIP.plan==='premium'||MEMBERSHIP.plan==='max'||MEMBERSHIP.plan==='annual';
+    refCard.style.display = isPaidPlan ? 'block' : 'none';
+    if(isPaidPlan && AUTH_TOKEN){
+      const refCodeEl = document.getElementById('referral-code');
+      if(refCodeEl && !refCodeEl.textContent) refCodeEl.textContent = 'REF-' + AUTH_TOKEN.slice(-8).toUpperCase();
+    }
+  }
+}
+
+function copyReferralCode(){
+  const code = document.getElementById('referral-code')?.textContent;
+  if(code) navigator.clipboard?.writeText(code).then(()=>toast('紹介コードをコピーしました'));
 }
 
 function openPlanModal(){
@@ -8596,6 +8630,9 @@ function renderPlanModal(){
     if(lbl.badge==='trial'){
       cur.style.cssText='background:rgba(93,184,150,.1);border:1px solid rgba(93,184,150,.3);color:var(--green);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
       cur.innerHTML=`✓ 無料体験中 <span style="opacity:.7">${document.getElementById('sb-trial-days')?.textContent||''}</span>`;
+    } else if(lbl.badge==='max'){
+      cur.style.cssText='background:linear-gradient(90deg,rgba(228,184,106,.2),rgba(228,184,106,.08));border:1px solid rgba(228,184,106,.7);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;';
+      cur.innerHTML=`👑 現在のプラン：Max`;
     } else if(lbl.badge==='premium'){
       cur.style.cssText='background:linear-gradient(90deg,rgba(228,184,106,.15),rgba(228,184,106,.05));border:1px solid rgba(228,184,106,.5);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
       cur.innerHTML=`👑 現在のプラン：Premium`;
@@ -8608,7 +8645,7 @@ function renderPlanModal(){
     }
   }
   // Highlight selected
-  ['free','pro','premium','annual'].forEach(p=>{
+  ['free','pro','premium','max','annual'].forEach(p=>{
     const el=document.getElementById(`pc-${p}`);
     if(el){ el.style.outline = (p===MEMBERSHIP.plan||p===MEMBERSHIP.selectedPlan)?'2px solid var(--amber)':'none'; }
   });
@@ -8616,14 +8653,14 @@ function renderPlanModal(){
   // 課金済みユーザーにはポータルリンクを表示
   const portalWrap = document.getElementById('plan-portal-wrap');
   if(portalWrap){
-    const isPaid = MEMBERSHIP.plan==='pro'||MEMBERSHIP.plan==='premium'||MEMBERSHIP.plan==='annual';
+    const isPaid = MEMBERSHIP.plan==='pro'||MEMBERSHIP.plan==='premium'||MEMBERSHIP.plan==='max'||MEMBERSHIP.plan==='annual';
     portalWrap.style.display = isPaid ? 'block' : 'none';
   }
 }
 
 function selectPlan(p){
   MEMBERSHIP.selectedPlan = p;
-  ['free','pro','premium','annual'].forEach(id=>{
+  ['free','pro','premium','max','annual'].forEach(id=>{
     const el=document.getElementById(`pc-${id}`);
     if(el) el.style.outline = id===p?'2px solid var(--amber)':'none';
   });
@@ -8639,6 +8676,9 @@ function updatePlanCTA(){
     btn.textContent='Freeプランに戻す';
     btn.style.background='var(--bg3)'; btn.style.color='var(--muted)';
     btn.style.border='1px solid var(--border2)';
+  } else if(p==='max'){
+    btn.textContent='Maxプランを始める（¥12,800/月）';
+    btn.style.background='linear-gradient(90deg,#e4b86a,#d4a456)'; btn.style.color='var(--bg)'; btn.style.border='none';
   } else if(p==='premium'){
     btn.textContent='Premiumプランを始める（¥4,980/月）';
     btn.style.background='linear-gradient(90deg,#e4b86a,#d4a456)'; btn.style.color='var(--bg)'; btn.style.border='none';
@@ -9498,11 +9538,10 @@ init();
 
         <!-- Premium -->
         <div class="plan-card" id="pc-premium" onclick="selectPlan('premium')" style="padding:16px 18px;background:linear-gradient(135deg,rgba(228,184,106,.08),rgba(228,184,106,.02));border:2px solid rgba(228,184,106,.7);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 0 20px rgba(228,184,106,.08);">
-          <div style="position:absolute;top:-1px;right:14px;padding:3px 10px;background:linear-gradient(90deg,#e4b86a,#d4a456);border-radius:0 0 7px 7px;font-size:9px;font-weight:600;color:var(--bg);letter-spacing:.06em;font-family:var(--fm);">最高品質</div>
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <div>
               <div style="font-size:13px;font-weight:600;color:var(--amber);">Premium</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px;">最高品質AI＋ディープ分析無制限</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">上位AIモデル＋ディープ分析60回/月</div>
             </div>
             <div style="text-align:right;">
               <div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥4,980</div>
@@ -9513,8 +9552,31 @@ init();
             <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.4);">✓ Claude Opus</span>
             <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.4);">✓ GPT-4o</span>
             <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.4);">✓ Gemini Pro</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.4);">✓ ディープ分析 無制限</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.4);">✓ ディープ分析 60回/月</span>
             <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.4);">✓ 全機能アンロック</span>
+          </div>
+        </div>
+
+        <!-- Max -->
+        <div class="plan-card" id="pc-max" onclick="selectPlan('max')" style="padding:16px 18px;background:linear-gradient(135deg,rgba(228,184,106,.14),rgba(157,120,216,.08));border:2px solid rgba(228,184,106,.9);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 0 24px rgba(228,184,106,.12);">
+          <div style="position:absolute;top:-1px;right:14px;padding:3px 10px;background:linear-gradient(90deg,#e4b86a,#d4a456);border-radius:0 0 7px 7px;font-size:9px;font-weight:600;color:var(--bg);letter-spacing:.06em;font-family:var(--fm);">最高品質</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--amber);">Max</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">最高品質AI＋すべて無制限</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥12,800</div>
+              <div style="font-size:9px;color:var(--muted2);">/月（税込）</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ Claude Opus</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ GPT-4o</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ Gemini Pro</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ AIチャット 無制限</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ ディープ分析 無制限</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ 全機能アンロック</span>
           </div>
         </div>
 

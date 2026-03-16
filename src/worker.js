@@ -18,35 +18,68 @@
 // ═══════ CONFIG ═══════
 
 const PLAN_LIMITS = {
-  free:            { deep: 3,     chat: 5     },
-  trial:           { deep: 5,     chat: 100   },
-  pro:             { deep: 30,    chat: 500   },
-  premium:         { deep: 99999, chat: 99999 },
-  annual:          { deep: 60,    chat: 1000  },
-  premium_annual:  { deep: 99999, chat: 99999 },
+  free:            { deep: 3,     chat: 5,    chatPer: 'day'   },
+  trial:           { deep: 30,    chat: 9999, chatPer: 'day'   },
+  pro:             { deep: 30,    chat: 9999, chatPer: 'day'   },
+  premium:         { deep: 60,    chat: 9999, chatPer: 'day'   },
+  max:             { deep: 99999, chat: 9999, chatPer: 'day'   },
+  annual:          { deep: 30,    chat: 9999, chatPer: 'day'   },
+  premium_annual:  { deep: 60,    chat: 9999, chatPer: 'day'   },
+  max_annual:      { deep: 99999, chat: 9999, chatPer: 'day'   },
 };
 
+// フェアユースポリシー: 1時間30回超 or 1日100回超で5-10秒待機
+const FAIR_USE = { hourly: 30, daily: 100, delayMs: 7000 };
+
 // プランごとのAIモデル設定
-// ルーティング判定: 全プラン共通 gpt-5-mini
-// gpt-simple: 相槌等の簡単応答（gpt-5-mini、Claudeを呼ばない）
 const PLAN_MODELS = {
-  premium: {
-    claude:  'claude-opus-4-20250514',
-    openai:  'gpt-5-mini',
+  free: {
+    claude:  'claude-sonnet-4-20250514',
+    openai:  'gpt-5-nano',
     gemini:  'gemini-2.5-flash',
-    router:  'gpt-5-mini',
+    router:  'gpt-5-nano',
   },
-  premium_annual: {
-    claude:  'claude-opus-4-20250514',
-    openai:  'gpt-5-mini',
-    gemini:  'gemini-2.5-flash',
-    router:  'gpt-5-mini',
-  },
-  _default: {
+  pro: {
     claude:  'claude-sonnet-4-20250514',
     openai:  'gpt-5-mini',
     gemini:  'gemini-2.5-flash',
     router:  'gpt-5-mini',
+  },
+  annual: {
+    claude:  'claude-sonnet-4-20250514',
+    openai:  'gpt-5-mini',
+    gemini:  'gemini-2.5-flash',
+    router:  'gpt-5-mini',
+  },
+  premium: {
+    claude:  'claude-opus-4-20250514',
+    openai:  'gpt-5',
+    gemini:  'gemini-2.5-pro',
+    router:  'gpt-5-mini',
+  },
+  premium_annual: {
+    claude:  'claude-opus-4-20250514',
+    openai:  'gpt-5',
+    gemini:  'gemini-2.5-pro',
+    router:  'gpt-5-mini',
+  },
+  max: {
+    claude:  'claude-opus-4-20250514',
+    openai:  'gpt-5',
+    gemini:  'gemini-2.5-pro',
+    router:  'gpt-5-mini',
+  },
+  max_annual: {
+    claude:  'claude-opus-4-20250514',
+    openai:  'gpt-5',
+    gemini:  'gemini-2.5-pro',
+    router:  'gpt-5-mini',
+  },
+  _default: {
+    claude:  'claude-sonnet-4-20250514',
+    openai:  'gpt-5-nano',
+    gemini:  'gemini-2.5-flash',
+    router:  'gpt-5-nano',
   },
 };
 
@@ -62,14 +95,16 @@ const PROMO_CODES = {
   'GOALPRO7':   { plan: 'pro', days: 7,   desc: 'Pro 7日間無料体験' },
 };
 
-const RATE_LIMIT_WINDOW = 60;        // 秒
-const RATE_LIMIT_MAX    = 30;        // 1分あたりのリクエスト数
+const RATE_LIMIT_WINDOW = 60;
+const RATE_LIMIT_MAX    = 30;
 
 const STRIPE_PRICE_IDS = {
   pro:             'price_1TAJNZ4084X0uakaB1IoYYuI',
   premium:         'price_1TBCKT4084X0uakaZg3wdluF',
   annual:          'price_1TAJUm4084X0uakakFD0smoF',
-  premium_annual:  'price_PREMIUM_ANNUAL_TODO',  // Stripe商品作成後に置換
+  premium_annual:  'price_PREMIUM_ANNUAL_TODO',
+  max:             'price_MAX_MONTHLY_TODO',
+  max_annual:      'price_MAX_ANNUAL_TODO',
 };
 
 const STRIPE_SUCCESS_URL = 'https://goal-ai-frontend.pages.dev?checkout=success';
@@ -212,7 +247,14 @@ async function authenticateRequest(request, env) {
     if (tokenData.revoked) {
       return { ok: false, error: 'Token revoked', status: 401 };
     }
-    return { ok: true, tokenId: token, plan: tokenData.plan || 'trial', userId: tokenData.userId || token };
+    // トライアル期限切れチェック → Freeに自動ダウングレード
+    let effectivePlan = tokenData.plan || 'trial';
+    if (effectivePlan === 'trial' && tokenData.trialEnd && new Date(tokenData.trialEnd) < new Date()) {
+      effectivePlan = 'free';
+      tokenData.plan = 'free';
+      await env.TOKEN_KV.put(`token:${token}`, JSON.stringify(tokenData), { expirationTtl: 365 * 86400 });
+    }
+    return { ok: true, tokenId: token, plan: effectivePlan, userId: tokenData.userId || token, trialEnd: tokenData.trialEnd || null };
   }
 
   // 将来的にSupabase JWT検証を追加予定
@@ -239,6 +281,42 @@ async function checkDeepUsage(env, userId, plan) {
   return { used, limit, remaining: Math.max(0, limit - used) };
 }
 
+// Free日次チャット制限チェック
+async function checkDailyChatUsage(env, userId, plan) {
+  const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+  if (limits.chat >= 9999) return { ok: true, remaining: 9999 }; // 無制限プラン
+  const dayKey = getDayKey();
+  const usageKey = `usage:chat:${userId}:${dayKey}`;
+  const used = parseInt(await env.TOKEN_KV.get(usageKey) || '0');
+  return { ok: used < limits.chat, used, limit: limits.chat, remaining: Math.max(0, limits.chat - used) };
+}
+
+async function incrementDailyChatUsage(env, userId) {
+  const dayKey = getDayKey();
+  const usageKey = `usage:chat:${userId}:${dayKey}`;
+  const used = parseInt(await env.TOKEN_KV.get(usageKey) || '0');
+  await env.TOKEN_KV.put(usageKey, String(used + 1), { expirationTtl: 86400 * 2 });
+}
+
+function getDayKey() {
+  // JST (UTC+9)
+  const now = new Date(Date.now() + 9 * 3600000);
+  return now.toISOString().slice(0, 10);
+}
+
+// フェアユースポリシーチェック
+async function checkFairUse(env, userId) {
+  const hourKey = `fu:h:${userId}:${Math.floor(Date.now() / 3600000)}`;
+  const dayKey = `fu:d:${userId}:${getDayKey()}`;
+  const hourly = parseInt(await env.TOKEN_KV.get(hourKey) || '0');
+  const daily = parseInt(await env.TOKEN_KV.get(dayKey) || '0');
+  const throttle = hourly >= FAIR_USE.hourly || daily >= FAIR_USE.daily;
+  // Increment
+  await env.TOKEN_KV.put(hourKey, String(hourly + 1), { expirationTtl: 7200 });
+  await env.TOKEN_KV.put(dayKey, String(daily + 1), { expirationTtl: 86400 * 2 });
+  return { throttle, delayMs: throttle ? FAIR_USE.delayMs : 0 };
+}
+
 async function incrementDeepUsage(env, userId) {
   const monthKey = getMonthKey();
   const usageKey = `usage:deep:${userId}:${monthKey}`;
@@ -256,6 +334,15 @@ async function handleChat(request, env, ctx) {
 
   const rl = await checkRateLimit(env, auth.userId);
   if (!rl.ok) return jsonRes({ error: 'Rate limit exceeded', retryAfter: RATE_LIMIT_WINDOW }, 429);
+
+  // 日次チャット制限（Free: 5回/日）
+  const chatUsage = await checkDailyChatUsage(env, auth.userId, auth.plan);
+  if (!chatUsage.ok) return jsonRes({ error: '本日のチャット上限に達しました。明日またお試しください。', used: chatUsage.used, limit: chatUsage.limit, remaining: 0 }, 429);
+  await incrementDailyChatUsage(env, auth.userId);
+
+  // フェアユースポリシー
+  const fu = await checkFairUse(env, auth.userId);
+  if (fu.throttle) await new Promise(r => setTimeout(r, fu.delayMs));
 
   const body = await request.json();
   const { system, messages, maxTokens = 1000, goalId } = body;
@@ -300,6 +387,15 @@ async function handleChatStream(request, env) {
 
   const rl = await checkRateLimit(env, auth.userId);
   if (!rl.ok) return jsonRes({ error: 'Rate limit exceeded' }, 429);
+
+  // 日次チャット制限
+  const chatUsage = await checkDailyChatUsage(env, auth.userId, auth.plan);
+  if (!chatUsage.ok) return jsonRes({ error: '本日のチャット上限に達しました', remaining: 0 }, 429);
+  await incrementDailyChatUsage(env, auth.userId);
+
+  // フェアユースポリシー
+  const fu = await checkFairUse(env, auth.userId);
+  if (fu.throttle) await new Promise(r => setTimeout(r, fu.delayMs));
 
   const body = await request.json();
   const { system, messages, maxTokens = 600 } = body;
@@ -548,18 +644,20 @@ async function handleTokenRegister(request, env, ctx) {
     }
   }
 
-  // Freeプラントークン自動発行
+  // 14日間トライアル付きトークン自動発行
   const tokenId = `goal_test_${generateId(24)}`;
   const now = new Date();
+  const trialEnd = new Date(now.getTime() + 14 * 86400000);
   const tokenData = {
     tokenId,
-    plan: 'free',
+    plan: 'trial',
     userId: deviceId,
     promoCode: null,
-    promoDesc: 'Freeプラン（自動登録）',
-    note: 'auto-register',
+    promoDesc: 'Pro体験トライアル（14日間）',
+    note: 'auto-register-trial',
     createdAt: now.toISOString(),
-    expiresAt: null, // Freeは無期限
+    expiresAt: null, // トークン自体は無期限
+    trialEnd: trialEnd.toISOString(), // トライアル終了日
     revoked: false,
   };
 
@@ -748,7 +846,7 @@ async function handleCheckoutCreate(request, env) {
 
   const priceId = STRIPE_PRICE_IDS[plan];
   if (!priceId) {
-    return jsonRes({ error: '無効なプランです。pro, premium, annual のいずれかを指定してください' }, 400);
+    return jsonRes({ error: '無効なプランです。pro, premium, max, annual, premium_annual, max_annual のいずれかを指定してください' }, 400);
   }
 
   // Stripe Checkout Session作成（REST API直接呼び出し）
