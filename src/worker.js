@@ -204,8 +204,14 @@ export default {
       if (url.pathname === '/api/referral/code' && request.method === 'GET') {
         return corsResponse(env, await handleReferralCode(request, env), request);
       }
+      if (url.pathname === '/api/referral/create' && request.method === 'POST') {
+        return corsResponse(env, await handleReferralCreate(request, env), request);
+      }
       if (url.pathname === '/api/referral/apply' && request.method === 'POST') {
         return corsResponse(env, await handleReferralApply(request, env), request);
+      }
+      if (url.pathname === '/api/referral/status' && request.method === 'GET') {
+        return corsResponse(env, await handleReferralStatus(request, env), request);
       }
 
       // ── Feedbacks ──
@@ -386,6 +392,9 @@ async function handleChat(request, env, ctx) {
     ]));
   }
 
+  // ストリーク更新（非同期）
+  if (ctx && env.SUPABASE_URL) ctx.waitUntil(updateStreak(auth.tokenId, env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY));
+
   return jsonRes(data, 200, { 'X-RateLimit-Remaining': String(rl.remaining), 'X-Model-Used': claudeModel });
 }
 
@@ -429,6 +438,9 @@ async function handleChatStream(request, env) {
     const err = await res.text();
     return new Response(err, { status: res.status, headers: { 'Content-Type': 'text/plain' } });
   }
+
+  // ストリーク更新（非同期、ctx不要 — fire and forget）
+  if (env.SUPABASE_URL) updateStreak(auth.tokenId, env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
   // SSEストリームをそのまま透過プロキシ
   return new Response(res.body, {
@@ -773,6 +785,18 @@ async function handleTokenRedeem(request, env, ctx) {
 
   if (!promoCode) return jsonRes({ error: 'Promo code required' }, 400);
 
+  // クーポン一回限りチェック
+  if (promoCode && env.SUPABASE_URL) {
+    const ucRes = await fetch(
+      `${env.SUPABASE_URL}/rest/v1/used_coupons?token_id=eq.${encodeURIComponent(deviceId || '')}&coupon_code=eq.${encodeURIComponent(promoCode.toUpperCase())}`,
+      { headers: { 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}` } }
+    );
+    const ucRows = await ucRes.json();
+    if (Array.isArray(ucRows) && ucRows.length > 0) {
+      return jsonRes({ error: 'このコードはすでに使用済みです' }, 400);
+    }
+  }
+
   const promo = PROMO_CODES[promoCode.toUpperCase()];
   if (!promo) return jsonRes({ error: '無効なプロモコードです' }, 400);
 
@@ -810,6 +834,15 @@ async function handleTokenRedeem(request, env, ctx) {
   // Supabaseに同期
   if (ctx && env.SUPABASE_URL) {
     ctx.waitUntil(syncUserToSupabase(env, tokenData));
+  }
+
+  // 使用済み記録
+  if (promoCode && env.SUPABASE_URL) {
+    ctx.waitUntil(fetch(`${env.SUPABASE_URL}/rest/v1/used_coupons`, {
+      method: 'POST',
+      headers: { 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ token_id: deviceId || tokenId, coupon_code: promoCode.toUpperCase() })
+    }));
   }
 
   return jsonRes({
@@ -1421,12 +1454,33 @@ async function handleFeedbackSave(request, env) {
   const { summary, rawChat } = body;
   if (!summary) return jsonRes({ error: 'summary is required' }, 400);
 
+  // AI感情分析
+  let sentiment = 'neutral';
+  try {
+    const sentRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 10,
+        messages: [{ role: 'user', content: `以下のフィードバックの感情を positive/neutral/negative の1単語だけで答えてください：「${summary || JSON.stringify(rawChat)}」` }]
+      })
+    });
+    const sentData = await sentRes.json();
+    const raw = (sentData.content?.[0]?.text || '').trim().toLowerCase();
+    if (['positive','neutral','negative'].includes(raw)) sentiment = raw;
+  } catch(e) {}
+
   const result = await supabaseQuery(env, 'feedbacks', 'POST', {
     body: {
       user_id: userId,
       summary,
       raw_chat: rawChat || null,
       status: 'new',
+      sentiment,
+      source: body.source || 'chat',
+      nps_score: body.nps_score || null,
+      feature_tag: body.feature_tag || null,
+      is_beta: body.is_beta || false,
     },
   });
 
@@ -1533,6 +1587,87 @@ async function handleReferralApply(request, env) {
   await env.TOKEN_KV.put(`referral:applied:${auth.tokenId}`, referrerTokenId, { expirationTtl: 365 * 86400 });
 
   return jsonRes({ ok: true, message: '紹介コードが適用されました。Pro以上のプランを選択すると初月75%OFFが適用されます。' });
+}
+
+async function handleReferralCreate(request, env) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+
+  const paidPlans = ['pro','premium','max','annual','premium_annual','max_annual'];
+  if (!paidPlans.includes(auth.plan)) {
+    return jsonRes({ error: '有料プランのユーザーのみ紹介可能です' }, 403);
+  }
+
+  const supaUrl = env.SUPABASE_URL, supaKey = env.SUPABASE_SERVICE_KEY;
+  const headers = { 'apikey': supaKey, 'Authorization': `Bearer ${supaKey}`, 'Content-Type': 'application/json' };
+
+  // 既存コード確認
+  const userRes = await fetch(`${supaUrl}/rest/v1/users?token_id=eq.${encodeURIComponent(auth.tokenId)}&select=referral_code`, { headers });
+  const users = await userRes.json();
+  if (users.length && users[0].referral_code) {
+    return jsonRes({ referral_code: users[0].referral_code });
+  }
+
+  // 新規コード生成
+  const code = 'REF' + generateId(5).toUpperCase();
+  await Promise.all([
+    fetch(`${supaUrl}/rest/v1/users?token_id=eq.${encodeURIComponent(auth.tokenId)}`, {
+      method: 'PATCH', headers: { ...headers, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ referral_code: code })
+    }),
+    fetch(`${supaUrl}/rest/v1/referrals`, {
+      method: 'POST', headers: { ...headers, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ referrer_token_id: auth.tokenId, referral_code: code, status: 'pending' })
+    })
+  ]);
+  return jsonRes({ referral_code: code });
+}
+
+async function handleReferralStatus(request, env) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+
+  const supaUrl = env.SUPABASE_URL, supaKey = env.SUPABASE_SERVICE_KEY;
+  const headers = { 'apikey': supaKey, 'Authorization': `Bearer ${supaKey}` };
+
+  const userRes = await fetch(`${supaUrl}/rest/v1/users?token_id=eq.${encodeURIComponent(auth.tokenId)}&select=referral_code,streak_count,streak_best`, { headers });
+  const users = await userRes.json();
+  if (!users.length) return jsonRes({ error: 'User not found' }, 404);
+
+  let completed_count = 0;
+  const referral_code = users[0].referral_code || null;
+  if (referral_code) {
+    const cntRes = await fetch(`${supaUrl}/rest/v1/referrals?referral_code=eq.${encodeURIComponent(referral_code)}&status=eq.completed&select=id`, { headers });
+    completed_count = (await cntRes.json()).length;
+  }
+  return jsonRes({ referral_code, completed_count, streak_count: users[0].streak_count || 0, streak_best: users[0].streak_best || 0 });
+}
+
+// ═══════ STREAK UPDATE ═══════
+
+async function updateStreak(tokenId, supabaseUrl, supabaseKey) {
+  try {
+    const today = new Date(Date.now() + 9 * 3600000).toISOString().split('T')[0]; // JST
+    const headers = { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' };
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/users?token_id=eq.${encodeURIComponent(tokenId)}&select=streak_count,streak_best,last_active_date`,
+      { headers }
+    );
+    const users = await res.json();
+    if (!users.length) return;
+    const user = users[0];
+    if (user.last_active_date === today) return;
+
+    const yesterday = new Date(Date.now() + 9 * 3600000 - 86400000).toISOString().split('T')[0];
+    const streak = user.last_active_date === yesterday ? (user.streak_count || 0) + 1 : 1;
+    const best = Math.max(streak, user.streak_best || 0);
+
+    await fetch(`${supabaseUrl}/rest/v1/users?token_id=eq.${encodeURIComponent(tokenId)}`, {
+      method: 'PATCH',
+      headers: { ...headers, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ streak_count: streak, streak_best: best, last_active_date: today })
+    });
+  } catch (e) { /* silent */ }
 }
 
 function generateId(length = 24) {
