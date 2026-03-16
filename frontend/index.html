@@ -62,10 +62,6 @@
 <body>
 <div id="app">
 
-<!-- Mobile hamburger -->
-<button id="hamburger-btn" onclick="toggleSidebar()" aria-label="メニュー">
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-</button>
 <div id="sb-overlay" onclick="toggleSidebar()"></div>
 
 <!-- ═══ SIDEBAR ═══ -->
@@ -313,6 +309,9 @@
         <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;">
           <!-- Chat toolbar -->
           <div id="home-chat-toolbar" style="display:flex;align-items:center;gap:6px;padding:6px 16px;flex-shrink:0;">
+            <button id="hamburger-btn" onclick="toggleSidebar()" aria-label="メニュー">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
             <button onclick="openChatHistory()" title="過去の会話" style="height:32px;padding:0 10px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;font-size:11px;font-family:var(--ff);transition:color .15s;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--muted)'"><svg width="13" height="13" class="svg-ic"><use href="#ic-clock"/></svg>過去の会話</button>
             <button onclick="toggleHomeSearch()" title="検索" style="width:32px;height:32px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--muted)'"><svg width="13" height="13" class="svg-ic"><use href="#ic-search"/></svg></button>
             <span id="streak-badge" style="display:none;font-size:10px;color:var(--amber);font-family:var(--fm);background:var(--amber-g);padding:3px 8px;border-radius:6px;border:1px solid rgba(228,184,106,.2);white-space:nowrap;"></span>
