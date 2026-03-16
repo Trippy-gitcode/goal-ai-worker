@@ -1286,21 +1286,9 @@ async function init(){
       savedGoals.forEach(g => ALL_GOALS.push(g));
       renderSidebarGoals();
     }
-    // ホームチャット履歴をSupabaseから読み込み
-    const savedHistory = await apiLoadHistory(null, 100);
-    if (savedHistory.length > 0) {
-      homeMsgs = [];
-      homeHistory = [];
-      // 時系列順（created_at asc）に変換
-      savedHistory.reverse().forEach(m => {
-        const time = new Date(m.created_at).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
-        const date = new Date(m.created_at).toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});
-        homeMsgs.push({ role: m.role === 'assistant' ? 'ai' : m.role, content: m.content, time, date });
-        homeHistory.push({ role: m.role, content: m.content });
-      });
-    }
   }
-  renderHomeMsgs();
+  // リロード時は常に新しいチャット開始画面を表示
+  showHomeScreen();
   // Show onboarding popup if "私をデザイン" not done
   setTimeout(()=> checkOnboarding(), 500);
   setTimeout(()=> renderAIUnderstanding(), 600);

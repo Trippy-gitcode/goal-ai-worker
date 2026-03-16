@@ -843,8 +843,10 @@ async function addRouteFollowUp(userText, aiResult, source, today, homeInner, ho
   }catch(e){}
 }
 
-async function newHomeChat(){
-  // Auto-generate title for the current session
+// ═══ UNIFIED HOME SCREEN ═══
+// リロード時・「新しい会話」押下時の両方でこの関数を呼ぶ
+function showHomeScreen(){
+  // 1. 既存会話の保存とタイトル生成（会話がある場合のみ）
   if(homeMsgs.length > 0){
     const recentMsgs = homeMsgs.filter(m=>m.role==='user'||m.role==='ai').slice(-6);
     if(recentMsgs.length > 0){
@@ -852,16 +854,25 @@ async function newHomeChat(){
       generateSessionTitle(currentSessionId, summary);
     }
   }
+
+  // 2. チャット状態リセット
   currentSessionId = crypto.randomUUID ? crypto.randomUUID() : 'sess_' + Date.now();
-  const today=new Date().toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});
-  homeMsgs.push({role:'_sep',content:'',date:today});
-  homeHistory=[];
-  saveHomeMsgs(); renderHomeMsgs();
+  homeMsgs = [];
+  homeHistory = [];
+
+  // 3. ウェルカム表示
+  renderWelcomeView();
   renderSidebarChatRecords();
-  // Show welcome state
-  const chatInner = document.getElementById('home-chat-inner');
-  if(chatInner) chatInner.innerHTML = buildEmptyHomeHTML();
 }
+
+function renderWelcomeView(){
+  const chatInner = document.getElementById('home-chat-inner');
+  if(!chatInner) return;
+  chatInner.innerHTML = buildEmptyHomeHTML();
+  updateHomePlaceholder();
+}
+
+function newHomeChat(){ showHomeScreen(); }
 
 let chatRecords = []; // {sessionId, title, date, count}
 
