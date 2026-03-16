@@ -295,10 +295,6 @@ function editWorriesSummary(){
 function worriesResize(el) { chatResize(el, 80); }
 function worriesKey(e) { chatKey(sendWorriesMsg, e); }
 
-function saveProfile(){
-  toast('プロフィールを保存しました ✓');
-  closeProfile();
-}
 function delRoutine(btn){ btn.closest('.routine-row').remove(); }
 function cyclePri(el){
   const cycle = [
