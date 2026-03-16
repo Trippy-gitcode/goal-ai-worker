@@ -102,9 +102,9 @@ const STRIPE_PRICE_IDS = {
   pro:             'price_1TAJNZ4084X0uakaB1IoYYuI',
   premium:         'price_1TBCKT4084X0uakaZg3wdluF',
   annual:          'price_1TAJUm4084X0uakakFD0smoF',
-  premium_annual:  'price_PREMIUM_ANNUAL_TODO',
-  max:             'price_MAX_MONTHLY_TODO',
-  max_annual:      'price_MAX_ANNUAL_TODO',
+  premium_annual:  'price_1TBUKE4084X0uakaolxB0a4b',
+  max:             'price_1TBUJh4084X0uaka60rFQJHq',
+  max_annual:      'price_1TBUJn4084X0uakaKJ7XcUAz',
 };
 
 const STRIPE_SUCCESS_URL = 'https://goal-ai-frontend.pages.dev?checkout=success';
@@ -858,6 +858,13 @@ async function handleCheckoutCreate(request, env) {
   params.append('cancel_url', STRIPE_CANCEL_URL);
   params.append('metadata[tokenId]', auth.tokenId);
   params.append('metadata[plan]', plan);
+
+  // 初回割引クーポン自動適用（月額プランのみ）
+  if (plan === 'pro' || plan === 'premium') {
+    params.append('discounts[0][coupon]', 'LAUNCH500');
+  } else if (plan === 'max') {
+    params.append('discounts[0][coupon]', 'LAUNCHMAX');
+  }
 
   const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
     method: 'POST',
