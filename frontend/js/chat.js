@@ -622,7 +622,7 @@ async function sendHomeMsg(){
 
   const inp = document.getElementById('home-msg-in');
   const text = inp.value.trim();
-  if(!text && !homeImageData) return;
+  if(!text && !homeImageData){ document.getElementById('home-send-btn').disabled=false; return; }
 
   // Image handling
   let userContent;
@@ -673,7 +673,16 @@ async function sendHomeMsg(){
     return;
   }
 
-  await homeSmartRoute(text, today, homeInner, homeWrap);
+  try{
+    await homeSmartRoute(text, today, homeInner, homeWrap);
+  }catch(e){
+    // フォールバック: エラー表示
+    const errBub = document.createElement('div');
+    errBub.className = 'msg ai';
+    errBub.style.marginBottom = '16px';
+    errBub.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="color:var(--red)">通信エラーが発生しました。もう一度お試しください。</div></div>`;
+    homeInner.appendChild(errBub);
+  }
   homeLoading = false; homeSendRestore();
 }
 
@@ -688,7 +697,8 @@ async function routeMessage(text){
   // 500文字超の要約依頼はgemini
   if(text.length > 500) return 'gemini';
   try{
-    const res = await fetch(`${WORKER_URL}/api/deep/openai`, {
+    // gpt-simpleエンドポイントを使用（deep使用量カウントなし）
+    const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
       method:'POST', headers:getAuthHeaders(),
       body:JSON.stringify({
         system: ROUTE_PROMPT,
@@ -696,6 +706,7 @@ async function routeMessage(text){
         maxTokens:10
       })
     });
+    if(!res.ok) return 'claude'; // エラー時はClaudeフォールバック
     const data = await res.json();
     const answer = (data.choices?.[0]?.message?.content || 'claude').trim().toLowerCase();
     if(['gemini','gpt','gpt-simple','claude'].includes(answer)) return answer;
