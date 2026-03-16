@@ -51,14 +51,15 @@
 5. Claude: 統合・戦略文書化（ストリーミング）
 6. GPT+Gemini: デュアルレビュー → Claude: 最終修正
 
-## AIスマートルーティング
-- 天気・ニュース・時事・「〇〇とは」→ Gemini（「🔍 Geminiでリサーチ中...」表示）
-- 翻訳・アイデア出し・ブレスト・SNS投稿案・要約 → GPT（「💡 GPTでアイデア生成中...」表示）
-- 感情・悩み・ゴール・タスク・戦略・それ以外 → Claude（デフォルト）
-- Claudeが {"route":"gemini/gpt","query":"..."} を返した場合、フロントエンドでパースしてルーティング実行
-- ルーティングJSONはチャットバブルに表示してはいけない
-- ルーティング先AIの結果上部に「🔍 Gemini」「💡 GPT」のバッジを表示
-- Claudeが直接回答した場合は「🧠 Claude」バッジ表示
+## AIスマートルーティング（GPT-5 mini判定）
+- ルーティング判定: 全プラン共通でGPT-5 miniが1単語で分類
+- gemini: 天気・ニュース・検索・最新情報・長文要約（500文字超）→ Gemini 2.5 Flash（「🔍 Geminiでリサーチ中...」+ バッジ）
+- gpt: 翻訳・SNS投稿案・キャッチコピー・短い要約・アイデア出し → GPT-5 mini（「💡 GPTでアイデア生成中...」+ バッジ）
+- gpt-simple: 相槌・短い返事（ありがとう、OK等）→ GPT-5 mini軽量応答（ラベルなし、Claudeを呼ばない）
+- claude: 感情・悩み・ゴール・戦略・コーチング → Claude Sonnet/Opus（「🧠 Claude」バッジ）
+- ルーティング先AIの結果上部にバッジ表示
+- Geminiクォータ超過時はClaudeにフォールバック
+- /api/chat/gpt-simple エンドポイント追加（deep使用量カウントなし）
 
 ## AIの応答ルール
 - 端的に2〜3文。長文禁止
@@ -68,10 +69,10 @@
 - ユーザーが同意するまで次のフェーズに進まない
 
 ## プラン別AIモデル
-| プラン | Claude | GPT | Gemini |
-|-------|--------|-----|--------|
-| Free/Pro | claude-sonnet-4-20250514 | gpt-4o-mini | gemini-2.0-flash |
-| Premium | claude-opus-4-20250514 | gpt-4o | gemini-1.5-pro |
+| プラン | Claude | GPT | Gemini | ルーティング |
+|-------|--------|-----|--------|------------|
+| Free/Pro | claude-sonnet-4-20250514 | gpt-5-mini | gemini-2.5-flash | gpt-5-mini |
+| Premium | claude-opus-4-20250514 | gpt-5-mini | gemini-2.5-flash | gpt-5-mini |
 
 ## メンバーシップ
 | プラン | 月額 | AIチャット | ディープ分析 |
@@ -188,11 +189,14 @@ grep -c "Geminiでリサーチ\|GPTでアイデア" frontend/index.html  → 2�
 grep -c "getModel\|X-Model-Used" src/worker.js                 → 1以上（プラン別モデル）
 ```
 
-### Geminiモデル確認
+### AIモデル確認
 ```
-grep "gemini-2.0-flash" src/worker.js                          → Free/Proで使用確認
-grep "gemini-1.5-pro" src/worker.js                            → Premiumで使用確認
-grep "gemini-1.5-flash" src/worker.js                          → 0（旧モデルが残っていないこと）
+grep "gpt-5-mini" src/worker.js                                → 1以上（ルーティング+応答）
+grep "gemini-2.5-flash" src/worker.js                          → 1以上（全プラン共通）
+grep -c "gpt-4o-mini\|gpt-4o" src/worker.js                   → 0（旧モデルなし）
+grep -c "gemini-2.0-flash\|gemini-1.5" src/worker.js           → 0（旧モデルなし）
+grep -c "haiku" src/worker.js                                  → 0（Haiku廃止）
+grep "gpt-simple" src/worker.js                                → 1以上（簡単応答ルート）
 ```
 
 ### フィードバック・認証・決済確認

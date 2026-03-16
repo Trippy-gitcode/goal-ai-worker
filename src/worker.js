@@ -18,24 +18,35 @@
 // ═══════ CONFIG ═══════
 
 const PLAN_LIMITS = {
-  free:    { deep: 3,    chat: 5    },
-  trial:   { deep: 5,    chat: 100  },
-  pro:     { deep: 30,   chat: 500  },
-  premium: { deep: 99999, chat: 99999 },
-  annual:  { deep: 60,   chat: 1000 },
+  free:            { deep: 3,     chat: 5     },
+  trial:           { deep: 5,     chat: 100   },
+  pro:             { deep: 30,    chat: 500   },
+  premium:         { deep: 99999, chat: 99999 },
+  annual:          { deep: 60,    chat: 1000  },
+  premium_annual:  { deep: 99999, chat: 99999 },
 };
 
 // プランごとのAIモデル設定
+// ルーティング判定: 全プラン共通 gpt-5-mini
+// gpt-simple: 相槌等の簡単応答（gpt-5-mini、Claudeを呼ばない）
 const PLAN_MODELS = {
   premium: {
     claude:  'claude-opus-4-20250514',
-    openai:  'gpt-4o',
-    gemini:  'gemini-1.5-pro',
+    openai:  'gpt-5-mini',
+    gemini:  'gemini-2.5-flash',
+    router:  'gpt-5-mini',
+  },
+  premium_annual: {
+    claude:  'claude-opus-4-20250514',
+    openai:  'gpt-5-mini',
+    gemini:  'gemini-2.5-flash',
+    router:  'gpt-5-mini',
   },
   _default: {
     claude:  'claude-sonnet-4-20250514',
-    openai:  'gpt-4o-mini',
-    gemini:  'gemini-2.0-flash',
+    openai:  'gpt-5-mini',
+    gemini:  'gemini-2.5-flash',
+    router:  'gpt-5-mini',
   },
 };
 
@@ -55,9 +66,10 @@ const RATE_LIMIT_WINDOW = 60;        // 秒
 const RATE_LIMIT_MAX    = 30;        // 1分あたりのリクエスト数
 
 const STRIPE_PRICE_IDS = {
-  pro:     'price_1TAJNZ4084X0uakaB1IoYYuI',
-  premium: 'price_1TBCKT4084X0uakaZg3wdluF',
-  annual:  'price_1TAJUm4084X0uakakFD0smoF',
+  pro:             'price_1TAJNZ4084X0uakaB1IoYYuI',
+  premium:         'price_1TBCKT4084X0uakaZg3wdluF',
+  annual:          'price_1TAJUm4084X0uakakFD0smoF',
+  premium_annual:  'price_PREMIUM_ANNUAL_TODO',  // Stripe商品作成後に置換
 };
 
 const STRIPE_SUCCESS_URL = 'https://goal-ai-frontend.pages.dev?checkout=success';
@@ -84,6 +96,9 @@ export default {
       }
       if (url.pathname === '/api/deep/openai' && request.method === 'POST') {
         return corsResponse(env, await handleDeepOpenAI(request, env, ctx));
+      }
+      if (url.pathname === '/api/chat/gpt-simple' && request.method === 'POST') {
+        return corsResponse(env, await handleGptSimple(request, env));
       }
       if (url.pathname === '/api/deep/gemini' && request.method === 'POST') {
         return corsResponse(env, await handleDeepGemini(request, env, ctx));
@@ -321,6 +336,38 @@ async function handleChatStream(request, env) {
       'X-Model-Used': claudeModel,
     },
   });
+}
+
+// ═══════ GPT-SIMPLE (軽量応答、deep使用量カウントなし) ═══════
+
+async function handleGptSimple(request, env) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+
+  const body = await request.json();
+  const { messages, system, maxTokens = 150 } = body;
+  const model = getModel(auth.plan, 'openai'); // gpt-5-mini
+
+  const openaiMessages = [];
+  if (system) openaiMessages.push({ role: 'system', content: system });
+  if (Array.isArray(messages)) openaiMessages.push(...messages);
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: Math.min(maxTokens, 300),
+      messages: openaiMessages,
+    }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) return jsonRes({ error: data.error?.message || 'GPT error' }, res.status);
+  return jsonRes(data, 200, { 'X-Model-Used': model, 'X-Route': 'gpt-simple' });
 }
 
 // ═══════ DEEP ANALYSIS HANDLERS ═══════
