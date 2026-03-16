@@ -106,6 +106,26 @@ function closeSidebar(){
   }
 }
 
+// ════════ GLOBAL HEADER (全タブ共通) ════════
+function renderGlobalHeader(title, rightButtons) {
+  return `<div style="display:flex;align-items:center;height:48px;padding:0 8px;gap:6px;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;">
+    <button onclick="toggleSidebar()" style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;flex-shrink:0;padding:0;background:transparent;border:none;cursor:pointer;color:var(--cream);border-radius:10px;" aria-label="メニュー"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <span style="flex:1;font-size:14px;font-weight:500;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${title||''}</span>
+    <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">${rightButtons||''}</div>
+  </div>`;
+}
+
+// ════════ SWIPE TO OPEN SIDEBAR ════════
+function initSwipeToOpenSidebar(){
+  let touchStartX=0, touchStartY=0;
+  document.addEventListener('touchstart', e=>{ touchStartX=e.touches[0].clientX; touchStartY=e.touches[0].clientY; }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    const dx=e.changedTouches[0].clientX-touchStartX;
+    const dy=Math.abs(e.changedTouches[0].clientY-touchStartY);
+    if(touchStartX<25 && dx>60 && dy<30) toggleSidebar();
+  }, {passive:true});
+}
+
 // ════════ PAGE NAVIGATION ════════
 function showPage(pg) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));

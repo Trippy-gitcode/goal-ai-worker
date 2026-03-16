@@ -1244,7 +1244,7 @@ document.addEventListener('click', e=>{
 });
 
 async function init(){
-  // Legacy chat vars cleared
+  initSwipeToOpenSidebar();
   initHomePlaceholder();
   renderMembershipUI();
   updateNotifSettingUI();

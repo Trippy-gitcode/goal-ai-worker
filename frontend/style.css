@@ -96,6 +96,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
 
 @media(max-width:768px){
   #hamburger-btn{display:flex;position:static;z-index:auto;width:36px;height:36px;flex-shrink:0;}
+  .mob-hamburger{display:flex!important;}
   #sb{
     position:fixed;left:-280px;top:0;bottom:0;width:272px;min-width:272px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
     z-index:1000;transition:left .28s ease;
