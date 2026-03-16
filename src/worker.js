@@ -482,7 +482,7 @@ async function handleGptSimple(request, env) {
     },
     body: JSON.stringify({
       model,
-      max_tokens: Math.min(maxTokens, 300),
+      max_completion_tokens: Math.min(Math.max(maxTokens, 50), 300),
       messages: openaiMessages,
     }),
   });
@@ -522,7 +522,7 @@ async function handleDeepOpenAI(request, env) {
     },
     body: JSON.stringify({
       model: openaiModel,
-      max_tokens: Math.min(maxTokens, 2000),
+      max_completion_tokens: Math.min(maxTokens, 2000),
       messages: openaiMessages,
     }),
   });

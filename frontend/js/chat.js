@@ -696,19 +696,22 @@ claude: 上記以外（感情、悩み、ゴール、戦略、コーチング、
 async function routeMessage(text){
   // 500文字超の要約依頼はgemini
   if(text.length > 500) return 'gemini';
+  // 短い相槌パターンはgpt-simple（API呼び出し不要）
+  const simplePatterns = /^(ありがとう|OK|うん|はい|いいえ|了解|わかった|なるほど|そうだね|いいね|おはよう|おやすみ|お疲れ)$/i;
+  if(simplePatterns.test(text.trim())) return 'gpt-simple';
+  // Claude APIでルーティング判定（chat endpoint、deep使用量カウントなし）
   try{
-    // gpt-simpleエンドポイントを使用（deep使用量カウントなし）
-    const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
+    const res = await fetch(`${WORKER_URL}/api/chat`, {
       method:'POST', headers:getAuthHeaders(),
       body:JSON.stringify({
         system: ROUTE_PROMPT,
         messages:[{role:'user',content:text}],
-        maxTokens:10
+        maxTokens:20
       })
     });
-    if(!res.ok) return 'claude'; // エラー時はClaudeフォールバック
+    if(!res.ok) return 'claude';
     const data = await res.json();
-    const answer = (data.choices?.[0]?.message?.content || 'claude').trim().toLowerCase();
+    const answer = (data.content?.[0]?.text || 'claude').trim().toLowerCase().replace(/[^a-z-]/g,'');
     if(['gemini','gpt','gpt-simple','claude'].includes(answer)) return answer;
   }catch(e){}
   return 'claude';
