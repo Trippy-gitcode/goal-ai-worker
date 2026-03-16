@@ -720,8 +720,81 @@ async function routeMessage(text){
 async function homeSmartRoute(text, today, homeInner, homeWrap){
   const inner = typeof homeInner === 'string' ? document.getElementById(homeInner) : homeInner;
   const scroll = typeof homeWrap === 'string' ? document.getElementById(homeWrap) : homeWrap;
-  // 全メッセージをClaudeストリーミングで直接処理（ルーティング廃止）
-  await homeClaudeStream(today, inner, scroll);
+  const { bub } = mkStreamBubble(inner, scroll);
+
+  // Step 1: ルーティング判定
+  const route = await routeMessage(text);
+
+  // Step 2: ルートに応じて処理
+  if(route === 'gemini'){
+    bub.innerHTML = '🔍 Geminiでリサーチ中...';
+    bub.style.cssText += 'color:var(--amber);font-size:13px;';
+    try{
+      const ctx = buildAIContextCached();
+      const result = await callGemini(text, `ユーザーの質問に簡潔かつ正確に答えてください。日本語で回答。\n\nユーザー背景：${ctx}`);
+      bub.innerHTML = `<div style="font-size:9px;color:var(--amber);font-family:var(--fm);margin-bottom:6px;opacity:.7;">🔍 Gemini</div>${renderMsgContent(result)}`;
+      bub.classList.remove('stream-bubble'); bub.style.cssText = '';
+      homeMsgs.push({role:'ai',content:result,time:now(),date:today});
+      homeHistory.push({role:'assistant',content:result});
+      saveHomeMsgs();
+      await addRouteFollowUp(text, result, 'Gemini', today, inner, scroll);
+    }catch(e){
+      bub.innerHTML = ''; bub.style.cssText = '';
+      bub.parentElement?.remove();
+      await homeClaudeStream(today, inner, scroll);
+    }
+
+  } else if(route === 'gpt'){
+    bub.innerHTML = '💡 GPTでアイデア生成中...';
+    bub.style.cssText += 'color:var(--amber);font-size:13px;';
+    try{
+      const ctx = buildAIContextCached();
+      const result = await callOpenAI(text, `ユーザーのリクエストに創造的かつ実用的に応えてください。日本語で回答。\n\nユーザー背景：${ctx}`, 800);
+      bub.innerHTML = `<div style="font-size:9px;color:var(--amber);font-family:var(--fm);margin-bottom:6px;opacity:.7;">💡 GPT</div>${renderMsgContent(result)}`;
+      bub.classList.remove('stream-bubble'); bub.style.cssText = '';
+      homeMsgs.push({role:'ai',content:result,time:now(),date:today});
+      homeHistory.push({role:'assistant',content:result});
+      saveHomeMsgs();
+      await addRouteFollowUp(text, result, 'GPT', today, inner, scroll);
+    }catch(e){
+      bub.innerHTML = ''; bub.style.cssText = '';
+      bub.parentElement?.remove();
+      await homeClaudeStream(today, inner, scroll);
+    }
+
+  } else if(route === 'gpt-simple'){
+    try{
+      const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
+        method:'POST', headers:getAuthHeaders(),
+        body:JSON.stringify({
+          system:'日本語で端的に1文で返答してください。',
+          messages:[{role:'user',content:text}],
+          maxTokens:100
+        })
+      });
+      const data = await res.json();
+      const reply = data.choices?.[0]?.message?.content;
+      if(reply){
+        bub.innerHTML = renderMsgContent(reply);
+        bub.classList.remove('stream-bubble');
+        homeMsgs.push({role:'ai',content:reply,time:now(),date:today});
+        homeHistory.push({role:'assistant',content:reply});
+        saveHomeMsgs();
+      } else {
+        // GPT-5 nanoが空応答→Claudeフォールバック
+        bub.parentElement?.remove();
+        await homeClaudeStream(today, inner, scroll);
+      }
+    }catch(e){
+      bub.parentElement?.remove();
+      await homeClaudeStream(today, inner, scroll);
+    }
+
+  } else {
+    // Claude直接応答（デフォルト）
+    bub.parentElement?.remove();
+    await homeClaudeStream(today, inner, scroll);
+  }
 }
 
 async function executeRoute(route, text, today, inner, scroll, indicatorBub){
