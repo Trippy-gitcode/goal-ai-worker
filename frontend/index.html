@@ -6053,7 +6053,16 @@ async function loadChatSession(sessionId){
   } catch(e) { toast('会話の読み込みに失敗しました'); }
 }
 
-// visualViewport API removed — CSS flexbox handles keyboard layout natively
+// ═══ KEYBOARD HANDLING (iOS visualViewport) ═══
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', ()=>{
+    const kbHeight = window.innerHeight - window.visualViewport.height;
+    const inputs = [document.getElementById('home-input-area'), document.getElementById('hub-chat-input-row')].filter(Boolean);
+    inputs.forEach(el => {
+      el.style.paddingBottom = kbHeight > 50 ? kbHeight + 'px' : 'env(safe-area-inset-bottom)';
+    });
+  });
+}
 function homeKey(e) { chatKey(sendHomeMsg, e); }
 
 // ─ Summary strip ─
@@ -8645,7 +8654,7 @@ function renderPlanModal(){
     }
   }
   // Highlight selected
-  ['free','pro','premium','max','annual'].forEach(p=>{
+  ['free','pro','premium','max'].forEach(p=>{
     const el=document.getElementById(`pc-${p}`);
     if(el){ el.style.outline = (p===MEMBERSHIP.plan||p===MEMBERSHIP.selectedPlan)?'2px solid var(--amber)':'none'; }
   });
@@ -8660,7 +8669,7 @@ function renderPlanModal(){
 
 function selectPlan(p){
   MEMBERSHIP.selectedPlan = p;
-  ['free','pro','premium','max','annual'].forEach(id=>{
+  ['free','pro','premium','max'].forEach(id=>{
     const el=document.getElementById(`pc-${id}`);
     if(el) el.style.outline = id===p?'2px solid var(--amber)':'none';
   });
@@ -8682,13 +8691,49 @@ function updatePlanCTA(){
   } else if(p==='premium'){
     btn.textContent='Premiumプランを始める（¥4,980/月）';
     btn.style.background='linear-gradient(90deg,#e4b86a,#d4a456)'; btn.style.color='var(--bg)'; btn.style.border='none';
-  } else if(p==='annual'){
-    btn.textContent='年間プランを始める（¥29,800）';
-    btn.style.background='#c4a0e8'; btn.style.color='var(--bg)'; btn.style.border='none';
   } else {
     btn.textContent= MEMBERSHIP.promoApplied ? `プロモコードでProを開始` : 'Proプランを始める（¥2,980/月）';
     btn.style.background='var(--amber)'; btn.style.color='var(--bg)'; btn.style.border='none';
   }
+}
+
+let planBilling = 'monthly'; // 'monthly' | 'annual'
+
+function toggleBillingPeriod(){
+  const sw = document.getElementById('billing-switch');
+  const knob = document.getElementById('billing-knob');
+  const mLabel = document.getElementById('billing-monthly-label');
+  const aLabel = document.getElementById('billing-annual-label');
+
+  if(sw.checked){
+    planBilling = 'annual';
+    knob.style.transform = 'translateX(22px)';
+    mLabel.style.color = 'var(--muted)'; mLabel.style.fontWeight = '400';
+    aLabel.style.color = 'var(--cream)'; aLabel.style.fontWeight = '500';
+  } else {
+    planBilling = 'monthly';
+    knob.style.transform = 'translateX(0)';
+    mLabel.style.color = 'var(--cream)'; mLabel.style.fontWeight = '500';
+    aLabel.style.color = 'var(--muted)'; aLabel.style.fontWeight = '400';
+  }
+  updatePlanPrices();
+}
+
+function updatePlanPrices(){
+  const prices = {
+    pro: { monthly: '¥2,980', annual: '¥29,800', annualMonthly: '¥2,483/月' },
+    premium: { monthly: '¥4,980', annual: '¥49,800', annualMonthly: '¥4,150/月' },
+    max: { monthly: '¥12,800', annual: '¥128,000', annualMonthly: '¥10,666/月' },
+  };
+  ['pro','premium','max'].forEach(plan => {
+    const priceEl = document.getElementById('plan-price-' + plan);
+    if(!priceEl) return;
+    if(planBilling === 'annual'){
+      priceEl.innerHTML = `<span style="font-size:20px;">${prices[plan].annual}</span><span style="font-size:10px;color:var(--muted)">/年</span><br><span style="font-size:11px;color:var(--green);">${prices[plan].annualMonthly}</span>`;
+    } else {
+      priceEl.innerHTML = `<span style="font-size:20px;">${prices[plan].monthly}</span><span style="font-size:10px;color:var(--muted)">/月</span>`;
+    }
+  });
 }
 
 async function applyPromoCode(){
@@ -8753,7 +8798,7 @@ async function subscribePlan(){
   try {
     const res = await fetch(`${WORKER_URL}/api/checkout/create`, {
       method:'POST', headers:getAuthHeaders(),
-      body: JSON.stringify({ plan: p })
+      body: JSON.stringify({ plan: planBilling === 'annual' ? p + '_annual' : p })
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'Checkout作成に失敗');
@@ -9489,6 +9534,15 @@ init();
     <!-- Plan cards -->
     <div style="padding:20px 24px;">
       <div style="font-size:9px;color:var(--muted2);font-family:var(--fm);letter-spacing:.15em;margin-bottom:14px;">プランを選択</div>
+      <div id="billing-toggle" style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:20px;">
+        <span id="billing-monthly-label" style="font-size:13px;color:var(--cream);font-weight:500;">月額</span>
+        <label style="position:relative;display:inline-block;width:48px;height:26px;cursor:pointer;">
+          <input type="checkbox" id="billing-switch" onchange="toggleBillingPeriod()" style="display:none;">
+          <span style="position:absolute;inset:0;background:var(--bg3);border:1px solid var(--border2);border-radius:13px;transition:background .2s;"></span>
+          <span id="billing-knob" style="position:absolute;top:3px;left:3px;width:20px;height:20px;background:var(--amber);border-radius:50%;transition:transform .2s;"></span>
+        </label>
+        <span id="billing-annual-label" style="font-size:13px;color:var(--muted);font-weight:400;">年間 <span style="font-size:10px;color:var(--green);background:var(--green-d);padding:2px 6px;border-radius:4px;">2ヶ月無料</span></span>
+      </div>
       <div style="display:flex;flex-direction:column;gap:10px;" id="plan-cards">
 
         <!-- Free -->
@@ -9521,7 +9575,7 @@ init();
               <div style="font-size:13px;font-weight:500;color:var(--amber);">Pro</div>
               <div style="font-size:10px;color:var(--muted);margin-top:2px;">ゴール無制限・毎週AIレビュー・全機能</div>
             </div>
-            <div style="text-align:right;">
+            <div style="text-align:right;" id="plan-price-pro">
               <div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥2,980</div>
               <div style="font-size:9px;color:var(--muted2);">/月（税込）</div>
             </div>
@@ -9543,7 +9597,7 @@ init();
               <div style="font-size:13px;font-weight:600;color:var(--amber);">Premium</div>
               <div style="font-size:10px;color:var(--muted);margin-top:2px;">上位AIモデル＋ディープ分析60回/月</div>
             </div>
-            <div style="text-align:right;">
+            <div style="text-align:right;" id="plan-price-premium">
               <div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥4,980</div>
               <div style="font-size:9px;color:var(--muted2);">/月（税込）</div>
             </div>
@@ -9565,7 +9619,7 @@ init();
               <div style="font-size:13px;font-weight:700;color:var(--amber);">Max</div>
               <div style="font-size:10px;color:var(--muted);margin-top:2px;">最高品質AI＋すべて無制限</div>
             </div>
-            <div style="text-align:right;">
+            <div style="text-align:right;" id="plan-price-max">
               <div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥12,800</div>
               <div style="font-size:9px;color:var(--muted2);">/月（税込）</div>
             </div>
@@ -9580,19 +9634,6 @@ init();
           </div>
         </div>
 
-        <!-- Annual -->
-        <div class="plan-card" id="pc-annual" onclick="selectPlan('annual')" style="padding:16px 18px;background:rgba(157,120,216,.06);border:2px solid rgba(157,120,216,.2);border-radius:12px;cursor:pointer;transition:all .15s;">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <div style="font-size:13px;font-weight:500;color:#c4a0e8;">Pro 年間プラン</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px;">2ヶ月分お得・年払いで割引</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:20px;font-family:var(--fd);color:#c4a0e8;">¥29,800</div>
-              <div style="font-size:9px;color:var(--green);">/年 → 月あたり ¥2,483</div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Promo code -->

@@ -395,7 +395,13 @@ async function handleChat(request, env, ctx) {
   // ストリーク更新（非同期）
   if (ctx && env.SUPABASE_URL) ctx.waitUntil(updateStreak(auth.tokenId, env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY));
 
-  return jsonRes(data, 200, { 'X-RateLimit-Remaining': String(rl.remaining), 'X-Model-Used': claudeModel });
+  // NPS表示判定（チャット5回ごと）
+  const dailyKey = getDayKey();
+  const chatCountKey = `usage:chat:${auth.userId}:${dailyKey}`;
+  const chatCount = parseInt(await env.TOKEN_KV.get(chatCountKey) || '0');
+  const show_nps = (chatCount > 0 && chatCount % 5 === 0);
+
+  return jsonRes(data, 200, { 'X-RateLimit-Remaining': String(rl.remaining), 'X-Model-Used': claudeModel, 'X-Show-NPS': show_nps ? '1' : '0' });
 }
 
 async function handleChatStream(request, env) {
@@ -1533,7 +1539,7 @@ function corsResponse(env, response, request) {
   if (requestOrigin && allowedOrigins.includes(requestOrigin)) { headers.set('Access-Control-Allow-Origin', requestOrigin); } else if (!requestOrigin) { headers.set('Access-Control-Allow-Origin', allowedOrigins[0] || 'https://goal-ai-frontend.pages.dev'); } else { headers.set('Access-Control-Allow-Origin', 'null'); }
   headers.set('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
   headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Secret');
-  headers.set('Access-Control-Expose-Headers', 'X-RateLimit-Remaining, X-Model-Used');
+  headers.set('Access-Control-Expose-Headers', 'X-RateLimit-Remaining, X-Model-Used, X-Show-NPS');
   headers.set('Access-Control-Max-Age', '86400');
 
   return new Response(response.body, {
