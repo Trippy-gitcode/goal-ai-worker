@@ -2022,6 +2022,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
           <div id="home-chat-toolbar" style="display:flex;align-items:center;gap:6px;padding:6px 16px;flex-shrink:0;">
             <button onclick="openChatHistory()" title="過去の会話" style="height:32px;padding:0 10px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;font-size:11px;font-family:var(--ff);transition:color .15s;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--muted)'"><svg width="13" height="13" class="svg-ic"><use href="#ic-clock"/></svg>過去の会話</button>
             <button onclick="toggleHomeSearch()" title="検索" style="width:32px;height:32px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--muted)'"><svg width="13" height="13" class="svg-ic"><use href="#ic-search"/></svg></button>
+            <span id="streak-badge" style="display:none;font-size:10px;color:var(--amber);font-family:var(--fm);background:var(--amber-g);padding:3px 8px;border-radius:6px;border:1px solid rgba(228,184,106,.2);white-space:nowrap;"></span>
             <span id="kabeuchi-indicator">💭 壁打ちモード</span>
             <button onclick="newHomeChat()" title="新しい会話" style="height:32px;padding:0 10px;border-radius:8px;background:var(--amber);border:1px solid var(--amber);color:#0c0e14;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:11px;font-family:var(--ff);transition:opacity .15s;margin-left:auto;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">＋ 新しい会話</button>
           </div>
@@ -3178,6 +3179,38 @@ input,textarea,select{font-family:var(--ff);outline:none}
 // ════════ WORKER CONFIG ════════
 const WORKER_URL = 'https://goal-ai-worker.goalai-futoshi.workers.dev';
 let AUTH_TOKEN = null;
+let STREAK = { count: 0, best: 0, lastDate: null };
+
+function updateStreak(){
+  const today = new Date().toISOString().slice(0,10);
+  if(STREAK.lastDate === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+  if(STREAK.lastDate === yesterday){
+    STREAK.count++;
+  } else if(STREAK.lastDate && STREAK.lastDate !== today){
+    STREAK.count = 1;
+  } else {
+    STREAK.count = 1;
+  }
+  STREAK.lastDate = today;
+  STREAK.best = Math.max(STREAK.best, STREAK.count);
+  renderStreak();
+  setCookie('goal_streak', JSON.stringify(STREAK), 365);
+  if(STREAK.count === 3) toast('🔥 3日連続！いい調子です');
+  if(STREAK.count === 7){ toast('🎉 1週間連続！素晴らしい'); launchConfetti(); }
+  if(STREAK.count === 30){ toast('🏆 30日連続達成！'); launchConfetti(); }
+}
+
+function renderStreak(){
+  const badge = document.getElementById('streak-badge');
+  if(!badge) return;
+  if(STREAK.count > 0){
+    badge.style.display = '';
+    badge.textContent = `🔥 ${STREAK.count}日連続`;
+  } else {
+    badge.style.display = 'none';
+  }
+}
 
 // Safari IME対策: compositionstart/endで自前フラグ管理
 let _isComposing = false;
@@ -5615,13 +5648,28 @@ function saveHomeMsgs(){
   if (toSave.length) apiSaveMessages(toSave);
 }
 
+function buildEmptyHomeHTML(){
+  const presets=[
+    {icon:'💰',text:'副業を始めたい'},
+    {icon:'📚',text:'英語を話せるようになりたい'},
+    {icon:'💪',text:'ダイエットを成功させたい'},
+    {icon:'🚀',text:'自分のビジネスを立ち上げたい'},
+    {icon:'✍️',text:'資格を取りたい'},
+    {icon:'🎯',text:'転職を成功させたい'}
+  ];
+  const cards=presets.map(p=>'<div onclick="document.getElementById(\'home-msg-in\').value=\''+p.text+'\';sendHomeMsg();" style="padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;gap:10px;" onmouseover="this.style.borderColor=\'var(--amber)\';this.style.background=\'var(--amber-g)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.background=\'var(--bg3)\'"><span style="font-size:20px;">'+p.icon+'</span><span style="font-size:12px;color:var(--cream);line-height:1.4;">'+p.text+'</span></div>').join('');
+  return '<div style="text-align:center;padding:60px 20px 10px;color:var(--muted);line-height:2;">'
+    +'<div style="margin:0 auto 16px;opacity:.4;">'+getLogoSVG(56)+'</div>'
+    +'<div style="font-size:18px;color:var(--cream);font-weight:500;margin-bottom:6px;">何を達成したいですか？</div>'
+    +'<div style="font-size:14px;margin-bottom:20px;">やりたいこと、気になること、何でも大丈夫です。</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-width:360px;margin:0 auto;text-align:left;">'+cards+'</div>'
+    +'</div>';
+}
+
 function renderHomeMsgs(){
   const c=document.getElementById('home-chat-inner'); c.innerHTML='';
   if(homeMsgs.length===0){
-    c.innerHTML=`<div style="text-align:center;padding:80px 20px 20px;color:var(--muted);line-height:2;">
-      <div style="margin:0 auto 16px;opacity:.4;">${getLogoSVG(56)}</div>
-      <div style="font-size:18px;color:var(--cream);font-weight:500;margin-bottom:6px;">何を達成したいですか？</div>
-      <div style="font-size:14px;">やりたいこと、気になること、何でも大丈夫です。</div></div>`;
+    c.innerHTML=buildEmptyHomeHTML();
     return;
   }
   let lastDate='';
@@ -5722,6 +5770,7 @@ async function sendHomeMsg(){
   homeHistory.push({role:'user',content:userContent});
   clearHomeImage();
   renderHomeMsgs(); homeLoading = true;
+  updateStreak();
 
   const homeInner = document.getElementById('home-chat-inner');
   const homeWrap = document.getElementById('home-chat-wrap');
@@ -5927,10 +5976,7 @@ async function newHomeChat(){
   renderSidebarChatRecords();
   // Show welcome state
   const chatInner = document.getElementById('home-chat-inner');
-  if(chatInner) chatInner.innerHTML = `<div style="text-align:center;padding:80px 20px 20px;color:var(--muted);line-height:2;">
-    <div style="margin:0 auto 16px;opacity:.4;">${getLogoSVG(56)}</div>
-    <div style="font-size:18px;color:var(--cream);font-weight:500;margin-bottom:6px;">何を達成したいですか？</div>
-    <div style="font-size:14px;">やりたいこと、気になること、何でも大丈夫です。</div></div>`;
+  if(chatInner) chatInner.innerHTML = buildEmptyHomeHTML();
 }
 
 let chatRecords = []; // {sessionId, title, date, count}
@@ -6419,6 +6465,7 @@ async function sendHubMsg(){
   const goalId = goal.supabaseId || null;
   const _msgs = {get v(){return hubChatMsgs[goal.id]}, set v(x){}};
   const _hist = {get v(){return hubChatHistories[goal.id]}, set v(x){}};
+  updateStreak();
 
   await sendChatMsg({
     inputId: 'hub-msg-in',
@@ -8160,6 +8207,12 @@ function renderDeepResult(containerId, scrollId, results, userQuery) {
   const wrap = document.createElement('div');
   wrap.className = 'deep-result-wrap';
   wrap.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:12px;background:var(--amber-g);border:1px solid rgba(228,184,106,.2);border-radius:8px;font-size:10px;color:var(--amber);font-family:var(--fm);">
+      <span>🔍 Gemini</span><span style="color:var(--border2)">→</span>
+      <span>💡 GPT</span><span style="color:var(--border2)">→</span>
+      <span>🧠 Claude</span>
+      <span style="margin-left:auto;color:var(--muted2);">3AI連携分析</span>
+    </div>
     <div class="deep-result-header">
       <span style="color:var(--amber);">${getLogoSVG(18)}</span>
       <div style="flex:1">
@@ -8845,6 +8898,9 @@ async function init(){
   renderMembershipUI();
   updateNotifSettingUI();
   showPage('home');
+
+  // Load streak from cookie
+  try{ const s = getCookie('goal_streak'); if(s) STREAK = JSON.parse(s); renderStreak(); }catch(e){}
 
   // Stripe Checkout戻り処理
   const urlParams = new URLSearchParams(window.location.search);
