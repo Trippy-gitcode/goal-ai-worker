@@ -200,6 +200,14 @@ export default {
         return corsResponse(env, await handleVoiceTranscribe(request, env), request);
       }
 
+      // ── Referral ──
+      if (url.pathname === '/api/referral/code' && request.method === 'GET') {
+        return corsResponse(env, await handleReferralCode(request, env), request);
+      }
+      if (url.pathname === '/api/referral/apply' && request.method === 'POST') {
+        return corsResponse(env, await handleReferralApply(request, env), request);
+      }
+
       // ── Feedbacks ──
       if (url.pathname === '/api/feedbacks' && request.method === 'POST') {
         return corsResponse(env, await handleFeedbackSave(request, env), request);
@@ -1479,6 +1487,52 @@ function corsResponse(env, response, request) {
     statusText: response.statusText,
     headers,
   });
+}
+
+// ═══════ REFERRAL (友達紹介) ═══════
+
+async function handleReferralCode(request, env) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+
+  // 有料プランのみ紹介可能
+  const paidPlans = ['pro','premium','max','annual','premium_annual','max_annual'];
+  if (!paidPlans.includes(auth.plan)) {
+    return jsonRes({ error: '有料プランのユーザーのみ紹介可能です', eligible: false }, 403);
+  }
+
+  // 既存コード確認 or 新規生成
+  let code = await env.TOKEN_KV.get(`referral:code:${auth.tokenId}`);
+  if (!code) {
+    code = generateId(8).toUpperCase();
+    await env.TOKEN_KV.put(`referral:code:${auth.tokenId}`, code, { expirationTtl: 365 * 86400 });
+    await env.TOKEN_KV.put(`referral:owner:${code}`, auth.tokenId, { expirationTtl: 365 * 86400 });
+  }
+  return jsonRes({ code, eligible: true });
+}
+
+async function handleReferralApply(request, env) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+
+  const body = await request.json();
+  const { code } = body;
+  if (!code) return jsonRes({ error: '紹介コードを入力してください' }, 400);
+
+  const referrerTokenId = await env.TOKEN_KV.get(`referral:owner:${code.toUpperCase()}`);
+  if (!referrerTokenId) return jsonRes({ error: '無効な紹介コードです' }, 404);
+  if (referrerTokenId === auth.tokenId) return jsonRes({ error: '自分のコードは使えません' }, 400);
+
+  // 月1回制限チェック
+  const monthKey = getMonthKey();
+  const usedKey = `referral:used:${auth.tokenId}:${monthKey}`;
+  if (await env.TOKEN_KV.get(usedKey)) return jsonRes({ error: '今月は既に紹介特典を利用済みです' }, 409);
+
+  // 記録
+  await env.TOKEN_KV.put(usedKey, '1', { expirationTtl: 35 * 86400 });
+  await env.TOKEN_KV.put(`referral:applied:${auth.tokenId}`, referrerTokenId, { expirationTtl: 365 * 86400 });
+
+  return jsonRes({ ok: true, message: '紹介コードが適用されました。Pro以上のプランを選択すると初月75%OFFが適用されます。' });
 }
 
 function generateId(length = 24) {
