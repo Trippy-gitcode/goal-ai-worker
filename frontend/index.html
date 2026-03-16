@@ -5107,7 +5107,8 @@ async function chatStream({ system, messages, maxTokens, innerEl, scrollEl, onDo
           } else {
             result = await callOpenAI(q, `ユーザーのリクエストに創造的かつ実用的に応えてください。日本語で回答。\n\nユーザー背景：${ctx}`, 800);
           }
-          bub.innerHTML = renderMsgContent(result);
+          const badge = bub._routeData.route === 'gemini' ? '🔍 Gemini' : '💡 GPT';
+          bub.innerHTML = `<div style="font-size:9px;color:var(--amber);font-family:var(--fm);margin-bottom:6px;opacity:.7;">${badge}</div>${renderMsgContent(result)}`;
           bub.classList.remove('stream-bubble');
           bub.style.cssText = '';
           if(onDone) onDone(result);
@@ -5125,6 +5126,127 @@ async function chatStream({ system, messages, maxTokens, innerEl, scrollEl, onDo
     },
     (e) => { bub.classList.remove('stream-bubble'); bub.textContent = 'エラーが発生しました。'; if (onError) onError(e); }
   );
+}
+
+// ════════ AI SELECTION POPUP ════════
+function checkAndShowSelections(bubEl, text){
+  // Detect numbered list (1. xxx 2. xxx 3. xxx) with 3-6 items
+  const matches = text.match(/^(\d+)\.\s+(.+)$/gm);
+  if(!matches || matches.length < 3 || matches.length > 6) return;
+  const items = matches.map(m => {
+    const mm = m.match(/^(\d+)\.\s+(.+)$/);
+    return mm ? {num:mm[1], text:mm[2].trim()} : null;
+  }).filter(Boolean);
+  if(items.length < 3) return;
+
+  // Create popup
+  const popup = document.createElement('div');
+  popup.className = 'ai-selection-popup';
+  popup.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:90%;max-width:400px;background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:16px;z-index:800;box-shadow:0 -4px 24px rgba(0,0,0,.5);animation:fadeUp .3s ease;';
+  popup.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div style="font-size:12px;color:var(--amber);font-weight:500;">選択してください</div>
+      <button onclick="this.closest('.ai-selection-popup').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;">✕</button>
+    </div>
+    ${items.map(i => `<div onclick="selectAIOption('${escapeHtml(i.text).replace(/'/g,"\\'")}');this.closest('.ai-selection-popup').remove();" style="padding:10px 12px;margin-bottom:6px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--cream);transition:border-color .15s;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border)'">${i.num}. ${escapeHtml(i.text)}</div>`).join('')}
+  `;
+  // Remove existing popup
+  document.querySelector('.ai-selection-popup')?.remove();
+  document.body.appendChild(popup);
+  // Auto-remove after 30s
+  setTimeout(() => popup.remove(), 30000);
+}
+
+function selectAIOption(text){
+  const inp = document.getElementById('home-msg-in') || document.getElementById('hub-msg-in');
+  if(inp){
+    inp.value = text;
+    // Trigger send
+    if(document.getElementById('home-msg-in') === inp) sendHomeMsg();
+    else sendHubMsg();
+  }
+}
+
+// ════════ UNIFIED CHAT SEND ════════
+async function sendChatMsg({
+  inputId, innerElId, scrollElId, loadingRef, msgsRef, historyRef,
+  systemPrompt, maxTokens, goalId, messageType, resizeFn,
+  enableDeepAnalysis, enableRouting, onBeforeSend, onAfterAI, renderFn,
+  bubbleStyle // 'standard' | 'tdp' | 'worries'
+}){
+  if(loadingRef.v) return;
+  if(!navigator.onLine){ toast('ネットワークに接続されていません'); return; }
+
+  const inp = document.getElementById(inputId);
+  const text = inp.value.trim();
+  if(!text && !(inputId === 'home-msg-in' && homeImageData)) return;
+  inp.value = '';
+  if(resizeFn) resizeFn(inp);
+
+  // Pre-send hook (image handling etc)
+  const userContent = onBeforeSend ? onBeforeSend(text) : text;
+  const displayText = typeof userContent === 'string' ? userContent : text;
+
+  // Push user message
+  const today = new Date().toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});
+  if(msgsRef){
+    msgsRef.v.push({role:'user', content:displayText, time:now(), date:today});
+  }
+  if(historyRef){
+    historyRef.v.push({role:'user', content:userContent});
+  }
+  if(renderFn) renderFn();
+  loadingRef.v = true;
+
+  // Save user message to Supabase
+  if(AUTH_TOKEN && messageType){
+    apiSaveMessages([{role:'user', content:displayText, goalId:goalId||null, messageType}]);
+  }
+
+  const inner = document.getElementById(innerElId);
+  const scroll = document.getElementById(scrollElId);
+  const sys = typeof systemPrompt === 'function' ? systemPrompt() : systemPrompt;
+
+  // Deep analysis check
+  if(enableDeepAnalysis && text && isDeepAnalysisNeeded(text) && AUTH_TOKEN){
+    showDeepConfirm(innerElId, scrollElId,
+      async () => {
+        await runDeepAnalysis(text, innerElId, scrollElId, (results) => {
+          if(results){
+            renderDeepResult(innerElId, scrollElId, results, text);
+            if(msgsRef) msgsRef.v.push({role:'ai', content:results.finalOutput.slice(0,300)+'…', time:now(), date:today});
+            if(historyRef) historyRef.v.push({role:'assistant', content:results.finalOutput});
+            if(AUTH_TOKEN && messageType) apiSaveMessages([{role:'assistant', content:results.finalOutput, goalId:goalId||null, aiModel:'deep', messageType}]);
+          }
+          loadingRef.v = false;
+        });
+      },
+      async () => {
+        await _doChatStream(sys, historyRef, msgsRef, inner, scroll, today, goalId, messageType, loadingRef, onAfterAI, renderFn, enableRouting);
+      }
+    );
+    return;
+  }
+
+  await _doChatStream(sys, historyRef, msgsRef, inner, scroll, today, goalId, messageType, loadingRef, onAfterAI, renderFn, enableRouting);
+}
+
+async function _doChatStream(sys, historyRef, msgsRef, inner, scroll, today, goalId, messageType, loadingRef, onAfterAI, renderFn, enableRouting){
+  await chatStream({
+    system: sys,
+    messages: historyRef ? historyRef.v.slice(-20) : [],
+    maxTokens: 500,
+    innerEl: inner, scrollEl: scroll,
+    onDone(t){
+      if(msgsRef) msgsRef.v.push({role:'ai', content:t, time:now(), date:today});
+      if(historyRef) historyRef.v.push({role:'assistant', content:t});
+      if(renderFn) renderFn();
+      if(AUTH_TOKEN && messageType) apiSaveMessages([{role:'assistant', content:t, goalId:goalId||null, aiModel:'claude', messageType}]);
+      if(onAfterAI) onAfterAI(t);
+      loadingRef.v = false;
+    },
+    onError(e){ loadingRef.v = false; }
+  });
 }
 
 // ════════ UTILS ════════
@@ -5570,60 +5692,54 @@ function mkHomeMsg(m){
 }
 
 async function sendHomeMsg(){
-  if(homeLoading)return;
-  if(!navigator.onLine){ toast('ネットワークに接続されていません'); return; }
-  // Auto-register if no token
+  if(homeLoading) return;
   if(!AUTH_TOKEN){ await ensureAuth(); }
   document.getElementById('home-send-btn').disabled = true;
-  const inp=document.getElementById('home-msg-in');
-  const text=inp.value.trim();
-  if(!text && !homeImageData)return;
-  inp.value=''; homeResize(inp);
 
-  // 送信ボタン即時フィードバック
-  const sendBtn=document.getElementById('home-send-btn');
-  if(sendBtn) sendBtn.classList.add('sending');
+  const inp = document.getElementById('home-msg-in');
+  const text = inp.value.trim();
+  if(!text && !homeImageData) return;
 
-  const today=new Date().toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});
-
-  // Build content array (text + optional image)
+  // Image handling
   let userContent;
   if(homeImageData){
-    userContent=[
+    userContent = [
       {type:'image',source:{type:'base64',media_type:homeImageData.type,data:homeImageData.base64}},
       {type:'text',text:text||'この画像について話しましょう'}
     ];
   } else {
-    userContent=text;
+    userContent = text;
   }
+  const displayText = text || (homeImageData ? `📷 ${homeImageData.name}` : '');
+  const today = new Date().toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});
+  inp.value = ''; homeResize(inp);
 
-  const displayText=text||(homeImageData?`📷 ${homeImageData.name}`:'');
-  const userMsg={role:'user',content:displayText,time:now(),date:today,
-    img:homeImageData?homeImageData.base64:null, imgType:homeImageData?.type};
-  homeMsgs.push(userMsg);
+  const sendBtn = document.getElementById('home-send-btn');
+  if(sendBtn) sendBtn.classList.add('sending');
+
+  homeMsgs.push({role:'user',content:displayText,time:now(),date:today,
+    img:homeImageData?homeImageData.base64:null, imgType:homeImageData?.type});
   homeHistory.push({role:'user',content:userContent});
   clearHomeImage();
-  renderHomeMsgs(); homeLoading=true;
-  const homeInner = document.getElementById('home-chat-inner');
-  const homeWrap  = document.getElementById('home-chat-wrap');
+  renderHomeMsgs(); homeLoading = true;
 
-  // ── Deep analysis check (image queries skip) ──
-  if (text && !homeImageData && isDeepAnalysisNeeded(text) && AUTH_TOKEN) {
+  const homeInner = document.getElementById('home-chat-inner');
+  const homeWrap = document.getElementById('home-chat-wrap');
+
+  // Deep analysis check
+  if(text && !homeImageData && isDeepAnalysisNeeded(text) && AUTH_TOKEN){
     showDeepConfirm('home-chat-inner', 'home-chat-wrap',
-      // YES → deep analysis
       async () => {
         await runDeepAnalysis(text, 'home-chat-inner', 'home-chat-wrap', (results) => {
-          if (results) {
+          if(results){
             renderDeepResult('home-chat-inner', 'home-chat-wrap', results, text);
-            const summary = `【ディープ分析完了】${results.finalOutput.slice(0,200)}…`;
-            homeMsgs.push({ role:'ai', content:summary, time:now(), date:today });
-            homeHistory.push({ role:'assistant', content:results.finalOutput });
+            homeMsgs.push({role:'ai', content:`【ディープ分析完了】${results.finalOutput.slice(0,200)}…`, time:now(), date:today});
+            homeHistory.push({role:'assistant', content:results.finalOutput});
             saveHomeMsgs();
           }
           homeLoading = false; homeSendRestore();
         });
       },
-      // NO → smart routed response
       async () => {
         await homeSmartRoute(text, today, homeInner, homeWrap);
         homeLoading = false; homeSendRestore();
@@ -5632,7 +5748,6 @@ async function sendHomeMsg(){
     return;
   }
 
-  // ── AI Smart Routing ──
   await homeSmartRoute(text, today, homeInner, homeWrap);
   homeLoading = false; homeSendRestore();
 }
@@ -5810,6 +5925,12 @@ async function newHomeChat(){
   homeHistory=[];
   saveHomeMsgs(); renderHomeMsgs();
   renderSidebarChatRecords();
+  // Show welcome state
+  const chatInner = document.getElementById('home-chat-inner');
+  if(chatInner) chatInner.innerHTML = `<div style="text-align:center;padding:80px 20px 20px;color:var(--muted);line-height:2;">
+    <div style="margin:0 auto 16px;opacity:.4;">${getLogoSVG(56)}</div>
+    <div style="font-size:18px;color:var(--cream);font-weight:500;margin-bottom:6px;">何を達成したいですか？</div>
+    <div style="font-size:14px;">やりたいこと、気になること、何でも大丈夫です。</div></div>`;
 }
 
 let chatRecords = []; // {sessionId, title, date, count}
@@ -5847,7 +5968,7 @@ function renderSidebarChatRecords(){
     return;
   }
   el.innerHTML = recent.map(r => `
-    <div onclick="loadChatSession('${r.sessionId}')" style="padding:6px 16px;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+    <div onclick="toggleSidebar();loadChatSession('${r.sessionId}')" style="padding:6px 16px;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
       <svg width="12" height="12" style="color:var(--muted2);flex-shrink:0" class="svg-ic"><use href="#ic-chat"/></svg>
       <div style="font-size:11px;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(r.title)}</div>
     </div>`).join('');
@@ -5884,7 +6005,7 @@ function renderChatHistoryList(sessions){
     const d = new Date(s.date);
     const dateStr = d.toLocaleDateString('ja-JP',{month:'short',day:'numeric'});
     const preview = (s.firstMsg || '会話').substring(0, 30);
-    return `<div onclick="loadChatSession('${s.sessionId}')" style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+    return `<div onclick="toggleSidebar();loadChatSession('${s.sessionId}')" style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div style="font-size:13px;color:var(--cream);font-weight:500;">${preview}…</div>
         <div style="font-size:10px;color:var(--muted2);flex-shrink:0;margin-left:10px;">${dateStr}</div>
@@ -6290,52 +6411,29 @@ function renderHubChat(){
   setTimeout(() => { document.getElementById('hub-chat-wrap').scrollTop = 99999; }, 50);
 }
 
+const _hubLoading = {get v(){return hubChatLoading}, set v(x){hubChatLoading=x}};
+
 async function sendHubMsg(){
-  if(hubChatLoading) return;
-  if(!navigator.onLine){ toast('ネットワークに接続されていません'); return; }
-  const inp = document.getElementById('hub-msg-in');
-  const text = inp.value.trim(); if(!text) return;
-  inp.value = ''; hubMsgResize(inp);
   const goal = ALL_GOALS[hubGoalIdx];
+  if(!goal) return;
   const goalId = goal.supabaseId || null;
+  const _msgs = {get v(){return hubChatMsgs[goal.id]}, set v(x){}};
+  const _hist = {get v(){return hubChatHistories[goal.id]}, set v(x){}};
 
-  hubChatMsgs[goal.id].push({role:'user', content:text, time:now()});
-  hubChatHistories[goal.id].push({role:'user', content:text});
-  renderHubChat(); hubChatLoading = true;
-  apiSaveMessages([{ role:'user', content:text, goalId, messageType:'hub_chat' }]);
-
-  const hubSys = `あなたはGOAL AIのゴール専用コーチです。\n\n${buildAIContextCached()}\n\n現在のゴール「${goal.title}」に特化して具体的に。3〜5文で簡潔に。`;
-
-  // Deep analysis check
-  if (isDeepAnalysisNeeded(text) && AUTH_TOKEN) {
-    showDeepConfirm('hub-chat-inner', 'hub-chat-wrap',
-      async () => {
-        await runDeepAnalysis(text, 'hub-chat-inner', 'hub-chat-wrap', (results) => {
-          if (results) {
-            renderDeepResult('hub-chat-inner', 'hub-chat-wrap', results, text);
-            hubChatMsgs[goal.id].push({ role:'ai', content:results.finalOutput.slice(0,300)+'…', time:now() });
-            hubChatHistories[goal.id].push({ role:'assistant', content:results.finalOutput });
-            apiSaveMessages([{ role:'assistant', content:results.finalOutput, goalId, aiModel:'deep', messageType:'hub_chat' }]);
-          }
-          hubChatLoading = false;
-        });
-      },
-      async () => {
-        await chatStream({ system:hubSys, messages:hubChatHistories[goal.id].slice(-20), maxTokens:500,
-          innerEl:'hub-chat-inner', scrollEl:'hub-chat-wrap',
-          onDone(t){ hubChatMsgs[goal.id].push({role:'ai',content:t,time:now()}); hubChatHistories[goal.id].push({role:'assistant',content:t}); renderHubChat(); apiSaveMessages([{role:'assistant',content:t,goalId,aiModel:'claude',messageType:'hub_chat'}]); }
-        });
-        hubChatLoading = false;
-      }
-    );
-    return;
-  }
-
-  await chatStream({ system:hubSys, messages:hubChatHistories[goal.id].slice(-20), maxTokens:500,
-    innerEl:'hub-chat-inner', scrollEl:'hub-chat-wrap',
-    onDone(t){ hubChatMsgs[goal.id].push({role:'ai',content:t,time:now()}); hubChatHistories[goal.id].push({role:'assistant',content:t}); renderHubChat(); apiSaveMessages([{role:'assistant',content:t,goalId,aiModel:'claude',messageType:'hub_chat'}]); }
+  await sendChatMsg({
+    inputId: 'hub-msg-in',
+    innerElId: 'hub-chat-inner',
+    scrollElId: 'hub-chat-wrap',
+    loadingRef: _hubLoading,
+    msgsRef: _msgs,
+    historyRef: _hist,
+    systemPrompt: () => `あなたはGOAL AIのゴール専用コーチです。\n\n${buildAIContextCached()}\n\n現在のゴール「${goal.title}」に特化して具体的に。3〜5文で簡潔に。`,
+    goalId, messageType: 'hub_chat',
+    resizeFn: hubMsgResize,
+    enableDeepAnalysis: true,
+    enableRouting: true,
+    renderFn: () => renderHubChat(),
   });
-  hubChatLoading = false;
 }
 function hubMsgResize(el) { chatResize(el, 110); }
 function hubMsgKey(e) { chatKey(sendHubMsg, e); }
@@ -7362,6 +7460,8 @@ function streamAppend(bub, fullText){
     bub._textNode = document.createTextNode('');
     bub.appendChild(bub._textNode);
     bub._dotsRemoved = true;
+    // Scroll to bubble top once
+    if(bub.parentElement) bub.parentElement.scrollIntoView({block:'start',behavior:'smooth'});
     bub._displayedLen = 0;
     bub._targetText = '';
     bub._animTimer = null;
@@ -7385,6 +7485,8 @@ function streamFinalize(bub, fullText){
   bub._streamDone = true;
   if(bub._animTimer){ clearInterval(bub._animTimer); bub._animTimer = null; }
   bub.innerHTML = renderMsgContent(fullText);
+  // Check for numbered selection list
+  checkAndShowSelections(bub, fullText);
   bub.classList.remove('stream-bubble');
 }
 
