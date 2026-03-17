@@ -1,3 +1,30 @@
+// ════════ SHARED STATE ════════
+const DEEP_TRIGGERS = [
+  '事業計画','ビジネスプラン','ビジネス計画',
+  'クラファン','クラウドファンディング',
+  '戦略','マーケティング戦略','集客戦略','SNS戦略',
+  '競合','競合分析','市場調査','市場分析','リサーチ',
+  'LP','ランディングページ','セールスコピー',
+  '資金調達','投資','融資','ROI','収益',
+  'ブランディング','ポジショニング','差別化',
+  'コンテンツ計画','プロモーション','広告戦略',
+  'ビジネスモデル','収益モデル','マネタイズ',
+  'ピッチ','提案書','企画書',
+];
+
+const MEMBERSHIP = {
+  plan: 'free',
+  trialEnd: null,
+  promoApplied: null,
+  selectedPlan: 'pro',
+};
+
+let FREE_MODEL_USAGE = {
+  claude: { used: 0, limit: 5, remaining: 5 },
+  gemini: { used: 0, limit: 5, remaining: 5 },
+  gpt:    { used: 0, limit: 10, remaining: 10 },
+};
+
 // ════════ WORKER CONFIG ════════
 const WORKER_URL = 'https://goal-ai-worker.goalai-futoshi.workers.dev';
 let AUTH_TOKEN = null;

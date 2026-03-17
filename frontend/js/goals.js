@@ -521,13 +521,18 @@ async function sendTaskMsg(){
   const tdpBub = document.createElement('div'); tdpBub.className = 'tdp-bubble stream-bubble';
   tdpWrap.appendChild(tdpBub); chat.appendChild(tdpWrap); chat.scrollTop = chat.scrollHeight;
 
-  await streamAI(
-    { system: taskSys, messages: taskHistory, maxTokens: 800 },
-    (t) => { tdpBub.innerHTML = renderMsgContent(t); chat.scrollTop = chat.scrollHeight; },
-    (t) => { tdpBub.classList.remove('stream-bubble'); selectedTask.chatLog.push({role:'ai',content:t}); renderTasks(); },
-    (e) => { tdpBub.classList.remove('stream-bubble'); tdpBub.textContent = 'エラーが発生しました。'; }
-  );
-  taskChatLoading = false;
+  try{
+    await streamAI(
+      { system: taskSys, messages: taskHistory, maxTokens: 800 },
+      (t) => { tdpBub.innerHTML = renderMsgContent(t); chat.scrollTop = chat.scrollHeight; },
+      (t) => { tdpBub.classList.remove('stream-bubble'); selectedTask.chatLog.push({role:'ai',content:t}); renderTasks(); },
+      (e) => { tdpBub.classList.remove('stream-bubble'); tdpBub.textContent = 'エラーが発生しました。'; }
+    );
+  }catch(e){
+    tdpBub.classList.remove('stream-bubble'); tdpBub.textContent = 'エラーが発生しました。';
+  }finally{
+    taskChatLoading = false;
+  }
 }
 
 function tdpResize(el) { chatResize(el, 80); }
@@ -536,11 +541,30 @@ function tdpKey(e) { chatKey(sendTaskMsg, e); }
 
 
 
-// ════════ CALENDAR ════════
+// ════════ CALENDAR (v2) ════════
 const calPersonalEvents = {};
 let calPanelDate = null;
 let calPanelKey  = null;
 let calChatHistory = {};
+let calView = 'month'; // month | week | day
+let calSelectedDay = null;
+
+const GOAL_COLORS = ['#FF6B6B','#4ECDC4','#45B7D1','#F7B731','#A55EEA','#26DE81','#FC5C65','#778CA3'];
+function getGoalColor(idx){ return GOAL_COLORS[idx % GOAL_COLORS.length]; }
+
+// 日本の祝日（2026年）
+const JP_HOLIDAYS = {'1-1':'元日','1-12':'成人の日','2-11':'建国記念の日','2-23':'天皇誕生日','3-20':'春分の日','4-29':'昭和の日','5-3':'憲法記念日','5-4':'みどりの日','5-5':'こどもの日','7-20':'海の日','8-11':'山の日','9-21':'敬老の日','9-23':'秋分の日','10-12':'スポーツの日','11-3':'文化の日','11-23':'勤労感謝の日'};
+function getHoliday(m,d){ return JP_HOLIDAYS[`${m}-${d}`]||''; }
+
+function switchCalView(v){
+  calView = v;
+  document.querySelectorAll('.cal-view-tab').forEach(t=>t.classList.toggle('active',t.id===`cal-tab-${v}`));
+  renderCalendar();
+}
+function calGoToday(){
+  const now=new Date(); calYear=now.getFullYear(); calMonth=now.getMonth();
+  renderCalendar();
+}
 let calChatLoading = false;
 
 function calNav(d){
@@ -550,19 +574,38 @@ function calNav(d){
   renderCalendar();
 }
 
+function renderCalProgressBar(){
+  const bar=document.getElementById('cal-progress-bar');
+  if(!bar)return;
+  bar.innerHTML=ALL_GOALS.filter(g=>!g.archived).map((g,i)=>{
+    const c=getGoalColor(i);
+    const pct=g.actual||0;
+    return `<div class="cal-progress-item" onclick="filterCalGoal(${i})" title="${escapeHtml(g.title)}">
+      <div style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0;"></div>
+      <span style="max-width:80px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(g.title)}</span>
+      <div class="cal-progress-fill"><div style="width:${pct}%;background:${c}"></div></div>
+      <span style="font-family:var(--fm)">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+let calFilterGoal=-1;
+function filterCalGoal(idx){ calFilterGoal=calFilterGoal===idx?-1:idx; renderCalendar(); }
+
 function renderCalendar(){
   const lbl=document.getElementById('cal-month-lbl');
   lbl.textContent=`${calYear}年 ${calMonth+1}月`;
+  renderCalProgressBar();
   const events=getCalEvents();
   const grid=document.getElementById('cal-grid');
   grid.innerHTML='';
   const dows=['日','月','火','水','木','金','土'];
-  dows.forEach(d=>{const el=document.createElement('div');el.className='cal-dow';el.textContent=d;grid.appendChild(el);});
+  dows.forEach((d,i)=>{const el=document.createElement('div');el.className='cal-dow'+(i===0?' sun':'')+(i===6?' sat':'');el.textContent=d;grid.appendChild(el);});
 
   const firstDay=new Date(calYear,calMonth,1).getDay();
   const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
   const daysInPrev=new Date(calYear,calMonth,0).getDate();
   const today=new Date();
+  const todayStr=today.toISOString().slice(0,10);
 
   for(let i=0;i<firstDay;i++){
     const cell=document.createElement('div');cell.className='cal-cell other-month';
@@ -573,22 +616,33 @@ function renderCalendar(){
   for(let d=1;d<=daysInMonth;d++){
     const cell=document.createElement('div');
     cell.className='cal-cell';
+    const dow=new Date(calYear,calMonth,d).getDay();
     const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
-    const isReview=d>=1&&d<=7;
     if(isToday)cell.classList.add('today');
-    if(isReview){cell.classList.add('review-period');if(spartanMode)cell.classList.add('spartan-on');}
-    cell.innerHTML=`<div class="cal-date">${d}</div><div class="cal-events"></div>`;
+    const dateClass='cal-date'+(dow===0?' sun':'')+(dow===6?' sat':'');
+    const holiday=getHoliday(calMonth+1,d);
+    cell.innerHTML=`<div class="${dateClass}">${d}</div>${holiday?'<div class="cal-holiday">'+holiday+'</div>':''}<div class="cal-events"></div>`;
     const evKey=`${calYear}-${calMonth+1}-${d}`;
-    const evList=(events[evKey]||[]).concat(calPersonalEvents[evKey]||[]);
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let evList=(events[evKey]||[]).concat(calPersonalEvents[evKey]||[]);
+    if(calFilterGoal>=0) evList=evList.filter(ev=>ev.goalIdx===calFilterGoal);
     const evContainer=cell.querySelector('.cal-events');
-    evList.forEach(ev=>{
+    evList.slice(0,3).forEach(ev=>{
       const el=document.createElement('div');
-      el.className=`cal-ev ${ev.type}`;
-      el.textContent=ev.text;
-      el.onclick=(e)=>{e.stopPropagation();openCalPanel(d,evKey,ev);};
+      el.className='cal-ev';
+      const isOverdue=ev.type==='task'&&dateStr<todayStr;
+      const isDueToday=ev.type==='task'&&dateStr===todayStr;
+      if(isOverdue)el.classList.add('overdue');
+      else if(isDueToday)el.classList.add('due-today');
+      el.style.background=isOverdue?'#FF4444':isDueToday?'#FF8C00':(ev.goalColor||'var(--blue)');
+      el.textContent=(ev.source==='ai'?'✨ ':'')+ev.text;
       evContainer.appendChild(el);
     });
-    cell.onclick=()=>openCalPanel(d,evKey,null);
+    if(evList.length>3){
+      const more=document.createElement('div');more.style.cssText='font-size:8px;color:var(--muted);margin-top:1px;';
+      more.textContent=`+${evList.length-3}件`;evContainer.appendChild(more);
+    }
+    cell.onclick=()=>openCalDayPanel(d,evKey);
     grid.appendChild(cell);
   }
   const total=firstDay+daysInMonth;
@@ -600,66 +654,62 @@ function renderCalendar(){
   }
 }
 
-// ════════ CALENDAR PANEL ════════
-function openCalPanel(day, evKey, focusEv){
-  calPanelDate = day;
-  calPanelKey  = evKey;
-  const [y,m,d] = evKey.split('-');
-  const dateObj = new Date(y, m-1, d);
-  const label = dateObj.toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
-  document.getElementById('cal-panel-date').textContent = label;
-
-  // Events list
-  const allEv = (getCalEvents()[evKey]||[]).concat(calPersonalEvents[evKey]||[]);
-  const evEl = document.getElementById('cal-panel-events');
-  if(allEv.length){
-    const typeLabel = {task:'タスク',milestone:'マイルストーン',done:'完了',review:'レビュー',personal:'個人予定'};
-    const typeColor = {task:'var(--blue)',milestone:'var(--amber)',done:'var(--green)',review:'var(--red)',personal:'var(--muted2)'};
-    evEl.innerHTML = allEv.map(ev=>`
-      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
-        <span style="width:6px;height:6px;border-radius:50%;background:${typeColor[ev.type]||'var(--muted2)'};flex-shrink:0;"></span>
-        <span style="font-size:12px;color:var(--cream);flex:1;">${ev.text}</span>
-        <span style="font-size:9px;color:var(--muted2);font-family:var(--fm);">${typeLabel[ev.type]||ev.type}</span>
-      </div>`).join('');
+function openCalDayPanel(day, evKey){
+  calPanelDate=day; calPanelKey=evKey;
+  const panel=document.getElementById('cal-day-panel');
+  const title=document.getElementById('cal-day-title');
+  const dows=['日','月','火','水','木','金','土'];
+  const dow=new Date(calYear,calMonth,day).getDay();
+  title.textContent=`${calMonth+1}月${day}日（${dows[dow]}）`;
+  const events=getCalEvents();
+  const evList=(events[evKey]||[]).concat(calPersonalEvents[evKey]||[]);
+  const container=document.getElementById('cal-day-tasks');
+  if(!evList.length){
+    container.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">この日のタスクはありません</div>';
   } else {
-    evEl.innerHTML = '<div style="font-size:11px;color:var(--muted2);padding:8px 0;">この日の予定はありません</div>';
+    container.innerHTML=evList.map(ev=>`<div class="cal-day-task">
+      <div class="cal-day-task-check ${ev.type==='done'?'done':''}" onclick="event.stopPropagation();" title="${ev.type==='done'?'完了':'未完了'}">
+        ${ev.type==='done'?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;color:var(--cream);${ev.type==='done'?'text-decoration:line-through;opacity:.5;':''}">${ev.source==='ai'?'✨ ':''}${escapeHtml(ev.text)}</div>
+        ${ev.goalName?'<div style="font-size:10px;color:var(--muted);margin-top:2px;">'+escapeHtml(ev.goalName)+'</div>':''}
+      </div>
+      <div style="width:8px;height:8px;border-radius:50%;background:${ev.goalColor||'var(--muted)'};flex-shrink:0;"></div>
+    </div>`).join('');
   }
-  document.getElementById('cal-panel-subtitle').textContent = `予定 ${allEv.length}件`;
-
-  // Init chat for this day
-  if(!calChatHistory[evKey]) calChatHistory[evKey] = [];
-  renderCalChat(evKey);
-
-  // If no chat yet, send an AI opening
-  if(calChatHistory[evKey].length === 0 && allEv.length > 0){
-    const evSummary = allEv.map(e=>e.text).join('、');
-    setTimeout(()=>autoGreetCalDay(evKey, label, evSummary), 300);
-  }
-
-  document.getElementById('cal-panel').style.transform = 'translateX(0)';
+  panel.classList.add('open');
 }
+function closeCalDayPanel(){ document.getElementById('cal-day-panel')?.classList.remove('open'); }
+function openCalAddModal(){ toast('タスク追加は各ゴールの「タスク」タブから行えます'); }
 
-function closeCalPanel(){
-  document.getElementById('cal-panel').style.transform = 'translateX(100%)';
-  document.getElementById('cal-add-form').style.display = 'none';
-}
+// ════════ CALENDAR PANEL (legacy compat) ════════
+function openCalPanel(day, evKey, focusEv){ openCalDayPanel(day, evKey); }
+function closeCalPanel(){ closeCalDayPanel(); }
 
-function openAddEventForm(){
-  const f = document.getElementById('cal-add-form');
-  f.style.display = f.style.display==='none' ? 'block' : 'none';
-  document.getElementById('cal-ev-title').focus();
-}
+// Calendar swipe
+(function(){
+  let sx=0,sy=0;
+  document.addEventListener('DOMContentLoaded',()=>{
+    const el=document.getElementById('cal-scroll');
+    if(!el)return;
+    el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+    el.addEventListener('touchend',e=>{
+      const dx=e.changedTouches[0].clientX-sx;
+      const dy=Math.abs(e.changedTouches[0].clientY-sy);
+      if(Math.abs(dx)>60&&dy<40){ dx>0?calNav(-1):calNav(1); }
+    },{passive:true});
+  });
+})();
 
 function saveCalEvent(){
-  const title = document.getElementById('cal-ev-title').value.trim();
-  const type  = document.getElementById('cal-ev-type').value;
+  const title = document.getElementById('cal-ev-title')?.value?.trim();
+  const type  = document.getElementById('cal-ev-type')?.value || 'personal';
   if(!title || !calPanelKey) return;
   if(!calPersonalEvents[calPanelKey]) calPersonalEvents[calPanelKey]=[];
   calPersonalEvents[calPanelKey].push({type, text:title});
-  document.getElementById('cal-ev-title').value = '';
-  document.getElementById('cal-add-form').style.display = 'none';
   renderCalendar();
-  openCalPanel(calPanelDate, calPanelKey, null);
+  openCalDayPanel(calPanelDate, calPanelKey);
 }
 
 function renderCalChat(evKey){
@@ -714,7 +764,7 @@ async function sendCalMsg(){
   cWrap.appendChild(cBub); chat.appendChild(cWrap); chat.scrollTop=99999;
   try{
     await streamAI(
-      { system:calSys, messages:calChatHistory[calPanelKey].slice(-12), maxTokens:400 },
+      { system:calSys, messages:calChatHistory[calPanelKey].slice(-8), maxTokens:400 },
       (t)=>{ cBub.innerHTML=renderMsgContent(t); chat.scrollTop=99999; },
       (t)=>{ cBub.classList.remove('stream-bubble'); calChatHistory[calPanelKey].push({role:'ai',content:t}); renderCalChat(calPanelKey); },
       (e)=>{ cBub.classList.remove('stream-bubble'); calChatHistory[calPanelKey].push({role:'ai',content:'エラーが発生しました。'}); renderCalChat(calPanelKey); }
@@ -722,8 +772,9 @@ async function sendCalMsg(){
   }catch(e){
     calChatHistory[calPanelKey].push({role:'ai',content:'エラーが発生しました。'});
     renderCalChat(calPanelKey);
+  }finally{
+    calChatLoading=false;
   }
-  calChatLoading=false;
 }
 function calMsgKey(e) { chatKey(sendCalMsg, e); }
 
@@ -876,9 +927,10 @@ function openGoalHub(idx){
     document.getElementById('hub-stat-deadline').textContent = '期限未設定';
   }
 
-  // Status chip - hide for new goals (actual=0, target=0) or no deadline
+  // Status chip - hide for new goals (actual=0, target=0), no deadline, or no tasks
   const chipEl = document.getElementById('hub-status-chip');
-  if(goal.actual === 0 && goal.target === 0){
+  const goalTasks = (goal.phases||[]).flatMap(p=>(p.tasks||[]));
+  if((goal.actual === 0 && goal.target === 0) || !goal.deadline || goalTasks.length === 0){
     chipEl.innerHTML = '';
   } else if(!isOk){
     const diff = goal.target - goal.actual;
@@ -1244,11 +1296,20 @@ document.addEventListener('click', e=>{
 });
 
 async function init(){
+  // テーマ・フォントサイズ復元（Cookie）
+  const savedTheme = document.cookie.match(/goal_ai_theme=([^;]+)/)?.[1];
+  if(savedTheme) applyTheme(savedTheme);
+  restoreThemeUI();
+  const savedFontSize = document.cookie.match(/goal_ai_fontsize=([^;]+)/)?.[1];
+  if(savedFontSize) applyFontSize(savedFontSize);
+
   initSwipeToOpenSidebar();
   initHomePlaceholder();
   renderMembershipUI();
   updateNotifSettingUI();
   showPage('home');
+  showHomeScreen();
+  initAvatarDisplay();
 
   // Load streak from cookie
   try{ const s = getCookie('goal_streak'); if(s) STREAK = JSON.parse(s); renderStreak(); }catch(e){}
@@ -1279,6 +1340,15 @@ async function init(){
         renderAPIKeySettings();
       }
     });
+    // Free model usage取得
+    try {
+      const usageData = await apiCall('/api/usage', 'GET');
+      if (usageData && usageData.model_usage) {
+        FREE_MODEL_USAGE = usageData.model_usage;
+      }
+      renderModelUsageBadge();
+    } catch(e){}
+
     // ゴールをSupabaseから読み込み
     const savedGoals = await apiLoadGoals();
     if (savedGoals.length > 0) {

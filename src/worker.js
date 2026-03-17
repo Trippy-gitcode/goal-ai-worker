@@ -35,9 +35,9 @@ const FAIR_USE = { hourly: 30, daily: 100, delayMs: 7000 };
 const PLAN_MODELS = {
   free: {
     claude:  'claude-sonnet-4-20250514',
-    openai:  'gpt-5-nano',
+    openai:  'gpt-5-mini',
     gemini:  'gemini-2.5-flash',
-    router:  'gpt-5-nano',
+    router:  'gpt-5-mini',
   },
   pro: {
     claude:  'claude-sonnet-4-20250514',
@@ -77,9 +77,9 @@ const PLAN_MODELS = {
   },
   _default: {
     claude:  'claude-sonnet-4-20250514',
-    openai:  'gpt-5-nano',
+    openai:  'gpt-5-mini',
     gemini:  'gemini-2.5-flash',
-    router:  'gpt-5-nano',
+    router:  'gpt-5-mini',
   },
 };
 
@@ -200,6 +200,11 @@ export default {
         return corsResponse(env, await handleVoiceTranscribe(request, env), request);
       }
 
+      // ── Profile avatar ──
+      if (url.pathname === '/api/profile/avatar' && request.method === 'POST') {
+        return corsResponse(env, await handleAvatarUpload(request, env), request);
+      }
+
       // ── Referral ──
       if (url.pathname === '/api/referral/code' && request.method === 'GET') {
         return corsResponse(env, await handleReferralCode(request, env), request);
@@ -318,6 +323,28 @@ function getDayKey() {
   return now.toISOString().slice(0, 10);
 }
 
+// ═══════ FREE MODEL USAGE LIMITS ═══════
+const FREE_MODEL_LIMITS = { claude: 5, gemini: 5, gpt: 10 };
+
+async function getFreeModelUsage(tokenId, model, env) {
+  const key = `free_model:${tokenId}:${getDayKey()}:${model}`;
+  return parseInt(await env.TOKEN_KV.get(key) || '0');
+}
+
+async function incrementFreeModelUsage(tokenId, model, env) {
+  const key = `free_model:${tokenId}:${getDayKey()}:${model}`;
+  const current = await getFreeModelUsage(tokenId, model, env);
+  await env.TOKEN_KV.put(key, String(current + 1), { expirationTtl: 86400 * 2 });
+}
+
+async function canUseModel(tokenId, plan, model, env) {
+  if (plan !== 'free') return { allowed: true, remaining: 9999 };
+  const limit = FREE_MODEL_LIMITS[model];
+  if (!limit) return { allowed: true, remaining: 9999 };
+  const used = await getFreeModelUsage(tokenId, model, env);
+  return { allowed: used < limit, remaining: Math.max(0, limit - used) };
+}
+
 // フェアユースポリシーチェック
 async function checkFairUse(env, userId) {
   const hourKey = `fu:h:${userId}:${Math.floor(Date.now() / 3600000)}`;
@@ -422,6 +449,26 @@ async function handleChatStream(request, env) {
 
   const body = await request.json();
   const { system, messages, maxTokens = 600 } = body;
+
+  // Freeプラン: Claude上限チェック → 超過時はnanoでSSE応答
+  if (auth.plan === 'free') {
+    const cm = await canUseModel(auth.tokenId, auth.plan, 'claude', env);
+    if (!cm.allowed) {
+      // nanoで非ストリーミング応答をSSE形式にラップして返す
+      const nanoRes = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
+        body: JSON.stringify({ model: 'gpt-5-nano', max_completion_tokens: Math.min(maxTokens, 600),
+          messages: [{ role: 'system', content: system || '' }, ...messages] }),
+      });
+      const nanoData = await nanoRes.json();
+      const text = nanoData.choices?.[0]?.message?.content || '';
+      const sseBody = `data: {"type":"content_block_delta","delta":{"text":${JSON.stringify(text)}}}\n\ndata: [DONE]\n\n`;
+      return new Response(sseBody, { status: 200, headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Model-Used': 'gpt-5-nano' } });
+    }
+    await incrementFreeModelUsage(auth.tokenId, 'claude', env);
+  }
+
   const claudeModel = getModel(auth.plan, 'claude');
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -468,7 +515,18 @@ async function handleGptSimple(request, env) {
 
   const body = await request.json();
   const { messages, system, maxTokens = 150 } = body;
-  const model = getModel(auth.plan, 'openai'); // gpt-5-mini
+
+  // ルーティング判定キャッシュ（systemにROUTE_PROMPTが含まれる場合）
+  const isRouting = system && system.includes('1単語のみ返せ');
+  if (isRouting && messages?.[0]?.content) {
+    const userText = messages[0].content;
+    const cacheKey = `route:${userText.slice(0, 50)}`;
+    const cached = await env.TOKEN_KV.get(cacheKey);
+    if (cached) return jsonRes({ choices: [{ message: { content: cached } }] }, 200, { 'X-Route-Cache': 'hit' });
+  }
+
+  // ルーティング判定はmini、相槌応答はnano
+  const model = isRouting ? getModel(auth.plan, 'router') : 'gpt-5-nano';
 
   const openaiMessages = [];
   if (system) openaiMessages.push({ role: 'system', content: system });
@@ -489,6 +547,16 @@ async function handleGptSimple(request, env) {
 
   const data = await res.json();
   if (!res.ok) return jsonRes({ error: data.error?.message || 'GPT error' }, res.status);
+
+  // ルーティング判定結果をキャッシュ
+  if (isRouting && messages?.[0]?.content) {
+    const routeResult = (data.choices?.[0]?.message?.content || '').trim().toLowerCase();
+    if (['gemini','gpt','gpt-simple','claude'].includes(routeResult.replace(/[^a-z-]/g,''))) {
+      const cacheKey = `route:${messages[0].content.slice(0, 50)}`;
+      await env.TOKEN_KV.put(cacheKey, routeResult.replace(/[^a-z-]/g,''), { expirationTtl: 3600 });
+    }
+  }
+
   return jsonRes(data, 200, { 'X-Model-Used': model, 'X-Route': 'gpt-simple' });
 }
 
@@ -508,7 +576,17 @@ async function handleDeepOpenAI(request, env) {
 
   const body = await request.json();
   const { messages, system, maxTokens = 1000 } = body;
-  const openaiModel = getModel(auth.plan, 'openai');
+  let openaiModel = getModel(auth.plan, 'openai');
+
+  // Freeプラン: GPT使用量チェック → nano切替
+  if (auth.plan === 'free') {
+    const gm = await canUseModel(auth.tokenId, auth.plan, 'gpt', env);
+    if (!gm.allowed) {
+      openaiModel = 'gpt-5-nano';
+    } else {
+      await incrementFreeModelUsage(auth.tokenId, 'gpt', env);
+    }
+  }
 
   const openaiMessages = [];
   if (system) openaiMessages.push({ role: 'system', content: system });
@@ -549,6 +627,26 @@ async function handleDeepGemini(request, env) {
 
   const body = await request.json();
   const { prompt, systemCtx, maxTokens = 1200 } = body;
+
+  // Freeプラン: Gemini使用量チェック → nano切替
+  if (auth.plan === 'free') {
+    const gm = await canUseModel(auth.tokenId, auth.plan, 'gemini', env);
+    if (!gm.allowed) {
+      // nanoで代替応答
+      const nanoMessages = [{ role: 'system', content: systemCtx || '' }, { role: 'user', content: prompt }];
+      const nanoRes = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
+        body: JSON.stringify({ model: 'gpt-5-nano', max_completion_tokens: Math.min(maxTokens, 600), messages: nanoMessages }),
+      });
+      const nanoData = await nanoRes.json();
+      // Gemini互換のレスポンス形式で返す
+      const nanoText = nanoData.choices?.[0]?.message?.content || '';
+      return jsonRes({ candidates: [{ content: { parts: [{ text: nanoText }] } }] }, 200, { 'X-Model-Used': 'gpt-5-nano' });
+    }
+    await incrementFreeModelUsage(auth.tokenId, 'gemini', env);
+  }
+
   const geminiModel = getModel(auth.plan, 'gemini');
 
   const text = systemCtx ? `${systemCtx}\n\n${prompt}` : prompt;
@@ -874,10 +972,21 @@ async function handleUsageGet(request, env, ctx) {
     ctx.waitUntil(syncUsageToSupabase(env, auth.tokenId, getMonthKey(), usage.used, 0));
   }
 
+  // Freeプランのモデル別使用量
+  const model_usage = {};
+  if (auth.plan === 'free') {
+    for (const m of ['claude', 'gemini', 'gpt']) {
+      const used = await getFreeModelUsage(auth.tokenId, m, env);
+      const limit = FREE_MODEL_LIMITS[m];
+      model_usage[m] = { used, limit, remaining: Math.max(0, limit - used) };
+    }
+  }
+
   return jsonRes({
     plan: auth.plan,
     month: getMonthKey(),
     deep: usage,
+    model_usage,
   });
 }
 
@@ -1384,6 +1493,39 @@ async function syncUsageToSupabase(env, tokenId, month, deepCount, chatCount) {
 // ═══════ DB MIGRATION (admin only) ═══════
 
 // ═══════ VOICE TRANSCRIPTION ═══════
+
+async function handleAvatarUpload(request, env) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+
+  const body = await request.json();
+  const { avatar_base64 } = body;
+
+  if (!avatar_base64 || avatar_base64.length > 7_000_000) {
+    return jsonRes({ error: '画像サイズは5MB以下にしてください' }, 400);
+  }
+  if (!avatar_base64.startsWith('data:image/')) {
+    return jsonRes({ error: '画像形式が不正です' }, 400);
+  }
+
+  // Supabaseのusersテーブルに保存
+  const supabaseRes = await fetch(`${env.SUPABASE_URL}/rest/v1/users?token_id=eq.${auth.tokenId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': env.SUPABASE_SERVICE_KEY,
+      'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+      'Prefer': 'return=minimal',
+    },
+    body: JSON.stringify({ avatar_base64 }),
+  });
+
+  if (!supabaseRes.ok) {
+    return jsonRes({ error: 'アバター保存に失敗しました' }, 500);
+  }
+
+  return jsonRes({ success: true });
+}
 
 async function handleVoiceTranscribe(request, env) {
   const auth = await authenticateRequest(request, env);

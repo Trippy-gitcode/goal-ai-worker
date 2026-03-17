@@ -1,6 +1,15 @@
 // ════════ CHAT ════════
 function getLogoSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 100 100"><defs><linearGradient id="lg${size}" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M26 70 L32 40 L42 55 L50 24 L58 55 L68 40 L74 70 Z" fill="url(#lg${size})"/></svg>`;}
 function getUserAvatarText(){const n=USER_PROFILE.nickname||USER_PROFILE.name||'';return n?n.charAt(0):'';}
+function renderUserAvatarInner(av){
+  if(USER_PROFILE.avatar_base64){
+    av.innerHTML=`<img src="${USER_PROFILE.avatar_base64}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+  } else {
+    const ut=getUserAvatarText();
+    if(ut) av.textContent=ut;
+    else av.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>';
+  }
+}
 function showTyping() { showChatTyping(document.getElementById('home-chat-inner'), 'typing-indicator'); }
 function hideTyping() { hideChatTyping('typing-indicator'); }
 
@@ -81,8 +90,9 @@ async function startGoal(){
         if(goalObj.supabaseId) apiSaveMessages([{role:'assistant',content:t,goalId:goalObj.supabaseId,aiModel:'claude',messageType:'hub_chat'}]);
       }
     });
-  }catch(e){}
-  hubChatLoading = false;
+  }catch(e){}finally{
+    hubChatLoading = false;
+  }
 }
 document.getElementById('wlc-in').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&!_isComposing)startGoal();});
 
@@ -487,28 +497,12 @@ let homeMsgs = [];
 let homeHistory = [];
 let homeLoading = false;
 
-const SYS_HOME = `あなたはGOAL AIの「ゴール形成パートナー」です。
-ユーザーがまだ漠然としたビジョンや思いを話してきたとき、すぐに提案や作業指示をしてはいけません。
-まずユーザーの内側にある想いを一緒に掘り下げて、ゴールの輪郭を形作ることが最優先です。
-
-【進め方】
-1. ユーザーが曖昧なビジョンを話したら、すぐ作業提案せず「なぜそう思ったの？」「それが実現したらどうなる？」のように掘り下げる
-2. ユーザーの発言から「何をしたいか（What）」と「なぜしたいか（Why）」の両方が読み取れた時点で「こういうゴールにまとめてみない？」と提案する。時間軸（When）は後から設定できるので必須ではない。WhatもWhyも曖昧な段階では掘り下げを続ける
-3. ゴールが確定して初めて、タスクや具体的なアクションの話に入る
-4. ゴールが確定するまでは、ロードマップ・タスク・スケジュールの話は一切しない
-
-【スタイル】
-- 端的に、2〜3文で返す。長文禁止
-- 質問は1回に1つだけ。本文中で質問した場合、末尾に同じ質問を繰り返さない
-- 温かく、でも核心を突く問いかけをする
-- 日本語・現場の言葉
-
-【ゴールに関係ない話題への対応】
-- ゴールに関係ない雑談（翻訳依頼、一般的な質問など）には普通に答える。無理にゴールに結びつけない
-
-【対話の確認ルール】
-- まとめや結論を出した後、必ず「これで合ってますか？」「しっくりきますか？」とユーザーに確認する
-- ユーザーが「違う」「ちょっと違う」と言ったら、決めつけずに「どの部分が違いますか？」と対話を続ける
+const SYS_HOME = `あなたはGOAL AIのコーチです。ユーザーのゴール達成を支援します。
+- 曖昧なビジョン→What+Whyを掘り下げ、揃ったらゴール提案
+- ゴール確定前はタスク・スケジュールの話をしない
+- 2〜3文・質問1回・同じ質問を繰り返さない
+- まとめ後「これで合ってますか？」と確認
+- 雑談には普通に答える。無理にゴールに結びつけない
 - ユーザーが納得して明確に同意するまで次のフェーズに進まない
 - AIが勝手に「では次に進みましょう」と進めることを禁止する`;
 
@@ -601,7 +595,7 @@ function renderMsgContent(text){
 function mkHomeMsg(m){
   const wrap=document.createElement('div'); wrap.className=`msg ${m.role}`; wrap.style.marginBottom='16px';
   const av=document.createElement('div'); av.className=`msg-av ${m.role}`;
-  if(m.role==='ai'){av.innerHTML=getLogoSVG(14);}else{const ut=getUserAvatarText();if(ut)av.textContent=ut;else av.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>';}
+  if(m.role==='ai'){av.innerHTML=getLogoSVG(14);}else{renderUserAvatarInner(av);}
   const body=document.createElement('div'); body.className='msg-body';
   if(m.img){
     const imgEl=document.createElement('img');
@@ -682,8 +676,9 @@ async function sendHomeMsg(){
     errBub.style.marginBottom = '16px';
     errBub.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="color:var(--red)">通信エラーが発生しました。もう一度お試しください。</div></div>`;
     homeInner.appendChild(errBub);
+  }finally{
+    homeLoading = false; homeSendRestore();
   }
-  homeLoading = false; homeSendRestore();
 }
 
 // ════════ AI SMART ROUTING (GPT-5 mini判定) ════════
@@ -699,19 +694,19 @@ async function routeMessage(text){
   // 短い相槌パターンはgpt-simple（API呼び出し不要）
   const simplePatterns = /^(ありがとう|OK|うん|はい|いいえ|了解|わかった|なるほど|そうだね|いいね|おはよう|おやすみ|お疲れ)$/i;
   if(simplePatterns.test(text.trim())) return 'gpt-simple';
-  // Claude APIでルーティング判定（chat endpoint、deep使用量カウントなし）
+  // GPT-simpleでルーティング判定（チャット回数を消費しない）
   try{
-    const res = await fetch(`${WORKER_URL}/api/chat`, {
+    const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
       method:'POST', headers:getAuthHeaders(),
       body:JSON.stringify({
         system: ROUTE_PROMPT,
         messages:[{role:'user',content:text}],
-        maxTokens:20
+        maxTokens:300
       })
     });
     if(!res.ok) return 'claude';
     const data = await res.json();
-    const answer = (data.content?.[0]?.text || 'claude').trim().toLowerCase().replace(/[^a-z-]/g,'');
+    const answer = (data.choices?.[0]?.message?.content || 'claude').trim().toLowerCase().replace(/[^a-z-]/g,'');
     if(['gemini','gpt','gpt-simple','claude'].includes(answer)) return answer;
   }catch(e){}
   return 'claude';
@@ -722,78 +717,87 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
   const scroll = typeof homeWrap === 'string' ? document.getElementById(homeWrap) : homeWrap;
   const { bub } = mkStreamBubble(inner, scroll);
 
-  // Step 1: ルーティング判定
-  const route = await routeMessage(text);
+  try {
+    // Step 1: ルーティング判定（直列）
+    const route = await routeMessage(text);
 
-  // Step 2: ルートに応じて処理
-  if(route === 'gemini'){
-    bub.innerHTML = '🔍 Geminiでリサーチ中...';
-    bub.style.cssText += 'color:var(--amber);font-size:13px;';
-    try{
-      const ctx = buildAIContextCached();
-      const result = await callGemini(text, `ユーザーの質問に簡潔かつ正確に答えてください。日本語で回答。\n\nユーザー背景：${ctx}`);
-      bub.innerHTML = `<div style="font-size:9px;color:var(--amber);font-family:var(--fm);margin-bottom:6px;opacity:.7;">🔍 Gemini</div>${renderMsgContent(result)}`;
-      bub.classList.remove('stream-bubble'); bub.style.cssText = '';
-      homeMsgs.push({role:'ai',content:result,time:now(),date:today});
-      homeHistory.push({role:'assistant',content:result});
-      saveHomeMsgs();
-      await addRouteFollowUp(text, result, 'Gemini', today, inner, scroll);
-    }catch(e){
-      bub.innerHTML = ''; bub.style.cssText = '';
-      bub.parentElement?.remove();
-      await homeClaudeStream(today, inner, scroll);
-    }
-
-  } else if(route === 'gpt'){
-    bub.innerHTML = '💡 GPTでアイデア生成中...';
-    bub.style.cssText += 'color:var(--amber);font-size:13px;';
-    try{
-      const ctx = buildAIContextCached();
-      const result = await callOpenAI(text, `ユーザーのリクエストに創造的かつ実用的に応えてください。日本語で回答。\n\nユーザー背景：${ctx}`, 800);
-      bub.innerHTML = `<div style="font-size:9px;color:var(--amber);font-family:var(--fm);margin-bottom:6px;opacity:.7;">💡 GPT</div>${renderMsgContent(result)}`;
-      bub.classList.remove('stream-bubble'); bub.style.cssText = '';
-      homeMsgs.push({role:'ai',content:result,time:now(),date:today});
-      homeHistory.push({role:'assistant',content:result});
-      saveHomeMsgs();
-      await addRouteFollowUp(text, result, 'GPT', today, inner, scroll);
-    }catch(e){
-      bub.innerHTML = ''; bub.style.cssText = '';
-      bub.parentElement?.remove();
-      await homeClaudeStream(today, inner, scroll);
-    }
-
-  } else if(route === 'gpt-simple'){
-    try{
-      const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
-        method:'POST', headers:getAuthHeaders(),
-        body:JSON.stringify({
-          system:'日本語で端的に1文で返答してください。',
-          messages:[{role:'user',content:text}],
-          maxTokens:100
-        })
-      });
-      const data = await res.json();
-      const reply = data.choices?.[0]?.message?.content;
-      if(reply){
-        bub.innerHTML = renderMsgContent(reply);
-        bub.classList.remove('stream-bubble');
-        homeMsgs.push({role:'ai',content:reply,time:now(),date:today});
-        homeHistory.push({role:'assistant',content:reply});
+    // Step 2: ルートに応じて処理
+    if(route === 'gemini'){
+      bub.innerHTML = '🔍 Geminiでリサーチ中...';
+      bub.style.cssText += 'color:var(--amber);font-size:13px;';
+      try{
+        const ctx = buildAIContextCached();
+        const result = await callGemini(text, `ユーザーの質問に簡潔かつ正確に答えてください。日本語で回答。質問は1回だけ。同じ内容を言い換えて繰り返さない。\n\nユーザー背景：${ctx}`);
+        bub.innerHTML = `<div style="font-size:9px;color:var(--amber);font-family:var(--fm);margin-bottom:6px;opacity:.7;">🔍 Gemini</div>${renderMsgContent(result)}`;
+        bub.classList.remove('stream-bubble'); bub.style.cssText = '';
+        homeMsgs.push({role:'ai',content:result,time:now(),date:today});
+        homeHistory.push({role:'assistant',content:result});
         saveHomeMsgs();
-      } else {
-        // GPT-5 nanoが空応答→Claudeフォールバック
+        await addRouteFollowUp(text, result, 'Gemini', today, inner, scroll);
+      }catch(e){
+        bub.innerHTML = ''; bub.style.cssText = '';
         bub.parentElement?.remove();
         await homeClaudeStream(today, inner, scroll);
       }
-    }catch(e){
+
+    } else if(route === 'gpt'){
+      bub.innerHTML = '💡 GPTでアイデア生成中...';
+      bub.style.cssText += 'color:var(--amber);font-size:13px;';
+      try{
+        const ctx = buildAIContextCached();
+        const result = await callOpenAI(text, `ユーザーのリクエストに創造的かつ実用的に応えてください。日本語で回答。\n\nユーザー背景：${ctx}`, 800);
+        bub.innerHTML = `<div style="font-size:9px;color:var(--amber);font-family:var(--fm);margin-bottom:6px;opacity:.7;">💡 GPT</div>${renderMsgContent(result)}`;
+        bub.classList.remove('stream-bubble'); bub.style.cssText = '';
+        homeMsgs.push({role:'ai',content:result,time:now(),date:today});
+        homeHistory.push({role:'assistant',content:result});
+        saveHomeMsgs();
+        await addRouteFollowUp(text, result, 'GPT', today, inner, scroll);
+      }catch(e){
+        bub.innerHTML = ''; bub.style.cssText = '';
+        bub.parentElement?.remove();
+        await homeClaudeStream(today, inner, scroll);
+      }
+
+    } else if(route === 'gpt-simple'){
+      try{
+        const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
+          method:'POST', headers:getAuthHeaders(),
+          body:JSON.stringify({
+            system:'日本語で端的に1文で返答してください。',
+            messages:[{role:'user',content:text}],
+            maxTokens:100
+          })
+        });
+        const data = await res.json();
+        const reply = data.choices?.[0]?.message?.content;
+        if(reply){
+          bub.innerHTML = renderMsgContent(reply);
+          bub.classList.remove('stream-bubble');
+          homeMsgs.push({role:'ai',content:reply,time:now(),date:today});
+          homeHistory.push({role:'assistant',content:reply});
+          saveHomeMsgs();
+        } else {
+          // GPT-5 nanoが空応答→Claudeフォールバック
+          bub.parentElement?.remove();
+          await homeClaudeStream(today, inner, scroll);
+        }
+      }catch(e){
+        bub.parentElement?.remove();
+        await homeClaudeStream(today, inner, scroll);
+      }
+
+    } else {
+      // Claude直接応答（デフォルト）
       bub.parentElement?.remove();
       await homeClaudeStream(today, inner, scroll);
     }
-
-  } else {
-    // Claude直接応答（デフォルト）
-    bub.parentElement?.remove();
-    await homeClaudeStream(today, inner, scroll);
+  } catch(e) {
+    // 予期しないエラー: バブルをエラー表示に変更
+    if(bub && bub.parentElement){
+      bub.classList.remove('stream-bubble');
+      bub.textContent = 'エラーが発生しました。もう一度お試しください。';
+      bub.style.color = 'var(--red)';
+    }
   }
 }
 
@@ -803,7 +807,7 @@ async function executeRoute(route, text, today, inner, scroll, indicatorBub){
   try{
     let result;
     if(route.route === 'gemini'){
-      result = await callGemini(query, `ユーザーの質問に簡潔かつ正確に答えてください。日本語で回答。\n\nユーザー背景：${ctx}`);
+      result = await callGemini(query, `ユーザーの質問に簡潔かつ正確に答えてください。日本語で回答。質問は1回だけ。同じ内容を言い換えて繰り返さない。\n\nユーザー背景：${ctx}`);
     } else {
       result = await callOpenAI(query, `ユーザーのリクエストに創造的かつ実用的に応えてください。日本語で回答。\n\nユーザー背景：${ctx}`, 800);
     }
@@ -829,9 +833,12 @@ async function executeRoute(route, text, today, inner, scroll, indicatorBub){
 async function homeClaudeStream(today, homeInner, homeWrap){
   const sys = SYS_HOME + `\n\n${buildAIContextCached()}`;
   await chatStream({
-    system: sys, messages: homeHistory.slice(-10), maxTokens: 500,
+    system: sys, messages: homeHistory.slice(-8), maxTokens: 350,
     innerEl: homeInner, scrollEl: homeWrap,
-    onDone(t){ homeMsgs.push({role:'ai',content:t,time:now(),date:today}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs(); }
+    onDone(t){
+      homeMsgs.push({role:'ai',content:t,time:now(),date:today}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs();
+      if(MEMBERSHIP.plan==='free'){ if(FREE_MODEL_USAGE.claude.remaining>0){FREE_MODEL_USAGE.claude.remaining--;FREE_MODEL_USAGE.claude.used++;} renderModelUsageBadge(); }
+    }
   });
 }
 
@@ -959,6 +966,14 @@ async function openChatHistory(){
   }
 }
 function closeChatHistory(){ document.getElementById('chat-history-panel').style.display='none'; }
+async function deleteChatSession(sessionId){
+  if(!confirm('この会話を削除しますか？')) return;
+  try{ await fetch(`${WORKER_URL}/api/history?sessionId=${sessionId}`, {method:'DELETE',headers:getAuthHeaders()}); }catch(e){}
+  chatSessions = chatSessions.filter(s=>s.sessionId!==sessionId);
+  renderChatHistoryList(chatSessions);
+  renderSidebarChatRecords();
+  toast('会話を削除しました');
+}
 function renderChatHistoryList(sessions){
   const list = document.getElementById('chat-history-list');
   if(!sessions.length){ list.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);">まだ会話がありません</div>'; return; }
@@ -966,12 +981,14 @@ function renderChatHistoryList(sessions){
     const d = new Date(s.date);
     const dateStr = d.toLocaleDateString('ja-JP',{month:'short',day:'numeric'});
     const preview = (s.firstMsg || '会話').substring(0, 30);
-    return `<div onclick="toggleSidebar();loadChatSession('${s.sessionId}')" style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:13px;color:var(--cream);font-weight:500;">${preview}…</div>
-        <div style="font-size:10px;color:var(--muted2);flex-shrink:0;margin-left:10px;">${dateStr}</div>
+    return `<div style="display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+      <div onclick="loadChatSession('${s.sessionId}')" style="flex:1;min-width:0;cursor:pointer;">
+        <div style="font-size:13px;color:var(--cream);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(preview)}…</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">${Math.ceil(s.count/2)}件 · ${dateStr}</div>
       </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:3px;">${s.count}メッセージ</div>
+      <button onclick="event.stopPropagation();deleteChatSession('${s.sessionId}')" title="削除" style="width:32px;height:32px;border-radius:8px;border:none;background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--muted);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </button>
     </div>`;
   }).join('');
 }
@@ -981,6 +998,7 @@ function filterChatHistory(q){
   renderChatHistoryList(filtered);
 }
 async function loadChatSession(sessionId){
+  closeSidebar();
   closeChatHistory();
   try {
     const res = await fetch(`${WORKER_URL}/api/history?sessionId=${sessionId}&limit=200`, {headers: getAuthHeaders()});
@@ -997,6 +1015,26 @@ async function loadChatSession(sessionId){
     currentSessionId = sessionId;
     renderHomeMsgs();
   } catch(e) { toast('会話の読み込みに失敗しました'); }
+}
+
+// ═══ FREE MODEL USAGE BADGE ═══
+function renderModelUsageBadge(){
+  if(!MEMBERSHIP || MEMBERSHIP.plan !== 'free') {
+    const b = document.getElementById('model-usage-badge');
+    if(b) b.style.display='none';
+    return;
+  }
+  const badge = document.getElementById('model-usage-badge');
+  if(!badge) return;
+  badge.style.display='flex';
+  const { claude, gemini, gpt } = FREE_MODEL_USAGE;
+  const totalRemaining = claude.remaining + gemini.remaining + gpt.remaining;
+  const color = totalRemaining > 5 ? 'var(--amber)' : 'var(--red)';
+  badge.innerHTML = `<div onclick="showModelUsageDetail()" style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);font-size:11px;font-weight:500;color:${color};cursor:pointer;white-space:nowrap;" title="高品質AI残り回数">⚡${totalRemaining}回/24h</div>`;
+}
+function showModelUsageDetail(){
+  const { claude, gemini, gpt } = FREE_MODEL_USAGE;
+  toast(`Claude: ${claude.remaining}/${claude.limit}回  Gemini: ${gemini.remaining}/${gemini.limit}回  GPT: ${gpt.remaining}/${gpt.limit}回`);
 }
 
 // ═══ KEYBOARD HANDLING (iOS visualViewport) ═══
@@ -1232,13 +1270,18 @@ ${buildAIContextCached()}
   const htpBub = document.createElement('div'); htpBub.className = 'tdp-bubble stream-bubble';
   htpWrap.appendChild(htpBub); chat.appendChild(htpWrap); chat.scrollTop = 99999;
 
-  await streamAI(
-    { system: htpSys, messages: htpHistory.slice(-12), maxTokens: 400 },
-    (t) => { htpBub.innerHTML = renderMsgContent(t); chat.scrollTop = 99999; },
-    (t) => { htpBub.classList.remove('stream-bubble'); htpHistory.push({role:'assistant',content:t}); },
-    (e) => { htpBub.classList.remove('stream-bubble'); htpBub.textContent = 'エラーが発生しました。'; }
-  );
-  htpLoading = false;
+  try{
+    await streamAI(
+      { system: htpSys, messages: htpHistory.slice(-8), maxTokens: 400 },
+      (t) => { htpBub.innerHTML = renderMsgContent(t); chat.scrollTop = 99999; },
+      (t) => { htpBub.classList.remove('stream-bubble'); htpHistory.push({role:'assistant',content:t}); },
+      (e) => { htpBub.classList.remove('stream-bubble'); htpBub.textContent = 'エラーが発生しました。'; }
+    );
+  }catch(e){
+    htpBub.classList.remove('stream-bubble'); htpBub.textContent = 'エラーが発生しました。';
+  }finally{
+    htpLoading = false;
+  }
 }
 
 function htpResize(el) { chatResize(el, 80); }
@@ -1398,8 +1441,9 @@ async function sendFeedbackMsg(){
     }
   } catch(e){
     appendFbMsg('ai', 'エラーが発生しました。もう一度お試しください。');
+  }finally{
+    fbLoading = false;
   }
-  fbLoading = false;
 }
 
 async function extractThemes(){

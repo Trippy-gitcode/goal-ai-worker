@@ -201,15 +201,18 @@ async function apiCall(endpoint, method, body) {
 }
 
 // ════════ UNIFIED CHAT STREAM ════════
-async function chatStream({ system, messages, maxTokens, innerEl, scrollEl, onDone, onError }) {
+async function chatStream({ system, messages, maxTokens, innerEl, scrollEl, onDone, onError, signal }) {
   const inner = typeof innerEl === 'string' ? document.getElementById(innerEl) : innerEl;
   const scroll = typeof scrollEl === 'string' ? document.getElementById(scrollEl) : scrollEl;
-  const { bub } = mkStreamBubble(inner, scroll);
+  const { bub, wrap } = mkStreamBubble(inner, scroll);
   await streamAI(
-    { system, messages, maxTokens: maxTokens || 500 },
+    { system, messages, maxTokens: maxTokens || 500, signal },
     (t) => { streamAppend(bub, t); if (scroll) scroll.scrollTop = 99999; },
     (t) => { streamFinalize(bub, t); if (onDone) onDone(t); },
-    (e) => { bub.classList.remove('stream-bubble'); bub.textContent = 'エラーが発生しました。'; if (onError) onError(e); }
+    (e) => {
+      if (signal?.aborted) { wrap.remove(); return; }
+      bub.classList.remove('stream-bubble'); bub.textContent = 'エラーが発生しました。'; if (onError) onError(e);
+    }
   );
 }
 
@@ -317,21 +320,25 @@ async function sendChatMsg({
 }
 
 async function _doChatStream(sys, historyRef, msgsRef, inner, scroll, today, goalId, messageType, loadingRef, onAfterAI, renderFn, enableRouting){
-  await chatStream({
-    system: sys,
-    messages: historyRef ? historyRef.v.slice(-20) : [],
-    maxTokens: 500,
-    innerEl: inner, scrollEl: scroll,
-    onDone(t){
-      if(msgsRef) msgsRef.v.push({role:'ai', content:t, time:now(), date:today});
-      if(historyRef) historyRef.v.push({role:'assistant', content:t});
-      if(renderFn) renderFn();
-      if(AUTH_TOKEN && messageType) apiSaveMessages([{role:'assistant', content:t, goalId:goalId||null, aiModel:'claude', messageType}]);
-      if(onAfterAI) onAfterAI(t);
-      loadingRef.v = false;
-    },
-    onError(e){ loadingRef.v = false; }
-  });
+  try{
+    await chatStream({
+      system: sys,
+      messages: historyRef ? historyRef.v.slice(-8) : [],
+      maxTokens: 500,
+      innerEl: inner, scrollEl: scroll,
+      onDone(t){
+        if(msgsRef) msgsRef.v.push({role:'ai', content:t, time:now(), date:today});
+        if(historyRef) historyRef.v.push({role:'assistant', content:t});
+        if(renderFn) renderFn();
+        if(AUTH_TOKEN && messageType) apiSaveMessages([{role:'assistant', content:t, goalId:goalId||null, aiModel:'claude', messageType}]);
+        if(onAfterAI) onAfterAI(t);
+        loadingRef.v = false;
+      },
+      onError(e){ loadingRef.v = false; }
+    });
+  }catch(e){
+    loadingRef.v = false;
+  }
 }
 
 
@@ -369,17 +376,15 @@ function handleKey(e) { chatKey(sendHomeMsg, e); }
 
 
 // ════════ STREAMING AI HELPER ════════
-async function streamAI({ system, messages, maxTokens = 600 }, onChunk, onDone, onError) {
+async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, onDone, onError) {
   try {
-    const res = await fetch(`${WORKER_URL}/api/chat/stream`, {
+    const fetchOpts = {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({
-        system,
-        messages,
-        maxTokens
-      })
-    });
+      body: JSON.stringify({ system, messages, maxTokens })
+    };
+    if (signal) fetchOpts.signal = signal;
+    const res = await fetch(`${WORKER_URL}/api/chat/stream`, fetchOpts);
     if (!res.ok || !res.body) throw new Error('HTTP ' + res.status);
     const reader = res.body.getReader();
     const dec = new TextDecoder('utf-8');
@@ -397,8 +402,21 @@ async function streamAI({ system, messages, maxTokens = 600 }, onChunk, onDone, 
         if (raw === '[DONE]') continue;
         try {
           const d = JSON.parse(raw);
+          let textChunk = null;
+          // Anthropic標準: content_block_delta + delta.text
           if (d.type === 'content_block_delta' && d.delta?.text) {
-            full += d.delta.text;
+            textChunk = d.delta.text;
+          }
+          // Anthropic text_delta形式
+          else if (d.type === 'content_block_delta' && d.delta?.type === 'text_delta') {
+            textChunk = d.delta.text;
+          }
+          // Worker独自フォーマット（フォールバック）
+          else if (d.text && typeof d.text === 'string') {
+            textChunk = d.text;
+          }
+          if (textChunk) {
+            full += textChunk;
             onChunk(full);
           }
         } catch {}
@@ -457,7 +475,7 @@ function streamAppend(bub, fullText){
         clearInterval(bub._animTimer);
         bub._animTimer = null;
       }
-    }, 30);
+    }, 15);
   }
 }
 

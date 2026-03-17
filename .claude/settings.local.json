@@ -1,1 +1,11 @@
-{"permissions":{"allow":["Bash(*)","Read(*)","Write(*)","Edit(*)"]}}
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "WebFetch(domain:goal-ai-frontend.pages.dev)"
+    ]
+  }
+}

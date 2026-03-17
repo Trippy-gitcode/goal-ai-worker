@@ -1123,6 +1123,76 @@ function renderGapContent(data){
   el.innerHTML = html || '<div style="color:var(--green);font-size:12px;padding:8px 0;">✓ 大きな乖離は検出されませんでした。このまま継続しましょう。</div>';
 }
 
+// ════════ AVATAR UPLOAD ════════
 
+async function handleAvatarUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    toast('画像は5MB以下にしてください');
+    return;
+  }
+  try {
+    const base64 = await cropToCircle(file, 200);
+    updateAvatarDisplay(base64);
+    await apiCall('/api/profile/avatar', 'POST', { avatar_base64: base64 });
+    USER_PROFILE.avatar_base64 = base64;
+    toast('プロフィール画像を更新しました');
+  } catch(e) {
+    toast('画像のアップロードに失敗しました');
+  }
+}
+
+function cropToCircle(file, size) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        ctx.beginPath();
+        ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        const min = Math.min(img.width, img.height);
+        const sx = (img.width - min) / 2;
+        const sy = (img.height - min) / 2;
+        ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function updateAvatarDisplay(base64) {
+  const img = document.getElementById('profile-avatar-img');
+  const text = document.getElementById('profile-avatar-text');
+  if (!img || !text) return;
+  if (base64) {
+    img.src = base64;
+    img.style.display = 'block';
+    text.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    text.style.display = 'flex';
+    const name = USER_PROFILE.nickname || USER_PROFILE.name || '';
+    if (name) {
+      text.textContent = name.charAt(0);
+    } else {
+      text.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+    }
+  }
+}
+
+function initAvatarDisplay() {
+  updateAvatarDisplay(USER_PROFILE.avatar_base64 || null);
+}
 
 

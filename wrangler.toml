@@ -2,6 +2,10 @@ name = "goal-ai-worker"
 main = "src/worker.js"
 compatibility_date = "2024-12-01"
 
+# ── スマートプレイスメント ──
+[placement]
+mode = "smart"
+
 # ── 開発用 ──
 [dev]
 port = 8787

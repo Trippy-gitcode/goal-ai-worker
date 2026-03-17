@@ -26,7 +26,6 @@ ${curGoal ? '\nゴール：'+curGoal : ''}
 {"type":"tradeoff","items":[{"give":"諦めること","detail":"詳細","gain":"得られる時間・効果"}]}
 \`\`\``;
 }
-const SYS_NORMAL = getSysNormal();
 
 function getSysSpartan(){
   const goal = ALL_GOALS[activeGoalIdx];
@@ -38,9 +37,9 @@ ${curGoal ? '\nゴール：'+curGoal+(progressStr?' | '+progressStr:'') : ''}
 
 【必須JSON出力】SYS_NORMALと同じJSON形式を使う。ただし tradeoff は必ず含める。`;
 }
-const SYS_SPARTAN = getSysSpartan();
 
-const SYS_MENCARE = `あなたはGOAL AIのメンケアモードです。今、ユーザーは精神的に疲れています。
+function getSysMencare(){
+  return `あなたはGOAL AIのメンケアモードです。今、ユーザーは精神的に疲れています。
 ${curGoal ? '\nゴール：'+curGoal : ''}
 
 【最優先ルール】
@@ -54,6 +53,7 @@ ${curGoal ? '\nゴール：'+curGoal : ''}
 
 【個人情報の活用】
 ユーザーの強み・日課・生活リズムを把握した上で、「あなたならできる」という根拠を具体的に示す。`;
+}
 
 
 // ════════ INITIAL WELCOME MESSAGE ════════
@@ -66,17 +66,23 @@ const FAIL_HISTORY = [];
 
 // ════════ CALENDAR DATA ════════
 function getCalEvents() {
-  // タスクの期限からカレンダーイベントを動的生成
   const events = {};
-  ALL_GOALS.forEach(goal => {
-    goal.phases.forEach(phase => {
-      phase.tasks.forEach(task => {
+  ALL_GOALS.filter(g=>!g.archived).forEach((goal,gi) => {
+    const color = getGoalColor(gi);
+    (goal.phases||[]).forEach(phase => {
+      (phase.tasks||[]).forEach(task => {
         if(!task.due) return;
         const d = new Date(task.due);
         const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         if(!events[key]) events[key] = [];
-        const type = task.status==='done'?'done':task.status==='current'?'task':'task';
-        events[key].push({type, text: task.title});
+        events[key].push({
+          type: task.status==='done'?'done':'task',
+          text: task.title,
+          goalName: goal.title,
+          goalColor: color,
+          goalIdx: gi,
+          source: task.source||'user'
+        });
       });
     });
   });
@@ -248,17 +254,13 @@ function applyModeUI(mode) {
   const labels = { mencare:'🌸 メンケアモード ON', normal:'💬 通常モードに戻りました', spartan:'🔥 スパルタモード ON', kabeuchi:'💭 壁打ちモード ON' };
   toast(labels[mode]);
 
-  const notices = {
-    mencare: 'メンケアモードになりました。\n\nまず、今どんな気持ちか教えてもらえますか？ゴールとか進捗の話は後でいいから。',
-    normal:  '通常モードに戻りました。引き続き一緒に進めましょう。',
-    spartan: 'スパルタモードをONにしました。\n\n甘えは禁止です。結果だけで判断します。今から何を変えますか？',
-    kabeuchi: '壁打ちモードをONにしました。\n\n答えは出しません。あなた自身の中にある答えを、質問で引き出します。\nさて、今一番頭にあることは何ですか？',
-  };
-  if(homeMsgs.length > 0) {
-    homeMsgs.push({role:'ai', content: notices[mode], time: now()});
-    renderHomeMsgs();
-    showPage('home');
-  }
+  // モード別背景色
+  document.body.classList.remove('mode-spartan','mode-mencare','mode-kabeuchi');
+  if(mode==='spartan') document.body.classList.add('mode-spartan');
+  if(mode==='mencare') document.body.classList.add('mode-mencare');
+  if(mode==='kabeuchi') document.body.classList.add('mode-kabeuchi');
+
+  showPage('home');
 }
 
 // Keep stubs so settings page toggles still work
@@ -350,19 +352,6 @@ const OUTPUT_FORMATS = [
 let _selectedFormat = 'text';
 
 // Keywords that trigger deep analysis suggestion
-const DEEP_TRIGGERS = [
-  '事業計画','ビジネスプラン','ビジネス計画',
-  'クラファン','クラウドファンディング',
-  '戦略','マーケティング戦略','集客戦略','SNS戦略',
-  '競合','競合分析','市場調査','市場分析','リサーチ',
-  'LP','ランディングページ','セールスコピー',
-  '資金調達','投資','融資','ROI','収益',
-  'ブランディング','ポジショニング','差別化',
-  'コンテンツ計画','プロモーション','広告戦略',
-  'ビジネスモデル','収益モデル','マネタイズ',
-  'ピッチ','提案書','企画書',
-];
-
 function isDeepAnalysisNeeded(text) {
   return DEEP_TRIGGERS.some(kw => text.includes(kw));
 }
@@ -820,20 +809,11 @@ function renderAPIKeySettings() {
   const used = getDeepUsedCount();
 
   if (AUTH_TOKEN) {
-    const tokenInfo = AUTH_TOKEN.slice(0, 18) + '...';
     el.innerHTML = `
-      <div style="padding:10px;background:var(--green-d);border-radius:8px;border:1px solid rgba(93,184,150,.3);margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-          <div style="width:7px;height:7px;border-radius:50%;background:var(--green);"></div>
-          <span style="font-size:10px;color:var(--green);font-weight:600;">接続済み</span>
-        </div>
-        <div style="font-size:9px;color:var(--muted);font-family:var(--fm);">${tokenInfo}</div>
-      </div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg4);border-radius:6px;border:1px solid var(--border);">
         <span style="font-size:9.5px;color:var(--muted2);">今月のディープ分析</span>
         <span style="font-size:10px;font-family:var(--fm);color:${remaining<=2?'var(--amber)':'var(--green)'};">${used} / ${limit}回　残り${remaining}回</span>
-      </div>
-      <div style="font-size:9px;color:var(--muted2);margin-top:6px;">APIキーはCloudflare Workerで安全に管理されています。</div>`;
+      </div>`;
   } else {
     el.innerHTML = `
       <div style="padding:10px;background:var(--amber-d);border-radius:8px;border:1px solid rgba(228,184,106,.3);margin-bottom:10px;">
@@ -869,29 +849,73 @@ async function applyPromoFromSettings() {
 const THEMES = {
   dark:  { label:'ダーク',    emoji:'🌙' },
   light: { label:'ライト',   emoji:'☀️' },
-  pop:   { label:'ポップ',    emoji:'🌈' },
-  zen:   { label:'禅',        emoji:'🍵' },
+  harajuku: { label:'ハラジュク', emoji:'🌈' },
+  'bright-glass': { label:'ライトグラス', emoji:'💎' },
+  'dark-glass':   { label:'ダークグラス',   emoji:'🔮' },
+  'harajuku-glass': { label:'ハラジュクグラス', emoji:'🌸' },
 };
 let currentTheme = 'dark';
 let currentFontSize = 'md';
+let currentBaseTheme = 'dark';
+let glassMode = false;
 
 function applyTheme(t){
   currentTheme = t;
   document.documentElement.setAttribute('data-theme', t);
+  document.cookie = `goal_ai_theme=${t};path=/;max-age=31536000;Secure;SameSite=Lax`;
   // Update active card
-  Object.keys(THEMES).forEach(k=>{
-    const c = document.getElementById(`tc-${k}`);
-    if(c) c.classList.toggle('active', k===t);
+  document.querySelectorAll('.theme-card').forEach(c=>{
+    c.classList.toggle('active', c.dataset.theme === t);
   });
   // Update sidebar label
   const lbl = document.getElementById('sb-theme-label');
-  if(lbl) lbl.textContent = `テーマ：${THEMES[t].label}`;
+  if(lbl && THEMES[t]) lbl.textContent = `テーマ：${THEMES[t].label}`;
+}
+
+function setBaseTheme(base){
+  currentBaseTheme = base;
+  const themeMap = {'light-glass':'bright-glass','harajuku-glass':'harajuku-glass'};
+  const theme = glassMode ? (themeMap[base+'-glass'] || base+'-glass') : base;
+  applyTheme(theme);
+  document.querySelectorAll('[data-theme-btn]').forEach(btn=>{
+    btn.style.borderColor = btn.dataset.themeBtn === base ? 'var(--amber)' : 'var(--border)';
+  });
+  document.cookie = `goal_ai_basetheme=${base};path=/;max-age=31536000;Secure;SameSite=Lax`;
+}
+
+function toggleGlassMode(){
+  glassMode = !glassMode;
+  const toggle = document.getElementById('glass-toggle');
+  const knob = document.getElementById('glass-toggle-knob');
+  if(toggle) toggle.style.background = glassMode ? 'var(--amber)' : 'var(--border)';
+  if(knob) knob.style.left = glassMode ? '25px' : '3px';
+  const themeMap = {'light-glass':'bright-glass','harajuku-glass':'harajuku-glass'};
+  const theme = glassMode ? (themeMap[currentBaseTheme+'-glass'] || currentBaseTheme+'-glass') : currentBaseTheme;
+  applyTheme(theme);
+  document.cookie = `goal_ai_glass=${glassMode};path=/;max-age=31536000;Secure;SameSite=Lax`;
+}
+
+function restoreThemeUI(){
+  const base = document.cookie.match(/goal_ai_basetheme=([^;]+)/)?.[1] || 'dark';
+  const glass = document.cookie.match(/goal_ai_glass=([^;]+)/)?.[1] === 'true';
+  currentBaseTheme = base;
+  glassMode = glass;
+  const toggle = document.getElementById('glass-toggle');
+  const knob = document.getElementById('glass-toggle-knob');
+  if(toggle) toggle.style.background = glass ? 'var(--amber)' : 'var(--border)';
+  if(knob) knob.style.left = glass ? '25px' : '3px';
+  document.querySelectorAll('[data-theme-btn]').forEach(btn=>{
+    btn.style.borderColor = btn.dataset.themeBtn === base ? 'var(--amber)' : 'var(--border)';
+  });
 }
 
 function applyFontSize(sz){
   currentFontSize = sz;
-  const sizes = {sm:'12px', md:'13px', lg:'15px'};
-  document.body.style.fontSize = sizes[sz] || '13px';
+  const sizes = {xs:'14px', sm:'16px', md:'18px', lg:'20px'};
+  const px = sizes[sz] || '18px';
+  document.documentElement.style.setProperty('--font-size-chat', px);
+  document.body.style.fontSize = sz === 'xs' ? '13px' : sz === 'sm' ? '14px' : sz === 'lg' ? '15px' : '14px';
+  document.cookie = `goal_ai_fontsize=${sz};path=/;max-age=31536000;Secure;SameSite=Lax`;
   document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));
   const el = document.getElementById(`sz-${sz}`);
   if(el) el.classList.add('active');
@@ -1004,13 +1028,7 @@ const PROMO_CODES = {
   'GOALPRO7':  {plan:'pro', days:7,   desc:'Pro 7日間無料体験'},
 };
 
-// Membership state
-const MEMBERSHIP = {
-  plan: 'pro',          // 'free' | 'pro' | 'annual'
-  trialEnd: null,       // Date or null
-  promoApplied: null,
-  selectedPlan: 'pro',  // in modal
-};
+// Membership state is defined in globals.js
 
 function getMembershipLabel(){
   if(MEMBERSHIP.trialEnd && new Date() < new Date(MEMBERSHIP.trialEnd)){

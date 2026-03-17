@@ -32,6 +32,36 @@ grep -c "transcribeAudio\|MediaRecorder" frontend/index.html # 1以上
 - 保全確認grepで1件でも失敗 → デプロイしない
 - 確認grepを実行していない → デプロイしない
 
+### 【デプロイ時の必須手順】
+毎回デプロイする前に以下を実行すること：
+
+```bash
+# Service Workerのキャッシュバージョンを必ずインクリメント
+# goal-ai-v1 → goal-ai-v2 → goal-ai-v3 ... と毎回上げる
+# これをしないと古いキャッシュが残りデプロイが反映されない
+
+# 現在のバージョンを確認
+grep "CACHE_NAME" frontend/sw.js
+
+# バージョンを1つ上げる（例: v2→v3）
+sed -i '' "s/goal-ai-vX/goal-ai-vY/" frontend/sw.js
+```
+
+### 【デプロイ後の必須確認】
+デプロイ後に必ずブラウザで以下を確認してから「完了」と報告すること：
+
+```
+1. Chromeで https://goal-ai-frontend.pages.dev を開く
+2. Command + Shift + R（強制リロード）
+3. DevTools Console（Command + Option + I → Console）を開く
+4. Uncaught エラーが 0件 であることを確認
+5. チャットで「こんにちは」と送信して応答が返ることを確認
+6. NetworkタブでPOST /api/chat/stream が 200 で返ることを確認
+
+上記3つが全て確認できた場合のみデプロイ完了とする。
+1つでも失敗していたら修正して再デプロイする。
+```
+
 ### 【絶対禁止】許可なく絶対にやらないこと
 以下はGOAL AIのコアコンセプト・データ・インフラに関わる変更のため、
 **ユーザーの明示的な許可なしに絶対に実行しない。**
@@ -44,6 +74,7 @@ grep -c "transcribeAudio\|MediaRecorder" frontend/index.html # 1以上
 - **認証・トークン処理の削除**
 - **Stripe連携処理の削除**
 - **Phase 1実装済み機能（壁打ち・マイルストーン・音声・マイクロタスク等）の削除**
+- **指示された実装の省略・スキップ**（不要と判断しても勝手に省かない。省略する場合は必ずユーザーの承認を得ること）
 
 違反した場合は即座に `git revert` で元に戻し、ユーザーに報告すること。
 
