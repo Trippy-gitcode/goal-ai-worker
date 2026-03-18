@@ -63,7 +63,7 @@ export const STRIPE_PRICE_IDS = {
 export const STRIPE_SUCCESS_URL = 'https://goal-ai-frontend.pages.dev?checkout=success';
 export const STRIPE_CANCEL_URL  = 'https://goal-ai-frontend.pages.dev?checkout=cancel';
 
-export const APP_VERSION = '3.9.0';
+export const APP_VERSION = '3.9.1';
 
 export const COMMON_RULES = `【共通ルール】
 - ユーザーの質問にはまず答える。質問を聞き返す前にまず回答する。
