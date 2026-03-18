@@ -1,3 +1,11 @@
+// ════════ NANO FALLBACK BANNER ════════
+function showNanoFallbackBanner(hours) {
+  let b = document.getElementById('nano-fallback-banner');
+  if(!b){ b=document.createElement('div'); b.id='nano-fallback-banner'; b.className='nano-fallback-banner'; const toolbar=document.getElementById('home-chat-toolbar'); if(toolbar) toolbar.after(b); }
+  b.textContent = `上限に達したため、回答精度低下中（${hours||'数'}時間後に回復）`;
+}
+function hideNanoFallbackBanner(){ document.getElementById('nano-fallback-banner')?.remove(); }
+
 // ════════ CHAT ════════
 function getLogoSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 100 100"><defs><linearGradient id="lg${size}" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M26 70 L32 40 L42 55 L50 24 L58 55 L68 40 L74 70 Z" fill="url(#lg${size})"/></svg>`;}
 function getUserAvatarText(){const n=USER_PROFILE.nickname||USER_PROFILE.name||'';return n?n.charAt(0):'';}
@@ -48,6 +56,7 @@ async function startGoal(){
 
   ALL_GOALS.push(goalObj);
   renderSidebarGoals();
+  if (typeof showTaskSetupPhase === 'function') showTaskSetupPhase(goalObj);
 
   // Open goal hub chat with AI hearing
   const idx = ALL_GOALS.length - 1;
@@ -83,6 +92,7 @@ async function startGoal(){
       system: hearingSys, messages:[{role:'user',content:`「${v}」をゴールにしたい`}], maxTokens:300,
       innerEl: 'hub-chat-inner', scrollEl: 'hub-chat-wrap',
       onDone(t){
+        if(!t||!t.trim()) return;
         hubChatMsgs[goalObj.id].push({role:'ai',content:t,time:now()});
         hubChatHistories[goalObj.id].push({role:'user',content:`「${v}」をゴールにしたい`});
         hubChatHistories[goalObj.id].push({role:'assistant',content:t});
@@ -109,6 +119,9 @@ let voiceAnalyser = null;
 let voiceAnimFrame = null;
 let voiceInterimBubbleEl = null;
 let voiceTimeoutId = null;
+let voiceWarningId = null;
+let silenceFrames = 0;
+let voiceSwipeStartY = null;
 
 function voiceUIStart(){
   const btn = document.getElementById('home-voice-btn');
@@ -134,6 +147,10 @@ function voiceUIStop(){
   homeRecording = false;
   // タイムアウトクリア
   if(voiceTimeoutId){ clearTimeout(voiceTimeoutId); voiceTimeoutId=null; }
+  if(voiceWarningId){ clearTimeout(voiceWarningId); voiceWarningId=null; }
+  silenceFrames = 0;
+  voiceSwipeStartY = null;
+  btn.classList.remove('recording-warning');
   // アニメーション停止
   if(voiceAnimFrame){ cancelAnimationFrame(voiceAnimFrame); voiceAnimFrame=null; }
   // リングリセット
@@ -202,8 +219,22 @@ function startVoiceLevelAnim(stream){
         outerRing.style.opacity = 0.15 + level*0.4;
       }
 
+      // F-4: 無音3秒検知で自動停止
+      if(level < 0.05){
+        silenceFrames++;
+        // ~60fps × 3秒 = 180フレーム
+        if(silenceFrames > 180 && homeRecording){
+          homeSpeechRecognition?.stop();
+          homeMediaRecorder?.stop();
+          return;
+        }
+      } else {
+        silenceFrames = 0;
+      }
+
       voiceAnimFrame = requestAnimationFrame(tick);
     }
+    silenceFrames = 0;
     voiceAnimFrame = requestAnimationFrame(tick);
   }catch(e){
     // AudioContext unavailable for level animation
@@ -326,20 +357,25 @@ async function toggleHomeVoice(){
     // 音量レベル連動アニメーション開始
     startVoiceLevelAnim(stream);
 
-    // R: 4秒タイムアウトで自動停止
+    // F-8: 60秒タイムアウトで自動停止
     voiceTimeoutId = setTimeout(()=>{
       if(homeRecording){
         homeSpeechRecognition?.stop();
         homeMediaRecorder?.stop();
       }
-    }, 4000);
+    }, 60000);
+    // 50秒で警告表示
+    voiceWarningId = setTimeout(()=>{
+      const btn = document.getElementById('home-voice-btn');
+      if(btn) btn.classList.add('recording-warning');
+    }, 50000);
 
     // Web Speech APIも同時に開始
     if(hasWebSpeech){
       try{
         const recognition = new SR();
         recognition.lang = 'ja-JP';
-        recognition.continuous = true;
+        recognition.continuous = false;
         recognition.interimResults = true;
         homeSpeechRecognition = recognition;
 
@@ -387,6 +423,42 @@ async function toggleHomeVoice(){
     voiceUIStop();
   }
 }
+
+// F-5: スワイプキャンセル（マイクボタンでタッチ上方向スワイプ→録音キャンセル）
+(function(){
+  const btn = document.getElementById('home-voice-btn');
+  if(!btn) return;
+  btn.addEventListener('touchstart', (e)=>{
+    if(homeRecording) voiceSwipeStartY = e.touches[0].clientY;
+  }, {passive:true});
+  btn.addEventListener('touchmove', (e)=>{
+    if(!homeRecording || voiceSwipeStartY===null) return;
+    const dy = voiceSwipeStartY - e.touches[0].clientY;
+    if(dy > 50){
+      // 上方向50px以上スワイプでキャンセル
+      voiceSwipeStartY = null;
+      homeSpeechRecognition?.stop();
+      homeMediaRecorder?.stop();
+      // 録音結果を破棄
+      homeAudioChunks = [];
+      homeSpeechResult = '';
+      homeSpeechGotResult = false;
+      voiceUIStop();
+      const inp = document.getElementById('home-msg-in');
+      if(inp) inp.value = '';
+      removeVoiceInterimBubble();
+      toast('音声入力をキャンセルしました');
+    }
+  }, {passive:true});
+})();
+
+// F-9: キーボードショートカット Ctrl+Shift+V で音声入力トグル
+document.addEventListener('keydown', (e)=>{
+  if(e.ctrlKey && e.shiftKey && e.key === 'V'){
+    e.preventDefault();
+    toggleHomeVoice();
+  }
+});
 
 // ════════ IMAGE INPUT ════════
 let homeImageData = null;
@@ -496,15 +568,47 @@ const HOME_CHAT_KEY = 'goalai_home_chat_v1';
 let homeMsgs = [];
 let homeHistory = [];
 let homeLoading = false;
+let currentRouteAI = null; // 【2】会話中のAI固定用（'gemini'|'gpt'|'claude'|null）
 
-const SYS_HOME = `あなたはGOAL AIのコーチです。ユーザーのゴール達成を支援します。
-- 曖昧なビジョン→What+Whyを掘り下げ、揃ったらゴール提案
-- ゴール確定前はタスク・スケジュールの話をしない
-- 2〜3文・質問1回・同じ質問を繰り返さない
-- まとめ後「これで合ってますか？」と確認
-- 雑談には普通に答える。無理にゴールに結びつけない
-- ユーザーが納得して明確に同意するまで次のフェーズに進まない
-- AIが勝手に「では次に進みましょう」と進めることを禁止する`;
+const SYS_HOME = `あなたはGOAL AIのAIアシスタントです。
+
+【最優先ルール】ユーザーの質問・依頼にまず答えること。質問を聞き返す前にまず回答する。
+- 質問されたら答える。調べものには調べて答える。雑談には雑談で返す。
+- 翻訳を頼まれたら翻訳する。おすすめを聞かれたらおすすめを教える。
+- ChatGPT・Claude・Geminiと同等の応答品質を最低ラインとする。
+- まず回答し、その上で必要なら追加質問してもよい。
+
+【位置情報が必要な質問】
+- 「近くの」「この辺の」等の質問には、まず一般的なおすすめを回答した上で「お住まいの地域やエリアを教えていただければ、もっと具体的におすすめできます！」と添える。
+- エリアを教えてもらったら即座に具体的な回答をする。
+- 聞き返しだけで回答しないのは禁止。必ずまず回答する。
+
+【ゴール提案の条件】以下の全てを満たす場合のみ、自然にゴール化を提案してよい：
+1. ユーザー自身が「〜したい」「〜になりたい」「〜を目指す」等の目標・夢・やりたいことを語っている
+2. What（何を）とWhy（なぜ）の両方が会話の中で明確になっている
+3. 提案は「一緒にゴールを設定して、タスクを作っていきますか？」のように軽く聞く形で
+
+【禁止事項】
+- ユーザーの質問を無視してゴール設定に誘導すること
+- 「あなたの大切にしたいことから考えましょう」等の押し付けコーチング
+- 回答の代わりに質問だけを返すこと
+- 何でもかんでもゴールに結びつけようとすること
+
+【応答スタイル】
+- 2〜3文で簡潔に。長文禁止
+- 質問は1回まで
+- 同じ内容の繰り返し禁止
+- まとめ後に「これで合ってますか？」確認（ゴール提案時のみ）
+
+【チャットモード】
+- 通常: 上記ルール通り
+- メンケア: 寄り添い重視。解決策より共感
+- スパルタ: 甘さゼロ。率直に指摘
+- 壁打ち: 答え禁止。ソクラテス式問答で考えを引き出す
+
+【パーソナライズ】
+ユーザープロフィール（名前・職種・強み・弱み・価値観等）が設定されている場合は、
+回答をその人に合わせて最適化する。`;
 
 function saveHomeMsgs(){
   // 最後の2メッセージ（user + ai）をSupabaseに保存
@@ -516,22 +620,27 @@ function saveHomeMsgs(){
     messageType: 'home_chat',
   }));
   if (toSave.length) apiSaveMessages(toSave);
+  updateTopicTags();
 }
 
+function _goldSVG(paths){return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="url(#goldG)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;}
 function buildEmptyHomeHTML(){
+  const gDef='<defs><linearGradient id="goldG" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs>';
   const presets=[
-    {icon:'💰',text:'副業を始めたい'},
-    {icon:'📚',text:'英語を話せるようになりたい'},
-    {icon:'💪',text:'ダイエットを成功させたい'},
-    {icon:'🚀',text:'自分のビジネスを立ち上げたい'},
-    {icon:'✍️',text:'資格を取りたい'},
-    {icon:'🎯',text:'転職を成功させたい'}
+    {svg:_goldSVG('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'),text:'今日あった出来事を聞いて'},
+    {svg:_goldSVG('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>'),text:'最近のニュースを教えて'},
+    {svg:_goldSVG('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'),text:'文章を添削して'},
+    {svg:_goldSVG('<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 5 12 4.5 4.5 0 0 0-1 2H8a4.5 4.5 0 0 0-1-2A7 7 0 0 1 12 2z"/>'),text:'アイデアを一緒に考えて'},
+    {svg:_goldSVG('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'),text:'目標を設定したい'},
+    {svg:_goldSVG('<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/><path d="M16 3l1 1-1 1"/>'),text:'キャリアの相談がしたい'}
   ];
-  const cards=presets.map(p=>'<div onclick="document.getElementById(\'home-msg-in\').value=\''+p.text+'\';sendHomeMsg();" style="padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;gap:10px;" onmouseover="this.style.borderColor=\'var(--amber)\';this.style.background=\'var(--amber-g)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.background=\'var(--bg3)\'"><span style="font-size:20px;">'+p.icon+'</span><span style="font-size:12px;color:var(--cream);line-height:1.4;">'+p.text+'</span></div>').join('');
-  return '<div style="text-align:center;padding:60px 20px 10px;color:var(--muted);line-height:2;">'
+  const cards=presets.map(p=>'<div onclick="document.getElementById(\'home-msg-in\').value=\''+p.text+'\';sendHomeMsg();" style="padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;gap:10px;" onmouseover="this.style.borderColor=\'var(--amber)\';this.style.background=\'var(--amber-g)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.background=\'var(--bg3)\'">'+p.svg+'<span style="font-size:12px;color:var(--cream);line-height:1.4;">'+p.text+'</span></div>').join('');
+  const greeting = USER_PROFILE.nickname ? `こんにちは、${escapeHtml(USER_PROFILE.nickname)}さん` : 'こんにちは！';
+  return '<svg style="position:absolute;width:0;height:0;"><defs><linearGradient id="goldG" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs></svg>'
+    +'<div style="text-align:center;padding:60px 20px 10px;color:var(--muted);line-height:2;">'
     +'<div style="margin:0 auto 16px;opacity:.4;">'+getLogoSVG(56)+'</div>'
-    +'<div style="font-size:18px;color:var(--cream);font-weight:500;margin-bottom:6px;">何を達成したいですか？</div>'
-    +'<div style="font-size:14px;margin-bottom:20px;">やりたいこと、気になること、何でも大丈夫です。</div>'
+    +'<div style="font-size:18px;color:var(--cream);font-weight:500;margin-bottom:6px;">'+greeting+'</div>'
+    +'<div style="font-size:14px;margin-bottom:20px;">雑談、相談、調べもの、何でもOK</div>'
     +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-width:360px;margin:0 auto;text-align:left;">'+cards+'</div>'
     +'</div>';
 }
@@ -554,10 +663,12 @@ function renderHomeMsgs(){
       const sep=document.createElement('div'); sep.className='hist-date-sep';
       sep.innerHTML=`<span>${m.date}</span>`; c.appendChild(sep);
     }
-    c.appendChild(mkHomeMsg(m));
+    const el = mkHomeMsg(m);
+    if(el) c.appendChild(el);
   });
   setTimeout(()=>{ document.getElementById('home-chat-wrap').scrollTop=99999; },50);
   updateHomePlaceholder();
+  updateTopicTags();
 }
 
 // Helper: render message content (Markdown → HTML, XSS safe)
@@ -587,12 +698,19 @@ function renderMsgContent(text){
   html = html.replace(/^(\d+)\.\s+(.+)$/gm, '<div style="padding-left:20px;position:relative;"><span style="position:absolute;left:0;color:var(--amber);font-weight:500;">$1.</span>$2</div>');
   // URLs
   html = html.replace(/(https?:\/\/[^\s&lt;]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--amber);text-decoration:underline;">$1</a>');
-  // Newlines
-  html = html.replace(/\n/g,'<br>');
+  // Paragraphs: 連続改行(2+)を<p>タグに変換、単一改行は<br>
+  const parts = html.split(/\n{2,}/);
+  if(parts.length > 1){
+    html = parts.map(p => `<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+  } else {
+    html = html.replace(/\n/g,'<br>');
+  }
   return html;
 }
 
 function mkHomeMsg(m){
+  // 【1】空メッセージはDOMに追加しない
+  if(!m.content || (typeof m.content === 'string' && m.content.trim() === '')) return null;
   const wrap=document.createElement('div'); wrap.className=`msg ${m.role}`; wrap.style.marginBottom='16px';
   const av=document.createElement('div'); av.className=`msg-av ${m.role}`;
   if(m.role==='ai'){av.innerHTML=getLogoSVG(14);}else{renderUserAvatarInner(av);}
@@ -604,9 +722,85 @@ function mkHomeMsg(m){
   }
   const bub=document.createElement('div'); bub.className='bubble';
   bub.innerHTML=renderMsgContent(m.content);
-  const t=document.createElement('div'); t.className='msg-time'; t.textContent=m.time||'';
+  // アクションボタン（SVGアイコン）
+  const _svgCopy='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const _svgQuote='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.76-2.02-2-2H5c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h2c0 4-3 5-6 5z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.76-2.02-2-2h-3c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h2c0 4-3 5-6 5z"/></svg>';
+  const _svgEdit='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+  let actionsHtml=`<span class="msg-actions"><button class="msg-action-btn" title="コピー" onclick="copyMessage(this)">${_svgCopy}</button><button class="msg-action-btn" title="引用" onclick="quoteMessage(this)">${_svgQuote}</button>`;
+  if(m.role==='user') actionsHtml+=`<button class="msg-action-btn" title="編集して再送信" onclick="editAndResend(this)">${_svgEdit}</button>`;
+  actionsHtml+='</span>';
+  const t=document.createElement('div'); t.className='msg-footer';
+  if(m.role === 'ai'){ t.innerHTML = `<span class="msg-time">${m.time||''}</span> · <span class="msg-model">${m.model||'Claude'}</span>${actionsHtml}`; }
+  else { t.innerHTML = `<span class="msg-time">${m.time||''}</span>${actionsHtml}`; }
   body.appendChild(bub); body.appendChild(t); wrap.appendChild(av); wrap.appendChild(body);
+  wrap.style.position='relative';
   return wrap;
+}
+
+// 【5】コピー・引用ハンドラ
+function copyMessage(btn){
+  const bub = btn.closest('.msg')?.querySelector('.bubble');
+  if(!bub) return;
+  const text = bub.innerText || bub.textContent || '';
+  navigator.clipboard.writeText(text).then(()=>toast('コピーしました')).catch(()=>toast('コピーに失敗しました'));
+}
+function quoteMessage(btn){
+  const bub = btn.closest('.msg')?.querySelector('.bubble');
+  if(!bub) return;
+  const text = bub.innerText || bub.textContent || '';
+  const inp = document.getElementById('home-msg-in');
+  if(!inp) return;
+  inp.value = '> ' + text.split('\n').join('\n> ') + '\n';
+  inp.focus();
+  homeResize(inp);
+}
+
+// 【6】編集して再送信
+function editAndResend(btn){
+  const msgEl = btn.closest('.msg');
+  if(!msgEl) return;
+  const bub = msgEl.querySelector('.bubble');
+  if(!bub) return;
+  const origText = bub.innerText || bub.textContent || '';
+  // バブルをテキストエリアに変換
+  const ta = document.createElement('textarea');
+  ta.className = 'edit-textarea';
+  ta.value = origText;
+  ta.style.cssText = 'width:100%;min-height:60px;padding:8px;border-radius:8px;background:var(--bg3);color:var(--cream);border:1px solid var(--amber);font-size:14px;font-family:var(--ff);resize:vertical;';
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:6px;margin-top:6px;';
+  btnRow.innerHTML = `<button class="edit-resend-btn" style="padding:6px 14px;background:var(--amber);color:#000;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">再送信</button><button class="edit-cancel-btn" style="padding:6px 14px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;">キャンセル</button>`;
+  bub.style.display = 'none';
+  msgEl.querySelector('.msg-actions')?.remove();
+  const body = msgEl.querySelector('.msg-body');
+  body.insertBefore(ta, bub);
+  body.insertBefore(btnRow, bub);
+  ta.focus();
+
+  btnRow.querySelector('.edit-cancel-btn').onclick = ()=>{
+    ta.remove(); btnRow.remove(); bub.style.display='';
+  };
+  btnRow.querySelector('.edit-resend-btn').onclick = ()=>{
+    const newText = ta.value.trim();
+    if(!newText){ toast('テキストを入力してください'); return; }
+    // このメッセージ以降のAI応答を削除して再送信
+    const allMsgs = document.getElementById('home-chat-inner')?.children;
+    if(allMsgs){
+      let found = false;
+      const toRemove = [];
+      for(const child of allMsgs){
+        if(child === msgEl){ found = true; toRemove.push(child); continue; }
+        if(found) toRemove.push(child);
+      }
+      toRemove.forEach(el => el.remove());
+    }
+    // homeMsgs/homeHistoryから該当以降を削除
+    const idx = homeMsgs.findIndex(m => m.role === 'user' && m.content === origText);
+    if(idx >= 0){ homeMsgs.splice(idx); homeHistory.splice(idx); }
+    // 新テキストで再送信
+    document.getElementById('home-msg-in').value = newText;
+    sendHomeMsg();
+  };
 }
 
 async function sendHomeMsg(){
@@ -640,6 +834,7 @@ async function sendHomeMsg(){
   homeHistory.push({role:'user',content:userContent});
   clearHomeImage();
   renderHomeMsgs(); homeLoading = true;
+  showTaskChip(); // 会話開始後にタスク化チップ表示
   updateStreak();
 
   const homeInner = document.getElementById('home-chat-inner');
@@ -681,12 +876,33 @@ async function sendHomeMsg(){
   }
 }
 
+// ════════ GOAL DETECTION STATE ════════
+let goalDetectLevel = 'none';
+let pendingGoalProposal = false;
+let pendingTaskSuggestion = false;
+
 // ════════ AI SMART ROUTING (GPT-5 mini判定) ════════
-const ROUTE_PROMPT = `ユーザーのメッセージを分類せよ。以下の1単語のみ返せ。
+const ROUTE_PROMPT = `ユーザーのメッセージを分類せよ。JSON形式で返せ。
+{"route":"gemini|gpt|gpt-simple|claude","coaching":true|false}
+
+route:
 gemini: 天気、ニュース、検索、最新情報、長文の要約依頼（500文字超）
 gpt: 翻訳、SNS投稿案、キャッチコピー、短い要約（500文字以下）、アイデア出し、ブレスト
 gpt-simple: 相槌や短い返事（ありがとう、OK、うん、了解、いいね等）
-claude: 上記以外（感情、悩み、ゴール、戦略、コーチング、雑談で深い対話が必要なもの）`;
+claude: 上記以外（感情、悩み、ゴール、戦略、コーチング、雑談で深い対話が必要なもの）
+
+coaching: ユーザーが目標・悩み・将来・キャリア・成長・自己改善について語っている場合はtrue
+
+追加のルーティング判定項目:
+- goal_intent: ユーザーの発言からゴール化の意図レベルを判定
+  - "none": 雑談・質問・調べもの（例：「天気教えて」「翻訳して」）
+  - "level1": 漠然とした願望（例：「英語できるようになりたいな」）
+  - "level2": 具体的意図あり（例：「来年までにTOEIC800取りたい」）
+  - "level3": 明示的要求（例：「ゴール設定したい」「目標作りたい」）
+
+- task_potential: ユーザーの発言にタスク化できる行動・予定・やるべきことが含まれる場合はtrue
+
+JSONで返してください: { "route": "...", "coaching": true|false, "goal_intent": "none|level1|level2|level3", "task_potential": true|false }`;
 
 async function routeMessage(text){
   // 500文字超の要約依頼はgemini
@@ -706,8 +922,24 @@ async function routeMessage(text){
     });
     if(!res.ok) return 'claude';
     const data = await res.json();
-    const answer = (data.choices?.[0]?.message?.content || 'claude').trim().toLowerCase().replace(/[^a-z-]/g,'');
-    if(['gemini','gpt','gpt-simple','claude'].includes(answer)) return answer;
+    const answer = (data.choices?.[0]?.message?.content || '').trim();
+    // Try JSON parse
+    try {
+      const parsed = JSON.parse(answer);
+      const route = parsed.route || 'claude';
+      if (parsed.coaching && !isCoachingMode) isCoachingMode = true;
+      if (parsed.goal_intent) {
+        window._lastGoalIntent = parsed.goal_intent;
+        goalDetectLevel = parsed.goal_intent;
+        if (parsed.goal_intent === 'level3') pendingGoalProposal = true;
+      }
+      if (parsed.task_potential) { window._pendingTaskSuggestion = true; highlightTaskChip(); }
+      if (['gemini','gpt','gpt-simple','claude'].includes(route)) return route;
+    } catch(e) {
+      // Fallback: old single-word format
+      const clean = answer.toLowerCase().replace(/[^a-z-]/g,'');
+      if (['gemini','gpt','gpt-simple','claude'].includes(clean)) return clean;
+    }
   }catch(e){}
   return 'claude';
 }
@@ -715,50 +947,77 @@ async function routeMessage(text){
 async function homeSmartRoute(text, today, homeInner, homeWrap){
   const inner = typeof homeInner === 'string' ? document.getElementById(homeInner) : homeInner;
   const scroll = typeof homeWrap === 'string' ? document.getElementById(homeWrap) : homeWrap;
-  const { bub } = mkStreamBubble(inner, scroll);
 
   try {
-    // Step 1: ルーティング判定（直列）
-    const route = await routeMessage(text);
+    // 【2】会話途中はルーティングしない。最初のメッセージでのみ判定
+    let route;
+    if(currentRouteAI){
+      route = currentRouteAI; // 会話中はAI固定
+    } else {
+      route = await routeMessage(text);
+      currentRouteAI = (route === 'gpt-simple') ? 'claude' : route; // gpt-simpleは次からclaude
+    }
 
-    // Step 2: ルートに応じて処理
+    // 【1】ルーティング判定後にバブルを作成（空バブル防止）
     if(route === 'gemini'){
-      bub.innerHTML = '🔍 Geminiでリサーチ中...';
+      const { bub } = mkStreamBubble(inner, scroll);
+      bub.innerHTML = '🔍 リサーチ中...';
       bub.style.cssText += 'color:var(--amber);font-size:13px;';
       try{
         const ctx = buildAIContextCached();
-        const result = await callGemini(text, `ユーザーの質問に簡潔かつ正確に答えてください。日本語で回答。質問は1回だけ。同じ内容を言い換えて繰り返さない。\n\nユーザー背景：${ctx}`);
-        bub.innerHTML = `<div style="font-size:9px;color:var(--amber);font-family:var(--fm);margin-bottom:6px;opacity:.7;">🔍 Gemini</div>${renderMsgContent(result)}`;
+        const result = await callGemini(text, `【絶対ルール】ユーザーの質問にまず具体的に回答すること。聞き返し禁止。
+- ニュースを聞かれたら→主要ニュースを3〜5件紹介する
+- おすすめを聞かれたら→具体的な候補を3〜5件挙げる
+- 天気を聞かれたら→天気情報を回答する
+- 検索を頼まれたら→検索結果を要約して回答する
+回答した後に「他に気になることはありますか？」と1回だけ聞いてよい。
+「どんなジャンル？」「どの地域？」等の聞き返しは禁止。情報が足りなければ幅広く回答する。
+日本語で回答。\n\nユーザー背景：${ctx}`);
+        if(!result || !result.trim()){ bub.closest('.msg')?.remove(); return; }
+        bub.innerHTML = renderMsgContent(result);
         bub.classList.remove('stream-bubble'); bub.style.cssText = '';
-        homeMsgs.push({role:'ai',content:result,time:now(),date:today});
+        const gemFooter = bub.parentElement?.querySelector('.msg-footer');
+        if(gemFooter) gemFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">Gemini</span>`;
+        homeMsgs.push({role:'ai',content:result,time:now(),date:today,model:'Gemini'});
         homeHistory.push({role:'assistant',content:result});
         saveHomeMsgs();
-        await addRouteFollowUp(text, result, 'Gemini', today, inner, scroll);
+        return;
       }catch(e){
         bub.innerHTML = ''; bub.style.cssText = '';
-        bub.parentElement?.remove();
+        bub.closest('.msg')?.remove();
+        currentRouteAI = 'claude'; // フォールバック時はClaude固定
         await homeClaudeStream(today, inner, scroll);
       }
 
     } else if(route === 'gpt'){
-      bub.innerHTML = '💡 GPTでアイデア生成中...';
+      const { bub } = mkStreamBubble(inner, scroll);
+      bub.innerHTML = '💡 アイデア生成中...';
       bub.style.cssText += 'color:var(--amber);font-size:13px;';
       try{
         const ctx = buildAIContextCached();
-        const result = await callOpenAI(text, `ユーザーのリクエストに創造的かつ実用的に応えてください。日本語で回答。\n\nユーザー背景：${ctx}`, 800);
-        bub.innerHTML = `<div style="font-size:9px;color:var(--amber);font-family:var(--fm);margin-bottom:6px;opacity:.7;">💡 GPT</div>${renderMsgContent(result)}`;
+        const result = await callOpenAI(text, `【絶対ルール】ユーザーのリクエストにまず具体的に回答すること。聞き返し禁止。
+- 翻訳を頼まれたら→即座に翻訳結果を返す
+- アイデアを聞かれたら→具体的なアイデアを3〜5件挙げる
+- 要約を頼まれたら→即座に要約する
+回答した後に補足質問を1回だけしてよい。依頼されたことをそのまま実行する。日本語で回答。\n\nユーザー背景：${ctx}`, 800);
+        if(!result || !result.trim()){ bub.closest('.msg')?.remove(); return; }
+        bub.innerHTML = renderMsgContent(result);
         bub.classList.remove('stream-bubble'); bub.style.cssText = '';
-        homeMsgs.push({role:'ai',content:result,time:now(),date:today});
+        const gptFooter = bub.parentElement?.querySelector('.msg-footer');
+        if(gptFooter) gptFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">GPT</span>`;
+        homeMsgs.push({role:'ai',content:result,time:now(),date:today,model:'GPT'});
         homeHistory.push({role:'assistant',content:result});
         saveHomeMsgs();
-        await addRouteFollowUp(text, result, 'GPT', today, inner, scroll);
+        return;
       }catch(e){
         bub.innerHTML = ''; bub.style.cssText = '';
-        bub.parentElement?.remove();
+        bub.closest('.msg')?.remove();
+        currentRouteAI = 'claude';
         await homeClaudeStream(today, inner, scroll);
       }
 
     } else if(route === 'gpt-simple'){
+      const { bub } = mkStreamBubble(inner, scroll);
       try{
         const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
           method:'POST', headers:getAuthHeaders(),
@@ -770,34 +1029,32 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
         });
         const data = await res.json();
         const reply = data.choices?.[0]?.message?.content;
-        if(reply){
+        if(reply && reply.trim()){
           bub.innerHTML = renderMsgContent(reply);
           bub.classList.remove('stream-bubble');
-          homeMsgs.push({role:'ai',content:reply,time:now(),date:today});
+          const simFooter = bub.parentElement?.querySelector('.msg-footer');
+          if(simFooter) simFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">GPT</span>`;
+          homeMsgs.push({role:'ai',content:reply,time:now(),date:today,model:'GPT'});
           homeHistory.push({role:'assistant',content:reply});
           saveHomeMsgs();
         } else {
-          // GPT-5 nanoが空応答→Claudeフォールバック
-          bub.parentElement?.remove();
+          bub.closest('.msg')?.remove();
           await homeClaudeStream(today, inner, scroll);
         }
       }catch(e){
-        bub.parentElement?.remove();
+        bub.closest('.msg')?.remove();
         await homeClaudeStream(today, inner, scroll);
       }
 
     } else {
       // Claude直接応答（デフォルト）
-      bub.parentElement?.remove();
       await homeClaudeStream(today, inner, scroll);
     }
   } catch(e) {
-    // 予期しないエラー: バブルをエラー表示に変更
-    if(bub && bub.parentElement){
-      bub.classList.remove('stream-bubble');
-      bub.textContent = 'エラーが発生しました。もう一度お試しください。';
-      bub.style.color = 'var(--red)';
-    }
+    const errEl = document.createElement('div');
+    errEl.className = 'msg ai';
+    errEl.innerHTML = `<div class="msg-body"><div class="bubble" style="color:var(--red)">エラーが発生しました。もう一度お試しください。</div></div>`;
+    inner.appendChild(errEl);
   }
 }
 
@@ -807,25 +1064,26 @@ async function executeRoute(route, text, today, inner, scroll, indicatorBub){
   try{
     let result;
     if(route.route === 'gemini'){
-      result = await callGemini(query, `ユーザーの質問に簡潔かつ正確に答えてください。日本語で回答。質問は1回だけ。同じ内容を言い換えて繰り返さない。\n\nユーザー背景：${ctx}`);
+      result = await callGemini(query, `【絶対ルール】ユーザーの質問にまず具体的に回答すること。聞き返し禁止。情報が足りなければ幅広く回答する。日本語で回答。\n\nユーザー背景：${ctx}`);
     } else {
-      result = await callOpenAI(query, `ユーザーのリクエストに創造的かつ実用的に応えてください。日本語で回答。\n\nユーザー背景：${ctx}`, 800);
+      result = await callOpenAI(query, `【絶対ルール】ユーザーのリクエストにまず具体的に回答すること。聞き返し禁止。依頼されたことをそのまま実行する。日本語で回答。\n\nユーザー背景：${ctx}`, 800);
     }
     // インジケーターバブルを結果で置換
+    if(!result || !result.trim()){ indicatorBub.closest('.msg')?.remove(); return; }
+    const routeModel = route.route === 'gemini' ? 'Gemini' : 'GPT';
     indicatorBub.innerHTML = renderMsgContent(result);
     indicatorBub.classList.remove('stream-bubble');
     indicatorBub.style.cssText = '';
-    homeMsgs.push({role:'ai',content:result,time:now(),date:today});
+    const routeFooter = indicatorBub.parentElement?.querySelector('.msg-footer');
+    if(routeFooter) routeFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">${routeModel}</span>`;
+    homeMsgs.push({role:'ai',content:result,time:now(),date:today,model:routeModel});
     homeHistory.push({role:'assistant',content:result});
     saveHomeMsgs();
-    // Claude補足コメント
-    await addRouteFollowUp(text, result, route.route==='gemini'?'Gemini':'GPT', today, inner, scroll);
+    // ★ ルーティング後はreturnで終了。Claudeの補足コメントは呼ばない
+    return;
   }catch(e){
     // フォールバック: Claudeで直接回答
-    indicatorBub.innerHTML = '';
-    indicatorBub.style.cssText = '';
-    indicatorBub.classList.remove('stream-bubble');
-    indicatorBub.parentElement?.remove();
+    indicatorBub.closest('.msg')?.remove();
     await homeClaudeStream(today, inner, scroll);
   }
 }
@@ -836,7 +1094,8 @@ async function homeClaudeStream(today, homeInner, homeWrap){
     system: sys, messages: homeHistory.slice(-8), maxTokens: 350,
     innerEl: homeInner, scrollEl: homeWrap,
     onDone(t){
-      homeMsgs.push({role:'ai',content:t,time:now(),date:today}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs();
+      if(!t || !t.trim()) return;
+      homeMsgs.push({role:'ai',content:t,time:now(),date:today,model:'Claude'}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs();
       if(MEMBERSHIP.plan==='free'){ if(FREE_MODEL_USAGE.claude.remaining>0){FREE_MODEL_USAGE.claude.remaining--;FREE_MODEL_USAGE.claude.used++;} renderModelUsageBadge(); }
     }
   });
@@ -865,7 +1124,7 @@ async function addRouteFollowUp(userText, aiResult, source, today, homeInner, ho
         {role:'user',content:'この回答について、私のゴールの観点から一言補足して。'}
       ],
       maxTokens: 150, innerEl: homeInner, scrollEl: homeWrap,
-      onDone(t){ homeMsgs.push({role:'ai',content:t,time:now(),date:today}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs(); }
+      onDone(t){ if(!t||!t.trim())return; homeMsgs.push({role:'ai',content:t,time:now(),date:today,model:'Claude'}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs(); }
     });
   }catch(e){}
 }
@@ -886,6 +1145,8 @@ function showHomeScreen(){
   currentSessionId = crypto.randomUUID ? crypto.randomUUID() : 'sess_' + Date.now();
   homeMsgs = [];
   homeHistory = [];
+  currentRouteAI = null; // 【2】新しい会話でルーティングリセット
+  hideTaskChip(); // タスク化チップをリセット
 
   // 3. ウェルカム表示
   renderWelcomeView();
@@ -897,6 +1158,25 @@ function renderWelcomeView(){
   if(!chatInner) return;
   chatInner.innerHTML = buildEmptyHomeHTML();
   updateHomePlaceholder();
+  showProfileHint();
+}
+
+// STEP 11: プロフィール未設定案内
+function showProfileHint() {
+  if (getCookie('profile_hint_shown')) return;
+  if (USER_PROFILE.nickname || USER_PROFILE.occupation) return;
+  if (homeMsgs.length > 0) return;
+
+  const inner = document.getElementById('home-chat-inner');
+  if (!inner) return;
+
+  const hint = document.createElement('div');
+  hint.className = 'msg ai';
+  hint.style.marginBottom = '16px';
+  hint.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="font-size:13px;">こんにちは！何でも聞いてください。<br>もしよかったら<a onclick="showPage('myself');closeSidebar();" style="color:var(--amber);cursor:pointer;text-decoration:underline;">「私をデザイン」</a>であなたのことを教えてもらえると、より的確なアドバイスができるようになります。</div></div>`;
+  inner.appendChild(hint);
+
+  setCookie('profile_hint_shown', 'true', 365);
 }
 
 function newHomeChat(){ showHomeScreen(); }
@@ -930,9 +1210,14 @@ async function generateSessionTitle(sessionId, summary){
 function renderSidebarChatRecords(){
   const el = document.getElementById('sb-chat-records');
   if(!el) return;
-  const recent = chatRecords.slice(0,5);
+  const recent = chatRecords.filter(r => {
+    const t = (r.title || '').trim();
+    if (!t || t === '会話' || t === '会話...') return false;
+    if (t.startsWith('ビジョン：') || t.startsWith('【ユーザー情報】') || t.startsWith('【あなたの役割】') || t.startsWith('【共通ルール】')) return false;
+    return true;
+  }).slice(0,5);
   if(recent.length === 0){
-    el.innerHTML = '<div style="padding:4px 16px 8px;font-size:10px;color:var(--muted2);">まだ会話がありません</div>';
+    el.innerHTML = '';
     return;
   }
   el.innerHTML = recent.map(r => `
@@ -954,6 +1239,8 @@ let chatSessions = [];
 async function openChatHistory(){
   const panel = document.getElementById('chat-history-panel');
   panel.style.display = 'flex';
+  // チャット内容+ツールバーを非表示にして重畳防止
+  document.querySelectorAll('#home-chat-wrap, #home-input-area, #home-chat-toolbar, #home-search-bar, #home-topic-tags').forEach(el => { if(el) el.style.display = 'none'; });
   const list = document.getElementById('chat-history-list');
   list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">読み込み中…</div>';
   try {
@@ -965,7 +1252,20 @@ async function openChatHistory(){
     list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">履歴を読み込めませんでした</div>';
   }
 }
-function closeChatHistory(){ document.getElementById('chat-history-panel').style.display='none'; }
+function closeChatHistory(){
+  document.getElementById('chat-history-panel').style.display='none';
+  // チャット内容+ツールバーを復元（inline styleのdisplay値を明示）
+  const toolbar = document.getElementById('home-chat-toolbar');
+  if(toolbar) toolbar.style.display = 'flex';
+  const chatWrap = document.getElementById('home-chat-wrap');
+  if(chatWrap) chatWrap.style.display = '';
+  const inputArea = document.getElementById('home-input-area');
+  if(inputArea) inputArea.style.display = '';
+  const searchBar = document.getElementById('home-search-bar');
+  if(searchBar) searchBar.style.display = 'none'; // 検索バーはデフォルト非表示
+  const topicTags = document.getElementById('home-topic-tags');
+  if(topicTags) topicTags.style.display = '';
+}
 async function deleteChatSession(sessionId){
   if(!confirm('この会話を削除しますか？')) return;
   try{ await fetch(`${WORKER_URL}/api/history?sessionId=${sessionId}`, {method:'DELETE',headers:getAuthHeaders()}); }catch(e){}
@@ -974,16 +1274,29 @@ async function deleteChatSession(sessionId){
   renderSidebarChatRecords();
   toast('会話を削除しました');
 }
+function isJunkSession(s) {
+  const p = (s.firstMsg || s.title || '').trim();
+  if (!p || p === '会話' || p === '会話...') return true;
+  if (p.startsWith('ビジョン：') || p.startsWith('【ユーザー情報】') || p.startsWith('【あなたの役割】')) return true;
+  if (p.startsWith('【共通ルール】') || p.startsWith('【最優先ルール】')) return true;
+  if (s.count <= 1 && !s.hasUserMsg) return true;
+  return false;
+}
+
 function renderChatHistoryList(sessions){
   const list = document.getElementById('chat-history-list');
-  if(!sessions.length){ list.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);">まだ会話がありません</div>'; return; }
+  const filtered = sessions.filter(s => !isJunkSession(s));
+  if(!filtered.length){ list.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);">会話履歴はまだありません</div>'; return; }
+  sessions = filtered;
   list.innerHTML = sessions.map(s => {
     const d = new Date(s.date);
     const dateStr = d.toLocaleDateString('ja-JP',{month:'short',day:'numeric'});
     const preview = (s.firstMsg || '会話').substring(0, 30);
+    const star = s.goal_candidate ? '<span class="goal-star" style="color:var(--amber);margin-right:4px;">★</span>' : '';
+    const tagPill = s.session_tag ? `<span style="display:inline-block;background:rgba(200,146,10,0.15);color:var(--amber);font-size:0.6rem;padding:1px 5px;border-radius:6px;margin-left:4px;">${escapeHtml(s.session_tag)}</span>` : '';
     return `<div style="display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
       <div onclick="loadChatSession('${s.sessionId}')" style="flex:1;min-width:0;cursor:pointer;">
-        <div style="font-size:13px;color:var(--cream);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(preview)}…</div>
+        <div style="font-size:13px;color:var(--cream);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${star}${escapeHtml(preview)}…${tagPill}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:3px;">${Math.ceil(s.count/2)}件 · ${dateStr}</div>
       </div>
       <button onclick="event.stopPropagation();deleteChatSession('${s.sessionId}')" title="削除" style="width:32px;height:32px;border-radius:8px;border:none;background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--muted);">
@@ -1000,6 +1313,7 @@ function filterChatHistory(q){
 async function loadChatSession(sessionId){
   closeSidebar();
   closeChatHistory();
+  showPage('home'); // ホーム画面を正しく表示（ヘッダー含む）
   try {
     const res = await fetch(`${WORKER_URL}/api/history?sessionId=${sessionId}&limit=200`, {headers: getAuthHeaders()});
     const data = await res.json();
@@ -1007,6 +1321,10 @@ async function loadChatSession(sessionId){
     homeMsgs = [];
     homeHistory = [];
     messages.forEach(m => {
+      if(!m.content || !m.content.trim()) return;
+      // システムプロンプト・プロフィール注入テキストをスキップ
+      const c = m.content.trim();
+      if(c.startsWith('【ユーザー情報】') || c.startsWith('【あなたの役割】') || c.startsWith('【共通ルール】') || c.startsWith('【最優先ルール】') || c.startsWith('ビジョン：未設定')) return;
       const time = new Date(m.created_at).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
       const date = new Date(m.created_at).toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});
       homeMsgs.push({role: m.role==='assistant'?'ai':m.role, content: m.content, time, date});
@@ -1015,6 +1333,58 @@ async function loadChatSession(sessionId){
     currentSessionId = sessionId;
     renderHomeMsgs();
   } catch(e) { toast('会話の読み込みに失敗しました'); }
+}
+
+// ═══ BATCH DELETE CHAT HISTORY ═══
+let historySelectMode = false;
+let selectedSessions = new Set();
+
+function toggleHistorySelectMode() {
+  historySelectMode = !historySelectMode;
+  selectedSessions.clear();
+  renderChatHistoryList(chatSessions);
+  const footer = document.getElementById('history-select-footer');
+  if (footer) footer.style.display = historySelectMode ? 'flex' : 'none';
+}
+
+function toggleSessionSelect(sessionId) {
+  if (selectedSessions.has(sessionId)) selectedSessions.delete(sessionId);
+  else selectedSessions.add(sessionId);
+  updateSelectFooter();
+}
+
+function updateSelectFooter() {
+  const n = selectedSessions.size;
+  const countEl = document.getElementById('history-select-count');
+  if (countEl) countEl.textContent = `${n}件選択`;
+  const delBtn = document.getElementById('delete-selected-btn');
+  if (delBtn) delBtn.textContent = n > 0 ? `削除（${n}件）` : '削除';
+  const allBtn = document.getElementById('select-all-btn');
+  const totalVisible = chatSessions.filter(s => !isJunkSession(s)).length;
+  if (allBtn) allBtn.textContent = n >= totalVisible ? 'すべて解除' : 'すべて選択';
+}
+
+function toggleSelectAll() {
+  const visible = chatSessions.filter(s => !isJunkSession(s));
+  if (selectedSessions.size >= visible.length) {
+    selectedSessions.clear();
+  } else {
+    visible.forEach(s => selectedSessions.add(s.sessionId));
+  }
+  renderChatHistoryList(chatSessions);
+  updateSelectFooter();
+}
+
+async function deleteSelectedSessions() {
+  if (selectedSessions.size === 0) return;
+  if (!confirm(`${selectedSessions.size}件の会話を削除しますか？`)) return;
+  for (const sid of selectedSessions) {
+    try { await apiCall(`/api/history/${sid}`, 'DELETE'); } catch(e) {}
+  }
+  selectedSessions.clear();
+  historySelectMode = false;
+  renderSidebarChatRecords();
+  toast('会話を削除しました');
 }
 
 // ═══ FREE MODEL USAGE BADGE ═══
@@ -1320,7 +1690,13 @@ let fbTurnCount = 0;
 let fbSummary = '';
 let fbThemes = {good:null, bad:null, wish:null};
 
-const FB_SYS = `あなたはGOAL AIのフィードバック収集AIです。
+const FB_SYS = `あなたはGOAL AIの改善担当です。ユーザーが貴重な時間を使ってフィードバックをくれています。
+
+【応答ルール（最優先）】
+1. ユーザーの発言には必ず最初に感謝を示す（例：「教えてくれてありがとうございます」「貴重なご意見ですね」）
+2. 共感を示してからフォローアップ質問する（例：「文字が見えにくいのは使いづらかったですね。どの画面で特に気になりましたか？」）
+3. 否定・反論しない。改善の参考にする姿勢を見せる
+4. 最後に「他に気になったことはありますか？」で締める
 
 【ミッション】
 ユーザーとの自然な対話で以下3テーマを引き出す：
@@ -1364,18 +1740,41 @@ function closeFeedback(){ document.getElementById('feedback-modal').style.displa
 
 function appendFbMsg(role, text){
   const chat = document.getElementById('feedback-chat');
+  if (!chat || !text) return;
+
   const wrap = document.createElement('div');
-  wrap.style.cssText = `display:flex;gap:10px;align-items:flex-start;${role==='user'?'flex-direction:row-reverse':''}`;
+  wrap.className = `msg ${role === 'user' ? 'user' : 'ai'}`;
+  wrap.style.marginBottom = '16px';
+  wrap.style.position = 'relative';
+
   const av = document.createElement('div');
-  av.style.cssText = `width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;${role==='ai'?'background:var(--amber-d);color:var(--amber);border:1px solid rgba(228,184,106,.3)':'background:var(--bg3);border:1px solid var(--border2);color:var(--cream)'}`;
-  if(role==='ai'){av.innerHTML=getLogoSVG(16);}else{av.textContent=getUserAvatarText()||'U';}
+  av.className = `msg-av ${role === 'user' ? 'user' : 'ai'}`;
+  if (role === 'ai') {
+    av.innerHTML = getLogoSVG(14);
+  } else {
+    const ut = getUserAvatarText();
+    if (ut) av.textContent = ut;
+    else av.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>';
+  }
+
+  const body = document.createElement('div');
+  body.className = 'msg-body';
+
   const bub = document.createElement('div');
-  bub.style.cssText = `max-width:85%;padding:10px 14px;border-radius:10px;font-size:12.5px;line-height:1.7;white-space:pre-line;${role==='ai'?'background:var(--bg3);border:1px solid var(--border);color:var(--cream)':'background:var(--amber-d);border:1px solid rgba(228,184,106,.2);color:var(--cream)'}`;
-  bub.textContent = text;
-  wrap.appendChild(av); wrap.appendChild(bub);
+  bub.className = 'bubble';
+  bub.innerHTML = renderMsgContent(text);
+
+  const footer = document.createElement('div');
+  footer.className = 'msg-footer';
+  footer.innerHTML = `<span class="msg-time">${now()}</span>`;
+
+  body.appendChild(bub);
+  body.appendChild(footer);
+  wrap.appendChild(av);
+  wrap.appendChild(body);
   chat.appendChild(wrap);
-  chat.scrollTop = 99999;
-  return bub;
+
+  setTimeout(() => { chat.scrollTop = chat.scrollHeight; }, 50);
 }
 
 function appendFbButtons(){
@@ -1490,7 +1889,10 @@ async function submitFeedback(){
       method:'POST', headers:getAuthHeaders(),
       body: JSON.stringify({
         summary: fbSummary,
-        rawChat: { messages: fbMsgs, themes: fbThemes }
+        rawChat: { messages: fbMsgs, themes: fbThemes },
+        ...getDeviceInfo(),
+        app_version: APP_VERSION,
+        tester_tier: MEMBERSHIP.tester_tier || null,
       })
     });
     toast('フィードバックを送信しました ✓');
@@ -1593,5 +1995,272 @@ function updateNotifSettingUI() {
 function scheduleNotif(title, body, delayMs) {
   if (_notifPerm !== 'granted') return;
   setTimeout(() => { try { new Notification(title, { body, tag: 'goalai' }); } catch {} }, delayMs);
+}
+
+// ════════ E-1~E-4: GOAL PROPOSAL CARD ════════
+function renderGoalProposalCard(title, why, deadline) {
+  const safeTitle = escapeHtml(title || '');
+  const safeWhy = escapeHtml(why || '');
+  const safeDeadline = escapeHtml(deadline || '');
+  return '<div class="goal-proposal-card" style="margin-top:12px;padding:16px;background:var(--card-bg,var(--bg3));border:1.5px solid var(--amber);border-radius:var(--r);">'
+    + '<div style="font-size:14px;font-weight:600;color:var(--cream);margin-bottom:8px;">💡 ゴールにしませんか？</div>'
+    + '<div style="color:var(--cream);margin-bottom:4px;">🎯 ' + safeTitle + '</div>'
+    + (safeWhy ? '<div style="color:var(--muted);font-size:12px;margin-bottom:4px;">💡 ' + safeWhy + '</div>' : '')
+    + (safeDeadline ? '<div style="color:var(--muted);font-size:12px;margin-bottom:12px;">📅 ' + safeDeadline + '</div>' : '<div style="margin-bottom:12px;"></div>')
+    + '<div style="display:flex;gap:8px;">'
+    + '<button onclick="startGoalAssist({title:\'' + safeTitle.replace(/'/g, "\\'") + '\',why:\'' + safeWhy.replace(/'/g, "\\'") + '\',deadline:\'' + safeDeadline.replace(/'/g, "\\'") + '\'})" style="flex:1;padding:8px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;">ゴールアシストを始める</button>'
+    + '<button onclick="declineGoalProposal(\'' + safeTitle.replace(/'/g, "\\'") + '\');this.closest(\'.goal-proposal-card\').style.display=\'none\'" style="flex:1;padding:8px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">今はいい</button>'
+    + '</div></div>';
+}
+
+function startGoalAssist(goalData) {
+  const wlcIn = document.getElementById('wlc-in');
+  if (wlcIn) wlcIn.value = goalData.title || '';
+  showPage('welcome');
+}
+
+// ════════ E-5: Track declined goal proposals ════════
+function declineGoalProposal(topic) {
+  let declined = [];
+  try {
+    const raw = getCookie('declined_goals');
+    if (raw) declined = JSON.parse(raw);
+  } catch(e) {}
+  const existing = declined.find(d => d.topic === topic);
+  if (existing) {
+    existing.count++;
+    existing.date = new Date().toISOString().slice(0,10);
+  } else {
+    declined.push({ topic, date: new Date().toISOString().slice(0,10), count: 1 });
+  }
+  setCookie('declined_goals', JSON.stringify(declined), 365);
+}
+
+function shouldRemindGoal(topic) {
+  try {
+    const raw = getCookie('declined_goals');
+    if (!raw) return true;
+    const declined = JSON.parse(raw);
+    const entry = declined.find(d => d.topic === topic);
+    if (!entry) return true;
+    if (entry.count >= 2) return false; // 2回断ったら二度とリマインドしない
+    const daysSince = Math.floor((Date.now() - new Date(entry.date).getTime()) / 86400000);
+    return daysSince >= 2; // 2日後からリマインド可能
+  } catch(e) { return true; }
+}
+
+// ════════ E-7: Recent topic tags above input ════════
+function updateTopicTags() {
+  const container = document.getElementById('home-topic-tags');
+  if (!container) return;
+  const recentUserMsgs = homeMsgs.filter(m => m.role === 'user').slice(-5);
+  if (recentUserMsgs.length === 0) { container.style.display = 'none'; return; }
+
+  // Extract keywords (simple approach: look for goal-related terms)
+  const keywords = new Set();
+  const patterns = /(\S{2,}(?:学習|転職|資格|ダイエット|運動|英語|プログラミング|副業|読書|貯金|起業|独立))/g;
+  recentUserMsgs.forEach(m => {
+    const matches = (m.content || '').match(patterns);
+    if (matches) matches.forEach(w => keywords.add(w));
+  });
+
+  if (keywords.size === 0) { container.style.display = 'none'; return; }
+
+  container.style.display = 'flex';
+  container.innerHTML = Array.from(keywords).slice(0, 5).map(k =>
+    `<span class="topic-tag" onclick="suggestGoalFromTag('${escapeHtml(k).replace(/'/g,"\\'")}')">${escapeHtml(k)}</span>`
+  ).join('');
+}
+
+function suggestGoalFromTag(topic) {
+  if (!shouldRemindGoal(topic)) { toast('この話題は以前お断りされました'); return; }
+  const inner = document.getElementById('home-chat-inner');
+  const scroll = document.getElementById('home-chat-wrap');
+  if (!inner) return;
+  const card = document.createElement('div');
+  card.className = 'msg ai';
+  card.innerHTML = `<div class="msg-body">${renderGoalProposalCard(topic, '', '')}</div>`;
+  inner.appendChild(card);
+  if (scroll) scroll.scrollTop = scroll.scrollHeight;
+}
+
+// ════════ E-8: Goal assist banner ════════
+function showGoalAssistBanner(title) {
+  let banner = document.getElementById('goal-assist-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'goal-assist-banner';
+    banner.className = 'goal-assist-banner';
+    const chatWrap = document.getElementById('home-chat-wrap');
+    if (chatWrap) chatWrap.parentElement.insertBefore(banner, chatWrap);
+  }
+  banner.innerHTML = `🎯 ゴールアシスト中：${escapeHtml(title)} <button class="close-btn" onclick="this.parentElement.remove()">×</button>`;
+}
+
+// ═══ CHAT_CONFIGS — 4画面共通設定 ═══
+const CHAT_CONFIGS = {
+  home: {
+    containerId: 'home-chat-inner',
+    scrollId: 'home-chat-wrap',
+    inputId: 'home-msg-in',
+    routing: true,
+    fixedModel: null,
+    freeNoCount: false,
+    role: 'ユーザーの万能AIアシスタント。質問にはまず答え、必要に応じてコーチングする。',
+    voiceInput: true,
+    msgsKey: 'homeMsgs',
+    profileInject: { initial: ['nickname', 'occupation', 'age', 'mbti'], onCoaching: ['strengths', 'weaknesses', 'values', 'vision', 'constraints'] },
+    coachingDetect: true
+  },
+  goal: {
+    containerId: 'hub-chat-inner',
+    scrollId: 'hub-chat-wrap',
+    inputId: 'hub-msg-in',
+    routing: true,
+    fixedModel: null,
+    freeNoCount: false,
+    role: null,
+    voiceInput: true,
+    msgsKey: 'goalMsgs',
+    profileInject: { initial: ['nickname', 'occupation', 'age', 'mbti', 'strengths', 'weaknesses', 'values', 'vision', 'constraints'] },
+    coachingDetect: false
+  },
+  design: {
+    containerId: 'know-chat',
+    scrollId: null,
+    inputId: 'know-msg-in',
+    routing: false,
+    fixedModel: 'sonnet',
+    freeNoCount: true,
+    role: '優秀なライフデザイナー。質問を通じてユーザーの本質を引き出す。先入観を持たず、答えを誘導しない。',
+    voiceInput: true,
+    msgsKey: 'designMsgs',
+    profileInject: { initial: ['nickname'] },
+    coachingDetect: false
+  },
+  feedback: {
+    containerId: 'feedback-chat',
+    scrollId: null,
+    inputId: 'feedback-msg-in',
+    routing: false,
+    fixedModel: 'sonnet',
+    freeNoCount: true,
+    role: '感謝と共感を最優先するプロダクト改善パートナー。必ず感謝から始め、否定・反論しない。',
+    voiceInput: true,
+    msgsKey: 'feedbackMsgs',
+    profileInject: { initial: ['nickname'] },
+    coachingDetect: false
+  }
+};
+
+// ═══ HOME_ROLES — モード別ロール ═══
+const HOME_ROLES = {
+  normal: 'ユーザーの万能AIアシスタント。質問にはまず答え、必要に応じてコーチングする。',
+  spartan: '丁寧だけど辛口。甘さゼロで言い訳の妥当性もチェック。無駄なフォローなしで率直に問題点と改善点だけを伝える。',
+  mencare: '寄り添い型のメンタルケアパートナー。共感を第一に、ユーザーの気持ちを受け止める。',
+  kabeuchi: 'ソクラテス式の壁打ち相手。答えを教えず、質問で思考を深める。'
+};
+
+// ═══ コーチング検出フラグ ═══
+let isCoachingMode = false;
+
+// ═══ AIロールバッジ更新 ═══
+function updateRoleBadge(roleText) {
+  const badge = document.getElementById('chat-role-badge');
+  if (!badge) return;
+  if (!roleText) { badge.style.display = 'none'; return; }
+  badge.style.display = 'flex';
+  badge.querySelector('.role-text').textContent = roleText;
+}
+
+// ═══ 現在のチャット画面のconfig取得 ═══
+function getCurrentChatConfig() {
+  // ホームのモードに応じてロールを切り替え
+  const mode = spartanMode ? 'spartan' : mencareMode ? 'mencare' : kabeuchiMode ? 'kabeuchi' : 'normal';
+  return {
+    ...CHAT_CONFIGS.home,
+    role: HOME_ROLES[mode]
+  };
+}
+
+// ════════ TASK PIN / TASK SUGGESTION ════════
+function hideTaskChip(){ const w=document.getElementById('task-chip-wrap'); if(w) w.style.display='none'; }
+function showTaskChip(){ const w=document.getElementById('task-chip-wrap'); if(w){ w.style.display='flex'; const b=document.getElementById('task-chip-btn'); if(b) b.classList.remove('highlight'); } }
+function highlightTaskChip(){ const w=document.getElementById('task-chip-wrap'); if(w){ w.style.display='flex'; const b=document.getElementById('task-chip-btn'); if(b) b.classList.add('highlight'); } }
+
+function openTaskFromChat() {
+  const msgs = document.querySelectorAll('#home-chat-inner .msg.ai .bubble');
+  const lastAI = msgs.length > 0 ? msgs[msgs.length - 1].textContent : '';
+  if (!lastAI) { toast('タスク化する会話がありません'); return; }
+  requestTaskBreakdown(lastAI);
+}
+
+function getLastAIMessage() {
+  const msgs = document.querySelectorAll('#home-chat-inner .msg.ai .bubble');
+  return msgs.length > 0 ? msgs[msgs.length - 1].textContent : '';
+}
+
+function appendTaskSuggestionButton(bubbleEl) {
+  if (!bubbleEl) return;
+  const btn = document.createElement('button');
+  btn.className = 'inline-task-btn';
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v10"/><path d="M8 6h8l-2 8h-4z"/><path d="M12 14v8"/><path d="M9 22h6"/></svg> タスクにする';
+  btn.onclick = () => requestTaskBreakdown(bubbleEl.textContent);
+  bubbleEl.parentElement?.appendChild(btn);
+}
+
+async function requestTaskBreakdown(contextText) {
+  toast('タスクを分析中...');
+  try {
+    const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
+      method:'POST', headers: getAuthHeaders(),
+      body: JSON.stringify({ system:'以下の会話内容からタスクを抽出してJSON配列で返してください。各タスクにはtitle（20文字以内）とdeadline（YYYY-MM-DD or null）を含めてください。3〜7個。JSONのみ返す。', messages:[{role:'user',content:contextText.slice(0,1000)}], maxTokens:400 })
+    });
+    const data = await res.json();
+    const raw = (data.choices?.[0]?.message?.content || '').replace(/```json|```/g,'').trim();
+    const tasks = JSON.parse(raw);
+    if (Array.isArray(tasks)) showTaskCard(tasks);
+    else toast('タスクの分析に失敗しました');
+  } catch(e) { toast('タスクの分析に失敗しました'); }
+}
+
+function showTaskCard(tasks) {
+  const goalOpts = ALL_GOALS.filter(g=>!g.archived).map(g=>`<option value="${g.id}">${escapeHtml(g.title)}</option>`).join('');
+  const modal = document.createElement('div');
+  modal.className = 'task-card-modal';
+  modal.innerHTML = `<div class="task-card"><h3 class="task-card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M12 2v10"/><path d="M8 6h8l-2 8h-4z"/><path d="M12 14v8"/><path d="M9 22h6"/></svg> タスク化</h3><div class="task-card-list">${tasks.map((t,i)=>`<label class="task-card-item"><input type="checkbox" checked data-idx="${i}"><span class="task-card-name">${escapeHtml(t.title)}</span>${t.deadline?`<span class="task-card-date">${t.deadline}</span>`:''}</label>`).join('')}</div><div class="task-card-options"><div style="display:flex;gap:8px;align-items:center;"><span style="font-size:0.8rem;color:var(--muted);">種類:</span><label style="font-size:0.8rem;"><input type="radio" name="task-type" value="life" checked> ライフ</label><label style="font-size:0.8rem;"><input type="radio" name="task-type" value="goal"> ゴール紐付</label></div><div id="task-goal-select" style="display:none;margin-top:4px;"><select id="task-goal-dropdown" class="field-select" style="font-size:0.8rem;"><option value="">ゴールを選択...</option>${goalOpts}</select></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px;"><span style="font-size:0.8rem;color:var(--muted);">重み:</span><label style="font-size:0.8rem;"><input type="radio" name="task-priority" value="high"> 重要</label><label style="font-size:0.8rem;"><input type="radio" name="task-priority" value="normal" checked> 普通</label><label style="font-size:0.8rem;"><input type="radio" name="task-priority" value="low"> 軽い</label></div></div><div class="task-card-actions"><button onclick="this.closest('.task-card-modal').remove()" class="task-card-cancel">キャンセル</button><button onclick="confirmTaskCard()" class="task-card-confirm">追加する</button></div></div>`;
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+  modal.querySelectorAll('input[name="task-type"]').forEach(r => r.addEventListener('change', e => {
+    document.getElementById('task-goal-select').style.display = e.target.value==='goal'?'block':'none';
+  }));
+  modal._tasks = tasks;
+}
+
+async function confirmTaskCard() {
+  const modal = document.querySelector('.task-card-modal');
+  if (!modal) return;
+  const checked = modal.querySelectorAll('input[type="checkbox"]:checked');
+  const taskType = modal.querySelector('input[name="task-type"]:checked')?.value || 'life';
+  const priority = modal.querySelector('input[name="task-priority"]:checked')?.value || 'normal';
+  const goalId = taskType === 'goal' ? document.getElementById('task-goal-dropdown')?.value : null;
+  const tasks = modal._tasks;
+  let count = 0;
+  for (const cb of checked) {
+    const idx = parseInt(cb.dataset.idx);
+    const t = tasks[idx];
+    if (!t) continue;
+    // Save to goal's phases if goal-linked, otherwise standalone
+    if (goalId) {
+      const goal = ALL_GOALS.find(g => String(g.id) === String(goalId));
+      if (goal) {
+        if (!goal.phases || !goal.phases.length) goal.phases = [{title:'タスク',tasks:[]}];
+        goal.phases[0].tasks.push({id:'task_'+Date.now()+'_'+idx, title:t.title, done:false, deadline:t.deadline, source:'chat', priority});
+      }
+    }
+    count++;
+  }
+  modal.remove();
+  toast(`${count}件のタスクを追加しました`);
 }
 

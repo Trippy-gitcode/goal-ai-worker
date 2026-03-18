@@ -30,12 +30,8 @@ ${curGoal ? '\nゴール：'+curGoal : ''}
 function getSysSpartan(){
   const goal = ALL_GOALS[activeGoalIdx];
   const progressStr = goal ? `進捗：${goal.actual}%（目安${goal.target}%）| 遅延：${goal.target-goal.actual>0?'-'+(goal.target-goal.actual)+'%':'なし'}` : '';
-  return `あなたはGOAL AIのスパルタモードです。甘さゼロ、結果だけ。
-${curGoal ? '\nゴール：'+curGoal+(progressStr?' | '+progressStr:'') : ''}
-
-【スタイル】断定的。共感なし。数字と事実から始める。来月のタスクはAIが決めて提示する。「〜かもしれない」は使わない。
-
-【必須JSON出力】SYS_NORMALと同じJSON形式を使う。ただし tradeoff は必ず含める。`;
+  return `あなたは端的で辛口なコーチです。口調は丁寧語を使いますが、無駄な褒め言葉・フォロー・励ましは一切しません。甘さゼロです。問題点や甘さを率直に指摘し、具体的な改善点だけを伝えます。共感・慰め・サポートの言葉は不要です。短く、的確に、事実だけを述べてください。ユーザーが言い訳をした場合、その言い訳の妥当性を論理的に検証し、妥当でなければ率直に指摘してください。
+${curGoal ? '\nゴール：'+curGoal+(progressStr?' | '+progressStr:'') : ''}`;
 }
 
 function getSysMencare(){
@@ -132,9 +128,20 @@ function initSwipeToOpenSidebar(){
   }, {passive:true});
 }
 
+// ════════ TAB SWIPE ════════
+function initTabSwipe(container, onSwipe) {
+  let startX = 0, startY = 0;
+  container.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true });
+  container.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = Math.abs(e.changedTouches[0].clientY - startY);
+    if (Math.abs(dx) > 50 && dy < 40) onSwipe(dx > 0 ? 'right' : 'left');
+  }, { passive: true });
+}
+
 // ════════ PAGE NAVIGATION ════════
 function showPage(pg) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active');p.classList.remove('page-enter');});
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   curPage = pg;
   closeSidebar();
@@ -174,6 +181,9 @@ function showPage(pg) {
     document.getElementById('pg-welcome-wrap').classList.add('active');
     document.getElementById('topbar').style.display='none';
   }
+  // D-8: Page transition animation
+  const activePg = document.querySelector('.page.active');
+  if (activePg) activePg.classList.add('page-enter');
 }
 
 // ════════ SPARTAN MODE ════════
@@ -254,11 +264,18 @@ function applyModeUI(mode) {
   const labels = { mencare:'🌸 メンケアモード ON', normal:'💬 通常モードに戻りました', spartan:'🔥 スパルタモード ON', kabeuchi:'💭 壁打ちモード ON' };
   toast(labels[mode]);
 
+  // AIロールバッジ更新
+  const roleBadgeLabels = { spartan:'🔥 スパルタ', mencare:'🌸 メンケア', kabeuchi:'💭 壁打ち', normal:'' };
+  if(typeof updateRoleBadge === 'function') updateRoleBadge(roleBadgeLabels[mode] || '');
+
   // モード別背景色
   document.body.classList.remove('mode-spartan','mode-mencare','mode-kabeuchi');
   if(mode==='spartan') document.body.classList.add('mode-spartan');
   if(mode==='mencare') document.body.classList.add('mode-mencare');
   if(mode==='kabeuchi') document.body.classList.add('mode-kabeuchi');
+
+  // Update pill buttons
+  if(typeof updateModePills === 'function') updateModePills();
 
   showPage('home');
 }
@@ -607,7 +624,7 @@ async function runDeepAnalysis(userQuery, containerId, scrollId, onComplete) {
     panel.remove();
     const errWrap = document.createElement('div');
     errWrap.className = 'msg ai'; errWrap.style.marginBottom = '16px';
-    errWrap.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="border-color:var(--red-d)">ディープ分析中にエラーが発生しました：${e.message}<br><br>設定パネル（⚙）→「3AI ディープ分析 — API設定」でAPIキーを確認してください。</div></div>`;
+    errWrap.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="border-color:var(--red-d)">ディープ分析中にエラーが発生しました：${escapeHtml(e.message || '')}<br><br>設定パネル（⚙）→「3AI ディープ分析 — API設定」でAPIキーを確認してください。</div></div>`;
     const inner = document.getElementById(containerId);
     if (inner) inner.appendChild(errWrap);
     const s = document.getElementById(scrollId);
@@ -909,6 +926,33 @@ function restoreThemeUI(){
   });
 }
 
+// ═══ C-16: AUTO THEME (follow system) ═══
+let autoTheme = false;
+function applySystemTheme() {
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  setBaseTheme(prefersDark ? 'dark' : 'light');
+}
+function toggleAutoTheme() {
+  autoTheme = !autoTheme;
+  const toggle = document.getElementById('auto-theme-toggle');
+  const knob = document.getElementById('auto-theme-toggle-knob');
+  if(toggle) toggle.style.background = autoTheme ? 'var(--amber)' : 'var(--border)';
+  if(knob) knob.style.left = autoTheme ? '25px' : '3px';
+  document.cookie = `goal_ai_autotheme=${autoTheme};path=/;max-age=31536000;Secure;SameSite=Lax`;
+  if(autoTheme) applySystemTheme();
+}
+function restoreAutoThemeUI() {
+  autoTheme = document.cookie.match(/goal_ai_autotheme=([^;]+)/)?.[1] === 'true';
+  const toggle = document.getElementById('auto-theme-toggle');
+  const knob = document.getElementById('auto-theme-toggle-knob');
+  if(toggle) toggle.style.background = autoTheme ? 'var(--amber)' : 'var(--border)';
+  if(knob) knob.style.left = autoTheme ? '25px' : '3px';
+  if(autoTheme) applySystemTheme();
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  if(autoTheme) applySystemTheme();
+});
+
 function applyFontSize(sz){
   currentFontSize = sz;
   const sizes = {xs:'14px', sm:'16px', md:'18px', lg:'20px'};
@@ -935,6 +979,64 @@ function openSettingsPanel(){
 }
 function closeSettingsPanel(){
   document.getElementById('settings-panel').style.display = 'none';
+}
+
+// ════════ VERSION CHECK ════════
+(function initVersionCheck(){
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.version')?.addEventListener('click', async () => {
+      try {
+        const res = await fetch(WORKER_URL + '/api/version');
+        const data = await res.json();
+        if (data.version !== APP_VERSION) {
+          if (confirm('新しいバージョン v' + data.version + ' があります。更新しますか？')) {
+            location.reload(true);
+          }
+        } else {
+          toast('最新バージョンです (v' + APP_VERSION + ')');
+        }
+      } catch(e) { toast('バージョン確認に失敗しました'); }
+    });
+  });
+})();
+
+// ════════ HELP GUIDE ════════
+const _hGold = 'url(#helpGoldG)';
+const _hSvg = (p) => `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="${_hGold}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const HELP_SLIDES = [
+  { title: '何でも聞いてみよう', icon: _hSvg('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'), body: 'ホーム画面のチャットで何でも質問できます。天気、翻訳、アイデア出し — 最適なAIが自動で答えます。' },
+  { title: 'ゴールを設定しよう', icon: _hSvg('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'), body: '「ゴールハブ」で目標を設定すると、AIがあなた専用のコーチになります。タスク管理・進捗追跡もお任せ。' },
+  { title: '自分を知ろう', icon: _hSvg('<path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z"/>'), body: '「私をデザイン」であなたの強み・価値観を教えると、AIがもっと的確なアドバイスをしてくれます。' }
+];
+
+function showHelpGuide() {
+  let current = 0;
+  function render() {
+    const slide = HELP_SLIDES[current];
+    const isLast = current === HELP_SLIDES.length - 1;
+    const existing = document.getElementById('help-guide-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'help-guide-modal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `<svg style="position:absolute;width:0;height:0;"><defs><linearGradient id="helpGoldG" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs></svg><div class="modal-content" style="max-width:400px;padding:32px;text-align:center;">
+      <div style="margin-bottom:12px;">${slide.icon}</div>
+      <h3 style="font-size:1.2rem;font-weight:700;color:var(--cream);margin-bottom:8px;">${slide.title}</h3>
+      <p style="font-size:0.9rem;color:var(--muted);line-height:1.6;margin-bottom:16px;">${slide.body}</p>
+      <div style="display:flex;justify-content:center;gap:8px;margin-bottom:16px;">
+        ${HELP_SLIDES.map((_,i) => `<span style="width:8px;height:8px;border-radius:50%;background:${i===current?'var(--amber)':'var(--muted2)'};"></span>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;">
+        ${current > 0 ? `<button onclick="document.getElementById('help-guide-modal').remove();showHelpSlide(${current-1})" style="padding:8px 20px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">← 戻る</button>` : ''}
+        <button onclick="document.getElementById('help-guide-modal').remove();${isLast ? '' : `showHelpSlide(${current+1})`}" style="padding:8px 20px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;">${isLast ? '始める！' : '次へ →'}</button>
+      </div>
+    </div>`;
+    modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+    document.body.appendChild(modal);
+  }
+  render();
+  window.showHelpSlide = function(idx) { current = idx; render(); };
 }
 
 // ════════ ARCHIVE VIEW ════════
@@ -965,10 +1067,10 @@ function renderArchiveList(){
       <div class="ac-badge" style="background:${isDone?'var(--green-d)':'var(--bg4)'};color:${isDone?'var(--green)':'var(--muted2)'};">
         ${isDone?`<svg width=12 height=12><use href='#ic-award'/></svg> 達成済み`:`<svg width=12 height=12><use href='#ic-archive'/></svg> アーカイブ`}
       </div>
-      <div style="font-size:13px;font-weight:500;color:var(--cream);margin-bottom:6px;">${g.title}</div>
+      <div style="font-size:13px;font-weight:500;color:var(--cream);margin-bottom:6px;">${escapeHtml(g.title || '')}</div>
       <div style="display:flex;gap:12px;font-size:10px;color:var(--muted);">
         <span>最終進捗 ${g.actual}%</span>
-        <span>目標期限 ${g.deadline}</span>
+        <span>目標期限 ${escapeHtml(g.deadline || '')}</span>
         ${daysAgo!==null?`<span>${daysAgo}日前にアーカイブ</span>`:''}
       </div>
       <div style="margin-top:10px;display:flex;gap:7px;">
@@ -1069,6 +1171,17 @@ function renderMembershipUI(){
       if(nudgeSub) nudgeSub.textContent = lbl.sub+' · このまま続けるにはProへ';
     } else {
       nudge.style.display='none';
+    }
+  }
+
+  // Update logo plan badge
+  const logoPlan = document.getElementById('sb-logo-plan');
+  if(logoPlan){
+    if(MEMBERSHIP.plan && MEMBERSHIP.plan !== 'free'){
+      logoPlan.style.display = 'inline';
+      logoPlan.textContent = lbl.text;
+    } else {
+      logoPlan.style.display = 'none';
     }
   }
 
@@ -1295,4 +1408,151 @@ async function openCustomerPortal(){
     toast(e.message || 'サブスクリプション管理を開けませんでした');
   }
 }
+
+// ════════ D-2: LOGO TAP → HOME ════════
+document.querySelector('.sb-logo')?.addEventListener('click', () => {
+  showPage('home');
+  closeSidebar();
+});
+if (document.querySelector('.sb-logo')) {
+  document.querySelector('.sb-logo').style.cursor = 'pointer';
+}
+
+// ════════ D-9: SIDEBAR EMPTY AREA TAP → HOME ════════
+document.getElementById('sb')?.addEventListener('click', (e) => {
+  if (e.target.closest('a, button, .nav-item, .mode-box, .goal-card, .upgrade-box, .sb-logo, .prof-row, .btn-add-goal, select, input, .upgrade-nudge, .nav-section, .mode-selector, .sb-bottom')) return;
+  closeSidebar();
+  showPage('home');
+});
+
+// ════════ AI理解メモ表示 ════════
+async function showAIMemo(type, goalId) {
+  let memo = '';
+  if (type === 'goal') {
+    const goal = ALL_GOALS.find(g => String(g.id) === String(goalId));
+    memo = goal?.ai_memo || '';
+  } else {
+    memo = USER_PROFILE.ai_memo || '';
+  }
+
+  if (!memo) {
+    toast('AI理解メモはまだ作成されていません');
+    // Generate it
+    try {
+      const res = await apiCall('/api/ai-memo/generate', 'POST', { type, goal_id: goalId, trigger: 'manual' });
+      if (res?.memo) {
+        memo = res.memo;
+        if (type === 'goal') {
+          const goal = ALL_GOALS.find(g => String(g.id) === String(goalId));
+          if (goal) goal.ai_memo = memo;
+        } else {
+          USER_PROFILE.ai_memo = memo;
+        }
+      } else { return; }
+    } catch(e) { return; }
+  }
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `<div class="modal-content" style="max-width:500px;padding:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3 style="color:var(--cream);margin:0;">📋 AIの理解メモ</h3>
+      <button onclick="this.closest('.modal-overlay').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;">×</button>
+    </div>
+    <div style="font-size:13px;color:var(--cream);line-height:1.7;white-space:pre-wrap;">${escapeHtml(memo)}</div>
+    <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5;">内容が違うと感じたら、チャットで「もっと厳しくして」「私の強みは〇〇」など伝えてください。</p>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+      <button onclick="this.closest('.modal-overlay').remove()" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">閉じる</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+// ════════ MODE PILLS & POPUP ════════
+const MODE_DESCRIPTIONS = {
+  mencare: { name: 'メンケアモード', description: '寄り添い型のメンタルケアパートナー。共感を第一に、あなたの気持ちを受け止めます。' },
+  kabeuchi: { name: '壁打ちモード', description: '答えを出さず思考を引き出すソクラテス式。質問だけで考えを深めます。' },
+  spartan: { name: 'スパルタモード', description: '丁寧だけど辛口。甘さゼロで言い訳の妥当性もチェック。無駄なフォローなしで、率直に問題点と改善点だけを伝えます。' }
+};
+
+function handleModeClick(mode) {
+  const currentMode = spartanMode ? 'spartan' : mencareMode ? 'mencare' : kabeuchiMode ? 'kabeuchi' : 'normal';
+  const info = MODE_DESCRIPTIONS[mode];
+  const isActive = currentMode === mode;
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = '<div class="modal-content" style="max-width:340px;padding:24px;text-align:center;">' +
+    '<h3 style="color:var(--cream);margin-bottom:8px;">' + info.name + (isActive ? ' (ON)' : '') + '</h3>' +
+    '<p style="color:var(--muted);font-size:0.85rem;line-height:1.6;margin-bottom:16px;">' + (isActive ? '通常モードに戻しますか？' : info.description) + '</p>' +
+    '<div style="display:flex;gap:8px;justify-content:center;">' +
+      '<button onclick="this.closest(\'.modal-overlay\').remove()" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">キャンセル</button>' +
+      '<button id="_mode-confirm-btn" style="padding:8px 16px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;">' + (isActive ? '停止する' : '設定する') + '</button>' +
+    '</div>' +
+  '</div>';
+  modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+  const confirmBtn = modal.querySelector('#_mode-confirm-btn');
+  confirmBtn.addEventListener('click', function() {
+    if (isActive) {
+      selectMode('normal');
+    } else {
+      selectMode(mode);
+    }
+    updateModePills();
+    modal.remove();
+  });
+  document.body.appendChild(modal);
+}
+
+function updateModePills() {
+  const current = spartanMode ? 'spartan' : mencareMode ? 'mencare' : kabeuchiMode ? 'kabeuchi' : 'normal';
+  document.querySelectorAll('.mode-pill,.mode-box-v2,.mode-e,.mode-f').forEach(function(p) {
+    p.classList.toggle('active', p.dataset.mode === current);
+  });
+}
+
+// ════════ SIDEBAR TASK LIST ════════
+function updateSidebarTaskList() {
+  const container = document.getElementById('sb-task-list');
+  if (!container) return;
+  // Get pending tasks from ALL_GOALS
+  const tasks = [];
+  ALL_GOALS.forEach(function(g, gi) {
+    if (!g.phases) return;
+    g.phases.forEach(function(phase) {
+      if (!phase.tasks) return;
+      phase.tasks.forEach(function(task) {
+        if (!task.done) tasks.push({ title: task.title, deadline: task.deadline, priority: task.priority, goalTitle: g.title, goalIdx: gi });
+      });
+    });
+  });
+  // Sort by deadline (nearest first), limit 5
+  tasks.sort(function(a, b) {
+    if (!a.deadline && !b.deadline) return 0;
+    if (!a.deadline) return 1;
+    if (!b.deadline) return -1;
+    return a.deadline.localeCompare(b.deadline);
+  });
+  var top5 = tasks.slice(0, 5);
+  if (top5.length === 0) {
+    container.innerHTML = '<div class="sb-task-empty">タスクなし</div>';
+    return;
+  }
+  container.innerHTML = top5.map(function(t) {
+    var dot = t.priority === 'high' ? '🔴' : t.priority === 'low' ? '🟢' : '🟡';
+    var dl = t.deadline ? t.deadline.slice(5) : '';
+    return '<div class="sb-task-item"><span class="sb-task-name">' + escapeHtml((t.title || '').slice(0, 20)) + '</span><span class="sb-task-meta">' + dot + ' ' + dl + '</span></div>';
+  }).join('') + '<div class="sb-task-more" onclick="showPage(\'tasks\')">全タスク →</div>';
+}
+
+// ════════ D-15: KEYBOARD SHORTCUTS ════════
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const modal = document.querySelector('.modal-overlay');
+    if (modal) { modal.remove(); return; }
+    document.getElementById('goal-fullscreen-modal')?.remove();
+    showPage('home');
+  }
+});
 

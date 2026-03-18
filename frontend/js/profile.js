@@ -127,10 +127,10 @@ function renderCharts(){
         ${i<FAIL_HISTORY.length-1?'<div class="fail-line"></div>':''}
       </div>
       <div class="fail-content">
-        <div class="fail-date">${f.date}</div>
-        <div class="fail-reason">${f.reason}</div>
-        <div class="fail-deep">${f.deep}</div>
-        <span class="fail-tag" style="background:rgba(255,255,255,.06);color:var(--muted)"># ${f.tag}</span>
+        <div class="fail-date">${escapeHtml(f.date || '')}</div>
+        <div class="fail-reason">${escapeHtml(f.reason || '')}</div>
+        <div class="fail-deep">${escapeHtml(f.deep || '')}</div>
+        <span class="fail-tag" style="background:rgba(255,255,255,.06);color:var(--muted)"># ${escapeHtml(f.tag || '')}</span>
       </div>`;
     tl.appendChild(item);
   });
@@ -323,8 +323,8 @@ function addRoutine(){
   const row = document.createElement('div');
   row.className = 'routine-row';
   row.innerHTML = `
-    <span class="routine-time">${start} – ${end}</span>
-    <span class="routine-label">${label}</span>
+    <span class="routine-time">${escapeHtml(start)} – ${escapeHtml(end)}</span>
+    <span class="routine-label">${escapeHtml(label)}</span>
     <span class="routine-pri" style="border-color:rgba(228,184,106,.4);color:var(--amber);background:var(--amber-d);" onclick="cyclePri(this)">目標時間</span>
     <span class="routine-del" onclick="delRoutine(this)">×</span>`;
   list.appendChild(row);
@@ -424,6 +424,7 @@ function switchMyselfTab(tab){
   document.getElementById('mtab-' + tab).classList.add('active');
   document.getElementById('myself-pane-' + tab).classList.add('active');
   if(tab === 'connect') renderConnectContent();
+  if(tab === 'profile') initProfileScrollHandler();
 }
 
 // ─ 自分を知る ─
@@ -457,7 +458,7 @@ function appendKnowMsg(role, text){
   if(role==='ai'){av.textContent='🪞';}else{const ut=getUserAvatarText();av.textContent=ut||'U';}
   const bub = document.createElement('div');
   bub.style.cssText = `max-width:80%;padding:11px 15px;border-radius:10px;font-size:12.5px;line-height:1.75;${role==='ai'?'background:rgba(157,120,216,.1);border:1px solid rgba(157,120,216,.2);color:var(--cream)':'background:var(--bg3);border:1px solid var(--border2);color:var(--cream)'}`;
-  bub.innerHTML = text.replace(/\n/g,'<br>');
+  bub.innerHTML = escapeHtml(text).replace(/\n/g,'<br>');
   wrap.appendChild(av); wrap.appendChild(bub);
   chat.appendChild(wrap);
   setTimeout(()=>{ const p=chat.closest('[style*="overflow-y"]')||chat.parentElement; if(p) p.scrollTop=99999; },50);
@@ -529,7 +530,7 @@ async function sendKnowMsg(){
           })
         });
         const bd = await bridgeRes.json();
-        nextMsg = (bd.content?.map(b=>b.text||'').join('') || '') + '\n\n' + nextQ;
+        nextMsg = (bd.content?.map(b=>b.text||'').join('') || '');
       }
     }
     document.getElementById(typId)?.remove();
@@ -644,12 +645,12 @@ function applySummaryToProfile(){
     if(pd.energyGain?.length){
       USER_PROFILE.energyGain = pd.energyGain;
       const cont = document.getElementById('energy-gain-tags');
-      if(cont){ cont.innerHTML=''; pd.energyGain.forEach(t=>{ const tag=document.createElement('span'); tag.className='energy-tag'; tag.style.cssText='background:var(--green-d);border:1px solid rgba(93,184,150,.3);color:var(--green);'; tag.innerHTML=`${t} <span class="remove-x" onclick="this.parentElement.remove();updateProfile()">×</span>`; cont.appendChild(tag); }); }
+      if(cont){ cont.innerHTML=''; pd.energyGain.forEach(t=>{ const tag=document.createElement('span'); tag.className='energy-tag'; tag.style.cssText='background:var(--green-d);border:1px solid rgba(93,184,150,.3);color:var(--green);'; tag.innerHTML=`${escapeHtml(t)} <span class="remove-x" onclick="this.parentElement.remove();updateProfile()">×</span>`; cont.appendChild(tag); }); }
     }
     if(pd.energyDrain?.length){
       USER_PROFILE.energyDrain = pd.energyDrain;
       const cont = document.getElementById('energy-drain-tags');
-      if(cont){ cont.innerHTML=''; pd.energyDrain.forEach(t=>{ const tag=document.createElement('span'); tag.className='energy-tag'; tag.style.cssText='background:var(--red-d);border:1px solid rgba(224,104,104,.3);color:var(--red);'; tag.innerHTML=`${t} <span class="remove-x" onclick="this.parentElement.remove();updateProfile()">×</span>`; cont.appendChild(tag); }); }
+      if(cont){ cont.innerHTML=''; pd.energyDrain.forEach(t=>{ const tag=document.createElement('span'); tag.className='energy-tag'; tag.style.cssText='background:var(--red-d);border:1px solid rgba(224,104,104,.3);color:var(--red);'; tag.innerHTML=`${escapeHtml(t)} <span class="remove-x" onclick="this.parentElement.remove();updateProfile()">×</span>`; cont.appendChild(tag); }); }
     }
     if(pd.mbtiGuess){
       USER_PROFILE.mbti = pd.mbtiGuess;
@@ -685,7 +686,7 @@ function knowKey(e){ if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!_isCompos
 function editVision(){
   const el = document.getElementById('vision-statement');
   const current = el.textContent.trim().replace(/^「|」$/g,'');
-  el.innerHTML = `<textarea style="width:100%;background:transparent;border:none;color:var(--cream);font-family:var(--ff);font-size:14px;line-height:1.9;resize:none;outline:none;font-style:italic;" rows="3" id="vision-edit">${current}</textarea>
+  el.innerHTML = `<textarea style="width:100%;background:transparent;border:none;color:var(--cream);font-family:var(--ff);font-size:14px;line-height:1.9;resize:none;outline:none;font-style:italic;" rows="3" id="vision-edit">${escapeHtml(current)}</textarea>
   <div style="display:flex;gap:8px;margin-top:8px;">
     <button onclick="saveVision()" style="padding:5px 13px;background:rgba(157,120,216,.2);border:1px solid rgba(157,120,216,.4);border-radius:6px;color:#c4a0e8;font-size:10px;cursor:pointer;font-family:var(--ff);">保存</button>
     <button onclick="renderVision()" style="padding:5px 13px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:10px;cursor:pointer;font-family:var(--ff);">キャンセル</button>
@@ -693,11 +694,11 @@ function editVision(){
 }
 function saveVision(){
   const text = document.getElementById('vision-edit')?.value.trim();
-  if(text) document.getElementById('vision-statement').innerHTML = `「${text}」`;
+  if(text) document.getElementById('vision-statement').innerHTML = `「${escapeHtml(text)}」`;
   else renderVision();
 }
 function renderVision(){
-  document.getElementById('vision-statement').innerHTML = USER_PROFILE.vision ? '「'+USER_PROFILE.vision+'」' : '<span style="color:var(--muted2)">ビジョンを設定すると表示されます</span>';
+  document.getElementById('vision-statement').innerHTML = USER_PROFILE.vision ? '「'+escapeHtml(USER_PROFILE.vision)+'」' : '<span style="color:var(--muted2)">ビジョンを設定すると表示されます</span>';
 }
 function addVisionItem(type){
   const text = prompt(type==='image'?'見られたい姿を入力:':'強みを入力:');
@@ -857,7 +858,7 @@ function addEnergyTag(type){
   const tag = document.createElement('span');
   tag.className = 'energy-tag';
   tag.style.cssText = `background:${bg};border:1px solid ${border};color:${color};`;
-  tag.innerHTML = `${text} <span class="remove-x" onclick="this.parentElement.remove();updateProfile()">×</span>`;
+  tag.innerHTML = `${escapeHtml(text)} <span class="remove-x" onclick="this.parentElement.remove();updateProfile()">×</span>`;
   document.getElementById(contId)?.appendChild(tag);
   updateProfile();
 }
@@ -1189,6 +1190,29 @@ function updateAvatarDisplay(base64) {
       text.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
     }
   }
+}
+
+// ═══ AI理解度 折りたたみ ═══
+function toggleCompletenessDetail() {
+  const detail = document.getElementById('completeness-detail');
+  const toggle = document.getElementById('completeness-toggle');
+  if (!detail || !toggle) return;
+  const isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : 'block';
+  toggle.textContent = isOpen ? '↓ 詳細' : '↑ 閉じる';
+}
+
+function initProfileScrollHandler() {
+  const container = document.querySelector('#myself-pane-profile') || document.querySelector('.profile-page');
+  if (!container) return;
+  container.addEventListener('scroll', () => {
+    const detail = document.getElementById('completeness-detail');
+    if (detail && detail.style.display !== 'none') {
+      detail.style.display = 'none';
+      const toggle = document.getElementById('completeness-toggle');
+      if (toggle) toggle.textContent = '↓ 詳細';
+    }
+  }, { passive: true });
 }
 
 function initAvatarDisplay() {

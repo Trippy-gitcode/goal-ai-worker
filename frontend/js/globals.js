@@ -76,7 +76,7 @@ function getCookie(name) {
   return m ? decodeURIComponent(m[1]) : null;
 }
 function deleteCookie(name) {
-  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Strict`;
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Strict;Secure`;
 }
 
 // Restore token from cookie on load
@@ -117,5 +117,22 @@ function getDeviceId() {
   let hash = 0;
   for (let i = 0; i < raw.length; i++) hash = ((hash << 5) - hash + raw.charCodeAt(i)) | 0;
   return 'dev_' + Math.abs(hash).toString(36);
+}
+
+const APP_VERSION = '3.5.1';
+
+const FONT_SIZES = {
+  xs: { label: '極小', base: '14px', lh: '1.55' },
+  sm: { label: '小', base: '16px', lh: '1.6' },
+  md: { label: '中', base: '18px', lh: '1.65' },
+  lg: { label: '大', base: '20px', lh: '1.7' }
+};
+
+function setFontSize(size) {
+  const s = FONT_SIZES[size];
+  if (!s) return;
+  document.documentElement.style.setProperty('--base-font-size', s.base);
+  document.documentElement.style.setProperty('--base-line-height', s.lh);
+  setCookie('font_size', size, 365);
 }
 

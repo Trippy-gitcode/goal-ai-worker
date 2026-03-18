@@ -103,7 +103,7 @@ async function validateToken() {
   if (!AUTH_TOKEN) return null;
   try {
     const res = await fetch(`${WORKER_URL}/api/token/validate`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: getAuthHeaders(),
       body: JSON.stringify({ token: AUTH_TOKEN }),
     });
     if (!res.ok) return null; // Network/server error — keep token, don't delete
@@ -119,6 +119,14 @@ async function validateToken() {
     if (data.plan) {
       MEMBERSHIP.plan = data.plan;
       MEMBERSHIP.trialEnd = data.expiresAt || null;
+    }
+    // Sync tester info
+    if (data.tester_tier) {
+      MEMBERSHIP.tester_tier = data.tester_tier;
+      MEMBERSHIP.tester_expires_at = data.tester_expires_at;
+    } else {
+      MEMBERSHIP.tester_tier = null;
+      MEMBERSHIP.tester_expires_at = null;
     }
     return data;
   } catch {
@@ -141,7 +149,7 @@ function toast(msg){
   const existing=document.getElementById('toast');if(existing)existing.remove();
   const t=document.createElement('div');t.id='toast';
   t.setAttribute('role','status');t.setAttribute('aria-live','polite');
-  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e2333;border:1px solid rgba(255,255,255,.15);color:var(--cream);padding:9px 18px;border-radius:8px;font-size:12px;z-index:9999;animation:fadeUp .3s ease;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)';
+  t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--toast-bg,#1e2333);border:1px solid var(--border2,rgba(255,255,255,.15));color:var(--toast-text,var(--cream));padding:9px 18px;border-radius:8px;font-size:12px;z-index:9999;animation:fadeUp .3s ease;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)';
   t.textContent=msg;document.body.appendChild(t);
   setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3000);
 }
@@ -201,14 +209,14 @@ async function apiCall(endpoint, method, body) {
 }
 
 // ════════ UNIFIED CHAT STREAM ════════
-async function chatStream({ system, messages, maxTokens, innerEl, scrollEl, onDone, onError, signal }) {
+async function chatStream({ system, messages, maxTokens, innerEl, scrollEl, onDone, onError, signal, modelLabel }) {
   const inner = typeof innerEl === 'string' ? document.getElementById(innerEl) : innerEl;
   const scroll = typeof scrollEl === 'string' ? document.getElementById(scrollEl) : scrollEl;
   const { bub, wrap } = mkStreamBubble(inner, scroll);
   await streamAI(
     { system, messages, maxTokens: maxTokens || 500, signal },
     (t) => { streamAppend(bub, t); if (scroll) scroll.scrollTop = 99999; },
-    (t) => { streamFinalize(bub, t); if (onDone) onDone(t); },
+    (t) => { streamFinalize(bub, t, modelLabel || 'Claude'); if (onDone) onDone(t); },
     (e) => {
       if (signal?.aborted) { wrap.remove(); return; }
       bub.classList.remove('stream-bubble'); bub.textContent = 'エラーが発生しました。'; if (onError) onError(e);
@@ -386,6 +394,9 @@ async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, 
     if (signal) fetchOpts.signal = signal;
     const res = await fetch(`${WORKER_URL}/api/chat/stream`, fetchOpts);
     if (!res.ok || !res.body) throw new Error('HTTP ' + res.status);
+    const isFallback = res.headers.get('X-Model-Fallback') === 'true';
+    const resetHours = res.headers.get('X-Reset-Hours');
+    if (isFallback) showNanoFallbackBanner(resetHours);
     const reader = res.body.getReader();
     const dec = new TextDecoder('utf-8');
     let full = '';
@@ -441,7 +452,7 @@ function mkStreamBubble(innerEl, scrollEl, extraBubStyle) {
   // 「考え中...」ドットアニメーション
   bub.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
   const t = document.createElement('div');
-  t.className = 'msg-time'; t.textContent = now();
+  t.className = 'msg-footer'; t.textContent = now();
   body.appendChild(bub); body.appendChild(t);
   wrap.appendChild(av); wrap.appendChild(body);
   innerEl.appendChild(wrap);
@@ -480,13 +491,18 @@ function streamAppend(bub, fullText){
 }
 
 // ストリーミング完了時 — バッファ残りを一括表示してMarkdown変換
-function streamFinalize(bub, fullText){
+function streamFinalize(bub, fullText, modelLabel){
   bub._streamDone = true;
   if(bub._animTimer){ clearInterval(bub._animTimer); bub._animTimer = null; }
-  bub.innerHTML = `<div style="font-size:9px;color:var(--amber);font-family:var(--fm);margin-bottom:6px;opacity:.7;">🧠 Claude</div>${renderMsgContent(fullText)}`;
+  // 【1】空テキストならバブルごと削除
+  if(!fullText || fullText.trim() === ''){ bub.closest('.msg')?.remove(); return; }
+  bub.innerHTML = renderMsgContent(fullText);
   // Check for numbered selection list
   checkAndShowSelections(bub, fullText);
   bub.classList.remove('stream-bubble');
+  // Update msg-footer with model name
+  const footer = bub.parentElement?.querySelector('.msg-footer');
+  if(footer){ footer.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">${modelLabel || 'Claude'}</span><span class="msg-actions"><button class="msg-action-btn" title="コピー" onclick="copyMessage(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button class="msg-action-btn" title="引用" onclick="quoteMessage(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.76-2.02-2-2H5c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h2c0 4-3 5-6 5z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.76-2.02-2-2h-3c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h2c0 4-3 5-6 5z"/></svg></button></span>`; }
 }
 
 
@@ -520,5 +536,152 @@ function compressImage(file, maxPx, quality) {
     };
     reader.readAsDataURL(file);
   });
+}
+
+// ═══ 共通チャットエンジン ═══
+
+/**
+ * 共通デバイス情報取得（フィードバック送信時に自動付与）
+ */
+function getDeviceInfo() {
+  const ua = navigator.userAgent;
+  let device = 'pc', platform = 'unknown';
+  if (/iPad|Macintosh.*Touch/i.test(ua) && 'ontouchend' in document) { device = 'tablet'; platform = 'iPad'; }
+  else if (/Android/i.test(ua) && !/Mobile/i.test(ua)) { device = 'tablet'; platform = 'Android'; }
+  else if (/iPhone/i.test(ua)) { device = 'smartphone'; platform = 'iPhone'; }
+  else if (/Android.*Mobile/i.test(ua)) { device = 'smartphone'; platform = 'Android'; }
+  else if (/Macintosh/i.test(ua)) { device = 'pc'; platform = 'Mac'; }
+  else if (/Windows/i.test(ua)) { device = 'pc'; platform = 'Windows'; }
+  return { device, platform, screen_width: window.innerWidth, ua_short: ua.slice(0, 120) };
+}
+
+/**
+ * 共通チャットメッセージ表示
+ */
+function appendChatMsg(container, role, text, opts = {}) {
+  if (!text || !text.trim()) return null;
+  const wrap = document.createElement('div');
+  wrap.className = `msg ${role === 'user' ? 'user' : 'ai'}`;
+  wrap.style.position = 'relative';
+  const av = document.createElement('div');
+  av.className = `msg-av ${role === 'user' ? 'user' : 'ai'}`;
+  if (role === 'ai') { av.innerHTML = opts.avatar || getLogoSVG(14); }
+  else { const ut = getUserAvatarText(); if (ut) av.textContent = ut; else av.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>'; }
+  const body = document.createElement('div');
+  body.className = 'msg-body';
+  const bub = document.createElement('div');
+  bub.className = 'bubble';
+  bub.innerHTML = renderMsgContent(text);
+  const footer = document.createElement('div');
+  footer.className = 'msg-footer';
+  if (role === 'ai' && opts.model) { footer.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">${opts.model}</span>`; }
+  else { footer.innerHTML = `<span class="msg-time">${now()}</span>`; }
+  body.appendChild(bub); body.appendChild(footer);
+  wrap.appendChild(av); wrap.appendChild(body);
+  container.appendChild(wrap);
+  if (opts.scrollEl) opts.scrollEl.scrollTop = opts.scrollEl.scrollHeight;
+  return { wrap, bub };
+}
+
+/**
+ * 共通AI送信（非ストリーミング）
+ */
+async function sendChatAPI(params) {
+  const endpoint = params.endpoint || '/api/chat';
+  const res = await apiCall(endpoint, 'POST', {
+    system: params.system,
+    messages: params.messages,
+    maxTokens: params.maxTokens || 600
+  });
+  if (!res || res.error) throw new Error(res?.error || 'API error');
+  if (res.content) return res.content.map(b => b.text || '').join('');
+  if (res.choices) return res.choices[0]?.message?.content || '';
+  return '';
+}
+
+/**
+ * 共通AI送信（ストリーミング）
+ */
+async function sendChatStream(container, scrollEl, params, onDone) {
+  const { bub } = mkStreamBubble(container, scrollEl);
+  await streamAI(
+    { system: params.system, messages: params.messages, maxTokens: params.maxTokens || 600 },
+    (chunk) => { streamAppend(bub, chunk); if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight; },
+    (fullText) => { streamFinalize(bub, fullText, params.model || 'Claude'); if (onDone) onDone(fullText); },
+    (err) => { bub.closest('.msg')?.remove(); toast('エラーが発生しました'); }
+  );
+}
+
+/**
+ * 共通チャット入力セットアップ
+ */
+function setupChatInput(config) {
+  const { inputEl, sendBtn, voiceBtn, onSend, maxH } = config;
+  if (inputEl) {
+    inputEl.addEventListener('input', () => chatResize(inputEl, maxH || 150));
+    inputEl.addEventListener('keydown', (e) => chatKey(() => {
+      const text = inputEl.value.trim();
+      if (text) { onSend(text); inputEl.value = ''; chatResize(inputEl, maxH || 150); }
+    }, e));
+  }
+  if (sendBtn) {
+    sendBtn.addEventListener('click', () => {
+      const text = inputEl?.value?.trim();
+      if (text) { onSend(text); inputEl.value = ''; chatResize(inputEl, maxH || 150); }
+    });
+  }
+  if (voiceBtn && inputEl) {
+    voiceBtn.addEventListener('click', () => toggleHomeVoice());
+  }
+}
+
+/**
+ * 共通音声入力
+ */
+async function startVoiceInput(inputEl) {
+  if (!inputEl) return;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const chunks = [];
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus'
+      : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : 'audio/webm';
+    const recorder = new MediaRecorder(stream, { mimeType });
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      try {
+        const blob = new Blob(chunks, { type: mimeType });
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        const res = await fetch(`${WORKER_URL}/api/voice/transcribe`, {
+          method: 'POST', headers: getAuthHeaders(),
+          body: JSON.stringify({ audio: base64, mimeType })
+        });
+        const data = await res.json();
+        if (data.text) {
+          inputEl.value += (inputEl.value ? ' ' : '') + data.text;
+          chatResize(inputEl, 150);
+          inputEl.focus();
+        } else { toast('音声を認識できませんでした'); }
+      } catch (e) { toast('音声認識に失敗しました'); }
+    };
+    recorder.start();
+    toast('録音中…タップで停止');
+    inputEl._voiceRecorder = recorder;
+  } catch (e) { toast('マイクへのアクセスが許可されていません'); }
+}
+
+/**
+ * 共通画像アップロード処理
+ */
+function handleImageUpload(event, inputEl) {
+  const file = event?.target?.files?.[0];
+  if (!file || !file.type.startsWith('image/')) return;
+  toast('画像を添付しました: ' + file.name);
+  event.target.value = '';
 }
 

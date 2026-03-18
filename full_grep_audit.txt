@@ -1,0 +1,219 @@
+以下の全項目をgrepで検証して、結果を「✅ 存在する / ❌ 存在しない」で全て報告してください。修正はしないで。
+
+まずfix_tester_setup.mdのデプロイは完了していますか？バージョンを確認して報告してください。
+grep "APP_VERSION" frontend/js/globals.js
+
+=== #1 グラスモードのロゴ透過防止 ===
+grep -n "sb-logo.*background\|logo.*backdrop-filter.*none\|logo.*opaque" frontend/style.css
+
+=== #2 「私をデザイン」説明文（「あなたを知るほど、AIはもっと的確になる。」） ===
+grep -n "あなたを知るほど\|もっと的確" frontend/index.html frontend/js/profile.js
+
+=== #3 チャットモード背景色（スパルタ赤/メンケア青/壁打ち紫） ===
+grep -c "mode-spartan\|mode-mencare\|mode-kabeuchi" frontend/style.css
+
+=== #4 チャット背景プリセット（夕焼け・星空・深海・オーロラ） ===
+grep -c "BG_PRESETS\|setChatBg\|sunset\|aurora" frontend/js/chat.js frontend/js/ui.js
+
+=== #5 スワイプ感度改善（画面中央からも検知） ===
+grep -n "touchstart\|swipe.*50\|initTabSwipe" frontend/js/goals.js frontend/js/ui.js | head -5
+
+=== #6 AI理解メモの会話回数ベース自動更新（chat_count % 5） ===
+grep -n "chat_count.*5\|chat_count.*%\|memo.*auto.*update\|ai-memo.*chat" src/worker.js
+
+=== #7 フィードバックタブのキーボード見切れ対応 ===
+grep -n "visualViewport.*feedback\|fb-input.*keyboard\|feedback.*viewport" frontend/js/chat.js frontend/js/profile.js
+
+=== #8 過去の会話リストの重畳（DOMが被る） ===
+grep -n "history.*z-index\|history.*display.*none\|showHistory.*hide" frontend/js/chat.js frontend/js/ui.js | head -5
+
+=== #14 AI理解メモ更新時のユーザー通知 ===
+grep -n "memo.*updated\|memo.*通知\|メモ.*更新.*toast\|MEMO_UPDATE.*toast" frontend/js/chat.js src/worker.js
+
+=== #15 プロフィールAI理解度のスクロール自動閉じ ===
+grep -n "scroll.*completeness\|completeness.*close\|scroll.*fold" frontend/js/profile.js
+
+=== #16 フィードバックの良い/悪い/欲しいカテゴリ別ヒアリングUI ===
+grep -n "良かった\|使いにくかった\|欲しい機能\|feedback.*category\|fb-category" frontend/js/chat.js frontend/js/profile.js frontend/index.html
+
+=== #22 フィードバック強化9項目（NPS/投票/感情スコア等） ===
+grep -c "nps_score\|feature_tag\|sentiment.*positive\|is_beta\|source.*churn" src/worker.js
+
+=== #23 クーポン一回限り ===
+grep -c "used_coupons\|coupon.*once\|checkCouponUsed\|coupon.*already" src/worker.js
+
+=== #24 紹介者報酬の自動処理 ===
+grep -c "referrer_reward\|applyReferralReward\|referral.*reward.*apply" src/worker.js
+
+=== #28 PWA（manifest.json + アイコン） ===
+ls -la frontend/manifest.json frontend/icons/icon-192.png frontend/icons/icon-512.png 2>&1
+grep -c "manifest\|serviceWorker.*register" frontend/index.html
+
+=== #29 Freeプランモデル切替（日次上限→nanoフォールバック） ===
+grep -n "nano.*fallback\|switchToNano\|free.*exceed.*nano\|model.*nano.*free" src/worker.js
+
+=== #30 ルーティング判定を/api/chat/gpt-simpleに変更（カウントなし） ===
+grep -n "gpt-simple.*route\|routing.*gpt-simple\|route.*gpt.simple" src/worker.js frontend/js/chat.js
+
+=== #31 プロフィール画像アップロード ===
+grep -c "profile.*image.*upload\|avatar.*upload\|uploadProfileImage\|profile.*photo" frontend/js/profile.js src/worker.js
+
+=== #32 トリセツPDF出力 ===
+grep -c "generatePDF\|jsPDF\|トリセツ\|pdf.*export" frontend/js/profile.js
+
+=== #33 「今日の1%」マイクロタスク ===
+grep -c "microTask\|今日の1%\|dailyMicro\|daily.*micro" frontend/js/app.js frontend/js/goals.js
+
+=== #34 マイルストーン演出+シェア（コンフェッティ） ===
+grep -c "launchConfetti\|checkMilestone\|milestone.*share\|confetti" frontend/js/goals.js
+
+=== #35 音声入力+要約（50文字以上→タスク変換提案） ===
+grep -n "voice.*summary\|音声.*要約\|50.*char.*task\|summarize.*voice" frontend/js/chat.js
+
+=== #36 ウェルカム画面（こんにちは、{nickname}さん + カード6つ変更） ===
+grep -n "こんにちは\|nickname.*さん\|今日あった\|ニュースを教えて\|文章を添削\|アイデアを一緒" frontend/js/chat.js frontend/js/app.js
+
+=== #37 過去の会話重畳修正 === （#8と同じだが別修正依頼として送信済み）
+grep -n "history.*overlap\|history-list.*z\|chat-container.*hide.*history" frontend/js/chat.js frontend/js/ui.js | head -5
+
+=== #38a ロゴ透過防止（#1と同じ、Code送信済み確認） ===
+echo "=== #1と同一。上記結果を参照 ==="
+
+=== #38b AI理解メモ会話回数更新（#6と同じ、Code送信済み確認） ===
+echo "=== #6と同一。上記結果を参照 ==="
+
+=== #39 過去の会話の複数選択・一括削除 ===
+grep -c "deleteSelectedSessions\|historySelectMode\|selectedSessions\|batch.*delete\|一括削除" frontend/js/chat.js frontend/js/ui.js
+
+=== #40 Proアップグレードボックスのサイズ統一 ===
+grep -n "sb-upgrade\|upgrade.*box\|upgrade.*padding.*12\|pro.*upgrade.*size" frontend/style.css
+
+=== ゴールアシスト機能群（E-1〜E-20で承認された18項目） ===
+echo "--- E-1 AIゴール検出エンジン ---"
+grep -c "detectGoal\|goal.*detect\|What.*Why.*揃" frontend/js/chat.js src/worker.js
+
+echo "--- E-2 ゴール提案カード ---"
+grep -c "goal-proposal-card\|ゴールにしませんか\|GoalProposal" frontend/js/chat.js
+
+echo "--- E-3 チャット文脈→ゴール設定フォーム自動プリフィル ---"
+grep -c "prefill\|preFill\|auto.*fill.*goal\|context.*goal.*form" frontend/js/chat.js frontend/js/goals.js
+
+echo "--- E-4 ゴールアシスト完了後にホームチャットに自然に戻る ---"
+grep -c "goalAssist.*complete\|assist.*done.*home\|returnToHome.*goal" frontend/js/goals.js
+
+echo "--- E-5 「今はいい」後の2日後リマインド ---"
+grep -c "declined_goals\|remind.*2day\|リマインド.*ゴール" frontend/js/chat.js
+
+echo "--- E-6 ゴール化の閾値3段階判断 ---"
+grep -c "goalLevel\|level.*wish\|level.*intent\|閾値.*ゴール" src/worker.js
+
+echo "--- E-8 「最近の話題」タグ表示 ---"
+grep -c "topic.*tag\|topicTag\|recent.*topic\|話題タグ" frontend/js/chat.js
+
+echo "--- E-9 ゴールアシストモードのゴールドバナー ---"
+grep -c "goalAssist.*banner\|assist-banner\|goal.*gold.*banner" frontend/js/goals.js frontend/style.css
+
+echo "--- E-10 過去会話のゴール候補にスター★ ---"
+grep -c "goal.*star\|star.*candidate\|★.*goal" frontend/js/chat.js
+
+echo "--- E-13 複数ゴール候補の同時検出 ---"
+grep -c "multiple.*goal\|2つのゴール\|prioritize.*goal" frontend/js/chat.js src/worker.js
+
+echo "--- E-16 クイックゴール（ロングタップ→即登録） ---"
+grep -c "longpress.*goal\|quickGoal\|long.*tap.*goal" frontend/js/chat.js
+
+echo "--- E-17 ゴール達成報告検出+コンフェッティ ---"
+grep -c "achieve.*detect\|達成.*検出\|goal.*complete.*detect" frontend/js/chat.js src/worker.js
+
+echo "--- E-19 定期チェックイン（ストリーク連動） ---"
+grep -c "checkin\|checkIn\|streak.*login\|チェックイン" frontend/js/app.js
+
+echo "--- E-20 会話テーマの自動タグ付け ---"
+grep -c "session.*tag\|auto.*tag.*theme\|テーマタグ" frontend/js/chat.js src/worker.js
+
+=== 音声入力改善群（F-1〜F-9で承認分） ===
+echo "--- F-1 タップ切替方式 ---"
+grep -c "toggleRecording\|toggle.*record\|tap.*record" frontend/js/chat.js
+
+echo "--- F-3 リアルタイム文字起こし ---"
+grep -c "SpeechRecognition\|interimResults\|webkitSpeechRecognition" frontend/js/chat.js
+
+echo "--- F-4 音量波形アニメーション ---"
+grep -c "analyser\|AnalyserNode\|volume.*animation\|wave.*mic" frontend/js/chat.js
+
+echo "--- F-5 無音3秒で自動停止 ---"
+grep -c "silenceTimer\|SILENCE_TIMEOUT\|silence.*3\|無音.*停止" frontend/js/chat.js
+
+echo "--- F-6 スワイプキャンセル ---"
+grep -c "cancelRecording\|swipe.*cancel\|recording.*cancel.*swipe" frontend/js/chat.js
+
+echo "--- F-7 録音完了後プレビュー+編集（即送信しない） ---"
+grep -c "preview.*voice\|voice.*edit\|録音.*プレビュー\|voice.*confirm" frontend/js/chat.js
+
+echo "--- F-9 60秒上限 ---"
+grep -c "MAX_RECORDING\|60000\|60.*sec.*limit\|recording.*max" frontend/js/chat.js
+
+=== ナビゲーション群（D承認分） ===
+echo "--- D-1 全画面ハンバーガーメニュー ---"
+grep -c "toggleSidebar\|hamburger\|☰" frontend/index.html
+
+echo "--- D-2 ロゴタップ→ホーム移動 ---"
+grep -c "logo.*click.*home\|logo.*onclick.*home\|sb-logo.*home" frontend/js/ui.js frontend/index.html
+
+echo "--- D-6 左端スワイプ→サイドバー ---"
+grep -c "swipe.*sidebar\|edge.*swipe\|touchstart.*sidebar" frontend/js/ui.js
+
+echo "--- D-14 ゴール設定完了→タスク設定フェーズ遷移 ---"
+grep -c "goal.*complete.*task\|after.*goal.*task\|goal.*save.*task.*phase" frontend/js/goals.js
+
+=== その他 ===
+echo "--- ストリークUI ---"
+grep -c "streak_count\|streak_best\|streakDisplay\|streak.*badge" frontend/js/app.js frontend/js/ui.js
+
+echo "--- renderChatUI統合（生存確認） ---"
+grep -c "renderChatUI\|CHAT_CONFIGS" frontend/js/chat.js
+
+echo "--- パーソナル注入（生存確認） ---"
+grep -c "buildProfileBlock\|buildServerSystemPrompt\|profile_inject" src/worker.js
+
+echo "--- コーチング検出（生存確認） ---"
+grep -c "coaching" src/worker.js frontend/js/chat.js
+
+echo "--- AIロール（生存確認） ---"
+grep -c "HOME_ROLES\|suggest-roles\|ai_role" src/worker.js frontend/js/chat.js frontend/js/goals.js
+
+echo "--- AI理解メモ基本機能（生存確認） ---"
+grep -c "ai-memo\|ai_memo\|showAIMemo" src/worker.js frontend/js/chat.js frontend/js/goals.js
+
+echo "--- Freeカウント無し（生存確認） ---"
+grep -c "free_no_count\|freeNoCount" src/worker.js frontend/js/chat.js
+
+echo "--- テスター機能（生存確認） ---"
+grep -c "TESTER_CODES\|tester_code\|tester_expires" src/worker.js
+grep -c "checkTesterParam\|tester.*apply" frontend/js/app.js
+
+echo "--- オーナーバイパス（生存確認） ---"
+grep -c "isOwner\|owner_key\|OWNER_SECRET" src/worker.js
+
+echo "--- SW自動更新（生存確認） ---"
+grep -c "skipWaiting\|clients.claim" frontend/sw.js
+
+echo "--- ヘルプガイド（生存確認） ---"
+grep -c "showHelpGuide\|HELP_SLIDES" frontend/js/app.js frontend/js/ui.js
+
+echo "--- 会話一括削除（生存確認） ---"
+grep -c "deleteSelectedSessions\|historySelectMode" frontend/js/chat.js frontend/js/ui.js
+
+echo "--- 期限通知バナー（生存確認） ---"
+grep -c "expiry-banner\|checkPlanExpiry\|showExpiryBanner" frontend/js/app.js frontend/style.css
+
+echo "--- 管理API（生存確認） ---"
+grep -c "admin/testers\|handleAdminTesters" src/worker.js
+
+echo "--- プロフィール1ページ化（生存確認） ---"
+grep -c "completeness\|toggleCompletenessDetail\|calcProfileCompleteness" frontend/js/profile.js
+
+echo "--- バージョン ---"
+grep "APP_VERSION" frontend/js/globals.js
+
+全結果を報告して。修正はしないで。

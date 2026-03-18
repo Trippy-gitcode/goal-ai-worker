@@ -541,167 +541,371 @@ function tdpKey(e) { chatKey(sendTaskMsg, e); }
 
 
 
-// ════════ CALENDAR (v2) ════════
+// ════════ CALENDAR (v3 — redesigned month grid) ════════
 const calPersonalEvents = {};
 let calPanelDate = null;
 let calPanelKey  = null;
 let calChatHistory = {};
 let calView = 'month'; // month | week | day
 let calSelectedDay = null;
+let calFilterGoal = -1;
+let calChatLoading = false;
 
 const GOAL_COLORS = ['#FF6B6B','#4ECDC4','#45B7D1','#F7B731','#A55EEA','#26DE81','#FC5C65','#778CA3'];
 function getGoalColor(idx){ return GOAL_COLORS[idx % GOAL_COLORS.length]; }
 
-// 日本の祝日（2026年）
-const JP_HOLIDAYS = {'1-1':'元日','1-12':'成人の日','2-11':'建国記念の日','2-23':'天皇誕生日','3-20':'春分の日','4-29':'昭和の日','5-3':'憲法記念日','5-4':'みどりの日','5-5':'こどもの日','7-20':'海の日','8-11':'山の日','9-21':'敬老の日','9-23':'秋分の日','10-12':'スポーツの日','11-3':'文化の日','11-23':'勤労感謝の日'};
-function getHoliday(m,d){ return JP_HOLIDAYS[`${m}-${d}`]||''; }
-
-function switchCalView(v){
-  calView = v;
-  document.querySelectorAll('.cal-view-tab').forEach(t=>t.classList.toggle('active',t.id===`cal-tab-${v}`));
-  renderCalendar();
-}
-function calGoToday(){
-  const now=new Date(); calYear=now.getFullYear(); calMonth=now.getMonth();
-  renderCalendar();
-}
-let calChatLoading = false;
-
-function calNav(d){
-  calMonth+=d;
-  if(calMonth>11){calMonth=0;calYear++;}
-  if(calMonth<0){calMonth=11;calYear--;}
-  renderCalendar();
+// ── B-16: Japanese holidays ──
+function getJapaneseHoliday(year, month, day) {
+  // month is 0-indexed
+  const m = month + 1;
+  const holidays = {
+    '1-1':'元日','1-2':'振替休日','1-13':'成人の日','2-11':'建国記念の日','2-23':'天皇誕生日',
+    '3-20':'春分の日','3-21':'春分の日','4-29':'昭和の日','5-3':'憲法記念日','5-4':'みどりの日',
+    '5-5':'こどもの日','7-21':'海の日','8-11':'山の日','9-15':'敬老の日','9-23':'秋分の日',
+    '10-13':'スポーツの日','11-3':'文化の日','11-23':'勤労感謝の日'
+  };
+  return holidays[m+'-'+day] || null;
 }
 
-function renderCalProgressBar(){
-  const bar=document.getElementById('cal-progress-bar');
-  if(!bar)return;
-  bar.innerHTML=ALL_GOALS.filter(g=>!g.archived).map((g,i)=>{
-    const c=getGoalColor(i);
-    const pct=g.actual||0;
-    return `<div class="cal-progress-item" onclick="filterCalGoal(${i})" title="${escapeHtml(g.title)}">
-      <div style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0;"></div>
-      <span style="max-width:80px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(g.title)}</span>
-      <div class="cal-progress-fill"><div style="width:${pct}%;background:${c}"></div></div>
-      <span style="font-family:var(--fm)">${pct}%</span>
-    </div>`;
-  }).join('');
+// Legacy compat alias
+function getHoliday(m,d){ return getJapaneseHoliday(0, m-1, d) || ''; }
+
+function getRokuyo(year, month, day) {
+  // Simplified Rokuyo calculation (month is 0-indexed)
+  const rokuyoNames = ['大安','赤口','先勝','友引','先負','仏滅'];
+  const idx = (month + 1 + day) % 6;
+  return rokuyoNames[idx];
 }
-let calFilterGoal=-1;
-function filterCalGoal(idx){ calFilterGoal=calFilterGoal===idx?-1:idx; renderCalendar(); }
+
+// ── B-1: Month grid view ──
+function getTasksForMonth(year, month) {
+  const tasks = [];
+  ALL_GOALS.forEach((g, gi) => {
+    if (g.archived) return;
+    if (!g.phases) return;
+    g.phases.forEach(phase => {
+      if (!phase.tasks) return;
+      phase.tasks.forEach(task => {
+        const dl = task.deadline || task.due;
+        if (!dl) return;
+        const d = new Date(dl);
+        if (d.getFullYear() === year && d.getMonth() === month) {
+          tasks.push({
+            title: task.title, date: dl.slice(0,10),
+            done: task.done || task.status === 'done', color: getGoalColor(gi),
+            goalTitle: g.title, source: task.source || 'user',
+            taskId: task.id, goalId: g.id, goalIdx: gi
+          });
+        }
+      });
+    });
+  });
+  return tasks;
+}
 
 function renderCalendar(){
-  const lbl=document.getElementById('cal-month-lbl');
-  lbl.textContent=`${calYear}年 ${calMonth+1}月`;
-  renderCalProgressBar();
-  const events=getCalEvents();
-  const grid=document.getElementById('cal-grid');
-  grid.innerHTML='';
-  const dows=['日','月','火','水','木','金','土'];
-  dows.forEach((d,i)=>{const el=document.createElement('div');el.className='cal-dow'+(i===0?' sun':'')+(i===6?' sat':'');el.textContent=d;grid.appendChild(el);});
+  const container = document.getElementById('cal-container');
+  if (!container) return;
+  const now = new Date();
+  if (calYear === undefined) { calYear = now.getFullYear(); calMonth = now.getMonth(); }
 
-  const firstDay=new Date(calYear,calMonth,1).getDay();
-  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
-  const daysInPrev=new Date(calYear,calMonth,0).getDate();
-  const today=new Date();
-  const todayStr=today.toISOString().slice(0,10);
+  const first = new Date(calYear, calMonth, 1);
+  const last = new Date(calYear, calMonth + 1, 0);
+  const startDay = first.getDay(); // 0=Sun
+  const daysInMonth = last.getDate();
+  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+  const today = now.getDate();
+  const isCurrentMonth = (calYear === now.getFullYear() && calMonth === now.getMonth());
+  const todayStr = now.toISOString().slice(0,10);
 
-  for(let i=0;i<firstDay;i++){
-    const cell=document.createElement('div');cell.className='cal-cell other-month';
-    const d=daysInPrev-firstDay+1+i;
-    cell.innerHTML=`<div class="cal-date">${d}</div>`;
-    grid.appendChild(cell);
-  }
-  for(let d=1;d<=daysInMonth;d++){
-    const cell=document.createElement('div');
-    cell.className='cal-cell';
-    const dow=new Date(calYear,calMonth,d).getDay();
-    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
-    if(isToday)cell.classList.add('today');
-    const dateClass='cal-date'+(dow===0?' sun':'')+(dow===6?' sat':'');
-    const holiday=getHoliday(calMonth+1,d);
-    cell.innerHTML=`<div class="${dateClass}">${d}</div>${holiday?'<div class="cal-holiday">'+holiday+'</div>':''}<div class="cal-events"></div>`;
-    const evKey=`${calYear}-${calMonth+1}-${d}`;
-    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    let evList=(events[evKey]||[]).concat(calPersonalEvents[evKey]||[]);
-    if(calFilterGoal>=0) evList=evList.filter(ev=>ev.goalIdx===calFilterGoal);
-    const evContainer=cell.querySelector('.cal-events');
-    evList.slice(0,3).forEach(ev=>{
-      const el=document.createElement('div');
-      el.className='cal-ev';
-      const isOverdue=ev.type==='task'&&dateStr<todayStr;
-      const isDueToday=ev.type==='task'&&dateStr===todayStr;
-      if(isOverdue)el.classList.add('overdue');
-      else if(isDueToday)el.classList.add('due-today');
-      el.style.background=isOverdue?'#FF4444':isDueToday?'#FF8C00':(ev.goalColor||'var(--blue)');
-      el.textContent=(ev.source==='ai'?'✨ ':'')+ev.text;
-      evContainer.appendChild(el);
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const dayNames = ['日','月','火','水','木','金','土'];
+
+  // Get tasks for this month from ALL_GOALS
+  let monthTasks = getTasksForMonth(calYear, calMonth);
+  if (calFilterGoal >= 0) monthTasks = monthTasks.filter(t => t.goalIdx === calFilterGoal);
+
+  let html = `<div class="cal-header">
+    <button class="cal-nav-btn" onclick="calPrev()">‹</button>
+    <span class="cal-month">${calYear}年${monthNames[calMonth]}</span>
+    <button class="cal-nav-btn" onclick="calNext()">›</button>
+    <button class="cal-today-btn" onclick="calToday()">今日</button>
+  </div>`;
+
+  // Goal progress bars
+  if (ALL_GOALS.length > 0) {
+    html += '<div class="cal-progress-area">';
+    ALL_GOALS.forEach((g, i) => {
+      if (g.archived) return;
+      const pct = g.target > 0 ? Math.round(g.actual / g.target * 100) : (g.actual || 0);
+      const color = getGoalColor(i);
+      const activeClass = calFilterGoal === i ? ' cal-goal-bar-active' : '';
+      html += `<div class="cal-goal-bar${activeClass}" onclick="filterCalByGoal(${i})">
+        <span class="cal-goal-dot" style="background:${color}"></span>
+        <span class="cal-goal-name">${escapeHtml((g.title||'').slice(0,10))}</span>
+        <div class="cal-goal-prog"><div class="cal-goal-prog-fill" style="width:${Math.min(pct,100)}%;background:${color}"></div></div>
+        <span class="cal-goal-pct">${pct}%</span>
+      </div>`;
     });
-    if(evList.length>3){
-      const more=document.createElement('div');more.style.cssText='font-size:8px;color:var(--muted);margin-top:1px;';
-      more.textContent=`+${evList.length-3}件`;evContainer.appendChild(more);
+    html += '</div>';
+  }
+
+  // View tabs
+  html += `<div class="cal-view-tabs">
+    <button class="cal-view-btn ${calView==='month'?'active':''}" onclick="setCalView('month')">月</button>
+    <button class="cal-view-btn ${calView==='week'?'active':''}" onclick="setCalView('week')">週</button>
+    <button class="cal-view-btn ${calView==='day'?'active':''}" onclick="setCalView('day')">日</button>
+  </div>`;
+
+  if (calView === 'week') {
+    // Get the week containing the selected date or today
+    const today2 = new Date();
+    const startOfWeek = new Date(calYear, calMonth, today2.getDate() - today2.getDay());
+
+    html += '<div class="cal-week-grid">';
+    // Header row with day names
+    html += '<div class="cal-week-header"><div class="cal-time-col"></div>';
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(startOfWeek);
+      day.setDate(day.getDate() + d);
+      const isToday2 = day.toDateString() === today2.toDateString();
+      const wDayNames = ['日','月','火','水','木','金','土'];
+      html += `<div class="cal-week-day ${isToday2?'today':''} ${d===0?'sun':''} ${d===6?'sat':''}">${wDayNames[d]} ${day.getDate()}</div>`;
     }
-    cell.onclick=()=>openCalDayPanel(d,evKey);
-    grid.appendChild(cell);
-  }
-  const total=firstDay+daysInMonth;
-  const remaining=(7-total%7)%7;
-  for(let i=1;i<=remaining;i++){
-    const cell=document.createElement('div');cell.className='cal-cell other-month';
-    cell.innerHTML=`<div class="cal-date">${i}</div>`;
-    grid.appendChild(cell);
-  }
-}
+    html += '</div>';
 
-function openCalDayPanel(day, evKey){
-  calPanelDate=day; calPanelKey=evKey;
-  const panel=document.getElementById('cal-day-panel');
-  const title=document.getElementById('cal-day-title');
-  const dows=['日','月','火','水','木','金','土'];
-  const dow=new Date(calYear,calMonth,day).getDay();
-  title.textContent=`${calMonth+1}月${day}日（${dows[dow]}）`;
-  const events=getCalEvents();
-  const evList=(events[evKey]||[]).concat(calPersonalEvents[evKey]||[]);
-  const container=document.getElementById('cal-day-tasks');
-  if(!evList.length){
-    container.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">この日のタスクはありません</div>';
-  } else {
-    container.innerHTML=evList.map(ev=>`<div class="cal-day-task">
-      <div class="cal-day-task-check ${ev.type==='done'?'done':''}" onclick="event.stopPropagation();" title="${ev.type==='done'?'完了':'未完了'}">
-        ${ev.type==='done'?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}
-      </div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;color:var(--cream);${ev.type==='done'?'text-decoration:line-through;opacity:.5;':''}">${ev.source==='ai'?'✨ ':''}${escapeHtml(ev.text)}</div>
-        ${ev.goalName?'<div style="font-size:10px;color:var(--muted);margin-top:2px;">'+escapeHtml(ev.goalName)+'</div>':''}
-      </div>
-      <div style="width:8px;height:8px;border-radius:50%;background:${ev.goalColor||'var(--muted)'};flex-shrink:0;"></div>
-    </div>`).join('');
+    // All-day tasks row
+    html += '<div class="cal-week-allday"><div class="cal-time-col" style="font-size:10px;color:var(--muted);">終日</div>';
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(startOfWeek);
+      day.setDate(day.getDate() + d);
+      const dateStr2 = day.toISOString().slice(0,10);
+      const dayTasks2 = getTasksForMonth(day.getFullYear(), day.getMonth()).filter(t => t.date === dateStr2);
+      html += '<div class="cal-week-allday-cell">';
+      dayTasks2.forEach(t => {
+        html += `<div class="task-pill" style="background:${t.color}">${escapeHtml((t.title||'').slice(0,8))}</div>`;
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+
+    // Time slots (6:00 - 23:00)
+    for (let h = 6; h < 24; h++) {
+      html += `<div class="cal-week-row"><div class="cal-time-col">${h}:00</div>`;
+      for (let d = 0; d < 7; d++) {
+        html += '<div class="cal-week-cell"></div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
   }
-  panel.classList.add('open');
-}
-function closeCalDayPanel(){ document.getElementById('cal-day-panel')?.classList.remove('open'); }
-function openCalAddModal(){ toast('タスク追加は各ゴールの「タスク」タブから行えます'); }
 
-// ════════ CALENDAR PANEL (legacy compat) ════════
-function openCalPanel(day, evKey, focusEv){ openCalDayPanel(day, evKey); }
-function closeCalPanel(){ closeCalDayPanel(); }
-
-// Calendar swipe
-(function(){
-  let sx=0,sy=0;
-  document.addEventListener('DOMContentLoaded',()=>{
-    const el=document.getElementById('cal-scroll');
-    if(!el)return;
-    el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
-    el.addEventListener('touchend',e=>{
-      const dx=e.changedTouches[0].clientX-sx;
-      const dy=Math.abs(e.changedTouches[0].clientY-sy);
-      if(Math.abs(dx)>60&&dy<40){ dx>0?calNav(-1):calNav(1); }
-    },{passive:true});
+  // Day headers
+  if (calView === 'month') {
+  html += '<div class="cal-grid">';
+  dayNames.forEach((d, i) => {
+    const cls = i === 0 ? 'cal-day-hdr sun' : i === 6 ? 'cal-day-hdr sat' : 'cal-day-hdr';
+    html += `<div class="${cls}">${d}</div>`;
   });
-})();
 
+  // Empty cells before first day (show prev month dates)
+  for (let i = 0; i < startDay; i++) {
+    const d = daysInPrev - startDay + 1 + i;
+    html += `<div class="cal-cell empty"><div class="cal-date">${d}</div></div>`;
+  }
+
+  // Day cells
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = isCurrentMonth && d === today;
+    const dayOfWeek = (startDay + d - 1) % 7;
+    const isSun = dayOfWeek === 0, isSat = dayOfWeek === 6;
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayTasks = monthTasks.filter(t => t.date === dateStr);
+    const holiday = getJapaneseHoliday(calYear, calMonth, d);
+    const rokuyo = getRokuyo(calYear, calMonth, d);
+
+    html += `<div class="cal-cell ${isToday?'today':''}" onclick="showDayDetail('${dateStr}')">
+      <div class="cal-date ${isSun||holiday?'sun':''} ${isSat?'sat':''}">
+        ${isToday ? `<span class="cal-today-num">${d}</span>` : d}
+      </div>`;
+
+    // Holiday & rokuyo
+    if (holiday) html += `<div class="cal-holiday">${holiday}</div>`;
+    html += `<div class="cal-rokuyo">${rokuyo}</div>`;
+
+    // Task pills (max 3 visible)
+    dayTasks.slice(0, 3).forEach(t => {
+      const overdue = !t.done && dateStr < todayStr;
+      const pillColor = overdue ? '#FF4444' : (t.color || '#778CA3');
+      html += `<div class="task-pill" style="background:${pillColor}">${escapeHtml((t.title||'').slice(0,6))}${t.source==='ai'?' ✨':''}</div>`;
+    });
+    if (dayTasks.length > 3) html += `<div class="task-pill-more">+${dayTasks.length-3}</div>`;
+
+    html += '</div>';
+  }
+
+  // Trailing empty cells
+  const total = startDay + daysInMonth;
+  const remaining = (7 - total % 7) % 7;
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="cal-cell empty"><div class="cal-date">${i}</div></div>`;
+  }
+
+  html += '</div>';
+  } // end if (calView === 'month')
+
+  // FAB
+  html += '<button class="cal-fab" onclick="openTaskAddModal()">＋</button>';
+
+  // Day detail panel
+  html += '<div id="cal-day-detail" class="cal-day-detail" style="display:none"></div>';
+
+  container.innerHTML = html;
+}
+
+function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+function calToday() { const n=new Date(); calYear=n.getFullYear(); calMonth=n.getMonth(); renderCalendar(); }
+function setCalView(v) { calView = v; renderCalendar(); }
+function filterCalByGoal(idx) { calFilterGoal = calFilterGoal === idx ? -1 : idx; renderCalendar(); }
+
+// Legacy aliases
+function calNav(d) { if(d>0) calNext(); else calPrev(); }
+function calGoToday() { calToday(); }
+function switchCalView(v) { setCalView(v); }
+function filterCalGoal(idx) { filterCalByGoal(idx); }
+
+function showDayDetail(dateStr) {
+  const detail = document.getElementById('cal-day-detail');
+  if (!detail) return;
+  const tasks = getTasksForMonth(parseInt(dateStr.slice(0,4)), parseInt(dateStr.slice(5,7))-1)
+    .filter(t => t.date === dateStr);
+  if (calFilterGoal >= 0) {
+    // respect active goal filter in day detail too
+  }
+
+  const d = new Date(dateStr);
+  const dayLabel = d.toLocaleDateString('ja-JP', {month:'long', day:'numeric', weekday:'short'});
+  const holiday = getJapaneseHoliday(d.getFullYear(), d.getMonth(), d.getDate());
+  const rokuyo = getRokuyo(d.getFullYear(), d.getMonth(), d.getDate());
+
+  let html = `<div class="cal-detail-hdr">
+    <span>${dayLabel}${holiday ? ' <span style="color:var(--red);font-size:12px;">'+holiday+'</span>' : ''} <span style="font-size:11px;color:var(--muted);font-weight:normal;">${rokuyo}</span></span>
+    <button onclick="document.getElementById('cal-day-detail').style.display='none'" style="background:none;border:none;color:var(--cream);font-size:18px;cursor:pointer;">×</button>
+  </div>`;
+
+  if (tasks.length === 0) {
+    html += '<div class="cal-detail-empty">この日のタスクはありません</div>';
+  } else {
+    tasks.forEach(t => {
+      html += `<div class="cal-detail-task">
+        <span class="cal-goal-dot" style="background:${t.color}"></span>
+        <input type="checkbox" ${t.done?'checked':''} onchange="toggleCalTask('${t.taskId}','${t.goalId}',this.checked)" style="accent-color:var(--amber);cursor:pointer;">
+        <span class="cal-task-title ${t.done?'done':''}">${escapeHtml(t.title)}</span>
+        <span class="cal-task-goal">${escapeHtml((t.goalTitle||'').slice(0,8))}</span>
+      </div>`;
+    });
+  }
+
+  detail.innerHTML = html;
+  detail.style.display = 'block';
+}
+
+function toggleCalTask(taskId, goalId, done) {
+  ALL_GOALS.forEach(g => {
+    if (!g.phases) return;
+    g.phases.forEach(phase => {
+      if (!phase.tasks) return;
+      phase.tasks.forEach(task => {
+        if (String(task.id) === String(taskId)) {
+          task.done = done;
+          task.status = done ? 'done' : 'todo';
+        }
+      });
+    });
+  });
+  renderCalendar();
+}
+
+// Task add modal
+function openTaskAddModal() {
+  const modal = document.createElement('div');
+  modal.id = 'task-add-modal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `<div class="modal-content" style="max-width:420px;padding:24px;">
+    <h3 style="margin-bottom:16px;color:var(--cream);">＋ 新しいタスク</h3>
+    <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">タスク名</label>
+    <input id="new-task-name" class="field-input" placeholder="タスク名を入力" style="margin-bottom:12px;">
+    <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">ゴール紐付き</label>
+    <select id="new-task-goal" class="field-select" style="margin-bottom:12px;">
+      <option value="">なし（独立タスク）</option>
+      ${ALL_GOALS.filter(g=>!g.archived).map((g,i)=>`<option value="${g.id}">${escapeHtml(g.title)}</option>`).join('')}
+    </select>
+    <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">期限（任意）</label>
+    <input id="new-task-deadline" type="date" class="field-input" style="margin-bottom:12px;">
+    <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;">繰り返し</label>
+    <select id="new-task-recurrence" class="field-select" style="margin-bottom:16px;">
+      <option value="">なし</option>
+      <option value="daily">毎日</option>
+      <option value="weekly">毎週</option>
+      <option value="monthly">毎月</option>
+    </select>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button onclick="document.getElementById('task-add-modal')?.remove()" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">キャンセル</button>
+      <button onclick="addTaskFromModal()" style="padding:8px 16px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;">追加する</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+// Legacy alias
+function openCalAddModal() { openTaskAddModal(); }
+
+function addTaskFromModal() {
+  const name = document.getElementById('new-task-name')?.value?.trim();
+  if (!name) { toast('タスク名を入力してください'); return; }
+  const goalId = document.getElementById('new-task-goal')?.value || null;
+  const deadline = document.getElementById('new-task-deadline')?.value || null;
+  const recurrence = document.getElementById('new-task-recurrence')?.value || null;
+
+  if (goalId) {
+    const goal = ALL_GOALS.find(g => String(g.id) === String(goalId));
+    if (goal) {
+      if (!goal.phases || goal.phases.length === 0) {
+        goal.phases = [{ title: 'タスク', tasks: [] }];
+      }
+      goal.phases[0].tasks.push({ id: 'task_'+Date.now(), title: name, done: false, status:'todo', deadline, due: deadline, source: 'user', recurrence });
+    }
+  }
+
+  document.getElementById('task-add-modal')?.remove();
+  renderCalendar();
+  toast('タスクを追加しました');
+}
+
+// ── Legacy panel compat ──
+function closeCalDayPanel() { const d=document.getElementById('cal-day-detail'); if(d) d.style.display='none'; }
+function openCalDayPanel(day, evKey) { showDayDetail(`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`); }
+function openCalPanel(day, evKey, focusEv) { openCalDayPanel(day, evKey); }
+function closeCalPanel() { closeCalDayPanel(); }
+
+// ── B-6: Calendar swipe navigation ──
+let calTouchStartX = 0;
+document.addEventListener('touchstart', e => {
+  const calPage = document.getElementById('pg-calendar-wrap') || document.getElementById('pg-calendar');
+  if (!calPage || !calPage.classList.contains('active')) return;
+  calTouchStartX = e.touches[0].clientX;
+}, {passive:true});
+document.addEventListener('touchend', e => {
+  const calPage = document.getElementById('pg-calendar-wrap') || document.getElementById('pg-calendar');
+  if (!calPage || !calPage.classList.contains('active')) return;
+  const dx = e.changedTouches[0].clientX - calTouchStartX;
+  if (Math.abs(dx) > 60) {
+    if (dx < 0) calNext(); else calPrev();
+  }
+}, {passive:true});
+
+// ── Legacy calendar helpers ──
 function saveCalEvent(){
   const title = document.getElementById('cal-ev-title')?.value?.trim();
   const type  = document.getElementById('cal-ev-type')?.value || 'personal';
@@ -709,11 +913,11 @@ function saveCalEvent(){
   if(!calPersonalEvents[calPanelKey]) calPersonalEvents[calPanelKey]=[];
   calPersonalEvents[calPanelKey].push({type, text:title});
   renderCalendar();
-  openCalDayPanel(calPanelDate, calPanelKey);
 }
 
 function renderCalChat(evKey){
   const chat = document.getElementById('cal-chat');
+  if (!chat) return;
   chat.innerHTML = '';
   (calChatHistory[evKey]||[]).forEach(m=>{
     const wrap=document.createElement('div');
@@ -749,16 +953,18 @@ async function autoGreetCalDay(evKey, label, evSummary){
 async function sendCalMsg(){
   if(calChatLoading||!calPanelKey) return;
   const inp=document.getElementById('cal-msg-in');
+  if(!inp) return;
   const text=inp.value.trim(); if(!text) return;
   inp.value=''; inp.style.height='auto';
+  if(!calChatHistory[calPanelKey]) calChatHistory[calPanelKey]=[];
   calChatHistory[calPanelKey].push({role:'user',content:text});
   renderCalChat(calPanelKey); calChatLoading=true;
   const chat=document.getElementById('cal-chat');
-  const allEv=(getCalEvents()[calPanelKey]||[]).concat(calPersonalEvents[calPanelKey]||[]);
-  const evSummary=allEv.map(e=>e.text).join('、')||'予定なし';
-  const calSys=`${buildAIContextCached()}\n\n対象日：${document.getElementById('cal-panel-date').textContent}\n予定：${evSummary}\n\nこの日の予定・スケジュール調整・方針についてのチャット。日程変更の提案は具体的に。3〜4文で。`;
+  if(!chat) return;
+  const monthTasks=getTasksForMonth(calYear,calMonth);
+  const evSummary=monthTasks.map(e=>e.title).join('、')||'予定なし';
+  const calSys=`${buildAIContextCached()}\n\n対象日：${calPanelKey}\n予定：${evSummary}\n\nこの日の予定・スケジュール調整・方針についてのチャット。日程変更の提案は具体的に。3〜4文で。`;
 
-  // Custom bubble (tdp style)
   const cWrap=document.createElement('div'); cWrap.className='tdp-msg ai';
   const cBub=document.createElement('div'); cBub.className='tdp-bubble stream-bubble';
   cWrap.appendChild(cBub); chat.appendChild(cWrap); chat.scrollTop=99999;
@@ -902,6 +1108,22 @@ function openGoalHub(idx){
   const goal = ALL_GOALS[idx];
   if(!goal) return;
   document.getElementById('home-chat-inner').innerHTML='';
+
+  // Breadcrumb (D-4)
+  const bcContainer = document.getElementById('hub-breadcrumb');
+  if (bcContainer) bcContainer.innerHTML = renderBreadcrumb(goal.title);
+  else {
+    const hubHeader = document.getElementById('hub-title')?.parentElement;
+    if (hubHeader) {
+      let bc = document.getElementById('hub-breadcrumb');
+      if (!bc) {
+        bc = document.createElement('div');
+        bc.id = 'hub-breadcrumb';
+        hubHeader.parentElement.insertBefore(bc, hubHeader);
+      }
+      bc.innerHTML = renderBreadcrumb(goal.title);
+    }
+  }
 
   // Header
   document.getElementById('hub-title').textContent = goal.title;
@@ -1300,6 +1522,7 @@ async function init(){
   const savedTheme = document.cookie.match(/goal_ai_theme=([^;]+)/)?.[1];
   if(savedTheme) applyTheme(savedTheme);
   restoreThemeUI();
+  if(typeof restoreAutoThemeUI === 'function') restoreAutoThemeUI();
   const savedFontSize = document.cookie.match(/goal_ai_fontsize=([^;]+)/)?.[1];
   if(savedFontSize) applyFontSize(savedFontSize);
 
@@ -1329,8 +1552,23 @@ async function init(){
     window.history.replaceState({}, '', window.location.pathname);
   }
 
+  // Owner bypass check (before auth)
+  checkOwnerParam();
+
   // Auto-register if no token
   if (!AUTH_TOKEN) await ensureAuth();
+
+  // Tester URL auto-apply (after auth)
+  await checkTesterParam();
+
+  // Plan expiry banner for testers
+  checkPlanExpiry();
+
+  // Help guide auto-show for testers on first visit
+  if (MEMBERSHIP.tester_tier && !getCookie('help_shown')) {
+    setTimeout(() => showHelpGuide(), 1000);
+    setCookie('help_shown', 'true', 365);
+  }
 
   // Validate saved token + load Supabase data on startup
   if (AUTH_TOKEN) {
@@ -1362,6 +1600,9 @@ async function init(){
   // Show onboarding popup if "私をデザイン" not done
   setTimeout(()=> checkOnboarding(), 500);
   setTimeout(()=> renderAIUnderstanding(), 600);
+
+  // Tester auto-version check
+  startVersionCheck();
 }
 
 // ════════ FEATURE 4: AI理解度 ════════
@@ -1387,6 +1628,9 @@ function renderAIUnderstanding(){
   const itemsEl = document.getElementById('ai-understand-items');
   if(pctEl) pctEl.style.width = pct+'%';
   if(numEl) numEl.textContent = pct+'%';
+  // 折りたたみ式AI理解度スコアも更新
+  const scoreEl = document.getElementById('completeness-score');
+  if(scoreEl) scoreEl.textContent = pct+'%';
   if(itemsEl){
     itemsEl.innerHTML = fields.map(f=>{
       const ok = f.check();
@@ -1720,4 +1964,195 @@ function exportText(){
     text += '\n';
   });
   navigator.clipboard?.writeText(text).then(()=>toast('テキストをコピーしました'));
+}
+
+// ════════ D-13: GOAL & TASK FULLSCREEN MODAL ════════
+function openGoalModal() {
+  let existing = document.getElementById('goal-fullscreen-modal');
+  if (existing) { existing.remove(); return; }
+
+  const modal = document.createElement('div');
+  modal.id = 'goal-fullscreen-modal';
+  modal.className = 'modal-overlay';
+  modal.style.cssText = 'display:flex;align-items:stretch;justify-content:center;';
+
+  let html = '<div class="modal-content" style="width:100%;max-width:600px;max-height:90vh;overflow-y:auto;padding:20px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><h3 style="color:var(--cream);margin:0;">ゴール＆タスク</h3><button onclick="document.getElementById(\'goal-fullscreen-modal\')?.remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;">×</button></div>';
+
+  ALL_GOALS.forEach((g, i) => {
+    if (g.archived) return;
+    const color = getGoalColor ? getGoalColor(i) : 'var(--amber)';
+    const pct = g.target > 0 ? Math.round(g.actual / g.target * 100) : 0;
+    html += '<div style="margin-bottom:16px;">';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;" onclick="document.getElementById(\'goal-fullscreen-modal\')?.remove();openGoalHub(' + i + ');">';
+    html += '<span style="width:12px;height:12px;border-radius:50%;background:' + color + ';flex-shrink:0;"></span>';
+    html += '<span style="color:var(--cream);font-weight:600;flex:1;">' + escapeHtml(g.title) + '</span>';
+    html += '<span style="font-size:11px;color:var(--muted);">' + pct + '%</span>';
+    html += '<div style="width:60px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:2px;"></div></div>';
+    html += '</div>';
+
+    // Tasks
+    if (g.phases) {
+      g.phases.forEach(phase => {
+        if (!phase.tasks) return;
+        phase.tasks.forEach(task => {
+          const taskDone = task.done || task.status === 'done';
+          html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0 6px 20px;">';
+          html += '<input type="checkbox" ' + (taskDone ? 'checked' : '') + ' onchange="toggleGoalModalTask(\'' + g.id + '\',\'' + task.id + '\',this.checked)">';
+          html += '<span style="color:var(--cream);font-size:13px;flex:1;' + (taskDone ? 'text-decoration:line-through;opacity:.5;' : '') + '">' + escapeHtml(task.title) + '</span>';
+          html += '</div>';
+        });
+      });
+    }
+    html += '</div>';
+  });
+
+  html += '<button onclick="document.getElementById(\'goal-fullscreen-modal\')?.remove();showWelcome();" style="width:100%;padding:12px;background:var(--amber-d);border:1.5px solid var(--amber);color:var(--amber);border-radius:8px;cursor:pointer;font-size:13px;margin-top:8px;">＋ 新しいゴール</button>';
+  html += '</div>';
+
+  modal.innerHTML = html;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+function toggleGoalModalTask(goalId, taskId, done) {
+  ALL_GOALS.forEach(g => {
+    if (String(g.id) !== String(goalId)) return;
+    if (!g.phases) return;
+    g.phases.forEach(phase => {
+      if (!phase.tasks) return;
+      phase.tasks.forEach(task => {
+        if (String(task.id) === String(taskId)) {
+          task.done = done;
+          task.status = done ? 'done' : 'todo';
+        }
+      });
+    });
+  });
+}
+
+// ════════ E-4: Goal assist complete → home transition ════════
+function onGoalAssistComplete(goal) {
+  toast('ゴールとタスクを設定しました！');
+  setTimeout(() => {
+    showPage('home');
+    const inner = document.getElementById('home-chat-inner');
+    if (inner) {
+      const msg = document.createElement('div');
+      msg.className = 'msg ai';
+      msg.style.marginBottom = '16px';
+      msg.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble">🎯 「${escapeHtml(goal.title)}」のゴールとタスクを設定しました！何か他に気になることはありますか？</div></div>`;
+      inner.appendChild(msg);
+      const scroll = document.getElementById('home-chat-wrap');
+      if (scroll) scroll.scrollTop = scroll.scrollHeight;
+    }
+  }, 1500);
+}
+
+// ════════ D-3: Goal save → task setup phase auto-transition ════════
+function showTaskSetupPhase(goalObj) {
+  toast('ゴールを設定しました！');
+  setTimeout(() => {
+    const modal = document.createElement('div');
+    modal.id = 'task-setup-modal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `<div class="modal-content" style="max-width:500px;padding:24px;">
+      <h3 style="color:var(--cream);margin-bottom:8px;">${escapeHtml(goalObj.title)}</h3>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">ステップ 1 ゴール ✅ → 2 タスク 👈</div>
+      <p style="color:var(--cream);margin-bottom:16px;">AIがタスクを提案します。一緒にタスクを作りましょう！</p>
+      <div style="margin-bottom:16px;">
+        <input id="task-setup-input" class="field-input" placeholder="タスクを入力して追加" style="margin-bottom:8px;">
+        <button onclick="addTaskSetupItem()" style="padding:6px 14px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-size:12px;">＋ 追加</button>
+      </div>
+      <div id="task-setup-list" style="margin-bottom:16px;"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button onclick="document.getElementById('task-setup-modal')?.remove();showPage('home');" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">ホームに戻る</button>
+        <button onclick="document.getElementById('task-setup-modal')?.remove();onGoalAssistComplete({title:'${escapeHtml(goalObj.title).replace(/'/g, "\\'")}',id:'${goalObj.id}'});" style="padding:8px 16px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;">完了</button>
+      </div>
+    </div>`;
+    modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+    document.body.appendChild(modal);
+  }, 1000);
+}
+
+function addTaskSetupItem() {
+  const input = document.getElementById('task-setup-input');
+  const list = document.getElementById('task-setup-list');
+  if (!input || !list || !input.value.trim()) return;
+  const item = document.createElement('div');
+  item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);';
+  item.innerHTML = `<input type="checkbox" checked><span style="color:var(--cream);font-size:13px;">${escapeHtml(input.value.trim())}</span>`;
+  list.appendChild(item);
+  input.value = '';
+}
+
+// ════════ D-4: Breadcrumb ════════
+function renderBreadcrumb(current) {
+  return `<div class="breadcrumb"><a onclick="showPage('home');closeSidebar();">ホーム</a><span class="sep">›</span><a onclick="showPage('goal');">ゴール</a><span class="sep">›</span><span>${escapeHtml(current)}</span></div>`;
+}
+
+// ════════ D-12: Progress stepper for goal setup ════════
+function renderStepIndicator(currentStep) {
+  const steps = ['ゴール名', '理由', '期限', '確認'];
+  return `<div class="step-indicator">${steps.map((s, i) => {
+    const cls = i < currentStep ? 'done' : i === currentStep ? 'active' : '';
+    return (i > 0 ? '<div class="step-line ' + (i <= currentStep ? 'done' : '') + '"></div>' : '') +
+      '<div class="step-dot ' + cls + '">' + (i < currentStep ? '✓' : (i+1)) + '</div>';
+  }).join('')}</div>`;
+}
+
+// ════════ AIロール提案・選択 ════════
+async function showRoleSelection(goal) {
+  try {
+    const res = await apiCall(`/api/goals/${goal.id}/suggest-roles`, 'POST', {
+      goal_title: goal.title, goal_why: goal.why || ''
+    });
+    const suggestions = res?.suggestions || [
+      { icon: '🎯', name: '万能コーチ', description: 'バランスの取れた総合支援' },
+      { icon: '🔥', name: 'スパルタ', description: '厳しく追い込む' },
+      { icon: '🤝', name: '伴走者', description: '寄り添い型サポート' }
+    ];
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `<div class="modal-content" style="max-width:420px;padding:24px;">
+      <h3 style="color:var(--cream);margin-bottom:12px;">🎯 このゴールに最適なAIロール</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+        ${suggestions.map((s,i) => `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .15s;" onclick="this.querySelector('input').checked=true;this.closest('.modal-content').querySelectorAll('label').forEach(l=>l.style.borderColor='var(--border)');this.style.borderColor='var(--amber)';">
+          <input type="radio" name="ai-role" value="${i}" style="display:none;">
+          <span style="font-size:24px;">${s.icon}</span>
+          <div><div style="font-weight:600;color:var(--cream);font-size:13px;">${escapeHtml(s.name)}</div><div style="font-size:11px;color:var(--muted);">${escapeHtml(s.description)}</div></div>
+        </label>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button onclick="this.closest('.modal-overlay').remove();" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">後で選ぶ</button>
+        <button onclick="confirmGoalRole('${goal.id}',this.closest('.modal-overlay'))" style="padding:8px 16px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;">決定</button>
+      </div>
+    </div>`;
+    modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+    modal._suggestions = suggestions;
+    document.body.appendChild(modal);
+  } catch(e) { toast('ロール提案の取得に失敗しました'); }
+}
+
+function confirmGoalRole(goalId, modal) {
+  const checked = modal.querySelector('input[name="ai-role"]:checked');
+  if (!checked) { toast('ロールを選択してください'); return; }
+  const idx = parseInt(checked.value);
+  const suggestion = modal._suggestions[idx];
+  // Save to goal
+  const goal = ALL_GOALS.find(g => String(g.id) === String(goalId));
+  if (goal) {
+    goal.ai_role_icon = suggestion.icon;
+    goal.ai_role_name = suggestion.name;
+    goal.ai_role_description = suggestion.description;
+    // Save to Supabase
+    apiCall(`/api/goals/${goalId}`, 'PATCH', {
+      ai_role_icon: suggestion.icon,
+      ai_role_name: suggestion.name,
+      ai_role_description: suggestion.description
+    });
+  }
+  modal.remove();
+  toast(`${suggestion.icon} ${suggestion.name}を設定しました`);
 }
