@@ -137,7 +137,7 @@ export default {
     try {
       // ── Version ──
       if (url.pathname === '/api/version') {
-        return corsResponse(env, jsonRes({ version: '3.8.0', deployed_at: new Date().toISOString() }), request);
+        return corsResponse(env, jsonRes({ version: '3.8.1', deployed_at: new Date().toISOString() }), request);
       }
 
       // ── Error Report ──
@@ -698,7 +698,7 @@ async function handleGPTChat(env, system, messages, auth, maxTokens) {
 }
 
 async function handleGPTSimpleChat(env, system, messages, auth) {
-  const model = 'gpt-5-nano';
+  const model = getModel(auth.plan, 'openai');
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
