@@ -139,7 +139,7 @@ export default {
     try {
       // ── Version ──
       if (url.pathname === '/api/version') {
-        return corsResponse(env, jsonRes({ version: '3.7.1', deployed_at: new Date().toISOString() }), request);
+        return corsResponse(env, jsonRes({ version: '3.7.2', deployed_at: new Date().toISOString() }), request);
       }
 
       // ── Error Report ──
@@ -604,7 +604,10 @@ function quickRoute(message) {
   }
 
   // gemini: 明確なリサーチ系
-  if (/^(今日の天気|明日の天気|ニュース|最新の|検索して|調べて|〜とは\?|〜って何)/.test(msg)) {
+  if (/^(天気|今日の天気|明日の天気|ニュース|最新の|検索して|調べて|〜とは\?|〜って何)/.test(msg)) {
+    return { route: 'gemini', coaching: false };
+  }
+  if (/天気.*(教えて|おしえて|知りたい)|ニュース.*(教えて|おしえて|知りたい)/.test(msg)) {
     return { route: 'gemini', coaching: false };
   }
 
@@ -640,25 +643,48 @@ async function callRoutingAPI(env, auth, userMessage) {
 async function handleGeminiChat(env, system, messages, auth) {
   const model = getModel(auth.plan, 'gemini');
   try {
+    // Gemini API: contentsの最初のメッセージはuserでなければならない
+    const geminiContents = messages
+      .filter(m => m.content && (typeof m.content === 'string' ? m.content.trim() : true))
+      .map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: typeof m.content === 'string' ? m.content : JSON.stringify(m.content) }] }));
+    // 最初がmodelの場合、ダミーuserを先頭に挿入
+    if (geminiContents.length > 0 && geminiContents[0].role === 'model') {
+      geminiContents.unshift({ role: 'user', parts: [{ text: '...' }] });
+    }
+    if (geminiContents.length === 0) throw new Error('No valid messages');
+
+    const reqBody = {
+      contents: geminiContents,
+      generationConfig: { maxOutputTokens: 1000 }
+    };
+    if (system) reqBody.system_instruction = { parts: [{ text: system }] };
+    // google_searchはGemini 2.0+で利用可能、2.5 flashでも対応
+    reqBody.tools = [{ google_search: {} }];
+
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`,
-      { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: system ? { parts: [{ text: system }] } : undefined,
-          contents: messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: typeof m.content === 'string' ? m.content : JSON.stringify(m.content) }] })),
-          tools: [{ google_search: {} }]
-        }) }
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(reqBody) }
     );
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('Gemini API error:', res.status, errText);
+      throw new Error('Gemini API error: ' + res.status);
+    }
+
     const data = await res.json();
     const text = data.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
     if (!text) throw new Error('Empty Gemini response');
     const sseBody = `data: {"type":"content_block_delta","delta":{"text":${JSON.stringify(text)}}}\n\ndata: [DONE]\n\n`;
     return new Response(sseBody, { status: 200, headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Model-Used': model } });
-  } catch (e) { return null; } // null = fallback to Claude
+  } catch (e) {
+    console.error('handleGeminiChat failed:', e.message);
+    return null; // fallback to Claude
+  }
 }
 
 async function handleGPTChat(env, system, messages, auth, maxTokens) {
-  const model = getModel(auth.plan, 'gpt');
+  const model = getModel(auth.plan, 'openai'); // PLAN_MODELSのキーは'openai'
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -670,7 +696,7 @@ async function handleGPTChat(env, system, messages, auth, maxTokens) {
     if (!text) throw new Error('Empty GPT response');
     const sseBody = `data: {"type":"content_block_delta","delta":{"text":${JSON.stringify(text)}}}\n\ndata: [DONE]\n\n`;
     return new Response(sseBody, { status: 200, headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Model-Used': model } });
-  } catch (e) { return null; }
+  } catch (e) { console.error('handleGPTChat failed:', e.message); return null; }
 }
 
 async function handleGPTSimpleChat(env, system, messages, auth) {
@@ -2773,7 +2799,7 @@ function corsResponse(env, response, request) {
   if (requestOrigin && allowedOrigins.includes(requestOrigin)) { headers.set('Access-Control-Allow-Origin', requestOrigin); } else if (!requestOrigin) { headers.set('Access-Control-Allow-Origin', allowedOrigins[0] || 'https://goal-ai-frontend.pages.dev'); } else { headers.set('Access-Control-Allow-Origin', 'null'); }
   headers.set('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
   headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Secret, X-Owner-Key');
-  headers.set('Access-Control-Expose-Headers', 'X-RateLimit-Remaining, X-Model-Used, X-Show-NPS');
+  headers.set('Access-Control-Expose-Headers', 'X-RateLimit-Remaining, X-Model-Used, X-Show-NPS, X-Model-Fallback, X-Reset-Hours');
   headers.set('Access-Control-Max-Age', '86400');
 
   return new Response(response.body, {
