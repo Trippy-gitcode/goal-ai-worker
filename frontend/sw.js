@@ -10,6 +10,7 @@ const STATIC_ASSETS = [
   '/js/goals.js',
   '/js/profile.js',
   '/js/ui.js',
+  '/js/location.js',
   '/js/app.js',
   '/manifest.json',
 ];

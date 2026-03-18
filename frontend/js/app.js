@@ -123,5 +123,8 @@ function showExpiryBanner(hoursLeft) {
   });
 })();
 
+// ════════ LOCATION INIT ════════
+initLocation();
+
 // ════════ APP BOOTSTRAP ════════
 init();

@@ -648,7 +648,7 @@ async function callRoutingAPI(env, auth, userMessage) {
 
 // ═══════ AI ROUTE HANDLERS (Gemini / GPT / GPT-simple) ═══════
 
-async function handleGeminiChat(env, system, messages, auth) {
+async function handleGeminiChat(env, system, messages, auth, userLocation) {
   const model = getModel(auth.plan, 'gemini');
   try {
     // Gemini API: contentsの最初のメッセージはuserでなければならない
@@ -661,11 +661,18 @@ async function handleGeminiChat(env, system, messages, auth) {
     }
     if (geminiContents.length === 0) throw new Error('No valid messages');
 
+    // 位置情報をシステムプロンプトに注入
+    let geminiSystem = system || '';
+    if (userLocation && userLocation.city) {
+      geminiSystem += `\n\nユーザーの現在地: ${userLocation.region} ${userLocation.city}`;
+      geminiSystem += `\n天気・交通・地域情報の質問には、この位置情報を踏まえて回答してください。`;
+    }
+
     const reqBody = {
       contents: geminiContents,
       generationConfig: { maxOutputTokens: 1000 }
     };
-    if (system) reqBody.system_instruction = { parts: [{ text: system }] };
+    if (geminiSystem) reqBody.system_instruction = { parts: [{ text: geminiSystem }] };
     // google_searchはGemini 2.0+で利用可能、2.5 flashでも対応
     reqBody.tools = [{ google_search: {} }];
 
@@ -907,7 +914,7 @@ async function handleChatStream(request, env, ctx) {
   if (!rl.ok) return jsonRes({ error: 'Rate limit exceeded' }, 429);
 
   const body = await request.json();
-  const { system, messages, maxTokens = 600, free_no_count, context } = body;
+  const { system, messages, maxTokens = 600, free_no_count, context, location } = body;
 
   // free_no_count validation: only allowed for design/feedback contexts
   if (free_no_count && !['design', 'feedback'].includes(context)) {
@@ -924,6 +931,15 @@ async function handleChatStream(request, env, ctx) {
   // フェアユースポリシー
   const fu = await checkFairUse(env, auth.userId);
   if (fu.throttle) await new Promise(r => setTimeout(r, fu.delayMs));
+
+  // 位置情報: KVにキャッシュ（1時間TTL）
+  let userLocation = location;
+  if (location && location.city) {
+    ctx.waitUntil(env.KV.put(`location:${auth.tokenId}`, JSON.stringify(location), { expirationTtl: 3600 }).catch(() => {}));
+  }
+  if (!userLocation) {
+    try { const cached = await env.KV.get(`location:${auth.tokenId}`); if (cached) userLocation = JSON.parse(cached); } catch(e) {}
+  }
 
   // Step 10: ルーティング + プロフィール + RAG 全並列実行
   const userMessage = messages?.[messages.length - 1]?.content || '';
@@ -965,7 +981,7 @@ async function handleChatStream(request, env, ctx) {
   if (finalRoute !== 'claude') {
     let routeResponse = null;
     if (finalRoute === 'gemini') {
-      routeResponse = await handleGeminiChat(env, enhancedSystem, compressedMessages, auth);
+      routeResponse = await handleGeminiChat(env, enhancedSystem, compressedMessages, auth, userLocation);
     } else if (finalRoute === 'gpt') {
       routeResponse = await handleGPTChat(env, enhancedSystem, compressedMessages, auth, maxTokens);
     } else if (finalRoute === 'gpt-simple') {
