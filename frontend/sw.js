@@ -1,4 +1,4 @@
-const CACHE_NAME = 'goal-ai-v3.7.7';
+const CACHE_NAME = 'goal-ai-v3.8.0';
 
 const STATIC_ASSETS = [
   '/',

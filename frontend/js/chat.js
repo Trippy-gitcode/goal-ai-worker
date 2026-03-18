@@ -865,7 +865,7 @@ async function sendHomeMsg(){
         });
       },
       async () => {
-        await homeSmartRoute(text, today, homeInner, homeWrap);
+        await homeClaudeStream(today, homeInner, homeWrap);
         homeLoading = false; homeSendRestore();
       }
     );
@@ -873,9 +873,9 @@ async function sendHomeMsg(){
   }
 
   try{
-    await homeSmartRoute(text, today, homeInner, homeWrap);
+    // 全メッセージを /api/chat/stream に送信（Worker側でルーティング判定）
+    await homeClaudeStream(today, homeInner, homeWrap);
   }catch(e){
-    // フォールバック: エラー表示
     const errBub = document.createElement('div');
     errBub.className = 'msg ai';
     errBub.style.marginBottom = '16px';
@@ -1105,8 +1105,9 @@ async function homeClaudeStream(today, homeInner, homeWrap){
     innerEl: homeInner, scrollEl: homeWrap,
     onDone(t){
       if(!t || !t.trim()) return;
-      homeMsgs.push({role:'ai',content:t,time:now(),date:today,model:'Claude'}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs();
-      if(MEMBERSHIP.plan==='free'){ if(FREE_MODEL_USAGE.claude.remaining>0){FREE_MODEL_USAGE.claude.remaining--;FREE_MODEL_USAGE.claude.used++;} renderModelUsageBadge(); }
+      // モデル名はX-Model-Usedヘッダーから取得（Worker側ルーティングで動的に変わる）
+      const modelName = window._lastModelUsed ? formatModelName(window._lastModelUsed) : 'Claude';
+      homeMsgs.push({role:'ai',content:t,time:now(),date:today,model:modelName}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs();
     }
   });
 }
