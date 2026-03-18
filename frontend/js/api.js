@@ -76,7 +76,7 @@ async function apiSaveMessages(messages) {
   try {
     await fetch(`${WORKER_URL}/api/history`, {
       method: 'POST', headers: getAuthHeaders(),
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ messages, sessionId: currentSessionId }),
     });
   } catch (e) { console.error('apiSaveMessages error:', e); }
 }
