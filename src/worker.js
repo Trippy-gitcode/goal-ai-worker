@@ -137,7 +137,7 @@ export default {
     try {
       // ── Version ──
       if (url.pathname === '/api/version') {
-        return corsResponse(env, jsonRes({ version: '3.7.6', deployed_at: new Date().toISOString() }), request);
+        return corsResponse(env, jsonRes({ version: '3.7.7', deployed_at: new Date().toISOString() }), request);
       }
 
       // ── Error Report ──
@@ -923,15 +923,18 @@ async function handleChatStream(request, env, ctx) {
   let localRoute = quickRoute(userMessage);
 
   const [routeFromAPI, profile, ragResults] = await Promise.all([
-    (!localRoute) ? callRoutingAPI(env, auth, userMessage) : Promise.resolve(null),
-    getProfileWithCache(env, auth.tokenId, ctx),
-    env.RAG_ENABLED === 'true' ? searchRelatedMessages(env, auth.tokenId, userMessage, goalId) : Promise.resolve([])
+    (!localRoute) ? callRoutingAPI(env, auth, userMessage).catch(() => 'claude') : Promise.resolve(null),
+    getProfileWithCache(env, auth.tokenId, ctx).catch(() => null),
+    env.RAG_ENABLED === 'true' ? searchRelatedMessages(env, auth.tokenId, userMessage, goalId).catch(() => []) : Promise.resolve([])
   ]);
 
   const finalRoute = localRoute?.route || routeFromAPI || 'claude';
 
-  // 会話履歴圧縮
-  const compressedMessages = await buildCompressedMessages(env, auth.tokenId, sessionId, messages);
+  // 会話履歴圧縮（sessionIdがない場合はスキップ）
+  let compressedMessages = messages;
+  try {
+    if (sessionId) compressedMessages = await buildCompressedMessages(env, auth.tokenId, sessionId, messages);
+  } catch(e) { console.error('compression failed:', e.message); }
 
   // システムプロンプト構築（fixedPart + variablePart）
   const aiMemo = profile?.ai_memo || null;
@@ -939,10 +942,12 @@ async function handleChatStream(request, env, ctx) {
   let fixedPart = '', variablePart = '';
 
   if (body.profile_inject) {
-    const result = await buildServerSystemPrompt(body, auth.tokenId, env, { aiMemo, ragResults });
-    fixedPart = result.fixedPart;
-    variablePart = result.variablePart;
-    enhancedSystem = fixedPart + variablePart;
+    try {
+      const result = await buildServerSystemPrompt(body, auth.tokenId, env, { aiMemo, ragResults });
+      fixedPart = result.fixedPart || '';
+      variablePart = result.variablePart || '';
+      enhancedSystem = fixedPart + variablePart;
+    } catch(e) { console.error('buildServerSystemPrompt error:', e.message); }
   }
 
   // ルーティング分岐: Gemini / GPT / GPT-simple はClaude以外で応答
