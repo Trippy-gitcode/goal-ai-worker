@@ -139,7 +139,7 @@ export default {
     try {
       // ── Version ──
       if (url.pathname === '/api/version') {
-        return corsResponse(env, jsonRes({ version: '3.7.0', deployed_at: new Date().toISOString() }), request);
+        return corsResponse(env, jsonRes({ version: '3.7.1', deployed_at: new Date().toISOString() }), request);
       }
 
       // ── Error Report ──
@@ -617,6 +617,78 @@ function quickRoute(message) {
   return null;
 }
 
+// ═══════ ROUTING API CALL ═══════
+
+async function callRoutingAPI(env, auth, userMessage) {
+  try {
+    const routeSystem = 'ユーザーのメッセージを分類せよ。以下のカテゴリから1単語のみ返せ: gemini（天気・ニュース・検索・調査）, gpt（翻訳・SNS・コピー・要約）, gpt-simple（相槌・短い返事・挨拶）, claude（コーチング・戦略・感情・その他すべて）';
+    const model = getModel(auth.plan, 'router');
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
+      body: JSON.stringify({ model, max_completion_tokens: 10, messages: [{ role: 'system', content: routeSystem }, { role: 'user', content: userMessage.slice(0, 300) }] })
+    });
+    const data = await res.json();
+    const result = (data.choices?.[0]?.message?.content || '').trim().toLowerCase().replace(/[^a-z-]/g, '');
+    if (['gemini', 'gpt', 'gpt-simple', 'claude'].includes(result)) return result;
+    return 'claude';
+  } catch (e) { return 'claude'; }
+}
+
+// ═══════ AI ROUTE HANDLERS (Gemini / GPT / GPT-simple) ═══════
+
+async function handleGeminiChat(env, system, messages, auth) {
+  const model = getModel(auth.plan, 'gemini');
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: system ? { parts: [{ text: system }] } : undefined,
+          contents: messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: typeof m.content === 'string' ? m.content : JSON.stringify(m.content) }] })),
+          tools: [{ google_search: {} }]
+        }) }
+    );
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
+    if (!text) throw new Error('Empty Gemini response');
+    const sseBody = `data: {"type":"content_block_delta","delta":{"text":${JSON.stringify(text)}}}\n\ndata: [DONE]\n\n`;
+    return new Response(sseBody, { status: 200, headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Model-Used': model } });
+  } catch (e) { return null; } // null = fallback to Claude
+}
+
+async function handleGPTChat(env, system, messages, auth, maxTokens) {
+  const model = getModel(auth.plan, 'gpt');
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
+      body: JSON.stringify({ model, max_completion_tokens: Math.min(maxTokens, 1000), messages: [{ role: 'system', content: system || '' }, ...messages] })
+    });
+    const data = await res.json();
+    const text = data.choices?.[0]?.message?.content || '';
+    if (!text) throw new Error('Empty GPT response');
+    const sseBody = `data: {"type":"content_block_delta","delta":{"text":${JSON.stringify(text)}}}\n\ndata: [DONE]\n\n`;
+    return new Response(sseBody, { status: 200, headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Model-Used': model } });
+  } catch (e) { return null; }
+}
+
+async function handleGPTSimpleChat(env, system, messages, auth) {
+  const model = 'gpt-5-nano';
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
+      body: JSON.stringify({ model, max_completion_tokens: 150, messages: [{ role: 'system', content: system || '' }, ...messages] })
+    });
+    const data = await res.json();
+    const text = data.choices?.[0]?.message?.content || '';
+    if (!text) throw new Error('Empty GPT-simple response');
+    const sseBody = `data: {"type":"content_block_delta","delta":{"text":${JSON.stringify(text)}}}\n\ndata: [DONE]\n\n`;
+    return new Response(sseBody, { status: 200, headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Model-Used': model } });
+  } catch (e) { return null; }
+}
+
 // ═══════ PROMPT CACHE — ANTHROPIC REQUEST BUILDER (Step 4) ═══════
 
 function buildAnthropicRequest(fixedPart, variablePart, messages, model, maxTokens, env) {
@@ -819,15 +891,21 @@ async function handleChatStream(request, env, ctx) {
   const fu = await checkFairUse(env, auth.userId);
   if (fu.throttle) await new Promise(r => setTimeout(r, fu.delayMs));
 
-  // Step 10: 並列実行（ルーティング不要ここではプロフィール+RAG）
+  // Step 10: ルーティング + プロフィール + RAG 全並列実行
   const userMessage = messages?.[messages.length - 1]?.content || '';
   const sessionId = body.sessionId || null;
   const goalId = body.goal_id || null;
 
-  const [profile, ragResults] = await Promise.all([
+  // ローカルルーティング（~0ms）
+  let localRoute = quickRoute(userMessage);
+
+  const [routeFromAPI, profile, ragResults] = await Promise.all([
+    (!localRoute) ? callRoutingAPI(env, auth, userMessage) : Promise.resolve(null),
     getProfileWithCache(env, auth.tokenId, ctx),
     RAG_ENABLED ? searchRelatedMessages(env, auth.tokenId, userMessage, goalId) : Promise.resolve([])
   ]);
+
+  const finalRoute = localRoute?.route || routeFromAPI || 'claude';
 
   // 会話履歴圧縮
   const compressedMessages = await buildCompressedMessages(env, auth.tokenId, sessionId, messages);
@@ -842,6 +920,28 @@ async function handleChatStream(request, env, ctx) {
     fixedPart = result.fixedPart;
     variablePart = result.variablePart;
     enhancedSystem = fixedPart + variablePart;
+  }
+
+  // ルーティング分岐: Gemini / GPT / GPT-simple はClaude以外で応答
+  if (finalRoute !== 'claude') {
+    let routeResponse = null;
+    if (finalRoute === 'gemini') {
+      routeResponse = await handleGeminiChat(env, enhancedSystem, compressedMessages, auth);
+    } else if (finalRoute === 'gpt') {
+      routeResponse = await handleGPTChat(env, enhancedSystem, compressedMessages, auth, maxTokens);
+    } else if (finalRoute === 'gpt-simple') {
+      routeResponse = await handleGPTSimpleChat(env, enhancedSystem, compressedMessages, auth);
+    }
+    if (routeResponse) {
+      // 非同期後処理（ルーティング先に関わらず実行）
+      if (env.SUPABASE_URL) updateStreak(auth.tokenId, env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+      if (ctx) {
+        if (MEMO_ENABLED) ctx.waitUntil(countRecentMessages(env, auth.tokenId).then(c => { if (c > 0 && c % 5 === 0) return regenerateAiMemo(env, auth.tokenId, goalId); }).catch(() => {}));
+        if (RAG_ENABLED && userMessage) ctx.waitUntil(generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage).catch(() => {}));
+      }
+      return routeResponse;
+    }
+    // routeResponse === null → フォールバックとしてClaudeに進む
   }
 
   // Freeプラン: Claude上限チェック → 超過時はnanoでSSE応答
