@@ -137,7 +137,7 @@ export default {
     try {
       // ── Version ──
       if (url.pathname === '/api/version') {
-        return corsResponse(env, jsonRes({ version: '3.8.2', deployed_at: new Date().toISOString() }), request);
+        return corsResponse(env, jsonRes({ version: '3.8.3', deployed_at: new Date().toISOString() }), request);
       }
 
       // ── Error Report ──
@@ -1021,7 +1021,6 @@ async function handleChatStream(request, env, ctx) {
       'Content-Type': 'application/json',
       'x-api-key': env.ANTHROPIC_API_KEY,
       'anthropic-version': '2023-06-01',
-      'anthropic-beta': 'prompt-caching-2024-07-04',
     },
     body: JSON.stringify(apiBody),
     signal: controller.signal,
