@@ -1392,11 +1392,16 @@ async function deleteSelectedSessions() {
   if (selectedSessions.size === 0) return;
   if (!confirm(`${selectedSessions.size}件の会話を削除しますか？`)) return;
   for (const sid of selectedSessions) {
-    try { await apiCall(`/api/history/${sid}`, 'DELETE'); } catch(e) {}
+    try { await fetch(`${WORKER_URL}/api/history?sessionId=${sid}`, {method:'DELETE', headers:getAuthHeaders()}); } catch(e) {}
   }
+  // ローカルのリストからも削除
+  chatSessions = chatSessions.filter(s => !selectedSessions.has(s.sessionId));
   selectedSessions.clear();
   historySelectMode = false;
+  renderChatHistoryList(chatSessions);
   renderSidebarChatRecords();
+  const footer = document.getElementById('history-select-footer');
+  if (footer) footer.style.display = 'none';
   toast('会話を削除しました');
 }
 

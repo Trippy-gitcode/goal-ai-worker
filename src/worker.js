@@ -134,7 +134,7 @@ export default {
     try {
       // ── Version ──
       if (url.pathname === '/api/version') {
-        return corsResponse(env, jsonRes({ version: '3.5.5', deployed_at: new Date().toISOString() }), request);
+        return corsResponse(env, jsonRes({ version: '3.5.6', deployed_at: new Date().toISOString() }), request);
       }
 
       // ── Error Report ──
@@ -225,6 +225,9 @@ export default {
       }
       if (url.pathname === '/api/history' && request.method === 'POST') {
         return corsResponse(env, await handleHistorySave(request, env, ctx), request);
+      }
+      if (url.pathname === '/api/history' && request.method === 'DELETE') {
+        return corsResponse(env, await handleHistoryDelete(request, env), request);
       }
 
       // ── Voice transcription ──
@@ -1700,6 +1703,24 @@ async function handleHistorySave(request, env, ctx) {
   }
 
   return jsonRes({ saved: result?.length || 0 });
+}
+
+async function handleHistoryDelete(request, env) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+
+  const userId = await getUserIdFromToken(env, auth.tokenId);
+  if (!userId) return jsonRes({ error: 'User not found' }, 404);
+
+  const url = new URL(request.url);
+  const sessionId = url.searchParams.get('sessionId');
+  if (!sessionId) return jsonRes({ error: 'sessionId required' }, 400);
+
+  await supabaseQuery(env, 'chat_messages', 'DELETE', {
+    filters: `user_id=eq.${userId}&session_id=eq.${sessionId}`
+  });
+
+  return jsonRes({ deleted: true });
 }
 
 async function autoTagSession(sessionId, messages, env) {
