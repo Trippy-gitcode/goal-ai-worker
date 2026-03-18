@@ -183,9 +183,11 @@ function showPage(pg) {
     document.getElementById('pg-welcome-wrap').classList.add('active');
     document.getElementById('topbar').style.display='none';
   }
-  // D-8: Page transition animation
-  const activePg = document.querySelector('.page.active');
-  if (activePg) activePg.classList.add('page-enter');
+  // D-8: Page transition animation (skip on initial load)
+  if (window._appInitDone) {
+    const activePg = document.querySelector('.page.active');
+    if (activePg) activePg.classList.add('page-enter');
+  }
 }
 
 // ════════ SPARTAN MODE ════════

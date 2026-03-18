@@ -1531,6 +1531,7 @@ async function init(){
   renderMembershipUI();
   updateNotifSettingUI();
   showPage('home');
+  window._appInitDone = true; // 初回ロード完了フラグ（以降のshowPageでアニメーション有効）
   showHomeScreen();
   initAvatarDisplay();
 
