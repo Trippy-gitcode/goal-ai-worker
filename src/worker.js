@@ -134,7 +134,7 @@ export default {
     try {
       // ── Version ──
       if (url.pathname === '/api/version') {
-        return corsResponse(env, jsonRes({ version: '3.5.9', deployed_at: new Date().toISOString() }), request);
+        return corsResponse(env, jsonRes({ version: '3.6.0', deployed_at: new Date().toISOString() }), request);
       }
 
       // ── Error Report ──

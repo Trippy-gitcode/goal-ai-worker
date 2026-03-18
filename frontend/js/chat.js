@@ -1747,13 +1747,14 @@ const FB_SYS = `あなたはGOAL AIの改善担当です。ユーザーが貴重
 function openFeedbackChat(){
   fbMsgs = []; fbHistory = []; fbLoading = false; fbTurnCount = 0; fbSummary = '';
   fbThemes = {good:null, bad:null, wish:null};
+  closeSidebar();
   const modal = document.getElementById('feedback-modal');
   modal.style.display = 'flex';
   const chat = document.getElementById('feedback-chat');
   chat.innerHTML = '';
   appendFbMsg('ai', '使ってみてどうでしたか？');
   fbHistory.push({role:'assistant', content:'使ってみてどうでしたか？'});
-  document.getElementById('feedback-input-area').style.display = 'flex';
+  document.getElementById('feedback-input-area').style.display = '';
 }
 function closeFeedback(){ document.getElementById('feedback-modal').style.display = 'none'; }
 
