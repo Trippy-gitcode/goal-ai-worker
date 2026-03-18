@@ -400,6 +400,8 @@ async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, 
     const isFallback = res.headers.get('X-Model-Fallback') === 'true';
     const resetHours = res.headers.get('X-Reset-Hours');
     if (isFallback) showNanoFallbackBanner(resetHours);
+    // モデル名をヘッダーから取得（フッター表示用）
+    window._lastModelUsed = res.headers.get('X-Model-Used') || null;
     const reader = res.body.getReader();
     const dec = new TextDecoder('utf-8');
     let full = '';
@@ -498,8 +500,25 @@ function streamAppend(bub, fullText){
   }
 }
 
+function formatModelName(model) {
+  if (!model) return 'Claude';
+  if (model.includes('gemini')) return 'Gemini';
+  if (model.includes('gpt-5-nano')) return 'GPT nano';
+  if (model.includes('gpt-5-mini')) return 'GPT';
+  if (model.includes('gpt-5')) return 'GPT';
+  if (model.includes('gpt')) return 'GPT';
+  if (model.includes('opus')) return 'Claude Opus';
+  if (model.includes('sonnet')) return 'Claude Sonnet';
+  if (model.includes('claude')) return 'Claude';
+  return model;
+}
+
 // ストリーミング完了時 — バッファ残りを一括表示してMarkdown変換
 function streamFinalize(bub, fullText, modelLabel){
+  // X-Model-Usedヘッダーからモデル名を取得（ルーティングで動的に変わる）
+  const actualModel = window._lastModelUsed || modelLabel;
+  const displayName = formatModelName(actualModel);
+  modelLabel = displayName;
   bub._streamDone = true;
   if(bub._animTimer){ clearInterval(bub._animTimer); bub._animTimer = null; }
   // 【1】空テキストならバブルごと削除
