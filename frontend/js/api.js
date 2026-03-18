@@ -712,3 +712,17 @@ function handleImageUpload(event, inputEl) {
   event.target.value = '';
 }
 
+// ═══ ES Module: expose to window ═══
+Object.assign(window, {
+  apiLoadGoals, apiCreateGoal, apiUpdateGoal, apiDeleteGoal,
+  apiLoadHistory, apiSaveMessages, redeemPromoCode, validateToken, fetchUsage,
+  escapeHtml, toast, CHAT_CONFIG, chatResize, chatKey,
+  showChatTyping, hideChatTyping, apiCall, chatStream,
+  checkAndShowSelections, selectAIOption, sendChatMsg, _doChatStream,
+  now, scrollDown, scrollToLatest, autoResize, handleKey,
+  streamAI, mkStreamBubble, streamAppend, formatModelName, streamFinalize,
+  buildAIContextCached, invalidateCtxCache, compressImage,
+  getDeviceInfo, appendChatMsg, sendChatAPI, sendChatStream,
+  setupChatInput, startVoiceInput, handleImageUpload
+});
+

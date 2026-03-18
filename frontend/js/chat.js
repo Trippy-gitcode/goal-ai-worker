@@ -2289,3 +2289,52 @@ async function confirmTaskCard() {
   toast(`${count}件のタスクを追加しました`);
 }
 
+// ═══ ES Module: expose to window ═══
+// Mutable primitives shared cross-file
+Object.defineProperty(window, 'memoToastShown', {
+  get() { return memoToastShown; }, set(v) { memoToastShown = v; },
+  configurable: true, enumerable: true
+});
+Object.defineProperty(window, 'homeImageData', {
+  get() { return homeImageData; }, set(v) { homeImageData = v; },
+  configurable: true, enumerable: true
+});
+// Functions and constants
+Object.assign(window, {
+  _msgActionsHtml, showNanoFallbackBanner, hideNanoFallbackBanner,
+  getLogoSVG, getUserAvatarText, renderUserAvatarInner,
+  showTyping, hideTyping, startReview, showWelcome, setEx, startGoal,
+  voiceUIStart, voiceUIStop, voiceSetFinal, startVoiceLevelAnim,
+  showVoiceInterimBubble, removeVoiceInterimBubble, toggleHomeVoice,
+  handleHomeImage, handleHomePaste, handleHomeDrop, processHomeImageFile,
+  showHomeImagePreview, clearHomeImage, updateHomePlaceholder, initHomePlaceholder,
+  HOME_CHAT_KEY, SYS_HOME, saveHomeMsgs,
+  buildEmptyHomeHTML, renderHomeMsgs, renderMsgContent, mkHomeMsg,
+  copyMessage, quoteMessage, editAndResend,
+  sendHomeMsg, ROUTE_PROMPT, routeMessage, homeSmartRoute,
+  executeRoute, homeClaudeStream, retryLastHomeMsg, addRouteFollowUp,
+  showHomeScreen, renderWelcomeView, showProfileHint,
+  newHomeChat, goHomeNewChat, generateSessionTitle,
+  renderSidebarChatRecords, homeResize, homeSendRestore,
+  openChatHistory, closeChatHistory, deleteChatSession, isJunkSession,
+  renderChatHistoryList, filterChatHistory, loadChatSession,
+  toggleHistorySelectMode, toggleSessionSelect, updateSelectFooter,
+  toggleSelectAll, deleteSelectedSessions,
+  renderModelUsageBadge, showModelUsageDetail, homeKey,
+  renderHomeSummary, switchHsTaskTab, getThisWeekTasks, renderHsTaskList,
+  hsToggleTask, recalcGoalProgress, openHomeTaskPanel, closeHomeTaskPanel,
+  htpUpdateStatus, htpQuickChat, sendHtpMsg, htpResize, htpKey,
+  refreshQuote, FB_SYS, openFeedbackChat, closeFeedback, appendFbMsg,
+  appendFbButtons, sendFeedbackMsg, extractThemes, continueFeedback,
+  correctFeedback, submitFeedback,
+  toggleHomeSearch, clearHomeSearch, searchHomeChat,
+  toggleHubSearch, clearHubSearch, searchHubChat,
+  requestNotifPermission, updateNotifSettingUI, scheduleNotif,
+  renderGoalProposalCard, startGoalAssist, declineGoalProposal,
+  shouldRemindGoal, updateTopicTags, suggestGoalFromTag, showGoalAssistBanner,
+  CHAT_CONFIGS, HOME_ROLES, updateRoleBadge, getCurrentChatConfig,
+  hideTaskChip, showTaskChip, highlightTaskChip,
+  openTaskFromChat, getLastAIMessage, appendTaskSuggestionButton,
+  requestTaskBreakdown, showTaskCard, confirmTaskCard
+});
+

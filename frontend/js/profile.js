@@ -1219,4 +1219,25 @@ function initAvatarDisplay() {
   updateAvatarDisplay(USER_PROFILE.avatar_base64 || null);
 }
 
+// ═══ ES Module: expose to window ═══
+Object.assign(window, {
+  USER_PROFILE, buildAIContext, renderCharts,
+  selRadio, selMBTI, saveGoal, openProfile, closeProfile, closeProfileOutside,
+  WORRIES_SYS, initWorriesChat, appendWorryBubble, sendWorriesMsg,
+  editWorriesSummary, worriesResize, worriesKey,
+  delRoutine, cyclePri, addRoutine, KNOW_THEMES,
+  closeOnboarding, checkOnboarding,
+  openMyselfHub, openProfileDirect, switchMyselfTab,
+  startKnowSession, updateKnowChips, appendKnowMsg, sendKnowMsg,
+  generateKnowSummary, applySummaryToProfile,
+  knowResize, knowKey, editVision, saveVision, renderVision, addVisionItem,
+  regenCatchcopy, runConnectAnalysis, renderConnectContent, hubChatFromConnect,
+  updateProfile, saveProfile, updateAge, selGender, toggleInterest,
+  addEnergyTag, setNetworkQ, renderMyselfProfile,
+  MBTI_QUICK, MBTI_FULL, MBTI_TYPES,
+  startMbtiTest, renderMbtiQuestion, answerMbti, calcMbtiType,
+  runGapAnalysis, renderGapContent,
+  handleAvatarUpload, cropToCircle, updateAvatarDisplay,
+  toggleCompletenessDetail, initProfileScrollHandler, initAvatarDisplay
+});
 

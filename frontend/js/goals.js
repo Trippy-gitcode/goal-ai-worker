@@ -2157,3 +2157,55 @@ function confirmGoalRole(goalId, modal) {
   modal.remove();
   toast(`${suggestion.icon} ${suggestion.name}を設定しました`);
 }
+
+// ═══ ES Module: expose to window ═══
+// Mutable primitives shared cross-file (used in ui.js, chat.js)
+Object.defineProperty(window, 'spartanMode', {
+  get() { return spartanMode; }, set(v) { spartanMode = v; },
+  configurable: true, enumerable: true
+});
+Object.defineProperty(window, 'mencareMode', {
+  get() { return mencareMode; }, set(v) { mencareMode = v; },
+  configurable: true, enumerable: true
+});
+Object.defineProperty(window, 'mencareEndTime', {
+  get() { return mencareEndTime; }, set(v) { mencareEndTime = v; },
+  configurable: true, enumerable: true
+});
+Object.defineProperty(window, 'mencareTimerInterval', {
+  get() { return mencareTimerInterval; }, set(v) { mencareTimerInterval = v; },
+  configurable: true, enumerable: true
+});
+Object.defineProperty(window, 'curPage', {
+  get() { return curPage; }, set(v) { curPage = v; },
+  configurable: true, enumerable: true
+});
+// Constants, arrays, functions
+Object.assign(window, {
+  TASKS, ALL_GOALS, GOAL_COLORS, getGoalColor,
+  getActiveGoalPhases, switchTaskView, renderTaskTimeView,
+  renderGoalSelectorBar, renderTodaySummaryBar, getTodayTasks,
+  setFilter, renderTasks, renderGoalView, renderTodayView,
+  mkTaskRow, cycleStatus, addTask, openTaskDetail, closeTaskDetail,
+  updateTaskStatus, renderTaskChat, mkTdpMsg, sendTaskMsg, tdpResize, tdpKey,
+  getJapaneseHoliday, getHoliday, getRokuyo, getTasksForMonth,
+  renderCalendar, calPrev, calNext, calToday, setCalView, filterCalByGoal,
+  calNav, calGoToday, switchCalView, filterCalGoal,
+  showDayDetail, toggleCalTask, openTaskAddModal, openCalAddModal,
+  addTaskFromModal, closeCalDayPanel, openCalDayPanel, openCalPanel, closeCalPanel,
+  saveCalEvent, renderCalChat, autoGreetCalDay, sendCalMsg, calMsgKey,
+  renderGantt, openGoalHub, switchHubTab, renderHubChat,
+  sendHubMsg, hubMsgResize, hubMsgKey,
+  renderHubTasks, renderHubAnalytics,
+  openMemoEditor, closeMemoEditor, saveMemo, renderHubMemo,
+  renderHubSettings, saveHubGoalSettings,
+  confirmDeleteGoal, closeDeleteModal, executeDeleteGoal, archiveGoal,
+  renderSidebarGoals, init, renderAIUnderstanding,
+  launchConfetti, checkMilestone, showMilestoneCard, shareMilestone,
+  voiceSetFinalWithSummary, proposeVoiceTask, showVoiceTaskProposal, addVoiceTask,
+  renderMicroTask, generateMicroTask, renderMicroTaskUI, completeMicroTask,
+  exportTorisetsuPDF, openExportModal, exportICS, exportNotion, exportText,
+  openGoalModal, toggleGoalModalTask, onGoalAssistComplete,
+  showTaskSetupPhase, addTaskSetupItem, renderBreadcrumb, renderStepIndicator,
+  showRoleSelection, confirmGoalRole
+});

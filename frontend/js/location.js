@@ -26,6 +26,7 @@ function requestLocation() {
 }
 
 // Cookie から復元を試行 → なければ新規取得
+window.initLocation = initLocation;
 function initLocation() {
   const cookie = document.cookie.split('; ').find(c => c.startsWith('user_location='));
   if (cookie) {

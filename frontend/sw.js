@@ -1,31 +1,13 @@
-const CACHE_NAME = 'goal-ai-v3.8.3';
+const CACHE_NAME = 'goal-ai-v3.9.0';
 
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/js/globals.js',
-  '/js/api.js',
-  '/js/chat.js',
-  '/js/goals.js',
-  '/js/profile.js',
-  '/js/ui.js',
-  '/js/location.js',
-  '/js/app.js',
-  '/manifest.json',
-];
+// ネットワークファースト + 動的キャッシュ（Viteハッシュ付きファイル名と互換）
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
-  self.skipWaiting();
-});
+self.addEventListener('install', () => self.skipWaiting());
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    caches.keys().then((names) =>
+      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
     )
   );
   self.clients.claim();
@@ -34,19 +16,23 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
+  // API呼び出しはキャッシュしない
   if (url.pathname.startsWith('/api/') || url.hostname.includes('workers.dev')) {
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request).then((response) => {
-        if (response && response.status === 200 && response.type === 'basic') {
+    fetch(event.request)
+      .then((response) => {
+        if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        // オフライン時はキャッシュから返す
+        return caches.match(event.request);
+      })
   );
 });

@@ -1559,3 +1559,36 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ═══ ES Module: expose to window ═══
+Object.defineProperty(window, 'kabeuchiMode', {
+  get() { return kabeuchiMode; }, set(v) { kabeuchiMode = v; },
+  configurable: true, enumerable: true
+});
+Object.assign(window, {
+  getSysNormal, getSysSpartan, getSysMencare,
+  DEMO_MSGS, CHART_DATA, FAIL_HISTORY, getCalEvents,
+  toggleSidebar, closeSidebar, renderGlobalHeader,
+  initSwipeToOpenSidebar, initTabSwipe,
+  showPage, selectMode, activateMencare, applyModeUI,
+  toggleSpartan, toggleMencare, getActiveMode, updateModeUI, updateMencareTimer,
+  DEEP_LIMITS, getDeepMonthKey, getDeepUsedCount, getDeepLimit,
+  getDeepRemaining, incrementDeepUsage, getDeepUsageBadgeHTML,
+  OUTPUT_FORMATS, isDeepAnalysisNeeded, showDeepConfirm,
+  selectDeepFormat, createDeepProgressPanel, setPhaseStatus,
+  callGemini, callOpenAI, runDeepAnalysis, renderDeepResult,
+  exportDeepFormat, continueDeepChat,
+  renderAPIKeySettings, applyPromoFromSettings,
+  THEMES, applyTheme, setBaseTheme, toggleGlassMode,
+  restoreThemeUI, applySystemTheme, toggleAutoTheme, restoreAutoThemeUI,
+  applyFontSize, applyLanguage, openSettingsPanel, closeSettingsPanel,
+  HELP_SLIDES, showHelpGuide,
+  openArchiveView, closeArchiveView, renderArchiveList,
+  openArchivedGoalDetail, restoreGoal, exportData,
+  PROMO_CODES, getMembershipLabel, renderMembershipUI,
+  copyReferralCode, openPlanModal, closePlanModal, renderPlanModal,
+  selectPlan, updatePlanCTA, toggleBillingPeriod, updatePlanPrices,
+  applyPromoCode, subscribePlan, openCustomerPortal,
+  showAIMemo, MODE_DESCRIPTIONS, handleModeClick,
+  updateModePills, updateSidebarTaskList
+});
+

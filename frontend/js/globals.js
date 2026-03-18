@@ -119,7 +119,7 @@ function getDeviceId() {
   return 'dev_' + Math.abs(hash).toString(36);
 }
 
-const APP_VERSION = '3.8.3';
+const APP_VERSION = '3.9.0';
 
 const FONT_SIZES = {
   xs: { label: '極小', base: '14px', lh: '1.55' },
@@ -135,4 +135,26 @@ function setFontSize(size) {
   document.documentElement.style.setProperty('--base-line-height', s.lh);
   setCookie('font_size', size, 365);
 }
+
+// ═══ ES Module: expose to window for cross-module access ═══
+// Mutable primitives (defineProperty for live binding)
+Object.defineProperty(window, 'AUTH_TOKEN', {
+  get() { return AUTH_TOKEN; }, set(v) { AUTH_TOKEN = v; },
+  configurable: true, enumerable: true
+});
+Object.defineProperty(window, '_isComposing', {
+  get() { return _isComposing; }, set(v) { _isComposing = v; },
+  configurable: true, enumerable: true
+});
+Object.defineProperty(window, 'currentSessionId', {
+  get() { return currentSessionId; }, set(v) { currentSessionId = v; },
+  configurable: true, enumerable: true
+});
+// Objects, constants, functions
+Object.assign(window, {
+  DEEP_TRIGGERS, MEMBERSHIP, FREE_MODEL_USAGE, WORKER_URL,
+  STREAK, APP_VERSION, FONT_SIZES,
+  updateStreak, renderStreak, setCookie, getCookie, deleteCookie,
+  ensureAuth, getAuthHeaders, getDeviceId, setFontSize
+});
 

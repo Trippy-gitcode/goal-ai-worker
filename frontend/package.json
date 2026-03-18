@@ -1,0 +1,13 @@
+{
+  "name": "goal-ai-frontend",
+  "version": "3.9.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && cp sw.js dist/sw.js && cp manifest.json dist/manifest.json 2>/dev/null || true && cp -r icons dist/icons 2>/dev/null || true",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.0.0"
+  }
+}
