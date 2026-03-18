@@ -7,7 +7,7 @@ ${curGoal ? '\nゴール：'+curGoal : ''}
 - ユーザーがまだ漠然としたビジョンを話しているなら、すぐ提案せず動機や感情を掘り下げる
 - 「なぜそう思った？」「それが実現したらどうなる？」のような問いかけをする
 - ゴールの輪郭が見えてきたら「こういうゴールにまとめてみない？」と提案する
-- ゴールが確定して初めてタスクやアクションの話に入る
+- タスクはゴールがなくても独立して作成できる。ゴールを前提条件にしない
 - 2〜3文で返す。質問は1回に1つだけ
 
 【JSON出力（ゴール確定後、必要な場合のみ）】
@@ -261,11 +261,11 @@ function applyModeUI(mode) {
   const msgIn = document.getElementById('msg-in');
   if(msgIn) msgIn.placeholder = '返信する';
 
-  const labels = { mencare:'🌸 メンケアモード ON', normal:'💬 通常モードに戻りました', spartan:'🔥 スパルタモード ON', kabeuchi:'💭 壁打ちモード ON' };
+  const labels = { mencare:'🌸 メンケアモード ON', normal:'💬 通常モードに戻りました', spartan:'🔥 スパルタモード ON', kabeuchi:'💭 ソクラテスモード ON' };
   toast(labels[mode]);
 
   // AIロールバッジ更新
-  const roleBadgeLabels = { spartan:'🔥 スパルタ', mencare:'🌸 メンケア', kabeuchi:'💭 壁打ち', normal:'' };
+  const roleBadgeLabels = { spartan:'🔥 スパルタ', mencare:'🌸 メンケア', kabeuchi:'💭 ソクラテス', normal:'' };
   if(typeof updateRoleBadge === 'function') updateRoleBadge(roleBadgeLabels[mode] || '');
 
   // モード別背景色
@@ -1472,7 +1472,7 @@ async function showAIMemo(type, goalId) {
 // ════════ MODE PILLS & POPUP ════════
 const MODE_DESCRIPTIONS = {
   mencare: { name: 'メンケアモード', description: '寄り添い型のメンタルケアパートナー。共感を第一に、あなたの気持ちを受け止めます。' },
-  kabeuchi: { name: '壁打ちモード', description: '答えを出さず思考を引き出すソクラテス式。質問だけで考えを深めます。' },
+  kabeuchi: { name: 'ソクラテスモード', description: '答えを出さず思考を引き出すソクラテス式。質問だけで考えを深めます。' },
   spartan: { name: 'スパルタモード', description: '丁寧だけど辛口。甘さゼロで言い訳の妥当性もチェック。無駄なフォローなしで、率直に問題点と改善点だけを伝えます。' }
 };
 
@@ -1487,8 +1487,8 @@ function handleModeClick(mode) {
     '<h3 style="color:var(--cream);margin-bottom:8px;">' + info.name + (isActive ? ' (ON)' : '') + '</h3>' +
     '<p style="color:var(--muted);font-size:0.85rem;line-height:1.6;margin-bottom:16px;">' + (isActive ? '通常モードに戻しますか？' : info.description) + '</p>' +
     '<div style="display:flex;gap:8px;justify-content:center;">' +
-      '<button onclick="this.closest(\'.modal-overlay\').remove()" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">キャンセル</button>' +
       '<button id="_mode-confirm-btn" style="padding:8px 16px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;">' + (isActive ? '停止する' : '設定する') + '</button>' +
+      '<button onclick="this.closest(\'.modal-overlay\').remove()" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">キャンセル</button>' +
     '</div>' +
   '</div>';
   modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });

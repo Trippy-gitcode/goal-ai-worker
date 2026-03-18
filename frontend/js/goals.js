@@ -463,7 +463,7 @@ function renderTaskChat(task){
   if(!task.chatLog || task.chatLog.length === 0){
     const intro = {
       role:'ai',
-      content:`「${task.title}」について話しましょう。\n\nこのタスクに関してAIがサポートできます。進め方の相談・詰まった場所の壁打ち・優先度の見直しなど、何でも聞いてください。`,
+      content:`「${task.title}」について話しましょう。\n\nこのタスクに関してAIがサポートできます。進め方の相談・詰まった場所のソクラテス対話・優先度の見直しなど、何でも聞いてください。`,
     };
     chat.appendChild(mkTdpMsg(intro));
     return;

@@ -568,6 +568,7 @@ const HOME_CHAT_KEY = 'goalai_home_chat_v1';
 let homeMsgs = [];
 let homeHistory = [];
 let homeLoading = false;
+let homeMsgTurnCount = 0;
 let currentRouteAI = null; // 【2】会話中のAI固定用（'gemini'|'gpt'|'claude'|null）
 
 const SYS_HOME = `あなたはGOAL AIのAIアシスタントです。
@@ -604,7 +605,7 @@ const SYS_HOME = `あなたはGOAL AIのAIアシスタントです。
 - 通常: 上記ルール通り
 - メンケア: 寄り添い重視。解決策より共感
 - スパルタ: 甘さゼロ。率直に指摘
-- 壁打ち: 答え禁止。ソクラテス式問答で考えを引き出す
+- ソクラテス: 答え禁止。ソクラテス式問答で考えを引き出す
 
 【パーソナライズ】
 ユーザープロフィール（名前・職種・強み・弱み・価値観等）が設定されている場合は、
@@ -834,7 +835,8 @@ async function sendHomeMsg(){
   homeHistory.push({role:'user',content:userContent});
   clearHomeImage();
   renderHomeMsgs(); homeLoading = true;
-  showTaskChip(); // 会話開始後にタスク化チップ表示
+  homeMsgTurnCount++;
+  if (homeMsgTurnCount >= 2) showTaskChip();
   updateStreak();
 
   const homeInner = document.getElementById('home-chat-inner');
@@ -1146,6 +1148,7 @@ function showHomeScreen(){
   homeMsgs = [];
   homeHistory = [];
   currentRouteAI = null; // 【2】新しい会話でルーティングリセット
+  homeMsgTurnCount = 0;
   hideTaskChip(); // タスク化チップをリセット
 
   // 3. ウェルカム表示
@@ -1424,7 +1427,7 @@ function homeKey(e) { chatKey(sendHomeMsg, e); }
 function renderHomeSummary(){
   const mode=getActiveMode();
   const modeIcons={normal:'💬',spartan:'🔥',mencare:'🌸',kabeuchi:'💭'};
-  const modeNames={normal:'通常',spartan:'スパルタ',mencare:'メンケア',kabeuchi:'壁打ち'};
+  const modeNames={normal:'通常',spartan:'スパルタ',mencare:'メンケア',kabeuchi:'ソクラテス'};
   document.getElementById('hs-mode-icon').textContent=modeIcons[mode];
   document.getElementById('hs-mode-name').textContent=modeNames[mode];
 
@@ -2158,7 +2161,7 @@ const HOME_ROLES = {
   normal: 'ユーザーの万能AIアシスタント。質問にはまず答え、必要に応じてコーチングする。',
   spartan: '丁寧だけど辛口。甘さゼロで言い訳の妥当性もチェック。無駄なフォローなしで率直に問題点と改善点だけを伝える。',
   mencare: '寄り添い型のメンタルケアパートナー。共感を第一に、ユーザーの気持ちを受け止める。',
-  kabeuchi: 'ソクラテス式の壁打ち相手。答えを教えず、質問で思考を深める。'
+  kabeuchi: 'ソクラテス式の対話相手。答えを教えず、質問で思考を深める。'
 };
 
 // ═══ コーチング検出フラグ ═══

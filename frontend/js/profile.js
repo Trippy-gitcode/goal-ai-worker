@@ -28,7 +28,7 @@ const USER_PROFILE = {
 // ─ Build full AI context string from all profile + goals data ─
 function buildAIContext(){
   const mode = getActiveMode();
-  const modeStr = mode==='spartan'?'スパルタ（断定的・甘さゼロ）':mode==='mencare'?'メンケア（寄り添い最優先）':mode==='kabeuchi'?'壁打ち（質問のみ・ソクラテス式問答）':'通常（共感＋具体的提案）';
+  const modeStr = mode==='spartan'?'スパルタ（断定的・甘さゼロ）':mode==='mencare'?'メンケア（寄り添い最優先）':mode==='kabeuchi'?'ソクラテス（質問のみ・ソクラテス式問答）':'通常（共感＋具体的提案）';
   const activeGoals = ALL_GOALS.filter(g=>!g.archived && g.status!=='done');
   const goalsStr = activeGoals.map(g=>{
     const daysLeft = Math.ceil((new Date(g.deadline)-new Date())/86400000);
@@ -66,7 +66,7 @@ function buildAIContext(){
 
   // ゴール
   if(goalsStr) parts.push('【現在のゴール】\n' + goalsStr);
-  else parts.push('【現在のゴール】\nまだゴールが設定されていません。ユーザーの想いを掘り下げて、一緒にゴールを形作ってください。');
+  else parts.push('【現在のゴール】\nまだゴールが設定されていません。ゴール設定を強要せず、ユーザーの話題に応じて自然に対応してください。');
 
   parts.push('【現在のモード】' + modeStr);
 
@@ -76,7 +76,7 @@ function buildAIContext(){
   if(p.strengths.length) instructions.push(`- 強みを活かしたアドバイスをする`);
   if(p.weaknesses.length) instructions.push(`- 弱み（特に${p.weaknesses[0]}）を先回りしてサポートする`);
   instructions.push('- ゴールがある場合は遅延状況を把握した上で応答する');
-  instructions.push('- ゴールがない場合はすぐに提案せず、まずユーザーの想いを掘り下げる');
+  instructions.push('- ゴールがない場合でもタスク作成は可能。ゴール設定を強要しない');
   if(p.vision) instructions.push('- ビジョンとゴールの整合性を意識したアドバイスをする');
   parts.push('【重要な指示】\n' + instructions.join('\n'));
 
