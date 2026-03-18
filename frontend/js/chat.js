@@ -1,3 +1,8 @@
+// ════════ SHARED ACTION BUTTONS HTML ════════
+function _msgActionsHtml(){
+  return `<span class="msg-actions"><button class="msg-action-btn" title="コピー" onclick="copyMessage(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button class="msg-action-btn" title="引用" onclick="quoteMessage(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.76-2.02-2-2H5c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h2c0 4-3 5-6 5z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.76-2.02-2-2h-3c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h2c0 4-3 5-6 5z"/></svg></button></span>`;
+}
+
 // ════════ NANO FALLBACK BANNER ════════
 function showNanoFallbackBanner(hours) {
   let b = document.getElementById('nano-fallback-banner');
@@ -979,7 +984,7 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
         bub.innerHTML = renderMsgContent(result);
         bub.classList.remove('stream-bubble'); bub.style.cssText = '';
         const gemFooter = bub.parentElement?.querySelector('.msg-footer');
-        if(gemFooter) gemFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">Gemini</span>`;
+        if(gemFooter) gemFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">Gemini</span>${_msgActionsHtml()}`;
         homeMsgs.push({role:'ai',content:result,time:now(),date:today,model:'Gemini'});
         homeHistory.push({role:'assistant',content:result});
         saveHomeMsgs();
@@ -1006,7 +1011,7 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
         bub.innerHTML = renderMsgContent(result);
         bub.classList.remove('stream-bubble'); bub.style.cssText = '';
         const gptFooter = bub.parentElement?.querySelector('.msg-footer');
-        if(gptFooter) gptFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">GPT</span>`;
+        if(gptFooter) gptFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">GPT</span>${_msgActionsHtml()}`;
         homeMsgs.push({role:'ai',content:result,time:now(),date:today,model:'GPT'});
         homeHistory.push({role:'assistant',content:result});
         saveHomeMsgs();
@@ -1035,7 +1040,7 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
           bub.innerHTML = renderMsgContent(reply);
           bub.classList.remove('stream-bubble');
           const simFooter = bub.parentElement?.querySelector('.msg-footer');
-          if(simFooter) simFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">GPT</span>`;
+          if(simFooter) simFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">GPT</span>${_msgActionsHtml()}`;
           homeMsgs.push({role:'ai',content:reply,time:now(),date:today,model:'GPT'});
           homeHistory.push({role:'assistant',content:reply});
           saveHomeMsgs();
@@ -1077,7 +1082,7 @@ async function executeRoute(route, text, today, inner, scroll, indicatorBub){
     indicatorBub.classList.remove('stream-bubble');
     indicatorBub.style.cssText = '';
     const routeFooter = indicatorBub.parentElement?.querySelector('.msg-footer');
-    if(routeFooter) routeFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">${routeModel}</span>`;
+    if(routeFooter) routeFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">${routeModel}</span>${_msgActionsHtml()}`;
     homeMsgs.push({role:'ai',content:result,time:now(),date:today,model:routeModel});
     homeHistory.push({role:'assistant',content:result});
     saveHomeMsgs();
