@@ -1,3 +1,6 @@
+// ════════ MEMO UPDATE NOTIFICATION (Step 12) ════════
+let memoToastShown = false;
+
 // ════════ SHARED ACTION BUTTONS HTML ════════
 function _msgActionsHtml(){
   return `<span class="msg-actions"><button class="msg-action-btn" title="コピー" onclick="copyMessage(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button class="msg-action-btn" title="引用" onclick="quoteMessage(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.76-2.02-2-2H5c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h2c0 4-3 5-6 5z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.76-2.02-2-2h-3c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h2c0 4-3 5-6 5z"/></svg></button></span>`;
@@ -1154,6 +1157,7 @@ function showHomeScreen(){
   homeHistory = [];
   currentRouteAI = null; // 【2】新しい会話でルーティングリセット
   homeMsgTurnCount = 0;
+  memoToastShown = false; // メモ更新通知リセット
   hideTaskChip(); // タスク化チップをリセット
 
   // 3. ウェルカム表示

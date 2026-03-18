@@ -126,6 +126,11 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // ── Feature flags ──
+    const MEMO_ENABLED = env.MEMO_ENABLED === 'true';
+    const RAG_ENABLED = env.RAG_ENABLED === 'true';
+    const CACHE_ENABLED = env.CACHE_ENABLED === 'true';
+
     // CORS preflight
     if (request.method === 'OPTIONS') {
       return corsResponse(env, new Response(null, { status: 204 }), request);
@@ -134,7 +139,7 @@ export default {
     try {
       // ── Version ──
       if (url.pathname === '/api/version') {
-        return corsResponse(env, jsonRes({ version: '3.6.0', deployed_at: new Date().toISOString() }), request);
+        return corsResponse(env, jsonRes({ version: '3.7.0', deployed_at: new Date().toISOString() }), request);
       }
 
       // ── Error Report ──
@@ -444,6 +449,206 @@ async function incrementDeepUsage(env, userId) {
   await env.TOKEN_KV.put(usageKey, String(used + 1), { expirationTtl: expiry });
 }
 
+// ═══════ AI MEMO ENHANCEMENT (Step 2) ═══════
+
+async function countRecentMessages(env, tokenId) {
+  // tokenId全体のユーザーメッセージ数をカウント（セッション跨ぎで累積）
+  try {
+    const users = await supabaseQuery(env, 'users', 'GET', {
+      filters: `token_id=eq.${encodeURIComponent(tokenId)}`,
+      select: 'id',
+    });
+    const userId = users?.[0]?.id;
+    if (!userId) return 0;
+
+    // Supabase REST API: HEAD with Prefer: count=exact
+    const url = `${env.SUPABASE_URL}/rest/v1/chat_messages?user_id=eq.${userId}&role=eq.user&select=id`;
+    const res = await fetch(url, {
+      method: 'HEAD',
+      headers: {
+        ...supabaseHeaders(env),
+        'Prefer': 'count=exact',
+      },
+    });
+    const contentRange = res.headers.get('content-range');
+    // Format: "*/123" or "0-9/123"
+    if (contentRange) {
+      const total = contentRange.split('/')[1];
+      return parseInt(total) || 0;
+    }
+    return 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+async function regenerateAiMemo(env, tokenId, goalId) {
+  try {
+    const users = await supabaseQuery(env, 'users', 'GET', {
+      filters: `token_id=eq.${encodeURIComponent(tokenId)}`,
+      select: 'id',
+    });
+    const userId = users?.[0]?.id;
+    if (!userId) return;
+
+    // Get last 50 messages via supabaseQuery
+    let filters = `user_id=eq.${userId}&order=created_at.desc&limit=50`;
+    if (goalId) {
+      filters += `&goal_id=eq.${goalId}`;
+    }
+
+    const messages = await supabaseQuery(env, 'chat_messages', 'GET', {
+      filters,
+      select: 'role,content,created_at',
+    });
+
+    if (!messages || messages.length < 5) return;
+
+    const conversationText = messages
+      .reverse()
+      .map(m => `${m.role}: ${m.content}`)
+      .join('\n');
+
+    // Call Claude API to generate memo
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `以下の会話履歴から、このユーザーについてわかったことを要約してください。
+
+【出力ルール】
+- 箇条書き10〜15項目以内
+- 合計1,200文字以内（厳守）
+- 性格傾向・行動パターン・コミュニケーションの好み・モチベーション源・弱点と対処法を含めること
+- 過去のメモは破棄し、最新の理解で完全に上書きすること
+
+【会話履歴】
+${conversationText}`
+        }],
+      }),
+    });
+
+    const data = await response.json();
+    const memo = data.content?.[0]?.text;
+    if (!memo) return;
+
+    // Save to goals.ai_memo or users.ai_memo depending on goalId
+    if (goalId) {
+      await supabaseQuery(env, 'goals', 'PATCH', {
+        filters: `id=eq.${goalId}`,
+        body: { ai_memo: memo, ai_memo_updated_at: new Date().toISOString() },
+      });
+    } else {
+      await supabaseQuery(env, 'users', 'PATCH', {
+        filters: `token_id=eq.${encodeURIComponent(tokenId)}`,
+        body: { ai_memo: memo, ai_memo_updated_at: new Date().toISOString() },
+      });
+    }
+
+    // Delete KV profile cache
+    await env.TOKEN_KV.delete(`profile:${tokenId}`);
+
+    return true; // memo updated flag
+  } catch (e) {
+    // Silently fail — background task
+  }
+}
+
+// ═══════ PROFILE KV CACHE (Step 8) ═══════
+
+async function getProfileWithCache(env, tokenId, ctx) {
+  const cacheKey = `profile:${tokenId}`;
+
+  // Check KV first
+  const cached = await env.TOKEN_KV.get(cacheKey, 'json');
+  if (cached) return cached;
+
+  // Fall back to Supabase
+  const userId = await getUserIdFromToken(env, tokenId);
+  if (!userId) return null;
+
+  const res = await supabaseQuery(env, 'users', 'GET', {
+    filters: `id=eq.${userId}`,
+    select: 'nickname,occupation,age,mbti,strengths,weaknesses,values,vision,constraints,ai_memo,ai_memo_updated_at',
+  });
+  const profile = res?.[0] || null;
+
+  // Cache with 5min TTL
+  if (profile && ctx) {
+    ctx.waitUntil(
+      env.TOKEN_KV.put(cacheKey, JSON.stringify(profile), { expirationTtl: 300 })
+    );
+  }
+
+  return profile;
+}
+
+// ═══════ LOCAL ROUTING (Step 9) ═══════
+
+function quickRoute(message) {
+  const msg = message.trim().toLowerCase();
+
+  // gpt-simple: 相槌・短い返事
+  if (msg.length < 15) {
+    if (/^(うん|はい|ok|おk|そう|ありがと|了解|わかった|なるほど|いいね|おー|へー|ほー|そうだね|たしかに)/.test(msg)) {
+      return { route: 'gpt-simple', coaching: false };
+    }
+  }
+
+  // gemini: 明確なリサーチ系
+  if (/^(今日の天気|明日の天気|ニュース|最新の|検索して|調べて|〜とは\?|〜って何)/.test(msg)) {
+    return { route: 'gemini', coaching: false };
+  }
+
+  // gpt: 明確な生成タスク
+  if (/^(翻訳して|英語に|日本語に|要約して|まとめて|SNS.*書いて|キャッチコピー|タイトル案)/.test(msg)) {
+    return { route: 'gpt', coaching: false };
+  }
+
+  // 判定不能 → APIフォールバック
+  return null;
+}
+
+// ═══════ PROMPT CACHE — ANTHROPIC REQUEST BUILDER (Step 4) ═══════
+
+function buildAnthropicRequest(fixedPart, variablePart, messages, model, maxTokens, env) {
+  const CACHE_ENABLED = env.CACHE_ENABLED === 'true';
+  const requestBody = {
+    model: model,
+    max_tokens: maxTokens,
+    messages: messages,
+  };
+
+  if (CACHE_ENABLED) {
+    const systemBlocks = [
+      {
+        type: 'text',
+        text: fixedPart,
+        cache_control: { type: 'ephemeral' },
+      },
+    ];
+    if (variablePart && variablePart.trim()) {
+      systemBlocks.push({
+        type: 'text',
+        text: variablePart,
+      });
+    }
+    requestBody.system = systemBlocks;
+  } else {
+    requestBody.system = fixedPart + variablePart;
+  }
+
+  return requestBody;
+}
+
 // ═══════ PROFILE & SYSTEM PROMPT BUILDER ═══════
 
 function buildProfileBlock(profile, fields) {
@@ -472,7 +677,7 @@ const COMMON_RULES = `【共通ルール】
 - ユーザーの質問を無視してゴール設定に誘導することを禁止。
 - 同じ内容の繰り返し禁止。`;
 
-async function buildServerSystemPrompt(body, tokenId, env) {
+async function buildServerSystemPrompt(body, tokenId, env, { aiMemo, ragResults } = {}) {
   // profile_inject fields from frontend
   const injectFields = body.profile_inject || ['nickname'];
 
@@ -483,7 +688,7 @@ async function buildServerSystemPrompt(body, tokenId, env) {
     if (userId) {
       const res = await supabaseQuery(env, 'users', 'GET', {
         filters: `id=eq.${userId}`,
-        select: 'nickname,occupation,age,mbti,strengths,weaknesses,values,vision,constraints',
+        select: 'nickname,occupation,age,mbti,strengths,weaknesses,values,vision,constraints,ai_memo,ai_memo_updated_at',
       });
       if (res && res.length > 0) profile = res[0];
     }
@@ -497,13 +702,31 @@ async function buildServerSystemPrompt(body, tokenId, env) {
 
   const profileBlock = buildProfileBlock(profile, fields);
 
-  let prompt = '';
-  if (body.role) prompt += `【あなたの役割】${body.role}\n\n`;
-  if (profileBlock) prompt += `【ユーザー情報】\n${profileBlock}\n\n`;
-  prompt += COMMON_RULES;
-  if (body.system) prompt += `\n\n${body.system}`;
+  // ① fixedPart: role, profile, memo, common rules (cacheable)
+  let fixedPart = '';
+  if (body.role) fixedPart += `【あなたの役割】${body.role}\n\n`;
+  if (profileBlock) fixedPart += `【ユーザー情報】\n${profileBlock}\n\n`;
 
-  return prompt;
+  // AI理解メモ注入 (MEMO_ENABLED check)
+  const memoText = aiMemo || profile?.ai_memo || null;
+  if (env.MEMO_ENABLED === 'true' && memoText) {
+    fixedPart += `【AIの理解メモ】\n${memoText}\n\n`;
+  }
+
+  fixedPart += COMMON_RULES;
+  if (body.system) fixedPart += `\n\n${body.system}`;
+
+  // ② variablePart: RAG results (not cached, changes per request)
+  let variablePart = '';
+  if (env.RAG_ENABLED === 'true' && ragResults && ragResults.length > 0) {
+    variablePart += `\n【関連する過去の会話】\n`;
+    ragResults.forEach(r => {
+      variablePart += `・${r.date}: ${r.content}\n`;
+    });
+    variablePart += `※直近の会話が最優先。過去の会話は参考情報として扱うこと\n`;
+  }
+
+  return { fixedPart, variablePart };
 }
 
 // ═══════ CHAT HANDLERS (Claude) ═══════
@@ -596,10 +819,30 @@ async function handleChatStream(request, env, ctx) {
   const fu = await checkFairUse(env, auth.userId);
   if (fu.throttle) await new Promise(r => setTimeout(r, fu.delayMs));
 
-  // Build enhanced system prompt with profile injection
-  const enhancedSystem = body.profile_inject
-    ? await buildServerSystemPrompt(body, auth.tokenId, env)
-    : (body.system || '');
+  // Step 10: 並列実行（ルーティング不要ここではプロフィール+RAG）
+  const userMessage = messages?.[messages.length - 1]?.content || '';
+  const sessionId = body.sessionId || null;
+  const goalId = body.goal_id || null;
+
+  const [profile, ragResults] = await Promise.all([
+    getProfileWithCache(env, auth.tokenId, ctx),
+    RAG_ENABLED ? searchRelatedMessages(env, auth.tokenId, userMessage, goalId) : Promise.resolve([])
+  ]);
+
+  // 会話履歴圧縮
+  const compressedMessages = await buildCompressedMessages(env, auth.tokenId, sessionId, messages);
+
+  // システムプロンプト構築（fixedPart + variablePart）
+  const aiMemo = profile?.ai_memo || null;
+  let enhancedSystem = body.system || '';
+  let fixedPart = '', variablePart = '';
+
+  if (body.profile_inject) {
+    const result = await buildServerSystemPrompt(body, auth.tokenId, env, { aiMemo, ragResults });
+    fixedPart = result.fixedPart;
+    variablePart = result.variablePart;
+    enhancedSystem = fixedPart + variablePart;
+  }
 
   // Freeプラン: Claude上限チェック → 超過時はnanoでSSE応答
   if (auth.plan === 'free' && !free_no_count) {
@@ -626,20 +869,22 @@ async function handleChatStream(request, env, ctx) {
   const controller = new AbortController();
   request.signal?.addEventListener('abort', () => controller.abort());
 
+  // Step 4+10: プロンプトキャッシュ2ブロック分割 + 圧縮メッセージ
+  const effectiveMaxTokens = Math.min(maxTokens, auth.plan === 'premium' ? 4000 : 2000);
+  const apiBody = (CACHE_ENABLED && fixedPart)
+    ? buildAnthropicRequest(fixedPart, variablePart, compressedMessages, claudeModel, effectiveMaxTokens, env)
+    : { model: claudeModel, max_tokens: effectiveMaxTokens, stream: true, system: enhancedSystem || undefined, messages: compressedMessages };
+  if (!apiBody.stream) apiBody.stream = true;
+
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': env.ANTHROPIC_API_KEY,
       'anthropic-version': '2023-06-01',
+      'anthropic-beta': 'prompt-caching-2024-07-04',
     },
-    body: JSON.stringify({
-      model: claudeModel,
-      max_tokens: Math.min(maxTokens, auth.plan === 'premium' ? 4000 : 2000),
-      stream: true,
-      system: enhancedSystem || undefined,
-      messages,
-    }),
+    body: JSON.stringify(apiBody),
     signal: controller.signal,
   });
 
@@ -651,8 +896,25 @@ async function handleChatStream(request, env, ctx) {
   // ストリーク更新（非同期、ctx不要 — fire and forget）
   if (env.SUPABASE_URL) updateStreak(auth.tokenId, env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
-  // AI理解メモ自動更新（5回ごと、非同期）
-  if (ctx) ctx.waitUntil(checkMemoAutoUpdate(auth.tokenId, env));
+  // 非同期後処理（全てctx.waitUntil）
+  if (ctx) {
+    // AI理解メモ自動更新（5回ごと）
+    if (MEMO_ENABLED) {
+      ctx.waitUntil(countRecentMessages(env, auth.tokenId).then(count => {
+        if (count > 0 && count % 5 === 0) return regenerateAiMemo(env, auth.tokenId, goalId);
+      }).catch(() => {}));
+    }
+    // RAG: embedding生成
+    if (RAG_ENABLED && userMessage) {
+      ctx.waitUntil(generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage).catch(() => {}));
+    }
+    // 会話要約更新（10メッセージごと）
+    if (sessionId) {
+      ctx.waitUntil(countSessionMessages(env, auth.tokenId, sessionId).then(sc => {
+        if (sc >= 10 && sc % 10 === 0) return generateConversationSummary(env, auth.tokenId, sessionId);
+      }).catch(() => {}));
+    }
+  }
 
   // SSEストリームをそのまま透過プロキシ
   return new Response(res.body, {
@@ -1880,6 +2142,220 @@ async function syncUsageToSupabase(env, tokenId, month, deepCount, chatCount) {
   }
 }
 
+
+// ═══════ EMBEDDING GENERATION (Step 6) ═══════
+
+async function generateAndStoreEmbedding(env, tokenId, sessionId, goalId, text) {
+  try {
+    if (!text || text.length < 20) return;
+    const truncatedForEmbed = text.slice(0, 500);
+    const truncatedContent = text.slice(0, 200);
+
+    // Generate embedding via OpenAI
+    const embRes = await fetch('https://api.openai.com/v1/embeddings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'text-embedding-3-small',
+        input: truncatedForEmbed,
+      }),
+    });
+    if (!embRes.ok) {
+      console.error('Embedding API error:', await embRes.text());
+      return;
+    }
+    const embData = await embRes.json();
+    const embedding = embData.data?.[0]?.embedding;
+    if (!embedding) return;
+
+    // Store in chat_embeddings table
+    await supabaseQuery(env, 'chat_embeddings', 'POST', {
+      body: {
+        token_id: tokenId,
+        session_id: sessionId || null,
+        goal_id: goalId || null,
+        content: truncatedContent,
+        embedding: JSON.stringify(embedding),
+      },
+    });
+  } catch (e) {
+    console.error('generateAndStoreEmbedding error:', e);
+  }
+}
+
+// ═══════ RAG SEARCH (Step 7) ═══════
+
+async function searchRelatedMessages(env, tokenId, userMessage, goalId) {
+  try {
+    if (!userMessage || userMessage.length < 10) return [];
+
+    // Generate embedding for the query
+    const embRes = await fetch('https://api.openai.com/v1/embeddings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'text-embedding-3-small',
+        input: userMessage.slice(0, 500),
+      }),
+    });
+    if (!embRes.ok) return [];
+    const embData = await embRes.json();
+    const queryEmbedding = embData.data?.[0]?.embedding;
+    if (!queryEmbedding) return [];
+
+    // Call Supabase RPC match_embeddings
+    const rpcRes = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/match_embeddings`, {
+      method: 'POST',
+      headers: {
+        'apikey': env.SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query_embedding: queryEmbedding,
+        match_token_id: tokenId,
+        match_threshold: 0.75,
+        match_count: 3,
+      }),
+    });
+    if (!rpcRes.ok) {
+      console.error('match_embeddings RPC error:', await rpcRes.text());
+      return [];
+    }
+    const results = await rpcRes.json();
+    return results || [];
+  } catch (e) {
+    console.error('searchRelatedMessages error:', e);
+    return [];
+  }
+}
+
+// ═══════ CONVERSATION HISTORY COMPRESSION (Step 11) ═══════
+
+async function generateConversationSummary(env, tokenId, sessionId) {
+  try {
+    const kvKey = `summary:${tokenId}:${sessionId}`;
+    // Check if summary already exists in KV
+    const existing = await env.TOKEN_KV.get(kvKey);
+    if (existing) return existing;
+
+    // Fetch recent messages from Supabase for this session
+    const users = await supabaseQuery(env, 'users', 'GET', {
+      filters: `token_id=eq.${encodeURIComponent(tokenId)}`,
+      select: 'id',
+    });
+    if (!users || !users[0]) return null;
+
+    const messages = await supabaseQuery(env, 'chat_messages', 'GET', {
+      filters: `user_id=eq.${users[0].id}&session_id=eq.${encodeURIComponent(sessionId)}&order=created_at.asc`,
+      select: 'role,content',
+    });
+    if (!messages || messages.length < 6) return null;
+
+    // Take older messages (all except last 10)
+    const olderMessages = messages.slice(0, -10);
+    if (olderMessages.length < 3) return null;
+
+    const conversationText = olderMessages
+      .map(m => `${m.role === 'user' ? 'ユーザー' : 'AI'}: ${(m.content || '').slice(0, 200)}`)
+      .join('\n');
+
+    // Summarize using GPT-5 nano
+    const summaryRes = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-5-nano',
+        max_completion_tokens: 300,
+        messages: [
+          {
+            role: 'system',
+            content: 'あなたは会話の要約を行うアシスタントです。以下の会話履歴を、重要なポイントと文脈を保持しながら簡潔に日本語で要約してください。200文字以内で要約してください。',
+          },
+          {
+            role: 'user',
+            content: conversationText.slice(0, 3000),
+          },
+        ],
+      }),
+    });
+    if (!summaryRes.ok) return null;
+    const summaryData = await summaryRes.json();
+    const summary = summaryData.choices?.[0]?.message?.content || '';
+    if (!summary) return null;
+
+    // Store in KV with 24h TTL
+    await env.TOKEN_KV.put(kvKey, summary, { expirationTtl: 86400 });
+    return summary;
+  } catch (e) {
+    console.error('generateConversationSummary error:', e);
+    return null;
+  }
+}
+
+async function buildCompressedMessages(env, tokenId, sessionId, currentMessages) {
+  try {
+    if (!currentMessages || currentMessages.length <= 10) return currentMessages;
+
+    // Get summary of older messages
+    const summary = await generateConversationSummary(env, tokenId, sessionId);
+    const recentMessages = currentMessages.slice(-10);
+
+    if (summary) {
+      // Prepend summary as a system-like context message
+      return [
+        { role: 'user', content: `[前回までの会話の要約]: ${summary}` },
+        { role: 'assistant', content: 'はい、前回の会話内容を理解しました。続けてください。' },
+        ...recentMessages,
+      ];
+    }
+
+    // No summary available, just return recent messages
+    return recentMessages;
+  } catch (e) {
+    console.error('buildCompressedMessages error:', e);
+    return currentMessages.slice(-10);
+  }
+}
+
+async function countSessionMessages(env, tokenId, sessionId) {
+  try {
+    const users = await supabaseQuery(env, 'users', 'GET', {
+      filters: `token_id=eq.${encodeURIComponent(tokenId)}`,
+      select: 'id',
+    });
+    if (!users || !users[0]) return 0;
+
+    const res = await fetch(
+      `${env.SUPABASE_URL}/rest/v1/chat_messages?user_id=eq.${users[0].id}&session_id=eq.${encodeURIComponent(sessionId)}&select=id`,
+      {
+        method: 'HEAD',
+        headers: {
+          ...supabaseHeaders(env),
+          'Prefer': 'count=exact',
+        },
+      }
+    );
+    const count = res.headers.get('content-range');
+    if (count) {
+      const match = count.match(/\/(\d+)/);
+      return match ? parseInt(match[1], 10) : 0;
+    }
+    return 0;
+  } catch (e) {
+    console.error('countSessionMessages error:', e);
+    return 0;
+  }
+}
 
 // ═══════ DB MIGRATION (admin only) ═══════
 

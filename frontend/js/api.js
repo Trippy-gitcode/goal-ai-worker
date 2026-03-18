@@ -429,6 +429,11 @@ async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, 
           else if (d.text && typeof d.text === 'string') {
             textChunk = d.text;
           }
+          // メモ更新通知 (Step 12)
+          if (d.type === 'meta' && d.memo_updated && !memoToastShown) {
+            toast('AIの理解が更新されました');
+            memoToastShown = true;
+          }
           if (textChunk) {
             full += textChunk;
             onChunk(full);
