@@ -3009,3 +3009,35 @@ function getMonthEndTtl() {
   const diff = Math.ceil((endOfMonth - now) / 1000);
   return diff + 3 * 86400; // +3日バッファ
 }
+
+// ═══════ NAMED EXPORTS (for Hono index.js) ═══════
+export {
+  // Chat
+  handleChat, handleChatStream, handleGptSimple,
+  // Deep analysis
+  handleDeepOpenAI, handleDeepGemini, handleDeepClaude, handleDeepClaudeStream,
+  // Token management
+  handleTokenRegister, handleTokenCreate, handleTokenValidate, handleTokenRedeem,
+  // Usage
+  handleUsageGet,
+  // Stripe
+  handleCheckoutCreate, handleCheckoutPortal, handleStripeWebhook,
+  // Goals
+  handleGoalsList, handleGoalCreate, handleGoalUpdate, handleGoalDelete, handleSuggestRoles,
+  // History
+  handleHistoryGet, handleHistorySave, handleHistoryDelete,
+  // Voice & Profile
+  handleVoiceTranscribe, handleAvatarUpload,
+  // Referral
+  handleReferralCode, handleReferralCreate, handleReferralApply, handleReferralStatus,
+  // Tester
+  handleTesterApply,
+  // AI Memo
+  handleAIMemoGenerate,
+  // Admin
+  handleAdminTesters,
+  // Feedbacks
+  handleFeedbackSave, handleFeedbackList,
+  // Helpers
+  jsonRes, corsResponse,
+};
