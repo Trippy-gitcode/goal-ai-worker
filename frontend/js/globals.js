@@ -119,7 +119,7 @@ function getDeviceId() {
   return 'dev_' + Math.abs(hash).toString(36);
 }
 
-const APP_VERSION = '3.5.4';
+const APP_VERSION = '3.5.5';
 
 const FONT_SIZES = {
   xs: { label: '極小', base: '14px', lh: '1.55' },

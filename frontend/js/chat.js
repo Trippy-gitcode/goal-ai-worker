@@ -1305,7 +1305,7 @@ function renderChatHistoryList(sessions){
     return `<div style="display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
       <div onclick="loadChatSession('${s.sessionId}')" style="flex:1;min-width:0;cursor:pointer;">
         <div style="font-size:13px;color:var(--cream);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${star}${escapeHtml(preview)}…${tagPill}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:3px;">${Math.ceil(s.count/2)}件 · ${dateStr}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">${Math.max(1, Math.floor(s.count/2))}往復 · ${dateStr}</div>
       </div>
       <button onclick="event.stopPropagation();deleteChatSession('${s.sessionId}')" title="削除" style="width:32px;height:32px;border-radius:8px;border:none;background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--muted);">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
@@ -1321,7 +1321,10 @@ function filterChatHistory(q){
 async function loadChatSession(sessionId){
   closeSidebar();
   closeChatHistory();
-  showPage('home'); // ホーム画面を正しく表示（ヘッダー含む）
+  showPage('home');
+  // ローディング表示
+  const inner = document.getElementById('home-chat-inner');
+  if(inner) inner.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">読み込み中…</div>';
   try {
     const res = await fetch(`${WORKER_URL}/api/history?sessionId=${sessionId}&limit=200`, {headers: getAuthHeaders()});
     const data = await res.json();
@@ -1330,7 +1333,6 @@ async function loadChatSession(sessionId){
     homeHistory = [];
     messages.forEach(m => {
       if(!m.content || !m.content.trim()) return;
-      // システムプロンプト・プロフィール注入テキストをスキップ
       const c = m.content.trim();
       if(c.startsWith('【ユーザー情報】') || c.startsWith('【あなたの役割】') || c.startsWith('【共通ルール】') || c.startsWith('【最優先ルール】') || c.startsWith('ビジョン：未設定')) return;
       const time = new Date(m.created_at).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
@@ -1339,8 +1341,11 @@ async function loadChatSession(sessionId){
       homeHistory.push({role: m.role, content: m.content});
     });
     currentSessionId = sessionId;
+    if(homeMsgs.length === 0){
+      toast('この会話のメッセージを読み込めませんでした');
+    }
     renderHomeMsgs();
-  } catch(e) { toast('会話の読み込みに失敗しました'); }
+  } catch(e) { toast('会話の読み込みに失敗しました'); renderHomeMsgs(); }
 }
 
 // ═══ BATCH DELETE CHAT HISTORY ═══
