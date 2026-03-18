@@ -127,9 +127,7 @@ export default {
     const url = new URL(request.url);
 
     // ── Feature flags ──
-    const MEMO_ENABLED = env.MEMO_ENABLED === 'true';
-    const RAG_ENABLED = env.RAG_ENABLED === 'true';
-    const CACHE_ENABLED = env.CACHE_ENABLED === 'true';
+    // 環境変数はhandlerスコープではなくenv直接参照に統一（スコープ問題回避）
 
     // CORS preflight
     if (request.method === 'OPTIONS') {
@@ -139,7 +137,7 @@ export default {
     try {
       // ── Version ──
       if (url.pathname === '/api/version') {
-        return corsResponse(env, jsonRes({ version: '3.7.3', deployed_at: new Date().toISOString() }), request);
+        return corsResponse(env, jsonRes({ version: '3.7.4', deployed_at: new Date().toISOString() }), request);
       }
 
       // ── Error Report ──
@@ -718,14 +716,13 @@ async function handleGPTSimpleChat(env, system, messages, auth) {
 // ═══════ PROMPT CACHE — ANTHROPIC REQUEST BUILDER (Step 4) ═══════
 
 function buildAnthropicRequest(fixedPart, variablePart, messages, model, maxTokens, env) {
-  const CACHE_ENABLED = env.CACHE_ENABLED === 'true';
   const requestBody = {
     model: model,
     max_tokens: maxTokens,
     messages: messages,
   };
 
-  if (CACHE_ENABLED) {
+  if (env.CACHE_ENABLED === 'true') {
     const systemBlocks = [
       {
         type: 'text',
@@ -928,7 +925,7 @@ async function handleChatStream(request, env, ctx) {
   const [routeFromAPI, profile, ragResults] = await Promise.all([
     (!localRoute) ? callRoutingAPI(env, auth, userMessage) : Promise.resolve(null),
     getProfileWithCache(env, auth.tokenId, ctx),
-    RAG_ENABLED ? searchRelatedMessages(env, auth.tokenId, userMessage, goalId) : Promise.resolve([])
+    env.RAG_ENABLED === 'true' ? searchRelatedMessages(env, auth.tokenId, userMessage, goalId) : Promise.resolve([])
   ]);
 
   const finalRoute = localRoute?.route || routeFromAPI || 'claude';
@@ -962,8 +959,8 @@ async function handleChatStream(request, env, ctx) {
       // 非同期後処理（ルーティング先に関わらず実行）
       if (env.SUPABASE_URL) updateStreak(auth.tokenId, env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
       if (ctx) {
-        if (MEMO_ENABLED) ctx.waitUntil(countRecentMessages(env, auth.tokenId).then(c => { if (c > 0 && c % 5 === 0) return regenerateAiMemo(env, auth.tokenId, goalId); }).catch(() => {}));
-        if (RAG_ENABLED && userMessage) ctx.waitUntil(generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage).catch(() => {}));
+        if (env.MEMO_ENABLED === 'true') ctx.waitUntil(countRecentMessages(env, auth.tokenId).then(c => { if (c > 0 && c % 5 === 0) return regenerateAiMemo(env, auth.tokenId, goalId); }).catch(() => {}));
+        if (env.RAG_ENABLED === 'true' && userMessage) ctx.waitUntil(generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage).catch(() => {}));
       }
       return routeResponse;
     }
@@ -997,7 +994,7 @@ async function handleChatStream(request, env, ctx) {
 
   // Step 4+10: プロンプトキャッシュ2ブロック分割 + 圧縮メッセージ
   const effectiveMaxTokens = Math.min(maxTokens, auth.plan === 'premium' ? 4000 : 2000);
-  const apiBody = (CACHE_ENABLED && fixedPart)
+  const apiBody = (env.CACHE_ENABLED === 'true' && fixedPart)
     ? buildAnthropicRequest(fixedPart, variablePart, compressedMessages, claudeModel, effectiveMaxTokens, env)
     : { model: claudeModel, max_tokens: effectiveMaxTokens, stream: true, system: enhancedSystem || undefined, messages: compressedMessages };
   if (!apiBody.stream) apiBody.stream = true;
@@ -1025,13 +1022,13 @@ async function handleChatStream(request, env, ctx) {
   // 非同期後処理（全てctx.waitUntil）
   if (ctx) {
     // AI理解メモ自動更新（5回ごと）
-    if (MEMO_ENABLED) {
+    if (env.MEMO_ENABLED === 'true') {
       ctx.waitUntil(countRecentMessages(env, auth.tokenId).then(count => {
         if (count > 0 && count % 5 === 0) return regenerateAiMemo(env, auth.tokenId, goalId);
       }).catch(() => {}));
     }
     // RAG: embedding生成
-    if (RAG_ENABLED && userMessage) {
+    if (env.RAG_ENABLED === 'true' && userMessage) {
       ctx.waitUntil(generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage).catch(() => {}));
     }
     // 会話要約更新（10メッセージごと）
