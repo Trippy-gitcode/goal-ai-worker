@@ -33,14 +33,6 @@ export async function supabaseQuery(env, table, method, { filters, body, select,
   return text ? JSON.parse(text) : null;
 }
 
-export async function getUserIdFromToken(env, tokenId) {
-  const users = await supabaseQuery(env, 'users', 'GET', {
-    filters: `token_id=eq.${encodeURIComponent(tokenId)}`,
-    select: 'id',
-  });
-  return users?.[0]?.id || null;
-}
-
 export async function syncUserToSupabase(env, tokenData) {
   try {
     await supabaseQuery(env, 'users', 'POST', {
@@ -94,4 +86,26 @@ export async function syncUsageToSupabase(env, tokenId, month, deepCount, chatCo
       filters: 'on_conflict=user_id,month',
     });
   } catch (e) { console.error('syncUsageToSupabase error:', e); }
+}
+
+export async function saveDeepAnalysis(env, tokenId, analysisType, data) {
+  try {
+    const users = await supabaseQuery(env, 'users', 'GET', {
+      filters: `token_id=eq.${encodeURIComponent(tokenId)}`,
+      select: 'id',
+    });
+    if (!users || !users[0]) return;
+    await supabaseQuery(env, 'deep_analyses', 'POST', {
+      body: {
+        user_id: users[0].id,
+        goal_id: data.goalId || null,
+        analysis_type: analysisType,
+        input_text: data.input || null,
+        gemini_result: data.gemini || null,
+        gpt_result: data.gpt || null,
+        claude_result: data.claude || null,
+        final_result: data.final || null,
+      },
+    });
+  } catch (e) { console.error('saveDeepAnalysis error:', e); }
 }
