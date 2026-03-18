@@ -365,6 +365,9 @@ function scrollToLatest(){const w=document.getElementById('home-chat-wrap');if(w
     const w=document.getElementById('home-chat-wrap');
     const btn=document.getElementById('scroll-latest-btn');
     if(!w||!btn)return;
+    // メッセージが0件なら非表示
+    const msgs=document.querySelectorAll('#home-chat-inner .msg');
+    if(!msgs||msgs.length===0){btn.style.display='none';return;}
     const gap=w.scrollHeight-w.scrollTop-w.clientHeight;
     if(gap>200){
       btn.style.display='flex';
