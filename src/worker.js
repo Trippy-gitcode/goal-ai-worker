@@ -134,7 +134,7 @@ export default {
     try {
       // ── Version ──
       if (url.pathname === '/api/version') {
-        return corsResponse(env, jsonRes({ version: '3.5.6', deployed_at: new Date().toISOString() }), request);
+        return corsResponse(env, jsonRes({ version: '3.5.7', deployed_at: new Date().toISOString() }), request);
       }
 
       // ── Error Report ──
@@ -1663,7 +1663,7 @@ async function handleHistoryGet(request, env, url) {
     return jsonRes({ sessions: Object.values(sessionMap).slice(0, 50) });
   }
 
-  let filters = `user_id=eq.${userId}&order=created_at.desc&limit=${limit}`;
+  let filters = `user_id=eq.${userId}&order=created_at.asc&limit=${limit}`;
   if (goalId) filters += `&goal_id=eq.${goalId}`;
   if (sessionId) filters += `&session_id=eq.${sessionId}`;
 

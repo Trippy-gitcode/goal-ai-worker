@@ -1411,8 +1411,7 @@ async function openCustomerPortal(){
 
 // ════════ D-2: LOGO TAP → HOME ════════
 document.querySelector('.sb-logo')?.addEventListener('click', () => {
-  showPage('home');
-  closeSidebar();
+  goHomeNewChat();
 });
 if (document.querySelector('.sb-logo')) {
   document.querySelector('.sb-logo').style.cursor = 'pointer';

@@ -1188,6 +1188,7 @@ function showProfileHint() {
 }
 
 function newHomeChat(){ showHomeScreen(); }
+function goHomeNewChat(){ closeSidebar(); showPage('home'); showHomeScreen(); }
 
 let chatRecords = []; // {sessionId, title, date, count}
 
@@ -1328,7 +1329,7 @@ async function loadChatSession(sessionId){
   try {
     const res = await fetch(`${WORKER_URL}/api/history?sessionId=${sessionId}&limit=200`, {headers: getAuthHeaders()});
     const data = await res.json();
-    const messages = (data.messages || []).reverse();
+    const messages = data.messages || []; // APIがcreated_at.ascで返す
     homeMsgs = [];
     homeHistory = [];
     messages.forEach(m => {
