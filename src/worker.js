@@ -137,7 +137,7 @@ export default {
     try {
       // ── Version ──
       if (url.pathname === '/api/version') {
-        return corsResponse(env, jsonRes({ version: '3.8.1', deployed_at: new Date().toISOString() }), request);
+        return corsResponse(env, jsonRes({ version: '3.8.2', deployed_at: new Date().toISOString() }), request);
       }
 
       // ── Error Report ──
@@ -152,6 +152,16 @@ export default {
           }
         } catch(e) {}
         return corsResponse(env, jsonRes({ ok: true }), request);
+      }
+
+      // DEBUG: 最近のエラーを取得
+      if (url.pathname === '/api/debug/errors' && request.method === 'GET') {
+        const hour = new Date().toISOString().slice(0,13);
+        const errors = JSON.parse(await env.TOKEN_KV.get(`err:${hour}`) || '[]');
+        const prevHour = new Date(Date.now() - 3600000).toISOString().slice(0,13);
+        const prevErrors = JSON.parse(await env.TOKEN_KV.get(`err:${prevHour}`) || '[]');
+        const lastError = JSON.parse(await env.TOKEN_KV.get('debug:last_error') || 'null');
+        return corsResponse(env, jsonRes({ lastError, current: errors, previous: prevErrors }), request);
       }
 
       // ── Routes ──
@@ -889,6 +899,7 @@ async function handleChat(request, env, ctx) {
 }
 
 async function handleChatStream(request, env, ctx) {
+ try {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
 
@@ -1054,6 +1065,12 @@ async function handleChatStream(request, env, ctx) {
       'X-Model-Used': claudeModel,
     },
   });
+ } catch(e) {
+  console.error('handleChatStream FATAL:', e.message, e.stack);
+  // KVにエラーを保存（デバッグ用）
+  try { await env.TOKEN_KV.put('debug:last_error', JSON.stringify({ msg: e.message, stack: (e.stack||'').slice(0,500), ts: Date.now() }), { expirationTtl: 3600 }); } catch(_){}
+  return jsonRes({ error: 'Internal error: ' + e.message }, 500);
+ }
 }
 
 // ═══════ AI MEMO AUTO UPDATE (5回ごと) ═══════
