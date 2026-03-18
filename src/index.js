@@ -1,20 +1,21 @@
 import { Hono } from 'hono';
-import {
-  handleChat, handleChatStream, handleGptSimple,
-  handleDeepOpenAI, handleDeepGemini, handleDeepClaude, handleDeepClaudeStream,
-  handleTokenRegister, handleTokenCreate, handleTokenValidate, handleTokenRedeem,
-  handleUsageGet,
-  handleCheckoutCreate, handleCheckoutPortal, handleStripeWebhook,
-  handleGoalsList, handleGoalCreate, handleGoalUpdate, handleGoalDelete, handleSuggestRoles,
-  handleHistoryGet, handleHistorySave, handleHistoryDelete,
-  handleVoiceTranscribe, handleAvatarUpload,
-  handleReferralCode, handleReferralCreate, handleReferralApply, handleReferralStatus,
-  handleTesterApply,
-  handleAIMemoGenerate,
-  handleAdminTesters,
-  handleFeedbackSave, handleFeedbackList,
-  jsonRes, corsResponse,
-} from './worker.js';
+import { corsResponse } from './middleware/cors.js';
+import { jsonRes } from './utils/helpers.js';
+import { APP_VERSION } from './utils/constants.js';
+
+// Route handlers
+import { handleChat, handleChatStream, handleGptSimple } from './routes/chat.js';
+import { handleDeepOpenAI, handleDeepGemini, handleDeepClaude, handleDeepClaudeStream } from './routes/deep.js';
+import { handleTokenRegister, handleTokenCreate, handleTokenValidate, handleTokenRedeem } from './routes/token.js';
+import { handleUsageGet, handleAvatarUpload, handleFeedbackSave } from './routes/misc.js';
+import { handleCheckoutCreate, handleCheckoutPortal, handleStripeWebhook } from './routes/checkout.js';
+import { handleGoalsList, handleGoalCreate, handleGoalUpdate, handleGoalDelete, handleSuggestRoles } from './routes/goals.js';
+import { handleHistoryGet, handleHistorySave, handleHistoryDelete } from './routes/history.js';
+import { handleVoiceTranscribe } from './routes/voice.js';
+import { handleReferralCode, handleReferralCreate, handleReferralApply, handleReferralStatus } from './routes/referral.js';
+import { handleTesterApply } from './routes/tester.js';
+import { handleAIMemoGenerate } from './routes/memo.js';
+import { handleAdminTesters, handleFeedbackList } from './routes/admin.js';
 
 const app = new Hono();
 
@@ -26,19 +27,13 @@ app.use('*', async (c, next) => {
   await next();
 });
 
-// Helper: wrap response with CORS headers
 function withCors(c, response) {
   return corsResponse(c.env, response, c.req.raw);
 }
 
 // ── Version / Health / Debug ──
-app.get('/api/version', (c) => {
-  return withCors(c, jsonRes({ version: '3.9.0', deployed_at: new Date().toISOString() }));
-});
-
-app.get('/health', (c) => {
-  return withCors(c, jsonRes({ status: 'ok', service: 'goal-ai-worker', ts: Date.now() }));
-});
+app.get('/api/version', (c) => withCors(c, jsonRes({ version: APP_VERSION, deployed_at: new Date().toISOString() })));
+app.get('/health', (c) => withCors(c, jsonRes({ status: 'ok', service: 'goal-ai-worker', ts: Date.now() })));
 
 app.post('/api/error-report', async (c) => {
   try {
@@ -46,9 +41,7 @@ app.post('/api/error-report', async (c) => {
     const key = `err:${new Date().toISOString().slice(0,13)}`;
     const existing = JSON.parse(await c.env.TOKEN_KV.get(key) || '[]');
     existing.push({ ...body, ip: c.req.header('CF-Connecting-IP') });
-    if (existing.length <= 100) {
-      await c.env.TOKEN_KV.put(key, JSON.stringify(existing), { expirationTtl: 86400 * 7 });
-    }
+    if (existing.length <= 100) await c.env.TOKEN_KV.put(key, JSON.stringify(existing), { expirationTtl: 86400 * 7 });
   } catch(e) {}
   return withCors(c, jsonRes({ ok: true }));
 });
@@ -128,9 +121,7 @@ app.notFound((c) => withCors(c, jsonRes({ error: 'Not found' }, 404)));
 // ── Error ──
 app.onError((err, c) => {
   console.error('Worker error:', err);
-  if (err instanceof SyntaxError) {
-    return withCors(c, jsonRes({ error: 'Invalid JSON in request body' }, 400));
-  }
+  if (err instanceof SyntaxError) return withCors(c, jsonRes({ error: 'Invalid JSON in request body' }, 400));
   return withCors(c, jsonRes({ error: 'Internal server error' }, 500));
 });
 
