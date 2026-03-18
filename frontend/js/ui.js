@@ -95,6 +95,8 @@ function toggleSidebar(){
   ov.classList.toggle('open');
   if(hb) hb.style.display = isOpen ? '' : 'none';
   document.body.style.overflow = isOpen ? '' : 'hidden';
+  // サイドバー表示時にモーダルを閉じる
+  if(!isOpen) document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
 }
 function closeSidebar(){
   const sb = document.getElementById('sb');
