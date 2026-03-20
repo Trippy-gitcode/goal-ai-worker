@@ -9,7 +9,7 @@ export async function handleCheckoutCreate(request, env) {
   const body = await request.json();
   const { plan } = body;
   const priceId = STRIPE_PRICE_IDS[plan];
-  if (!priceId) return jsonRes({ error: '無効なプランです。pro, premium, max, annual, premium_annual, max_annual のいずれかを指定してください' }, 400);
+  if (!priceId) return jsonRes({ error: '無効なプランです。light, pro, max, ultra のいずれかを指定してください' }, 400);
   const params = new URLSearchParams();
   params.append('mode', 'subscription');
   params.append('line_items[0][price]', priceId);
@@ -18,8 +18,7 @@ export async function handleCheckoutCreate(request, env) {
   params.append('cancel_url', STRIPE_CANCEL_URL);
   params.append('metadata[tokenId]', auth.tokenId);
   params.append('metadata[plan]', plan);
-  if (plan === 'pro' || plan === 'premium') params.append('discounts[0][coupon]', 'LAUNCH500');
-  else if (plan === 'max') params.append('discounts[0][coupon]', 'LAUNCHMAX');
+  // TODO: Step 6 でクーポン・従量課金対応
   const res = await fetch('https://api.stripe.com/v1/checkout/sessions', { method: 'POST', headers: { 'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() });
   const session = await res.json();
   if (!res.ok) { console.error('Stripe Checkout error:', session); return jsonRes({ error: session.error?.message || 'Stripe error' }, res.status); }

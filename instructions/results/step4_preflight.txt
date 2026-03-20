@@ -1,0 +1,85 @@
+=== Step 4 Preflight ===
+--- grep: premium references ---
+src/utils/constants.js:7:  premium:         { deep: 60,    chat: 9999, chatPer: 'day'   },
+src/utils/constants.js:10:  premium_annual:  { deep: 60,    chat: 9999, chatPer: 'day'   },
+src/utils/constants.js:20:  premium:         { claude: 'claude-opus-4-20250514', openai: 'gpt-5', gemini: 'gemini-2.5-pro', router: 'gpt-5-mini' },
+src/utils/constants.js:21:  premium_annual:  { claude: 'claude-opus-4-20250514', openai: 'gpt-5', gemini: 'gemini-2.5-pro', router: 'gpt-5-mini' },
+src/utils/constants.js:40:  TESTER01: { plan: 'premium', max_uses: 5 },
+src/utils/constants.js:56:  premium:         'price_1TBCKT4084X0uakaZg3wdluF',
+src/utils/constants.js:58:  premium_annual:  'price_1TBUKE4084X0uakaolxB0a4b',
+src/routes/checkout.js:12:  if (!priceId) return jsonRes({ error: '無効なプランです。pro, premium, max, annual, premium_annual, max_annual のいずれかを指定してください' }, 400);
+src/routes/checkout.js:21:  if (plan === 'pro' || plan === 'premium') params.append('discounts[0][coupon]', 'LAUNCH500');
+CHECK: 上記が存在する = 旧構成が残っている = 更新対象
+
+--- DB RPC check ---
+CHECK: session_progress.md の Step 3 結果を確認。RPCの引数名 p_user_id を確認
+
+--- env check ---
+0
+wrangler.toml にない（secretsで管理=OK）
+
+--- file structure ---
+      72 src/utils/constants.js
+      86 src/utils/rate-limit.js
+     255 src/routes/chat.js
+     114 src/routes/checkout.js
+     527 total
+
+--- getModel usage ---
+src/utils/constants.js:27:export function getModel(plan, provider) {
+src/worker.js.bak:86:function getModel(plan, provider) {
+src/worker.js.bak:636:    const model = getModel(auth.plan, 'router');
+src/worker.js.bak:652:  const model = getModel(auth.plan, 'gemini');
+src/worker.js.bak:702:  const model = getModel(auth.plan, 'openai'); // PLAN_MODELSのキーは'openai'
+src/worker.js.bak:718:  const model = getModel(auth.plan, 'openai');
+src/worker.js.bak:864:  const claudeModel = getModel(auth.plan, 'claude');
+src/worker.js.bak:1022:  const claudeModel = getModel(auth.plan, 'claude');
+src/worker.js.bak:1128:  const model = isRouting ? getModel(auth.plan, 'router') : 'gpt-5-nano';
+src/worker.js.bak:1178:  let openaiModel = getModel(auth.plan, 'openai');
+src/worker.js.bak:1249:  const geminiModel = getModel(auth.plan, 'gemini');
+src/worker.js.bak:1290:  const claudeModel = getModel(auth.plan, 'claude');
+src/worker.js.bak:1319:  const claudeModel = getModel(auth.plan, 'claude');
+src/routes/deep.js:15:  let openaiModel = getModel(auth.plan, 'openai');
+src/routes/deep.js:64:  const geminiModel = getModel(auth.plan, 'gemini');
+src/routes/deep.js:93:  const claudeModel = getModel(auth.plan, 'claude');
+src/routes/deep.js:111:  const claudeModel = getModel(auth.plan, 'claude');
+src/routes/chat.js:34:  const claudeModel = getModel(auth.plan, 'claude');
+src/routes/chat.js:164:  const claudeModel = getModel(auth.plan, 'claude');
+src/routes/chat.js:231:  const model = isRouting ? getModel(auth.plan, 'router') : 'gpt-5-nano';
+src/services/ai/gemini.js:4:  const model = getModel(auth.plan, 'gemini');
+src/services/ai/gpt.js:4:  const model = getModel(auth.plan, 'openai');
+src/services/ai/gpt.js:20:  const model = getModel(auth.plan, 'openai');
+src/services/ai/routing.js:25:    const model = getModel(auth.plan, 'router');
+
+--- auth.userId vs auth.tokenId ---
+22:  const rl = await checkRateLimit(env, auth.userId);
+25:  const chatUsage = await checkDailyChatUsage(env, auth.userId, auth.plan);
+27:  await incrementDailyChatUsage(env, auth.userId);
+29:  const fu = await checkFairUse(env, auth.userId);
+49:      saveChatMessage(env, auth.tokenId, lastUserMsg.role, lastUserMsg.content, null, goalId, 'chat'),
+50:      saveChatMessage(env, auth.tokenId, 'assistant', aiContent, 'claude', goalId, 'chat'),
+54:  if (ctx && env.SUPABASE_URL) ctx.waitUntil(updateStreak(auth.tokenId, env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY));
+57:  const chatCountKey = `usage:chat:${auth.userId}:${dailyKey}`;
+69:  const rl = await checkRateLimit(env, auth.userId);
+80:    const chatUsage = await checkDailyChatUsage(env, auth.userId, auth.plan);
+82:    await incrementDailyChatUsage(env, auth.userId);
+85:  const fu = await checkFairUse(env, auth.userId);
+90:    ctx.waitUntil(env.KV.put(`location:${auth.tokenId}`, JSON.stringify(location), { expirationTtl: 3600 }).catch(() => {}));
+93:    try { const cached = await env.KV.get(`location:${auth.tokenId}`); if (cached) userLocation = JSON.parse(cached); } catch(e) {}
+104:    getProfileWithCache(env, auth.tokenId, ctx).catch(() => null),
+105:    env.RAG_ENABLED === 'true' ? searchRelatedMessages(env, auth.tokenId, userMessage, goalId).catch(() => []) : Promise.resolve([])
+112:    if (sessionId) compressedMessages = await buildCompressedMessages(env, auth.tokenId, sessionId, messages);
+121:      const result = await buildServerSystemPrompt(body, auth.tokenId, env, { aiMemo, ragResults });
+138:      if (env.SUPABASE_URL) updateStreak(auth.tokenId, env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+140:        if (env.MEMO_ENABLED === 'true') ctx.waitUntil(countRecentMessages(env, auth.tokenId).then(c => { if (c > 0 && c % 5 === 0) return regenerateAiMemo(env, auth.tokenId, goalId); }).catch(() => {}));
+141:        if (env.RAG_ENABLED === 'true' && userMessage) ctx.waitUntil(generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage).catch(() => {}));
+148:    const cm = await canUseModel(auth.tokenId, auth.plan, 'claude', env);
+161:    await incrementFreeModelUsage(auth.tokenId, 'claude', env);
+187:  if (env.SUPABASE_URL) updateStreak(auth.tokenId, env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+191:      ctx.waitUntil(countRecentMessages(env, auth.tokenId).then(count => {
+192:        if (count > 0 && count % 5 === 0) return regenerateAiMemo(env, auth.tokenId, goalId);
+196:      ctx.waitUntil(generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage).catch(() => {}));
+199:      ctx.waitUntil(countSessionMessages(env, auth.tokenId, sessionId).then(sc => {
+200:        if (sc >= 10 && sc % 10 === 0) return generateConversationSummary(env, auth.tokenId, sessionId);
+
+=== Preflight DONE ===

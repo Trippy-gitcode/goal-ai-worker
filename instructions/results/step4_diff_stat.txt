@@ -1,0 +1,10 @@
+ CLAUDE.md              | 323 +++++++++----------------------------------------
+ frontend/index.html    |   2 +-
+ frontend/js/globals.js |   2 +-
+ frontend/sw.js         |   2 +-
+ package-lock.json      | 251 +++++++++++++++++++++++---------------
+ package.json           |   1 +
+ src/routes/chat.js     |  67 +++++++++-
+ src/routes/checkout.js |   5 +-
+ src/utils/constants.js | 101 ++++++++++------
+ 9 files changed, 345 insertions(+), 409 deletions(-)

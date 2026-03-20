@@ -1,0 +1,12 @@
+=== Step 4 Grep Check ===
+PLAN_CONFIG|getPlanConfig count: 7
+USAGE_BATCH_SIZE count: 1
+recordTurnUsage count: 3
+maybeSendUsageRecord count: 2
+getCurrentMonth count: 1
+increment_turn_usage count: 2
+handleChatStream|buildServerSystemPrompt count: 5
+quickRoute|callRoutingAPI count: 3
+MEMO_ENABLED|RAG_ENABLED|CACHE_ENABLED count: 6
+旧プラン名 (should be 0): 1
+=== Grep DONE ===

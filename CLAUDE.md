@@ -1,288 +1,76 @@
 # GOAL AI — CLAUDE.md（Claude Code専用）
-> 最終更新：2026-03-17（v3.1.5）
-> 方針・ルール → goal_ai_project_v5.8.md｜履歴・スキーマ → goal_ai_reference.md
+> 最終更新：2026-03-21（v6.3 / KICKOFF-001 Step 4準備 / ワークフローv14追加）
+> 方針・ルール → development_rules.md（C1〜C7）
+> プラン・戦略 → goal_ai_project_v6_3.md
+> 履歴・スキーマ → goal_ai_reference_v2.md
 
 ---
 
-## 【鉄則】毎回必ず守ること
+## 現在の実行チェーン（KICKOFF-001）
 
-### 実装前
-1. 対象箇所を **grep で場所特定**してから編集（行番号把握後にstr_replace）
-2. 修正対象のセレクタ/関数名が**実際のDOM/コードに存在するか**確認してから修正
-3. 同じプロパティが**複数箇所**（デスクトップ/モバイル/メディアクエリ）にないかgrep全量確認
+各ステップ完了後にふとしの承認を得てから次へ。
 
-### 実装後・デプロイ前
-4. 末尾の**保全確認grep**を全項目実行 → 1件でも失敗したら再修正
-5. `APP_VERSION`をインクリメント（globals.js, sw.js, index.html, worker.jsの4箇所同期）
-6. sw.jsの`CACHE_NAME`を`'goal-ai-v' + APP_VERSION`に更新
+| Step | 指示書 | 追補適用 | 状態 |
+|------|--------|---------|:----:|
+| 0 | CLAUDE.md更新 | — | ✅ |
+| 1 | STRIPE-SETUP-AUTO | AMEND-002 | ✅ |
+| 2 | TEST-INFRA-001 | — | ✅ |
+| 3 | STRIPE-001-SCHEMA | AMEND-001 + AMEND-002 | ✅ |
+| 4 | STRIPE-002-TURN-RECORD | AMEND-001 + AMEND-002 | ✅ |
+| 5 | STRIPE-003-CAP-FAIRUSE | AMEND-001 + AMEND-002 | ⬜ |
+| 6 | STRIPE-004-API-WEBHOOK | AMEND-001 + AMEND-002 | ⬜ |
+| 7 | STRIPE-005-FRONTEND | AMEND-001 + AMEND-002 | ⬜ |
+| 8a | DESIGN-IMPL-001 PART-1 | — | ⬜ |
+| 8b | DESIGN-IMPL-001 PART-2 | — | ⬜ |
+| 8c | DESIGN-IMPL-001 PART-3 | — | ⬜ |
 
-### デプロイ後
-7. `Deployed: vX.X.X` と変更サマリー3行を報告
-8. バージョン番号ルール: 大変更=整数、小変更=小数第一、極小=小数第二
 
-### デプロイ禁止条件
-- 保全確認grepで1件でも失敗
-- 確認grepを実行していない
+---
 
-### 【鉄則】デプロイ後スモークテスト（必須）
-デプロイ後、`bash scripts/smoke_test.sh` を必ず実行すること。
-1つでも失敗したら即 `npx wrangler rollback` で前バージョンに戻す。
+## 【鉄則】
 
-### 【鉄則】デグレ発覚時の対応
-1. まず `npx wrangler rollback` で前バージョンに戻す（ユーザー影響を最小化）
-2. `npx wrangler tail --format pretty` でエラーログを確認
-3. 原因を特定してから修正（推測で修正しない）
-4. 修正後、スモークテスト全項目を通してからデプロイ
+1. grep で場所特定してから編集
+2. 指示書+追補を全て読んでから実装開始
+3. 保全確認grep全項目実行。1件でも失敗なら再修正
+4. 1機能1デプロイ。デプロイ後即スモークテスト
+5. FAIL → wrangler rollback → ログ確認 → 修正
+6. ログ確認前の投機的修正禁止
+7. 指示書にないファイルは変更禁止
+8. APP_VERSION インクリメント（globals.js, sw.js, index.html, worker.js）
 
-### 【鉄則】バグ修正時
-- エラーが報告されたら、まず `wrangler tail` でログを確認すること
-- 推測で修正しない。ログを見て原因を特定してから修正する
-- 「〜だと思います」で修正コードを書かない
+## 重要な発見事項（Step 4以降の前提）
 
-### 【鉄則】変更ファイル制限
-- 指示書で修正対象として明記されていないファイル・関数は変更しないこと
-- 修正が必要だと判断した場合は、理由を説明して承認を求めること
-- 副作用が予想される変更は、影響範囲を事前に報告すること
+### DBスキーマの命名規則
+- 全テーブルが `user_id` (UUID) を使用（`token_id` ではない）
+- `chat_messages` のカラム: id, user_id, goal_id, role, content, ai_model, message_type, created_at, session_id, goal_candidate, session_tag
+- `usage_tracking` の既存unique制約: `(user_id, month)`
+- Worker側の `auth.tokenId` と DB の `user_id` の対応関係を要確認
 
-### 【絶対禁止】許可なく絶対にやらないこと
-- AIスマートルーティングの廃止・削除・無効化
-- プラン構成（Free/Pro/Premium/Max）の変更・削除
+### constants.js 要更新
+- 現在: free/pro/premium/max/annual/premium_annual/max_annual の7プラン
+- v6.3: free/light/pro/max/ultra の5プラン
+- PLAN_MODELS, PLAN_LIMITS, STRIPE_PRICE_IDS を全て書き換え必要
+- Step 4開始前にconstants.js更新を先行すること
+
+## 実行ワークフロー（v14以降）
+
+1. 指示書は instructions/ に保存されている
+2. 実行結果は instructions/results/ に保存する（grep出力・diff・smoke結果）
+3. 各ステップ完了後 session_progress.md を更新する
+4. テストFAIL時は即停止 → wrangler rollback → 結果記録 → 次の指示を待つ
+5. 指示書にない変更は加えない。改善案は session_progress.md「## 提案ログ」に記録のみ
+6. 各ステップ完了時に git tag stepN-complete を打つ
+
+## 品質ゲート（全ステップ共通）
+
+Phase 0: プリフライトチェック → Phase 1-2: 実装 → Phase 3: diff保存+grep保全 → Phase 4: キャノピーテスト → Phase 5: tag + session_progress更新
+
+### 【グローバルルール】
+- 指示書中の `token_id` は `auth.userId`（UUID）に読み替えること（DB操作は全て `user_id`）
+
+### 【絶対禁止】
+- AIスマートルーティングの廃止・削除
+- プラン構成の勝手な変更
 - Supabaseテーブル・カラムの削除
-- 既存APIエンドポイントの削除
-- 認証・トークン処理の削除
-- Stripe連携処理の削除
-- Phase 1実装済み機能の削除
-- 指示された実装の省略・スキップ（不要と判断しても勝手に省かない）
-
----
-
-## 技術スタック
-
-| レイヤー | 採用技術 | 状態 |
-|---------|---------|------|
-| フロントエンド | HTML + JS（js/分割済み） | ✅ 稼働中 |
-| ホスティング | Cloudflare Pages（goal-ai-frontend.pages.dev） | ✅ 稼働中 |
-| APIプロキシ | Cloudflare Workers | ✅ 稼働中 |
-| メインAI | Claude Sonnet 4.6 / Opus 4.6 | ✅ 稼働中 |
-| サブAI① | GPT-5 nano / mini / 5 | ✅ 稼働中 |
-| サブAI② | Gemini 2.5 Flash / Pro | ✅ 稼働中 |
-| 決済 | Stripe | ✅ 稼働中 |
-| 永続化 | Supabase PostgreSQL | ✅ 稼働中 |
-| KVキャッシュ | Cloudflare KV | ✅ 稼働中 |
-
----
-
-## ファイル構成
-
-```
-goal-ai-worker/
-├── CLAUDE.md
-├── wrangler.toml
-├── package.json
-├── .dev.vars
-├── src/
-│   └── worker.js
-└── frontend/
-    ├── index.html          # HTML骨格（〜300行）
-    ├── style.css           # 全CSS（6テーマ×25+変数）
-    ├── sw.js               # Service Worker（PWA）
-    ├── js/
-    │   ├── globals.js      # APP_VERSION, FONT_SIZES, グローバル変数
-    │   ├── api.js          # API通信・escapeHtml・streamAI
-    │   ├── chat.js         # チャット・ルーティング・履歴・メッセージ生成
-    │   ├── goals.js        # ゴール・タスク・マイルストーン・カレンダー
-    │   ├── profile.js      # プロフィール・デザインセッション
-    │   ├── ui.js           # toast・modal・sidebar・テーマ
-    │   └── app.js          # init()・エントリーポイント
-    ├── lp.html
-    ├── terms.html
-    └── privacy.html
-```
-
----
-
-## テーマ構成（6種）
-
-| テーマ | data-theme | 特徴 |
-|-------|-----------|------|
-| ダーク | dark | 標準ダーク |
-| ダークグラス | dark-glass | ダーク + blur |
-| ライト | light | 標準ライト |
-| ライトグラス | light-glass | ライト + blur |
-| ハラジュク | harajuku | 黄→ピンクグラデ、レインボーボーダー |
-| ハラジュクグラス | harajuku-glass | ハラジュク + blur |
-
-全UIコンポーネントはCSS変数（--text-primary, --bg, --accent等）のみを参照。
-ハードコード色は禁止。
-
----
-
-## AIモデル割り当て（プラン別）
-
-| プラン | Claude | GPT | Gemini | ルーティング |
-|-------|--------|-----|--------|------------|
-| Free | Sonnet 4.6 | GPT-5 nano | 2.5 Flash | GPT-5 mini |
-| Pro | Sonnet 4.6 | GPT-5 mini | 2.5 Flash | GPT-5 mini |
-| Premium | Opus 4.6 | GPT-5 | 2.5 Pro | GPT-5 mini |
-| Max | Opus 4.6 | GPT-5 | 2.5 Pro | GPT-5 mini |
-
-### ルーティング4カテゴリ
-- **gemini**: 天気・ニュース・検索・アイデア → 「🔍 リサーチ中...」バッジ
-- **gpt**: 翻訳・SNSコピー・短い要約 → 「💡 アイデアを生成中...」バッジ
-- **gpt-simple**: 相槌・短い返事 → バッジなし
-- **claude**: コーチング・戦略・感情・それ以外 → バッジなし（デフォルト）
-
-### ルーティングルール
-- ルーティングは**新しい会話の最初のメッセージでのみ**実行
-- 一度Geminiに振られたらその会話はGeminiが最後まで担当（currentRouteAI変数）
-- ルーティング判定は `/api/chat/gpt-simple`（カウントなし）を使用
-
----
-
-## システムプロンプトルール（全AI共通）
-
-```
-【最優先】ユーザーの質問・依頼にまず答えること。
-- 質問されたら答える。調べものには調べて答える。雑談には雑談で返す。
-- ゴール設定への誘導は絶対にしない。
-- 回答の代わりに質問だけを返さない（答えた上で追加質問はOK）。
-- 聞き返し禁止。ニュースなら3〜5件即回答。おすすめなら具体的候補を即回答。
-
-【ゴール提案の条件】ユーザーが自ら目標を語り、What+Whyが揃った場合のみ。
-```
-
----
-
-## チャットUI — DOM構造（最重要）
-
-```
-div.msg                    ← 最外殻
-├── div.msg-av             ← アバター（24x24px）
-└── div.msg-body           ← メッセージ本体
-    ├── div.msg-actions    ← コピー/引用ボタン（position:absolute、ホバー時表示）
-    ├── div.bubble         ← テキスト本体
-    └── div.msg-footer     ← 「15:12 · Claude」（時間 + AIモデル名）
-```
-
-### ⚠️ 存在しないセレクタ（CSSを書くな）
-- `.msg-header` — 存在しない
-- `.chat-message` — 存在しない
-
-### 空バブル防止（3箇所全てにガード必須）
-1. DOM追加前: テキストが空ならDOMに追加しない
-2. onDoneコールバック: `if(!t||!t.trim()) return;`（配列にpushしない）
-3. renderHomeMsgs: mkHomeMsgがnullを返したらスキップ
-
-### チャット画面は5画面全て共通
-修正時は必ず全5画面に適用すること。1画面だけ修正して他を放置しない。
-- ホームチャット
-- ゴールハブチャット
-- フィードバックチャット
-- デザインセッションチャット
-- 悩み相談チャット
-
----
-
-## プラン制限
-
-| プラン | チャット | ディープ分析 |
-|-------|---------|------------|
-| free | 5回/日 | 3回/月 |
-| pro | 無制限* | 30回/月 |
-| premium | 無制限* | 60回/月 |
-| max | 無制限 | 無制限 |
-
-*フェアユース: 1時間30回・1日100回超過で速度低下
-
----
-
-## APIエンドポイント一覧
-
-```
-POST /api/chat/stream
-POST /api/chat/gpt-simple
-POST /api/deep/openai
-POST /api/deep/gemini
-POST /api/deep/claude/stream
-POST /api/token/create（管理者）
-POST /api/token/validate
-POST /api/token/redeem
-POST /api/token/register（Free自動登録）
-GET  /api/usage
-GET  /api/version
-POST /api/checkout/create
-POST /api/checkout/portal
-POST /api/webhook/stripe
-GET  /api/goals
-POST /api/goals
-PATCH /api/goals/:id
-DELETE /api/goals/:id
-GET  /api/history
-POST /api/history
-DELETE /api/history/:session_id
-POST /api/feedbacks
-GET  /api/feedbacks（管理者用）
-POST /api/voice/transcribe
-POST /api/referral/create
-POST /api/referral/apply
-GET  /api/referral/status
-POST /api/error-report
-```
-
----
-
-## Worker Secrets
-
-```
-ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY
-TOKEN_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
-SUPABASE_URL, SUPABASE_SERVICE_KEY
-```
-
----
-
-## 本番URL
-
-- フロントエンド: https://goal-ai-frontend.pages.dev
-- Worker: https://goal-ai-worker.goalai-futoshi.workers.dev
-
----
-
-## デプロイコマンド
-
-```bash
-npx wrangler deploy src/worker.js
-npx wrangler pages deploy frontend --project-name goal-ai-frontend
-```
-
----
-
-## 保全確認grep（デプロイ前に全項目実行）
-
-```bash
-# セキュリティ
-grep -c "escapeHtml" frontend/js/api.js                       # 1以上
-grep -c "Secure" frontend/js/globals.js frontend/js/ui.js     # 1以上
-grep -c "console.log" frontend/index.html                     # 0件
-
-# AIモデル
-grep "gpt-5-mini\|gpt-5-nano\|gpt-5\"" src/worker.js         # 各1以上
-grep "gemini-2.5-flash\|gemini-2.5-pro" src/worker.js         # 各1以上
-grep "gpt-4o\|gemini-2.0\|gemini-1.5" src/worker.js           # 0件（旧モデルなし）
-
-# プラン・機能
-grep "chat.*5\b" src/worker.js                                # Free制限5回/日
-grep "goal-ai-frontend.pages.dev" src/worker.js               # Stripe URL
-grep -c "overscroll-behavior" frontend/style.css              # 1以上
-grep -c "kabeuchi\|壁打ち" frontend/js/chat.js                # 1以上
-grep -c "launchConfetti\|checkMilestone" frontend/js/goals.js # 2以上
-grep -c "transcribeAudio\|MediaRecorder" frontend/js/chat.js  # 1以上
-
-# テーマ
-grep -c "harajuku" frontend/style.css                         # 5以上
-grep -c "pop\|pastel\|ポップ" frontend/style.css              # 0件（旧テーマ名なし）
-grep -c "\-\-text-primary" frontend/style.css                 # 6以上（全テーマ定義）
-
-# バージョン
-grep "APP_VERSION" frontend/js/globals.js                     # 存在確認
-```
+- 既存APIエンドポイント・認証・Stripe処理の削除
+- 指示された実装の省略・スキップ

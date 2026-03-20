@@ -1,6 +1,6 @@
 import { authenticateRequest } from '../middleware/auth.js';
 import { jsonRes } from '../utils/helpers.js';
-import { getModel, FREE_MODEL_LIMITS } from '../utils/constants.js';
+import { getModel, FREE_MODEL_LIMITS, getPlanConfig, getCurrentMonth, USAGE_BATCH_SIZE } from '../utils/constants.js';
 import { checkRateLimit, checkDailyChatUsage, incrementDailyChatUsage, checkFairUse, canUseModel, incrementFreeModelUsage, getEffectiveModel } from '../utils/rate-limit.js';
 import { getDayKey } from '../utils/helpers.js';
 import { saveChatMessage } from '../utils/supabase.js';
@@ -80,6 +80,11 @@ export async function handleChatStream(request, env, ctx) {
     const chatUsage = await checkDailyChatUsage(env, auth.userId, auth.plan);
     if (!chatUsage.ok) return jsonRes({ error: '本日のチャット上限に達しました', remaining: 0 }, 429);
     await incrementDailyChatUsage(env, auth.userId);
+    // ═══ ターン記録 + 従量課金（STEP4-EXEC） ═══
+    if (auth.plan !== 'free') {
+      const usageResult = await recordTurnUsage(env, auth.userId, auth.plan);
+      console.log(`[TURN] user=${auth.userId} plan=${auth.plan} turns=${usageResult.turns_used} amount=¥${usageResult.current_amount}`);
+    }
   }
 
   const fu = await checkFairUse(env, auth.userId);
@@ -252,4 +257,64 @@ export async function handleGptSimple(request, env) {
   }
 
   return jsonRes(data, 200, { 'X-Model-Used': model, 'X-Route': 'gpt-simple' });
+}
+
+// ═══════ ターン記録 + Stripe従量課金（STEP4-EXEC） ═══════
+async function recordTurnUsage(env, userId, plan) {
+  const config = getPlanConfig(plan);
+  if (config.per_turn === 0) {
+    return { current_amount: 0, turns_used: 0, cap_reached: false, is_capped: false, should_degrade: false };
+  }
+  const month = getCurrentMonth();
+  const supabaseUrl = env.SUPABASE_URL;
+  const supabaseKey = env.SUPABASE_SERVICE_KEY;
+  let result;
+  try {
+    const rpcRes = await fetch(`${supabaseUrl}/rest/v1/rpc/increment_turn_usage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
+      body: JSON.stringify({ p_user_id: userId, p_month: month, p_per_turn: config.per_turn, p_cap: config.cap })
+    });
+    if (!rpcRes.ok) { console.error('increment_turn_usage RPC failed:', await rpcRes.text()); return { current_amount: 0, turns_used: 0, cap_reached: false, is_capped: false, should_degrade: false }; }
+    const rpcData = await rpcRes.json();
+    result = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+  } catch (e) { console.error('recordTurnUsage error:', e.message); return { current_amount: 0, turns_used: 0, cap_reached: false, is_capped: false, should_degrade: false }; }
+  const { turns_used, current_amount, cap_reached, is_capped } = result || {};
+  if (!is_capped) await maybeSendUsageRecord(env, userId, turns_used || 0, plan);
+  return { current_amount: current_amount || 0, turns_used: turns_used || 0, cap_reached: cap_reached || is_capped || false, is_capped: is_capped || false, should_degrade: cap_reached || is_capped || false };
+}
+
+async function maybeSendUsageRecord(env, userId, turnsUsed, plan) {
+  const config = getPlanConfig(plan);
+  if (config.per_turn === 0) return;
+  const month = getCurrentMonth();
+  const supabaseUrl = env.SUPABASE_URL;
+  const supabaseKey = env.SUPABASE_SERVICE_KEY;
+  let synced = 0;
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&month=eq.${month}&select=stripe_usage_synced`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
+    const data = await res.json();
+    synced = data?.[0]?.stripe_usage_synced || 0;
+  } catch (e) { console.error('Failed to get stripe_usage_synced:', e.message); return; }
+  const unsent = turnsUsed - synced;
+  if (unsent < USAGE_BATCH_SIZE) return;
+  let meteredItemId;
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/users?user_id=eq.${userId}&select=stripe_metered_subscription_item_id`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
+    const data = await res.json();
+    meteredItemId = data?.[0]?.stripe_metered_subscription_item_id;
+  } catch (e) { console.error('Failed to get metered item ID:', e.message); return; }
+  if (!meteredItemId) return; // テスター等はスキップ
+  try {
+    const response = await fetch(`https://api.stripe.com/v1/subscription_items/${meteredItemId}/usage_records`, {
+      method: 'POST', headers: { 'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `quantity=${unsent}&action=increment&timestamp=${Math.floor(Date.now() / 1000)}`
+    });
+    if (response.ok) {
+      await fetch(`${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&month=eq.${month}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json', 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ stripe_usage_synced: turnsUsed })
+      });
+    } else { console.error('Stripe usage_record failed:', await response.json()); }
+  } catch (e) { console.error('Stripe usage_record error:', e.message); }
 }

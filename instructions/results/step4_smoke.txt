@@ -1,0 +1,35 @@
+
+==========================================
+  TEST-001: Schema Validation
+==========================================
+
+[1;33m⏭ SKIP[0m: Schema tests pending STRIPE-001 implementation
+
+==========================================
+  TEST-001: Schema Validation: ✅ 0 / ❌ 0 / ⏭ 1
+==========================================
+=== CANOPY TEST ===
+Worker: "version":"3.9.3"
+--- Core functions ---
+OK: handleChatStream (8 refs)
+OK: buildServerSystemPrompt (7 refs)
+OK: quickRoute (5 refs)
+OK: callRoutingAPI (5 refs)
+OK: handleGeminiChat (7 refs)
+OK: handleGPTChat (7 refs)
+OK: MEMO_ENABLED (7 refs)
+OK: RAG_ENABLED (8 refs)
+OK: CACHE_ENABLED (4 refs)
+--- PLAN_CONFIG ---
+OK: plan free
+OK: plan light
+OK: plan pro
+OK: plan max
+OK: plan ultra
+--- Old plan cleanup ---
+OK: no old plan names
+--- Turn recording ---
+OK: recordTurnUsage (3 refs)
+OK: maybeSendUsageRecord (2 refs)
+OK: increment_turn_usage (2 refs)
+=== CANOPY PASS ===

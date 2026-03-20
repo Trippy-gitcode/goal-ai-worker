@@ -1,0 +1,288 @@
+diff --git a/src/routes/chat.js b/src/routes/chat.js
+index 7af80c9..444a554 100644
+--- a/src/routes/chat.js
++++ b/src/routes/chat.js
+@@ -1,6 +1,6 @@
+ import { authenticateRequest } from '../middleware/auth.js';
+ import { jsonRes } from '../utils/helpers.js';
+-import { getModel, FREE_MODEL_LIMITS } from '../utils/constants.js';
++import { getModel, FREE_MODEL_LIMITS, getPlanConfig, getCurrentMonth, USAGE_BATCH_SIZE } from '../utils/constants.js';
+ import { checkRateLimit, checkDailyChatUsage, incrementDailyChatUsage, checkFairUse, canUseModel, incrementFreeModelUsage, getEffectiveModel } from '../utils/rate-limit.js';
+ import { getDayKey } from '../utils/helpers.js';
+ import { saveChatMessage } from '../utils/supabase.js';
+@@ -80,6 +80,11 @@ export async function handleChatStream(request, env, ctx) {
+     const chatUsage = await checkDailyChatUsage(env, auth.userId, auth.plan);
+     if (!chatUsage.ok) return jsonRes({ error: '本日のチャット上限に達しました', remaining: 0 }, 429);
+     await incrementDailyChatUsage(env, auth.userId);
++    // ═══ ターン記録 + 従量課金（STEP4-EXEC） ═══
++    if (auth.plan !== 'free') {
++      const usageResult = await recordTurnUsage(env, auth.userId, auth.plan);
++      console.log(`[TURN] user=${auth.userId} plan=${auth.plan} turns=${usageResult.turns_used} amount=¥${usageResult.current_amount}`);
++    }
+   }
+ 
+   const fu = await checkFairUse(env, auth.userId);
+@@ -253,3 +258,63 @@ export async function handleGptSimple(request, env) {
+ 
+   return jsonRes(data, 200, { 'X-Model-Used': model, 'X-Route': 'gpt-simple' });
+ }
++
++// ═══════ ターン記録 + Stripe従量課金（STEP4-EXEC） ═══════
++async function recordTurnUsage(env, userId, plan) {
++  const config = getPlanConfig(plan);
++  if (config.per_turn === 0) {
++    return { current_amount: 0, turns_used: 0, cap_reached: false, is_capped: false, should_degrade: false };
++  }
++  const month = getCurrentMonth();
++  const supabaseUrl = env.SUPABASE_URL;
++  const supabaseKey = env.SUPABASE_SERVICE_KEY;
++  let result;
++  try {
++    const rpcRes = await fetch(`${supabaseUrl}/rest/v1/rpc/increment_turn_usage`, {
++      method: 'POST',
++      headers: { 'Content-Type': 'application/json', 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
++      body: JSON.stringify({ p_user_id: userId, p_month: month, p_per_turn: config.per_turn, p_cap: config.cap })
++    });
++    if (!rpcRes.ok) { console.error('increment_turn_usage RPC failed:', await rpcRes.text()); return { current_amount: 0, turns_used: 0, cap_reached: false, is_capped: false, should_degrade: false }; }
++    const rpcData = await rpcRes.json();
++    result = Array.isArray(rpcData) ? rpcData[0] : rpcData;
++  } catch (e) { console.error('recordTurnUsage error:', e.message); return { current_amount: 0, turns_used: 0, cap_reached: false, is_capped: false, should_degrade: false }; }
++  const { turns_used, current_amount, cap_reached, is_capped } = result || {};
++  if (!is_capped) await maybeSendUsageRecord(env, userId, turns_used || 0, plan);
++  return { current_amount: current_amount || 0, turns_used: turns_used || 0, cap_reached: cap_reached || is_capped || false, is_capped: is_capped || false, should_degrade: cap_reached || is_capped || false };
++}
++
++async function maybeSendUsageRecord(env, userId, turnsUsed, plan) {
++  const config = getPlanConfig(plan);
++  if (config.per_turn === 0) return;
++  const month = getCurrentMonth();
++  const supabaseUrl = env.SUPABASE_URL;
++  const supabaseKey = env.SUPABASE_SERVICE_KEY;
++  let synced = 0;
++  try {
++    const res = await fetch(`${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&month=eq.${month}&select=stripe_usage_synced`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
++    const data = await res.json();
++    synced = data?.[0]?.stripe_usage_synced || 0;
++  } catch (e) { console.error('Failed to get stripe_usage_synced:', e.message); return; }
++  const unsent = turnsUsed - synced;
++  if (unsent < USAGE_BATCH_SIZE) return;
++  let meteredItemId;
++  try {
++    const res = await fetch(`${supabaseUrl}/rest/v1/users?user_id=eq.${userId}&select=stripe_metered_subscription_item_id`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
++    const data = await res.json();
++    meteredItemId = data?.[0]?.stripe_metered_subscription_item_id;
++  } catch (e) { console.error('Failed to get metered item ID:', e.message); return; }
++  if (!meteredItemId) return; // テスター等はスキップ
++  try {
++    const response = await fetch(`https://api.stripe.com/v1/subscription_items/${meteredItemId}/usage_records`, {
++      method: 'POST', headers: { 'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' },
++      body: `quantity=${unsent}&action=increment&timestamp=${Math.floor(Date.now() / 1000)}`
++    });
++    if (response.ok) {
++      await fetch(`${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&month=eq.${month}`, {
++        method: 'PATCH', headers: { 'Content-Type': 'application/json', 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Prefer': 'return=minimal' },
++        body: JSON.stringify({ stripe_usage_synced: turnsUsed })
++      });
++    } else { console.error('Stripe usage_record failed:', await response.json()); }
++  } catch (e) { console.error('Stripe usage_record error:', e.message); }
++}
+diff --git a/src/routes/checkout.js b/src/routes/checkout.js
+index 5632c8e..b249b8e 100644
+--- a/src/routes/checkout.js
++++ b/src/routes/checkout.js
+@@ -9,7 +9,7 @@ export async function handleCheckoutCreate(request, env) {
+   const body = await request.json();
+   const { plan } = body;
+   const priceId = STRIPE_PRICE_IDS[plan];
+-  if (!priceId) return jsonRes({ error: '無効なプランです。pro, premium, max, annual, premium_annual, max_annual のいずれかを指定してください' }, 400);
++  if (!priceId) return jsonRes({ error: '無効なプランです。light, pro, max, ultra のいずれかを指定してください' }, 400);
+   const params = new URLSearchParams();
+   params.append('mode', 'subscription');
+   params.append('line_items[0][price]', priceId);
+@@ -18,8 +18,7 @@ export async function handleCheckoutCreate(request, env) {
+   params.append('cancel_url', STRIPE_CANCEL_URL);
+   params.append('metadata[tokenId]', auth.tokenId);
+   params.append('metadata[plan]', plan);
+-  if (plan === 'pro' || plan === 'premium') params.append('discounts[0][coupon]', 'LAUNCH500');
+-  else if (plan === 'max') params.append('discounts[0][coupon]', 'LAUNCHMAX');
++  // TODO: Step 6 でクーポン・従量課金対応
+   const res = await fetch('https://api.stripe.com/v1/checkout/sessions', { method: 'POST', headers: { 'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() });
+   const session = await res.json();
+   if (!res.ok) { console.error('Stripe Checkout error:', session); return jsonRes({ error: session.error?.message || 'Stripe error' }, res.status); }
+diff --git a/src/utils/constants.js b/src/utils/constants.js
+index ff029dd..5db170d 100644
+--- a/src/utils/constants.js
++++ b/src/utils/constants.js
+@@ -1,34 +1,66 @@
+-// ═══════ CONFIG ═══════
++// ═══════ PLAN_CONFIG — Single Source of Truth (v6.3) ═══════
+ 
+-export const PLAN_LIMITS = {
+-  free:            { deep: 3,     chat: 5,    chatPer: 'day'   },
+-  trial:           { deep: 30,    chat: 9999, chatPer: 'day'   },
+-  pro:             { deep: 30,    chat: 9999, chatPer: 'day'   },
+-  premium:         { deep: 60,    chat: 9999, chatPer: 'day'   },
+-  max:             { deep: 99999, chat: 9999, chatPer: 'day'   },
+-  annual:          { deep: 30,    chat: 9999, chatPer: 'day'   },
+-  premium_annual:  { deep: 60,    chat: 9999, chatPer: 'day'   },
+-  max_annual:      { deep: 99999, chat: 9999, chatPer: 'day'   },
++export const PLAN_CONFIG = {
++  free: {
++    display_name: 'Free', price_fixed: 0, per_turn: 0, cap: 0, daily_limit: 20,
++    deep_monthly: 3, ai_memo: false, context_multiplier: 1.0, fallback_model: 'gpt-5-nano',
++    models: { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5-mini', gemini: 'gemini-2.5-flash', router: 'gpt-5-mini' },
++    fair_use: { h5_limit: 10, weekly_limit: 140 }
++  },
++  light: {
++    display_name: 'Light', price_fixed: 500, per_turn: 8, cap: 980, daily_limit: null,
++    deep_monthly: 5, ai_memo: false, context_multiplier: 1.0, fallback_model: 'gpt-5-nano',
++    models: { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5-mini', gemini: 'gemini-2.5-flash', router: 'gpt-5-mini' },
++    fair_use: { h5_limit: 50, weekly_limit: 200 }
++  },
++  pro: {
++    display_name: 'Pro', price_fixed: 1500, per_turn: 20, cap: 2980, daily_limit: null,
++    deep_monthly: 30, ai_memo: true, context_multiplier: 1.0, fallback_model: 'gpt-5-nano',
++    models: { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5', gemini: 'gemini-2.5-flash', router: 'gpt-5-mini' },
++    fair_use: { h5_limit: 80, weekly_limit: 500 }
++  },
++  max: {
++    display_name: 'Max', price_fixed: 1500, per_turn: 10, cap: 9800, daily_limit: null,
++    deep_monthly: Infinity, ai_memo: true, context_multiplier: 1.0, fallback_model: 'gpt-5-mini',
++    models: { claude: 'claude-opus-4-20250514', openai: 'gpt-5', gemini: 'gemini-2.5-pro', router: 'gpt-5-mini' },
++    fair_use: { h5_limit: 200, weekly_limit: 1500 }
++  },
++  ultra: {
++    display_name: 'Ultra', price_fixed: 20000, per_turn: 0, cap: 0, daily_limit: null,
++    deep_monthly: Infinity, ai_memo: true, context_multiplier: 2.0, fallback_model: null,
++    et_weekly_limit: 140, priority_queue: true,
++    models: { claude: 'claude-opus-4-20250514', openai: 'gpt-5', gemini: 'gemini-2.5-pro', router: 'gpt-5-mini' },
++    fair_use: { h5_limit: 200, weekly_limit: 1500 }
++  }
+ };
+ 
+-export const FAIR_USE = { hourly: 30, daily: 100, delayMs: 7000 };
++// ═══════ 導出定数（後方互換） ═══════
++export const PLAN_LIMITS = Object.fromEntries(
++  Object.entries(PLAN_CONFIG).map(([key, cfg]) => [key, {
++    deep: cfg.deep_monthly === Infinity ? 99999 : cfg.deep_monthly,
++    chat: cfg.daily_limit || 9999, chatPer: 'day'
++  }])
++);
+ 
+-export const PLAN_MODELS = {
+-  free:            { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5-mini', gemini: 'gemini-2.5-flash', router: 'gpt-5-mini' },
+-  pro:             { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5-mini', gemini: 'gemini-2.5-flash', router: 'gpt-5-mini' },
+-  annual:          { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5-mini', gemini: 'gemini-2.5-flash', router: 'gpt-5-mini' },
+-  premium:         { claude: 'claude-opus-4-20250514', openai: 'gpt-5', gemini: 'gemini-2.5-pro', router: 'gpt-5-mini' },
+-  premium_annual:  { claude: 'claude-opus-4-20250514', openai: 'gpt-5', gemini: 'gemini-2.5-pro', router: 'gpt-5-mini' },
+-  max:             { claude: 'claude-opus-4-20250514', openai: 'gpt-5', gemini: 'gemini-2.5-pro', router: 'gpt-5-mini' },
+-  max_annual:      { claude: 'claude-opus-4-20250514', openai: 'gpt-5', gemini: 'gemini-2.5-pro', router: 'gpt-5-mini' },
+-  _default:        { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5-mini', gemini: 'gemini-2.5-flash', router: 'gpt-5-mini' },
+-};
++export const PLAN_MODELS = Object.fromEntries(
++  Object.entries(PLAN_CONFIG).map(([key, cfg]) => [key, cfg.models])
++);
++PLAN_MODELS._default = PLAN_CONFIG.free.models;
+ 
+-export function getModel(plan, provider) {
++// ═══════ getModel（Step 5 準備: overrideModels 引数追加） ═══════
++export function getModel(plan, provider, overrideModels) {
++  if (overrideModels) return overrideModels[provider] || PLAN_MODELS._default[provider];
+   const models = PLAN_MODELS[plan] || PLAN_MODELS._default;
+   return models[provider];
+ }
+ 
++export function getPlanConfig(plan) {
++  return PLAN_CONFIG[plan] || PLAN_CONFIG.free;
++}
++
++export const FAIR_USE = { hourly: 30, daily: 100, delayMs: 7000 };
++export const FREE_MODEL_LIMITS = { claude: 5, gemini: 5, gpt: 10 };
++
+ export const PROMO_CODES = {
+   'LAUNCH30':   { plan: 'pro', days: 30,  desc: 'Pro 30日間無料（ローンチ記念）' },
+   'INVITE2026': { plan: 'pro', days: 14,  desc: 'Pro 14日間無料（招待コード）' },
+@@ -37,7 +69,7 @@ export const PROMO_CODES = {
+ };
+ 
+ export const TESTER_CODES = {
+-  TESTER01: { plan: 'premium', max_uses: 5 },
++  TESTER01: { plan: 'max', max_uses: 5 },
+   TESTER02: { plan: 'pro', max_uses: 5 },
+   TESTER03: { plan: 'pro', max_uses: 10 },
+   TESTER04: { plan: 'pro', max_uses: 10 },
+@@ -45,26 +77,27 @@ export const TESTER_CODES = {
+ };
+ export const TESTER_TOTAL_LIMIT = 50;
+ export const TESTER_DURATION_HOURS = 72;
+-
+ export const RATE_LIMIT_WINDOW = 60;
+ export const RATE_LIMIT_MAX = 30;
+ 
+-export const FREE_MODEL_LIMITS = { claude: 5, gemini: 5, gpt: 10 };
+-
+ export const STRIPE_PRICE_IDS = {
+-  pro:             'price_1TAJNZ4084X0uakaB1IoYYuI',
+-  premium:         'price_1TBCKT4084X0uakaZg3wdluF',
+-  annual:          'price_1TAJUm4084X0uakakFD0smoF',
+-  premium_annual:  'price_1TBUKE4084X0uakaolxB0a4b',
+-  max:             'price_1TBUJh4084X0uaka60rFQJHq',
+-  max_annual:      'price_1TBUJn4084X0uakaKJ7XcUAz',
++  light: 'price_1TCzZj4084X0uakahTbAwTYK', light_metered: 'price_1TCzsw4084X0uakajD8aUGIm', light_annual: 'price_1TCztW4084X0uakaqwlf41QK',
++  pro: 'price_1TCzv64084X0uakaeTSyND0a', pro_metered: 'price_1TCzwJ4084X0uakapKKWw6nV', pro_annual: 'price_1TCzwo4084X0uakatfRAkNFr',
++  max: 'price_1TCzz44084X0uakaYnrDA4vv', max_metered: 'price_1TCzzk4084X0uakaiQmUneA7', max_annual: 'price_1TD0094084X0uaka1yAJuPoz',
++  ultra: 'price_1TD03i4084X0uakalPdCgNCJ', ultra_annual: 'price_1TD0414084X0uakaVSJtVFrd',
++  addon_50: 'price_1TD3QJ4084X0uakaOlOzERwV', addon_120: 'price_1TD3QK4084X0uakauP63gUOn',
+ };
+-
+ export const STRIPE_SUCCESS_URL = 'https://goal-ai-frontend.pages.dev?checkout=success';
+ export const STRIPE_CANCEL_URL  = 'https://goal-ai-frontend.pages.dev?checkout=cancel';
+ 
+-export const APP_VERSION = '3.9.1';
++export const USAGE_BATCH_SIZE = 1; // ローンチ直前に5に変更
++export function getCurrentMonth() {
++  const now = new Date();
++  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
++  return `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}`;
++}
+ 
++export const APP_VERSION = '3.9.3';
+ export const COMMON_RULES = `【共通ルール】
+ - ユーザーの質問にはまず答える。質問を聞き返す前にまず回答する。
+ - 2〜3文で簡潔に。長文禁止。質問は1回まで。
+diff --git a/frontend/index.html b/frontend/index.html
+index 4fba3c3..89549de 100644
+--- a/frontend/index.html
++++ b/frontend/index.html
+@@ -218,7 +218,7 @@
+       <span style="color:var(--muted3);">|</span>
+       <a href="privacy.html" target="_blank">プライバシー</a>
+       <span style="color:var(--muted3);">|</span>
+-      <span class="version" title="バージョン確認">v3.9.1</span>
++      <span class="version" title="バージョン確認">v3.9.3</span>
+     </div>
+   </div>
+ </div>
+diff --git a/frontend/js/globals.js b/frontend/js/globals.js
+index 9705775..2ae863d 100644
+--- a/frontend/js/globals.js
++++ b/frontend/js/globals.js
+@@ -119,7 +119,7 @@ function getDeviceId() {
+   return 'dev_' + Math.abs(hash).toString(36);
+ }
+ 
+-const APP_VERSION = '3.9.1';
++const APP_VERSION = '3.9.3';
+ 
+ const FONT_SIZES = {
+   xs: { label: '極小', base: '14px', lh: '1.55' },
+diff --git a/frontend/sw.js b/frontend/sw.js
+index 5f677a8..9a9d31d 100644
+--- a/frontend/sw.js
++++ b/frontend/sw.js
+@@ -1,4 +1,4 @@
+-const CACHE_NAME = 'goal-ai-v3.9.1';
++const CACHE_NAME = 'goal-ai-v3.9.3';
+ 
+ // ネットワークファースト + 動的キャッシュ（Viteハッシュ付きファイル名と互換）
+ 
