@@ -864,6 +864,8 @@ async function sendHomeMsg(){
   clearHomeImage();
   renderHomeMsgs(); homeLoading = true;
   homeMsgTurnCount++;
+  window._homeMsgCount = (window._homeMsgCount || 0) + 1;
+  if(typeof renderFreeUsageBar === 'function') renderFreeUsageBar();
   if (homeMsgTurnCount >= 2) showTaskChip();
   updateStreak();
 

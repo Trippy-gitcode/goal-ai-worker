@@ -1,12 +1,34 @@
 #!/bin/bash
 # canopy.sh — 全Step横断の既存機能生死確認
-echo "=== CANOPY TEST ==="
+CANOPY_START=$(date +%s)
+echo "=== CANOPY TEST ($(date '+%H:%M:%S')) ==="
 FAIL=0
 
 # 1. Worker稼働確認
 VERSION=$(curl -s https://goal-ai-worker.goalai-futoshi.workers.dev/api/version | grep -o '"version":"[^"]*"')
 echo "Worker: $VERSION"
 if [ -z "$VERSION" ]; then echo "FAIL: Worker not responding"; FAIL=1; fi
+
+# 1b. HTTP smoke tests — 主要エンドポイント200確認
+echo "--- HTTP Smoke Tests ---"
+BASE="https://goal-ai-worker.goalai-futoshi.workers.dev"
+for ep in "/api/version" "/health"; do
+  STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE$ep")
+  if [ "$STATUS" = "200" ]; then echo "OK: GET $ep → $STATUS"; else echo "FAIL: GET $ep → $STATUS"; FAIL=1; fi
+done
+# 認証必須エンドポイント → 401が正常
+for ep in "/api/usage" "/api/plan/status" "/api/goals"; do
+  STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE$ep")
+  if [ "$STATUS" = "401" ]; then echo "OK: GET $ep → 401 (auth required)"; else echo "FAIL: GET $ep → $STATUS (expected 401)"; FAIL=1; fi
+done
+# POST without body → 400 or 401
+for ep in "/api/chat/stream" "/api/checkout/create"; do
+  STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE$ep")
+  if [ "$STATUS" = "400" ] || [ "$STATUS" = "401" ]; then echo "OK: POST $ep → $STATUS"; else echo "FAIL: POST $ep → $STATUS"; FAIL=1; fi
+done
+# Frontend Pages
+FE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://goal-ai-frontend.pages.dev/")
+if [ "$FE_STATUS" = "200" ]; then echo "OK: Frontend → $FE_STATUS"; else echo "FAIL: Frontend → $FE_STATUS"; FAIL=1; fi
 
 # 2. 既存機能grep（src/全体）
 echo "--- Core functions ---"
@@ -82,5 +104,7 @@ for pattern in "ultra-particles\|ultraFloat" "plan-compare-table" "フェアユ�
   if [ "$COUNT" -eq 0 ]; then echo "FAIL: $pattern not found in frontend"; FAIL=1; else echo "OK: $pattern ($COUNT refs)"; fi
 done
 
-echo "=== CANOPY $([ $FAIL -eq 0 ] && echo 'PASS' || echo 'FAIL') ==="
+CANOPY_END=$(date +%s)
+CANOPY_DUR=$((CANOPY_END - CANOPY_START))
+echo "=== CANOPY $([ $FAIL -eq 0 ] && echo 'PASS' || echo 'FAIL') (${CANOPY_DUR}s) ==="
 exit $FAIL

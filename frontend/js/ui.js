@@ -1199,6 +1199,9 @@ function renderMembershipUI(){
     }
   }
 
+  // Free残り回数バー (#3)
+  renderFreeUsageBar();
+
   // Update logo plan badge
   const logoPlan = document.getElementById('sb-logo-plan');
   if(logoPlan){
@@ -1445,6 +1448,21 @@ async function fetchPlanStatus(){
     _planStatusCache = await res.json();
     return _planStatusCache;
   } catch { return null; }
+}
+
+function renderFreeUsageBar(){
+  if(MEMBERSHIP.plan !== 'free') { const el=document.getElementById('sb-free-usage'); if(el) el.style.display='none'; return; }
+  const nudge = document.getElementById('sb-upgrade-nudge');
+  if(!nudge) return;
+  let bar = document.getElementById('sb-free-usage');
+  if(!bar){ bar=document.createElement('div'); bar.id='sb-free-usage'; bar.style.cssText='padding:4px 16px 8px;'; nudge.after(bar); }
+  const limit = 20;
+  // KV日次使用量はWorker側管理のため、フロント側ではセッション内カウントで近似表示
+  const used = window._homeMsgCount || 0;
+  const remaining = Math.max(0, limit - used);
+  const pct = Math.round(used / limit * 100);
+  bar.style.display = 'block';
+  bar.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted2);margin-bottom:3px;"><span>今日の残り</span><span>${remaining}/${limit}回</span></div><div style="height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${pct>=90?'var(--red)':pct>=70?'var(--amber)':'var(--green)'};border-radius:2px;transition:width .3s;"></div></div>`;
 }
 
 function renderUsageBar(){
