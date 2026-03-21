@@ -1,0 +1,12 @@
+=== Step 6 Grep Check ===
+handlePlanStatus in plan.js: 1
+plan/status in index.js: 1
+metered|usage_type in checkout.js: 11
+invoice.paid|subscription.updated in checkout.js: 3
+stripe_metered_subscription_item_id in checkout.js: 1
+trial_period_days in checkout.js: 1
+getDegradedModels|checkFairUseV2|effectiveModels in chat.js: 12
+recordTurnUsage|maybeSendUsageRecord in chat.js: 5
+handleChatStream|buildServerSystemPrompt: 5
+quickRoute|callRoutingAPI: 3
+=== Grep DONE ===

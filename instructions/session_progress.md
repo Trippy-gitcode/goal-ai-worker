@@ -14,6 +14,21 @@
 | 2 | テスト基盤（helpers 4件 + smoke 5件 + grep全17PASS） | ✅ |
 | 3 | DBスキーマ拡張（8カラム+7カラム+2テーブル+3RPC） | ✅ |
 | 4 | constants.js v6.3更新 + ターン記録（STEP4-EXEC） | ✅ |
+| 5 | キャップ+フェアユース+モデル降格（STEP5-EXEC） | ✅ |
+
+## Step 5 変更サマリー（2026-03-21）
+
+### 変更ファイル
+- `src/routes/chat.js` — getDegradedModels, checkFairUseV2, getWeekStartUTC追加。旧checkFairUse削除。effectiveModelsパススルー。X-Model-Degraded等レスポンスヘッダー
+- `src/services/ai/gpt.js` — handleGPTChat/handleGPTSimpleChatにoverrideModels引数追加
+- `src/services/ai/gemini.js` — handleGeminiChatにoverrideModels引数追加
+
+### テスト結果
+- Canopy: 全PASS
+- Step 5固有: getDegradedModels(3), checkFairUseV2(2), effectiveModels(7), X-Model-Degraded(1)
+- 旧checkFairUse: chat.jsから完全削除確認
+
+---
 
 ## Step 4 変更サマリー（2026-03-21）
 

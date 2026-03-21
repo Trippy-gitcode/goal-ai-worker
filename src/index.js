@@ -15,6 +15,7 @@ import { handleVoiceTranscribe } from './routes/voice.js';
 import { handleReferralCode, handleReferralCreate, handleReferralApply, handleReferralStatus } from './routes/referral.js';
 import { handleTesterApply } from './routes/tester.js';
 import { handleAIMemoGenerate } from './routes/memo.js';
+import { handlePlanStatus } from './routes/plan.js';
 import { handleAdminTesters, handleFeedbackList } from './routes/admin.js';
 
 const app = new Hono();
@@ -74,6 +75,7 @@ app.post('/api/token/redeem', async (c) => withCors(c, await handleTokenRedeem(c
 
 // ── Usage ──
 app.get('/api/usage', async (c) => withCors(c, await handleUsageGet(c.req.raw, c.env, c.executionCtx)));
+app.get('/api/plan/status', async (c) => withCors(c, await handlePlanStatus(c.req.raw, c.env)));
 
 // ── Stripe ──
 app.post('/api/checkout/create', async (c) => withCors(c, await handleCheckoutCreate(c.req.raw, c.env)));

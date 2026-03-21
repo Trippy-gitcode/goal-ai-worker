@@ -17,7 +17,7 @@
 | 2 | TEST-INFRA-001 | — | ✅ |
 | 3 | STRIPE-001-SCHEMA | AMEND-001 + AMEND-002 | ✅ |
 | 4 | STRIPE-002-TURN-RECORD | AMEND-001 + AMEND-002 | ✅ |
-| 5 | STRIPE-003-CAP-FAIRUSE | AMEND-001 + AMEND-002 | ⬜ |
+| 5 | STRIPE-003-CAP-FAIRUSE | AMEND-001 + AMEND-002 | ✅ |
 | 6 | STRIPE-004-API-WEBHOOK | AMEND-001 + AMEND-002 | ⬜ |
 | 7 | STRIPE-005-FRONTEND | AMEND-001 + AMEND-002 | ⬜ |
 | 8a | DESIGN-IMPL-001 PART-1 | — | ⬜ |
@@ -64,6 +64,9 @@
 ## 品質ゲート（全ステップ共通）
 
 Phase 0: プリフライトチェック → Phase 1-2: 実装 → Phase 3: diff保存+grep保全 → Phase 4: キャノピーテスト → Phase 5: tag + session_progress更新
+
+### 結果レポート規約
+各Step完了時に、自分で results/ を読み session_progress.md に判定(PASS/FAIL)・変更サマリー・grep結果・キャノピー結果・gitタグ・提案ログを書く。Claude.ai は session_progress.md だけ読んで判断する。
 
 ### 【グローバルルール】
 - 指示書中の `token_id` は `auth.userId`（UUID）に読み替えること（DB操作は全て `user_id`）
