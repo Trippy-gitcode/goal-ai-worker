@@ -19,19 +19,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
 <meta name="theme-color" content="#e8b84b">
-<script>
-(function(){
-  var m = document.cookie.match(/(?:^|; )font_size=([^;]*)/);
-  if (!m) { m = document.cookie.match(/(?:^|; )goal_ai_fontsize=([^;]*)/); }
-  var sizes = {xs:'14px',sm:'16px',md:'18px',lg:'20px'};
-  var lh = {xs:'1.55',sm:'1.6',md:'1.65',lg:'1.7'};
-  var sz = m ? decodeURIComponent(m[1]) : 'md';
-  if (sizes[sz]) {
-    document.documentElement.style.setProperty('--base-font-size', sizes[sz]);
-    document.documentElement.style.setProperty('--base-line-height', lh[sz]);
-  }
-})();
-</script>
+<script src="js/fontsize-init.js"></script>
 <!-- system fonts only — no external load needed -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
@@ -1803,12 +1791,6 @@
   <div style="font-size:16px;color:#fff;letter-spacing:.12em;font-weight:500;">ここに画像をドロップ</div>
 </div>
 
-<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/sw.js').then(()=>{}).catch(()=>{});
-  });
-}
-</script>
+<script src="js/sw-register.js"></script>
 </body>
 </html>
