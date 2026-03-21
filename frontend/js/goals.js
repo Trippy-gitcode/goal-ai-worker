@@ -1598,6 +1598,7 @@ async function init(){
       renderSidebarGoals();
     }
   }
+  if(typeof renderLifeTasks === 'function') renderLifeTasks();
   // リロード時は常に新しいチャット開始画面を表示
   showHomeScreen();
   // Show onboarding popup if "私をデザイン" not done

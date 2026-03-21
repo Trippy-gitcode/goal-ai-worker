@@ -1625,6 +1625,60 @@ function updateSidebarTaskList() {
   }).join('') + '<div class="sb-task-more" onclick="showPage(\'tasks\')">全タスク →</div>';
 }
 
+// ════════ UX-001: 初期タスク段階式 ════════
+const LIFE_TASKS_STAGE1 = [
+  { id: 'lt1', title: 'プロフィールを完成させる', done: false },
+  { id: 'lt2', title: 'GOAL AIと自分について話す', done: false },
+  { id: 'lt3', title: 'AIに今気になっていることを相談する', done: false },
+];
+const LIFE_TASKS_STAGE2 = [
+  { id: 'lt4', title: '「私をデザイン」を体験する', done: false },
+  { id: 'lt5', title: '最初のゴールを設定する', done: false },
+];
+
+function getLifeTasks(){
+  try { return JSON.parse(localStorage.getItem('life_tasks') || 'null'); } catch { return null; }
+}
+function saveLifeTasks(tasks){ localStorage.setItem('life_tasks', JSON.stringify(tasks)); }
+
+function initLifeTasks(){
+  if(getLifeTasks()) return; // 既に初期化済み
+  saveLifeTasks(LIFE_TASKS_STAGE1.map(t => ({...t})));
+}
+
+function completeLifeTask(id){
+  const tasks = getLifeTasks();
+  if(!tasks) return;
+  const t = tasks.find(x => x.id === id);
+  if(t) t.done = true;
+  // ステージ2チェック: ステージ1の3個中2個完了
+  const s1Done = tasks.filter(x => ['lt1','lt2','lt3'].includes(x.id) && x.done).length;
+  if(s1Done >= 2 && !tasks.find(x => x.id === 'lt4')){
+    LIFE_TASKS_STAGE2.forEach(s2 => tasks.push({...s2}));
+    toast('新しいタスクが追加されました');
+  }
+  saveLifeTasks(tasks);
+  renderLifeTasks();
+}
+
+function renderLifeTasks(){
+  const tasks = getLifeTasks();
+  if(!tasks || tasks.length === 0) return;
+  const pending = tasks.filter(t => !t.done);
+  if(pending.length === 0) return;
+  const container = document.getElementById('sb-task-list');
+  if(!container) return;
+  // ライフタスクをサイドバー先頭に挿入
+  let wrap = document.getElementById('life-tasks-wrap');
+  if(!wrap){ wrap = document.createElement('div'); wrap.id = 'life-tasks-wrap'; container.prepend(wrap); }
+  wrap.innerHTML = pending.map(t =>
+    `<div class="sb-task-item" onclick="completeLifeTask('${t.id}')" style="cursor:pointer;">
+      <span class="sb-task-name">🟢 ${escapeHtml(t.title)}</span>
+      <span class="sb-task-meta" style="font-size:9px;color:var(--green);">タップで完了</span>
+    </div>`
+  ).join('');
+}
+
 // ════════ D-15: KEYBOARD SHORTCUTS ════════
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {

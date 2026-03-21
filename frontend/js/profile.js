@@ -403,6 +403,8 @@ let myselfTab = 'know';
 function closeOnboarding(){
   document.getElementById('onboarding-modal').style.display='none';
   localStorage.setItem('ob_done','1');
+  if(typeof initLifeTasks === 'function') initLifeTasks();
+  if(typeof renderLifeTasks === 'function') setTimeout(renderLifeTasks, 500);
 }
 function checkOnboarding(){
   if(localStorage.getItem('ob_done')) return;
