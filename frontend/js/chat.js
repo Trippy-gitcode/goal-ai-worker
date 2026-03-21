@@ -944,7 +944,7 @@ async function routeMessage(text){
       if (parsed.goal_intent) {
         window._lastGoalIntent = parsed.goal_intent;
         goalDetectLevel = parsed.goal_intent;
-        if (parsed.goal_intent === 'level3') pendingGoalProposal = true;
+        if (parsed.goal_intent === 'level3') { pendingGoalProposal = true; showGoalDetectToast(); }
       }
       if (parsed.task_potential) { window._pendingTaskSuggestion = true; highlightTaskChip(); }
       if (['gemini','gpt','gpt-simple','claude'].includes(route)) return route;
@@ -2139,6 +2139,20 @@ function suggestGoalFromTag(topic) {
   card.innerHTML = `<div class="msg-body">${renderGoalProposalCard(topic, '', '')}</div>`;
   inner.appendChild(card);
   if (scroll) scroll.scrollTop = scroll.scrollHeight;
+}
+
+// ════════ Goal detect toast (Step 8c) ════════
+function showGoalDetectToast(){
+  let t = document.getElementById('goal-detect-toast');
+  if(t) t.remove();
+  t = document.createElement('div');
+  t.id = 'goal-detect-toast';
+  t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--amber-g);border:1px solid rgba(228,184,106,.4);border-radius:12px;padding:10px 18px;color:var(--amber);font-size:12px;font-family:var(--ff);cursor:pointer;z-index:800;opacity:0;transition:all .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.3);display:flex;align-items:center;gap:8px;';
+  t.innerHTML = '🎯 ゴール候補を検出しました <span style="font-size:10px;color:var(--muted);">タップして確認</span>';
+  t.onclick = () => { t.remove(); const tags = document.getElementById('home-topic-tags'); if(tags) tags.scrollIntoView({behavior:'smooth'}); };
+  document.body.appendChild(t);
+  requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+  setTimeout(() => { if(t.parentElement){ t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)'; setTimeout(() => t.remove(), 300); } }, 5000);
 }
 
 // ════════ E-8: Goal assist banner ════════

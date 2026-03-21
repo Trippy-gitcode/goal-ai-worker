@@ -1,0 +1,14 @@
+=== Step 8c Preflight ===
+--- plan cards current ---
+5
+--- goal detect ---
+893:let goalDetectLevel = 'none';
+894:let pendingGoalProposal = false;
+946:        goalDetectLevel = parsed.goal_intent;
+947:        if (parsed.goal_intent === 'level3') pendingGoalProposal = true;
+2058:function renderGoalProposalCard(title, why, deadline) {
+2139:  card.innerHTML = `<div class="msg-body">${renderGoalProposalCard(topic, '', '')}</div>`;
+2365:  renderGoalProposalCard, startGoalAssist, declineGoalProposal,
+--- scroll-snap css ---
+0
+=== Preflight DONE ===

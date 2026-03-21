@@ -2104,3 +2104,5 @@ body,body *{transition:background-color .3s ease,color .3s ease,border-color .3s
 .sb-task-meta{font-size:0.65rem;color:var(--muted2);white-space:nowrap;}
 .sb-task-more{padding:4px 12px;font-size:0.7rem;color:var(--amber);cursor:pointer;text-align:right;}
 .sb-task-empty{padding:6px 12px;font-size:0.75rem;color:var(--muted2);}
+/* Ultra particle animation (Step 8c) */
+@keyframes ultraFloat{0%,100%{transform:translateY(0) scale(1);opacity:.3;}50%{transform:translateY(-8px) scale(1.3);opacity:.6;}}

@@ -75,5 +75,12 @@ done
 OLD_TEXT=$(grep -c "週平均作業時間\|できなかった理由の履歴" frontend/index.html 2>/dev/null)
 if [ "$OLD_TEXT" -gt 0 ]; then echo "FAIL: old text still in index.html"; FAIL=1; else echo "OK: old text removed"; fi
 
+# 11. Step 8c: プラン演出+ゴール検出トースト
+echo "--- Plan presentation + Goal toast (8c) ---"
+for pattern in "ultra-particles\|ultraFloat" "plan-compare-table" "フェアユース制限" "goal-detect-toast\|showGoalDetectToast"; do
+  COUNT=$(grep -rc "$pattern" frontend/ 2>/dev/null | awk -F: '{s+=$2}END{print s}')
+  if [ "$COUNT" -eq 0 ]; then echo "FAIL: $pattern not found in frontend"; FAIL=1; else echo "OK: $pattern ($COUNT refs)"; fi
+done
+
 echo "=== CANOPY $([ $FAIL -eq 0 ] && echo 'PASS' || echo 'FAIL') ==="
 exit $FAIL
