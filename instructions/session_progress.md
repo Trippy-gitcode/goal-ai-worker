@@ -76,6 +76,33 @@
 - C9: セッション開始時にCLAUDE.md参照ファイルの存在検証
 - A2: 5セッションごとの棚卸し（CLAUDE.md/rules/progress整合性確認）
 
+### 未実装候補（2026-03-22 キュー空時自律調査結果）
+
+**テスト配布に影響するもの（優先度高）**
+
+| # | タスク名 | 影響範囲 | 工数目安 | 優先度案 |
+|---|---------|---------|---------|---------|
+| A | アカウント削除の実装（現在toast「準備中」） | src/routes/新規, Supabase CASCADE | 2h | 🔴 |
+| B | Ultraコンテキスト2倍の適用 | src/services/history.js, chat.js | 30min | 🟡 |
+| C | ET(Extended Thinking)週間上限トラッキング | src/routes/chat.js, constants.js | 1h | 🟡 |
+
+**UX改善（中期）**
+
+| # | タスク名 | 影響範囲 | 工数目安 | 優先度案 |
+|---|---------|---------|---------|---------|
+| D | 達成報告検出+コンフェッティ自動トリガー | src/routes/chat.js, frontend/js/goals.js | 1h | 🟡 |
+| E | 定期チェックイン（ストリーク連動） | frontend/js/chat.js, Worker通知 | 2h | 🟡 |
+| F | クイックゴール（ロングタップ→即登録） | frontend/js/chat.js, style.css | 1h | 🟢 |
+| G | チャット背景プリセット | frontend/style.css, ui.js | 30min | 🟢 |
+
+**アーキテクチャ（後回し可）**
+
+| # | タスク名 | 影響範囲 | 工数目安 | 優先度案 |
+|---|---------|---------|---------|---------|
+| H | Vite + ES Modules完全移行 | frontend/全体, ビルドパイプライン | 4h | 🔴 |
+| I | Playwright E2Eテスト拡充 | tests/e2e/ | 2h | 🟡 |
+| J | AI理解メモ生成キューイング | src/services/memo.js | 2h | 🟢 |
+
 ---
 
 ## Stripe Price ID マッピング
