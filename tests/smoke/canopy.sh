@@ -58,5 +58,12 @@ done
 OLD_FE=$(grep -c "pc-premium\|selectPlan('premium')\|selectPlan('annual')" frontend/index.html 2>/dev/null)
 if [ "$OLD_FE" -gt 0 ]; then echo "FAIL: old plan cards in index.html"; FAIL=1; else echo "OK: no old plan cards in HTML"; fi
 
+# 9. Step 8a: 共通コンポーネント
+echo "--- Common Components (8a) ---"
+for pattern in "M5 24l4-11" "getGptSVG" "_saveScroll" "stopHomeStream" "_setHomeSendIcon"; do
+  COUNT=$(grep -rc "$pattern" frontend/ 2>/dev/null | awk -F: '{s+=$2}END{print s}')
+  if [ "$COUNT" -eq 0 ]; then echo "FAIL: $pattern not found in frontend"; FAIL=1; else echo "OK: $pattern ($COUNT refs)"; fi
+done
+
 echo "=== CANOPY $([ $FAIL -eq 0 ] && echo 'PASS' || echo 'FAIL') ==="
 exit $FAIL

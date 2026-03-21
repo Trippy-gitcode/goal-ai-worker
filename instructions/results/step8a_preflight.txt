@@ -1,0 +1,32 @@
+=== Step 8a Preflight ===
+--- crown/avatar refs ---
+frontend/js/goals.js:1218:    const av = document.createElement('div'); av.className = `msg-av ${m.role}`;
+frontend/js/goals.js:2045:      msg.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble">🎯 「${escapeHtml(goal.title)}」のゴールとタスクを設定しました！何か他に気になることはありますか？</div></div>`;
+frontend/js/ui.js:631:    errWrap.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="border-color:var(--red-d)">ディープ分析中にエラーが発生しました：${escapeHtml(e.message || '')}<br><br>設定パネル（⚙）→「3AI ディープ分析 — API設定」でAPIキーを確認してください。</div></div>`;
+frontend/js/chat.js:262:    av.className = 'msg-av user';
+frontend/js/chat.js:724:  const av=document.createElement('div'); av.className=`msg-av ${m.role}`;
+frontend/js/chat.js:882:    errBub.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="color:var(--red)">通信エラーが発生しました。もう一度お試しください。</div></div>`;
+frontend/js/chat.js:1189:  hint.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="font-size:13px;">こんにちは！何でも聞いてください。<br>もしよかったら<a onclick="showPage('myself');closeSidebar();" style="color:var(--amber);cursor:pointer;text-decoration:underline;">「私をデザイン」</a>であなたのことを教えてもらえると、より的確なアドバイスができるようになります。</div></div>`;
+frontend/js/chat.js:1776:  av.className = `msg-av ${role === 'user' ? 'user' : 'ai'}`;
+frontend/js/api.js:180:  d.innerHTML = `<div class="${bubbleClass === 'tdp-msg ai' ? 'tdp-av ai' : 'msg-av ai'}">${avatarHtml || getLogoSVG(14)}</div><div class="${bubbleClass === 'tdp-msg ai' ? 'tdp-bubble' : 'msg-body'}" style="${bubbleClass === 'tdp-msg ai' ? '' : ''}"><div class="${bubbleClass === 'tdp-msg ai' ? '' : 'bubble'}" style="padding:0;"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
+frontend/js/api.js:461:  av.className = 'msg-av ai'; av.innerHTML = getLogoSVG(14);
+frontend/js/api.js:599:  av.className = `msg-av ${role === 'user' ? 'user' : 'ai'}`;
+--- formatModelName ---
+470:  t.className = 'msg-footer'; t.textContent = now();
+508:function formatModelName(model) {
+525:  const displayName = formatModelName(actualModel);
+535:  // Update msg-footer with model name
+536:  const footer = bub.parentElement?.querySelector('.msg-footer');
+537:  if(footer){ footer.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">${modelLabel || 'Claude'}</span><span class="msg-actions"><button class="msg-action-btn" title="コピー" onclick="copyMessage(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button class="msg-action-btn" title="引用" onclick="quoteMessage(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.76-2.02-2-2H5c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h2c0 4-3 5-6 5z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.76-2.02-2-2h-3c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h2c0 4-3 5-6 5z"/></svg></button></span>`; }
+608:  footer.className = 'msg-footer';
+609:  if (role === 'ai' && opts.model) { footer.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">${opts.model}</span>`; }
+728:  streamAI, mkStreamBubble, streamAppend, formatModelName, streamFinalize,
+--- chat input boxes ---
+2
+--- AbortController ---
+frontend/js/chat.js:417:          if(e.error !== 'no-speech' && e.error !== 'aborted'){
+frontend/js/api.js:221:      if (signal?.aborted) { wrap.remove(); return; }
+--- streamAI signature ---
+390:async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, onDone, onError) {
+522:function streamFinalize(bub, fullText, modelLabel){
+=== Preflight DONE ===

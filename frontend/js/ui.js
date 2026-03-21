@@ -142,7 +142,19 @@ function initTabSwipe(container, onSwipe) {
 }
 
 // ════════ PAGE NAVIGATION ════════
+function _saveScroll(){
+  const scrollEls = {'home':'home-chat-wrap','goal-hub':'hub-chat-wrap'};
+  const el = scrollEls[curPage] && document.getElementById(scrollEls[curPage]);
+  if(el) sessionStorage.setItem('scroll_'+curPage, el.scrollTop);
+}
+function _restoreScroll(pg){
+  const scrollEls = {'home':'home-chat-wrap','goal-hub':'hub-chat-wrap'};
+  const el = scrollEls[pg] && document.getElementById(scrollEls[pg]);
+  const saved = sessionStorage.getItem('scroll_'+pg);
+  if(el && saved) requestAnimationFrame(()=>{ el.scrollTop = parseInt(saved); });
+}
 function showPage(pg) {
+  _saveScroll();
   document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active');p.classList.remove('page-enter');});
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   curPage = pg;
@@ -152,9 +164,11 @@ function showPage(pg) {
     document.getElementById('nav-home').classList.add('active');
     document.getElementById('topbar').style.display='none';
     renderHomeSummary();
+    _restoreScroll('home');
   } else if(pg==='goal-hub'){
     document.getElementById('pg-goal-hub-wrap').classList.add('active');
     document.getElementById('topbar').style.display='none';
+    _restoreScroll('goal-hub');
   } else if(pg==='myself'){
     document.getElementById('pg-myself-wrap').classList.add('active');
     document.getElementById('topbar').style.display='none';

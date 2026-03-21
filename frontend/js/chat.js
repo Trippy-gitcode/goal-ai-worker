@@ -15,7 +15,8 @@ function showNanoFallbackBanner(hours) {
 function hideNanoFallbackBanner(){ document.getElementById('nano-fallback-banner')?.remove(); }
 
 // ════════ CHAT ════════
-function getLogoSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 100 100"><defs><linearGradient id="lg${size}" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M26 70 L32 40 L42 55 L50 24 L58 55 L68 40 L74 70 Z" fill="url(#lg${size})"/></svg>`;}
+function getLogoSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 32 32"><defs><linearGradient id="crown${size}" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown${size})"/></svg>`;}
+function getGptSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="#5b8def" stroke-width="1.5"><path d="M9 21h6M12 3a6 6 0 00-4 10.5V17h8v-3.5A6 6 0 0012 3z"/></svg>`;}
 function getUserAvatarText(){const n=USER_PROFILE.nickname||USER_PROFILE.name||'';return n?n.charAt(0):'';}
 function renderUserAvatarInner(av){
   if(USER_PROFILE.avatar_base64){
@@ -837,6 +838,8 @@ async function sendHomeMsg(){
 
   const sendBtn = document.getElementById('home-send-btn');
   if(sendBtn) sendBtn.classList.add('sending');
+  _homeAbort = new AbortController();
+  _setHomeSendIcon('stop');
 
   homeMsgs.push({role:'user',content:displayText,time:now(),date:today,
     img:homeImageData?homeImageData.base64:null, imgType:homeImageData?.type});
@@ -1102,7 +1105,7 @@ async function homeClaudeStream(today, homeInner, homeWrap){
   const sys = SYS_HOME + `\n\n${buildAIContextCached()}`;
   await chatStream({
     system: sys, messages: homeHistory.slice(-8), maxTokens: 350,
-    innerEl: homeInner, scrollEl: homeWrap,
+    innerEl: homeInner, scrollEl: homeWrap, signal: _homeAbort?.signal,
     onDone(t){
       if(!t || !t.trim()) return;
       // モデル名はX-Model-Usedヘッダーから取得（Worker側ルーティングで動的に変わる）
@@ -1246,7 +1249,25 @@ function homeResize(el) {
   const btn = document.getElementById('home-send-btn');
   if (btn) btn.disabled = !el.value.trim() && !homeImageData;
 }
-function homeSendRestore(){ const b=document.getElementById('home-send-btn'); if(b){b.classList.remove('sending');b.disabled=false;} }
+let _homeAbort = null;
+function homeSendRestore(){
+  const b=document.getElementById('home-send-btn');
+  if(b){b.classList.remove('sending');b.disabled=false;}
+  _homeAbort = null;
+  _setHomeSendIcon('send');
+}
+function _setHomeSendIcon(mode){
+  const icon = document.getElementById('home-send-icon');
+  if(!icon) return;
+  if(mode==='stop'){
+    icon.innerHTML = '<rect x="6" y="6" width="12" height="12" rx="2" fill="#0c0e14"/>';
+    icon.closest('button')?.setAttribute('onclick','stopHomeStream()');
+  } else {
+    icon.innerHTML = '<path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>';
+    icon.closest('button')?.setAttribute('onclick','sendHomeMsg()');
+  }
+}
+function stopHomeStream(){ if(_homeAbort){ _homeAbort.abort(); _homeAbort=null; } }
 
 // ═══ CHAT HISTORY PANEL ═══
 let chatSessions = [];

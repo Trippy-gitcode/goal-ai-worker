@@ -1,0 +1,43 @@
+=== CANOPY TEST ===
+Worker: "version":"3.9.3"
+--- Core functions ---
+OK: handleChatStream (8 refs)
+OK: buildServerSystemPrompt (7 refs)
+OK: quickRoute (5 refs)
+OK: callRoutingAPI (5 refs)
+OK: handleGeminiChat (7 refs)
+OK: handleGPTChat (7 refs)
+OK: MEMO_ENABLED (7 refs)
+OK: RAG_ENABLED (8 refs)
+OK: CACHE_ENABLED (4 refs)
+--- PLAN_CONFIG ---
+OK: plan free
+OK: plan light
+OK: plan pro
+OK: plan max
+OK: plan ultra
+--- Old plan cleanup ---
+OK: no old plan names
+--- Turn recording ---
+OK: recordTurnUsage (3 refs)
+OK: maybeSendUsageRecord (2 refs)
+OK: increment_turn_usage (2 refs)
+--- Cap + FairUse + Degradation ---
+OK: getDegradedModels (3 refs)
+OK: checkFairUseV2 (2 refs)
+OK: effectiveModels (7 refs)
+OK: X-Model-Degraded (1 refs)
+--- API + Webhook ---
+OK: handlePlanStatus (3 refs)
+OK: invoice.paid (2 refs)
+OK: stripe_metered_subscription_item_id (3 refs)
+OK: trial_period_days (1 refs)
+--- Frontend v6.3 ---
+OK: pc-light (1 refs)
+OK: pc-ultra (1 refs)
+OK: plan-usage-bar (2 refs)
+OK: fetchPlanStatus (2 refs)
+OK: showDegradeBadge (2 refs)
+OK: X-Model-Degraded (1 refs)
+OK: no old plan cards in HTML
+=== CANOPY PASS ===
