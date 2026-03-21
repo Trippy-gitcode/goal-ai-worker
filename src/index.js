@@ -17,6 +17,7 @@ import { handleTesterApply } from './routes/tester.js';
 import { handleAIMemoGenerate } from './routes/memo.js';
 import { handlePlanStatus } from './routes/plan.js';
 import { handleAdminTesters, handleFeedbackList } from './routes/admin.js';
+import { handleAccountDelete } from './routes/account.js';
 
 const app = new Hono();
 
@@ -116,6 +117,9 @@ app.get('/api/admin/testers', async (c) => withCors(c, await handleAdminTesters(
 // ── Feedbacks ──
 app.post('/api/feedbacks', async (c) => withCors(c, await handleFeedbackSave(c.req.raw, c.env)));
 app.get('/api/feedbacks', async (c) => withCors(c, await handleFeedbackList(c.req.raw, c.env)));
+
+// ── Account ──
+app.post('/api/account/delete', async (c) => withCors(c, await handleAccountDelete(c.req.raw, c.env)));
 
 // ── 404 ──
 app.notFound((c) => withCors(c, jsonRes({ error: 'Not found' }, 404)));

@@ -1000,10 +1000,20 @@ function closeSettingsPanel(){
 }
 
 // ════════ ACCOUNT DELETE (2-step confirmation, #08c) ════════
-function confirmDeleteAccount(){
+async function confirmDeleteAccount(){
   if(!confirm('本当にアカウントを削除しますか？\nすべてのゴール・タスク・チャット履歴が完全に消去されます。')) return;
   if(!confirm('この操作は元に戻せません。\n本当に全データを完全に削除してよろしいですか？')) return;
-  toast('アカウント削除は現在準備中です');
+  try {
+    const res = await fetch(`${WORKER_URL}/api/account/delete`, { method:'POST', headers:getAuthHeaders() });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error);
+    toast('アカウントを削除しました');
+    closeSettingsPanel();
+    // ローカルデータクリア
+    localStorage.clear();
+    document.cookie.split(';').forEach(c => { document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/'; });
+    setTimeout(() => location.reload(), 1500);
+  } catch(e) { toast(e.message || 'アカウント削除に失敗しました'); }
 }
 
 // ════════ VERSION CHECK ════════
