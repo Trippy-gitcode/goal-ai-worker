@@ -402,6 +402,11 @@ async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, 
     if (isFallback) showNanoFallbackBanner(resetHours);
     // モデル名をヘッダーから取得（フッター表示用）
     window._lastModelUsed = res.headers.get('X-Model-Used') || null;
+    // 降格バッジ（Step 7）
+    const isDegraded = res.headers.get('X-Model-Degraded') === '1';
+    const degradeReason = res.headers.get('X-Degrade-Reason') || '';
+    if (isDegraded && typeof showDegradeBadge === 'function') showDegradeBadge(degradeReason);
+    else if (typeof hideDegradeBadge === 'function') hideDegradeBadge();
     const reader = res.body.getReader();
     const dec = new TextDecoder('utf-8');
     let full = '';

@@ -313,10 +313,10 @@ function updateMencareTimer(){
 const DEEP_LIMITS = {
   free:    3,    // Free: 3回/月
   trial:   5,    // テストユーザー/Trial: 5回/日
+  light:   5,    // Light: 5回/月
   pro:    30,    // Pro: 30回/月
-  premium: 60,   // Premium: 60回/月
   max:   9999,   // Max: 無制限
-  annual: 60,    // 年間Pro: 60回/月
+  ultra: 9999,   // Ultra: 無制限
 };
 
 // Usage tracker (in-memory, keyed by YYYY-MM)
@@ -352,8 +352,8 @@ function getDeepUsageBadgeHTML() {
   const limit = getDeepLimit();
   const used = getDeepUsedCount();
   const plan = MEMBERSHIP.plan;
-  const planLabel = plan === 'premium' ? 'Premium' : plan === 'annual' ? 'Pro年間' : plan === 'pro' ? 'Pro' :
-    (MEMBERSHIP.trialEnd && new Date() < new Date(MEMBERSHIP.trialEnd)) ? 'テスト' : 'Free';
+  const planLabel = {ultra:'Ultra',max:'Max',pro:'Pro',light:'Light',free:'Free'}[plan] ||
+    ((MEMBERSHIP.trialEnd && new Date() < new Date(MEMBERSHIP.trialEnd)) ? 'テスト' : 'Free');
 
   if (remaining === 0) {
     return `<span class="deep-usage-badge deep-usage-zero">⚠ 今月の残り回数：0回（${planLabel}プラン 上限${limit}回）</span>`;
@@ -1141,10 +1141,10 @@ function getMembershipLabel(){
     const days = Math.ceil((new Date(MEMBERSHIP.trialEnd)-new Date())/86400000);
     return {badge:'trial', text:'無料体験中', sub:`残 ${days}日`};
   }
+  if(MEMBERSHIP.plan==='ultra') return {badge:'ultra', text:'Ultra', sub:null};
   if(MEMBERSHIP.plan==='max') return {badge:'max', text:'Max', sub:null};
-  if(MEMBERSHIP.plan==='premium') return {badge:'premium', text:'Premium', sub:null};
   if(MEMBERSHIP.plan==='pro') return {badge:'pro', text:'Pro', sub:null};
-  if(MEMBERSHIP.plan==='annual') return {badge:'pro', text:'Pro 年間', sub:null};
+  if(MEMBERSHIP.plan==='light') return {badge:'light', text:'Light', sub:null};
   return {badge:'free', text:'Free', sub:'アップグレード'};
 }
 
@@ -1157,7 +1157,7 @@ function renderMembershipUI(){
 
   if(badge){
     badge.className = `plan-badge-${lbl.badge}`;
-    badge.textContent = (lbl.badge==='pro'||lbl.badge==='premium'||lbl.badge==='max')?'▲ '+lbl.text:lbl.text;
+    badge.textContent = (['light','pro','max','ultra'].includes(lbl.badge))?'▲ '+lbl.text:lbl.text;
   }
   if(trialEl){
     if(lbl.sub && lbl.badge==='trial'){
@@ -1199,7 +1199,7 @@ function renderMembershipUI(){
   // Referral card — show only for paid users
   const refCard = document.getElementById('referral-card');
   if(refCard){
-    const isPaidPlan = MEMBERSHIP.plan==='pro'||MEMBERSHIP.plan==='premium'||MEMBERSHIP.plan==='max'||MEMBERSHIP.plan==='annual';
+    const isPaidPlan = ['light','pro','max','ultra'].includes(MEMBERSHIP.plan);
     refCard.style.display = isPaidPlan ? 'block' : 'none';
     if(isPaidPlan && AUTH_TOKEN){
       const refCodeEl = document.getElementById('referral-code');
@@ -1214,6 +1214,7 @@ function copyReferralCode(){
 }
 
 function openPlanModal(){
+  fetchPlanStatus().then(() => { renderPlanModal(); });
   renderPlanModal();
   document.getElementById('modal-plan').style.display='flex';
 }
@@ -1228,12 +1229,12 @@ function renderPlanModal(){
     if(lbl.badge==='trial'){
       cur.style.cssText='background:rgba(93,184,150,.1);border:1px solid rgba(93,184,150,.3);color:var(--green);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
       cur.innerHTML=`✓ 無料体験中 <span style="opacity:.7">${document.getElementById('sb-trial-days')?.textContent||''}</span>`;
+    } else if(lbl.badge==='ultra'){
+      cur.style.cssText='background:linear-gradient(135deg,rgba(228,184,106,.25),rgba(157,120,216,.15));border:1px solid rgba(228,184,106,.9);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;';
+      cur.innerHTML=`👑 現在のプラン：Ultra`;
     } else if(lbl.badge==='max'){
       cur.style.cssText='background:linear-gradient(90deg,rgba(228,184,106,.2),rgba(228,184,106,.08));border:1px solid rgba(228,184,106,.7);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;';
       cur.innerHTML=`👑 現在のプラン：Max`;
-    } else if(lbl.badge==='premium'){
-      cur.style.cssText='background:linear-gradient(90deg,rgba(228,184,106,.15),rgba(228,184,106,.05));border:1px solid rgba(228,184,106,.5);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
-      cur.innerHTML=`👑 現在のプラン：Premium`;
     } else if(lbl.badge==='pro'){
       cur.style.cssText='background:var(--amber-g);border:1px solid rgba(228,184,106,.4);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
       cur.innerHTML=`★ 現在のプラン：${lbl.text}`;
@@ -1243,22 +1244,24 @@ function renderPlanModal(){
     }
   }
   // Highlight selected
-  ['free','pro','premium','max'].forEach(p=>{
+  ['free','light','pro','max','ultra'].forEach(p=>{
     const el=document.getElementById(`pc-${p}`);
     if(el){ el.style.outline = (p===MEMBERSHIP.plan||p===MEMBERSHIP.selectedPlan)?'2px solid var(--amber)':'none'; }
   });
   updatePlanCTA();
+  // 利用額バー表示
+  renderUsageBar();
   // 課金済みユーザーにはポータルリンクを表示
   const portalWrap = document.getElementById('plan-portal-wrap');
   if(portalWrap){
-    const isPaid = MEMBERSHIP.plan==='pro'||MEMBERSHIP.plan==='premium'||MEMBERSHIP.plan==='max'||MEMBERSHIP.plan==='annual';
+    const isPaid = ['light','pro','max','ultra'].includes(MEMBERSHIP.plan);
     portalWrap.style.display = isPaid ? 'block' : 'none';
   }
 }
 
 function selectPlan(p){
   MEMBERSHIP.selectedPlan = p;
-  ['free','pro','premium','max'].forEach(id=>{
+  ['free','light','pro','max','ultra'].forEach(id=>{
     const el=document.getElementById(`pc-${id}`);
     if(el) el.style.outline = id===p?'2px solid var(--amber)':'none';
   });
@@ -1267,21 +1270,18 @@ function selectPlan(p){
 
 function updatePlanCTA(){
   const btn = document.getElementById('plan-cta-btn');
-  const wrap = document.getElementById('plan-cta-wrap');
   if(!btn) return;
   const p = MEMBERSHIP.selectedPlan;
+  const names = { free:'Free', light:'Light（¥500〜/月）', pro:'Pro（¥1,500〜/月）', max:'Max（¥1,500〜/月）', ultra:'Ultra（¥20,000/月）' };
   if(p==='free'){
     btn.textContent='Freeプランに戻す';
-    btn.style.background='var(--bg3)'; btn.style.color='var(--muted)';
-    btn.style.border='1px solid var(--border2)';
-  } else if(p==='max'){
-    btn.textContent='Maxプランを始める（¥12,800/月）';
-    btn.style.background='linear-gradient(90deg,#e4b86a,#d4a456)'; btn.style.color='var(--bg)'; btn.style.border='none';
-  } else if(p==='premium'){
-    btn.textContent='Premiumプランを始める（¥4,980/月）';
-    btn.style.background='linear-gradient(90deg,#e4b86a,#d4a456)'; btn.style.color='var(--bg)'; btn.style.border='none';
+    btn.style.background='var(--bg3)'; btn.style.color='var(--muted)'; btn.style.border='1px solid var(--border2)';
+  } else if(p==='ultra'){
+    btn.textContent='Ultraプランを始める';
+    btn.style.background='linear-gradient(135deg,#e4b86a,#BA55D3)'; btn.style.color='#fff'; btn.style.border='none';
   } else {
-    btn.textContent= MEMBERSHIP.promoApplied ? `プロモコードでProを開始` : 'Proプランを始める（¥2,980/月）';
+    const label = MEMBERSHIP.promoApplied && p==='pro' ? 'プロモコードでProを開始' : `${names[p]||p}プランを始める`;
+    btn.textContent=label;
     btn.style.background='var(--amber)'; btn.style.color='var(--bg)'; btn.style.border='none';
   }
 }
@@ -1310,17 +1310,18 @@ function toggleBillingPeriod(){
 
 function updatePlanPrices(){
   const prices = {
-    pro: { monthly: '¥2,980', annual: '¥29,800', annualMonthly: '¥2,483/月' },
-    premium: { monthly: '¥4,980', annual: '¥49,800', annualMonthly: '¥4,150/月' },
-    max: { monthly: '¥12,800', annual: '¥128,000', annualMonthly: '¥10,666/月' },
+    light: { monthly: '¥500〜980', annual: '¥6,000', annualMonthly: '¥500/月', sub: '¥8/ターン · 上限¥980' },
+    pro: { monthly: '¥1,500〜2,980', annual: '¥18,000', annualMonthly: '¥1,500/月', sub: '¥20/ターン · 上限¥2,980' },
+    max: { monthly: '¥1,500〜9,800', annual: '¥18,000', annualMonthly: '¥1,500/月', sub: '¥10/ターン · 上限¥9,800' },
+    ultra: { monthly: '¥20,000', annual: '¥200,000', annualMonthly: '¥16,666/月', sub: '使い放題' },
   };
-  ['pro','premium','max'].forEach(plan => {
+  ['light','pro','max','ultra'].forEach(plan => {
     const priceEl = document.getElementById('plan-price-' + plan);
     if(!priceEl) return;
     if(planBilling === 'annual'){
-      priceEl.innerHTML = `<span style="font-size:20px;">${prices[plan].annual}</span><span style="font-size:10px;color:var(--muted)">/年</span><br><span style="font-size:11px;color:var(--green);">${prices[plan].annualMonthly}</span>`;
+      priceEl.innerHTML = `<div style="font-size:20px;font-family:var(--fd);color:var(--amber);">${prices[plan].annual}</div><div style="font-size:9px;color:var(--muted2);">/年（${prices[plan].annualMonthly}）</div>`;
     } else {
-      priceEl.innerHTML = `<span style="font-size:20px;">${prices[plan].monthly}</span><span style="font-size:10px;color:var(--muted)">/月</span>`;
+      priceEl.innerHTML = `<div style="font-size:20px;font-family:var(--fd);color:var(--amber);">${prices[plan].monthly}</div><div style="font-size:9px;color:var(--muted2);">/月（税込）</div>`;
     }
   });
 }
@@ -1387,7 +1388,7 @@ async function subscribePlan(){
   try {
     const res = await fetch(`${WORKER_URL}/api/checkout/create`, {
       method:'POST', headers:getAuthHeaders(),
-      body: JSON.stringify({ plan: planBilling === 'annual' ? p + '_annual' : p })
+      body: JSON.stringify({ plan: p, billing_period: planBilling })
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'Checkout作成に失敗');
@@ -1411,6 +1412,60 @@ async function openCustomerPortal(){
   } catch(e) {
     toast(e.message || 'サブスクリプション管理を開けませんでした');
   }
+}
+
+// ═══════ 利用額バー（Step 7） ═══════
+let _planStatusCache = null;
+async function fetchPlanStatus(){
+  if(!AUTH_TOKEN) return null;
+  try {
+    const res = await fetch(`${WORKER_URL}/api/plan/status`, { headers: getAuthHeaders() });
+    if(!res.ok) return null;
+    _planStatusCache = await res.json();
+    return _planStatusCache;
+  } catch { return null; }
+}
+
+function renderUsageBar(){
+  const container = document.getElementById('plan-usage-bar');
+  if(!container) return;
+  const d = _planStatusCache;
+  if(!d || d.plan === 'free' || d.cap === 0){
+    container.style.display='none'; return;
+  }
+  container.style.display='block';
+  const pct = Math.min(d.percent || 0, 100);
+  const barColor = pct >= 100 ? 'var(--red)' : pct >= 80 ? '#e8a040' : 'var(--amber)';
+  container.innerHTML = `
+    <div style="font-size:10px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;">
+      <span>今月の利用額</span>
+      <span style="color:${pct>=100?'var(--red)':'var(--cream)'};font-family:var(--fm);">¥${(d.current_amount||0).toLocaleString()} / ¥${(d.cap||0).toLocaleString()}</span>
+    </div>
+    <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;">
+      <div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px;transition:width .4s;"></div>
+    </div>
+    ${pct>=100?'<div style="font-size:9px;color:var(--red);margin-top:4px;">上限到達 · モデルが自動降格されています</div>':''}
+    <div style="font-size:9px;color:var(--muted2);margin-top:2px;">${d.turns_used||0}ターン使用 · ¥${d.per_turn}/ターン</div>
+  `;
+}
+
+// ═══════ 降格バッジ（Step 7） ═══════
+function showDegradeBadge(reason){
+  let existing = document.getElementById('degrade-badge');
+  if(!existing){
+    existing = document.createElement('div');
+    existing.id = 'degrade-badge';
+    existing.style.cssText = 'padding:6px 12px;background:rgba(224,104,104,.1);border:1px solid rgba(224,104,104,.3);border-radius:8px;font-size:11px;color:var(--red);text-align:center;margin:4px 12px;';
+    const toolbar = document.getElementById('home-chat-toolbar');
+    if(toolbar) toolbar.after(existing);
+  }
+  const reasonText = reason === 'cap' ? '利用上限到達' : reason === 'fair_use_5h' ? '短時間集中利用' : reason === 'fair_use_weekly' ? '週間上限接近' : '利用制限';
+  existing.textContent = `⚠ ${reasonText}のため、軽量モデルで応答しています`;
+  existing.style.display = 'block';
+}
+function hideDegradeBadge(){
+  const el = document.getElementById('degrade-badge');
+  if(el) el.style.display = 'none';
 }
 
 // ════════ D-2: LOGO TAP → HOME ════════

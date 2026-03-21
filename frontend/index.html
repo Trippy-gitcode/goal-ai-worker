@@ -1596,6 +1596,9 @@
         </label>
         <span id="billing-annual-label" style="font-size:13px;color:var(--muted);font-weight:400;">年間 <span style="font-size:10px;color:var(--green);background:var(--green-d);padding:2px 6px;border-radius:4px;">2ヶ月無料</span></span>
       </div>
+      <!-- 利用額バー（Step 7） -->
+      <div id="plan-usage-bar" style="display:none;margin-bottom:16px;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;"></div>
+
       <div style="display:flex;flex-direction:column;gap:10px;" id="plan-cards">
 
         <!-- Free -->
@@ -1603,7 +1606,7 @@
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <div>
               <div style="font-size:13px;font-weight:500;color:var(--cream);">Free</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px;">基本機能・ゴール1つ・月2回レビュー</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">20回/日 · Sonnet + GPT-5 mini + Flash</div>
             </div>
             <div style="text-align:right;">
               <div style="font-size:20px;font-family:var(--fd);color:var(--cream);">¥0</div>
@@ -1613,10 +1616,27 @@
           <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
             <span class="plan-feat">✓ ゴール1つ</span>
             <span class="plan-feat">✓ タスク管理</span>
-            <span class="plan-feat">✓ 月2回レビュー</span>
-            <span class="plan-feat dim">✗ 複数ゴール</span>
-            <span class="plan-feat dim">✗ 毎週レビュー</span>
-            <span class="plan-feat dim">✗ 乖離分析</span>
+            <span class="plan-feat">✓ ディープ分析 3回/月</span>
+            <span class="plan-feat dim">✗ 従量課金なし</span>
+          </div>
+        </div>
+
+        <!-- Light -->
+        <div class="plan-card" id="pc-light" onclick="selectPlan('light')" style="padding:16px 18px;background:var(--bg3);border:2px solid var(--border2);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--cream);">Light</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">¥8/ターン · 上限¥980 · Sonnet + mini + Flash</div>
+            </div>
+            <div style="text-align:right;" id="plan-price-light">
+              <div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥500〜980</div>
+              <div style="font-size:9px;color:var(--muted2);">/月（税込）</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ 使った分だけ</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ 14日間無料体験</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ ディープ分析 5回/月</span>
           </div>
         </div>
 
@@ -1626,41 +1646,18 @@
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <div>
               <div style="font-size:13px;font-weight:500;color:var(--amber);">Pro</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px;">ゴール無制限・毎週AIレビュー・全機能</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">¥20/ターン · 上限¥2,980 · Sonnet 4.6 + GPT-5 + Flash</div>
             </div>
             <div style="text-align:right;" id="plan-price-pro">
-              <div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥2,980</div>
+              <div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥1,500〜2,980</div>
               <div style="font-size:9px;color:var(--muted2);">/月（税込）</div>
             </div>
           </div>
           <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ ゴール無制限</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ 毎週レビュー</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ 乖離分析</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ MBTI本格診断</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ 音声・画像入力</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ 優先サポート</span>
-          </div>
-        </div>
-
-        <!-- Premium -->
-        <div class="plan-card" id="pc-premium" onclick="selectPlan('premium')" style="padding:16px 18px;background:linear-gradient(135deg,rgba(228,184,106,.08),rgba(228,184,106,.02));border:2px solid rgba(228,184,106,.7);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 0 20px rgba(228,184,106,.08);">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--amber);">Premium</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px;">上位AIモデル＋ディープ分析60回/月</div>
-            </div>
-            <div style="text-align:right;" id="plan-price-premium">
-              <div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥4,980</div>
-              <div style="font-size:9px;color:var(--muted2);">/月（税込）</div>
-            </div>
-          </div>
-          <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.4);">✓ Claude Opus</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.4);">✓ GPT-4o</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.4);">✓ Gemini Pro</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.4);">✓ ディープ分析 60回/月</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.4);">✓ 全機能アンロック</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ GPT-5搭載</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ AIメモ</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ 14日間無料体験</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.3);">✓ ディープ分析 30回/月</span>
           </div>
         </div>
 
@@ -1670,19 +1667,38 @@
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <div>
               <div style="font-size:13px;font-weight:700;color:var(--amber);">Max</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px;">最高品質AI＋すべて無制限</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">¥10/ターン · 上限¥9,800 · Opus 4.6 + GPT-5 + 2.5 Pro</div>
             </div>
             <div style="text-align:right;" id="plan-price-max">
-              <div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥12,800</div>
+              <div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥1,500〜9,800</div>
               <div style="font-size:9px;color:var(--muted2);">/月（税込）</div>
             </div>
           </div>
           <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ Claude Opus</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ GPT-4o</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ Gemini Pro</span>
-            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ AIチャット 無制限</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ Claude Opus 4.6</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ GPT-5</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ Gemini 2.5 Pro</span>
             <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ ディープ分析 無制限</span>
+          </div>
+        </div>
+
+        <!-- Ultra -->
+        <div class="plan-card" id="pc-ultra" onclick="selectPlan('ultra')" style="padding:16px 18px;background:linear-gradient(135deg,rgba(228,184,106,.2),rgba(157,120,216,.12));border:2px solid rgba(228,184,106,1);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 0 30px rgba(228,184,106,.15);">
+          <div style="position:absolute;top:-1px;right:14px;padding:3px 10px;background:linear-gradient(135deg,#e4b86a,#BA55D3);border-radius:0 0 7px 7px;font-size:9px;font-weight:700;color:#fff;letter-spacing:.06em;font-family:var(--fm);">UNLIMITED</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--amber);">Ultra</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">使い放題 · Maxと同モデル · コンテキスト2倍</div>
+            </div>
+            <div style="text-align:right;" id="plan-price-ultra">
+              <div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥20,000</div>
+              <div style="font-size:9px;color:var(--muted2);">/月（税込）</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ 完全使い放題</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ モデル降格なし</span>
+            <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ コンテキスト2倍</span>
             <span class="plan-feat" style="color:var(--amber);border-color:rgba(228,184,106,.5);">✓ 全機能アンロック</span>
           </div>
         </div>

@@ -1,0 +1,22 @@
+=== Step 7 Preflight ===
+--- Plan modal HTML ---
+4
+--- subscribePlan ---
+1248:    if(el){ el.style.outline = (p===MEMBERSHIP.plan||p===MEMBERSHIP.selectedPlan)?'2px solid var(--amber)':'none'; }
+1260:  MEMBERSHIP.selectedPlan = p;
+1272:  const p = MEMBERSHIP.selectedPlan;
+1289:let planBilling = 'monthly'; // 'monthly' | 'annual'
+1298:    planBilling = 'annual';
+1303:    planBilling = 'monthly';
+1320:    if(planBilling === 'annual'){
+1367:async function subscribePlan(){
+1368:  const p = MEMBERSHIP.selectedPlan;
+1390:      body: JSON.stringify({ plan: planBilling === 'annual' ? p + '_annual' : p })
+--- getMembershipLabel refs ---
+12
+--- X-Model-Degraded in api.js ---
+0
+0
+--- /api/plan/status backend ---
+1
+=== Preflight DONE ===
