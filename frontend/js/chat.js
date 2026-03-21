@@ -1022,9 +1022,10 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
       }
 
     } else if(route === 'gpt'){
-      const { bub } = mkStreamBubble(inner, scroll);
-      bub.innerHTML = '💡 アイデア生成中...';
-      bub.style.cssText += 'color:var(--amber);font-size:13px;';
+      const { bub, wrap } = mkStreamBubble(inner, scroll);
+      bub.innerHTML = getGptSVG(14) + ' アイデア生成中...';
+      bub.style.cssText += 'color:#5b8def;font-size:13px;display:flex;align-items:center;gap:6px;';
+      const av = wrap?.querySelector('.msg-av'); if(av) av.innerHTML = getGptSVG(14);
       try{
         const ctx = buildAIContextCached();
         const result = await callOpenAI(text, `【絶対ルール】ユーザーのリクエストにまず具体的に回答すること。聞き返し禁止。
