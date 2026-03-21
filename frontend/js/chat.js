@@ -634,6 +634,22 @@ function saveHomeMsgs(){
 }
 
 function _goldSVG(paths){return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="url(#goldG)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;}
+// ═══ UX-003: AI最適化%表示 ═══
+function getAiOptPct(){
+  const fields = ['nickname','age','occupation','field','mbti','strengths','weaknesses','interests','constraints','vision','worries'];
+  let filled = 0;
+  fields.forEach(k => {
+    const v = USER_PROFILE[k];
+    if(Array.isArray(v) ? v.length > 0 : !!v) filled++;
+  });
+  if(ALL_GOALS.filter(g=>!g.archived).length > 0) filled++;
+  return Math.round(filled / (fields.length + 1) * 100);
+}
+function getAiOptBadgeHTML(){
+  const pct = getAiOptPct();
+  return `<div id="ai-opt-badge" onclick="showPage('myself');switchMyselfTab('profile');" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(228,184,106,.08);border:1px solid rgba(228,184,106,.2);border-radius:20px;cursor:pointer;margin-bottom:16px;transition:all .15s;" onmouseover="this.style.borderColor='rgba(228,184,106,.5)'" onmouseout="this.style.borderColor='rgba(228,184,106,.2)'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span style="font-size:11px;color:var(--amber);font-family:var(--fm);">AI最適化 ${pct}%</span></div>`;
+}
+
 function buildEmptyHomeHTML(){
   const gDef='<defs><linearGradient id="goldG" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs>';
   const presets=[
@@ -650,7 +666,8 @@ function buildEmptyHomeHTML(){
     +'<div style="text-align:center;padding:60px 20px 10px;color:var(--muted);line-height:2;">'
     +'<div style="margin:0 auto 16px;opacity:.4;">'+getLogoSVG(56)+'</div>'
     +'<div style="font-size:18px;color:var(--cream);font-weight:500;margin-bottom:6px;">'+greeting+'</div>'
-    +'<div style="font-size:14px;margin-bottom:20px;">雑談、相談、調べもの、何でもOK</div>'
+    +'<div style="font-size:14px;margin-bottom:12px;">雑談、相談、調べもの、何でもOK</div>'
+    + getAiOptBadgeHTML()
     +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-width:360px;margin:0 auto;text-align:left;">'+cards+'</div>'
     +'</div>';
 }
