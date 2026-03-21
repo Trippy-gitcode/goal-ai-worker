@@ -1016,6 +1016,27 @@ async function confirmDeleteAccount(){
   } catch(e) { toast(e.message || 'アカウント削除に失敗しました'); }
 }
 
+// ════════ G: チャット背景プリセット ════════
+const CHAT_BG_PRESETS = [
+  { id:'none', label:'なし', css:'' },
+  { id:'dots', label:'ドット', css:'radial-gradient(circle, rgba(228,184,106,.04) 1px, transparent 1px)' },
+  { id:'grid', label:'グリッド', css:'linear-gradient(rgba(228,184,106,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(228,184,106,.03) 1px, transparent 1px)' },
+  { id:'wave', label:'ウェーブ', css:'repeating-linear-gradient(135deg, transparent, transparent 20px, rgba(228,184,106,.02) 20px, rgba(228,184,106,.02) 40px)' },
+];
+function applyChatBg(id){
+  const p = CHAT_BG_PRESETS.find(x=>x.id===id) || CHAT_BG_PRESETS[0];
+  const chatWrap = document.getElementById('home-chat-wrap');
+  if(chatWrap){
+    chatWrap.style.backgroundImage = p.css || 'none';
+    if(p.id==='dots') chatWrap.style.backgroundSize = '20px 20px';
+    else if(p.id==='grid') chatWrap.style.backgroundSize = '20px 20px';
+    else chatWrap.style.backgroundSize = '';
+  }
+  localStorage.setItem('chat_bg', id);
+  document.querySelectorAll('.bg-btn').forEach(b => b.classList.toggle('active', b.dataset.bg===id));
+}
+function initChatBg(){ const saved = localStorage.getItem('chat_bg'); if(saved) applyChatBg(saved); }
+
 // ════════ VERSION CHECK ════════
 (function initVersionCheck(){
   document.addEventListener('DOMContentLoaded', () => {

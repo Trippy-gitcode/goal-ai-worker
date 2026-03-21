@@ -25,12 +25,18 @@ export async function countRecentMessages(env, tokenId) {
 
 export async function regenerateAiMemo(env, tokenId, goalId) {
   try {
+    // J: KVロックで重複実行防止
+    const lockKey = `memo_lock:${tokenId}`;
+    const locked = await env.TOKEN_KV.get(lockKey);
+    if (locked) return; // 既に実行中
+    await env.TOKEN_KV.put(lockKey, '1', { expirationTtl: 60 }); // 60秒ロック
+
     const users = await supabaseQuery(env, 'users', 'GET', {
       filters: `token_id=eq.${encodeURIComponent(tokenId)}`,
       select: 'id',
     });
     const userId = users?.[0]?.id;
-    if (!userId) return;
+    if (!userId) { await env.TOKEN_KV.delete(lockKey); return; }
 
     let filters = `user_id=eq.${userId}&order=created_at.desc&limit=50`;
     if (goalId) filters += `&goal_id=eq.${goalId}`;

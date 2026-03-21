@@ -1531,6 +1531,7 @@ async function init(){
   initSwipeToOpenSidebar();
   initHomePlaceholder();
   renderMembershipUI();
+  if(typeof initChatBg === 'function') initChatBg();
   updateNotifSettingUI();
   showPage('home');
   window._appInitDone = true; // 初回ロード完了フラグ（以降のshowPageでアニメーション有効）

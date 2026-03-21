@@ -761,7 +761,26 @@ function mkHomeMsg(m){
   else { t.innerHTML = `<span class="msg-time">${m.time||''}</span>${actionsHtml}`; }
   body.appendChild(bub); body.appendChild(t); wrap.appendChild(av); wrap.appendChild(body);
   wrap.style.position='relative';
+  // F: ロングタップ→クイックゴール
+  if(m.role === 'ai') addLongTapGoal(bub, m.content);
   return wrap;
+}
+
+// F: ロングタップ → クイックゴール
+function addLongTapGoal(el, content){
+  let timer = null;
+  el.addEventListener('touchstart', () => { timer = setTimeout(() => { quickGoalFromText(content); }, 600); }, {passive:true});
+  el.addEventListener('touchend', () => { clearTimeout(timer); }, {passive:true});
+  el.addEventListener('touchmove', () => { clearTimeout(timer); }, {passive:true});
+}
+function quickGoalFromText(text){
+  if(!text) return;
+  const title = text.slice(0, 50).replace(/\n/g,' ').trim();
+  if(confirm(`「${title}…」からゴールを作成しますか？`)){
+    showWelcome();
+    const inp = document.getElementById('wlc-in');
+    if(inp) inp.value = title;
+  }
 }
 
 // 【5】コピー・引用ハンドラ
@@ -1131,8 +1150,37 @@ async function homeClaudeStream(today, homeInner, homeWrap){
       // モデル名はX-Model-Usedヘッダーから取得（Worker側ルーティングで動的に変わる）
       const modelName = window._lastModelUsed ? formatModelName(window._lastModelUsed) : 'Claude';
       homeMsgs.push({role:'ai',content:t,time:now(),date:today,model:modelName}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs();
+      // D: 達成報告検出 → コンフェッティ
+      detectAchievement(t);
     }
   });
+}
+
+// ═══ E: 定期チェックイン ═══
+function showDailyCheckin(container){
+  const today = new Date().toISOString().slice(0,10);
+  if(localStorage.getItem('checkin_'+today)) return;
+  localStorage.setItem('checkin_'+today, '1');
+  const streak = STREAK.count || 0;
+  let msg = '';
+  if(streak >= 7) msg = `🔥 ${streak}日連続！素晴らしい継続力です。今日も一歩進みましょう。`;
+  else if(streak >= 3) msg = `✨ ${streak}日連続で使ってくれていますね。今日は何を進めますか？`;
+  else if(streak >= 1) msg = 'おかえりなさい。今日もサポートします。';
+  else return; // 初回は表示しない
+  const el = document.createElement('div');
+  el.style.cssText = 'text-align:center;padding:8px 16px;margin:8px auto;max-width:360px;background:var(--amber-g);border:1px solid rgba(228,184,106,.2);border-radius:10px;font-size:11px;color:var(--amber);';
+  el.textContent = msg;
+  container.appendChild(el);
+}
+
+function detectAchievement(aiText){
+  if(!aiText) return;
+  const patterns = /達成|おめでとう|完了しました|やり遂げ|目標クリア|ゴール達成/;
+  if(patterns.test(aiText) && typeof launchConfetti === 'function'){
+    const activeGoal = ALL_GOALS.find(g => !g.archived);
+    if(activeGoal) checkMilestone(activeGoal);
+    else launchConfetti();
+  }
 }
 
 function retryLastHomeMsg(){
@@ -1195,6 +1243,8 @@ function renderWelcomeView(){
   chatInner.innerHTML = buildEmptyHomeHTML();
   updateHomePlaceholder();
   showProfileHint();
+  // E: 定期チェックイン（1日1回）
+  showDailyCheckin(chatInner);
 }
 
 // STEP 11: プロフィール未設定案内

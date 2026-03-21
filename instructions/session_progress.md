@@ -7,8 +7,8 @@
 
 ## 現在地
 - **バージョン:** v3.9.3
-- **チェーン:** テスト配布前 追加3件 完了
-- **次のミッション:** キュー空
+- **チェーン:** 提案ログD-J実装（7件）
+- **次のミッション:** D 達成報告検出+コンフェッティ
 
 ## ミッションキュー（上から順に実行）
 
@@ -29,6 +29,15 @@
 A. ✅ アカウント削除（POST /api/account/delete + 2段階confirm + Supabase全テーブル削除 + KVクリア + localStorage/cookieクリア）
 B. ✅ Ultraコンテキスト2倍（buildCompressedMessagesにcontextMultiplier引数、Ultra=20メッセージ窓）
 C. ✅ ET週間上限トラッキング（KVベース、checkETLimit/incrementETUsage、/api/plan/statusにet情報追加）
+
+### 提案ログD-J実装（ふとし承認 2026-03-22）
+D. 🟡 達成報告検出+コンフェッティ自動トリガー
+E. 🟡 定期チェックイン（ストリーク連動）
+F. 🟢 クイックゴール（ロングタップ→即登録）
+G. 🟢 チャット背景プリセット
+H. 🔴 Vite + ES Modules完全移行
+I. 🟡 Playwright E2Eテスト拡充
+J. 🟢 AI理解メモ生成キューイング
 
 ### ふとし手動タスク（Code実行不可）
 - [ ] スマホ+PC通しテスト
