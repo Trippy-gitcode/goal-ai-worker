@@ -1,79 +1,92 @@
 # GOAL AI — CLAUDE.md（Claude Code専用）
-> 最終更新：2026-03-21（v6.3 / KICKOFF-001 Step 4準備 / ワークフローv14追加）
-> 方針・ルール → development_rules.md（C1〜C7）
-> プラン・戦略 → goal_ai_project_v6_3.md
-> 履歴・スキーマ → goal_ai_reference_v2.md
+> 最終更新：2026-03-21（v15 自律型エンジニアモード）
+> セッション開始時にこのファイルとinstructions/session_progress.mdを必ず読むこと
+> 判断に迷ったら development_rules.md を参照
 
 ---
 
-## 現在の実行チェーン（KICKOFF-001）
+## 🔒 契約セクション（Code変更禁止。変更権限はClaude.ai経由のみ）
 
-各ステップ完了後にふとしの承認を得てから次へ。
+### プラン構成（v6.3）
+Free(¥0,20回/日,Sonnet+mini+Flash) / Light(¥500~980,¥8/t,cap¥980) / Pro(¥1,500~2,980,¥20/t,cap¥2,980,Sonnet4.6+GPT-5+Flash) / Max(¥1,500~9,800,¥10/t,cap¥9,800,Opus4.6+GPT-5+2.5Pro) / Ultra(¥20,000使い放題,Maxと同モデル,ET140回/週,コンテキスト2倍)
 
-| Step | 指示書 | 追補適用 | 状態 |
-|------|--------|---------|:----:|
-| 0 | CLAUDE.md更新 | — | ✅ |
-| 1 | STRIPE-SETUP-AUTO | AMEND-002 | ✅ |
-| 2 | TEST-INFRA-001 | — | ✅ |
-| 3 | STRIPE-001-SCHEMA | AMEND-001 + AMEND-002 | ✅ |
-| 4 | STRIPE-002-TURN-RECORD | AMEND-001 + AMEND-002 | ✅ |
-| 5 | STRIPE-003-CAP-FAIRUSE | AMEND-001 + AMEND-002 | ✅ |
-| 6 | STRIPE-004-API-WEBHOOK | AMEND-001 + AMEND-002 | ✅ |
-| 7 | STRIPE-005-FRONTEND | AMEND-001 + AMEND-002 | ⬜ |
-| 8a | DESIGN-IMPL-001 PART-1 | — | ⬜ |
-| 8b | DESIGN-IMPL-001 PART-2 | — | ⬜ |
-| 8c | DESIGN-IMPL-001 PART-3 | — | ⬜ |
+### 変更不可の設計
+- AIルーティング: quickRoute→callRoutingAPI→モデル振り分け（廃止禁止）
+- フェアユース: 5h窓+週間窓の2層（checkFairUseV2。削除禁止）
+- 従量課金: Stripe Metered Billing（recordTurnUsage→maybeSendUsageRecord）
+- DB: user_id(UUID)。指示書のtoken_idはauth.userIdに読み替え
+- PLAN_CONFIGがSingle Source of Truth
 
+### ふとしの方針メモ
+- 品質最優先。スピードのために品質を犠牲にしない
+- GPT-5をProに投入（粗利88%維持、ChatGPT Plus対抗）
+- 旧KVフェアユースはv6.3で完全削除済み（I/O半減）
+- このチャット(Claude.ai)は経営者+アドバイザーの場。実務は全てCode
+- UX改善3件承認済み: 初期タスク段階式(UX-001) / コーチマーク3点(UX-002) / AI最適化%表示(UX-003)。詳細はsession_progress.md「UX改善仕様」セクション参照
+
+### 契約変更ルール
+- 契約セクションの編集権限はClaude.ai（Desktop Commander経由）のみ
+- Codeによる契約セクションの変更は絶対禁止
+- 変更時はClaude.aiがsession_progress.mdにも記録する
+
+### 仕様と設計の境界
+- 仕様変更（禁止）= ユーザーから見える挙動が変わること
+- 設計変更（自由）= 内部構造・実装方法の選択。判断根拠を記録
+
+### verify.sh 最低基準
+- 新規関数: 全てgrep存在確認
+- 既存保全: canopy.shの全項目（累積。削除禁止）
+- PLAN_CONFIG数値: 契約セクションの値と一致すること
+- 旧コード残存: 削除対象が残っていないこと
+
+### 承認ルール
+- 🔴高リスク: ふとしの個別承認必須
+- 🟡中リスク: レポートのみで判断可
+- 🟢低リスク: バッチ承認可（複数ステップまとめて）
 
 ---
 
-## 【鉄則】
+## 鉄則（常に意識する5つだけ。詳細はdevelopment_rules.md）
 
-1. grep で場所特定してから編集
-2. 指示書+追補を全て読んでから実装開始
-3. 保全確認grep全項目実行。1件でも失敗なら再修正
-4. 1機能1デプロイ。デプロイ後即スモークテスト
-5. FAIL → wrangler rollback → ログ確認 → 修正
-6. ログ確認前の投機的修正禁止
-7. 指示書にないファイルは変更禁止
-8. APP_VERSION インクリメント（globals.js, sw.js, index.html, worker.js）
+1. **仕様変更禁止。** 契約セクション参照。設計判断は自由、根拠を記録
+2. **1機能1デプロイ → canopy → PASS → 次。** FAILならrollback→記録→停止
+3. **verify.shを自分で作り自分で実行。** canopyに新項目を累積追加（削除禁止）
+4. **判断根拠・結果・提案をsession_progress.mdに記録。** レポート規約に従う
+5. **ミッション遂行に必要なバグ修正はOK（記録必須）。無関係なバグは報告のみ**
 
-## 重要な発見事項（Step 4以降の前提）
+---
 
-### DBスキーマの命名規則
-- 全テーブルが `user_id` (UUID) を使用（`token_id` ではない）
-- `chat_messages` のカラム: id, user_id, goal_id, role, content, ai_model, message_type, created_at, session_id, goal_candidate, session_tag
-- `usage_tracking` の既存unique制約: `(user_id, month)`
-- Worker側の `auth.tokenId` と DB の `user_id` の対応関係を要確認
+## ミッションキュー運用
+- Claude.aiがDC経由でsession_progress.mdのキューに直接追記する
+- Codeはステップ完了後、session_progress.mdのキューを再読してから次に進む
+- キュー消化時は完了記録を書く
+- ふとしのコピペは不要
 
-### constants.js 要更新
-- 現在: free/pro/premium/max/annual/premium_annual/max_annual の7プラン
-- v6.3: free/light/pro/max/ultra の5プラン
-- PLAN_MODELS, PLAN_LIMITS, STRIPE_PRICE_IDS を全て書き換え必要
-- Step 4開始前にconstants.js更新を先行すること
+---
 
-## 実行ワークフロー（v14以降）
+## 実行チェーン（KICKOFF-001）
 
-1. 指示書は instructions/ に保存されている
-2. 実行結果は instructions/results/ に保存する（grep出力・diff・smoke結果）
-3. 各ステップ完了後 session_progress.md を更新する
-4. テストFAIL時は即停止 → wrangler rollback → 結果記録 → 次の指示を待つ
-5. 指示書にない変更は加えない。改善案は session_progress.md「## 提案ログ」に記録のみ
-6. 各ステップ完了時に git tag stepN-complete を打つ
+| Step | 状態 |
+|------|:---:|
+| 0-6 (インフラ+バックエンド) | ✅ |
+| 7 フロントエンド | ✅ |
+| 8a デザイン共通 | ⬜ |
+| 8b 各画面UI | ⬜ |
+| 8c プラン演出 | ⬜ |
 
-## 品質ゲート（全ステップ共通）
+---
 
-Phase 0: プリフライトチェック → Phase 1-2: 実装 → Phase 3: diff保存+grep保全 → Phase 4: キャノピーテスト → Phase 5: tag + session_progress更新
+## 参照ドキュメント（リポジトリ内）
+Step 7以降: stripe_005_frontend.md / stripe_amendment_001.md / stripe_amendment_002.md / design_impl_001.md / design_review_changelog_v3.md / goal_ai_design_spec_v3.md / development_rules.md
 
-### 結果レポート規約
-各Step完了時に、自分で results/ を読み session_progress.md に判定(PASS/FAIL)・変更サマリー・grep結果・キャノピー結果・gitタグ・提案ログを書く。Claude.ai は session_progress.md だけ読んで判断する。
+---
 
-### 【グローバルルール】
-- 指示書中の `token_id` は `auth.userId`（UUID）に読み替えること（DB操作は全て `user_id`）
+## ファイル構成（v3.9.3）
+src/: index.js, routes/(chat,checkout,plan,deep,goals,history,memo,misc,referral,tester,token,voice,admin), services/ai/(gpt,gemini,routing,claude), services/(embedding,history,memo,profile,prompt), utils/(constants,helpers,rate-limit,streak,supabase)
+frontend/js/: globals,api,chat,goals,profile,ui,app,location,main
+git tags: step4-complete / step5-complete / step6-complete
 
-### 【絶対禁止】
-- AIスマートルーティングの廃止・削除
-- プラン構成の勝手な変更
-- Supabaseテーブル・カラムの削除
-- 既存APIエンドポイント・認証・Stripe処理の削除
-- 指示された実装の省略・スキップ
+---
+
+## 【絶対禁止】
+- ルーティング廃止 / プラン構成変更 / テーブル削除 / API削除 / 実装スキップ / 契約変更(署名なし) / canopy項目削除

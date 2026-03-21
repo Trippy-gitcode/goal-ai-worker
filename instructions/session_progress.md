@@ -1,110 +1,104 @@
-# GOAL AI — セッション引き継ぎ v14（実行中）
-> 更新: 2026-03-21
-> 今セッション: 実装その14（KICKOFF-001 Step 0〜6 完了）
-> 次セッション: Step 7（STRIPE-005-FRONTEND）から再開
+# GOAL AI — プロジェクトダッシュボード
+> このファイルが Code のセッション引き継ぎの唯一の情報源
+> セッション開始時に必ず読む。セッション終了時に必ず更新する。
 
 ---
 
-## 完了済みステップ
+## 現在地
+- **バージョン:** v3.9.3
+- **チェーン:** KICKOFF-001 Step 8a から再開
+- **次のミッション:** ミッションキュー参照
 
-| Step | 内容 | 状態 |
-|------|------|:---:|
-| 0 | CLAUDE.md更新（PLAN_CONFIG v6.3 + チェーン表） | ✅ |
-| 1 | Stripe設定（5商品/14Price/16環境変数/Webhook/Portal） | ✅ |
-| 2 | テスト基盤（helpers 4件 + smoke 5件 + grep全17PASS） | ✅ |
-| 3 | DBスキーマ拡張（8カラム+7カラム+2テーブル+3RPC） | ✅ |
-| 4 | constants.js v6.3更新 + ターン記録（STEP4-EXEC） | ✅ |
-| 5 | キャップ+フェアユース+モデル降格（STEP5-EXEC） | ✅ |
-| 6 | API plan/status + Webhook拡張（STEP6-EXEC） | ✅ |
+## ミッションキュー（上から順に実行）
+1. ~~🔴 Step 7~~ ✅ 完了
+2. 🟡 Step 8a: デザイン共通コンポーネント（参照: design_impl_001.md + design_review_changelog_v3.md）
+3. 🟡 Step 8b: 各画面UI変更（参照: 同上）
+4. 🟢 Step 8c: プラン演出+トースト（参照: 同上）
+5. 🟡 UX-001: 初期タスク段階式自動生成（オンボーディング完了時にライフタスク3個生成→2個完了で+2個追加。詳細は下記「UX改善仕様」参照）
+6. 🟡 UX-002: ホーム画面コーチマーク3点（初回表示時のみ: ①モードチップ ②タスクボックス ③サイドバーハンバーガー）
+7. 🟡 UX-003: ホーム会話前画面に「AI最適化 ◯%」表示（プロフィール回答率で算出、タップでプロフィールAI理解度ページへ遷移、会話開始後は非表示）
 
-## Step 6 変更サマリー（2026-03-21）
+## 直近の変更履歴
 
-### 変更ファイル
-- `src/routes/plan.js` — 新規: handlePlanStatus (usage/cap/models/fair_use返却)
-- `src/index.js` — /api/plan/status ルート追加
-- `src/routes/checkout.js` — handleCheckoutCreate全面書換(fixed+metered 2ラインアイテム, Light/Pro 14日トライアル), Webhook: metered item ID保存, invoice.paid, subscription.updated
+### Step 7 (2026-03-21) ✅
+- プランモーダル: 旧4プラン→新5プラン(Free/Light/Pro/Max/Ultra)
+- 利用額バー: /api/plan/status → plan-usage-bar (amount/cap/percent)
+- 降格バッジ: X-Model-Degraded → degrade-badge警告バナー
+- subscribePlan: billing_period対応
+- getMembershipLabel/DEEP_LIMITS/renderMembershipUI v6.3更新
+- canopy.sh: Step 5/6/7累積30項目追加
+- git tag: step7-complete
+- 設計判断: Premium完全削除、annual→billing_periodパラメータに変更
 
-### テスト結果
-- Canopy: 全PASS
-- Step 6固有: handlePlanStatus(3), invoice.paid(2), subscription.updated(1), trial_period_days(1), stripe_metered_subscription_item_id(3)
-- /api/plan/status: 認証エラー正常返却確認
+### Step 6 (2026-03-21) ✅
+- /api/plan/status エンドポイント（src/routes/plan.js 新規）
+- checkout.js: fixed+metered 2ラインアイテム、Light/Pro 14日トライアル
+- Webhook: metered item ID保存 / invoice.paid / subscription.updated
+- git tag: step6-complete
+
+### Step 5 (2026-03-21) ✅
+- getDegradedModels + checkFairUseV2（5h+weekly窓）
+- effectiveModels パススルー（gpt.js/gemini.js overrideModels対応）
+- 旧KV checkFairUse 完全削除
+- X-Model-Degraded / X-Usage-* レスポンスヘッダー
+- git tag: step5-complete
+
+### Step 4 (2026-03-21) ✅
+- PLAN_CONFIG v6.3 Single Source of Truth（5プラン）
+- recordTurnUsage + maybeSendUsageRecord
+- Stripe Metered Billing usage_record送信
+- APP_VERSION 3.9.3
+- git tag: step4-complete
+
+## 未解決の問題
+（なし）
+
+## UX改善仕様（2026-03-21 Claude.ai承認済み）
+
+### UX-001: 初期タスク段階式
+- トリガー: オンボーディング完了時
+- タスク種別: ライフタスク、重み🟢軽い
+- **ステージ1（即時生成、3個）:**
+  1. プロフィールを完成させる
+  2. GOAL AIと自分について話す
+  3. AIに今気になっていることを相談する
+- **ステージ2（↑のうち2個完了でトリガー、+2個）:**
+  4. 「私をデザイン」を体験する
+  5. 最初のゴールを設定する
+- ステージ2追加時にトースト通知「新しいタスクが追加されました」
+
+### UX-002: ホーム画面コーチマーク
+- 表示条件: ホーム画面初回表示時のみ（フラグでlocalStorage管理）
+- 方式: コーチマーク式（1箇所ずつスポットライト+吹き出し、タップで次へ）
+- 3ステップ:
+  1. モードチップ →「会話のスタイルを切り替えられます」
+  2. タスクボックス →「会話から生まれたタスクがここに表示されます」
+  3. サイドバーハンバーガー →「ゴール管理や自己分析はここから」
+
+### UX-003: AI最適化%表示
+- 配置: ホーム会話前画面、ヒーロー直下（プリセットチップの上）
+- 表示: 「AI最適化 ◯%」（プロフィール回答率で算出、既存のAI理解度ロジック流用）
+- タップ → プロフィール画面のAI理解度セクションへ遷移
+- 会話開始後は非表示（会話前画面のみ）
+
+### テスト配布フィードバック項目メモ
+- 料金プランの分かりやすさ（プラン選択画面を見せて反応を取る）
+
+## 提案ログ（Codeが気づいた改善点。実装はしていない）
+（Step 4〜6 では提案なし）
 
 ---
 
-## Step 5 変更サマリー（2026-03-21）
+## Stripe Price ID マッピング
+| プラン | fixed | metered | annual |
+|--------|-------|---------|--------|
+| Light | price_1TCzZj...hTbAwTYK | price_1TCzsw...jD8aUGIm | price_1TCztW...qwlf41QK |
+| Pro | price_1TCzv6...eTSyND0a | price_1TCzwJ...pKKWw6nV | price_1TCzwo...tfRAkNFr |
+| Max | price_1TCzz4...YnrDA4vv | price_1TCzzk...iQmUneA7 | price_1TD009...1yAJuPoz |
+| Ultra | price_1TD03i...lPdCgNCJ | — | price_1TD041...VSJtVFrd |
+| Addon 50 | price_1TD3QJ...OlOzERwV | — | — |
+| Addon 120 | price_1TD3QK...uP63gUOn | — | — |
 
-### 変更ファイル
-- `src/routes/chat.js` — getDegradedModels, checkFairUseV2, getWeekStartUTC追加。旧checkFairUse削除。effectiveModelsパススルー。X-Model-Degraded等レスポンスヘッダー
-- `src/services/ai/gpt.js` — handleGPTChat/handleGPTSimpleChatにoverrideModels引数追加
-- `src/services/ai/gemini.js` — handleGeminiChatにoverrideModels引数追加
-
-### テスト結果
-- Canopy: 全PASS
-- Step 5固有: getDegradedModels(3), checkFairUseV2(2), effectiveModels(7), X-Model-Degraded(1)
-- 旧checkFairUse: chat.jsから完全削除確認
-
----
-
-## Step 4 変更サマリー（2026-03-21）
-
-### 変更ファイル
-- `src/utils/constants.js` — PLAN_CONFIG v6.3 (free/light/pro/max/ultra), 自動導出PLAN_LIMITS/MODELS, getModel+overrideModels, getPlanConfig, getCurrentMonth, USAGE_BATCH_SIZE, 新STRIPE_PRICE_IDS
-- `src/routes/chat.js` — recordTurnUsage + maybeSendUsageRecord追加, handleChatStreamにターン記録呼び出し
-- `src/routes/checkout.js` — プラン名バリデーション更新(light/pro/max/ultra), クーポンロジックコメントアウト
-- `frontend/js/globals.js` / `frontend/sw.js` / `frontend/index.html` / `src/utils/constants.js` — APP_VERSION 3.9.3
-
-### テスト結果
-- Canopy: 全PASS (Worker稼働, コア関数9個, 5プラン, 旧プラン名0, ターン記録3関数)
-- `/api/version` → 3.9.3 確認
-
----
-
-## Step 3 で発見した重要事項
-
-### DBの命名規則
-- 全テーブルが `user_id` (UUID) を使用。指示書の `token_id` と異なる
-- `usage_tracking` の unique制約: `(user_id, month)`
-- `chat_messages` カラム: id, user_id, goal_id, role, content, ai_model, message_type, created_at, session_id, goal_candidate, session_tag
-
-### constants.js の旧→新 変更が必要
-
-現在のconstants.js:
-- 7プラン: free/pro/premium/max + annual variants
-- PLAN_MODELS: claude-sonnet(free/pro) / claude-opus(premium/max)
-- old STRIPE_PRICE_IDS (旧プラン用)
-
-v6.3で必要:
-- 5プラン: free/light/pro/max/ultra
-- light: sonnet + mini + flash (¥8/turn, cap ¥980)
-- pro: sonnet-4.6 + gpt-5 + flash (¥20/turn, cap ¥2,980)
-- max: opus-4.6 + gpt-5 + 2.5-pro (¥10/turn, cap ¥9,800)
-- ultra: maxと同モデル (従量なし, キャップなし, ET 140/週)
-- STRIPE_PRICE_IDS: Step 1で取得済みの新Price IDに全置換
-
-### Step 4 開始前のやること（この順序で）
-1. constants.js のPLAN_MODELS, PLAN_LIMITS, STRIPE_PRICE_IDS を v6.3 に更新
-2. rate-limit.js のフェアユース判定をv6.3プラン名に対応
-3. handleChatStream にターンカウント+Stripe usage_record送信を追加
-4. Ultra分岐（従量送信スキップ）
-5. デプロイ → test_002_turn_record.sh → 承認
-
-## 次セッションのプロジェクトナレッジ
-変更なし（v13時点のファイル構成を維持）。
-session_handoff_v14.md は既にナレッジに入っている。
-
-## Stripe Price ID マッピング（Step 1で確定済み）
-| 変数 | Price ID |
-|------|----------|
-| STRIPE_PRICE_LIGHT_FIXED | price_1TCzZj4084X0uakahTbAwTYK |
-| STRIPE_PRICE_LIGHT_METERED | price_1TCzsw4084X0uakajD8aUGIm |
-| STRIPE_PRICE_LIGHT_ANNUAL | price_1TCztW4084X0uakaqwlf41QK |
-| STRIPE_PRICE_PRO_FIXED | price_1TCzv64084X0uakaeTSyND0a |
-| STRIPE_PRICE_PRO_METERED | price_1TCzwJ4084X0uakapKKWw6nV |
-| STRIPE_PRICE_PRO_ANNUAL | price_1TCzwo4084X0uakatfRAkNFr |
-| STRIPE_PRICE_MAX_FIXED | price_1TCzz44084X0uakaYnrDA4vv |
-| STRIPE_PRICE_MAX_METERED | price_1TCzzk4084X0uakaiQmUneA7 |
-| STRIPE_PRICE_MAX_ANNUAL | price_1TD0094084X0uaka1yAJuPoz |
-| STRIPE_PRICE_ULTRA_FIXED | price_1TD03i4084X0uakalPdCgNCJ |
-| STRIPE_PRICE_ULTRA_ANNUAL | price_1TD0414084X0uakaVSJtVFrd |
-| STRIPE_PRICE_ADDON_50 | price_1TD3QJ4084X0uakaOlOzERwV |
-| STRIPE_PRICE_ADDON_120 | price_1TD3QK4084X0uakauP63gUOn |
+## Supabase
+- URL: https://wrvwcfilokfcjudspizp.supabase.co
+- Service Key: tests/.env.test
