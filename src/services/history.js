@@ -63,11 +63,12 @@ export async function generateConversationSummary(env, tokenId, sessionId) {
   } catch (e) { console.error('generateConversationSummary error:', e); return null; }
 }
 
-export async function buildCompressedMessages(env, tokenId, sessionId, currentMessages) {
+export async function buildCompressedMessages(env, tokenId, sessionId, currentMessages, contextMultiplier = 1.0) {
   try {
-    if (!currentMessages || currentMessages.length <= 10) return currentMessages;
+    const windowSize = Math.round(10 * contextMultiplier);
+    if (!currentMessages || currentMessages.length <= windowSize) return currentMessages;
     const summary = await generateConversationSummary(env, tokenId, sessionId);
-    const recentMessages = currentMessages.slice(-10);
+    const recentMessages = currentMessages.slice(-windowSize);
     if (summary) {
       return [
         { role: 'user', content: `[前回までの会話の要約]: ${summary}` },
@@ -76,7 +77,7 @@ export async function buildCompressedMessages(env, tokenId, sessionId, currentMe
       ];
     }
     return recentMessages;
-  } catch (e) { console.error('buildCompressedMessages error:', e); return currentMessages.slice(-10); }
+  } catch (e) { console.error('buildCompressedMessages error:', e); return currentMessages.slice(-(Math.round(10 * (contextMultiplier || 1)))); }
 }
 
 export async function countSessionMessages(env, tokenId, sessionId) {

@@ -23,6 +23,14 @@ export async function handlePlanStatus(request, env) {
 
   const percent = config.cap > 0 ? Math.round((usage.current_amount / config.cap) * 100) : 0;
 
+  // ET週間使用量（Ultra専用）
+  let et = null;
+  if (config.et_weekly_limit) {
+    const weekKey = getETWeekKey();
+    const etUsed = parseInt(await env.TOKEN_KV.get(`et:${auth.userId}:${weekKey}`) || '0');
+    et = { used: etUsed, limit: config.et_weekly_limit, remaining: Math.max(0, config.et_weekly_limit - etUsed) };
+  }
+
   return jsonRes({
     plan: auth.plan,
     display_name: config.display_name,
@@ -35,6 +43,32 @@ export async function handlePlanStatus(request, env) {
     models: config.models,
     fair_use: config.fair_use,
     deep_monthly: config.deep_monthly === Infinity ? null : config.deep_monthly,
-    ai_memo: config.ai_memo
+    ai_memo: config.ai_memo,
+    et
   });
+}
+
+function getETWeekKey() {
+  const now = new Date();
+  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const day = jst.getUTCDay();
+  const diff = day === 0 ? 6 : day - 1;
+  jst.setUTCDate(jst.getUTCDate() - diff);
+  return `${jst.getUTCFullYear()}-W${String(Math.ceil(jst.getUTCDate() / 7)).padStart(2, '0')}`;
+}
+
+export async function incrementETUsage(env, userId) {
+  const weekKey = getETWeekKey();
+  const kvKey = `et:${userId}:${weekKey}`;
+  const current = parseInt(await env.TOKEN_KV.get(kvKey) || '0');
+  await env.TOKEN_KV.put(kvKey, String(current + 1), { expirationTtl: 86400 * 8 });
+  return current + 1;
+}
+
+export async function checkETLimit(env, userId, plan) {
+  const config = getPlanConfig(plan);
+  if (!config.et_weekly_limit) return { ok: true };
+  const weekKey = getETWeekKey();
+  const used = parseInt(await env.TOKEN_KV.get(`et:${userId}:${weekKey}`) || '0');
+  return { ok: used < config.et_weekly_limit, used, limit: config.et_weekly_limit };
 }

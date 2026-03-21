@@ -149,7 +149,8 @@ export async function handleChatStream(request, env, ctx) {
 
   let compressedMessages = messages;
   try {
-    if (sessionId) compressedMessages = await buildCompressedMessages(env, auth.tokenId, sessionId, messages);
+    const ctxMultiplier = getPlanConfig(auth.plan).context_multiplier || 1.0;
+    if (sessionId) compressedMessages = await buildCompressedMessages(env, auth.tokenId, sessionId, messages, ctxMultiplier);
   } catch(e) { console.error('compression failed:', e.message); }
 
   const aiMemo = profile?.ai_memo || null;
