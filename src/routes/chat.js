@@ -80,8 +80,20 @@ export async function handleChatStream(request, env, ctx) {
 
   if (!free_no_count) {
     const chatUsage = await checkDailyChatUsage(env, auth.userId, auth.plan);
-    if (!chatUsage.ok) return jsonRes({ error: '本日のチャット上限に達しました', remaining: 0 }, 429);
     await incrementDailyChatUsage(env, auth.userId);
+    // Free日次上限超過→nanoフォールバック（#5）
+    if (!chatUsage.ok && auth.plan === 'free') {
+      const nanoRes = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
+        body: JSON.stringify({ model: 'gpt-5-nano', max_completion_tokens: Math.min(maxTokens, 600), messages: [{ role: 'system', content: body.system || '' }, ...messages] }),
+      });
+      const nanoData = await nanoRes.json();
+      const text = nanoData.choices?.[0]?.message?.content || '';
+      const sseBody = `data: {"type":"content_block_delta","delta":{"text":${JSON.stringify(text)}}}\n\ndata: [DONE]\n\n`;
+      return new Response(sseBody, { status: 200, headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Model-Used': 'gpt-5-nano', 'X-Model-Fallback': 'true', 'X-Reset-Hours': '12' } });
+    }
+    if (!chatUsage.ok) return jsonRes({ error: '本日のチャット上限に達しました', remaining: 0 }, 429);
 
     // ═══ ターン記録（Step 4） ═══
     if (auth.plan !== 'free') {
