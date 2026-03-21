@@ -402,6 +402,8 @@ async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, 
     if (isFallback) showNanoFallbackBanner(resetHours);
     // モデル名をヘッダーから取得（フッター表示用）
     window._lastModelUsed = res.headers.get('X-Model-Used') || null;
+    // #7: バブル固有のモデル名をdata属性に保持
+    if (window._currentStreamBubble) window._currentStreamBubble.dataset.model = window._lastModelUsed || '';
     // 降格バッジ（Step 7）
     const isDegraded = res.headers.get('X-Model-Degraded') === '1';
     const degradeReason = res.headers.get('X-Degrade-Reason') || '';
@@ -471,6 +473,7 @@ function mkStreamBubble(innerEl, scrollEl, extraBubStyle) {
   body.appendChild(bub); body.appendChild(t);
   wrap.appendChild(av); wrap.appendChild(body);
   innerEl.appendChild(wrap);
+  window._currentStreamBubble = bub; // #7: バブル固有モデル名用
   if (scrollEl) scrollEl.scrollTop = 99999;
   // テキストノード追記用
   bub._textNode = null;
@@ -521,7 +524,7 @@ function formatModelName(model) {
 // ストリーミング完了時 — バッファ残りを一括表示してMarkdown変換
 function streamFinalize(bub, fullText, modelLabel){
   // X-Model-Usedヘッダーからモデル名を取得（ルーティングで動的に変わる）
-  const actualModel = window._lastModelUsed || modelLabel;
+  const actualModel = bub.dataset?.model || window._lastModelUsed || modelLabel;
   const displayName = formatModelName(actualModel);
   modelLabel = displayName;
   bub._streamDone = true;

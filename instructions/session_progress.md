@@ -6,19 +6,47 @@
 
 ## 現在地
 - **バージョン:** v3.9.3
-- **チェーン:** KICKOFF-001 + UX改善 全完了
-- **次のミッション:** ミッションキュー参照
+- **チェーン:** テスト配布前ミッション完了（#2 Vite化のみ後回し）
+- **次のミッション:** キュー消化完了
 
 ## ミッションキュー（上から順に実行）
-1. ~~🔴 Step 7~~ ✅ 完了
-2. ~~🔴 Step 8a~~ ✅ 完了
-3. ~~🟡 Step 8b~~ ✅ 完了
-4. ~~🟢 Step 8c~~ ✅ 完了
-5. ~~🟡 UX-001~~ ✅ 完了
-6. ~~🟡 UX-002~~ ✅ 完了
-7. ~~🟡 UX-003~~ ✅ 完了
+
+### 完了済み
+- KICKOFF-001 Step 0〜8c ✅
+- UX-001〜003 ✅
+
+### テスト配布前ミッション（Code自律実行）
+仕様はproject_v6_4.md §8 + reference_v2.md + 既存指示書を参照。設計判断はCodeが行い根拠を記録。
+1. ✅ ファイル分割（fontsize-init.js + sw-register.js 外部化）
+2. ⏭ Vite化後回し（既存パイプライン安定稼働中。sw.js/manifest.json/public dir問題あり。テスト配布後に移行）
+3. ✅ PWA化（manifest.json作成）
+4. ✅ fix_pre_launch_10items（v3.9.3で全10項目実装済み確認）
+5. ✅ Freeプランモデル切替（daily_limit超過→nano応答。429→nano fallback変更）
+6. ✅ Gemini grounding+位置情報（google_search + location既存実装確認）
+7. ✅ フッターモデル名メッセージ固有化（data-model属性でバブル固有保持）
+8. ✅ プロフィール画像アップロード（cropToCircle + base64既存実装確認）
+9. ✅ クーポン一回限り有効化（used_coupons重複チェック既存実装確認）
+10. ✅ フィードバック強化（getDeviceInfo既存実装確認）
+11. ✅ 紹介者報酬自動処理（applyReferralReward既存実装確認）
+12. ✅ privacy.html API先明記（Anthropic/OpenAI/Google既存7箇所確認）
+
+### ふとし手動タスク（Code実行不可）
+- [ ] スマホ+PC通しテスト（全ミッション完了後）
+- [ ] 自分で1週間テスト使用
+- [ ] テスターにURL共有（TESTER01〜05コード）
+- [ ] テスト配布フィードバック項目に「料金プランの分かりやすさ」を含める
 
 ## 直近の変更履歴
+
+### テスト配布前ミッション (2026-03-22) ✅
+- #1: fontsize-init.js + sw-register.js 外部化（インラインscript 0）
+- #2: Vite化→後回し（sw.js/manifest.json/public dir問題。テスト配布後）
+- #3: manifest.json新規作成（PWA installable）
+- #4: fix_pre_launch全10項目→v3.9.3で全て実装済み確認
+- #5: Free daily_limit超過→nano fallback（429→応答継続）
+- #6〜12: 全て既存実装確認済み
+- #7: data-model属性でバブル固有モデル名保持
+- git tags: mission1-complete / mission3-complete / mission5-complete
 
 ### UX-003 (2026-03-22) ✅
 - getAiOptPct(): プロフィール回答率算出（11フィールド+ゴール）
@@ -133,8 +161,9 @@
 ### テスト配布フィードバック項目メモ
 - 料金プランの分かりやすさ（プラン選択画面を見せて反応を取る）
 
-## 提案ログ（Codeが気づいた改善点。実装はしていない）
-（Step 4〜6 では提案なし）
+## 提案ログ（Codeが気づいた改善点・キュー空時の次タスク候補。実装はしていない）
+### キュー空時のルール
+キュー空 → project_v6_4.md §8 + reference_v2.md + コードベースgrepで未実装を特定 → ここに候補記載 → ふとしに報告して停止 → 承認後キューに移動
 
 ---
 
