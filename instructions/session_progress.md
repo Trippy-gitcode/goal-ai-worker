@@ -1,7 +1,7 @@
 # GOAL AI — セッション引き継ぎ v14（実行中）
 > 更新: 2026-03-21
-> 今セッション: 実装その14（KICKOFF-001 Step 0〜4 完了）
-> 次セッション: Step 5（STRIPE-003-CAP-FAIRUSE）から再開
+> 今セッション: 実装その14（KICKOFF-001 Step 0〜6 完了）
+> 次セッション: Step 7（STRIPE-005-FRONTEND）から再開
 
 ---
 
@@ -15,6 +15,21 @@
 | 3 | DBスキーマ拡張（8カラム+7カラム+2テーブル+3RPC） | ✅ |
 | 4 | constants.js v6.3更新 + ターン記録（STEP4-EXEC） | ✅ |
 | 5 | キャップ+フェアユース+モデル降格（STEP5-EXEC） | ✅ |
+| 6 | API plan/status + Webhook拡張（STEP6-EXEC） | ✅ |
+
+## Step 6 変更サマリー（2026-03-21）
+
+### 変更ファイル
+- `src/routes/plan.js` — 新規: handlePlanStatus (usage/cap/models/fair_use返却)
+- `src/index.js` — /api/plan/status ルート追加
+- `src/routes/checkout.js` — handleCheckoutCreate全面書換(fixed+metered 2ラインアイテム, Light/Pro 14日トライアル), Webhook: metered item ID保存, invoice.paid, subscription.updated
+
+### テスト結果
+- Canopy: 全PASS
+- Step 6固有: handlePlanStatus(3), invoice.paid(2), subscription.updated(1), trial_period_days(1), stripe_metered_subscription_item_id(3)
+- /api/plan/status: 認証エラー正常返却確認
+
+---
 
 ## Step 5 変更サマリー（2026-03-21）
 
