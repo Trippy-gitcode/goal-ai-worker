@@ -1271,7 +1271,9 @@ function renderHubTasks(){
       <div style="font-size:9px;font-family:var(--fm);padding:1px 7px;border-radius:4px;background:${phase.phaseColor}22;color:${phase.phaseColor}">
         ${phase.tasks.filter(t=>t.status==='done').length}/${phase.tasks.length}</div>`;
     ph.appendChild(phHd);
-    phase.tasks.forEach(task => {
+    // 完了タスクを下部に自動移動（#05b）
+    const sorted = [...phase.tasks].sort((a,b) => (a.status==='done'?1:0) - (b.status==='done'?1:0));
+    sorted.forEach(task => {
       const row = document.createElement('div');
       const statusColors = {done:'var(--green)',current:'var(--amber)',todo:'var(--muted2)',blocked:'var(--red)'};
       const statusLabels = {done:'✅ 完了',current:'🔵 進行中',todo:'⬜ 未着手',blocked:'🔴 ブロック'};
@@ -1282,7 +1284,7 @@ function renderHubTasks(){
         <div style="width:7px;height:7px;border-radius:50%;background:${statusColors[task.status]||'var(--muted2)'};flex-shrink:0;"></div>
         <div style="flex:1;font-size:12px;color:var(--cream);${task.status==='done'?'text-decoration:line-through;opacity:.5':''}">${escapeHtml(task.title)}</div>
         <div style="font-size:9px;font-family:var(--fm);color:${statusColors[task.status]||'var(--muted2)'}">${statusLabels[task.status]||''}</div>
-        <div style="font-size:9px;color:var(--muted2);font-family:var(--fm)">${task.due||''}</div>`;
+        <div style="font-size:9px;color:var(--muted2);font-family:var(--fm)">${task.due||'—'}</div>`;
       ph.appendChild(row);
     });
     inner.appendChild(ph);
@@ -1309,7 +1311,7 @@ function renderHubAnalytics(){
       </div>
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center;">
         <div style="font-family:var(--fd);font-size:28px;font-weight:300;color:var(--amber)">${goal.target}%</div>
-        <div style="font-size:9px;color:var(--muted2);margin-top:3px;letter-spacing:.1em;font-family:var(--fm)">今日の目安</div>
+        <div style="font-size:9px;color:var(--muted2);margin-top:3px;letter-spacing:.1em;font-family:var(--fm)">今日の予定</div>
       </div>
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center;">
         <div style="font-family:var(--fd);font-size:28px;font-weight:300;color:${daysLeft<30?'var(--red)':'var(--cream)'}">${daysLeft}</div>
@@ -1495,7 +1497,7 @@ function renderSidebarGoals(){
       </div>
       <div class="gc-progress">
         <div class="gc-prog-bar">
-          <div class="gc-prog-target" style="left:${g.target}%;" title="今日の目安 ${g.target}%"></div>
+          <div class="gc-prog-target" style="left:${g.target}%;" title="今日の予定 ${g.target}%"></div>
           <div class="gc-prog-actual" style="width:${g.actual}%;background:${isOk?'var(--green)':'var(--red)'}"></div>
         </div>
         <div class="gc-prog-labels">

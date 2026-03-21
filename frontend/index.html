@@ -232,7 +232,7 @@
 
     <!-- Progress comparison widget -->
     <div class="prog-compare" id="prog-compare-widget">
-      <div class="prog-compare-title">進捗 — 今日の目安 vs 実績</div>
+      <div class="prog-compare-title">進捗 — 今日の予定 vs 実績</div>
       <div class="prog-compare-bars">
         <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:var(--muted3);border-radius:3px;"></div>
         <div style="position:absolute;top:0;left:0;height:100%;width:0%;background:var(--muted2);border-radius:3px;transition:width .6s;" id="prog-actual-bar"></div>
@@ -241,7 +241,7 @@
       <div class="prog-compare-labels">
         <span class="prog-lbl"><span class="prog-dot" style="background:var(--muted2)"></span><span style="color:var(--muted2)" id="prog-actual-label">実績 0%</span></span>
         <span class="prog-status-chip" style="background:var(--bg3);color:var(--muted2)" id="prog-status-chip">—</span>
-        <span class="prog-lbl"><span class="prog-dot" style="background:var(--amber)"></span><span style="color:var(--amber)" id="prog-target-label">目安 0%</span></span>
+        <span class="prog-lbl"><span class="prog-dot" style="background:var(--amber)"></span><span style="color:var(--amber)" id="prog-target-label">予定 0%</span></span>
       </div>
     </div>
 
@@ -994,7 +994,7 @@
             <div class="stat-tile-bar"><div class="stat-tile-fill" id="at-tasks-bar" style="width:0%;background:var(--muted2)"></div></div>
           </div>
           <div class="stat-tile">
-            <div class="stat-tile-lbl">週平均作業時間</div>
+            <div class="stat-tile-lbl">会話件数</div>
             <div class="stat-tile-val" id="at-hours">—<span style="font-size:16px;color:var(--muted)"></span></div>
             <div class="stat-tile-sub" style="color:var(--muted)" id="at-hours-sub">—</div>
             <div class="stat-tile-bar"><div class="stat-tile-fill" id="at-hours-bar" style="width:0%;background:var(--muted2)"></div></div>
@@ -1004,9 +1004,9 @@
         <!-- Progress timeline -->
         <div class="chart-box">
           <div class="chart-hd">
-            <div class="chart-title">月別進捗：目安 vs 実績</div>
+            <div class="chart-title">月別進捗：予定 vs 実績</div>
             <div style="display:flex;gap:10px;font-size:10px;">
-              <span style="display:flex;align-items:center;gap:4px;color:var(--muted)"><span style="width:10px;height:3px;background:rgba(228,184,106,.5);display:inline-block;border-radius:1px"></span>目安</span>
+              <span style="display:flex;align-items:center;gap:4px;color:var(--muted)"><span style="width:10px;height:3px;background:rgba(228,184,106,.5);display:inline-block;border-radius:1px"></span>予定</span>
               <span style="display:flex;align-items:center;gap:4px;color:var(--muted)"><span style="width:10px;height:10px;background:var(--green);display:inline-block;border-radius:2px"></span>実績（順調）</span>
               <span style="display:flex;align-items:center;gap:4px;color:var(--muted)"><span style="width:10px;height:10px;background:var(--red);display:inline-block;border-radius:2px"></span>実績（遅延）</span>
             </div>
@@ -1020,7 +1020,7 @@
         <!-- Failure reason history -->
         <div class="chart-box">
           <div class="chart-hd">
-            <div class="chart-title">できなかった理由の履歴</div>
+            <div class="chart-title">停滞ポイント</div>
             <div style="font-size:10px;color:var(--muted)">根本原因分析</div>
           </div>
           <div class="fail-timeline" id="fail-timeline"></div>
@@ -1317,18 +1317,51 @@
   </div>
 </div>
 
-<!-- ═══ ONBOARDING POPUP ═══ -->
-<div id="onboarding-modal" style="display:none;position:fixed;inset:0;z-index:2100;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:center;justify-content:center;">
-  <div style="width:min(420px,90vw);background:var(--bg2);border:1px solid rgba(157,120,216,.3);border-radius:16px;overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,.5);">
-    <div style="padding:28px 28px 0;text-align:center;">
-      <div style="font-size:36px;margin-bottom:12px;">🪞</div>
-      <div style="font-size:16px;font-weight:600;color:var(--cream);margin-bottom:8px;">まずはあなたのことを教えてください</div>
-      <div style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:20px;">AIがあなたに合ったコーチングをするために<br>「私をデザイン」セッション（約10分）を行います。<br>回答はプロフィールに自動反映されます。</div>
+<!-- ═══ ONBOARDING 3-STEP (#07) ═══ -->
+<div id="onboarding-modal" style="display:none;position:fixed;inset:0;z-index:2100;background:var(--bg);flex-direction:column;overflow:hidden;">
+  <div id="ob-slides" style="flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;">
+    <!-- Step 1 -->
+    <div class="ob-slide" style="min-width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;">
+      <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round" style="margin-bottom:24px;opacity:.9;">
+        <circle cx="20" cy="40" r="10"/><circle cx="40" cy="30" r="10"/><circle cx="60" cy="40" r="10"/>
+        <path d="M10 55 Q40 70 70 55" stroke-dasharray="4 3"/>
+      </svg>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <span style="padding:3px 10px;background:rgba(224,112,112,.15);border:1px solid rgba(224,112,112,.3);border-radius:12px;font-size:10px;color:#e07070;">Gemini</span>
+        <span style="padding:3px 10px;background:rgba(91,141,239,.15);border:1px solid rgba(91,141,239,.3);border-radius:12px;font-size:10px;color:#5b8def;">ChatGPT</span>
+        <span style="padding:3px 10px;background:rgba(232,145,58,.15);border:1px solid rgba(232,145,58,.3);border-radius:12px;font-size:10px;color:#e8913a;">Claude</span>
+      </div>
+      <div style="font-size:20px;font-weight:600;color:var(--cream);margin-bottom:8px;">AIに何でも聞ける</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">3つのAIがチームであなたを支えます</div>
     </div>
-    <div style="padding:0 28px 24px;display:flex;flex-direction:column;gap:10px;">
-      <button onclick="closeOnboarding();openMyselfHub();startKnowSession();" style="width:100%;padding:13px;background:rgba(157,120,216,.85);border:none;border-radius:10px;color:white;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--ff);transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">私をデザインする</button>
-      <button onclick="closeOnboarding()" style="width:100%;padding:11px;background:transparent;border:1px solid var(--border2);border-radius:10px;color:var(--muted);font-size:12.5px;cursor:pointer;font-family:var(--ff);transition:all .15s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--muted)'">あとで（Skip）</button>
+    <!-- Step 2 -->
+    <div class="ob-slide" style="min-width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;">
+      <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round" style="margin-bottom:24px;opacity:.9;">
+        <circle cx="28" cy="35" r="8"/><circle cx="52" cy="35" r="8"/>
+        <path d="M20 55 Q40 65 60 55"/><path d="M15 60 L65 60" stroke-dasharray="6 4"/>
+      </svg>
+      <div style="font-size:20px;font-weight:600;color:var(--cream);margin-bottom:8px;">一緒にゴールまで並走</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">会話からタスクを自動作成<br>ゴールまでナビゲート<br>AIが活動を分析</div>
     </div>
+    <!-- Step 3 -->
+    <div class="ob-slide" style="min-width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;">
+      <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round" style="margin-bottom:24px;opacity:.9;">
+        <circle cx="28" cy="38" r="9"/><circle cx="52" cy="38" r="9"/>
+        <path d="M37 38 L43 38"/><path d="M28 50 Q40 60 52 50"/>
+      </svg>
+      <div style="font-size:20px;font-weight:600;color:var(--cream);margin-bottom:8px;">あなたを理解して進化</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">会話を重ねて学ぶ<br>人生を分析＆デザイン</div>
+    </div>
+  </div>
+  <!-- Dots + CTA -->
+  <div style="padding:0 32px calc(44px + env(safe-area-inset-bottom));text-align:center;">
+    <div id="ob-dots" style="display:flex;justify-content:center;gap:8px;margin-bottom:20px;">
+      <div class="ob-dot active" style="width:8px;height:8px;border-radius:50%;background:var(--amber);transition:all .2s;"></div>
+      <div class="ob-dot" style="width:8px;height:8px;border-radius:50%;background:var(--muted3);transition:all .2s;"></div>
+      <div class="ob-dot" style="width:8px;height:8px;border-radius:50%;background:var(--muted3);transition:all .2s;"></div>
+    </div>
+    <button id="ob-cta" onclick="obNext()" style="width:100%;padding:14px;background:var(--amber);border:none;border-radius:12px;color:var(--bg);font-size:15px;font-weight:600;cursor:pointer;font-family:var(--ff);margin-bottom:12px;">次へ</button>
+    <button onclick="closeOnboarding()" style="width:100%;padding:10px;background:transparent;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--ff);">スキップして始める</button>
   </div>
 </div>
 
@@ -1526,7 +1559,8 @@
       <!-- Account -->
       <div>
         <div style="font-size:9px;color:var(--muted2);font-family:var(--fm);letter-spacing:.15em;margin-bottom:10px;">アカウント</div>
-        <button onclick="openPlanModal();closeSettingsPanel();" style="width:100%;padding:10px 14px;background:var(--amber-g);border:1px solid rgba(228,184,106,.3);border-radius:8px;font-size:12px;color:var(--amber);cursor:pointer;text-align:left;"><svg width="14" height="14" class="svg-ic"><use href="#ic-plan"/></svg> プラン管理 / サブスクリプション</button>
+        <button onclick="openPlanModal();closeSettingsPanel();" style="width:100%;padding:10px 14px;background:var(--amber-g);border:1px solid rgba(228,184,106,.3);border-radius:8px;font-size:12px;color:var(--amber);cursor:pointer;text-align:left;margin-bottom:8px;"><svg width="14" height="14" class="svg-ic"><use href="#ic-plan"/></svg> プラン管理 / サブスクリプション</button>
+        <button onclick="confirmDeleteAccount()" style="width:100%;padding:10px 14px;background:var(--red-d);border:1px solid rgba(224,104,104,.3);border-radius:8px;font-size:12px;color:var(--red);cursor:pointer;text-align:left;"><svg width="14" height="14" class="svg-ic"><use href="#ic-trash"/></svg> アカウントを削除</button>
       </div>
 
     </div>

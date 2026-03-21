@@ -65,5 +65,15 @@ for pattern in "M5 24l4-11" "getGptSVG" "_saveScroll" "stopHomeStream" "_setHome
   if [ "$COUNT" -eq 0 ]; then echo "FAIL: $pattern not found in frontend"; FAIL=1; else echo "OK: $pattern ($COUNT refs)"; fi
 done
 
+# 10. Step 8b: 各画面UI変更
+echo "--- Screen UI changes (8b) ---"
+for pattern in "ob-slides" "obNext" "confirmDeleteAccount" "3人寄れば" "停滞ポイント"; do
+  COUNT=$(grep -rc "$pattern" frontend/ 2>/dev/null | awk -F: '{s+=$2}END{print s}')
+  if [ "$COUNT" -eq 0 ]; then echo "FAIL: $pattern not found in frontend"; FAIL=1; else echo "OK: $pattern ($COUNT refs)"; fi
+done
+# 旧文言が残っていないか
+OLD_TEXT=$(grep -c "週平均作業時間\|できなかった理由の履歴" frontend/index.html 2>/dev/null)
+if [ "$OLD_TEXT" -gt 0 ]; then echo "FAIL: old text still in index.html"; FAIL=1; else echo "OK: old text removed"; fi
+
 echo "=== CANOPY $([ $FAIL -eq 0 ] && echo 'PASS' || echo 'FAIL') ==="
 exit $FAIL

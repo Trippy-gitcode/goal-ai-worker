@@ -1,0 +1,36 @@
+=== Step 8b Preflight ===
+--- ゴールハブタブ ---
+1171:  switchHubTab(hubTab === 'chat' ? 'chat' : hubTab);
+1193:function switchHubTab(tab){
+1196:  document.querySelectorAll('.hub-pane').forEach(p => p.classList.remove('active'));
+1198:  document.getElementById('hub-pane-' + tab).classList.add('active');
+2197:  renderGantt, openGoalHub, switchHubTab, renderHubChat,
+--- デザインセッション ---
+413:  switchMyselfTab(myselfTab);
+417:  switchMyselfTab('profile');
+420:function switchMyselfTab(tab){
+423:  document.querySelectorAll('[id^="myself-pane-"]').forEach(p => p.classList.remove('active'));
+425:  document.getElementById('myself-pane-' + tab).classList.add('active');
+431:function startKnowSession(){
+679:  switchMyselfTab('profile');
+1206:  const container = document.querySelector('#myself-pane-profile') || document.querySelector('.profile-page');
+1230:  openMyselfHub, openProfileDirect, switchMyselfTab,
+1231:  startKnowSession, updateKnowChips, appendKnowMsg, sendKnowMsg,
+--- オンボーディング ---
+--- 分析ダッシュボード ---
+--- フィードバック ---
+1773:function openFeedbackChat(){
+1779:  const chat = document.getElementById('feedback-chat');
+1788:  const chat = document.getElementById('feedback-chat');
+1827:  const chat = document.getElementById('feedback-chat');
+1849:async function sendFeedbackMsg(){
+2188:    containerId: 'feedback-chat',
+2348:  refreshQuote, FB_SYS, openFeedbackChat, closeFeedback, appendFbMsg,
+2349:  appendFbButtons, sendFeedbackMsg, extractThemes, continueFeedback,
+--- 設定パネル ---
+992:function openSettingsPanel(){
+993:  const p = document.getElementById('settings-panel');
+998:function closeSettingsPanel(){
+999:  document.getElementById('settings-panel').style.display = 'none';
+1652:  applyFontSize, applyLanguage, openSettingsPanel, closeSettingsPanel,
+=== Preflight DONE ===

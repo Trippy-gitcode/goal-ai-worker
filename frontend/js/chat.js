@@ -1781,6 +1781,17 @@ function openFeedbackChat(){
   appendFbMsg('ai', '使ってみてどうでしたか？');
   fbHistory.push({role:'assistant', content:'使ってみてどうでしたか？'});
   document.getElementById('feedback-input-area').style.display = '';
+  // クイック返信ピル（#08b）
+  const pills = document.createElement('div');
+  pills.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;';
+  ['使いやすかった','改善してほしい','新機能リクエスト','バグ報告'].forEach(label => {
+    const btn = document.createElement('button');
+    btn.style.cssText = 'padding:6px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;color:var(--cream);font-size:11px;cursor:pointer;font-family:var(--ff);transition:all .15s;';
+    btn.textContent = label;
+    btn.onclick = () => { document.getElementById('feedback-msg-in').value = label; sendFeedbackMsg(); pills.remove(); };
+    pills.appendChild(btn);
+  });
+  chat.appendChild(pills);
 }
 function closeFeedback(){ document.getElementById('feedback-modal').style.display = 'none'; }
 

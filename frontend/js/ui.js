@@ -431,12 +431,12 @@ function showDeepConfirm(containerId, scrollId, onYes, onNo) {
   bubble.innerHTML = `
     <div class="deep-confirm-title">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      ディープ分析を実行しますか？
+      3人寄れば文殊の知恵
     </div>
     ${usageBadge}
     <div class="deep-confirm-desc">
-      Gemini（リサーチ）→ GPT（アイデア）→ Claude（戦略）→ デュアルレビュー<br>
-      の順で自動実行されます。<span style="color:var(--amber)">所要時間：30〜60秒</span>
+      3つのAIが連携して深く分析します。<br>
+      Gemini（リサーチ）→ GPT（アイデア）→ Claude（戦略）<span style="color:var(--amber)">　約30〜60秒</span>
     </div>
     <div style="font-size:9.5px;color:var(--muted2);margin-bottom:5px;">出力形式を選択：</div>
     <div class="deep-format-row" id="deep-fmt-row">
@@ -448,7 +448,7 @@ function showDeepConfirm(containerId, scrollId, onYes, onNo) {
     </div>
     <div class="deep-confirm-btns" style="margin-top:10px;">
       <button class="deep-confirm-btn deep-btn-yes" onclick="this.closest('.deep-confirm-bubble').remove();__deepYes()">
-        ⚡ ディープ分析で実行（残り${remaining}回）
+        ⚡ ヒアリング開始（残り${remaining}回）
       </button>
       <button class="deep-confirm-btn deep-btn-no" onclick="this.closest('.deep-confirm-bubble').remove();__deepNo()">
         通常の返答でOK
@@ -997,6 +997,13 @@ function openSettingsPanel(){
 }
 function closeSettingsPanel(){
   document.getElementById('settings-panel').style.display = 'none';
+}
+
+// ════════ ACCOUNT DELETE (2-step confirmation, #08c) ════════
+function confirmDeleteAccount(){
+  if(!confirm('本当にアカウントを削除しますか？\nすべてのゴール・タスク・チャット履歴が完全に消去されます。')) return;
+  if(!confirm('この操作は元に戻せません。\n本当に全データを完全に削除してよろしいですか？')) return;
+  toast('アカウント削除は現在準備中です');
 }
 
 // ════════ VERSION CHECK ════════

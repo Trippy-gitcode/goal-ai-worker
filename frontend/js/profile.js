@@ -400,12 +400,48 @@ let knowState = {
 
 let myselfTab = 'know';
 
-function closeOnboarding(){ document.getElementById('onboarding-modal').style.display='none'; }
+function closeOnboarding(){
+  document.getElementById('onboarding-modal').style.display='none';
+  localStorage.setItem('ob_done','1');
+}
 function checkOnboarding(){
-  // Show onboarding if know session hasn't been completed
+  if(localStorage.getItem('ob_done')) return;
   if(!knowState.done && !USER_PROFILE.knowSummary){
     document.getElementById('onboarding-modal').style.display='flex';
+    _initObScroll();
   }
+}
+let _obStep = 0;
+function obNext(){
+  const slides = document.getElementById('ob-slides');
+  if(!slides) return;
+  _obStep++;
+  if(_obStep >= 3){
+    closeOnboarding(); openMyselfHub(); startKnowSession(); return;
+  }
+  slides.scrollTo({ left: slides.clientWidth * _obStep, behavior: 'smooth' });
+  _updateObDots();
+  if(_obStep === 2) document.getElementById('ob-cta').textContent = '今すぐ分析＆デザイン';
+}
+function _updateObDots(){
+  document.querySelectorAll('#ob-dots .ob-dot').forEach((d,i) => {
+    d.style.background = i === _obStep ? 'var(--amber)' : 'var(--muted3)';
+    d.style.width = i === _obStep ? '20px' : '8px';
+    d.style.borderRadius = i === _obStep ? '4px' : '50%';
+  });
+}
+function _initObScroll(){
+  _obStep = 0; _updateObDots();
+  const cta = document.getElementById('ob-cta');
+  if(cta) cta.textContent = '次へ';
+  const slides = document.getElementById('ob-slides');
+  if(slides){ slides.scrollLeft = 0; slides.addEventListener('scroll', () => {
+    const idx = Math.round(slides.scrollLeft / slides.clientWidth);
+    if(idx !== _obStep){ _obStep = idx; _updateObDots();
+      if(idx === 2 && cta) cta.textContent = '今すぐ分析＆デザイン';
+      else if(cta) cta.textContent = '次へ';
+    }
+  }); }
 }
 
 function openMyselfHub(){
