@@ -7,7 +7,7 @@
 
 ## 現在地
 - **バージョン:** v3.9.3
-- **チェーン:** 開発体制改善ミッション
+- **チェーン:** テスト配布前 追加3件 完了
 - **次のミッション:** キュー空
 
 ## ミッションキュー（上から順に実行）
@@ -25,6 +25,11 @@
 5. ✅ Pages プレビュー → Dashboard設定のみ (ドキュメント化)
 6. ✅ 提案ログテンプレート → 既存
 
+### テスト配布前 追加ミッション（ふとし承認済み 2026-03-22）
+A. ✅ アカウント削除（POST /api/account/delete + 2段階confirm + Supabase全テーブル削除 + KVクリア + localStorage/cookieクリア）
+B. ✅ Ultraコンテキスト2倍（buildCompressedMessagesにcontextMultiplier引数、Ultra=20メッセージ窓）
+C. ✅ ET週間上限トラッキング（KVベース、checkETLimit/incrementETUsage、/api/plan/statusにet情報追加）
+
 ### ふとし手動タスク（Code実行不可）
 - [ ] スマホ+PC通しテスト
 - [ ] 自分で1週間テスト使用
@@ -34,6 +39,12 @@
 - [ ] ローンチ時「ソロ開発者がAIと3週間で作ったSaaS」ストーリー活用
 
 ## 直近の変更履歴（直近3件のみ。過去分はinstructions/results/に保存）
+
+### テスト配布前 追加3件 (2026-03-22) ✅
+- A: POST /api/account/delete + Supabase CASCADE + KV/localStorage全削除
+- B: Ultra context_multiplier 2.0 → buildCompressedMessages 20メッセージ窓
+- C: ET KV週間カウンタ + /api/plan/status et情報
+- git tags: v3.9.3-account-delete / v3.9.3-ultra-et
 
 ### 開発体制改善ミッション (2026-03-22) ✅
 - #1: デザイン検証修正 (CRN-02 gray, CRN-03 入力統一4画面, GPT電球アイコン)
