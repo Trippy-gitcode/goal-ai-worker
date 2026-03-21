@@ -1689,6 +1689,51 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ════════ UX-002: コーチマーク ════════
+const COACH_STEPS = [
+  { target: '.mode-row-f', text: '会話のスタイルを切り替えられます', pos: 'bottom' },
+  { target: '#sb-task-list', text: '会話から生まれたタスクがここに表示されます', pos: 'bottom' },
+  { target: '#hamburger-btn', text: 'ゴール管理や自己分析はここから', pos: 'bottom' },
+];
+let _coachStep = 0;
+
+function showCoachMarks(){
+  if(localStorage.getItem('coach_done')) return;
+  _coachStep = 0;
+  _renderCoachStep();
+}
+
+function _renderCoachStep(){
+  // 既存オーバーレイ削除
+  document.getElementById('coach-overlay')?.remove();
+  if(_coachStep >= COACH_STEPS.length){
+    localStorage.setItem('coach_done','1');
+    return;
+  }
+  const step = COACH_STEPS[_coachStep];
+  const el = document.querySelector(step.target);
+  if(!el){ _coachStep++; _renderCoachStep(); return; }
+
+  const rect = el.getBoundingClientRect();
+  const overlay = document.createElement('div');
+  overlay.id = 'coach-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.6);';
+  overlay.onclick = () => { _coachStep++; _renderCoachStep(); };
+
+  // スポットライト（切り抜き）
+  const spot = document.createElement('div');
+  spot.style.cssText = `position:absolute;top:${rect.top-4}px;left:${rect.left-4}px;width:${rect.width+8}px;height:${rect.height+8}px;border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.6);background:transparent;z-index:1;`;
+  overlay.appendChild(spot);
+
+  // 吹き出し
+  const tip = document.createElement('div');
+  tip.style.cssText = `position:absolute;left:50%;transform:translateX(-50%);top:${rect.bottom+12}px;background:var(--amber);color:var(--bg);padding:10px 18px;border-radius:10px;font-size:12px;font-family:var(--ff);max-width:280px;text-align:center;z-index:2;box-shadow:0 4px 16px rgba(0,0,0,.3);`;
+  tip.innerHTML = `${step.text}<div style="font-size:9px;margin-top:6px;opacity:.7;">タップで次へ (${_coachStep+1}/${COACH_STEPS.length})</div>`;
+  overlay.appendChild(tip);
+
+  document.body.appendChild(overlay);
+}
+
 // ═══ ES Module: expose to window ═══
 Object.defineProperty(window, 'kabeuchiMode', {
   get() { return kabeuchiMode; }, set(v) { kabeuchiMode = v; },

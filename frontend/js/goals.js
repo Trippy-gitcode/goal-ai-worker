@@ -1603,6 +1603,8 @@ async function init(){
   showHomeScreen();
   // Show onboarding popup if "私をデザイン" not done
   setTimeout(()=> checkOnboarding(), 500);
+  // UX-002: コーチマーク（オンボーディング完了後のみ）
+  setTimeout(()=> { if(localStorage.getItem('ob_done') && typeof showCoachMarks === 'function') showCoachMarks(); }, 1000);
   setTimeout(()=> renderAIUnderstanding(), 600);
 
   // Tester auto-version check
