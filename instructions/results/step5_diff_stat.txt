@@ -1,0 +1,7 @@
+ CLAUDE.md                 |   3 +
+ package-lock.json         | 251 ++++++++++++++++++++++++++++------------------
+ package.json              |   1 +
+ src/routes/chat.js        | 132 ++++++++++++++++++++----
+ src/services/ai/gemini.js |   4 +-
+ src/services/ai/gpt.js    |   8 +-
+ 6 files changed, 275 insertions(+), 124 deletions(-)

@@ -1,0 +1,21 @@
+=== Step 5 Preflight ===
+--- Step 4 artifacts ---
+6
+--- chat_messages user_id column ---
+69:        user_id: users[0].id, goal_id: goalId || null,
+85:      body: { user_id: users[0].id, month, deep_count: deepCount, chat_count: chatCount },
+86:      filters: 'on_conflict=user_id,month',
+100:        user_id: users[0].id,
+--- getModel overrideModels ---
+// ═══════ getModel（Step 5 準備: overrideModels 引数追加） ═══════
+export function getModel(plan, provider, overrideModels) {
+  if (overrideModels) return overrideModels[provider] || PLAN_MODELS._default[provider];
+--- getModel in ai handlers ---
+src/services/ai/gpt.js:1:import { getModel } from '../../utils/constants.js';
+src/services/ai/gpt.js:4:  const model = getModel(auth.plan, 'openai');
+src/services/ai/gpt.js:20:  const model = getModel(auth.plan, 'openai');
+src/services/ai/gemini.js:1:import { getModel } from '../../utils/constants.js';
+src/services/ai/gemini.js:4:  const model = getModel(auth.plan, 'gemini');
+--- idx check ---
+CHECK: session_progress.md の Step 3 でインデックス idx_chat_messages_user_created 作成済みか確認
+=== Preflight DONE ===

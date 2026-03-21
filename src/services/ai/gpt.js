@@ -1,7 +1,7 @@
 import { getModel } from '../../utils/constants.js';
 
-export async function handleGPTChat(env, system, messages, auth, maxTokens) {
-  const model = getModel(auth.plan, 'openai');
+export async function handleGPTChat(env, system, messages, auth, maxTokens, overrideModels) {
+  const model = getModel(auth.plan, 'openai', overrideModels);
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -16,8 +16,8 @@ export async function handleGPTChat(env, system, messages, auth, maxTokens) {
   } catch (e) { console.error('handleGPTChat failed:', e.message); return null; }
 }
 
-export async function handleGPTSimpleChat(env, system, messages, auth) {
-  const model = getModel(auth.plan, 'openai');
+export async function handleGPTSimpleChat(env, system, messages, auth, overrideModels) {
+  const model = getModel(auth.plan, 'openai', overrideModels);
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

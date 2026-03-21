@@ -1,0 +1,16 @@
+=== Step 5 Grep Check ===
+getDegradedModels|effectiveModels: 10
+checkFairUseV2|fair_use_5h|fair_use_weekly: 4
+getWeekStartUTC: 2
+X-Model-Degraded|X-Degrade-Reason: 2
+overrideModels in gpt.js: 4
+overrideModels in gemini.js: 2
+recordTurnUsage|maybeSendUsageRecord: 5
+PLAN_CONFIG|getPlanConfig: 7
+handleChatStream|buildServerSystemPrompt: 5
+quickRoute|callRoutingAPI: 3
+MEMO|RAG|CACHE_ENABLED: 6
+--- old checkFairUse should be removed from chat.js ---
+old checkFairUse (should be 0): 0
+0
+=== Grep DONE ===

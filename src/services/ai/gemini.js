@@ -1,7 +1,7 @@
 import { getModel } from '../../utils/constants.js';
 
-export async function handleGeminiChat(env, system, messages, auth, userLocation) {
-  const model = getModel(auth.plan, 'gemini');
+export async function handleGeminiChat(env, system, messages, auth, userLocation, overrideModels) {
+  const model = getModel(auth.plan, 'gemini', overrideModels);
   try {
     const geminiContents = messages
       .filter(m => m.content && (typeof m.content === 'string' ? m.content.trim() : true))

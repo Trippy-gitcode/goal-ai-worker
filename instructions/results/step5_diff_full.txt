@@ -1,0 +1,242 @@
+diff --git a/src/routes/chat.js b/src/routes/chat.js
+index 444a554..0542a1b 100644
+--- a/src/routes/chat.js
++++ b/src/routes/chat.js
+@@ -1,7 +1,7 @@
+ import { authenticateRequest } from '../middleware/auth.js';
+ import { jsonRes } from '../utils/helpers.js';
+ import { getModel, FREE_MODEL_LIMITS, getPlanConfig, getCurrentMonth, USAGE_BATCH_SIZE } from '../utils/constants.js';
+-import { checkRateLimit, checkDailyChatUsage, incrementDailyChatUsage, checkFairUse, canUseModel, incrementFreeModelUsage, getEffectiveModel } from '../utils/rate-limit.js';
++import { checkRateLimit, checkDailyChatUsage, incrementDailyChatUsage, canUseModel, incrementFreeModelUsage, getEffectiveModel } from '../utils/rate-limit.js';
+ import { getDayKey } from '../utils/helpers.js';
+ import { saveChatMessage } from '../utils/supabase.js';
+ import { updateStreak } from '../utils/streak.js';
+@@ -26,9 +26,6 @@ export async function handleChat(request, env, ctx) {
+   if (!chatUsage.ok) return jsonRes({ error: '本日のチャット上限に達しました。明日またお試しください。', used: chatUsage.used, limit: chatUsage.limit, remaining: 0 }, 429);
+   await incrementDailyChatUsage(env, auth.userId);
+ 
+-  const fu = await checkFairUse(env, auth.userId);
+-  if (fu.throttle) await new Promise(r => setTimeout(r, fu.delayMs));
+-
+   const body = await request.json();
+   const { system, messages, maxTokens = 1000, goalId } = body;
+   const claudeModel = getModel(auth.plan, 'claude');
+@@ -36,7 +33,7 @@ export async function handleChat(request, env, ctx) {
+   const res = await fetch('https://api.anthropic.com/v1/messages', {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+-    body: JSON.stringify({ model: claudeModel, max_tokens: Math.min(maxTokens, auth.plan === 'premium' ? 4000 : 2000), system: system || undefined, messages }),
++    body: JSON.stringify({ model: claudeModel, max_tokens: Math.min(maxTokens, ['max', 'ultra'].includes(auth.plan) ? 4000 : 2000), system: system || undefined, messages }),
+   });
+ 
+   const data = await res.json();
+@@ -76,19 +73,45 @@ export async function handleChatStream(request, env, ctx) {
+     return jsonRes({ error: 'Invalid context for free_no_count' }, 400);
+   }
+ 
++  let effectiveModels = null; // null = 通常モデル（overrideなし）
++  let isDegraded = false;
++  let degradeReason = null;
++  let usageResult = null;
++
+   if (!free_no_count) {
+     const chatUsage = await checkDailyChatUsage(env, auth.userId, auth.plan);
+     if (!chatUsage.ok) return jsonRes({ error: '本日のチャット上限に達しました', remaining: 0 }, 429);
+     await incrementDailyChatUsage(env, auth.userId);
+-    // ═══ ターン記録 + 従量課金（STEP4-EXEC） ═══
++
++    // ═══ ターン記録（Step 4） ═══
+     if (auth.plan !== 'free') {
+-      const usageResult = await recordTurnUsage(env, auth.userId, auth.plan);
++      usageResult = await recordTurnUsage(env, auth.userId, auth.plan);
+       console.log(`[TURN] user=${auth.userId} plan=${auth.plan} turns=${usageResult.turns_used} amount=¥${usageResult.current_amount}`);
++
++      // ═══ キャップ判定（Step 5） ═══
++      if (usageResult.should_degrade) {
++        const degraded = getDegradedModels(auth.plan);
++        if (degraded) { // Ultra は null → 降格しない
++          effectiveModels = degraded;
++          isDegraded = true;
++          degradeReason = 'cap';
++        }
++      }
+     }
+-  }
+ 
+-  const fu = await checkFairUse(env, auth.userId);
+-  if (fu.throttle) await new Promise(r => setTimeout(r, fu.delayMs));
++    // ═══ フェアユース判定（Step 5） ═══
++    if (!isDegraded) {
++      const fairUse = await checkFairUseV2(env, auth.userId, auth.plan);
++      if (fairUse.degraded) {
++        const degraded = getDegradedModels(auth.plan);
++        if (degraded) {
++          effectiveModels = degraded;
++          isDegraded = true;
++          degradeReason = fairUse.reason;
++        }
++      }
++    }
++  }
+ 
+   let userLocation = location;
+   if (location && location.city) {
+@@ -133,11 +156,11 @@ export async function handleChatStream(request, env, ctx) {
+   if (finalRoute !== 'claude') {
+     let routeResponse = null;
+     if (finalRoute === 'gemini') {
+-      routeResponse = await handleGeminiChat(env, enhancedSystem, compressedMessages, auth, userLocation);
++      routeResponse = await handleGeminiChat(env, enhancedSystem, compressedMessages, auth, userLocation, effectiveModels);
+     } else if (finalRoute === 'gpt') {
+-      routeResponse = await handleGPTChat(env, enhancedSystem, compressedMessages, auth, maxTokens);
++      routeResponse = await handleGPTChat(env, enhancedSystem, compressedMessages, auth, maxTokens, effectiveModels);
+     } else if (finalRoute === 'gpt-simple') {
+-      routeResponse = await handleGPTSimpleChat(env, enhancedSystem, compressedMessages, auth);
++      routeResponse = await handleGPTSimpleChat(env, enhancedSystem, compressedMessages, auth, effectiveModels);
+     }
+     if (routeResponse) {
+       if (env.SUPABASE_URL) updateStreak(auth.tokenId, env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+@@ -166,12 +189,12 @@ export async function handleChatStream(request, env, ctx) {
+     await incrementFreeModelUsage(auth.tokenId, 'claude', env);
+   }
+ 
+-  const claudeModel = getModel(auth.plan, 'claude');
++  const claudeModel = getModel(auth.plan, 'claude', effectiveModels);
+ 
+   const controller = new AbortController();
+   request.signal?.addEventListener('abort', () => controller.abort());
+ 
+-  const effectiveMaxTokens = Math.min(maxTokens, auth.plan === 'premium' ? 4000 : 2000);
++  const effectiveMaxTokens = Math.min(maxTokens, ['max', 'ultra'].includes(auth.plan) ? 4000 : 2000);
+   const apiBody = (env.CACHE_ENABLED === 'true' && fixedPart)
+     ? buildAnthropicRequest(fixedPart, variablePart, compressedMessages, claudeModel, effectiveMaxTokens, env)
+     : { model: claudeModel, max_tokens: effectiveMaxTokens, stream: true, system: enhancedSystem || undefined, messages: compressedMessages };
+@@ -207,10 +230,23 @@ export async function handleChatStream(request, env, ctx) {
+     }
+   }
+ 
+-  return new Response(res.body, {
+-    status: 200,
+-    headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive', 'X-Model-Used': claudeModel },
+-  });
++  // レスポンスヘッダーに降格情報を付与（Step 5）
++  const responseHeaders = {
++    'Content-Type': 'text/event-stream',
++    'Cache-Control': 'no-cache',
++    'Connection': 'keep-alive',
++    'X-Model-Used': claudeModel,
++    'X-Model-Degraded': isDegraded ? '1' : '0',
++    'X-Degrade-Reason': degradeReason || '',
++  };
++  if (usageResult && usageResult.current_amount > 0) {
++    const config = getPlanConfig(auth.plan);
++    responseHeaders['X-Usage-Amount'] = String(usageResult.current_amount);
++    responseHeaders['X-Usage-Cap'] = String(config.cap);
++    responseHeaders['X-Usage-Percent'] = String(Math.round((usageResult.current_amount / config.cap) * 100));
++  }
++
++  return new Response(res.body, { status: 200, headers: responseHeaders });
+  } catch(e) {
+   console.error('handleChatStream FATAL:', e.message, e.stack);
+   try { await env.TOKEN_KV.put('debug:last_error', JSON.stringify({ msg: e.message, stack: (e.stack||'').slice(0,500), ts: Date.now() }), { expirationTtl: 3600 }); } catch(_){}
+@@ -318,3 +354,61 @@ async function maybeSendUsageRecord(env, userId, turnsUsed, plan) {
+     } else { console.error('Stripe usage_record failed:', await response.json()); }
+   } catch (e) { console.error('Stripe usage_record error:', e.message); }
+ }
++
++// ═══════ モデル降格（STEP5-EXEC） ═══════
++function getDegradedModels(plan) {
++  const config = getPlanConfig(plan);
++  const fallback = config.fallback_model;
++  if (!fallback) return null; // Ultra: 降格なし
++  return {
++    claude: fallback === 'gpt-5-nano' ? 'claude-haiku-4-5-20251001' : 'claude-sonnet-4-20250514',
++    openai: fallback,
++    gemini: 'gemini-2.5-flash',
++    router: 'gpt-5-mini'
++  };
++}
++
++// ═══════ v6.3 フェアユース（5h窓 + 週間窓） ═══════
++async function checkFairUseV2(env, userId, plan) {
++  const config = getPlanConfig(plan);
++  const supabaseUrl = env.SUPABASE_URL;
++  const supabaseKey = env.SUPABASE_SERVICE_KEY;
++
++  // 5h窓チェック
++  const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString();
++  try {
++    const res5h = await fetch(
++      `${supabaseUrl}/rest/v1/chat_messages?user_id=eq.${userId}&role=eq.user&created_at=gte.${fiveHoursAgo}&select=id`,
++      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Prefer': 'count=exact', 'Range': '0-0' } }
++    );
++    const count5h = parseInt(res5h.headers.get('content-range')?.split('/')?.[1] || '0');
++    if (count5h >= config.fair_use.h5_limit) {
++      return { degraded: true, reason: 'fair_use_5h' };
++    }
++  } catch (e) { console.error('Fair use 5h check failed:', e.message); }
++
++  // 週間窓チェック
++  const weekStart = getWeekStartUTC();
++  try {
++    const resWeek = await fetch(
++      `${supabaseUrl}/rest/v1/chat_messages?user_id=eq.${userId}&role=eq.user&created_at=gte.${weekStart}&select=id`,
++      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Prefer': 'count=exact', 'Range': '0-0' } }
++    );
++    const countWeekly = parseInt(resWeek.headers.get('content-range')?.split('/')?.[1] || '0');
++    if (countWeekly >= config.fair_use.weekly_limit) {
++      return { degraded: true, reason: 'fair_use_weekly' };
++    }
++  } catch (e) { console.error('Fair use weekly check failed:', e.message); }
++
++  return { degraded: false, reason: null };
++}
++
++function getWeekStartUTC() {
++  const now = new Date();
++  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
++  const day = jst.getUTCDay();
++  const diff = day === 0 ? 6 : day - 1;
++  jst.setUTCDate(jst.getUTCDate() - diff);
++  jst.setUTCHours(0, 0, 0, 0);
++  return new Date(jst.getTime() - 9 * 60 * 60 * 1000).toISOString();
++}
+diff --git a/src/services/ai/gemini.js b/src/services/ai/gemini.js
+index 6ba2833..921ba01 100644
+--- a/src/services/ai/gemini.js
++++ b/src/services/ai/gemini.js
+@@ -1,7 +1,7 @@
+ import { getModel } from '../../utils/constants.js';
+ 
+-export async function handleGeminiChat(env, system, messages, auth, userLocation) {
+-  const model = getModel(auth.plan, 'gemini');
++export async function handleGeminiChat(env, system, messages, auth, userLocation, overrideModels) {
++  const model = getModel(auth.plan, 'gemini', overrideModels);
+   try {
+     const geminiContents = messages
+       .filter(m => m.content && (typeof m.content === 'string' ? m.content.trim() : true))
+diff --git a/src/services/ai/gpt.js b/src/services/ai/gpt.js
+index fad9117..858d9e0 100644
+--- a/src/services/ai/gpt.js
++++ b/src/services/ai/gpt.js
+@@ -1,7 +1,7 @@
+ import { getModel } from '../../utils/constants.js';
+ 
+-export async function handleGPTChat(env, system, messages, auth, maxTokens) {
+-  const model = getModel(auth.plan, 'openai');
++export async function handleGPTChat(env, system, messages, auth, maxTokens, overrideModels) {
++  const model = getModel(auth.plan, 'openai', overrideModels);
+   try {
+     const res = await fetch('https://api.openai.com/v1/chat/completions', {
+       method: 'POST',
+@@ -16,8 +16,8 @@ export async function handleGPTChat(env, system, messages, auth, maxTokens) {
+   } catch (e) { console.error('handleGPTChat failed:', e.message); return null; }
+ }
+ 
+-export async function handleGPTSimpleChat(env, system, messages, auth) {
+-  const model = getModel(auth.plan, 'openai');
++export async function handleGPTSimpleChat(env, system, messages, auth, overrideModels) {
++  const model = getModel(auth.plan, 'openai', overrideModels);
+   try {
+     const res = await fetch('https://api.openai.com/v1/chat/completions', {
+       method: 'POST',
