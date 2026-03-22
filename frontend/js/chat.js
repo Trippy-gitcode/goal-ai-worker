@@ -16,7 +16,7 @@ function hideNanoFallbackBanner(){ document.getElementById('nano-fallback-banner
 
 // ════════ CHAT ════════
 function getLogoSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 32 32"><defs><linearGradient id="crown${size}" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown${size})"/></svg>`;}
-function getGptSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="#5b8def" stroke-width="1.5"><path d="M9 21h6M12 3a6 6 0 00-4 10.5V17h8v-3.5A6 6 0 0012 3z"/></svg>`;}
+function getGptSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="var(--model-gpt)" stroke-width="1.5"><path d="M9 21h6M12 3a6 6 0 00-4 10.5V17h8v-3.5A6 6 0 0012 3z"/></svg>`;}
 function getUserAvatarText(){const n=USER_PROFILE.nickname||USER_PROFILE.name||'';return n?n.charAt(0):'';}
 function renderUserAvatarInner(av){
   if(USER_PROFILE.avatar_base64){
@@ -27,7 +27,7 @@ function renderUserAvatarInner(av){
     else av.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>';
   }
 }
-function showTyping() { showChatTyping(document.getElementById('home-chat-inner'), 'typing-indicator'); }
+function showTyping(route) { showChatTyping(document.getElementById('home-chat-inner'), 'typing-indicator', undefined, undefined, route); }
 function hideTyping() { hideChatTyping('typing-indicator'); }
 
 function startReview() {
@@ -567,7 +567,7 @@ function clearHomeImage(){
 function updateHomePlaceholder(){
   const el=document.getElementById('home-msg-in');
   if(!el)return;
-  el.placeholder = homeMsgs.length > 0 ? '返信する' : '会話を始める';
+  el.placeholder = homeMsgs.length > 0 ? '返信する' : '質問、相談、なんでも...';
 }
 function initHomePlaceholder(){ updateHomePlaceholder(); }
 
@@ -647,35 +647,44 @@ function getAiOptPct(){
 }
 function getAiOptBadgeHTML(){
   const pct = getAiOptPct();
-  return `<div id="ai-opt-badge" onclick="showPage('myself');switchMyselfTab('profile');" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(228,184,106,.08);border:1px solid rgba(228,184,106,.2);border-radius:20px;cursor:pointer;margin-bottom:16px;transition:all .15s;" onmouseover="this.style.borderColor='rgba(228,184,106,.5)'" onmouseout="this.style.borderColor='rgba(228,184,106,.2)'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span style="font-size:11px;color:var(--amber);font-family:var(--fm);">AI最適化 ${pct}%</span></div>`;
+  return `<div id="ai-opt-badge" onclick="showPage('myself');switchMyselfTab('profile');" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:var(--pill-radius);cursor:pointer;margin-bottom:16px;transition:all .15s;" onmouseover="this.style.borderColor='var(--mode-normal-border)'" onmouseout="this.style.borderColor='var(--amber-d)'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span style="font-size:11px;color:var(--amber);font-family:var(--fm);">AI最適化 ${pct}%</span></div>`;
 }
 
 function buildEmptyHomeHTML(){
-  const gDef='<defs><linearGradient id="goldG" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs>';
-  const presets=[
-    {svg:_goldSVG('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'),text:'今日あった出来事を聞いて'},
-    {svg:_goldSVG('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>'),text:'最近のニュースを教えて'},
-    {svg:_goldSVG('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'),text:'文章を添削して'},
-    {svg:_goldSVG('<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 5 12 4.5 4.5 0 0 0-1 2H8a4.5 4.5 0 0 0-1-2A7 7 0 0 1 12 2z"/>'),text:'アイデアを一緒に考えて'},
-    {svg:_goldSVG('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'),text:'目標を設定したい'},
-    {svg:_goldSVG('<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/><path d="M16 3l1 1-1 1"/>'),text:'キャリアの相談がしたい'}
-  ];
-  const cards=presets.map(p=>'<div onclick="document.getElementById(\'home-msg-in\').value=\''+p.text+'\';sendHomeMsg();" style="padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;gap:10px;" onmouseover="this.style.borderColor=\'var(--amber)\';this.style.background=\'var(--amber-g)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.background=\'var(--bg3)\'">'+p.svg+'<span style="font-size:12px;color:var(--cream);line-height:1.4;">'+p.text+'</span></div>').join('');
   const greeting = USER_PROFILE.nickname ? `こんにちは、${escapeHtml(USER_PROFILE.nickname)}さん` : 'こんにちは！';
-  return '<svg style="position:absolute;width:0;height:0;"><defs><linearGradient id="goldG" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs></svg>'
-    +'<div style="text-align:center;padding:60px 20px 10px;color:var(--muted);line-height:2;">'
-    +'<div style="margin:0 auto 16px;opacity:.4;">'+getLogoSVG(56)+'</div>'
+  return '<div style="text-align:center;padding:20px 20px 10px;color:var(--muted);line-height:2;">'
     +'<div style="font-size:18px;color:var(--cream);font-weight:500;margin-bottom:6px;">'+greeting+'</div>'
-    +'<div style="font-size:14px;margin-bottom:12px;">雑談、相談、調べもの、何でもOK</div>'
+    +'<div style="font-size:13px;margin-bottom:8px;">雑談、相談、調べもの、何でもOK</div>'
     + getAiOptBadgeHTML()
-    +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-width:360px;margin:0 auto;text-align:left;">'+cards+'</div>'
     +'</div>';
 }
 
+function updatePlusButtonState(){
+  const btn=document.getElementById('home-new-chat-btn');
+  if(!btn)return;
+  if(homeMsgs.length>0){
+    btn.style.background='var(--amber)';btn.style.border='none';btn.style.color='var(--text-on-accent)';
+  } else {
+    btn.style.background='var(--bg3)';btn.style.border='1px solid var(--border)';btn.style.color='var(--muted)';
+  }
+}
+
+function setPreset(btn){
+  const input=document.getElementById('home-msg-in');
+  if(input){input.value=btn.textContent.trim();homeResize(input);sendHomeMsg();}
+}
+function updateHeroVisibility(){
+  const hero=document.getElementById('home-hero');
+  if(hero) hero.style.display = homeMsgs.length > 0 ? 'none' : '';
+}
 function renderHomeMsgs(){
   const c=document.getElementById('home-chat-inner'); c.innerHTML='';
+  const chatWrap=document.getElementById('home-chat-wrap');
+  if(homeMsgs.length>0){ chatWrap.classList.add('has-msgs'); } else { chatWrap.classList.remove('has-msgs'); }
+  updateHeroVisibility();
   if(homeMsgs.length===0){
     c.innerHTML=buildEmptyHomeHTML();
+    updatePlusButtonState();
     return;
   }
   let lastDate='';
@@ -696,6 +705,7 @@ function renderHomeMsgs(){
   setTimeout(()=>{ document.getElementById('home-chat-wrap').scrollTop=99999; },50);
   updateHomePlaceholder();
   updateTopicTags();
+  updatePlusButtonState();
 }
 
 // Helper: render message content (Markdown → HTML, XSS safe)
@@ -757,14 +767,30 @@ function mkHomeMsg(m){
   if(m.role==='user') actionsHtml+=`<button class="msg-action-btn" title="編集して再送信" onclick="editAndResend(this)">${_svgEdit}</button>`;
   actionsHtml+='</span>';
   const t=document.createElement('div'); t.className='msg-footer';
-  if(m.role === 'ai'){ t.innerHTML = `<span class="msg-time">${m.time||''}</span> · <span class="msg-model">${m.model||'Claude'}</span>${actionsHtml}`; }
+  if(m.role === 'ai'){ t.innerHTML = `<span class="msg-time">${m.time||''}</span>&nbsp;&nbsp;<span class="msg-model">${m.model||'Claude'}</span>${actionsHtml}`; }
   else { t.innerHTML = `<span class="msg-time">${m.time||''}</span>${actionsHtml}`; }
   body.appendChild(bub); body.appendChild(t); wrap.appendChild(av); wrap.appendChild(body);
   wrap.style.position='relative';
+  // Mobile long-press to show msg-actions (300ms)
+  (function(){
+    let lpTimer=null;
+    wrap.addEventListener('touchstart',function(){
+      lpTimer=setTimeout(function(){ wrap.classList.add('msg-actions-visible'); },300);
+    },{passive:true});
+    wrap.addEventListener('touchend',function(){ clearTimeout(lpTimer); },{passive:true});
+    wrap.addEventListener('touchmove',function(){ clearTimeout(lpTimer); },{passive:true});
+  })();
   // F: ロングタップ→クイックゴール
   if(m.role === 'ai') addLongTapGoal(bub, m.content);
   return wrap;
 }
+
+// Dismiss msg-actions-visible on tap/click elsewhere
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.msg-actions-visible .msg-actions')){
+    document.querySelectorAll('.msg-actions-visible').forEach(function(el){ el.classList.remove('msg-actions-visible'); });
+  }
+});
 
 // F: ロングタップ → クイックゴール
 function addLongTapGoal(el, content){
@@ -815,7 +841,7 @@ function editAndResend(btn){
   ta.style.cssText = 'width:100%;min-height:60px;padding:8px;border-radius:8px;background:var(--bg3);color:var(--cream);border:1px solid var(--amber);font-size:14px;font-family:var(--ff);resize:vertical;';
   const btnRow = document.createElement('div');
   btnRow.style.cssText = 'display:flex;gap:6px;margin-top:6px;';
-  btnRow.innerHTML = `<button class="edit-resend-btn" style="padding:6px 14px;background:var(--amber);color:#000;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">再送信</button><button class="edit-cancel-btn" style="padding:6px 14px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;">キャンセル</button>`;
+  btnRow.innerHTML = `<button class="edit-resend-btn" style="padding:6px 14px;background:var(--amber);color:var(--text-on-accent);border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">再送信</button><button class="edit-cancel-btn" style="padding:6px 14px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;">キャンセル</button>`;
   bub.style.display = 'none';
   msgEl.querySelector('.msg-actions')?.remove();
   const body = msgEl.querySelector('.msg-body');
@@ -985,7 +1011,7 @@ async function routeMessage(text){
         window._lastGoalIntent = parsed.goal_intent;
         goalDetectLevel = parsed.goal_intent;
         if (parsed.goal_topics?.length > 0) window._detectedGoalTopics = parsed.goal_topics;
-        if (parsed.goal_intent === 'level3') { pendingGoalProposal = true; showGoalDetectToast(); }
+        if (parsed.goal_intent === 'level3' || (parsed.goal_intent === 'level2' && parsed.goal_topics?.length > 0)) { pendingGoalProposal = true; showGoalDetectToast(parsed.goal_topics); }
       }
       if (parsed.task_potential) { window._pendingTaskSuggestion = true; highlightTaskChip(); }
       if (['gemini','gpt','gpt-simple','claude'].includes(route)) return route;
@@ -1014,9 +1040,7 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
 
     // 【1】ルーティング判定後にバブルを作成（空バブル防止）
     if(route === 'gemini'){
-      const { bub } = mkStreamBubble(inner, scroll);
-      bub.innerHTML = '🔍 リサーチ中...';
-      bub.style.cssText += 'color:var(--amber);font-size:13px;';
+      const { bub } = mkStreamBubble(inner, scroll, undefined, 'gemini');
       try{
         const ctx = buildAIContextCached();
         const result = await callGemini(text, `【絶対ルール】ユーザーの質問にまず具体的に回答すること。聞き返し禁止。
@@ -1031,7 +1055,7 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
         bub.innerHTML = renderMsgContent(result);
         bub.classList.remove('stream-bubble'); bub.style.cssText = '';
         const gemFooter = bub.parentElement?.querySelector('.msg-footer');
-        if(gemFooter) gemFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">Gemini</span>${_msgActionsHtml()}`;
+        if(gemFooter) gemFooter.innerHTML = `<span class="msg-time">${now()}</span>&nbsp;&nbsp;<span class="msg-model">Gemini</span>${_msgActionsHtml()}`;
         homeMsgs.push({role:'ai',content:result,time:now(),date:today,model:'Gemini'});
         homeHistory.push({role:'assistant',content:result});
         saveHomeMsgs();
@@ -1044,10 +1068,7 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
       }
 
     } else if(route === 'gpt'){
-      const { bub, wrap } = mkStreamBubble(inner, scroll);
-      bub.innerHTML = getGptSVG(14) + ' アイデア生成中...';
-      bub.style.cssText += 'color:#5b8def;font-size:13px;display:flex;align-items:center;gap:6px;';
-      const av = wrap?.querySelector('.msg-av'); if(av) av.innerHTML = getGptSVG(14);
+      const { bub, wrap } = mkStreamBubble(inner, scroll, undefined, 'gpt');
       try{
         const ctx = buildAIContextCached();
         const result = await callOpenAI(text, `【絶対ルール】ユーザーのリクエストにまず具体的に回答すること。聞き返し禁止。
@@ -1059,7 +1080,7 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
         bub.innerHTML = renderMsgContent(result);
         bub.classList.remove('stream-bubble'); bub.style.cssText = '';
         const gptFooter = bub.parentElement?.querySelector('.msg-footer');
-        if(gptFooter) gptFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">GPT</span>${_msgActionsHtml()}`;
+        if(gptFooter) gptFooter.innerHTML = `<span class="msg-time">${now()}</span>&nbsp;&nbsp;<span class="msg-model">GPT</span>${_msgActionsHtml()}`;
         homeMsgs.push({role:'ai',content:result,time:now(),date:today,model:'GPT'});
         homeHistory.push({role:'assistant',content:result});
         saveHomeMsgs();
@@ -1088,7 +1109,7 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
           bub.innerHTML = renderMsgContent(reply);
           bub.classList.remove('stream-bubble');
           const simFooter = bub.parentElement?.querySelector('.msg-footer');
-          if(simFooter) simFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">GPT</span>${_msgActionsHtml()}`;
+          if(simFooter) simFooter.innerHTML = `<span class="msg-time">${now()}</span>&nbsp;&nbsp;<span class="msg-model">GPT</span>${_msgActionsHtml()}`;
           homeMsgs.push({role:'ai',content:reply,time:now(),date:today,model:'GPT'});
           homeHistory.push({role:'assistant',content:reply});
           saveHomeMsgs();
@@ -1130,7 +1151,7 @@ async function executeRoute(route, text, today, inner, scroll, indicatorBub){
     indicatorBub.classList.remove('stream-bubble');
     indicatorBub.style.cssText = '';
     const routeFooter = indicatorBub.parentElement?.querySelector('.msg-footer');
-    if(routeFooter) routeFooter.innerHTML = `<span class="msg-time">${now()}</span> · <span class="msg-model">${routeModel}</span>${_msgActionsHtml()}`;
+    if(routeFooter) routeFooter.innerHTML = `<span class="msg-time">${now()}</span>&nbsp;&nbsp;<span class="msg-model">${routeModel}</span>${_msgActionsHtml()}`;
     homeMsgs.push({role:'ai',content:result,time:now(),date:today,model:routeModel});
     homeHistory.push({role:'assistant',content:result});
     saveHomeMsgs();
@@ -1171,7 +1192,7 @@ function showDailyCheckin(container){
   else if(streak >= 1) msg = 'おかえりなさい。今日もサポートします。';
   else return; // 初回は表示しない
   const el = document.createElement('div');
-  el.style.cssText = 'text-align:center;padding:8px 16px;margin:8px auto;max-width:360px;background:var(--amber-g);border:1px solid rgba(228,184,106,.2);border-radius:10px;font-size:11px;color:var(--amber);';
+  el.style.cssText = 'text-align:center;padding:8px 16px;margin:8px auto;max-width:360px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:10px;font-size:11px;color:var(--amber);';
   el.textContent = msg;
   container.appendChild(el);
 }
@@ -1305,7 +1326,7 @@ function renderSidebarChatRecords(){
     if (!t || t === '会話' || t === '会話...') return false;
     if (t.startsWith('ビジョン：') || t.startsWith('【ユーザー情報】') || t.startsWith('【あなたの役割】') || t.startsWith('【共通ルール】')) return false;
     return true;
-  }).slice(0,5);
+  }).slice(0,4);
   if(recent.length === 0){
     el.innerHTML = '';
     return;
@@ -1333,7 +1354,7 @@ function _setHomeSendIcon(mode){
   const icon = document.getElementById('home-send-icon');
   if(!icon) return;
   if(mode==='stop'){
-    icon.innerHTML = '<rect x="6" y="6" width="12" height="12" rx="2" fill="#0c0e14"/>';
+    icon.innerHTML = '<rect x="6" y="6" width="12" height="12" rx="2" fill="var(--text-on-accent)"/>';
     icon.closest('button')?.setAttribute('onclick','stopHomeStream()');
   } else {
     icon.innerHTML = '<path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>';
@@ -1518,7 +1539,7 @@ function renderModelUsageBadge(){
   const { claude, gemini, gpt } = FREE_MODEL_USAGE;
   const totalRemaining = claude.remaining + gemini.remaining + gpt.remaining;
   const color = totalRemaining > 5 ? 'var(--amber)' : 'var(--red)';
-  badge.innerHTML = `<div onclick="showModelUsageDetail()" style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);font-size:11px;font-weight:500;color:${color};cursor:pointer;white-space:nowrap;" title="高品質AI残り回数">⚡${totalRemaining}回/24h</div>`;
+  badge.innerHTML = `<div onclick="showModelUsageDetail()" style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--pill-radius);background:var(--bg3);border:1px solid var(--border);font-size:11px;font-weight:500;color:${color};cursor:pointer;white-space:nowrap;" title="高品質AI残り回数">⚡${totalRemaining}回/24h</div>`;
 }
 function showModelUsageDetail(){
   const { claude, gemini, gpt } = FREE_MODEL_USAGE;
@@ -1572,7 +1593,7 @@ function renderHomeSummary(){
   const items = todayItems.length ? todayItems : getTodayTasks().slice(0,3);
   todayEl.innerHTML = '';
   if(!items.length){
-    todayEl.innerHTML = '<div style="font-size:11px;color:var(--muted2)">今日のタスクなし 🎉</div>';
+    todayEl.innerHTML = '<div style="font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>今日のタスクはありません</div>';
   } else {
     items.forEach(item => {
       const row = document.createElement('div'); row.className = 'hs-task-row'; row.style.cursor='pointer';
@@ -1590,6 +1611,28 @@ function renderHomeSummary(){
   // 今日の1%マイクロタスク
   renderMicroTask();
   // Quote loaded from memory only (set by refreshQuote)
+  // ホームタスクボックス更新
+  renderHomeTaskBox();
+}
+
+function renderHomeTaskBox(){
+  const box=document.getElementById('home-task-box');
+  const inner=document.getElementById('home-task-box-inner');
+  if(!box||!inner)return;
+  if(homeMsgs.length>0){box.style.display='none';return;}
+  const all=getTodayTasks();
+  const total=all.length;const done=all.filter(i=>i.task.status==='done').length;
+  if(total===0){
+    inner.innerHTML='<div style="display:flex;align-items:center;gap:6px;justify-content:center;padding:16px 0;color:var(--muted2);font-size:12px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>今日のタスクはありません</div>';
+    box.style.display='block';return;
+  }
+  let html='<div style="font-size:10px;color:var(--muted2);font-family:var(--fm);margin-bottom:6px;">今日のタスク <span style="color:var(--cream)">'+done+'/'+total+'件</span></div>';
+  all.filter(i=>i.task.status!=='done').slice(0,5).forEach(item=>{
+    const urgColor=item.urgency==='urgent'?'var(--red)':item.urgency==='in-progress'?'var(--amber)':'var(--muted2)';
+    html+='<div class="hs-task-row" style="cursor:pointer" onclick="openHomeTaskPanel(this.__item__)"><div class="hs-task-check" onclick="event.stopPropagation();hsToggleTask(\''+item.task.id+'\',this)"></div><div class="hs-task-title" style="flex:1">'+escapeHtml(item.task.title)+'</div><div style="width:5px;height:5px;border-radius:50%;background:'+urgColor+';flex-shrink:0"></div></div>';
+  });
+  inner.innerHTML=html;
+  box.style.display='block';
 }
 
 let _hsTaskTab = 'today';
@@ -1807,6 +1850,8 @@ let fbLoading = false;
 let fbTurnCount = 0;
 let fbSummary = '';
 let fbThemes = {good:null, bad:null, wish:null};
+let fbNpsScore = null;
+let fbNpsShown = false;
 
 const FB_SYS = `あなたはGOAL AIの改善担当です。ユーザーが貴重な時間を使ってフィードバックをくれています。
 
@@ -1846,6 +1891,7 @@ const FB_SYS = `あなたはGOAL AIの改善担当です。ユーザーが貴重
 function openFeedbackChat(){
   fbMsgs = []; fbHistory = []; fbLoading = false; fbTurnCount = 0; fbSummary = '';
   fbThemes = {good:null, bad:null, wish:null};
+  fbNpsScore = null; fbNpsShown = false;
   closeSidebar();
   const modal = document.getElementById('feedback-modal');
   modal.style.display = 'flex';
@@ -1859,7 +1905,7 @@ function openFeedbackChat(){
   pills.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;';
   ['使いやすかった','改善してほしい','新機能リクエスト','バグ報告'].forEach(label => {
     const btn = document.createElement('button');
-    btn.style.cssText = 'padding:6px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;color:var(--cream);font-size:11px;cursor:pointer;font-family:var(--ff);transition:all .15s;';
+    btn.style.cssText = 'padding:6px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--pill-radius);color:var(--cream);font-size:11px;cursor:pointer;font-family:var(--ff);transition:all .15s;';
     btn.textContent = label;
     btn.onclick = () => { document.getElementById('feedback-msg-in').value = label; sendFeedbackMsg(); pills.remove(); };
     pills.appendChild(btn);
@@ -1967,6 +2013,11 @@ async function sendFeedbackMsg(){
       const aiText = (data.content?.map(b=>b.text||'').join('') || '他に気になったことはありますか？').trim();
       fbHistory.push({role:'assistant', content:aiText});
       appendFbMsg('ai', aiText);
+      // Show NPS after 2-3 turns
+      if(!fbNpsShown && fbTurnCount >= 2 && fbTurnCount <= 4){
+        fbNpsShown = true;
+        setTimeout(() => showNpsPrompt(), 800);
+      }
     }
   } catch(e){
     appendFbMsg('ai', 'エラーが発生しました。もう一度お試しください。');
@@ -2020,6 +2071,7 @@ async function submitFeedback(){
       body: JSON.stringify({
         summary: fbSummary,
         rawChat: { messages: fbMsgs, themes: fbThemes },
+        nps_score: fbNpsScore,
         ...getDeviceInfo(),
         app_version: APP_VERSION,
         tester_tier: MEMBERSHIP.tester_tier || null,
@@ -2031,6 +2083,52 @@ async function submitFeedback(){
   } catch(e){
     toast('送信に失敗しました');
   }
+}
+
+// ════════ NPS SCORING ════════
+function showNpsPrompt(){
+  const chat = document.getElementById('feedback-chat');
+  if(!chat) return;
+  appendFbMsg('ai', 'ところで、GOAL AIを友人や同僚に薦める可能性はどのくらいですか？');
+  fbHistory.push({role:'assistant', content:'GOAL AIを友人や同僚に薦める可能性はどのくらいですか？'});
+  const wrap = document.createElement('div');
+  wrap.className = 'nps-wrap';
+  wrap.style.cssText = 'margin:4px 0 12px;';
+  const row = document.createElement('div');
+  row.className = 'nps-row';
+  for(let i=0;i<=10;i++){
+    const btn = document.createElement('button');
+    btn.className = 'nps-btn';
+    btn.textContent = i;
+    btn.onclick = () => selectNps(i, row);
+    row.appendChild(btn);
+  }
+  wrap.appendChild(row);
+  const labels = document.createElement('div');
+  labels.className = 'nps-label-row';
+  labels.innerHTML = '<span>全く薦めない</span><span>非常に薦める</span>';
+  wrap.appendChild(labels);
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function selectNps(score, row){
+  fbNpsScore = score;
+  row.querySelectorAll('.nps-btn').forEach((b,i) => {
+    b.classList.toggle('selected', i === score);
+    b.disabled = true;
+    b.style.cursor = 'default';
+  });
+  // Follow-up question based on score
+  const followUp = score >= 9
+    ? '高い評価をありがとうございます！特に気に入っている点を教えてください。'
+    : score >= 7
+    ? 'ありがとうございます。もっと良くするために改善できることはありますか？'
+    : 'ご評価ありがとうございます。どうすればもっと良くなるか教えてください。';
+  setTimeout(() => {
+    appendFbMsg('ai', followUp);
+    fbHistory.push({role:'assistant', content: followUp});
+  }, 500);
 }
 
 
@@ -2138,7 +2236,7 @@ function renderGoalProposalCard(title, why, deadline) {
     + (safeWhy ? '<div style="color:var(--muted);font-size:12px;margin-bottom:4px;">💡 ' + safeWhy + '</div>' : '')
     + (safeDeadline ? '<div style="color:var(--muted);font-size:12px;margin-bottom:12px;">📅 ' + safeDeadline + '</div>' : '<div style="margin-bottom:12px;"></div>')
     + '<div style="display:flex;gap:8px;">'
-    + '<button onclick="startGoalAssist({title:\'' + safeTitle.replace(/'/g, "\\'") + '\',why:\'' + safeWhy.replace(/'/g, "\\'") + '\',deadline:\'' + safeDeadline.replace(/'/g, "\\'") + '\'})" style="flex:1;padding:8px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;">ゴールアシストを始める</button>'
+    + '<button onclick="startGoalAssist({title:\'' + safeTitle.replace(/'/g, "\\'") + '\',why:\'' + safeWhy.replace(/'/g, "\\'") + '\',deadline:\'' + safeDeadline.replace(/'/g, "\\'") + '\'})" style="flex:1;padding:8px;background:var(--amber);color:var(--text-on-accent);border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;">ゴールアシストを始める</button>'
     + '<button onclick="declineGoalProposal(\'' + safeTitle.replace(/'/g, "\\'") + '\');this.closest(\'.goal-proposal-card\').style.display=\'none\'" style="flex:1;padding:8px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">今はいい</button>'
     + '</div></div>';
 }
@@ -2214,18 +2312,36 @@ function suggestGoalFromTag(topic) {
   if (scroll) scroll.scrollTop = scroll.scrollHeight;
 }
 
-// ════════ Goal detect toast (Step 8c) ════════
-function showGoalDetectToast(){
+// ════════ Goal detect toast (Step 8c + E-13: multiple candidates) ════════
+function showGoalDetectToast(topics){
   let t = document.getElementById('goal-detect-toast');
   if(t) t.remove();
   t = document.createElement('div');
   t.id = 'goal-detect-toast';
-  t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--amber-g);border:1px solid rgba(228,184,106,.4);border-radius:12px;padding:10px 18px;color:var(--amber);font-size:12px;font-family:var(--ff);cursor:pointer;z-index:800;opacity:0;transition:all .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.3);display:flex;align-items:center;gap:8px;';
-  t.innerHTML = '🎯 ゴール候補を検出しました <span style="font-size:10px;color:var(--muted);">タップして確認</span>';
-  t.onclick = () => { t.remove(); const tags = document.getElementById('home-topic-tags'); if(tags) tags.scrollIntoView({behavior:'smooth'}); };
+  t.className = 'goal-detect-toast';
+
+  if (topics && topics.length > 1) {
+    // Multiple goal candidates — show list
+    let listHtml = '<div style="display:flex;flex-direction:column;gap:6px;width:100%;">';
+    listHtml += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="font-size:16px;">👑</span><span style="font-weight:600;">ゴール候補が見つかりました</span></div>';
+    topics.forEach(topic => {
+      listHtml += `<div class="goal-detect-item" onclick="event.stopPropagation();this.closest('#goal-detect-toast').remove();window._selectedGoalTopic='${topic.replace(/'/g,"\\'")}';const tags=document.getElementById('home-topic-tags');if(tags)tags.scrollIntoView({behavior:'smooth'});" style="padding:8px 12px;background:var(--bg3);border:1px solid var(--amber-d);border-radius:8px;cursor:pointer;font-size:11px;color:var(--amber);transition:background .15s;">${topic}</div>`;
+    });
+    listHtml += '</div>';
+    listHtml += '<button class="goal-detect-close" onclick="event.stopPropagation();this.parentElement.remove();">&times;</button>';
+    t.innerHTML = listHtml;
+    t.style.flexDirection = 'column';
+    t.style.alignItems = 'stretch';
+    t.onclick = null;
+  } else {
+    // Single or no topics — original behavior
+    const label = (topics && topics.length === 1) ? `「${topics[0]}」をゴールにしますか？` : 'ゴールにしますか？';
+    t.innerHTML = `<span style="font-size:16px;">👑</span> ${label} <button class="goal-detect-close" onclick="event.stopPropagation();this.parentElement.remove();">&times;</button>`;
+    t.onclick = () => { t.remove(); if(topics && topics[0]) window._selectedGoalTopic = topics[0]; const tags = document.getElementById('home-topic-tags'); if(tags) tags.scrollIntoView({behavior:'smooth'}); };
+  }
+
   document.body.appendChild(t);
-  requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
-  setTimeout(() => { if(t.parentElement){ t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)'; setTimeout(() => t.remove(), 300); } }, 5000);
+  requestAnimationFrame(() => { t.classList.add('visible'); });
 }
 
 // ════════ E-8: Goal assist banner ════════
@@ -2445,7 +2561,7 @@ Object.assign(window, {
   htpUpdateStatus, htpQuickChat, sendHtpMsg, htpResize, htpKey,
   refreshQuote, FB_SYS, openFeedbackChat, closeFeedback, appendFbMsg,
   appendFbButtons, sendFeedbackMsg, extractThemes, continueFeedback,
-  correctFeedback, submitFeedback,
+  correctFeedback, submitFeedback, showNpsPrompt, selectNps,
   toggleHomeSearch, clearHomeSearch, searchHomeChat,
   toggleHubSearch, clearHubSearch, searchHubChat,
   requestNotifPermission, updateNotifSettingUI, scheduleNotif,
