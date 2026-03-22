@@ -392,7 +392,7 @@ async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, 
     const fetchOpts = {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ system, messages, maxTokens, location: window.USER_LOCATION || null })
+      body: JSON.stringify({ system, messages, maxTokens, location: window.USER_LOCATION || null, deep_context: window._lastDeepResult || null })
     };
     if (signal) fetchOpts.signal = signal;
     const res = await fetch(`${WORKER_URL}/api/chat/stream`, fetchOpts);

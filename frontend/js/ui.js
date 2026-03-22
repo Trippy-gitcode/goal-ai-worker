@@ -634,6 +634,8 @@ async function runDeepAnalysis(userQuery, containerId, scrollId, onComplete) {
     results.finalOutput = finalOutput;
     results.format = _selectedFormat;
     setPhaseStatus('ph-fix', 'done');
+    // M: ディープ分析結果を保持（次の会話のコンテキストに注入）
+    window._lastDeepResult = { query: userQuery, summary: finalOutput.slice(0, 1000), timestamp: Date.now() };
 
     panel.remove();
     onComplete(results);

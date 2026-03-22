@@ -166,6 +166,14 @@ export async function handleChatStream(request, env, ctx) {
     } catch(e) { console.error('buildServerSystemPrompt error:', e.message); }
   }
 
+  // M: ディープ分析結果をシステムプロンプトに注入
+  if (body.deep_context && body.deep_context.summary) {
+    const age = Date.now() - (body.deep_context.timestamp || 0);
+    if (age < 3600000) { // 1時間以内のみ有効
+      enhancedSystem += `\n\n【直近のディープ分析結果】\nユーザーの質問: ${body.deep_context.query}\n分析サマリー: ${body.deep_context.summary}\nこの分析結果を踏まえて回答してください。`;
+    }
+  }
+
   if (finalRoute !== 'claude') {
     let routeResponse = null;
     if (finalRoute === 'gemini') {
