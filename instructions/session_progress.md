@@ -7,8 +7,8 @@
 
 ## 現在地
 - **バージョン:** v3.9.3
-- **チェーン:** 提案ログD-J完了（H Vite除く）
-- **次のミッション:** キュー空
+- **チェーン:** Vite化+残バックログ
+- **次のミッション:** H Vite + ES Modules
 
 ## ミッションキュー（上から順に実行）
 
@@ -35,7 +35,7 @@ D. ✅ 達成報告検出+コンフェッティ（AI応答パターンマッチ�
 E. ✅ 定期チェックイン（ストリーク連動、1日1回localStorage）
 F. ✅ クイックゴール（600msロングタップ→ゴール作成画面）
 G. ✅ チャット背景プリセット（なし/ドット/グリッド/ウェーブ、設定パネル）
-H. ⏭ Vite化→ローンチ後に実施
+H. ✅ Vite + ES Modules完全移行（publicDir, esbuild minify, hashed assets, deploy:frontend）
 I. ✅ Playwright E2E（features.spec.ts: プランモーダル/設定/オンボーディング/API認証）
 J. ✅ メモ生成KVロック（60秒TTL、重複実行防止）
 
