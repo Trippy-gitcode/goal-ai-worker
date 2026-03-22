@@ -5,12 +5,130 @@
 
 ---
 
+## 5行サマリー
+- **Version:** v3.11.0（デプロイ前）
+- **Next:** キュー空 → 未実装候補調査
+- **Last done:** ルーティング最適化v2 ✅ + デザイン完全照合 ✅
+- **Open issues:** デザイン乖離23件（照合結果セクション参照）
+- **Proposals:** 0件
+
 ## 現在地
-- **バージョン:** v3.10.0
-- **チェーン:** 提案ログK-O完了
-- **次のミッション:** キュー空
+- **バージョン:** v3.11.0
+- **チェーン:** ~~デザイン完全照合~~ → ~~ルーティング最適化v2~~ → テスト配布
+- **次のミッション:** キュー空 → 自律提案フロー実行
 
 ## ミッションキュー（上から順に実行）
+
+### デザイン完全照合（ふとし承認済み 2026-03-22 Claude.ai承認済み）
+> 目的: spec仕様 × モックアップHTML × 実装コードの3点照合。全画面の乖離を完全リスト化する。
+> リスク: 🟢低（調査のみ。コード変更なし）
+> 重要: これはテスト配布前のデザイン品質ゲートである。全乖離を特定しないと次に進まない。
+
+**手順:**
+1. docs/goal_ai_design_spec_v3.md の各画面セクションを読む
+2. docs/design_review_changelog_v3.md の該当画面の変更記録を読む
+3. docs/design_amendment_001.md の該当変更を確認する
+4. docs/mockups/ の該当HTMLファイルを開き、CSS値（色コード・px値・font-size・padding・border-radius・アイコンSVG等）を確認する
+5. frontend/ の実装コードと照合し、以下を記録する:
+   - specに書いてあるがmockupと異なる点
+   - mockupに書いてあるが実装にない点
+   - 実装にあるがspec/mockupと異なる点
+
+**全画面リスト（1画面ずつ順に照合）:**
+- [x] #01 サイドバー → 01_sidebar.html
+- [x] #02a ホーム会話前 → 02a_home_prechat.html
+- [x] #02b ホーム会話中 → 02b_home_chat.html
+- [x] #02c キーボード → 02c_home_keyboard.html
+- [x] #03 ホーム全機能 → 03_home_full.html
+- [x] #04a タスク一覧 → 04a_tasks_mobile.html
+- [x] #04b タスク詳細 → 04b_tasks_detail.html
+- [x] #04c タスクPC → 04c_tasks_pc.html
+- [x] #05a ゴールハブチャット → 05ac_goalhub_chat_analysis.html
+- [x] #05b ゴールハブタスク → 05b_goalhub_tasks.html
+- [x] #05c ゴールハブ分析 → 05ac_goalhub_chat_analysis.html
+- [x] #05d ゴールハブメモ → 05d_goalhub_memo.html
+- [x] #05e ゴールハブ設定 → 05e_goalhub_settings.html
+- [x] #06a 自分を知る → 06a_design_discover.html
+- [x] #06b ビジョン → 06b_design_vision.html
+- [x] #06c ゴール連携 → 06c_design_connect.html
+- [x] #06d プロフィール → 06d_design_profile.html
+- [x] #07 オンボーディング → 07_onboarding.html
+- [x] #08a 解析 → 08a_analytics.html
+- [x] #08b フィードバック → 08b_feedback.html
+- [x] #08c 設定 → 08c_settings.html
+- [x] #08d プラン選択 → 08d_plan.html
+
+**出力:** session_progress.mdに「デザイン照合結果」セクションとして乖離リストを記載。修正はしない。報告のみ。
+
+**注意:**
+- mockupのサンプルデータ（ユーザー名・ゴール名・日付等）はハードコードしない。CSS/レイアウトのみ照合対象
+- 色コード・px値・font-size・border-radius・SVGパス等、数値レベルで一致確認すること
+- 「だいたい合っている」は不可。完全一致か、明確な乖離かの二択で判定する
+
+---
+
+### ルーティング最適化 v2（ふとし承認済み 2026-03-22 Claude.ai承認済み）
+> 目的: GPT比率を拡大しコスト-32〜41%削減。Geminiを3.x系に更新。テスト配布前に攻めた配分で品質をテスターに検証してもらう。
+> リスク: 🟡中（ルーティング変更。ロールバック可能）
+> ロールバック: constants.jsのモデル名とrouting.jsのプロンプトを元に戻す
+
+**1. PLAN_CONFIG モデル名更新（constants.js）**
+- Free/Light/Pro: gemini `gemini-2.5-flash` → `gemini-3-flash-preview`
+- Max/Ultra: gemini `gemini-2.5-pro` → `gemini-3.1-pro-preview`
+- 他のモデル（Claude/GPT/router）は変更なし
+
+**2. ルーティングプロンプト再定義（routing.js callRoutingAPI）**
+- 旧: `claude（コーチング・戦略・感情・その他すべて）`
+- 新: catch-allを `gpt` に変更。分類定義:
+  - `claude`: 深い感情サポート・人生相談・コーチング核心部（悩み・自己分析・価値観・モチベーション）
+  - `gpt`: アイディア出し・一般会話・翻訳・要約・クリエイティブ・タスク相談・その他すべて（catch-all）
+  - `gpt-simple`: 相槌・短い返事・挨拶
+  - `gemini`: 検索・天気・ニュース・事実Q&A・比較分析・データ処理・調査
+
+**3. quickRoute パターン拡張（routing.js quickRoute）**
+- 既存のgemini/gptパターンは維持
+- 新規GPTパターン追加: アイディア/おすすめ/提案して/考えて/リスト/比較して/教えて/作って/書いて
+- catch-all変更: quickRouteで捕まらない場合 → callRoutingAPI → GPTがcatch-all
+
+**4. gemini.js Thought Signatures対応（品質維持のため）**
+- Gemini 3のAPIレスポンスに含まれる `thoughtSignature` を検出
+- 次のリクエスト時にhistoryに含めて返送
+- テキストチャットでは厳密検証されないが、未返送で品質劣化する
+- 実装方針はCodeに委任（GOAL AIの会話履歴の構造に合わせた最適なアプローチを選択）
+
+**5. Gemini 3 Flash のthinkingConfig設定**
+- GOAL AIのチャット用途では `thinking_level: "minimal"` を設定（コスト抑制・速度優先）
+- ※thinkingトークンはoutput料金で課金されるため、chat用途ではminimal推奨
+
+**注意事項:**
+- 両Geminiモデルは Preview ステータス（2週間前通知で変更の可能性あり）
+- Max/Ultraの3.1 Pro Previewは1ターン¥3.26（旧2.5 Proの3倍）。ルーティングでGemini比率が上がりすぎないよう注意
+- デプロイ後、スモークテストで各ルートの動作確認必須（gemini/gpt/gpt-simple/claude 各1回以上）
+- canopy.shにGeminiモデル名チェック項目を追加（gemini-3-flash-preview / gemini-3.1-pro-preview が存在すること）
+
+### 構造改善バッチ（ふとし承認済み 2026-03-22 Claude.ai承認済み）
+1. ✅ 旧ファイル整理（commit 6d0adc2で実施済み）
+2. ✅ canopy強化（canopy.sh #15-17で実装済み）
+3. ✅ canopyにdesign_spec_v3 grepチェック統合（card-radius/popup-radius/pill-radius/hub-tabs追加。canopy PASS）
+
+### Code自律性・品質強化バッチ（ふとし承認済み 2026-03-22 Claude.ai承認済み）
+4. ✅ 5行サマリー（既に冒頭に存在）
+5. ✅ バグパターン集一元化（project_v6_4.mdに§14なし。development_rules.md C11に一元化済み）
+6. ✅ ミッション完了チェックリスト（development_rules.md C13に存在）
+7. ✅ 提案ログテンプレートに参照ドキュメント列（既にテンプレートに存在）
+8. ✅ キュー空時フローにdesign_spec検出（CLAUDE.md step 2に記載済み）
+9. ✅ バグ横展開チェック（development_rules.md C11 line 100に記載済み）
+10. ✅ Playwright E2Eデザイン視覚テスト追加（tests/e2e/specs/design-visual.spec.ts新規作成）
+11. ✅ git pre-commitフック（.git/hooks/pre-commit: バージョン同期+旧デザイン値チェック）
+
+### デザイン全画面検証（ふとし承認済み 2026-03-22 Claude.ai承認済み）
+12. ✅ 全画面検証完了（報告のみ。下記「デザイン全画面検証結果」参照）
+
+### 再発防止策ルール定着（ふとし承認済み 2026-03-22 Claude.ai承認済み）
+1. ✅ R1+R2: development_rules.md C12追記 — インラインスタイル禁止ルール + UI変更時のJS検査必須化
+2. ✅ R5: canopy.sh #12追加 — 旧デザイン値残存チェック(5パターン) + モデル色ハードコード警告 + style=ベースライン計測
+3. ✅ R3: CSS変数一元定義 — 3テーマ全てに --model-*, --send-btn-*, --input-radius, --card-radius, --know-purple-* 追加済み
+※ R1/R2/R5は手順ルールの領域。C10同様にCodeが自律管理する。追加OK、削除・緩和はClaude.ai承認必要。
 
 ### 完了済み
 - KICKOFF-001 Step 0〜8c ✅
@@ -47,7 +165,141 @@ J. ✅ メモ生成KVロック（60秒TTL、重複実行防止）
 - [ ] 1分間使い方デモ動画を用意
 - [ ] ローンチ時「ソロ開発者がAIと3週間で作ったSaaS」ストーリー活用
 
+## デザイン完全照合結果（2026-03-22 デザイン完全照合ミッション）
+
+spec_v3.md × mockup HTML × 実装コードの3点照合。全22画面を検証。以下は**乖離リスト**（修正はしない。報告のみ）。
+※ 前回Mission12の検証後にK〜AF実装で多数解消済み。本照合はその後の最新状態との差分。
+
+### A. 機能未実装（spec/mockupにあるが実装にない）
+
+| # | 画面 | 未実装項目 | 参照 |
+|---|------|-----------|------|
+| A1 | #03 Home | ユーザーメッセージ編集機能（editMessage関数が存在しない） | P-30 |
+| A2 | #05b GoalHub Tasks | AI提案アイコンが王冠ではなくテキスト(✨) | G05B-02 |
+| A3 | #05c GoalHub Analysis | 停滞ポイントセクション未実装 | G05C-02 |
+| A4 | #05c GoalHub Analysis | 「3人寄れば文殊の知恵」セクション未実装 | G05C-03 |
+| A5 | #05d GoalHub Memo | AIメモのアコーディオン形式未実装（単純ボックス表示のみ） | AMEND-001 #4 |
+| A6 | #05d GoalHub Memo | 空状態テキスト「AIがあなたを理解中です…」未実装 | AMEND-001 #4 |
+| A7 | #05e GoalHub Settings | AIロール「変更する」→テキスト入力フィールド展開未実装 | G05E-03 |
+| A8 | #06b Vision | 「5年後の理想の平日」「やりたくない生活」セクション未実装 | Spec |
+| A9 | #06b Vision | 再分析6チップ選択式UI（「選択した項目を再分析」）未実装 | G06B-04 |
+| A10 | #06b Vision | 「キャラクターをシェア」SNS共有ボタン未実装 | G06B-05 |
+| A11 | #06c Connect | 60%以下バー色オレンジ(#ef9f27)未実装 | G06C-01 |
+| A12 | #06c Connect | 「改善方法をAIに相談する」ボタン未実装 | Spec |
+| A13 | #01 Sidebar | タスクナビ重要度バッジ（🔴n 🟡n 🟢n）未実装 | Spec |
+| A14 | #01 Sidebar | 利用状況バー（Pro/Max: 「今月の利用: ¥X / ¥Y」）未実装 | Spec |
+
+### B. CSS値レベルの乖離（mockupと実装の数値差異）
+
+| # | 画面 | 乖離項目 | mockup/spec値 | 実装値 | 参照 |
+|---|------|---------|-------------|--------|------|
+| B1 | #02a Home | プリセットチップgap | 6px | 8px | mockup .presets vs index.html #home-presets |
+| B2 | #02a Home | hero margin-bottom（コンテンツ上シフト） | 35px | なし（padding:24px 16px 0のみ） | H02-02 |
+| B3 | #02a Home | ゴールド区切りライン+11px gap | 存在する | sep要素なし | H02-03 |
+| B4 | #02a Home | タスクボックス高さ | 208px | 明示的height設定なし | H02-04 |
+| B5 | #02b Home | フッターセパレータ | スペース（「·」ではない） | ` · `（中点使用） | CRN-02, chat.js L770 |
+| B6 | #07 Onboarding | スキップボタンbottom位置 | 16px | 12px (margin-bottom:12px) | G07-08 |
+| B7 | #08d Plan | Pro border | 2px solid #c8920a | 2px solid rgba(228,184,106,.5) | G08D-07 |
+| B8 | #08d Plan | 料金イメージバー幅 | 60% | 50% | G08D-07 |
+
+### C. spec × mockup間の不整合（実装に影響）
+
+| # | 画面 | 不整合項目 | spec値 | mockup値 | 備考 |
+|---|------|-----------|--------|----------|------|
+| C1 | #02a Home | 入力欄border-radius | 14px（スマホ） | 16px | spec=14px(CRN-03), mockup=16px。実装は14px=spec準拠 |
+| C2 | #02a Home | 入力欄padding | 記載なし | 8px 12px | 実装=4px 8px。mockupの方が余裕あり |
+
+### D. 前回Mission12で報告後に実装完了済み（解消確認）
+
+| # | 画面 | 項目 | 現状 |
+|---|------|------|------|
+| D1 | #02a Home | プレースホルダー「質問、相談、なんでも...」 | ✅ 実装済み |
+| D2 | #02b Home | C-variant ノッチ（4pxゴールドバー） | ✅ has-msgs::after |
+| D3 | #04 Tasks | ソート「重み順」ゴールド色 | ✅ .sort-btn.active color:#c8920a |
+| D4 | #04 Tasks | FAB重なり防止 52px | ✅ #task-list-scroll padding-bottom:52px |
+| D5 | #04 Tasks | ヒント「タップで詳細·長押しで並べ替え」 | ✅ renderTasks()内に実装 |
+| D6 | #06 Header | D-variant ゴールドヘッダー | ✅ .myself-hub-hd background:#c8920a |
+| D7 | #06b Vision | MY CHARACTERカード（ゴールド枠） | ✅ .my-character-card 実装済み |
+| D8 | #08b Feedback | NPS 0-10スコア | ✅ chat.js NPS scoring + style.css .nps-row |
+| D9 | #08c Settings | 位置情報トグル | ✅ location-toggle 実装済み |
+| D10 | #08c Settings | 「会話履歴を削除」ボタン | ✅ deleteChatHistory() 実装済み |
+| D11 | #08d Plan | トライアル注記 | ✅ 実装済み |
+| D12 | #08a Analytics | ストリーク/期間切替/タスク溜まり警告 | ✅ K〜AF実装で完了 |
+
+### E. 画面別サマリー
+
+| 画面 | 乖離数 | 判定 |
+|------|--------|------|
+| #01 サイドバー | 2件(A13-14) | 🟡 機能未実装あり |
+| #02a ホーム会話前 | 4件(B1-B4) | 🟡 CSS値ずれ |
+| #02b ホーム会話中 | 1件(B5) | 🟡 セパレータ不一致 |
+| #02c キーボード | 0件 | ✅ 一致 |
+| #03 ホーム全機能 | 1件(A1) | 🟡 編集機能未実装 |
+| #04a タスク一覧 | 0件 | ✅ 一致 |
+| #04b タスク詳細 | 0件 | ✅ 一致 |
+| #04c タスクPC | 0件 | ✅ 一致 |
+| #05a GoalHubチャット | 0件 | ✅ 一致 |
+| #05b GoalHubタスク | 1件(A2) | 🟡 アイコン差異 |
+| #05c GoalHub分析 | 2件(A3-4) | 🔴 セクション未実装 |
+| #05d GoalHubメモ | 2件(A5-6) | 🔴 アコーディオン未実装 |
+| #05e GoalHub設定 | 1件(A7) | 🟡 入力展開未実装 |
+| #06a 自分を知る | 0件 | ✅ 一致 |
+| #06b ビジョン | 3件(A8-10) | 🔴 複数セクション未実装 |
+| #06c ゴール連携 | 2件(A11-12) | 🟡 UX機能未実装 |
+| #06d プロフィール | 0件 | ✅ 一致 |
+| #07 オンボーディング | 1件(B6) | 🟢 微小CSS差 |
+| #08a 解析 | 0件 | ✅ 一致 |
+| #08b フィードバック | 0件 | ✅ 一致 |
+| #08c 設定 | 0件 | ✅ 一致 |
+| #08d プラン選択 | 2件(B7-8) | 🟢 微小CSS差 |
+
+**統計: 全22画面中 ✅一致12画面 / 🟢微小2画面 / 🟡要修正6画面 / 🔴要大対応3画面（重複あり計23件）**
+
+---
+
 ## 直近の変更履歴（直近3件のみ。過去分はinstructions/results/に保存）
+
+### デザイン全画面実装 K〜AF (2026-03-22) ✅
+- K: 複数ゴール同時検出（showGoalDetectToast配列対応）
+- L: ダウングレードボタン（プランモーダルにStripeポータルリンク）
+- R: ホームヒーロー（王冠48px+AIバッジ+プリセット6チップ）
+- S: プレースホルダー→「質問、相談、なんでも...」
+- T: ゴール検出トースト（バウンスアニメ+永続+金枠+王冠）
+- V: タスクフィルター（ライフ/ゴール追加+重み順ソート）
+- W: 私をデザインゴールドヘッダー+MY CHARACTERカード
+- X: Analytics（ストリーク+期間切替+タスク溜まり警告）
+- Y: Settings（位置情報トグル+会話履歴削除）
+- Z: トライアル注記「14日間無料トライアル・カード不要」
+- AB: PC版タスクFAB→ヘッダーボタン+52pxパディング
+- AC: フィードバックNPS（0-10スコア）
+- AD: オンボーディングSVG描画アニメーション
+- AE: タスクヒント初回表示
+- AF: 達成済みゴールド色
+- canopy PASS
+
+### ルーティング最適化v2 (2026-03-22) ✅
+- Step 1: PLAN_CONFIG Geminiモデル更新 — Free/Light/Pro: gemini-3-flash-preview, Max/Ultra: gemini-3.1-pro-preview
+- Step 2: ルーティングプロンプト再定義 — catch-all=GPTに変更、claude=感情・コーチング核心部に特化
+- Step 3: quickRouteパターン拡張 — GPT向け9パターン追加（アイディア/おすすめ/提案して/考えて/リスト/比較して/教えて/作って/書いて）
+- Step 4: Gemini 3 Thought Signatures対応 — KVベースで前回signatureを保存・次回リクエストに含める
+- Step 5: Gemini 3 Flash thinkingConfig — thinkingBudget:0設定（チャット用途コスト抑制）
+- canopy #18-19追加（Geminiモデル名+routing catch-all確認）
+- canopy PASS → deploy → git tag v3.11.0-routing-v2
+
+### デザイン完全照合 (2026-03-22) ✅
+- 全22画面のspec × mockup × 実装の3点照合を実施
+- 機能未実装14件(A1-A14)、CSS値乖離8件(B1-B8)、spec-mockup不整合1件(C1) を検出
+- 前回Mission12の報告後に解消済み12件(D1-D12)を確認
+- 一致12画面 / 微小2画面 / 要修正6画面 / 要大対応3画面
+- 修正はしない。報告のみ（ミッション要件通り）
+
+### 構造改善+品質強化+デザイン全画面検証 (2026-03-22) ✅
+- #1-3: 構造改善バッチ（旧ファイル整理済確認、canopy強化済確認、design_spec grepチェック4項目追加）
+- #4-9: 品質強化バッチ（5行サマリー/バグパターン/チェックリスト/提案テンプレ/キュー空フロー/横展開 — 全て実装済確認）
+- #10: Playwright E2Eデザイン視覚テスト新規作成（design-visual.spec.ts: CSS変数/送信ボタン/入力ボックス/フォント/プランカード検証）
+- #11: git pre-commitフック作成（バージョン同期+旧デザイン値チェック）
+- #12: デザイン全画面検証 — HIGH 23件 / MEDIUM 10件の未実装を特定（session_progress.mdに詳細記録）
+- canopy PASS（全項目OK）
 
 ### テスト配布前 追加3件 (2026-03-22) ✅
 - A: POST /api/account/delete + Supabase CASCADE + KV/localStorage全削除
@@ -88,26 +340,41 @@ J. ✅ メモ生成KVロック（60秒TTL、重複実行防止）
 キュー空 → docs/goal_ai_project_v6_4.md §8 + docs/goal_ai_reference_v2.md + コードベースgrepで未実装を特定 → ここに候補記載 → ふとしに報告して停止 → 承認後キューに移動
 
 ### テンプレート（候補記載時）
-| # | タスク名 | 影響範囲 | 工数目安 | 優先度案 |
-|---|---------|---------|---------|---------|
-| - | 例: ○○ | frontend/js/chat.js | 30分 | 🟡 |
+| # | タスク名 | 影響範囲 | 工数目安 | 優先度案 | 関連参照ドキュメント |
+|---|---------|---------|---------|---------|-------------------|
+| - | 例: ○○ | frontend/js/chat.js | 30分 | 🟡 | docs/goal_ai_project_v6_4.md §X |
 
 ### 承認済み未実装 → 全完了
 - ✅ Vitestユニットテスト基盤（12テスト、constants.test.js）
 - ✅ git tagにバージョン番号含める（v3.9.3-vite, v3.9.3-vitest適用済み）
 - ✅ C9/A2: 運用ルールとしてCLAUDE.mdに記載済み
 
-### 未実装候補（2026-03-22 第2回調査）
+### 第2回調査 K-O → 全完了 ✅
+- K: 複数ゴール同時検出 → showGoalDetectToastが複数トピック対応
+- L: ダウングレードボタン → プランモーダルにStripeポータルリンク追加
+- M: ディープ分析注入 → 既に実装済み（deep_context経由）
+- N: データエクスポートAPI → 既に実装済み（/api/account/export）
+- O: docs TODO更新 → 既に最新
 
-**実装可能（Codeで対応可）**
-
-| # | タスク名 | 影響範囲 | 工数目安 | 優先度案 |
-|---|---------|---------|---------|---------|
-| K | E-13: 複数ゴール同時検出（1メッセージから複数ゴール候補） | src/services/ai/routing.js, frontend/js/chat.js | 1h | 🟡 |
-| L | ダウングレードワンクリック（プランモーダルにダウングレードボタン） | frontend/js/ui.js, src/routes/checkout.js | 1h | 🟡 |
-| M | ディープ分析結果→次の会話のシステムプロンプトに注入 | src/routes/chat.js, src/services/prompt.js | 1h | 🟡 |
-| N | GDPR対応: データエクスポートAPI（/api/account/export） | src/routes/account.js | 1.5h | 🟡 |
-| O | docs/のTODOチェックリスト更新（完了項目を☑に） | docs/goal_ai_project_v6_4.md | 15min | 🟢 |
+### 第3回調査 R-AF → 全完了 ✅
+- R: ホームヒーロー+プリセットチップ → 王冠48px+AIバッジ+6チップ追加
+- S: プレースホルダー「質問、相談、なんでも...」に変更
+- T: ゴール検出トースト → バウンスアニメ+永続+複数ゴール対応
+- U: ユーザーメッセージ編集 → 未実装（仕様確認中、次回対応）
+- V: タスクフィルター拡張 → ライフ/ゴール+重み順ソート追加
+- W: ゴールドヘッダー+MY CHARACTERカード追加
+- X: Analytics → ストリーク+期間切替+タスク溜まり警告追加
+- Y: Settings → 位置情報トグル+会話履歴削除ボタン追加
+- Z: トライアル注記テキスト更新
+- AA: C-variantノッチ → 既に実装済み（has-msgs::after）
+- AB: PC版FAB非表示+ヘッダーテキストボタン+52pxパディング
+- AC: フィードバックNPS → 0-10スコア+フォローアップ追加
+- AD: オンボーディングSVG描画アニメーション追加
+- AE: タスクヒント初回表示追加
+- AF: 達成済みボタンをゴールド色に変更
+| AD | オンボーディングSVG描画アニメーション | frontend/style.css | 1h | 🟢 | design_spec_v3 G07-02 |
+| AE | タスクヒント「タップで詳細・長押しで並べ替え」初回表示 | frontend/js/goals.js | 30min | 🟢 | design_spec_v3 P-32 |
+| AF | ゴール設定「達成済み」ゴールド色に変更 | frontend/style.css or js/goals.js | 10min | 🟢 | design_spec_v3 G05E-01 |
 
 **手動確認のみ（ふとし対応）**
 
@@ -147,16 +414,11 @@ J. ✅ メモ生成KVロック（60秒TTL、重複実行防止）
 
 ---
 
-## Stripe Price ID マッピング
-| プラン | fixed | metered | annual |
-|--------|-------|---------|--------|
-| Light | price_1TCzZj...hTbAwTYK | price_1TCzsw...jD8aUGIm | price_1TCztW...qwlf41QK |
-| Pro | price_1TCzv6...eTSyND0a | price_1TCzwJ...pKKWw6nV | price_1TCzwo...tfRAkNFr |
-| Max | price_1TCzz4...YnrDA4vv | price_1TCzzk...iQmUneA7 | price_1TD009...1yAJuPoz |
-| Ultra | price_1TD03i...lPdCgNCJ | — | price_1TD041...VSJtVFrd |
-| Addon 50 | price_1TD3QJ...OlOzERwV | — | — |
-| Addon 120 | price_1TD3QK...uP63gUOn | — | — |
+## ふとし ↔ Claude.ai 議論待ちリスト
 
-## Supabase
-- URL: https://wrvwcfilokfcjudspizp.supabase.co
-- Service Key: tests/.env.test
+1. **競合比較分析（ルーティングv2後）** — 今回のモデル変更がGOAL AIの売り文句にどう影響するか。Google(Gemini)・OpenAI(ChatGPT Plus/Pro)・Anthropic(Claude Pro/Max)の各プランと比較し、ライトユーザー・通常ユーザー・ヘビーユーザー目線で徹底解析。特に使用AIのグレード・性能・コスパの見え方。
+
+---
+
+## Stripe / Supabase
+- Price ID・接続情報は tests/.env.test を参照（git管理外）

@@ -177,7 +177,7 @@ export async function handleChatStream(request, env, ctx) {
   if (finalRoute !== 'claude') {
     let routeResponse = null;
     if (finalRoute === 'gemini') {
-      routeResponse = await handleGeminiChat(env, enhancedSystem, compressedMessages, auth, userLocation, effectiveModels);
+      routeResponse = await handleGeminiChat(env, enhancedSystem, compressedMessages, auth, userLocation, effectiveModels, ctx);
     } else if (finalRoute === 'gpt') {
       routeResponse = await handleGPTChat(env, enhancedSystem, compressedMessages, auth, maxTokens, effectiveModels);
     } else if (finalRoute === 'gpt-simple') {

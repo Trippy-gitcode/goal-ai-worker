@@ -4,32 +4,32 @@ export const PLAN_CONFIG = {
   free: {
     display_name: 'Free', price_fixed: 0, per_turn: 0, cap: 0, daily_limit: 20,
     deep_monthly: 3, ai_memo: false, context_multiplier: 1.0, fallback_model: 'gpt-5-nano',
-    models: { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5-mini', gemini: 'gemini-2.5-flash', router: 'gpt-5-mini' },
+    models: { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5-mini', gemini: 'gemini-3-flash-preview', router: 'gpt-5-mini' },
     fair_use: { h5_limit: 10, weekly_limit: 140 }
   },
   light: {
     display_name: 'Light', price_fixed: 500, per_turn: 8, cap: 980, daily_limit: null,
     deep_monthly: 5, ai_memo: false, context_multiplier: 1.0, fallback_model: 'gpt-5-nano',
-    models: { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5-mini', gemini: 'gemini-2.5-flash', router: 'gpt-5-mini' },
+    models: { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5-mini', gemini: 'gemini-3-flash-preview', router: 'gpt-5-mini' },
     fair_use: { h5_limit: 50, weekly_limit: 200 }
   },
   pro: {
     display_name: 'Pro', price_fixed: 1500, per_turn: 20, cap: 2980, daily_limit: null,
     deep_monthly: 30, ai_memo: true, context_multiplier: 1.0, fallback_model: 'gpt-5-nano',
-    models: { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5', gemini: 'gemini-2.5-flash', router: 'gpt-5-mini' },
+    models: { claude: 'claude-sonnet-4-20250514', openai: 'gpt-5', gemini: 'gemini-3-flash-preview', router: 'gpt-5-mini' },
     fair_use: { h5_limit: 80, weekly_limit: 500 }
   },
   max: {
     display_name: 'Max', price_fixed: 1500, per_turn: 10, cap: 9800, daily_limit: null,
     deep_monthly: Infinity, ai_memo: true, context_multiplier: 1.0, fallback_model: 'gpt-5-mini',
-    models: { claude: 'claude-opus-4-20250514', openai: 'gpt-5', gemini: 'gemini-2.5-pro', router: 'gpt-5-mini' },
+    models: { claude: 'claude-opus-4-20250514', openai: 'gpt-5', gemini: 'gemini-3.1-pro-preview', router: 'gpt-5-mini' },
     fair_use: { h5_limit: 200, weekly_limit: 1500 }
   },
   ultra: {
     display_name: 'Ultra', price_fixed: 20000, per_turn: 0, cap: 0, daily_limit: null,
     deep_monthly: Infinity, ai_memo: true, context_multiplier: 2.0, fallback_model: null,
     et_weekly_limit: 140, priority_queue: true,
-    models: { claude: 'claude-opus-4-20250514', openai: 'gpt-5', gemini: 'gemini-2.5-pro', router: 'gpt-5-mini' },
+    models: { claude: 'claude-opus-4-20250514', openai: 'gpt-5', gemini: 'gemini-3.1-pro-preview', router: 'gpt-5-mini' },
     fair_use: { h5_limit: 200, weekly_limit: 1500 }
   }
 };
@@ -97,7 +97,7 @@ export function getCurrentMonth() {
   return `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
-export const APP_VERSION = '3.10.0';
+export const APP_VERSION = '3.11.0';
 export const COMMON_RULES = `【共通ルール】
 - ユーザーの質問にはまず答える。質問を聞き返す前にまず回答する。
 - 2〜3文で簡潔に。長文禁止。質問は1回まで。

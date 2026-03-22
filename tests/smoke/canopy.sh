@@ -142,8 +142,8 @@ done
 STYLE_COUNT=$(grep -rc 'style=' frontend/js/ 2>/dev/null | awk -F: '{s+=$2}END{print s}')
 echo "INFO: inline style= count in JS: $STYLE_COUNT (baseline)"
 
-# 14. UI仕様チェック（design_impl_001.md の仕様値がコードに存在するか）
-echo "--- UI spec values (design_impl_001) ---"
+# 14. UI仕様チェック（design_spec_v3 8a〜8c 全仕様統合）
+echo "--- UI spec values (design_spec_v3 8a-8c) ---"
 # CRN-01: 統一王冠SVG
 CRN01=$(grep -rc "M5 24l4-11 3 5L16 6" frontend/ 2>/dev/null | awk -F: '{s+=$2}END{print s}')
 if [ "$CRN01" -ge 2 ]; then echo "OK: CRN-01 crown SVG ($CRN01 refs)"; else echo "FAIL: CRN-01 crown SVG missing ($CRN01)"; FAIL=1; fi
@@ -167,12 +167,20 @@ for v in "model-claude" "model-gpt" "model-gemini"; do
   VC=$(grep -c "$v" frontend/style.css 2>/dev/null)
   if [ "$VC" -ge 3 ]; then echo "OK: --$v ($VC refs)"; else echo "FAIL: --$v missing ($VC)"; FAIL=1; fi
 done
+# CSS変数トークン: card-radius, popup-radius, pill-radius
+for v in "card-radius" "popup-radius" "pill-radius"; do
+  VC=$(grep -c "$v" frontend/style.css 2>/dev/null)
+  if [ "$VC" -ge 3 ]; then echo "OK: --$v ($VC refs)"; else echo "FAIL: --$v missing ($VC)"; FAIL=1; fi
+done
+# 8b: ゴールハブ5タブ
+HT=$(grep -c "hub-tab" frontend/index.html 2>/dev/null)
+if [ "$HT" -ge 5 ]; then echo "OK: 8b hub-tabs ($HT)"; else echo "FAIL: 8b hub-tabs missing ($HT, need ≥5)"; FAIL=1; fi
 # 8b: オンボーディング3ステップ
 OB=$(grep -c "ob-slides\|ob-dot" frontend/index.html 2>/dev/null)
 if [ "$OB" -ge 2 ]; then echo "OK: 8b onboarding slides ($OB)"; else echo "FAIL: 8b onboarding slides missing ($OB)"; FAIL=1; fi
-# 8c: プランカルーセル
-PC=$(grep -c "plan-carousel\|pc-free\|pc-pro\|pc-ultra" frontend/ -r 2>/dev/null | awk -F: '{s+=$2}END{print s}')
-if [ "$PC" -ge 3 ]; then echo "OK: 8c plan cards ($PC refs)"; else echo "FAIL: 8c plan cards missing ($PC)"; FAIL=1; fi
+# 8c: プランカルーセル（5プラン全クラス）
+PC=$(grep -c "pc-free\|pc-light\|pc-pro\|pc-max\|pc-ultra" frontend/ -r 2>/dev/null | awk -F: '{s+=$2}END{print s}')
+if [ "$PC" -ge 5 ]; then echo "OK: 8c plan cards ($PC refs)"; else echo "FAIL: 8c plan cards missing ($PC, need ≥5)"; FAIL=1; fi
 # 8c: ゴール検出トースト
 GDT=$(grep -c "showGoalDetectToast\|goal-detect-toast" frontend/ -r 2>/dev/null | awk -F: '{s+=$2}END{print s}')
 if [ "$GDT" -ge 2 ]; then echo "OK: 8c goal detect toast ($GDT refs)"; else echo "FAIL: 8c goal detect toast missing ($GDT)"; FAIL=1; fi
@@ -190,6 +198,21 @@ for old in "audit_batch_04.md" "fix_persistent_bugs.md" "fix_persistent_bugs_v2.
   if [ -f "$old" ]; then echo "FAIL: stale file $old in root"; STALE=1; FAIL=1; fi
 done
 if [ "$STALE" -eq 0 ]; then echo "OK: no stale root files"; fi
+
+# 18. Gemini 3.x モデル名チェック
+echo "--- Gemini 3.x model names ---"
+G3F=$(grep -c "gemini-3-flash-preview" src/utils/constants.js 2>/dev/null)
+G3P=$(grep -c "gemini-3.1-pro-preview" src/utils/constants.js 2>/dev/null)
+if [ "$G3F" -ge 3 ]; then echo "OK: gemini-3-flash-preview ($G3F refs)"; else echo "FAIL: gemini-3-flash-preview missing ($G3F, need ≥3)"; FAIL=1; fi
+if [ "$G3P" -ge 2 ]; then echo "OK: gemini-3.1-pro-preview ($G3P refs)"; else echo "FAIL: gemini-3.1-pro-preview missing ($G3P, need ≥2)"; FAIL=1; fi
+# 旧Geminiモデル名が残っていないこと
+OLD_GEM=$(grep -c "gemini-2\.5" src/utils/constants.js 2>/dev/null)
+if [ "$OLD_GEM" -eq 0 ]; then echo "OK: no old gemini-2.5 models"; else echo "FAIL: old gemini-2.5 still in constants.js ($OLD_GEM refs)"; FAIL=1; fi
+
+# 19. ルーティングcatch-all=GPT確認
+echo "--- Routing catch-all ---"
+CATCH_GPT=$(grep -c "return 'gpt'" src/services/ai/routing.js 2>/dev/null)
+if [ "$CATCH_GPT" -ge 2 ]; then echo "OK: routing catch-all=gpt ($CATCH_GPT)"; else echo "FAIL: routing catch-all not gpt ($CATCH_GPT, need ≥2)"; FAIL=1; fi
 
 # 17. session_progress.mdバージョンとAPP_VERSIONの一致
 echo "--- SP version sync ---"
