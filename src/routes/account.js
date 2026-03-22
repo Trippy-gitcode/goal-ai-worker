@@ -1,6 +1,50 @@
 import { authenticateRequest } from '../middleware/auth.js';
 import { jsonRes } from '../utils/helpers.js';
 
+export async function handleAccountExport(request, env) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+
+  const supabaseUrl = env.SUPABASE_URL;
+  const supabaseKey = env.SUPABASE_SERVICE_KEY;
+  const headers = { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` };
+  const userId = auth.userId;
+
+  try {
+    const [userRes, goalsRes, msgsRes, usageRes, feedbackRes] = await Promise.all([
+      fetch(`${supabaseUrl}/rest/v1/users?user_id=eq.${userId}&select=*`, { headers }),
+      fetch(`${supabaseUrl}/rest/v1/goals?user_id=eq.${userId}&select=*&order=created_at.desc`, { headers }),
+      fetch(`${supabaseUrl}/rest/v1/chat_messages?user_id=eq.${userId}&select=role,content,ai_model,created_at,session_id,goal_id&order=created_at.desc&limit=500`, { headers }),
+      fetch(`${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&select=*`, { headers }),
+      fetch(`${supabaseUrl}/rest/v1/feedbacks?user_id=eq.${userId}&select=*`, { headers }),
+    ]);
+
+    const data = {
+      exported_at: new Date().toISOString(),
+      user: (await userRes.json())?.[0] || null,
+      goals: await goalsRes.json(),
+      chat_messages: await msgsRes.json(),
+      usage: await usageRes.json(),
+      feedbacks: await feedbackRes.json(),
+    };
+
+    // Redact sensitive fields
+    if (data.user) {
+      delete data.user.stripe_customer_id;
+      delete data.user.stripe_subscription_id;
+      delete data.user.stripe_metered_subscription_item_id;
+    }
+
+    return new Response(JSON.stringify(data, null, 2), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', 'Content-Disposition': 'attachment; filename="goal-ai-export.json"' },
+    });
+  } catch (e) {
+    console.error('Account export error:', e.message);
+    return jsonRes({ error: 'データエクスポートに失敗しました' }, 500);
+  }
+}
+
 export async function handleAccountDelete(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);

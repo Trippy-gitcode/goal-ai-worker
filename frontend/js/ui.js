@@ -1162,17 +1162,25 @@ function restoreGoal(id){
 }
 
 // ─ Export data ─
-function exportData(){
-  const data = {
-    goals: ALL_GOALS,
-    profile: USER_PROFILE,
-    membership: MEMBERSHIP,
-    exportedAt: new Date().toISOString()
-  };
-  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`goalai_export_${new Date().toISOString().split('T')[0]}.json`;
-  a.click(); URL.revokeObjectURL(a.href);
+async function exportData(){
+  if(!AUTH_TOKEN){ toast('ログインが必要です'); return; }
+  toast('データをエクスポート中…');
+  try {
+    const res = await fetch(`${WORKER_URL}/api/account/export`, { headers: getAuthHeaders() });
+    if(!res.ok) throw new Error('エクスポート失敗');
+    const blob = await res.blob();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `goalai_export_${new Date().toISOString().split('T')[0]}.json`;
+    a.click(); URL.revokeObjectURL(a.href);
+    toast('エクスポート完了');
+  } catch(e) {
+    // フォールバック: ローカルデータ
+    const data = { goals: ALL_GOALS, profile: USER_PROFILE, membership: MEMBERSHIP, exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download=`goalai_export_${new Date().toISOString().split('T')[0]}.json`;
+    a.click(); URL.revokeObjectURL(a.href);
+  }
 }
 
 // ─ Close overlay clicks ─
@@ -1329,17 +1337,35 @@ function updatePlanCTA(){
   const btn = document.getElementById('plan-cta-btn');
   if(!btn) return;
   const p = MEMBERSHIP.selectedPlan;
-  const names = { free:'Free', light:'Light（¥500〜/月）', pro:'Pro（¥1,500〜/月）', max:'Max（¥1,500〜/月）', ultra:'Ultra（¥20,000/月）' };
-  if(p==='free'){
+  const cur = MEMBERSHIP.plan;
+  const tiers = ['free','light','pro','max','ultra'];
+  const curIdx = tiers.indexOf(cur);
+  const selIdx = tiers.indexOf(p);
+  const isDowngrade = curIdx > 0 && selIdx < curIdx;
+  const isCurrent = p === cur;
+
+  if(isCurrent){
+    btn.textContent='現在のプラン';
+    btn.style.background='var(--bg3)'; btn.style.color='var(--muted)'; btn.style.border='1px solid var(--border2)';
+    btn.onclick = null;
+  } else if(isDowngrade){
+    btn.textContent= p === 'free' ? 'Freeプランに戻す' : `${p.charAt(0).toUpperCase()+p.slice(1)}にダウングレード`;
+    btn.style.background='var(--bg3)'; btn.style.color='var(--muted)'; btn.style.border='1px solid var(--border2)';
+    btn.onclick = () => { openCustomerPortal(); };
+  } else if(p==='free'){
     btn.textContent='Freeプランに戻す';
     btn.style.background='var(--bg3)'; btn.style.color='var(--muted)'; btn.style.border='1px solid var(--border2)';
+    btn.onclick = () => { subscribePlan(); };
   } else if(p==='ultra'){
     btn.textContent='Ultraプランを始める';
     btn.style.background='linear-gradient(135deg,#e4b86a,#BA55D3)'; btn.style.color='#fff'; btn.style.border='none';
+    btn.onclick = () => { subscribePlan(); };
   } else {
+    const names = { light:'Light', pro:'Pro', max:'Max' };
     const label = MEMBERSHIP.promoApplied && p==='pro' ? 'プロモコードでProを開始' : `${names[p]||p}プランを始める`;
     btn.textContent=label;
     btn.style.background='var(--amber)'; btn.style.color='var(--bg)'; btn.style.border='none';
+    btn.onclick = () => { subscribePlan(); };
   }
 }
 

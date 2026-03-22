@@ -953,7 +953,9 @@ coaching: ユーザーが目標・悩み・将来・キャリア・成長・自�
 
 - task_potential: ユーザーの発言にタスク化できる行動・予定・やるべきことが含まれる場合はtrue
 
-JSONで返してください: { "route": "...", "coaching": true|false, "goal_intent": "none|level1|level2|level3", "task_potential": true|false }`;
+- goal_topics: goal_intentがlevel2以上の場合、検出したゴール候補を配列で返す（例: ["TOEIC800点","英会話力向上"]）。1つだけの場合も配列。
+
+JSONで返してください: { "route": "...", "coaching": true|false, "goal_intent": "none|level1|level2|level3", "task_potential": true|false, "goal_topics": [] }`;
 
 async function routeMessage(text){
   // 500文字超の要約依頼はgemini
@@ -982,6 +984,7 @@ async function routeMessage(text){
       if (parsed.goal_intent) {
         window._lastGoalIntent = parsed.goal_intent;
         goalDetectLevel = parsed.goal_intent;
+        if (parsed.goal_topics?.length > 0) window._detectedGoalTopics = parsed.goal_topics;
         if (parsed.goal_intent === 'level3') { pendingGoalProposal = true; showGoalDetectToast(); }
       }
       if (parsed.task_potential) { window._pendingTaskSuggestion = true; highlightTaskChip(); }
