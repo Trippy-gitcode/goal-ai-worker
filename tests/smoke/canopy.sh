@@ -1,6 +1,16 @@
 #!/bin/bash
 # canopy.sh — 全Step横断の既存機能生死確認
 CANOPY_START=$(date +%s)
+
+# 結果保存先
+mkdir -p instructions/results
+RESULT_FILE="instructions/results/canopy_latest.txt"
+PREV_FILE="instructions/results/canopy_prev.txt"
+if [ -f "$RESULT_FILE" ]; then cp "$RESULT_FILE" "$PREV_FILE"; fi
+
+# 全出力をファイルにもtee
+exec > >(tee "$RESULT_FILE") 2>&1
+
 echo "=== CANOPY TEST ($(date '+%H:%M:%S')) ==="
 FAIL=0
 
@@ -104,7 +114,99 @@ for pattern in "ultra-particles\|ultraFloat" "plan-compare-table" "フェアユ�
   if [ "$COUNT" -eq 0 ]; then echo "FAIL: $pattern not found in frontend"; FAIL=1; else echo "OK: $pattern ($COUNT refs)"; fi
 done
 
+# 12. C10: バージョン同期チェック（4箇所一致）
+echo "--- Version sync (C10) ---"
+V_GLOBALS=$(grep -o "APP_VERSION = '[^']*'" frontend/js/globals.js | grep -o "'[^']*'" | tr -d "'")
+V_SW=$(grep -o "goal-ai-v[^']*" frontend/public/sw.js | head -1 | sed 's/goal-ai-v//')
+V_HTML=$(grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' frontend/index.html | head -1 | sed 's/v//')
+echo "  globals.js=$V_GLOBALS  sw.js=$V_SW  index.html=$V_HTML"
+if [ "$V_GLOBALS" = "$V_SW" ] && [ "$V_SW" = "$V_HTML" ]; then
+  echo "OK: version sync ($V_GLOBALS)"
+else
+  echo "FAIL: version mismatch"; FAIL=1
+fi
+
+# 13. C12: スタイル整合性チェック（インラインスタイル禁止ルール）
+echo "--- Style integrity (C12) ---"
+# 旧デザイン値の残存チェック（JSファイル内）
+for bad in "border-radius:24px" "border-radius:20px" "#c4a0e8" "#252a40" "#323855"; do
+  COUNT=$(grep -rc "$bad" frontend/js/ 2>/dev/null | awk -F: '{s+=$2}END{print s}')
+  if [ "$COUNT" -gt 0 ]; then echo "FAIL: old style '$bad' found in JS ($COUNT)"; FAIL=1; else echo "OK: no '$bad' in JS"; fi
+done
+# ハードコードモデル色の残存チェック（PDF/export除く）
+for bad in "#5b8def" "#e07070" "#e8913a"; do
+  COUNT=$(grep -c "$bad" frontend/js/chat.js frontend/js/ui.js frontend/js/goals.js frontend/js/profile.js 2>/dev/null | awk -F: '{s+=$2}END{print s}')
+  if [ "$COUNT" -gt 0 ]; then echo "WARN: hardcoded model color '$bad' in JS ($COUNT)"; fi
+done
+# インラインstyle= 総数ベースライン（増加検出用）
+STYLE_COUNT=$(grep -rc 'style=' frontend/js/ 2>/dev/null | awk -F: '{s+=$2}END{print s}')
+echo "INFO: inline style= count in JS: $STYLE_COUNT (baseline)"
+
+# 14. UI仕様チェック（design_impl_001.md の仕様値がコードに存在するか）
+echo "--- UI spec values (design_impl_001) ---"
+# CRN-01: 統一王冠SVG
+CRN01=$(grep -rc "M5 24l4-11 3 5L16 6" frontend/ 2>/dev/null | awk -F: '{s+=$2}END{print s}')
+if [ "$CRN01" -ge 2 ]; then echo "OK: CRN-01 crown SVG ($CRN01 refs)"; else echo "FAIL: CRN-01 crown SVG missing ($CRN01)"; FAIL=1; fi
+# CRN-02: モデル名グレー (--text-tertiary or --muted)
+CRN02=$(grep -c "msg-model.*muted\|msg-model.*tertiary" frontend/style.css 2>/dev/null)
+if [ "$CRN02" -ge 1 ]; then echo "OK: CRN-02 model name gray"; else echo "FAIL: CRN-02 model name not gray"; FAIL=1; fi
+# CRN-03: 入力ボックス統一 (border-radius:14px or --input-radius)
+CRN03=$(grep -c "input-radius\|border-radius:14px" frontend/style.css 2>/dev/null)
+if [ "$CRN03" -ge 2 ]; then echo "OK: CRN-03 input radius ($CRN03 refs)"; else echo "FAIL: CRN-03 input radius missing ($CRN03)"; FAIL=1; fi
+# 送信ボタンサイズ (--send-btn-size)
+SBS=$(grep -c "send-btn-size" frontend/style.css 2>/dev/null)
+if [ "$SBS" -ge 3 ]; then echo "OK: send-btn-size ($SBS refs)"; else echo "FAIL: send-btn-size missing ($SBS)"; FAIL=1; fi
+# 送信ボタングラデーション (--send-btn-grad)
+SBG=$(grep -c "send-btn-grad" frontend/style.css 2>/dev/null)
+if [ "$SBG" -ge 3 ]; then echo "OK: send-btn-grad ($SBG refs)"; else echo "FAIL: send-btn-grad missing ($SBG)"; FAIL=1; fi
+# 送信ボタン丸型 (border-radius:50%)
+SBR=$(grep -c "border-radius:50%" frontend/style.css 2>/dev/null)
+if [ "$SBR" -ge 3 ]; then echo "OK: send-btn round ($SBR refs)"; else echo "FAIL: send-btn not round ($SBR)"; FAIL=1; fi
+# モデル色CSS変数
+for v in "model-claude" "model-gpt" "model-gemini"; do
+  VC=$(grep -c "$v" frontend/style.css 2>/dev/null)
+  if [ "$VC" -ge 3 ]; then echo "OK: --$v ($VC refs)"; else echo "FAIL: --$v missing ($VC)"; FAIL=1; fi
+done
+# 8b: オンボーディング3ステップ
+OB=$(grep -c "ob-slides\|ob-dot" frontend/index.html 2>/dev/null)
+if [ "$OB" -ge 2 ]; then echo "OK: 8b onboarding slides ($OB)"; else echo "FAIL: 8b onboarding slides missing ($OB)"; FAIL=1; fi
+# 8c: プランカルーセル
+PC=$(grep -c "plan-carousel\|pc-free\|pc-pro\|pc-ultra" frontend/ -r 2>/dev/null | awk -F: '{s+=$2}END{print s}')
+if [ "$PC" -ge 3 ]; then echo "OK: 8c plan cards ($PC refs)"; else echo "FAIL: 8c plan cards missing ($PC)"; FAIL=1; fi
+# 8c: ゴール検出トースト
+GDT=$(grep -c "showGoalDetectToast\|goal-detect-toast" frontend/ -r 2>/dev/null | awk -F: '{s+=$2}END{print s}')
+if [ "$GDT" -ge 2 ]; then echo "OK: 8c goal detect toast ($GDT refs)"; else echo "FAIL: 8c goal detect toast missing ($GDT)"; FAIL=1; fi
+
+# 15. 参照ドキュメント全ファイル存在チェック
+echo "--- Reference docs exist ---"
+for ref in "docs/goal_ai_project_v6_4.md" "docs/goal_ai_reference_v2.md" "docs/goal_ai_design_spec_v3.md" "docs/design_review_changelog_v3.md" "docs/design_amendment_001.md" "instructions/design_impl_001.md" "instructions/stripe_005_frontend.md" "instructions/stripe_amendment_001.md" "instructions/stripe_amendment_002.md" "development_rules.md"; do
+  if [ -f "$ref" ]; then echo "OK: $ref"; else echo "FAIL: $ref missing"; FAIL=1; fi
+done
+
+# 16. 旧ファイルがルートに残っていないこと
+echo "--- No stale root files ---"
+STALE=0
+for old in "audit_batch_04.md" "fix_persistent_bugs.md" "fix_persistent_bugs_v2.md" "fix_pre_launch_10items.md" "fix_profile_page.md" "fix_system_concept_change.md" "fix_tester_setup.md" "fix_ui_batch_04.md" "render_chat_ui_integration.md" "v3.9.1_worker_full_split.md" "v3_9_0_location_vite_hono_v2.md"; do
+  if [ -f "$old" ]; then echo "FAIL: stale file $old in root"; STALE=1; FAIL=1; fi
+done
+if [ "$STALE" -eq 0 ]; then echo "OK: no stale root files"; fi
+
+# 17. session_progress.mdバージョンとAPP_VERSIONの一致
+echo "--- SP version sync ---"
+SP_VER=$(grep -o 'バージョン:.*v[0-9.]*' instructions/session_progress.md 2>/dev/null | grep -o 'v[0-9.]*')
+echo "  session_progress=$SP_VER  APP_VERSION=$V_GLOBALS"
+# INFO only (SP version may lag during development)
+
 CANOPY_END=$(date +%s)
 CANOPY_DUR=$((CANOPY_END - CANOPY_START))
+
 echo "=== CANOPY $([ $FAIL -eq 0 ] && echo 'PASS' || echo 'FAIL') (${CANOPY_DUR}s) ==="
+
+# 前回差分出力
+if [ -f "$PREV_FILE" ]; then
+  echo ""
+  echo "--- Diff from previous run ---"
+  diff "$PREV_FILE" "$RESULT_FILE" || true
+fi
+
 exit $FAIL
