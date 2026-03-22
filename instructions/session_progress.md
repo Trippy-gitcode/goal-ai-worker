@@ -344,6 +344,42 @@ spec_v3.md × mockup HTML × 実装コードの3点照合。全22画面を検証
 |---|---------|---------|---------|---------|-------------------|
 | - | 例: ○○ | frontend/js/chat.js | 30分 | 🟡 | docs/goal_ai_project_v6_4.md §X |
 
+### 第4回調査（2026-03-22 キュー空時自律提案）
+
+**デザイン照合A1-A14の修正候補（テスト配布前ゲート）**
+
+| # | タスク名 | 影響範囲 | 工数目安 | 優先度案 | 関連参照ドキュメント |
+|---|---------|---------|---------|---------|-------------------|
+| AG | フッターセパレータ修正（·→スペース） | frontend/js/chat.js L770等 | 15min | 🟢 | design_spec_v3 CRN-02 |
+| AH | プリセットgap修正（8px→6px） | frontend/index.html #home-presets | 5min | 🟢 | mockup 02a |
+| AI | AI提案アイコン王冠化（✨→crown SVG） | frontend/js/goals.js | 20min | 🟢 | design_spec_v3 G05B-02 |
+| AJ | AIメモ空状態テキスト追加 | frontend/js/goals.js | 15min | 🟢 | design_spec_v3 AMEND-001 #4 |
+| AK | Connect画面オレンジ色(#ef9f27)60%以下 | frontend/js/profile.js | 15min | 🟢 | design_spec_v3 G06C-01 |
+| AL | Onboardingスキップbottom位置(12→16px) | frontend/index.html | 5min | 🟢 | design_spec_v3 G07-08 |
+| AM | Proカードborder修正（alpha→ソリッド） | frontend/index.html | 5min | 🟢 | design_spec_v3 G08D-07 |
+
+**機能未実装候補（中期）**
+
+| # | タスク名 | 影響範囲 | 工数目安 | 優先度案 | 関連参照ドキュメント |
+|---|---------|---------|---------|---------|-------------------|
+| AN | ユーザーメッセージ編集機能 | frontend/js/chat.js | 2h | 🟡 | design_spec_v3 P-30 |
+| AO | AIメモアコーディオン形式 | frontend/js/goals.js, style.css | 1.5h | 🟡 | design_spec_v3 AMEND-001 #4 |
+| AP | ビジョン画面「5年後/やりたくない」セクション | frontend/index.html, profile.js | 1h | 🟡 | design_spec_v3 #06b |
+| AQ | ビジョン再分析6チップUI | frontend/js/profile.js | 1h | 🟡 | design_spec_v3 G06B-04 |
+| AR | Connect「改善方法をAIに相談する」ボタン | frontend/js/profile.js | 30min | 🟢 | design_spec_v3 #06c |
+| AS | SNS共有「キャラクターをシェア」ボタン | frontend/js/profile.js | 30min | 🟢 | design_spec_v3 G06B-05 |
+| AT | サイドバー重要度バッジ（🔴n 🟡n 🟢n） | frontend/js/ui.js | 1h | 🟡 | design_spec_v3 #01 |
+| AU | サイドバー利用状況バー（Pro/Max） | frontend/js/ui.js | 1h | 🟡 | design_spec_v3 #01 |
+| AV | AIロール「変更する」テキスト入力展開 | frontend/js/goals.js | 30min | 🟢 | design_spec_v3 G05E-03 |
+
+**バックログ候補（reference_v2.md由来）**
+
+| # | タスク名 | 影響範囲 | 工数目安 | 優先度案 | 関連参照ドキュメント |
+|---|---------|---------|---------|---------|-------------------|
+| AW | AIメモ更新トースト通知 | frontend/js/profile.js, ui.js | 30min | 🟢 | reference_v2 #14 |
+| AX | 紹介報酬自動処理 | src/routes/referral.js | 2h | 🟡 | reference_v2 #24 |
+| AY | トリセツPDF出力 | frontend/js | 3h | 🟡 | reference_v2 #32 |
+
 ### 承認済み未実装 → 全完了
 - ✅ Vitestユニットテスト基盤（12テスト、constants.test.js）
 - ✅ git tagにバージョン番号含める（v3.9.3-vite, v3.9.3-vitest適用済み）
