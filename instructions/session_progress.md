@@ -277,6 +277,15 @@ spec_v3.md × mockup HTML × 実装コードの3点照合。全22画面を検証
 - AF: 達成済みゴールド色
 - canopy PASS
 
+### CSS微修正バッチ AG-AM (2026-03-22) ✅
+- AG: フッターセパレータ `·` → スペース（chat.js 5箇所全置換、CRN-02準拠）
+- AH: プリセットgap 8px → 6px（mockup 02a一致）
+- AL: Onboardingスキップbottom margin 12→16px（G07-08）
+- AM: Proカードborder rgba(.5) → ソリッド#c8920a（G08D-07）
+- AI(AI提案王冠): GoalHubタスクにAI提案セクション自体がないためスキップ（機能未実装レイヤー）
+- AK(Connect 60%オレンジ): renderConnectContent内にロジックがないためスキップ（機能未実装レイヤー）
+- canopy PASS → deploy → git tag v3.11.0-css-fixes
+
 ### ルーティング最適化v2 (2026-03-22) ✅
 - Step 1: PLAN_CONFIG Geminiモデル更新 — Free/Light/Pro: gemini-3-flash-preview, Max/Ultra: gemini-3.1-pro-preview
 - Step 2: ルーティングプロンプト再定義 — catch-all=GPTに変更、claude=感情・コーチング核心部に特化
