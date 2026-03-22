@@ -95,7 +95,28 @@ J. ✅ メモ生成KVロック（60秒TTL、重複実行防止）
 - ✅ git tagにバージョン番号含める（v3.9.3-vite, v3.9.3-vitest適用済み）
 - ✅ C9/A2: 運用ルールとしてCLAUDE.mdに記載済み
 
-### 未実装候補（2026-03-22 キュー空時自律調査結果）
+### 未実装候補（2026-03-22 第2回調査）
+
+**実装可能（Codeで対応可）**
+
+| # | タスク名 | 影響範囲 | 工数目安 | 優先度案 |
+|---|---------|---------|---------|---------|
+| K | E-13: 複数ゴール同時検出（1メッセージから複数ゴール候補） | src/services/ai/routing.js, frontend/js/chat.js | 1h | 🟡 |
+| L | ダウングレードワンクリック（プランモーダルにダウングレードボタン） | frontend/js/ui.js, src/routes/checkout.js | 1h | 🟡 |
+| M | ディープ分析結果→次の会話のシステムプロンプトに注入 | src/routes/chat.js, src/services/prompt.js | 1h | 🟡 |
+| N | GDPR対応: データエクスポートAPI（/api/account/export） | src/routes/account.js | 1.5h | 🟡 |
+| O | docs/のTODOチェックリスト更新（完了項目を☑に） | docs/goal_ai_project_v6_4.md | 15min | 🟢 |
+
+**手動確認のみ（ふとし対応）**
+
+| # | 項目 | 確認方法 |
+|---|------|---------|
+| P | Supabaseマイグレーション確認 | Dashboard確認 |
+| Q | OWNER_SECRET環境変数 | wrangler secret list |
+
+---
+
+### 未実装候補（2026-03-22 第1回調査 A-J → 全完了）
 
 **テスト配布に影響するもの（優先度高）**
 
