@@ -127,10 +127,10 @@ export async function handleChatStream(request, env, ctx) {
 
   let userLocation = location;
   if (location && location.city) {
-    ctx.waitUntil(env.KV.put(`location:${auth.tokenId}`, JSON.stringify(location), { expirationTtl: 3600 }).catch(() => {}));
+    ctx.waitUntil(env.TOKEN_KV.put(`location:${auth.tokenId}`, JSON.stringify(location), { expirationTtl: 3600 }).catch(() => {}));
   }
   if (!userLocation) {
-    try { const cached = await env.KV.get(`location:${auth.tokenId}`); if (cached) userLocation = JSON.parse(cached); } catch(e) {}
+    try { const cached = await env.TOKEN_KV.get(`location:${auth.tokenId}`); if (cached) userLocation = JSON.parse(cached); } catch(e) {}
   }
 
   const userMessage = messages?.[messages.length - 1]?.content || '';
