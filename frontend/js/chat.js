@@ -1717,9 +1717,11 @@ function hsToggleTask(taskId,el){
   for(const goal of ALL_GOALS){ for(const phase of goal.phases){
     const t=phase.tasks.find(t=>t.id===taskId);
     if(t){
-      t.status=t.status==='done'?'todo':'done';
+      const wasDone=t.status==='done';
+      t.status=wasDone?'todo':'done';
       el.className='hs-task-check '+(t.status==='done'?'done':'');
       el.textContent=t.status==='done'?'✓':'';
+      if(t.status==='done') taskCheckAnim(el);
       const titleEl=el.nextElementSibling;
       if(titleEl) titleEl.className='hs-task-title '+(t.status==='done'?'done':'');
       // 進捗再計算＆マイルストーンチェック
@@ -1728,6 +1730,25 @@ function hsToggleTask(taskId,el){
       return;
     }
   }}
+}
+// P-33: C案アニメーション（縮小→Y軸フリップ→展開→紙吹雪5粒）
+function taskCheckAnim(el){
+  el.classList.add('task-check-anim');
+  el.addEventListener('animationend',()=>el.classList.remove('task-check-anim'),{once:true});
+  const colors=['#c8920a','#e07070','#5b8def','#28b464','#e8913a'];
+  const rect=el.getBoundingClientRect();
+  for(let i=0;i<5;i++){
+    const p=document.createElement('div');
+    p.className='task-confetti-particle';
+    p.style.background=colors[i%colors.length];
+    p.style.left=(rect.left+rect.width/2)+'px';
+    p.style.top=(rect.top+rect.height/2)+'px';
+    p.style.position='fixed';
+    p.style.setProperty('--cx',(Math.random()*40-20)+'px');
+    p.style.setProperty('--cy',(Math.random()*-30-10)+'px');
+    document.body.appendChild(p);
+    p.addEventListener('animationend',()=>p.remove(),{once:true});
+  }
 }
 
 function recalcGoalProgress(goal){
@@ -2335,7 +2356,7 @@ function showGoalDetectToast(topics){
   if (topics && topics.length > 1) {
     // Multiple goal candidates — show list
     let listHtml = '<div style="display:flex;flex-direction:column;gap:6px;width:100%;">';
-    listHtml += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="font-size:16px;">👑</span><span style="font-weight:600;">ゴール候補が見つかりました</span></div>';
+    listHtml += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">${getLogoSVG(16)}<span style="font-weight:600;">ゴール候補が見つかりました</span></div>`;
     topics.forEach(topic => {
       listHtml += `<div class="goal-detect-item" onclick="event.stopPropagation();this.closest('#goal-detect-toast').remove();window._selectedGoalTopic='${topic.replace(/'/g,"\\'")}';const tags=document.getElementById('home-topic-tags');if(tags)tags.scrollIntoView({behavior:'smooth'});" style="padding:8px 12px;background:var(--bg3);border:1px solid var(--amber-d);border-radius:8px;cursor:pointer;font-size:11px;color:var(--amber);transition:background .15s;">${topic}</div>`;
     });
@@ -2348,7 +2369,7 @@ function showGoalDetectToast(topics){
   } else {
     // Single or no topics — original behavior
     const label = (topics && topics.length === 1) ? `「${topics[0]}」をゴールにしますか？` : 'ゴールにしますか？';
-    t.innerHTML = `<span style="font-size:16px;">👑</span> ${label} <button class="goal-detect-close" onclick="event.stopPropagation();this.parentElement.remove();">&times;</button>`;
+    t.innerHTML = `${getLogoSVG(16)} ${label} <button class="goal-detect-close" onclick="event.stopPropagation();this.parentElement.remove();">&times;</button>`;
     t.onclick = () => { t.remove(); if(topics && topics[0]) window._selectedGoalTopic = topics[0]; const tags = document.getElementById('home-topic-tags'); if(tags) tags.scrollIntoView({behavior:'smooth'}); };
   }
 
@@ -2583,6 +2604,6 @@ Object.assign(window, {
   hideTaskChip, showTaskChip, highlightTaskChip,
   openTaskFromChat, getLastAIMessage, appendTaskSuggestionButton,
   requestTaskBreakdown, showTaskCard, confirmTaskCard,
-  setPreset
+  setPreset, taskCheckAnim
 });
 

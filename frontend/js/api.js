@@ -149,7 +149,7 @@ function toast(msg){
   const existing=document.getElementById('toast');if(existing)existing.remove();
   const t=document.createElement('div');t.id='toast';
   t.setAttribute('role','status');t.setAttribute('aria-live','polite');
-  t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--toast-bg,#1e2333);border:1px solid var(--border2,rgba(255,255,255,.15));color:var(--toast-text,var(--cream));padding:9px 18px;border-radius:8px;font-size:12px;z-index:9999;animation:fadeUp .3s ease;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)';
+  t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--toast-bg);border:1px solid var(--border2);color:var(--toast-text);padding:9px 18px;border-radius:8px;font-size:12px;z-index:9999;animation:fadeUp .3s ease;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)';
   t.textContent=msg;document.body.appendChild(t);
   setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3000);
 }
@@ -172,12 +172,26 @@ function chatKey(sendFn, e) {
   }
 }
 
-function showChatTyping(chatEl, typingId, avatarHtml, bubbleClass) {
+function _routeBadgeHTML(route) {
+  if (route === 'gemini') {
+    return `<div class="route-badge" style="display:flex;align-items:center;gap:5px;padding:10px 14px;color:var(--model-gemini);font-size:12px;white-space:nowrap;"><svg width="14" height="14" class="svg-ic" style="color:var(--model-gemini);flex-shrink:0;animation:route-pulse 1.5s ease-in-out infinite"><use href="#ic-search"/></svg>リサーチ中...</div>`;
+  }
+  if (route === 'gpt') {
+    return `<div class="route-badge" style="display:flex;align-items:center;gap:5px;padding:10px 14px;color:var(--model-gpt);font-size:12px;white-space:nowrap;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="color:var(--model-gpt);flex-shrink:0;animation:route-pulse 1.5s ease-in-out infinite"><path d="M8 1C5.24 1 3 3.24 3 6c0 1.83 1 3.43 2.5 4.3V12h5v-1.7C12 9.43 13 7.83 13 6c0-2.76-2.24-5-5-5z" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="5.5" y1="13.5" x2="10.5" y2="13.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="15" x2="10" y2="15" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>アイデアを生成中...</div>`;
+  }
+  return '';
+}
+
+function showChatTyping(chatEl, typingId, avatarHtml, bubbleClass, route) {
   const d = document.createElement('div');
   d.id = typingId;
   d.className = bubbleClass || 'msg ai';
   d.style.marginBottom = '16px';
-  d.innerHTML = `<div class="${bubbleClass === 'tdp-msg ai' ? 'tdp-av ai' : 'msg-av ai'}">${avatarHtml || getLogoSVG(14)}</div><div class="${bubbleClass === 'tdp-msg ai' ? 'tdp-bubble' : 'msg-body'}" style="${bubbleClass === 'tdp-msg ai' ? '' : ''}"><div class="${bubbleClass === 'tdp-msg ai' ? '' : 'bubble'}" style="padding:0;"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
+  const badge = _routeBadgeHTML(route);
+  const dotsHTML = badge
+    ? badge + '<div class="typing-dots" style="padding:0 14px 10px;"><span></span><span></span><span></span></div>'
+    : '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  d.innerHTML = `<div class="${bubbleClass === 'tdp-msg ai' ? 'tdp-av ai' : 'msg-av ai'}">${avatarHtml || getLogoSVG(14)}</div><div class="${bubbleClass === 'tdp-msg ai' ? 'tdp-bubble' : 'msg-body'}" style="${bubbleClass === 'tdp-msg ai' ? '' : ''}"><div class="${bubbleClass === 'tdp-msg ai' ? '' : 'bubble'}" style="padding:0;">${dotsHTML}</div></div>`;
   chatEl.appendChild(d);
   chatEl.scrollTop = chatEl.scrollHeight;
 }
@@ -238,13 +252,13 @@ function checkAndShowSelections(bubEl, text){
   // Create popup
   const popup = document.createElement('div');
   popup.className = 'ai-selection-popup';
-  popup.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:90%;max-width:400px;background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:16px;z-index:800;box-shadow:0 -4px 24px rgba(0,0,0,.5);animation:fadeUp .3s ease;';
+  popup.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:90%;max-width:400px;background:var(--bg2);border:1px solid var(--border-card);border-radius:var(--popup-radius);padding:16px;z-index:800;box-shadow:0 -4px 24px rgba(0,0,0,.5);animation:fadeUp .3s ease;';
   popup.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
       <div style="font-size:12px;color:var(--amber);font-weight:500;">選択してください</div>
       <button onclick="this.closest('.ai-selection-popup').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;">✕</button>
     </div>
-    ${items.map(i => `<div onclick="selectAIOption('${escapeHtml(i.text).replace(/'/g,"\\'")}');this.closest('.ai-selection-popup').remove();" style="padding:10px 12px;margin-bottom:6px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--cream);transition:border-color .15s;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border)'">${i.num}. ${escapeHtml(i.text)}</div>`).join('')}
+    ${items.map(i => `<div onclick="selectAIOption('${escapeHtml(i.text).replace(/'/g,"\\'")}');this.closest('.ai-selection-popup').remove();" style="padding:10px 12px;margin-bottom:6px;background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;cursor:pointer;font-size:13px;color:var(--cream);transition:border-color .15s;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border)'">${i.num}. ${escapeHtml(i.text)}</div>`).join('')}
   `;
   // Remove existing popup
   document.querySelector('.ai-selection-popup')?.remove();
@@ -264,11 +278,14 @@ function selectAIOption(text){
 }
 
 // ════════ UNIFIED CHAT SEND ════════
+let _chatAbort = null;
+function stopChatStream(){ if(_chatAbort){ _chatAbort.abort(); _chatAbort=null; } }
 async function sendChatMsg({
   inputId, innerElId, scrollElId, loadingRef, msgsRef, historyRef,
   systemPrompt, maxTokens, goalId, messageType, resizeFn,
   enableDeepAnalysis, enableRouting, onBeforeSend, onAfterAI, renderFn,
-  bubbleStyle // 'standard' | 'tdp' | 'worries'
+  bubbleStyle, // 'standard' | 'tdp' | 'worries'
+  sendBtnId, sendFnName // for stop button support
 }){
   if(loadingRef.v) return;
   if(!navigator.onLine){ toast('ネットワークに接続されていません'); return; }
@@ -294,6 +311,10 @@ async function sendChatMsg({
   if(renderFn) renderFn();
   loadingRef.v = true;
 
+  // Stop button: switch send → stop icon (AMEND-001 #2)
+  _chatAbort = new AbortController();
+  if(sendBtnId) _setChatSendIcon(sendBtnId, 'stop', sendFnName);
+
   // Save user message to Supabase
   if(AUTH_TOKEN && messageType){
     apiSaveMessages([{role:'user', content:displayText, goalId:goalId||null, messageType}]);
@@ -302,6 +323,8 @@ async function sendChatMsg({
   const inner = document.getElementById(innerElId);
   const scroll = document.getElementById(scrollElId);
   const sys = typeof systemPrompt === 'function' ? systemPrompt() : systemPrompt;
+  const _signal = _chatAbort?.signal;
+  const _restore = ()=>{ _chatAbort=null; if(sendBtnId) _setChatSendIcon(sendBtnId,'send',sendFnName); };
 
   // Deep analysis check
   if(enableDeepAnalysis && text && isDeepAnalysisNeeded(text) && AUTH_TOKEN){
@@ -314,38 +337,51 @@ async function sendChatMsg({
             if(historyRef) historyRef.v.push({role:'assistant', content:results.finalOutput});
             if(AUTH_TOKEN && messageType) apiSaveMessages([{role:'assistant', content:results.finalOutput, goalId:goalId||null, aiModel:'deep', messageType}]);
           }
-          loadingRef.v = false;
+          loadingRef.v = false; _restore();
         });
       },
       async () => {
-        await _doChatStream(sys, historyRef, msgsRef, inner, scroll, today, goalId, messageType, loadingRef, onAfterAI, renderFn, enableRouting);
+        await _doChatStream(sys, historyRef, msgsRef, inner, scroll, today, goalId, messageType, loadingRef, onAfterAI, renderFn, enableRouting, _signal, _restore);
       }
     );
     return;
   }
 
-  await _doChatStream(sys, historyRef, msgsRef, inner, scroll, today, goalId, messageType, loadingRef, onAfterAI, renderFn, enableRouting);
+  await _doChatStream(sys, historyRef, msgsRef, inner, scroll, today, goalId, messageType, loadingRef, onAfterAI, renderFn, enableRouting, _signal, _restore);
+}
+function _setChatSendIcon(btnId, mode, fnName){
+  const btn = document.getElementById(btnId);
+  if(!btn) return;
+  const svg = btn.querySelector('svg');
+  if(!svg) return;
+  if(mode==='stop'){
+    svg.innerHTML = '<rect x="6" y="6" width="12" height="12" rx="2" fill="var(--text-on-accent)"/>';
+    btn.setAttribute('onclick','stopChatStream()');
+  } else {
+    svg.innerHTML = '<path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>';
+    btn.setAttribute('onclick', (fnName||'sendHomeMsg')+'()');
+  }
 }
 
-async function _doChatStream(sys, historyRef, msgsRef, inner, scroll, today, goalId, messageType, loadingRef, onAfterAI, renderFn, enableRouting){
+async function _doChatStream(sys, historyRef, msgsRef, inner, scroll, today, goalId, messageType, loadingRef, onAfterAI, renderFn, enableRouting, signal, restore){
   try{
     await chatStream({
       system: sys,
       messages: historyRef ? historyRef.v.slice(-8) : [],
       maxTokens: 500,
-      innerEl: inner, scrollEl: scroll,
+      innerEl: inner, scrollEl: scroll, signal,
       onDone(t){
         if(msgsRef) msgsRef.v.push({role:'ai', content:t, time:now(), date:today});
         if(historyRef) historyRef.v.push({role:'assistant', content:t});
         if(renderFn) renderFn();
         if(AUTH_TOKEN && messageType) apiSaveMessages([{role:'assistant', content:t, goalId:goalId||null, aiModel:'claude', messageType}]);
         if(onAfterAI) onAfterAI(t);
-        loadingRef.v = false;
+        loadingRef.v = false; if(restore) restore();
       },
-      onError(e){ loadingRef.v = false; }
+      onError(e){ loadingRef.v = false; if(restore) restore(); }
     });
   }catch(e){
-    loadingRef.v = false;
+    loadingRef.v = false; if(restore) restore();
   }
 }
 
@@ -455,7 +491,7 @@ async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, 
 }
 
 // Shared helper: create streaming AI bubble with typing dots
-function mkStreamBubble(innerEl, scrollEl, extraBubStyle) {
+function mkStreamBubble(innerEl, scrollEl, extraBubStyle, route) {
   const wrap = document.createElement('div');
   wrap.className = 'msg ai';
   wrap.style.marginBottom = '16px';
@@ -466,8 +502,13 @@ function mkStreamBubble(innerEl, scrollEl, extraBubStyle) {
   const bub = document.createElement('div');
   bub.className = 'bubble stream-bubble';
   if (extraBubStyle) bub.style.cssText = extraBubStyle;
-  // 「考え中...」ドットアニメーション
-  bub.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  // ルーティングバッジ + 「考え中...」ドットアニメーション
+  const badge = _routeBadgeHTML(route);
+  if (badge) {
+    bub.innerHTML = badge + '<div class="typing-dots" style="padding:0 14px 10px;"><span></span><span></span><span></span></div>';
+  } else {
+    bub.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  }
   const t = document.createElement('div');
   t.className = 'msg-footer'; t.textContent = now();
   body.appendChild(bub); body.appendChild(t);
@@ -731,6 +772,7 @@ Object.assign(window, {
   streamAI, mkStreamBubble, streamAppend, formatModelName, streamFinalize,
   buildAIContextCached, invalidateCtxCache, compressImage,
   getDeviceInfo, appendChatMsg, sendChatAPI, sendChatStream,
-  setupChatInput, startVoiceInput, handleImageUpload
+  setupChatInput, startVoiceInput, handleImageUpload,
+  stopChatStream, _setChatSendIcon
 });
 

@@ -387,6 +387,7 @@ function cycleStatus(e, taskId){
       if(task){
         const i = order.indexOf(task.status);
         task.status = order[(i+1)%order.length];
+        if(task.status==='done') taskCheckAnim(e.target);
         renderTasks();
         if(selectedTask && selectedTask.id === taskId)
           document.getElementById('tdp-status-sel').value = task.status;
@@ -511,6 +512,8 @@ async function sendTaskMsg(){
   selectedTask.chatLog.forEach(m=>chat.appendChild(mkTdpMsg(m)));
   chat.scrollTop = chat.scrollHeight;
   taskChatLoading = true;
+  _chatAbort = new AbortController();
+  _setChatSendIcon('task-send-btn','stop','sendTaskMsg');
 
   const taskSys = `あなたはGOAL AIのタスクコーチです。
 ゴール：${curGoal}
@@ -540,6 +543,8 @@ async function sendTaskMsg(){
     tdpBub.classList.remove('stream-bubble'); tdpBub.textContent = 'エラーが発生しました。';
   }finally{
     taskChatLoading = false;
+    _chatAbort = null;
+    _setChatSendIcon('task-send-btn','send','sendTaskMsg');
   }
 }
 
@@ -1258,6 +1263,7 @@ async function sendHubMsg(){
     enableDeepAnalysis: true,
     enableRouting: true,
     renderFn: () => renderHubChat(),
+    sendBtnId: 'hub-send-btn', sendFnName: 'sendHubMsg',
   });
 }
 function hubMsgResize(el) { chatResize(el, 110); }
