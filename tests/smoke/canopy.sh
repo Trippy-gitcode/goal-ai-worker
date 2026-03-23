@@ -214,6 +214,41 @@ echo "--- Routing catch-all ---"
 CATCH_GPT=$(grep -c "return 'gpt'" src/services/ai/routing.js 2>/dev/null)
 if [ "$CATCH_GPT" -ge 2 ]; then echo "OK: routing catch-all=gpt ($CATCH_GPT)"; else echo "FAIL: routing catch-all not gpt ($CATCH_GPT, need ≥2)"; FAIL=1; fi
 
+# 20. ビルド出力(frontend-dist)とソース(frontend)の一致検証
+echo "--- Build output sync (frontend-dist vs frontend) ---"
+if [ -f "frontend-dist/index.html" ]; then
+  # ソースにある主要要素がビルド出力にも存在するか
+  for check in "mode-chip" "ゴール一覧" "chip-row"; do
+    SRC=$(grep -c "$check" frontend/index.html 2>/dev/null)
+    DIST=$(grep -c "$check" frontend-dist/index.html 2>/dev/null)
+    if [ "$SRC" -gt 0 ] && [ "$DIST" -eq 0 ]; then
+      echo "FAIL: '$check' in frontend/ but NOT in frontend-dist/ (build stale)"; FAIL=1
+    else
+      echo "OK: '$check' sync (src=$SRC dist=$DIST)"
+    fi
+  done
+  # 旧コードがビルド出力に残っていないか
+  for old in "mode-f" "mode-row-f" "ゴールプロジェクト"; do
+    SRC=$(grep -c "$old" frontend/index.html 2>/dev/null)
+    DIST=$(grep -c "$old" frontend-dist/index.html 2>/dev/null)
+    if [ "$SRC" -eq 0 ] && [ "$DIST" -gt 0 ]; then
+      echo "FAIL: '$old' removed from frontend/ but still in frontend-dist/ (build stale)"; FAIL=1
+    else
+      echo "OK: '$old' cleanup (src=$SRC dist=$DIST)"
+    fi
+  done
+  # APP_VERSIONがビルド出力にも反映されているか
+  V_DIST=$(grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' frontend-dist/index.html | head -1 | sed 's/v//')
+  echo "  frontend-dist version=$V_DIST  source version=$V_HTML"
+  if [ "$V_DIST" != "$V_HTML" ]; then
+    echo "FAIL: frontend-dist version ($V_DIST) != source version ($V_HTML)"; FAIL=1
+  else
+    echo "OK: frontend-dist version sync"
+  fi
+else
+  echo "FAIL: frontend-dist/index.html not found (vite build not run?)"; FAIL=1
+fi
+
 # 17. session_progress.mdバージョンとAPP_VERSIONの一致
 echo "--- SP version sync ---"
 SP_VER=$(grep -o 'バージョン:.*v[0-9.]*' instructions/session_progress.md 2>/dev/null | grep -o 'v[0-9.]*')
