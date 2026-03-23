@@ -882,9 +882,22 @@ function renderConnectContent(loading=false, data=null){
   if(data.feedback?.length){
     html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:16px 0 8px;">📊 現在のゴールへのフィードバック</div>`;
     data.feedback.forEach(f=>{
+      const pct = f.compatibility || 0;
+      const isWarn = pct > 0 && pct <= 60;
+      const barColor = isWarn ? '#ef9f27' : 'linear-gradient(90deg,#c8920a,#f5d380)';
+      const pctColor = isWarn ? '#ef9f27' : '#c8920a';
+      const barHtml = pct > 0 ? `<div style="display:flex;align-items:center;gap:6px;margin:6px 0;">
+        <span style="font-size:8px;color:var(--muted);">相性:</span>
+        <div style="width:80px;height:4px;border-radius:2px;background:var(--muted3);overflow:hidden;">
+          <div style="height:100%;width:${pct}%;border-radius:2px;background:${barColor};"></div>
+        </div>
+        <span style="font-size:9px;font-weight:500;color:${pctColor};">${pct}%</span>
+      </div>` : '';
+      const improveBtn = isWarn ? `<div onclick="hubChatFromConnect('${(f.goal||'').replace(/'/g,"\\'")}','改善方法を教えて')" style="display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;border:0.5px solid rgba(200,146,10,0.3);color:#c8920a;font-size:9px;cursor:pointer;width:fit-content;margin-top:6px;">💬 改善方法をAIに相談する</div>` : '';
       html += `<div class="connect-card">
         <div class="connect-card-hd" style="color:${f.type==='ok'?'var(--green)':'var(--amber)'}">${f.type==='ok'?'✓':'⚠'} ${f.goal}</div>
         <div class="connect-card-body">${f.message}</div>
+        ${barHtml}${improveBtn}
       </div>`;
     });
   }
