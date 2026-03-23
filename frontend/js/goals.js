@@ -1272,27 +1272,23 @@ function renderHubTasks(){
     const ph = document.createElement('div');
     ph.style.marginBottom = '20px';
     const phHd = document.createElement('div');
-    phHd.style.cssText = `display:flex;align-items:center;gap:8px;margin-bottom:10px;`;
-    phHd.innerHTML = `
-      <div style="width:4px;height:14px;background:${phase.phaseColor};border-radius:2px;"></div>
-      <div style="font-size:12px;font-weight:500;color:var(--cream)">${phase.phaseTitle}</div>
-      <div style="font-size:9px;font-family:var(--fm);padding:1px 7px;border-radius:4px;background:${phase.phaseColor}22;color:${phase.phaseColor}">
-        ${phase.tasks.filter(t=>t.status==='done').length}/${phase.tasks.length}</div>`;
+    phHd.className = 'tgroup';
+    const doneCnt = phase.tasks.filter(t=>t.status==='done').length;
+    const pct = phase.tasks.length ? Math.round(doneCnt/phase.tasks.length*100) : 0;
+    phHd.innerHTML = `<span class="tgroup-icon">${phase.icon||''}</span>${phase.phaseTitle}<span style="font-size:8px;color:var(--muted2);margin-left:4px;">${doneCnt}/${phase.tasks.length}</span><div class="tgroup-prog"><div class="tgroup-prog-fill" style="width:${pct}%"></div></div>`;
     ph.appendChild(phHd);
     // 完了タスクを下部に自動移動（#05b）
     const sorted = [...phase.tasks].sort((a,b) => (a.status==='done'?1:0) - (b.status==='done'?1:0));
     sorted.forEach(task => {
+      const isDone = task.status === 'done';
       const row = document.createElement('div');
-      const statusColors = {done:'var(--green)',current:'var(--amber)',todo:'var(--muted2)',blocked:'var(--red)'};
-      const statusLabels = {done:'✅ 完了',current:'🔵 進行中',todo:'⬜ 未着手',blocked:'🔴 ブロック'};
-      row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border:1px solid var(--border-card);border-radius:9px;margin-bottom:6px;cursor:pointer;transition:border-color .15s;';
-      row.onmouseover = () => row.style.borderColor = 'var(--border2)';
-      row.onmouseout  = () => row.style.borderColor = 'var(--border)';
+      row.className = `tc${isDone?' done-tc':''}`;
+      const wt = task.priority==='high'?'<span class="tw twr">重要</span>':task.priority==='mid'?'<span class="tw twy">普通</span>':'<span class="tw twg">軽い</span>';
       row.innerHTML = `
-        <div style="width:7px;height:7px;border-radius:50%;background:${statusColors[task.status]||'var(--muted2)'};flex-shrink:0;"></div>
-        <div style="flex:1;font-size:12px;color:var(--cream);${task.status==='done'?'text-decoration:line-through;opacity:.5':''}">${escapeHtml(task.title)}</div>
-        <div style="font-size:9px;font-family:var(--fm);color:${statusColors[task.status]||'var(--muted2)'}">${statusLabels[task.status]||''}</div>
-        <div style="font-size:9px;color:var(--muted2);font-family:var(--fm)">${task.due||'—'}</div>`;
+        <div class="tch${isDone?' done':''}"></div>
+        <div class="tt${isDone?' dn':''}">${escapeHtml(task.title)}</div>
+        ${task.source==='ai'?'<span class="tai">✨</span>':''}${wt}
+        <span class="td">${task.due||'—'}</span>`;
       ph.appendChild(row);
     });
     inner.appendChild(ph);
