@@ -7,15 +7,15 @@
 
 ## 5行サマリー
 - **Version:** v3.11.0
-- **Next:** AP（ビジョン画面セクション追加）
-- **Last done:** AJ ✅ + AN 既実装確認 ✅ + デザイン構造照合v2 ✅
+- **Next:** キュー空 → ふとしの承認待ち
+- **Last done:** AP ✅ + AJ ✅ + AN既実装 ✅ + デザイン構造照合v2 ✅
 - **Open issues:** 構造差93件（docs/design_checklist_v2.md 参照）
 - **Proposals:** 0件
 
 ## 現在地
 - **バージョン:** v3.11.0
-- **チェーン:** ~~デザイン構造照合v2~~ → ~~AJ~~ → ~~AN(既実装)~~ → AP → テスト配布
-- **次のミッション:** AP: ビジョン画面セクション追加（キュー先頭）
+- **チェーン:** ~~デザイン構造照合v2~~ → ~~AJ~~ → ~~AN(既実装)~~ → ~~AP~~ → テスト配布
+- **次のミッション:** キュー空 → ふとしの承認待ち
 
 ## ミッションキュー（上から順に実行）
 
@@ -371,6 +371,15 @@ spec_v3.md × mockup HTML × 実装コードの3点照合。全22画面を検証
 ---
 
 ## 直近の変更履歴（直近3件のみ。過去分はinstructions/results/に保存）
+
+### AP: ビジョン画面セクション追加 (2026-03-23) ✅
+- 「5年後の理想の平日」セクション追加（mockup 06b準拠: 13px, 12px radius, 1.8 line-height, ペンアイコン）
+- 「やりたくない生活」セクション追加（同上）
+- editVisionField()関数: インライン編集→保存→renderVision()
+- applySummaryToProfile()拡張: 【5年後の理想の平日】【やりたくない生活】パターンマッチ追加
+- USER_PROFILE.ideal_day, .unwanted_life フィールド追加
+- AN（ユーザーメッセージ編集）: editAndResend()として既に実装済みを確認→スキップ
+- canopy PASS → deploy → git tag v3.11.0-ap-vision
 
 ### AJ: AIメモ空状態テキスト (2026-03-23) ✅
 - GoalHubメモペインに「AIの理解メモ」セクション新設
