@@ -855,14 +855,26 @@ function editAndResend(btn){
   btnRow.querySelector('.edit-resend-btn').onclick = ()=>{
     const newText = ta.value.trim();
     if(!newText){ toast('テキストを入力してください'); return; }
-    // このメッセージ以降のAI応答を削除して再送信
+    // P-30: 直後のAI応答は取り消し線で残し、それ以降は削除して再送信
     const allMsgs = document.getElementById('home-chat-inner')?.children;
     if(allMsgs){
       let found = false;
+      let firstAiAfter = true;
       const toRemove = [];
       for(const child of allMsgs){
         if(child === msgEl){ found = true; toRemove.push(child); continue; }
-        if(found) toRemove.push(child);
+        if(found){
+          if(firstAiAfter && child.classList.contains('ai')){
+            // 直後のAI応答 → 取り消し線で残す
+            const aiBub = child.querySelector('.bubble');
+            if(aiBub) aiBub.style.textDecoration = 'line-through';
+            child.style.opacity = '0.5';
+            child.querySelector('.msg-actions')?.remove();
+            firstAiAfter = false;
+          } else {
+            toRemove.push(child);
+          }
+        }
       }
       toRemove.forEach(el => el.remove());
     }
