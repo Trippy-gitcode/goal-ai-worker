@@ -7,19 +7,106 @@
 
 ## 5行サマリー
 - **Version:** v3.11.0
-- **Next:** キュー空 → ふとしの承認待ち
+- **Next:** デザインmockup完全準拠ミッション（構造差5件+スケーリング差20件+機能未実装7件）
 - **Last done:** AP ✅ + AJ ✅ + AN既実装 ✅ + デザイン構造照合v2 ✅
-- **Open issues:** 構造差93件（docs/design_checklist_v2.md 参照）
+- **Open issues:** design_checklist_v2.mdの乖離を全修正する
 - **Proposals:** 0件
 
 ## 現在地
 - **バージョン:** v3.11.0
-- **チェーン:** ~~デザイン構造照合v2~~ → ~~AJ~~ → ~~AN(既実装)~~ → ~~AP~~ → テスト配布
-- **次のミッション:** キュー空 → ふとしの承認待ち
+- **チェーン:** デザインmockup完全準拠 → テスト配布
+- **次のミッション:** デザインmockup完全準拠（キュー先頭）
 
 ## ミッションキュー（上から順に実行）
 
-### デザイン構造照合v2（ふとし承認済み 2026-03-23 実装その18）
+### デザインmockup完全準拠（ふとし承認済み 2026-03-23 実装その18）
+> 目的: design_checklist_v2.mdで検出された全乖離をmockupに準拠させる。構造差・スケーリング差・機能未実装を全て修正。
+> リスク: 🔴高（全画面に影響する大規模UI修正。1画面ずつデプロイ→canopy→確認のサイクルで進める）
+> 参照: docs/design_checklist_v2.md（照合結果）、docs/mockups/（正のデザイン）
+
+**方針:**
+- **全ての乖離をmockupに寄せる**（mockupが正）
+- **例外2件のみ実装値を維持:**
+  1. input font-size 16px（iOS Safari自動ズーム防止。12pxにするとフォーカス時に画面がズームする）
+  2. 送信/画像/音声ボタンサイズ 44px（Apple HIG最小タッチターゲット。28pxだとタップしにくい）
+- 上記2件以外は、mockupのCSS値（font-size, padding, margin, border, icon size, 構造等）に完全準拠する
+
+**修正カテゴリと優先順:**
+
+**STEP 1: 構造差修正（最優先 — UIの見た目が根本的に違う5件）**
+各修正後に1デプロイ → canopy → 次
+
+1-1. サイドバーモードチップ: `<button class="mode-f">` SVGアイコン付き → `<span class="chip">` テキストのみピル（border-radius:8px, border:0.5px solid, font-size:8px, padding:2px 6px, gap:3px）。active状態はgradient背景。mockup 01_sidebar.html参照
+1-2. ホームヒーローモデル名: バッジ風 → テキスト+ドット区切り（font-size:12px, gap:7px）。mockup 02a_home_prechat.html参照
+1-3. タスク行: `.task-row` rich → `.tc` compact（gap:5px, padding:6px 4px, border-radius:6px, title font-size:9px）。カテゴリヘッダーも `.tgroup` テキスト+絵文字に。mockup 04a_tasks_mobile.html参照
+1-4. GoalHubタスク: インラインスタイル → CSS class（.tc/.tch/.phase）。チェックボックスを14px circle に。mockup 05b_goalhub_tasks.html参照
+1-5. 自分を知る入力欄: 紫テーマ独自 → CRN-03統一入力欄。mockup 06a_design_discover.html参照
+
+**STEP 2: スケーリング差修正（全画面のCSS値をmockupに準拠）**
+※ input font-size 16px と ボタン44px の2件は除外
+
+2-1. #01 サイドバー:
+  - ロゴSVG 28→22px
+  - ブランドテキスト 22→13px
+  - サブテキスト "Your private AI partner" → 削除（mockupにない）
+  - ヘッダーpadding 16px 20px 10px → 0 12px 6px
+  - ヘッダーborder 1px → 0.5px
+  - ナビアイテム font-size 12→10px, padding 9px 20px → 5px 12px
+  - ナビアイコン 18→15px
+  - 「すべて見る→」色 gray → #c8920a (gold)
+  - ゴールセクション名「ゴールプロジェクト」→「ゴール一覧」、サブテキスト「目標に本気で…」削除
+  - フッターpadding 14px → 4px 12px
+  - アバター 30→22px
+
+2-2. #02a ホーム会話前:
+  - ツールバーアイコン 32-36px → 20px
+  - プリセットチップ font-size 12→10px, border 1px→0.5px
+  - 入力ボックスpadding → 8px 12px（mockup値）
+
+2-3. #02b ホーム会話中:
+  - メッセージアバター 24→18px
+  - フッター font-size 9→7px
+
+2-4. #03 ホーム全機能:
+  - モデル名ヘッダー色: gray統一 → Claude:#e8913a, GPT:#5b8def, Gemini:#e07070（AI名前のみカラー。CRN-02再確認）
+
+2-5. #04a タスク一覧:
+  - タスクタイトル font-size 12.5→9px
+  - チェックボックス 16→14px
+  - カテゴリ名 font-size 13→11px
+
+2-6. #05a/c GoalHub:
+  - ヘッダーpadding 20px 28px 0 → 8px 14px
+  - タイトル font-size 21→13px, font-weight 400→500
+  - 戻るボタン: ボタン(border/bg付き) → テキストリンク
+  - 進捗バー高さ 6→4px
+  - タブ font-size 12→9px, padding 9px 18px → 7px 10px
+  - タブ active: solid border → gradient underline
+
+2-7. #05b GoalHubタスク:
+  - フェーズヘッダー・タスク行をCSS classに統一（STEP 1-4に含む）
+
+2-8. #06d プロフィール:
+  - アバター 80→48px
+
+**STEP 3: 機能未実装修正（照合v2で検出された残り）**
+3-1. GoalHub分析 停滞ポイントセクション — mockup 05ac参照
+3-2. GoalHub分析 「3人寄れば文殊の知恵」セクション — mockup 05ac参照
+3-3. AIメモ アコーディオン形式 — mockup 05d参照
+3-4. AIロール「変更する」テキスト入力展開 — mockup 05e参照
+3-5. ビジョン再分析6チップUI — mockup 06b参照
+3-6. Connect 60%以下オレンジ(#ef9f27) + 「改善方法をAIに相談する」ボタン — mockup 06c参照
+3-7. SNS共有「キャラクターをシェア」ボタン — mockup 06b参照
+
+**デプロイ戦略:**
+- STEP 1: 1件ずつデプロイ（構造変更は高リスク）。1-1完了→canopy→確認→1-2…
+- STEP 2: 画面単位でバッチ（2-1全部→デプロイ→canopy→2-2全部→デプロイ…）
+- STEP 3: 機能単位でデプロイ
+- 各デプロイ後にcanopy PASS必須。FAILならrollback
+
+---
+
+### デザイン構造照合v2（ふとし承認済み 2026-03-23 実装その18）✅ 完了
 > 目的: 前回照合（v1）が「機能の有無」だけを確認し、HTML構造・CSS値・レイアウトの乖離を大量に見逃した。今回はmockup HTMLの要素を1つずつ実装コードと構造比較する。
 > リスク: 🟢低（調査のみ。コード変更なし）
 > 重要: 前回の照合レポート（デザイン完全照合結果セクション）は信頼できない。「✅一致」と判定された画面も全て再照合すること。
@@ -380,6 +467,15 @@ spec_v3.md × mockup HTML × 実装コードの3点照合。全22画面を検証
 - USER_PROFILE.ideal_day, .unwanted_life フィールド追加
 - AN（ユーザーメッセージ編集）: editAndResend()として既に実装済みを確認→スキップ
 - canopy PASS → deploy → git tag v3.11.0-ap-vision
+
+### デザインmockup完全準拠 STEP 1+2 (2026-03-24) 進行中
+- 1-1 ✅ サイドバーモードチップ → テキストのみピル（span.mode-chip, gradient active）
+- 1-2 ✅ ヒーローモデル名 → テキスト+ドット区切り（12px, gap:7px）
+- 1-5 ✅ 自分を知る入力欄 → CRN-03統一（gold border, round send btn）
+- 2-1 ✅ サイドバースケーリング全修正（ロゴ22px/ブランド13px/ナビ10px/アイコン15px/アバター22px/フッター4px 12px/ゴール一覧テキスト/私をデザインsub化）
+- 1-3, 1-4 未着手（タスク画面大規模リファクタ — 要慎重実装）
+- 2-2〜2-8, STEP 3 未着手
+- canopy全PASS → 全deploy済み
 
 ### AJ: AIメモ空状態テキスト (2026-03-23) ✅
 - GoalHubメモペインに「AIの理解メモ」セクション新設
