@@ -22,7 +22,9 @@ const USER_PROFILE = {
   wantedImage: [],
   catchcopy:  '',
   worries:    '',
-  knowSummary: ''
+  knowSummary: '',
+  ideal_day:  '',
+  unwanted_life: ''
 };
 
 // ─ Build full AI context string from all profile + goals data ─
@@ -130,7 +132,7 @@ function renderCharts(){
         <div class="fail-date">${escapeHtml(f.date || '')}</div>
         <div class="fail-reason">${escapeHtml(f.reason || '')}</div>
         <div class="fail-deep">${escapeHtml(f.deep || '')}</div>
-        <span class="fail-tag" style="background:rgba(255,255,255,.06);color:var(--muted)"># ${escapeHtml(f.tag || '')}</span>
+        <span class="fail-tag" style="background:var(--muted3);color:var(--muted)"># ${escapeHtml(f.tag || '')}</span>
       </div>`;
     tl.appendChild(item);
   });
@@ -208,7 +210,7 @@ function appendWorryBubble(m){
   const wrap = document.createElement('div');
   wrap.style.cssText = `display:flex;gap:8px;${m.role==='user'?'flex-direction:row-reverse;':''}animation:fadeUp .3s ease both`;
   const av = document.createElement('div');
-  av.style.cssText = `width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;${m.role==='ai'?'background:linear-gradient(135deg,#252a40,#323855);color:var(--mencare);border:1px solid var(--mencare-d)':'background:linear-gradient(135deg,#e4b86a,#b8882a);color:#0c0e14;font-weight:700'}`;
+  av.style.cssText = `width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;${m.role==='ai'?'background:var(--avatar-bg);color:var(--mencare);border:1px solid var(--mencare-d)':'background:linear-gradient(135deg,var(--amber),var(--accent));color:var(--text-on-accent);font-weight:700'}`;
   if(m.role==='ai'){av.innerHTML=getLogoSVG(12);}else{const ut=getUserAvatarText();if(ut)av.textContent=ut;else av.textContent='U';}
   const bub = document.createElement('div');
   bub.style.cssText = `max-width:85%;padding:9px 13px;border-radius:11px;font-size:12px;line-height:1.75;${m.role==='ai'?'background:var(--bg3);border:1px solid var(--border);border-radius:3px 11px 11px 11px;color:var(--cream)':'background:var(--mencare-d);border:1px solid var(--mencare-d);border-radius:11px 3px 11px 11px;color:var(--cream)'}`;
@@ -234,7 +236,7 @@ async function sendWorriesMsg(){
   const wWrap = document.createElement('div');
   wWrap.style.cssText = 'display:flex;gap:8px;animation:fadeUp .3s ease both';
   const wAv = document.createElement('div');
-  wAv.style.cssText = 'width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;background:linear-gradient(135deg,#252a40,#323855);color:var(--mencare);border:1px solid var(--mencare-d)';
+  wAv.style.cssText = 'width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;background:var(--avatar-bg);color:var(--mencare);border:1px solid var(--mencare-d)';
   wAv.innerHTML = getLogoSVG(12);
   const wBub = document.createElement('div');
   wBub.className = 'stream-bubble';
@@ -298,10 +300,10 @@ function worriesKey(e) { chatKey(sendWorriesMsg, e); }
 function delRoutine(btn){ btn.closest('.routine-row').remove(); }
 function cyclePri(el){
   const cycle = [
-    {label:'高優先',bg:'var(--green-d)',color:'var(--green)',border:'rgba(93,184,150,.4)'},
-    {label:'目標時間',bg:'var(--amber-d)',color:'var(--amber)',border:'rgba(228,184,106,.4)'},
+    {label:'高優先',bg:'var(--green-d)',color:'var(--green)',border:'var(--green-d)'},
+    {label:'目標時間',bg:'var(--amber-d)',color:'var(--amber)',border:'var(--mode-normal-border)'},
     {label:'健康維持',bg:'var(--blue-d)',color:'var(--blue)',border:'rgba(120,168,216,.4)'},
-    {label:'固定',bg:'var(--red-d)',color:'var(--red)',border:'rgba(224,104,104,.3)'},
+    {label:'固定',bg:'var(--red-d)',color:'var(--red)',border:'var(--red-d)'},
     {label:'任意',bg:'var(--bg3)',color:'var(--muted)',border:'var(--border2)'},
   ];
   const cur = el.textContent.trim();
@@ -325,7 +327,7 @@ function addRoutine(){
   row.innerHTML = `
     <span class="routine-time">${escapeHtml(start)} – ${escapeHtml(end)}</span>
     <span class="routine-label">${escapeHtml(label)}</span>
-    <span class="routine-pri" style="border-color:rgba(228,184,106,.4);color:var(--amber);background:var(--amber-d);" onclick="cyclePri(this)">目標時間</span>
+    <span class="routine-pri" style="border-color:var(--mode-normal-border);color:var(--amber);background:var(--amber-d);" onclick="cyclePri(this)">目標時間</span>
     <span class="routine-del" onclick="delRoutine(this)">×</span>`;
   list.appendChild(row);
 }
@@ -492,10 +494,10 @@ function appendKnowMsg(role, text){
   const wrap = document.createElement('div');
   wrap.style.cssText = `display:flex;gap:10px;align-items:flex-start;${role==='user'?'flex-direction:row-reverse':''}`;
   const av = document.createElement('div');
-  av.style.cssText = `width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;${role==='ai'?'background:rgba(157,120,216,.25);color:#c4a0e8':'background:var(--amber-g);border:1px solid rgba(228,184,106,.3);color:var(--amber)'}`;
+  av.style.cssText = `width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;${role==='ai'?'background:var(--know-purple-border);color:var(--know-purple)':'background:var(--amber-g);border:1px solid var(--mode-normal-border);color:var(--amber)'}`;
   if(role==='ai'){av.textContent='🪞';}else{const ut=getUserAvatarText();av.textContent=ut||'U';}
   const bub = document.createElement('div');
-  bub.style.cssText = `max-width:80%;padding:11px 15px;border-radius:10px;font-size:12.5px;line-height:1.75;${role==='ai'?'background:rgba(157,120,216,.1);border:1px solid rgba(157,120,216,.2);color:var(--cream)':'background:var(--bg3);border:1px solid var(--border2);color:var(--cream)'}`;
+  bub.style.cssText = `max-width:80%;padding:11px 15px;border-radius:10px;font-size:12.5px;line-height:1.75;${role==='ai'?'background:var(--know-purple-bg);border:1px solid var(--know-purple-bg);color:var(--cream)':'background:var(--bg3);border:1px solid var(--border2);color:var(--cream)'}`;
   bub.innerHTML = escapeHtml(text).replace(/\n/g,'<br>');
   wrap.appendChild(av); wrap.appendChild(bub);
   chat.appendChild(wrap);
@@ -523,8 +525,8 @@ async function sendKnowMsg(){
   const typWrap = document.createElement('div');
   typWrap.id = typId;
   typWrap.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
-  typWrap.innerHTML = `<div style="width:28px;height:28px;border-radius:50%;background:rgba(157,120,216,.25);display:flex;align-items:center;justify-content:center;font-size:12px;color:#c4a0e8;flex-shrink:0">🪞</div>
-    <div style="padding:11px 15px;border-radius:10px;background:rgba(157,120,216,.1);border:1px solid rgba(157,120,216,.2)"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  typWrap.innerHTML = `<div style="width:28px;height:28px;border-radius:50%;background:var(--know-purple-border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--know-purple);flex-shrink:0">🪞</div>
+    <div style="padding:11px 15px;border-radius:10px;background:var(--know-purple-bg);border:1px solid var(--know-purple-bg)"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
   document.getElementById('know-chat').appendChild(typWrap);
 
   try {
@@ -683,12 +685,12 @@ function applySummaryToProfile(){
     if(pd.energyGain?.length){
       USER_PROFILE.energyGain = pd.energyGain;
       const cont = document.getElementById('energy-gain-tags');
-      if(cont){ cont.innerHTML=''; pd.energyGain.forEach(t=>{ const tag=document.createElement('span'); tag.className='energy-tag'; tag.style.cssText='background:var(--green-d);border:1px solid rgba(93,184,150,.3);color:var(--green);'; tag.innerHTML=`${escapeHtml(t)} <span class="remove-x" onclick="this.parentElement.remove();updateProfile()">×</span>`; cont.appendChild(tag); }); }
+      if(cont){ cont.innerHTML=''; pd.energyGain.forEach(t=>{ const tag=document.createElement('span'); tag.className='energy-tag'; tag.style.cssText='background:var(--green-d);border:1px solid var(--green-d);color:var(--green);'; tag.innerHTML=`${escapeHtml(t)} <span class="remove-x" onclick="this.parentElement.remove();updateProfile()">×</span>`; cont.appendChild(tag); }); }
     }
     if(pd.energyDrain?.length){
       USER_PROFILE.energyDrain = pd.energyDrain;
       const cont = document.getElementById('energy-drain-tags');
-      if(cont){ cont.innerHTML=''; pd.energyDrain.forEach(t=>{ const tag=document.createElement('span'); tag.className='energy-tag'; tag.style.cssText='background:var(--red-d);border:1px solid rgba(224,104,104,.3);color:var(--red);'; tag.innerHTML=`${escapeHtml(t)} <span class="remove-x" onclick="this.parentElement.remove();updateProfile()">×</span>`; cont.appendChild(tag); }); }
+      if(cont){ cont.innerHTML=''; pd.energyDrain.forEach(t=>{ const tag=document.createElement('span'); tag.className='energy-tag'; tag.style.cssText='background:var(--red-d);border:1px solid var(--red-d);color:var(--red);'; tag.innerHTML=`${escapeHtml(t)} <span class="remove-x" onclick="this.parentElement.remove();updateProfile()">×</span>`; cont.appendChild(tag); }); }
     }
     if(pd.mbtiGuess){
       USER_PROFILE.mbti = pd.mbtiGuess;
@@ -712,7 +714,12 @@ function applySummaryToProfile(){
   if(visionMatch){ USER_PROFILE.vision = visionMatch[1].trim(); const el=document.getElementById('vision-statement'); if(el) el.textContent=USER_PROFILE.vision; }
   const catchMatch = cleanSummary.match(/【キャッチコピー】\s*「?([\s\S]*?)」?\s*(?=【|$)/);
   if(catchMatch){ USER_PROFILE.catchcopy = catchMatch[1].trim().replace(/^「|」$/g,''); const el=document.getElementById('vision-catchcopy'); if(el) el.textContent=USER_PROFILE.catchcopy; }
+  const idealMatch = cleanSummary.match(/【5年後の理想の平日】\s*([\s\S]*?)(?=【|$)/);
+  if(idealMatch){ USER_PROFILE.ideal_day = idealMatch[1].trim(); }
+  const unwantedMatch = cleanSummary.match(/【やりたくない生活】\s*([\s\S]*?)(?=【|$)/);
+  if(unwantedMatch){ USER_PROFILE.unwanted_life = unwantedMatch[1].trim(); }
   USER_PROFILE.knowSummary = cleanSummary;
+  renderVision();
   toast('プロフィールに反映しました ✓');
   switchMyselfTab('profile');
 }
@@ -726,7 +733,7 @@ function editVision(){
   const current = el.textContent.trim().replace(/^「|」$/g,'');
   el.innerHTML = `<textarea style="width:100%;background:transparent;border:none;color:var(--cream);font-family:var(--ff);font-size:14px;line-height:1.9;resize:none;outline:none;font-style:italic;" rows="3" id="vision-edit">${escapeHtml(current)}</textarea>
   <div style="display:flex;gap:8px;margin-top:8px;">
-    <button onclick="saveVision()" style="padding:5px 13px;background:rgba(157,120,216,.2);border:1px solid rgba(157,120,216,.4);border-radius:6px;color:#c4a0e8;font-size:10px;cursor:pointer;font-family:var(--ff);">保存</button>
+    <button onclick="saveVision()" style="padding:5px 13px;background:var(--know-purple-bg);border:1px solid var(--know-purple-border);border-radius:6px;color:var(--know-purple);font-size:10px;cursor:pointer;font-family:var(--ff);">保存</button>
     <button onclick="renderVision()" style="padding:5px 13px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:10px;cursor:pointer;font-family:var(--ff);">キャンセル</button>
   </div>`;
 }
@@ -737,6 +744,39 @@ function saveVision(){
 }
 function renderVision(){
   document.getElementById('vision-statement').innerHTML = USER_PROFILE.vision ? '「'+escapeHtml(USER_PROFILE.vision)+'」' : '<span style="color:var(--muted2)">ビジョンを設定すると表示されます</span>';
+  // 5年後の理想の平日
+  const idealEl = document.getElementById('vision-ideal-day');
+  if(idealEl){
+    idealEl.innerHTML = USER_PROFILE.ideal_day ? escapeHtml(USER_PROFILE.ideal_day) : '<span style="color:var(--muted2);font-size:12px;">「自分を知る」セッション完了後に表示されます</span>';
+  }
+  // やりたくない生活
+  const unwantedEl = document.getElementById('vision-unwanted-life');
+  if(unwantedEl){
+    unwantedEl.innerHTML = USER_PROFILE.unwanted_life ? escapeHtml(USER_PROFILE.unwanted_life) : '<span style="color:var(--muted2);font-size:12px;">「自分を知る」セッション完了後に表示されます</span>';
+  }
+}
+function editVisionField(field){
+  const elId = field === 'ideal_day' ? 'vision-ideal-day' : 'vision-unwanted-life';
+  const label = field === 'ideal_day' ? '5年後の理想の平日' : 'やりたくない生活';
+  const el = document.getElementById(elId);
+  if(!el) return;
+  const current = USER_PROFILE[field] || '';
+  const ta = document.createElement('textarea');
+  ta.value = current;
+  ta.style.cssText = 'width:100%;min-height:80px;padding:10px;border-radius:8px;background:var(--bg);color:var(--cream);border:1px solid var(--amber);font-size:13px;font-family:var(--ff);resize:vertical;line-height:1.7;';
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:6px;margin-top:8px;';
+  row.innerHTML = `<button style="padding:6px 14px;background:var(--amber);color:var(--text-on-accent);border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">保存</button><button style="padding:6px 14px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;">キャンセル</button>`;
+  el.innerHTML = '';
+  el.appendChild(ta);
+  el.appendChild(row);
+  ta.focus();
+  row.children[1].onclick = () => renderVision();
+  row.children[0].onclick = () => {
+    USER_PROFILE[field] = ta.value.trim();
+    saveProfile();
+    renderVision();
+  };
 }
 function addVisionItem(type){
   const text = prompt(type==='image'?'見られたい姿を入力:':'強みを入力:');
@@ -761,6 +801,22 @@ async function regenCatchcopy(){
     el.textContent = data.content?.map(b=>b.text||'').join('').trim() || '「アイデアを、形に変える人。」';
   } catch(e){ el.textContent = '「アイデアを、形に変える人。」'; }
   el.style.opacity = '1';
+}
+
+// ─ MY CHARACTER (Vision tab) ─
+function editMyCharacter(){
+  const fields = [
+    {id:'char-personality', label:'性格タイプ'},
+    {id:'char-action-style', label:'行動スタイル'},
+    {id:'char-core-value', label:'コアバリュー'},
+    {id:'char-growth-edge', label:'成長エッジ'}
+  ];
+  fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    const cur = el.textContent.trim() === '--' ? '' : el.textContent.trim();
+    const val = prompt(f.label + 'を入力:', cur);
+    if(val !== null && val.trim()) el.textContent = val.trim();
+  });
 }
 
 // ─ ゴールとの連携 ─
@@ -806,7 +862,7 @@ function renderConnectContent(loading=false, data=null){
   if(data.checks?.length){
     html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin-bottom:8px;">⚠ 確認項目</div>`;
     data.checks.forEach(c=>{
-      html += `<div class="connect-card" style="border-color:${c.type==='warning'?'rgba(224,104,104,.3)':'rgba(93,184,150,.3)'}">
+      html += `<div class="connect-card" style="border-color:${c.type==='warning'?'var(--red-d)':'var(--green-d)'}">
         <div class="connect-card-hd" style="color:${c.type==='warning'?'var(--red)':'var(--green)'}">${c.type==='warning'?'⚠':'✓'} ${c.goal}</div>
         <div class="connect-card-body">${c.message}</div>
         <button class="connect-apply-btn" onclick="hubChatFromConnect('${c.goal}', '${c.message.replace(/'/g,"\\'")}')">💬 チャットで確認する</button>
@@ -817,7 +873,7 @@ function renderConnectContent(loading=false, data=null){
     html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:16px 0 8px;">💡 ビジョンから生まれるゴールアイデア</div>`;
     data.ideas.forEach(id=>{
       html += `<div class="connect-card">
-        <div class="connect-card-hd" style="color:#c4a0e8">💡 ${id.title}</div>
+        <div class="connect-card-hd" style="color:var(--know-purple)">💡 ${id.title}</div>
         <div class="connect-card-body">${id.reason}</div>
         <button class="connect-apply-btn">＋ このゴールを追加する</button>
       </div>`;
@@ -892,7 +948,7 @@ function addEnergyTag(type){
   inp.value = '';
   const color = type==='gain'?'var(--green)':'var(--red)';
   const bg    = type==='gain'?'var(--green-d)':'var(--red-d)';
-  const border= type==='gain'?'rgba(93,184,150,.3)':'rgba(224,104,104,.3)';
+  const border= type==='gain'?'var(--green-d)':'var(--red-d)';
   const tag = document.createElement('span');
   tag.className = 'energy-tag';
   tag.style.cssText = `background:${bg};border:1px solid ${border};color:${color};`;
@@ -1037,8 +1093,8 @@ function startMbtiTest(mode){
   wrap.innerHTML = `
     <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
       <div style="font-size:10px;color:var(--muted2);">診断モード：</div>
-      <div onclick="startMbtiTest('quick')" style="padding:4px 11px;border-radius:5px;font-size:10px;cursor:pointer;border:1px solid ${mbtiMode==='quick'?'rgba(228,184,106,.5)':'var(--border2)'};background:${mbtiMode==='quick'?'var(--amber-g)':'transparent'};color:${mbtiMode==='quick'?'var(--amber)':'var(--muted2)'}">簡易（10問・2分）</div>
-      <div onclick="startMbtiTest('full')" style="padding:4px 11px;border-radius:5px;font-size:10px;cursor:pointer;border:1px solid ${mbtiMode==='full'?'rgba(228,184,106,.5)':'var(--border2)'};background:${mbtiMode==='full'?'var(--amber-g)':'transparent'};color:${mbtiMode==='full'?'var(--amber)':'var(--muted2)'}">本格（60問・15分）</div>
+      <div onclick="startMbtiTest('quick')" style="padding:4px 11px;border-radius:5px;font-size:10px;cursor:pointer;border:1px solid ${mbtiMode==='quick'?'var(--mode-normal-border)':'var(--border2)'};background:${mbtiMode==='quick'?'var(--amber-g)':'transparent'};color:${mbtiMode==='quick'?'var(--amber)':'var(--muted2)'}">簡易（10問・2分）</div>
+      <div onclick="startMbtiTest('full')" style="padding:4px 11px;border-radius:5px;font-size:10px;cursor:pointer;border:1px solid ${mbtiMode==='full'?'var(--mode-normal-border)':'var(--border2)'};background:${mbtiMode==='full'?'var(--amber-g)':'transparent'};color:${mbtiMode==='full'?'var(--amber)':'var(--muted2)'}">本格（60問・15分）</div>
     </div>
     <div class="mbti-progress-bar"><div class="mbti-progress-fill" id="mbti-prog" style="width:0%"></div></div>
     <div id="mbti-questions-area"></div>`;
@@ -1064,7 +1120,7 @@ function renderMbtiQuestion(){
       <div class="mbti-result-name">${info.n}</div>
       <div class="mbti-result-desc">${info.d}</div>
       <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
-        <button onclick="document.getElementById('mbti-test-wrap').style.display='none';saveProfile()" style="padding:8px 20px;background:var(--amber-g);border:1px solid rgba(228,184,106,.4);border-radius:8px;color:var(--amber);font-size:12px;cursor:pointer;font-family:var(--ff);">プロフィールに保存</button>
+        <button onclick="document.getElementById('mbti-test-wrap').style.display='none';saveProfile()" style="padding:8px 20px;background:var(--amber-g);border:1px solid var(--mode-normal-border);border-radius:8px;color:var(--amber);font-size:12px;cursor:pointer;font-family:var(--ff);">プロフィールに保存</button>
         ${mbtiMode==='quick'?`<button onclick="startMbtiTest('full')" style="padding:8px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--ff);">本格診断（60問）で再診断</button>`:''}
       </div>
     </div>`;
@@ -1154,7 +1210,7 @@ function renderGapContent(data){
   if(data.quickwins?.length){
     html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--green);font-family:var(--fm);margin:14px 0 9px;">⚡ 今週できること</div>`;
     data.quickwins.forEach(q=>{
-      html += `<div style="background:var(--green-d);border:1px solid rgba(93,184,150,.25);border-radius:9px;padding:11px 15px;margin-bottom:7px;">
+      html += `<div style="background:var(--green-d);border:1px solid var(--green-d);border-radius:9px;padding:11px 15px;margin-bottom:7px;">
         <div style="font-size:11.5px;font-weight:500;color:var(--green);margin-bottom:4px;">${q.title}</div>
         <div style="font-size:11px;color:var(--muted);line-height:1.65;">${q.detail}</div></div>`;
     });
@@ -1268,7 +1324,7 @@ Object.assign(window, {
   openMyselfHub, openProfileDirect, switchMyselfTab,
   startKnowSession, updateKnowChips, appendKnowMsg, sendKnowMsg,
   generateKnowSummary, applySummaryToProfile,
-  knowResize, knowKey, editVision, saveVision, renderVision, addVisionItem,
+  knowResize, knowKey, editVision, saveVision, renderVision, addVisionItem, editVisionField, editMyCharacter,
   regenCatchcopy, runConnectAnalysis, renderConnectContent, hubChatFromConnect,
   updateProfile, saveProfile, updateAge, selGender, toggleInterest,
   addEnergyTag, setNetworkQ, renderMyselfProfile,

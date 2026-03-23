@@ -7,15 +7,15 @@
 
 ## 5行サマリー
 - **Version:** v3.11.0
-- **Next:** AJ（AIメモ空状態テキスト）→ AN（ユーザーメッセージ編集）
-- **Last done:** デザイン構造照合v2 ✅（docs/design_checklist_v2.md に全結果）
-- **Open issues:** 構造差93件検出（スケーリング差22件/構造差5件/機能未実装7件/mockup限定4件）
+- **Next:** AP（ビジョン画面セクション追加）
+- **Last done:** AJ ✅ + AN 既実装確認 ✅ + デザイン構造照合v2 ✅
+- **Open issues:** 構造差93件（docs/design_checklist_v2.md 参照）
 - **Proposals:** 0件
 
 ## 現在地
 - **バージョン:** v3.11.0
-- **チェーン:** ~~デザイン構造照合v2~~ → AJ → AN → テスト配布
-- **次のミッション:** AJ: AIメモ空状態テキスト（キュー先頭）
+- **チェーン:** ~~デザイン構造照合v2~~ → ~~AJ~~ → ~~AN(既実装)~~ → AP → テスト配布
+- **次のミッション:** AP: ビジョン画面セクション追加（キュー先頭）
 
 ## ミッションキュー（上から順に実行）
 
@@ -371,6 +371,13 @@ spec_v3.md × mockup HTML × 実装コードの3点照合。全22画面を検証
 ---
 
 ## 直近の変更履歴（直近3件のみ。過去分はinstructions/results/に保存）
+
+### AJ: AIメモ空状態テキスト (2026-03-23) ✅
+- GoalHubメモペインに「AIの理解メモ」セクション新設
+- 空状態: 「AIがあなたを理解中です。5回ほど会話すると…」(13px, --text-secondary)
+- データ有: goal.ai_memo をpre-wrap表示
+- mockup 05d準拠: gold accent border + 背景
+- canopy PASS → deploy → git tag v3.11.0-aj-memo
 
 ### デザイン構造照合v2 (2026-03-23) ✅
 - 全22画面のmockup HTML要素を1つずつ実装と構造比較（タグ名・CSS値・テキスト・アイコン）
