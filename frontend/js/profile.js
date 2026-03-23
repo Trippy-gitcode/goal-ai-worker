@@ -803,6 +803,18 @@ async function regenCatchcopy(){
   el.style.opacity = '1';
 }
 
+function shareCharacter(){
+  const char = document.getElementById('my-character-card');
+  const traits = char ? char.innerText : '';
+  const vision = USER_PROFILE.vision || '';
+  const text = `【MY CHARACTER】\n${traits}\n\nビジョン: ${vision}\n\n#GOALAI`;
+  if(navigator.share){
+    navigator.share({title:'MY CHARACTER - GOAL AI',text}).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(text).then(()=>toast('クリップボードにコピーしました'));
+  }
+}
+
 // ─ MY CHARACTER (Vision tab) ─
 function editMyCharacter(){
   const fields = [
@@ -1337,7 +1349,7 @@ Object.assign(window, {
   openMyselfHub, openProfileDirect, switchMyselfTab,
   startKnowSession, updateKnowChips, appendKnowMsg, sendKnowMsg,
   generateKnowSummary, applySummaryToProfile,
-  knowResize, knowKey, editVision, saveVision, renderVision, addVisionItem, editVisionField, editMyCharacter,
+  knowResize, knowKey, editVision, saveVision, renderVision, addVisionItem, editVisionField, editMyCharacter, shareCharacter,
   regenCatchcopy, runConnectAnalysis, renderConnectContent, hubChatFromConnect,
   updateProfile, saveProfile, updateAge, selGender, toggleInterest,
   addEnergyTag, setNetworkQ, renderMyselfProfile,
