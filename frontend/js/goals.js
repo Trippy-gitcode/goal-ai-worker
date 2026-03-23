@@ -176,11 +176,11 @@ function renderTodaySummaryBar(){
         <div class="today-stat-val">${total}</div>
         <div class="today-stat-lbl">今日のタスク</div>
       </div>
-      <div class="today-stat" style="border-color:rgba(224,104,104,.3)">
+      <div class="today-stat" style="border-color:var(--red-d)">
         <div class="today-stat-val" style="color:var(--red)">${urgent}</div>
         <div class="today-stat-lbl">期限切れ / 今日締切</div>
       </div>
-      <div class="today-stat" style="border-color:rgba(93,184,150,.3)">
+      <div class="today-stat" style="border-color:var(--green-d)">
         <div class="today-stat-val" style="color:var(--green)">${done}</div>
         <div class="today-stat-lbl">完了済み</div>
       </div>
@@ -214,10 +214,18 @@ function getTodayTasks(){
 
 
 
+let weightSortActive = false;
+
 function setFilter(f, el){
   taskFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
+  renderTasks();
+}
+
+function toggleWeightSort(el){
+  weightSortActive = !weightSortActive;
+  el.classList.toggle('active', weightSortActive);
   renderTasks();
 }
 
@@ -236,16 +244,35 @@ function renderTasks(){
     renderGoalSelectorBar();
     renderGoalView(container);
   }
+  // First-time task hint (P-32)
+  if(!localStorage.getItem('task_hint_shown') && container.children.length > 0){
+    localStorage.setItem('task_hint_shown','1');
+    const hint = document.createElement('div');
+    hint.className = 'task-hint-banner';
+    hint.textContent = 'タップで詳細・長押しで並べ替え';
+    hint.onclick = () => hint.remove();
+    container.prepend(hint);
+    setTimeout(()=>hint.remove(), 5000);
+  }
 }
 
 function renderGoalView(container){
+  // 'life' and 'goal' filters: check active goal's type
+  const activeGoal = ALL_GOALS[activeGoalIdx];
+  if(taskFilter === 'life' && activeGoal && activeGoal.type !== 'life') return;
+  if(taskFilter === 'goal' && activeGoal && activeGoal.type === 'life') return;
+
   const phases = getActiveGoalPhases();
   phases.forEach(phase => {
-    const visible = phase.tasks.filter(t => {
+    let visible = phase.tasks.filter(t => {
       if(taskFilter === 'done') return t.status === 'done';
       if(taskFilter === 'active') return t.status !== 'done';
       return true;
     });
+    // Weight sort: sort by task.weight descending (higher weight first)
+    if(weightSortActive){
+      visible = visible.slice().sort((a,b) => (b.weight||0) - (a.weight||0));
+    }
     if(visible.length === 0) return;
 
     const doneCnt = phase.tasks.filter(t=>t.status==='done').length;
@@ -256,7 +283,7 @@ function renderGoalView(container){
     const phd = document.createElement('div');
     phd.className = 'phase-hd';
     phd.innerHTML = `
-      <div class="phase-num" style="background:rgba(255,255,255,.06);border:1px solid ${phase.phaseColor}33;color:${phase.phaseColor}">${phase.phase}</div>
+      <div class="phase-num" style="background:var(--muted3);border:1px solid ${phase.phaseColor}33;color:${phase.phaseColor}">${phase.phase}</div>
       <div class="phase-title">${phase.phaseTitle}</div>
       <div class="phase-meta">${doneCnt}/${phase.tasks.length}</div>
       <div class="phase-prog">
@@ -851,8 +878,8 @@ function openTaskAddModal() {
       <option value="monthly">毎月</option>
     </select>
     <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button onclick="document.getElementById('task-add-modal')?.remove()" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">キャンセル</button>
-      <button onclick="addTaskFromModal()" style="padding:8px 16px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;">追加する</button>
+      <button onclick="document.getElementById('task-add-modal')?.remove()" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border-card);border-radius:8px;cursor:pointer;">キャンセル</button>
+      <button onclick="addTaskFromModal()" style="padding:8px 16px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:8px;cursor:pointer;font-weight:600;">追加する</button>
     </div>
   </div>`;
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
@@ -1061,7 +1088,7 @@ function renderGantt(){
       const widthPct = Math.max(1, (dueDate - barStart) / totalMs * 100);
 
       const barColor = task.status==='done' ? 'var(--green)' : task.status==='current' ? phase.phaseColor : phase.phaseColor+'88';
-      const textColor = task.status==='done' ? '#fff' : '#fff';
+      const textColor = task.status==='done' ? 'var(--text-primary)' : 'var(--text-primary)';
 
       const bar = document.createElement('div');
       bar.className = 'gantt-bar';
@@ -1277,7 +1304,7 @@ function renderHubTasks(){
       const row = document.createElement('div');
       const statusColors = {done:'var(--green)',current:'var(--amber)',todo:'var(--muted2)',blocked:'var(--red)'};
       const statusLabels = {done:'✅ 完了',current:'🔵 進行中',todo:'⬜ 未着手',blocked:'🔴 ブロック'};
-      row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;margin-bottom:6px;cursor:pointer;transition:border-color .15s;';
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border:1px solid var(--border-card);border-radius:9px;margin-bottom:6px;cursor:pointer;transition:border-color .15s;';
       row.onmouseover = () => row.style.borderColor = 'var(--border2)';
       row.onmouseout  = () => row.style.borderColor = 'var(--border)';
       row.innerHTML = `
@@ -1305,22 +1332,22 @@ function renderHubAnalytics(){
 
     <!-- 3 stat tiles -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center;">
+      <div style="background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;padding:14px 16px;text-align:center;">
         <div style="font-family:var(--fd);font-size:28px;font-weight:300;color:${isOk?'var(--green)':'var(--red)'}">${goal.actual}%</div>
         <div style="font-size:9px;color:var(--muted2);margin-top:3px;letter-spacing:.1em;font-family:var(--fm)">現在の進捗</div>
       </div>
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center;">
+      <div style="background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;padding:14px 16px;text-align:center;">
         <div style="font-family:var(--fd);font-size:28px;font-weight:300;color:var(--amber)">${goal.target}%</div>
         <div style="font-size:9px;color:var(--muted2);margin-top:3px;letter-spacing:.1em;font-family:var(--fm)">今日の予定</div>
       </div>
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center;">
+      <div style="background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;padding:14px 16px;text-align:center;">
         <div style="font-family:var(--fd);font-size:28px;font-weight:300;color:${daysLeft<30?'var(--red)':'var(--cream)'}">${daysLeft}</div>
         <div style="font-size:9px;color:var(--muted2);margin-top:3px;letter-spacing:.1em;font-family:var(--fm)">残り日数</div>
       </div>
     </div>
 
     <!-- Pace prediction -->
-    <div style="background:${isOk?'var(--green-d)':'var(--red-d)'};border:1px solid ${isOk?'rgba(93,184,150,.3)':'rgba(224,104,104,.3)'};border-radius:10px;padding:16px 18px;margin-bottom:20px;">
+    <div style="background:${isOk?'var(--green-d)':'var(--red-d)'};border:1px solid ${isOk?'var(--green-d)':'var(--red-d)'};border-radius:10px;padding:16px 18px;margin-bottom:20px;">
       <div style="font-size:10px;letter-spacing:.12em;color:${isOk?'var(--green)':'var(--red)'};font-family:var(--fm);margin-bottom:8px;">
         ${isOk ? '✓ 現在のペースで順調' : '⚠ このペースが続くと…'}
       </div>
@@ -1331,7 +1358,7 @@ function renderHubAnalytics(){
     </div>
 
     <!-- Phase progress bars -->
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
+    <div style="background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;padding:16px 18px;">
       <div style="font-size:10px;letter-spacing:.12em;color:var(--muted2);font-family:var(--fm);margin-bottom:14px;">フェーズ別進捗</div>
       ${goal.phases.map(ph => {
         const done = ph.tasks.filter(t=>t.status==='done').length;
@@ -1374,6 +1401,19 @@ function saveMemo(){
 }
 function renderHubMemo(){
   const goal = ALL_GOALS[hubGoalIdx];
+
+  // AIの理解メモ表示
+  const aiMemoContent = document.getElementById('hub-ai-memo-content');
+  if(aiMemoContent){
+    const aiMemo = goal.ai_memo || '';
+    if(aiMemo){
+      aiMemoContent.textContent = aiMemo;
+      aiMemoContent.style.color = 'var(--muted)';
+    } else {
+      aiMemoContent.innerHTML = `<div style="text-align:center;padding:12px 0;color:var(--text-secondary);font-size:13px;line-height:1.7;">AIがあなたを理解中です。<br>5回ほど会話すると、ここにAIの理解メモが表示されます。</div>`;
+    }
+  }
+
   const list = document.getElementById('hub-memo-list');
   if(!list) return;
   const memos = hubMemos[goal.id] || [];
@@ -1743,9 +1783,9 @@ async function proposeVoiceTask(text){
 
 function showVoiceTaskProposal(title, due){
   const el = document.createElement('div');
-  el.style.cssText = 'padding:10px 16px;background:var(--amber-g);border:1px solid rgba(228,184,106,.3);border-radius:10px;margin:8px 16px;font-size:12px;display:flex;align-items:center;gap:10px;';
+  el.style.cssText = 'padding:10px 16px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:10px;margin:8px 16px;font-size:12px;display:flex;align-items:center;gap:10px;';
   el.innerHTML = `<span style="flex:1;color:var(--cream);">📝 「${title}」をタスクに追加？</span>
-    <button onclick="addVoiceTask('${title.replace(/'/g,"\\'")}','${due||''}');this.parentElement.remove();" style="padding:5px 12px;background:var(--amber);border:none;border-radius:6px;font-size:11px;color:var(--bg);cursor:pointer;font-family:var(--ff);">追加</button>
+    <button onclick="addVoiceTask('${title.replace(/'/g,"\\'")}','${due||''}');this.parentElement.remove();" style="padding:5px 12px;background:var(--send-btn-grad);border:none;border-radius:6px;font-size:11px;color:var(--text-on-accent);cursor:pointer;font-family:var(--ff);">追加</button>
     <button onclick="this.parentElement.remove();" style="padding:5px 8px;background:none;border:1px solid var(--border2);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--ff);">✕</button>`;
   const inner = document.getElementById('home-chat-inner');
   if(inner) inner.appendChild(el);
@@ -1777,7 +1817,7 @@ function renderMicroTask(){
   const activeGoals = ALL_GOALS.filter(g=>!g.archived && g.status!=='done');
   if(!activeGoals.length){ el.innerHTML=''; return; }
   // AIに今日の1%タスクを聞く
-  el.innerHTML = `<div class="micro-task-card" style="padding:12px 16px;background:var(--amber-g);border:1px solid rgba(228,184,106,.2);border-radius:10px;margin-top:10px;">
+  el.innerHTML = `<div class="micro-task-card" style="padding:12px 16px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:10px;margin-top:10px;">
     <div style="font-size:10px;color:var(--amber);font-weight:600;letter-spacing:.1em;margin-bottom:6px;">🎯 今日の1%</div>
     <div style="font-size:12px;color:var(--muted);">生成中…</div>
   </div>`;
@@ -1800,7 +1840,7 @@ async function generateMicroTask(el, todayKey, goals){
 }
 
 function renderMicroTaskUI(el, micro){
-  el.innerHTML = `<div class="micro-task-card" style="padding:12px 16px;background:${micro.done?'rgba(93,184,150,.08)':'var(--amber-g)'};border:1px solid ${micro.done?'rgba(93,184,150,.2)':'rgba(228,184,106,.2)'};border-radius:10px;margin-top:10px;display:flex;align-items:center;gap:12px;transition:all .3s;">
+  el.innerHTML = `<div class="micro-task-card" style="padding:12px 16px;background:${micro.done?'var(--green-d)':'var(--amber-g)'};border:1px solid ${micro.done?'var(--green-d)':'var(--amber-d)'};border-radius:10px;margin-top:10px;display:flex;align-items:center;gap:12px;transition:all .3s;">
     <div class="micro-check" onclick="completeMicroTask()" style="width:22px;height:22px;border-radius:50%;border:2px solid ${micro.done?'var(--green)':'var(--amber)'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:12px;background:${micro.done?'var(--green)':'transparent'};color:${micro.done?'var(--bg)':'transparent'};transition:all .3s;">${micro.done?'✓':''}</div>
     <div style="flex:1;">
       <div style="font-size:10px;color:${micro.done?'var(--green)':'var(--amber)'};font-weight:600;letter-spacing:.1em;margin-bottom:3px;">🎯 今日の1%</div>
@@ -1827,6 +1867,7 @@ async function exportTorisetsuPDF(){
   const name = p.nickname || p.name || 'ユーザー';
   const activeGoals = ALL_GOALS.filter(g=>!g.archived);
 
+  /* PDF export: hardcoded colors intentional for print */
   // 一時的なHTMLコンテナを作成（日本語フォント対応）
   const container = document.createElement('div');
   container.style.cssText = 'position:fixed;left:-9999px;top:0;width:800px;padding:48px;background:#fff;font-family:"Hiragino Sans","Noto Sans JP",sans-serif;color:#333;line-height:1.8;';
@@ -2069,12 +2110,12 @@ function showTaskSetupPhase(goalObj) {
       <p style="color:var(--cream);margin-bottom:16px;">AIがタスクを提案します。一緒にタスクを作りましょう！</p>
       <div style="margin-bottom:16px;">
         <input id="task-setup-input" class="field-input" placeholder="タスクを入力して追加" style="margin-bottom:8px;">
-        <button onclick="addTaskSetupItem()" style="padding:6px 14px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-size:12px;">＋ 追加</button>
+        <button onclick="addTaskSetupItem()" style="padding:6px 14px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:8px;cursor:pointer;font-size:12px;">＋ 追加</button>
       </div>
       <div id="task-setup-list" style="margin-bottom:16px;"></div>
       <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button onclick="document.getElementById('task-setup-modal')?.remove();showPage('home');" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">ホームに戻る</button>
-        <button onclick="document.getElementById('task-setup-modal')?.remove();onGoalAssistComplete({title:'${escapeHtml(goalObj.title).replace(/'/g, "\\'")}',id:'${goalObj.id}'});" style="padding:8px 16px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;">完了</button>
+        <button onclick="document.getElementById('task-setup-modal')?.remove();showPage('home');" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border-card);border-radius:8px;cursor:pointer;">ホームに戻る</button>
+        <button onclick="document.getElementById('task-setup-modal')?.remove();onGoalAssistComplete({title:'${escapeHtml(goalObj.title).replace(/'/g, "\\'")}',id:'${goalObj.id}'});" style="padding:8px 16px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:8px;cursor:pointer;font-weight:600;">完了</button>
       </div>
     </div>`;
     modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
@@ -2125,15 +2166,15 @@ async function showRoleSelection(goal) {
     modal.innerHTML = `<div class="modal-content" style="max-width:420px;padding:24px;">
       <h3 style="color:var(--cream);margin-bottom:12px;">🎯 このゴールに最適なAIロール</h3>
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
-        ${suggestions.map((s,i) => `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .15s;" onclick="this.querySelector('input').checked=true;this.closest('.modal-content').querySelectorAll('label').forEach(l=>l.style.borderColor='var(--border)');this.style.borderColor='var(--amber)';">
+        ${suggestions.map((s,i) => `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;cursor:pointer;transition:border-color .15s;" onclick="this.querySelector('input').checked=true;this.closest('.modal-content').querySelectorAll('label').forEach(l=>l.style.borderColor='var(--border-card)');this.style.borderColor='var(--amber)';">
           <input type="radio" name="ai-role" value="${i}" style="display:none;">
           <span style="font-size:24px;">${s.icon}</span>
           <div><div style="font-weight:600;color:var(--cream);font-size:13px;">${escapeHtml(s.name)}</div><div style="font-size:11px;color:var(--muted);">${escapeHtml(s.description)}</div></div>
         </label>`).join('')}
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button onclick="this.closest('.modal-overlay').remove();" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">後で選ぶ</button>
-        <button onclick="confirmGoalRole('${goal.id}',this.closest('.modal-overlay'))" style="padding:8px 16px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;">決定</button>
+        <button onclick="this.closest('.modal-overlay').remove();" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border-card);border-radius:8px;cursor:pointer;">後で選ぶ</button>
+        <button onclick="confirmGoalRole('${goal.id}',this.closest('.modal-overlay'))" style="padding:8px 16px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:8px;cursor:pointer;font-weight:600;">決定</button>
       </div>
     </div>`;
     modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
@@ -2191,7 +2232,7 @@ Object.assign(window, {
   TASKS, ALL_GOALS, GOAL_COLORS, getGoalColor,
   getActiveGoalPhases, switchTaskView, renderTaskTimeView,
   renderGoalSelectorBar, renderTodaySummaryBar, getTodayTasks,
-  setFilter, renderTasks, renderGoalView, renderTodayView,
+  setFilter, toggleWeightSort, renderTasks, renderGoalView, renderTodayView,
   mkTaskRow, cycleStatus, addTask, openTaskDetail, closeTaskDetail,
   updateTaskStatus, renderTaskChat, mkTdpMsg, sendTaskMsg, tdpResize, tdpKey,
   getJapaneseHoliday, getHoliday, getRokuyo, getTasksForMonth,
