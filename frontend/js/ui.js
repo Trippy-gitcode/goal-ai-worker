@@ -1502,6 +1502,27 @@ async function subscribePlan(){
     return;
   }
 
+  // 2ステップ確認（BD: project_v6_4 §8）
+  const names = {light:'Light',pro:'Pro',max:'Max',ultra:'Ultra'};
+  const priceLabel = planBilling==='annual' ? '年額プラン' : '月額プラン';
+  const confirmed = await new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1100;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:320px;width:90%;text-align:center;">
+      <div style="font-size:14px;font-weight:600;color:var(--cream);margin-bottom:12px;">${names[p]||p}プラン（${priceLabel}）に変更しますか？</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6;">決済ページに移動します。<br>いつでもキャンセル可能です。</div>
+      <div style="display:flex;gap:8px;justify-content:center;">
+        <button id="plan-confirm-no" style="padding:8px 20px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">キャンセル</button>
+        <button id="plan-confirm-yes" style="padding:8px 20px;background:var(--amber);color:var(--bg);border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">決済に進む</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#plan-confirm-yes').onclick = ()=>{ overlay.remove(); resolve(true); };
+    overlay.querySelector('#plan-confirm-no').onclick = ()=>{ overlay.remove(); resolve(false); };
+    overlay.onclick = (e)=>{ if(e.target===overlay){ overlay.remove(); resolve(false); } };
+  });
+  if(!confirmed) return;
+
   // Stripe Checkoutへリダイレクト
   if(!AUTH_TOKEN){ toast('先にトークンを設定してください'); return; }
   const btn = document.getElementById('plan-cta-btn');
