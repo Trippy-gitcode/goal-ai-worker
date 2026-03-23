@@ -1380,6 +1380,7 @@ Object.assign(window, {
   startMbtiTest, renderMbtiQuestion, answerMbti, calcMbtiType,
   runGapAnalysis, renderGapContent,
   handleAvatarUpload, cropToCircle, updateAvatarDisplay,
-  toggleCompletenessDetail, initProfileScrollHandler, initAvatarDisplay
+  toggleCompletenessDetail, initProfileScrollHandler, initAvatarDisplay,
+  obNext
 });
 

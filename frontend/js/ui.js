@@ -1959,6 +1959,7 @@ Object.assign(window, {
   showAIMemo, MODE_DESCRIPTIONS, handleModeClick,
   updateModePills, updateSidebarTaskList,
   updateAnalyticsExtras, setAnalyticsPeriod,
-  deleteChatHistory, toggleLocationSetting, restoreLocationToggleUI
+  deleteChatHistory, toggleLocationSetting, restoreLocationToggleUI,
+  applyChatBg, confirmDeleteAccount, completeLifeTask
 });
 

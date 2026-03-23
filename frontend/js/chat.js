@@ -2570,6 +2570,7 @@ Object.assign(window, {
   CHAT_CONFIGS, HOME_ROLES, updateRoleBadge, getCurrentChatConfig,
   hideTaskChip, showTaskChip, highlightTaskChip,
   openTaskFromChat, getLastAIMessage, appendTaskSuggestionButton,
-  requestTaskBreakdown, showTaskCard, confirmTaskCard
+  requestTaskBreakdown, showTaskCard, confirmTaskCard,
+  setPreset
 });
 

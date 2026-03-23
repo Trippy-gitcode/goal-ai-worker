@@ -1381,6 +1381,17 @@ function renderHubAnalytics(){
     </div>`;
 }
 
+// ─ Start Deep Analysis from GoalHub ─
+function startDeepAnalysis(goalIdx) {
+  const goal = ALL_GOALS[goalIdx];
+  if (!goal) return;
+  const query = `「${goal.title}」の進捗を深く分析してください。現在${goal.actual}%、目標${goal.target}%です。`;
+  showDeepConfirm('hub-analytics-inner', 'hub-analytics-wrap',
+    () => runDeepAnalysis(query, 'hub-analytics-inner', 'hub-analytics-wrap'),
+    () => {}
+  );
+}
+
 // ─ Hub Memo ─
 function openMemoEditor(){
   document.getElementById('hub-memo-editor').style.display = 'block';
@@ -2308,5 +2319,6 @@ Object.assign(window, {
   exportTorisetsuPDF, openExportModal, exportICS, exportNotion, exportText,
   openGoalModal, toggleGoalModalTask, onGoalAssistComplete,
   showTaskSetupPhase, addTaskSetupItem, renderBreadcrumb, renderStepIndicator,
-  showRoleSelection, confirmGoalRole
+  showRoleSelection, confirmGoalRole,
+  startDeepAnalysis
 });
