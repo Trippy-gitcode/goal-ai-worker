@@ -1374,6 +1374,33 @@ function renderHubAnalytics(){
           </div>
         </div>`;
       }).join('')}
+    </div>
+
+    <!-- 停滞ポイント (3-1) -->
+    <div style="background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;padding:16px 18px;margin-top:16px;">
+      <div style="font-size:10px;letter-spacing:.12em;color:var(--muted2);font-family:var(--fm);margin-bottom:10px;">停滞ポイント</div>
+      <div id="hub-stagnation-${goal.id}" style="font-size:11px;color:var(--muted);line-height:1.6;">
+        ${(goal.stagnation_points || []).length ? goal.stagnation_points.map(sp =>
+          `<div style="display:flex;align-items:baseline;gap:6px;padding:4px 0;border-bottom:0.5px solid var(--border);">
+            <span style="font-size:8px;color:var(--muted2);font-family:var(--fm);flex-shrink:0;">${sp.date||''}</span>
+            <span style="flex:1;">${sp.content||''}</span>
+            ${sp.tag ? `<span style="font-size:7px;padding:1px 4px;border-radius:3px;flex-shrink:0;background:${sp.tag==='外部依存'?'var(--red-d)':sp.tag==='体調'?'var(--orange-d)':'var(--muted3)'};color:${sp.tag==='外部依存'?'var(--red)':sp.tag==='体調'?'var(--orange)':'var(--muted2)'};">${sp.tag}</span>` : ''}
+          </div>`
+        ).join('') : '<div style="color:var(--muted2);font-size:10px;">停滞ポイントはまだ記録されていません。</div>'}
+      </div>
+    </div>
+
+    <!-- 3人寄れば文殊の知恵 (3-2) -->
+    <div style="background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;padding:16px 18px;margin-top:16px;">
+      <div style="font-size:10px;letter-spacing:.12em;color:var(--muted2);font-family:var(--fm);margin-bottom:6px;">3人寄れば文殊の知恵</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:10px;">3つのAI（Gemini・ChatGPT・Claude）がそれぞれの視点でこのゴールを深く分析します。</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <span style="font-size:8px;padding:2px 8px;border-radius:10px;background:rgba(224,112,112,.1);color:var(--model-gemini);">Gemini</span>
+        <span style="font-size:8px;padding:2px 8px;border-radius:10px;background:rgba(91,141,239,.1);color:var(--model-gpt);">ChatGPT</span>
+        <span style="font-size:8px;padding:2px 8px;border-radius:10px;background:rgba(232,145,58,.1);color:var(--model-claude);">Claude</span>
+      </div>
+      <button onclick="startDeepAnalysis(${hubGoalIdx})" style="width:100%;padding:10px;background:var(--send-btn-grad);border:none;border-radius:10px;color:var(--text-on-accent);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--ff);">ヒアリング開始</button>
+      <div style="font-size:9px;color:var(--muted2);text-align:center;margin-top:6px;">残り ${goal.deep_remaining ?? '—'} 回</div>
     </div>`;
 }
 
