@@ -284,20 +284,20 @@ input,textarea,select{font-family:var(--ff);outline:none}
 .sb-logo{padding:16px 20px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;background:var(--bg2)}
 /* グラステーマでもロゴは不透明（ブランド品位保持） */
 [data-theme$="-glass"] .sb-logo{background:var(--bg2)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
-.sb-logo-mark{font-family:var(--fd);font-size:22px;font-weight:600;letter-spacing:.08em;background:var(--logo-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 100%;animation:logo-shimmer 4s ease-in-out infinite alternate;}
+.sb-logo-mark{font-family:var(--fd);font-size:13px;font-weight:500;letter-spacing:.08em;background:var(--logo-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 100%;animation:logo-shimmer 4s ease-in-out infinite alternate;}
 @keyframes logo-shimmer{0%{background-position:0% 0%}100%{background-position:100% 0%}}
 .sb-logo-sub{font-size:8.5px;color:var(--muted2);letter-spacing:.22em;text-transform:uppercase;margin-top:3px;font-family:var(--fm)}
 
 /* Nav */
 .nav-item{
-  display:flex;align-items:center;gap:9px;padding:9px 20px;
+  display:flex;align-items:center;gap:7px;padding:5px 12px;
   cursor:pointer;transition:background .15s,color .15s,transform .15s;
-  font-size:12px;font-weight:400;letter-spacing:.01em;color:var(--muted);border-left:2px solid transparent;
+  font-size:10px;font-weight:400;letter-spacing:.01em;color:var(--muted);position:relative;
 }
-.nav-item:hover{background:var(--bg3);color:var(--cream);transform:translateX(2px);}
-.nav-item.active{background:var(--bg3);color:var(--amber);border-left-color:var(--amber)}
-.nav-icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.nav-section{padding:18px 20px 5px;font-size:12px;color:var(--muted2);letter-spacing:0.05em;text-transform:uppercase;font-family:var(--fm);font-weight:600;}
+.nav-item:hover{background:var(--bg3);color:var(--cream);}
+.nav-item.active{background:var(--bg3);color:var(--amber);font-weight:500;}
+.nav-icon{width:15px;height:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.nav-section{padding:5px 12px 3px;font-size:10px;color:var(--muted2);letter-spacing:0.05em;font-family:var(--fm);font-weight:500;}
 .sidebar-section-label{font-weight:600;letter-spacing:0.05em;font-size:12px;}
 
 /* Goal cards */
@@ -351,7 +351,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
 .btn-add-goal:hover{background:rgba(228,184,106,0.2);border-color:var(--amber);transform:scale(1.02);}
 
 /* Profile */
-.sb-bottom{margin-top:auto;padding:14px;border-top:1px solid var(--border)}
+.sb-bottom{margin-top:auto;padding:4px 12px;border-top:0.5px solid var(--border)}
 .prof-row{display:flex;align-items:center;gap:9px;padding:6px 6px;border-radius:8px;cursor:pointer;transition:background .15s}
 .prof-row:hover{background:var(--bg3)}
 .avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#b8882a);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--bg);font-weight:700}

@@ -78,28 +78,25 @@
 
 <!-- ═══ SIDEBAR ═══ -->
 <div id="sb">
-  <div class="sb-logo">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <svg width="28" height="28" viewBox="0 0 32 32"><defs><linearGradient id="logo-grad-sb" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#logo-grad-sb)"/></svg>
-      <div class="sb-logo-mark">GOAL AI</div>
-      <span id="sb-logo-plan" class="logo-plan-badge" style="display:none;" onclick="event.stopPropagation();openPlanModal()"></span>
-    </div>
-    <div class="sb-logo-sub">Your private AI partner</div>
+  <div class="sb-logo" style="padding:0 12px 6px;border-bottom:0.5px solid var(--border);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+    <svg width="22" height="22" viewBox="0 0 32 32"><defs><linearGradient id="logo-grad-sb" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#logo-grad-sb)"/></svg>
+    <span class="sb-logo-mark" style="font-size:13px;font-weight:500;">GOAL AI</span>
+    <span id="sb-logo-plan" class="logo-plan-badge" style="display:none;font-size:7px;padding:1px 5px;border-radius:4px;background:rgba(200,146,10,0.1);color:#c8920a;margin-left:auto;" onclick="event.stopPropagation();openPlanModal()"></span>
   </div>
 
   <!-- Nav -->
   <div style="padding:8px 0;">
     <div class="nav-item active" onclick="goHomeNewChat()" id="nav-home">
-      <span class="nav-icon"><svg width="18" height="18" class="svg-ic"><use href="#ic-home"/></svg></span> ホーム
+      <span class="nav-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-home"/></svg></span> ホーム
     </div>
     <div class="nav-item" onclick="showPage('tasks')" id="nav-tasks">
-      <span class="nav-icon"><svg width="18" height="18" class="svg-ic"><use href="#ic-tasks"/></svg></span> タスク
+      <span class="nav-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-tasks"/></svg></span> タスク
     </div>
     <div class="nav-item" onclick="showPage('calendar')" id="nav-calendar">
-      <span class="nav-icon"><svg width="18" height="18" class="svg-ic"><use href="#ic-calendar"/></svg></span> カレンダー
+      <span class="nav-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-calendar"/></svg></span> カレンダー
     </div>
     <div class="nav-item" onclick="showPage('analytics')" id="nav-analytics">
-      <span class="nav-icon"><svg width="18" height="18" class="svg-ic"><use href="#ic-analytics"/></svg></span> 解析
+      <span class="nav-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-analytics"/></svg></span> 解析
     </div>
   </div>
 
@@ -128,28 +125,18 @@
   <!-- Chat Records -->
   <div class="nav-section" style="display:flex;align-items:center;justify-content:space-between;">
     チャットレコード
-    <span onclick="openChatHistory()" style="font-size:9px;color:var(--muted2);cursor:pointer;">すべて見る →</span>
+    <span onclick="openChatHistory()" style="font-size:8px;color:var(--amber);cursor:pointer;">すべて見る →</span>
   </div>
   <div id="sb-chat-records"></div>
 
   <!-- Goals (Supabaseから動的に描画) -->
-  <div class="nav-section" id="sb-goals-section">ゴールプロジェクト</div>
-  <div style="padding:0 12px 4px;font-size:0.65rem;color:var(--muted2);">目標に本気で取り組むエキスパートモード</div>
+  <div class="nav-section" id="sb-goals-section">ゴール一覧</div>
 
   <div class="btn-add-goal" onclick="showWelcome()"><svg width="14" height="14" class="svg-ic"><use href="#ic-plus"/></svg> 新しいゴール</div>
 
   <!-- 私をデザイン — fixed entry -->
   <div class="nav-section" style="margin-top:8px">パーソナル</div>
-  <div class="goal-card" onclick="openMyselfHub()" id="gc-myself" style="border-color:var(--know-purple-border);background:rgba(157,120,216,.06);">
-    <div style="display:flex;align-items:center;gap:7px;">
-      <span style="font-size:16px">🪞</span>
-      <div>
-        <div class="gc-title" style="color:var(--know-purple)">私をデザイン</div>
-        <div style="font-size:9px;color:var(--muted2);margin-top:2px">あなたを知るほど、AIはもっと的確になる。</div>
-      </div>
-    </div>
-    <div class="gc-hub-hint" style="color:rgba(157,120,216,.7)">→ セッションを開く</div>
-  </div>
+  <div onclick="openMyselfHub()" id="gc-myself" style="padding:3px 12px 3px 34px;font-size:9px;color:var(--muted);cursor:pointer;">私をデザイン</div>
 
   <div class="nav-item" onclick="showAIMemo('home');closeSidebar();" style="padding:7px 16px;font-size:12px;">
     <div class="nav-icon">📋</div>
@@ -178,7 +165,7 @@
   <div class="sb-bottom" style="padding:6px 12px 8px;">
     <!-- 1行: avatar · name · settings · help -->
     <div class="prof-row" onclick="openProfileDirect()" style="gap:6px;padding:6px 8px;">
-      <div class="avatar" id="sb-avatar" style="width:26px;height:26px;font-size:10px;">?</div>
+      <div class="avatar" id="sb-avatar" style="width:22px;height:22px;font-size:9px;">?</div>
       <div style="flex:1;min-width:0;overflow:hidden;">
         <div class="prof-name" id="sb-prof-name" style="font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
       </div>
