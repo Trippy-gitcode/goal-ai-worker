@@ -188,6 +188,7 @@ function showPage(pg) {
     document.getElementById('pg-analytics-wrap').classList.add('active');
     document.getElementById('nav-analytics').classList.add('active');
     renderCharts();
+    updateAnalyticsExtras();
     document.getElementById('topbar').style.display='none';
   } else if(pg==='settings'){
     document.getElementById('pg-settings-wrap').classList.add('active');
@@ -214,7 +215,7 @@ function selectMode(mode) {
     const sel = window._mencaredays || 3;
     const input = document.createElement('div');
     input.style.cssText = 'position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;';
-    input.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;width:min(320px,85vw);text-align:center;">
+    input.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border-card);border-radius:14px;padding:24px;width:min(320px,85vw);text-align:center;">
       <div style="font-size:14px;color:var(--cream);margin-bottom:14px;">メンケアモードの期間</div>
       <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px;" id="_mencare-days">
         ${[1,2,3,5,7].map(d=>`<button onclick="window._mencaredays=${d};document.querySelectorAll('#_mencare-days button').forEach(b=>b.style.background='var(--bg3)');this.style.background='var(--mencare-d)';this.style.borderColor='var(--mencare)'" style="padding:8px 14px;background:${d===3?'var(--mencare-d)':'var(--bg3)'};border:1px solid ${d===3?'var(--mencare)':'var(--border)'};border-radius:8px;color:var(--cream);font-size:13px;cursor:pointer;font-family:var(--ff);">${d}日</button>`).join('')}
@@ -667,7 +668,7 @@ function renderDeepResult(containerId, scrollId, results, userQuery) {
   const wrap = document.createElement('div');
   wrap.className = 'deep-result-wrap';
   wrap.innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:12px;background:var(--amber-g);border:1px solid rgba(228,184,106,.2);border-radius:8px;font-size:10px;color:var(--amber);font-family:var(--fm);">
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:12px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:8px;font-size:10px;color:var(--amber);font-family:var(--fm);">
       <span>🔍 Gemini</span><span style="color:var(--border2)">→</span>
       <span>💡 GPT</span><span style="color:var(--border2)">→</span>
       <span>🧠 Claude</span>
@@ -700,7 +701,7 @@ function renderDeepResult(containerId, scrollId, results, userQuery) {
           <div>${renderMsgContent(results.gptReview)}</div>
         </div>
         <div>
-          <div style="font-size:9.5px;color:#6a9fd4;margin-bottom:4px;font-weight:600;">🔵 Gemini レビュー（エビデンス・競合整合性）</div>
+          <div style="font-size:9.5px;color:var(--blue);margin-bottom:4px;font-weight:600;">🔵 Gemini レビュー（エビデンス・競合整合性）</div>
           <div>${renderMsgContent(results.geminiReview)}</div>
         </div>
       </div>
@@ -711,7 +712,7 @@ function renderDeepResult(containerId, scrollId, results, userQuery) {
         <button class="deep-pdf-btn${results.format==='word'?' selected':''}" onclick="exportDeepFormat('word', window.__lastDeepResults, '${userQuery.replace(/'/g,'').slice(0,20)}')">🔵 Word</button>
         <button class="deep-pdf-btn${results.format==='excel'?' selected':''}" onclick="exportDeepFormat('excel', window.__lastDeepResults, '${userQuery.replace(/'/g,'').slice(0,20)}')">🟢 Excel</button>
         <button class="deep-pdf-btn${results.format==='pptx'?' selected':''}" onclick="exportDeepFormat('pptx', window.__lastDeepResults, '${userQuery.replace(/'/g,'').slice(0,20)}')">🟠 パワポ</button>
-        <button class="deep-pdf-btn" style="border-color:rgba(157,120,216,.3);color:#9d78d8;margin-left:auto;" onclick="continueDeepChat('${userQuery.replace(/'/g,'').slice(0,30)}')">＋ 深掘り</button>
+        <button class="deep-pdf-btn" style="border-color:var(--know-purple-border);color:var(--purple);margin-left:auto;" onclick="continueDeepChat('${userQuery.replace(/'/g,'').slice(0,30)}')">＋ 深掘り</button>
       </div>
     </div>`;
   inner.appendChild(wrap);
@@ -751,7 +752,7 @@ function exportDeepFormat(format, results, title) {
   } else if (format === 'pdf') {
     // HTML→print PDF (browser built-in)
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
-      <style>body{font-family:sans-serif;max-width:800px;margin:40px auto;font-size:13px;line-height:1.7;color:#222;}
+      <style>/* PDF/print: hardcoded colors intentional */body{font-family:sans-serif;max-width:800px;margin:40px auto;font-size:13px;line-height:1.7;color:#222;}
       h1{font-size:18px;border-bottom:2px solid #e4b86a;padding-bottom:6px;color:#b8882a;}
       h2{font-size:14px;color:#555;margin-top:24px;}
       .review{background:#f8f8f8;border-left:3px solid #ccc;padding:10px 14px;margin:10px 0;font-size:12px;}
@@ -775,7 +776,7 @@ function exportDeepFormat(format, results, title) {
     // Word-compatible HTML
     const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
       <head><meta charset="utf-8"><title>${title}</title>
-      <style>body{font-family:'Meiryo',sans-serif;font-size:11pt;} h1{font-size:16pt;color:#b8882a;} h2{font-size:13pt;}</style></head>
+      <style>/* PDF/print: hardcoded colors intentional */body{font-family:'Meiryo',sans-serif;font-size:11pt;} h1{font-size:16pt;color:#b8882a;} h2{font-size:13pt;}</style></head>
       <body><h1>GOAL AI ディープ分析レポート</h1>
       <p>テーマ：${title}　生成：${new Date().toLocaleString('ja-JP')}</p>
       <h2>戦略立案</h2><p>${results.finalOutput.replace(/\n/g,'</p><p>')}</p>
@@ -813,7 +814,7 @@ function exportDeepFormat(format, results, title) {
       { title: 'Gemini レビュー', body: results.geminiReview.slice(0, 600) },
       { title: 'Powered by', body: 'GOAL AI\nGemini × GPT × Claude\nデュアルレビュー完了' },
     ];
-    const slideHTML = slides.map((s,i)=>`
+    const slideHTML = slides.map((s,i)=>` /* PDF/print: hardcoded colors intentional */
       <div style="width:25.4cm;height:14.3cm;padding:1.5cm 2cm;background:${i===0?'#0c0e14':'#fff'};
         color:${i===0?'#e4b86a':'#222'};border:1px solid #ddd;page-break-after:always;
         display:flex;flex-direction:column;justify-content:center;box-sizing:border-box;">
@@ -847,18 +848,18 @@ function renderAPIKeySettings() {
 
   if (AUTH_TOKEN) {
     el.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg4);border-radius:6px;border:1px solid var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg4);border-radius:6px;border:1px solid var(--border-card);">
         <span style="font-size:9.5px;color:var(--muted2);">今月のディープ分析</span>
         <span style="font-size:10px;font-family:var(--fm);color:${remaining<=2?'var(--amber)':'var(--green)'};">${used} / ${limit}回　残り${remaining}回</span>
       </div>`;
   } else {
     el.innerHTML = `
-      <div style="padding:10px;background:var(--amber-d);border-radius:8px;border:1px solid rgba(228,184,106,.3);margin-bottom:10px;">
+      <div style="padding:10px;background:var(--amber-d);border-radius:8px;border:1px solid var(--mode-normal-border);margin-bottom:10px;">
         <div style="font-size:10px;color:var(--amber);margin-bottom:6px;font-weight:600;">プロモコードで接続</div>
         <div style="display:flex;gap:6px;">
           <input type="text" id="settings-promo-input" placeholder="コードを入力..."
-            style="flex:1;background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:11px;color:var(--cream);outline:none;font-family:var(--fm);">
-          <button onclick="applyPromoFromSettings()" style="background:var(--amber);color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:11px;cursor:pointer;font-weight:600;">適用</button>
+            style="flex:1;background:var(--bg4);border:1px solid var(--border-card);border-radius:6px;padding:7px 10px;font-size:11px;color:var(--cream);outline:none;font-family:var(--fm);">
+          <button onclick="applyPromoFromSettings()" style="background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:6px;padding:7px 14px;font-size:11px;cursor:pointer;font-weight:600;">適用</button>
         </div>
       </div>
       <div style="font-size:9px;color:var(--muted2);">プロモコードを入力するとAI機能が利用可能になります。</div>`;
@@ -996,6 +997,7 @@ function openSettingsPanel(){
   p.style.display = 'block';
   applyTheme(currentTheme);
   renderAPIKeySettings();
+  restoreLocationToggleUI();
 }
 function closeSettingsPanel(){
   document.getElementById('settings-panel').style.display = 'none';
@@ -1021,9 +1023,9 @@ async function confirmDeleteAccount(){
 // ════════ G: チャット背景プリセット ════════
 const CHAT_BG_PRESETS = [
   { id:'none', label:'なし', css:'' },
-  { id:'dots', label:'ドット', css:'radial-gradient(circle, rgba(228,184,106,.04) 1px, transparent 1px)' },
-  { id:'grid', label:'グリッド', css:'linear-gradient(rgba(228,184,106,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(228,184,106,.03) 1px, transparent 1px)' },
-  { id:'wave', label:'ウェーブ', css:'repeating-linear-gradient(135deg, transparent, transparent 20px, rgba(228,184,106,.02) 20px, rgba(228,184,106,.02) 40px)' },
+  { id:'dots', label:'ドット', css:'radial-gradient(circle, var(--amber-g) 1px, transparent 1px)' },
+  { id:'grid', label:'グリッド', css:'linear-gradient(var(--amber-g) 1px, transparent 1px), linear-gradient(90deg, var(--amber-g) 1px, transparent 1px)' },
+  { id:'wave', label:'ウェーブ', css:'repeating-linear-gradient(135deg, transparent, transparent 20px, var(--amber-g) 20px, var(--amber-g) 40px)' },
 ];
 function applyChatBg(id){
   const p = CHAT_BG_PRESETS.find(x=>x.id===id) || CHAT_BG_PRESETS[0];
@@ -1087,7 +1089,7 @@ function showHelpGuide() {
       </div>
       <div style="display:flex;gap:8px;justify-content:center;">
         ${current > 0 ? `<button onclick="document.getElementById('help-guide-modal').remove();showHelpSlide(${current-1})" style="padding:8px 20px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">← 戻る</button>` : ''}
-        <button onclick="document.getElementById('help-guide-modal').remove();${isLast ? '' : `showHelpSlide(${current+1})`}" style="padding:8px 20px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;">${isLast ? '始める！' : '次へ →'}</button>
+        <button onclick="document.getElementById('help-guide-modal').remove();${isLast ? '' : `showHelpSlide(${current+1})`}" style="padding:8px 20px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:8px;cursor:pointer;font-weight:600;">${isLast ? '始める！' : '次へ →'}</button>
       </div>
     </div>`;
     modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
@@ -1122,7 +1124,7 @@ function renderArchiveList(){
     const isDone = g.archiveReason==='done';
     const daysAgo = g.archivedAt ? Math.floor((Date.now()-new Date(g.archivedAt))/86400000) : null;
     return `<div class="archive-card" onclick="openArchivedGoalDetail('${g.id}')">
-      <div class="ac-badge" style="background:${isDone?'var(--green-d)':'var(--bg4)'};color:${isDone?'var(--green)':'var(--muted2)'};">
+      <div class="ac-badge" style="background:${isDone?'var(--amber-d)':'var(--bg4)'};color:${isDone?'var(--amber)':'var(--muted2)'};">
         ${isDone?`<svg width=12 height=12><use href='#ic-award'/></svg> 達成済み`:`<svg width=12 height=12><use href='#ic-archive'/></svg> アーカイブ`}
       </div>
       <div style="font-size:13px;font-weight:500;color:var(--cream);margin-bottom:6px;">${escapeHtml(g.title || '')}</div>
@@ -1132,7 +1134,7 @@ function renderArchiveList(){
         ${daysAgo!==null?`<span>${daysAgo}日前にアーカイブ</span>`:''}
       </div>
       <div style="margin-top:10px;display:flex;gap:7px;">
-        <button onclick="event.stopPropagation();restoreGoal('${g.id}')" style="padding:5px 12px;background:var(--amber-g);border:1px solid rgba(228,184,106,.3);border-radius:6px;font-size:10.5px;color:var(--amber);cursor:pointer;"><svg width="13" height="13" class="svg-ic"><use href="#ic-restore"/></svg> 復元する</button>
+        <button onclick="event.stopPropagation();restoreGoal('${g.id}')" style="padding:5px 12px;background:var(--amber-g);border:1px solid var(--mode-normal-border);border-radius:6px;font-size:10.5px;color:var(--amber);cursor:pointer;"><svg width="13" height="13" class="svg-ic"><use href="#ic-restore"/></svg> 復元する</button>
         <button onclick="event.stopPropagation();openArchivedGoalDetail('${g.id}')" style="padding:5px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;font-size:10.5px;color:var(--muted);cursor:pointer;"><svg width="13" height="13" class="svg-ic"><use href="#ic-memo"/></svg> 詳細を見る</button>
       </div>
     </div>`;
@@ -1229,12 +1231,22 @@ function renderMembershipUI(){
     }
   }
   if(nudge){
+    const nudgeLabel = nudge.querySelector('div:first-child');
     if(MEMBERSHIP.plan==='free'){
       nudge.style.display='block';
-      if(nudgeSub) nudgeSub.textContent='ゴール無制限・毎週レビュー';
+      if(nudgeLabel) nudgeLabel.innerHTML='<svg width="13" height="13" class="svg-ic"><use href="#ic-zap"/></svg> Proで全機能を解放';
+      if(nudgeSub) nudgeSub.textContent='GPT-5 + Opus 4.6が使える';
     } else if(lbl.badge==='trial'){
       nudge.style.display='block';
       if(nudgeSub) nudgeSub.textContent = lbl.sub+' · このまま続けるにはProへ';
+    } else if(MEMBERSHIP.plan==='light'){
+      nudge.style.display='block';
+      if(nudgeLabel) nudgeLabel.innerHTML='<svg width="13" height="13" class="svg-ic"><use href="#ic-zap"/></svg> Proで全機能を解放';
+      if(nudgeSub) nudgeSub.textContent='GPT-5 + Opus 4.6が使える';
+    } else if(MEMBERSHIP.plan==='pro'){
+      nudge.style.display='block';
+      if(nudgeLabel) nudgeLabel.innerHTML='<svg width="13" height="13" class="svg-ic"><use href="#ic-zap"/></svg> Maxで更に強力なAIを解放';
+      if(nudgeSub) nudgeSub.textContent='Opus 4.6 + 2.5 Pro';
     } else {
       nudge.style.display='none';
     }
@@ -1292,26 +1304,52 @@ function renderPlanModal(){
   const cur = document.getElementById('plan-current-badge');
   if(cur){
     if(lbl.badge==='trial'){
-      cur.style.cssText='background:rgba(93,184,150,.1);border:1px solid rgba(93,184,150,.3);color:var(--green);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
+      cur.style.cssText='background:var(--green-d);border:1px solid var(--green-d);color:var(--green);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
       cur.innerHTML=`✓ 無料体験中 <span style="opacity:.7">${document.getElementById('sb-trial-days')?.textContent||''}</span>`;
     } else if(lbl.badge==='ultra'){
-      cur.style.cssText='background:linear-gradient(135deg,rgba(228,184,106,.25),rgba(157,120,216,.15));border:1px solid rgba(228,184,106,.9);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;';
+      cur.style.cssText='background:linear-gradient(135deg,var(--amber-d),var(--know-purple-border));border:1px solid var(--amber);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;';
       cur.innerHTML=`👑 現在のプラン：Ultra`;
     } else if(lbl.badge==='max'){
-      cur.style.cssText='background:linear-gradient(90deg,rgba(228,184,106,.2),rgba(228,184,106,.08));border:1px solid rgba(228,184,106,.7);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;';
+      cur.style.cssText='background:linear-gradient(90deg,var(--amber-d),var(--amber-g));border:1px solid var(--amber);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;';
       cur.innerHTML=`👑 現在のプラン：Max`;
     } else if(lbl.badge==='pro'){
-      cur.style.cssText='background:var(--amber-g);border:1px solid rgba(228,184,106,.4);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
+      cur.style.cssText='background:var(--amber-g);border:1px solid var(--amber-d);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
       cur.innerHTML=`★ 現在のプラン：${lbl.text}`;
     } else {
       cur.style.cssText='background:var(--bg3);border:1px solid var(--border2);color:var(--muted);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
       cur.innerHTML='現在のプラン：Free（無料）';
     }
   }
-  // Highlight selected
+  // Highlight selected + downgrade buttons (L: E-13)
+  const tiers = ['free','light','pro','max','ultra'];
+  const curIdx = tiers.indexOf(MEMBERSHIP.plan);
   ['free','light','pro','max','ultra'].forEach(p=>{
     const el=document.getElementById(`pc-${p}`);
-    if(el){ el.style.outline = (p===MEMBERSHIP.plan||p===MEMBERSHIP.selectedPlan)?'2px solid var(--amber)':'none'; }
+    if(el){
+      el.style.outline = (p===MEMBERSHIP.plan||p===MEMBERSHIP.selectedPlan)?'2px solid var(--amber)':'none';
+      // Remove existing downgrade link if any
+      const existing = el.querySelector('.plan-downgrade-link');
+      if(existing) existing.remove();
+      // Add downgrade link for plans below current
+      const pIdx = tiers.indexOf(p);
+      if(curIdx > 0 && pIdx < curIdx && p !== 'free') {
+        const link = document.createElement('div');
+        link.className = 'plan-downgrade-link';
+        link.style.cssText = 'margin-top:8px;text-align:right;';
+        link.innerHTML = `<span onclick="event.stopPropagation();openCustomerPortal();" style="font-size:10px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px;">ダウングレード</span>`;
+        el.appendChild(link);
+      }
+      // Show "現在のプラン" badge on current plan card
+      const existingBadge = el.querySelector('.plan-current-inline');
+      if(existingBadge) existingBadge.remove();
+      if(p === MEMBERSHIP.plan) {
+        const badge = document.createElement('div');
+        badge.className = 'plan-current-inline';
+        badge.style.cssText = 'margin-top:8px;text-align:right;font-size:9px;color:var(--amber);font-family:var(--fm);';
+        badge.textContent = '✓ 現在のプラン';
+        el.appendChild(badge);
+      }
+    }
   });
   updatePlanCTA();
   // 利用額バー表示
@@ -1358,7 +1396,7 @@ function updatePlanCTA(){
     btn.onclick = () => { subscribePlan(); };
   } else if(p==='ultra'){
     btn.textContent='Ultraプランを始める';
-    btn.style.background='linear-gradient(135deg,#e4b86a,#BA55D3)'; btn.style.color='#fff'; btn.style.border='none';
+    btn.style.background='linear-gradient(135deg,var(--amber),var(--purple))'; btn.style.color='var(--text-on-accent)'; btn.style.border='none';
     btn.onclick = () => { subscribePlan(); };
   } else {
     const names = { light:'Light', pro:'Pro', max:'Max' };
@@ -1553,7 +1591,7 @@ function showDegradeBadge(reason){
   if(!existing){
     existing = document.createElement('div');
     existing.id = 'degrade-badge';
-    existing.style.cssText = 'padding:6px 12px;background:rgba(224,104,104,.1);border:1px solid rgba(224,104,104,.3);border-radius:8px;font-size:11px;color:var(--red);text-align:center;margin:4px 12px;';
+    existing.style.cssText = 'padding:6px 12px;background:var(--red-d);border:1px solid var(--red-d);border-radius:8px;font-size:11px;color:var(--red);text-align:center;margin:4px 12px;';
     const toolbar = document.getElementById('home-chat-toolbar');
     if(toolbar) toolbar.after(existing);
   }
@@ -1634,6 +1672,7 @@ const MODE_DESCRIPTIONS = {
 
 function handleModeClick(mode) {
   const currentMode = spartanMode ? 'spartan' : mencareMode ? 'mencare' : kabeuchiMode ? 'kabeuchi' : 'normal';
+  if(mode === 'normal'){ selectMode('normal'); updateModePills(); return; }
   const info = MODE_DESCRIPTIONS[mode];
   const isActive = currentMode === mode;
 
@@ -1643,7 +1682,7 @@ function handleModeClick(mode) {
     '<h3 style="color:var(--cream);margin-bottom:8px;">' + info.name + (isActive ? ' (ON)' : '') + '</h3>' +
     '<p style="color:var(--muted);font-size:0.85rem;line-height:1.6;margin-bottom:16px;">' + (isActive ? '通常モードに戻しますか？' : info.description) + '</p>' +
     '<div style="display:flex;gap:8px;justify-content:center;">' +
-      '<button id="_mode-confirm-btn" style="padding:8px 16px;background:var(--amber);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;">' + (isActive ? '停止する' : '設定する') + '</button>' +
+      '<button id="_mode-confirm-btn" style="padding:8px 16px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:8px;cursor:pointer;font-weight:600;">' + (isActive ? '停止する' : '設定する') + '</button>' +
       '<button onclick="this.closest(\'.modal-overlay\').remove()" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">キャンセル</button>' +
     '</div>' +
   '</div>';
@@ -1663,8 +1702,10 @@ function handleModeClick(mode) {
 
 function updateModePills() {
   const current = spartanMode ? 'spartan' : mencareMode ? 'mencare' : kabeuchiMode ? 'kabeuchi' : 'normal';
-  document.querySelectorAll('.mode-pill,.mode-box-v2,.mode-e,.mode-f').forEach(function(p) {
-    p.classList.toggle('active', p.dataset.mode === current);
+  document.querySelectorAll('.mode-pill,.mode-box-v2,.mode-e,.mode-f,.mode-chip').forEach(function(p) {
+    const isActive = p.dataset.mode === current;
+    p.classList.toggle('active', isActive);
+    p.classList.toggle('on', isActive);
   });
 }
 
@@ -1811,6 +1852,81 @@ function _renderCoachStep(){
   document.body.appendChild(overlay);
 }
 
+// ════════ Analytics extras ════════
+let _analyticsPeriod = 6;
+function updateAnalyticsExtras(){
+  // Streak
+  const countEl = document.getElementById('analytics-streak-count');
+  const bestEl = document.getElementById('analytics-streak-best');
+  if(countEl && typeof STREAK !== 'undefined'){
+    countEl.textContent = STREAK.count || 0;
+    if(bestEl) bestEl.textContent = '最高: ' + (STREAK.best || 0) + '日';
+  }
+  // Task backlog warning
+  const backlogBar = document.getElementById('analytics-backlog-bar');
+  if(backlogBar && typeof GOALS !== 'undefined'){
+    let pending = 0;
+    (GOALS || []).forEach(g => { (g.tasks || []).forEach(t => { if(!t.done) pending++; }); });
+    backlogBar.style.display = pending >= 5 ? '' : 'none';
+  }
+}
+function setAnalyticsPeriod(months){
+  _analyticsPeriod = months;
+  document.querySelectorAll('.period-chip').forEach(c => {
+    c.classList.toggle('active', parseInt(c.dataset.period) === months);
+  });
+  renderCharts();
+}
+
+// ════════ Settings: Delete chat history ════════
+async function deleteChatHistory(){
+  if(!confirm('全ての会話履歴を削除しますか？\nこの操作は元に戻せません。')) return;
+  try {
+    localStorage.removeItem('homeMsgs');
+    localStorage.removeItem('goalMsgs');
+    localStorage.removeItem('chatHistory');
+    toast('会話履歴を削除しました');
+  } catch(e){
+    toast('削除に失敗しました');
+  }
+}
+
+// ════════ Settings: Location toggle ════════
+function toggleLocationSetting(){
+  const enabled = localStorage.getItem('location_enabled') !== 'false';
+  const newVal = !enabled;
+  localStorage.setItem('location_enabled', newVal ? 'true' : 'false');
+  const knob = document.getElementById('location-toggle-knob');
+  const toggle = document.getElementById('location-toggle');
+  if(toggle && knob){
+    if(newVal){
+      toggle.style.background = 'var(--amber)';
+      knob.style.left = '25px';
+      if(typeof initLocation === 'function') initLocation();
+    } else {
+      toggle.style.background = 'var(--border)';
+      knob.style.left = '3px';
+      window.USER_LOCATION = null;
+    }
+  }
+  toast(newVal ? '位置情報を有効にしました' : '位置情報を無効にしました');
+}
+
+function restoreLocationToggleUI(){
+  const enabled = localStorage.getItem('location_enabled') !== 'false';
+  const knob = document.getElementById('location-toggle-knob');
+  const toggle = document.getElementById('location-toggle');
+  if(toggle && knob){
+    if(enabled){
+      toggle.style.background = 'var(--amber)';
+      knob.style.left = '25px';
+    } else {
+      toggle.style.background = 'var(--border)';
+      knob.style.left = '3px';
+    }
+  }
+}
+
 // ═══ ES Module: expose to window ═══
 Object.defineProperty(window, 'kabeuchiMode', {
   get() { return kabeuchiMode; }, set(v) { kabeuchiMode = v; },
@@ -1841,6 +1957,8 @@ Object.assign(window, {
   selectPlan, updatePlanCTA, toggleBillingPeriod, updatePlanPrices,
   applyPromoCode, subscribePlan, openCustomerPortal,
   showAIMemo, MODE_DESCRIPTIONS, handleModeClick,
-  updateModePills, updateSidebarTaskList
+  updateModePills, updateSidebarTaskList,
+  updateAnalyticsExtras, setAnalyticsPeriod,
+  deleteChatHistory, toggleLocationSetting, restoreLocationToggleUI
 });
 

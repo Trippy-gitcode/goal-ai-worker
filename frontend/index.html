@@ -111,19 +111,11 @@
   <div id="mbox-spartan" style="display:none;"></div>
   <div id="mbox-mencare-sub" style="display:none;"></div>
   <div class="mencare-timer" id="mencare-timer" style="display:none;"></div>
-  <div class="mode-row-f">
-    <button class="mode-f mencare" data-mode="mencare" onclick="handleModeClick('mencare')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#28b464" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
-      <span class="mode-f-name">メンケア</span>
-    </button>
-    <button class="mode-f kabeuchi" data-mode="kabeuchi" onclick="handleModeClick('kabeuchi')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-      <span class="mode-f-name">ソクラテス</span>
-    </button>
-    <button class="mode-f spartan" data-mode="spartan" onclick="handleModeClick('spartan')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc3232" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 7 4 11 4 14a8 8 0 0016 0c0-3-4-7-8-12z"/></svg>
-      <span class="mode-f-name">スパルタ</span>
-    </button>
+  <div class="chip-row">
+    <span class="mode-chip on" data-mode="normal" onclick="handleModeClick('normal')">通常</span>
+    <span class="mode-chip" data-mode="mencare" onclick="handleModeClick('mencare')">メンケア</span>
+    <span class="mode-chip" data-mode="kabeuchi" onclick="handleModeClick('kabeuchi')">ソクラテス</span>
+    <span class="mode-chip" data-mode="spartan" onclick="handleModeClick('spartan')">スパルタ</span>
   </div>
 
   <!-- Tasks -->
