@@ -753,6 +753,22 @@
                   </div>
                 </div>
 
+                <!-- 再分析6チップ (G06B-04) -->
+                <div style="border-top:0.5px solid var(--border);padding-top:20px;margin-bottom:8px;">
+                  <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:12px;">再分析する</div>
+                  <div id="reanalyze-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+                    <span class="reanalyze-chip" data-section="character" onclick="toggleReanalyzeChip(this)" style="padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;">キャラクター</span>
+                    <span class="reanalyze-chip" data-section="vision" onclick="toggleReanalyzeChip(this)" style="padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;">ビジョン</span>
+                    <span class="reanalyze-chip" data-section="image" onclick="toggleReanalyzeChip(this)" style="padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;">見られたい姿</span>
+                    <span class="reanalyze-chip" data-section="strength" onclick="toggleReanalyzeChip(this)" style="padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;">強みの言語化</span>
+                    <span class="reanalyze-chip" data-section="ideal" onclick="toggleReanalyzeChip(this)" style="padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;">5年後の理想</span>
+                    <span class="reanalyze-chip" data-section="unwanted" onclick="toggleReanalyzeChip(this)" style="padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;">やりたくない生活</span>
+                  </div>
+                  <div style="text-align:center;">
+                    <button onclick="runReanalysis()" style="display:inline-block;background:var(--send-btn-grad);color:var(--text-on-accent);font-size:14px;font-weight:600;padding:12px 28px;border-radius:24px;border:none;cursor:pointer;font-family:var(--ff);">選択した項目を再分析</button>
+                  </div>
+                </div>
+
                 <!-- SNS共有 (G06B-05) -->
                 <div style="text-align:center;padding:16px 0 4px;border-top:0.5px solid var(--border);margin-top:16px;">
                   <button onclick="shareCharacter()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:20px;border:0.5px solid var(--border);background:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--ff);">

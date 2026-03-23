@@ -803,6 +803,29 @@ async function regenCatchcopy(){
   el.style.opacity = '1';
 }
 
+function toggleReanalyzeChip(el){
+  const isOn = el.style.borderColor === 'rgba(200, 146, 10, 0.4)' || el.style.background.includes('rgba(200');
+  if(isOn){
+    el.style.border = '1px solid var(--border)';
+    el.style.background = 'transparent';
+    el.style.color = 'var(--muted)';
+  } else {
+    el.style.border = '1px solid rgba(200,146,10,0.4)';
+    el.style.background = 'rgba(200,146,10,0.08)';
+    el.style.color = '#c8920a';
+  }
+}
+function runReanalysis(){
+  const selected = [];
+  document.querySelectorAll('.reanalyze-chip').forEach(c => {
+    if(c.style.color === 'rgb(200, 146, 10)') selected.push(c.dataset.section);
+  });
+  if(!selected.length){ toast('再分析する項目を選択してください'); return; }
+  toast(`${selected.length}項目を再分析します…`);
+  // Trigger know session restart for selected sections
+  switchMyselfTab('know');
+}
+
 function shareCharacter(){
   const char = document.getElementById('my-character-card');
   const traits = char ? char.innerText : '';
@@ -1349,7 +1372,7 @@ Object.assign(window, {
   openMyselfHub, openProfileDirect, switchMyselfTab,
   startKnowSession, updateKnowChips, appendKnowMsg, sendKnowMsg,
   generateKnowSummary, applySummaryToProfile,
-  knowResize, knowKey, editVision, saveVision, renderVision, addVisionItem, editVisionField, editMyCharacter, shareCharacter,
+  knowResize, knowKey, editVision, saveVision, renderVision, addVisionItem, editVisionField, editMyCharacter, shareCharacter, toggleReanalyzeChip, runReanalysis,
   regenCatchcopy, runConnectAnalysis, renderConnectContent, hubChatFromConnect,
   updateProfile, saveProfile, updateAge, selGender, toggleInterest,
   addEnergyTag, setNetworkQ, renderMyselfProfile,
