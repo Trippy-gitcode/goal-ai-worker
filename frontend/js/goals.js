@@ -281,15 +281,8 @@ function renderGoalView(container){
     block.className = 'phase-block';
 
     const phd = document.createElement('div');
-    phd.className = 'phase-hd';
-    phd.innerHTML = `
-      <div class="phase-num" style="background:var(--muted3);border:1px solid ${phase.phaseColor}33;color:${phase.phaseColor}">${phase.phase}</div>
-      <div class="phase-title">${phase.phaseTitle}</div>
-      <div class="phase-meta">${doneCnt}/${phase.tasks.length}</div>
-      <div class="phase-prog">
-        <div class="phase-prog-bar"><div class="phase-prog-fill" style="width:${pct}%;background:${phase.phaseColor}"></div></div>
-        <span style="color:${phase.phaseColor};font-family:var(--fm);font-size:10px">${pct}%</span>
-      </div>`;
+    phd.className = 'tgroup';
+    phd.innerHTML = `<span class="tgroup-icon">${phase.icon||''}</span>${phase.phaseTitle}<div class="tgroup-prog"><div class="tgroup-prog-fill" style="width:${pct}%"></div></div>`;
     block.appendChild(phd);
 
     const taskWrap = document.createElement('div');
@@ -341,37 +334,25 @@ function renderTodayView(container){
 function mkTaskRow(task, phase, idx, goal){
   const isDone = task.status === 'done';
   const isOverdue = task.due && !isDone && new Date(task.due) < new Date();
-  const hasChat = task.chatLog && task.chatLog.length > 0;
   const isSelected = selectedTask && selectedTask.id === task.id;
-  const priorityColor = task.priority==='high'?'var(--red)':task.priority==='mid'?'var(--amber)':'var(--border2)';
 
   const row = document.createElement('div');
-  row.className = `task-row${isDone?' done-row':''}${isSelected?' selected':''}`;
+  row.className = `tc${isDone?' done-tc':''}${isSelected?' sel':''}${isOverdue?' overdue':''}`;
   row.draggable = true;
 
-  // In today view, show goal name badge; in goal view, show phase badge
-  const contextBadge = goal
-    ? `<span class="task-goal-label" style="background:${goal.color}22;color:${goal.color}">${escapeHtml(goal.title)}</span>`
-    : `<span class="task-tag" style="background:${phase.phaseColor}1a;color:${phase.phaseColor}">Phase ${phase.phase}</span>`;
+  // Weight tag
+  const wt = task.priority==='high'?'<span class="tw twr">重要</span>':task.priority==='mid'?'<span class="tw twy">普通</span>':'<span class="tw twg">軽い</span>';
+  // Due date
+  const dueHtml = task.due ? `<span class="td${isOverdue?' tdo':''}">${isOverdue?'期限切れ':task.due}</span>` : '<span class="td">—</span>';
+  // AI badge
+  const aiHtml = task.source==='ai' ? '<span class="tai">✨</span>' : '';
+  // Recurrence
+  const repHtml = task.repeat ? `<span class="trp">🔁${task.repeat}</span>` : '';
 
   row.innerHTML = `
-    <div class="task-priority" style="background:${priorityColor}"></div>
-    <div class="task-drag" title="ドラッグで並び替え">⠿</div>
-    <div class="task-check">
-      <div class="check-circle ${task.status}" onclick="cycleStatus(event,'${task.id}')">
-        ${task.status==='done'?'✓':task.status==='blocked'?'!':''}
-      </div>
-    </div>
-    <div class="task-content">
-      <div class="task-title">${escapeHtml(task.title)}</div>
-      <div class="task-meta-row">
-        ${task.due?`<span class="task-due${isOverdue?' overdue':''}">${task.due}${isOverdue?' ⚠':''}</span>`:''}
-        ${contextBadge}
-        ${hasChat?`<span class="task-chat-badge">💬 ${Math.floor(task.chatLog.length/2)}件</span>`:''}
-      </div>
-      ${task.note?`<div class="task-note">${task.note}</div>`:''}
-    </div>
-    <div class="task-arrow">›</div>`;
+    <div class="tch${isDone?' done':''}" onclick="cycleStatus(event,'${task.id}')">${isDone?'':''}${''}</div>
+    <div class="tt${isDone?' dn':''}">${escapeHtml(task.title)}</div>
+    ${aiHtml}${wt}${repHtml}${dueHtml}`;
 
   row.addEventListener('click', e => {
     if(e.target.classList.contains('check-circle')) return;
