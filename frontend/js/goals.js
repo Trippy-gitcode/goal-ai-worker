@@ -1402,15 +1402,44 @@ function saveMemo(){
 function renderHubMemo(){
   const goal = ALL_GOALS[hubGoalIdx];
 
-  // AIの理解メモ表示
-  const aiMemoContent = document.getElementById('hub-ai-memo-content');
-  if(aiMemoContent){
+  // AIの理解メモ — アコーディオン表示 (AMEND-001 #4)
+  const accEl = document.getElementById('hub-ai-memo-accordion');
+  const dateEl = document.getElementById('hub-ai-memo-date');
+  if(accEl){
     const aiMemo = goal.ai_memo || '';
     if(aiMemo){
-      aiMemoContent.textContent = aiMemo;
-      aiMemoContent.style.color = 'var(--muted)';
+      if(dateEl) dateEl.textContent = goal.ai_memo_updated_at ? new Date(goal.ai_memo_updated_at).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' 更新' : '';
+      // カテゴリ分類: 箇条書きをカテゴリに振り分け
+      const categories = [
+        {title:'性格・コミュニケーション', pattern:/性格|コミュニケーション|話し方|人間関係|共感|対人/i, items:[]},
+        {title:'行動パターン', pattern:/行動|習慣|ルーティン|先延ばし|計画|実行|時間/i, items:[]},
+        {title:'モチベーション', pattern:/モチベ|やる気|目標|成長|挑戦|達成|情熱|興味/i, items:[]},
+        {title:'弱点・課題', pattern:/弱|苦手|課題|問題|不安|恐|克服|改善/i, items:[]}
+      ];
+      const lines = aiMemo.split(/\n/).filter(l=>l.trim());
+      lines.forEach(l=>{
+        const clean = l.replace(/^[-・●]\s*/,'').trim();
+        if(!clean) return;
+        let placed = false;
+        for(const cat of categories){ if(cat.pattern.test(clean)){ cat.items.push(clean); placed=true; break; } }
+        if(!placed && categories.length) categories[0].items.push(clean);
+      });
+      // fallback: all in one if no categorization worked
+      const nonEmpty = categories.filter(c=>c.items.length);
+      if(nonEmpty.length === 0){ nonEmpty.push({title:'メモ',items:lines.map(l=>l.replace(/^[-・●]\s*/,'').trim()).filter(Boolean)}); }
+      let html = '';
+      nonEmpty.forEach((cat,i)=>{
+        html += `<div class="ai-memo-acc-item${i<2?' open':''}">
+          <div class="ai-memo-acc-hd" onclick="this.parentElement.classList.toggle('open')">
+            <span class="ai-memo-acc-title">${cat.title}</span><span class="ai-memo-acc-arrow">▶</span>
+          </div>
+          <div class="ai-memo-acc-body">${cat.items.map(it=>'・'+it).join('\n')}</div>
+        </div>`;
+      });
+      accEl.innerHTML = html;
     } else {
-      aiMemoContent.innerHTML = `<div style="text-align:center;padding:12px 0;color:var(--text-secondary);font-size:13px;line-height:1.7;">AIがあなたを理解中です。<br>5回ほど会話すると、ここにAIの理解メモが表示されます。</div>`;
+      if(dateEl) dateEl.textContent = '';
+      accEl.innerHTML = `<div style="text-align:center;padding:12px 0;color:var(--text-secondary);font-size:13px;line-height:1.7;">AIがあなたを理解中です。<br>5回ほど会話すると、ここにAIの理解メモが表示されます。</div>`;
     }
   }
 

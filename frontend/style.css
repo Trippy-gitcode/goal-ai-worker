@@ -1550,6 +1550,17 @@ input,textarea,select{font-family:var(--ff);outline:none}
 /* Hub memo */
 #hub-memo-wrap{flex:1;overflow-y:auto;padding:20px 28px;}
 #hub-memo-inner{max-width:720px;margin:0 auto;}
+/* ═══ AI Memo Accordion (AMEND-001 #4) ═══ */
+.ai-memo-acc-item{border-bottom:0.5px solid var(--border);padding:8px 0;}
+.ai-memo-acc-item:last-child{border-bottom:none;}
+.ai-memo-acc-hd{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:2px 0;}
+.ai-memo-acc-hd:hover{opacity:.8}
+.ai-memo-acc-title{font-size:11px;font-weight:500;color:var(--cream);}
+.ai-memo-acc-arrow{font-size:9px;color:var(--muted2);transition:transform .2s;}
+.ai-memo-acc-item.open .ai-memo-acc-arrow{transform:rotate(90deg);}
+.ai-memo-acc-body{display:none;padding:6px 0 2px;font-size:14px;color:var(--muted);line-height:1.6;white-space:pre-wrap;}
+.ai-memo-acc-item.open .ai-memo-acc-body{display:block;}
+
 .memo-entry{
   background:var(--bg3);border:1px solid var(--border);border-radius:10px;
   padding:14px 16px;margin-bottom:10px;
