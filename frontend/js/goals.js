@@ -1437,6 +1437,27 @@ function renderHubSettings(goal){
   if(titleIn) titleIn.value = goal.title;
   if(deadlineIn) deadlineIn.value = goal.deadline;
   if(kpiIn) kpiIn.value = goal.kpi || '';
+  // AI Role display
+  const roleDisplay = document.getElementById('hub-role-display');
+  if(roleDisplay) roleDisplay.textContent = goal.ai_role_name ? `${goal.ai_role_icon||'🤖'} ${goal.ai_role_name}` : '未設定';
+}
+function toggleHubRoleEdit(){
+  const el = document.getElementById('hub-role-edit');
+  if(!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if(el.style.display === 'block'){
+    const goal = ALL_GOALS[hubGoalIdx];
+    document.getElementById('hub-role-input').value = goal.ai_role_name || '';
+  }
+}
+function saveHubRole(){
+  const goal = ALL_GOALS[hubGoalIdx];
+  const val = document.getElementById('hub-role-input').value.trim();
+  goal.ai_role_name = val;
+  document.getElementById('hub-role-display').textContent = val ? `🤖 ${val}` : '未設定';
+  document.getElementById('hub-role-edit').style.display = 'none';
+  toast('AIロールを更新しました ✓');
+  if(goal.supabaseId) apiUpdateGoal(goal.supabaseId, { ai_role_name: val });
 }
 function saveHubGoalSettings(){
   const goal = ALL_GOALS[hubGoalIdx];
@@ -2245,7 +2266,7 @@ Object.assign(window, {
   sendHubMsg, hubMsgResize, hubMsgKey,
   renderHubTasks, renderHubAnalytics,
   openMemoEditor, closeMemoEditor, saveMemo, renderHubMemo,
-  renderHubSettings, saveHubGoalSettings,
+  renderHubSettings, saveHubGoalSettings, toggleHubRoleEdit, saveHubRole,
   confirmDeleteGoal, closeDeleteModal, executeDeleteGoal, archiveGoal,
   renderSidebarGoals, init, renderAIUnderstanding,
   launchConfetti, checkMilestone, showMilestoneCard, shareMilestone,

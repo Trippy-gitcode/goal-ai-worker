@@ -557,6 +557,23 @@
                     </div>
                   </div>
                 </div>
+                <!-- ── AIロール (G05E-03) ── -->
+                <div class="settings-card full" style="margin-bottom:16px;">
+                  <div class="sc-hd"><span class="sc-hd-icon">🤖</span><div class="sc-hd-title">AIロール</div></div>
+                  <div class="sc-body">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                      <div id="hub-role-display" style="font-size:12px;color:var(--cream);">未設定</div>
+                      <button onclick="toggleHubRoleEdit()" style="font-size:10px;color:var(--amber);background:none;border:none;cursor:pointer;font-family:var(--ff);">変更する</button>
+                    </div>
+                    <div id="hub-role-edit" style="display:none;">
+                      <input id="hub-role-input" placeholder="例: 厳しめのコーチ、優しい相談相手…" style="width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--cream);font-size:12px;font-family:var(--ff);outline:none;margin-bottom:8px;">
+                      <div style="display:flex;gap:6px;">
+                        <button onclick="saveHubRole()" style="padding:6px 14px;background:var(--amber);border:none;border-radius:6px;color:var(--text-on-accent);cursor:pointer;font-size:11px;font-weight:500;">保存</button>
+                        <button onclick="toggleHubRoleEdit()" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:11px;">キャンセル</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <!-- ── ゴール管理 ── -->
                 <div class="settings-card full" style="border-color:rgba(224,104,104,.2);">
                   <div class="sc-hd"><span class="sc-hd-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-warning"/></svg></span><div class="sc-hd-title" style="color:var(--red)">ゴールの管理</div></div>
