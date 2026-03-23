@@ -7,15 +7,15 @@
 
 ## 5行サマリー
 - **Version:** v3.11.0
-- **Next:** STEP 1-3/1-4（タスク画面リファクタ）判断待ち or テスト配布
-- **Last done:** デザインmockup完全準拠 STEP2全完了+STEP3全完了 ✅
-- **Open issues:** STEP 1-3/1-4（タスク行構造差）のみ未着手
+- **Next:** キュー空 → テスト配布準備
+- **Last done:** デザインmockup完全準拠 全STEP完了 ✅（STEP1+2+3）
+- **Open issues:** なし
 - **Proposals:** 0件
 
 ## 現在地
 - **バージョン:** v3.11.0
-- **チェーン:** デザインmockup完全準拠 → テスト配布
-- **次のミッション:** デザインmockup完全準拠（キュー先頭）
+- **チェーン:** ~~デザインmockup完全準拠~~ → テスト配布
+- **次のミッション:** キュー空 → ふとしの指示待ち
 
 ## ミッションキュー（上から順に実行）
 
@@ -489,8 +489,10 @@ spec_v3.md × mockup HTML × 実装コードの3点照合。全22画面を検証
 - 3-2 ✅ GoalHub分析「3人寄れば文殊の知恵」（モデルバッジ+ヒアリング開始CTA+残り回数）
 - 3-3 ✅ AIメモ アコーディオン形式（4カテゴリ自動分類、最初2つ展開、更新日時表示）
 - **STEP 3 全完了**
-- 1-3, 1-4 未着手（タスク画面大規模リファクタ — テスト配布後に判断を推奨）
-- canopy全PASS → 全deploy済み
+- 1-3 ✅ タスク行 .task-row → .tc compact（gap:5px, 6px padding, 9px title, .tch 14px checkbox, .tw weight tags）
+- 1-4 ✅ GoalHubタスク インラインスタイル → CSS class（.tc/.tch/.tgroup統一）
+- **STEP 1 全完了 — デザインmockup完全準拠ミッション完了 ✅**
+- canopy全PASS → 全build+deploy済み（Worker+Pages）
 
 ### AJ: AIメモ空状態テキスト (2026-03-23) ✅
 - GoalHubメモペインに「AIの理解メモ」セクション新設
@@ -588,7 +590,6 @@ spec_v3.md × mockup HTML × 実装コードの3点照合。全22画面を検証
 - git tags: step7-complete 〜 step8c-complete
 
 ## 未解決の問題
-- 🔴 **ブラウザでモードチップがまだアイコンボタン（mode-f）のまま。** SWクリア+ハードリロード済み。frontend-dist/index.htmlを確認せよ。
 - ✅ 解決済み: デザイン未反映の根本原因はAPP_VERSIONの未更新。v3.9.3のままだったためSWが古いキャッシュを配信。v3.10.0に更新してSWキャッシュパージ完了
 - ✅ 解決済み: スマホチャットエラーの根本原因はenv.KV(undefined)→env.TOKEN_KVの誤参照。修正済み
 - 🟡 教訓: CLAUDE.md v16の鉄則5項に「APP_VERSION更新」が含まれていなかった。今後はデプロイ時に必ず更新する
