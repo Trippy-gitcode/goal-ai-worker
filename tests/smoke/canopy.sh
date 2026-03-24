@@ -8,7 +8,8 @@ RESULT_FILE="instructions/results/canopy_latest.txt"
 PREV_FILE="instructions/results/canopy_prev.txt"
 if [ -f "$RESULT_FILE" ]; then cp "$RESULT_FILE" "$PREV_FILE"; fi
 
-# 全出力をファイルにもtee
+# 全出力をファイルにもtee（diffセクション前でfdを閉じる）
+exec 3>&1
 exec > >(tee "$RESULT_FILE") 2>&1
 
 echo "=== CANOPY TEST ($(date '+%H:%M:%S')) ==="
@@ -249,6 +250,33 @@ else
   echo "FAIL: frontend-dist/index.html not found (vite build not run?)"; FAIL=1
 fi
 
+# 21. Vite tree-shake検証: HTML onclick関数がwindow登録されているか
+echo "--- Vite tree-shake safety (onclick vs window.assign) ---"
+# HTML静的onclick関数を抽出
+HTML_ONCLICK=$(grep -o 'onclick="[a-zA-Z_]*(' frontend/index.html 2>/dev/null | sed 's/onclick="//;s/($//' | sort -u)
+# 全JSファイルのObject.assign(window,{...})内の関数名を抽出
+WINDOW_FNS=$(for f in frontend/js/ui.js frontend/js/chat.js frontend/js/goals.js frontend/js/profile.js frontend/js/api.js frontend/js/app.js; do sed -n '/Object\.assign(window/,/});/p' "$f" 2>/dev/null; done | grep -o '[a-zA-Z_]*' | sort -u)
+ONCLICK_FAIL=0
+for fn in $HTML_ONCLICK; do
+  if ! echo "$WINDOW_FNS" | grep -qw "$fn"; then
+    echo "FAIL: onclick '$fn' NOT in window.assign (will be tree-shaked by Vite)"; FAIL=1; ONCLICK_FAIL=1
+  fi
+done
+# JS動的onclick関数も検証
+JS_ONCLICK=$(grep -oh 'onclick="[a-zA-Z_]*(' frontend/js/*.js 2>/dev/null | sed 's/onclick="//;s/($//' | sort -u)
+for fn in $JS_ONCLICK; do
+  if ! echo "$WINDOW_FNS" | grep -qw "$fn"; then
+    # 定義自体が存在するか確認
+    DEFINED=$(grep -rc "function $fn" frontend/js/ 2>/dev/null | awk -F: '{s+=$2}END{print s}')
+    if [ "$DEFINED" -eq 0 ]; then
+      echo "FAIL: dynamic onclick '$fn' has NO DEFINITION anywhere"; FAIL=1; ONCLICK_FAIL=1
+    else
+      echo "FAIL: dynamic onclick '$fn' NOT in window.assign (will be tree-shaked by Vite)"; FAIL=1; ONCLICK_FAIL=1
+    fi
+  fi
+done
+if [ "$ONCLICK_FAIL" -eq 0 ]; then echo "OK: all onclick functions registered in window"; fi
+
 # 17. session_progress.mdバージョンとAPP_VERSIONの一致
 echo "--- SP version sync ---"
 SP_VER=$(grep -o 'バージョン:.*v[0-9.]*' instructions/session_progress.md 2>/dev/null | grep -o 'v[0-9.]*')
@@ -260,7 +288,10 @@ CANOPY_DUR=$((CANOPY_END - CANOPY_START))
 
 echo "=== CANOPY $([ $FAIL -eq 0 ] && echo 'PASS' || echo 'FAIL') (${CANOPY_DUR}s) ==="
 
-# 前回差分出力
+# teeを閉じてファイル書き込み終了（以降の出力はターミナルのみ）
+exec 1>&3 3>&-
+
+# 前回差分出力（ターミナルのみ、ファイルには保存しない）
 if [ -f "$PREV_FILE" ]; then
   echo ""
   echo "--- Diff from previous run ---"
