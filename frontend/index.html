@@ -186,7 +186,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.5</span>
+      <span class="version" title="バージョン確認">v3.11.6</span>
     </div>
   </div>
 </div>
@@ -225,39 +225,7 @@
     <div class="page active" id="pg-home-wrap">
       <div id="pg-home">
 
-        <!-- Summary strip -->
-        <div id="home-summary">
-
-          <!-- Mode -->
-          <div class="hs-block" style="min-width:110px;">
-            <div class="hs-label">モード</div>
-            <div class="hs-mode" id="hs-mode-display">
-              <span id="hs-mode-icon">💬</span>
-              <span id="hs-mode-name">通常</span>
-            </div>
-          </div>
-
-          <!-- Goals -->
-          <div class="hs-block" style="min-width:240px;">
-            <div class="hs-label">ゴール進捗</div>
-            <div id="hs-goals"></div>
-          </div>
-
-          <!-- Today tasks only -->
-          <div class="hs-block" style="min-width:240px;">
-            <div class="hs-label">今日やること</div>
-            <div id="hs-today-tasks"></div>
-          </div>
-
-          <!-- 今日の1% -->
-          <div class="hs-block" style="min-width:260px;">
-            <div class="hs-label">今日の1%</div>
-            <div id="hs-micro-task"></div>
-          </div>
-
-          <!-- AI quote removed — shown as chat placeholder instead -->
-
-        </div>
+        <!-- Summary strip removed (A1 mockup準拠) -->
 
         <!-- Personal chat + task panel container -->
         <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;">
@@ -326,17 +294,7 @@
               <span>タスク化</span>
             </button>
           </div>
-          <!-- Task box (spec #02a: 208px, scrollable) -->
-          <div id="home-task-box" style="display:none;max-width:700px;margin:0 auto;flex-shrink:0;">
-            <div style="height:1px;background:var(--amber);opacity:.3;margin:0 12px;"></div>
-            <div style="padding:8px 12px;max-height:208px;overflow-y:auto;">
-              <div id="home-task-box-inner"></div>
-              <div style="text-align:right;margin-top:4px;">
-                <span onclick="showPage('tasks')" style="font-size:10px;color:var(--muted2);cursor:pointer;font-family:var(--fm);">タスク画面 →</span>
-              </div>
-            </div>
-          </div>
-          <!-- Input area — flex child, not fixed -->
+          <!-- Input area — mockup準拠: プリセット直下 -->
           <div id="home-input-area" style="padding:0 12px calc(16px + env(safe-area-inset-bottom));background:transparent;flex-shrink:0;">
             <div style="max-width:700px;margin:0 auto;background:rgba(12,14,20,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0.5px solid rgba(200,146,10,0.3);border-radius:14px;display:flex;align-items:center;gap:4px;padding:8px 12px;transition:border-color .2s;box-shadow:0 -4px 20px rgba(0,0,0,.25);" id="home-input-wrap" ondragover="event.preventDefault();this.style.borderColor='var(--amber)'" ondragleave="this.style.borderColor=''" ondrop="handleHomeDrop(event);this.style.borderColor=''">
               <!-- Image attach -->
@@ -347,7 +305,6 @@
               <textarea id="home-msg-in" rows="1" placeholder="質問、相談、なんでも..."
                 style="flex:1;padding:10px 4px;background:transparent;border:none;color:var(--cream);font-family:var(--ff);font-size:16px;line-height:1.5;resize:none;max-height:110px;min-height:24px;outline:none;align-self:center;"
                 oninput="homeResize(this)" onkeydown="homeKey(event)" onpaste="handleHomePaste(event)"></textarea>
-              <!-- Task pin removed: replaced by task-chip above input area -->
               <!-- Voice -->
               <button id="home-voice-btn" onclick="toggleHomeVoice()" title="音声入力"
                 style="width:44px;height:44px;border-radius:50%;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);flex-shrink:0;transition:all .15s;overflow:visible;position:relative;"
@@ -370,6 +327,17 @@
                 <img id="home-img-thumb" style="width:36px;height:36px;object-fit:cover;border-radius:5px;">
                 <span id="home-img-name" style="font-size:11px;color:var(--muted);flex:1;"></span>
                 <span onclick="clearHomeImage()" style="font-size:11px;color:var(--muted);cursor:pointer;padding:2px 6px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕ 削除</span>
+              </div>
+            </div>
+          </div>
+          <!-- Separator (mockup準拠) -->
+          <div style="height:11px;flex-shrink:0;position:relative;max-width:700px;margin:0 auto;width:100%;"><div style="position:absolute;bottom:0;left:24px;right:24px;height:1px;background:linear-gradient(90deg,transparent,rgba(200,146,10,0.15),transparent);"></div></div>
+          <!-- Task box (spec #02a: 208px, scrollable) -->
+          <div id="home-task-box" style="display:none;max-width:700px;margin:0 auto;flex-shrink:0;">
+            <div style="padding:8px 12px;max-height:208px;overflow-y:auto;">
+              <div id="home-task-box-inner"></div>
+              <div style="text-align:right;margin-top:4px;">
+                <span onclick="showPage('tasks')" style="font-size:10px;color:var(--muted2);cursor:pointer;font-family:var(--fm);">タスク画面 →</span>
               </div>
             </div>
           </div>

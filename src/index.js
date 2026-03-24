@@ -121,6 +121,7 @@ app.get('/api/feedbacks', async (c) => withCors(c, await handleFeedbackList(c.re
 // ── Account ──
 app.post('/api/account/delete', async (c) => withCors(c, await handleAccountDelete(c.req.raw, c.env)));
 app.get('/api/account/export', async (c) => withCors(c, await handleAccountExport(c.req.raw, c.env)));
+app.post('/api/account/export', async (c) => withCors(c, await handleAccountExport(c.req.raw, c.env)));
 
 // ── 404 ──
 app.notFound((c) => withCors(c, jsonRes({ error: 'Not found' }, 404)));

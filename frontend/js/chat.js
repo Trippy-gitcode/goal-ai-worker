@@ -651,10 +651,7 @@ function getAiOptBadgeHTML(){
 }
 
 function buildEmptyHomeHTML(){
-  const greeting = USER_PROFILE.nickname ? `こんにちは、${escapeHtml(USER_PROFILE.nickname)}さん` : 'こんにちは！';
-  return '<div style="text-align:center;padding:20px 20px 10px;color:var(--muted);line-height:2;">'
-    +'<div style="font-size:18px;color:var(--cream);font-weight:500;margin-bottom:6px;">'+greeting+'</div>'
-    +'<div style="font-size:13px;margin-bottom:8px;">雑談、相談、調べもの、何でもOK</div>'
+  return '<div style="text-align:center;padding:12px 20px 4px;">'
     + getAiOptBadgeHTML()
     +'</div>';
 }
@@ -1573,57 +1570,7 @@ function homeKey(e) { chatKey(sendHomeMsg, e); }
 // ─ Summary strip ─
 
 function renderHomeSummary(){
-  const mode=getActiveMode();
-  const modeIcons={normal:'💬',spartan:'🔥',mencare:'🌸',kabeuchi:'💭'};
-  const modeNames={normal:'通常',spartan:'スパルタ',mencare:'メンケア',kabeuchi:'ソクラテス'};
-  document.getElementById('hs-mode-icon').textContent=modeIcons[mode];
-  document.getElementById('hs-mode-name').textContent=modeNames[mode];
-
-  const goalsEl=document.getElementById('hs-goals'); goalsEl.innerHTML='';
-  if(ALL_GOALS.filter(g=>!g.archived).length === 0){
-    goalsEl.innerHTML=`<div style="text-align:center;padding:16px 0;color:var(--muted2);font-size:11.5px;line-height:1.8;">
-      まだゴールがありません。<br>
-      <span style="color:var(--amber);cursor:pointer;font-weight:500;" onclick="showWelcome()">まずはゴールを一緒に考えましょう →</span>
-    </div>`;
-  } else {
-    ALL_GOALS.filter(g=>!g.archived).forEach(g=>{
-      const isOk=g.actual>=g.target;
-      const row=document.createElement('div'); row.className='hs-goal-row';
-      row.innerHTML=`<div class="hs-goal-name">${escapeHtml(g.title)}</div>
-        <div class="hs-goal-bar">
-          <div class="hs-goal-actual" style="width:${g.actual}%;background:${isOk?'var(--green)':'var(--red)'}"></div>
-          <div class="hs-goal-marker" style="left:${g.target}%"></div>
-        </div>
-        <div class="hs-goal-pct" style="color:${isOk?'var(--green)':'var(--red)'}">${g.actual}%</div>`;
-      goalsEl.appendChild(row);
-    });
-  }
-
-  const todayEl=document.getElementById('hs-today-tasks');
-  // Today only - show urgent/in-progress tasks
-  const todayItems = getTodayTasks().filter(i => i.urgency==='urgent'||i.urgency==='in-progress').slice(0,4);
-  const items = todayItems.length ? todayItems : getTodayTasks().slice(0,3);
-  todayEl.innerHTML = '';
-  if(!items.length){
-    todayEl.innerHTML = '<div style="font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>今日のタスクはありません</div>';
-  } else {
-    items.forEach(item => {
-      const row = document.createElement('div'); row.className = 'hs-task-row'; row.style.cursor='pointer';
-      const isDone = item.task.status==='done';
-      const urgColor = item.urgency==='urgent'?'var(--red)':item.urgency==='in-progress'?'var(--amber)':'var(--muted2)';
-      row.innerHTML = `
-        <div class="hs-task-check ${isDone?'done':''}" onclick="event.stopPropagation();hsToggleTask('${item.task.id}',this)">${isDone?'✓':''}</div>
-        <div class="hs-task-title ${isDone?'done':''}" style="flex:1">${escapeHtml(item.task.title)}</div>
-        <div style="width:5px;height:5px;border-radius:50%;background:${urgColor};flex-shrink:0;margin-left:4px"></div>`;
-      row.addEventListener('click', ()=>openHomeTaskPanel(item));
-      todayEl.appendChild(row);
-    });
-  }
-
-  // 今日の1%マイクロタスク
-  renderMicroTask();
-  // Quote loaded from memory only (set by refreshQuote)
-  // ホームタスクボックス更新
+  // Summary strip removed (A1 mockup準拠) — タスクボックスのみ更新
   renderHomeTaskBox();
 }
 
@@ -1633,26 +1580,59 @@ function renderHomeTaskBox(){
   if(!box||!inner)return;
   if(homeMsgs.length>0){box.style.display='none';return;}
   const all=getTodayTasks();
-  const total=all.length;const done=all.filter(i=>i.task.status==='done').length;
+  const remaining=all.filter(i=>i.task.status!=='done').length;
+  const total=all.length;
   if(total===0){
     inner.innerHTML='<div style="display:flex;align-items:center;gap:6px;justify-content:center;padding:16px 0;color:var(--muted2);font-size:12px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>今日のタスクはありません</div>';
     box.style.display='block';return;
   }
-  let html='<div style="font-size:10px;color:var(--muted2);font-family:var(--fm);margin-bottom:6px;">今日のタスク <span style="color:var(--cream)">'+done+'/'+total+'件</span></div>';
-  all.filter(i=>i.task.status!=='done').slice(0,5).forEach(item=>{
-    const urgColor=item.urgency==='urgent'?'var(--red)':item.urgency==='in-progress'?'var(--amber)':'var(--muted2)';
-    html+='<div class="hs-task-row" style="cursor:pointer" onclick="openHomeTaskPanel(this.__item__)"><div class="hs-task-check" onclick="event.stopPropagation();hsToggleTask(\''+item.task.id+'\',this)"></div><div class="hs-task-title" style="flex:1">'+escapeHtml(item.task.title)+'</div><div style="width:5px;height:5px;border-radius:50%;background:'+urgColor+';flex-shrink:0"></div></div>';
+  // Header (mockup準拠)
+  let html='<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">'
+    +'<span style="font-size:11px;font-weight:500;color:var(--cream);">タスク</span>'
+    +'<span style="font-size:9px;color:var(--muted);margin-left:2px;">残り <span style="color:var(--amber);font-weight:600;">'+remaining+'</span>/'+total+'件</span>'
+    +'<span style="margin-left:auto;font-size:9px;color:var(--amber);cursor:pointer;" onclick="showPage(\'tasks\')">タスク画面 →</span>'
+    +'</div>';
+  // Group by date
+  const todayStr=new Date().toISOString().slice(0,10);
+  const tmrw=new Date();tmrw.setDate(tmrw.getDate()+1);const tmrwStr=tmrw.toISOString().slice(0,10);
+  const groups={};
+  all.filter(i=>i.task.status!=='done').slice(0,8).forEach(item=>{
+    const due=item.task.due||'未定';
+    let label;
+    if(due===todayStr) label='今日';
+    else if(due<todayStr) label='期限切れ';
+    else if(due===tmrwStr) label='明日';
+    else label=due.slice(5).replace('-','/');
+    if(!groups[label]) groups[label]=[];
+    groups[label].push(item);
   });
+  const pColors={high:'var(--red)',mid:'var(--amber)',low:'var(--green)'};
+  const pLabels={high:'重要',mid:'普通',low:'軽い'};
+  const pClasses={high:'twr',mid:'twy',low:'twg'};
+  for(const[label,items] of Object.entries(groups)){
+    const now=new Date();const m=now.getMonth()+1;const d=now.getDate();
+    const dateStr=label==='今日'?m+'/'+d:label==='明日'?(tmrw.getMonth()+1)+'/'+tmrw.getDate():'';
+    html+='<div style="font-size:9px;font-weight:500;color:var(--cream);padding:4px 0 2px;">'+label+(dateStr?' <span style="font-weight:400;color:var(--muted2);">'+dateStr+'</span>':'')+'</div>';
+    items.forEach(item=>{
+      const t=item.task;
+      const p=t.priority||'mid';
+      const isOverdue=t.due&&t.due<todayStr;
+      html+='<div style="display:flex;align-items:center;gap:4px;padding:3px 0 3px 10px;border-bottom:0.5px solid rgba(128,128,128,0.06);cursor:pointer;" onclick="openHomeTaskById(\''+t.id+'\')">'
+        +'<div style="width:4px;height:4px;border-radius:50%;background:'+pColors[p]+';flex-shrink:0;"></div>'
+        +'<div style="font-size:10px;color:'+(isOverdue?'var(--red)':'var(--cream)')+';flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escapeHtml(t.title)+'</div>'
+        +'<span style="font-size:8px;padding:1px 4px;border-radius:2px;" class="'+pClasses[p]+'">'+pLabels[p]+'</span>'
+        +(t.due?'<span style="font-size:8px;color:'+(isOverdue?'var(--red);font-weight:500':'var(--muted2)')+';">'+(isOverdue?'期限切れ':'〆'+t.due.slice(5).replace('-','/'))+'</span>':'')
+        +'<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>'
+        +'</div>';
+    });
+  }
   inner.innerHTML=html;
   box.style.display='block';
 }
 
 let _hsTaskTab = 'today';
 function switchHsTaskTab(tab){
-  _hsTaskTab = tab;
-  document.getElementById('hs-tab-today').className = 'hs-task-tab' + (tab==='today'?' active':'');
-  document.getElementById('hs-tab-week').className  = 'hs-task-tab' + (tab==='week'?' active':'');
-  renderHsTaskList(document.getElementById('hs-today-tasks'), tab);
+  // Summary strip removed (A1) — no-op
 }
 
 function getThisWeekTasks(){
@@ -1683,6 +1663,7 @@ function getThisWeekTasks(){
 }
 
 function renderHsTaskList(el, tab){
+  if(!el) return;
   el.innerHTML = '';
   const allItems = tab === 'week' ? getThisWeekTasks() : getTodayTasks();
   let items;
@@ -1765,6 +1746,13 @@ let htpTask = null;
 let htpPhase = null;
 let htpHistory = [];
 let htpLoading = false;
+
+function openHomeTaskById(taskId){
+  for(const goal of ALL_GOALS){ for(const phase of goal.phases){
+    const t=phase.tasks.find(t=>t.id===taskId);
+    if(t){ openHomeTaskPanel({task:t,phase,goal}); return; }
+  }}
+}
 
 function openHomeTaskPanel(item){
   htpTask = item.task;
@@ -2590,7 +2578,7 @@ Object.assign(window, {
   toggleSelectAll, deleteSelectedSessions,
   renderModelUsageBadge, showModelUsageDetail, homeKey,
   renderHomeSummary, switchHsTaskTab, getThisWeekTasks, renderHsTaskList,
-  hsToggleTask, recalcGoalProgress, openHomeTaskPanel, closeHomeTaskPanel,
+  hsToggleTask, recalcGoalProgress, openHomeTaskById, openHomeTaskPanel, closeHomeTaskPanel,
   htpUpdateStatus, htpQuickChat, sendHtpMsg, htpResize, htpKey,
   refreshQuote, FB_SYS, openFeedbackChat, closeFeedback, appendFbMsg,
   appendFbButtons, sendFeedbackMsg, extractThemes, continueFeedback,
