@@ -675,6 +675,7 @@ function updateHeroVisibility(){
   const presets=document.getElementById('home-presets');
   const badge=document.getElementById('home-ai-badge');
   const chatWrap=document.getElementById('home-chat-wrap');
+
   const isChat = homeMsgs.length > 0;
   if(hero){
     hero.style.display = isChat ? 'none' : 'flex';
@@ -686,6 +687,7 @@ function updateHeroVisibility(){
     chatWrap.style.display = isChat ? '' : 'none';
     chatWrap.style.flex = isChat ? '1' : '';
   }
+
 }
 function renderHomeMsgs(){
   const c=document.getElementById('home-chat-inner'); c.innerHTML='';

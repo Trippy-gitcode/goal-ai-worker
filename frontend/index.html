@@ -186,7 +186,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.7</span>
+      <span class="version" title="バージョン確認">v3.11.8</span>
     </div>
   </div>
 </div>
@@ -259,7 +259,7 @@
               </div>
             </div>
             <!-- Hero section (spec #02a H02-05, mockup準拠: flex:1で王冠を垂直中央配置) -->
-            <div id="home-hero" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;padding:0 16px;max-width:700px;margin:0 auto;">
+            <div id="home-hero" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;max-height:calc(50vh - 50px);text-align:center;padding:0 16px;max-width:700px;margin:0 auto;">
               <div>
                 <svg width="48" height="48" viewBox="0 0 32 32"><defs><linearGradient id="hero-grad" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#hero-grad)"/></svg>
                 <div style="display:flex;justify-content:center;align-items:center;gap:7px;margin-top:10px;">
@@ -269,11 +269,12 @@
                   <span style="width:3px;height:3px;border-radius:50%;background:var(--muted2);"></span>
                   <span style="font-size:12px;font-weight:500;color:var(--cream);">Claude</span>
                 </div>
-                <div style="font-size:12px;color:var(--muted);margin-top:8px;margin-bottom:12px;">最適なAIが回答します</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:8px;margin-bottom:4px;">最適なAIが回答します</div>
+                <div id="home-ai-badge" style="margin-top:6px;"></div>
               </div>
             </div>
-            <!-- Presets + badge (hero外、flex-shrink:0でbottom寄せ) -->
-            <div id="home-presets" style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:0 16px;margin-bottom:8px;max-width:700px;margin-left:auto;margin-right:auto;flex-shrink:0;">
+            <!-- Presets (hero外、flex-shrink:0でbottom寄せ) -->
+            <div id="home-presets" style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:0 16px;margin-bottom:0;max-width:700px;margin-left:auto;margin-right:auto;flex-shrink:0;">
               <button class="preset-chip" onclick="setPreset(this)">今日やること整理</button>
               <button class="preset-chip" onclick="setPreset(this)">目標の進捗を確認</button>
               <button class="preset-chip" onclick="setPreset(this)">モチベーションが出ない</button>
@@ -281,7 +282,8 @@
               <button class="preset-chip" onclick="setPreset(this)">ストレス解消法</button>
               <button class="preset-chip" onclick="setPreset(this)">自分の強みを知りたい</button>
             </div>
-            <div id="home-ai-badge" style="text-align:center;flex-shrink:0;margin-bottom:16px;"></div>
+            <!-- preset-gap: presets〜input間のスペース（sep-gapと同程度 11px） -->
+            <div style="height:11px;flex-shrink:0;"></div>
             <div id="home-chat-wrap" style="flex:1;overflow-y:auto;position:relative;display:none;">
             <div id="home-chat-inner" style="max-width:740px;margin:0 auto;padding:8px 20px 16px;"></div>
           </div>
@@ -344,6 +346,8 @@
               </div>
             </div>
           </div>
+          <!-- Bottom padding -->
+          <div style="height:16px;flex-shrink:0;"></div>
 
           <!-- Chat history slide panel -->
           <div id="chat-history-panel" style="display:none;position:absolute;inset:0;z-index:60;background:var(--bg2);flex-direction:column;overflow:hidden;">
