@@ -1,0 +1,132 @@
+=== CANOPY TEST (21:57:15) ===
+Worker: "version":"3.11.9"
+--- HTTP Smoke Tests ---
+OK: GET /api/version → 200
+OK: GET /health → 200
+OK: GET /api/usage → 401 (auth required)
+OK: GET /api/plan/status → 401 (auth required)
+OK: GET /api/goals → 401 (auth required)
+OK: POST /api/chat/stream → 401
+OK: POST /api/checkout/create → 401
+OK: Frontend → 200
+--- Core functions ---
+OK: handleChatStream (8 refs)
+OK: buildServerSystemPrompt (7 refs)
+OK: quickRoute (5 refs)
+OK: callRoutingAPI (5 refs)
+OK: handleGeminiChat (7 refs)
+OK: handleGPTChat (7 refs)
+OK: MEMO_ENABLED (7 refs)
+OK: RAG_ENABLED (8 refs)
+OK: CACHE_ENABLED (4 refs)
+--- PLAN_CONFIG ---
+OK: plan free
+OK: plan light
+OK: plan pro
+OK: plan max
+OK: plan ultra
+--- Old plan cleanup ---
+OK: no old plan names
+--- Turn recording ---
+OK: recordTurnUsage (3 refs)
+OK: maybeSendUsageRecord (2 refs)
+OK: increment_turn_usage (2 refs)
+--- Cap + FairUse + Degradation ---
+OK: getDegradedModels (3 refs)
+OK: checkFairUseV2 (2 refs)
+OK: effectiveModels (7 refs)
+OK: X-Model-Degraded (1 refs)
+--- API + Webhook ---
+OK: handlePlanStatus (3 refs)
+OK: invoice.paid (2 refs)
+OK: stripe_metered_subscription_item_id (4 refs)
+OK: trial_period_days (1 refs)
+--- Frontend v6.3 ---
+OK: pc-light (1 refs)
+OK: pc-ultra (1 refs)
+OK: plan-usage-bar (2 refs)
+OK: fetchPlanStatus (2 refs)
+OK: showDegradeBadge (2 refs)
+OK: X-Model-Degraded (1 refs)
+OK: no old plan cards in HTML
+--- Common Components (8a) ---
+OK: M5 24l4-11 (4 refs)
+OK: getGptSVG (1 refs)
+OK: _saveScroll (2 refs)
+OK: stopHomeStream (2 refs)
+OK: _setHomeSendIcon (3 refs)
+--- Screen UI changes (8b) ---
+OK: ob-slides (3 refs)
+OK: obNext (3 refs)
+OK: confirmDeleteAccount (3 refs)
+OK: 3人寄れば (3 refs)
+OK: 停滞ポイント (4 refs)
+OK: old text removed
+--- Plan presentation + Goal toast (8c) ---
+OK: ultra-particles\|ultraFloat (2 refs)
+OK: plan-compare-table (1 refs)
+OK: フェアユース制限 (1 refs)
+OK: goal-detect-toast\|showGoalDetectToast (8 refs)
+--- Version sync (C10) ---
+  globals.js=3.11.9  sw.js=3.11.9  index.html=3.11.9
+OK: version sync (3.11.9)
+--- Style integrity (C12) ---
+OK: no 'border-radius:24px' in JS
+OK: no 'border-radius:20px' in JS
+OK: no '#c4a0e8' in JS
+OK: no '#252a40' in JS
+OK: no '#323855' in JS
+WARN: hardcoded model color '#5b8def' in JS (1)
+WARN: hardcoded model color '#e07070' in JS (1)
+WARN: hardcoded model color '#e8913a' in JS (1)
+INFO: inline style= count in JS: 383 (baseline)
+--- UI spec values (design_spec_v3 8a-8c) ---
+OK: CRN-01 crown SVG (4 refs)
+OK: CRN-02 model name gray
+OK: CRN-03 input radius (11 refs)
+OK: send-btn-size (7 refs)
+OK: send-btn-grad (8 refs)
+OK: send-btn round (31 refs)
+OK: --model-claude (3 refs)
+OK: --model-gpt (3 refs)
+OK: --model-gemini (3 refs)
+OK: --card-radius (3 refs)
+OK: --popup-radius (3 refs)
+OK: --pill-radius (3 refs)
+OK: 8b hub-tabs (11)
+OK: 8b onboarding slides (5)
+OK: 8c plan cards (5 refs)
+OK: 8c goal detect toast (8 refs)
+--- Reference docs exist ---
+OK: docs/goal_ai_project_v6_4.md
+OK: docs/goal_ai_reference_v2.md
+OK: docs/goal_ai_design_spec_v3.md
+OK: docs/design_review_changelog_v3.md
+OK: docs/design_amendment_001.md
+OK: instructions/design_impl_001.md
+OK: instructions/stripe_005_frontend.md
+OK: instructions/stripe_amendment_001.md
+OK: instructions/stripe_amendment_002.md
+OK: development_rules.md
+--- No stale root files ---
+OK: no stale root files
+--- Gemini 3.x model names ---
+OK: gemini-3-flash-preview (3 refs)
+OK: gemini-3.1-pro-preview (2 refs)
+OK: no old gemini-2.5 models
+--- Routing catch-all ---
+OK: routing catch-all=gpt (2)
+--- Build output sync (frontend-dist vs frontend) ---
+OK: 'mode-chip' sync (src=4 dist=4)
+OK: 'ゴール一覧' sync (src=1 dist=1)
+OK: 'chip-row' sync (src=1 dist=1)
+OK: 'mode-f' cleanup (src=0 dist=0)
+OK: 'mode-row-f' cleanup (src=0 dist=0)
+OK: 'ゴールプロジェクト' cleanup (src=0 dist=0)
+  frontend-dist version=3.11.9  source version=3.11.9
+OK: frontend-dist version sync
+--- Vite tree-shake safety (onclick vs window.assign) ---
+OK: all onclick functions registered in window
+--- SP version sync ---
+  session_progress=v3.11.9  APP_VERSION=3.11.9
+=== CANOPY PASS (11s) ===

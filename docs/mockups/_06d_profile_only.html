@@ -1,0 +1,14 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+*{margin:0;padding:0}body{background:#0e0e18;overflow:hidden;height:100vh}
+iframe{width:100%;height:200%;border:none;position:absolute;top:0}
+</style></head><body>
+<iframe id="m" src="06d_design_profile.html"></iframe>
+<script>
+document.getElementById('m').onload=function(){
+  try{
+    var phones=this.contentDocument.querySelectorAll('.phone');
+    if(phones[2]) phones[2].scrollIntoView({block:'start'});
+  }catch(e){}
+};
+</script>
+</body></html>

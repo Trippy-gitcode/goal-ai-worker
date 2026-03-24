@@ -865,14 +865,20 @@ async function runConnectAnalysis(){
     const res = await fetch(`${WORKER_URL}/api/chat`,{
       method:'POST', headers:getAuthHeaders(),
       body: JSON.stringify({
-        system:`あなたはコーチです。ユーザーのビジョンと現在のゴールを照合し、以下のJSONで返してください：
+        system:`あなたはコーチです。ユーザーのビジョン・強み・弱みと現在のゴールを照合し、以下のJSONで返してください：
 {
-  "checks": [{"type":"warning"|"ok", "goal":"ゴール名", "message":"確認メッセージ"}],
-  "ideas": [{"title":"新ゴール名", "reason":"理由"}],
-  "feedback": [{"type":"ok"|"warning", "goal":"ゴール名", "message":"フィードバック"}]
+  "goals": [
+    {
+      "goal": "ゴール名",
+      "compatibility": 0〜100の整数（ビジョン・強み・弱みとの相性スコア）,
+      "description": "なぜこの相性スコアか（強み/弱みとの関連を具体的に）",
+      "advice": "AIアドバイス（改善策や活かし方）"
+    }
+  ],
+  "ideas": [{"title":"ビジョンから生まれる新ゴール候補", "reason":"理由"}]
 }
-日本語。JSONのみ出力。マークダウン不要。`,
-        messages:[{role:'user', content:`ビジョン：${USER_PROFILE.vision||'未設定'}\nゴール一覧：\n${goalsText}`}],
+60%以下は警告色で表示される。日本語。JSONのみ出力。マークダウン不要。`,
+        messages:[{role:'user', content:`ビジョン：${USER_PROFILE.vision||'未設定'}\n強み：${(USER_PROFILE.strengths||[]).join('・')||'未設定'}\n弱み：${(USER_PROFILE.weaknesses||[]).join('・')||'未設定'}\nゴール一覧：\n${goalsText}`}],
         maxTokens:700
       })
     });
@@ -894,45 +900,59 @@ function renderConnectContent(loading=false, data=null){
   }
   if(!data){ el.innerHTML = `<div style="color:var(--muted2);font-size:12px;padding:10px 0;">分析データがありません。「再分析」を押してください。</div>`; return; }
   let html = '';
-  if(data.checks?.length){
-    html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin-bottom:8px;">⚠ 確認項目</div>`;
-    data.checks.forEach(c=>{
-      html += `<div class="connect-card" style="border-color:${c.type==='warning'?'var(--red-d)':'var(--green-d)'}">
-        <div class="connect-card-hd" style="color:${c.type==='warning'?'var(--red)':'var(--green)'}">${c.type==='warning'?'⚠':'✓'} ${c.goal}</div>
-        <div class="connect-card-body">${c.message}</div>
-        <button class="connect-apply-btn" onclick="hubChatFromConnect('${c.goal}', '${c.message.replace(/'/g,"\\'")}')">💬 チャットで確認する</button>
+  // 新形式: goals[] with compatibility bar (mockup準拠)
+  if(data.goals?.length){
+    data.goals.forEach(g=>{
+      const pct = g.compatibility || 0;
+      const isWarn = pct <= 60;
+      const barColor = isWarn ? '#ef9f27' : 'linear-gradient(90deg,#c8920a,#f5d380)';
+      const pctColor = isWarn ? '#ef9f27' : '#c8920a';
+      const goalSafe = (g.goal||'').replace(/'/g,"\\'");
+      html += `<div class="connect-card" style="border-color:${isWarn?'rgba(239,159,39,0.3)':'rgba(200,146,10,0.3)'}">
+        <div class="connect-card-hd">${g.goal}</div>
+        <div class="connect-card-body">${g.description||''}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin:8px 0;">
+          <span style="font-size:8px;color:var(--muted);">相性:</span>
+          <div style="width:80px;height:4px;border-radius:2px;background:var(--muted3);overflow:hidden;">
+            <div style="height:100%;width:${pct}%;border-radius:2px;background:${barColor};"></div>
+          </div>
+          <span style="font-size:9px;font-weight:500;color:${pctColor};">${pct}%</span>
+        </div>
+        ${g.advice?`<div style="padding:8px 10px;border-radius:6px;background:rgba(200,146,10,0.04);border:0.5px solid rgba(200,146,10,0.15);margin-top:6px;font-size:9px;color:var(--muted);line-height:1.5;">
+          <div style="font-size:8px;font-weight:500;color:var(--amber);margin-bottom:3px;">${getLogoSVG(10)} AIアドバイス</div>${g.advice}
+        </div>`:''}
+        ${isWarn?`<div onclick="hubChatFromConnect('${goalSafe}','改善方法を教えて')" style="display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;border:0.5px solid rgba(200,146,10,0.3);color:#c8920a;font-size:9px;cursor:pointer;width:fit-content;margin-top:6px;">💬 改善方法をAIに相談する</div>`:''}
       </div>`;
     });
   }
+  // フォールバック: 旧形式 (checks/feedback) — パース失敗時の互換性維持
+  else if(data.checks?.length || data.feedback?.length){
+    if(data.checks?.length){
+      html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin-bottom:8px;">⚠ 確認項目</div>`;
+      data.checks.forEach(c=>{
+        html += `<div class="connect-card" style="border-color:${c.type==='warning'?'var(--red-d)':'var(--green-d)'}">
+          <div class="connect-card-hd" style="color:${c.type==='warning'?'var(--red)':'var(--green)'}">${c.type==='warning'?'⚠':'✓'} ${c.goal}</div>
+          <div class="connect-card-body">${c.message}</div>
+        </div>`;
+      });
+    }
+    if(data.feedback?.length){
+      html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:16px 0 8px;">📊 フィードバック</div>`;
+      data.feedback.forEach(f=>{
+        html += `<div class="connect-card">
+          <div class="connect-card-hd" style="color:${f.type==='ok'?'var(--green)':'var(--amber)'}">${f.type==='ok'?'✓':'⚠'} ${f.goal}</div>
+          <div class="connect-card-body">${f.message}</div>
+        </div>`;
+      });
+    }
+  }
+  // ideas（新旧共通）
   if(data.ideas?.length){
     html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:16px 0 8px;">💡 ビジョンから生まれるゴールアイデア</div>`;
     data.ideas.forEach(id=>{
       html += `<div class="connect-card">
         <div class="connect-card-hd" style="color:var(--know-purple)">💡 ${id.title}</div>
         <div class="connect-card-body">${id.reason}</div>
-        <button class="connect-apply-btn">＋ このゴールを追加する</button>
-      </div>`;
-    });
-  }
-  if(data.feedback?.length){
-    html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:16px 0 8px;">📊 現在のゴールへのフィードバック</div>`;
-    data.feedback.forEach(f=>{
-      const pct = f.compatibility || 0;
-      const isWarn = pct > 0 && pct <= 60;
-      const barColor = isWarn ? '#ef9f27' : 'linear-gradient(90deg,#c8920a,#f5d380)';
-      const pctColor = isWarn ? '#ef9f27' : '#c8920a';
-      const barHtml = pct > 0 ? `<div style="display:flex;align-items:center;gap:6px;margin:6px 0;">
-        <span style="font-size:8px;color:var(--muted);">相性:</span>
-        <div style="width:80px;height:4px;border-radius:2px;background:var(--muted3);overflow:hidden;">
-          <div style="height:100%;width:${pct}%;border-radius:2px;background:${barColor};"></div>
-        </div>
-        <span style="font-size:9px;font-weight:500;color:${pctColor};">${pct}%</span>
-      </div>` : '';
-      const improveBtn = isWarn ? `<div onclick="hubChatFromConnect('${(f.goal||'').replace(/'/g,"\\'")}','改善方法を教えて')" style="display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;border:0.5px solid rgba(200,146,10,0.3);color:#c8920a;font-size:9px;cursor:pointer;width:fit-content;margin-top:6px;">💬 改善方法をAIに相談する</div>` : '';
-      html += `<div class="connect-card">
-        <div class="connect-card-hd" style="color:${f.type==='ok'?'var(--green)':'var(--amber)'}">${f.type==='ok'?'✓':'⚠'} ${f.goal}</div>
-        <div class="connect-card-body">${f.message}</div>
-        ${barHtml}${improveBtn}
       </div>`;
     });
   }
