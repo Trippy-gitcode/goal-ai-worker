@@ -672,7 +672,20 @@ function setPreset(btn){
 }
 function updateHeroVisibility(){
   const hero=document.getElementById('home-hero');
-  if(hero) hero.style.display = homeMsgs.length > 0 ? 'none' : '';
+  const presets=document.getElementById('home-presets');
+  const badge=document.getElementById('home-ai-badge');
+  const chatWrap=document.getElementById('home-chat-wrap');
+  const isChat = homeMsgs.length > 0;
+  if(hero){
+    hero.style.display = isChat ? 'none' : 'flex';
+    hero.style.flex = isChat ? '' : '1';
+  }
+  if(presets) presets.style.display = isChat ? 'none' : '';
+  if(badge) badge.style.display = isChat ? 'none' : '';
+  if(chatWrap){
+    chatWrap.style.display = isChat ? '' : 'none';
+    chatWrap.style.flex = isChat ? '1' : '';
+  }
 }
 function renderHomeMsgs(){
   const c=document.getElementById('home-chat-inner'); c.innerHTML='';
@@ -680,7 +693,10 @@ function renderHomeMsgs(){
   if(homeMsgs.length>0){ chatWrap.classList.add('has-msgs'); } else { chatWrap.classList.remove('has-msgs'); }
   updateHeroVisibility();
   if(homeMsgs.length===0){
-    c.innerHTML=buildEmptyHomeHTML();
+    c.innerHTML='';
+    // badge is rendered in #home-ai-badge by updateHeroVisibility
+    const badgeEl=document.getElementById('home-ai-badge');
+    if(badgeEl) badgeEl.innerHTML=getAiOptBadgeHTML();
     updatePlusButtonState();
     return;
   }
@@ -1273,11 +1289,12 @@ function showHomeScreen(){
 function renderWelcomeView(){
   const chatInner = document.getElementById('home-chat-inner');
   if(!chatInner) return;
-  chatInner.innerHTML = buildEmptyHomeHTML();
+  chatInner.innerHTML = '';
+  // AI opt badge → hero内のbadge専用コンテナに配置（mockup準拠）
+  const badgeEl = document.getElementById('home-ai-badge');
+  if(badgeEl) badgeEl.innerHTML = getAiOptBadgeHTML();
   updateHomePlaceholder();
-  showProfileHint();
-  // E: 定期チェックイン（1日1回）
-  showDailyCheckin(chatInner);
+  updateHeroVisibility();
 }
 
 // STEP 11: プロフィール未設定案内

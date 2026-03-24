@@ -186,7 +186,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.6</span>
+      <span class="version" title="バージョン確認">v3.11.7</span>
     </div>
   </div>
 </div>
@@ -258,28 +258,31 @@
                 <button onclick="clearHomeSearch()" style="background:none;border:none;color:var(--muted2);cursor:pointer;padding:0 2px;font-size:11px;line-height:1;">✕</button>
               </div>
             </div>
-            <!-- Hero section (spec #02a H02-05) -->
-            <div id="home-hero" style="text-align:center;padding:24px 16px 0;max-width:700px;margin:0 auto;">
-              <svg width="48" height="48" viewBox="0 0 32 32"><defs><linearGradient id="hero-grad" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#hero-grad)"/></svg>
-              <div style="display:flex;justify-content:center;align-items:center;gap:7px;margin-top:10px;">
-                <span style="font-size:12px;font-weight:500;color:var(--cream);">Gemini</span>
-                <span style="width:3px;height:3px;border-radius:50%;background:var(--muted2);"></span>
-                <span style="font-size:12px;font-weight:500;color:var(--cream);">ChatGPT</span>
-                <span style="width:3px;height:3px;border-radius:50%;background:var(--muted2);"></span>
-                <span style="font-size:12px;font-weight:500;color:var(--cream);">Claude</span>
-              </div>
-              <div style="font-size:12px;color:var(--muted);margin-top:8px;margin-bottom:12px;">最適なAIが回答します</div>
-              <!-- Preset chips (P-05/P-07) -->
-              <div id="home-presets" style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:8px;">
-                <button class="preset-chip" onclick="setPreset(this)">今日やること整理</button>
-                <button class="preset-chip" onclick="setPreset(this)">目標の進捗を確認</button>
-                <button class="preset-chip" onclick="setPreset(this)">モチベーションが出ない</button>
-                <button class="preset-chip" onclick="setPreset(this)">新しいスキルを学びたい</button>
-                <button class="preset-chip" onclick="setPreset(this)">ストレス解消法</button>
-                <button class="preset-chip" onclick="setPreset(this)">自分の強みを知りたい</button>
+            <!-- Hero section (spec #02a H02-05, mockup準拠: flex:1で王冠を垂直中央配置) -->
+            <div id="home-hero" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;padding:0 16px;max-width:700px;margin:0 auto;">
+              <div>
+                <svg width="48" height="48" viewBox="0 0 32 32"><defs><linearGradient id="hero-grad" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#hero-grad)"/></svg>
+                <div style="display:flex;justify-content:center;align-items:center;gap:7px;margin-top:10px;">
+                  <span style="font-size:12px;font-weight:500;color:var(--cream);">Gemini</span>
+                  <span style="width:3px;height:3px;border-radius:50%;background:var(--muted2);"></span>
+                  <span style="font-size:12px;font-weight:500;color:var(--cream);">ChatGPT</span>
+                  <span style="width:3px;height:3px;border-radius:50%;background:var(--muted2);"></span>
+                  <span style="font-size:12px;font-weight:500;color:var(--cream);">Claude</span>
+                </div>
+                <div style="font-size:12px;color:var(--muted);margin-top:8px;margin-bottom:12px;">最適なAIが回答します</div>
               </div>
             </div>
-            <div id="home-chat-wrap" style="flex:1;overflow-y:auto;position:relative;">
+            <!-- Presets + badge (hero外、flex-shrink:0でbottom寄せ) -->
+            <div id="home-presets" style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:0 16px;margin-bottom:8px;max-width:700px;margin-left:auto;margin-right:auto;flex-shrink:0;">
+              <button class="preset-chip" onclick="setPreset(this)">今日やること整理</button>
+              <button class="preset-chip" onclick="setPreset(this)">目標の進捗を確認</button>
+              <button class="preset-chip" onclick="setPreset(this)">モチベーションが出ない</button>
+              <button class="preset-chip" onclick="setPreset(this)">新しいスキルを学びたい</button>
+              <button class="preset-chip" onclick="setPreset(this)">ストレス解消法</button>
+              <button class="preset-chip" onclick="setPreset(this)">自分の強みを知りたい</button>
+            </div>
+            <div id="home-ai-badge" style="text-align:center;flex-shrink:0;margin-bottom:16px;"></div>
+            <div id="home-chat-wrap" style="flex:1;overflow-y:auto;position:relative;display:none;">
             <div id="home-chat-inner" style="max-width:740px;margin:0 auto;padding:8px 20px 16px;"></div>
           </div>
           <button id="scroll-latest-btn" onclick="scrollToLatest()" style="display:none;position:absolute;bottom:90px;right:24px;z-index:600;background:var(--amber);color:#fff;border:none;cursor:pointer;padding:8px 18px 8px 14px;border-radius:28px;font-size:13px;font-family:var(--fm);font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.4);align-items:center;gap:6px;opacity:0;transition:opacity .25s ease,transform .25s ease;transform:translateY(8px);">
