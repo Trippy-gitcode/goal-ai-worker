@@ -1369,7 +1369,30 @@ function selectPlan(p){
     if(el) el.style.outline = id===p?'2px solid var(--amber)':'none';
   });
   updatePlanCTA();
+  updatePlanDots(p);
 }
+function updatePlanDots(p){
+  const plans=['free','light','pro','max','ultra'];
+  const idx=plans.indexOf(p);
+  const dots=document.querySelectorAll('#plan-dots .plan-dot');
+  dots.forEach((d,i)=>{
+    if(i===idx){d.style.width='16px';d.style.borderRadius='3px';d.style.background='var(--amber)';}
+    else{d.style.width='6px';d.style.borderRadius='50%';d.style.background='rgba(255,255,255,0.15)';}
+  });
+}
+// Scroll-based dot update
+(function(){
+  const el=document.getElementById('plan-cards');
+  if(!el)return;
+  el.addEventListener('scroll',()=>{
+    const cards=el.querySelectorAll('.plan-card');
+    const scrollLeft=el.scrollLeft;
+    const cardWidth=cards[0]?.offsetWidth||280;
+    const idx=Math.round(scrollLeft/(cardWidth+12));
+    const plans=['free','light','pro','max','ultra'];
+    if(plans[idx]) updatePlanDots(plans[idx]);
+  },{passive:true});
+})();
 
 function updatePlanCTA(){
   const btn = document.getElementById('plan-cta-btn');
@@ -1975,7 +1998,7 @@ Object.assign(window, {
   openArchivedGoalDetail, restoreGoal, exportData,
   PROMO_CODES, getMembershipLabel, renderMembershipUI,
   copyReferralCode, openPlanModal, closePlanModal, renderPlanModal,
-  selectPlan, updatePlanCTA, toggleBillingPeriod, updatePlanPrices,
+  selectPlan, updatePlanCTA, updatePlanDots, toggleBillingPeriod, updatePlanPrices,
   applyPromoCode, subscribePlan, openCustomerPortal,
   showAIMemo, MODE_DESCRIPTIONS, handleModeClick,
   updateModePills, updateSidebarTaskList,

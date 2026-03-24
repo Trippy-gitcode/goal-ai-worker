@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#06a-d Design Me Review v2</title>
+<style>
+:root{
+--color-background-primary:#141420;
+--color-background-secondary:#1a1a2e;
+--color-background-info:#2a3a5c;
+--color-text-primary:#e8e8e8;
+--color-text-secondary:#888;
+--color-text-tertiary:#555;
+--color-text-info:#8ab4f8;
+--color-border-tertiary:#2a2a3e;
+--color-border-secondary:#444;
+}
+body{background:#0e0e18;padding:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+.phones{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:8px 0;max-width:720px;margin:0 auto}
+.phone{width:100%;max-width:340px;margin:0 auto;border-radius:18px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);overflow:hidden;height:720px;display:flex;flex-direction:column;position:relative}
+.slabel{font-size:12px;font-weight:500;color:var(--color-text-secondary);text-align:center;margin:0 0 8px}
+.snum{display:inline-block;font-size:9px;font-weight:600;color:#fff;background:#c8920a;padding:1px 6px;border-radius:4px;margin-right:4px}
+.ph-s{height:20px;padding:4px 14px;display:flex;align-items:center;justify-content:space-between;font-size:9px;color:rgba(255,255,255,0.7);background:#c8920a}
+.hd{padding:10px 14px;display:flex;align-items:center;gap:8px;background:#c8920a;flex-shrink:0}
+.hd-ham{width:16px;display:flex;flex-direction:column;gap:2.5px}.hd-ham span{height:1.5px;background:#fff;border-radius:1px}
+.hd-title{font-size:14px;font-weight:500;color:#fff}
+.tabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);flex-shrink:0;padding:0 14px;background:rgba(200,146,10,0.06)}
+.tab{padding:7px 10px;font-size:9px;color:var(--color-text-secondary);cursor:pointer;position:relative;white-space:nowrap}
+.tab.on{color:#c8920a;font-weight:500}
+.tab.on::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2px;border-radius:1px;background:#c8920a}
+.body{flex:1;overflow-y:auto;padding:8px 14px}
+
+/* Session bar */
+.session-bar{padding:8px 10px;border-radius:8px;background:var(--color-background-secondary);margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.session-label{font-size:9px;color:var(--color-text-secondary)}
+.session-prog{flex:1;height:4px;border-radius:2px;background:var(--color-border-tertiary);overflow:hidden}
+.session-prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#c8920a,#f5d380)}
+.session-count{font-size:9px;color:#c8920a;font-weight:500}
+/* Theme chips */
+.themes{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 10px}
+.theme{font-size:9px;padding:5px 12px;border-radius:12px;border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary);cursor:pointer}
+.theme.on{background:linear-gradient(135deg,#c8920a,#f5d380);color:#fff;border-color:transparent}
+.theme.done{background:rgba(200,146,10,0.08);color:#c8920a;border-color:rgba(200,146,10,0.3)}
+.theme.locked{opacity:0.35;cursor:default}
+.theme-lock{font-size:8px;margin-right:2px}
+/* Messages */
+.msg{padding:8px 0}
+.mh{display:flex;align-items:flex-end;gap:6px;margin-bottom:3px}
+.mav{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px}
+.mav-ai{background:linear-gradient(135deg,#c8920a33,#f5d38066)}
+.mav-u{background:var(--color-background-info);color:var(--color-text-info);font-weight:500}
+.mn{font-size:9px;font-weight:500;line-height:20px}
+.mn-role{color:#c8920a}
+.mn-user{color:var(--color-text-secondary)}
+.mb{padding-left:26px;font-size:12px;line-height:1.6;color:var(--color-text-primary)}
+.mb-u{color:var(--color-text-secondary)}
+.summary{padding:10px 12px;border-radius:8px;background:rgba(200,146,10,0.04);border:0.5px solid rgba(200,146,10,0.2);margin:8px 0;font-size:10px;color:var(--color-text-secondary);line-height:1.5}
+.summary-head{font-size:10px;font-weight:500;color:#c8920a;margin:0 0 4px}
+/* Unified input [CRN-03 全画面統一] */
+.chat-in{display:flex;gap:4px;padding:6px 14px 8px;align-items:center;border-top:0.5px solid var(--color-border-tertiary);flex-shrink:0}
+.in-box{flex:1;display:flex;gap:4px;align-items:center;padding:8px 12px;border-radius:14px;border:0.5px solid rgba(200,146,10,0.3);background:var(--color-background-secondary)}
+.in-text{flex:1;font-size:12px;color:var(--color-text-tertiary)}
+.in-b{width:28px;height:28px;border-radius:50%;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.in-b svg{width:13px;height:13px;stroke:var(--color-text-secondary);fill:none;stroke-width:1.5}
+.in-s{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#c8920a,#f5d380);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.in-s svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2}
+/* Empty state */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:24px;text-align:center}
+.empty-icon{width:56px;height:56px;border-radius:50%;background:rgba(200,146,10,0.08);display:flex;align-items:center;justify-content:center;margin:0 0 12px}
+.empty-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin:0 0 6px}
+.empty-desc{font-size:10px;color:var(--color-text-secondary);line-height:1.5;margin:0 0 16px}
+.empty-cta{padding:10px 24px;border-radius:10px;background:linear-gradient(135deg,#c8920a,#f5d380);color:#fff;font-size:11px;font-weight:500;cursor:pointer}
+.empty-skip{font-size:9px;color:var(--color-text-tertiary);margin-top:10px;cursor:pointer}
+/* Connect */
+.connect-desc{font-size:10px;color:var(--color-text-secondary);line-height:1.5;margin:0 0 10px}
+.connect-goal{padding:12px;border-radius:10px;border:0.5px solid var(--color-border-tertiary);margin:0 0 8px}
+.connect-head{display:flex;align-items:center;gap:6px;margin:0 0 5px}
+.connect-icon{font-size:14px}
+.connect-name{font-size:11px;font-weight:500;color:var(--color-text-primary)}
+.connect-match{font-size:10px;color:var(--color-text-secondary);line-height:1.5;margin:0 0 6px}
+.connect-strength{display:flex;align-items:center;gap:6px;margin:0 0 6px}
+.connect-label{font-size:8px;color:var(--color-text-secondary)}
+.connect-bar{width:80px;height:4px;border-radius:2px;background:var(--color-border-tertiary);overflow:hidden}
+.connect-bar-fill{height:100%;border-radius:2px}
+.connect-bar-gold{background:linear-gradient(90deg,#c8920a,#f5d380)}
+.connect-bar-warn{background:#ef9f27}
+.connect-pct{font-size:9px;font-weight:500}
+.connect-pct-gold{color:#c8920a}
+.connect-pct-warn{color:#ef9f27}
+.advice{padding:8px 10px;border-radius:6px;background:rgba(200,146,10,0.04);border:0.5px solid rgba(200,146,10,0.15);margin:0 0 6px;font-size:9px;color:var(--color-text-secondary);line-height:1.4}
+.advice-head{font-size:8px;font-weight:500;color:#c8920a;margin:0 0 2px}
+.improve-btn{display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;border:0.5px solid rgba(200,146,10,0.3);color:#c8920a;font-size:9px;cursor:pointer;width:fit-content}
+.improve-btn svg{width:10px;height:10px;stroke:#c8920a;fill:none;stroke-width:1.5}
+.reanalyze{display:flex;align-items:center;justify-content:center;gap:5px;padding:10px;border-radius:8px;border:0.5px solid rgba(200,146,10,0.3);color:#c8920a;font-size:10px;cursor:pointer;margin:12px 0}
+.reanalyze svg{width:14px;height:14px;stroke:#c8920a;fill:none;stroke-width:1.5}
+/* Profile */
+.ai-bar{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:8px;background:var(--color-background-secondary);margin:0 0 4px;cursor:pointer}
+.ai-bar-label{font-size:9px;color:var(--color-text-secondary)}
+.ai-bar-prog{flex:1;height:4px;border-radius:2px;background:var(--color-border-tertiary);overflow:hidden}
+.ai-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#c8920a,#f5d380)}
+.ai-bar-pct{font-size:9px;font-weight:500;color:#c8920a}
+.ai-bar-hint{font-size:7px;color:var(--color-text-tertiary);margin:0 0 6px}
+/* AI understanding breakdown (expanded) */
+.ai-breakdown{padding:8px 10px;border-radius:8px;background:var(--color-background-secondary);margin:0 0 8px;border:0.5px solid rgba(200,146,10,0.15)}
+.ai-bd-row{display:flex;align-items:center;justify-content:space-between;padding:3px 0;font-size:8px}
+.ai-bd-label{color:var(--color-text-secondary)}
+.ai-bd-val{color:var(--color-text-primary);font-weight:500}
+.ai-bd-done{color:#c8920a}
+.ai-bd-none{color:var(--color-text-tertiary)}
+.avatar-area{display:flex;align-items:center;gap:10px;margin:0 0 8px}
+.avatar-circle{width:48px;height:48px;border-radius:50%;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;color:var(--color-text-info)}
+.avatar-info{flex:1}
+.avatar-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.avatar-nick{font-size:9px;color:var(--color-text-secondary)}
+.avatar-edit{font-size:8px;color:#c8920a;cursor:pointer}
+.pf-sec{font-size:11px;font-weight:500;color:var(--color-text-primary);margin:12px 0 5px;display:flex;align-items:center;gap:5px}
+.pf-sec:first-child{margin-top:4px}
+.pf-sec svg{width:14px;height:14px;stroke:#c8920a;fill:none;stroke-width:1.5}
+.pf-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:10px}
+.pf-label{color:var(--color-text-secondary)}
+.pf-val{color:var(--color-text-primary)}
+.mbti{display:flex;align-items:center;gap:8px;margin:4px 0 6px}
+.mbti-badge{padding:4px 14px;border-radius:8px;background:linear-gradient(135deg,#c8920a22,#f5d38044);color:#c8920a;font-size:13px;font-weight:500}
+.mbti-redo{font-size:8px;color:var(--color-text-tertiary);cursor:pointer}
+.chips-header{display:flex;align-items:center;justify-content:space-between;margin:4px 0}
+.chips-ai-label{font-size:8px;color:#c8920a;display:flex;align-items:center;gap:3px}
+.chips-edit{font-size:8px;color:var(--color-text-tertiary);cursor:pointer}
+.chips-wrap{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 4px}
+.chip{font-size:9px;padding:4px 10px;border-radius:10px;border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)}
+.chip.on{background:rgba(200,146,10,0.1);color:#c8920a;border-color:rgba(200,146,10,0.3)}
+.chip.ai-new{background:rgba(200,146,10,0.06);color:#c8920a;border:0.5px dashed rgba(200,146,10,0.4)}
+.chip-ai-badge{font-size:6px;margin-left:2px;opacity:0.7}
+.chips-confirm{display:flex;gap:6px;margin:4px 0 6px}
+.chips-confirm-btn{font-size:8px;padding:3px 10px;border-radius:6px;cursor:pointer}
+.chips-confirm-yes{background:linear-gradient(135deg,#c8920a,#f5d380);color:#fff}
+.chips-confirm-no{background:transparent;border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+<defs><linearGradient id="crown" x1="6" y1="6" x2="26" y2="24" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs>
+</svg>
+
+<div class="phones">
+
+<!-- ================================ -->
+<!-- #06a v2: 自分を知る（入力欄統一）  -->
+<!-- ================================ -->
+<div>
+<p class="slabel"><span class="snum">#06a v2</span>🪞 自分を知る（入力欄統一）</p>
+<div class="phone">
+<div class="ph-s"><span>9:41</span><span>···</span></div>
+<div class="hd"><div class="hd-ham"><span></span><span></span><span></span></div><div class="hd-title">私をデザイン</div></div>
+<div class="tabs"><div class="tab on">🪞 自分を知る</div><div class="tab">🎯 ビジョン</div><div class="tab">🔗 連携</div><div class="tab">👤 プロフ</div></div>
+<div class="body">
+<div class="session-bar"><div class="session-label">セッション進捗</div><div class="session-prog"><div class="session-prog-fill" style="width:40%"></div></div><div class="session-count">2/5</div></div>
+<div class="themes">
+<span class="theme done">あなたについて</span>
+<span class="theme done">今の自分</span>
+<span class="theme on">苦手なこと</span>
+<span class="theme locked"><span class="theme-lock">🔒</span>大切なこと</span>
+<span class="theme locked"><span class="theme-lock">🔒</span>なりたい自分</span>
+<span class="theme locked"><span class="theme-lock">🔒</span>恐れと障壁</span>
+</div>
+<div class="msg"><div class="mh"><div class="mav mav-ai"><svg viewBox="0 0 32 32" width="12" height="12"><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown)"/></svg></div><span class="mn mn-role">ライフデザイナー</span></div><div class="mb">何かをつい先延ばしにしてしまうことはありますか？</div></div>
+<div class="msg"><div class="mh"><div class="mav mav-u">F</div><span class="mn mn-user">Futoshi</span></div><div class="mb mb-u">事務作業。経理とか書類整理がすごく苦手で…</div></div>
+<div class="msg"><div class="mh"><div class="mav mav-ai"><svg viewBox="0 0 32 32" width="12" height="12"><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown)"/></svg></div><span class="mn mn-role">ライフデザイナー</span></div><div class="mb">なるほど。では逆に、人に任せたいと思うことは？</div></div>
+<div class="summary"><div class="summary-head">ここまでのまとめ</div>強み: 発想力・巻き込み力<br>苦手: 事務作業・数字管理・ルーティン</div>
+</div>
+<!-- [G06A-01] CRN-03全画面統一: 画像+音声+送信 -->
+<div class="chat-in"><div class="in-box"><div class="in-text">答えを入力...</div><div style="display:flex;gap:4px"><div class="in-b"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div><div class="in-b"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg></div><div class="in-s"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></div></div></div></div>
+</div>
+</div>
+
+<!-- ================================ -->
+<!-- #06c v2: ゴール連携（60%以下警告）-->
+<!-- ================================ -->
+<div>
+<p class="slabel"><span class="snum">#06c v2</span>🔗 ゴール連携（60%以下警告色）</p>
+<div class="phone">
+<div class="ph-s"><span>9:41</span><span>···</span></div>
+<div class="hd"><div class="hd-ham"><span></span><span></span><span></span></div><div class="hd-title">私をデザイン</div></div>
+<div class="tabs"><div class="tab">🪞 自分を知る</div><div class="tab">🎯 ビジョン</div><div class="tab on">🔗 連携</div><div class="tab">👤 プロフ</div></div>
+<div class="body">
+<div class="connect-desc">あなたの強み・弱み・価値観と各ゴールの相性をAIが分析します。</div>
+
+<!-- High: 85% → gold -->
+<div class="connect-goal">
+<div class="connect-head"><span class="connect-icon">🎬</span><span class="connect-name">YouTube 10万人</span></div>
+<div class="connect-match">発想力と巻き込み力はコンテンツ制作に直結。事務作業の苦手さは外注やツールで補完可能。</div>
+<div class="connect-strength"><span class="connect-label">相性:</span><div class="connect-bar"><div class="connect-bar-fill connect-bar-gold" style="width:85%"></div></div><span class="connect-pct connect-pct-gold">85%</span></div>
+<div class="advice"><div class="advice-head"><svg viewBox="0 0 32 32" width="10" height="10" style="vertical-align:middle;margin-right:2px"><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown)"/></svg>AIアドバイス</div>サムネイル制作は強みの発想力が活きる領域。編集のルーティン化が課題。テンプレート活用を推奨。</div>
+</div>
+
+<!-- Low: 55% → orange warning [G06C-01: 60%以下] -->
+<div class="connect-goal">
+<div class="connect-head"><span class="connect-icon">💪</span><span class="connect-name">フルマラソン完走</span></div>
+<div class="connect-match">コツコツ継続が必要。先延ばし傾向があるため、習慣化の仕組みづくりが重要。</div>
+<div class="connect-strength"><span class="connect-label">相性:</span><div class="connect-bar"><div class="connect-bar-fill connect-bar-warn" style="width:55%"></div></div><span class="connect-pct connect-pct-warn">55%</span></div>
+<div class="advice"><div class="advice-head"><svg viewBox="0 0 32 32" width="10" height="10" style="vertical-align:middle;margin-right:2px"><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown)"/></svg>AIアドバイス</div>ランニングアプリで記録を可視化→SNS共有で「巻き込み力」を活用すると継続しやすい。</div>
+<div class="improve-btn"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"/></svg>改善方法をAIに相談する</div>
+</div>
+
+<div class="reanalyze"><svg viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>再分析する</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- ================================ -->
+<!-- #06d v2: プロフ（理解度内訳+年齢行） -->
+<!-- ================================ -->
+<div style="max-width:360px;margin:12px auto 0">
+<p class="slabel"><span class="snum">#06d v2</span>👤 プロフィール（理解度内訳+年齢分離）</p>
+<div class="phone" style="height:780px">
+<div class="ph-s"><span>9:41</span><span>···</span></div>
+<div class="hd"><div class="hd-ham"><span></span><span></span><span></span></div><div class="hd-title">私をデザイン</div></div>
+<div class="tabs"><div class="tab">🪞 自分を知る</div><div class="tab">🎯 ビジョン</div><div class="tab">🔗 連携</div><div class="tab on">👤 プロフ</div></div>
+<div class="body">
+
+<!-- Avatar (top) with camera icon + upload -->
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin:4px 0 12px;">
+<div style="position:relative;width:48px;height:48px;">
+<div class="avatar-circle">F</div>
+<div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:#c8920a;display:flex;align-items:center;justify-content:center;border:2px solid var(--color-background-primary);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+</div>
+<span style="font-size:9px;color:var(--color-text-tertiary);">タップして変更</span>
+</div>
+
+<!-- AI understanding bar (clickable) -->
+<div class="ai-bar"><div class="ai-bar-label">AIの理解度</div><div class="ai-bar-prog"><div class="ai-bar-fill" style="width:68%"></div></div><div class="ai-bar-pct">68%</div></div>
+<div class="ai-bar-hint">↑ タップで内訳を表示</div>
+
+<!-- [G06D-01] 展開時の内訳表示 -->
+<div class="ai-breakdown">
+<div class="ai-bd-row"><span class="ai-bd-label">基本情報</span><span class="ai-bd-val ai-bd-done">7/7 入力済み</span></div>
+<div class="ai-bd-row"><span class="ai-bd-label">MBTI診断</span><span class="ai-bd-val ai-bd-done">完了</span></div>
+<div class="ai-bd-row"><span class="ai-bd-label">強み・弱み</span><span class="ai-bd-val ai-bd-done">5項目</span></div>
+<div class="ai-bd-row"><span class="ai-bd-label">嗜好・興味</span><span class="ai-bd-val ai-bd-done">3/6 選択</span></div>
+<div class="ai-bd-row"><span class="ai-bd-label">🪞 自分を知る</span><span class="ai-bd-val ai-bd-none">2/5 テーマ</span></div>
+<div class="ai-bd-row"><span class="ai-bd-label">🎯 ビジョン</span><span class="ai-bd-val ai-bd-none">未生成</span></div>
+</div>
+
+<!-- Basic info (実装準拠: 編集フォーム形式) -->
+<div class="pf-sec"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8"/></svg>基本情報</div>
+<div class="pf-row"><span class="pf-label">なんて呼ばれたい？</span><span class="pf-val">Futoshi</span></div>
+<div class="pf-row"><span class="pf-label">氏名</span><span class="pf-val">田川 太志</span></div>
+<div class="pf-row"><span class="pf-label">生年月日</span><span class="pf-val">1998/03/15</span></div>
+<div class="pf-row"><span class="pf-label">年齢</span><span class="pf-val">28歳</span></div>
+<div class="pf-row"><span class="pf-label">性別</span><span class="pf-val">男性</span></div>
+<div class="pf-row"><span class="pf-label">職種</span><span class="pf-val">クリエイター</span></div>
+<div class="pf-row"><span class="pf-label">専門</span><span class="pf-val">動画制作</span></div>
+<div class="pf-row"><span class="pf-label">家族</span><span class="pf-val">独身</span></div>
+<div class="pf-row"><span class="pf-label">使える時間・条件</span><span class="pf-val">平日3h / 休日6h</span></div>
+
+<!-- MBTI (実装準拠: 再診断ボタン+テストUI) -->
+<div class="pf-sec"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M12 8v4M12 16h0"/></svg>MBTI</div>
+<div class="mbti"><span class="mbti-badge">INFJ</span><span class="mbti-redo">再診断する</span></div>
+
+<!-- Strengths (実装準拠: トグル式チップ、AI提案なし) -->
+<div class="pf-sec"><svg viewBox="0 0 32 32" width="14" height="14"><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown)"/></svg>強み・弱み</div>
+<div style="font-size:8px;color:var(--color-text-secondary);margin:0 0 3px">強み（AIが活かす領域）</div>
+<div class="chips-wrap">
+<span class="chip on">発想力</span><span class="chip on">巻き込み力</span><span class="chip on">文章力</span>
+<span class="chip">行動力</span><span class="chip">論理思考</span><span class="chip">継続力</span><span class="chip">分析力</span>
+</div>
+<div style="font-size:8px;color:var(--color-text-secondary);margin:6px 0 3px">弱み（AIが補う領域）</div>
+<div class="chips-wrap">
+<span class="chip on">先延ばし</span><span class="chip on">完璧主義</span>
+<span class="chip">自己管理</span><span class="chip">集中力</span><span class="chip">感情コントロール</span>
+</div>
+
+<!-- Interests -->
+<div class="pf-sec"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>嗜好・興味</div>
+<div class="chips-wrap"><span class="chip on">動画</span><span class="chip on">音楽</span><span class="chip on">テクノロジー</span><span class="chip">読書</span><span class="chip">ゲーム</span><span class="chip">旅行</span></div>
+
+<!-- エネルギータグ -->
+<div style="font-size:8px;color:var(--color-text-secondary);margin:8px 0 4px">エネルギーをもらうもの / 奪われるもの</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 8px">
+<div style="background:var(--color-background-secondary);border-radius:8px;padding:8px 10px;">
+<div style="font-size:8px;color:#28b464;font-weight:500;margin-bottom:4px">⚡ もらうもの</div>
+<div class="chips-wrap"><span class="chip on" style="font-size:8px;padding:3px 8px;">新しい挑戦</span><span class="chip on" style="font-size:8px;padding:3px 8px;">人との対話</span></div>
+</div>
+<div style="background:var(--color-background-secondary);border-radius:8px;padding:8px 10px;">
+<div style="font-size:8px;color:#e24b4a;font-weight:500;margin-bottom:4px">🔋 奪われるもの</div>
+<div class="chips-wrap"><span class="chip on" style="font-size:8px;padding:3px 8px;">ルーティン</span><span class="chip on" style="font-size:8px;padding:3px 8px;">事務作業</span></div>
+</div>
+</div>
+
+<!-- 人間関係・サポートネットワーク -->
+<div class="pf-sec"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>人間関係</div>
+<div style="font-size:9px;color:var(--color-text-secondary);line-height:1.6;margin:0 0 4px">
+<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span>💬 率直に相談できる人</span><span style="color:#c8920a">いる</span></div>
+<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span>🚀 背中を押してくれる人</span><span style="color:#c8920a">いる</span></div>
+<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span>🪞 良い点を客観視する人</span><span style="color:var(--color-text-tertiary)">いない</span></div>
+<div style="display:flex;justify-content:space-between;padding:3px 0"><span>🧠 専門的アドバイスの人</span><span style="color:var(--color-text-tertiary)">いない</span></div>
+</div>
+</div>
+</div>
+</div>
+
+</body>
+</html>

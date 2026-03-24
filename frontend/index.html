@@ -186,7 +186,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.8</span>
+      <span class="version" title="バージョン確認">v3.11.9</span>
     </div>
   </div>
 </div>
@@ -1753,10 +1753,10 @@
       <!-- 利用額バー（Step 7） -->
       <div id="plan-usage-bar" style="display:none;margin-bottom:16px;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;"></div>
 
-      <div style="display:flex;flex-direction:column;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;" id="plan-cards">
+      <div style="display:flex;flex-direction:row;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:8px;" id="plan-cards">
 
         <!-- Free -->
-        <div class="plan-card" id="pc-free" onclick="selectPlan('free')" style="padding:16px 18px;background:var(--bg3);border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;scroll-snap-align:center;min-width:0;">
+        <div class="plan-card" id="pc-free" onclick="selectPlan('free')" style="padding:16px 18px;background:var(--bg3);border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;scroll-snap-align:center;min-width:280px;flex-shrink:0;">
           <div style="font-size:10px;color:var(--muted2);margin-bottom:8px;font-style:italic;">まずは試してみる</div>
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <div><div style="font-size:13px;font-weight:500;color:var(--cream);">Free</div></div>
@@ -1771,7 +1771,7 @@
         </div>
 
         <!-- Light -->
-        <div class="plan-card" id="pc-light" onclick="selectPlan('light')" style="padding:16px 18px;background:var(--bg3);border:2px solid var(--border2);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;scroll-snap-align:center;min-width:0;">
+        <div class="plan-card" id="pc-light" onclick="selectPlan('light')" style="padding:16px 18px;background:var(--bg3);border:2px solid var(--border2);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;scroll-snap-align:center;min-width:280px;flex-shrink:0;">
           <div style="font-size:10px;color:var(--muted2);margin-bottom:8px;font-style:italic;">広告なしで3AI</div>
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <div><div style="font-size:13px;font-weight:500;color:var(--cream);">Light</div></div>
@@ -1786,7 +1786,7 @@
         </div>
 
         <!-- Pro -->
-        <div class="plan-card" id="pc-pro" onclick="selectPlan('pro')" style="padding:16px 18px;background:var(--amber-g);border:2px solid #c8920a;border-radius:12px;cursor:pointer;transition:all .15s;position:relative;scroll-snap-align:center;min-width:0;">
+        <div class="plan-card" id="pc-pro" onclick="selectPlan('pro')" style="padding:16px 18px;background:var(--amber-g);border:2px solid #c8920a;border-radius:12px;cursor:pointer;transition:all .15s;position:relative;scroll-snap-align:center;min-width:280px;flex-shrink:0;">
           <div style="position:absolute;top:-1px;right:14px;padding:3px 10px;background:var(--amber);border-radius:0 0 7px 7px;font-size:9px;font-weight:600;color:var(--bg);letter-spacing:.06em;font-family:var(--fm);">人気 No.1</div>
           <div style="font-size:10px;color:var(--amber);margin-bottom:8px;font-style:italic;opacity:.8;">ChatGPTと同じGPT-5が使える</div>
           <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -1804,7 +1804,7 @@
         </div>
 
         <!-- Max -->
-        <div class="plan-card" id="pc-max" onclick="selectPlan('max')" style="padding:16px 18px;background:linear-gradient(135deg,rgba(228,184,106,.14),rgba(157,120,216,.08));border:2px solid rgba(228,184,106,.9);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 0 24px rgba(228,184,106,.12);scroll-snap-align:center;min-width:0;">
+        <div class="plan-card" id="pc-max" onclick="selectPlan('max')" style="padding:16px 18px;background:linear-gradient(135deg,rgba(228,184,106,.14),rgba(157,120,216,.08));border:2px solid rgba(228,184,106,.9);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 0 24px rgba(228,184,106,.12);scroll-snap-align:center;min-width:280px;flex-shrink:0;">
           <div style="position:absolute;top:-1px;right:14px;padding:3px 10px;background:linear-gradient(90deg,#e4b86a,#d4a456);border-radius:0 0 7px 7px;font-size:9px;font-weight:600;color:var(--bg);letter-spacing:.06em;font-family:var(--fm);">最高品質</div>
           <div style="font-size:10px;color:var(--muted2);margin-bottom:8px;font-style:italic;">上位モデル+1ターン半額</div>
           <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -1820,7 +1820,7 @@
         </div>
 
         <!-- Ultra -->
-        <div class="plan-card" id="pc-ultra" onclick="selectPlan('ultra')" style="padding:16px 18px;background:linear-gradient(135deg,rgba(228,184,106,.2),rgba(157,120,216,.12));border:2px solid transparent;border-image:linear-gradient(135deg,#e4b86a,#BA55D3,#e4b86a) 1;border-radius:12px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 0 30px rgba(228,184,106,.15);scroll-snap-align:center;min-width:0;overflow:hidden;">
+        <div class="plan-card" id="pc-ultra" onclick="selectPlan('ultra')" style="padding:16px 18px;background:linear-gradient(135deg,rgba(228,184,106,.2),rgba(157,120,216,.12));border:2px solid transparent;border-image:linear-gradient(135deg,#e4b86a,#BA55D3,#e4b86a) 1;border-radius:12px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 0 30px rgba(228,184,106,.15);scroll-snap-align:center;min-width:280px;flex-shrink:0;overflow:hidden;">
           <div class="ultra-particles" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"><div style="position:absolute;width:3px;height:3px;background:var(--amber);border-radius:50%;top:20%;left:15%;animation:ultraFloat 3s ease-in-out infinite;opacity:.4;"></div><div style="position:absolute;width:2px;height:2px;background:#BA55D3;border-radius:50%;top:60%;left:75%;animation:ultraFloat 4s ease-in-out 1s infinite;opacity:.3;"></div><div style="position:absolute;width:2px;height:2px;background:var(--amber);border-radius:50%;top:40%;left:50%;animation:ultraFloat 3.5s ease-in-out .5s infinite;opacity:.35;"></div></div>
           <div style="position:absolute;top:-1px;right:14px;padding:3px 10px;background:linear-gradient(135deg,#e4b86a,#BA55D3);border-radius:0 0 7px 7px;font-size:9px;font-weight:700;color:#fff;letter-spacing:.06em;font-family:var(--fm);">UNLIMITED</div>
           <div style="font-size:10px;color:var(--amber);margin-bottom:8px;font-style:italic;opacity:.8;">全モデル使い放題+Extended Thinking</div>
@@ -1841,6 +1841,15 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- ドットインジケーター -->
+      <div id="plan-dots" style="display:flex;justify-content:center;gap:6px;padding:12px 0 4px;">
+        <div class="plan-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .2s;"></div>
+        <div class="plan-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .2s;"></div>
+        <div class="plan-dot active" style="width:16px;height:6px;border-radius:3px;background:var(--amber);transition:all .2s;"></div>
+        <div class="plan-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .2s;"></div>
+        <div class="plan-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .2s;"></div>
       </div>
 
       <!-- ChatGPT比較ボックス -->
