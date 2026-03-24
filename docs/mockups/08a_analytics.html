@@ -1,0 +1,151 @@
+  <!-- #08a 解析ダッシュボード -->
+  <div style="width: 390px; border-radius: 24px; overflow: hidden; border: 0.5px solid #333; background: #1a1a1a; color: #e8e8e8;">
+
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <span style="font-size: 17px; font-weight: 600;">解析</span>
+      </div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+
+    <div style="padding: 0 16px 24px; overflow-y: auto; max-height: 720px;">
+
+      <!-- ストリーク -->
+      <div style="background: rgba(200,146,10,0.08); border-radius: 14px; padding: 16px; margin-bottom: 16px; text-align: center;">
+        <div style="font-size: 32px; margin-bottom: 4px;">🔥</div>
+        <div style="font-size: 28px; font-weight: 700; color: #f5d380;">12日連続</div>
+        <div style="font-size: 12px; color: #888; margin-top: 4px;">最高記録 18日</div>
+      </div>
+
+      <!-- 統計3カード -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px;">
+        <div style="background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; text-align: center;">
+          <div style="font-size: 11px; color: #888; margin-bottom: 4px;">タスク完了率</div>
+          <div style="font-size: 22px; font-weight: 700; color: #f5d380;">73%</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; text-align: center;">
+          <div style="font-size: 11px; color: #888; margin-bottom: 4px;">完了タスク</div>
+          <div style="font-size: 22px; font-weight: 700; color: #e8e8e8;">22<span style="font-size: 13px; color: #888;">/30</span></div>
+        </div>
+        <div style="background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; text-align: center;">
+          <div style="font-size: 11px; color: #888; margin-bottom: 4px;">会話件数</div>
+          <div style="font-size: 22px; font-weight: 700; color: #e8e8e8;">156</div>
+        </div>
+      </div>
+
+      <!-- 月別チャート（2色バー + 期間切替） -->
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+          <span style="font-size: 13px; font-weight: 600; color: #bbb;">月別進捗</span>
+          <div style="display: flex; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <div style="width: 8px; height: 8px; border-radius: 2px; background: rgba(255,255,255,0.12);"></div>
+              <span style="font-size: 10px; color: #888;">全体</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <div style="width: 8px; height: 8px; border-radius: 2px; background: #c8920a;"></div>
+              <span style="font-size: 10px; color: #888;">達成</span>
+            </div>
+          </div>
+        </div>
+        <!-- 期間切替チップ -->
+        <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+          <div style="padding: 4px 10px; border-radius: 12px; background: rgba(200,146,10,0.15); border: 1px solid rgba(200,146,10,0.4); font-size: 11px; color: #c8920a;">3ヶ月</div>
+          <div style="padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); font-size: 11px; color: #666;">6ヶ月</div>
+          <div style="padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); font-size: 11px; color: #666;">12ヶ月</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 16px 12px;">
+          <div style="display: flex; align-items: flex-end; gap: 16px; height: 110px; justify-content: space-around;">
+            <!-- 1月: 8中5 -->
+            <div style="flex: 1; text-align: center;">
+              <div style="font-size: 10px; color: #888; margin-bottom: 6px;">5/8</div>
+              <div style="height: 60px; display: flex; align-items: flex-end; justify-content: center; gap: 3px;">
+                <div style="width: 14px; height: 60px; background: rgba(255,255,255,0.08); border-radius: 3px 3px 0 0;"></div>
+                <div style="width: 14px; height: 38px; background: rgba(200,146,10,0.6); border-radius: 3px 3px 0 0;"></div>
+              </div>
+              <div style="font-size: 10px; color: #888; margin-top: 6px;">1月</div>
+            </div>
+            <!-- 2月: 12中8 -->
+            <div style="flex: 1; text-align: center;">
+              <div style="font-size: 10px; color: #888; margin-bottom: 6px;">8/12</div>
+              <div style="height: 80px; display: flex; align-items: flex-end; justify-content: center; gap: 3px;">
+                <div style="width: 14px; height: 80px; background: rgba(255,255,255,0.08); border-radius: 3px 3px 0 0;"></div>
+                <div style="width: 14px; height: 53px; background: rgba(200,146,10,0.7); border-radius: 3px 3px 0 0;"></div>
+              </div>
+              <div style="font-size: 10px; color: #888; margin-top: 6px;">2月</div>
+            </div>
+            <!-- 3月: 10中9（好調） -->
+            <div style="flex: 1; text-align: center;">
+              <div style="font-size: 10px; color: #c8920a; font-weight: 600; margin-bottom: 6px;">9/10</div>
+              <div style="height: 70px; display: flex; align-items: flex-end; justify-content: center; gap: 3px;">
+                <div style="width: 14px; height: 70px; background: rgba(255,255,255,0.08); border-radius: 3px 3px 0 0;"></div>
+                <div style="width: 14px; height: 63px; background: linear-gradient(180deg, #f5d380, #c8920a); border-radius: 3px 3px 0 0;"></div>
+              </div>
+              <div style="font-size: 10px; color: #c8920a; font-weight: 600; margin-top: 6px;">3月</div>
+            </div>
+          </div>
+          <!-- タスク溜まりすぎ警告 -->
+          <div style="margin-top: 14px; padding: 10px 12px; background: rgba(239,159,39,0.08); border: 0.5px solid rgba(239,159,39,0.25); border-radius: 10px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1L1 14h14L8 1z" stroke="#ef9f27" stroke-width="1.2" stroke-linejoin="round"/><line x1="8" y1="6" x2="8" y2="9" stroke="#ef9f27" stroke-width="1.2" stroke-linecap="round"/><circle cx="8" cy="11.5" r="0.8" fill="#ef9f27"/></svg>
+              <span style="font-size: 12px; color: #ef9f27;">未完了タスクが溜まっています</span>
+            </div>
+            <span style="font-size: 11px; color: #c8920a; font-weight: 600; white-space: nowrap;">整理する →</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 停滞ポイント -->
+      <div style="margin-bottom: 20px;">
+        <div style="font-size: 13px; font-weight: 600; color: #bbb; margin-bottom: 10px;">停滞ポイント</div>
+        <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 12px;">
+          <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+            <div style="font-size: 11px; color: #666; min-width: 40px;">3/15</div>
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 13px; color: #ccc;">資料作成が進まない</span>
+                <span style="font-size: 10px; padding: 2px 8px; border-radius: 8px; background: rgba(224,112,112,0.15); color: #e07070; white-space: nowrap;">外部依存</span>
+              </div>
+            </div>
+          </div>
+          <div style="border-top: 0.5px solid rgba(255,255,255,0.06); padding-top: 10px;">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <div style="font-size: 11px; color: #666; min-width: 40px;">3/12</div>
+              <div style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 13px; color: #ccc;">朝のルーティンが崩れた</span>
+                <span style="font-size: 10px; padding: 2px 8px; border-radius: 8px; background: rgba(239,159,39,0.15); color: #ef9f27; white-space: nowrap;">体調</span>
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3AIディープ分析 -->
+      <div style="margin-bottom: 8px;">
+        <div style="font-size: 13px; font-weight: 600; color: #bbb; margin-bottom: 4px;">3人寄れば文殊の知恵</div>
+        <div style="font-size: 11px; color: #888; margin-bottom: 12px;">3つのAIが多角的にあなたの活動を分析します</div>
+        <div style="background: rgba(200,146,10,0.06); border: 1px solid rgba(200,146,10,0.2); border-radius: 14px; padding: 16px; text-align: center;">
+          <div style="display: flex; justify-content: center; gap: 16px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: #e07070;"></div>
+              <span style="font-size: 11px; color: #999;">Gemini</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: #5b8def;"></div>
+              <span style="font-size: 11px; color: #999;">ChatGPT</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: #e8913a;"></div>
+              <span style="font-size: 11px; color: #999;">Claude</span>
+            </div>
+          </div>
+          <div style="display: inline-block; background: linear-gradient(135deg, #c8920a, #f5d380); color: #1a1a1a; font-size: 14px; font-weight: 600; padding: 10px 24px; border-radius: 20px;">ヒアリング開始</div>
+          <div style="font-size: 11px; color: #888; margin-top: 8px;">残り 2回 / 3回</div>
+        </div>
+      </div>
+
+    </div>
+  </div>

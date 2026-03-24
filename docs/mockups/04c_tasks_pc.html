@@ -1,0 +1,101 @@
+<svg width="0" height="0"><defs><linearGradient id="crown" x1="6" y1="6" x2="26" y2="24"><stop stop-color="#c8920a"/><stop offset="1" stop-color="#f5d380"/></linearGradient></defs></svg>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.pc{width:100%;max-width:800px;margin:0 auto;border-radius:10px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);overflow:hidden}
+.pc-hd{padding:7px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:8px}
+.pc-ham{width:14px;display:flex;flex-direction:column;gap:2px}.pc-ham span{height:1.5px;background:var(--color-text-primary);border-radius:1px}
+.pc-t{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.pc-cnt{font-size:8px;color:var(--color-text-secondary);margin-left:auto}
+.pc-sort{font-size:7px;color:#c8920a;display:flex;align-items:center;gap:2px}
+.pc-sort svg{width:10px;height:10px;stroke:#c8920a;fill:none;stroke-width:1.5}
+.pc-add{font-size:8px;color:#c8920a;cursor:pointer;margin-left:8px;display:flex;align-items:center;gap:2px}
+.pc-add svg{width:10px;height:10px;stroke:#c8920a;fill:none;stroke-width:2}
+.vtabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);padding:0 16px}
+.vt{padding:6px 10px;font-size:8px;color:var(--color-text-secondary);cursor:pointer;position:relative;white-space:nowrap}
+.vt.on{color:#c8920a;font-weight:500}
+.vt.on::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2px;border-radius:1px;background:linear-gradient(90deg,#c8920a,#f5d380)}
+.frow{display:flex;gap:3px;padding:5px 16px;align-items:center}
+.fb{font-size:7px;padding:2px 8px;border-radius:10px;border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)}.fb.on{background:rgba(200,146,10,0.1);color:#c8920a;border-color:rgba(200,146,10,0.3)}
+.pc-body{display:grid;grid-template-columns:40fr 60fr;min-height:340px}
+.pc-left{border-right:0.5px solid var(--color-border-tertiary);padding:6px 12px;overflow-y:auto;max-height:340px}
+.pc-right{padding:8px 12px;display:flex;flex-direction:column}
+.tg{font-size:9px;font-weight:600;color:var(--color-text-primary);padding:5px 0 2px;display:flex;align-items:center;gap:4px}
+.tg-i{font-size:10px}
+.tg-p{width:28px;height:3px;border-radius:2px;background:var(--color-border-tertiary);margin-left:auto;overflow:hidden}
+.tg-pf{height:100%;border-radius:2px;background:linear-gradient(90deg,#c8920a,#f5d380)}
+.tc{display:flex;align-items:center;gap:4px;padding:4px 4px;border-radius:4px;cursor:pointer;margin:0 0 1px;font-size:8px}
+.tc:hover{background:var(--color-background-secondary)}
+.tc.sel{background:var(--color-background-secondary);border:0.5px solid rgba(200,146,10,0.4)}
+.tc.od{border:0.5px solid rgba(226,75,74,0.2);background:rgba(226,75,74,0.02)}
+.tch{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--color-border-secondary);flex-shrink:0}
+.tch.dn{background:var(--color-border-secondary);border-color:transparent;display:flex;align-items:center;justify-content:center}
+.tch.dn::after{content:'';width:4px;height:2.5px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg);display:block;margin-top:-1px}
+.tt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--color-text-primary)}
+.tt.done{text-decoration:line-through;color:var(--color-text-tertiary)}
+.tw{font-size:6px;padding:1px 3px;border-radius:2px}
+.twr{background:rgba(226,75,74,0.1);color:#e24b4a}.twy{background:rgba(239,159,39,0.1);color:#ef9f27}.twg{background:rgba(29,158,117,0.1);color:#1d9e75}
+.td{font-size:6px;color:var(--color-text-tertiary);margin-left:auto;flex-shrink:0}
+.tdo{color:#e24b4a;font-weight:500}
+.tai{font-size:6px;color:#c8920a}
+.dt-row{display:flex;align-items:center;gap:6px;margin:0 0 5px}
+.dt{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.ds-s{padding:2px 6px;border-radius:4px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:7px}
+.dm{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 6px}
+.dmc{font-size:7px;padding:2px 6px;border-radius:5px;background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.dmc-g{color:#c8920a}.dmc-d{color:#e24b4a}
+.cl{font-size:8px;font-weight:500;color:var(--color-text-primary);margin:0 0 3px}
+.chat-box{border-radius:6px;background:var(--color-background-secondary);padding:6px;flex:1;min-height:120px}
+.cm{display:flex;gap:4px;padding:3px 0;font-size:8px;line-height:1.5}
+.cm-av{width:12px;height:12px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.cm-av-ai{background:linear-gradient(135deg,#c8920a33,#f5d38066)}.cm-av-ai svg{width:8px;height:8px}
+.cm-av-u{background:var(--color-background-info);font-size:5px;font-weight:500;color:var(--color-text-info)}
+.cm-n{font-size:6px;font-weight:500;margin-bottom:1px}
+.cm-n-ai{color:#e8913a}.cm-n-u{color:var(--color-text-secondary)}
+.cm-b{color:var(--color-text-secondary)}
+.bottom-area{margin-top:auto;flex-shrink:0}
+.qa{display:flex;gap:3px;margin:0 0 5px;flex-wrap:wrap}
+.qa-b{font-size:7px;padding:3px 7px;border-radius:4px;border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary);cursor:pointer}
+.ci{display:flex;gap:3px;align-items:center;padding:6px 8px;border-radius:12px;border:0.5px solid rgba(200,146,10,0.3);background:var(--color-background-secondary)}
+.ci-text{flex:1;font-size:8px;color:var(--color-text-tertiary)}
+.ci-btn{width:22px;height:22px;border-radius:50%;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ci-btn svg{width:10px;height:10px;stroke:var(--color-text-secondary);fill:none;stroke-width:1.5}
+.ci-send{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#c8920a,#f5d380);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ci-send svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2}
+</style>
+
+<div class="pc">
+<div class="pc-hd"><div class="pc-ham"><span></span><span></span><span></span></div><div class="pc-t">タスク</div><div class="pc-cnt">3/8 完了</div><div class="pc-sort"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h12M3 18h6"/></svg>重み順</div><div class="pc-add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>タスク追加</div></div>
+<div class="vtabs"><div class="vt on">ゴール別</div><div class="vt">今日</div><div class="vt">3日間</div><div class="vt">今週</div><div class="vt">ガント</div></div>
+<div class="frow"><span class="fb on">すべて</span><span class="fb">ライフ</span><span class="fb">ゴール</span><span class="fb">進行中</span><span class="fb">完了</span></div>
+<div class="pc-body">
+<div class="pc-left">
+<div class="tg">ライフタスク</div>
+<div class="tc od"><div class="tch"></div><div class="tt" style="color:#e24b4a">レポート提出</div><span class="tw twr">重要</span><span class="td tdo">期限切れ</span></div>
+<div class="tc"><div class="tch"></div><div class="tt">ジム予約</div><span class="tw twy">普通</span><span class="td">—</span></div>
+<div class="tc"><div class="tch dn"></div><div class="tt done">スーパーで買い物</div><span class="tw twg">軽い</span><span class="td">—</span></div>
+<div class="tg"><span class="tg-i">🎬</span>YouTube 10万人<div class="tg-p"><div class="tg-pf" style="width:65%"></div></div></div>
+<div class="tc sel"><div class="tch"></div><div class="tt">動画編集（3本目）</div><span class="tai">✨</span><span class="tw twr">重要</span><span class="td">〆3/20</span></div>
+<div class="tc"><div class="tch"></div><div class="tt">SEOリサーチ</div><span class="tw twy">普通</span><span class="td">〆3/25</span></div>
+<div class="tc od"><div class="tch"></div><div class="tt">コラボ企画連絡</div><span class="tw twy">普通</span><span class="td tdo">期限切れ</span></div>
+<div class="tc"><div class="tch dn"></div><div class="tt done">サムネイル作成</div><span class="tw twr">重要</span><span class="td">—</span></div>
+<div class="tg"><span class="tg-i">💪</span>フルマラソン完走<div class="tg-p"><div class="tg-pf" style="width:30%"></div></div></div>
+<div class="tc"><div class="tch"></div><div class="tt">5kmラン</div><span class="tw twy">普通</span><span class="td">—</span></div>
+</div>
+<div class="pc-right">
+<div class="dt-row"><div class="dt">動画編集（3本目）</div><span class="ds-s">進行中 ▾</span><span class="tw twr">重要</span></div>
+<div class="dm"><span class="dmc dmc-g">🎬 YouTube 10万人</span><span class="dmc dmc-d">〆 3/20</span><span class="dmc">✨ AI提案</span></div>
+<div class="cl">タスクチャット</div>
+<div class="chat-box">
+<div class="cm"><div class="cm-av cm-av-ai"><svg viewBox="0 0 32 32"><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown)"/></svg></div><div><div class="cm-n cm-n-ai">Claude</div><div class="cm-b">カット編集を先に終わらせてからテロップ→BGMの順が王道です。</div></div></div>
+<div class="cm"><div class="cm-av cm-av-u">F</div><div><div class="cm-n cm-n-u">You</div><div class="cm-b">BGMの選び方は？</div></div></div>
+<div class="cm"><div class="cm-av cm-av-ai"><svg viewBox="0 0 32 32"><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown)"/></svg></div><div><div class="cm-n cm-n-ai">Claude</div><div class="cm-b">Artlist、Epidemic Sound、甘茶の音楽工房が定番。</div></div></div>
+<div class="cm"><div class="cm-av cm-av-u">F</div><div><div class="cm-n cm-n-u">You</div><div class="cm-b">テロップの目安は？</div></div></div>
+<div class="cm"><div class="cm-av cm-av-ai"><svg viewBox="0 0 32 32"><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown)"/></svg></div><div><div class="cm-n cm-n-ai">Claude</div><div class="cm-b">1分あたり3〜5カットが目安。強調箇所だけに絞ると見やすい。</div></div></div>
+</div>
+<div class="bottom-area">
+<div class="qa"><div class="qa-b">進め方を聞く</div><div class="qa-b">詰まっている</div><div class="qa-b">30分でできること</div><div class="qa-b">完了報告</div></div>
+<div class="ci"><span class="ci-text">このタスクについて質問...</span><div class="ci-btn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div><div class="ci-btn"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg></div><div class="ci-send"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></div></div>
+</div>
+</div>
+</div>
+</div>
