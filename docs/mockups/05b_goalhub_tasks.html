@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#05b #05d GoalHub Review</title>
+<style>
+:root{
+--color-background-primary:#141420;
+--color-background-secondary:#1a1a2e;
+--color-background-info:#2a3a5c;
+--color-text-primary:#e8e8e8;
+--color-text-secondary:#888;
+--color-text-tertiary:#555;
+--color-text-info:#8ab4f8;
+--color-border-tertiary:#2a2a3e;
+--color-border-secondary:#444;
+}
+body{background:#0e0e18;padding:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+.phones{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:8px 0;max-width:720px;margin:0 auto}
+.phone{width:100%;max-width:340px;margin:0 auto;border-radius:18px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);overflow:hidden;height:720px;display:flex;flex-direction:column;position:relative}
+.slabel{font-size:12px;font-weight:500;color:var(--color-text-secondary);text-align:center;margin:0 0 8px}
+.snum{display:inline-block;font-size:9px;font-weight:600;color:#fff;background:#c8920a;padding:1px 6px;border-radius:4px;margin-right:4px}
+.ph-s{height:20px;padding:4px 14px;display:flex;align-items:center;justify-content:space-between;font-size:9px;color:var(--color-text-tertiary)}
+
+/* Hub header (v3 style) */
+.hub-hd{padding:8px 14px;border-bottom:0.5px solid var(--color-border-tertiary);flex-shrink:0}
+.hub-top{display:flex;align-items:center;gap:6px;margin:0 0 5px}
+.hub-back{font-size:10px;color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;gap:3px}
+.hub-back svg{width:12px;height:12px;stroke:var(--color-text-secondary);fill:none;stroke-width:1.5}
+.hub-title{font-size:13px;font-weight:500;color:var(--color-text-primary);flex:1}
+.hub-icon{font-size:14px;margin-right:2px}
+.hub-share{width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.hub-share svg{width:14px;height:14px;stroke:var(--color-text-secondary);fill:none;stroke-width:1.5}
+.hub-prog{display:flex;align-items:center;gap:6px}
+.hub-bar{flex:1;height:4px;border-radius:2px;background:var(--color-border-tertiary);position:relative}
+.hub-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#c8920a,#f5d380)}
+.hub-bar-target{position:absolute;top:-1px;width:2px;height:6px;background:#e24b4a;border-radius:1px}
+.hub-status{display:flex;justify-content:flex-end;align-items:center;gap:4px;font-size:7px;color:var(--color-text-secondary);margin-top:2px}
+.hub-status .warn{color:#e24b4a;font-weight:500}
+
+/* Tabs */
+.hub-tabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);flex-shrink:0;padding:0 14px}
+.ht{padding:7px 10px;font-size:9px;color:var(--color-text-secondary);cursor:pointer;position:relative;white-space:nowrap}
+.ht.on{color:#c8920a;font-weight:500}
+.ht.on::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2px;border-radius:1px;background:linear-gradient(90deg,#c8920a,#f5d380)}
+.hub-body{flex:1;overflow-y:auto;padding:8px 14px}
+.sec-t{font-size:10px;font-weight:500;color:var(--color-text-primary);margin:10px 0 5px}
+.sec-t:first-child{margin-top:2px}
+
+/* ===== #05b TASKS ===== */
+.phase{margin:10px 0 4px;display:flex;align-items:center;gap:6px}
+.phase:first-child{margin-top:2px}
+.phase-name{font-size:11px;font-weight:500;color:var(--color-text-primary)}
+.phase-count{font-size:8px;color:var(--color-text-secondary);margin-left:auto}
+.phase-bar{width:100%;height:3px;border-radius:2px;background:var(--color-border-tertiary);margin:2px 0 4px;overflow:hidden}
+.phase-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#c8920a,#f5d380)}
+.tc{display:flex;align-items:center;gap:5px;padding:6px 2px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.tc:last-child{border:none}
+.tch{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--color-border-secondary);flex-shrink:0}
+.tch.done{background:var(--color-border-secondary);border-color:transparent;position:relative;display:flex;align-items:center;justify-content:center}
+.tch.done::after{content:'';width:5px;height:3px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg);display:block;margin-top:-1px}
+.tt{font-size:10px;color:var(--color-text-primary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tt.dn{text-decoration:line-through;color:var(--color-text-tertiary)}
+.tw{font-size:7px;padding:1px 4px;border-radius:3px}
+.twr{background:rgba(226,75,74,0.1);color:#e24b4a}
+.twy{background:rgba(239,159,39,0.1);color:#ef9f27}
+.twg{background:rgba(29,158,117,0.1);color:#1d9e75}
+.tai{font-size:7px;color:#c8920a}
+.td{font-size:7px;color:var(--color-text-tertiary)}
+.tdo{color:#e24b4a;font-weight:500}
+.ai-suggest{padding:10px 12px;border-radius:8px;background:rgba(200,146,10,0.04);border:0.5px solid rgba(200,146,10,0.2);margin:10px 0}
+.ai-suggest-head{font-size:9px;font-weight:500;color:#c8920a;margin:0 0 6px;display:flex;align-items:center;gap:4px}
+.ai-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:9px}
+.ai-row:last-child{border:none}
+.ai-row-name{color:var(--color-text-primary)}
+.ai-row-add{color:#c8920a;font-size:8px;cursor:pointer}
+.add-task{padding:8px 0;font-size:10px;color:#c8920a;cursor:pointer;display:flex;align-items:center;gap:4px}
+
+/* ===== #05d MEMO ===== */
+.ai-memo-card{padding:8px 10px;border-radius:8px;background:rgba(200,146,10,0.04);border:0.5px solid rgba(200,146,10,0.2);margin:0 0 10px;font-size:9px;color:var(--color-text-secondary);line-height:1.5}
+.ai-memo-head{font-size:9px;font-weight:500;color:#c8920a;margin:0 0 3px;display:flex;justify-content:space-between}
+.ai-memo-date{font-size:7px;color:var(--color-text-tertiary)}
+.memo-group-title{font-size:12px;font-weight:600;color:var(--color-text-primary);margin:12px 0 6px}
+.memo-group-title:first-child{margin-top:4px}
+.memo-group{border-radius:10px;background:var(--color-background-secondary);overflow:hidden;margin:0 0 12px}
+.memo-item{padding:10px 12px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer}
+.memo-item:last-child{border:none}
+.memo-item-title{font-size:10px;font-weight:500;color:var(--color-text-primary);margin:0 0 2px}
+.memo-item-sub{font-size:8px;color:var(--color-text-tertiary);display:flex;gap:6px}
+.memo-item-date{color:var(--color-text-tertiary)}
+.memo-item-preview{color:var(--color-text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.memo-fab{position:absolute;bottom:14px;right:14px;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#c8920a,#f5d380);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(200,146,10,0.3);z-index:10}
+.memo-fab svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.5}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+<defs><linearGradient id="crown" x1="6" y1="6" x2="26" y2="24" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs>
+</svg>
+
+<div class="phones">
+
+<!-- ======================== -->
+<!-- #05b: タスク              -->
+<!-- ======================== -->
+<div>
+<p class="slabel"><span class="snum">#05b</span>ゴールハブ — タスク</p>
+<div class="phone">
+<div class="ph-s"><span>9:41</span><span>···</span></div>
+<div class="hub-hd">
+<div class="hub-top">
+<div class="hub-back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>戻る</div>
+<span class="hub-icon">🎬</span>
+<div class="hub-title">YouTube 10万人</div>
+<div class="hub-share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+</div>
+<div class="hub-prog"><div class="hub-bar"><div class="hub-bar-fill" style="width:65%"></div><div class="hub-bar-target" style="left:72%"></div></div></div>
+<div class="hub-status"><span class="warn">⚠ やや遅延</span><span>（実績65% / 予定72%）</span></div>
+</div>
+<div class="hub-tabs"><div class="ht">チャット</div><div class="ht on">タスク</div><div class="ht">分析</div><div class="ht">メモ</div><div class="ht">設定</div></div>
+<div class="hub-body">
+
+<!-- Phase 1 -->
+<div class="phase"><span class="phase-name">Phase 1: 基盤づくり</span><span class="phase-count">3/4</span></div>
+<div class="phase-bar"><div class="phase-bar-fill" style="width:75%"></div></div>
+<div class="tc"><div class="tch done"></div><div class="tt dn">チャンネル設計</div><span class="tw twg">軽い</span></div>
+<div class="tc"><div class="tch done"></div><div class="tt dn">ロゴ・バナー作成</div><span class="tw twy">普通</span></div>
+<div class="tc"><div class="tch done"></div><div class="tt dn">初投稿3本アップ</div><span class="tw twr">重要</span></div>
+<div class="tc"><div class="tch"></div><div class="tt">SEOキーワード調査</div><span class="tai">✨</span><span class="tw twy">普通</span><span class="td">〆3/25</span></div>
+
+<!-- Phase 2 -->
+<div class="phase"><span class="phase-name">Phase 2: 成長期</span><span class="phase-count">1/5</span></div>
+<div class="phase-bar"><div class="phase-bar-fill" style="width:20%"></div></div>
+<div class="tc"><div class="tch done"></div><div class="tt dn">サムネイル作成</div><span class="tw twr">重要</span></div>
+<div class="tc"><div class="tch"></div><div class="tt">動画編集（3本目）</div><span class="tai">✨</span><span class="tw twr">重要</span><span class="td">〆3/20</span></div>
+<div class="tc"><div class="tch"></div><div class="tt">SEOリサーチ</div><span class="tw twy">普通</span><span class="td">〆3/25</span></div>
+<div class="tc"><div class="tch"></div><div class="tt">コラボ企画連絡</div><span class="tw twy">普通</span><span class="td tdo">期限切れ</span></div>
+<div class="tc"><div class="tch"></div><div class="tt">週2投稿ルーティン化</div><span class="tw twy">普通</span><span class="td">—</span></div>
+
+<!-- Phase 3 -->
+<div class="phase"><span class="phase-name">Phase 3: 収益化</span><span class="phase-count">0/3</span></div>
+<div class="phase-bar"><div class="phase-bar-fill" style="width:0%"></div></div>
+<div class="tc"><div class="tch"></div><div class="tt">収益化申請（1000人/4000h）</div><span class="tw twr">重要</span></div>
+<div class="tc"><div class="tch"></div><div class="tt">スポンサー営業リスト</div><span class="tw twy">普通</span></div>
+
+<!-- AI Suggest -->
+<div class="ai-suggest">
+<div class="ai-suggest-head"><svg viewBox="0 0 32 32" width="12" height="12"><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown)"/></svg> AIが提案するタスク</div>
+<div class="ai-row"><span class="ai-row-name">ショート動画を3本投稿</span><span class="ai-row-add">＋ 追加</span></div>
+<div class="ai-row"><span class="ai-row-name">競合チャンネル分析</span><span class="ai-row-add">＋ 追加</span></div>
+</div>
+
+<div class="add-task">＋ タスクを追加</div>
+</div>
+</div>
+</div>
+
+<!-- ======================== -->
+<!-- #05d: メモ                -->
+<!-- ======================== -->
+<div>
+<p class="slabel"><span class="snum">#05d</span>ゴールハブ — メモ</p>
+<div class="phone">
+<div class="ph-s"><span>9:41</span><span>···</span></div>
+<div class="hub-hd">
+<div class="hub-top">
+<div class="hub-back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>戻る</div>
+<span class="hub-icon">🎬</span>
+<div class="hub-title">YouTube 10万人</div>
+<div class="hub-share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+</div>
+<div class="hub-prog"><div class="hub-bar"><div class="hub-bar-fill" style="width:65%"></div><div class="hub-bar-target" style="left:72%"></div></div></div>
+<div class="hub-status"><span class="warn">⚠ やや遅延</span><span>（実績65% / 予定72%）</span></div>
+</div>
+<div class="hub-tabs"><div class="ht">チャット</div><div class="ht">タスク</div><div class="ht">分析</div><div class="ht on">メモ</div><div class="ht">設定</div></div>
+<div class="hub-body">
+
+<!-- AI memo -->
+<div class="sec-t" style="margin-top:2px">AIの理解メモ</div>
+<div class="ai-memo-card">
+<div class="ai-memo-head">ゴール用メモ<span class="ai-memo-date">3/18 更新</span></div>
+- 独立がゴール背景<br>
+- 週2投稿にコミット<br>
+- コラボに苦手意識あり<br>
+- サムネイル改善意欲が高い
+</div>
+
+<!-- User memos -->
+<div class="sec-t">自分のメモ</div>
+
+<div class="memo-group-title">今日</div>
+<div class="memo-group">
+<div class="memo-item">
+<div class="memo-item-title">サムネイルCTR改善案</div>
+<div class="memo-item-sub"><span class="memo-item-date">14:30</span><span class="memo-item-preview">文字を大きく・顔出し・コントラスト強く</span></div>
+</div>
+</div>
+
+<div class="memo-group-title">過去7日間</div>
+<div class="memo-group">
+<div class="memo-item">
+<div class="memo-item-title">企画アイデア</div>
+<div class="memo-item-sub"><span class="memo-item-date">3/15</span><span class="memo-item-preview">視聴者参加型の投票企画をやる</span></div>
+</div>
+<div class="memo-item">
+<div class="memo-item-title">参考チャンネル</div>
+<div class="memo-item-sub"><span class="memo-item-date">3/14</span><span class="memo-item-preview">@CreatorA の編集スタイルを研究</span></div>
+</div>
+</div>
+
+<div class="memo-group-title">過去30日間</div>
+<div class="memo-group">
+<div class="memo-item">
+<div class="memo-item-title">コラボ候補リスト</div>
+<div class="memo-item-sub"><span class="memo-item-date">3/2</span><span class="memo-item-preview">@ChannelB @ChannelC に連絡する</span></div>
+</div>
+<div class="memo-item">
+<div class="memo-item-title">収益化までのロードマップ</div>
+<div class="memo-item-sub"><span class="memo-item-date">2/28</span><span class="memo-item-preview">1000人→4000h→申請→承認まで</span></div>
+</div>
+</div>
+</div>
+
+<!-- FAB -->
+<div class="memo-fab"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+</div>
+</div>
+
+</div>
+</body>
+</html>

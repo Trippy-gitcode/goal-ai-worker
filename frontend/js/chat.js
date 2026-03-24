@@ -1943,7 +1943,7 @@ function openFeedbackChat(){
   // クイック返信ピル（#08b）
   const pills = document.createElement('div');
   pills.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;';
-  ['使いやすかった','改善してほしい','新機能リクエスト','バグ報告'].forEach(label => {
+  ['使いやすかった','改善してほしい点がある','新機能のリクエスト','バグを見つけた'].forEach(label => {
     const btn = document.createElement('button');
     btn.style.cssText = 'padding:6px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--pill-radius);color:var(--cream);font-size:11px;cursor:pointer;font-family:var(--ff);transition:all .15s;';
     btn.textContent = label;

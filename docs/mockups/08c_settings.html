@@ -1,0 +1,125 @@
+  <!-- #08c 設定パネル -->
+  <div style="width: 390px; border-radius: 24px; overflow: hidden; border: 0.5px solid #333; background: #1a1a1a; color: #e8e8e8;">
+
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <span style="font-size: 17px; font-weight: 600;">設定</span>
+      </div>
+    </div>
+
+    <div style="padding: 0 16px 24px; overflow-y: auto; max-height: 760px;">
+
+      <!-- プラン -->
+      <div style="background: rgba(200,146,10,0.08); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <div>
+            <div style="font-size: 11px; color: #888;">現在のプラン</div>
+            <div style="font-size: 32px; font-weight: 700; color: #f5d380; line-height: 1.2;">Pro</div>
+          </div>
+          <div style="font-size: 13px; color: #c8920a; font-weight: 600;">プラン変更 →</div>
+        </div>
+        <div style="font-size: 12px; color: #888; line-height: 1.5; padding-top: 6px; border-top: 0.5px solid rgba(255,255,255,0.06);">Premiumにすると、Claude Opus 4.6・GPT-5・Gemini 2.5 Proの上位モデルが使えます</div>
+      </div>
+
+      <!-- テーマ -->
+      <div style="margin-bottom: 20px;">
+        <div style="font-size: 13px; font-weight: 600; color: #bbb; margin-bottom: 12px;">テーマ</div>
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <div style="flex: 1; height: 44px; border-radius: 10px; background: #1a1a1a; border: 1.5px solid #c8920a; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #f5d380;">ダーク</div>
+          <div style="flex: 1; height: 44px; border-radius: 10px; background: #f5f5f0; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #333;">ライト</div>
+          <div style="flex: 1; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #ff9ec6, #ffd700, #7effdb); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #333; font-weight: 600;">ハラジュク</div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
+          <span style="font-size: 13px; color: #ccc;">システムに追従</span>
+          <div style="width: 44px; height: 24px; border-radius: 12px; background: #c8920a; position: relative;">
+            <div style="width: 20px; height: 20px; border-radius: 50%; background: white; position: absolute; top: 2px; right: 2px;"></div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 0.5px solid rgba(255,255,255,0.06);">
+          <div>
+            <span style="font-size: 13px; color: #ccc;">グラスモード</span>
+            <div style="font-size: 11px; color: #888;">背景を半透明ガラス風に</div>
+          </div>
+          <div style="width: 44px; height: 24px; border-radius: 12px; background: rgba(255,255,255,0.15); position: relative;">
+            <div style="width: 20px; height: 20px; border-radius: 50%; background: #888; position: absolute; top: 2px; left: 2px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 文字サイズ -->
+      <div style="margin-bottom: 4px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 0.5px solid rgba(255,255,255,0.06);">
+          <span style="font-size: 13px; color: #ccc;">文字サイズ</span>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 11px; color: #888;">小</span>
+            <div style="width: 80px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); position: relative;">
+              <div style="width: 40px; height: 4px; border-radius: 2px; background: #c8920a;"></div>
+              <div style="width: 14px; height: 14px; border-radius: 50%; background: #f5d380; position: absolute; top: -5px; left: 33px;"></div>
+            </div>
+            <span style="font-size: 15px; color: #888;">大</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 位置情報 -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 0.5px solid rgba(255,255,255,0.06);">
+        <div>
+          <div style="font-size: 13px; color: #ccc;">位置情報</div>
+          <div style="font-size: 11px; color: #888;">天気やローカル情報に使用</div>
+        </div>
+        <div style="width: 44px; height: 24px; border-radius: 12px; background: rgba(255,255,255,0.15); position: relative;">
+          <div style="width: 20px; height: 20px; border-radius: 50%; background: #888; position: absolute; top: 2px; left: 2px;"></div>
+        </div>
+      </div>
+
+      <!-- 通知 -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 0.5px solid rgba(255,255,255,0.06);">
+        <div>
+          <div style="font-size: 13px; color: #ccc;">通知</div>
+          <div style="font-size: 11px; color: #888;">リマインダー・レビュー通知</div>
+        </div>
+        <div style="width: 44px; height: 24px; border-radius: 12px; background: #c8920a; position: relative;">
+          <div style="width: 20px; height: 20px; border-radius: 50%; background: white; position: absolute; top: 2px; right: 2px;"></div>
+        </div>
+      </div>
+
+      <!-- 言語 -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 0.5px solid rgba(255,255,255,0.06);">
+        <span style="font-size: 13px; color: #ccc;">言語</span>
+        <span style="font-size: 13px; color: #888;">日本語 ▾</span>
+      </div>
+
+      <!-- データ管理 -->
+      <div style="padding: 12px 0; border-top: 0.5px solid rgba(255,255,255,0.06);">
+        <div style="font-size: 13px; color: #ccc; margin-bottom: 8px;">データ管理</div>
+        <div style="display: flex; gap: 8px;">
+          <div style="padding: 8px 14px; border-radius: 10px; border: 0.5px solid rgba(255,255,255,0.12); font-size: 12px; color: #999;">会話履歴を削除</div>
+          <div style="padding: 8px 14px; border-radius: 10px; border: 0.5px solid rgba(224,112,112,0.3); font-size: 12px; color: #e07070;">アカウント削除</div>
+        </div>
+      </div>
+
+      <!-- 友達紹介 -->
+      <div style="padding: 12px 0; border-top: 0.5px solid rgba(255,255,255,0.06);">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 13px; color: #ccc;">友達紹介</div>
+            <div style="font-size: 11px; color: #888;">紹介でPro 1ヶ月無料</div>
+          </div>
+          <div style="font-size: 13px; color: #c8920a; font-weight: 600;">コードをコピー</div>
+        </div>
+      </div>
+
+      <!-- プロモコード -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 0.5px solid rgba(255,255,255,0.06);">
+        <span style="font-size: 13px; color: #ccc;">プロモコード</span>
+        <span style="font-size: 13px; color: #c8920a;">入力する →</span>
+      </div>
+
+      <!-- バージョン -->
+      <div style="padding: 12px 0; border-top: 0.5px solid rgba(255,255,255,0.06); text-align: center;">
+        <span style="font-size: 11px; color: #555;">GOAL AI v3.9.2</span>
+      </div>
+
+    </div>
+  </div>
