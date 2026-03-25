@@ -6,18 +6,79 @@
 ---
 
 ## 5行サマリー
-- **Version:** v3.11.10
-- **Next:** A2→A4→A5→A3→B1-B5 mockup準拠デザイン修正9件
-- **Last done:** A1 ホーム画面 mockupレイアウト変更+C16全10ファクター再検証 完了（v3.11.10）。ふとし承認済み
+- **Version:** v3.11.11（デプロイ待ち）
+- **Next:** ふとしのs0_確認 → sa_確認 → デプロイ
+- **Last done:** Stage 0 s0_画像8枚生成完了。全mockupが新規作成のため左側は「NEW FILE」表示
 - **Open issues:** なし
 - **Proposals:** 10件（提案ログ参照）
 
 ## 現在地
-- **バージョン:** v3.11.10
-- **チェーン:** A2→A4→A5→A3→B1-B5 → テスト配布
-- **次のミッション:** A2 ビジョン mockup更新
+- **バージョン:** v3.11.11（デプロイ待ち）
+- **チェーン:** ふとしs0_承認 → sa_確認 → ふとし承認 → デプロイ → sb_ → テスト配布
+- **次のミッション:** ふとしのs0_+sa_承認待ち → デプロイ
 
 ## ミッションキュー（上から順に実行）
+
+### Stage 0: mockup更新前後比較画像生成 ✅完了（2026-03-25）
+> 目的: 全画面のmockup更新前後の比較画像（s0_）を生成し、ふとしの承認を得る
+> リスク: 🟢低（画像生成のみ。コード変更なし）
+
+**結果:** git履歴調査の結果、全8画面のmockup HTMLは当バッチで**新規作成**（更新前バージョンなし）。
+s0_画像は左="NEW FILE（更新前なし）" / 右="現在のmockup" で8枚生成。
+
+**生成ファイル:** `docs/mockups/screenshots/s0_{画面ID}_diff.png` × 8枚
+**ふとし確認待ち:** Finderで `docs/mockups/screenshots/` を開いて `s0_*_diff.png` + `sa_*_compare.png` を確認
+
+---
+
+### mockup文字化け修正+compare画像再生成+リネーム ✅完了（2026-03-25）
+> 目的: 6画面のmockup HTML文字化けを修正し、全8画面のcompare画像を再生成する。ファイル命名規則を新ルールに統一
+> リスク: 🟢低（HTMLのcharset修正+画像再生成のみ）
+
+**原因:** 6画面のmockup HTMLはフラグメント（DOCTYPE/charset宣言なし）。Playwrightが直接読み込むとcharset未指定で文字化け
+**修正:** `scripts/c16_stage_a.js` を更新。フラグメントHTMLは `_viewer.html?f=ファイル名` 経由で読み込み（_viewer.htmlにcharset=UTF-8あり）。mockup原本は変更なし
+**結果:** 全8画面の `sa_{画面ID}_compare.png` を文字化けなしで再生成。旧命名ファイル削除済み
+
+**ふとし確認待ち:** Finderで `docs/mockups/screenshots/` を開いて `sa_*_compare.png` 8枚を確認 → 承認後デプロイ
+
+---
+
+### C16 Stage A一括検証 ✅Stage A PASS（2026-03-25）
+> 目的: A2-A5/B1-B5の全8画面に対しC16 Stage A（localhost比較）を実施。A1は検証済みのためスキップ
+> リスク: 🟡中（差分発見時は修正→再検証ループ）
+> 参照: development_rules.md C16（2段階検証 Stage A/B）
+
+**検証方法:**
+1. mockup配信: `python3 -m http.server 8765` (docs/mockups/)
+2. 実装配信: `npx vite preview --port 4173` (frontend-dist/)
+3. Playwrightで全8画面のスクショを自動撮影（scripts/c16_stage_a.js）
+4. mockup/実装の横並びcompare画像を自動生成
+5. 全38構造要素のコードgrep確認
+
+**10ファクター検証結果:**
+
+| 画面 | 構造差分 | データ依存差異 | 判定 |
+|---|---|---|---|
+| A2 ビジョン | 0件 | AI分析データ空（未ログイン） | PASS |
+| A3 ゴール連携 | 0件 | ゴール未設定→空表示 | PASS |
+| A4 プロフィール | 0件 | プロフィールデータ空 | PASS |
+| A5 プラン | 0件 | プランカード・dots表示確認 | PASS |
+| B1 GoalHubタスク | 0件 | GoalHub=ゴール必須→ホーム表示 | PASS |
+| B2 GoalHub設定 | 0件 | 同上 | PASS |
+| B3 解析 | 0件 | ストリーク=0、3AI section存在 | PASS |
+| B4+B5 設定 | 0件 | referral非表示(free)、promo card存在 | PASS |
+
+**構造要素検証:** 38/38 FOUND（A3互換性バー・A5 dotインジケーター・B1-B5全新規要素含む）
+**compare画像:** `docs/mockups/screenshots/` に全8画面保存済み
+  - a2_vision_compare.png, a3_goal_link_compare.png, a4_profile_compare.png
+  - a5_plan_compare.png, b1_hub_tasks_compare.png, b2_hub_settings_compare.png
+  - b3_analytics_compare.png, b4b5_fb_settings_compare.png
+
+**検証範囲:** ソースレベル構造確認 + localhost視覚比較（Stage A）。Stage B（デプロイ後本番URL）は未実施
+
+**ふとし確認待ち:** Finderで `docs/mockups/screenshots/` を開いて全compare画像を確認 → 承認後デプロイ
+
+---
 
 ### A2 ビジョン mockup更新 ✅完了（2026-03-24）
 > 目的: ビジョン画面を実装準拠にmockup HTMLを更新する（実装変更なし）

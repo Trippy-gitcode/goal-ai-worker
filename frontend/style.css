@@ -902,6 +902,21 @@ input,textarea,select{font-family:var(--ff);outline:none}
 /* Recurrence */
 .trp{font-size:6px;color:var(--muted2)}
 
+/* AI suggest card (#05b mockup) */
+.ai-suggest{padding:10px 12px;border-radius:8px;background:rgba(200,146,10,0.04);border:0.5px solid rgba(200,146,10,0.2);margin:10px 0}
+.ai-suggest-head{font-size:9px;font-weight:500;color:#c8920a;margin:0 0 6px;display:flex;align-items:center;gap:4px}
+.ai-suggest .ai-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:0.5px solid var(--border1);font-size:9px}
+.ai-suggest .ai-row:last-child{border:none}
+.ai-suggest .ai-row-name{color:var(--cream)}
+.ai-suggest .ai-row-add{color:#c8920a;font-size:8px;cursor:pointer;transition:opacity .15s}
+.ai-suggest .ai-row-add:hover{opacity:.7}
+.ai-suggest-loading{font-size:8px;color:var(--muted2);padding:4px 0}
+/* Hub settings — notification rows + export (#05e mockup) */
+.hub-notif-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.hub-notif-row:last-child{border:none}
+.hub-export-btn{padding:7px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--muted);cursor:pointer;font-size:11px;font-family:var(--ff);transition:border-color .15s}
+.hub-export-btn:hover{border-color:var(--amber)}
+
 /* Legacy compat — keep for task detail panel */
 .check-circle{
   width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border2);
