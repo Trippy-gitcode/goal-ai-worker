@@ -1290,6 +1290,22 @@ function copyReferralCode(){
   if(code) navigator.clipboard?.writeText(code).then(()=>toast('紹介コードをコピーしました'));
 }
 
+function openSettingsPromoInput(){
+  const el = document.getElementById('settings-promo-expand');
+  if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function applySettingsPromo(){
+  const code = document.getElementById('settings-promo-code-in')?.value.trim().toUpperCase();
+  if(!code){ toast('コードを入力してください'); return; }
+  const promoIn = document.getElementById('promo-code-in');
+  if(promoIn){
+    promoIn.value = code;
+    if(typeof applyPromoCode === 'function') applyPromoCode();
+  }
+  document.getElementById('settings-promo-expand').style.display = 'none';
+}
+
 function openPlanModal(){
   fetchPlanStatus().then(() => { renderPlanModal(); });
   renderPlanModal();
@@ -1997,7 +2013,8 @@ Object.assign(window, {
   openArchiveView, closeArchiveView, renderArchiveList,
   openArchivedGoalDetail, restoreGoal, exportData,
   PROMO_CODES, getMembershipLabel, renderMembershipUI,
-  copyReferralCode, openPlanModal, closePlanModal, renderPlanModal,
+  copyReferralCode, openSettingsPromoInput, applySettingsPromo,
+  openPlanModal, closePlanModal, renderPlanModal,
   selectPlan, updatePlanCTA, updatePlanDots, toggleBillingPeriod, updatePlanPrices,
   applyPromoCode, subscribePlan, openCustomerPortal,
   showAIMemo, MODE_DESCRIPTIONS, handleModeClick,

@@ -186,7 +186,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.10</span>
+      <span class="version" title="バージョン確認">v3.11.11</span>
     </div>
   </div>
 </div>
@@ -547,6 +547,24 @@
                         <button onclick="saveHubRole()" style="padding:6px 14px;background:var(--amber);border:none;border-radius:6px;color:var(--text-on-accent);cursor:pointer;font-size:11px;font-weight:500;">保存</button>
                         <button onclick="toggleHubRoleEdit()" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:11px;">キャンセル</button>
                       </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- ── 通知 (#05e mockup) ── -->
+                <div class="settings-card full" style="margin-bottom:16px;">
+                  <div class="sc-hd"><span class="sc-hd-icon">🔔</span><div class="sc-hd-title">通知</div></div>
+                  <div class="sc-body">
+                    <div class="hub-notif-row"><span style="font-size:12px;color:var(--cream);">期限リマインダー</span><div class="toggle on" id="hub-notif-deadline" onclick="toggleHubNotif(this)"></div></div>
+                    <div class="hub-notif-row"><span style="font-size:12px;color:var(--cream);">週次レビュー</span><div class="toggle on" id="hub-notif-review" onclick="toggleHubNotif(this)"></div></div>
+                  </div>
+                </div>
+                <!-- ── エクスポート (#05e mockup) ── -->
+                <div class="settings-card full" style="margin-bottom:16px;">
+                  <div class="sc-hd"><span class="sc-hd-icon">📤</span><div class="sc-hd-title">エクスポート</div></div>
+                  <div class="sc-body">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                      <button onclick="exportHubMarkdown()" class="hub-export-btn">Markdown</button>
+                      <button onclick="exportHubICS()" class="hub-export-btn">ICS（カレンダー）</button>
                     </div>
                   </div>
                 </div>
@@ -1115,6 +1133,23 @@
           <div class="fail-timeline" id="fail-timeline"></div>
         </div>
 
+        <!-- 3人寄れば文殊の知恵 (#08a mockup) -->
+        <div class="chart-box" id="analytics-deep-section">
+          <div class="chart-hd">
+            <div class="chart-title">3人寄れば文殊の知恵</div>
+            <div style="font-size:10px;color:var(--muted)">3つのAIが多角的にあなたの活動を分析します</div>
+          </div>
+          <div style="padding:16px;text-align:center;">
+            <div style="display:flex;justify-content:center;gap:16px;margin-bottom:12px;">
+              <div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--model-gemini);"></div><span style="font-size:10px;color:var(--muted);">Gemini</span></div>
+              <div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--model-gpt);"></div><span style="font-size:10px;color:var(--muted);">ChatGPT</span></div>
+              <div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--model-claude);"></div><span style="font-size:10px;color:var(--muted);">Claude</span></div>
+            </div>
+            <button onclick="startAnalyticsDeep()" style="width:100%;padding:10px;background:var(--send-btn-grad);border:none;border-radius:10px;color:var(--text-on-accent);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--ff);">ヒアリング開始</button>
+            <div style="font-size:9px;color:var(--muted2);margin-top:6px;" id="analytics-deep-remaining"></div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1260,17 +1295,34 @@
             </div>
           </div>
 
-          <!-- Referral -->
+          <!-- Referral (#08c mockup) -->
           <div class="settings-card full" id="referral-card" style="display:none;">
-            <div class="sc-hd"><span class="sc-hd-icon">🎁</span><div class="sc-hd-title">友達を紹介</div></div>
+            <div class="sc-hd"><span class="sc-hd-icon">🎁</span><div class="sc-hd-title">友達紹介</div></div>
             <div class="sc-body">
-              <div style="font-size:12px;color:var(--cream);margin-bottom:8px;">あなたの紹介コード</div>
-              <div id="referral-code" style="font-size:18px;font-family:var(--fm);color:var(--amber);letter-spacing:2px;margin-bottom:12px;padding:10px;background:var(--bg2);border:1px dashed var(--amber);border-radius:8px;text-align:center;user-select:all;"></div>
-              <div style="font-size:11px;color:var(--muted);line-height:1.6;">
-                紹介された方: Pro初月75%OFF（¥745）<br>
-                あなた: 1つ上のグレード1ヶ月無料
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <div>
+                  <div style="font-size:12px;color:var(--cream);">紹介でPro 1ヶ月無料</div>
+                  <div style="font-size:11px;color:var(--muted);margin-top:2px;">紹介された方: Pro初月75%OFF</div>
+                </div>
+                <button onclick="copyReferralCode()" style="padding:6px 14px;background:none;border:1px solid var(--amber);border-radius:8px;color:var(--amber);font-size:11px;cursor:pointer;font-family:var(--ff);white-space:nowrap;">コードをコピー</button>
               </div>
-              <button onclick="copyReferralCode()" style="margin-top:10px;padding:8px 16px;background:var(--amber);border:none;border-radius:8px;color:var(--bg);font-size:12px;cursor:pointer;font-family:var(--ff);">コードをコピー</button>
+              <div id="referral-code" style="font-size:14px;font-family:var(--fm);color:var(--amber);letter-spacing:2px;padding:8px;background:var(--bg2);border:1px dashed var(--amber);border-radius:8px;text-align:center;user-select:all;"></div>
+            </div>
+          </div>
+
+          <!-- プロモコード (#08c mockup) -->
+          <div class="settings-card full" id="settings-promo-card">
+            <div class="sc-body" style="padding:12px 16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:12px;color:var(--cream);">プロモコード</span>
+                <span style="font-size:12px;color:var(--amber);cursor:pointer;" onclick="openSettingsPromoInput()">入力する →</span>
+              </div>
+              <div id="settings-promo-expand" style="display:none;margin-top:10px;">
+                <div style="display:flex;gap:8px;">
+                  <input id="settings-promo-code-in" class="field-input" placeholder="コードを入力…" style="flex:1;padding:8px 12px;" onkeydown="if(event.key==='Enter'&&!event.isComposing)applySettingsPromo()">
+                  <button onclick="applySettingsPromo()" style="padding:8px 14px;background:var(--amber);border:none;border-radius:8px;color:var(--bg);font-size:11px;cursor:pointer;font-family:var(--ff);white-space:nowrap;">適用</button>
+                </div>
+              </div>
             </div>
           </div>
 

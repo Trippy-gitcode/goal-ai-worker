@@ -51,6 +51,31 @@ export async function handleGoalDelete(request, env, url) {
   return jsonRes({ deleted: true });
 }
 
+export async function handleSuggestTasks(request, env) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+  const body = await request.json();
+  const { goal_title, existing_tasks } = body;
+  if (!goal_title) return jsonRes({ error: 'goal_title required' }, 400);
+  try {
+    const taskList = (existing_tasks || []).join('、') || 'なし';
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'gpt-5-mini',
+        messages: [{ role: 'user', content: `ゴール「${goal_title}」の達成に向けて、次にやるべきタスクを2〜3個提案してください。既存タスク：${taskList}。既存と重複しない新しいタスクを提案。各タスクは15文字以内の簡潔なタイトル。JSON形式で返却：{"tasks":["タスク名1","タスク名2"]}` }],
+        max_tokens: 200, response_format: { type: 'json_object' }
+      })
+    });
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || '{}';
+    return jsonRes(JSON.parse(content));
+  } catch(e) {
+    return jsonRes({ tasks: ['進捗を振り返る', '次のマイルストーンを設定'] });
+  }
+}
+
 export async function handleSuggestRoles(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
