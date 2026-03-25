@@ -1270,6 +1270,8 @@ function hubMsgResize(el) { chatResize(el, 110); }
 function hubMsgKey(e) { chatKey(sendHubMsg, e); }
 
 // ─ Hub Tasks ─
+const hubTaskSuggestions = {}; // cache: goalId -> string[]
+
 function renderHubTasks(){
   const goal = ALL_GOALS[hubGoalIdx];
   const inner = document.getElementById('hub-tasks-inner');
@@ -1299,6 +1301,75 @@ function renderHubTasks(){
     });
     inner.appendChild(ph);
   });
+
+  // AI提案カード（#05b mockup準拠）
+  renderHubTaskSuggestions(goal, inner);
+}
+
+function renderHubTaskSuggestions(goal, container){
+  const card = document.createElement('div');
+  card.className = 'ai-suggest';
+  card.innerHTML = `<div class="ai-suggest-head"><svg viewBox="0 0 32 32" width="12" height="12"><defs><linearGradient id="crown-sg" x1="6" y1="6" x2="26" y2="24" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown-sg)"/></svg> AIが提案するタスク</div>`;
+  container.appendChild(card);
+
+  const cached = hubTaskSuggestions[goal.id];
+  if(cached){
+    cached.forEach(t => card.appendChild(mkSuggestRow(t, goal)));
+    return;
+  }
+
+  // Loading state
+  const loading = document.createElement('div');
+  loading.className = 'ai-suggest-loading';
+  loading.textContent = '提案を生成中…';
+  card.appendChild(loading);
+
+  fetchTaskSuggestions(goal).then(tasks => {
+    hubTaskSuggestions[goal.id] = tasks;
+    loading.remove();
+    tasks.forEach(t => card.appendChild(mkSuggestRow(t, goal)));
+  }).catch(() => {
+    loading.textContent = '提案を取得できませんでした';
+  });
+}
+
+function mkSuggestRow(title, goal){
+  const row = document.createElement('div');
+  row.className = 'ai-row';
+  row.innerHTML = `<span class="ai-row-name">${escapeHtml(title)}</span><span class="ai-row-add">＋ 追加</span>`;
+  row.querySelector('.ai-row-add').onclick = () => addSuggestedTask(goal, title, row);
+  return row;
+}
+
+function addSuggestedTask(goal, title, rowEl){
+  const lastPhase = goal.phases[goal.phases.length - 1];
+  if(!lastPhase) return;
+  const newId = 't_' + Date.now();
+  lastPhase.tasks.push({id:newId, title, status:'todo', due:'', priority:'mid', note:'', source:'ai', chatLog:[]});
+  rowEl.remove();
+  // Remove from cache
+  const cached = hubTaskSuggestions[goal.id];
+  if(cached){
+    const idx = cached.indexOf(title);
+    if(idx !== -1) cached.splice(idx, 1);
+  }
+  renderHubTasks();
+  toast('タスクを追加しました');
+}
+
+async function fetchTaskSuggestions(goal){
+  const existingTasks = goal.phases.flatMap(p => p.tasks.map(t => t.title));
+  const goalId = goal.supabaseId;
+  if(goalId && AUTH_TOKEN){
+    try{
+      const res = await apiCall(`/api/goals/${goalId}/suggest-tasks`, 'POST', {
+        goal_title: goal.title, existing_tasks: existingTasks
+      });
+      if(res?.tasks?.length) return res.tasks;
+    }catch(e){}
+  }
+  // Fallback: generic suggestions
+  return ['進捗を振り返る', '次のマイルストーンを設定'];
 }
 
 // ─ Hub Analytics ─
@@ -1398,6 +1469,25 @@ function startDeepAnalysis(goalIdx) {
   );
 }
 
+// ─ Analytics page deep analysis (#08a) ─
+function startAnalyticsDeep(){
+  const goal = ALL_GOALS.filter(g => !g.archived)[0];
+  if(!goal){ toast('ゴールを設定してください'); return; }
+  const query = `全ゴールの進捗を総合分析してください。${ALL_GOALS.filter(g=>!g.archived).map(g=>`「${g.title}」${g.actual}%`).join('、')}`;
+  showDeepConfirm('analytics-deep-section', 'pg-analytics',
+    () => runDeepAnalysis(query, 'analytics-deep-section', 'pg-analytics'),
+    () => {}
+  );
+}
+
+function updateAnalyticsDeepRemaining(){
+  const el = document.getElementById('analytics-deep-remaining');
+  if(el){
+    const remaining = typeof getDeepRemaining === 'function' ? getDeepRemaining() : '—';
+    el.textContent = `残り ${remaining} 回`;
+  }
+}
+
 // ─ Hub Memo ─
 function openMemoEditor(){
   document.getElementById('hub-memo-editor').style.display = 'block';
@@ -1490,6 +1580,12 @@ function renderHubSettings(goal){
   // AI Role display
   const roleDisplay = document.getElementById('hub-role-display');
   if(roleDisplay) roleDisplay.textContent = goal.ai_role_name ? `${goal.ai_role_icon||'🤖'} ${goal.ai_role_name}` : '未設定';
+  // Notification toggles (#05e)
+  const ns = goal.notifSettings || { deadline: true, review: true };
+  const dlEl = document.getElementById('hub-notif-deadline');
+  const rvEl = document.getElementById('hub-notif-review');
+  if(dlEl) dlEl.classList.toggle('on', ns.deadline !== false);
+  if(rvEl) rvEl.classList.toggle('on', ns.review !== false);
 }
 function toggleHubRoleEdit(){
   const el = document.getElementById('hub-role-edit');
@@ -1524,6 +1620,38 @@ function saveHubGoalSettings(){
 
 
 // ════════ GOAL DELETE / ARCHIVE ════════
+// ── Hub Notification toggles (#05e) ──
+function toggleHubNotif(el){
+  el.classList.toggle('on');
+  const goal = ALL_GOALS[hubGoalIdx];
+  if(!goal.notifSettings) goal.notifSettings = { deadline: true, review: true };
+  goal.notifSettings.deadline = document.getElementById('hub-notif-deadline').classList.contains('on');
+  goal.notifSettings.review = document.getElementById('hub-notif-review').classList.contains('on');
+  toast('通知設定を更新しました');
+}
+
+// ── Hub Export buttons (#05e) ──
+function exportHubMarkdown(){
+  const goal = ALL_GOALS[hubGoalIdx];
+  if(!goal) return;
+  let md = `# ${goal.title}\n\n`;
+  md += `期限: ${goal.deadline || '未設定'}\n進捗: ${goal.actual}%\n\n`;
+  goal.phases.forEach(p => {
+    md += `## ${p.phaseTitle}\n`;
+    p.tasks.forEach(t => {
+      md += `- [${t.status==='done'?'x':' '}] ${t.title}${t.due?' (〆'+t.due+')':''}\n`;
+    });
+    md += '\n';
+  });
+  navigator.clipboard.writeText(md).then(() => toast('Markdownをコピーしました'));
+}
+
+function exportHubICS(){
+  const goal = ALL_GOALS[hubGoalIdx];
+  if(!goal) return;
+  exportICS(goal.title);
+}
+
 function confirmDeleteGoal(){
   const goal = ALL_GOALS[hubGoalIdx];
   if(!goal) return;
@@ -2314,7 +2442,9 @@ Object.assign(window, {
   saveCalEvent, renderCalChat, autoGreetCalDay, sendCalMsg, calMsgKey,
   renderGantt, openGoalHub, switchHubTab, renderHubChat,
   sendHubMsg, hubMsgResize, hubMsgKey,
-  renderHubTasks, renderHubAnalytics,
+  renderHubTasks, renderHubAnalytics, addSuggestedTask, fetchTaskSuggestions,
+  toggleHubNotif, exportHubMarkdown, exportHubICS,
+  startAnalyticsDeep, updateAnalyticsDeepRemaining,
   openMemoEditor, closeMemoEditor, saveMemo, renderHubMemo,
   renderHubSettings, saveHubGoalSettings, toggleHubRoleEdit, saveHubRole,
   confirmDeleteGoal, closeDeleteModal, executeDeleteGoal, archiveGoal,

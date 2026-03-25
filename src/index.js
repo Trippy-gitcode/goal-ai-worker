@@ -9,7 +9,7 @@ import { handleDeepOpenAI, handleDeepGemini, handleDeepClaude, handleDeepClaudeS
 import { handleTokenRegister, handleTokenCreate, handleTokenValidate, handleTokenRedeem } from './routes/token.js';
 import { handleUsageGet, handleAvatarUpload, handleFeedbackSave } from './routes/misc.js';
 import { handleCheckoutCreate, handleCheckoutPortal, handleStripeWebhook } from './routes/checkout.js';
-import { handleGoalsList, handleGoalCreate, handleGoalUpdate, handleGoalDelete, handleSuggestRoles } from './routes/goals.js';
+import { handleGoalsList, handleGoalCreate, handleGoalUpdate, handleGoalDelete, handleSuggestRoles, handleSuggestTasks } from './routes/goals.js';
 import { handleHistoryGet, handleHistorySave, handleHistoryDelete } from './routes/history.js';
 import { handleVoiceTranscribe } from './routes/voice.js';
 import { handleReferralCode, handleReferralCreate, handleReferralApply, handleReferralStatus } from './routes/referral.js';
@@ -88,6 +88,7 @@ app.get('/api/goals', async (c) => withCors(c, await handleGoalsList(c.req.raw, 
 app.post('/api/goals', async (c) => withCors(c, await handleGoalCreate(c.req.raw, c.env)));
 app.patch('/api/goals/:id', async (c) => withCors(c, await handleGoalUpdate(c.req.raw, c.env, new URL(c.req.url))));
 app.post('/api/goals/:id/suggest-roles', async (c) => withCors(c, await handleSuggestRoles(c.req.raw, c.env)));
+app.post('/api/goals/:id/suggest-tasks', async (c) => withCors(c, await handleSuggestTasks(c.req.raw, c.env)));
 app.delete('/api/goals/:id', async (c) => withCors(c, await handleGoalDelete(c.req.raw, c.env, new URL(c.req.url))));
 
 // ── History ──

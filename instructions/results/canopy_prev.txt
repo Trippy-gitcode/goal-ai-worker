@@ -1,5 +1,5 @@
-=== CANOPY TEST (21:57:15) ===
-Worker: "version":"3.11.9"
+=== CANOPY TEST (00:12:23) ===
+Worker: "version":"3.11.10"
 --- HTTP Smoke Tests ---
 OK: GET /api/version → 200
 OK: GET /health → 200
@@ -50,7 +50,7 @@ OK: showDegradeBadge (2 refs)
 OK: X-Model-Degraded (1 refs)
 OK: no old plan cards in HTML
 --- Common Components (8a) ---
-OK: M5 24l4-11 (4 refs)
+OK: M5 24l4-11 (5 refs)
 OK: getGptSVG (1 refs)
 OK: _saveScroll (2 refs)
 OK: stopHomeStream (2 refs)
@@ -68,8 +68,8 @@ OK: plan-compare-table (1 refs)
 OK: フェアユース制限 (1 refs)
 OK: goal-detect-toast\|showGoalDetectToast (8 refs)
 --- Version sync (C10) ---
-  globals.js=3.11.9  sw.js=3.11.9  index.html=3.11.9
-OK: version sync (3.11.9)
+  globals.js=3.11.11  sw.js=3.11.11  index.html=3.11.11
+OK: version sync (3.11.11)
 --- Style integrity (C12) ---
 OK: no 'border-radius:24px' in JS
 OK: no 'border-radius:20px' in JS
@@ -81,7 +81,7 @@ WARN: hardcoded model color '#e07070' in JS (1)
 WARN: hardcoded model color '#e8913a' in JS (1)
 INFO: inline style= count in JS: 383 (baseline)
 --- UI spec values (design_spec_v3 8a-8c) ---
-OK: CRN-01 crown SVG (4 refs)
+OK: CRN-01 crown SVG (5 refs)
 OK: CRN-02 model name gray
 OK: CRN-03 input radius (11 refs)
 OK: send-btn-size (7 refs)
@@ -123,10 +123,10 @@ OK: 'chip-row' sync (src=1 dist=1)
 OK: 'mode-f' cleanup (src=0 dist=0)
 OK: 'mode-row-f' cleanup (src=0 dist=0)
 OK: 'ゴールプロジェクト' cleanup (src=0 dist=0)
-  frontend-dist version=3.11.9  source version=3.11.9
+  frontend-dist version=3.11.11  source version=3.11.11
 OK: frontend-dist version sync
 --- Vite tree-shake safety (onclick vs window.assign) ---
 OK: all onclick functions registered in window
 --- SP version sync ---
-  session_progress=v3.11.9  APP_VERSION=3.11.9
+  session_progress=v3.11.10  APP_VERSION=3.11.11
 === CANOPY PASS (11s) ===
