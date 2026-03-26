@@ -76,6 +76,35 @@ export async function handleSuggestTasks(request, env) {
   }
 }
 
+export async function handleExtractGoals(request, env) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+  const userId = await getUserIdFromToken(env, auth.tokenId);
+  if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
+  try {
+    // Fetch recent chat history
+    const messages = await supabaseQuery(env, 'chat_messages', 'GET', {
+      filters: `user_id=eq.${userId}&order=created_at.desc&limit=50`
+    });
+    if (!messages || messages.length < 3) return jsonRes({ goals: [] });
+    const context = messages.map(m => `${m.role}: ${(m.content || '').slice(0, 200)}`).join('\n').slice(0, 2000);
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'gpt-5-mini',
+        messages: [{ role: 'user', content: `以下の会話履歴から、ユーザーが取り組みたそうなゴール候補を最大3つ抽出してください。既に明示的にゴール化されたものは除外。各ゴールはタイトル（20文字以内）と根拠（会話のどの部分から推定したか、15文字以内）。JSON形式：{"goals":[{"title":"ゴール名","reason":"根拠"}]}\n\n${context}` }],
+        max_tokens: 300, response_format: { type: 'json_object' }
+      })
+    });
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || '{}';
+    return jsonRes(JSON.parse(content));
+  } catch(e) {
+    return jsonRes({ goals: [] });
+  }
+}
+
 export async function handleSuggestRoles(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);

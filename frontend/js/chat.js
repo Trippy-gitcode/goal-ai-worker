@@ -817,11 +817,31 @@ function addLongTapGoal(el, content){
 function quickGoalFromText(text){
   if(!text) return;
   const title = text.slice(0, 50).replace(/\n/g,' ').trim();
-  if(confirm(`「${title}…」からゴールを作成しますか？`)){
-    showWelcome();
-    const inp = document.getElementById('wlc-in');
-    if(inp) inp.value = title;
-  }
+  if(!title) return;
+  // Toast-style confirmation instead of native confirm
+  const t = document.createElement('div');
+  t.className = 'quick-goal-toast';
+  t.innerHTML = `<div style="font-size:11px;color:var(--cream);margin-bottom:6px;">🎯 ゴールを作成</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.4;">「${escapeHtml(title)}」</div>
+    <div style="display:flex;gap:6px;">
+      <button class="qg-btn qg-yes">作成する</button>
+      <button class="qg-btn qg-no">キャンセル</button>
+    </div>`;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  t.querySelector('.qg-yes').onclick = () => {
+    t.remove();
+    try {
+      showWelcome();
+      const inp = document.getElementById('wlc-in');
+      if(inp) inp.value = title;
+      toast('ゴール作成画面を開きました');
+    } catch(e) {
+      toast('ゴール作成に失敗しました');
+    }
+  };
+  t.querySelector('.qg-no').onclick = () => { t.classList.remove('show'); setTimeout(()=>t.remove(), 200); };
+  setTimeout(() => { if(t.parentNode) { t.classList.remove('show'); setTimeout(()=>t.remove(), 200); } }, 8000);
 }
 
 // 【5】コピー・引用ハンドラ
