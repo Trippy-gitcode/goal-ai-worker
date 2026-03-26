@@ -1026,6 +1026,9 @@ const CHAT_BG_PRESETS = [
   { id:'dots', label:'ドット', css:'radial-gradient(circle, var(--amber-g) 1px, transparent 1px)' },
   { id:'grid', label:'グリッド', css:'linear-gradient(var(--amber-g) 1px, transparent 1px), linear-gradient(90deg, var(--amber-g) 1px, transparent 1px)' },
   { id:'wave', label:'ウェーブ', css:'repeating-linear-gradient(135deg, transparent, transparent 20px, var(--amber-g) 20px, var(--amber-g) 40px)' },
+  { id:'sunset', label:'夕焼け', css:'linear-gradient(180deg, rgba(200,80,50,0.08) 0%, rgba(200,146,10,0.06) 40%, transparent 100%)' },
+  { id:'starry', label:'星空', css:'radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.15) 0%, transparent 100%), radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.12) 0%, transparent 100%), radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 100%), radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.08) 0%, transparent 100%)' },
+  { id:'aurora', label:'オーロラ', css:'linear-gradient(135deg, rgba(100,200,150,0.05) 0%, rgba(80,120,200,0.05) 50%, rgba(150,80,180,0.05) 100%)' },
 ];
 function applyChatBg(id){
   const p = CHAT_BG_PRESETS.find(x=>x.id===id) || CHAT_BG_PRESETS[0];

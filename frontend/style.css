@@ -834,6 +834,19 @@ input,textarea,select{font-family:var(--ff);outline:none}
 
 /* ═══ NPS Score Buttons ═══ */
 .nps-row{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:12px 0 8px;}
+/* Quick goal toast (#7) */
+.quick-goal-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:14px 18px;z-index:9999;opacity:0;transition:all .2s;min-width:240px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.quick-goal-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.qg-btn{padding:6px 14px;border-radius:8px;font-size:10px;cursor:pointer;font-family:var(--ff);border:none}
+.qg-yes{background:var(--amber);color:var(--text-on-accent);font-weight:500}
+.qg-no{background:var(--bg3);color:var(--muted);border:1px solid var(--border2)}
+/* Extract goals from history (#4) */
+.btn-extract-goals{display:flex;align-items:center;gap:6px;padding:6px 12px;margin:4px 8px;font-size:10px;color:var(--amber);cursor:pointer;border-radius:8px;transition:background .15s}
+.btn-extract-goals:hover{background:var(--amber-g)}
+.extract-goal-card{padding:8px 10px;background:var(--amber-g);border:0.5px solid rgba(200,146,10,0.2);border-radius:8px;margin:4px 8px;font-size:10px}
+.extract-goal-item{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:0.5px solid var(--border)}
+.extract-goal-item:last-child{border:none}
+
 .nps-btn{
   width:36px;height:36px;border-radius:8px;border:1px solid var(--border2);
   background:var(--bg3);color:var(--cream);font-size:13px;font-family:var(--fm);

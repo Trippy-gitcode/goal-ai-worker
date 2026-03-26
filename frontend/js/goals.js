@@ -1750,6 +1750,51 @@ function renderSidebarGoals(){
 
   // Show upgrade nudge if free + >1 goal attempted
   if(MEMBERSHIP.plan==='free' && ALL_GOALS.length >= 1) renderMembershipUI();
+  // Show "extract goals from history" button when no active goals
+  const extractBtn = document.getElementById('btn-extract-goals');
+  if(extractBtn) extractBtn.style.display = activeGoals.length === 0 && AUTH_TOKEN ? '' : 'none';
+}
+
+// ── Extract goals from past conversations (#4 E-10) ──
+async function extractGoalsFromHistory(){
+  const btn = document.getElementById('btn-extract-goals');
+  if(btn) btn.textContent = '分析中…';
+  try {
+    const res = await apiCall('/api/goals/extract-from-history', 'POST', {});
+    const goals = res?.goals || [];
+    if(goals.length === 0){
+      toast('ゴール候補が見つかりませんでした');
+      if(btn) btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 過去会話からゴール候補を発見';
+      return;
+    }
+    // Show extracted goals as a card below the button
+    let existing = document.getElementById('extract-goals-card');
+    if(existing) existing.remove();
+    const card = document.createElement('div');
+    card.id = 'extract-goals-card';
+    card.className = 'extract-goal-card';
+    card.innerHTML = `<div style="font-size:9px;font-weight:500;color:#c8920a;margin-bottom:6px;">💡 会話から見つかったゴール候補</div>`;
+    goals.forEach(g => {
+      const row = document.createElement('div');
+      row.className = 'extract-goal-item';
+      row.innerHTML = `<div><div style="color:var(--cream)">${escapeHtml(g.title)}</div><div style="font-size:8px;color:var(--muted2);margin-top:1px">${escapeHtml(g.reason||'')}</div></div><span style="color:#c8920a;cursor:pointer;font-size:9px;flex-shrink:0;" onclick="adoptExtractedGoal('${escapeHtml(g.title).replace(/'/g,"\\'")}')">＋ 作成</span>`;
+      card.appendChild(row);
+    });
+    btn.after(card);
+    if(btn) btn.style.display = 'none';
+  } catch(e) {
+    toast('ゴール候補の抽出に失敗しました');
+    if(btn) btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 過去会話からゴール候補を発見';
+  }
+}
+
+function adoptExtractedGoal(title){
+  showWelcome();
+  const inp = document.getElementById('wlc-in');
+  if(inp) inp.value = title;
+  const card = document.getElementById('extract-goals-card');
+  if(card) card.remove();
+  toast('ゴール作成画面を開きました');
 }
 
 // Close modals on overlay click
@@ -2445,6 +2490,7 @@ Object.assign(window, {
   renderHubTasks, renderHubAnalytics, addSuggestedTask, fetchTaskSuggestions,
   toggleHubNotif, exportHubMarkdown, exportHubICS,
   startAnalyticsDeep, updateAnalyticsDeepRemaining,
+  extractGoalsFromHistory, adoptExtractedGoal,
   openMemoEditor, closeMemoEditor, saveMemo, renderHubMemo,
   renderHubSettings, saveHubGoalSettings, toggleHubRoleEdit, saveHubRole,
   confirmDeleteGoal, closeDeleteModal, executeDeleteGoal, archiveGoal,
