@@ -429,7 +429,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
 .bubble{padding:0;border-radius:0;font-size:var(--font-size-chat,16px);line-height:1.5;letter-spacing:.01em;word-break:break-word;overflow-wrap:break-word;background:none;border:none;color:var(--cream)}
 .msg.ai .bubble{background:transparent!important;border:none;border-radius:0;color:var(--cream)}
 .msg.user .bubble{background:transparent!important;border:none;border-radius:0;color:var(--cream)}
-.msg{border-bottom:1px solid var(--border);padding-bottom:12px}
+.msg{padding-bottom:12px}
 .msg-time,.msg-footer{font-size:7px;color:var(--muted2);margin-top:2px;padding:0 3px}
 .msg-model{color:var(--muted);font-weight:400}
 .msg-body p,.bubble p{margin:0 0 12px 0}
