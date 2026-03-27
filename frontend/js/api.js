@@ -443,6 +443,14 @@ function autoResize(el) { chatResize(el, 110); }
 function handleKey(e) { chatKey(sendHomeMsg, e); }
 
 
+// ════════ S3: WORKER PREWARM ════════
+// Cloudflare Workers cold start解消（起動時に軽量GETを1回送信）
+(function(){
+  if(typeof WORKER_URL !== 'undefined'){
+    fetch(WORKER_URL + '/api/version', { priority: 'low' }).catch(()=>{});
+  }
+})();
+
 // ════════ STREAMING AI HELPER ════════
 async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, onDone, onError) {
   try {
