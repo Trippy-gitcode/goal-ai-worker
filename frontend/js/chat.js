@@ -1755,16 +1755,42 @@ function showModelUsageDetail(){
   toast(`Claude: ${claude.remaining}/${claude.limit}回  Gemini: ${gemini.remaining}/${gemini.limit}回  GPT: ${gpt.remaining}/${gpt.limit}回`);
 }
 
-// ═══ KEYBOARD HANDLING (iOS visualViewport) ═══
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize', ()=>{
-    const kbHeight = window.innerHeight - window.visualViewport.height;
-    const inputs = [document.getElementById('home-input-area'), document.getElementById('hub-chat-input-row')].filter(Boolean);
-    inputs.forEach(el => {
-      el.style.paddingBottom = kbHeight > 50 ? kbHeight + 'px' : 'env(safe-area-inset-bottom)';
-    });
-  });
-}
+// ═══ KEYBOARD HANDLING (iOS visualViewport) — BUG-01 fix ═══
+// input areaをキーボード直上に固定する
+(function initKeyboardFix(){
+  if(!window.visualViewport) return;
+  const handler = () => {
+    const vvH = window.visualViewport.height;
+    const offsetTop = window.visualViewport.offsetTop;
+    const kbH = window.innerHeight - vvH - offsetTop;
+    const inputArea = document.getElementById('home-input-area');
+    if(!inputArea) return;
+    if(kbH > 50){
+      // キーボード表示中: inputをfixedにしてキーボード直上に配置
+      inputArea.style.position = 'fixed';
+      inputArea.style.bottom = kbH + 'px';
+      inputArea.style.left = '0';
+      inputArea.style.right = '0';
+      inputArea.style.zIndex = '100';
+      inputArea.style.background = 'var(--bg)';
+      // チャットエリアにbottomパディングを追加（inputが重ならないように）
+      const chatWrap = document.getElementById('home-chat-wrap');
+      if(chatWrap) chatWrap.style.paddingBottom = (inputArea.offsetHeight + kbH) + 'px';
+    } else {
+      // キーボード非表示: 通常のフロー位置に戻す
+      inputArea.style.position = '';
+      inputArea.style.bottom = '';
+      inputArea.style.left = '';
+      inputArea.style.right = '';
+      inputArea.style.zIndex = '';
+      inputArea.style.background = 'transparent';
+      const chatWrap = document.getElementById('home-chat-wrap');
+      if(chatWrap) chatWrap.style.paddingBottom = '';
+    }
+  };
+  window.visualViewport.addEventListener('resize', handler);
+  window.visualViewport.addEventListener('scroll', handler);
+})();
 function homeKey(e) { chatKey(sendHomeMsg, e); }
 
 // ─ Summary strip ─

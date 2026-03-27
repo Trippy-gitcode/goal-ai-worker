@@ -100,23 +100,22 @@ function showExpiryBanner(hoursLeft) {
 }
 
 // ════════ GLOBAL KEYBOARD/VIEWPORT HANDLER ════════
+// Home input area は chat.js の BUG-01 fix で専用ハンドリング。
+// ここでは home-input-area 以外のinput（Hub, Know等）のスクロール対応のみ
 (function initViewportHandler() {
   if (!window.visualViewport) return;
   window.visualViewport.addEventListener('resize', () => {
     const vvH = window.visualViewport.height;
     const wH = window.innerHeight;
     const kbH = wH - vvH;
-    // キーボードが表示されている（50px以上の差）
     const activeEl = document.activeElement;
     if (kbH > 50 && activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT')) {
-      // 入力欄の親コンテナにpaddingBottomを追加
-      const container = activeEl.closest('#home-input-area, #hub-chat-input-row, #know-input-row, #feedback-input-area, .input-area');
+      // home-input-area は chat.js で処理するためスキップ
+      const container = activeEl.closest('#hub-chat-input-row, #know-input-row, #feedback-input-area, .input-area');
       if (container) container.style.paddingBottom = kbH + 'px';
-      // 入力欄を画面内にスクロール
       setTimeout(() => activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 100);
     } else {
-      // キーボード非表示 → padding復元
-      document.querySelectorAll('#home-input-area, #hub-chat-input-row, #know-input-row, #feedback-input-area, .input-area').forEach(el => {
+      document.querySelectorAll('#hub-chat-input-row, #know-input-row, #feedback-input-area, .input-area').forEach(el => {
         el.style.paddingBottom = '';
       });
     }
