@@ -187,7 +187,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.19</span>
+      <span class="version" title="バージョン確認">v3.11.20</span>
     </div>
   </div>
 </div>
@@ -303,8 +303,8 @@
               <span>タスク化</span>
             </button>
           </div>
-          <!-- Input area — メッセージエリアに重畳（overlay） -->
-          <div id="home-input-area" style="position:absolute;bottom:0;left:0;right:0;padding:8px 12px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent 0%, var(--bg) 40%);z-index:50;">
+          <!-- Input area — メッセージエリアに重畳（viewport固定） -->
+          <div id="home-input-area" style="position:fixed;bottom:0;left:0;right:0;padding:8px 12px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent 0%, var(--bg) 40%);z-index:50;">
             <div style="max-width:700px;margin:0 auto;background:rgba(12,14,20,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0.5px solid rgba(200,146,10,0.3);border-radius:14px;display:flex;align-items:center;gap:4px;padding:8px 12px;transition:border-color .2s;box-shadow:0 -4px 20px rgba(0,0,0,.25);" id="home-input-wrap" ondragover="event.preventDefault();this.style.borderColor='var(--amber)'" ondragleave="this.style.borderColor=''" ondrop="handleHomeDrop(event);this.style.borderColor=''">
               <!-- Image attach -->
               <label title="画像を添付" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);flex-shrink:0;transition:color .15s;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--muted)'">

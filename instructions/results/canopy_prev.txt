@@ -1,5 +1,5 @@
-=== CANOPY TEST (22:46:05) ===
-Worker: "version":"3.11.17"
+=== CANOPY TEST (23:21:39) ===
+Worker: "version":"3.11.18"
 --- HTTP Smoke Tests ---
 OK: GET /api/version → 200
 OK: GET /health → 200
@@ -68,8 +68,8 @@ OK: plan-compare-table (1 refs)
 OK: フェアユース制限 (1 refs)
 OK: goal-detect-toast\|showGoalDetectToast (8 refs)
 --- Version sync (C10) ---
-  globals.js=3.11.18  sw.js=3.11.18  index.html=3.11.18
-OK: version sync (3.11.18)
+  globals.js=3.11.19  sw.js=3.11.19  index.html=3.11.19
+OK: version sync (3.11.19)
 --- Style integrity (C12) ---
 OK: no 'border-radius:24px' in JS
 OK: no 'border-radius:20px' in JS
@@ -123,10 +123,10 @@ OK: 'chip-row' sync (src=1 dist=1)
 OK: 'mode-f' cleanup (src=0 dist=0)
 OK: 'mode-row-f' cleanup (src=0 dist=0)
 OK: 'ゴールプロジェクト' cleanup (src=0 dist=0)
-  frontend-dist version=3.11.18  source version=3.11.18
+  frontend-dist version=3.11.19  source version=3.11.19
 OK: frontend-dist version sync
 --- Vite tree-shake safety (onclick vs window.assign) ---
 OK: all onclick functions registered in window
 --- SP version sync ---
-  session_progress=v3.11.17  APP_VERSION=3.11.18
+  session_progress=v3.11.18  APP_VERSION=3.11.19
 === CANOPY PASS (10s) ===
