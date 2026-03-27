@@ -187,7 +187,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.13</span>
+      <span class="version" title="バージョン確認">v3.11.16</span>
     </div>
   </div>
 </div>
@@ -310,7 +310,7 @@
               </label>
               <textarea id="home-msg-in" rows="1" placeholder="質問、相談、なんでも..."
                 style="flex:1;padding:10px 4px;background:transparent;border:none;color:var(--cream);font-family:var(--ff);font-size:16px;line-height:1.5;resize:none;max-height:110px;min-height:24px;outline:none;align-self:center;"
-                oninput="homeResize(this)" onkeydown="homeKey(event)" onpaste="handleHomePaste(event)"></textarea>
+                oninput="homeResize(this);preRouteOnInput()" onkeydown="homeKey(event)" onpaste="handleHomePaste(event)"></textarea>
               <!-- Voice -->
               <button id="home-voice-btn" onclick="toggleHomeVoice()" title="音声入力"
                 style="width:44px;height:44px;border-radius:50%;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);flex-shrink:0;transition:all .15s;overflow:visible;position:relative;"
