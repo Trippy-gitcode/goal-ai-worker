@@ -1756,25 +1756,21 @@ function showModelUsageDetail(){
 }
 
 // ═══ KEYBOARD HANDLING (iOS visualViewport) — BUG-01 fix ═══
-// input area（position:absolute）のbottomをキーボード高さ分調整
+// input area（position:fixed）のbottomをキーボード高さ分調整
 (function initKeyboardFix(){
   if(!window.visualViewport) return;
   const handler = () => {
     const vvH = window.visualViewport.height;
-    const offsetTop = window.visualViewport.offsetTop;
-    const kbH = window.innerHeight - vvH - offsetTop;
+    const kbH = window.innerHeight - vvH;
     const inputArea = document.getElementById('home-input-area');
     if(!inputArea) return;
     if(kbH > 50){
-      // キーボード表示中: bottomをキーボード高さ分上げる
       inputArea.style.bottom = kbH + 'px';
     } else {
-      // キーボード非表示: 元のbottom:0に戻す
       inputArea.style.bottom = '0';
     }
   };
   window.visualViewport.addEventListener('resize', handler);
-  window.visualViewport.addEventListener('scroll', handler);
 })();
 function homeKey(e) { chatKey(sendHomeMsg, e); }
 
