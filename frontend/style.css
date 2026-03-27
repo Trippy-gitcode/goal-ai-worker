@@ -152,7 +152,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
   #topbar{display:none!important;}
   #home-chat-toolbar{padding:8px 12px!important;gap:6px;}
   .page{height:100%;overflow:hidden;}
-  #pg-home{display:flex;flex-direction:column;height:100%;overflow:hidden;}
+  #pg-home{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
   .tb-title{font-size:13px}
   .prog-compare{display:none}
   .tb-chip{display:none}
@@ -1182,7 +1182,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
 .btn-add-routine:hover{border-color:var(--amber);color:var(--amber);background:var(--amber-g)}
 
 /* ═══ HOME PAGE ═══ */
-#pg-home{display:flex;flex-direction:column;height:100%;overflow:hidden;position:relative}
+#pg-home{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;position:relative}
 
 /* Summary strip */
 #home-summary{

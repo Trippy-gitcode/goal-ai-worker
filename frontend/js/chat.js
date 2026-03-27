@@ -1755,23 +1755,8 @@ function showModelUsageDetail(){
   toast(`Claude: ${claude.remaining}/${claude.limit}回  Gemini: ${gemini.remaining}/${gemini.limit}回  GPT: ${gpt.remaining}/${gpt.limit}回`);
 }
 
-// ═══ KEYBOARD HANDLING (iOS visualViewport) — BUG-01 fix ═══
-// input area（position:fixed）のbottomをキーボード高さ分調整
-(function initKeyboardFix(){
-  if(!window.visualViewport) return;
-  const handler = () => {
-    const vvH = window.visualViewport.height;
-    const kbH = window.innerHeight - vvH;
-    const inputArea = document.getElementById('home-input-area');
-    if(!inputArea) return;
-    if(kbH > 50){
-      inputArea.style.bottom = kbH + 'px';
-    } else {
-      inputArea.style.bottom = '0';
-    }
-  };
-  window.visualViewport.addEventListener('resize', handler);
-})();
+// ═══ KEYBOARD HANDLING ═══
+// BUG-01: dvh + flex構造でキーボード追従。JS handler不要
 function homeKey(e) { chatKey(sendHomeMsg, e); }
 
 // ─ Summary strip ─
