@@ -1816,6 +1816,8 @@ async function init(){
   initHomePlaceholder();
   renderMembershipUI();
   if(typeof initChatBg === 'function') initChatBg();
+  if(typeof applyPresets === 'function') applyPresets();
+  if(typeof initHomeLayoutStates === 'function') initHomeLayoutStates();
   updateNotifSettingUI();
   showPage('home');
   window._appInitDone = true; // 初回ロード完了フラグ（以降のshowPageでアニメーション有効）

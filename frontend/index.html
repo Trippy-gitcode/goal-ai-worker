@@ -187,7 +187,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.16</span>
+      <span class="version" title="バージョン確認">v3.11.17</span>
     </div>
   </div>
 </div>
@@ -275,13 +275,16 @@
               </div>
             </div>
             <!-- Presets (hero外、flex-shrink:0でbottom寄せ) -->
-            <div id="home-presets" style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:0 16px;margin-bottom:0;max-width:700px;margin-left:auto;margin-right:auto;flex-shrink:0;">
-              <button class="preset-chip" onclick="setPreset(this)">今日やること整理</button>
-              <button class="preset-chip" onclick="setPreset(this)">目標の進捗を確認</button>
-              <button class="preset-chip" onclick="setPreset(this)">モチベーションが出ない</button>
-              <button class="preset-chip" onclick="setPreset(this)">新しいスキルを学びたい</button>
-              <button class="preset-chip" onclick="setPreset(this)">ストレス解消法</button>
-              <button class="preset-chip" onclick="setPreset(this)">自分の強みを知りたい</button>
+            <div style="position:relative;max-width:700px;margin-left:auto;margin-right:auto;flex-shrink:0;">
+              <div id="home-presets" style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:0 16px;margin-bottom:0;">
+                <button class="preset-chip" onclick="setPreset(this)">今日やること整理</button>
+                <button class="preset-chip" onclick="setPreset(this)">目標の進捗を確認</button>
+                <button class="preset-chip" onclick="setPreset(this)">モチベーションが出ない</button>
+                <button class="preset-chip" onclick="setPreset(this)">新しいスキルを学びたい</button>
+                <button class="preset-chip" onclick="setPreset(this)">ストレス解消法</button>
+                <button class="preset-chip" onclick="setPreset(this)">自分の強みを知りたい</button>
+              </div>
+              <button onclick="openPresetEditor()" title="プリセットを編集" style="position:absolute;top:-4px;right:12px;background:none;border:none;cursor:pointer;opacity:0.5;color:var(--muted);padding:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
             </div>
             <!-- preset-gap: presets〜input間のスペース（sep-gapと同程度 11px） -->
             <div style="height:11px;flex-shrink:0;"></div>
@@ -345,6 +348,18 @@
               <div style="text-align:right;margin-top:4px;">
                 <span onclick="showPage('tasks')" style="font-size:10px;color:var(--muted2);cursor:pointer;font-family:var(--fm);">タスク画面 →</span>
               </div>
+            </div>
+          </div>
+          <!-- Preset editor modal (G4-A) -->
+          <div id="preset-editor-modal" style="display:none;position:absolute;inset:0;z-index:70;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;">
+            <div style="background:var(--bg2);border:1px solid var(--border-card);border-radius:14px;padding:20px;width:90%;max-width:360px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                <span style="font-size:13px;font-weight:500;color:var(--cream);">プリセットを編集</span>
+                <button onclick="closePresetEditor()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;">✕</button>
+              </div>
+              <div id="preset-edit-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;"></div>
+              <button onclick="addPresetItem()" style="width:100%;padding:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--muted);cursor:pointer;font-size:11px;font-family:var(--ff);">＋ 追加</button>
+              <button onclick="savePresets()" style="width:100%;margin-top:8px;padding:10px;background:var(--amber);border:none;border-radius:10px;color:var(--text-on-accent);cursor:pointer;font-size:12px;font-weight:500;font-family:var(--ff);">保存</button>
             </div>
           </div>
           <!-- Bottom padding -->
