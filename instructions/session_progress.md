@@ -20,33 +20,52 @@
 ## ミッションキュー（上から順に実行）
 
 ### BUG-01: G4キーボード固定バグ修正（ふとし発見 2026-03-27）
-> 目的: 入力ボックスがスクロールに同期して動く問題を修正
-> リスク: 🟢低（計算式1行 + イベントリスナー1行の変更のみ）
-> 対象ファイル: frontend/js/chat.js（L1758付近 initKeyboardFix関数）
-> 分類: C11 ふとし発見バグ → 即修正
+> 目的: 入力ボックスがキーボードの裏に隠れる問題を修正
+> リスク: 🟡中（ホームのDOM構造変更を伴う）
+> 対象ファイル: frontend/index.html、frontend/style.css、frontend/js/chat.js
+> 分類: C11 ふとし発見バグ → 即調査・即修正
 
 **根本原因（Claude.ai調査済み）:**
-`home-input-area`はすでに`position:fixed`（index.html L307）。
-問題はkbH計算式に`offsetTop`（スクロール量）が混入していること。
+iOS Safariでは `overflow:hidden` を持つ祖先要素の中にある `position:fixed` は
+ビューポート基準で固定されず、その祖先要素内に閉じ込められる（既知のiOS Safariバグ）。
 
-```js
-// 現状（バグあり）
-const kbH = window.innerHeight - vvH - offsetTop;
-// offsetTopはスクロール量。キーボード高さとは無関係なのに減算されている
-// → スクロールするたびにkbHが変動 → bottom値が変わり入力ボックスが動く
-
-// 正解
-const kbH = window.innerHeight - vvH;
+```
+#pg-home（overflow:hidden ← 祖先）
+  └── div（overflow:hidden + position:relative）
+        └── #home-input-area（position:fixed ← 脱出できない）
 ```
 
-Codeの自己診断「scrollリスナーが原因」は**表面的な観察で不正確**。
-計算式のバグが本質。scrollリスナーだけ消しても問題が残る可能性がある。
+`bottom = kbH`をJSで設定しても`#pg-home`の範囲外に出られないため、
+キーボードが出るとその後ろに隠れたままになる。
+`initKeyboardFix`のJS修正（計算式・scrollリスナー削除）は表面的な対応だった。
 
-**修正内容（2点のみ）:**
-1. `const kbH = window.innerHeight - vvH - offsetTop;` → `const kbH = window.innerHeight - vvH;`
-2. `window.visualViewport.addEventListener('scroll', handler);` の行を削除
+**正しい修正方針: flex構造 + `height:100dvh`（JavaScript不要）**
 
-**検証:** iOSシミュレーターまたは実機でスクロール中に入力ボックスが動かないことを確認
+```html
+<!-- 変更後の構造 -->
+#pg-home（height:100dvh、display:flex、flex-direction:column、overflow:hidden）
+  ├── #home-chat-toolbar（flex-shrink:0）
+  ├── hero + presets + chat-wrap（flex:1、overflow-y:auto）
+  └── #home-input-area（flex-shrink:0、position:fixedを解除 → staticに）
+```
+
+`height:100dvh`（dynamic viewport height）= キーボード表示時にブラウザが自動でコンテナ高さを縮小。
+flex最下部の入力エリアが自然にキーボード直上に配置される。JavaScriptのvisualViewportハンドリング不要。
+
+**具体的な変更内容:**
+1. `#pg-home` に `height:100dvh` を追加（既存の`height:100%`を置換）
+2. `#home-input-area` の `position:fixed;left:0;right:0` を削除し、フロー内に戻す
+3. `#home-input-area` の `bottom` 関連スタイルを削除
+4. `chat.js` の `initKeyboardFix` 関数を削除（不要になる）
+5. hero/presets/chat-wrapを包むdivを `flex:1;overflow-y:auto` に変更して入力エリアを外に出す
+
+**注意:** `dvh`はiOS 15.4+、Android Chrome 108+でサポート。フォールバックとして `height:100vh` も併記
+```css
+height: 100vh; /* fallback */
+height: 100dvh;
+```
+
+**C16:** UIレイアウト変更のためStage A（localhost + iOSシミュレーター）→ デプロイ → Stage B（実機確認）
 
 ---
 
