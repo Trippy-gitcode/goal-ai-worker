@@ -6,39 +6,47 @@
 ---
 
 ## 5行サマリー
-- **Version:** v3.11.17（デプロイ済み）
-- **Next:** BUG-01（キーボード固定バグ修正）→ 提案ログ選定
-- **Last done:** BUG-01をキューに追加。B4/B5 invalidate注意事項を記録
-- **Open issues:** G4キーボード固定バグ（BUG-01）、G6のS4/E/Dは次フェーズ
-- **Proposals:** 7件（#11-#17。テスト配布前の優先度順に記載）
+- **Version:** v3.11.18（デプロイ済み）
+- **Next:** キュー空 → 提案ログ#11-#17選定待ち or テスト配布
+- **Last done:** BUG-01 キーボード固定バグ修正完了。position:fixed + visualViewport方式に変更
+- **Open issues:** G6のS4/E/Dは次フェーズ
+- **Proposals:** 7件（#11-#17）
 
 ## 現在地
-- **バージョン:** v3.11.17（デプロイ済み）
+- **バージョン:** v3.11.18（デプロイ済み）
 - **チェーン:** 全ミッション完了 → テスト配布
-- **次のミッション:** キュー空（自律調査→提案ログ）
+- **次のミッション:** キュー空
 
 ## ミッションキュー（上から順に実行）
 
 ### BUG-01: G4キーボード固定バグ修正（ふとし発見 2026-03-27）
-> 目的: 入力ボックスがキーボード直上に固定されていない問題を修正
-> リスク: 🟡中（iOS/Androidのvisualviewport挙動差異が原因の可能性）
-> 対象ファイル: frontend/index.html または js/chat.js（実装箇所を特定してから）
-> 分類: C11 ふとし発見バグ → 即調査・即修正
+> 目的: 入力ボックスがスクロールに同期して動く問題を修正
+> リスク: 🟢低（計算式1行 + イベントリスナー1行の変更のみ）
+> 対象ファイル: frontend/js/chat.js（L1758付近 initKeyboardFix関数）
+> 分類: C11 ふとし発見バグ → 即修正
 
-**症状:** 入力ボックスがキーボード表示時にキーボード直上に固定されない
+**根本原因（Claude.ai調査済み）:**
+`home-input-area`はすでに`position:fixed`（index.html L307）。
+問題はkbH計算式に`offsetTop`（スクロール量）が混入していること。
 
-**調査手順:**
-1. 現状の実装を確認（`visualViewport` API または `env(keyboard-inset-height)` が使われているか）
-2. iOSのSafariではvisualViewport.addEventListener('resize')が必要。`position:fixed;bottom:0`だけでは不十分
-3. Androidと挙動が違う場合は条件分岐が必要
-4. 実機（iOS Safari想定）でデバッグ
+```js
+// 現状（バグあり）
+const kbH = window.innerHeight - vvH - offsetTop;
+// offsetTopはスクロール量。キーボード高さとは無関係なのに減算されている
+// → スクロールするたびにkbHが変動 → bottom値が変わり入力ボックスが動く
 
-**修正仕様（Claude.ai承認済み）:**
-- キーボード表示中: 入力ボックスをキーボード直上に固定（`visualViewport.height`を使ってbottom位置を動的計算）
-- キーボード非表示時: 通常のフロー位置に戻す
-- 実装参考: `window.visualViewport.addEventListener('resize', () => { inputWrap.style.bottom = ... })`
+// 正解
+const kbH = window.innerHeight - vvH;
+```
 
-**C16:** UIバグ修正のためStage 0スキップ。Stage A（localhost + iOSシミュレーター）→ デプロイ → Stage B（実機確認）
+Codeの自己診断「scrollリスナーが原因」は**表面的な観察で不正確**。
+計算式のバグが本質。scrollリスナーだけ消しても問題が残る可能性がある。
+
+**修正内容（2点のみ）:**
+1. `const kbH = window.innerHeight - vvH - offsetTop;` → `const kbH = window.innerHeight - vvH;`
+2. `window.visualViewport.addEventListener('scroll', handler);` の行を削除
+
+**検証:** iOSシミュレーターまたは実機でスクロール中に入力ボックスが動かないことを確認
 
 ---
 
