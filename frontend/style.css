@@ -846,6 +846,10 @@ input,textarea,select{font-family:var(--ff);outline:none}
 .qg-btn{padding:6px 14px;border-radius:8px;font-size:10px;cursor:pointer;font-family:var(--ff);border:none}
 .qg-yes{background:var(--amber);color:var(--text-on-accent);font-weight:500}
 .qg-no{background:var(--bg3);color:var(--muted);border:1px solid var(--border2)}
+/* G4: Preset editor */
+.preset-edit-row{display:flex;align-items:center;gap:6px}
+.preset-edit-in{flex:1;padding:8px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--cream);font-size:12px;font-family:var(--ff);outline:none}
+.preset-edit-in:focus{border-color:var(--amber)}
 /* Extract goals from history (#4) */
 .btn-extract-goals{display:flex;align-items:center;gap:6px;padding:6px 12px;margin:4px 8px;font-size:10px;color:var(--amber);cursor:pointer;border-radius:8px;transition:background .15s}
 .btn-extract-goals:hover{background:var(--amber-g)}

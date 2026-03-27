@@ -671,6 +671,77 @@ function setPreset(btn){
   const input=document.getElementById('home-msg-in');
   if(input){input.value=btn.textContent.trim();homeResize(input);sendHomeMsg();}
 }
+
+// ════════ G4-A: Preset Editor ════════
+const DEFAULT_PRESETS = ['今日やること整理','目標の進捗を確認','モチベーションが出ない','新しいスキルを学びたい','ストレス解消法','自分の強みを知りたい'];
+
+function loadPresets(){
+  try{
+    const saved = localStorage.getItem('custom_presets');
+    return saved ? JSON.parse(saved) : null;
+  }catch(e){ return null; }
+}
+
+function applyPresets(){
+  const presets = loadPresets() || DEFAULT_PRESETS;
+  const container = document.getElementById('home-presets');
+  if(!container) return;
+  container.innerHTML = presets.map(p => `<button class="preset-chip" onclick="setPreset(this)">${escapeHtml(p)}</button>`).join('');
+}
+
+function openPresetEditor(){
+  const modal = document.getElementById('preset-editor-modal');
+  if(!modal) return;
+  modal.style.display = 'flex';
+  const list = document.getElementById('preset-edit-list');
+  const presets = loadPresets() || DEFAULT_PRESETS;
+  list.innerHTML = presets.map((p,i) => `<div class="preset-edit-row" data-idx="${i}"><input class="preset-edit-in" value="${escapeHtml(p)}" maxlength="30"><button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 6px;">✕</button></div>`).join('');
+}
+
+function closePresetEditor(){
+  document.getElementById('preset-editor-modal').style.display = 'none';
+}
+
+function addPresetItem(){
+  const list = document.getElementById('preset-edit-list');
+  if(list.children.length >= 6){ toast('最大6件です'); return; }
+  const row = document.createElement('div');
+  row.className = 'preset-edit-row';
+  row.innerHTML = `<input class="preset-edit-in" value="" maxlength="30" placeholder="新しいプリセット"><button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 6px;">✕</button>`;
+  list.appendChild(row);
+  row.querySelector('input').focus();
+}
+
+function savePresets(){
+  const inputs = document.querySelectorAll('#preset-edit-list .preset-edit-in');
+  const presets = Array.from(inputs).map(i => i.value.trim()).filter(Boolean).slice(0, 6);
+  if(presets.length === 0){ toast('少なくとも1つ必要です'); return; }
+  localStorage.setItem('custom_presets', JSON.stringify(presets));
+  applyPresets();
+  closePresetEditor();
+  toast('プリセットを保存しました');
+}
+
+// ════════ G4-B: 3-State Layout ════════
+function initHomeLayoutStates(){
+  const inp = document.getElementById('home-msg-in');
+  if(!inp) return;
+  inp.addEventListener('focus', () => {
+    if(homeMsgs.length > 0) return; // 会話中は状態②→③で既に切り替え済み
+    // 状態②: 入力フォーカス → タスクボックス非表示
+    const taskBox = document.getElementById('home-task-box');
+    if(taskBox) taskBox.style.display = 'none';
+  });
+  inp.addEventListener('blur', () => {
+    if(homeMsgs.length > 0) return;
+    // 状態① に戻す（タスクボックス再表示）
+    setTimeout(() => {
+      const taskBox = document.getElementById('home-task-box');
+      if(taskBox && homeMsgs.length === 0) renderHomeTaskBox();
+    }, 200);
+  });
+}
+
 function updateHeroVisibility(){
   const hero=document.getElementById('home-hero');
   const presets=document.getElementById('home-presets');
@@ -2689,6 +2760,7 @@ Object.assign(window, {
   _msgActionsHtml, showNanoFallbackBanner, hideNanoFallbackBanner,
   getLogoSVG, getUserAvatarText, renderUserAvatarInner,
   showTyping, hideTyping, updateTypingRoute, preRouteOnInput, showRoutePreview, hideRoutePreview,
+  openPresetEditor, closePresetEditor, addPresetItem, savePresets, applyPresets, initHomeLayoutStates,
   startReview, showWelcome, setEx, startGoal,
   voiceUIStart, voiceUIStop, voiceSetFinal, startVoiceLevelAnim,
   showVoiceInterimBubble, removeVoiceInterimBubble, toggleHomeVoice,
