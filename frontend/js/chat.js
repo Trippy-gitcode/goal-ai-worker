@@ -1755,8 +1755,19 @@ function showModelUsageDetail(){
   toast(`Claude: ${claude.remaining}/${claude.limit}回  Gemini: ${gemini.remaining}/${gemini.limit}回  GPT: ${gpt.remaining}/${gpt.limit}回`);
 }
 
-// ═══ KEYBOARD HANDLING ═══
-// BUG-01: dvh + flex構造でキーボード追従。JS handler不要
+// ═══ KEYBOARD HANDLING (BUG-01b) ═══
+// body直下のposition:fixedはiOSスクロールの影響を受けない
+(function initKeyboardFix(){
+  if(!window.visualViewport) return;
+  const inputArea = document.getElementById('home-input-area');
+  if(!inputArea) return;
+  const update = () => {
+    const kbH = Math.max(0, window.innerHeight - window.visualViewport.height);
+    inputArea.style.bottom = kbH + 'px';
+  };
+  window.visualViewport.addEventListener('resize', update);
+  update();
+})();
 function homeKey(e) { chatKey(sendHomeMsg, e); }
 
 // ─ Summary strip ─
