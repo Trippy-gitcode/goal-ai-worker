@@ -151,7 +151,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
   /* Topbar mobile — minimal */
   #topbar{display:none!important;}
   #home-chat-toolbar{padding:8px 12px!important;gap:6px;}
-  .page{height:100%;overflow:hidden;}
+  .page{height:100vh;height:100dvh;overflow:hidden;}
   #pg-home{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
   .tb-title{font-size:13px}
   .prog-compare{display:none}
@@ -406,7 +406,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
 
 /* ═══ PAGE CONTAINER ═══ */
 #pages{flex:1;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);}
-.page{display:none;flex:1;overflow:hidden;flex-direction:column;background:var(--bg);height:100%;}
+.page{display:none;flex:1;overflow:hidden;flex-direction:column;background:var(--bg);height:100vh;height:100dvh;}
 .page.active{display:flex}
 
 /* ═══ CHAT PAGE ═══ */

@@ -6,66 +6,108 @@
 ---
 
 ## 5行サマリー
-- **Version:** v3.11.18（デプロイ済み）
-- **Next:** キュー空 → 提案ログ#11-#17選定待ち or テスト配布
-- **Last done:** BUG-01 キーボード固定バグ修正完了。position:fixed + visualViewport方式に変更
+- **Version:** v3.11.22（デプロイ済み）
+- **Next:** BUG-01b（入力ボックスDOM構造修正 — タスクの下に表示される問題）
+- **Last done:** BUG-01（v3.11.22）は不完全。DOM構造変更が必要（BUG-01b）
 - **Open issues:** G6のS4/E/Dは次フェーズ
 - **Proposals:** 7件（#11-#17）
 
 ## 現在地
-- **バージョン:** v3.11.18（デプロイ済み）
+- **バージョン:** v3.11.22（デプロイ済み）
 - **チェーン:** 全ミッション完了 → テスト配布
 - **次のミッション:** キュー空
 
 ## ミッションキュー（上から順に実行）
 
-### BUG-01: G4キーボード固定バグ修正（ふとし発見 2026-03-27）
-> 目的: 入力ボックスがキーボードの裏に隠れる問題を修正
-> リスク: 🟡中（ホームのDOM構造変更を伴う）
+### BUG-01b: G4キーボード固定バグ再修正（ふとし確認 2026-03-28 — v3.11.22でも未解決）
+> リスク: 🟡中（DOM構造の変更必須）
 > 対象ファイル: frontend/index.html、frontend/style.css、frontend/js/chat.js
-> 分類: C11 ふとし発見バグ → 即調査・即修正
+> 分類: C11 ふとし発見バグ継続 → 前回修正（v3.11.22）は不完全
 
-**根本原因（Claude.ai調査済み）:**
-iOS Safariでは `overflow:hidden` を持つ祖先要素の中にある `position:fixed` は
-ビューポート基準で固定されず、その祖先要素内に閉じ込められる（既知のiOS Safariバグ）。
+**ふとしが見ている症状（v3.11.22時点でも発生）:**
+1. タスクボックスの**下**に入力ボックスが表示されている（正しくはタスクの上）
+2. メッセージエリアをスクロールしても入力ボックスは動かない
+3. タスクボックスをスクロールすると入力ボックスが一緒に動く
+4. 画面が「メッセージ領域」と「タスク+入力ボックスのペア」に2分割されている印象
 
+**前回修正（v3.11.22）が不完全な理由:**
+CSS1行（heightの変更）だけでは解決しない。問題は**DOMの物理的な構造**にある。
+
+`#home-input-area`が`overflow:hidden`の親コンテナ**内部**の、かつ`#home-task-box`の**後ろ（下）**に置かれている。
+→ タスクの下に表示されるのはDOMの順序通り。heightを変えても位置は変わらない。
+
+**現状のDOM構造（問題あり）:**
 ```
-#pg-home（overflow:hidden ← 祖先）
-  └── div（overflow:hidden + position:relative）
-        └── #home-input-area（position:fixed ← 脱出できない）
+div（overflow:hidden、flex:1）← 脱出できない壁
+  ├── toolbar
+  ├── hero / presets
+  ├── home-chat-wrap（メッセージスクロール）
+  ├── separator
+  ├── home-task-box  ← タスクボックス
+  ├── bottom-padding
+  └── home-input-area（position:fixed ← 壁の中に閉じ込め、タスクの下）
 ```
 
-`bottom = kbH`をJSで設定しても`#pg-home`の範囲外に出られないため、
-キーボードが出るとその後ろに隠れたままになる。
-`initKeyboardFix`のJS修正（計算式・scrollリスナー削除）は表面的な対応だった。
-
-**正しい修正方針: flex構造 + `height:100dvh`（JavaScript不要）**
-
-```html
-<!-- 変更後の構造 -->
-#pg-home（height:100dvh、display:flex、flex-direction:column、overflow:hidden）
-  ├── #home-chat-toolbar（flex-shrink:0）
-  ├── hero + presets + chat-wrap（flex:1、overflow-y:auto）
-  └── #home-input-area（flex-shrink:0、position:fixedを解除 → staticに）
+**正しい修正（DOM構造変更）:**
+```
+#pg-home（display:flex; flex-direction:column; height:100vh; height:100dvh）
+  ├── div（flex:1; overflow:hidden）← 既存の overflow:hidden コンテナ
+  │     ├── toolbar
+  │     ├── hero / presets
+  │     ├── home-chat-wrap（flex:1; overflow-y:auto）
+  │     ├── separator
+  │     └── home-task-box
+  └── #home-input-area（position:relative または static; flex-shrink:0）
+        ← overflow:hiddenコンテナの"外"、#pg-homeの直接の子として配置
 ```
 
-`height:100dvh`（dynamic viewport height）= キーボード表示時にブラウザが自動でコンテナ高さを縮小。
-flex最下部の入力エリアが自然にキーボード直上に配置される。JavaScriptのvisualViewportハンドリング不要。
+**具体的な変更（index.html）:**
+1. `#home-input-area`のdiv要素を`overflow:hidden`親コンテナの**閉じタグの外側（後）**に移動
+2. `#home-input-area`のstyleから`position:fixed; left:0; right:0;`を削除（position:staticに）
+3. `bottom: kbH`のJS動的変更も不要になる
 
-**具体的な変更内容:**
-1. `#pg-home` に `height:100dvh` を追加（既存の`height:100%`を置換）
-2. `#home-input-area` の `position:fixed;left:0;right:0` を削除し、フロー内に戻す
-3. `#home-input-area` の `bottom` 関連スタイルを削除
-4. `chat.js` の `initKeyboardFix` 関数を削除（不要になる）
-5. hero/presets/chat-wrapを包むdivを `flex:1;overflow-y:auto` に変更して入力エリアを外に出す
+**具体的な変更（style.css）:**
+- `#pg-home`に`display:flex; flex-direction:column; height:100vh; height:100dvh;`を確認・追加
 
-**注意:** `dvh`はiOS 15.4+、Android Chrome 108+でサポート。フォールバックとして `height:100vh` も併記
+**具体的な変更（chat.js）:**
+- `initKeyboardFix`関数を削除（DVH+flex構造で不要）
+
+**検証（2点必須）:**
+1. タスクボックスの**上**に入力ボックスが表示されること
+2. タスクボックスをスクロールしても入力ボックスが動かないこと
+
+
+
+**根本原因（Claude.ai最終確定）:**
+
+DOM構造:
+```
+#pg-home-wrap（.page → height:100%; overflow:hidden）← ここが制限している
+  └── #pg-home（height:100dvh）← 親が100%のため100dvhに届かない
+        └── #home-input-area（flex-shrink:0）← 正しい位置にいるが効かない
+```
+
+`#pg-home`に`height:100dvh`を設定済みだが、親の`#pg-home-wrap`（`.page`クラス）が
+`height:100%`のままなので、`100dvh`が機能していない。キーボード表示時に
+ブラウザが`100dvh`を縮小しても`#pg-home`自体が縮まず、`#home-input-area`が
+キーボードの裏に入ったまま。
+
+**修正（1行）:**
 ```css
-height: 100vh; /* fallback */
-height: 100dvh;
+/* style.css のモバイル用メディアクエリ内（@media width<=768px） */
+/* 現状 */
+.page { height:100%; overflow:hidden; }
+
+/* 修正後 */
+.page { height:100vh; height:100dvh; overflow:hidden; }
 ```
 
-**C16:** UIレイアウト変更のためStage A（localhost + iOSシミュレーター）→ デプロイ → Stage B（実機確認）
+または`#pg-home-wrap`に直接:
+```css
+#pg-home-wrap { height:100vh; height:100dvh; }
+```
+
+**検証:** キーボード表示時に`#home-input-area`がキーボード直上に来ること
 
 ---
 
