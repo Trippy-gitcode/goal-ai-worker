@@ -187,13 +187,34 @@ function showChatTyping(chatEl, typingId, avatarHtml, bubbleClass, route) {
   d.id = typingId;
   d.className = bubbleClass || 'msg ai';
   d.style.marginBottom = '16px';
-  const badge = _routeBadgeHTML(route);
-  const dotsHTML = badge
-    ? badge + '<div class="typing-dots" style="padding:0 14px 10px;"><span></span><span></span><span></span></div>'
-    : '<div class="typing-dots"><span></span><span></span><span></span></div>';
-  d.innerHTML = `<div class="${bubbleClass === 'tdp-msg ai' ? 'tdp-av ai' : 'msg-av ai'}">${avatarHtml || getLogoSVG(14)}</div><div class="${bubbleClass === 'tdp-msg ai' ? 'tdp-bubble' : 'msg-body'}" style="${bubbleClass === 'tdp-msg ai' ? '' : ''}"><div class="${bubbleClass === 'tdp-msg ai' ? '' : 'bubble'}" style="padding:0;">${dotsHTML}</div></div>`;
+  const isTask = bubbleClass === 'tdp-msg ai';
+  const avClass = isTask ? 'tdp-av ai' : 'msg-av ai';
+  const bodyClass = isTask ? 'tdp-bubble' : 'msg-body';
+  const bubClass = isTask ? '' : 'bubble';
+
+  // G5: Phase-based text
+  const modelName = route === 'gemini' ? 'Gemini' : route === 'gpt' ? 'ChatGPT' : route === 'claude' ? 'Claude' : null;
+  let phaseText;
+  if(modelName){
+    phaseText = `<span class="typing-phase">${modelName} が考えています...</span>`;
+  } else {
+    phaseText = '<span class="typing-phase typing-dots-text">・・・</span>';
+  }
+
+  d.innerHTML = `<div class="${avClass}">${avatarHtml || getLogoSVG(14)}</div><div class="${bodyClass}"><div class="${bubClass}" style="padding:8px 14px;">${phaseText}</div></div>`;
   chatEl.appendChild(d);
   chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+// G5: Update typing phase text (called when route is determined)
+function updateTypingPhase(typingId, route) {
+  const el = document.getElementById(typingId);
+  if(!el) return;
+  const phase = el.querySelector('.typing-phase');
+  if(!phase) return;
+  const modelName = route === 'gemini' ? 'Gemini' : route === 'gpt' || route === 'gpt-simple' ? 'ChatGPT' : 'Claude';
+  phase.textContent = `${modelName} が考えています...`;
+  phase.classList.remove('typing-dots-text');
 }
 
 function hideChatTyping(typingId) {
@@ -502,12 +523,12 @@ function mkStreamBubble(innerEl, scrollEl, extraBubStyle, route) {
   const bub = document.createElement('div');
   bub.className = 'bubble stream-bubble';
   if (extraBubStyle) bub.style.cssText = extraBubStyle;
-  // ルーティングバッジ + 「考え中...」ドットアニメーション
-  const badge = _routeBadgeHTML(route);
-  if (badge) {
-    bub.innerHTML = badge + '<div class="typing-dots" style="padding:0 14px 10px;"><span></span><span></span><span></span></div>';
+  // G5: Phase-based text instead of dots
+  const modelName = route === 'gemini' ? 'Gemini' : route === 'gpt' ? 'ChatGPT' : route === 'claude' ? 'Claude' : null;
+  if (modelName) {
+    bub.innerHTML = `<span class="typing-phase">${modelName} が考えています...</span>`;
   } else {
-    bub.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+    bub.innerHTML = '<span class="typing-phase typing-dots-text">・・・</span>';
   }
   const t = document.createElement('div');
   t.className = 'msg-footer'; t.textContent = now();
@@ -528,6 +549,8 @@ function streamAppend(bub, fullText){
     bub.innerHTML = '';
     bub._textNode = document.createTextNode('');
     bub.appendChild(bub._textNode);
+    // G5: Add cursor blink
+    bub.classList.add('stream-cursor');
     bub._dotsRemoved = true;
     // Scroll to bubble top once
     if(bub.parentElement) bub.parentElement.scrollIntoView({block:'start',behavior:'smooth'});
@@ -572,6 +595,7 @@ function streamFinalize(bub, fullText, modelLabel){
   if(bub._animTimer){ clearInterval(bub._animTimer); bub._animTimer = null; }
   // 【1】空テキストならバブルごと削除
   if(!fullText || fullText.trim() === ''){ bub.closest('.msg')?.remove(); return; }
+  bub.classList.remove('stream-cursor'); // G5: Remove cursor
   bub.innerHTML = renderMsgContent(fullText);
   // Check for numbered selection list
   checkAndShowSelections(bub, fullText);
@@ -766,7 +790,7 @@ Object.assign(window, {
   apiLoadGoals, apiCreateGoal, apiUpdateGoal, apiDeleteGoal,
   apiLoadHistory, apiSaveMessages, redeemPromoCode, validateToken, fetchUsage,
   escapeHtml, toast, CHAT_CONFIG, chatResize, chatKey,
-  showChatTyping, hideChatTyping, apiCall, chatStream,
+  showChatTyping, hideChatTyping, updateTypingPhase, apiCall, chatStream,
   checkAndShowSelections, selectAIOption, sendChatMsg, _doChatStream,
   now, scrollDown, scrollToLatest, autoResize, handleKey,
   streamAI, mkStreamBubble, streamAppend, formatModelName, streamFinalize,
