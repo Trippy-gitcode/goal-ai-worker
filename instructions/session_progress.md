@@ -7,8 +7,8 @@
 
 ## 5行サマリー
 - **Version:** v3.11.22（デプロイ済み）
-- **Next:** BUG-01b（入力ボックスDOM構造修正 — タスクの下に表示される問題）
-- **Last done:** BUG-01（v3.11.22）は不完全。DOM構造変更が必要（BUG-01b）
+- **Next:** BUG-01b（#home-input-areaをbody直下に移動。Claude.ai確定仕様）
+- **Last done:** Claude.aiが静的解析でBUG-01の根本原因を確定。仕様をBUG-01bに更新
 - **Open issues:** G6のS4/E/Dは次フェーズ
 - **Proposals:** 7件（#11-#17）
 
@@ -19,7 +19,68 @@
 
 ## ミッションキュー（上から順に実行）
 
-### BUG-01b: G4キーボード固定バグ再修正（ふとし確認 2026-03-28 — v3.11.22でも未解決）
+### BUG-01b: G4キーボード固定バグ 確定修正仕様（Claude.ai 2026-03-28）
+> リスク: 🟡中（DOM移動。ロジック変更なし）
+> 対象ファイル: frontend/index.html、frontend/js/chat.js
+> 分類: C11 継続バグ → この仕様で実装。それ以上の診断・推測・別アプローチは禁止
+
+**確定した根本原因:**
+`#home-input-area`は現在`#pg-home`（`overflow:hidden`、`display:flex`）の子要素。
+`position`未指定（static）のためflexフロー内に存在し、iOSがページをスクロールすると
+flexコンテナごと動いて入力ボックスが連動する。
+
+`position:fixed`を付けても`overflow:hidden`の祖先（`#pg-home-wrap`、`#pg-home`）が存在する限り
+iOS Safariはビューポート基準で固定しない（iOS Safariの確定した仕様）。
+
+**唯一の解決策: `#home-input-area`を`<body>`直接の子に移動する**
+
+```
+変更前:
+body > #app > #pages > #pg-home-wrap > #pg-home > #home-input-area
+
+変更後:
+body > #home-input-area  ← overflow:hiddenの祖先がゼロ
+body > #app > #pages > ... （#pg-home-wrapはそのまま）
+```
+
+**変更1: index.html**
+- `#home-input-area`のdivブロック全体（L389〜L424）を`#pg-home`から切り取る
+- `</body>`の直前に貼り付ける
+- styleに`position:fixed;bottom:0;left:0;right:0;z-index:200;`を追加
+- 元の場所のコメント行（`<!-- Input area -->`）ごと削除
+
+**変更2: chat.js の `initKeyboardFix`を以下に置き換える**
+```js
+(function initKeyboardFix(){
+  if(!window.visualViewport) return;
+  const inputArea = document.getElementById('home-input-area');
+  if(!inputArea) return;
+  const update = () => {
+    // keyboard height = innerHeight - visualViewport.height（offsetTop不使用）
+    const kbH = Math.max(0, window.innerHeight - window.visualViewport.height);
+    inputArea.style.bottom = kbH + 'px';
+  };
+  window.visualViewport.addEventListener('resize', update);
+  // scrollリスナー不要（body直下のposition:fixedはiOSスクロールの影響を受けない）
+  update();
+})();
+```
+
+**offsetTopを使わない理由:**
+- body直下の`position:fixed`はiOSがページをスクロールしても動かない（trueビューポート固定）
+- `offsetTop`を加算すると逆にズレが生じる
+
+**変更3: コンテンツ領域の下部padding確認**
+- `#home-chat-inner`は`padding-bottom:100px`済み → OK
+- `#home-task-box`内のスクロールコンテナに`padding-bottom:80px`を追加
+  （fixedの入力ボックスに隠れるコンテンツがないよう）
+
+**検証条件（Stage A・B両方で確認）:**
+1. キーボード表示中に入力ボックスがキーボード直上に固定されること
+2. チャット領域・タスクボックスをスクロールしても入力ボックスが動かないこと
+3. キーボードなし時に入力ボックスが画面下端に正しく表示されること
+
+**Codeへの厳命: この仕様以外のアプローチ（dvh、flex構造変更、scrollリスナー追加等）は試みないこと。診断が出たら実装前にsession_progress.mdに記載してClaude.aiの確認を待つこと。**
 > リスク: 🟡中（DOM構造の変更必須）
 > 対象ファイル: frontend/index.html、frontend/style.css、frontend/js/chat.js
 > 分類: C11 ふとし発見バグ継続 → 前回修正（v3.11.22）は不完全
