@@ -6,18 +6,58 @@
 ---
 
 ## 5行サマリー
-- **Version:** v3.11.16（デプロイ済み）
-- **Next:** G4（ホームレイアウト改善）
-- **Last done:** G1-G6完了。G5=待機アニメ、G6=S3プリウォーム+S1プリルーティング+S5キャッシュ+Fプレビュー+C時間帯ヒント
-- **Open issues:** G6のS4/E/Dは次フェーズ（Supabaseマイグレーション+UI設計必要）
-- **Proposals:** 消化済み
+- **Version:** v3.11.17（デプロイ済み）
+- **Next:** BUG-01（キーボード固定バグ修正）→ 提案ログ選定
+- **Last done:** BUG-01をキューに追加。B4/B5 invalidate注意事項を記録
+- **Open issues:** G4キーボード固定バグ（BUG-01）、G6のS4/E/Dは次フェーズ
+- **Proposals:** 7件（#11-#17。テスト配布前の優先度順に記載）
 
 ## 現在地
-- **バージョン:** v3.11.16（デプロイ済み）
-- **チェーン:** G4 → テスト配布
-- **次のミッション:** G4 ホーム画面レイアウト改善
+- **バージョン:** v3.11.17（デプロイ済み）
+- **チェーン:** 全ミッション完了 → テスト配布
+- **次のミッション:** キュー空（自律調査→提案ログ）
 
 ## ミッションキュー（上から順に実行）
+
+### BUG-01: G4キーボード固定バグ修正（ふとし発見 2026-03-27）
+> 目的: 入力ボックスがキーボード直上に固定されていない問題を修正
+> リスク: 🟡中（iOS/Androidのvisualviewport挙動差異が原因の可能性）
+> 対象ファイル: frontend/index.html または js/chat.js（実装箇所を特定してから）
+> 分類: C11 ふとし発見バグ → 即調査・即修正
+
+**症状:** 入力ボックスがキーボード表示時にキーボード直上に固定されない
+
+**調査手順:**
+1. 現状の実装を確認（`visualViewport` API または `env(keyboard-inset-height)` が使われているか）
+2. iOSのSafariではvisualViewport.addEventListener('resize')が必要。`position:fixed;bottom:0`だけでは不十分
+3. Androidと挙動が違う場合は条件分岐が必要
+4. 実機（iOS Safari想定）でデバッグ
+
+**修正仕様（Claude.ai承認済み）:**
+- キーボード表示中: 入力ボックスをキーボード直上に固定（`visualViewport.height`を使ってbottom位置を動的計算）
+- キーボード非表示時: 通常のフロー位置に戻す
+- 実装参考: `window.visualViewport.addEventListener('resize', () => { inputWrap.style.bottom = ... })`
+
+**C16:** UIバグ修正のためStage 0スキップ。Stage A（localhost + iOSシミュレーター）→ デプロイ → Stage B（実機確認）
+
+---
+
+### NOTE: B4/B5（KVキャッシュ）実装時の必須確認事項（ふとし指示 2026-03-27）
+> G6でB4/B5（profile/userIdのKVキャッシュ）を実装する際、以下を**必ず**実装すること
+
+**profile KVキャッシュ（B4）のinvalidateタイミング:**
+- `/api/account` のprofile更新エンドポイントでKV削除（`KV.delete('profile:${userId}')`）
+- ゴール追加・更新・削除時にもKV削除
+- invalidateなしで実装した場合、古いプロフィールでAIが回答し続けるバグになる
+
+**userId KVキャッシュ（B5）:**
+- token_idは不変なので永続キャッシュでOK。invalidate不要
+
+**実装確認コマンド（canopyに追加すること）:**
+```bash
+# profile更新後にKVが削除されることを確認
+# grep -rn "profile:${" src/ → invalidate呼び出しが存在すること
+```
 
 ### G1: ホームヘッダー全アイコン拡大（ふとし承認済み 2026-03-27）
 > 目的: ホームチャット画面のヘッダーアイコンをClaude.aiアバター相当（28px）に統一。山ロゴも48px→64pxに拡大
@@ -133,9 +173,106 @@
 6. E（信頼度 + サジェスト）
 7. D（feedbackテーブル）— Eのサジェストと一体実装
 
+---
+
+**【コスト削減バッチ（A案）】**
+
+**A1: quickRoute拡充（60→80%）**
+- 純粋タスク系パターンをさらに追加（C22ルール厳守）。複合意図の可能性があるものは除外
+- 追加候補: `^(翻訳|英語で|日本語で|要約|まとめ|箇条書き|リスト化|SNS.*投稿|ブログ.*書)` → gpt確定
+
+**A2: フロントroutingの重複呼び出し削減**
+- S1/S5（キャッシュ）と一体実装。キャッシュhit時はAPIスキップ
+
+**A3: max_tokens削減（output平均 -20%）**
+- 通常チャット: 2000→1500（Free/Pro）、4000→3000（Max/Ultra）
+- systemプロンプトに「簡潔に、必要な情報のみ」を1行追加して自然な短縮を促す
+
+**A4: feedback感情分析 Claude Sonnet → gpt-5-nano**
+- misc.js L52 の `claude-sonnet-4-20250514` を `gpt-5-nano` に変更
+- 1単語（positive/neutral/negative）判定のみなので品質影響なし
+
+**A5: AI理解メモをdiff更新（入力60%削減）**
+- memo生成時、前回のai_memoをベースに「変更点のみ」を追加するプロンプトに変更
+- 初回生成は従来通り全情報送信
+
+**A8: embedding生成を5ターンに1回**
+- `generateAndStoreEmbedding`呼び出し前にターン番号をチェック（`turnCount % 5 === 0`）
+- RAG検索は毎ターン実行。storageだけ間引く
+
+**A11: AI理解メモ生成 Claude Sonnet → gpt-5-mini**
+- services/memo.js L53 のモデルを `gpt-5-mini` に変更
+- 削減額最大（¥2.2/月/ユーザー）。メモ生成は構造化タスクなのでSonnet不要
+
+**A12: プロンプトキャッシュブロック改善**
+- COMMON_RULESを独立したキャッシュブロックとして分離
+- roleブロックも固定化してキャッシュ対象に。`cache_control: { type: 'ephemeral' }` 適用範囲拡大
+
+**A13: chat_messages取得にlimit=20追加**
+- history.jsの `supabaseQuery` でlimit=20を追加（現状: 全件取得）
+- buildCompressedMessagesのwindowSize=10なので20件で十分
+
+**A14: gpt-simpleの出力トークン削減**
+- max_tokens: 150 → 80（gpt-simple用途は短文のみ）
+- gpt.js L25の `max_completion_tokens: 150` を80に変更
+
+**A15: feedback感情分析の入力トークン削減**
+- misc.jsでrawChat全体を送信→gpt-nanoで要約してから感情判定の2段処理に変更
+- input: 200token → 50token程度
+
+**A20: usage_trackingをKVバッファ化（5分間）**
+- chat.js内のrecordTurnUsage: 毎ターンのSupabase SELECT+INSERTをKVキャッシュ経由に変更
+- 5分間はKVから使用量を読み、Stripe送信はバッチ化
+
+---
+
+**【速度改善バッチ（B案、品質影響なし）】**
+> 実装順序: B1→B4/B5→B6/B19（これだけで体感-1.3秒）→B3（G6 S1と統合）→B2→残り
+
+**B1: Workerプリウォーム（G6 S3と同一）**
+- DOMContentLoaded時に `/api/version` へGET（期待: -300ms コールドスタート解消）
+
+**B4: profileのKVキャッシュ（5分）**
+- `buildServerSystemPrompt`内のSupabase SELECT結果をKVに5分間キャッシュ
+- KVキー: `profile:${userId}`。profile更新時にinvalidate
+
+**B5: getUserIdFromTokenのKVキャッシュ（永続）**
+- `token_id → user_id` 変換結果をKV永続キャッシュ（token_idは不変）
+- KVキー: `uid:${tokenId}`。期待: -100〜200ms
+
+**B6: 会話要約をwaitUntilで非同期化**
+- `generateConversationSummary`をメインのresponse返却後に実行
+- `ctx.waitUntil(generateConversationSummary(...))` に変更。期待: -500〜1000ms
+
+**B10: gpt-simpleをstreaming=trueに変更**
+- chat.js / gpt.js のgpt-simple呼び出しを `stream: true` に変更
+- 最初のtokenを即表示（G5タイピング演出と連動）
+
+**B11: フロント側でメッセージ圧縮して送信**
+- `homeClaudeStream`の送信前に`buildCompressedMessages`相当処理をフロントで実行
+- Workerへの送信バイト数を削減。期待: -100〜200ms
+
+**B13: ストリームchunkを256byte単位でバッファ処理**
+- TextDecoderの読み取りを256byte単位にまとめてDOM更新頻度を削減
+
+**B17: chat_messages取得をlimit=20&order=desc**
+- history.js L32のクエリに `&limit=20&order=created_at.desc` を追加（A13と一体実装）
+
+**B19: streak更新をwaitUntilで非同期化**
+- streak.js のDB UPDATE をメインフローから切り離し。期待: -50〜100ms
+
+**B20: routing専用軽量エンドポイント `/api/route`**
+- gpt-simpleエンドポイントのロジックをstrip。routing判定のみの軽量版を作成
+
+**期待累積速度改善: 最大約-2.9秒（体感上位4施策だけで-1.3秒）**
+
+---
+
 **注意事項:**
 - S1プリルーティング用のprivacy.html追記済み（2026-03-27 L137）。G6デプロイ時に `npm run deploy:frontend` で含めること
 - DのSupabaseテーブル追加はマイグレーション必要。`supabase migration`で管理
+- A3のmax_tokens削減はコスト削減効果が最大（¥11/月/ユーザー）。品質確認を優先してStage Bで動作確認後にmax_tokensを段階的に下げること
+- B4/B5のKVキャッシュ追加後は、profile更新・ゴール変更時のinvalidateロジックを必ず実装すること（古いキャッシュが残ると古いプロフィールで回答する）
 
 ### G5: 待機中アニメーション改善（ふとし承認済み 2026-03-27）
 > 目的: AI応答待ちの体感時間を短縮。フェーズ別テキスト表示 + タイピング演出
@@ -427,20 +564,19 @@
 
 ---
 
-## 提案ログ（2026-03-24 キュー空時自律調査）
+## 提案ログ（2026-03-27 第2回自律調査）
+
+**前回(#1-#10)の消化状況:** #1背景プリセット/#4ゴール抽出/#7クイックゴールUX = 実装済み。#2/#5/#8/#9/#10 = 既存実装を確認。#3リファラル/#6複数ゴール = 次フェーズ保留
 
 | # | 項目 | 仕様出典 | リスク | 備考 |
 |---|------|----------|--------|------|
-| 1 | チャット背景プリセット（夕焼け/星空等） | reference_v2 §Backlog | 🟡 | UI仕様あり、コード0件 |
-| 2 | AIメモ自動更新（5ターンごと） | reference_v2 §Backlog | 🟡 | トリガーロジックなし |
-| 3 | リファラル報酬の自動処理 | reference_v2 §Backlog | 🔴 | Stripe連携必要 |
-| 4 | 過去会話からゴール候補を抽出 | reference_v2 §Backlog E-10 | 🟡 | 履歴マイニングなし |
-| 5 | 会話テーマ自動タグ付け | reference_v2 §Backlog E-20 | 🟢 | 完全未実装 |
-| 6 | 複数ゴール同時検出 | reference_v2 §Backlog E-13 | 🟡 | 1ターン1ゴールのみ |
-| 7 | クイックゴール（長押し→即登録） | reference_v2 §Backlog E-16 | 🟢 | ゴール用なし |
-| 8 | 達成レポート検出+紙吹雪 | reference_v2 §Backlog E-17 | 🟢 | 検出ロジックなし |
-| 9 | 定期チェックイン（ストリーク連動） | reference_v2 §Backlog E-19 | 🟡 | チェックインプロンプトなし |
-| 10 | プロフィール理解セクション スクロール時自動閉じ | reference_v2 §Backlog | 🟢 | 未実装 |
+| 11 | ルーティング信頼度+代替AI提案（G6-E） | session_progress G6 | 🔴 | confidence<70時に「他のAIでも→」。ROUTE_PROMPT変更+UI |
+| 12 | AIメモ更新トースト通知 | reference_v2 #14, amendment_001 | 🟢 | メモ再生成時にユーザーに通知。バックエンドはあり、UI未接続 |
+| 13 | Free→Nanoフォールバック | reference_v2 #29 | 🟡 | Free上限到達時にnanoモデルへ自動縮退。指示書あり未実装 |
+| 14 | ルーティングフィードバック学習（G6-D） | session_progress G6 | 🟡 | routing_feedbackテーブル+「別のAIで試す」データ蓄積 |
+| 15 | S4: ルーティングとストリーム並列化 | session_progress G6 | 🟡 | TCP接続をルーティング中に確立。TTFT 200-400ms短縮 |
+| 16 | リファラル報酬自動処理 | reference_v2 #24 | 🔴 | Stripe連携。applyReferralRewardは部分実装あり |
+| 17 | 複数ゴール同時検出（E-13強化） | reference_v2 E-13 | 🟡 | goal_topics配列処理は一部あり。並列提案UIが未実装 |
 
 ## 完了済みミッション詳細・照合結果・提案ログ過去分
 
