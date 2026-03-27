@@ -1009,6 +1009,84 @@ let goalDetectLevel = 'none';
 let pendingGoalProposal = false;
 let pendingTaskSuggestion = false;
 
+// ════════ S1: PRE-ROUTING ON INPUT ════════
+let _preRouteTimer = null;
+let _preRouteAbort = null; // S2
+let _preRoutedResult = null;
+let _preRouteExpiry = 0;
+
+function preRouteOnInput(){
+  const inp = document.getElementById('home-msg-in');
+  if(!inp) return;
+  const text = inp.value.trim();
+  if(text.length < 5){ _preRoutedResult = null; hideRoutePreview(); return; }
+
+  // S2: Abort previous pre-route
+  if(_preRouteAbort){ _preRouteAbort.abort(); _preRouteAbort = null; }
+  clearTimeout(_preRouteTimer);
+
+  _preRouteTimer = setTimeout(async () => {
+    // S5: Check cache first
+    const cached = getRoutingCache(text);
+    if(cached){ _preRoutedResult = cached; _preRouteExpiry = Date.now() + 3000; showRoutePreview(cached); return; }
+
+    _preRouteAbort = new AbortController();
+    try {
+      const route = await routeMessage(text);
+      _preRoutedResult = route;
+      _preRouteExpiry = Date.now() + 3000;
+      setRoutingCache(text, route); // S5
+      showRoutePreview(route); // F
+    } catch(e) { _preRoutedResult = null; }
+    _preRouteAbort = null;
+  }, 800);
+}
+
+// F: AI name preview in toolbar
+function showRoutePreview(route){
+  const name = route === 'gemini' ? 'Gemini' : route === 'gpt' || route === 'gpt-simple' ? 'ChatGPT' : 'Claude';
+  let el = document.getElementById('route-preview-badge');
+  if(!el){
+    el = document.createElement('span');
+    el.id = 'route-preview-badge';
+    el.style.cssText = 'font-size:9px;color:var(--muted);font-family:var(--fm);opacity:0;transition:opacity .3s;margin-left:4px;';
+    const toolbar = document.getElementById('home-chat-toolbar');
+    const spacer = toolbar?.querySelector('[style*="flex:1"]');
+    if(spacer) spacer.after(el); else return;
+  }
+  el.textContent = name;
+  requestAnimationFrame(() => el.style.opacity = '0.7');
+}
+function hideRoutePreview(){
+  const el = document.getElementById('route-preview-badge');
+  if(el) el.style.opacity = '0';
+}
+
+// S5: Routing cache (sessionStorage, last 20 entries)
+function getRoutingCache(text){
+  try{
+    const cache = JSON.parse(sessionStorage.getItem('route_cache')||'{}');
+    return cache[text] || null;
+  }catch(e){ return null; }
+}
+function setRoutingCache(text, route){
+  try{
+    const cache = JSON.parse(sessionStorage.getItem('route_cache')||'{}');
+    cache[text] = route;
+    const keys = Object.keys(cache);
+    if(keys.length > 20) delete cache[keys[0]];
+    sessionStorage.setItem('route_cache', JSON.stringify(cache));
+  }catch(e){}
+}
+
+// C: Time-based routing hint
+function getTimeHint(){
+  const h = new Date().getHours();
+  if(h >= 6 && h < 10) return '（朝の時間帯: タスク・計画系はgpt優先）';
+  if(h >= 21 || h < 2) return '（夜の時間帯: 感情・振り返り系はclaude優先）';
+  return '';
+}
+
 // ════════ AI SMART ROUTING (GPT-5 mini判定) ════════
 const ROUTE_PROMPT = `ユーザーのメッセージを分類せよ。JSON形式で返せ。
 {"route":"gemini|gpt|gpt-simple|claude","coaching":true|false}
@@ -1040,15 +1118,23 @@ async function routeMessage(text){
   // 短い相槌パターンはgpt-simple（API呼び出し不要）
   const simplePatterns = /^(ありがとう|OK|うん|はい|いいえ|了解|わかった|なるほど|そうだね|いいね|おはよう|おやすみ|お疲れ)$/i;
   if(simplePatterns.test(text.trim())) return 'gpt-simple';
+  // S1: Check pre-routed cache
+  if(_preRoutedResult && Date.now() < _preRouteExpiry){
+    const cached = _preRoutedResult;
+    _preRoutedResult = null;
+    return cached;
+  }
   // GPT-simpleでルーティング判定（チャット回数を消費しない）
   try{
+    const timeHint = getTimeHint(); // C: time-based hint
     const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
       method:'POST', headers:getAuthHeaders(),
       body:JSON.stringify({
-        system: ROUTE_PROMPT,
+        system: ROUTE_PROMPT + (timeHint ? '\n\nヒント: ' + timeHint : ''),
         messages:[{role:'user',content:text}],
         maxTokens:300
-      })
+      }),
+      signal: _preRouteAbort?.signal
     });
     if(!res.ok) return 'claude';
     const data = await res.json();
@@ -2602,7 +2688,8 @@ Object.defineProperty(window, 'homeImageData', {
 Object.assign(window, {
   _msgActionsHtml, showNanoFallbackBanner, hideNanoFallbackBanner,
   getLogoSVG, getUserAvatarText, renderUserAvatarInner,
-  showTyping, hideTyping, updateTypingRoute, startReview, showWelcome, setEx, startGoal,
+  showTyping, hideTyping, updateTypingRoute, preRouteOnInput, showRoutePreview, hideRoutePreview,
+  startReview, showWelcome, setEx, startGoal,
   voiceUIStart, voiceUIStop, voiceSetFinal, startVoiceLevelAnim,
   showVoiceInterimBubble, removeVoiceInterimBubble, toggleHomeVoice,
   handleHomeImage, handleHomePaste, handleHomeDrop, processHomeImageFile,
