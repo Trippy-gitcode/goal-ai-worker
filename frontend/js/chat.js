@@ -1756,7 +1756,7 @@ function showModelUsageDetail(){
 }
 
 // ═══ KEYBOARD HANDLING (iOS visualViewport) — BUG-01 fix ═══
-// input areaをキーボード直上に固定する
+// input area（position:absolute）のbottomをキーボード高さ分調整
 (function initKeyboardFix(){
   if(!window.visualViewport) return;
   const handler = () => {
@@ -1766,26 +1766,11 @@ function showModelUsageDetail(){
     const inputArea = document.getElementById('home-input-area');
     if(!inputArea) return;
     if(kbH > 50){
-      // キーボード表示中: inputをfixedにしてキーボード直上に配置
-      inputArea.style.position = 'fixed';
+      // キーボード表示中: bottomをキーボード高さ分上げる
       inputArea.style.bottom = kbH + 'px';
-      inputArea.style.left = '0';
-      inputArea.style.right = '0';
-      inputArea.style.zIndex = '100';
-      inputArea.style.background = 'var(--bg)';
-      // チャットエリアにbottomパディングを追加（inputが重ならないように）
-      const chatWrap = document.getElementById('home-chat-wrap');
-      if(chatWrap) chatWrap.style.paddingBottom = (inputArea.offsetHeight + kbH) + 'px';
     } else {
-      // キーボード非表示: 通常のフロー位置に戻す
-      inputArea.style.position = '';
-      inputArea.style.bottom = '';
-      inputArea.style.left = '';
-      inputArea.style.right = '';
-      inputArea.style.zIndex = '';
-      inputArea.style.background = 'transparent';
-      const chatWrap = document.getElementById('home-chat-wrap');
-      if(chatWrap) chatWrap.style.paddingBottom = '';
+      // キーボード非表示: 元のbottom:0に戻す
+      inputArea.style.bottom = '0';
     }
   };
   window.visualViewport.addEventListener('resize', handler);
