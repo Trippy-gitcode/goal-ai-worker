@@ -29,6 +29,7 @@ function renderUserAvatarInner(av){
 }
 function showTyping(route) { showChatTyping(document.getElementById('home-chat-inner'), 'typing-indicator', undefined, undefined, route); }
 function hideTyping() { hideChatTyping('typing-indicator'); }
+function updateTypingRoute(route) { updateTypingPhase('typing-indicator', route); }
 
 function startReview() {
   showPage('home');
@@ -987,7 +988,10 @@ async function sendHomeMsg(){
   }
 
   try{
+    // G5: Show typing indicator immediately (phase: ・・・)
+    showTyping();
     // 全メッセージを /api/chat/stream に送信（Worker側でルーティング判定）
+    hideTyping();
     await homeClaudeStream(today, homeInner, homeWrap);
   }catch(e){
     const errBub = document.createElement('div');
@@ -2598,7 +2602,7 @@ Object.defineProperty(window, 'homeImageData', {
 Object.assign(window, {
   _msgActionsHtml, showNanoFallbackBanner, hideNanoFallbackBanner,
   getLogoSVG, getUserAvatarText, renderUserAvatarInner,
-  showTyping, hideTyping, startReview, showWelcome, setEx, startGoal,
+  showTyping, hideTyping, updateTypingRoute, startReview, showWelcome, setEx, startGoal,
   voiceUIStart, voiceUIStop, voiceSetFinal, startVoiceLevelAnim,
   showVoiceInterimBubble, removeVoiceInterimBubble, toggleHomeVoice,
   handleHomeImage, handleHomePaste, handleHomeDrop, processHomeImageFile,
