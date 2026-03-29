@@ -6,15 +6,15 @@
 ---
 
 ## 5行サマリー
-- **Version:** v3.11.30（デプロイ済み 2026-03-29）
-- **Next:** BUG-01b（Phase 1: JSクリーンアップ → Phase 2: overflow:clip修正 → Phase 3: シミュレーター検証）
-- **Last done:** BUG-01b Phase 1-4 完了（クリーンアップ + overflow:clip）v3.11.30 デプロイ済み → ふとし実機確認待ち
+- **Version:** v3.11.31（デプロイ済み 2026-03-29）
+- **Next:** BUG-01b Phase 5（focusイベントでスクロール防止 + シミュレーター検証）
+- **Last done:** BUG-01b Phase 5 デプロイ v3.11.31。focus時scrollTo(0,0)×3 + touchmoveブロック追加 → ふとし実機確認待ち
 - **Open issues:** BUG-01b（iOSキーボード。Xcode導入済み。パッチ当て5回失敗→クリーンアップ+overflow:clip方式に切り替え）
 
 ## 現在地
-- **バージョン:** v3.11.30（デプロイ済み）
+- **バージョン:** v3.11.31（デプロイ済み）
 - **チェーン:** BUG-01b（Phase 1→2→3→4）→ テスト配布準備
-- **次のミッション:** BUG-01b Phase 1（クリーンアップ）
+- **次のミッション:** BUG-01b Phase 5（focusスクロール防止）
 
 ## ミッションキュー（上から順に実行）
 
@@ -95,6 +95,32 @@
 **Phase 4: デプロイ → ふとし実機確認**
 
 3-Aが全てPASSしたらデプロイ。ふとしに実機確認を依頼。
+
+**Phase 4実機結果（2026-03-29 v3.11.30）:**
+- overflow:clip変更で2回目キーボード表示の安定性は改善（2回目も1回目と同じ動作に）
+- しかし以下2点が未解決:
+  - ページが押し上げられる（ヒーローが上にスクロールされる）
+  - スクロール操作すると入力ボックスがキーボード裏に隠れる
+- 原因: iOS Safariの「テキストエリアにフォーカスした時にwindow自体をスクロールして要素を見せようとする」挙動。overflow:clipでもwindowスクロール自体は防げていない
+
+**Phase 5: focusイベントでスクロール防止**
+
+5-A. chat.jsに以下を追加:
+- `#home-msg-in`（textarea）のfocusイベントで `window.scrollTo(0, 0)` を呼ぶ
+- タイミングが重要: focusの直後にiOS Safariがスクロールするので、focusイベント内 + requestAnimationFrame + 100ms後の3回scrollTo(0,0)を呼ぶ
+- さらに、focus中のtouchmoveイベントをwindowレベルでpreventDefaultしてスクロール操作自体を防ぐ（ただしチャット領域#home-chat-wrapのスクロールは許可）
+
+5-B. シミュレーター検証:
+- 前回「シミュレーターでタッチ入力自動化不可」で検証できなかった
+- 解決策: JavaScriptでtextareaをfocusすることでキーボードを表示する
+  - ローカルサーバーで配信し、シミュレーターのSafariで開く
+  - SafariのWeb Inspectorまたは`xcrun simctl openurl`でJSを注入: `document.getElementById('home-msg-in').focus()`
+  - または: テストHTML（textarea + 自動focus）をローカルに作成してシミュレーターで開く
+- 検証項目:
+  1. focus後にページが押し上げられていないこと（window.scrollYが0であること）
+  2. キーボード表示中にスクロール操作してもinput-areaが動かないこと
+
+5-C. デプロイ → ふとし実機確認
 
 ---
 
