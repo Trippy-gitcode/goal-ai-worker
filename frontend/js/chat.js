@@ -740,6 +740,27 @@ function initHomeLayoutStates(){
       if(taskBox && homeMsgs.length === 0) renderHomeTaskBox();
     }, 200);
   });
+
+  // BUG-01b Phase 5: iOS Safariのfocus時スクロール防止
+  // iOS Safariはtextareaにフォーカスするとwindow自体をスクロールして要素を見せようとする
+  // → focus直後・rAF・100ms後の3回scrollTo(0,0)で押し上げを打ち消す
+  inp.addEventListener('focus', () => {
+    window.scrollTo(0, 0);
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+    setTimeout(() => window.scrollTo(0, 0), 100);
+  });
+
+  // BUG-01b Phase 5: focus中のtouchmoveをwindowレベルでブロック
+  // ただしチャット領域(#home-chat-wrap)内のスクロールは許可
+  let _inputFocused = false;
+  inp.addEventListener('focus', () => { _inputFocused = true; });
+  inp.addEventListener('blur', () => { _inputFocused = false; });
+  window.addEventListener('touchmove', (e) => {
+    if(!_inputFocused) return;
+    // #home-chat-wrap内のスクロールは許可
+    if(e.target.closest && e.target.closest('#home-chat-wrap')) return;
+    e.preventDefault();
+  }, { passive: false });
 }
 
 function updateHeroVisibility(){
