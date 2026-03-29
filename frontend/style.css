@@ -1730,6 +1730,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
   animation:cur-blink .7s step-end infinite;vertical-align:baseline;margin-left:2px;
 }
 .stream-bubble.done::after{display:none;}
+.stream-bubble.stream-cursor::after{content:'_';animation:blink-cursor .5s step-end infinite;color:var(--amber)}
 @keyframes cur-blink{0%,100%{opacity:1}50%{opacity:0}}
 
 /* ─ will-change: only on animated ─ */
