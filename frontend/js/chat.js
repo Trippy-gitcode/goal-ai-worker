@@ -1081,10 +1081,8 @@ async function sendHomeMsg(){
   }
 
   try{
-    // G5: Show typing indicator immediately (phase: ・・・)
-    showTyping();
-    // 全メッセージを /api/chat/stream に送信（Worker側でルーティング判定）
-    hideTyping();
+    // Worker側ルーティング使用時: homeClaudeStream内のchatStream→mkStreamBubbleで
+    // タイピングインジケーターが表示されるため、ここでの別途表示は不要
     await homeClaudeStream(today, homeInner, homeWrap);
   }catch(e){
     const errBub = document.createElement('div');
@@ -1273,9 +1271,13 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
     if(currentRouteAI){
       route = currentRouteAI; // 会話中はAI固定
     } else {
+      // G5-A: ルーティング中テキスト（>1秒経過後のみ表示）
+      const routeTimer = setTimeout(() => showTyping(), 1000);
       // S4: ルーティングとストリーム接続を並列化 — routeMessage中にWorkerへのTCP接続を確立
       const warmup = fetch(`${WORKER_URL}/api/chat/stream`, { method:'OPTIONS', priority:'high' }).catch(()=>{});
       route = await routeMessage(text);
+      clearTimeout(routeTimer);
+      hideTyping(); // ルーティング完了 → タイピング非表示（ルート別バブルに切り替え）
       warmup; // TCP/TLS接続をルーティング時間に隠蔽
       currentRouteAI = (route === 'gpt-simple') ? 'claude' : route; // gpt-simpleは次からclaude
     }
