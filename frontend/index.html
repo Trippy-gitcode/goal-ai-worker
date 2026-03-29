@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, interactive-widget=resizes-content">
 <meta property="og:title" content="GOAL AI - AIゴールコーチング">
 <meta property="og:description" content="ゴールだけ教えてくれればいい。3つのAIがあなたの目標達成をサポートします。">
 <meta property="og:type" content="website">
@@ -187,7 +187,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.29</span>
+      <span class="version" title="バージョン確認">v3.11.30</span>
     </div>
   </div>
 </div>
@@ -1973,8 +1973,7 @@
   <div style="font-size:16px;color:#fff;letter-spacing:.12em;font-weight:500;">ここに画像をドロップ</div>
 </div>
 
-<!-- BUG-01b: Input area — body直下 position:fixed（overflow:hidden祖先の外に配置） -->
-<div id="home-input-area" style="position:fixed;bottom:0;left:0;right:0;z-index:200;padding:8px 12px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent 0%, var(--bg) 40%);will-change:transform;-webkit-backface-visibility:hidden;backface-visibility:hidden;">
+<div id="home-input-area" style="position:fixed;bottom:0;left:0;right:0;z-index:200;padding:8px 12px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent 0%, var(--bg) 40%);">
   <div style="max-width:700px;margin:0 auto;background:rgba(12,14,20,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0.5px solid rgba(200,146,10,0.3);border-radius:14px;display:flex;align-items:center;gap:4px;padding:8px 12px;transition:border-color .2s;box-shadow:0 -4px 20px rgba(0,0,0,.25);" id="home-input-wrap" ondragover="event.preventDefault();this.style.borderColor='var(--amber)'" ondragleave="this.style.borderColor=''" ondrop="handleHomeDrop(event);this.style.borderColor=''">
     <label title="画像を添付" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);flex-shrink:0;transition:color .15s;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--muted)'">
       <input type="file" id="home-img-in" accept="image/*" style="display:none;" onchange="handleHomeImage(this)">

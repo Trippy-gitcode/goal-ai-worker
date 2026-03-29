@@ -1822,60 +1822,6 @@ function showModelUsageDetail(){
   toast(`Claude: ${claude.remaining}/${claude.limit}回  Gemini: ${gemini.remaining}/${gemini.limit}回  GPT: ${gpt.remaining}/${gpt.limit}回`);
 }
 
-// ═══ KEYBOARD HANDLING (BUG-01b) ═══
-// Step 1: visualViewport.heightでhtml/body/#app/.pageの高さを制約し、iOS Safariのキーボード押し上げを防止
-// Step 2: 入力ボックスをキーボード上に固定（position:fixedのbottomを動的調整）
-// iOS Safariはキーボード表示時にビューポートを縮めず、ページを上にスクロールして押し上げる
-// → 全コンテナ階層の高さをvisualViewport.heightに固定し、スクロール余地をなくす
-(function initKeyboardFix(){
-  if(!window.visualViewport) return;
-  const app = document.getElementById('app');
-  const inputArea = document.getElementById('home-input-area');
-  if(!app || !inputArea) return;
-
-  const docEl = document.documentElement;
-  const body = document.body;
-  let _kbOpen = false;
-
-  const update = () => {
-    const vv = window.visualViewport;
-    const kbH = Math.max(0, window.innerHeight - vv.height);
-    const isOpen = kbH > 50;
-
-    // Step 1: 全コンテナ階層の高さをvisualViewport.heightに制約
-    if(isOpen) {
-      const h = vv.height + 'px';
-      docEl.style.height = h;
-      body.style.height = h;
-      app.style.height = h;
-      // スクロールを強制リセット（iOS Safariの押し上げを打ち消す）
-      window.scrollTo(0, 0);
-      // アクティブな.pageの高さも制約
-      const activePage = app.querySelector('.page.active');
-      if(activePage) activePage.style.height = h;
-      const pgHome = document.getElementById('pg-home');
-      if(pgHome) pgHome.style.height = h;
-    } else if(_kbOpen) {
-      // キーボードが閉じた: CSS値に戻す
-      docEl.style.height = '';
-      body.style.height = '';
-      app.style.height = '';
-      const activePage = app.querySelector('.page.active');
-      if(activePage) activePage.style.height = '';
-      const pgHome = document.getElementById('pg-home');
-      if(pgHome) pgHome.style.height = '';
-    }
-    _kbOpen = isOpen;
-
-    // Step 2: 入力ボックスの位置をキーボード上に固定
-    const scrollOffset = vv.offsetTop || 0;
-    inputArea.style.bottom = (kbH - scrollOffset) + 'px';
-  };
-
-  window.visualViewport.addEventListener('resize', update);
-  window.visualViewport.addEventListener('scroll', update);
-  update();
-})();
 function homeKey(e) { chatKey(sendHomeMsg, e); }
 
 // ─ Summary strip ─

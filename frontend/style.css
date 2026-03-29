@@ -115,7 +115,7 @@
 
 
 html{font-size:var(--base-font-size,13px);line-height:var(--base-line-height,1.65);}
-html,body{height:100%;background:var(--bg);background-image:var(--bg-grad);background-attachment:fixed;color:var(--cream);font-family:var(--ff);font-size:13px;line-height:1.65;overflow:hidden;-webkit-font-smoothing:antialiased;overscroll-behavior:none;}
+html,body{height:100%;background:var(--bg);background-image:var(--bg-grad);background-attachment:fixed;color:var(--cream);font-family:var(--ff);font-size:13px;line-height:1.65;overflow:clip;-webkit-font-smoothing:antialiased;overscroll-behavior:none;}
 button{font-family:var(--ff);cursor:pointer;border:none;outline:none}
 input,textarea,select{font-family:var(--ff);outline:none}
 ::-webkit-scrollbar{width:3px;height:3px}
@@ -493,6 +493,9 @@ input,textarea,select{font-family:var(--ff);outline:none}
 /* G5: Phase-based typing text */
 .typing-phase{font-size:12px;color:var(--muted);font-family:var(--ff);animation:route-pulse 1.5s ease-in-out infinite}
 .typing-dots-text{letter-spacing:3px}
+/* #18: Send→Stop icon fade */
+#home-send-icon{transition:opacity .15s ease}
+
 /* G5: Stream cursor blink */
 .stream-cursor::after{content:'_';animation:blink-cursor .5s step-end infinite;color:var(--amber)}
 @keyframes blink-cursor{0%,100%{opacity:1}50%{opacity:0}}
