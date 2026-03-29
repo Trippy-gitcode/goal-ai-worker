@@ -6,15 +6,15 @@
 ---
 
 ## 5行サマリー
-- **Version:** v3.11.31（デプロイ済み 2026-03-29）
-- **Next:** BUG-01b Phase 5（focusイベントでスクロール防止 + シミュレーター検証）
-- **Last done:** BUG-01b Phase 5 デプロイ v3.11.31。focus時scrollTo(0,0)×3 + touchmoveブロック追加 → ふとし実機確認待ち
-- **Open issues:** BUG-01b（iOSキーボード。Xcode導入済み。パッチ当て5回失敗→クリーンアップ+overflow:clip方式に切り替え）
+- **Version:** v3.11.32（デプロイ済み 2026-03-30）
+- **Next:** BUG-01b Phase 6（フリッカー解消 — scrollイベントで即時リセット）
+- **Last done:** BUG-01b Phase 6 デプロイ v3.11.32。scrollリスナー方式でフリッカー解消 → ふとし実機確認待ち
+- **Open issues:** BUG-01b（iOSキーボード。Phase 6でフリッカー解消予定）
 
 ## 現在地
-- **バージョン:** v3.11.31（デプロイ済み）
-- **チェーン:** BUG-01b（Phase 1→2→3→4）→ テスト配布準備
-- **次のミッション:** BUG-01b Phase 5（focusスクロール防止）
+- **バージョン:** v3.11.32（デプロイ済み）
+- **チェーン:** BUG-01b Phase 6 → テスト配布準備
+- **次のミッション:** BUG-01b Phase 6（フリッカー解消）
 
 ## ミッションキュー（上から順に実行）
 
@@ -121,6 +121,36 @@
   2. キーボード表示中にスクロール操作してもinput-areaが動かないこと
 
 5-C. デプロイ → ふとし実機確認
+
+**Phase 5実機結果（2026-03-29 v3.11.31）:**
+- scrollTo(0,0)×3でページは元に戻るようになった（押し上げ後にリセットされる）
+- しかしフリッカーが出る（一瞬押し上げ→戻す が見える）
+- 原因: focusイベント内のscrollToでは、ブラウザがスクロールした"後"にリセットするためギャップが見える
+
+**Phase 6: フリッカー解消（scrollイベントで即時リセット）**
+
+6-A. chat.jsの修正:
+- 現在のfocusイベント内のscrollTo×3（即座+rAF+100ms）は削除
+- 代わりに: focusイベントの瞬間にwindowのscrollリスナーを張り、scroll発生時に即座にscrollTo(0,0)を呼ぶ
+- これにより「スクロールが起きた瞬間」にリセットされ、フリッカーが消える
+- scrollリスナーはキーボードが閉じたら（blur時に）解除する
+- 実装イメージ:
+```js
+const lockScroll = () => window.scrollTo(0, 0);
+textarea.addEventListener('focus', () => {
+  window.addEventListener('scroll', lockScroll, { passive: false });
+});
+textarea.addEventListener('blur', () => {
+  window.removeEventListener('scroll', lockScroll);
+});
+```
+
+6-B. シミュレーター検証:
+- JSでtextareaをfocusしてキーボードを表示
+- focus時にページが一瞬も動かないこと（フリッカーなし）を確認
+- window.scrollYが常に0であることを確認
+
+6-C. デプロイ → ふとし実機確認
 
 ---
 
