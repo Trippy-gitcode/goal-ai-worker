@@ -6,15 +6,15 @@
 ---
 
 ## 5行サマリー
-- **Version:** v3.11.33（デプロイ済み 2026-03-30）
-- **Next:** BUG-01b Phase 7（preventScrollアプローチ — スクロール自体を発生させない）
-- **Last done:** BUG-01b Phase 7 v3.11.33。preventScroll方式 → ふとし実機確認待ち
-- **Open issues:** BUG-01b（iOSキーボード。Phase 7: focus({preventScroll:true})で根本解決を狙う）
+- **Version:** v3.11.34（デプロイ済み 2026-03-30）
+- **Next:** BUG-01b Phase 8（入力ボックスのキーボード追従 — visualViewport.resizeでbottom調整）
+- **Last done:** BUG-01b Phase 8 v3.11.34。visualViewport.resizeでbottom調整追加 → ふとし実機確認待ち
+- **Open issues:** BUG-01b（iOSキーボード。Phase 8で入力ボックスのキーボード追従を実装予定）
 
 ## 現在地
-- **バージョン:** v3.11.33（デプロイ済み）
-- **チェーン:** BUG-01b Phase 7 → テスト配布準備
-- **次のミッション:** BUG-01b Phase 7（preventScrollアプローチ）
+- **バージョン:** v3.11.34（デプロイ済み）
+- **チェーン:** BUG-01b Phase 8 → テスト配布準備
+- **次のミッション:** BUG-01b Phase 8（入力ボックスのキーボード追従）
 
 ## ミッションキュー（上から順に実行）
 
@@ -185,6 +185,35 @@ ta.addEventListener('pointerdown', (e) => {
 - 既存のペースト・画像添付・音声入力が壊れていないこと
 
 7-C. デプロイ → ふとし実機確認
+
+**Phase 7実機結果（2026-03-29）:**
+- preventScroll + pointerdownアプローチでスクロール（押し上げ）は完全に解消。フリッカーもなし
+- しかし入力ボックスがキーボードの裏に隠れたまま。bottom:0がキーボード上端に来ていない
+- 原因推定: preventScrollでfocusした場合、interactive-widget=resizes-contentによるビューポート縮小が正しく反映されない or bottom:0の基準がlayout viewport基準のまま
+
+**Phase 8: 入力ボックスのキーボード追従（visualViewport.resizeでbottom調整）**
+
+8-A. chat.jsの修正:
+- Phase 7のpreventScroll + touchmoveブロックは一切変更しない（スクロール防止は維持）
+- `visualViewport.resize` イベントでキーボード高さを検出し、入力ボックスのbottomを設定
+- 実装イメージ:
+```js
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    const kbH = Math.max(0, window.innerHeight - window.visualViewport.height);
+    const inputArea = document.getElementById('home-input-area');
+    if (inputArea) inputArea.style.bottom = kbH + 'px';
+  });
+}
+```
+- キーボードが閉じたらkbH=0になり、bottom:0に戻る
+
+8-B. シミュレーター検証:
+- キーボード表示時に入力ボックスがキーボード直上に表示されること
+- キーボードを閉じたら入力ボックスが画面下端に戻ること
+- スクロール操作しても入力ボックスが動かないこと（Phase 7のscrollロックが効いていること）
+
+8-C. デプロイ → ふとし実機確認
 
 ---
 
