@@ -187,7 +187,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.24</span>
+      <span class="version" title="バージョン確認">v3.11.29</span>
     </div>
   </div>
 </div>
@@ -1091,7 +1091,14 @@
         <!-- Progress timeline -->
         <div class="chart-box">
           <div class="chart-hd">
-            <div class="chart-title">月別進捗：予定 vs 実績</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div class="chart-title">月別進捗：予定 vs 実績</div>
+              <div id="chart-period-chips" style="display:flex;gap:4px;">
+                <button onclick="setChartPeriod(3)" class="chart-period-chip active" data-period="3" style="padding:3px 8px;border-radius:10px;font-size:9px;cursor:pointer;border:1px solid var(--border2);background:var(--amber);color:var(--text-on-accent);font-family:var(--fm);">3m</button>
+                <button onclick="setChartPeriod(6)" class="chart-period-chip" data-period="6" style="padding:3px 8px;border-radius:10px;font-size:9px;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--muted);font-family:var(--fm);">6m</button>
+                <button onclick="setChartPeriod(12)" class="chart-period-chip" data-period="12" style="padding:3px 8px;border-radius:10px;font-size:9px;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--muted);font-family:var(--fm);">12m</button>
+              </div>
+            </div>
             <div style="display:flex;gap:10px;font-size:10px;">
               <span style="display:flex;align-items:center;gap:4px;color:var(--muted)"><span style="width:10px;height:3px;background:rgba(228,184,106,.5);display:inline-block;border-radius:1px"></span>予定</span>
               <span style="display:flex;align-items:center;gap:4px;color:var(--muted)"><span style="width:10px;height:10px;background:var(--green);display:inline-block;border-radius:2px"></span>実績（順調）</span>
@@ -1967,7 +1974,7 @@
 </div>
 
 <!-- BUG-01b: Input area — body直下 position:fixed（overflow:hidden祖先の外に配置） -->
-<div id="home-input-area" style="position:fixed;bottom:0;left:0;right:0;z-index:200;padding:8px 12px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent 0%, var(--bg) 40%);">
+<div id="home-input-area" style="position:fixed;bottom:0;left:0;right:0;z-index:200;padding:8px 12px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent 0%, var(--bg) 40%);will-change:transform;-webkit-backface-visibility:hidden;backface-visibility:hidden;">
   <div style="max-width:700px;margin:0 auto;background:rgba(12,14,20,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0.5px solid rgba(200,146,10,0.3);border-radius:14px;display:flex;align-items:center;gap:4px;padding:8px 12px;transition:border-color .2s;box-shadow:0 -4px 20px rgba(0,0,0,.25);" id="home-input-wrap" ondragover="event.preventDefault();this.style.borderColor='var(--amber)'" ondragleave="this.style.borderColor=''" ondrop="handleHomeDrop(event);this.style.borderColor=''">
     <label title="画像を添付" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);flex-shrink:0;transition:color .15s;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--muted)'">
       <input type="file" id="home-img-in" accept="image/*" style="display:none;" onchange="handleHomeImage(this)">

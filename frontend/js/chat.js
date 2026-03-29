@@ -16,7 +16,7 @@ function hideNanoFallbackBanner(){ document.getElementById('nano-fallback-banner
 
 // ════════ CHAT ════════
 function getLogoSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 32 32"><defs><linearGradient id="crown${size}" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown${size})"/></svg>`;}
-function getGptSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="var(--model-gpt)" stroke-width="1.5"><path d="M9 21h6M12 3a6 6 0 00-4 10.5V17h8v-3.5A6 6 0 0012 3z"/></svg>`;}
+function getGptSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><defs><linearGradient id="bulb${size}" x1="12" y1="3" x2="12" y2="21"><stop offset="0%" stop-color="#f5d380"/><stop offset="100%" stop-color="#c8920a"/></linearGradient></defs><path d="M9 21h6M12 3a6 6 0 00-4 10.5V17h8v-3.5A6 6 0 0012 3z" stroke="url(#bulb${size})"/></svg>`;}
 function getUserAvatarText(){const n=USER_PROFILE.nickname||USER_PROFILE.name||'';return n?n.charAt(0):'';}
 function renderUserAvatarInner(av){
   if(USER_PROFILE.avatar_base64){
@@ -1181,14 +1181,21 @@ coaching: ユーザーが目標・悩み・将来・キャリア・成長・自�
 
 - goal_topics: goal_intentがlevel2以上の場合、検出したゴール候補を配列で返す（例: ["TOEIC800点","英会話力向上"]）。1つだけの場合も配列。
 
-JSONで返してください: { "route": "...", "coaching": true|false, "goal_intent": "none|level1|level2|level3", "task_potential": true|false, "goal_topics": [] }`;
+- confidence: ルーティングの確信度(0-100)。迷いがある場合は低く
+
+JSONで返してください: { "route": "...", "coaching": true|false, "goal_intent": "none|level1|level2|level3", "task_potential": true|false, "goal_topics": [], "confidence": 80 }`;
 
 async function routeMessage(text){
   // 500文字超の要約依頼はgemini
   if(text.length > 500) return 'gemini';
-  // 短い相槌パターンはgpt-simple（API呼び出し不要）
-  const simplePatterns = /^(ありがとう|OK|うん|はい|いいえ|了解|わかった|なるほど|そうだね|いいね|おはよう|おやすみ|お疲れ)$/i;
-  if(simplePatterns.test(text.trim())) return 'gpt-simple';
+  const msg = text.trim().toLowerCase();
+  // G3: フロント側quickRoute（サーバー側routing.js quickRoute()と同期）
+  if(msg.length < 15 && /^(うん|はい|ok|おk|そう|ありがと|了解|わかった|なるほど|いいね|おー|へー|ほー|そうだね|たしかに)/.test(msg)) return 'gpt-simple';
+  if(/^(天気|今日の天気|明日の天気|ニュース|最新の|検索して|調べて)/.test(msg)) return 'gemini';
+  if(/天気.*(教えて|おしえて|知りたい)|ニュース.*(教えて|おしえて|知りたい)/.test(msg)) return 'gemini';
+  if(/^(翻訳して|英語に|日本語に|要約して|まとめて|SNS.*書いて|キャッチコピー|タイトル案)/.test(msg)) return 'gpt';
+  if(/^(アイディア|おすすめ|提案して|考えて|リスト|比較して|教えて|作って|書いて)/.test(msg)) return 'gpt';
+  if(/^(今日やること|タスク|やること.*整理|TODO|to.?do|スケジュール|予定.*整理|段取り)/.test(msg)) return 'gpt';
   // S1: Check pre-routed cache
   if(_preRoutedResult && Date.now() < _preRouteExpiry){
     const cached = _preRoutedResult;
@@ -1222,6 +1229,8 @@ async function routeMessage(text){
         if (parsed.goal_intent === 'level3' || (parsed.goal_intent === 'level2' && parsed.goal_topics?.length > 0)) { pendingGoalProposal = true; showGoalDetectToast(parsed.goal_topics); }
       }
       if (parsed.task_potential) { window._pendingTaskSuggestion = true; highlightTaskChip(); }
+      // #11: confidence保持（<70でサジェスト表示用）
+      window._lastRouteConfidence = parsed.confidence ?? 100;
       if (['gemini','gpt','gpt-simple','claude'].includes(route)) return route;
     } catch(e) {
       // Fallback: old single-word format
@@ -1242,7 +1251,10 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
     if(currentRouteAI){
       route = currentRouteAI; // 会話中はAI固定
     } else {
+      // S4: ルーティングとストリーム接続を並列化 — routeMessage中にWorkerへのTCP接続を確立
+      const warmup = fetch(`${WORKER_URL}/api/chat/stream`, { method:'OPTIONS', priority:'high' }).catch(()=>{});
       route = await routeMessage(text);
+      warmup; // TCP/TLS接続をルーティング時間に隠蔽
       currentRouteAI = (route === 'gpt-simple') ? 'claude' : route; // gpt-simpleは次からclaude
     }
 
@@ -1334,6 +1346,13 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
       // Claude直接応答（デフォルト）
       await homeClaudeStream(today, inner, scroll);
     }
+    // #11: confidence<70 → 代替AIサジェスト
+    if(window._lastRouteConfidence < 70 && currentRouteAI){
+      const alt = currentRouteAI === 'claude' ? 'ChatGPT' : 'Claude';
+      const altRoute = currentRouteAI === 'claude' ? 'gpt' : 'claude';
+      showAlternativeAISuggest(inner, alt, altRoute, text, today, scroll);
+    }
+    window._lastRouteConfidence = 100; // reset
   } catch(e) {
     const errEl = document.createElement('div');
     errEl.className = 'msg ai';
@@ -1386,6 +1405,43 @@ async function homeClaudeStream(today, homeInner, homeWrap){
       detectAchievement(t);
     }
   });
+}
+
+// #11: 代替AIサジェスト（confidence<70時）
+function showAlternativeAISuggest(container, altName, altRoute, text, today, scroll){
+  const el = document.createElement('div');
+  el.style.cssText = 'text-align:center;padding:6px 0;margin:4px 0;';
+  el.innerHTML = `<button onclick="this.parentElement.remove();retryWithRoute('${altRoute}','${escapeHtml(text).replace(/'/g,"\\'")}','${today}')" style="background:var(--bg3);border:1px solid var(--border2);border-radius:16px;padding:6px 14px;color:var(--amber);cursor:pointer;font-size:11px;font-family:var(--ff);">${altName}でも聞いてみる →</button>`;
+  container.appendChild(el);
+  if(scroll) scroll.scrollTop = scroll.scrollHeight;
+}
+async function retryWithRoute(route, text, today){
+  const inner = document.getElementById('home-chat-inner');
+  const scroll = document.getElementById('home-chat-wrap');
+  // #14: フィードバック記録
+  recordRoutingFeedback(text, currentRouteAI, route);
+  if(route === 'gpt'){
+    const { bub } = mkStreamBubble(inner, scroll, undefined, 'gpt');
+    try{
+      const ctx = buildAIContextCached();
+      const result = await callOpenAI(text, `ユーザーの質問に具体的に回答する。日本語で。\n\nユーザー背景：${ctx}`, 800);
+      if(result?.trim()){ bub.innerHTML = renderMsgContent(result); bub.classList.remove('stream-bubble'); bub.style.cssText='';
+        homeMsgs.push({role:'ai',content:result,time:now(),date:today,model:'GPT'}); homeHistory.push({role:'assistant',content:result}); saveHomeMsgs();
+      } else { bub.closest('.msg')?.remove(); }
+    }catch(e){ bub.closest('.msg')?.remove(); }
+  } else {
+    currentRouteAI = route;
+    await homeClaudeStream(today, inner, scroll);
+  }
+}
+function recordRoutingFeedback(text, original, chosen){
+  try{
+    const hash = text.slice(0,50);
+    fetch(`${WORKER_URL}/api/feedback/routing`, {
+      method:'POST', headers:getAuthHeaders(),
+      body:JSON.stringify({ message_hash:hash, original_route:original, chosen_route:chosen })
+    }).catch(()=>{});
+  }catch(e){}
 }
 
 // ═══ E: 定期チェックイン ═══
@@ -1570,7 +1626,18 @@ function _setHomeSendIcon(mode){
     icon.closest('button')?.setAttribute('onclick','sendHomeMsg()');
   }
 }
-function stopHomeStream(){ if(_homeAbort){ _homeAbort.abort(); _homeAbort=null; } }
+function stopHomeStream(){
+  if(_homeAbort){ _homeAbort.abort(); _homeAbort=null; }
+  // #18: 中断テキスト表示
+  const inner = document.getElementById('home-chat-inner');
+  if(inner){
+    const note = document.createElement('div');
+    note.style.cssText = 'text-align:center;font-size:12px;color:var(--muted2);margin:4px 0 8px;';
+    note.textContent = '中断しました';
+    inner.appendChild(note);
+  }
+  homeSendRestore();
+}
 
 // ═══ CHAT HISTORY PANEL ═══
 let chatSessions = [];
@@ -1756,16 +1823,57 @@ function showModelUsageDetail(){
 }
 
 // ═══ KEYBOARD HANDLING (BUG-01b) ═══
-// body直下のposition:fixedはiOSスクロールの影響を受けない
+// Step 1: visualViewport.heightでhtml/body/#app/.pageの高さを制約し、iOS Safariのキーボード押し上げを防止
+// Step 2: 入力ボックスをキーボード上に固定（position:fixedのbottomを動的調整）
+// iOS Safariはキーボード表示時にビューポートを縮めず、ページを上にスクロールして押し上げる
+// → 全コンテナ階層の高さをvisualViewport.heightに固定し、スクロール余地をなくす
 (function initKeyboardFix(){
   if(!window.visualViewport) return;
+  const app = document.getElementById('app');
   const inputArea = document.getElementById('home-input-area');
-  if(!inputArea) return;
+  if(!app || !inputArea) return;
+
+  const docEl = document.documentElement;
+  const body = document.body;
+  let _kbOpen = false;
+
   const update = () => {
-    const kbH = Math.max(0, window.innerHeight - window.visualViewport.height);
-    inputArea.style.bottom = kbH + 'px';
+    const vv = window.visualViewport;
+    const kbH = Math.max(0, window.innerHeight - vv.height);
+    const isOpen = kbH > 50;
+
+    // Step 1: 全コンテナ階層の高さをvisualViewport.heightに制約
+    if(isOpen) {
+      const h = vv.height + 'px';
+      docEl.style.height = h;
+      body.style.height = h;
+      app.style.height = h;
+      // スクロールを強制リセット（iOS Safariの押し上げを打ち消す）
+      window.scrollTo(0, 0);
+      // アクティブな.pageの高さも制約
+      const activePage = app.querySelector('.page.active');
+      if(activePage) activePage.style.height = h;
+      const pgHome = document.getElementById('pg-home');
+      if(pgHome) pgHome.style.height = h;
+    } else if(_kbOpen) {
+      // キーボードが閉じた: CSS値に戻す
+      docEl.style.height = '';
+      body.style.height = '';
+      app.style.height = '';
+      const activePage = app.querySelector('.page.active');
+      if(activePage) activePage.style.height = '';
+      const pgHome = document.getElementById('pg-home');
+      if(pgHome) pgHome.style.height = '';
+    }
+    _kbOpen = isOpen;
+
+    // Step 2: 入力ボックスの位置をキーボード上に固定
+    const scrollOffset = vv.offsetTop || 0;
+    inputArea.style.bottom = (kbH - scrollOffset) + 'px';
   };
+
   window.visualViewport.addEventListener('resize', update);
+  window.visualViewport.addEventListener('scroll', update);
   update();
 })();
 function homeKey(e) { chatKey(sendHomeMsg, e); }
@@ -2797,6 +2905,7 @@ Object.assign(window, {
   hideTaskChip, showTaskChip, highlightTaskChip,
   openTaskFromChat, getLastAIMessage, appendTaskSuggestionButton,
   requestTaskBreakdown, showTaskCard, confirmTaskCard,
-  setPreset, taskCheckAnim
+  setPreset, taskCheckAnim,
+  retryWithRoute, recordRoutingFeedback, stopHomeStream
 });
 

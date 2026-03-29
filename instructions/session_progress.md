@@ -6,169 +6,66 @@
 ---
 
 ## 5行サマリー
-- **Version:** v3.11.22（デプロイ済み）
-- **Next:** BUG-01b（#home-input-areaをbody直下に移動。Claude.ai確定仕様）
-- **Last done:** Claude.aiが静的解析でBUG-01の根本原因を確定。仕様をBUG-01bに更新
-- **Open issues:** G6のS4/E/Dは次フェーズ
-- **Proposals:** 7件（#11-#17）
+- **Version:** v3.11.29（デプロイ済み 2026-03-29）
+- **Next:** BUG-01b Step 1 実装済み→方針確認待ち→デプロイ→実機検証→Step 2
+- **Last done:** BUG-01b Step 1 実装・デプロイ v3.11.29
+- **Open issues:** BUG-01b Step 1 実機検証待ち（シミュレーターではタッチ入力自動化不可）
 
 ## 現在地
-- **バージョン:** v3.11.22（デプロイ済み）
-- **チェーン:** 全ミッション完了 → テスト配布
-- **次のミッション:** キュー空
+- **バージョン:** v3.11.29（デプロイ済み）
+- **チェーン:** BUG-01b Step 1 実装済み→方針確認待ち→Step 2→テスト配布準備
+- **次のミッション:** BUG-01b Step 1 方針確認→デプロイ→実機検証
 
 ## ミッションキュー（上から順に実行）
 
-### BUG-01b: G4キーボード固定バグ 確定修正仕様（Claude.ai 2026-03-28）
-> リスク: 🟡中（DOM移動。ロジック変更なし）
-> 対象ファイル: frontend/index.html、frontend/js/chat.js
-> 分類: C11 継続バグ → この仕様で実装。それ以上の診断・推測・別アプローチは禁止
+### BUG-01b: iOSキーボード表示時の挙動修正（2段階アプローチ）
+> リスク: 🟡中
+> 対象ファイル: frontend/index.html、frontend/style.css、frontend/js/chat.js、frontend/js/app.js
+> 分類: C11 継続バグ（ふとし実機確認済み）
 
-**確定した根本原因:**
-`#home-input-area`は現在`#pg-home`（`overflow:hidden`、`display:flex`）の子要素。
-`position`未指定（static）のためflexフロー内に存在し、iOSがページをスクロールすると
-flexコンテナごと動いて入力ボックスが連動する。
+**経緯:** Claude.aiの静的解析で3回「確定仕様」を出し、すべて実機で失敗。A10ルール適用。
 
-`position:fixed`を付けても`overflow:hidden`の祖先（`#pg-home-wrap`、`#pg-home`）が存在する限り
-iOS Safariはビューポート基準で固定しない（iOS Safariの確定した仕様）。
+**症状（ふとし実機確認 2026-03-29 最終整理）:**
 
-**唯一の解決策: `#home-input-area`を`<body>`直接の子に移動する**
+症状1: キーボード押し上げ
+- キーボードが表示されると、ページ全体がキーボードの高さ分だけ上にシフトする
+- iOS Safariはキーボード表示時にビューポートを縮めず、ページを上にスクロールする挙動がある
+- Android/デスクトップではビューポート自体が縮小するのでこの問題は起きない
 
-```
-変更前:
-body > #app > #pages > #pg-home-wrap > #pg-home > #home-input-area
+症状2: 入力ボックスのスクロール連動
+- キーボード表示直後は入力ボックスはキーボードの上に正しく見えている（fixedは一応効いている）
+- しかしユーザーがスクロール操作を行うと、入力ボックスがスクロールに巻き込まれて動く
+- 巻き込まれた結果、入力ボックスがキーボードの裏に隠れる
+- 原因: iOS Safariは「スクロール中はposition:fixedの再計算を一時停止する」挙動がある
 
-変更後:
-body > #home-input-area  ← overflow:hiddenの祖先がゼロ
-body > #app > #pages > ... （#pg-home-wrapはそのまま）
-```
+※両症状ともiOS上の全ブラウザ（Chrome/Firefox/LINE等含む）で共通（全てWebKitエンジン）
 
-**変更1: index.html**
-- `#home-input-area`のdivブロック全体（L389〜L424）を`#pg-home`から切り取る
-- `</body>`の直前に貼り付ける
-- styleに`position:fixed;bottom:0;left:0;right:0;z-index:200;`を追加
-- 元の場所のコメント行（`<!-- Input area -->`）ごと削除
+**アプローチ（2段階。Step 1を先に解決してからStep 2に進む）:**
 
-**変更2: chat.js の `initKeyboardFix`を以下に置き換える**
-```js
-(function initKeyboardFix(){
-  if(!window.visualViewport) return;
-  const inputArea = document.getElementById('home-input-area');
-  if(!inputArea) return;
-  const update = () => {
-    // keyboard height = innerHeight - visualViewport.height（offsetTop不使用）
-    const kbH = Math.max(0, window.innerHeight - window.visualViewport.height);
-    inputArea.style.bottom = kbH + 'px';
-  };
-  window.visualViewport.addEventListener('resize', update);
-  // scrollリスナー不要（body直下のposition:fixedはiOSスクロールの影響を受けない）
-  update();
-})();
-```
+**Step 1: キーボード表示時のページ押し上げを防ぐ**
+- 入力ボックスのことは一旦忘れる
+- iOS Safariはキーボード表示時にビューポートを縮めず、ページを上に押し上げる
+- Androidはブラウザが自動でビューポートを縮小するが、iOSはやらない
+- → JSで同じことを再現する: `visualViewport`のresizeイベントを監視し、`visualViewport.height`をページコンテナの高さに適用する
+- これにより「キーボードの上まで」がページの全体になり、押し上げが起きなくなる
+- シミュレーターで「キーボード表示時にページ上部のコンテンツが画面外に消えない」ことを検証
 
-**offsetTopを使わない理由:**
-- body直下の`position:fixed`はiOSがページをスクロールしても動かない（trueビューポート固定）
-- `offsetTop`を加算すると逆にズレが生じる
+**Step 2: 入力ボックスの固定**
+- Step 1が解決した状態で、入力ボックスがキーボードの上に固定される方法を探す
+- スクロール操作をしても入力ボックスが動かないことを検証
 
-**変更3: コンテンツ領域の下部padding確認**
-- `#home-chat-inner`は`padding-bottom:100px`済み → OK
-- `#home-task-box`内のスクロールコンテナに`padding-bottom:80px`を追加
-  （fixedの入力ボックスに隠れるコンテンツがないよう）
+**Codeへの指示:**
+1. Xcodeインストール済み。`xcrun simctl` でiOSシミュレーターを起動し、症状1（ページ押し上げ）を再現する
+2. Step 1の修正を行い、シミュレーターで押し上げが解消されたことを確認する
+3. Step 1が通ったらStep 2に進む
+4. 各ステップで修正方針を決めたら `session_progress.md` に「調査結果」を記載して**30分待機**
+   （Claude.aiがオンラインなら確認する。オフラインなら自己判断で進める）
 
-**検証条件（Stage A・B両方で確認）:**
-1. キーボード表示中に入力ボックスがキーボード直上に固定されること
-2. チャット領域・タスクボックスをスクロールしても入力ボックスが動かないこと
-3. キーボードなし時に入力ボックスが画面下端に正しく表示されること
-
-**Codeへの厳命: この仕様以外のアプローチ（dvh、flex構造変更、scrollリスナー追加等）は試みないこと。診断が出たら実装前にsession_progress.mdに記載してClaude.aiの確認を待つこと。**
-> リスク: 🟡中（DOM構造の変更必須）
-> 対象ファイル: frontend/index.html、frontend/style.css、frontend/js/chat.js
-> 分類: C11 ふとし発見バグ継続 → 前回修正（v3.11.22）は不完全
-
-**ふとしが見ている症状（v3.11.22時点でも発生）:**
-1. タスクボックスの**下**に入力ボックスが表示されている（正しくはタスクの上）
-2. メッセージエリアをスクロールしても入力ボックスは動かない
-3. タスクボックスをスクロールすると入力ボックスが一緒に動く
-4. 画面が「メッセージ領域」と「タスク+入力ボックスのペア」に2分割されている印象
-
-**前回修正（v3.11.22）が不完全な理由:**
-CSS1行（heightの変更）だけでは解決しない。問題は**DOMの物理的な構造**にある。
-
-`#home-input-area`が`overflow:hidden`の親コンテナ**内部**の、かつ`#home-task-box`の**後ろ（下）**に置かれている。
-→ タスクの下に表示されるのはDOMの順序通り。heightを変えても位置は変わらない。
-
-**現状のDOM構造（問題あり）:**
-```
-div（overflow:hidden、flex:1）← 脱出できない壁
-  ├── toolbar
-  ├── hero / presets
-  ├── home-chat-wrap（メッセージスクロール）
-  ├── separator
-  ├── home-task-box  ← タスクボックス
-  ├── bottom-padding
-  └── home-input-area（position:fixed ← 壁の中に閉じ込め、タスクの下）
-```
-
-**正しい修正（DOM構造変更）:**
-```
-#pg-home（display:flex; flex-direction:column; height:100vh; height:100dvh）
-  ├── div（flex:1; overflow:hidden）← 既存の overflow:hidden コンテナ
-  │     ├── toolbar
-  │     ├── hero / presets
-  │     ├── home-chat-wrap（flex:1; overflow-y:auto）
-  │     ├── separator
-  │     └── home-task-box
-  └── #home-input-area（position:relative または static; flex-shrink:0）
-        ← overflow:hiddenコンテナの"外"、#pg-homeの直接の子として配置
-```
-
-**具体的な変更（index.html）:**
-1. `#home-input-area`のdiv要素を`overflow:hidden`親コンテナの**閉じタグの外側（後）**に移動
-2. `#home-input-area`のstyleから`position:fixed; left:0; right:0;`を削除（position:staticに）
-3. `bottom: kbH`のJS動的変更も不要になる
-
-**具体的な変更（style.css）:**
-- `#pg-home`に`display:flex; flex-direction:column; height:100vh; height:100dvh;`を確認・追加
-
-**具体的な変更（chat.js）:**
-- `initKeyboardFix`関数を削除（DVH+flex構造で不要）
-
-**検証（2点必須）:**
-1. タスクボックスの**上**に入力ボックスが表示されること
-2. タスクボックスをスクロールしても入力ボックスが動かないこと
-
-
-
-**根本原因（Claude.ai最終確定）:**
-
-DOM構造:
-```
-#pg-home-wrap（.page → height:100%; overflow:hidden）← ここが制限している
-  └── #pg-home（height:100dvh）← 親が100%のため100dvhに届かない
-        └── #home-input-area（flex-shrink:0）← 正しい位置にいるが効かない
-```
-
-`#pg-home`に`height:100dvh`を設定済みだが、親の`#pg-home-wrap`（`.page`クラス）が
-`height:100%`のままなので、`100dvh`が機能していない。キーボード表示時に
-ブラウザが`100dvh`を縮小しても`#pg-home`自体が縮まず、`#home-input-area`が
-キーボードの裏に入ったまま。
-
-**修正（1行）:**
-```css
-/* style.css のモバイル用メディアクエリ内（@media width<=768px） */
-/* 現状 */
-.page { height:100%; overflow:hidden; }
-
-/* 修正後 */
-.page { height:100vh; height:100dvh; overflow:hidden; }
-```
-
-または`#pg-home-wrap`に直接:
-```css
-#pg-home-wrap { height:100vh; height:100dvh; }
-```
-
-**検証:** キーボード表示時に`#home-input-area`がキーボード直上に来ること
+**過去の失敗アプローチ（やらないこと）:**
+- `.page`にheight:100dvhを設定 → 親のheight:100%に制限されて効かなかった
+- DOM構造変更（input-areaを移動）→ bodyがスクロールするため効かなかった
+- GPUコンポジットレイヤー化（translate3d/will-change）→ 効果なし
+- visualViewport.scrollイベント補正 → 効果なし
 
 ---
 
@@ -438,6 +335,11 @@ DOM構造:
 
 **変更仕様（Claude.ai承認済み）:**
 
+【0. 入力ボックスのページ別表示制御（BUG修正）】
+- `#home-input-area`はbody直下のposition:fixedのため、全ページで常に表示されている（バグ）
+- `showPage()`内で、`pg === 'home'`のときだけ`#home-input-area`を`display:block`、それ以外では`display:none`にする
+- 初期表示（DOMContentLoaded時）もhome以外なら非表示にすること
+
 【A. プリセット✏アイコン追加】
 - `#home-presets` の右上に小さいペンシルアイコン（SVG, 14px, opacity:0.5）を追加
 - ラベルなし。タップで編集モーダルを開く
@@ -447,19 +349,26 @@ DOM構造:
 
 【B. 3状態レイアウト】
 
-**① デフォルト（キーボードなし）:**
-- 現状維持。プリセット（✏付き）・入力ボックス・タスクボックスを表示
+**【重要】入力ボックスの配置方針（Claude.ai確認済み 2026-03-28）:**
+- 入力ボックス（`#home-input-area`）は `position:fixed;bottom:0;left:0;right:0;z-index:200` のまま維持（オーバーレイ）
+- タスクボックス（`#home-task-box`）は入力ボックスの下にスクロールコンテンツとして存在し、入力ボックスに隠れないよう `padding-bottom` を設定する
+- DOMの移動は不要。現在の `</body>` 直前の配置で正しい
+- キーボード表示時の位置固定（BUG-01b）は今回スコープ外
 
-**② 入力中・会話前（キーボード表示時）:**
+**① デフォルト（キーボードなし）:**
+- 入力ボックス: 画面下端にオーバーレイ固定
+- タスクボックス: 入力ボックスの高さ分 `padding-bottom` を設定して隠れないようにする
+- 表示: hero → presets → コンテンツ領域（タスクボックス含む）→ 入力ボックス（オーバーレイ）
+
+**② 入力中・会話前（input focusイベント）:**
 - ヒーロー・プリセット: 表示維持
-- タスクボックス: **非表示**（キーボード表示と同時に隠す）
-- 入力ボックス: キーボード直上に固定（`visualViewport` APIまたは `env(keyboard-inset-height)` で対応）
+- タスクボックス: **非表示**（`display:none`）
+- 入力ボックス: 固定位置のまま
 
 **③ 会話中（メッセージ送信後）:**
 - ヒーロー・プリセット・タスクボックス: 非表示
 - 過去メッセージ: スクロール領域（`#home-chat-wrap`）。スクロール最下部 = 最新メッセージ
-- 最新メッセージ: 入力ボックスの上に固定表示（左右マージンはタスクボックス・入力ボックスと同じ `14px`、上下gap = `11px`）
-- 入力ボックス: キーボード表示中は常にキーボード直上に固定
+- 入力ボックス: 固定位置のまま
 
 **状態遷移:**
 - デフォルト → ② : input focus時
@@ -467,17 +376,46 @@ DOM構造:
 - ② → ③ : メッセージ送信
 - ③ → デフォルト : 新規チャット（`newHomeChat()`）
 
-### G3: ルーティングバグ調査（G1・G2完了後に着手）
+### G3: ルーティングバグ修正 ✅完了（2026-03-28）
 > 目的: 「今日やること整理」がClaude Opusにルーティングされた原因を特定・修正
-> リスク: 🟡中（ルーティングロジック変更の可能性あり）
-> 背景: ルーティングプロンプト（routing.js L27）では「タスク相談」→ gpt が正。Claude Opusが返った原因不明
 
-**調査手順:**
-1. Cloudflare Workers のログ（`wrangler tail`）で当該リクエストのroutingAPI応答を確認
-2. callRoutingAPI の返値が `claude` だった場合 → プロンプト改善（「タスク整理」を gpt 例示に追加）
-3. 返値が `gpt` だったのにClaudeが呼ばれた場合 → モデル振り分けロジックのバグ
-4. 修正後、「今日やること整理」で3回連続テストしてgptルートを確認
-> コスト影響: ルーティングプロンプト変更はコスト中立。モデル振り分けロジック変更はプラン差別化に影響しないため設計変更として自律対応可
+**原因特定:**
+フロント側`routeMessage()`にquickRouteパターンマッチが存在しなかった。サーバー側`routing.js`のquickRoute()には`^(今日やること|タスク|...)` → `gpt`パターンがあるが、フロント側はAPI判定のみに依存していた。routing API（gpt-simple）が`claude`を誤判定した場合、フロントがそのまま`/api/chat/stream`にClaude指定で送信 → サーバー側で再ルーティングされてもフロントのUI表示は`Claude`のまま。
+
+**修正:**
+フロント側`routeMessage()`にサーバー側quickRoute()と同一のパターンマッチを追加（chat.js L1190-1196）。
+quickRouteで確定するケースはAPI呼び出しをスキップするため、ルーティング速度も改善。
+
+**検証:** quickRoute対象パターン（「今日やること整理」「タスク整理」「翻訳して」等）はフロント側で即時gptに確定。API呼び出し不要
+
+---
+
+### G6 コスト削減+速度改善バッチ v3.11.25 ✅完了（2026-03-28）
+> v3.11.25でデプロイ済み。10施策一括実装
+
+**実装済み施策:**
+| ID | 施策 | 変更ファイル |
+|---|---|---|
+| S4 | ルーティングとストリーム接続並列化（OPTIONS preflight） | frontend/js/chat.js |
+| B5 | getUserIdFromToken KV永続キャッシュ（uid:${tokenId}） | src/middleware/auth.js |
+| A4 | sentiment分析: claude-sonnet → gpt-5-nano | src/routes/misc.js |
+| A11 | memo生成: claude-sonnet → gpt-5-mini | src/services/memo.js |
+| A14 | gpt-simple max_tokens: 150→80 | src/services/ai/gpt.js |
+| A8 | embedding生成: 毎ターン→5ターンに1回（KVカウンター） | src/routes/chat.js |
+| A13/B17 | chat_messages取得: limit 50→20 | src/services/memo.js |
+| A5 | memo diff更新（既存メモベースで変更点のみ更新） | src/services/memo.js |
+| A15 | sentiment入力削減（summary優先、rawChat先頭200文字） | src/routes/misc.js |
+| B13 | ストリームchunk 256byteバッファ処理 | frontend/js/api.js |
+
+**未実装（理由付き）:**
+- A3: max_tokens削減 → 「Stage Bで動作確認後に段階的に」の指示あり。次フェーズ
+- A20: KVバッファ → 変更範囲大。次フェーズ
+- B10: gpt-simple streaming → 効果限定（80トークン短文）。スキップ
+- B20: /api/route軽量エンドポイント → 変更範囲大。次フェーズ
+- G6-E: 信頼度+代替AI提案 → Claude.ai側mockup待ち
+- G6-D: フィードバック学習テーブル → Eと一体。mockup待ち
+
+**判断根拠:** 効果/リスク比の高い施策を優先。A3はユーザー体験への影響を確認してから段階適用。E/DはUI設計依存のためブロック中
 
 ---
 
@@ -694,19 +632,61 @@ DOM構造:
 
 ---
 
-## 提案ログ（2026-03-27 第2回自律調査）
+## 提案ログ（2026-03-29 第4回自律調査）
 
-**前回(#1-#10)の消化状況:** #1背景プリセット/#4ゴール抽出/#7クイックゴールUX = 実装済み。#2/#5/#8/#9/#10 = 既存実装を確認。#3リファラル/#6複数ゴール = 次フェーズ保留
+**前回(#11-#22)消化状況:** 全件実装済み。G4-0(ページ別表示制御)、B4 invalidate、canopy B4/B5検証、ET quota表示も追加済み
 
-| # | 項目 | 仕様出典 | リスク | 備考 |
-|---|------|----------|--------|------|
-| 11 | ルーティング信頼度+代替AI提案（G6-E） | session_progress G6 | 🔴 | confidence<70時に「他のAIでも→」。ROUTE_PROMPT変更+UI |
-| 12 | AIメモ更新トースト通知 | reference_v2 #14, amendment_001 | 🟢 | メモ再生成時にユーザーに通知。バックエンドはあり、UI未接続 |
-| 13 | Free→Nanoフォールバック | reference_v2 #29 | 🟡 | Free上限到達時にnanoモデルへ自動縮退。指示書あり未実装 |
-| 14 | ルーティングフィードバック学習（G6-D） | session_progress G6 | 🟡 | routing_feedbackテーブル+「別のAIで試す」データ蓄積 |
-| 15 | S4: ルーティングとストリーム並列化 | session_progress G6 | 🟡 | TCP接続をルーティング中に確立。TTFT 200-400ms短縮 |
-| 16 | リファラル報酬自動処理 | reference_v2 #24 | 🔴 | Stripe連携。applyReferralRewardは部分実装あり |
-| 17 | 複数ゴール同時検出（E-13強化） | reference_v2 E-13 | 🟡 | goal_topics配列処理は一部あり。並列提案UIが未実装 |
+| # | 項目 | ステータス | 備考 |
+|---|------|----------|------|
+| — | **保留（指示待ち）** | | |
+| A3 | max_tokens段階削減 | 保留 | Stage B動作確認後に段階適用の指示あり |
+| B20 | /api/route軽量EP | 保留 | S1プリルーティングで十分カバー |
+| BUG-01b | iOSキーボード固定 | Step 1実装済み・検証待ち | 下記「調査結果」参照 |
+
+---
+
+## BUG-01b 調査結果（2026-03-29 Code記載・確認待ち）
+
+### Step 1: キーボード表示時のページ押し上げ防止
+
+**原因分析:**
+- iOS Safari（全WebKitブラウザ共通）はキーボード表示時にビューポートを縮めない
+- 代わりにページ全体を上にスクロール（push-up）して、フォーカスされた要素を可視領域に持ってくる
+- `window.innerHeight`はキーボード表示後も変わらない
+- `visualViewport.height`のみがキーボード分だけ縮小する
+- CSS `100dvh`もキーボード表示前の値のまま変わらない
+
+**修正方針:**
+`visualViewport.resize`イベントで全コンテナ階層（`html`, `body`, `#app`, `.page.active`, `#pg-home`）の高さを`visualViewport.height`に制約する。これによりページコンテンツが可視領域に収まり、スクロール余地がなくなるため押し上げが発生しない。
+
+**実装済みコード（chat.js L1825-1876）:**
+```js
+// visualViewport.resize → kbH検出
+// kbH > 50: 全コンテナheight = vv.height + 'px', window.scrollTo(0,0)
+// kbH ≤ 50: 全コンテナheight = '' (CSS値に復帰)
+// inputArea.bottom = kbH - scrollOffset
+```
+
+**不採用にした既存アプローチ（session_progress.mdの「過去の失敗アプローチ」に追加なし）:**
+- GPUコンポジットレイヤー化（translate3d/will-change）→ 以前と同じく効果なしのため削除
+- `vv.offsetTop`によるスクロール補正のみ → 根本原因（ページ高さ超過）を解決しない
+
+**競合確認:**
+- app.js `initViewportHandler` — home-input-area以外のみ処理。競合なし
+- ui.js `showPage()` — ページ切替時にblurが発生しキーボードは閉じる。競合なし
+- style.css — inline style（JS設定）はCSS `height:100dvh` を上書き。問題なし
+
+**検証状況:**
+- iOSシミュレーター(iPhone 17 Pro/iOS 26.4)を起動、テストページを配信しDOM表示を確認
+- シミュレーターへのプログラマティックなタッチ注入が困難（Simulator appが標準macOS window APIを使わない、idb_companion未インストール）
+- **ソフトウェアキーボードの表示を自動化できず、実機での検証が必要**
+
+**次のステップ:**
+1. Claude.aiまたはふとしがStep 1の方針を確認
+2. 確認後、デプロイしてふとし実機でStep 1（押し上げ防止）を検証
+3. Step 1通過後、Step 2（スクロール時の入力ボックス固定）の検証に進む
+
+---
 
 ## 完了済みミッション詳細・照合結果・提案ログ過去分
 
