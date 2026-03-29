@@ -6,15 +6,15 @@
 ---
 
 ## 5行サマリー
-- **Version:** v3.11.32（デプロイ済み 2026-03-30）
-- **Next:** BUG-01b Phase 6（フリッカー解消 — scrollイベントで即時リセット）
-- **Last done:** BUG-01b Phase 6 デプロイ v3.11.32。scrollリスナー方式でフリッカー解消 → ふとし実機確認待ち
-- **Open issues:** BUG-01b（iOSキーボード。Phase 6でフリッカー解消予定）
+- **Version:** v3.11.33（デプロイ済み 2026-03-30）
+- **Next:** BUG-01b Phase 7（preventScrollアプローチ — スクロール自体を発生させない）
+- **Last done:** BUG-01b Phase 7 v3.11.33。preventScroll方式 → ふとし実機確認待ち
+- **Open issues:** BUG-01b（iOSキーボード。Phase 7: focus({preventScroll:true})で根本解決を狙う）
 
 ## 現在地
-- **バージョン:** v3.11.32（デプロイ済み）
-- **チェーン:** BUG-01b Phase 6 → テスト配布準備
-- **次のミッション:** BUG-01b Phase 6（フリッカー解消）
+- **バージョン:** v3.11.33（デプロイ済み）
+- **チェーン:** BUG-01b Phase 7 → テスト配布準備
+- **次のミッション:** BUG-01b Phase 7（preventScrollアプローチ）
 
 ## ミッションキュー（上から順に実行）
 
@@ -46,6 +46,8 @@
 5. visualViewport.resizeで全コンテナheightをvv.heightに制約 + scrollTo(0,0) → 効果なし
 6. scrollIntoViewの削除 → 効果なし
 7. visualViewport.resizeでscrollTo(0,0)のみ → 効果なし
+8. focus時scrollTo(0,0)×3（即座+rAF+100ms）→ ページは戻るが視覚的な移動（フリッカー）が残る
+9. scrollイベントリスナーで即時scrollTo(0,0) → 同上、視覚的移動は消えない
 
 **ミッション手順（順序厳守）:**
 
@@ -151,6 +153,38 @@ textarea.addEventListener('blur', () => {
 - window.scrollYが常に0であることを確認
 
 6-C. デプロイ → ふとし実機確認
+
+**Phase 6実機結果（2026-03-29）:**
+- scrollイベントリスナーでscrollTo(0,0)を即時呼んでも、視覚的な移動は消えなかった
+- 「フリッカー」というより、ページが下から上にスクロールされてから戻る動きが見える
+- 原因: scrollイベントが発火する時点でブラウザは既にレンダリングしてしまっている
+
+**Phase 7: preventScrollアプローチ（スクロールを「戻す」ではなく「させない」）**
+
+7-A. chat.jsの修正:
+- Phase 5/6で追加した全てのscrollTo、scrollリスナー、touchmoveブロックを削除（クリーンアップ）
+- textareaへの直接タップでブラウザがfocusするのを防ぎ、手動でfocusを呼ぶ:
+  1. `#home-msg-in` に `pointerdown` イベントリスナーを追加
+  2. pointerdownで `e.preventDefault()` → ブラウザのデフォルトfocus動作を阻止
+  3. 直後に `textarea.focus({ preventScroll: true })` を呼ぶ → スクロールなしでフォーカス
+  4. キーボードが出てもページは一切動かない
+- 実装イメージ:
+```js
+const ta = document.getElementById('home-msg-in');
+ta.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  ta.focus({ preventScroll: true });
+});
+```
+- 注意: preventDefault()するとカーソル位置の自動設定やテキスト選択が効かなくなる可能性がある。その場合は `mousedown` ではなく `touchstart` のみで対応するか、selectionRangeを手動設定する
+
+7-B. シミュレーター検証:
+- textareaタップ時にページが一切動かないこと
+- キーボードが正常に表示されること
+- テキスト入力・カーソル操作・テキスト選択が正常に動くこと
+- 既存のペースト・画像添付・音声入力が壊れていないこと
+
+7-C. デプロイ → ふとし実機確認
 
 ---
 

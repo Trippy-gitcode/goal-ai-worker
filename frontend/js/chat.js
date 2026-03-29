@@ -741,27 +741,14 @@ function initHomeLayoutStates(){
     }, 200);
   });
 
-  // BUG-01b Phase 6: iOS Safariのfocus時スクロールをscrollイベントで即時リセット
-  // iOS Safariはtextareaフォーカス時にwindowをスクロールして要素を見せようとする
-  // → scrollイベントで即座にscrollTo(0,0)し、フリッカーなくリセット
-  const lockScroll = () => window.scrollTo(0, 0);
-  inp.addEventListener('focus', () => {
-    window.addEventListener('scroll', lockScroll, { passive: false });
-  });
-  inp.addEventListener('blur', () => {
-    window.removeEventListener('scroll', lockScroll);
-  });
-
-  // BUG-01b Phase 5: focus中のtouchmoveをwindowレベルでブロック
-  // ただしチャット領域(#home-chat-wrap)内のスクロールは許可
-  let _inputFocused = false;
-  inp.addEventListener('focus', () => { _inputFocused = true; });
-  inp.addEventListener('blur', () => { _inputFocused = false; });
-  window.addEventListener('touchmove', (e) => {
-    if(!_inputFocused) return;
-    if(e.target.closest && e.target.closest('#home-chat-wrap')) return;
+  // BUG-01b Phase 7: preventScrollアプローチ
+  // ブラウザのデフォルトfocus動作（スクロールして要素を見せる）を阻止し、
+  // focus({ preventScroll: true })で手動フォーカス → ページが一切動かない
+  inp.addEventListener('pointerdown', (e) => {
+    if(document.activeElement === inp) return; // 既にフォーカス中ならデフォルト動作を維持（テキスト選択等）
     e.preventDefault();
-  }, { passive: false });
+    inp.focus({ preventScroll: true });
+  });
 }
 
 function updateHeroVisibility(){
