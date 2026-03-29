@@ -198,7 +198,7 @@ function showChatTyping(chatEl, typingId, avatarHtml, bubbleClass, route) {
   if(modelName){
     phaseText = `<span class="typing-phase">${modelName} が考えています...</span>`;
   } else {
-    phaseText = '<span class="typing-phase typing-dots-text">・・・</span>';
+    phaseText = '<span class="typing-phase">どのAIが適任か相談中...</span>';
   }
 
   d.innerHTML = `<div class="${avClass}">${avatarHtml || getLogoSVG(14)}</div><div class="${bodyClass}"><div class="${bubClass}" style="padding:8px 14px;">${phaseText}</div></div>`;
@@ -468,7 +468,15 @@ async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, 
     // モデル名をヘッダーから取得（フッター表示用）
     window._lastModelUsed = res.headers.get('X-Model-Used') || null;
     // #7: バブル固有のモデル名をdata属性に保持
-    if (window._currentStreamBubble) window._currentStreamBubble.dataset.model = window._lastModelUsed || '';
+    if (window._currentStreamBubble) {
+      window._currentStreamBubble.dataset.model = window._lastModelUsed || '';
+      // G5: ヘッダー到着時にフェーズテキストを「{AI名} が考えています...」に更新
+      const phase = window._currentStreamBubble.querySelector('.typing-phase');
+      if(phase && window._lastModelUsed) {
+        phase.textContent = formatModelName(window._lastModelUsed) + ' が考えています...';
+        phase.classList.remove('typing-dots-text');
+      }
+    }
     // 降格バッジ（Step 7）
     const isDegraded = res.headers.get('X-Model-Degraded') === '1';
     const degradeReason = res.headers.get('X-Degrade-Reason') || '';
@@ -478,10 +486,19 @@ async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, 
     const dec = new TextDecoder('utf-8');
     let full = '';
     let buffer = '';
+    let rawBuf = new Uint8Array(0); // B13: 256byte単位でバッファ処理
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
-      buffer += dec.decode(value, { stream: true });
+      if (done) {
+        if (rawBuf.byteLength > 0) buffer += dec.decode(rawBuf, { stream: false });
+      } else {
+        // B13: 小さなchunkを蓄積し256byte以上でデコード→DOM更新頻度削減
+        const merged = new Uint8Array(rawBuf.byteLength + value.byteLength);
+        merged.set(rawBuf); merged.set(value, rawBuf.byteLength);
+        if (merged.byteLength < 256) { rawBuf = merged; continue; }
+        buffer += dec.decode(merged, { stream: true });
+        rawBuf = new Uint8Array(0);
+      }
       const lines = buffer.split('\n');
       buffer = lines.pop();
       for (const line of lines) {
@@ -514,6 +531,7 @@ async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, 
           }
         } catch {}
       }
+      if (done) break;
     }
     onDone(full);
   } catch (e) { onError(e); }
