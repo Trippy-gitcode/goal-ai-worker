@@ -749,6 +749,19 @@ function initHomeLayoutStates(){
     e.preventDefault();
     inp.focus({ preventScroll: true });
   });
+
+  // BUG-01b Phase 8: 入力ボックスのキーボード追従
+  // preventScrollでスクロールを防いだ結果、入力ボックスがキーボード裏に隠れる
+  // → visualViewport.resizeでキーボード高さを検出し、bottomを動的に設定
+  if(window.visualViewport) {
+    const inputArea = document.getElementById('home-input-area');
+    if(inputArea) {
+      window.visualViewport.addEventListener('resize', () => {
+        const kbH = Math.max(0, window.innerHeight - window.visualViewport.height);
+        inputArea.style.bottom = kbH + 'px';
+      });
+    }
+  }
 }
 
 function updateHeroVisibility(){
