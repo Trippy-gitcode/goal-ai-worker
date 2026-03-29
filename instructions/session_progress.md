@@ -6,66 +6,95 @@
 ---
 
 ## 5行サマリー
-- **Version:** v3.11.29（デプロイ済み 2026-03-29）
-- **Next:** BUG-01b Step 1 実装済み→方針確認待ち→デプロイ→実機検証→Step 2
-- **Last done:** BUG-01b Step 1 実装・デプロイ v3.11.29
-- **Open issues:** BUG-01b Step 1 実機検証待ち（シミュレーターではタッチ入力自動化不可）
+- **Version:** v3.11.30（デプロイ済み 2026-03-29）
+- **Next:** BUG-01b（Phase 1: JSクリーンアップ → Phase 2: overflow:clip修正 → Phase 3: シミュレーター検証）
+- **Last done:** BUG-01b Phase 1-4 完了（クリーンアップ + overflow:clip）v3.11.30 デプロイ済み → ふとし実機確認待ち
+- **Open issues:** BUG-01b（iOSキーボード。Xcode導入済み。パッチ当て5回失敗→クリーンアップ+overflow:clip方式に切り替え）
 
 ## 現在地
-- **バージョン:** v3.11.29（デプロイ済み）
-- **チェーン:** BUG-01b Step 1 実装済み→方針確認待ち→Step 2→テスト配布準備
-- **次のミッション:** BUG-01b Step 1 方針確認→デプロイ→実機検証
+- **バージョン:** v3.11.30（デプロイ済み）
+- **チェーン:** BUG-01b（Phase 1→2→3→4）→ テスト配布準備
+- **次のミッション:** BUG-01b Phase 1（クリーンアップ）
 
 ## ミッションキュー（上から順に実行）
 
-### BUG-01b: iOSキーボード表示時の挙動修正（2段階アプローチ）
+### BUG-01b: iOSキーボード問題 — クリーンアップ + overflow:clip修正
 > リスク: 🟡中
 > 対象ファイル: frontend/index.html、frontend/style.css、frontend/js/chat.js、frontend/js/app.js
 > 分類: C11 継続バグ（ふとし実機確認済み）
 
-**経緯:** Claude.aiの静的解析で3回「確定仕様」を出し、すべて実機で失敗。A10ルール適用。
+**経緯:**
+パッチ当てを5回繰り返し、全て実機で失敗。コードが複雑化しデグレリスクが高まっている。
+今回はまずクリーンアップ（不要コード削除・品質改善）を行い、その上でCSS修正を入れる。
 
-**症状（ふとし実機確認 2026-03-29 最終整理）:**
+**症状（ふとし実機確認 2026-03-29）:**
+- キーボード表示時にページ全体がキーボード高さ分だけ上にシフトする（押し上げ）
+- スクロール操作すると入力ボックス（position:fixed）がスクロールに巻き込まれてキーボードの裏に隠れる
+- iOS上の全ブラウザ共通（全てWebKitエンジン）。Android/デスクトップでは発生しない
 
-症状1: キーボード押し上げ
-- キーボードが表示されると、ページ全体がキーボードの高さ分だけ上にシフトする
-- iOS Safariはキーボード表示時にビューポートを縮めず、ページを上にスクロールする挙動がある
-- Android/デスクトップではビューポート自体が縮小するのでこの問題は起きない
+**根本原因（Claude.ai分析 2026-03-29）:**
+- `interactive-widget=resizes-content` をviewportメタタグに追加済み（ブラウザにビューポート縮小を指示）
+- しかし `html,body` に `overflow:hidden` があるため、iOS Safariが入力フォーカス時に `overflow:hidden` を無視してスクロールする既知の挙動と衝突
+- 1回目のキーボード表示はOKだが、2回目以降で押し上げが再発する
+- JSでの補正（scrollTo、height制約、bottom調整、GPU compositing）は全て失敗
 
-症状2: 入力ボックスのスクロール連動
-- キーボード表示直後は入力ボックスはキーボードの上に正しく見えている（fixedは一応効いている）
-- しかしユーザーがスクロール操作を行うと、入力ボックスがスクロールに巻き込まれて動く
-- 巻き込まれた結果、入力ボックスがキーボードの裏に隠れる
-- 原因: iOS Safariは「スクロール中はposition:fixedの再計算を一時停止する」挙動がある
+**過去の失敗アプローチ一覧（絶対にやらないこと）:**
+1. `.page`にheight:100dvh設定 → 親のheight:100%に制限されて効かなかった
+2. DOM構造変更（input-areaをbody直下に移動）→ bodyがスクロールするため効かなかった
+3. GPUコンポジットレイヤー化（translate3d/will-change/backface-visibility）→ 効果なし
+4. visualViewport.scrollイベントでoffsetTop補正 → 効果なし
+5. visualViewport.resizeで全コンテナheightをvv.heightに制約 + scrollTo(0,0) → 効果なし
+6. scrollIntoViewの削除 → 効果なし
+7. visualViewport.resizeでscrollTo(0,0)のみ → 効果なし
 
-※両症状ともiOS上の全ブラウザ（Chrome/Firefox/LINE等含む）で共通（全てWebKitエンジン）
+**ミッション手順（順序厳守）:**
 
-**アプローチ（2段階。Step 1を先に解決してからStep 2に進む）:**
+**Phase 1: クリーンアップ（修正前に必ず完了すること）**
 
-**Step 1: キーボード表示時のページ押し上げを防ぐ**
-- 入力ボックスのことは一旦忘れる
-- iOS Safariはキーボード表示時にビューポートを縮めず、ページを上に押し上げる
-- Androidはブラウザが自動でビューポートを縮小するが、iOSはやらない
-- → JSで同じことを再現する: `visualViewport`のresizeイベントを監視し、`visualViewport.height`をページコンテナの高さに適用する
-- これにより「キーボードの上まで」がページの全体になり、押し上げが起きなくなる
-- シミュレーターで「キーボード表示時にページ上部のコンテンツが画面外に消えない」ことを検証
+1-A. BUG-01b関連の不要コードを全て削除:
+- chat.js: L1825-1829のBUG-01bコメントブロック → 削除
+- app.js: `initViewportHandler`関数（scrollTo(0,0)）→ 全削除（interactive-widget=resizes-contentで不要）
 
-**Step 2: 入力ボックスの固定**
-- Step 1が解決した状態で、入力ボックスがキーボードの上に固定される方法を探す
-- スクロール操作をしても入力ボックスが動かないことを検証
+1-B. フロントエンドJS全体の品質レビュー:
+- chat.js、app.js、ui.js、api.jsの全体を読み、以下を洗い出す:
+  - パッチ当てで残った不要なコード・コメント
+  - 重複した処理
+  - 意味が不明確な変数名・関数名
+  - デッドコード（使われていない関数）
+- 発見した問題箇所をsession_progress.mdに一覧として記載
+- 明らかに不要なコードは即削除。判断が必要なものは提案ログに記載
 
-**Codeへの指示:**
-1. Xcodeインストール済み。`xcrun simctl` でiOSシミュレーターを起動し、症状1（ページ押し上げ）を再現する
-2. Step 1の修正を行い、シミュレーターで押し上げが解消されたことを確認する
-3. Step 1が通ったらStep 2に進む
-4. 各ステップで修正方針を決めたら `session_progress.md` に「調査結果」を記載して**30分待機**
-   （Claude.aiがオンラインなら確認する。オフラインなら自己判断で進める）
+1-C. CSS階層の確認:
+- html, body, #app, #pages, .page, #pg-home の全heightとoverflowプロパティを一覧化
+- コンフリクトがあれば記載
 
-**過去の失敗アプローチ（やらないこと）:**
-- `.page`にheight:100dvhを設定 → 親のheight:100%に制限されて効かなかった
-- DOM構造変更（input-areaを移動）→ bodyがスクロールするため効かなかった
-- GPUコンポジットレイヤー化（translate3d/will-change）→ 効果なし
-- visualViewport.scrollイベント補正 → 効果なし
+**Phase 2: overflow:clip修正**
+
+2-A. style.css修正:
+- `html,body` の `overflow:hidden` を `overflow:clip` に変更
+- `overflow:clip` はスクロールコンテナを作らないため、iOS Safariが「スクロールで押し上げ」をできなくなる
+- `overflow:clip` はiOS 16+対応（ふとしのデバイスは対応済み）
+- 他の `overflow:hidden` 指定（#pages, .page, #pg-home内部div等）はスクロール領域制御のため維持
+
+2-B. 入力ボックスの確認:
+- `#home-input-area` は `position:fixed;bottom:0` のまま維持
+- `interactive-widget=resizes-content` + `overflow:clip` により、キーボード表示時にビューポートが縮小し、bottom:0がキーボード上端になるはず
+- JS側のbottom調整は一切不要
+
+**Phase 3: シミュレーター検証**
+
+3-A. iOSシミュレーターで以下を検証:
+- キーボード1回目表示: ページが押し上げられない、入力ボックスがキーボード上に見える
+- キーボードを閉じて2回目表示: 同上（2回目以降の再現性が重要）
+- キーボード表示中にスクロール操作: 入力ボックスが動かない
+- 他ページ（GoalHub、設定等）の入力欄でもキーボード表示が正常に動作する
+
+3-B. デスクトップブラウザでの退行確認:
+- overflow:clipへの変更でデスクトップの表示が崩れていないこと
+
+**Phase 4: デプロイ → ふとし実機確認**
+
+3-Aが全てPASSしたらデプロイ。ふとしに実機確認を依頼。
 
 ---
 
