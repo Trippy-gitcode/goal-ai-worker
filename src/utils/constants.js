@@ -97,7 +97,7 @@ export function getCurrentMonth() {
   return `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
-export const APP_VERSION = '3.11.38';
+export const APP_VERSION = '3.11.39';
 export const COMMON_RULES = `【共通ルール】
 - ユーザーの質問にはまず答える。質問を聞き返す前にまず回答する。
 - 2〜3文で簡潔に。長文禁止。質問は1回まで。
