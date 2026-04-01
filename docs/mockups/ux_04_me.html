@@ -1,0 +1,140 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#243028;--bg2:#2c3a31;--bg3:#354439;
+  --chalk:rgba(255,240,200,0.9);--chalk2:rgba(255,240,200,0.5);--chalk3:rgba(255,240,200,0.28);
+  --gold:rgba(255,220,140,1);--gold-d:rgba(255,220,140,0.12);--gold-b:rgba(255,220,140,0.25);
+  --red:#e06868;--green:#5db896;--amber:#d4a050;
+  --purple:#b090d0;--purple-d:rgba(176,144,208,0.12);
+  --ff:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;
+  --border:rgba(255,240,200,0.08);--border2:rgba(255,240,200,0.15);
+}
+.phone{width:100%;max-width:340px;margin:0 auto;border-radius:18px;border:0.5px solid var(--border2);background:var(--bg);overflow:hidden;height:700px;display:flex;flex-direction:column;position:relative;font-family:var(--ff)}
+.ph-s{height:18px;padding:3px 14px;display:flex;align-items:center;justify-content:space-between;font-size:8px;color:var(--chalk3)}
+
+/* Header */
+.mh{padding:14px 16px 0;flex-shrink:0}
+.mh-title{font-size:18px;font-weight:300;color:var(--chalk);letter-spacing:0.5px}
+
+/* Content */
+.mcontent{flex:1;overflow-y:auto;padding:12px 14px}
+
+/* Vision */
+.vision{border-radius:8px;border:0.5px solid var(--gold-b);background:var(--gold-d);padding:14px;margin-bottom:12px}
+.vision-label{font-size:8px;color:var(--gold);font-weight:500;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.vision-text{font-size:13px;color:var(--chalk);line-height:1.5;font-weight:300}
+
+/* Two column: strengths / challenges */
+.two-col{display:flex;gap:8px;margin-bottom:12px}
+.col{flex:1;border-radius:8px;background:var(--bg2);border:0.5px solid var(--border);padding:10px}
+.col-label{font-size:8px;font-weight:500;color:var(--chalk3);letter-spacing:0.5px;margin-bottom:6px}
+.col-item{font-size:9px;color:var(--chalk2);padding:3px 0;display:flex;align-items:center;gap:4px}
+.col-item::before{content:'';width:3px;height:3px;border-radius:50%;flex-shrink:0}
+.str .col-item::before{background:var(--green)}
+.cha .col-item::before{background:var(--amber)}
+
+/* Values */
+.values{margin-bottom:12px}
+.values-label{font-size:8px;font-weight:500;color:var(--chalk3);letter-spacing:0.5px;margin-bottom:6px}
+.val-tags{display:flex;flex-wrap:wrap;gap:5px}
+.val-tag{font-size:8px;padding:4px 10px;border-radius:10px;border:0.5px solid var(--border2);color:var(--chalk2);background:var(--bg2)}
+
+/* AI Memo */
+.memo-section{border-radius:8px;background:var(--bg2);border:0.5px solid var(--border);padding:10px;margin-bottom:12px}
+.memo-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.memo-label{font-size:9px;font-weight:500;color:var(--purple)}
+.memo-date{font-size:7px;color:var(--chalk3)}
+.memo-text{font-size:9px;color:var(--chalk2);line-height:1.5}
+.memo-wrong{display:inline-flex;align-items:center;gap:3px;margin-top:6px;font-size:8px;color:var(--red);border:0.5px solid rgba(224,104,104,0.3);border-radius:6px;padding:3px 8px;cursor:pointer}
+
+/* Actions */
+.me-actions{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.me-action{display:flex;align-items:center;gap:8px;padding:10px;border-radius:8px;background:var(--bg2);border:0.5px solid var(--border);cursor:pointer}
+.me-action svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:1.5;flex-shrink:0}
+.me-action-text{font-size:10px;color:var(--chalk)}
+.me-action-arrow{font-size:10px;color:var(--chalk3);margin-left:auto}
+
+/* Bottom tab */
+.btab{display:flex;height:42px;border-top:0.5px solid var(--border2);flex-shrink:0;background:var(--bg)}
+.btab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+.btab-item svg{width:16px;height:16px;stroke:var(--chalk3);fill:none;stroke-width:1.5}
+.btab-item span{font-size:7px;color:var(--chalk3)}
+.btab-item.active svg{stroke:var(--gold)}
+.btab-item.active span{color:var(--gold);font-weight:600}
+</style>
+
+<div class="phone">
+  <div class="ph-s"><span>14:20</span><span>...</span></div>
+
+  <div class="mh"><div class="mh-title">Me</div></div>
+
+  <div class="mcontent">
+    <!-- Vision -->
+    <div class="vision">
+      <div class="vision-label">My Vision</div>
+      <div class="vision-text">動画クリエイターとして独立し、健康的な体で自由に働きながら、副業収入で安定した生活基盤を作る。</div>
+    </div>
+
+    <!-- Strengths / Challenges -->
+    <div class="two-col">
+      <div class="col str">
+        <div class="col-label">強み</div>
+        <div class="col-item">継続力がある</div>
+        <div class="col-item">企画力に優れる</div>
+        <div class="col-item">学習意欲が高い</div>
+      </div>
+      <div class="col cha">
+        <div class="col-label">課題</div>
+        <div class="col-item">完璧主義で遅れがち</div>
+        <div class="col-item">休憩を忘れる</div>
+        <div class="col-item">優先順位に迷う</div>
+      </div>
+    </div>
+
+    <!-- Values -->
+    <div class="values">
+      <div class="values-label">大切にしていること</div>
+      <div class="val-tags">
+        <div class="val-tag">自由</div>
+        <div class="val-tag">成長</div>
+        <div class="val-tag">健康</div>
+        <div class="val-tag">創造性</div>
+        <div class="val-tag">誠実さ</div>
+      </div>
+    </div>
+
+    <!-- AI Understanding Memo -->
+    <div class="memo-section">
+      <div class="memo-head">
+        <div class="memo-label">AIの理解メモ</div>
+        <div class="memo-date">更新: 4/1 14:00</div>
+      </div>
+      <div class="memo-text">朝型で午前中の集中力が高い。動画編集は長時間まとめて作業する方が効率的。締切が近づくとプレッシャーで集中できなくなる傾向がある。最近はSEOに興味を持ち始めている。</div>
+      <div class="memo-wrong">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        これは違う
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="me-actions">
+      <div class="me-action">
+        <svg viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 017 4.5v0A2.5 2.5 0 014.5 7v0A2.5 2.5 0 012 9.5v5A2.5 2.5 0 004.5 17v0A2.5 2.5 0 007 19.5v0A2.5 2.5 0 009.5 22h5a2.5 2.5 0 002.5-2.5v0a2.5 2.5 0 002.5-2.5v0a2.5 2.5 0 002.5-2.5v-5A2.5 2.5 0 0019.5 7v0A2.5 2.5 0 0017 4.5v0A2.5 2.5 0 0014.5 2z"/></svg>
+        <div class="me-action-text">自分を知るセッション</div>
+        <div class="me-action-arrow">></div>
+      </div>
+      <div class="me-action">
+        <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        <div class="me-action-text">ゴール連携チェック</div>
+        <div class="me-action-arrow">></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btab">
+    <div class="btab-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 8 14"/></svg><span>TODAY</span></div>
+    <div class="btab-item"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>TALK</span></div>
+    <div class="btab-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><span>GOALS</span></div>
+    <div class="btab-item active"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>ME</span></div>
+  </div>
+</div>
