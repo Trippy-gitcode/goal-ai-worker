@@ -2877,10 +2877,10 @@ function renderTodayScreen(){
       const isOverdue = t.due && t.due < todayStr && !isDone;
       const goalName = item.goalName || '';
       const timeStr = t.estimated_time ? `${t.estimated_time}` : '';
-      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);${isDone?'opacity:0.35;':''}cursor:pointer;" onclick="openHomeTaskById('${t.id}')">
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);${isDone?'opacity:0.35;':''}cursor:pointer;">
         <div style="width:10px;display:flex;flex-direction:column;gap:1.5px;opacity:0.2;flex-shrink:0;"><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span></div>
-        <div style="width:20px;height:20px;border-radius:50%;${isDone?'':'border:1px solid '+(idx===0&&!isDone?'var(--amber)':'var(--border2)')+';'}display:flex;align-items:center;justify-content:center;font-size:9px;color:${idx===0&&!isDone?'var(--amber)':'var(--muted2)'};flex-shrink:0;${idx===0&&!isDone?'background:rgba(228,184,106,0.1);':''}">${isDone?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':(idx+1)}</div>
-        <div style="flex:1;min-width:0;">
+        <div onclick="event.stopPropagation();toggleTodayTask('${t.id}')" style="width:28px;height:28px;border-radius:50%;${isDone?'':'border:1px solid '+(idx===0&&!isDone?'var(--amber)':'var(--border2)')+';'}display:flex;align-items:center;justify-content:center;font-size:9px;color:${idx===0&&!isDone?'var(--amber)':'var(--muted2)'};flex-shrink:0;${idx===0&&!isDone?'background:rgba(228,184,106,0.1);':''}cursor:pointer;">${isDone?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':(idx+1)}</div>
+        <div style="flex:1;min-width:0;" onclick="openHomeTaskById('${t.id}')">
           <div style="font-size:12px;color:${isOverdue?'var(--red)':'var(--cream)'};line-height:1.3;${isDone?'text-decoration:line-through;':''}overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(t.title)}</div>
           ${timeStr ? `<div style="font-size:8px;color:${isOverdue?'var(--red)':'var(--muted2)'};margin-top:1px;">${isOverdue?'期限切れ':timeStr}</div>` : (isOverdue ? '<div style="font-size:8px;color:var(--red);margin-top:1px;">期限切れ</div>' : '')}
         </div>
@@ -2901,6 +2901,9 @@ function renderTodayScreen(){
 
   // Secretary memo (rule-based)
   renderSecretaryMemo(allTasks, todayStr);
+
+  // B-02: 心がけ欄（当日キャッシュ）
+  loadTodayMindset(allTasks);
 }
 
 function renderSecretaryMemo(allTasks, todayStr){
@@ -2965,6 +2968,43 @@ function renderSecretaryMemo(allTasks, todayStr){
   memoBody.innerHTML = memos.map(m =>
     `<div style="display:flex;align-items:flex-start;gap:6px;padding:3px 0;font-size:9px;color:var(--muted);line-height:1.4;">${m.icon}<span>${escapeHtml(m.text)}</span></div>`
   ).join('');
+}
+
+// B-02: 心がけ生成（GPT-simple, 当日キャッシュ）
+async function loadTodayMindset(allTasks){
+  const el = document.getElementById('today-mindset');
+  if(!el) return;
+  const todayKey = 'mindset_' + new Date().toISOString().slice(0,10);
+  const cached = sessionStorage.getItem(todayKey);
+  if(cached){ el.textContent = cached; el.style.display = ''; return; }
+  if(!AUTH_TOKEN || allTasks.length === 0) return;
+  try{
+    const taskNames = allTasks.filter(i=>i.task.status!=='done').slice(0,5).map(i=>i.task.title).join('、');
+    const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
+      method:'POST', headers:getAuthHeaders(),
+      body:JSON.stringify({ system:'ユーザーの今日のタスクを踏まえて、20文字以内の心がけを1つだけ返してください。「」は不要。具体的で行動につながるもの。', messages:[{role:'user',content:'今日のタスク: '+taskNames}], maxTokens:30 })
+    });
+    const data = await res.json();
+    const tip = (data.choices?.[0]?.message?.content || '').trim().replace(/^「|」$/g,'');
+    if(tip){ el.textContent = tip; el.style.display = ''; sessionStorage.setItem(todayKey, tip); }
+  }catch(e){}
+}
+
+// B-10: タスクタップで完了切替
+function toggleTodayTask(taskId){
+  for(const goal of ALL_GOALS){
+    for(const phase of (goal.phases||[])){
+      for(const task of (phase.tasks||[])){
+        if(String(task.id) === String(taskId)){
+          task.status = task.status === 'done' ? 'current' : 'done';
+          renderTodayScreen();
+          // Save to Supabase
+          if(typeof saveGoals === 'function') saveGoals();
+          return;
+        }
+      }
+    }
+  }
 }
 
 function sendTodayComment(){
@@ -3053,6 +3093,6 @@ Object.assign(window, {
   requestTaskBreakdown, showTaskCard, confirmTaskCard,
   setPreset, taskCheckAnim,
   retryWithRoute, recordRoutingFeedback, stopHomeStream,
-  renderTodayScreen, renderSecretaryMemo, sendTodayComment, openTodayAddTask
+  renderTodayScreen, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask
 });
 
