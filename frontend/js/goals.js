@@ -2475,9 +2475,97 @@ Object.defineProperty(window, 'curPage', {
   get() { return curPage; }, set(v) { curPage = v; },
   configurable: true, enumerable: true
 });
+// D-02: ゴール一覧 + やりたいことリスト
+function renderGoalsList(){
+  const el = document.getElementById('goals-list-content');
+  if(!el) return;
+  const goals = (typeof GOALS !== 'undefined' ? GOALS : ALL_GOALS.map(g=>({id:g.id,title:g.title,progress:g.progress||0,status:g.archived?'archived':'active'}))).filter(g=>g.status!=='archived');
+  if(goals.length === 0){
+    el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted2);font-size:12px;">ゴールがありません</div>';
+    return;
+  }
+  el.innerHTML = goals.map(g => {
+    const pct = g.progress || 0;
+    const totalTasks = ALL_GOALS.find(ag=>String(ag.id)===String(g.id))?.phases?.reduce((s,p)=>s+p.tasks.length,0) || 0;
+    const doneTasks = ALL_GOALS.find(ag=>String(ag.id)===String(g.id))?.phases?.reduce((s,p)=>s+p.tasks.filter(t=>t.status==='done').length,0) || 0;
+    return `<div onclick="openGoalHubById('${g.id}')" style="border-radius:8px;border:0.5px solid var(--border2);background:var(--bg2);padding:12px;margin-bottom:10px;cursor:pointer;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:500;color:var(--cream);line-height:1.3;">${escapeHtml(g.title)}</div></div>
+        <div style="font-size:16px;font-weight:600;color:var(--amber);flex-shrink:0;">${pct}%</div>
+      </div>
+      <div style="height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#c8920a,#f5d380);border-radius:2px;"></div></div>
+      <div style="font-size:8px;color:var(--muted2);margin-top:6px;">タスク ${doneTasks}/${totalTasks}完了</div>
+    </div>`;
+  }).join('');
+}
+
+function openGoalHubById(goalId){
+  const listView = document.getElementById('goals-list-view');
+  const hubView = document.getElementById('pg-goal-hub');
+  if(listView) listView.style.display = 'none';
+  if(hubView) hubView.style.display = '';
+  if(typeof loadGoalHub === 'function') loadGoalHub(goalId);
+}
+
+function switchGoalsTab(tab){
+  const goalsBtn = document.getElementById('goals-tab-goals');
+  const wishesBtn = document.getElementById('goals-tab-wishes');
+  const goalsContent = document.getElementById('goals-list-content');
+  const wishesContent = document.getElementById('wishes-list-content');
+  if(tab === 'goals'){
+    goalsBtn.style.borderBottomColor = 'var(--amber)'; goalsBtn.style.color = 'var(--amber)';
+    wishesBtn.style.borderBottomColor = 'transparent'; wishesBtn.style.color = 'var(--muted2)';
+    goalsContent.style.display = ''; wishesContent.style.display = 'none';
+  } else {
+    wishesBtn.style.borderBottomColor = 'var(--amber)'; wishesBtn.style.color = 'var(--amber)';
+    goalsBtn.style.borderBottomColor = 'transparent'; goalsBtn.style.color = 'var(--muted2)';
+    goalsContent.style.display = 'none'; wishesContent.style.display = '';
+    renderWishlist();
+  }
+}
+
+function renderWishlist(){
+  const el = document.getElementById('wishes-list-content');
+  if(!el) return;
+  let wishes = [];
+  try{ wishes = JSON.parse(localStorage.getItem('goal_ai_wishes') || '[]'); }catch(e){}
+  let html = wishes.map((w,i) => `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);">
+    <div onclick="toggleWish(${i})" style="width:20px;height:20px;border-radius:50%;border:1px solid ${w.done?'var(--green)':'var(--border2)'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">${w.done?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}</div>
+    <div style="flex:1;font-size:12px;color:${w.done?'var(--muted2)':'var(--cream)'};${w.done?'text-decoration:line-through;':''}">${escapeHtml(w.title)}</div>
+    <button onclick="promoteWish(${i})" style="font-size:8px;padding:3px 8px;background:var(--amber-d);border:0.5px solid var(--amber);border-radius:6px;color:var(--amber);cursor:pointer;border:none;">ゴール化</button>
+  </div>`).join('');
+  html += `<div style="padding:10px 0;"><input id="wish-input" placeholder="やりたいことを追加..." style="width:100%;padding:8px 10px;background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;color:var(--cream);font-family:var(--ff);font-size:11px;outline:none;box-sizing:border-box;" onkeydown="if(event.key==='Enter'){addWish(this.value);this.value=''}"></div>`;
+  el.innerHTML = html;
+}
+
+function addWish(title){
+  if(!title.trim()) return;
+  let wishes = []; try{ wishes = JSON.parse(localStorage.getItem('goal_ai_wishes') || '[]'); }catch(e){}
+  wishes.push({title:title.trim(), done:false});
+  localStorage.setItem('goal_ai_wishes', JSON.stringify(wishes));
+  renderWishlist();
+}
+
+function toggleWish(idx){
+  let wishes = []; try{ wishes = JSON.parse(localStorage.getItem('goal_ai_wishes') || '[]'); }catch(e){}
+  if(wishes[idx]) wishes[idx].done = !wishes[idx].done;
+  localStorage.setItem('goal_ai_wishes', JSON.stringify(wishes));
+  renderWishlist();
+}
+
+function promoteWish(idx){
+  let wishes = []; try{ wishes = JSON.parse(localStorage.getItem('goal_ai_wishes') || '[]'); }catch(e){}
+  const w = wishes[idx];
+  if(!w) return;
+  wishes.splice(idx, 1);
+  localStorage.setItem('goal_ai_wishes', JSON.stringify(wishes));
+  // Switch to goal creation with the wish title
+  if(typeof showWelcome === 'function'){ showWelcome(); setTimeout(()=>{ const inp = document.getElementById('wlc-in'); if(inp){ inp.value = w.title; } }, 200); }
+}
+
 // Constants, arrays, functions
 Object.assign(window, {
-  TASKS, ALL_GOALS, GOAL_COLORS, getGoalColor,
+  TASKS, ALL_GOALS, GOAL_COLORS, getGoalColor, renderGoalsList, openGoalHubById, switchGoalsTab, renderWishlist, addWish, toggleWish, promoteWish,
   getActiveGoalPhases, switchTaskView, renderTaskTimeView,
   renderGoalSelectorBar, renderTodaySummaryBar, getTodayTasks,
   setFilter, toggleWeightSort, renderTasks, renderGoalView, renderTodayView,
