@@ -2891,6 +2891,73 @@ function renderTodayScreen(){
       return `<div style="display:flex;align-items:center;gap:4px;"><span style="font-size:8px;color:var(--muted2);">${escapeHtml(g.title?.slice(0,6)||'')}</span><span style="font-size:10px;font-weight:600;color:var(--amber);">${pct}%</span></div>`;
     }).join('');
   }
+
+  // Secretary memo (rule-based)
+  renderSecretaryMemo(allTasks, todayStr);
+}
+
+function renderSecretaryMemo(allTasks, todayStr){
+  const memoEl = document.getElementById('today-memo');
+  const memoBody = document.getElementById('today-memo-body');
+  if(!memoEl || !memoBody) return;
+
+  const memos = [];
+  const warnIcon = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.5" style="flex-shrink:0;margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+  const noteIcon = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+
+  // Rule 1: Overdue tasks
+  const overdue = allTasks.filter(i => i.task.due && i.task.due < todayStr && i.task.status !== 'done');
+  overdue.forEach(i => {
+    memos.push({type:'warn', icon:warnIcon, text:`${i.task.title} が期限切れです。早めに対応を。`});
+  });
+
+  // Rule 2: Tasks due today with high priority
+  const urgentToday = allTasks.filter(i => i.task.due === todayStr && (i.task.priority === 'high') && i.task.status !== 'done');
+  urgentToday.forEach(i => {
+    memos.push({type:'warn', icon:warnIcon, text:`${i.task.title} は今日が締切です。`});
+  });
+
+  // Rule 3: Time budget check (if tasks have estimated_time)
+  const activeTasks = allTasks.filter(i => i.task.status !== 'done');
+  let totalMinutes = 0;
+  let hasTimeEstimate = false;
+  activeTasks.forEach(i => {
+    const et = i.task.estimated_time;
+    if(et){
+      hasTimeEstimate = true;
+      const m = et.match(/(\d+)\s*h/i);
+      if(m) totalMinutes += parseInt(m[1]) * 60;
+      const mm = et.match(/(\d+)\s*m/i);
+      if(mm) totalMinutes += parseInt(mm[1]);
+    }
+  });
+  if(hasTimeEstimate && totalMinutes > 480){
+    const hours = Math.round(totalMinutes / 60 * 10) / 10;
+    memos.push({type:'warn', icon:warnIcon, text:`今日のタスク合計は約${hours}時間。8時間を超えています。優先順位の見直しを。`});
+  }
+
+  // Rule 4: Suggestion - first task recommendation
+  if(activeTasks.length > 0 && !overdue.length){
+    const first = activeTasks[0];
+    const goalName = first.goal?.title || '';
+    if(goalName){
+      memos.push({type:'note', icon:noteIcon, text:`まずは「${first.task.title}」から。${goalName}の進捗に直結します。`});
+    }
+  }
+
+  // Rule 5: All tasks done celebration
+  if(allTasks.length > 0 && activeTasks.length === 0){
+    memos.push({type:'note', icon:noteIcon, text:`今日のタスクは全て完了。お疲れさまでした！`});
+  }
+
+  if(memos.length === 0){
+    memoEl.style.display = 'none';
+    return;
+  }
+  memoEl.style.display = '';
+  memoBody.innerHTML = memos.map(m =>
+    `<div style="display:flex;align-items:flex-start;gap:6px;padding:3px 0;font-size:9px;color:var(--muted);line-height:1.4;">${m.icon}<span>${escapeHtml(m.text)}</span></div>`
+  ).join('');
 }
 
 function sendTodayComment(){
@@ -2973,6 +3040,6 @@ Object.assign(window, {
   requestTaskBreakdown, showTaskCard, confirmTaskCard,
   setPreset, taskCheckAnim,
   retryWithRoute, recordRoutingFeedback, stopHomeStream,
-  renderTodayScreen, sendTodayComment, openTodayAddTask
+  renderTodayScreen, renderSecretaryMemo, sendTodayComment, openTodayAddTask
 });
 
