@@ -1034,8 +1034,16 @@ async function sendHomeMsg(){
   document.getElementById('home-send-btn').disabled = true;
 
   const inp = document.getElementById('home-msg-in');
-  const text = inp.value.trim();
+  let text = inp.value.trim();
   if(!text && !homeImageData){ document.getElementById('home-send-btn').disabled=false; return; }
+
+  // B-12: タスク作成モード — ユーザー入力にタスク作成コンテキストを付加
+  if(window._taskCreateMode && text){
+    text = `【新タスク作成】「${text}」をタスクにしたい。以下を質問して:\n1. いつまでにやる？（期限）\n2. どれくらい時間かかる？（見積もり）\n3. 優先度は？（高/中/低）\n回答を踏まえてタスクを構造化して提案して。`;
+    inp.value = text;
+    window._taskCreateMode = false;
+    inp.placeholder = '質問、相談、なんでも...';
+  }
 
   // Image handling
   let userContent;
@@ -2843,6 +2851,9 @@ async function confirmTaskCard() {
   }
   modal.remove();
   toast(`${count}件のタスクを追加しました`);
+  // C-11/H-02: タスク追加後にTODAYをリフレッシュ
+  if(typeof renderTodayScreen === 'function') renderTodayScreen();
+  if(typeof saveGoals === 'function') saveGoals();
 }
 
 // ═══ ES Module: expose to window ═══
@@ -2878,8 +2889,8 @@ function renderTodayScreen(){
       const isOverdue = t.due && t.due < todayStr && !isDone;
       const goalName = item.goalName || '';
       const timeStr = t.estimated_time ? `${t.estimated_time}` : '';
-      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);${isDone?'opacity:0.35;':''}cursor:pointer;">
-        <div style="width:10px;display:flex;flex-direction:column;gap:1.5px;opacity:0.2;flex-shrink:0;"><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span></div>
+      return `<div data-task-id="${t.id}" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);${isDone?'opacity:0.35;':''}cursor:pointer;">
+        <div data-drag="1" style="width:16px;height:28px;display:flex;flex-direction:column;gap:1.5px;align-items:center;justify-content:center;opacity:0.2;flex-shrink:0;touch-action:none;cursor:grab;"><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span></div>
         <div onclick="event.stopPropagation();toggleTodayTask('${t.id}')" style="width:28px;height:28px;border-radius:50%;${isDone?'':'border:1px solid '+(idx===0&&!isDone?'var(--amber)':'var(--border2)')+';'}display:flex;align-items:center;justify-content:center;font-size:9px;color:${idx===0&&!isDone?'var(--amber)':'var(--muted2)'};flex-shrink:0;${idx===0&&!isDone?'background:rgba(228,184,106,0.1);':''}cursor:pointer;">${isDone?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':(idx+1)}</div>
         <div style="flex:1;min-width:0;" onclick="openHomeTaskById('${t.id}')">
           <div style="font-size:12px;color:${isOverdue?'var(--red)':'var(--cream)'};line-height:1.3;${isDone?'text-decoration:line-through;':''}overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(t.title)}</div>
@@ -2903,6 +2914,8 @@ function renderTodayScreen(){
   // Secretary memo (rule-based)
   renderSecretaryMemo(allTasks, todayStr);
 
+  // B-08: ドラッグ並替初期化
+  initTodayDrag();
   // B-16: 日記読込
   loadTodayDiary();
   // B-02: 心がけ欄（当日キャッシュ）
@@ -2971,6 +2984,53 @@ function renderSecretaryMemo(allTasks, todayStr){
   memoBody.innerHTML = memos.map(m =>
     `<div style="display:flex;align-items:flex-start;gap:6px;padding:3px 0;font-size:9px;color:var(--muted);line-height:1.4;">${m.icon}<span>${escapeHtml(m.text)}</span></div>`
   ).join('');
+}
+
+// B-08: タスクドラッグ並替（touch対応、ライブラリ不使用）
+function initTodayDrag(){
+  const list = document.getElementById('today-task-list');
+  if(!list) return;
+  let dragEl = null, placeholder = null, startY = 0;
+  list.addEventListener('touchstart', (e) => {
+    const grip = e.target.closest('[data-drag]');
+    if(!grip) return;
+    dragEl = grip.closest('[data-task-id]');
+    if(!dragEl) return;
+    startY = e.touches[0].clientY;
+    dragEl.style.opacity = '0.5';
+    dragEl.style.transition = 'none';
+    placeholder = document.createElement('div');
+    placeholder.style.cssText = 'height:40px;border:1px dashed var(--border2);border-radius:6px;margin:4px 0;';
+    dragEl.after(placeholder);
+  }, {passive:true});
+  list.addEventListener('touchmove', (e) => {
+    if(!dragEl) return;
+    const y = e.touches[0].clientY;
+    const dy = y - startY;
+    dragEl.style.transform = `translateY(${dy}px)`;
+    // Find sibling to swap with
+    const siblings = [...list.querySelectorAll('[data-task-id]')];
+    const dragRect = dragEl.getBoundingClientRect();
+    for(const sib of siblings){
+      if(sib === dragEl || sib === placeholder) continue;
+      const sibRect = sib.getBoundingClientRect();
+      if(dragRect.top < sibRect.top + sibRect.height/2 && dragRect.top > sibRect.top - sibRect.height/2){
+        if(dragRect.top < sibRect.top) sib.before(placeholder);
+        else sib.after(placeholder);
+        break;
+      }
+    }
+  }, {passive:true});
+  list.addEventListener('touchend', () => {
+    if(!dragEl) return;
+    dragEl.style.opacity = ''; dragEl.style.transform = ''; dragEl.style.transition = '';
+    if(placeholder?.parentNode) placeholder.before(dragEl);
+    placeholder?.remove();
+    // Save new order to localStorage
+    const ids = [...list.querySelectorAll('[data-task-id]')].map(el=>el.dataset.taskId);
+    localStorage.setItem('today_task_order', JSON.stringify(ids));
+    dragEl = null; placeholder = null;
+  }, {passive:true});
 }
 
 // B-16: 日記（localStorage保存）
@@ -3048,17 +3108,22 @@ function sendTodayComment(){
 }
 
 function openTodayAddTask(){
-  // Switch to TALK and prompt for task creation
+  // B-11: TALKに遷移して入力待ち。送信時にタスク作成コンテキストを付加
+  window._taskCreateMode = true;
   showPage('home');
   setTimeout(() => {
     const msgIn = document.getElementById('home-msg-in');
     if(msgIn){
       msgIn.value = '';
-      msgIn.placeholder = '新しいタスクを入力...';
+      msgIn.placeholder = 'やりたいことを入力（例: 企画書を書く）';
       msgIn.focus({ preventScroll: true });
     }
   }, 100);
 }
+
+// B-12: タスク作成モードで送信された場合、タスク化コンテキストを注入
+const _origSendHomeMsg = typeof sendHomeMsg === 'function' ? sendHomeMsg : null;
+// sendHomeMsgの呼び出し前にタスク作成コンテキストを付加（chat.js内のsendHomeMsgは直接上書きできないためグローバルフラグで制御）
 
 // Mutable primitives shared cross-file
 Object.defineProperty(window, 'memoToastShown', {
