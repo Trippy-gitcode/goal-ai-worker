@@ -137,7 +137,7 @@ function renderTaskTimeView(view){
 
   if(!overdue.length && !upcoming.length && !inprogress.length){
     content.innerHTML = `<div style="text-align:center;padding:60px 0;color:var(--muted2);font-size:12px;">
-      ${view==='today'?'今日のタスクはありません 🎉':view==='3days'?'3日間タスクはありません':'今週のタスクはありません 🎉'}</div>`;
+      ${view==='today'?'今日のタスクはありません ':view==='3days'?'3日間タスクはありません':'今週のタスクはありません '}</div>`;
   }
 }
 
@@ -307,7 +307,7 @@ function renderTodayView(container){
   const allItems = getTodayTasks();
   if(allItems.length === 0){
     container.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--muted2);font-size:13px;">
-      🎉 今日のタスクはすべて完了しています
+      今日のタスクはすべて完了しています
     </div>`;
     return;
   }
@@ -345,7 +345,7 @@ function mkTaskRow(task, phase, idx, goal){
   // Due date
   const dueHtml = task.due ? `<span class="td${isOverdue?' tdo':''}">${isOverdue?'期限切れ':task.due}</span>` : '<span class="td">—</span>';
   // AI badge
-  const aiHtml = task.source==='ai' ? '<span class="tai">✨</span>' : '';
+  const aiHtml = task.source==='ai' ? '<span class="tai"></span>' : '';
   // Recurrence
   const repHtml = task.repeat ? `<span class="trp">🔁${task.repeat}</span>` : '';
 
@@ -750,7 +750,7 @@ function renderCalendar(){
     dayTasks.slice(0, 3).forEach(t => {
       const overdue = !t.done && dateStr < todayStr;
       const pillColor = overdue ? '#FF4444' : (t.color || '#778CA3');
-      html += `<div class="task-pill" style="background:${pillColor}">${escapeHtml((t.title||'').slice(0,6))}${t.source==='ai'?' ✨':''}</div>`;
+      html += `<div class="task-pill" style="background:${pillColor}">${escapeHtml((t.title||'').slice(0,6))}${t.source==='ai'?' ':''}</div>`;
     });
     if (dayTasks.length > 3) html += `<div class="task-pill-more">+${dayTasks.length-3}</div>`;
 
@@ -1295,7 +1295,7 @@ function renderHubTasks(){
       row.innerHTML = `
         <div class="tch${isDone?' done':''}"></div>
         <div class="tt${isDone?' dn':''}">${escapeHtml(task.title)}</div>
-        ${task.source==='ai'?'<span class="tai">✨</span>':''}${wt}
+        ${task.source==='ai'?'<span class="tai"></span>':''}${wt}
         <span class="td">${task.due||'—'}</span>`;
       ph.appendChild(row);
     });
@@ -1579,7 +1579,7 @@ function renderHubSettings(goal){
   if(kpiIn) kpiIn.value = goal.kpi || '';
   // AI Role display
   const roleDisplay = document.getElementById('hub-role-display');
-  if(roleDisplay) roleDisplay.textContent = goal.ai_role_name ? `${goal.ai_role_icon||'🤖'} ${goal.ai_role_name}` : '未設定';
+  if(roleDisplay) roleDisplay.textContent = goal.ai_role_name ? `${goal.ai_role_icon||'AI'} ${goal.ai_role_name}` : '未設定';
   // Notification toggles (#05e)
   const ns = goal.notifSettings || { deadline: true, review: true };
   const dlEl = document.getElementById('hub-notif-deadline');
@@ -1600,7 +1600,7 @@ function saveHubRole(){
   const goal = ALL_GOALS[hubGoalIdx];
   const val = document.getElementById('hub-role-input').value.trim();
   goal.ai_role_name = val;
-  document.getElementById('hub-role-display').textContent = val ? `🤖 ${val}` : '未設定';
+  document.getElementById('hub-role-display').textContent = val ? `AI ${val}` : '未設定';
   document.getElementById('hub-role-edit').style.display = 'none';
   toast('AIロールを更新しました ✓');
   if(goal.supabaseId) apiUpdateGoal(goal.supabaseId, { ai_role_name: val });
@@ -1703,7 +1703,7 @@ function archiveGoal(reason){
   renderSidebarGoals();
   renderArchiveList();  // update count badge
   showPage('home');
-  toast(reason==='done' ? `🏆「${goal.title}」を達成済みにしました！` : `「${goal.title}」をアーカイブしました`);
+  toast(reason==='done' ? `★「${goal.title}」を達成済みにしました！` : `「${goal.title}」をアーカイブしました`);
 }
 
 function renderSidebarGoals(){
@@ -1773,7 +1773,7 @@ async function extractGoalsFromHistory(){
     const card = document.createElement('div');
     card.id = 'extract-goals-card';
     card.className = 'extract-goal-card';
-    card.innerHTML = `<div style="font-size:9px;font-weight:500;color:#c8920a;margin-bottom:6px;">💡 会話から見つかったゴール候補</div>`;
+    card.innerHTML = `<div style="font-size:9px;font-weight:500;color:#c8920a;margin-bottom:6px;">◇ 会話から見つかったゴール候補</div>`;
     goals.forEach(g => {
       const row = document.createElement('div');
       row.className = 'extract-goal-item';
@@ -1973,17 +1973,17 @@ function checkMilestone(goal){
 
 function showMilestoneCard(goal, pct){
   launchConfetti();
-  const msgs = {25:'最初の一歩を踏み出した！🚀',50:'折り返し地点！ハーフウェイ達成 🎯',75:'あと少し！ゴールが見えてきた 🔥',100:'おめでとう！ゴール達成！🎉🎊'};
+  const msgs = {25:'最初の一歩を踏み出した！→',50:'折り返し地点！ハーフウェイ達成 ●',75:'あと少し！ゴールが見えてきた ▲',100:'おめでとう！ゴール達成！'};
   const card = document.createElement('div');
   card.className = 'milestone-card';
   card.innerHTML = `
-    <div style="font-size:28px;margin-bottom:8px;">${pct===100?'🏆':'🎯'}</div>
+    <div style="font-size:28px;margin-bottom:8px;">${pct===100?'★':'●'}</div>
     <div style="font-size:16px;font-weight:600;color:var(--cream);margin-bottom:4px;">${escapeHtml(goal.title)}</div>
     <div style="font-size:13px;color:var(--amber);margin-bottom:4px;">${pct}% 達成！</div>
     <div style="font-size:12px;color:var(--muted);">${msgs[pct]}</div>
     <div class="share-btns">
       <button class="share-btn" onclick="shareMilestone('${goal.title.replace(/'/g,"\\'")}',${pct},'twitter')">𝕏 シェア</button>
-      <button class="share-btn" onclick="shareMilestone('${goal.title.replace(/'/g,"\\'")}',${pct},'copy')">📋 コピー</button>
+      <button class="share-btn" onclick="shareMilestone('${goal.title.replace(/'/g,"\\'")}',${pct},'copy')">□ コピー</button>
       <button class="share-btn" onclick="shareMilestone('${goal.title.replace(/'/g,"\\'")}',${pct},'native')">📤 共有</button>
     </div>`;
   const container = document.getElementById('home-chat-inner')||document.body;
@@ -1992,7 +1992,7 @@ function showMilestoneCard(goal, pct){
 }
 
 function shareMilestone(title, pct, method){
-  const text = `【GOAL AI】「${title}」${pct}%達成！💪\n#GOALAI #目標達成`;
+  const text = `【GOAL AI】「${title}」${pct}%達成！\n#GOALAI #目標達成`;
   if(method==='twitter'){
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,'_blank');
   } else if(method==='copy'){
@@ -2066,7 +2066,7 @@ function renderMicroTask(){
   if(!activeGoals.length){ el.innerHTML=''; return; }
   // AIに今日の1%タスクを聞く
   el.innerHTML = `<div class="micro-task-card" style="padding:12px 16px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:10px;margin-top:10px;">
-    <div style="font-size:10px;color:var(--amber);font-weight:600;letter-spacing:.1em;margin-bottom:6px;">🎯 今日の1%</div>
+    <div style="font-size:10px;color:var(--amber);font-weight:600;letter-spacing:.1em;margin-bottom:6px;">● 今日の1%</div>
     <div style="font-size:12px;color:var(--muted);">生成中…</div>
   </div>`;
   generateMicroTask(el, todayKey, activeGoals);
@@ -2091,7 +2091,7 @@ function renderMicroTaskUI(el, micro){
   el.innerHTML = `<div class="micro-task-card" style="padding:12px 16px;background:${micro.done?'var(--green-d)':'var(--amber-g)'};border:1px solid ${micro.done?'var(--green-d)':'var(--amber-d)'};border-radius:10px;margin-top:10px;display:flex;align-items:center;gap:12px;transition:all .3s;">
     <div class="micro-check" onclick="completeMicroTask()" style="width:22px;height:22px;border-radius:50%;border:2px solid ${micro.done?'var(--green)':'var(--amber)'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:12px;background:${micro.done?'var(--green)':'transparent'};color:${micro.done?'var(--bg)':'transparent'};transition:all .3s;">${micro.done?'✓':''}</div>
     <div style="flex:1;">
-      <div style="font-size:10px;color:${micro.done?'var(--green)':'var(--amber)'};font-weight:600;letter-spacing:.1em;margin-bottom:3px;">🎯 今日の1%</div>
+      <div style="font-size:10px;color:${micro.done?'var(--green)':'var(--amber)'};font-weight:600;letter-spacing:.1em;margin-bottom:3px;">● 今日の1%</div>
       <div style="font-size:12.5px;color:var(--cream);${micro.done?'text-decoration:line-through;opacity:.6;':''}">${micro.task}</div>
     </div>
   </div>`;
@@ -2102,7 +2102,7 @@ function completeMicroTask(){
   _microTaskToday.done = true;
   renderMicroTaskUI(document.getElementById('hs-micro-task'), _microTaskToday);
   launchConfetti();
-  toast('1%達成！小さな一歩が大きな変化に 🎯');
+  toast('1%達成！小さな一歩が大きな変化に ●');
 }
 
 // ════════ FEATURE 13: トリセツPDF出力 ════════
@@ -2194,7 +2194,7 @@ function openExportModal(){
     <div style="display:flex;flex-direction:column;gap:8px;">
       <button class="export-opt" onclick="exportICS('${goal.title.replace(/'/g,"\\'")}');document.getElementById('export-modal').remove();" style="padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--cream);cursor:pointer;font-family:var(--ff);font-size:12px;text-align:left;transition:all .15s;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)'">📅 Google Calendar (.ics)</button>
       <button class="export-opt" onclick="exportNotion();document.getElementById('export-modal').remove();" style="padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--cream);cursor:pointer;font-family:var(--ff);font-size:12px;text-align:left;transition:all .15s;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)'">📝 Notion (Markdown)</button>
-      <button class="export-opt" onclick="exportText();document.getElementById('export-modal').remove();" style="padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--cream);cursor:pointer;font-family:var(--ff);font-size:12px;text-align:left;transition:all .15s;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)'">📋 テキストコピー</button>
+      <button class="export-opt" onclick="exportText();document.getElementById('export-modal').remove();" style="padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--cream);cursor:pointer;font-family:var(--ff);font-size:12px;text-align:left;transition:all .15s;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)'">□ テキストコピー</button>
     </div>
   </div>`;
   document.body.appendChild(modal);
@@ -2337,7 +2337,7 @@ function onGoalAssistComplete(goal) {
       const msg = document.createElement('div');
       msg.className = 'msg ai';
       msg.style.marginBottom = '16px';
-      msg.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble">🎯 「${escapeHtml(goal.title)}」のゴールとタスクを設定しました！何か他に気になることはありますか？</div></div>`;
+      msg.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble">● 「${escapeHtml(goal.title)}」のゴールとタスクを設定しました！何か他に気になることはありますか？</div></div>`;
       inner.appendChild(msg);
       const scroll = document.getElementById('home-chat-wrap');
       if (scroll) scroll.scrollTop = scroll.scrollHeight;
@@ -2404,15 +2404,15 @@ async function showRoleSelection(goal) {
       goal_title: goal.title, goal_why: goal.why || ''
     });
     const suggestions = res?.suggestions || [
-      { icon: '🎯', name: '万能コーチ', description: 'バランスの取れた総合支援' },
-      { icon: '🔥', name: 'スパルタ', description: '厳しく追い込む' },
+      { icon: '●', name: '万能コーチ', description: 'バランスの取れた総合支援' },
+      { icon: '▲', name: 'スパルタ', description: '厳しく追い込む' },
       { icon: '🤝', name: '伴走者', description: '寄り添い型サポート' }
     ];
 
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.innerHTML = `<div class="modal-content" style="max-width:420px;padding:24px;">
-      <h3 style="color:var(--cream);margin-bottom:12px;">🎯 このゴールに最適なAIロール</h3>
+      <h3 style="color:var(--cream);margin-bottom:12px;">● このゴールに最適なAIロール</h3>
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
         ${suggestions.map((s,i) => `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;cursor:pointer;transition:border-color .15s;" onclick="this.querySelector('input').checked=true;this.closest('.modal-content').querySelectorAll('label').forEach(l=>l.style.borderColor='var(--border-card)');this.style.borderColor='var(--amber)';">
           <input type="radio" name="ai-role" value="${i}" style="display:none;">

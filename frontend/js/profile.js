@@ -87,6 +87,21 @@ function buildAIContext(){
 
 
 // ════════ MBTI FULL VERSION (93-question authentic dimensions) ════════
+// #21: 期間切替
+let _chartPeriod = 3;
+function setChartPeriod(months){
+  _chartPeriod = months;
+  document.querySelectorAll('.chart-period-chip').forEach(c => {
+    const active = parseInt(c.dataset.period) === months;
+    c.style.background = active ? 'var(--amber)' : 'var(--bg3)';
+    c.style.color = active ? 'var(--text-on-accent)' : 'var(--muted)';
+  });
+  // Re-render chart with filtered data
+  const chart = document.getElementById('progress-chart');
+  if(chart) chart.innerHTML = '';
+  renderCharts();
+}
+
 function renderCharts(){
   // Bar chart
   const chart=document.getElementById('progress-chart');
@@ -921,7 +936,7 @@ function renderConnectContent(loading=false, data=null){
         ${g.advice?`<div style="padding:8px 10px;border-radius:6px;background:rgba(200,146,10,0.04);border:0.5px solid rgba(200,146,10,0.15);margin-top:6px;font-size:9px;color:var(--muted);line-height:1.5;">
           <div style="font-size:8px;font-weight:500;color:var(--amber);margin-bottom:3px;">${getLogoSVG(10)} AIアドバイス</div>${g.advice}
         </div>`:''}
-        ${isWarn?`<div onclick="hubChatFromConnect('${goalSafe}','改善方法を教えて')" style="display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;border:0.5px solid rgba(200,146,10,0.3);color:#c8920a;font-size:9px;cursor:pointer;width:fit-content;margin-top:6px;">💬 改善方法をAIに相談する</div>`:''}
+        ${isWarn?`<div onclick="hubChatFromConnect('${goalSafe}','改善方法を教えて')" style="display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;border:0.5px solid rgba(200,146,10,0.3);color:#c8920a;font-size:9px;cursor:pointer;width:fit-content;margin-top:6px;">→ 改善方法をAIに相談する</div>`:''}
       </div>`;
     });
   }
@@ -948,10 +963,10 @@ function renderConnectContent(loading=false, data=null){
   }
   // ideas（新旧共通）
   if(data.ideas?.length){
-    html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:16px 0 8px;">💡 ビジョンから生まれるゴールアイデア</div>`;
+    html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:16px 0 8px;">◇ ビジョンから生まれるゴールアイデア</div>`;
     data.ideas.forEach(id=>{
       html += `<div class="connect-card">
-        <div class="connect-card-hd" style="color:var(--know-purple)">💡 ${id.title}</div>
+        <div class="connect-card-hd" style="color:var(--know-purple)">◇ ${id.title}</div>
         <div class="connect-card-body">${id.reason}</div>
       </div>`;
     });
@@ -1257,7 +1272,7 @@ function renderGapContent(data){
   if(!el) return;
   if(!data){ el.innerHTML='<div style="color:var(--muted2);font-size:12px;padding:8px 0;">分析に失敗しました。再試行してください。</div>'; return; }
   const sev = {high:'var(--red)',medium:'var(--amber)',low:'var(--muted2)'};
-  const typ = {action:'💪',mindset:'🧠',skill:'📚'};
+  const typ = {action:'▲',mindset:'◆',skill:'■'};
   let html = '';
   if(data.gaps?.length){
     html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin-bottom:9px;">現実との乖離</div>`;
@@ -1271,12 +1286,12 @@ function renderGapContent(data){
     html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:14px 0 9px;">パーソナル課題提案</div>`;
     data.challenges.forEach(c=>{
       html += `<div style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:13px 16px;margin-bottom:8px;">
-        <div style="font-size:11.5px;font-weight:500;color:var(--cream);margin-bottom:5px;">${typ[c.type]||'💡'} ${c.title}</div>
+        <div style="font-size:11.5px;font-weight:500;color:var(--cream);margin-bottom:5px;">${typ[c.type]||'◇'} ${c.title}</div>
         <div style="font-size:11px;color:var(--muted);line-height:1.7;">${c.detail}</div></div>`;
     });
   }
   if(data.quickwins?.length){
-    html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--green);font-family:var(--fm);margin:14px 0 9px;">⚡ 今週できること</div>`;
+    html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--green);font-family:var(--fm);margin:14px 0 9px;">→ 今週できること</div>`;
     data.quickwins.forEach(q=>{
       html += `<div style="background:var(--green-d);border:1px solid var(--green-d);border-radius:9px;padding:11px 15px;margin-bottom:7px;">
         <div style="font-size:11.5px;font-weight:500;color:var(--green);margin-bottom:4px;">${q.title}</div>
@@ -1383,7 +1398,7 @@ function initAvatarDisplay() {
 
 // ═══ ES Module: expose to window ═══
 Object.assign(window, {
-  USER_PROFILE, buildAIContext, renderCharts,
+  USER_PROFILE, buildAIContext, renderCharts, setChartPeriod,
   selRadio, selMBTI, saveGoal, openProfile, closeProfile, closeProfileOutside,
   WORRIES_SYS, initWorriesChat, appendWorryBubble, sendWorriesMsg,
   editWorriesSummary, worriesResize, worriesKey,
