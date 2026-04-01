@@ -16,6 +16,17 @@ function hideNanoFallbackBanner(){ document.getElementById('nano-fallback-banner
 
 // ════════ CHAT ════════
 function getLogoSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 32 32"><defs><linearGradient id="crown${size}" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown${size})"/></svg>`;}
+
+// UX-01: 三賢者アイコン（route/modelから選択）
+function getSageIcon(size, route){
+  const s = size || 14;
+  if(route === 'gpt' || route === 'gpt-simple')
+    return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="rgba(100,160,200,0.9)" stroke-width="1.5"><path d="M12 2L2 19h20L12 2z"/><path d="M12 8v5"/><circle cx="12" cy="15" r="0.5" fill="rgba(100,160,200,0.9)"/></svg>`;
+  if(route === 'gemini')
+    return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="rgba(120,180,130,0.9)" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>`;
+  // claude or default: quill
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="rgba(220,160,80,0.9)" stroke-width="1.5"><path d="M20 2c-2 0-6 2-8 6-1 2-1 4-1 6 0 1-1 3-3 4l-1 1 2 2 1-1c1-2 3-3 4-3 2 0 4 0 6-1 4-2 6-6 6-8V2z"/><path d="M8 18l-3 3"/></svg>`;
+}
 function getGptSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><defs><linearGradient id="bulb${size}" x1="12" y1="3" x2="12" y2="21"><stop offset="0%" stop-color="#f5d380"/><stop offset="100%" stop-color="#c8920a"/></linearGradient></defs><path d="M9 21h6M12 3a6 6 0 00-4 10.5V17h8v-3.5A6 6 0 0012 3z" stroke="url(#bulb${size})"/></svg>`;}
 function getUserAvatarText(){const n=USER_PROFILE.nickname||USER_PROFILE.name||'';return n?n.charAt(0):'';}
 function renderUserAvatarInner(av){
@@ -2924,7 +2935,7 @@ Object.defineProperty(window, 'homeImageData', {
 // Functions and constants
 Object.assign(window, {
   _msgActionsHtml, showNanoFallbackBanner, hideNanoFallbackBanner,
-  getLogoSVG, getUserAvatarText, renderUserAvatarInner,
+  getLogoSVG, getSageIcon, getUserAvatarText, renderUserAvatarInner,
   showTyping, hideTyping, updateTypingRoute, preRouteOnInput, showRoutePreview, hideRoutePreview,
   openPresetEditor, closePresetEditor, addPresetItem, savePresets, applyPresets, initHomeLayoutStates,
   startReview, showWelcome, setEx, startGoal,
