@@ -1438,6 +1438,13 @@ async function homeClaudeStream(today, homeInner, homeWrap){
       homeMsgs.push({role:'ai',content:t,time:now(),date:today,model:modelName}); homeHistory.push({role:'assistant',content:t}); saveHomeMsgs();
       // D: 達成報告検出 → コンフェッティ
       detectAchievement(t);
+      // UX-01: TALK→TODAY連携 — task_potentialフラグ時にタスク化ボタンを自動表示
+      if(window._pendingTaskSuggestion){
+        window._pendingTaskSuggestion = false;
+        appendTaskSuggestionButton(window._currentStreamBubble);
+      }
+      // UX-01: TODAY画面のタスクリスト・秘書メモをリフレッシュ
+      if(typeof renderTodayScreen === 'function') renderTodayScreen();
     }
   });
 }
@@ -2965,12 +2972,18 @@ function sendTodayComment(){
   if(!inp || !inp.value.trim()) return;
   const comment = inp.value.trim();
   inp.value = '';
-  // Switch to TALK and send the comment as a message
+  // Build task context for AI
+  const tasks = getTodayTasks();
+  const todayStr = new Date().toISOString().slice(0,10);
+  const taskList = tasks.filter(i=>i.task.status!=='done').map((i,idx) =>
+    `${idx+1}. ${i.task.title}${i.task.due?' (〆'+i.task.due+')':''}${i.task.estimated_time?' '+i.task.estimated_time:''}`
+  ).join('\n');
+  const msg = `【状況変更】${comment}\n\n現在のタスク:\n${taskList}\n\nこの状況変更を踏まえて、タスクの順序や時間配分を再提案してください。`;
   showPage('home');
   setTimeout(() => {
     const msgIn = document.getElementById('home-msg-in');
     if(msgIn){
-      msgIn.value = '状況変更: ' + comment;
+      msgIn.value = msg;
       homeResize(msgIn);
       sendHomeMsg();
     }
