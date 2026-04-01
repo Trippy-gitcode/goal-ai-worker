@@ -159,7 +159,11 @@ function showPage(pg) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   curPage = pg;
   closeSidebar();
-  if(pg==='home'){
+  if(pg==='today'){
+    document.getElementById('pg-today-wrap').classList.add('active');
+    document.getElementById('topbar').style.display='none';
+    if(typeof renderTodayScreen === 'function') renderTodayScreen();
+  } else if(pg==='home'){
     document.getElementById('pg-home-wrap').classList.add('active');
     document.getElementById('nav-home').classList.add('active');
     document.getElementById('topbar').style.display='none';
@@ -198,6 +202,14 @@ function showPage(pg) {
     document.getElementById('pg-welcome-wrap').classList.add('active');
     document.getElementById('topbar').style.display='none';
   }
+  // UX-01: 入力ボックスはTALK(home)ページでのみ表示
+  const inputArea = document.getElementById('home-input-area');
+  if(inputArea) inputArea.style.display = (pg === 'home') ? '' : 'none';
+  // UX-01: ボトムタブのactive切り替え
+  document.querySelectorAll('#bottom-tabs .btab').forEach(b=>b.classList.remove('active'));
+  const tabMap = {'today':'btab-today','home':'btab-talk','goal-hub':'btab-goals','myself':'btab-me'};
+  const activeTab = document.getElementById(tabMap[pg]);
+  if(activeTab) activeTab.classList.add('active');
   // D-8: Page transition animation (skip on initial load)
   if (window._appInitDone) {
     const activePg = document.querySelector('.page.active');
@@ -1645,6 +1657,7 @@ function renderUsageBar(){
     </div>
     ${pct>=100?'<div style="font-size:9px;color:var(--red);margin-top:4px;">上限到達 · モデルが自動降格されています</div>':''}
     <div style="font-size:9px;color:var(--muted2);margin-top:2px;">${d.turns_used||0}ターン使用 · ¥${d.per_turn}/ターン</div>
+    ${d.et ? `<div style="font-size:9px;color:var(--muted2);margin-top:2px;">ET残り: ${d.et.remaining}/${d.et.limit}回/週</div>` : ''}
   `;
 }
 
@@ -1709,6 +1722,37 @@ async function showAIMemo(type, goalId) {
     } catch(e) { return; }
   }
 
+  // #20: アコーディオンUI — メモを4カテゴリに分類
+  const categories = [
+    { label: '性格・コミュニケーション', keys: ['性格','コミュニケーション','対人','話し方','聞き方','表現','社交'] },
+    { label: '行動パターン', keys: ['行動','習慣','パターン','傾向','日常','ルーティン','時間'] },
+    { label: 'モチベーション', keys: ['モチベーション','動機','やる気','情熱','目標','意欲','原動力'] },
+    { label: '弱点・課題', keys: ['弱点','課題','苦手','改善','注意','リスク','壁','障害'] },
+  ];
+  const lines = memo.split('\n').filter(l => l.trim());
+  const buckets = categories.map(() => []);
+  const uncategorized = [];
+  for(const line of lines){
+    let placed = false;
+    for(let i=0;i<categories.length;i++){
+      if(categories[i].keys.some(k => line.includes(k))){ buckets[i].push(line); placed=true; break; }
+    }
+    if(!placed) uncategorized.push(line);
+  }
+  // Distribute uncategorized evenly to smallest buckets
+  for(const line of uncategorized){
+    const minIdx = buckets.reduce((mi,b,i) => b.length < buckets[mi].length ? i : mi, 0);
+    buckets[minIdx].push(line);
+  }
+
+  const accordionHtml = categories.map((cat, i) => {
+    const open = i < 2 ? 'open' : '';
+    const content = buckets[i].length > 0
+      ? buckets[i].map(l => `<div style="font-size:13px;color:var(--cream);line-height:1.7;">${escapeHtml(l)}</div>`).join('')
+      : '<div style="font-size:12px;color:var(--muted2);padding:8px 0;">データなし</div>';
+    return `<details ${open} style="margin-bottom:8px;"><summary style="cursor:pointer;font-size:12px;font-weight:500;color:var(--amber);padding:6px 0;user-select:none;">${cat.label}</summary><div style="padding:4px 0 8px 12px;border-left:2px solid var(--border2);">${content}</div></details>`;
+  }).join('');
+
   const modal = document.createElement('div');
   modal.className = 'modal-overlay';
   modal.innerHTML = `<div class="modal-content" style="max-width:500px;padding:24px;">
@@ -1716,9 +1760,10 @@ async function showAIMemo(type, goalId) {
       <h3 style="color:var(--cream);margin:0;">📋 AIの理解メモ</h3>
       <button onclick="this.closest('.modal-overlay').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;">×</button>
     </div>
-    <div style="font-size:13px;color:var(--cream);line-height:1.7;white-space:pre-wrap;">${escapeHtml(memo)}</div>
+    ${accordionHtml}
     <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5;">内容が違うと感じたら、チャットで「もっと厳しくして」「私の強みは〇〇」など伝えてください。</p>
     <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+      <button onclick="navigator.clipboard.writeText(${JSON.stringify(memo).replace(/</g,'\\u003c')});toast('コピーしました')" style="padding:8px 16px;background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-right:8px;font-size:12px;">コピー</button>
       <button onclick="this.closest('.modal-overlay').remove()" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">閉じる</button>
     </div>
   </div>`;

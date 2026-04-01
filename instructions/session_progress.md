@@ -6,14 +6,14 @@
 ---
 
 ## 5行サマリー
-- **Version:** v3.11.36（デプロイ済み 2026-03-30）
+- **Version:** v3.11.37（デプロイ済み 2026-04-01）
 - **Next:** DEV-01（デザインスキル導入）→ DEV-02（開発体制改善）→ UX-01（UX刷新）
-- **Last done:** DEV-01完了 + DEV-02 P1-2完了 + UX-01 mockup 2画面（TODAY/TALK）作成 → ふとしデザイン承認待ち
+- **Last done:** UX-01 Step 2 Phase A完了 v3.11.37。ボトムタブ(TODAY/TALK/GOALS/ME) + TODAY画面実装 + 初期表示TODAY化
 - **Open issues:** G5未動作、BUG-01b残課題
 - **方針変更:** 新コンセプト「毎朝、最善の一日を始めよう」承認。UX全面刷新（docs/ux_redesign_v1.md）+ 開発体制改善4Phase（docs/dev_improvement_v1.md）
 
 ## 現在地
-- **バージョン:** v3.11.36（デプロイ済み）
+- **バージョン:** v3.11.37（デプロイ済み）
 - **チェーン:** DEV-01 → DEV-02 → UX-01（mockup→承認→実装）→ G5 → テスト配布準備
 - **次のミッション:** DEV-01（デザインスキル導入）
 
