@@ -38,7 +38,8 @@ export async function regenerateAiMemo(env, tokenId, goalId) {
     const userId = users?.[0]?.id;
     if (!userId) { await env.TOKEN_KV.delete(lockKey); return; }
 
-    let filters = `user_id=eq.${userId}&order=created_at.desc&limit=50`;
+    // A13/B17: limit=20 — buildCompressedMessagesのwindowSize=10なので20件で十分
+    let filters = `user_id=eq.${userId}&order=created_at.desc&limit=20`;
     if (goalId) filters += `&goal_id=eq.${goalId}`;
 
     const messages = await supabaseQuery(env, 'chat_messages', 'GET', { filters, select: 'role,content,created_at' });
@@ -46,17 +47,44 @@ export async function regenerateAiMemo(env, tokenId, goalId) {
 
     const conversationText = messages.reverse().map(m => `${m.role}: ${m.content}`).join('\n');
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // B-17: 直近7日間の日記を注入
+    let diaryText = '';
+    try {
+      const diaries = await supabaseQuery(env, 'diaries', 'GET', {
+        filters: `user_id=eq.${userId}&order=date.desc&limit=7`,
+        select: 'date,content',
+      });
+      if (diaries?.length) {
+        diaryText = '\n\n【直近の日記】\n' + diaries.map(d => `${d.date}: ${d.content}`).join('\n');
+      }
+    } catch(e) {}
+
+    // A5: 前回のai_memoがあればdiff更新（入力60%削減）
+    let existingMemo = null;
+    if (goalId) {
+      const goals = await supabaseQuery(env, 'goals', 'GET', { filters: `id=eq.${goalId}`, select: 'ai_memo' });
+      existingMemo = goals?.[0]?.ai_memo;
+    } else {
+      const userRows = await supabaseQuery(env, 'users', 'GET', { filters: `token_id=eq.${encodeURIComponent(tokenId)}`, select: 'ai_memo' });
+      existingMemo = userRows?.[0]?.ai_memo;
+    }
+
+    const prompt = existingMemo
+      ? `以下は前回のAI理解メモです。最近の会話と日記を踏まえて変更点のみ更新してください。変更がない項目はそのまま残してください。\n\n【前回のメモ】\n${existingMemo}\n\n【最近の会話】\n${conversationText}${diaryText}\n\n【出力ルール】\n- 箇条書き10〜15項目以内、合計1,200文字以内\n- 変更・追加があった項目のみ書き換え`
+      : `以下の会話履歴から、このユーザーについてわかったことを要約してください。\n\n【出力ルール】\n- 箇条書き10〜15項目以内\n- 合計1,200文字以内（厳守）\n- 性格傾向・行動パターン・コミュニケーションの好み・モチベーション源・弱点と対処法を含めること\n\n【会話履歴】\n${conversationText}${diaryText}`;
+
+    // A11: gpt-5-mini — 構造化要約タスクにSonnet不要、コスト¥2.2/月/ユーザー削減
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514', max_tokens: 1000,
-        messages: [{ role: 'user', content: `以下の会話履歴から、このユーザーについてわかったことを要約してください。\n\n【出力ルール】\n- 箇条書き10〜15項目以内\n- 合計1,200文字以内（厳守）\n- 性格傾向・行動パターン・コミュニケーションの好み・モチベーション源・弱点と対処法を含めること\n- 過去のメモは破棄し、最新の理解で完全に上書きすること\n\n【会話履歴】\n${conversationText}` }],
+        model: 'gpt-5-mini', max_completion_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }],
       }),
     });
 
     const data = await response.json();
-    const memo = data.content?.[0]?.text;
+    const memo = data.choices?.[0]?.message?.content;
     if (!memo) return;
 
     if (goalId) {
