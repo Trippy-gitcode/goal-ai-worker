@@ -156,7 +156,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.44</span>
+      <span class="version" title="バージョン確認">v3.11.45</span>
     </div>
   </div>
 </div>
@@ -227,6 +227,11 @@
           </div>
           <!-- Goal progress strip -->
           <div id="today-goals" style="display:flex;gap:10px;margin-top:12px;padding-top:8px;border-top:0.5px solid var(--border);"></div>
+          <!-- B-16: Diary -->
+          <div style="margin-top:14px;padding-top:10px;border-top:0.5px solid var(--border);">
+            <div style="font-size:8px;font-weight:500;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Today's Note</div>
+            <textarea id="today-diary" placeholder="今日どうだった？" style="width:100%;min-height:60px;padding:8px 10px;background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;color:var(--cream);font-family:var(--ff);font-size:11px;line-height:1.5;resize:vertical;outline:none;box-sizing:border-box;" oninput="saveTodayDiary()"></textarea>
+          </div>
         </div>
         <!-- Comment input -->
         <div style="padding:6px 14px;flex-shrink:0;border-top:0.5px solid var(--border);">
@@ -283,35 +288,26 @@
                 <button onclick="clearHomeSearch()" style="background:none;border:none;color:var(--muted2);cursor:pointer;padding:0 2px;font-size:11px;line-height:1;">✕</button>
               </div>
             </div>
-            <!-- Hero section (spec #02a H02-05, mockup準拠: flex:1で王冠を垂直中央配置) -->
+            <!-- UX-01: Three sages hero (replaces old AI name hero) -->
             <div id="home-hero" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;max-height:calc(50vh - 50px);text-align:center;padding:0 16px;max-width:700px;margin:0 auto;">
               <div>
-                <svg width="64" height="64" viewBox="0 0 32 32"><defs><linearGradient id="hero-grad" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#hero-grad)"/></svg>
-                <div style="display:flex;justify-content:center;align-items:center;gap:7px;margin-top:10px;">
-                  <span style="font-size:12px;font-weight:500;color:var(--cream);">Gemini</span>
-                  <span style="width:3px;height:3px;border-radius:50%;background:var(--muted2);"></span>
-                  <span style="font-size:12px;font-weight:500;color:var(--cream);">ChatGPT</span>
-                  <span style="width:3px;height:3px;border-radius:50%;background:var(--muted2);"></span>
-                  <span style="font-size:12px;font-weight:500;color:var(--cream);">Claude</span>
+                <div style="display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:10px;">
+                  <div style="width:36px;height:36px;border-radius:50%;background:rgba(100,160,200,0.1);display:flex;align-items:center;justify-content:center;opacity:0.5;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(100,160,200,0.9)" stroke-width="1.5"><path d="M12 2L2 19h20L12 2z"/><path d="M12 8v5"/><circle cx="12" cy="15" r="0.5" fill="rgba(100,160,200,0.9)"/></svg>
+                  </div>
+                  <div style="width:36px;height:36px;border-radius:50%;background:rgba(220,160,80,0.1);display:flex;align-items:center;justify-content:center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(220,160,80,0.9)" stroke-width="1.5"><path d="M20 2c-2 0-6 2-8 6-1 2-1 4-1 6 0 1-1 3-3 4l-1 1 2 2 1-1c1-2 3-3 4-3 2 0 4 0 6-1 4-2 6-6 6-8V2z"/><path d="M8 18l-3 3"/></svg>
+                  </div>
+                  <div style="width:36px;height:36px;border-radius:50%;background:rgba(120,180,130,0.1);display:flex;align-items:center;justify-content:center;opacity:0.5;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(120,180,130,0.9)" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+                  </div>
                 </div>
-                <div style="font-size:12px;color:var(--muted);margin-top:8px;margin-bottom:4px;">最適なAIが回答します</div>
+                <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">三人の賢者があなたを支えています</div>
                 <div id="home-ai-badge" style="margin-top:6px;"></div>
               </div>
             </div>
-            <!-- Presets (hero外、flex-shrink:0でbottom寄せ) -->
-            <div style="position:relative;max-width:700px;margin-left:auto;margin-right:auto;flex-shrink:0;">
-              <div id="home-presets" style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:0 16px;margin-bottom:0;">
-                <button class="preset-chip" onclick="setPreset(this)">今日やること整理</button>
-                <button class="preset-chip" onclick="setPreset(this)">目標の進捗を確認</button>
-                <button class="preset-chip" onclick="setPreset(this)">モチベーションが出ない</button>
-                <button class="preset-chip" onclick="setPreset(this)">新しいスキルを学びたい</button>
-                <button class="preset-chip" onclick="setPreset(this)">ストレス解消法</button>
-                <button class="preset-chip" onclick="setPreset(this)">自分の強みを知りたい</button>
-              </div>
-              <button onclick="openPresetEditor()" title="プリセットを編集" style="position:absolute;top:-4px;right:12px;background:none;border:none;cursor:pointer;opacity:0.5;color:var(--muted);padding:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
-            </div>
-            <!-- preset-gap: presets〜input間のスペース（sep-gapと同程度 11px） -->
-            <div style="height:11px;flex-shrink:0;"></div>
+            <!-- B-20: Presets removed (TODAY replaced them) -->
+            <div id="home-presets" style="display:none;"></div>
             <div id="home-chat-wrap" style="flex:1;overflow-y:auto;position:relative;display:none;">
             <div id="home-chat-inner" style="max-width:740px;margin:0 auto;padding:8px 20px 100px;"></div>
           </div>
@@ -416,7 +412,25 @@
     <!-- ─── CHAT ─── -->
     <!-- ─── GOAL HUB ─── -->
     <div class="page" id="pg-goal-hub-wrap">
-      <div id="pg-goal-hub">
+      <!-- D-02: Goals list view (shown before entering a goal hub) -->
+      <div id="goals-list-view" style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+        <div style="padding:14px 16px 0;">
+          <div style="font-size:18px;font-weight:300;color:var(--cream);letter-spacing:0.5px;">Goals</div>
+          <!-- Tab: ゴール / やりたいこと -->
+          <div style="display:flex;gap:0;margin-top:10px;border-bottom:0.5px solid var(--border);">
+            <button id="goals-tab-goals" onclick="switchGoalsTab('goals')" style="flex:1;padding:8px 0;background:none;border:none;border-bottom:2px solid var(--amber);color:var(--amber);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--ff);">ゴール</button>
+            <button id="goals-tab-wishes" onclick="switchGoalsTab('wishes')" style="flex:1;padding:8px 0;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted2);font-size:11px;cursor:pointer;font-family:var(--ff);">やりたいこと</button>
+          </div>
+        </div>
+        <div id="goals-list-content" style="flex:1;overflow-y:auto;padding:10px 14px 80px;"></div>
+        <div id="wishes-list-content" style="flex:1;overflow-y:auto;padding:10px 14px 80px;display:none;"></div>
+        <!-- Add FAB -->
+        <button onclick="showWelcome()" style="position:absolute;bottom:60px;right:16px;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#c8920a,#f5d380);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(200,146,10,0.3);z-index:10;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+
+      <div id="pg-goal-hub" style="display:none;">
 
         <!-- Hub header -->
         <div class="hub-hd">
@@ -426,7 +440,7 @@
               <div class="hub-goal-dot" id="hub-dot"></div>
               <span id="hub-title">ゴール名</span>
             </div>
-            <div class="hub-back" onclick="showPage('home')">🏠 ホーム</div>
+            <div class="hub-back" onclick="showPage('goal-hub')" style="font-size:11px;color:var(--amber);cursor:pointer;">← GOALS</div>
           </div>
           <div class="hub-progress-row">
             <div class="hub-prog-bar">
@@ -1494,8 +1508,8 @@
         <span style="padding:3px 10px;background:rgba(91,141,239,.15);border:1px solid rgba(91,141,239,.3);border-radius:12px;font-size:10px;color:var(--model-gpt);">ChatGPT</span>
         <span style="padding:3px 10px;background:rgba(232,145,58,.15);border:1px solid rgba(232,145,58,.3);border-radius:12px;font-size:10px;color:var(--model-claude);">Claude</span>
       </div>
-      <div style="font-size:20px;font-weight:600;color:var(--cream);margin-bottom:8px;">AIに何でも聞ける</div>
-      <div style="font-size:13px;color:var(--muted);line-height:1.8;">3つのAIがチームであなたを支えます</div>
+      <div style="font-size:20px;font-weight:600;color:var(--cream);margin-bottom:8px;">毎朝、最善の一日を始めよう</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">三人の賢者があなたを支えます</div>
     </div>
     <!-- Step 2 -->
     <div class="ob-slide" style="min-width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;">
@@ -1503,8 +1517,8 @@
         <circle cx="28" cy="35" r="8" class="ob-draw" style="--d:50;--i:0"/><circle cx="52" cy="35" r="8" class="ob-draw" style="--d:50;--i:1"/>
         <path d="M20 55 Q40 65 60 55" class="ob-draw" style="--d:60;--i:2"/><path d="M15 60 L65 60" stroke-dasharray="6 4" class="ob-draw" style="--d:50;--i:3"/>
       </svg>
-      <div style="font-size:20px;font-weight:600;color:var(--cream);margin-bottom:8px;">一緒にゴールまで並走</div>
-      <div style="font-size:13px;color:var(--muted);line-height:1.8;">会話からタスクを自動作成<br>ゴールまでナビゲート<br>AIが活動を分析</div>
+      <div style="font-size:20px;font-weight:600;color:var(--cream);margin-bottom:8px;">4つの画面で全てを管理</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">TODAY: タスクを最適順で表示<br>TALK: 賢者に何でも相談<br>GOALS: ゴールを管理<br>ME: 自分を深く知る</div>
     </div>
     <!-- Step 3 -->
     <div class="ob-slide" style="min-width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;">
