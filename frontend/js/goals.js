@@ -1819,6 +1819,8 @@ async function init(){
   if(typeof applyPresets === 'function') applyPresets();
   if(typeof initHomeLayoutStates === 'function') initHomeLayoutStates();
   updateNotifSettingUI();
+  // H-08: コーチングモード復元
+  try{ const savedMode = localStorage.getItem('goal_ai_mode'); if(savedMode && savedMode !== 'normal' && typeof selectMode === 'function') selectMode(savedMode); }catch(e){}
   showPage('today');
   window._appInitDone = true; // 初回ロード完了フラグ（以降のshowPageでアニメーション有効）
   if(typeof renderTodayScreen === 'function') renderTodayScreen();
