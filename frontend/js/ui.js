@@ -293,6 +293,8 @@ function applyModeUI(mode) {
   spartanMode  = mode === 'spartan';
   mencareMode  = mode === 'mencare';
   kabeuchiMode = mode === 'kabeuchi';
+  // H-08: セッション間モード保持
+  try{ localStorage.setItem('goal_ai_mode', mode); }catch(e){}
 
   const boxes = {
     mencare: document.getElementById('mbox-mencare'),

@@ -156,7 +156,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.43</span>
+      <span class="version" title="バージョン確認">v3.11.44</span>
     </div>
   </div>
 </div>
@@ -914,26 +914,33 @@
                   </div>
                 </div>
 
-                <!-- ③ 強み・弱み -->
+                <!-- ③ 強み・弱み (E-02: 2カラム) -->
                 <div class="mp-section">
                   <div class="mp-section-hd"><svg width="15" height="15" class="svg-ic"><use href="#ic-zap"/></svg>強み・弱み</div>
-                  <div style="font-size:10px;color:var(--muted);margin-bottom:7px;">強み（AIが活かす領域）</div>
-                  <div class="chip-group" id="mp-strengths" style="margin-bottom:14px;">
-                    <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">発想力</div>
-                    <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">文章力</div>
-                    <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">人間関係構築</div>
-                    <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">行動力</div>
-                    <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">論理思考</div>
-                    <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">継続力</div>
-                    <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">分析力</div>
-                  </div>
-                  <div style="font-size:10px;color:var(--muted);margin-bottom:7px;">弱み（AIが補う領域）</div>
-                  <div class="chip-group" id="mp-weaknesses">
-                    <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">先延ばし</div>
-                    <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">完璧主義</div>
-                    <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">自己管理</div>
-                    <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">集中力</div>
-                    <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">感情コントロール</div>
+                  <div style="display:flex;gap:10px;">
+                    <div style="flex:1;">
+                      <div style="font-size:10px;color:var(--muted);margin-bottom:7px;">強み</div>
+                      <div class="chip-group" id="mp-strengths">
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">発想力</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">文章力</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">人間関係構築</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">行動力</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">論理思考</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">継続力</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">分析力</div>
+                      </div>
+                    </div>
+                    <div style="width:1px;background:var(--border);flex-shrink:0;"></div>
+                    <div style="flex:1;">
+                      <div style="font-size:10px;color:var(--muted);margin-bottom:7px;">弱み</div>
+                      <div class="chip-group" id="mp-weaknesses">
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">先延ばし</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">完璧主義</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">自己管理</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">集中力</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">感情コントロール</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
