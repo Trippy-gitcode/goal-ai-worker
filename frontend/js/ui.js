@@ -130,6 +130,13 @@ function initSwipeToOpenSidebar(){
   }, {passive:true});
 }
 
+// A-11: popstateでタブ復元
+window.addEventListener('popstate', (e) => {
+  const pg = e.state?.page || 'today';
+  const validTabs = ['today','home','goal-hub','myself'];
+  if(validTabs.includes(pg)) showPage(pg);
+});
+
 // ════════ TAB SWIPE ════════
 function initTabSwipe(container, onSwipe) {
   let startX = 0, startY = 0;
@@ -205,6 +212,14 @@ function showPage(pg) {
   // UX-01: 入力ボックスはTALK(home)ページでのみ表示
   const inputArea = document.getElementById('home-input-area');
   if(inputArea) inputArea.style.display = (pg === 'home') ? '' : 'none';
+  // A-20: スクロール位置リセット
+  const activePgEl = document.querySelector('.page.active');
+  if(activePgEl) {
+    const scrollable = activePgEl.querySelector('[style*="overflow-y:auto"], [style*="overflow-y: auto"]') || activePgEl;
+    scrollable.scrollTop = 0;
+  }
+  // A-11: ブラウザ履歴管理
+  if(window._appInitDone) history.pushState({page:pg}, '', '#' + pg);
   // UX-01: ボトムタブのactive切り替え
   document.querySelectorAll('#bottom-tabs .btab').forEach(b=>b.classList.remove('active'));
   const tabMap = {'today':'btab-today','home':'btab-talk','goal-hub':'btab-goals','myself':'btab-me'};
