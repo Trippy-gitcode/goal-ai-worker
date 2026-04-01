@@ -2276,7 +2276,9 @@ body,body *{transition:background-color .3s ease,color .3s ease,border-color .3s
 .analytics-backlog-bar:hover{background:rgba(224,144,80,0.18);}
 
 /* ════════ BOTTOM TAB BAR ════════ */
-.btab{color:var(--muted2);transition:color .15s;}
-.btab.active{color:var(--amber);}
+.btab{color:var(--muted2);transition:color .15s;opacity:0.4;position:relative;}
+.btab.active{color:var(--amber);opacity:1;}
+.btab.active::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--amber);}
 .btab span{color:inherit;}
+@media(max-width:768px){.page{padding-bottom:56px;}}
 @media(min-width:769px){#bottom-tabs{display:none!important;}}
