@@ -84,23 +84,10 @@
     <span id="sb-logo-plan" class="logo-plan-badge" style="display:none;font-size:7px;padding:1px 5px;border-radius:4px;background:rgba(200,146,10,0.1);color:#c8920a;margin-left:auto;" onclick="event.stopPropagation();openPlanModal()"></span>
   </div>
 
-  <!-- Nav -->
-  <div style="padding:8px 0;">
-    <div class="nav-item active" onclick="goHomeNewChat()" id="nav-home">
-      <span class="nav-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-home"/></svg></span> ホーム
-    </div>
-    <div class="nav-item" onclick="showPage('tasks')" id="nav-tasks">
-      <span class="nav-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-tasks"/></svg></span> タスク
-    </div>
-    <div class="nav-item" onclick="showPage('calendar')" id="nav-calendar">
-      <span class="nav-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-calendar"/></svg></span> カレンダー
-    </div>
-    <div class="nav-item" onclick="showPage('analytics')" id="nav-analytics">
-      <span class="nav-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-analytics"/></svg></span> 解析
-    </div>
-  </div>
+  <!-- UX-01: Sidebar 4 items only -->
 
-  <!-- Modes -->
+  <!-- 1. コーチングモード切替 -->
+  <div class="nav-section" style="padding:8px 16px 4px;font-size:10px;">コーチングモード</div>
   <!-- mbox-*: hidden, kept for JS compatibility -->
   <div id="mbox-normal" style="display:none;"></div>
   <div id="mbox-mencare" style="display:none;"></div>
@@ -115,47 +102,29 @@
     <span class="mode-chip" data-mode="spartan" onclick="handleModeClick('spartan')">スパルタ</span>
   </div>
 
-  <!-- Tasks -->
-  <div class="nav-section" style="display:flex;align-items:center;justify-content:space-between;">
-    タスク
-    <span onclick="showPage('tasks');closeSidebar();" style="font-size:9px;color:var(--muted2);cursor:pointer;">全タスク →</span>
-  </div>
-  <div id="sb-task-list" class="sb-task-list"></div>
-
-  <!-- Chat Records -->
-  <div class="nav-section" style="display:flex;align-items:center;justify-content:space-between;">
-    チャットレコード
+  <!-- 2. チャット履歴 -->
+  <div class="nav-section" style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+    チャット履歴
     <span onclick="openChatHistory()" style="font-size:8px;color:var(--amber);cursor:pointer;">すべて見る →</span>
   </div>
   <div id="sb-chat-records"></div>
 
-  <!-- Goals (Supabaseから動的に描画) -->
-  <div class="nav-section" id="sb-goals-section">ゴール一覧</div>
+  <!-- 3. 設定（下部に移動済み — sb-bottomのsettingsボタン） -->
 
-  <div class="btn-add-goal" onclick="showWelcome()"><svg width="14" height="14" class="svg-ic"><use href="#ic-plus"/></svg> 新しいゴール</div>
-  <div class="btn-extract-goals" id="btn-extract-goals" onclick="extractGoalsFromHistory()" style="display:none;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 過去会話からゴール候補を発見</div>
-
-  <!-- 私をデザイン — fixed entry -->
-  <div class="nav-section" style="margin-top:8px">パーソナル</div>
-  <div onclick="openMyselfHub()" id="gc-myself" style="padding:3px 12px 3px 34px;font-size:9px;color:var(--muted);cursor:pointer;">私をデザイン</div>
-
-  <div class="nav-item" onclick="showAIMemo('home');closeSidebar();" style="padding:7px 16px;font-size:12px;">
-    <div class="nav-icon">📋</div>
-    AIの理解メモ
-  </div>
-
-  <!-- Upgrade nudge (shown for free/trial users) -->
-  <div id="sb-upgrade-nudge" class="upgrade-nudge" onclick="openPlanModal()" style="display:none;margin:0 0 8px;">
+  <!-- 4. プラン -->
+  <div id="sb-upgrade-nudge" class="upgrade-nudge" onclick="openPlanModal()" style="display:none;margin:8px 12px;">
     <div style="font-size:10.5px;font-weight:500;color:var(--amber);"><svg width="13" height="13" class="svg-ic"><use href="#ic-zap"/></svg> Proにアップグレード</div>
     <div style="font-size:9.5px;color:var(--muted);margin-top:2px;" id="sb-nudge-sub">ゴール無制限・毎週レビュー</div>
   </div>
 
-  <!-- Archive link -->
-  <div onclick="openArchiveView()" style="display:flex;align-items:center;gap:7px;padding:7px 16px;cursor:pointer;transition:background .15s;border-top:1px solid var(--border);" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
-    <span style="opacity:.55;"><svg width="14" height="14" class="svg-ic"><use href="#ic-archive"/></svg></span>
-    <span style="font-size:11px;color:var(--muted2);">アーカイブ済みゴール</span>
-    <span id="sb-archive-count" style="margin-left:auto;font-size:9px;color:var(--muted2);background:var(--bg3);padding:1px 6px;border-radius:10px;display:none;"></span>
-  </div>
+  <!-- Hidden: keep IDs for JS compatibility but don't display -->
+  <div id="sb-task-list" style="display:none;"></div>
+  <div id="sb-goals-section" style="display:none;"></div>
+  <div id="nav-home" style="display:none;"></div>
+  <div id="nav-tasks" style="display:none;"></div>
+  <div id="nav-calendar" style="display:none;"></div>
+  <div id="nav-analytics" style="display:none;"></div>
+  <div id="nav-settings" style="display:none;"></div>
 
   <!-- Feedback -->
   <div onclick="openFeedbackChat()" style="display:flex;align-items:center;gap:7px;padding:7px 16px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
@@ -187,7 +156,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v3.11.41</span>
+      <span class="version" title="バージョン確認">v3.11.42</span>
     </div>
   </div>
 </div>
