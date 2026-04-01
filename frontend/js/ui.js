@@ -316,11 +316,11 @@ function applyModeUI(mode) {
   const msgIn = document.getElementById('msg-in');
   if(msgIn) msgIn.placeholder = '返信する';
 
-  const labels = { mencare:'🌸 メンケアモード ON', normal:'💬 通常モードに戻りました', spartan:'🔥 スパルタモード ON', kabeuchi:'💭 ソクラテスモード ON' };
+  const labels = { mencare:'メンケアモード ON', normal:'通常モードに戻りました', spartan:'スパルタモード ON', kabeuchi:'ソクラテスモード ON' };
   toast(labels[mode]);
 
   // AIロールバッジ更新
-  const roleBadgeLabels = { spartan:'🔥 スパルタ', mencare:'🌸 メンケア', kabeuchi:'💭 ソクラテス', normal:'' };
+  const roleBadgeLabels = { spartan:'スパルタ', mencare:'メンケア', kabeuchi:'ソクラテス', normal:'' };
   if(typeof updateRoleBadge === 'function') updateRoleBadge(roleBadgeLabels[mode] || '');
 
   // モード別背景色
@@ -485,7 +485,7 @@ function showDeepConfirm(containerId, scrollId, onYes, onNo) {
     </div>
     <div class="deep-confirm-btns" style="margin-top:10px;">
       <button class="deep-confirm-btn deep-btn-yes" onclick="this.closest('.deep-confirm-bubble').remove();__deepYes()">
-        ⚡ ヒアリング開始（残り${remaining}回）
+        → ヒアリング開始（残り${remaining}回）
       </button>
       <button class="deep-confirm-btn deep-btn-no" onclick="this.closest('.deep-confirm-bubble').remove();__deepNo()">
         通常の返答でOK
@@ -517,7 +517,7 @@ function createDeepProgressPanel(containerId, scrollId) {
     { id:'ph-gpt2',    icon:'🟡', name:'GPT — アイデア精度UP' },
     { id:'ph-claude',  icon:'🟣', name:'Claude — 戦略立案・文章生成' },
     { id:'ph-review',  icon:'⚖️',  name:'デュアルレビュー（GPT × Gemini）' },
-    { id:'ph-fix',     icon:'✨', name:'Claude — 最終調整・出力' },
+    { id:'ph-fix',     icon:'★', name:'Claude — 最終調整・出力' },
   ];
   const fmtLabel = OUTPUT_FORMATS.find(f=>f.id===_selectedFormat)?.label || 'テキスト';
   panel.innerHTML = `
@@ -706,8 +706,8 @@ function renderDeepResult(containerId, scrollId, results, userQuery) {
   wrap.innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:12px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:8px;font-size:10px;color:var(--amber);font-family:var(--fm);">
       <span>🔍 Gemini</span><span style="color:var(--border2)">→</span>
-      <span>💡 GPT</span><span style="color:var(--border2)">→</span>
-      <span>🧠 Claude</span>
+      <span>→ GPT</span><span style="color:var(--border2)">→</span>
+      <span>→ Claude</span>
       <span style="margin-left:auto;color:var(--muted2);">3AI連携分析</span>
     </div>
     <div class="deep-result-header">
@@ -926,7 +926,7 @@ const THEMES = {
   harajuku: { label:'ハラジュク', emoji:'🌈' },
   'bright-glass': { label:'ライトグラス', emoji:'💎' },
   'dark-glass':   { label:'ダークグラス',   emoji:'🔮' },
-  'harajuku-glass': { label:'ハラジュクグラス', emoji:'🌸' },
+  'harajuku-glass': { label:'ハラジュクグラス', emoji:null },
 };
 let currentTheme = 'dark';
 let currentFontSize = 'md';
@@ -1781,7 +1781,7 @@ async function showAIMemo(type, goalId) {
   modal.className = 'modal-overlay';
   modal.innerHTML = `<div class="modal-content" style="max-width:500px;padding:24px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <h3 style="color:var(--cream);margin:0;">📋 AIの理解メモ</h3>
+      <h3 style="color:var(--cream);margin:0;">AIの理解メモ</h3>
       <button onclick="this.closest('.modal-overlay').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;">×</button>
     </div>
     ${accordionHtml}

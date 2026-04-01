@@ -45,9 +45,9 @@ function updateStreak(){
   STREAK.best = Math.max(STREAK.best, STREAK.count);
   renderStreak();
   setCookie('goal_streak', JSON.stringify(STREAK), 365);
-  if(STREAK.count === 3) toast('🔥 3日連続！いい調子です');
-  if(STREAK.count === 7){ toast('🎉 1週間連続！素晴らしい'); launchConfetti(); }
-  if(STREAK.count === 30){ toast('🏆 30日連続達成！'); launchConfetti(); }
+  if(STREAK.count === 3) toast('3日連続！いい調子です');
+  if(STREAK.count === 7){ toast('1週間連続！素晴らしい'); launchConfetti(); }
+  if(STREAK.count === 30){ toast('★ 30日連続達成！'); launchConfetti(); }
 }
 
 function renderStreak(){
@@ -55,7 +55,7 @@ function renderStreak(){
   if(!badge) return;
   if(STREAK.count > 0){
     badge.style.display = '';
-    badge.textContent = `🔥 ${STREAK.count}日連続`;
+    badge.textContent = `▲ ${STREAK.count}日連続`;
   } else {
     badge.style.display = 'none';
   }
@@ -119,7 +119,7 @@ function getDeviceId() {
   return 'dev_' + Math.abs(hash).toString(36);
 }
 
-const APP_VERSION = '3.11.45';
+const APP_VERSION = '3.11.46';
 
 const FONT_SIZES = {
   xs: { label: '極小', base: '14px', lh: '1.55' },
