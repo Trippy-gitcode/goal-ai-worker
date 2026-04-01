@@ -769,7 +769,8 @@ function initHomeLayoutStates(){
     if(inputArea) {
       window.visualViewport.addEventListener('resize', () => {
         const kbH = Math.max(0, window.innerHeight - window.visualViewport.height);
-        inputArea.style.bottom = kbH + 'px';
+        // キーボード開: kbH分上げる。キーボード閉: ボトムタブ(52px)の上に戻す
+        inputArea.style.bottom = (kbH > 50 ? kbH : 52) + 'px';
       });
     }
   }
@@ -926,7 +927,7 @@ function quickGoalFromText(text){
   // Toast-style confirmation instead of native confirm
   const t = document.createElement('div');
   t.className = 'quick-goal-toast';
-  t.innerHTML = `<div style="font-size:11px;color:var(--cream);margin-bottom:6px;">🎯 ゴールを作成</div>
+  t.innerHTML = `<div style="font-size:11px;color:var(--cream);margin-bottom:6px;">ゴールを作成</div>
     <div style="font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.4;">「${escapeHtml(title)}」</div>
     <div style="display:flex;gap:6px;">
       <button class="qg-btn qg-yes">作成する</button>
@@ -1046,7 +1047,7 @@ async function sendHomeMsg(){
   } else {
     userContent = text;
   }
-  const displayText = text || (homeImageData ? `📷 ${homeImageData.name}` : '');
+  const displayText = text || (homeImageData ? `画像: ${homeImageData.name}` : '');
   const today = new Date().toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});
   inp.value = ''; homeResize(inp);
 
@@ -1493,8 +1494,8 @@ function showDailyCheckin(container){
   localStorage.setItem('checkin_'+today, '1');
   const streak = STREAK.count || 0;
   let msg = '';
-  if(streak >= 7) msg = `🔥 ${streak}日連続！素晴らしい継続力です。今日も一歩進みましょう。`;
-  else if(streak >= 3) msg = `✨ ${streak}日連続で使ってくれていますね。今日は何を進めますか？`;
+  if(streak >= 7) msg = `▲ ${streak}日連続！素晴らしい継続力です。今日も一歩進みましょう。`;
+  else if(streak >= 3) msg = `★ ${streak}日連続で使ってくれていますね。今日は何を進めますか？`;
   else if(streak >= 1) msg = 'おかえりなさい。今日もサポートします。';
   else return; // 初回は表示しない
   const el = document.createElement('div');
@@ -1857,7 +1858,7 @@ function renderModelUsageBadge(){
   const { claude, gemini, gpt } = FREE_MODEL_USAGE;
   const totalRemaining = claude.remaining + gemini.remaining + gpt.remaining;
   const color = totalRemaining > 5 ? 'var(--amber)' : 'var(--red)';
-  badge.innerHTML = `<div onclick="showModelUsageDetail()" style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--pill-radius);background:var(--bg3);border:1px solid var(--border);font-size:11px;font-weight:500;color:${color};cursor:pointer;white-space:nowrap;" title="高品質AI残り回数">⚡${totalRemaining}回/24h</div>`;
+  badge.innerHTML = `<div onclick="showModelUsageDetail()" style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--pill-radius);background:var(--bg3);border:1px solid var(--border);font-size:11px;font-weight:500;color:${color};cursor:pointer;white-space:nowrap;" title="高品質AI残り回数">${totalRemaining}回/24h</div>`;
 }
 function showModelUsageDetail(){
   const { claude, gemini, gpt } = FREE_MODEL_USAGE;
@@ -1973,7 +1974,7 @@ function renderHsTaskList(el, tab){
     items = allItems.slice(0,8);
   }
   if(items.length === 0){
-    el.innerHTML = `<div style="font-size:11px;color:var(--muted2)">${tab==='today'?'今日のタスクなし 🎉':'今週のタスクなし 🎉'}</div>`;
+    el.innerHTML = `<div style="font-size:11px;color:var(--muted2)">${tab==='today'?'今日のタスクなし ':'今週のタスクなし '}</div>`;
     return;
   }
   items.forEach(item => {
@@ -2201,10 +2202,10 @@ const FB_SYS = `あなたはGOAL AIの改善担当です。ユーザーが貴重
 
 収集済みテーマの内容をさらに深掘りするより、未収集テーマへ自然に話題を向けること。
 3テーマすべて揃ったら、まとめを表示。まとめフォーマット：
-📋 フィードバックまとめ
-✅ 良かった点：（1文）
-⚠️ 改善点：（1文）
-💡 ほしい機能：（1文）
+フィードバックまとめ
+○ 良かった点：（1文）
+△ 改善点：（1文）
+◇ ほしい機能：（1文）
 
 まとめの末尾に「この内容で合っていますか？」と聞く。`;
 
@@ -2316,7 +2317,7 @@ async function sendFeedbackMsg(){
 
     if(allFilled){
       // 3テーマ揃った → まとめ生成
-      const summary = `📋 フィードバックまとめ\n✅ 良かった点：${fbThemes.good}\n⚠️ 改善点：${fbThemes.bad}\n💡 ほしい機能：${fbThemes.wish}`;
+      const summary = `フィードバックまとめ\n○ 良かった点：${fbThemes.good}\n△ 改善点：${fbThemes.bad}\n◇ ほしい機能：${fbThemes.wish}`;
       fbSummary = summary;
       appendFbMsg('ai', summary + '\n\nこの内容で合っていますか？');
       fbHistory.push({role:'assistant', content: summary + '\nこの内容で合っていますか？'});
@@ -2551,9 +2552,9 @@ function renderGoalProposalCard(title, why, deadline) {
   const safeWhy = escapeHtml(why || '');
   const safeDeadline = escapeHtml(deadline || '');
   return '<div class="goal-proposal-card" style="margin-top:12px;padding:16px;background:var(--card-bg,var(--bg3));border:1.5px solid var(--amber);border-radius:var(--r);">'
-    + '<div style="font-size:14px;font-weight:600;color:var(--cream);margin-bottom:8px;">💡 ゴールにしませんか？</div>'
-    + '<div style="color:var(--cream);margin-bottom:4px;">🎯 ' + safeTitle + '</div>'
-    + (safeWhy ? '<div style="color:var(--muted);font-size:12px;margin-bottom:4px;">💡 ' + safeWhy + '</div>' : '')
+    + '<div style="font-size:14px;font-weight:600;color:var(--cream);margin-bottom:8px;">ゴールにしませんか？</div>'
+    + '<div style="color:var(--cream);margin-bottom:4px;">● ' + safeTitle + '</div>'
+    + (safeWhy ? '<div style="color:var(--muted);font-size:12px;margin-bottom:4px;">◇ ' + safeWhy + '</div>' : '')
     + (safeDeadline ? '<div style="color:var(--muted);font-size:12px;margin-bottom:12px;">📅 ' + safeDeadline + '</div>' : '<div style="margin-bottom:12px;"></div>')
     + '<div style="display:flex;gap:8px;">'
     + '<button onclick="startGoalAssist({title:\'' + safeTitle.replace(/'/g, "\\'") + '\',why:\'' + safeWhy.replace(/'/g, "\\'") + '\',deadline:\'' + safeDeadline.replace(/'/g, "\\'") + '\'})" style="flex:1;padding:8px;background:var(--amber);color:var(--text-on-accent);border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;">ゴールアシストを始める</button>'
@@ -2674,7 +2675,7 @@ function showGoalAssistBanner(title) {
     const chatWrap = document.getElementById('home-chat-wrap');
     if (chatWrap) chatWrap.parentElement.insertBefore(banner, chatWrap);
   }
-  banner.innerHTML = `🎯 ゴールアシスト中：${escapeHtml(title)} <button class="close-btn" onclick="this.parentElement.remove()">×</button>`;
+  banner.innerHTML = `ゴールアシスト中：${escapeHtml(title)} <button class="close-btn" onclick="this.parentElement.remove()">×</button>`;
 }
 
 // ═══ CHAT_CONFIGS — 4画面共通設定 ═══
