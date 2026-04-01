@@ -7,7 +7,7 @@ import { APP_VERSION } from './utils/constants.js';
 import { handleChat, handleChatStream, handleGptSimple } from './routes/chat.js';
 import { handleDeepOpenAI, handleDeepGemini, handleDeepClaude, handleDeepClaudeStream } from './routes/deep.js';
 import { handleTokenRegister, handleTokenCreate, handleTokenValidate, handleTokenRedeem } from './routes/token.js';
-import { handleUsageGet, handleAvatarUpload, handleFeedbackSave } from './routes/misc.js';
+import { handleUsageGet, handleAvatarUpload, handleFeedbackSave, handleDiarySave, handleDiaryGet } from './routes/misc.js';
 import { handleCheckoutCreate, handleCheckoutPortal, handleStripeWebhook } from './routes/checkout.js';
 import { handleGoalsList, handleGoalCreate, handleGoalUpdate, handleGoalDelete, handleSuggestRoles, handleSuggestTasks, handleExtractGoals } from './routes/goals.js';
 import { handleHistoryGet, handleHistorySave, handleHistoryDelete } from './routes/history.js';
@@ -110,6 +110,10 @@ app.get('/api/referral/status', async (c) => withCors(c, await handleReferralSta
 // ── Tester ──
 app.post('/api/tester/apply', async (c) => withCors(c, await handleTesterApply(c.req.raw, c.env)));
 
+// ── Diary ──
+app.post('/api/diary', async (c) => withCors(c, await handleDiarySave(c.req.raw, c.env)));
+app.get('/api/diary', async (c) => withCors(c, await handleDiaryGet(c.req.raw, c.env)));
+
 // ── AI Memo ──
 app.post('/api/ai-memo/generate', async (c) => withCors(c, await handleAIMemoGenerate(c.req.raw, c.env)));
 
@@ -119,6 +123,16 @@ app.get('/api/admin/testers', async (c) => withCors(c, await handleAdminTesters(
 // ── Feedbacks ──
 app.post('/api/feedbacks', async (c) => withCors(c, await handleFeedbackSave(c.req.raw, c.env)));
 app.get('/api/feedbacks', async (c) => withCors(c, await handleFeedbackList(c.req.raw, c.env)));
+
+// #14: Routing feedback (KV蓄積→テスト配布後にバッチ分析)
+app.post('/api/feedback/routing', async (c) => {
+  try {
+    const body = await c.req.json();
+    const key = `rf:${Date.now()}`;
+    await c.env.TOKEN_KV.put(key, JSON.stringify(body), { expirationTtl: 86400 * 30 });
+  } catch(e) {}
+  return withCors(c, jsonRes({ ok: true }));
+});
 
 // ── Account ──
 app.post('/api/account/delete', async (c) => withCors(c, await handleAccountDelete(c.req.raw, c.env)));
