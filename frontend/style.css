@@ -269,7 +269,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
 }
 
 /* ═══ LAYOUT ═══ */
-#app{display:flex;height:100vh;height:100dvh;width:100vw;}
+#app{display:flex;height:100vh;height:100dvh;width:100vw;max-width:480px;margin:0 auto;}
 
 /* ═══ SIDEBAR ═══ */
 #sb{

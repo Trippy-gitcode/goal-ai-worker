@@ -2902,6 +2902,8 @@ function renderTodayScreen(){
   // Secretary memo (rule-based)
   renderSecretaryMemo(allTasks, todayStr);
 
+  // B-16: 日記読込
+  loadTodayDiary();
   // B-02: 心がけ欄（当日キャッシュ）
   loadTodayMindset(allTasks);
 }
@@ -2968,6 +2970,20 @@ function renderSecretaryMemo(allTasks, todayStr){
   memoBody.innerHTML = memos.map(m =>
     `<div style="display:flex;align-items:flex-start;gap:6px;padding:3px 0;font-size:9px;color:var(--muted);line-height:1.4;">${m.icon}<span>${escapeHtml(m.text)}</span></div>`
   ).join('');
+}
+
+// B-16: 日記（localStorage保存）
+function saveTodayDiary(){
+  const el = document.getElementById('today-diary');
+  if(!el) return;
+  const key = 'diary_' + new Date().toISOString().slice(0,10);
+  localStorage.setItem(key, el.value);
+}
+function loadTodayDiary(){
+  const el = document.getElementById('today-diary');
+  if(!el) return;
+  const key = 'diary_' + new Date().toISOString().slice(0,10);
+  el.value = localStorage.getItem(key) || '';
 }
 
 // B-02: 心がけ生成（GPT-simple, 当日キャッシュ）
@@ -3093,6 +3109,7 @@ Object.assign(window, {
   requestTaskBreakdown, showTaskCard, confirmTaskCard,
   setPreset, taskCheckAnim,
   retryWithRoute, recordRoutingFeedback, stopHomeStream,
-  renderTodayScreen, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask
+  renderTodayScreen, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask,
+  saveTodayDiary, loadTodayDiary
 });
 

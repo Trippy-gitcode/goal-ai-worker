@@ -184,6 +184,12 @@ function showPage(pg) {
   } else if(pg==='goal-hub'){
     document.getElementById('pg-goal-hub-wrap').classList.add('active');
     document.getElementById('topbar').style.display='none';
+    // D-02: Show goals list view, hide hub detail
+    const listView = document.getElementById('goals-list-view');
+    const hubView = document.getElementById('pg-goal-hub');
+    if(listView) listView.style.display = 'flex';
+    if(hubView) hubView.style.display = 'none';
+    if(typeof renderGoalsList === 'function') renderGoalsList();
     _restoreScroll('goal-hub');
   } else if(pg==='myself'){
     document.getElementById('pg-myself-wrap').classList.add('active');
@@ -191,24 +197,20 @@ function showPage(pg) {
     renderMyselfProfile();
     runConnectAnalysis();
   } else if(pg==='tasks'){
-    document.getElementById('pg-tasks-wrap').classList.add('active');
-    document.getElementById('nav-tasks').classList.add('active');
+    document.getElementById('pg-tasks-wrap')?.classList.add('active');
     document.getElementById('topbar').style.display='none';
-    renderTasks();
+    if(typeof renderTasks === 'function') renderTasks();
   } else if(pg==='calendar'){
-    document.getElementById('pg-calendar-wrap').classList.add('active');
-    document.getElementById('nav-calendar').classList.add('active');
-    renderCalendar();
+    document.getElementById('pg-calendar-wrap')?.classList.add('active');
+    if(typeof renderCalendar === 'function') renderCalendar();
     document.getElementById('topbar').style.display='none';
   } else if(pg==='analytics'){
-    document.getElementById('pg-analytics-wrap').classList.add('active');
-    document.getElementById('nav-analytics').classList.add('active');
-    renderCharts();
-    updateAnalyticsExtras();
+    document.getElementById('pg-analytics-wrap')?.classList.add('active');
+    if(typeof renderCharts === 'function') renderCharts();
+    if(typeof updateAnalyticsExtras === 'function') updateAnalyticsExtras();
     document.getElementById('topbar').style.display='none';
   } else if(pg==='settings'){
-    document.getElementById('pg-settings-wrap').classList.add('active');
-    document.getElementById('nav-settings').classList.add('active');
+    document.getElementById('pg-settings-wrap')?.classList.add('active');
     document.getElementById('topbar').style.display='none';
   } else if(pg==='welcome'){
     document.getElementById('pg-welcome-wrap').classList.add('active');
