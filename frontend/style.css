@@ -2274,3 +2274,9 @@ body,body *{transition:background-color .3s ease,color .3s ease,border-color .3s
 /* ════════ Analytics: Backlog warning bar ════════ */
 .analytics-backlog-bar{margin:0 16px 10px;padding:10px 14px;background:var(--orange-d);border:1px solid rgba(224,144,80,0.3);border-radius:10px;font-size:12px;color:var(--orange);cursor:pointer;transition:background .15s;}
 .analytics-backlog-bar:hover{background:rgba(224,144,80,0.18);}
+
+/* ════════ BOTTOM TAB BAR ════════ */
+.btab{color:var(--muted2);transition:color .15s;}
+.btab.active{color:var(--amber);}
+.btab span{color:inherit;}
+@media(min-width:769px){#bottom-tabs{display:none!important;}}

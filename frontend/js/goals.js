@@ -1819,9 +1819,9 @@ async function init(){
   if(typeof applyPresets === 'function') applyPresets();
   if(typeof initHomeLayoutStates === 'function') initHomeLayoutStates();
   updateNotifSettingUI();
-  showPage('home');
+  showPage('today');
   window._appInitDone = true; // 初回ロード完了フラグ（以降のshowPageでアニメーション有効）
-  showHomeScreen();
+  if(typeof renderTodayScreen === 'function') renderTodayScreen();
   initAvatarDisplay();
 
   // Load streak from cookie
