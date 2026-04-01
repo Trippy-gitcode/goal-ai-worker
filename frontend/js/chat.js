@@ -630,7 +630,17 @@ const SYS_HOME = `あなたはGOAL AIのAIアシスタントです。
 
 【パーソナライズ】
 ユーザープロフィール（名前・職種・強み・弱み・価値観等）が設定されている場合は、
-回答をその人に合わせて最適化する。`;
+回答をその人に合わせて最適化する。
+
+【秘書機能: タスク操作】
+会話の中でタスクの追加・変更・削除・並替の意図を検出した場合:
+- 変更内容を簡潔に提案する
+- ユーザーが承認したら、回答の最後に以下のタグを付加:
+  [TASK_UPDATE:add:タスク名] — 新タスク追加
+  [TASK_UPDATE:done:タスク名] — タスク完了
+  [TASK_UPDATE:move:タスク名:明日] — タスク移動
+- タグはユーザーに見せない（フロント側で非表示処理される）
+- 提案なしにタグだけ出力することは禁止`;
 
 function saveHomeMsgs(){
   // 最後の2メッセージ（user + ai）をSupabaseに保存
@@ -1452,6 +1462,8 @@ async function homeClaudeStream(today, homeInner, homeWrap){
         window._pendingTaskSuggestion = false;
         appendTaskSuggestionButton(window._currentStreamBubble);
       }
+      // C-10/11: TASK_UPDATEタグ検出→タスク操作→TODAY更新
+      processTaskUpdateTags(t);
       // UX-01: TODAY画面のタスクリスト・秘書メモをリフレッシュ
       if(typeof renderTodayScreen === 'function') renderTodayScreen();
     }
@@ -2986,6 +2998,50 @@ function renderSecretaryMemo(allTasks, todayStr){
   ).join('');
 }
 
+// C-10/11: TASK_UPDATEタグを検出してタスク操作
+function processTaskUpdateTags(text){
+  if(!text) return;
+  const regex = /\[TASK_UPDATE:(add|done|move):([^\]]+)\]/g;
+  let match;
+  let changed = false;
+  while((match = regex.exec(text)) !== null){
+    const action = match[1];
+    const params = match[2].split(':');
+    const taskName = params[0];
+    if(action === 'add'){
+      // 最初のゴールにタスク追加
+      if(ALL_GOALS.length > 0){
+        const goal = ALL_GOALS[0];
+        if(!goal.phases?.length) goal.phases = [{title:'タスク',tasks:[]}];
+        goal.phases[0].tasks.push({id:'task_'+Date.now(), title:taskName, status:'current', source:'ai'});
+        changed = true;
+      }
+    } else if(action === 'done'){
+      for(const goal of ALL_GOALS){
+        for(const phase of (goal.phases||[])){
+          for(const task of (phase.tasks||[])){
+            if(task.title.includes(taskName) && task.status !== 'done'){
+              task.status = 'done';
+              changed = true;
+            }
+          }
+        }
+      }
+    }
+    // move: 後続実装（日付変更が必要）
+  }
+  if(changed){
+    if(typeof saveGoals === 'function') saveGoals();
+    toast('タスクを更新しました');
+  }
+  // タグをバブルのテキストから除去（ユーザーに見せない）
+  if(window._currentStreamBubble){
+    const bub = window._currentStreamBubble;
+    const cleaned = (bub.textContent || '').replace(/\[TASK_UPDATE:[^\]]+\]/g, '').trim();
+    if(cleaned !== bub.textContent) bub.innerHTML = renderMsgContent(cleaned);
+  }
+}
+
 // B-08: タスクドラッグ並替（touch対応、ライブラリ不使用）
 function initTodayDrag(){
   const list = document.getElementById('today-task-list');
@@ -3034,17 +3090,37 @@ function initTodayDrag(){
 }
 
 // B-16: 日記（localStorage保存）
+let _diarySaveTimer = null;
 function saveTodayDiary(){
   const el = document.getElementById('today-diary');
   if(!el) return;
-  const key = 'diary_' + new Date().toISOString().slice(0,10);
+  const date = new Date().toISOString().slice(0,10);
+  const key = 'diary_' + date;
   localStorage.setItem(key, el.value);
+  // H-03: デバウンスしてAPI同期（2秒後）
+  clearTimeout(_diarySaveTimer);
+  _diarySaveTimer = setTimeout(() => {
+    if(AUTH_TOKEN){
+      fetch(`${WORKER_URL}/api/diary`, {
+        method:'POST', headers:getAuthHeaders(),
+        body:JSON.stringify({ date, content: el.value })
+      }).catch(()=>{});
+    }
+  }, 2000);
 }
 function loadTodayDiary(){
   const el = document.getElementById('today-diary');
   if(!el) return;
-  const key = 'diary_' + new Date().toISOString().slice(0,10);
-  el.value = localStorage.getItem(key) || '';
+  const date = new Date().toISOString().slice(0,10);
+  const key = 'diary_' + date;
+  // localStorage優先、なければAPI取得
+  const local = localStorage.getItem(key);
+  if(local){ el.value = local; return; }
+  if(AUTH_TOKEN){
+    fetch(`${WORKER_URL}/api/diary?date=${date}`, { headers:getAuthHeaders() })
+      .then(r=>r.json()).then(d=>{ if(d.diary?.content){ el.value = d.diary.content; localStorage.setItem(key, d.diary.content); } })
+      .catch(()=>{});
+  }
 }
 
 // B-02: 心がけ生成（GPT-simple, 当日キャッシュ）
@@ -3176,6 +3252,6 @@ Object.assign(window, {
   setPreset, taskCheckAnim,
   retryWithRoute, recordRoutingFeedback, stopHomeStream,
   renderTodayScreen, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask,
-  saveTodayDiary, loadTodayDiary
+  saveTodayDiary, loadTodayDiary, processTaskUpdateTags, initTodayDrag
 });
 
