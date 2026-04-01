@@ -126,7 +126,12 @@ function initSwipeToOpenSidebar(){
   document.addEventListener('touchend', e=>{
     const dx=e.changedTouches[0].clientX-touchStartX;
     const dy=Math.abs(e.changedTouches[0].clientY-touchStartY);
+    // Right swipe from left edge → sidebar
     if(touchStartX<25 && dx>60 && dy<30) toggleSidebar();
+    // A-15: Left swipe from right edge on TALK → chat history
+    if(curPage==='home' && touchStartX>window.innerWidth-40 && dx<-60 && dy<30){
+      if(typeof openChatHistory === 'function') openChatHistory();
+    }
   }, {passive:true});
 }
 
