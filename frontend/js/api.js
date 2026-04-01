@@ -476,6 +476,14 @@ async function streamAI({ system, messages, maxTokens = 600, signal }, onChunk, 
         phase.textContent = formatModelName(window._lastModelUsed) + ' が考えています...';
         phase.classList.remove('typing-dots-text');
       }
+      // UX-01: ヘッダー到着時にアバターを賢者アイコンに更新
+      const msgWrap = window._currentStreamBubble.closest('.msg');
+      const av = msgWrap?.querySelector('.msg-av');
+      if(av && typeof getSageIcon === 'function' && window._lastModelUsed) {
+        const m = window._lastModelUsed.toLowerCase();
+        const route = m.includes('gpt') ? 'gpt' : m.includes('gemini') ? 'gemini' : 'claude';
+        av.innerHTML = getSageIcon(14, route);
+      }
     }
     // 降格バッジ（Step 7）
     const isDegraded = res.headers.get('X-Model-Degraded') === '1';
@@ -543,7 +551,7 @@ function mkStreamBubble(innerEl, scrollEl, extraBubStyle, route) {
   wrap.className = 'msg ai';
   wrap.style.marginBottom = '16px';
   const av = document.createElement('div');
-  av.className = 'msg-av ai'; av.innerHTML = getLogoSVG(14);
+  av.className = 'msg-av ai'; av.innerHTML = typeof getSageIcon === 'function' ? getSageIcon(14, route) : getLogoSVG(14);
   const body = document.createElement('div');
   body.className = 'msg-body';
   const bub = document.createElement('div');
