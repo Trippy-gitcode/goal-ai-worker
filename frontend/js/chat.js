@@ -2866,7 +2866,7 @@ function renderTodayScreen(){
   const list = document.getElementById('today-task-list');
   if(!list) return;
   const todayStr = new Date().toISOString().slice(0,10);
-  const items = allTasks.slice(0,10);
+  const items = allTasks; // B-06: 全件表示（上限なし）
   if(items.length === 0){
     list.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--muted2);font-size:12px;">タスクがありません</div>';
   } else {
