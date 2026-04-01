@@ -2827,6 +2827,91 @@ async function confirmTaskCard() {
 }
 
 // ═══ ES Module: expose to window ═══
+// ═══ TODAY SCREEN (UX-01) ═══
+function renderTodayScreen(){
+  const greetMsg = document.getElementById('today-greet-msg');
+  const greetDate = document.getElementById('today-greet-date');
+  if(!greetMsg) return;
+
+  // Greeting based on time
+  const h = new Date().getHours();
+  const greeting = h < 12 ? 'おはよう。' : h < 17 ? 'こんにちは。' : 'おつかれさま。';
+  const allTasks = getTodayTasks();
+  const remaining = allTasks.filter(i => i.task.status !== 'done').length;
+  greetMsg.textContent = remaining > 0 ? `${greeting}今日は${remaining}つのタスク。` : `${greeting}今日のタスクは完了です。`;
+
+  const now = new Date();
+  const opts = {month:'long',day:'numeric',weekday:'short'};
+  greetDate.textContent = now.toLocaleDateString('ja-JP', opts);
+
+  // Tasks
+  const list = document.getElementById('today-task-list');
+  if(!list) return;
+  const todayStr = new Date().toISOString().slice(0,10);
+  const items = allTasks.slice(0,10);
+  if(items.length === 0){
+    list.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--muted2);font-size:12px;">タスクがありません</div>';
+  } else {
+    const pColors = {high:'var(--red)',mid:'var(--amber)',low:'var(--green)'};
+    list.innerHTML = items.map((item, idx) => {
+      const t = item.task;
+      const isDone = t.status === 'done';
+      const isOverdue = t.due && t.due < todayStr && !isDone;
+      const goalName = item.goalName || '';
+      const timeStr = t.estimated_time ? `${t.estimated_time}` : '';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);${isDone?'opacity:0.35;':''}cursor:pointer;" onclick="openHomeTaskById('${t.id}')">
+        <div style="width:10px;display:flex;flex-direction:column;gap:1.5px;opacity:0.2;flex-shrink:0;"><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span></div>
+        <div style="width:20px;height:20px;border-radius:50%;${isDone?'':'border:1px solid '+(idx===0&&!isDone?'var(--amber)':'var(--border2)')+';'}display:flex;align-items:center;justify-content:center;font-size:9px;color:${idx===0&&!isDone?'var(--amber)':'var(--muted2)'};flex-shrink:0;${idx===0&&!isDone?'background:rgba(228,184,106,0.1);':''}">${isDone?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':(idx+1)}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;color:${isOverdue?'var(--red)':'var(--cream)'};line-height:1.3;${isDone?'text-decoration:line-through;':''}overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(t.title)}</div>
+          ${timeStr ? `<div style="font-size:8px;color:${isOverdue?'var(--red)':'var(--muted2)'};margin-top:1px;">${isOverdue?'期限切れ':timeStr}</div>` : (isOverdue ? '<div style="font-size:8px;color:var(--red);margin-top:1px;">期限切れ</div>' : '')}
+        </div>
+        ${goalName ? `<div style="font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(228,184,106,0.1);color:var(--amber);border:0.5px solid rgba(228,184,106,0.2);flex-shrink:0;white-space:nowrap;">${escapeHtml(goalName)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // Goal progress
+  const goalsEl = document.getElementById('today-goals');
+  if(goalsEl && typeof GOALS !== 'undefined'){
+    const activeGoals = (GOALS || []).filter(g => g.status !== 'archived').slice(0,4);
+    goalsEl.innerHTML = activeGoals.map(g => {
+      const pct = g.progress || 0;
+      return `<div style="display:flex;align-items:center;gap:4px;"><span style="font-size:8px;color:var(--muted2);">${escapeHtml(g.title?.slice(0,6)||'')}</span><span style="font-size:10px;font-weight:600;color:var(--amber);">${pct}%</span></div>`;
+    }).join('');
+  }
+}
+
+function sendTodayComment(){
+  const inp = document.getElementById('today-comment-in');
+  if(!inp || !inp.value.trim()) return;
+  const comment = inp.value.trim();
+  inp.value = '';
+  // Switch to TALK and send the comment as a message
+  showPage('home');
+  setTimeout(() => {
+    const msgIn = document.getElementById('home-msg-in');
+    if(msgIn){
+      msgIn.value = '状況変更: ' + comment;
+      homeResize(msgIn);
+      sendHomeMsg();
+    }
+  }, 100);
+}
+
+function openTodayAddTask(){
+  // Switch to TALK and prompt for task creation
+  showPage('home');
+  setTimeout(() => {
+    const msgIn = document.getElementById('home-msg-in');
+    if(msgIn){
+      msgIn.value = '';
+      msgIn.placeholder = '新しいタスクを入力...';
+      msgIn.focus({ preventScroll: true });
+    }
+  }, 100);
+}
+
 // Mutable primitives shared cross-file
 Object.defineProperty(window, 'memoToastShown', {
   get() { return memoToastShown; }, set(v) { memoToastShown = v; },
@@ -2876,6 +2961,7 @@ Object.assign(window, {
   openTaskFromChat, getLastAIMessage, appendTaskSuggestionButton,
   requestTaskBreakdown, showTaskCard, confirmTaskCard,
   setPreset, taskCheckAnim,
-  retryWithRoute, recordRoutingFeedback, stopHomeStream
+  retryWithRoute, recordRoutingFeedback, stopHomeStream,
+  renderTodayScreen, sendTodayComment, openTodayAddTask
 });
 
