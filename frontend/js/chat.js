@@ -2874,6 +2874,8 @@ function renderTodayScreen(){
   // Greeting based on time
   const h = new Date().getHours();
   const greeting = h < 12 ? 'おはよう。' : h < 17 ? 'こんにちは。' : 'おつかれさま。';
+  const greetTime = document.getElementById('today-greet-time');
+  if(greetTime) greetTime.textContent = h < 12 ? 'GOOD MORNING' : h < 17 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
   const allTasks = getTodayTasks();
   const remaining = allTasks.filter(i => i.task.status !== 'done').length;
   greetMsg.textContent = remaining > 0 ? `${greeting}今日は${remaining}つのタスク。` : `${greeting}今日のタスクは完了です。`;
