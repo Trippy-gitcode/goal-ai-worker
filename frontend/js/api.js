@@ -592,7 +592,9 @@ function streamAppend(bub, fullText){
     bub._targetText = '';
     bub._animTimer = null;
   }
-  bub._targetText = fullText;
+  // TASK_UPDATEタグをストリーミング中に非表示（ユーザーに見せない）
+  bub._rawText = fullText;
+  bub._targetText = fullText.replace(/\[TASK_UPDATE:[^\]]*\]/g, '');
   if(!bub._animTimer){
     bub._animTimer = setInterval(()=>{
       if(bub._displayedLen < bub._targetText.length){
@@ -630,7 +632,9 @@ function streamFinalize(bub, fullText, modelLabel){
   // 【1】空テキストならバブルごと削除
   if(!fullText || fullText.trim() === ''){ bub.closest('.msg')?.remove(); return; }
   bub.classList.remove('stream-cursor'); // G5: Remove cursor
-  bub.innerHTML = renderMsgContent(fullText);
+  // TASK_UPDATEタグをMarkdown変換前にストリップ
+  const cleanText = fullText.replace(/\[TASK_UPDATE:[^\]]*\]/g, '').trim();
+  bub.innerHTML = renderMsgContent(cleanText);
   // Check for numbered selection list
   checkAndShowSelections(bub, fullText);
   bub.classList.remove('stream-bubble');
