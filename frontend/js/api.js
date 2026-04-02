@@ -640,7 +640,8 @@ function streamFinalize(bub, fullText, modelLabel){
   bub.classList.remove('stream-bubble');
   // Update msg-footer with model name
   const footer = bub.parentElement?.querySelector('.msg-footer');
-  if(footer){ footer.innerHTML = `<span class="msg-time">${now()}</span>  <span class="msg-model" style="color:var(--muted)">${modelLabel || 'Claude'}</span>${_msgActionsHtml()}`; }
+  // 2-2: モデル名テキスト非表示（賢者アイコンのみ）。タイムスタンプとアクションのみ
+  if(footer){ footer.innerHTML = `<span class="msg-time">${now()}</span>${_msgActionsHtml()}`; }
 }
 
 
