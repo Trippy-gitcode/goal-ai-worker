@@ -187,7 +187,15 @@ export async function handleChatStream(request, env, ctx) {
       if (env.SUPABASE_URL) updateStreak(auth.tokenId, env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
       if (ctx) {
         if (env.MEMO_ENABLED === 'true') ctx.waitUntil(countRecentMessages(env, auth.tokenId).then(c => { if (c > 0 && c % 5 === 0) return regenerateAiMemo(env, auth.tokenId, goalId); }).catch(() => {}));
-        if (env.RAG_ENABLED === 'true' && userMessage) ctx.waitUntil(generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage).catch(() => {}));
+        // A8: embedding生成は5ターンに1回（RAG検索は毎ターン実行済み）
+        if (env.RAG_ENABLED === 'true' && userMessage) {
+          ctx.waitUntil((async () => {
+            const tcKey = `emb_tc:${auth.tokenId}`;
+            const tc = parseInt(await env.TOKEN_KV.get(tcKey) || '0') + 1;
+            await env.TOKEN_KV.put(tcKey, String(tc), { expirationTtl: 86400 });
+            if (tc % 5 === 0) await generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage);
+          })().catch(() => {}));
+        }
       }
       return routeResponse;
     }
@@ -241,8 +249,14 @@ export async function handleChatStream(request, env, ctx) {
         if (count > 0 && count % 5 === 0) return regenerateAiMemo(env, auth.tokenId, goalId);
       }).catch(() => {}));
     }
+    // A8: embedding生成は5ターンに1回（RAG検索は毎ターン実行済み）
     if (env.RAG_ENABLED === 'true' && userMessage) {
-      ctx.waitUntil(generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage).catch(() => {}));
+      ctx.waitUntil((async () => {
+        const tcKey = `emb_tc:${auth.tokenId}`;
+        const tc = parseInt(await env.TOKEN_KV.get(tcKey) || '0') + 1;
+        await env.TOKEN_KV.put(tcKey, String(tc), { expirationTtl: 86400 });
+        if (tc % 5 === 0) await generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage);
+      })().catch(() => {}));
     }
     if (sessionId) {
       ctx.waitUntil(countSessionMessages(env, auth.tokenId, sessionId).then(sc => {
@@ -347,11 +361,18 @@ async function maybeSendUsageRecord(env, userId, turnsUsed, plan) {
   const month = getCurrentMonth();
   const supabaseUrl = env.SUPABASE_URL;
   const supabaseKey = env.SUPABASE_SERVICE_KEY;
+  // A20: KVキャッシュでstripe_usage_synced取得（5分間）
   let synced = 0;
+  const syncKV = `usage_sync:${userId}:${month}`;
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&month=eq.${month}&select=stripe_usage_synced`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
-    const data = await res.json();
-    synced = data?.[0]?.stripe_usage_synced || 0;
+    const cached = await env.TOKEN_KV.get(syncKV);
+    if (cached !== null) { synced = parseInt(cached); }
+    else {
+      const res = await fetch(`${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&month=eq.${month}&select=stripe_usage_synced`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
+      const data = await res.json();
+      synced = data?.[0]?.stripe_usage_synced || 0;
+      await env.TOKEN_KV.put(syncKV, String(synced), { expirationTtl: 300 });
+    }
   } catch (e) { console.error('Failed to get stripe_usage_synced:', e.message); return; }
   const unsent = turnsUsed - synced;
   if (unsent < USAGE_BATCH_SIZE) return;
@@ -372,6 +393,8 @@ async function maybeSendUsageRecord(env, userId, turnsUsed, plan) {
         method: 'PATCH', headers: { 'Content-Type': 'application/json', 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Prefer': 'return=minimal' },
         body: JSON.stringify({ stripe_usage_synced: turnsUsed })
       });
+      // A20: KVキャッシュも更新
+      await env.TOKEN_KV.put(syncKV, String(turnsUsed), { expirationTtl: 300 });
     } else { console.error('Stripe usage_record failed:', await response.json()); }
   } catch (e) { console.error('Stripe usage_record error:', e.message); }
 }

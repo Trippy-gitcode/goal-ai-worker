@@ -22,7 +22,7 @@ export async function handleGPTSimpleChat(env, system, messages, auth, overrideM
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
-      body: JSON.stringify({ model, max_completion_tokens: 150, messages: [{ role: 'system', content: system || '' }, ...messages] })
+      body: JSON.stringify({ model, max_completion_tokens: 80, messages: [{ role: 'system', content: system || '' }, ...messages] })
     });
     const data = await res.json();
     const text = data.choices?.[0]?.message?.content || '';

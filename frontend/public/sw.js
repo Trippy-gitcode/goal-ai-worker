@@ -1,4 +1,4 @@
-const CACHE_NAME = 'goal-ai-v3.11.48';
+const CACHE_NAME = 'goal-ai-v4.0.0';
 
 // ネットワークファースト + 動的キャッシュ（Viteハッシュ付きファイル名と互換）
 

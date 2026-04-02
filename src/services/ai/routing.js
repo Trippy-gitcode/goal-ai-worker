@@ -13,6 +13,10 @@ export function quickRoute(message) {
   if (/天気.*(教えて|おしえて|知りたい)|ニュース.*(教えて|おしえて|知りたい)/.test(msg)) {
     return { route: 'gemini', coaching: false };
   }
+  // BUG-03: 検索・事実・地理・交通系
+  if (/ダイヤ|時刻表|路線|行き方|乗り換え|運賃|料金|営業時間|場所|住所|電話番号|地図|アクセス|最寄り/.test(msg)) {
+    return { route: 'gemini', coaching: false };
+  }
   if (/^(翻訳して|英語に|日本語に|要約して|まとめて|SNS.*書いて|キャッチコピー|タイトル案)/.test(msg)) {
     return { route: 'gpt', coaching: false };
   }

@@ -45,9 +45,16 @@ export async function authenticateRequest(request, env) {
 }
 
 export async function getUserIdFromToken(env, tokenId) {
+  // B5: token_id→user_id は不変なのでKV永続キャッシュ
+  const kvKey = `uid:${tokenId}`;
+  const cached = await env.TOKEN_KV.get(kvKey);
+  if (cached) return cached;
+
   const users = await supabaseQuery(env, 'users', 'GET', {
     filters: `token_id=eq.${encodeURIComponent(tokenId)}`,
     select: 'id',
   });
-  return users?.[0]?.id || null;
+  const userId = users?.[0]?.id || null;
+  if (userId) await env.TOKEN_KV.put(kvKey, userId);
+  return userId;
 }
