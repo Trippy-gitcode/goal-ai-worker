@@ -20,6 +20,8 @@ export async function handleGoalCreate(request, env) {
   const { title, description, targetDate } = body;
   if (!title) return jsonRes({ error: 'タイトルは必須です' }, 400);
   const goal = await supabaseQuery(env, 'goals', 'POST', { body: { user_id: userId, title, description: description || null, target_date: targetDate || null } });
+  // B4: ゴール変更時にprofile KVキャッシュをinvalidate
+  await env.TOKEN_KV.delete(`profile:${auth.tokenId}`).catch(() => {});
   return jsonRes({ goal: goal?.[0] || null }, 201);
 }
 
@@ -38,6 +40,8 @@ export async function handleGoalUpdate(request, env, url) {
   if (body.targetDate !== undefined) updates.target_date = body.targetDate;
   if (body.lastMilestonePct !== undefined) updates.last_milestone_pct = body.lastMilestonePct;
   const result = await supabaseQuery(env, 'goals', 'PATCH', { filters: `id=eq.${goalId}&user_id=eq.${userId}`, body: updates });
+  // B4: ゴール変更時にprofile KVキャッシュをinvalidate
+  await env.TOKEN_KV.delete(`profile:${auth.tokenId}`).catch(() => {});
   return jsonRes({ goal: result?.[0] || null });
 }
 
@@ -48,6 +52,8 @@ export async function handleGoalDelete(request, env, url) {
   if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
   const goalId = url.pathname.split('/').pop();
   await supabaseQuery(env, 'goals', 'DELETE', { filters: `id=eq.${goalId}&user_id=eq.${userId}` });
+  // B4: ゴール変更時にprofile KVキャッシュをinvalidate
+  await env.TOKEN_KV.delete(`profile:${auth.tokenId}`).catch(() => {});
   return jsonRes({ deleted: true });
 }
 

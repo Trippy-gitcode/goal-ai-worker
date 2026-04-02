@@ -1047,13 +1047,7 @@ async function sendHomeMsg(){
   let text = inp.value.trim();
   if(!text && !homeImageData){ document.getElementById('home-send-btn').disabled=false; return; }
 
-  // B-12: タスク作成モード — ユーザー入力にタスク作成コンテキストを付加
-  if(window._taskCreateMode && text){
-    text = `【新タスク作成】「${text}」をタスクにしたい。以下を質問して:\n1. いつまでにやる？（期限）\n2. どれくらい時間かかる？（見積もり）\n3. 優先度は？（高/中/低）\n回答を踏まえてタスクを構造化して提案して。`;
-    inp.value = text;
-    window._taskCreateMode = false;
-    inp.placeholder = '質問、相談、なんでも...';
-  }
+
 
   // Image handling
   let userContent;
@@ -1243,6 +1237,8 @@ async function routeMessage(text){
   if(msg.length < 15 && /^(うん|はい|ok|おk|そう|ありがと|了解|わかった|なるほど|いいね|おー|へー|ほー|そうだね|たしかに)/.test(msg)) return 'gpt-simple';
   if(/^(天気|今日の天気|明日の天気|ニュース|最新の|検索して|調べて)/.test(msg)) return 'gemini';
   if(/天気.*(教えて|おしえて|知りたい)|ニュース.*(教えて|おしえて|知りたい)/.test(msg)) return 'gemini';
+  // BUG-03: 検索・事実・地理・交通系はGemini
+  if(/ダイヤ|時刻表|路線|行き方|乗り換え|運賃|料金|営業時間|場所|住所|電話番号|地図|アクセス|最寄り/.test(msg)) return 'gemini';
   if(/^(翻訳して|英語に|日本語に|要約して|まとめて|SNS.*書いて|キャッチコピー|タイトル案)/.test(msg)) return 'gpt';
   if(/^(アイディア|おすすめ|提案して|考えて|リスト|比較して|教えて|作って|書いて)/.test(msg)) return 'gpt';
   if(/^(今日やること|タスク|やること.*整理|TODO|to.?do|スケジュール|予定.*整理|段取り)/.test(msg)) return 'gpt';
@@ -3090,14 +3086,25 @@ function initTodayDrag(){
 }
 
 // B-16: 日記（localStorage保存）
+// Step 2.7: 日記 — debounce 1秒自動保存、初回トースト、正午リセット、タイトル自動生成
 let _diarySaveTimer = null;
+let _diaryTitleTimer = null;
+let _diarySavedOnce = false;
+
+function getDiaryDate(){
+  // 正午リセット: 現在時刻<12:00なら前日の日付
+  const now = new Date();
+  if(now.getHours() < 12) now.setDate(now.getDate() - 1);
+  return now.toISOString().slice(0,10);
+}
+
 function saveTodayDiary(){
   const el = document.getElementById('today-diary');
   if(!el) return;
-  const date = new Date().toISOString().slice(0,10);
+  const date = getDiaryDate();
   const key = 'diary_' + date;
   localStorage.setItem(key, el.value);
-  // H-03: デバウンスしてAPI同期（2秒後）
+  // debounce 1秒でAPI同期
   clearTimeout(_diarySaveTimer);
   _diarySaveTimer = setTimeout(() => {
     if(AUTH_TOKEN){
@@ -3106,13 +3113,47 @@ function saveTodayDiary(){
         body:JSON.stringify({ date, content: el.value })
       }).catch(()=>{});
     }
-  }, 2000);
+    if(!_diarySavedOnce){ _diarySavedOnce = true; toast('保存しました'); }
+  }, 1000);
+  // タイトル自動生成（debounce 3秒、10文字以上）
+  clearTimeout(_diaryTitleTimer);
+  if(el.value.length >= 10){
+    _diaryTitleTimer = setTimeout(() => generateDiaryTitle(el.value, date), 3000);
+  }
+}
+
+async function generateDiaryTitle(content, date){
+  if(!AUTH_TOKEN) return;
+  const titleEl = document.getElementById('today-diary-title');
+  if(!titleEl) return;
+  try{
+    const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
+      method:'POST', headers:getAuthHeaders(),
+      body:JSON.stringify({ system:'日記の内容から10文字以内の単文タイトルを1つ返す。「」不要。', messages:[{role:'user',content:content.slice(0,200)}], maxTokens:20 })
+    });
+    const data = await res.json();
+    const title = (data.choices?.[0]?.message?.content || '').trim().replace(/^「|」$/g,'');
+    if(title){
+      const dateStr = new Date(date + 'T12:00:00').toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',weekday:'short'});
+      titleEl.textContent = `${title}  ${dateStr}`;
+      titleEl.style.display = '';
+      localStorage.setItem('diary_title_'+date, title);
+    }
+  }catch(e){}
 }
 function loadTodayDiary(){
   const el = document.getElementById('today-diary');
   if(!el) return;
-  const date = new Date().toISOString().slice(0,10);
+  const date = getDiaryDate();
   const key = 'diary_' + date;
+  const titleEl = document.getElementById('today-diary-title');
+  // タイトル復元
+  const savedTitle = localStorage.getItem('diary_title_'+date);
+  if(savedTitle && titleEl){
+    const dateStr = new Date(date + 'T12:00:00').toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',weekday:'short'});
+    titleEl.textContent = `${savedTitle}  ${dateStr}`;
+    titleEl.style.display = '';
+  }
   // localStorage優先、なければAPI取得
   const local = localStorage.getItem(key);
   if(local){ el.value = local; return; }
@@ -3183,23 +3224,67 @@ function sendTodayComment(){
   }, 100);
 }
 
+// Step 2.6: ハーフモーダルでタスク追加
+let _taskAddHistory = [];
+
 function openTodayAddTask(){
-  // B-11: TALKに遷移して入力待ち。送信時にタスク作成コンテキストを付加
-  window._taskCreateMode = true;
-  showPage('home');
-  setTimeout(() => {
-    const msgIn = document.getElementById('home-msg-in');
-    if(msgIn){
-      msgIn.value = '';
-      msgIn.placeholder = 'やりたいことを入力（例: 企画書を書く）';
-      msgIn.focus({ preventScroll: true });
-    }
-  }, 100);
+  const sheet = document.getElementById('task-add-sheet');
+  if(!sheet) return;
+  sheet.style.display = 'flex';
+  _taskAddHistory = [];
+  document.getElementById('task-add-chat').innerHTML = '<div style="font-size:11px;color:var(--muted);padding:4px 0;">やりたいことを入力してください</div>';
+  setTimeout(() => document.getElementById('task-add-input')?.focus({ preventScroll: true }), 100);
 }
 
-// B-12: タスク作成モードで送信された場合、タスク化コンテキストを注入
-const _origSendHomeMsg = typeof sendHomeMsg === 'function' ? sendHomeMsg : null;
-// sendHomeMsgの呼び出し前にタスク作成コンテキストを付加（chat.js内のsendHomeMsgは直接上書きできないためグローバルフラグで制御）
+function closeTodayAddTask(){
+  const sheet = document.getElementById('task-add-sheet');
+  if(sheet) sheet.style.display = 'none';
+  _taskAddHistory = [];
+}
+
+async function sendTaskAddMsg(){
+  const inp = document.getElementById('task-add-input');
+  const chat = document.getElementById('task-add-chat');
+  if(!inp || !chat || !inp.value.trim()) return;
+  const text = inp.value.trim();
+  inp.value = '';
+  // Show user message
+  chat.innerHTML += `<div style="text-align:right;margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:rgba(228,184,106,0.1);border-radius:8px;font-size:11px;color:var(--cream);max-width:80%;">${escapeHtml(text)}</span></div>`;
+  chat.scrollTop = chat.scrollHeight;
+
+  // First message: task creation prompt
+  const isFirst = _taskAddHistory.length === 0;
+  const prompt = isFirst
+    ? `ユーザーが「${text}」をタスクにしたい。以下を簡潔に質問して（1つずつ）:\n- いつまで？\n- 所要時間は？\n- 優先度（高/中/低）?\n最後に[TASK_UPDATE:add:タスク名]を出力。`
+    : text;
+
+  _taskAddHistory.push({role:'user', content: prompt});
+
+  try{
+    const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
+      method:'POST', headers:getAuthHeaders(),
+      body:JSON.stringify({ system:'タスク作成アシスタント。ユーザーと短いやり取りでタスクを構造化する。3回以内で完了。最後に[TASK_UPDATE:add:タスク名]を出力。', messages:_taskAddHistory, maxTokens:200 })
+    });
+    const data = await res.json();
+    const reply = (data.choices?.[0]?.message?.content || '').trim();
+    _taskAddHistory.push({role:'assistant', content: reply});
+
+    // Process TASK_UPDATE tags
+    const cleaned = reply.replace(/\[TASK_UPDATE:[^\]]+\]/g, '').trim();
+    processTaskUpdateTags(reply);
+
+    // Show AI response
+    chat.innerHTML += `<div style="margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:var(--bg3);border-radius:8px;font-size:11px;color:var(--cream);max-width:80%;">${escapeHtml(cleaned)}</span></div>`;
+    chat.scrollTop = chat.scrollHeight;
+
+    // Auto-close if task was created
+    if(/\[TASK_UPDATE:add:/.test(reply)){
+      setTimeout(() => { closeTodayAddTask(); renderTodayScreen(); toast('タスクを追加しました'); }, 1000);
+    }
+  }catch(e){
+    chat.innerHTML += `<div style="margin:6px 0;font-size:10px;color:var(--red);">エラーが発生しました</div>`;
+  }
+}
 
 // Mutable primitives shared cross-file
 Object.defineProperty(window, 'memoToastShown', {
@@ -3252,6 +3337,7 @@ Object.assign(window, {
   setPreset, taskCheckAnim,
   retryWithRoute, recordRoutingFeedback, stopHomeStream,
   renderTodayScreen, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask,
-  saveTodayDiary, loadTodayDiary, processTaskUpdateTags, initTodayDrag
+  saveTodayDiary, loadTodayDiary, getDiaryDate, generateDiaryTitle, processTaskUpdateTags, initTodayDrag,
+  openTodayAddTask, closeTodayAddTask, sendTaskAddMsg
 });
 
