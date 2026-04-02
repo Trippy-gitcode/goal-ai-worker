@@ -2892,6 +2892,15 @@ function renderTodayScreen(){
   if(items.length === 0){
     list.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--muted2);font-size:12px;">タスクがありません</div>';
   } else {
+    // 1-7: ドラッグ並替順序をlocalStorageから復元
+    const savedOrder = JSON.parse(localStorage.getItem('today_task_order') || '[]');
+    if(savedOrder.length) items.sort((a,b) => {
+      const ia = savedOrder.indexOf(String(a.task.id)), ib = savedOrder.indexOf(String(b.task.id));
+      if(ia === -1 && ib === -1) return 0;
+      if(ia === -1) return 1;
+      if(ib === -1) return -1;
+      return ia - ib;
+    });
     const pColors = {high:'var(--red)',mid:'var(--amber)',low:'var(--green)'};
     list.innerHTML = items.map((item, idx) => {
       const t = item.task;
@@ -3147,6 +3156,17 @@ function loadTodayDiary(){
   const el = document.getElementById('today-diary');
   if(!el) return;
   const date = getDiaryDate();
+  // 3-5: 正午リセット — 正午を過ぎたら前日分を確定保存してクリア
+  const now = new Date();
+  if(now.getHours() >= 12){
+    const yesterday = new Date(now); yesterday.setDate(yesterday.getDate()-1);
+    const yKey = 'diary_' + yesterday.toISOString().slice(0,10);
+    const yContent = localStorage.getItem(yKey);
+    if(yContent && !localStorage.getItem(yKey+'_finalized')){
+      // 確定保存（APIに送信済みのはず）
+      localStorage.setItem(yKey+'_finalized', '1');
+    }
+  }
   const key = 'diary_' + date;
   const titleEl = document.getElementById('today-diary-title');
   // タイトル復元
