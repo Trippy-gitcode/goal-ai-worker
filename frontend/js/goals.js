@@ -820,6 +820,15 @@ function showDayDetail(dateStr) {
     });
   }
 
+  // B-18: カレンダーから日記閲覧
+  const diaryContent = localStorage.getItem('diary_' + dateStr);
+  if(diaryContent){
+    html += `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;border:0.5px solid var(--border);">
+      <div style="font-size:8px;color:var(--amber);font-weight:500;margin-bottom:4px;">日記</div>
+      <div style="font-size:10px;color:var(--cream);line-height:1.5;white-space:pre-wrap;">${escapeHtml(diaryContent)}</div>
+    </div>`;
+  }
+
   detail.innerHTML = html;
   detail.style.display = 'block';
 }

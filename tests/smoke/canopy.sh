@@ -283,6 +283,13 @@ SP_VER=$(grep -o 'バージョン:.*v[0-9.]*' instructions/session_progress.md 2
 echo "  session_progress=$SP_VER  APP_VERSION=$V_GLOBALS"
 # INFO only (SP version may lag during development)
 
+# B4/B5: KVキャッシュinvalidateチェック
+echo "--- B4/B5 KV invalidate ---"
+B4_INV=$(grep -rn 'profile:\${' src/routes/goals.js src/services/memo.js 2>/dev/null | wc -l | tr -d ' ')
+if [ "$B4_INV" -ge 4 ]; then echo "OK: B4 profile KV invalidate ($B4_INV refs)"; else echo "FAIL: B4 profile KV invalidate missing (only $B4_INV refs, need >=4)"; FAIL=1; fi
+B5_UID=$(grep -rn 'uid:\${' src/middleware/auth.js 2>/dev/null | wc -l | tr -d ' ')
+if [ "$B5_UID" -ge 1 ]; then echo "OK: B5 userId KV cache ($B5_UID refs)"; else echo "FAIL: B5 userId KV cache missing"; FAIL=1; fi
+
 CANOPY_END=$(date +%s)
 CANOPY_DUR=$((CANOPY_END - CANOPY_START))
 
