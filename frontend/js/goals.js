@@ -2572,9 +2572,22 @@ function promoteWish(idx){
   if(typeof showWelcome === 'function'){ showWelcome(); setTimeout(()=>{ const inp = document.getElementById('wlc-in'); if(inp){ inp.value = w.title; } }, 200); }
 }
 
+// 4: ゴール作成をTALKで開始（GOALS画面から遷移）
+function startGoalCreation(){
+  showPage('home');
+  setTimeout(() => {
+    const msgIn = document.getElementById('home-msg-in');
+    if(msgIn){
+      msgIn.value = '新しいゴールを設定したい';
+      homeResize(msgIn);
+      sendHomeMsg();
+    }
+  }, 200);
+}
+
 // Constants, arrays, functions
 Object.assign(window, {
-  TASKS, ALL_GOALS, GOAL_COLORS, getGoalColor, renderGoalsList, openGoalHubById, switchGoalsTab, renderWishlist, addWish, toggleWish, promoteWish,
+  TASKS, ALL_GOALS, GOAL_COLORS, getGoalColor, renderGoalsList, openGoalHubById, switchGoalsTab, renderWishlist, addWish, toggleWish, promoteWish, startGoalCreation,
   getActiveGoalPhases, switchTaskView, renderTaskTimeView,
   renderGoalSelectorBar, renderTodaySummaryBar, getTodayTasks,
   setFilter, toggleWeightSort, renderTasks, renderGoalView, renderTodayView,
