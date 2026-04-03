@@ -2280,5 +2280,7 @@ body,body *{transition:background-color .3s ease,color .3s ease,border-color .3s
 .btab.active{color:var(--amber);opacity:1;}
 .btab.active::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--amber);}
 .btab span{color:inherit;}
-@media(max-width:768px){.page{padding-bottom:56px;}}
+@media(max-width:768px){.page{padding-bottom:56px;}
+  #pg-today,#pg-myself{padding-bottom:60px;box-sizing:border-box;}
+}
 @media(min-width:769px){#bottom-tabs{display:none!important;}}

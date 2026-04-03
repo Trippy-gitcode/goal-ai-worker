@@ -3253,6 +3253,8 @@ function openTodayAddTask(){
   const sheet = document.getElementById('task-add-sheet');
   if(!sheet) return;
   sheet.style.display = 'flex';
+  const ov = document.getElementById('task-add-overlay');
+  if(ov) ov.style.display = 'block';
   _taskAddHistory = [];
   document.getElementById('task-add-chat').innerHTML = '<div style="font-size:11px;color:var(--muted);padding:4px 0;">やりたいことを入力してください</div>';
   setTimeout(() => document.getElementById('task-add-input')?.focus({ preventScroll: true }), 100);
@@ -3261,6 +3263,8 @@ function openTodayAddTask(){
 function closeTodayAddTask(){
   const sheet = document.getElementById('task-add-sheet');
   if(sheet) sheet.style.display = 'none';
+  const ov = document.getElementById('task-add-overlay');
+  if(ov) ov.style.display = 'none';
   _taskAddHistory = [];
 }
 

@@ -290,6 +290,64 @@ if [ "$B4_INV" -ge 4 ]; then echo "OK: B4 profile KV invalidate ($B4_INV refs)";
 B5_UID=$(grep -rn 'uid:\${' src/middleware/auth.js 2>/dev/null | wc -l | tr -d ' ')
 if [ "$B5_UID" -ge 1 ]; then echo "OK: B5 userId KV cache ($B5_UID refs)"; else echo "FAIL: B5 userId KV cache missing"; FAIL=1; fi
 
+# === v3追加: development_rules.md G2-G5 ゲート ===
+
+# G2-v3: UI変更時のpadding/z-index/overflow整合性チェック
+echo "--- G2-v3: CSS integrity ---"
+for id in "pg-today" "pg-myself"; do
+  PB=$(grep -c "$id.*padding-bottom\|$id{.*padding-bottom" frontend/style.css 2>/dev/null)
+  if [ "$PB" -ge 1 ]; then echo "OK: $id has padding-bottom"; else echo "WARN: $id may lack padding-bottom ($PB)"; fi
+done
+if [ -f "docs/z_index_map.md" ]; then echo "OK: z_index_map.md exists"; else echo "WARN: docs/z_index_map.md missing"; fi
+FIXED_OVERFLOW=$(grep -B3 'position.*fixed\|position:fixed' frontend/style.css 2>/dev/null | grep 'overflow.*hidden' | wc -l | tr -d ' ')
+if [ "$FIXED_OVERFLOW" -eq 0 ]; then echo "OK: no fixed+overflow:hidden conflict"; else echo "WARN: fixed+overflow:hidden found ($FIXED_OVERFLOW)"; fi
+
+# G3-v3: テストケース数 vs 仕様項目数
+echo "--- G3-v3: Test item count ---"
+if ls tests/e2e/specs/test*.spec.ts 1>/dev/null 2>&1; then
+  TOTAL_TESTS=0
+  for f in tests/e2e/specs/test*.spec.ts; do
+    C=$(grep -c "test(" "$f" 2>/dev/null)
+    TOTAL_TESTS=$((TOTAL_TESTS+C))
+  done
+  UT=$(grep -c '^\- \[ \]' docs/ux_user_test_v1.md 2>/dev/null || echo 0)
+  CL=$(grep -c '^### [A-Z]-[0-9]' docs/ux_checklist_v1.md 2>/dev/null || echo 0)
+  TP=$(grep -c '^\- \[ \]' docs/test_package_v1.md 2>/dev/null || echo 0)
+  TOTAL_SPEC=$((UT+CL+TP))
+  if [ "$TOTAL_TESTS" -ge "$TOTAL_SPEC" ]; then
+    echo "OK: test count ($TOTAL_TESTS) >= spec count ($TOTAL_SPEC)"
+  else
+    echo "FAIL: test count ($TOTAL_TESTS) < spec count ($TOTAL_SPEC)"; FAIL=1
+  fi
+else
+  echo "SKIP: no test spec files found"
+fi
+
+# G4-v3: HTMLテストレポートの存在チェック
+echo "--- G4-v3: Test report ---"
+if [ -f "tests/e2e/report/index.html" ]; then
+  echo "OK: HTML test report exists"
+else
+  echo "WARN: tests/e2e/report/index.html missing (run tests with --reporter=html)"
+fi
+
+# G5-v3: session_progress.md完了報告の分母チェック
+echo "--- G5-v3: Report format ---"
+if grep -q 'PASS.*FAIL.*SKIP\|PASS.*FAIL.*未実施' instructions/session_progress.md 2>/dev/null; then
+  echo "OK: session_progress.md has structured report"
+else
+  echo "INFO: no structured test report found in session_progress.md (OK if tests not yet run)"
+fi
+
+# UIコンポーネントのoverlay存在チェック
+echo "--- UI overlay check ---"
+SHEETS=$(grep -c 'task-add-sheet\|half-modal\|bottom-sheet' frontend/index.html 2>/dev/null)
+OVERLAYS=$(grep -c 'task-add-overlay\|modal-overlay\|sheet-overlay' frontend/index.html 2>/dev/null)
+echo "  sheets/modals=$SHEETS  overlays=$OVERLAYS"
+if [ "$SHEETS" -gt 0 ] && [ "$OVERLAYS" -eq 0 ]; then
+  echo "WARN: sheets exist but no overlays (users can't close?)"; 
+fi
+
 CANOPY_END=$(date +%s)
 CANOPY_DUR=$((CANOPY_END - CANOPY_START))
 

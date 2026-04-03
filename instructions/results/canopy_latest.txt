@@ -1,5 +1,5 @@
-=== CANOPY TEST (03:12:38) ===
-Worker: "version":"3.11.48"
+=== CANOPY TEST (15:42:36) ===
+Worker: "version":"4.0.3"
 --- HTTP Smoke Tests ---
 OK: GET /api/version → 200
 OK: GET /health → 200
@@ -68,8 +68,8 @@ OK: plan-compare-table (1 refs)
 OK: フェアユース制限 (1 refs)
 OK: goal-detect-toast\|showGoalDetectToast (8 refs)
 --- Version sync (C10) ---
-  globals.js=4.0.0  sw.js=4.0.0  index.html=4.0.0
-OK: version sync (4.0.0)
+  globals.js=4.0.4  sw.js=4.0.4  index.html=4.0.4
+OK: version sync (4.0.4)
 --- Style integrity (C12) ---
 OK: no 'border-radius:24px' in JS
 OK: no 'border-radius:20px' in JS
@@ -79,7 +79,7 @@ OK: no '#323855' in JS
 WARN: hardcoded model color '#5b8def' in JS (1)
 WARN: hardcoded model color '#e07070' in JS (1)
 WARN: hardcoded model color '#e8913a' in JS (1)
-INFO: inline style= count in JS: 424 (baseline)
+INFO: inline style= count in JS: 423 (baseline)
 --- UI spec values (design_spec_v3 8a-8c) ---
 OK: CRN-01 crown SVG (5 refs)
 OK: CRN-02 model name gray
@@ -123,13 +123,26 @@ OK: 'chip-row' sync (src=1 dist=1)
 OK: 'mode-f' cleanup (src=0 dist=0)
 OK: 'mode-row-f' cleanup (src=0 dist=0)
 OK: 'ゴールプロジェクト' cleanup (src=0 dist=0)
-  frontend-dist version=4.0.0  source version=4.0.0
+  frontend-dist version=4.0.4  source version=4.0.4
 OK: frontend-dist version sync
 --- Vite tree-shake safety (onclick vs window.assign) ---
 OK: all onclick functions registered in window
 --- SP version sync ---
-  session_progress=v3.11.48  APP_VERSION=4.0.0
+  session_progress=v4.0.3  APP_VERSION=4.0.4
 --- B4/B5 KV invalidate ---
 OK: B4 profile KV invalidate (4 refs)
 OK: B5 userId KV cache (1 refs)
+--- G2-v3: CSS integrity ---
+OK: pg-today has padding-bottom
+OK: pg-myself has padding-bottom
+OK: z_index_map.md exists
+WARN: fixed+overflow:hidden found (1)
+--- G3-v3: Test item count ---
+OK: test count (436) >= spec count (427)
+--- G4-v3: Test report ---
+WARN: tests/e2e/report/index.html missing (run tests with --reporter=html)
+--- G5-v3: Report format ---
+OK: session_progress.md has structured report
+--- UI overlay check ---
+  sheets/modals=1  overlays=1
 === CANOPY PASS (9s) ===

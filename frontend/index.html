@@ -156,7 +156,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v4.0.3</span>
+      <span class="version" title="バージョン確認">v4.0.4</span>
     </div>
   </div>
 </div>
@@ -252,6 +252,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <!-- Step 2.6: タスク追加ハーフモーダル -->
+        <div id="task-add-overlay" onclick="closeTodayAddTask()" style="display:none;position:absolute;inset:0;z-index:299;background:rgba(0,0,0,.3);"></div>
         <div id="task-add-sheet" style="display:none;position:absolute;bottom:0;left:0;right:0;z-index:300;background:var(--bg2);border-top:1px solid var(--border2);border-radius:16px 16px 0 0;max-height:60vh;flex-direction:column;box-shadow:0 -4px 24px rgba(0,0,0,.4);">
           <div style="display:flex;align-items:center;padding:12px 16px;border-bottom:0.5px solid var(--border);">
             <div style="font-size:13px;font-weight:500;color:var(--cream);flex:1;">タスクを追加</div>
