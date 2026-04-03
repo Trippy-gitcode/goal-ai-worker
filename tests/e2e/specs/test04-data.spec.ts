@@ -484,7 +484,7 @@ test.describe('4-5. Profile data', () => {
     const count = await chips.count();
     if (count > 0) {
       await chips.first().scrollIntoViewIfNeeded();
-      await chips.first().click({ timeout: 5000 }).catch(() => {});
+      try { await chips.first().click({ timeout: 5000 }); } catch { /* chip may not be clickable */ }
       await page.waitForTimeout(500);
     }
     await screenshot(page, '4-5-chips');

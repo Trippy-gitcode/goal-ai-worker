@@ -563,6 +563,13 @@ function mkStreamBubble(innerEl, scrollEl, extraBubStyle, route) {
     bub.innerHTML = `<span class="typing-phase">${modelName} が考えています...</span>`;
   } else {
     bub.innerHTML = '<span class="typing-phase typing-dots-text">・・・</span>';
+    // G5: 1秒後にルーティング中テキストに切り替え（まだtokenが来ていない場合）
+    bub._routingTimer = setTimeout(() => {
+      if (!bub._dotsRemoved) {
+        const phase = bub.querySelector('.typing-phase');
+        if (phase) { phase.textContent = 'どのAIが適任か相談中...'; phase.classList.remove('typing-dots-text'); }
+      }
+    }, 1000);
   }
   const t = document.createElement('div');
   t.className = 'msg-footer'; t.textContent = now();
@@ -580,6 +587,7 @@ function mkStreamBubble(innerEl, scrollEl, extraBubStyle, route) {
 // ストリーミング中のテキストアニメーション（30ms/文字の一定速度）
 function streamAppend(bub, fullText){
   if(!bub._dotsRemoved){
+    if(bub._routingTimer){ clearTimeout(bub._routingTimer); bub._routingTimer = null; }
     bub.innerHTML = '';
     bub._textNode = document.createTextNode('');
     bub.appendChild(bub._textNode);
