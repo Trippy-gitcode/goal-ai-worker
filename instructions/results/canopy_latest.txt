@@ -1,5 +1,5 @@
-=== CANOPY TEST (15:42:36) ===
-Worker: "version":"4.0.3"
+=== CANOPY TEST (17:44:04) ===
+Worker: "version":"4.0.4"
 --- HTTP Smoke Tests ---
 OK: GET /api/version → 200
 OK: GET /health → 200
@@ -68,8 +68,8 @@ OK: plan-compare-table (1 refs)
 OK: フェアユース制限 (1 refs)
 OK: goal-detect-toast\|showGoalDetectToast (8 refs)
 --- Version sync (C10) ---
-  globals.js=4.0.4  sw.js=4.0.4  index.html=4.0.4
-OK: version sync (4.0.4)
+  globals.js=4.0.5  sw.js=4.0.5  index.html=4.0.5
+OK: version sync (4.0.5)
 --- Style integrity (C12) ---
 OK: no 'border-radius:24px' in JS
 OK: no 'border-radius:20px' in JS
@@ -123,12 +123,12 @@ OK: 'chip-row' sync (src=1 dist=1)
 OK: 'mode-f' cleanup (src=0 dist=0)
 OK: 'mode-row-f' cleanup (src=0 dist=0)
 OK: 'ゴールプロジェクト' cleanup (src=0 dist=0)
-  frontend-dist version=4.0.4  source version=4.0.4
+  frontend-dist version=4.0.5  source version=4.0.5
 OK: frontend-dist version sync
 --- Vite tree-shake safety (onclick vs window.assign) ---
 OK: all onclick functions registered in window
 --- SP version sync ---
-  session_progress=v4.0.3  APP_VERSION=4.0.4
+  session_progress=v4.0.4  APP_VERSION=4.0.5
 --- B4/B5 KV invalidate ---
 OK: B4 profile KV invalidate (4 refs)
 OK: B5 userId KV cache (1 refs)
@@ -138,11 +138,15 @@ OK: pg-myself has padding-bottom
 OK: z_index_map.md exists
 WARN: fixed+overflow:hidden found (1)
 --- G3-v3: Test item count ---
-OK: test count (436) >= spec count (427)
+OK: test count (440) >= spec count (427)
 --- G4-v3: Test report ---
-WARN: tests/e2e/report/index.html missing (run tests with --reporter=html)
+OK: HTML test report exists
 --- G5-v3: Report format ---
 OK: session_progress.md has structured report
+--- G5-v4: Test anti-pattern check ---
+WARN: .catch(() => {}) found 4 times. Verify each is intentional
+WARN: typeof-only assertions found (1 times). May be hiding untested logic
+OK: no critical test anti-patterns
 --- UI overlay check ---
   sheets/modals=1  overlays=1
 === CANOPY PASS (9s) ===
