@@ -449,10 +449,10 @@ test.describe('6-5. Input edge cases', () => {
     const input = page.locator('#home-msg-in');
     await input.fill('Input before back');
     // Try browser back
-    await page.goBack().catch(() => {});
+    try { await page.goBack(); } catch { /* no history entry */ }
     await page.waitForTimeout(500);
     // Navigate forward again
-    await page.goForward().catch(() => {});
+    try { await page.goForward(); } catch { /* no forward entry */ }
     await page.waitForTimeout(500);
     // App should still be functional
     const tabVisible = await page.locator('#btab-today').isVisible().catch(() => false);

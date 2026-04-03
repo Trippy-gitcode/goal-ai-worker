@@ -1105,8 +1105,10 @@ async function sendHomeMsg(){
   }
 
   try{
-    // Worker側ルーティング使用時: homeClaudeStream内のchatStream→mkStreamBubbleで
-    // タイピングインジケーターが表示されるため、ここでの別途表示は不要
+    // G5: 待機アニメーション（api.js mkStreamBubble で実装）
+    // Phase 1: ・・・ → 1秒後「どのAIが適任か相談中...」
+    // Phase 2: ヘッダー到着「{AI名} が考えています...」
+    // Phase 3: token到着→カーソル点滅(blink)→完了で消去
     await homeClaudeStream(today, homeInner, homeWrap);
   }catch(e){
     const errBub = document.createElement('div');
