@@ -1595,6 +1595,39 @@ function renderHubSettings(goal){
   const rvEl = document.getElementById('hub-notif-review');
   if(dlEl) dlEl.classList.toggle('on', ns.deadline !== false);
   if(rvEl) rvEl.classList.toggle('on', ns.review !== false);
+  // Related goals (UX-01-B2)
+  renderLinkedGoals(goal);
+}
+
+async function renderLinkedGoals(goal){
+  const container = document.getElementById('hub-linked-goals');
+  if(!container) return;
+  if(!goal.supabaseId){
+    container.innerHTML = '<div style="font-size:12px;color:var(--muted2);">関連ゴールはありません</div>';
+    return;
+  }
+  try {
+    const res = await fetch(`${WORKER_URL}/api/goals/${goal.supabaseId}/links`, { headers: getAuthHeaders() });
+    if(!res.ok) throw new Error('fetch failed');
+    const links = await res.json();
+    if(!links || links.length === 0){
+      container.innerHTML = '<div style="font-size:12px;color:var(--muted2);">関連ゴールはありません</div>';
+      return;
+    }
+    container.innerHTML = links.map(link => {
+      const linked = ALL_GOALS.find(g => g.supabaseId === link.linked_goal_id || g.supabaseId === link.goal_id);
+      const title = linked ? linked.title : (link.linked_goal_title || '不明なゴール');
+      const color = linked ? linked.color : 'var(--muted)';
+      const idx = linked ? ALL_GOALS.indexOf(linked) : -1;
+      return `<div onclick="${idx >= 0 ? 'openGoalHub('+idx+')' : ''}" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:${idx>=0?'pointer':'default'};">
+        <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+        <span style="font-size:12px;color:var(--cream);flex:1;">${escapeHtml(title)}</span>
+        <span class="goal-link-badge" style="font-size:11px;color:var(--muted2);">${link.relation_type || '関連'}</span>
+      </div>`;
+    }).join('');
+  } catch(e){
+    container.innerHTML = '<div style="font-size:12px;color:var(--muted2);">関連ゴールはありません</div>';
+  }
 }
 function toggleHubRoleEdit(){
   const el = document.getElementById('hub-role-edit');
@@ -2631,7 +2664,7 @@ Object.assign(window, {
   startAnalyticsDeep, updateAnalyticsDeepRemaining,
   extractGoalsFromHistory, adoptExtractedGoal,
   openMemoEditor, closeMemoEditor, saveMemo, renderHubMemo,
-  renderHubSettings, saveHubGoalSettings, toggleHubRoleEdit, saveHubRole,
+  renderHubSettings, renderLinkedGoals, saveHubGoalSettings, toggleHubRoleEdit, saveHubRole,
   confirmDeleteGoal, closeDeleteModal, executeDeleteGoal, archiveGoal,
   renderSidebarGoals, init, renderAIUnderstanding,
   launchConfetti, checkMilestone, showMilestoneCard, shareMilestone,

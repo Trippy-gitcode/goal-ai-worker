@@ -156,7 +156,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v4.0.8</span>
+      <span class="version" title="バージョン確認">v4.0.9</span>
     </div>
   </div>
 </div>
@@ -227,6 +227,11 @@
           </div>
           <!-- Goal progress strip -->
           <div id="today-goals" style="display:flex;gap:10px;margin-top:12px;padding-top:8px;border-top:0.5px solid var(--border);"></div>
+          <!-- QOL提案カード枠 (Phase Cで中身を入れる) -->
+          <div id="qol-proposal-slot" style="margin-top:12px;padding-top:8px;border-top:0.5px solid var(--border);display:none;">
+            <div style="font-size:12px;font-weight:500;color:var(--muted2);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;">QOL Proposals</div>
+            <div id="qol-proposal-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
           <!-- B-16: Diary -->
           <div style="margin-top:14px;padding-top:10px;border-top:0.5px solid var(--border);">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
@@ -604,6 +609,15 @@
                     </div>
                   </div>
                 </div>
+                <!-- ── 関連ゴール (UX-01-B2) ── -->
+                <div class="settings-card full" style="margin-bottom:16px;">
+                  <div class="sc-hd"><span class="sc-hd-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-link"/></svg></span><div class="sc-hd-title">関連ゴール</div></div>
+                  <div class="sc-body">
+                    <div id="hub-linked-goals" style="display:flex;flex-direction:column;gap:8px;">
+                      <div style="font-size:12px;color:var(--muted2);">関連ゴールはありません</div>
+                    </div>
+                  </div>
+                </div>
                 <!-- ── ゴール管理 ── -->
                 <div class="settings-card full" style="border-color:rgba(224,104,104,.2);">
                   <div class="sc-hd"><span class="sc-hd-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-warning"/></svg></span><div class="sc-hd-title" style="color:var(--red)">ゴールの管理</div></div>
@@ -735,16 +749,22 @@
                   <!-- 見られたい姿 -->
                   <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
                     <div style="font-size:12px;color:var(--amber);letter-spacing:.12em;font-family:var(--fm);margin-bottom:10px;">見られたい姿</div>
-                    <div id="vision-image-list" style="display:flex;flex-direction:column;gap:6px;">
+                    <div id="vision-image-list" style="display:flex;flex-wrap:wrap;gap:6px;">
                     </div>
                     <button onclick="addVisionItem('image')" style="margin-top:8px;font-size:12px;color:var(--muted2);background:none;border:none;cursor:pointer;font-family:var(--ff);">+ 追加</button>
                   </div>
                   <!-- 強みの言語化 -->
                   <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
                     <div style="font-size:12px;color:var(--green);letter-spacing:.12em;font-family:var(--fm);margin-bottom:10px;">強みの言語化</div>
-                    <div id="vision-strength-list" style="display:flex;flex-direction:column;gap:6px;">
+                    <div id="vision-strength-list" style="display:flex;flex-wrap:wrap;gap:6px;">
                     </div>
                     <button onclick="addVisionItem('strength')" style="margin-top:8px;font-size:12px;color:var(--muted2);background:none;border:none;cursor:pointer;font-family:var(--ff);">+ 追加</button>
+                  </div>
+                </div>
+                <!-- 弱み -->
+                <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
+                  <div style="font-size:12px;color:var(--red);letter-spacing:.12em;font-family:var(--fm);margin-bottom:10px;">課題・弱み</div>
+                  <div id="vision-weakness-list" style="display:flex;flex-wrap:wrap;gap:6px;">
                   </div>
                 </div>
 
