@@ -6,6 +6,7 @@
 import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
+import { setupGuards, checkGuards } from '../helpers/test-guards';
 
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:4173';
 const SCREENSHOT_DIR = 'tests/e2e/screenshots/test01-cl';
@@ -40,13 +41,29 @@ const shot = (name: string) => path.join(SCREENSHOT_DIR, `${name}.png`);
 
 test.use({ viewport: { width: 390, height: 844 } });
 
+test.describe('UX Checklist v1', () => {
+  test.beforeEach(async ({ page }) => {
+    setupGuards(page);
+    // Set auth cookie and skip onboarding for all tests
+    const url = new URL(BASE);
+    await page.context().addCookies([{
+      name: 'goal_auth_token',
+      value: 'goal_test_7BDSzrA2f3pzQN0z2yNGYSKS',
+      domain: url.hostname,
+      path: '/',
+    }]);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.evaluate(() => { localStorage.setItem('ob_done', '1'); });
+  });
+  test.afterEach(async ({ page }) => { await checkGuards(page); });
+
 // ---------------------------------------------------------------------------
 // A. Navigation / Screen Transition (20 items)
 // ---------------------------------------------------------------------------
 test.describe('A. Navigation / Screen Transition', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
   });
 
   test('A-01: Bottom tabs — 4 tabs are visible', async ({ page }) => {
@@ -65,7 +82,10 @@ test.describe('A. Navigation / Screen Transition', () => {
     const cls = await todayTab.getAttribute('class') || '';
     const isActive = cls.includes('active') || cls.includes('sel');
     // If not class-based, check opacity of the SVG or dot presence
-    expect(isActive || await todayTab.locator('.tab-dot, .active-dot').count() > 0 || true).toBeTruthy();
+    // Active tab should have visual indicator (class, opacity, or SVG state change)
+    const hasDot = await todayTab.locator('.tab-dot, .active-dot').count() > 0;
+    const opacity = await todayTab.evaluate(el => window.getComputedStyle(el).opacity);
+    expect(isActive || hasDot || opacity === '1').toBeTruthy();
     await page.screenshot({ path: shot('A-02-active-tab') });
   });
 
@@ -149,9 +169,11 @@ test.describe('A. Navigation / Screen Transition', () => {
   test('A-08: Old topbar is not visible', async ({ page }) => {
     const topbar = page.locator('#topbar');
     const count = await topbar.count();
+    // topbar removed from DOM or hidden — both are correct
     if (count > 0) {
       await expect(topbar).not.toBeVisible();
     }
+    expect(count === 0 || !(await topbar.isVisible())).toBeTruthy();
   });
 
   test('A-09: Content not hidden behind bottom tabs', async ({ page }) => {
@@ -189,28 +211,25 @@ test.describe('A. Navigation / Screen Transition', () => {
   test('A-12: PWA launch shows TODAY as initial page', async ({ page }) => {
     // On fresh load, TODAY should be the active/default tab
     await page.waitForTimeout(1000);
-    const todayVisible = await page.locator('#pg-today-wrap, #pg-today').first().isVisible().catch(() => false);
-    // Either TODAY is visible or the app defaults to it
-    const js = readAllJs();
-    const defaultToday = js.includes("'today'") || js.includes('"today"');
-    expect(todayVisible || defaultToday).toBeTruthy();
+    await expect(page.locator('#pg-today-wrap, #pg-today').first()).toBeVisible();
   });
 
   test('A-13: Old page navigation repurposed correctly (pg-tasks, pg-analytics in goals hub)', async ({ page }) => {
     // pg-tasks and pg-analytics still exist but are subpages within GOALS hub, not standalone tabs.
     // Verify they are NOT shown by default on any main tab.
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     for (const tab of ['#btab-today', '#btab-talk', '#btab-goals', '#btab-me']) {
       await page.locator(tab).click();
       await page.waitForTimeout(300);
       const tasksWrap = page.locator('#pg-tasks-wrap');
       const analyticsWrap = page.locator('#pg-analytics-wrap');
-      if (await tasksWrap.count() > 0) {
-        const display = await tasksWrap.evaluate(el => getComputedStyle(el).display);
-        // pg-tasks-wrap should NOT be active (display:flex) on main tabs (only inside goal hub drill-down)
-        if (tab !== '#btab-goals') expect(display).toBe('none');
+      if (await tasksWrap.count() === 0) {
+        continue; // pg-tasks-wrap not in DOM (acceptable — may be fully removed)
       }
+      const display = await tasksWrap.evaluate(el => getComputedStyle(el).display);
+      // pg-tasks-wrap should NOT be active (display:flex) on main tabs (only inside goal hub drill-down)
+      if (tab !== '#btab-goals') expect(display).toBe('none');
     }
   });
 
@@ -282,8 +301,8 @@ test.describe('A. Navigation / Screen Transition', () => {
 // ---------------------------------------------------------------------------
 test.describe('B. TODAY Screen', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-today').click();
     await page.waitForTimeout(500);
   });
@@ -376,19 +395,19 @@ test.describe('B. TODAY Screen', () => {
 
   test('B-11: Task add + button opens half-modal sheet', async ({ page }) => {
     const addFab = page.locator('#today-add-fab').first();
-    if (await addFab.count() > 0 && await addFab.isVisible()) {
-      await addFab.click();
-      await page.waitForTimeout(500);
-      // Check for task-add-sheet or half-modal
-      const sheet = page.locator('#task-add-sheet, .half-modal, .bottom-sheet').first();
-      const visible = await sheet.isVisible().catch(() => false);
-      await page.screenshot({ path: shot('B-11-task-add-sheet') });
-      expect(visible || true).toBeTruthy(); // Sheet should appear
-    } else {
-      // Verify element exists in HTML
+    if (await addFab.count() === 0) {
+      // Verify element exists in HTML source at minimum
       const html = readHtml();
       expect(html.includes('task-add') || html.includes('today-add-fab')).toBeTruthy();
+      return;
     }
+    await expect(addFab).toBeVisible();
+    await addFab.click();
+    await page.waitForTimeout(500);
+    // Check for task-add-sheet or half-modal
+    const sheet = page.locator('#task-add-sheet, .half-modal, .bottom-sheet').first();
+    await expect(sheet).toBeVisible();
+    await page.screenshot({ path: shot('B-11-task-add-sheet') });
   });
 
   test('B-12: Task creation starts AI conversation in sheet', async ({ page }) => {
@@ -455,12 +474,10 @@ test.describe('B. TODAY Screen', () => {
     await page.locator('#btab-today').click();
     await page.waitForTimeout(500);
     const presets = page.locator('#home-presets');
-    if (await presets.count() > 0) {
-      const display = await presets.evaluate(el => getComputedStyle(el).display);
-      expect(display).toBe('none');
-    }
-    // If no presets element at all, that's also fine — page loaded successfully
-    await expect(page.locator('#btab-today')).toBeVisible();
+    // home-presets not in DOM = correctly removed, PASS
+    if (await presets.count() === 0) return;
+    const display = await presets.evaluate(el => getComputedStyle(el).display);
+    expect(display).toBe('none');
   });
 });
 
@@ -469,8 +486,8 @@ test.describe('B. TODAY Screen', () => {
 // ---------------------------------------------------------------------------
 test.describe('C. TALK Screen', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
   });
@@ -505,9 +522,7 @@ test.describe('C. TALK Screen', () => {
 
   test('C-04: Chat input fixed at bottom of TALK screen', async ({ page }) => {
     const input = page.locator('#home-input-area, #home-msg-in').first();
-    if (await input.count() > 0) {
-      await expect(input).toBeVisible();
-    }
+    await expect(input).toBeVisible();
     await page.screenshot({ path: shot('C-04-talk-input') });
   });
 
@@ -556,8 +571,8 @@ test.describe('C. TALK Screen', () => {
 
   test('C-12: Old home chat DOM repurposed correctly for TALK', async ({ page }) => {
     // Navigate to TALK first (beforeEach goes to TALK but let's ensure)
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(1000);
     // home-chat-inner is repurposed as TALK chat container
@@ -601,8 +616,8 @@ test.describe('C. TALK Screen', () => {
 // ---------------------------------------------------------------------------
 test.describe('D. GOALS Screen', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-goals').click();
     await page.waitForTimeout(500);
   });
@@ -618,7 +633,8 @@ test.describe('D. GOALS Screen', () => {
     const html = readHtml();
     const all = js + html;
     const hasWishlist = all.includes('wishlist') || all.includes('やりたいこと') || all.includes('wish');
-    expect(hasWishlist || true).toBeTruthy(); // May not be implemented yet
+    if (!hasWishlist) { test.skip(true, 'Wishlist not implemented yet'); return; }
+    expect(hasWishlist).toBeTruthy();
   });
 
   test('D-03: Wishlist promotion to goal works', async ({ page }) => {
@@ -681,8 +697,8 @@ test.describe('D. GOALS Screen', () => {
 // ---------------------------------------------------------------------------
 test.describe('E. ME Screen', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-me').click();
     await page.waitForTimeout(500);
   });
@@ -770,8 +786,8 @@ test.describe('E. ME Screen', () => {
 test.describe('F. Sidebar', () => {
 
   test('F-01: Coaching mode switch works', async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
     const hamburger = page.locator('#hamburger-btn');
@@ -786,8 +802,8 @@ test.describe('F. Sidebar', () => {
   });
 
   test('F-02: Chat history list displayed in sidebar', async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
     const hamburger = page.locator('#hamburger-btn');
@@ -842,8 +858,8 @@ test.describe('F. Sidebar', () => {
   test('F-08: Sidebar menu items are correctly structured', async ({ page }) => {
     // sb-chat-records exists but is repurposed as chat history in sidebar
     // Verify sidebar contains the 4 expected sections: coaching mode, chat history, settings, plan
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
     await page.locator('#hamburger-btn').click();
@@ -864,8 +880,8 @@ test.describe('F. Sidebar', () => {
   });
 
   test('F-10: Sidebar works from TALK tab (hamburger visible on TALK)', async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     // Hamburger button is on TALK page header
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(1000);
@@ -887,8 +903,8 @@ test.describe('G. Legacy Code Cleanup', () => {
 
   test('G-01: pg-home-wrap repurposed as TALK container', async ({ page }) => {
     // pg-home-wrap still exists but is now TALK's container
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
     await expect(page.locator('#pg-home-wrap')).toBeVisible();
@@ -901,38 +917,40 @@ test.describe('G. Legacy Code Cleanup', () => {
 
   test('G-02: Task page (pg-tasks) repurposed within GOALS hub', async ({ page }) => {
     // pg-tasks-wrap still exists but is used inside GOALS hub for task drill-down
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     // Verify it's not visible on main tabs by default
     await page.locator('#btab-today').click();
     await page.waitForTimeout(300);
     const tasksWrap = page.locator('#pg-tasks-wrap');
+    // pg-tasks-wrap either not in DOM or not active on TODAY — both are correct
     if (await tasksWrap.count() > 0) {
       const cls = await tasksWrap.getAttribute('class') || '';
       expect(cls).not.toContain('active');
     }
+    // Element absent or hidden = PASS
   });
 
   test('G-03: Analytics page (pg-analytics) repurposed within GOALS hub', async ({ page }) => {
     // pg-analytics-wrap still exists for deep analysis within goal hub
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-today').click();
     await page.waitForTimeout(300);
     const analyticsWrap = page.locator('#pg-analytics-wrap');
+    // pg-analytics-wrap either not in DOM or not active on TODAY — both are correct
     if (await analyticsWrap.count() > 0) {
       const cls = await analyticsWrap.getAttribute('class') || '';
       expect(cls).not.toContain('active');
     }
+    // Element absent or hidden = PASS
   });
 
   test('G-04: Old welcome screen does not conflict with new greeting', async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     // Check that no old welcome modal is blocking the TODAY screen
-    const todayVisible = await page.locator('#pg-today-wrap, #pg-today').first().isVisible().catch(() => false);
-    // If onboarding shows, it should be a proper modal, not conflicting
-    expect(todayVisible || true).toBeTruthy();
+    await expect(page.locator('#pg-today-wrap, #pg-today').first()).toBeVisible();
   });
 
   test('G-05: showPage function repurposed (not old switchPage)', async () => {
@@ -955,30 +973,26 @@ test.describe('G. Legacy Code Cleanup', () => {
   });
 
   test('G-07: Old input-area CSS does not conflict with TALK input', async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
     // home-input-area should be visible and properly positioned on TALK
     const inputArea = page.locator('#home-input-area').first();
-    if (await inputArea.count() > 0) {
-      await expect(inputArea).toBeVisible();
-    }
+    await expect(inputArea).toBeVisible();
   });
 
   test('G-08: Old mode switch UI not in TALK (moved to sidebar)', async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
     // Mode chips should NOT be directly in the TALK chat area
     const talkArea = page.locator('#home-chat-inner, #pg-home').first();
-    if (await talkArea.count() > 0) {
-      const modeInTalk = await talkArea.locator('[data-mode]').count();
-      // Mode chips in sidebar are OK, but not in the main chat area
-      // Allow 0 or verify they're in sidebar context
-      expect(modeInTalk >= 0).toBeTruthy();
-    }
+    await expect(talkArea).toBeVisible();
+    const modeInTalk = await talkArea.locator('[data-mode]').count();
+    // Mode chips in sidebar are OK, but not in the main chat area
+    expect(modeInTalk).toBe(0);
   });
 
   test('G-09: New chat button properly placed', async () => {
@@ -992,22 +1006,23 @@ test.describe('G. Legacy Code Cleanup', () => {
 
   test('G-10: Task detail panel used within GOALS hub (not standalone)', async ({ page }) => {
     // task-detail-panel exists but is part of goals hub drill-down, not a standalone 2-column page
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     // On TODAY, task detail should not be visible as a 2-column layout
     await page.locator('#btab-today').click();
     await page.waitForTimeout(300);
     const panel = page.locator('.task-detail-panel, #task-detail-panel');
     const count = await panel.count();
+    // task-detail-panel either not in DOM or not visible — both are correct
     if (count > 0) {
       const visible = await panel.first().isVisible();
-      // Should not be visible on TODAY by default
       expect(visible).toBeFalsy();
     }
+    // Element absent = PASS (no 2-column layout)
   });
 
   test('G-11: No null reference errors from old page IDs', async ({ page }) => {
-    await page.goto(BASE);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
     const errors: string[] = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.waitForTimeout(3000);
@@ -1026,7 +1041,8 @@ test.describe('G. Legacy Code Cleanup', () => {
     const hasRemoveListener = js.includes('removeEventListener') || js.includes('AbortController') || js.includes('.off(');
     // Or delegation pattern
     const hasDelegation = js.includes('delegate') || js.includes('closest(');
-    expect(hasRemoveListener || hasDelegation || true).toBeTruthy();
+    // Event delegation via .closest() is acceptable cleanup pattern
+    expect(hasRemoveListener || hasDelegation).toBeTruthy();
   });
 
   test('G-13: Feedback modal uses new design tone', async () => {
@@ -1036,7 +1052,8 @@ test.describe('G. Legacy Code Cleanup', () => {
     const all = html + js + css;
     const hasFeedback = all.includes('feedback') || all.includes('フィードバック');
     // If feedback exists, it should use current design
-    expect(hasFeedback || true).toBeTruthy();
+    // Feedback mechanism should exist in codebase
+    expect(hasFeedback).toBeTruthy();
   });
 
   test('G-14: Onboarding explains new 4-tab structure', async () => {
@@ -1045,7 +1062,8 @@ test.describe('G. Legacy Code Cleanup', () => {
     const all = js + html;
     const hasOnboarding = all.includes('onboard') || all.includes('welcome') || all.includes('ようこそ');
     // If onboarding exists, check it references new tabs
-    expect(hasOnboarding || true).toBeTruthy();
+    // Onboarding or welcome flow should exist in codebase
+    expect(hasOnboarding).toBeTruthy();
   });
 
   test('G-15: Service Worker cache does not serve old pages', async () => {
@@ -1058,7 +1076,7 @@ test.describe('G. Legacy Code Cleanup', () => {
       expect(hasCacheVersion).toBeTruthy();
     } else {
       // No SW file found — acceptable (PWA optional)
-      expect(typeof sw).toBe('string');
+      expect(sw).toBe('');
     }
   });
 });
@@ -1096,7 +1114,8 @@ test.describe('H. Data Integrity / API', () => {
   test('H-05: Wishlist data saved to Supabase correctly', async ({ page }) => {
     const js = readAllJs();
     const hasWishlist = js.includes('wishlist') || js.includes('wish');
-    expect(hasWishlist || true).toBeTruthy(); // May not be implemented yet
+    if (!hasWishlist) { test.skip(true, 'Wishlist not implemented yet'); return; }
+    expect(hasWishlist).toBeTruthy();
   });
 
   test('H-06: Mindset data cached (no duplicate API calls)', async ({ page }) => {
@@ -1203,8 +1222,8 @@ test.describe('I. iOS / Responsive / Design', () => {
   });
 
   test('I-09: All SVG icons render correctly (no broken paths)', async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     // Check that SVGs exist and have valid content
     const svgCount = await page.locator('svg').count();
     expect(svgCount).toBeGreaterThan(0);
@@ -1238,7 +1257,8 @@ test.describe('I. iOS / Responsive / Design', () => {
   test('I-13: Push notification request at appropriate timing', async () => {
     const js = readAllJs();
     const hasNotif = js.includes('Notification') || js.includes('requestPermission') || js.includes('push');
-    expect(hasNotif || true).toBeTruthy(); // May be deferred
+    if (!hasNotif) { test.skip(true, 'Push notification not implemented yet'); return; }
+    expect(hasNotif).toBeTruthy();
   });
 
   test('I-14: PWA manifest.json has correct icons and name', async () => {
@@ -1255,8 +1275,8 @@ test.describe('I. iOS / Responsive / Design', () => {
   });
 
   test('I-15: No text clipping or overflow issues', async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     // Check CSS for text-overflow handling
     const css = readAllCss();
     const html = readHtml();
@@ -1272,8 +1292,8 @@ test.describe('I. iOS / Responsive / Design', () => {
 test.describe('J. Immediate Bug Fixes', () => {
 
   test('J-01: TALK input box does not overlap bottom tabs after keyboard dismiss', async ({ page }) => {
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
     // Check that visualViewport handling exists
@@ -1283,13 +1303,15 @@ test.describe('J. Immediate Bug Fixes', () => {
     // Verify input area and bottom tabs don't overlap
     const inputArea = page.locator('#home-input-area').first();
     const bottomBar = page.locator('#btab-today').first();
-    if (await inputArea.count() > 0 && await bottomBar.count() > 0) {
-      const inputBox = await inputArea.boundingBox();
-      const tabBox = await bottomBar.boundingBox();
-      if (inputBox && tabBox) {
-        // Input bottom should be at or above tab top
-        expect(inputBox.y + inputBox.height).toBeLessThanOrEqual(tabBox.y + 10); // 10px tolerance
-      }
+    await expect(inputArea).toBeVisible();
+    await expect(bottomBar).toBeVisible();
+    const inputBox = await inputArea.boundingBox();
+    const tabBox = await bottomBar.boundingBox();
+    expect(inputBox).toBeTruthy();
+    expect(tabBox).toBeTruthy();
+    if (inputBox && tabBox) {
+      // Input bottom should be at or above tab top
+      expect(inputBox.y + inputBox.height).toBeLessThanOrEqual(tabBox.y + 10); // 10px tolerance
     }
     await page.screenshot({ path: shot('J-01-input-tab-overlap') });
   });
@@ -1311,28 +1333,36 @@ test.describe('J. Immediate Bug Fixes', () => {
     // Check for common UI emoji patterns that should be SVG
     // Note: Some emoji in text content (user messages) are OK; we check for structural emoji
     const emojiRegex = /[\u{1F300}-\u{1F9FF}]/u;
-    // Only flag if emoji are used in UI structure (not in string literals for display)
+    // Only flag emoji in visible UI structure (buttons, labels, headings)
+    // Exclude <option> tags (cannot contain SVG) and string literals
     const htmlOnly = readHtml();
-    // Count emoji in HTML attributes and structural elements (not in comments or data)
-    const structuralEmoji = htmlOnly.match(emojiRegex);
-    // This is a soft check — some emoji may be in data attributes for fallback
-    expect(structuralEmoji === null || true).toBeTruthy();
+    // Remove acceptable emoji locations before checking:
+    // - <option> tags (cannot contain SVG)
+    // - HTML comments
+    // - voice buttons (🎤 SVG replacement tracked separately)
+    const htmlCleaned = htmlOnly
+      .replace(/<option[^>]*>.*?<\/option>/gs, '')
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<button[^>]*voice[^>]*>.*?<\/button>/gs, '')
+      .replace(/<button[^>]*class="chat-voice-btn"[^>]*>.*?<\/button>/gs, '');
+    const structuralEmoji = htmlCleaned.match(new RegExp(emojiRegex.source, 'gu'));
+    // Current baseline: ~22 emoji remain (mostly in goal hub tabs, status labels)
+    // Full SVG migration tracked in backlog. Threshold prevents regression.
+    expect(structuralEmoji?.length ?? 0).toBeLessThanOrEqual(25);
   });
 
   test('J-04: Preset chips do not contain emoji in rendered UI', async ({ page }) => {
     // Check rendered preset chips on TALK page for emoji
-    await page.goto(BASE);
-    await page.waitForTimeout(2000);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
     const presets = page.locator('#home-presets');
-    if (await presets.count() > 0) {
-      const text = await presets.textContent() || '';
-      const emojiRegex = /[\u{1F300}-\u{1F9FF}]/u;
-      expect(emojiRegex.test(text)).toBeFalsy();
-    }
-    // If presets are hidden (display:none), that's acceptable too
-    expect(html.length).toBeGreaterThan(0);
+    // No presets in DOM = no emoji issue = PASS
+    if (await presets.count() === 0) return;
+    const text = await presets.textContent() || '';
+    const emojiRegex = /[\u{1F300}-\u{1F9FF}]/u;
+    expect(emojiRegex.test(text)).toBeFalsy();
   });
 
   test('J-05: Task display uses SVG checkmarks (not emoji)', async () => {
@@ -1346,3 +1376,4 @@ test.describe('J. Immediate Bug Fixes', () => {
     expect(hasEmojiCheck === false || hasSvgCheck).toBeTruthy();
   });
 });
+}); // end UX Checklist v1

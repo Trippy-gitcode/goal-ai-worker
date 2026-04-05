@@ -9,6 +9,8 @@
 
 import { test, expect, Page } from '@playwright/test';
 import * as path from 'path';
+import { setupGuards, checkGuards } from '../helpers/test-guards';
+import { loadAppReady } from '../helpers/test-setup';
 
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:4173';
 const WORKER = 'https://goal-ai-worker.goalai-futoshi.workers.dev';
@@ -23,8 +25,7 @@ async function screenshot(page: Page, name: string) {
 }
 
 async function loadApp(page: Page) {
-  await page.goto(BASE, { waitUntil: 'networkidle' });
-  await page.waitForSelector('#btab-today', { timeout: 15000 });
+  await loadAppReady(page, BASE);
 }
 
 async function goTab(page: Page, tab: 'today' | 'talk' | 'goals' | 'me') {
@@ -51,9 +52,34 @@ async function registerDevice(request: any, deviceId: string): Promise<string | 
 }
 
 // ===========================================================================
+test.describe('TEST-05: Auth / Security', () => {
+  test.beforeEach(async ({ page }) => { setupGuards(page); });
+  test.afterEach(async ({ page }) => { await checkGuards(page); });
+
+// ===========================================================================
 // 5-1. Auto-register
 // ===========================================================================
 test.describe('5-1. Auto-register', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/api/chat/stream', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'text/event-stream',
+        headers: { 'X-Model-Used': 'mock-test' },
+        body: 'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"text":"テスト応答です。"}}\n\nevent: message_stop\ndata: {"type":"message_stop"}\n\n',
+      });
+    });
+    await page.route('**/api/chat', route => {
+      if (route.request().method() === 'POST') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ content: [{ text: 'テスト応答です。' }], model: 'mock-test' }),
+        });
+      } else { route.continue(); }
+    });
+  });
 
   test('First access -> auto user registration -> goal_auth_token cookie set', async ({ page }) => {
     // Clear cookies first
@@ -68,8 +94,8 @@ test.describe('5-1. Auto-register', () => {
     const localToken = await page.evaluate(() => {
       return localStorage.getItem('goal_auth_token') || localStorage.getItem('authToken') || '';
     });
-    // Token presence depends on backend availability — just verify no crash
-    expect(typeof localToken).toBe('string');
+    // Token presence depends on backend availability — verify localStorage accessible
+    expect(localToken !== null && localToken !== undefined).toBe(true);
     await screenshot(page, '5-1-auto-register');
   });
 
@@ -107,6 +133,8 @@ test.describe('5-1. Auto-register', () => {
   });
 
   test('Tampered token (random string) -> 401 or new auto-register (no crash)', async ({ page }) => {
+    // Expect 401 errors from API calls with tampered token
+    (page as any).__guardOpts = { expectErrors: true };
     await loadApp(page);
     // Set a bogus token
     await page.context().clearCookies();
@@ -115,7 +143,7 @@ test.describe('5-1. Auto-register', () => {
       document.cookie = 'goal_auth_token=tampered_random_string_12345; path=/';
     });
     // Reload - app should not crash
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(5000);
     // Page should not show 500 error — check for crash indicators
     const hasError = await page.evaluate(() => {
@@ -292,6 +320,26 @@ test.describe('5-3. Data isolation', () => {
 // ===========================================================================
 test.describe('5-4. Input sanitization', () => {
 
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/api/chat/stream', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'text/event-stream',
+        headers: { 'X-Model-Used': 'mock-test' },
+        body: 'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"text":"テスト応答です。"}}\n\nevent: message_stop\ndata: {"type":"message_stop"}\n\n',
+      });
+    });
+    await page.route('**/api/chat', route => {
+      if (route.request().method() === 'POST') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ content: [{ text: 'テスト応答です。' }], model: 'mock-test' }),
+        });
+      } else { route.continue(); }
+    });
+  });
+
   test('HTML tag input (<script>alert(1)</script>) -> escaped as text', async ({ page }) => {
     await loadApp(page);
     await goTab(page, 'talk');
@@ -336,7 +384,7 @@ test.describe('5-4. Input sanitization', () => {
     // Empty message should not be added to chat
     // Or if send button is disabled, that's also fine
     const sendBtn = page.locator('#home-send-btn');
-    const isDisabled = await sendBtn.isDisabled().catch(() => false);
+    const isDisabled = await sendBtn.isDisabled();
     expect(isDisabled || chatAfter === chatBefore).toBe(true);
     await screenshot(page, '5-4-empty-input');
   });
@@ -355,3 +403,4 @@ test.describe('5-4. Input sanitization', () => {
     await screenshot(page, '5-4-special-chars');
   });
 });
+}); // end TEST-05

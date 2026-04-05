@@ -26,5 +26,15 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  preview: {
+    port: 4173,
+    proxy: {
+      '/api': {
+        target: 'https://goal-ai-worker.goalai-futoshi.workers.dev',
+        changeOrigin: true,
+        secure: true
+      }
+    }
   }
 })

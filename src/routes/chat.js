@@ -16,6 +16,7 @@ import { countRecentMessages, regenerateAiMemo } from '../services/memo.js';
 import { buildCompressedMessages, countSessionMessages, generateConversationSummary } from '../services/history.js';
 
 export async function handleChat(request, env, ctx) {
+  try {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
 
@@ -42,6 +43,11 @@ export async function handleChat(request, env, ctx) {
   if (ctx && env.SUPABASE_URL) {
     const lastUserMsg = messages[messages.length - 1];
     const aiContent = data.content?.[0]?.text || '';
+    // UX-01-A1: INTENT/GOAL_PROPOSAL タグ検出ログ
+    const intentMatch = aiContent.match(/\[INTENT:(\w+)\]/);
+    if (intentMatch) console.log(`[INTENT] user=${auth.userId} intent=${intentMatch[1]}`);
+    const hasGoalProposal = aiContent.includes('[GOAL_PROPOSAL]');
+    if (hasGoalProposal) console.log(`[GOAL_PROPOSAL] user=${auth.userId} detected in non-stream response`);
     ctx.waitUntil(Promise.all([
       saveChatMessage(env, auth.tokenId, lastUserMsg.role, lastUserMsg.content, null, goalId, 'chat'),
       saveChatMessage(env, auth.tokenId, 'assistant', aiContent, 'claude', goalId, 'chat'),
@@ -56,6 +62,10 @@ export async function handleChat(request, env, ctx) {
   const show_nps = (chatCount > 0 && chatCount % 5 === 0);
 
   return jsonRes(data, 200, { 'X-RateLimit-Remaining': String(rl.remaining), 'X-Model-Used': claudeModel, 'X-Show-NPS': show_nps ? '1' : '0' });
+  } catch (e) {
+    console.error('handleChat error:', e);
+    return jsonRes({ error: e.message || 'Chat handler error' }, 500);
+  }
 }
 
 export async function handleChatStream(request, env, ctx) {
@@ -192,7 +202,7 @@ export async function handleChatStream(request, env, ctx) {
           ctx.waitUntil((async () => {
             const tcKey = `emb_tc:${auth.tokenId}`;
             const tc = parseInt(await env.TOKEN_KV.get(tcKey) || '0') + 1;
-            await env.TOKEN_KV.put(tcKey, String(tc), { expirationTtl: 86400 });
+            try { await env.TOKEN_KV.put(tcKey, String(tc), { expirationTtl: 86400 }); } catch(_) {}
             if (tc % 5 === 0) await generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage);
           })().catch(() => {}));
         }
@@ -254,7 +264,7 @@ export async function handleChatStream(request, env, ctx) {
       ctx.waitUntil((async () => {
         const tcKey = `emb_tc:${auth.tokenId}`;
         const tc = parseInt(await env.TOKEN_KV.get(tcKey) || '0') + 1;
-        await env.TOKEN_KV.put(tcKey, String(tc), { expirationTtl: 86400 });
+        try { await env.TOKEN_KV.put(tcKey, String(tc), { expirationTtl: 86400 }); } catch(_) {}
         if (tc % 5 === 0) await generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage);
       })().catch(() => {}));
     }
@@ -371,7 +381,7 @@ async function maybeSendUsageRecord(env, userId, turnsUsed, plan) {
       const res = await fetch(`${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&month=eq.${month}&select=stripe_usage_synced`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
       const data = await res.json();
       synced = data?.[0]?.stripe_usage_synced || 0;
-      await env.TOKEN_KV.put(syncKV, String(synced), { expirationTtl: 300 });
+      try { await env.TOKEN_KV.put(syncKV, String(synced), { expirationTtl: 300 }); } catch(_) {}
     }
   } catch (e) { console.error('Failed to get stripe_usage_synced:', e.message); return; }
   const unsent = turnsUsed - synced;
@@ -393,8 +403,8 @@ async function maybeSendUsageRecord(env, userId, turnsUsed, plan) {
         method: 'PATCH', headers: { 'Content-Type': 'application/json', 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Prefer': 'return=minimal' },
         body: JSON.stringify({ stripe_usage_synced: turnsUsed })
       });
-      // A20: KVキャッシュも更新
-      await env.TOKEN_KV.put(syncKV, String(turnsUsed), { expirationTtl: 300 });
+      // A20: KVキャッシュも更新（KV制限超過時は無視）
+      try { await env.TOKEN_KV.put(syncKV, String(turnsUsed), { expirationTtl: 300 }); } catch(_) {}
     } else { console.error('Stripe usage_record failed:', await response.json()); }
   } catch (e) { console.error('Stripe usage_record error:', e.message); }
 }

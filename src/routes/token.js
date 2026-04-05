@@ -6,24 +6,29 @@ import { checkDeepUsage } from '../utils/rate-limit.js';
 import { safeCompare } from '../utils/helpers.js';
 
 export async function handleTokenRegister(request, env, ctx) {
-  const body = await request.json();
-  const { deviceId } = body;
-  if (!deviceId) return jsonRes({ error: 'deviceId is required' }, 400);
-  const existingTokenId = await env.TOKEN_KV.get(`device:${deviceId}`);
-  if (existingTokenId) {
-    const existingData = await env.TOKEN_KV.get(`token:${existingTokenId}`, 'json');
-    if (existingData && !existingData.revoked) return jsonRes({ token: existingTokenId, plan: existingData.plan, existing: true });
+  try {
+    const body = await request.json();
+    const { deviceId } = body;
+    if (!deviceId) return jsonRes({ error: 'deviceId is required' }, 400);
+    const existingTokenId = await env.TOKEN_KV.get(`device:${deviceId}`);
+    if (existingTokenId) {
+      const existingData = await env.TOKEN_KV.get(`token:${existingTokenId}`, 'json');
+      if (existingData && !existingData.revoked) return jsonRes({ token: existingTokenId, plan: existingData.plan, existing: true });
+    }
+    const tokenId = `goal_test_${generateId(24)}`;
+    const now = new Date();
+    const trialEnd = new Date(now.getTime() + 14 * 86400000);
+    const tokenData = { tokenId, plan: 'trial', userId: deviceId, promoCode: null, promoDesc: 'Pro体験トライアル（14日間）', note: 'auto-register-trial', createdAt: now.toISOString(), expiresAt: null, trialEnd: trialEnd.toISOString(), revoked: false };
+    const ttl = 365 * 86400;
+    await env.TOKEN_KV.put(`token:${tokenId}`, JSON.stringify(tokenData), { expirationTtl: ttl });
+    await env.TOKEN_KV.put(`device:${deviceId}`, tokenId, { expirationTtl: ttl });
+    await env.TOKEN_KV.put(`user_token:${deviceId}`, tokenId, { expirationTtl: ttl });
+    if (ctx && env.SUPABASE_URL) ctx.waitUntil(syncUserToSupabase(env, tokenData));
+    return jsonRes({ token: tokenId, plan: 'free', existing: false }, 201);
+  } catch (e) {
+    console.error('handleTokenRegister error:', e);
+    return jsonRes({ error: e.message || 'Registration error' }, 500);
   }
-  const tokenId = `goal_test_${generateId(24)}`;
-  const now = new Date();
-  const trialEnd = new Date(now.getTime() + 14 * 86400000);
-  const tokenData = { tokenId, plan: 'trial', userId: deviceId, promoCode: null, promoDesc: 'Pro体験トライアル（14日間）', note: 'auto-register-trial', createdAt: now.toISOString(), expiresAt: null, trialEnd: trialEnd.toISOString(), revoked: false };
-  const ttl = 365 * 86400;
-  await env.TOKEN_KV.put(`token:${tokenId}`, JSON.stringify(tokenData), { expirationTtl: ttl });
-  await env.TOKEN_KV.put(`device:${deviceId}`, tokenId, { expirationTtl: ttl });
-  await env.TOKEN_KV.put(`user_token:${deviceId}`, tokenId, { expirationTtl: ttl });
-  if (ctx && env.SUPABASE_URL) ctx.waitUntil(syncUserToSupabase(env, tokenData));
-  return jsonRes({ token: tokenId, plan: 'free', existing: false }, 201);
 }
 
 export async function handleTokenCreate(request, env, ctx) {

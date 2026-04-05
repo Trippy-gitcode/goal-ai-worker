@@ -527,8 +527,8 @@ function showHomeImagePreview(){
   preview.style.display = 'block';
   preview.innerHTML = `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;">
     <img id="home-img-thumb" src="data:${homeImageData.type};base64,${homeImageData.base64}" style="width:auto;height:60px;object-fit:cover;border-radius:5px;">
-    <span id="home-img-name" style="font-size:11px;color:var(--muted);flex:1;">${escapeHtml(homeImageData.name)}</span>
-    <span onclick="clearHomeImage()" style="font-size:11px;color:var(--muted);cursor:pointer;padding:2px 6px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕ 削除</span>
+    <span id="home-img-name" style="font-size:12px;color:var(--muted);flex:1;">${escapeHtml(homeImageData.name)}</span>
+    <span onclick="clearHomeImage()" style="font-size:12px;color:var(--muted);cursor:pointer;padding:2px 6px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕ 削除</span>
   </div>`;
 }
 function clearHomeImage(){
@@ -669,7 +669,7 @@ function getAiOptPct(){
 }
 function getAiOptBadgeHTML(){
   const pct = getAiOptPct();
-  return `<div id="ai-opt-badge" onclick="showPage('myself');switchMyselfTab('profile');" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:var(--pill-radius);cursor:pointer;margin-bottom:16px;transition:all .15s;" onmouseover="this.style.borderColor='var(--mode-normal-border)'" onmouseout="this.style.borderColor='var(--amber-d)'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span style="font-size:11px;color:var(--amber);font-family:var(--fm);">AI最適化 ${pct}%</span></div>`;
+  return `<div id="ai-opt-badge" onclick="showPage('myself');switchMyselfTab('profile');" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:var(--pill-radius);cursor:pointer;margin-bottom:16px;transition:all .15s;" onmouseover="this.style.borderColor='var(--mode-normal-border)'" onmouseout="this.style.borderColor='var(--amber-d)'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span style="font-size:12px;color:var(--amber);font-family:var(--fm);">AI最適化 ${pct}%</span></div>`;
 }
 
 function buildEmptyHomeHTML(){
@@ -937,8 +937,8 @@ function quickGoalFromText(text){
   // Toast-style confirmation instead of native confirm
   const t = document.createElement('div');
   t.className = 'quick-goal-toast';
-  t.innerHTML = `<div style="font-size:11px;color:var(--cream);margin-bottom:6px;">ゴールを作成</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.4;">「${escapeHtml(title)}」</div>
+  t.innerHTML = `<div style="font-size:12px;color:var(--cream);margin-bottom:6px;">ゴールを作成</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.4;">「${escapeHtml(title)}」</div>
     <div style="display:flex;gap:6px;">
       <button class="qg-btn qg-yes">作成する</button>
       <button class="qg-btn qg-no">キャンセル</button>
@@ -1166,7 +1166,7 @@ function showRoutePreview(route){
   if(!el){
     el = document.createElement('span');
     el.id = 'route-preview-badge';
-    el.style.cssText = 'font-size:9px;color:var(--muted);font-family:var(--fm);opacity:0;transition:opacity .3s;margin-left:4px;';
+    el.style.cssText = 'font-size:12px;color:var(--muted);font-family:var(--fm);opacity:0;transition:opacity .3s;margin-left:4px;';
     const toolbar = document.getElementById('home-chat-toolbar');
     const spacer = toolbar?.querySelector('[style*="flex:1"]');
     if(spacer) spacer.after(el); else return;
@@ -1462,6 +1462,11 @@ async function homeClaudeStream(today, homeInner, homeWrap){
       }
       // C-10/11: TASK_UPDATEタグ検出→タスク操作→TODAY更新
       processTaskUpdateTags(t);
+      // UX-01-A1: INTENTタグ・GOAL_PROPOSALタグ検出→カード表示
+      const cleaned = processIntentTags(t);
+      if(cleaned !== t && window._currentStreamBubble){
+        window._currentStreamBubble.innerHTML = renderMsgContent(cleaned);
+      }
       // UX-01: TODAY画面のタスクリスト・秘書メモをリフレッシュ
       if(typeof renderTodayScreen === 'function') renderTodayScreen();
     }
@@ -1472,7 +1477,7 @@ async function homeClaudeStream(today, homeInner, homeWrap){
 function showAlternativeAISuggest(container, altName, altRoute, text, today, scroll){
   const el = document.createElement('div');
   el.style.cssText = 'text-align:center;padding:6px 0;margin:4px 0;';
-  el.innerHTML = `<button onclick="this.parentElement.remove();retryWithRoute('${altRoute}','${escapeHtml(text).replace(/'/g,"\\'")}','${today}')" style="background:var(--bg3);border:1px solid var(--border2);border-radius:16px;padding:6px 14px;color:var(--amber);cursor:pointer;font-size:11px;font-family:var(--ff);">${altName}でも聞いてみる →</button>`;
+  el.innerHTML = `<button onclick="this.parentElement.remove();retryWithRoute('${altRoute}','${escapeHtml(text).replace(/'/g,"\\'")}','${today}')" style="background:var(--bg3);border:1px solid var(--border2);border-radius:16px;padding:6px 14px;color:var(--amber);cursor:pointer;font-size:12px;font-family:var(--ff);">${altName}でも聞いてみる →</button>`;
   container.appendChild(el);
   if(scroll) scroll.scrollTop = scroll.scrollHeight;
 }
@@ -1517,7 +1522,7 @@ function showDailyCheckin(container){
   else if(streak >= 1) msg = 'おかえりなさい。今日もサポートします。';
   else return; // 初回は表示しない
   const el = document.createElement('div');
-  el.style.cssText = 'text-align:center;padding:8px 16px;margin:8px auto;max-width:360px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:10px;font-size:11px;color:var(--amber);';
+  el.style.cssText = 'text-align:center;padding:8px 16px;margin:8px auto;max-width:360px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:10px;font-size:12px;color:var(--amber);';
   el.textContent = msg;
   container.appendChild(el);
 }
@@ -1660,7 +1665,7 @@ function renderSidebarChatRecords(){
   el.innerHTML = recent.map(r => `
     <div onclick="toggleSidebar();loadChatSession('${r.sessionId}')" style="padding:6px 16px;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
       <svg width="12" height="12" style="color:var(--muted2);flex-shrink:0" class="svg-ic"><use href="#ic-chat"/></svg>
-      <div style="font-size:11px;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(r.title)}</div>
+      <div style="font-size:12px;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(r.title)}</div>
     </div>`).join('');
 }
 
@@ -1763,7 +1768,7 @@ function renderChatHistoryList(sessions){
     return `<div style="display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
       <div onclick="loadChatSession('${s.sessionId}')" style="flex:1;min-width:0;cursor:pointer;">
         <div style="font-size:13px;color:var(--cream);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${star}${escapeHtml(preview)}…${tagPill}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:3px;">${Math.max(1, Math.floor(s.count/2))}往復 · ${dateStr}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">${Math.max(1, Math.floor(s.count/2))}往復 · ${dateStr}</div>
       </div>
       <button onclick="event.stopPropagation();deleteChatSession('${s.sessionId}')" title="削除" style="width:32px;height:32px;border-radius:8px;border:none;background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--muted);">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
@@ -1876,7 +1881,7 @@ function renderModelUsageBadge(){
   const { claude, gemini, gpt } = FREE_MODEL_USAGE;
   const totalRemaining = claude.remaining + gemini.remaining + gpt.remaining;
   const color = totalRemaining > 5 ? 'var(--amber)' : 'var(--red)';
-  badge.innerHTML = `<div onclick="showModelUsageDetail()" style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--pill-radius);background:var(--bg3);border:1px solid var(--border);font-size:11px;font-weight:500;color:${color};cursor:pointer;white-space:nowrap;" title="高品質AI残り回数">${totalRemaining}回/24h</div>`;
+  badge.innerHTML = `<div onclick="showModelUsageDetail()" style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--pill-radius);background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:500;color:${color};cursor:pointer;white-space:nowrap;" title="高品質AI残り回数">${totalRemaining}回/24h</div>`;
 }
 function showModelUsageDetail(){
   const { claude, gemini, gpt } = FREE_MODEL_USAGE;
@@ -1906,9 +1911,9 @@ function renderHomeTaskBox(){
   }
   // Header (mockup準拠)
   let html='<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">'
-    +'<span style="font-size:11px;font-weight:500;color:var(--cream);">タスク</span>'
-    +'<span style="font-size:9px;color:var(--muted);margin-left:2px;">残り <span style="color:var(--amber);font-weight:600;">'+remaining+'</span>/'+total+'件</span>'
-    +'<span style="margin-left:auto;font-size:9px;color:var(--amber);cursor:pointer;" onclick="showPage(\'tasks\')">タスク画面 →</span>'
+    +'<span style="font-size:12px;font-weight:500;color:var(--cream);">タスク</span>'
+    +'<span style="font-size:12px;color:var(--muted);margin-left:2px;">残り <span style="color:var(--amber);font-weight:600;">'+remaining+'</span>/'+total+'件</span>'
+    +'<span style="margin-left:auto;font-size:12px;color:var(--amber);cursor:pointer;" onclick="showPage(\'tasks\')">タスク画面 →</span>'
     +'</div>';
   // Group by date
   const todayStr=new Date().toISOString().slice(0,10);
@@ -1930,16 +1935,16 @@ function renderHomeTaskBox(){
   for(const[label,items] of Object.entries(groups)){
     const now=new Date();const m=now.getMonth()+1;const d=now.getDate();
     const dateStr=label==='今日'?m+'/'+d:label==='明日'?(tmrw.getMonth()+1)+'/'+tmrw.getDate():'';
-    html+='<div style="font-size:9px;font-weight:500;color:var(--cream);padding:4px 0 2px;">'+label+(dateStr?' <span style="font-weight:400;color:var(--muted2);">'+dateStr+'</span>':'')+'</div>';
+    html+='<div style="font-size:12px;font-weight:500;color:var(--cream);padding:4px 0 2px;">'+label+(dateStr?' <span style="font-weight:400;color:var(--muted2);">'+dateStr+'</span>':'')+'</div>';
     items.forEach(item=>{
       const t=item.task;
       const p=t.priority||'mid';
       const isOverdue=t.due&&t.due<todayStr;
       html+='<div style="display:flex;align-items:center;gap:4px;padding:3px 0 3px 10px;border-bottom:0.5px solid rgba(128,128,128,0.06);cursor:pointer;" onclick="openHomeTaskById(\''+t.id+'\')">'
         +'<div style="width:4px;height:4px;border-radius:50%;background:'+pColors[p]+';flex-shrink:0;"></div>'
-        +'<div style="font-size:10px;color:'+(isOverdue?'var(--red)':'var(--cream)')+';flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escapeHtml(t.title)+'</div>'
-        +'<span style="font-size:8px;padding:1px 4px;border-radius:2px;" class="'+pClasses[p]+'">'+pLabels[p]+'</span>'
-        +(t.due?'<span style="font-size:8px;color:'+(isOverdue?'var(--red);font-weight:500':'var(--muted2)')+';">'+(isOverdue?'期限切れ':'〆'+t.due.slice(5).replace('-','/'))+'</span>':'')
+        +'<div style="font-size:12px;color:'+(isOverdue?'var(--red)':'var(--cream)')+';flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escapeHtml(t.title)+'</div>'
+        +'<span style="font-size:12px;padding:1px 4px;border-radius:2px;" class="'+pClasses[p]+'">'+pLabels[p]+'</span>'
+        +(t.due?'<span style="font-size:12px;color:'+(isOverdue?'var(--red);font-weight:500':'var(--muted2)')+';">'+(isOverdue?'期限切れ':'〆'+t.due.slice(5).replace('-','/'))+'</span>':'')
         +'<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>'
         +'</div>';
     });
@@ -1992,7 +1997,7 @@ function renderHsTaskList(el, tab){
     items = allItems.slice(0,8);
   }
   if(items.length === 0){
-    el.innerHTML = `<div style="font-size:11px;color:var(--muted2)">${tab==='today'?'今日のタスクなし ':'今週のタスクなし '}</div>`;
+    el.innerHTML = `<div style="font-size:12px;color:var(--muted2)">${tab==='today'?'今日のタスクなし ':'今週のタスクなし '}</div>`;
     return;
   }
   items.forEach(item => {
@@ -2244,7 +2249,7 @@ function openFeedbackChat(){
   pills.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;';
   ['使いやすかった','改善してほしい点がある','新機能のリクエスト','バグを見つけた'].forEach(label => {
     const btn = document.createElement('button');
-    btn.style.cssText = 'padding:6px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--pill-radius);color:var(--cream);font-size:11px;cursor:pointer;font-family:var(--ff);transition:all .15s;';
+    btn.style.cssText = 'padding:6px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--pill-radius);color:var(--cream);font-size:12px;cursor:pointer;font-family:var(--ff);transition:all .15s;';
     btn.textContent = label;
     btn.onclick = () => { document.getElementById('feedback-msg-in').value = label; sendFeedbackMsg(); pills.remove(); };
     pills.appendChild(btn);
@@ -2664,7 +2669,7 @@ function showGoalDetectToast(topics){
     let listHtml = '<div style="display:flex;flex-direction:column;gap:6px;width:100%;">';
     listHtml += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">${getLogoSVG(16)}<span style="font-weight:600;">ゴール候補が見つかりました</span></div>`;
     topics.forEach(topic => {
-      listHtml += `<div class="goal-detect-item" onclick="event.stopPropagation();this.closest('#goal-detect-toast').remove();window._selectedGoalTopic='${topic.replace(/'/g,"\\'")}';const tags=document.getElementById('home-topic-tags');if(tags)tags.scrollIntoView({behavior:'smooth'});" style="padding:8px 12px;background:var(--bg3);border:1px solid var(--amber-d);border-radius:8px;cursor:pointer;font-size:11px;color:var(--amber);transition:background .15s;">${topic}</div>`;
+      listHtml += `<div class="goal-detect-item" onclick="event.stopPropagation();this.closest('#goal-detect-toast').remove();window._selectedGoalTopic='${topic.replace(/'/g,"\\'")}';const tags=document.getElementById('home-topic-tags');if(tags)tags.scrollIntoView({behavior:'smooth'});" style="padding:8px 12px;background:var(--bg3);border:1px solid var(--amber-d);border-radius:8px;cursor:pointer;font-size:12px;color:var(--amber);transition:background .15s;">${topic}</div>`;
     });
     listHtml += '</div>';
     listHtml += '<button class="goal-detect-close" onclick="event.stopPropagation();this.parentElement.remove();">&times;</button>';
@@ -2912,12 +2917,12 @@ function renderTodayScreen(){
       const timeStr = t.estimated_time ? `${t.estimated_time}` : '';
       return `<div data-task-id="${t.id}" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);${isDone?'opacity:0.35;':''}cursor:pointer;">
         <div data-drag="1" style="width:16px;height:28px;display:flex;flex-direction:column;gap:1.5px;align-items:center;justify-content:center;opacity:0.2;flex-shrink:0;touch-action:none;cursor:grab;"><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span></div>
-        <div onclick="event.stopPropagation();toggleTodayTask('${t.id}')" style="width:28px;height:28px;border-radius:50%;${isDone?'':'border:1px solid '+(idx===0&&!isDone?'var(--amber)':'var(--border2)')+';'}display:flex;align-items:center;justify-content:center;font-size:9px;color:${idx===0&&!isDone?'var(--amber)':'var(--muted2)'};flex-shrink:0;${idx===0&&!isDone?'background:rgba(228,184,106,0.1);':''}cursor:pointer;">${isDone?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':(idx+1)}</div>
+        <div onclick="event.stopPropagation();toggleTodayTask('${t.id}')" style="width:28px;height:28px;border-radius:50%;${isDone?'':'border:1px solid '+(idx===0&&!isDone?'var(--amber)':'var(--border2)')+';'}display:flex;align-items:center;justify-content:center;font-size:12px;color:${idx===0&&!isDone?'var(--amber)':'var(--muted2)'};flex-shrink:0;${idx===0&&!isDone?'background:rgba(228,184,106,0.1);':''}cursor:pointer;">${isDone?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':(idx+1)}</div>
         <div style="flex:1;min-width:0;" onclick="openHomeTaskById('${t.id}')">
           <div style="font-size:12px;color:${isOverdue?'var(--red)':'var(--cream)'};line-height:1.3;${isDone?'text-decoration:line-through;':''}overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(t.title)}</div>
-          ${timeStr ? `<div style="font-size:8px;color:${isOverdue?'var(--red)':'var(--muted2)'};margin-top:1px;">${isOverdue?'期限切れ':timeStr}</div>` : (isOverdue ? '<div style="font-size:8px;color:var(--red);margin-top:1px;">期限切れ</div>' : '')}
+          ${timeStr ? `<div style="font-size:12px;color:${isOverdue?'var(--red)':'var(--muted2)'};margin-top:1px;">${isOverdue?'期限切れ':timeStr}</div>` : (isOverdue ? '<div style="font-size:12px;color:var(--red);margin-top:1px;">期限切れ</div>' : '')}
         </div>
-        ${goalName ? `<div style="font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(228,184,106,0.1);color:var(--amber);border:0.5px solid rgba(228,184,106,0.2);flex-shrink:0;white-space:nowrap;">${escapeHtml(goalName)}</div>` : ''}
+        ${goalName ? `<div style="font-size:12px;padding:2px 6px;border-radius:3px;background:rgba(228,184,106,0.1);color:var(--amber);border:0.5px solid rgba(228,184,106,0.2);flex-shrink:0;white-space:nowrap;">${escapeHtml(goalName)}</div>` : ''}
       </div>`;
     }).join('');
   }
@@ -2928,7 +2933,7 @@ function renderTodayScreen(){
     const activeGoals = (GOALS || []).filter(g => g.status !== 'archived').slice(0,4);
     goalsEl.innerHTML = activeGoals.map(g => {
       const pct = g.progress || 0;
-      return `<div style="display:flex;align-items:center;gap:4px;"><span style="font-size:8px;color:var(--muted2);">${escapeHtml(g.title?.slice(0,6)||'')}</span><span style="font-size:10px;font-weight:600;color:var(--amber);">${pct}%</span></div>`;
+      return `<div style="display:flex;align-items:center;gap:4px;"><span style="font-size:12px;color:var(--muted2);">${escapeHtml(g.title?.slice(0,6)||'')}</span><span style="font-size:12px;font-weight:600;color:var(--amber);">${pct}%</span></div>`;
     }).join('');
   }
 
@@ -3003,12 +3008,12 @@ function renderSecretaryMemo(allTasks, todayStr){
   }
   memoEl.style.display = '';
   memoBody.innerHTML = memos.map(m =>
-    `<div style="display:flex;align-items:flex-start;gap:6px;padding:3px 0;font-size:9px;color:var(--muted);line-height:1.4;">${m.icon}<span>${escapeHtml(m.text)}</span></div>`
+    `<div style="display:flex;align-items:flex-start;gap:6px;padding:3px 0;font-size:12px;color:var(--muted);line-height:1.4;">${m.icon}<span>${escapeHtml(m.text)}</span></div>`
   ).join('');
 }
 
 // C-10/11: TASK_UPDATEタグを検出してタスク操作
-function processTaskUpdateTags(text){
+async function processTaskUpdateTags(text){
   if(!text) return;
   const regex = /\[TASK_UPDATE:(add|done|move):([^\]]+)\]/g;
   let match;
@@ -3018,13 +3023,19 @@ function processTaskUpdateTags(text){
     const params = match[2].split(':');
     const taskName = params[0];
     if(action === 'add'){
-      // 最初のゴールにタスク追加
-      if(ALL_GOALS.length > 0){
-        const goal = ALL_GOALS[0];
-        if(!goal.phases?.length) goal.phases = [{title:'タスク',tasks:[]}];
-        goal.phases[0].tasks.push({id:'task_'+Date.now(), title:taskName, status:'current', source:'ai'});
-        changed = true;
+      // ゴールが無い場合はデフォルトゴールを作成（await で完了を待つ）
+      if(ALL_GOALS.length === 0){
+        const defaultGoal = {id:'goal_default_'+Date.now(), title:'日常タスク', phases:[{title:'タスク',tasks:[]}], status:'active'};
+        ALL_GOALS.push(defaultGoal);
+        try{
+          const saved = await apiCreateGoal('日常タスク', 'AIが自動作成したデフォルトゴール', null);
+          if(saved && saved.id) defaultGoal.supabaseId = saved.id;
+        }catch(e){ /* 失敗してもローカルでは続行 */ }
       }
+      const goal = ALL_GOALS[0];
+      if(!goal.phases?.length) goal.phases = [{title:'タスク',tasks:[]}];
+      goal.phases[0].tasks.push({id:'task_'+Date.now(), title:taskName, status:'current', source:'ai'});
+      changed = true;
     } else if(action === 'done'){
       for(const goal of ALL_GOALS){
         for(const phase of (goal.phases||[])){
@@ -3040,7 +3051,17 @@ function processTaskUpdateTags(text){
     // move: 後続実装（日付変更が必要）
   }
   if(changed){
-    if(typeof saveGoals === 'function') saveGoals();
+    // ゴールをAPI経由で永続化
+    for(const goal of ALL_GOALS){
+      if(goal.supabaseId){
+        try{ await apiUpdateGoal(goal.supabaseId, { phases: goal.phases }); }catch(e){}
+      }
+    }
+    // localStorageにもバックアップ（DBにphasesカラムがない場合のフォールバック）
+    try{
+      const backup = ALL_GOALS.map(g => ({id:g.id, supabaseId:g.supabaseId, title:g.title, phases:g.phases, status:g.status}));
+      localStorage.setItem('goal_phases_backup', JSON.stringify(backup));
+    }catch(e){}
     toast('タスクを更新しました');
   }
   // タグをバブルのテキストから除去（ユーザーに見せない）
@@ -3050,6 +3071,97 @@ function processTaskUpdateTags(text){
     if(cleaned !== bub.textContent) bub.innerHTML = renderMsgContent(cleaned);
   }
 }
+
+// UX-01-A1: [INTENT:xxx]タグと[GOAL_PROPOSAL]タグを検出・処理
+function processIntentTags(text){
+  if(!text) return text;
+  // INTENTタグ検出（ログ用）
+  const intentMatch = text.match(/\[INTENT:(GOAL_CREATE|TASK_CREATE|STATUS_UPDATE|LIFE_DESIGN|QUESTION)\]/);
+  if(intentMatch) window._lastDetectedIntent = intentMatch[1];
+  // GOAL_PROPOSAL検出→カード表示
+  const proposalMatch = text.match(/\[GOAL_PROPOSAL\]([\s\S]*?)\[\/GOAL_PROPOSAL\]/);
+  if(proposalMatch) {
+    const raw = proposalMatch[1];
+    const proposal = parseGoalProposal(raw);
+    if(proposal) showGoalProposalCard(proposal);
+  }
+  // タグをテキストから除去（ユーザーに見せない）
+  let cleaned = text.replace(/\[INTENT:[^\]]+\]/g, '');
+  cleaned = cleaned.replace(/\[GOAL_PROPOSAL\][\s\S]*?\[\/GOAL_PROPOSAL\]/g, '');
+  return cleaned.trim();
+}
+
+function parseGoalProposal(raw){
+  try {
+    const name = raw.match(/name:\s*(.+)/)?.[1]?.trim();
+    const why = raw.match(/why:\s*(.+)/)?.[1]?.trim();
+    const deadline = raw.match(/deadline:\s*(\d{4}-\d{2}-\d{2})/)?.[1];
+    const relatedRaw = raw.match(/related_goals:\s*\[([^\]]*)\]/)?.[1];
+    const related_goals = relatedRaw ? relatedRaw.split(',').map(s => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean) : [];
+    const taskLines = raw.match(/- name:\s*(.+)\n\s*deadline:\s*(\S+)/g) || [];
+    const tasks = taskLines.map(line => {
+      const n = line.match(/- name:\s*(.+)/)?.[1]?.trim();
+      const d = line.match(/deadline:\s*(\S+)/)?.[1];
+      return n ? { name: n, deadline: d || null } : null;
+    }).filter(Boolean);
+    if(!name) return null;
+    return { name, why, deadline, tasks, related_goals };
+  } catch(e) { return null; }
+}
+
+function showGoalProposalCard(proposal){
+  // 既存カードを除去
+  document.querySelector('.goal-proposal-card')?.remove();
+  const card = document.createElement('div');
+  card.className = 'goal-proposal-card';
+  card.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:90%;max-width:400px;background:var(--bg2);border:1px solid var(--amber-d,#d4a843);border-radius:var(--popup-radius,14px);padding:16px;z-index:800;box-shadow:0 -4px 24px rgba(0,0,0,.5);animation:fadeUp .3s ease;';
+  let tasksHtml = '';
+  if(proposal.tasks?.length){
+    tasksHtml = '<div style="margin-top:10px;font-size:12px;color:var(--muted);">タスク:</div>' +
+      proposal.tasks.map(t => `<div style="padding:4px 0 4px 12px;font-size:12px;color:var(--cream);">・${escapeHtml(t.name)}${t.deadline ? ' <span style="color:var(--muted);">('+t.deadline+')</span>' : ''}</div>`).join('');
+  }
+  card.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="font-size:13px;color:var(--amber);font-weight:600;">ゴール提案</div>
+      <button onclick="this.closest('.goal-proposal-card').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;">✕</button>
+    </div>
+    <div style="font-size:14px;color:var(--cream);font-weight:500;margin-bottom:4px;">${escapeHtml(proposal.name)}</div>
+    ${proposal.why ? '<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'+escapeHtml(proposal.why)+'</div>' : ''}
+    ${proposal.deadline ? '<div style="font-size:11px;color:var(--amber-d,#d4a843);">期限: '+proposal.deadline+'</div>' : ''}
+    ${tasksHtml}
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button onclick="acceptGoalProposal(this)" style="flex:1;padding:10px;background:var(--amber);color:#1a1a2e;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">承認して追加</button>
+      <button onclick="this.closest('.goal-proposal-card').remove()" style="flex:1;padding:10px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:8px;font-size:13px;cursor:pointer;">却下</button>
+    </div>`;
+  // Store proposal data on the card element
+  card._proposal = proposal;
+  document.body.appendChild(card);
+  setTimeout(() => card.remove(), 60000);
+}
+
+async function acceptGoalProposal(btn){
+  const card = btn.closest('.goal-proposal-card');
+  const proposal = card?._proposal;
+  if(!proposal) return;
+  card.remove();
+  try {
+    // ゴール作成
+    const goal = await apiCreateGoal(proposal.name, proposal.why || '', proposal.deadline || null);
+    if(goal && goal.id){
+      const newGoal = { id:'goal_'+Date.now(), supabaseId:goal.id, title:proposal.name, phases:[{title:'タスク',tasks:[]}], status:'active' };
+      // タスクをフェーズに追加
+      for(const t of (proposal.tasks || [])){
+        newGoal.phases[0].tasks.push({ id:'task_'+Date.now()+Math.random().toString(36).slice(2,6), title:t.name, deadline:t.deadline, status:'current', source:'ai' });
+      }
+      ALL_GOALS.push(newGoal);
+      // phasesをAPI経由で永続化
+      try{ await apiUpdateGoal(goal.id, { phases: newGoal.phases }); }catch(e){}
+      toast('ゴールを追加しました: ' + proposal.name);
+      if(typeof renderTodayScreen === 'function') renderTodayScreen();
+    }
+  } catch(e) { toast('ゴール追加に失敗しました'); }
+}
+window.acceptGoalProposal = acceptGoalProposal;
 
 // B-08: タスクドラッグ並替（touch対応、ライブラリ不使用）
 function initTodayDrag(){
@@ -3258,7 +3370,7 @@ function openTodayAddTask(){
   const ov = document.getElementById('task-add-overlay');
   if(ov) ov.style.display = 'block';
   _taskAddHistory = [];
-  document.getElementById('task-add-chat').innerHTML = '<div style="font-size:11px;color:var(--muted);padding:4px 0;">やりたいことを入力してください</div>';
+  document.getElementById('task-add-chat').innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0;">やりたいことを入力してください</div>';
   setTimeout(() => document.getElementById('task-add-input')?.focus({ preventScroll: true }), 100);
 }
 
@@ -3277,13 +3389,13 @@ async function sendTaskAddMsg(){
   const text = inp.value.trim();
   inp.value = '';
   // Show user message
-  chat.innerHTML += `<div style="text-align:right;margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:rgba(228,184,106,0.1);border-radius:8px;font-size:11px;color:var(--cream);max-width:80%;">${escapeHtml(text)}</span></div>`;
+  chat.innerHTML += `<div style="text-align:right;margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:rgba(228,184,106,0.1);border-radius:8px;font-size:12px;color:var(--cream);max-width:80%;">${escapeHtml(text)}</span></div>`;
   chat.scrollTop = chat.scrollHeight;
 
-  // First message: task creation prompt
+  // First message: task creation prompt (immediate creation, then optional follow-up)
   const isFirst = _taskAddHistory.length === 0;
   const prompt = isFirst
-    ? `ユーザーが「${text}」をタスクにしたい。以下を簡潔に質問して（1つずつ）:\n- いつまで？\n- 所要時間は？\n- 優先度（高/中/低）?\n最後に[TASK_UPDATE:add:タスク名]を出力。`
+    ? `ユーザーが「${text}」をタスクにしたい。必ず最初の返答に[TASK_UPDATE:add:${text}]を含めてタスクを即座に作成し、一言応援コメントを添える。追加情報が必要なら作成後に聞く。`
     : text;
 
   _taskAddHistory.push({role:'user', content: prompt});
@@ -3291,7 +3403,7 @@ async function sendTaskAddMsg(){
   try{
     const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
       method:'POST', headers:getAuthHeaders(),
-      body:JSON.stringify({ system:'タスク作成アシスタント。ユーザーと短いやり取りでタスクを構造化する。3回以内で完了。最後に[TASK_UPDATE:add:タスク名]を出力。', messages:_taskAddHistory, maxTokens:200 })
+      body:JSON.stringify({ system:'タスク作成アシスタント。ユーザーの入力から即座にタスクを作成する。必ず最初の返答に[TASK_UPDATE:add:タスク名]を含める。作成後に追加情報を聞いてもよい。', messages:_taskAddHistory, maxTokens:200 })
     });
     const data = await res.json();
     const reply = (data.choices?.[0]?.message?.content || '').trim();
@@ -3299,18 +3411,31 @@ async function sendTaskAddMsg(){
 
     // Process TASK_UPDATE tags
     const cleaned = reply.replace(/\[TASK_UPDATE:[^\]]+\]/g, '').trim();
-    processTaskUpdateTags(reply);
+    const hadTag = /\[TASK_UPDATE:add:/.test(reply);
+    await processTaskUpdateTags(reply);
+
+    // Fallback: if first message and AI didn't include TASK_UPDATE, create task directly
+    if(isFirst && !hadTag && text.length > 0){
+      await processTaskUpdateTags(`[TASK_UPDATE:add:${text}]`);
+    }
 
     // Show AI response
-    chat.innerHTML += `<div style="margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:var(--bg3);border-radius:8px;font-size:11px;color:var(--cream);max-width:80%;">${escapeHtml(cleaned)}</span></div>`;
+    chat.innerHTML += `<div style="margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--cream);max-width:80%;">${escapeHtml(cleaned)}</span></div>`;
     chat.scrollTop = chat.scrollHeight;
 
     // Auto-close if task was created
-    if(/\[TASK_UPDATE:add:/.test(reply)){
+    if(hadTag || (isFirst && text.length > 0)){
       setTimeout(() => { closeTodayAddTask(); renderTodayScreen(); toast('タスクを追加しました'); }, 1000);
     }
   }catch(e){
-    chat.innerHTML += `<div style="margin:6px 0;font-size:10px;color:var(--red);">エラーが発生しました</div>`;
+    // API error fallback: create task directly from user input
+    if(isFirst && text.length > 0){
+      await processTaskUpdateTags(`[TASK_UPDATE:add:${text}]`);
+      chat.innerHTML += `<div style="margin:6px 0;font-size:12px;color:var(--muted);">タスクを追加しました</div>`;
+      setTimeout(() => { closeTodayAddTask(); renderTodayScreen(); toast('タスクを追加しました'); }, 1000);
+    } else {
+      chat.innerHTML += `<div style="margin:6px 0;font-size:12px;color:var(--red);">エラーが発生しました</div>`;
+    }
   }
 }
 
@@ -3365,7 +3490,7 @@ Object.assign(window, {
   setPreset, taskCheckAnim,
   retryWithRoute, recordRoutingFeedback, stopHomeStream,
   renderTodayScreen, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask,
-  saveTodayDiary, loadTodayDiary, getDiaryDate, generateDiaryTitle, processTaskUpdateTags, initTodayDrag,
+  saveTodayDiary, loadTodayDiary, getDiaryDate, generateDiaryTitle, processTaskUpdateTags, processIntentTags, acceptGoalProposal, initTodayDrag,
   openTodayAddTask, closeTodayAddTask, sendTaskAddMsg
 });
 

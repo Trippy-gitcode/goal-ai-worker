@@ -1,7 +1,7 @@
 # AI自律開発キット — ブートストラップ
 > このファイルを新しいClaude.aiプロジェクトのナレッジに入れるだけで開発体制が立ち上がる。
 > テンプレート本体: ~/Desktop/goal-ai-worker/templates/
-> 更新: 2026-03-22
+> 更新: 2026-04-03（v2: 指示を検証可能にする体制）
 
 ---
 
@@ -10,7 +10,7 @@
 - **品質最優先。** スピードのために品質を犠牲にしない
 - **自動化最大。** ふとしの手動作業を最低限に（承認のみ）
 - **Claude.ai = 経営者+アドバイザー。** 実装は全てClaude Codeに委任
-- **コードは読まない。指示書は書かない。** ミッション名+優先順の決定のみ
+- **コードは読まない。指示書は書かない。** ミッション定義のみ
 - **DC（Desktop Commander）経由でリポジトリに直接書き込み。** コピペゼロ
 - **ナレッジはリポジトリ docs/ に一元管理（Single Source of Truth）**
 
@@ -21,8 +21,8 @@
 | 層 | 担当 | 役割 |
 |---|------|------|
 | **ふとし** | 経営判断 | 「何を作るか」の決定 + 承認 |
-| **Claude.ai** | アドバイザー | 仕様・方針・コスト/プラン影響のある設計判断・DC経由の書き込み |
-| **Claude Code** | 自律エンジニア | アーキテクチャ設計・実装設計・手順ルール管理・実装・テスト・デプロイ・レポート |
+| **Claude.ai** | アドバイザー | 仕様協議・ミッション定義作成（v2テンプレート）・DC経由書き込み |
+| **Claude Code** | 自律エンジニア | 実装・テスト・デプロイ・レポート |
 
 Codeの設計権限の制約: コスト構造またはプラン間の差別化に影響するアーキテクチャ変更は、提案ログに記載して承認を待つ。
 
@@ -34,55 +34,48 @@ Codeの設計権限の制約: コスト構造またはプラン間の差別化�
   └── それ以外 → ふとしがCodeに直接伝える → Code修正 → session_progress.mdに記録
 
 Codeがバグ発見
-  ├── ミッション遂行に必要 → C6で即修正（記録必須）
+  ├── ミッション遂行に必要 → 即修正（記録必須）
   ├── コスト/プラン影響あり → 提案ログ→Claude.aiが読む→承認
   └── それ以外 → 提案ログ。キュー空時に自律修正可
 ```
 
 ---
 
-## 新プロジェクト立ち上げ手順
+## 仕様協議フロー（Claude.ai↔ふとし）
 
-### Step 0: リポジトリ準備
-```bash
-mkdir -p /path/to/new-project
-cd /path/to/new-project && git init
+1. ふとしが要件・課題を共有
+2. Claude.aiが仕様を整理し、影響範囲・コスト・リスクを分析
+3. ふとしが承認
+4. Claude.aiがミッション定義（v2テンプレート）をDCでsession_progress.mdに書き込み
+5. Codeが自律実行
+
+**ミッション定義の品質が開発品質を決める。** 曖昧な指示はCodeの誤解を生む。
+
+---
+
+## ミッション定義テンプレート v2（核心）
+
+**原則: 完了条件を全てbashコマンドで記述する。自然言語の「全件」「すべて」禁止。**
+
+```markdown
+### MISSION-ID: タイトル
+> リスク: 🟢低 / 🟡中 / 🔴高
+> 参照: docs/xxx.md, docs/yyy.md（全ファイルをフルパスで列挙）
+> 対象ファイル: src/xxx.js, frontend/yyy.html（変更してよいファイルを列挙）
+
+**目的:** 1行
+
+**プリフライト（実装前に必ず実行・結果をログに記録）:**
+  wc -l docs/xxx.md   # 参照ファイルの存在確認
+  grep -c '条件' source.md   # テスト項目数の期待値を記録
+
+**完了コマンド（全て期待出力でPASS判定）:**
+  cmd1: grep -c "xxx" file | awk '{if($1>=N) exit 0; else exit 1}'
+  cmd2: npx playwright test 2>&1 | grep "0 failed"
+
+**FAIL条件:** cmd1の出力 < N / cmd2でfailed > 0
+**完了報告:** MISSION-ID: XX/YYY PASS, ZZ FAIL
 ```
-
-### Step 1: DC allowedDirectories に新パスを追加
-Claude.aiがDCの `set_config_value` で新プロジェクトのパスを `allowedDirectories` に追加する。
-
-### Step 2: テンプレートコピー（またはbootstrapから生成）
-**テンプレートがある場合:**
-```bash
-SRC=~/Desktop/goal-ai-worker/templates
-DST=/path/to/new-project
-cp $SRC/CLAUDE_TEMPLATE.md $DST/CLAUDE.md
-cp $SRC/development_rules_template.md $DST/development_rules.md
-mkdir -p $DST/instructions $DST/tests/smoke $DST/docs
-cp $SRC/session_progress_template.md $DST/instructions/session_progress.md
-cp $SRC/canopy_template.sh $DST/tests/smoke/canopy.sh
-chmod +x $DST/tests/smoke/canopy.sh
-```
-**テンプレートがない場合:**
-このbootstrap.mdの「鉄則ルール」「Code側ルール」「承認ルール」セクションから4ファイル（CLAUDE.md / development_rules.md / session_progress.md / canopy.sh）を直接生成する。
-
-### Step 3: 初期ヒアリング（ふとしに確認）
-- [ ] プロダクト名と一言説明
-- [ ] 技術スタック（フレームワーク、DB、ホスティング、API）
-- [ ] ターゲットユーザー
-- [ ] 絶対に変更してはいけない設計判断
-- [ ] 既存コードの有無（0からか、既存リポジトリか）
-- [ ] デプロイ先とデプロイ方法
-- [ ] 課金の有無と決済基盤
-
-### Step 4: CLAUDE.md の [TODO] を埋める
-ヒアリング結果をもとに契約セクション・参照先・禁止事項を記入。
-
-### Step 5: session_progress.md に最初のミッションキューを書く
-
-### Step 6: Code起動
-ふとしが「CLAUDE.md読んで」→ 開発開始。
 
 ---
 
@@ -97,30 +90,36 @@ chmod +x $DST/tests/smoke/canopy.sh
 7. コードは読まない。指示書は書かない。ミッション定義のみ
 8. 事実確認せずに断言することを禁止。未確認は「未確認」と明言
 9. 誤り・誤解・意図しない事象 → 類似ケース検証 + 再発防止策提案
-10. 「忘れた」「間違えた」「見落とした」等の人間的ミス表現禁止。構造的原因を特定し機械的ゲートを提案
+10. **ミッション定義セルフチェック（毎回必須）:**
+    - 完了条件は全てbashコマンドで書けているか？
+    - 「全件」「すべて」「全て」をgrepの数値に置換したか？
+    - 参照ファイルは全てフルパスで列挙したか？
+    - FAIL条件は明示したか？
+    - 対象ファイル欄にスコープを明記したか？
+    - UIコンポーネント追加なら7項目チェック（open/close/復帰/z-index/overlay/キーボード/テスト追加）を含めたか？
+    - 画面遷移があるなら状態遷移表を書いたか？
+    - テストミッションなら実行戦略（フォアグラウンド/分割/タイムアウト）を明記したか？
+11. **仕様協議時の操作フロー確認（毎回必須）:**
+    - ユーザーが開始する操作は何か
+    - ユーザーが中断/キャンセルする手段はあるか
+    - 操作完了後に元の画面に戻るか
+    - エラー時にユーザーに何を見せるか
+    - 同じ操作を2回連続した場合の挙動
+    - オフライン時の挙動
 
 ---
 
-## Code側ルール（development_rules.md に詳細）
+## Code側ルール
 
-- **C1.** 参照ドキュメントを全て読んでから実装開始
-- **C2.** 基準フロー: 実装→bump-version→build→canopy→デプロイ→ヘルスチェック→git tag→push
-- **C3.** ファイル変更範囲の厳守
-- **C4.** ログ確認前の投機的修正禁止
-- **C5.** verify.shを自分で作成（累積成長型）
-- **C6.** 判断の線引き（設計自由、仕様変更禁止）
-- **C7.** 品質ゲート（プリフライト/diff/grep/canopy/git tag）
-- **C8.** キュー空時の自律提案（提案ログに記載→承認待ち）
-- **C9.** セッション開始時の参照ファイル検証
-- **C10.** デプロイ手順・バージョン同期（APP_VERSION 4箇所同期）
-- **C11.** バグ対応フロー（UI直接修正 / 仕様判断→Claude.ai / コスト影響→承認）
-- **C12.** インラインスタイル禁止 + UI変更時のJS検査
+**development_rules.md（95行）を参照。** 二重管理防止のためここには詳細を書かない。
+
+概要: 品質ゲートG1-G6（バージョン同期/Stage A/テスト項目数/テスト全PASS/報告フォーマット/デプロイパイプライン）＋絶対禁止5項目＋構造的制約（修正試行3回制限/ホットフィックスパス/300行制限/ルール追加原則禁止）。
 
 ---
 
 ## 承認ルール
 
-- 🟢低リスク: バッチ承認可
+- 🟢低リスク: バッチ承認可。ホットフィックスパス対象（mockup変更なし＋対象2ファイル以内＋仕様変更なし）はCode自律実行可
 - 🟡中リスク: 3件まで連続実行→まとめて報告
 - 🔴高リスク: 個別承認必須（実行前に停止）
 
@@ -129,14 +128,26 @@ chmod +x $DST/tests/smoke/canopy.sh
 ## 棚卸し（5セッションごと）
 
 1. CLAUDE.md・development_rules.md・session_progress.md の整合性
-2. docs/ のナレッジファイルが最新か
-3. 参照ドキュメントリストに不在ファイルがないか
+2. session_progress.md が300行以内か（超過ならアーカイブ）
+3. development_rules.md が100行以内か（超過なら圧縮）
 4. 提案ログに未処理の項目がないか
 
 ## 変更時の一括更新義務
 
 仕様・方針・ルールの変更が発生した場合、ふとしの承認を得た上で関連する全ファイルを一括更新する。
 「1箇所だけ更新して他を放置」は禁止。更新完了後、更新ファイル一覧を報告。
+
+---
+
+## 新プロジェクト立ち上げ手順
+
+Step 0: リポジトリ準備（mkdir + git init）
+Step 1: DC allowedDirectories に新パスを追加（set_config_value）
+Step 2: テンプレートコピー（~/Desktop/goal-ai-worker/templates/ から）またはbootstrapから直接生成
+Step 3: 初期ヒアリング（プロダクト名/技術スタック/ターゲット/設計判断/既存コード/デプロイ先/課金）
+Step 4: CLAUDE.md の [TODO] を埋める
+Step 5: session_progress.md に最初のミッションキューを書く（v2テンプレート準拠）
+Step 6: Code起動（ふとしが「CLAUDE.md読んで」）
 
 ---
 
@@ -151,7 +162,8 @@ chmod +x $DST/tests/smoke/canopy.sh
 
 ## 絶対禁止
 
-- canopy項目削除
-- 契約変更（署名なし）
+- canopy項目削除（追加は可、削除はふとし承認必須）
+- 契約変更（CLAUDE.md無断変更）
 - UI変更をgrep確認だけで「完了」にすること
 - ログ確認前の投機的修正
+- 分母なしの「ALL PASS」「全件完了」報告
