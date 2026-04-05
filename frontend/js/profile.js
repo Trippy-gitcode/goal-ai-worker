@@ -717,9 +717,15 @@ async function loadIdentityFromServer(){
     if(id.occupation) USER_PROFILE.occupation = id.occupation;
     if(id.field) USER_PROFILE.field = id.field;
     if(id.interests) USER_PROFILE.interests = id.interests;
+    // C: QOL提案キャッシュ（TODAY画面用）
+    if(data.qol_proposals && typeof window.loadQOLProposals === 'function'){
+      window._qolProposalsCache = data.qol_proposals;
+    }
     // Render on ME screen
     renderVision();
     renderIdentityOnME(id);
+    _meQolData = data.qol_proposals || [];
+    renderQOLOnME(_meQolData);
   } catch(e){ console.warn('Identity load failed', e); }
 }
 
@@ -746,6 +752,72 @@ function renderIdentityOnME(id){
     ).join('');
   }
 }
+
+// ── UX-01-C: QOL提案 ME画面表示 ──
+function renderQOLOnME(proposals){
+  const list = document.getElementById('me-qol-list');
+  if(!list) return;
+  if(!proposals || !proposals.length){
+    list.innerHTML = '<div style="font-size:12px;color:var(--muted2);">「自分を知る」セッション完了後に提案が生成されます</div>';
+    return;
+  }
+  const catIcons = { health:'💪', finance:'💰', career:'🚀', lifestyle:'✨', relationship:'💬' };
+  const urgLabels = { now:'今すぐ', this_month:'今月中', this_quarter:'今期中' };
+  list.innerHTML = proposals.map((p, i) => `
+    <div style="padding:10px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <span style="font-size:14px;">${catIcons[p.category] || '💡'}</span>
+        <span style="font-size:13px;color:var(--cream);font-weight:500;flex:1;">${escapeHtml(p.title)}</span>
+        <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(228,184,106,0.1);color:var(--amber);">${urgLabels[p.urgency] || p.urgency}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:8px;">${escapeHtml(p.description)}</div>
+      <button onclick="startQOLGoal(${i})" style="padding:6px 14px;background:var(--amber);color:#1a1a2e;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">やる</button>
+    </div>
+  `).join('');
+}
+
+let _meQolData = [];
+function startQOLGoal(idx){
+  const proposals = _meQolData;
+  if(!proposals || !proposals[idx]) return;
+  const title = proposals[idx].title;
+  if(typeof switchTab === 'function') switchTab('chat');
+  setTimeout(() => {
+    const input = document.getElementById('home-input');
+    if(input){
+      input.value = `${title}をやりたい`;
+      input.focus();
+      input.dispatchEvent(new Event('input'));
+    }
+  }, 300);
+}
+
+async function refreshQOLProposals(){
+  const btn = document.getElementById('qol-refresh-btn');
+  if(btn) btn.textContent = '生成中...';
+  try {
+    const res = await fetch(`${WORKER_URL}/api/me/qol-proposals/generate`, {
+      method: 'POST', headers: getAuthHeaders()
+    });
+    if(!res.ok) throw new Error('QOL generate failed');
+    const data = await res.json();
+    const proposals = data.qol_proposals || [];
+    _meQolData = proposals;
+    renderQOLOnME(proposals);
+    // Update TODAY screen cache
+    window._qolProposalsCache = proposals;
+    if(typeof renderQOLProposals === 'function') renderQOLProposals();
+    if(typeof toast === 'function') toast('QOL提案を更新しました');
+  } catch(e){
+    console.warn('QOL refresh failed', e);
+    if(typeof toast === 'function') toast('QOL提案の更新に失敗しました');
+  } finally {
+    if(btn) btn.textContent = '↺ 提案を更新';
+  }
+}
+
+window.startQOLGoal = startQOLGoal;
+window.refreshQOLProposals = refreshQOLProposals;
 
 function applySummaryToProfile(){
   // Use identityData (from [IDENTITY_UPDATE]) if available, fallback to profileData
@@ -1506,6 +1578,7 @@ Object.assign(window, {
   startKnowSession, updateKnowChips, appendKnowMsg, sendKnowMsg,
   generateKnowSummary, applySummaryToProfile, saveIdentityToServer, loadIdentityFromServer,
   knowResize, knowKey, editVision, saveVision, renderVision, addVisionItem, editVisionField, editMyCharacter, shareCharacter, toggleReanalyzeChip, runReanalysis,
+  renderQOLOnME, refreshQOLProposals, startQOLGoal,
   regenCatchcopy, runConnectAnalysis, renderConnectContent, hubChatFromConnect,
   updateProfile, saveProfile, updateAge, selGender, toggleInterest,
   addEnergyTag, setNetworkQ, renderMyselfProfile,
