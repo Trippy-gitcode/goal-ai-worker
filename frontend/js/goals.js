@@ -1921,6 +1921,10 @@ async function init(){
       renderModelUsageBadge();
     } catch(e){}
 
+    // C: QOL提案を並行読み込み
+    if(typeof loadQOLProposals === 'function') loadQOLProposals().then(() => {
+      if(typeof renderQOLProposals === 'function') renderQOLProposals();
+    });
     // ゴールをSupabaseから読み込み
     const savedGoals = await apiLoadGoals();
     if (savedGoals.length > 0) {

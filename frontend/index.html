@@ -156,7 +156,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v4.0.10</span>
+      <span class="version" title="バージョン確認">v4.0.11</span>
     </div>
   </div>
 </div>
@@ -792,6 +792,17 @@
                   <div id="vision-catchcopy" style="font-size:15px;font-family:var(--fd);font-weight:300;color:var(--cream);letter-spacing:.05em;">
                   </div>
                   <button onclick="regenCatchcopy()" style="margin-top:10px;padding:5px 12px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--ff);">↺ AIに別の案を出してもらう</button>
+                </div>
+
+                <!-- UX-01-C: QOL提案リスト -->
+                <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                    <div style="font-size:12px;color:var(--amber);letter-spacing:.12em;font-family:var(--fm);">QOL PROPOSALS</div>
+                    <button id="qol-refresh-btn" onclick="refreshQOLProposals()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--ff);">↺ 提案を更新</button>
+                  </div>
+                  <div id="me-qol-list" style="display:flex;flex-direction:column;gap:8px;">
+                    <div style="font-size:12px;color:var(--muted2);">「自分を知る」セッション完了後に提案が生成されます</div>
+                  </div>
                 </div>
 
                 <!-- MY CHARACTER card -->

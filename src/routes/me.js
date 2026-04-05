@@ -1,6 +1,7 @@
 import { authenticateRequest, getUserIdFromToken } from '../middleware/auth.js';
 import { jsonRes } from '../utils/helpers.js';
 import { supabaseQuery } from '../utils/supabase.js';
+import { QOL_PROPOSAL_PROMPT } from '../services/prompt.js';
 
 const DEFAULT_IDENTITY = {
   vision: null,
@@ -45,4 +46,94 @@ export async function handleIdentityPut(request, env) {
   });
 
   return jsonRes(result?.[0] || { user_id: userId, ...updates });
+}
+
+export async function handleQOLGenerate(request, env) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+  const userId = await getUserIdFromToken(env, auth.tokenId);
+  if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
+
+  // Load user_identity
+  const rows = await supabaseQuery(env, 'user_identity', 'GET', {
+    filters: `user_id=eq.${userId}`,
+  });
+  const identity = rows?.[0]?.identity || {};
+  const vision = rows?.[0]?.vision || '';
+
+  // Load existing goals to avoid duplicates
+  const goals = await supabaseQuery(env, 'goals', 'GET', {
+    filters: `user_id=eq.${userId}&status=neq.archived`,
+    select: 'title',
+  });
+  const goalTitles = (goals || []).map(g => g.title).filter(Boolean);
+
+  // Build user context for AI
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const seasons = { 1:'冬',2:'冬',3:'春',4:'春',5:'春',6:'夏',7:'夏',8:'夏',9:'秋',10:'秋',11:'秋',12:'冬' };
+  const timingHints = [];
+  if (month >= 1 && month <= 3) timingHints.push('確定申告期（2-3月）');
+  if (month === 6 || month === 12) timingHints.push('ボーナス期');
+  if (month >= 10 && month <= 12) timingHints.push('年末調整・ふるさと納税締切');
+  if (month === 4) timingHints.push('新年度・新生活');
+
+  const userContext = `ユーザー情報:
+ビジョン: ${vision || '未設定'}
+年齢: ${identity.age || '不明'}
+職業: ${identity.occupation || '不明'}(${identity.field || ''})
+年収帯: ${identity.income_range || '不明'}
+エリア: ${identity.area || '不明'}
+見られたい姿: ${(identity.desired_image || []).join('、') || '未設定'}
+強み: ${(identity.strengths || []).join('、') || '未設定'}
+趣味・興味: ${(identity.interests || []).join('、') || '未設定'}
+価値観: ${(identity.values || []).join('、') || '未設定'}
+現在時期: ${now.getFullYear()}年${month}月（${seasons[month]}）
+時期ヒント: ${timingHints.join('、') || 'なし'}
+既存ゴール: ${goalTitles.length ? goalTitles.join('、') : 'なし'}`;
+
+  // Call GPT for structured JSON generation
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        max_completion_tokens: 500,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: QOL_PROPOSAL_PROMPT },
+          { role: 'user', content: userContext },
+        ],
+      }),
+    });
+    const data = await res.json();
+    const raw = data.choices?.[0]?.message?.content || '[]';
+    let proposals;
+    try {
+      const parsed = JSON.parse(raw);
+      proposals = Array.isArray(parsed) ? parsed : parsed.proposals || parsed.items || [];
+    } catch { proposals = []; }
+
+    // Add generated_at timestamp
+    const generated_at = now.toISOString();
+    proposals = proposals.slice(0, 3).map(p => ({
+      title: p.title || '',
+      description: p.description || '',
+      category: p.category || 'lifestyle',
+      urgency: p.urgency || 'this_month',
+      generated_at,
+    }));
+
+    // Save to user_identity
+    await supabaseQuery(env, 'user_identity', 'POST', {
+      body: { user_id: userId, qol_proposals: proposals, updated_at: generated_at },
+      filters: 'on_conflict=user_id',
+    });
+
+    return jsonRes({ qol_proposals: proposals });
+  } catch (e) {
+    console.error('QOL generate failed:', e.message);
+    return jsonRes({ error: 'QOL生成に失敗しました' }, 500);
+  }
 }
