@@ -18,7 +18,7 @@ import { handleAIMemoGenerate } from './routes/memo.js';
 import { handlePlanStatus } from './routes/plan.js';
 import { handleAdminTesters, handleFeedbackList } from './routes/admin.js';
 import { handleAccountDelete, handleAccountExport } from './routes/account.js';
-import { handleIdentityGet, handleIdentityPut } from './routes/me.js';
+import { handleIdentityGet, handleIdentityPut, handleQOLGenerate } from './routes/me.js';
 
 const app = new Hono();
 
@@ -140,6 +140,7 @@ app.post('/api/feedback/routing', async (c) => {
 // ── ME (Identity) ──
 app.get('/api/me/identity', async (c) => withCors(c, await handleIdentityGet(c.req.raw, c.env)));
 app.put('/api/me/identity', async (c) => withCors(c, await handleIdentityPut(c.req.raw, c.env)));
+app.post('/api/me/qol-proposals/generate', async (c) => withCors(c, await handleQOLGenerate(c.req.raw, c.env)));
 
 // ── Account ──
 app.post('/api/account/delete', async (c) => withCors(c, await handleAccountDelete(c.req.raw, c.env)));

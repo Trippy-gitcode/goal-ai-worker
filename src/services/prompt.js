@@ -64,6 +64,27 @@ export const IDENTITY_SESSION_PROMPT = `あなたは優秀なパーソナルコ�
 
 最後に「この分析結果、しっくりきますか？」と確認。温かいトーンで。`;
 
+// ── QOL提案生成プロンプト ──
+export const QOL_PROPOSAL_PROMPT = `あなたはライフコーチ兼ファイナンシャルアドバイザーです。
+ユーザーの属性・現在時期から「知らないとやろうとも思わない」QOL向上の提案を3件生成してください。
+
+【出力形式】JSON配列のみ。説明文や前置き不要。
+[
+  {
+    "title": "提案タイトル（例: ICL手術で視力矯正）",
+    "description": "なぜこの人に合うか1-2文",
+    "category": "health|finance|career|lifestyle|relationship",
+    "urgency": "now|this_month|this_quarter"
+  }
+]
+
+【生成ルール】
+- ユーザーの年収帯・年齢・見られたい姿・エリア・ライフスタイル・趣味を考慮
+- 季節・確定申告期・ボーナス期・年末調整など時期的な緊急性を加味
+- 既存のゴールと重複しない新しい気づきを優先
+- 具体的かつ行動可能な提案（「健康に気をつける」等の抽象表現は禁止）
+- 日本の制度・サービスを前提にする`;
+
 export async function buildServerSystemPrompt(body, tokenId, env, { aiMemo, ragResults } = {}) {
   const injectFields = body.profile_inject || ['nickname'];
 

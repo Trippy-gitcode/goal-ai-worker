@@ -2940,6 +2940,9 @@ function renderTodayScreen(){
   // Secretary memo (rule-based)
   renderSecretaryMemo(allTasks, todayStr);
 
+  // C: QOL提案カード表示
+  renderQOLProposals();
+
   // B-08: ドラッグ並替初期化
   initTodayDrag();
   // B-16: 日記読込
@@ -3439,6 +3442,76 @@ async function sendTaskAddMsg(){
   }
 }
 
+// ═══ UX-01-C: QOL提案カード（TODAY画面） ═══
+let _qolProposalsCache = null;
+
+async function loadQOLProposals(){
+  try {
+    const res = await fetch(`${WORKER_URL}/api/me/identity`, { headers: getAuthHeaders() });
+    if(!res.ok) return [];
+    const data = await res.json();
+    _qolProposalsCache = data.qol_proposals || [];
+    return _qolProposalsCache;
+  } catch(e){ return []; }
+}
+
+function renderQOLProposals(){
+  const slot = document.getElementById('qol-proposal-slot');
+  const list = document.getElementById('qol-proposal-list');
+  if(!slot || !list) return;
+
+  const proposals = _qolProposalsCache || window._qolProposalsCache;
+  if(!proposals || !proposals.length){
+    slot.style.display = 'none';
+    return;
+  }
+  slot.style.display = '';
+  const catIcons = { health:'💪', finance:'💰', career:'🚀', lifestyle:'✨', relationship:'💬' };
+  const urgColors = { now:'var(--red)', this_month:'var(--amber)', this_quarter:'var(--muted)' };
+  list.innerHTML = proposals.map((p, i) => `
+    <div style="padding:10px 12px;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;cursor:pointer;" onclick="expandQOLCard(${i})">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <span style="font-size:14px;">${catIcons[p.category] || '💡'}</span>
+        <span style="font-size:13px;color:var(--cream);font-weight:500;flex:1;">${escapeHtml(p.title)}</span>
+        <span style="font-size:10px;color:${urgColors[p.urgency] || 'var(--muted)'};text-transform:uppercase;">${p.urgency === 'now' ? '今すぐ' : p.urgency === 'this_month' ? '今月中' : '今期中'}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.4;">${escapeHtml(p.description)}</div>
+      <div id="qol-expand-${i}" style="display:none;margin-top:8px;">
+        <button onclick="event.stopPropagation();acceptQOLProposal(${i})" style="width:100%;padding:8px;background:var(--amber);color:#1a1a2e;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">やる</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function expandQOLCard(idx){
+  // Toggle expand
+  const el = document.getElementById('qol-expand-' + idx);
+  if(!el) return;
+  const wasOpen = el.style.display !== 'none';
+  // Close all
+  document.querySelectorAll('[id^="qol-expand-"]').forEach(e => e.style.display = 'none');
+  if(!wasOpen) el.style.display = '';
+}
+
+function acceptQOLProposal(idx){
+  const proposals = _qolProposalsCache;
+  if(!proposals || !proposals[idx]) return;
+  const title = proposals[idx].title;
+  // Navigate to TALK and auto-input
+  if(typeof switchTab === 'function') switchTab('chat');
+  setTimeout(() => {
+    const input = document.getElementById('home-input');
+    if(input){
+      input.value = `${title}をやりたい`;
+      input.focus();
+      input.dispatchEvent(new Event('input'));
+    }
+  }, 300);
+}
+
+window.expandQOLCard = expandQOLCard;
+window.acceptQOLProposal = acceptQOLProposal;
+
 // Mutable primitives shared cross-file
 Object.defineProperty(window, 'memoToastShown', {
   get() { return memoToastShown; }, set(v) { memoToastShown = v; },
@@ -3491,6 +3564,7 @@ Object.assign(window, {
   retryWithRoute, recordRoutingFeedback, stopHomeStream,
   renderTodayScreen, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask,
   saveTodayDiary, loadTodayDiary, getDiaryDate, generateDiaryTitle, processTaskUpdateTags, processIntentTags, acceptGoalProposal, initTodayDrag,
+  loadQOLProposals, renderQOLProposals, acceptQOLProposal, expandQOLCard,
   openTodayAddTask, closeTodayAddTask, sendTaskAddMsg
 });
 
