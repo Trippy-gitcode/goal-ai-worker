@@ -149,6 +149,13 @@ export async function canUseModel(tokenId, plan, model, env) {
   return { allowed: used < limit, remaining: Math.max(0, limit - used) };
 }
 
+// ═══════ Embedding Turn Count (was: KV emb_tc: → now: Supabase) ═══════
+
+export async function incrementEmbeddingTurnCount(env, tokenId) {
+  const dayKey = getDayKey();
+  return sbIncrement(env, tokenId, 'emb_tc', dayKey);
+}
+
 // ═══════ Fair Use (hourly + weekly, was: KV 2 puts → now: Supabase) ═══════
 
 export async function checkFairUse(env, userId) {
