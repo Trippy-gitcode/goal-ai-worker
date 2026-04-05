@@ -9,7 +9,7 @@ import { handleDeepOpenAI, handleDeepGemini, handleDeepClaude, handleDeepClaudeS
 import { handleTokenRegister, handleTokenCreate, handleTokenValidate, handleTokenRedeem } from './routes/token.js';
 import { handleUsageGet, handleAvatarUpload, handleFeedbackSave, handleDiarySave, handleDiaryGet } from './routes/misc.js';
 import { handleCheckoutCreate, handleCheckoutPortal, handleStripeWebhook } from './routes/checkout.js';
-import { handleGoalsList, handleGoalCreate, handleGoalUpdate, handleGoalDelete, handleSuggestRoles, handleSuggestTasks, handleExtractGoals } from './routes/goals.js';
+import { handleGoalsList, handleGoalCreate, handleGoalUpdate, handleGoalDelete, handleSuggestRoles, handleSuggestTasks, handleExtractGoals, handleGoalLinkCreate, handleGoalLinksGet } from './routes/goals.js';
 import { handleHistoryGet, handleHistorySave, handleHistoryDelete } from './routes/history.js';
 import { handleVoiceTranscribe } from './routes/voice.js';
 import { handleReferralCode, handleReferralCreate, handleReferralApply, handleReferralStatus } from './routes/referral.js';
@@ -18,6 +18,7 @@ import { handleAIMemoGenerate } from './routes/memo.js';
 import { handlePlanStatus } from './routes/plan.js';
 import { handleAdminTesters, handleFeedbackList } from './routes/admin.js';
 import { handleAccountDelete, handleAccountExport } from './routes/account.js';
+import { handleIdentityGet, handleIdentityPut } from './routes/me.js';
 
 const app = new Hono();
 
@@ -91,6 +92,8 @@ app.post('/api/goals/:id/suggest-roles', async (c) => withCors(c, await handleSu
 app.post('/api/goals/:id/suggest-tasks', async (c) => withCors(c, await handleSuggestTasks(c.req.raw, c.env)));
 app.post('/api/goals/extract-from-history', async (c) => withCors(c, await handleExtractGoals(c.req.raw, c.env)));
 app.delete('/api/goals/:id', async (c) => withCors(c, await handleGoalDelete(c.req.raw, c.env, new URL(c.req.url))));
+app.post('/api/goals/link', async (c) => withCors(c, await handleGoalLinkCreate(c.req.raw, c.env)));
+app.get('/api/goals/:id/links', async (c) => withCors(c, await handleGoalLinksGet(c.req.raw, c.env, new URL(c.req.url))));
 
 // ── History ──
 app.get('/api/history', async (c) => withCors(c, await handleHistoryGet(c.req.raw, c.env, new URL(c.req.url))));
@@ -133,6 +136,10 @@ app.post('/api/feedback/routing', async (c) => {
   } catch(e) {}
   return withCors(c, jsonRes({ ok: true }));
 });
+
+// ── ME (Identity) ──
+app.get('/api/me/identity', async (c) => withCors(c, await handleIdentityGet(c.req.raw, c.env)));
+app.put('/api/me/identity', async (c) => withCors(c, await handleIdentityPut(c.req.raw, c.env)));
 
 // ── Account ──
 app.post('/api/account/delete', async (c) => withCors(c, await handleAccountDelete(c.req.raw, c.env)));

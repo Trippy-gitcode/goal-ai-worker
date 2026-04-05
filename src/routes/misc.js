@@ -67,7 +67,7 @@ export async function handleFeedbackSave(request, env) {
 export async function handleDiarySave(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, 401);
-  const userId = await getUserIdFromToken(auth.tokenId, env);
+  const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'user not found' }, 404);
   const body = await request.json();
   const date = body.date || new Date().toISOString().slice(0, 10);
@@ -81,7 +81,7 @@ export async function handleDiarySave(request, env) {
 export async function handleDiaryGet(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, 401);
-  const userId = await getUserIdFromToken(auth.tokenId, env);
+  const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'user not found' }, 404);
   const url = new URL(request.url);
   const date = url.searchParams.get('date') || new Date().toISOString().slice(0, 10);

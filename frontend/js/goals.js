@@ -688,7 +688,7 @@ function renderCalendar(){
     html += '</div>';
 
     // All-day tasks row
-    html += '<div class="cal-week-allday"><div class="cal-time-col" style="font-size:10px;color:var(--muted);">終日</div>';
+    html += '<div class="cal-week-allday"><div class="cal-time-col" style="font-size:12px;color:var(--muted);">終日</div>';
     for (let d = 0; d < 7; d++) {
       const day = new Date(startOfWeek);
       day.setDate(day.getDate() + d);
@@ -803,7 +803,7 @@ function showDayDetail(dateStr) {
   const rokuyo = getRokuyo(d.getFullYear(), d.getMonth(), d.getDate());
 
   let html = `<div class="cal-detail-hdr">
-    <span>${dayLabel}${holiday ? ' <span style="color:var(--red);font-size:12px;">'+holiday+'</span>' : ''} <span style="font-size:11px;color:var(--muted);font-weight:normal;">${rokuyo}</span></span>
+    <span>${dayLabel}${holiday ? ' <span style="color:var(--red);font-size:12px;">'+holiday+'</span>' : ''} <span style="font-size:12px;color:var(--muted);font-weight:normal;">${rokuyo}</span></span>
     <button onclick="document.getElementById('cal-day-detail').style.display='none'" style="background:none;border:none;color:var(--cream);font-size:18px;cursor:pointer;">×</button>
   </div>`;
 
@@ -824,8 +824,8 @@ function showDayDetail(dateStr) {
   const diaryContent = localStorage.getItem('diary_' + dateStr);
   if(diaryContent){
     html += `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;border:0.5px solid var(--border);">
-      <div style="font-size:8px;color:var(--amber);font-weight:500;margin-bottom:4px;">日記</div>
-      <div style="font-size:10px;color:var(--cream);line-height:1.5;white-space:pre-wrap;">${escapeHtml(diaryContent)}</div>
+      <div style="font-size:12px;color:var(--amber);font-weight:500;margin-bottom:4px;">日記</div>
+      <div style="font-size:12px;color:var(--cream);line-height:1.5;white-space:pre-wrap;">${escapeHtml(diaryContent)}</div>
     </div>`;
   }
 
@@ -1062,7 +1062,7 @@ function renderGantt(){
       lbl.className = 'gantt-label';
       const statusDot = task.status==='done'?'✓':task.status==='current'?'●':'○';
       const statusColor = task.status==='done'?'var(--green)':task.status==='current'?'var(--amber)':'var(--muted2)';
-      lbl.innerHTML = `<span style="color:${statusColor};font-size:10px;flex-shrink:0">${statusDot}</span><span title="${escapeHtml(task.title)}">${escapeHtml(task.title)}</span>`;
+      lbl.innerHTML = `<span style="color:${statusColor};font-size:12px;flex-shrink:0">${statusDot}</span><span title="${escapeHtml(task.title)}">${escapeHtml(task.title)}</span>`;
 
       // Bar track
       const track = document.createElement('div');
@@ -1111,7 +1111,7 @@ function renderGantt(){
 
   // Today marker legend
   const legend = document.createElement('div');
-  legend.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:16px;font-size:10px;color:var(--muted2);font-family:var(--fm);';
+  legend.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:16px;font-size:12px;color:var(--muted2);font-family:var(--fm);';
   legend.innerHTML = `<span style="width:12px;height:1px;background:var(--amber);opacity:.7;display:inline-block"></span> 今日 (${new Date().toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'})})　　クリックでタスク詳細を開けます`;
   inner.appendChild(legend);
 }
@@ -1159,7 +1159,7 @@ function openGoalHub(idx){
   document.getElementById('hub-prog-target').style.left = goal.target + '%';
   document.getElementById('hub-stat-pct').innerHTML =
     `<span style="color:${isOk?'var(--green)':'var(--red)'};font-weight:500">${goal.actual}%</span>` +
-    `<span style="color:var(--muted2);font-size:9px"> / 目安${goal.target}%</span>`;
+    `<span style="color:var(--muted2);font-size:12px"> / 目安${goal.target}%</span>`;
 
   // Deadline
   const hasDeadline = goal.deadline && goal.deadline !== 'null';
@@ -1292,7 +1292,7 @@ function renderHubTasks(){
     phHd.className = 'tgroup';
     const doneCnt = phase.tasks.filter(t=>t.status==='done').length;
     const pct = phase.tasks.length ? Math.round(doneCnt/phase.tasks.length*100) : 0;
-    phHd.innerHTML = `<span class="tgroup-icon">${phase.icon||''}</span>${phase.phaseTitle}<span style="font-size:8px;color:var(--muted2);margin-left:4px;">${doneCnt}/${phase.tasks.length}</span><div class="tgroup-prog"><div class="tgroup-prog-fill" style="width:${pct}%"></div></div>`;
+    phHd.innerHTML = `<span class="tgroup-icon">${phase.icon||''}</span>${phase.phaseTitle}<span style="font-size:12px;color:var(--muted2);margin-left:4px;">${doneCnt}/${phase.tasks.length}</span><div class="tgroup-prog"><div class="tgroup-prog-fill" style="width:${pct}%"></div></div>`;
     ph.appendChild(phHd);
     // 完了タスクを下部に自動移動（#05b）
     const sorted = [...phase.tasks].sort((a,b) => (a.status==='done'?1:0) - (b.status==='done'?1:0));
@@ -1397,21 +1397,21 @@ function renderHubAnalytics(){
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
       <div style="background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;padding:14px 16px;text-align:center;">
         <div style="font-family:var(--fd);font-size:28px;font-weight:300;color:${isOk?'var(--green)':'var(--red)'}">${goal.actual}%</div>
-        <div style="font-size:9px;color:var(--muted2);margin-top:3px;letter-spacing:.1em;font-family:var(--fm)">現在の進捗</div>
+        <div style="font-size:12px;color:var(--muted2);margin-top:3px;letter-spacing:.1em;font-family:var(--fm)">現在の進捗</div>
       </div>
       <div style="background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;padding:14px 16px;text-align:center;">
         <div style="font-family:var(--fd);font-size:28px;font-weight:300;color:var(--amber)">${goal.target}%</div>
-        <div style="font-size:9px;color:var(--muted2);margin-top:3px;letter-spacing:.1em;font-family:var(--fm)">今日の予定</div>
+        <div style="font-size:12px;color:var(--muted2);margin-top:3px;letter-spacing:.1em;font-family:var(--fm)">今日の予定</div>
       </div>
       <div style="background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;padding:14px 16px;text-align:center;">
         <div style="font-family:var(--fd);font-size:28px;font-weight:300;color:${daysLeft<30?'var(--red)':'var(--cream)'}">${daysLeft}</div>
-        <div style="font-size:9px;color:var(--muted2);margin-top:3px;letter-spacing:.1em;font-family:var(--fm)">残り日数</div>
+        <div style="font-size:12px;color:var(--muted2);margin-top:3px;letter-spacing:.1em;font-family:var(--fm)">残り日数</div>
       </div>
     </div>
 
     <!-- Pace prediction -->
     <div style="background:${isOk?'var(--green-d)':'var(--red-d)'};border:1px solid ${isOk?'var(--green-d)':'var(--red-d)'};border-radius:10px;padding:16px 18px;margin-bottom:20px;">
-      <div style="font-size:10px;letter-spacing:.12em;color:${isOk?'var(--green)':'var(--red)'};font-family:var(--fm);margin-bottom:8px;">
+      <div style="font-size:12px;letter-spacing:.12em;color:${isOk?'var(--green)':'var(--red)'};font-family:var(--fm);margin-bottom:8px;">
         ${isOk ? '✓ 現在のペースで順調' : '⚠ このペースが続くと…'}
       </div>
       ${isOk
@@ -1422,15 +1422,15 @@ function renderHubAnalytics(){
 
     <!-- Phase progress bars -->
     <div style="background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;padding:16px 18px;">
-      <div style="font-size:10px;letter-spacing:.12em;color:var(--muted2);font-family:var(--fm);margin-bottom:14px;">フェーズ別進捗</div>
+      <div style="font-size:12px;letter-spacing:.12em;color:var(--muted2);font-family:var(--fm);margin-bottom:14px;">フェーズ別進捗</div>
       ${goal.phases.map(ph => {
         const done = ph.tasks.filter(t=>t.status==='done').length;
         const total = ph.tasks.length;
         const pct = total ? Math.round(done/total*100) : 0;
         return `<div style="margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-            <div style="font-size:11px;color:var(--cream)">${ph.phaseTitle}</div>
-            <div style="font-size:10px;font-family:var(--fm);color:${ph.phaseColor}">${done}/${total}</div>
+            <div style="font-size:12px;color:var(--cream)">${ph.phaseTitle}</div>
+            <div style="font-size:12px;font-family:var(--fm);color:${ph.phaseColor}">${done}/${total}</div>
           </div>
           <div style="height:5px;background:var(--muted3);border-radius:3px;overflow:hidden;">
             <div style="height:100%;width:${pct}%;background:${ph.phaseColor};border-radius:3px;transition:width .4s;"></div>
@@ -1441,29 +1441,29 @@ function renderHubAnalytics(){
 
     <!-- 停滞ポイント (3-1) -->
     <div style="background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;padding:16px 18px;margin-top:16px;">
-      <div style="font-size:10px;letter-spacing:.12em;color:var(--muted2);font-family:var(--fm);margin-bottom:10px;">停滞ポイント</div>
-      <div id="hub-stagnation-${goal.id}" style="font-size:11px;color:var(--muted);line-height:1.6;">
+      <div style="font-size:12px;letter-spacing:.12em;color:var(--muted2);font-family:var(--fm);margin-bottom:10px;">停滞ポイント</div>
+      <div id="hub-stagnation-${goal.id}" style="font-size:12px;color:var(--muted);line-height:1.6;">
         ${(goal.stagnation_points || []).length ? goal.stagnation_points.map(sp =>
           `<div style="display:flex;align-items:baseline;gap:6px;padding:4px 0;border-bottom:0.5px solid var(--border);">
-            <span style="font-size:8px;color:var(--muted2);font-family:var(--fm);flex-shrink:0;">${sp.date||''}</span>
+            <span style="font-size:12px;color:var(--muted2);font-family:var(--fm);flex-shrink:0;">${sp.date||''}</span>
             <span style="flex:1;">${sp.content||''}</span>
-            ${sp.tag ? `<span style="font-size:7px;padding:1px 4px;border-radius:3px;flex-shrink:0;background:${sp.tag==='外部依存'?'var(--red-d)':sp.tag==='体調'?'var(--orange-d)':'var(--muted3)'};color:${sp.tag==='外部依存'?'var(--red)':sp.tag==='体調'?'var(--orange)':'var(--muted2)'};">${sp.tag}</span>` : ''}
+            ${sp.tag ? `<span style="font-size:12px;padding:1px 4px;border-radius:3px;flex-shrink:0;background:${sp.tag==='外部依存'?'var(--red-d)':sp.tag==='体調'?'var(--orange-d)':'var(--muted3)'};color:${sp.tag==='外部依存'?'var(--red)':sp.tag==='体調'?'var(--orange)':'var(--muted2)'};">${sp.tag}</span>` : ''}
           </div>`
-        ).join('') : '<div style="color:var(--muted2);font-size:10px;">停滞ポイントはまだ記録されていません。</div>'}
+        ).join('') : '<div style="color:var(--muted2);font-size:12px;">停滞ポイントはまだ記録されていません。</div>'}
       </div>
     </div>
 
     <!-- 3人寄れば文殊の知恵 (3-2) -->
     <div style="background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;padding:16px 18px;margin-top:16px;">
-      <div style="font-size:10px;letter-spacing:.12em;color:var(--muted2);font-family:var(--fm);margin-bottom:6px;">3人寄れば文殊の知恵</div>
-      <div style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:10px;">3つのAI（Gemini・ChatGPT・Claude）がそれぞれの視点でこのゴールを深く分析します。</div>
+      <div style="font-size:12px;letter-spacing:.12em;color:var(--muted2);font-family:var(--fm);margin-bottom:6px;">3人寄れば文殊の知恵</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px;">3つのAI（Gemini・ChatGPT・Claude）がそれぞれの視点でこのゴールを深く分析します。</div>
       <div style="display:flex;gap:6px;margin-bottom:10px;">
-        <span style="font-size:8px;padding:2px 8px;border-radius:10px;background:rgba(224,112,112,.1);color:var(--model-gemini);">Gemini</span>
-        <span style="font-size:8px;padding:2px 8px;border-radius:10px;background:rgba(91,141,239,.1);color:var(--model-gpt);">ChatGPT</span>
-        <span style="font-size:8px;padding:2px 8px;border-radius:10px;background:rgba(232,145,58,.1);color:var(--model-claude);">Claude</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:10px;background:rgba(224,112,112,.1);color:var(--model-gemini);">Gemini</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:10px;background:rgba(91,141,239,.1);color:var(--model-gpt);">ChatGPT</span>
+        <span style="font-size:12px;padding:2px 8px;border-radius:10px;background:rgba(232,145,58,.1);color:var(--model-claude);">Claude</span>
       </div>
       <button onclick="startDeepAnalysis(${hubGoalIdx})" style="width:100%;padding:10px;background:var(--send-btn-grad);border:none;border-radius:10px;color:var(--text-on-accent);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--ff);">ヒアリング開始</button>
-      <div style="font-size:9px;color:var(--muted2);text-align:center;margin-top:6px;">残り ${goal.deep_remaining ?? '—'} 回</div>
+      <div style="font-size:12px;color:var(--muted2);text-align:center;margin-top:6px;">残り ${goal.deep_remaining ?? '—'} 回</div>
     </div>`;
 }
 
@@ -1754,7 +1754,7 @@ function renderSidebarGoals(){
         </div>
       </div>
       <div class="gc-hub-hint">→ ゴールハブを開く</div>`;
-    addBtn.parentNode.insertBefore(div, addBtn);
+    if (addBtn && addBtn.parentNode) addBtn.parentNode.insertBefore(div, addBtn);
   });
 
   // Show upgrade nudge if free + >1 goal attempted
@@ -1782,11 +1782,11 @@ async function extractGoalsFromHistory(){
     const card = document.createElement('div');
     card.id = 'extract-goals-card';
     card.className = 'extract-goal-card';
-    card.innerHTML = `<div style="font-size:9px;font-weight:500;color:#c8920a;margin-bottom:6px;">◇ 会話から見つかったゴール候補</div>`;
+    card.innerHTML = `<div style="font-size:12px;font-weight:500;color:#c8920a;margin-bottom:6px;">◇ 会話から見つかったゴール候補</div>`;
     goals.forEach(g => {
       const row = document.createElement('div');
       row.className = 'extract-goal-item';
-      row.innerHTML = `<div><div style="color:var(--cream)">${escapeHtml(g.title)}</div><div style="font-size:8px;color:var(--muted2);margin-top:1px">${escapeHtml(g.reason||'')}</div></div><span style="color:#c8920a;cursor:pointer;font-size:9px;flex-shrink:0;" onclick="adoptExtractedGoal('${escapeHtml(g.title).replace(/'/g,"\\'")}')">＋ 作成</span>`;
+      row.innerHTML = `<div><div style="color:var(--cream)">${escapeHtml(g.title)}</div><div style="font-size:12px;color:var(--muted2);margin-top:1px">${escapeHtml(g.reason||'')}</div></div><span style="color:#c8920a;cursor:pointer;font-size:12px;flex-shrink:0;" onclick="adoptExtractedGoal('${escapeHtml(g.title).replace(/'/g,"\\'")}')">＋ 作成</span>`;
       card.appendChild(row);
     });
     btn.after(card);
@@ -1893,7 +1893,31 @@ async function init(){
     if (savedGoals.length > 0) {
       ALL_GOALS.length = 0;
       savedGoals.forEach(g => ALL_GOALS.push(g));
+      // localStorageバックアップからphasesを復元（DBにphasesカラムがない場合のフォールバック）
+      try{
+        const backup = JSON.parse(localStorage.getItem('goal_phases_backup') || '[]');
+        if(backup.length > 0){
+          for(const goal of ALL_GOALS){
+            if(!goal.phases || goal.phases.length === 0){
+              const saved = backup.find(b => String(b.supabaseId) === String(goal.supabaseId) || String(b.id) === String(goal.id));
+              if(saved && saved.phases && saved.phases.length > 0) goal.phases = saved.phases;
+            }
+          }
+        }
+      }catch(e){}
       renderSidebarGoals();
+      if(typeof renderTodayScreen === 'function') renderTodayScreen();
+    } else {
+      // Supabaseにゴールがない場合もlocalStorageから復元
+      try{
+        const backup = JSON.parse(localStorage.getItem('goal_phases_backup') || '[]');
+        if(backup.length > 0){
+          ALL_GOALS.length = 0;
+          backup.forEach(g => ALL_GOALS.push(g));
+          renderSidebarGoals();
+          if(typeof renderTodayScreen === 'function') renderTodayScreen();
+        }
+      }catch(e){}
     }
   }
   if(typeof renderLifeTasks === 'function') renderLifeTasks();
@@ -2042,8 +2066,8 @@ function showVoiceTaskProposal(title, due){
   const el = document.createElement('div');
   el.style.cssText = 'padding:10px 16px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:10px;margin:8px 16px;font-size:12px;display:flex;align-items:center;gap:10px;';
   el.innerHTML = `<span style="flex:1;color:var(--cream);">📝 「${title}」をタスクに追加？</span>
-    <button onclick="addVoiceTask('${title.replace(/'/g,"\\'")}','${due||''}');this.parentElement.remove();" style="padding:5px 12px;background:var(--send-btn-grad);border:none;border-radius:6px;font-size:11px;color:var(--text-on-accent);cursor:pointer;font-family:var(--ff);">追加</button>
-    <button onclick="this.parentElement.remove();" style="padding:5px 8px;background:none;border:1px solid var(--border2);border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--ff);">✕</button>`;
+    <button onclick="addVoiceTask('${title.replace(/'/g,"\\'")}','${due||''}');this.parentElement.remove();" style="padding:5px 12px;background:var(--send-btn-grad);border:none;border-radius:6px;font-size:12px;color:var(--text-on-accent);cursor:pointer;font-family:var(--ff);">追加</button>
+    <button onclick="this.parentElement.remove();" style="padding:5px 8px;background:none;border:1px solid var(--border2);border-radius:6px;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--ff);">✕</button>`;
   const inner = document.getElementById('home-chat-inner');
   if(inner) inner.appendChild(el);
 }
@@ -2055,7 +2079,8 @@ function addVoiceTask(title, due){
   if(!goal.phases) goal.phases = [];
   if(!goal.phases.length) goal.phases.push({name:'タスク',tasks:[]});
   goal.phases[0].tasks.push({id:crypto.randomUUID?crypto.randomUUID():'t_'+Date.now(),title,status:'todo',due:due||'',priority:'medium'});
-  saveGoals();
+  // ゴールをAPI経由で永続化
+  if(goal.supabaseId) apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(() => {});
   toast('タスクを追加しました：'+title);
 }
 
@@ -2075,7 +2100,7 @@ function renderMicroTask(){
   if(!activeGoals.length){ el.innerHTML=''; return; }
   // AIに今日の1%タスクを聞く
   el.innerHTML = `<div class="micro-task-card" style="padding:12px 16px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:10px;margin-top:10px;">
-    <div style="font-size:10px;color:var(--amber);font-weight:600;letter-spacing:.1em;margin-bottom:6px;">● 今日の1%</div>
+    <div style="font-size:12px;color:var(--amber);font-weight:600;letter-spacing:.1em;margin-bottom:6px;">● 今日の1%</div>
     <div style="font-size:12px;color:var(--muted);">生成中…</div>
   </div>`;
   generateMicroTask(el, todayKey, activeGoals);
@@ -2100,7 +2125,7 @@ function renderMicroTaskUI(el, micro){
   el.innerHTML = `<div class="micro-task-card" style="padding:12px 16px;background:${micro.done?'var(--green-d)':'var(--amber-g)'};border:1px solid ${micro.done?'var(--green-d)':'var(--amber-d)'};border-radius:10px;margin-top:10px;display:flex;align-items:center;gap:12px;transition:all .3s;">
     <div class="micro-check" onclick="completeMicroTask()" style="width:22px;height:22px;border-radius:50%;border:2px solid ${micro.done?'var(--green)':'var(--amber)'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:12px;background:${micro.done?'var(--green)':'transparent'};color:${micro.done?'var(--bg)':'transparent'};transition:all .3s;">${micro.done?'✓':''}</div>
     <div style="flex:1;">
-      <div style="font-size:10px;color:${micro.done?'var(--green)':'var(--amber)'};font-weight:600;letter-spacing:.1em;margin-bottom:3px;">● 今日の1%</div>
+      <div style="font-size:12px;color:${micro.done?'var(--green)':'var(--amber)'};font-weight:600;letter-spacing:.1em;margin-bottom:3px;">● 今日の1%</div>
       <div style="font-size:12.5px;color:var(--cream);${micro.done?'text-decoration:line-through;opacity:.6;':''}">${micro.task}</div>
     </div>
   </div>`;
@@ -2156,7 +2181,7 @@ async function exportTorisetsuPDF(){
   }
   if(p.knowSummary) html += section('AIによるまとめ', p.knowSummary);
 
-  html += `<div style="margin-top:32px;text-align:center;font-size:10px;color:#ccc;">Generated by GOAL AI — https://goal-ai-frontend.pages.dev</div>`;
+  html += `<div style="margin-top:32px;text-align:center;font-size:12px;color:#ccc;">Generated by GOAL AI — https://goal-ai-frontend.pages.dev</div>`;
 
   container.innerHTML = html;
   document.body.appendChild(container);
@@ -2199,7 +2224,7 @@ function openExportModal(){
       <div style="font-size:14px;font-weight:600;color:var(--cream);">エクスポート</div>
       <button onclick="document.getElementById('export-modal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;">✕</button>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">${goal.title}</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">${goal.title}</div>
     <div style="display:flex;flex-direction:column;gap:8px;">
       <button class="export-opt" onclick="exportICS('${goal.title.replace(/'/g,"\\'")}');document.getElementById('export-modal').remove();" style="padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--cream);cursor:pointer;font-family:var(--ff);font-size:12px;text-align:left;transition:all .15s;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)'">📅 Google Calendar (.ics)</button>
       <button class="export-opt" onclick="exportNotion();document.getElementById('export-modal').remove();" style="padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--cream);cursor:pointer;font-family:var(--ff);font-size:12px;text-align:left;transition:all .15s;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)'">📝 Notion (Markdown)</button>
@@ -2292,7 +2317,7 @@ function openGoalModal() {
     html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;" onclick="document.getElementById(\'goal-fullscreen-modal\')?.remove();openGoalHub(' + i + ');">';
     html += '<span style="width:12px;height:12px;border-radius:50%;background:' + color + ';flex-shrink:0;"></span>';
     html += '<span style="color:var(--cream);font-weight:600;flex:1;">' + escapeHtml(g.title) + '</span>';
-    html += '<span style="font-size:11px;color:var(--muted);">' + pct + '%</span>';
+    html += '<span style="font-size:12px;color:var(--muted);">' + pct + '%</span>';
     html += '<div style="width:60px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:2px;"></div></div>';
     html += '</div>';
 
@@ -2426,7 +2451,7 @@ async function showRoleSelection(goal) {
         ${suggestions.map((s,i) => `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border-card);border-radius:10px;cursor:pointer;transition:border-color .15s;" onclick="this.querySelector('input').checked=true;this.closest('.modal-content').querySelectorAll('label').forEach(l=>l.style.borderColor='var(--border-card)');this.style.borderColor='var(--amber)';">
           <input type="radio" name="ai-role" value="${i}" style="display:none;">
           <span style="font-size:24px;">${s.icon}</span>
-          <div><div style="font-weight:600;color:var(--cream);font-size:13px;">${escapeHtml(s.name)}</div><div style="font-size:11px;color:var(--muted);">${escapeHtml(s.description)}</div></div>
+          <div><div style="font-weight:600;color:var(--cream);font-size:13px;">${escapeHtml(s.name)}</div><div style="font-size:12px;color:var(--muted);">${escapeHtml(s.description)}</div></div>
         </label>`).join('')}
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end;">
@@ -2503,7 +2528,7 @@ function renderGoalsList(){
         <div style="font-size:16px;font-weight:600;color:var(--amber);flex-shrink:0;">${pct}%</div>
       </div>
       <div style="height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#c8920a,#f5d380);border-radius:2px;"></div></div>
-      <div style="font-size:8px;color:var(--muted2);margin-top:6px;">タスク ${doneTasks}/${totalTasks}完了</div>
+      <div style="font-size:12px;color:var(--muted2);margin-top:6px;">タスク ${doneTasks}/${totalTasks}完了</div>
     </div>`;
   }).join('');
 }
@@ -2541,9 +2566,9 @@ function renderWishlist(){
   let html = wishes.map((w,i) => `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);">
     <div onclick="toggleWish(${i})" style="width:20px;height:20px;border-radius:50%;border:1px solid ${w.done?'var(--green)':'var(--border2)'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">${w.done?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}</div>
     <div style="flex:1;font-size:12px;color:${w.done?'var(--muted2)':'var(--cream)'};${w.done?'text-decoration:line-through;':''}">${escapeHtml(w.title)}</div>
-    <button onclick="promoteWish(${i})" style="font-size:8px;padding:3px 8px;background:var(--amber-d);border:0.5px solid var(--amber);border-radius:6px;color:var(--amber);cursor:pointer;border:none;">ゴール化</button>
+    <button onclick="promoteWish(${i})" style="font-size:12px;padding:3px 8px;background:var(--amber-d);border:0.5px solid var(--amber);border-radius:6px;color:var(--amber);cursor:pointer;border:none;">ゴール化</button>
   </div>`).join('');
-  html += `<div style="padding:10px 0;"><input id="wish-input" placeholder="やりたいことを追加..." style="width:100%;padding:8px 10px;background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;color:var(--cream);font-family:var(--ff);font-size:11px;outline:none;box-sizing:border-box;" onkeydown="if(event.key==='Enter'){addWish(this.value);this.value=''}"></div>`;
+  html += `<div style="padding:10px 0;"><input id="wish-input" placeholder="やりたいことを追加..." style="width:100%;padding:8px 10px;background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;color:var(--cream);font-family:var(--ff);font-size:12px;outline:none;box-sizing:border-box;" onkeydown="if(event.key==='Enter'){addWish(this.value);this.value=''}"></div>`;
   el.innerHTML = html;
 }
 

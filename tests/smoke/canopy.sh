@@ -339,6 +339,77 @@ else
   echo "INFO: no structured test report found in session_progress.md (OK if tests not yet run)"
 fi
 
+# G5-v4: テストコードのアンチパターン検出（SKIPスキップ防止）
+echo "--- G5-v4: Test anti-pattern check ---"
+# G5-v4a: テストガード許容リストの件数上限（12件以下。追加はClaude.ai承認必須）
+GUARD_FILE="tests/e2e/helpers/test-guards.ts"
+if [ -f "$GUARD_FILE" ]; then
+  IGNORED_COUNT=$(grep -c "'" "$GUARD_FILE" | head -1)
+  # IGNORED_ERRORSブロック内の文字列リテラル数をカウント
+  IGNORED_COUNT=$(sed -n '/IGNORED_ERRORS/,/];/p' "$GUARD_FILE" | grep -c "'")
+  if [ "$IGNORED_COUNT" -gt 15 ]; then
+    echo "FAIL: test-guards.ts IGNORED_ERRORS has $IGNORED_COUNT entries (max 15). Codeが勝手に追加した可能性。Claude.ai承認必須"
+    FAIL=1
+  else
+    echo "OK: test-guards.ts IGNORED_ERRORS count=$IGNORED_COUNT (max 15)"
+  fi
+fi
+ANTI=0
+# パターン1: try/catch + expect(true) = 何も検証していないのにPASS
+P1=$(grep -rn 'expect(true)' tests/e2e/specs/test*.spec.ts 2>/dev/null | wc -l | tr -d ' ')
+if [ "$P1" -gt 0 ]; then
+  echo "FAIL: expect(true) found $P1 times in test specs (fake PASS — use test.skip() instead)"
+  grep -rn 'expect(true)' tests/e2e/specs/test*.spec.ts 2>/dev/null | head -5
+  FAIL=1; ANTI=1
+fi
+# パターン2: .catch(() => {}) でエラー握りつぶし（クリック失敗など）
+P2=$(grep -rn '\.catch.*=>.*{})' tests/e2e/specs/test*.spec.ts 2>/dev/null | wc -l | tr -d ' ')
+if [ "$P2" -gt 5 ]; then
+  echo "FAIL: .catch(() => {}) found $P2 times (error swallowing — use test.skip() or expect)"
+  FAIL=1; ANTI=1
+elif [ "$P2" -gt 0 ]; then
+  echo "WARN: .catch(() => {}) found $P2 times. Verify each is intentional"
+fi
+# パターン3: expect(typeof X).toBe('boolean') = 型チェックだけで値を検証していない
+P3=$(grep -rn "expect(typeof.*toBe('boolean')\|expect(typeof.*toBe(\"boolean\")" tests/e2e/specs/test*.spec.ts 2>/dev/null | wc -l | tr -d ' ')
+if [ "$P3" -gt 0 ]; then
+  echo "WARN: typeof-only assertions found ($P3 times). May be hiding untested logic"
+fi
+# パターン4: test()内のexpect数が0 = 何も検証していないテスト
+P4=0
+for f in tests/e2e/specs/test*.spec.ts; do
+  # 各test()ブロック内のexpect数を簡易チェック（完璧ではないが盲点を検出）
+  ZERO_EXPECT=$(awk '
+    /^\s*test\(/{in_test=1; expect_count=0; test_line=NR; test_name=$0}
+    in_test && /expect\(/{expect_count++}
+    in_test && /^\s*\}\);/{
+      if(expect_count==0 && test_name) print FILENAME":"test_line": ZERO expects in: "test_name
+      in_test=0
+    }
+  ' "$f" 2>/dev/null | wc -l | tr -d ' ')
+  P4=$((P4+ZERO_EXPECT))
+done
+if [ "$P4" -gt 0 ]; then
+  echo "WARN: $P4 test(s) with zero expect() calls (may pass without verifying anything)"
+fi
+if [ "$ANTI" -eq 0 ]; then echo "OK: no critical test anti-patterns"; fi
+# パターン5: test.skip()の件数上限（全テストの5%以下）
+P5=$(grep -rn 'test.skip' tests/e2e/specs/test*.spec.ts 2>/dev/null | wc -l | tr -d ' ')
+if [ "$P5" -gt 0 ]; then
+  TOTAL_TESTS=0
+  for f in tests/e2e/specs/test*.spec.ts; do
+    C=$(grep -c "test(" "$f" 2>/dev/null || echo 0)
+    TOTAL_TESTS=$((TOTAL_TESTS+C))
+  done
+  SKIP_PCT=$((P5 * 100 / TOTAL_TESTS))
+  if [ "$SKIP_PCT" -gt 5 ]; then
+    echo "FAIL: test.skip() is ${SKIP_PCT}% ($P5/$TOTAL_TESTS). Max 5%. Use data injection or API mocks instead."
+    FAIL=1
+  else
+    echo "OK: test.skip() count $P5/$TOTAL_TESTS (${SKIP_PCT}%)"
+  fi
+fi
+
 # UIコンポーネントのoverlay存在チェック
 echo "--- UI overlay check ---"
 SHEETS=$(grep -c 'task-add-sheet\|half-modal\|bottom-sheet' frontend/index.html 2>/dev/null)

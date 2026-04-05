@@ -225,7 +225,7 @@ function appendWorryBubble(m){
   const wrap = document.createElement('div');
   wrap.style.cssText = `display:flex;gap:8px;${m.role==='user'?'flex-direction:row-reverse;':''}animation:fadeUp .3s ease both`;
   const av = document.createElement('div');
-  av.style.cssText = `width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;${m.role==='ai'?'background:var(--avatar-bg);color:var(--mencare);border:1px solid var(--mencare-d)':'background:linear-gradient(135deg,var(--amber),var(--accent));color:var(--text-on-accent);font-weight:700'}`;
+  av.style.cssText = `width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;margin-top:1px;${m.role==='ai'?'background:var(--avatar-bg);color:var(--mencare);border:1px solid var(--mencare-d)':'background:linear-gradient(135deg,var(--amber),var(--accent));color:var(--text-on-accent);font-weight:700'}`;
   if(m.role==='ai'){av.innerHTML=getLogoSVG(12);}else{const ut=getUserAvatarText();if(ut)av.textContent=ut;else av.textContent='U';}
   const bub = document.createElement('div');
   bub.style.cssText = `max-width:85%;padding:9px 13px;border-radius:11px;font-size:12px;line-height:1.75;${m.role==='ai'?'background:var(--bg3);border:1px solid var(--border);border-radius:3px 11px 11px 11px;color:var(--cream)':'background:var(--mencare-d);border:1px solid var(--mencare-d);border-radius:11px 3px 11px 11px;color:var(--cream)'}`;
@@ -251,7 +251,7 @@ async function sendWorriesMsg(){
   const wWrap = document.createElement('div');
   wWrap.style.cssText = 'display:flex;gap:8px;animation:fadeUp .3s ease both';
   const wAv = document.createElement('div');
-  wAv.style.cssText = 'width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;background:var(--avatar-bg);color:var(--mencare);border:1px solid var(--mencare-d)';
+  wAv.style.cssText = 'width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;margin-top:1px;background:var(--avatar-bg);color:var(--mencare);border:1px solid var(--mencare-d)';
   wAv.innerHTML = getLogoSVG(12);
   const wBub = document.createElement('div');
   wBub.className = 'stream-bubble';
@@ -294,14 +294,14 @@ function editWorriesSummary(){
   const box = document.getElementById('worries-summary-text');
   const current = box.textContent;
   const ta = document.createElement('textarea');
-  ta.style.cssText = 'width:100%;background:transparent;border:none;color:var(--cream);font-family:var(--ff);font-size:11.5px;line-height:1.75;resize:none;outline:none;';
+  ta.style.cssText = 'width:100%;background:transparent;border:none;color:var(--cream);font-family:var(--ff);font-size:12px;line-height:1.75;resize:none;outline:none;';
   ta.rows = 4; ta.value = current;
   box.replaceWith(ta);
   ta.focus();
   ta.addEventListener('blur', ()=>{
     const newDiv = document.createElement('div');
     newDiv.id = 'worries-summary-text';
-    newDiv.style.cssText = 'font-size:11.5px;color:var(--cream);line-height:1.75;white-space:pre-wrap;';
+    newDiv.style.cssText = 'font-size:12px;color:var(--cream);line-height:1.75;white-space:pre-wrap;';
     newDiv.textContent = ta.value;
     ta.replaceWith(newDiv);
   });
@@ -748,8 +748,8 @@ function editVision(){
   const current = el.textContent.trim().replace(/^「|」$/g,'');
   el.innerHTML = `<textarea style="width:100%;background:transparent;border:none;color:var(--cream);font-family:var(--ff);font-size:14px;line-height:1.9;resize:none;outline:none;font-style:italic;" rows="3" id="vision-edit">${escapeHtml(current)}</textarea>
   <div style="display:flex;gap:8px;margin-top:8px;">
-    <button onclick="saveVision()" style="padding:5px 13px;background:var(--know-purple-bg);border:1px solid var(--know-purple-border);border-radius:6px;color:var(--know-purple);font-size:10px;cursor:pointer;font-family:var(--ff);">保存</button>
-    <button onclick="renderVision()" style="padding:5px 13px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:10px;cursor:pointer;font-family:var(--ff);">キャンセル</button>
+    <button onclick="saveVision()" style="padding:5px 13px;background:var(--know-purple-bg);border:1px solid var(--know-purple-border);border-radius:6px;color:var(--know-purple);font-size:12px;cursor:pointer;font-family:var(--ff);">保存</button>
+    <button onclick="renderVision()" style="padding:5px 13px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--ff);">キャンセル</button>
   </div>`;
 }
 function saveVision(){
@@ -927,23 +927,23 @@ function renderConnectContent(loading=false, data=null){
         <div class="connect-card-hd">${g.goal}</div>
         <div class="connect-card-body">${g.description||''}</div>
         <div style="display:flex;align-items:center;gap:6px;margin:8px 0;">
-          <span style="font-size:8px;color:var(--muted);">相性:</span>
+          <span style="font-size:12px;color:var(--muted);">相性:</span>
           <div style="width:80px;height:4px;border-radius:2px;background:var(--muted3);overflow:hidden;">
             <div style="height:100%;width:${pct}%;border-radius:2px;background:${barColor};"></div>
           </div>
-          <span style="font-size:9px;font-weight:500;color:${pctColor};">${pct}%</span>
+          <span style="font-size:12px;font-weight:500;color:${pctColor};">${pct}%</span>
         </div>
-        ${g.advice?`<div style="padding:8px 10px;border-radius:6px;background:rgba(200,146,10,0.04);border:0.5px solid rgba(200,146,10,0.15);margin-top:6px;font-size:9px;color:var(--muted);line-height:1.5;">
-          <div style="font-size:8px;font-weight:500;color:var(--amber);margin-bottom:3px;">${getLogoSVG(10)} AIアドバイス</div>${g.advice}
+        ${g.advice?`<div style="padding:8px 10px;border-radius:6px;background:rgba(200,146,10,0.04);border:0.5px solid rgba(200,146,10,0.15);margin-top:6px;font-size:12px;color:var(--muted);line-height:1.5;">
+          <div style="font-size:12px;font-weight:500;color:var(--amber);margin-bottom:3px;">${getLogoSVG(10)} AIアドバイス</div>${g.advice}
         </div>`:''}
-        ${isWarn?`<div onclick="hubChatFromConnect('${goalSafe}','改善方法を教えて')" style="display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;border:0.5px solid rgba(200,146,10,0.3);color:#c8920a;font-size:9px;cursor:pointer;width:fit-content;margin-top:6px;">→ 改善方法をAIに相談する</div>`:''}
+        ${isWarn?`<div onclick="hubChatFromConnect('${goalSafe}','改善方法を教えて')" style="display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;border:0.5px solid rgba(200,146,10,0.3);color:#c8920a;font-size:12px;cursor:pointer;width:fit-content;margin-top:6px;">→ 改善方法をAIに相談する</div>`:''}
       </div>`;
     });
   }
   // フォールバック: 旧形式 (checks/feedback) — パース失敗時の互換性維持
   else if(data.checks?.length || data.feedback?.length){
     if(data.checks?.length){
-      html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin-bottom:8px;">⚠ 確認項目</div>`;
+      html += `<div style="font-size:12px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin-bottom:8px;">⚠ 確認項目</div>`;
       data.checks.forEach(c=>{
         html += `<div class="connect-card" style="border-color:${c.type==='warning'?'var(--red-d)':'var(--green-d)'}">
           <div class="connect-card-hd" style="color:${c.type==='warning'?'var(--red)':'var(--green)'}">${c.type==='warning'?'⚠':'✓'} ${c.goal}</div>
@@ -952,7 +952,7 @@ function renderConnectContent(loading=false, data=null){
       });
     }
     if(data.feedback?.length){
-      html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:16px 0 8px;">📊 フィードバック</div>`;
+      html += `<div style="font-size:12px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:16px 0 8px;">📊 フィードバック</div>`;
       data.feedback.forEach(f=>{
         html += `<div class="connect-card">
           <div class="connect-card-hd" style="color:${f.type==='ok'?'var(--green)':'var(--amber)'}">${f.type==='ok'?'✓':'⚠'} ${f.goal}</div>
@@ -963,7 +963,7 @@ function renderConnectContent(loading=false, data=null){
   }
   // ideas（新旧共通）
   if(data.ideas?.length){
-    html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:16px 0 8px;">◇ ビジョンから生まれるゴールアイデア</div>`;
+    html += `<div style="font-size:12px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:16px 0 8px;">◇ ビジョンから生まれるゴールアイデア</div>`;
     data.ideas.forEach(id=>{
       html += `<div class="connect-card">
         <div class="connect-card-hd" style="color:var(--know-purple)">◇ ${id.title}</div>
@@ -1175,9 +1175,9 @@ function startMbtiTest(mode){
   // Show mode toggle
   wrap.innerHTML = `
     <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
-      <div style="font-size:10px;color:var(--muted2);">診断モード：</div>
-      <div onclick="startMbtiTest('quick')" style="padding:4px 11px;border-radius:5px;font-size:10px;cursor:pointer;border:1px solid ${mbtiMode==='quick'?'var(--mode-normal-border)':'var(--border2)'};background:${mbtiMode==='quick'?'var(--amber-g)':'transparent'};color:${mbtiMode==='quick'?'var(--amber)':'var(--muted2)'}">簡易（10問・2分）</div>
-      <div onclick="startMbtiTest('full')" style="padding:4px 11px;border-radius:5px;font-size:10px;cursor:pointer;border:1px solid ${mbtiMode==='full'?'var(--mode-normal-border)':'var(--border2)'};background:${mbtiMode==='full'?'var(--amber-g)':'transparent'};color:${mbtiMode==='full'?'var(--amber)':'var(--muted2)'}">本格（60問・15分）</div>
+      <div style="font-size:12px;color:var(--muted2);">診断モード：</div>
+      <div onclick="startMbtiTest('quick')" style="padding:4px 11px;border-radius:5px;font-size:12px;cursor:pointer;border:1px solid ${mbtiMode==='quick'?'var(--mode-normal-border)':'var(--border2)'};background:${mbtiMode==='quick'?'var(--amber-g)':'transparent'};color:${mbtiMode==='quick'?'var(--amber)':'var(--muted2)'}">簡易（10問・2分）</div>
+      <div onclick="startMbtiTest('full')" style="padding:4px 11px;border-radius:5px;font-size:12px;cursor:pointer;border:1px solid ${mbtiMode==='full'?'var(--mode-normal-border)':'var(--border2)'};background:${mbtiMode==='full'?'var(--amber-g)':'transparent'};color:${mbtiMode==='full'?'var(--amber)':'var(--muted2)'}">本格（60問・15分）</div>
     </div>
     <div class="mbti-progress-bar"><div class="mbti-progress-fill" id="mbti-prog" style="width:0%"></div></div>
     <div id="mbti-questions-area"></div>`;
@@ -1198,7 +1198,7 @@ function renderMbtiQuestion(){
     const nameEl = document.querySelector('.mbti-current-name');
     if(nameEl){ nameEl.textContent=info.n; }
     area.innerHTML = `<div class="mbti-result-card">
-      <div style="font-size:10px;color:var(--muted2);font-family:var(--fm);margin-bottom:8px;">${mbtiMode==='full'?'本格診断':'簡易診断'}の結果</div>
+      <div style="font-size:12px;color:var(--muted2);font-family:var(--fm);margin-bottom:8px;">${mbtiMode==='full'?'本格診断':'簡易診断'}の結果</div>
       <div class="mbti-result-type">${type}</div>
       <div class="mbti-result-name">${info.n}</div>
       <div class="mbti-result-desc">${info.d}</div>
@@ -1275,27 +1275,27 @@ function renderGapContent(data){
   const typ = {action:'▲',mindset:'◆',skill:'■'};
   let html = '';
   if(data.gaps?.length){
-    html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin-bottom:9px;">現実との乖離</div>`;
+    html += `<div style="font-size:12px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin-bottom:9px;">現実との乖離</div>`;
     data.gaps.forEach(g=>{
       html += `<div style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:13px 16px;margin-bottom:8px;border-left:3px solid ${sev[g.severity]||'var(--muted2)'};">
-        <div style="font-size:11.5px;font-weight:500;color:var(--cream);margin-bottom:5px;">${g.title}</div>
-        <div style="font-size:11px;color:var(--muted);line-height:1.7;">${g.detail}</div></div>`;
+        <div style="font-size:12px;font-weight:500;color:var(--cream);margin-bottom:5px;">${g.title}</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;">${g.detail}</div></div>`;
     });
   }
   if(data.challenges?.length){
-    html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:14px 0 9px;">パーソナル課題提案</div>`;
+    html += `<div style="font-size:12px;letter-spacing:.15em;color:var(--muted2);font-family:var(--fm);margin:14px 0 9px;">パーソナル課題提案</div>`;
     data.challenges.forEach(c=>{
       html += `<div style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:13px 16px;margin-bottom:8px;">
-        <div style="font-size:11.5px;font-weight:500;color:var(--cream);margin-bottom:5px;">${typ[c.type]||'◇'} ${c.title}</div>
-        <div style="font-size:11px;color:var(--muted);line-height:1.7;">${c.detail}</div></div>`;
+        <div style="font-size:12px;font-weight:500;color:var(--cream);margin-bottom:5px;">${typ[c.type]||'◇'} ${c.title}</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;">${c.detail}</div></div>`;
     });
   }
   if(data.quickwins?.length){
-    html += `<div style="font-size:9px;letter-spacing:.15em;color:var(--green);font-family:var(--fm);margin:14px 0 9px;">→ 今週できること</div>`;
+    html += `<div style="font-size:12px;letter-spacing:.15em;color:var(--green);font-family:var(--fm);margin:14px 0 9px;">→ 今週できること</div>`;
     data.quickwins.forEach(q=>{
       html += `<div style="background:var(--green-d);border:1px solid var(--green-d);border-radius:9px;padding:11px 15px;margin-bottom:7px;">
-        <div style="font-size:11.5px;font-weight:500;color:var(--green);margin-bottom:4px;">${q.title}</div>
-        <div style="font-size:11px;color:var(--muted);line-height:1.65;">${q.detail}</div></div>`;
+        <div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:4px;">${q.title}</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">${q.detail}</div></div>`;
     });
   }
   el.innerHTML = html || '<div style="color:var(--green);font-size:12px;padding:8px 0;">✓ 大きな乖離は検出されませんでした。このまま継続しましょう。</div>';

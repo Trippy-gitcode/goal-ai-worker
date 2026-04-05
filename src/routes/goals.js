@@ -39,6 +39,7 @@ export async function handleGoalUpdate(request, env, url) {
   if (body.progress !== undefined) updates.progress = body.progress;
   if (body.targetDate !== undefined) updates.target_date = body.targetDate;
   if (body.lastMilestonePct !== undefined) updates.last_milestone_pct = body.lastMilestonePct;
+  if (body.phases !== undefined) updates.phases = body.phases;
   const result = await supabaseQuery(env, 'goals', 'PATCH', { filters: `id=eq.${goalId}&user_id=eq.${userId}`, body: updates });
   // B4: ゴール変更時にprofile KVキャッシュをinvalidate
   await env.TOKEN_KV.delete(`profile:${auth.tokenId}`).catch(() => {});
@@ -109,6 +110,33 @@ export async function handleExtractGoals(request, env) {
   } catch(e) {
     return jsonRes({ goals: [] });
   }
+}
+
+// UX-01-A5: ゴール間リンク作成
+export async function handleGoalLinkCreate(request, env) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+  const userId = await getUserIdFromToken(env, auth.tokenId);
+  if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
+  const body = await request.json();
+  const { goal_id_from, goal_id_to, link_type, created_by } = body;
+  if (!goal_id_from || !goal_id_to) return jsonRes({ error: 'goal_id_from and goal_id_to required' }, 400);
+  const result = await supabaseQuery(env, 'goal_links', 'POST', {
+    body: { goal_id_from, goal_id_to, link_type: link_type || 'related', created_by: created_by || 'manual' },
+  });
+  return jsonRes({ link: result?.[0] || null }, 201);
+}
+
+// UX-01-A5: ゴールの関連ゴール取得
+export async function handleGoalLinksGet(request, env, url) {
+  const auth = await authenticateRequest(request, env);
+  if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+  const parts = url.pathname.split('/');
+  const goalId = parts[parts.indexOf('goals') + 1];
+  const links = await supabaseQuery(env, 'goal_links', 'GET', {
+    filters: `or=(goal_id_from.eq.${goalId},goal_id_to.eq.${goalId})`,
+  });
+  return jsonRes({ links: links || [] });
 }
 
 export async function handleSuggestRoles(request, env) {

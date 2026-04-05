@@ -18,7 +18,7 @@ async function apiLoadGoals() {
       archived: g.status === 'archived',
       archiveReason: g.archive_reason || null,
       archivedAt: g.archived_at || null,
-      phases: []
+      phases: g.phases || []
     }));
   } catch (e) { console.error('apiLoadGoals error:', e); return []; }
 }

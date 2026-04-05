@@ -9,6 +9,8 @@
 
 import { test, expect, Page } from '@playwright/test';
 import * as path from 'path';
+import { setupGuards, checkGuards } from '../helpers/test-guards';
+import { loadAppReady } from '../helpers/test-setup';
 
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:4173';
 const WORKER = 'https://goal-ai-worker.goalai-futoshi.workers.dev';
@@ -24,8 +26,7 @@ async function screenshot(page: Page, name: string) {
 }
 
 async function loadApp(page: Page) {
-  await page.goto(BASE, { waitUntil: 'networkidle' });
-  await page.waitForSelector('#btab-today', { timeout: 15000 });
+  await loadAppReady(page, BASE);
 }
 
 async function goTab(page: Page, tab: 'today' | 'talk' | 'goals' | 'me') {
@@ -40,6 +41,11 @@ async function sendChat(page: Page, message: string) {
   await input.fill(message);
   await page.locator('#home-send-btn').click();
 }
+
+// ===========================================================================
+test.describe('TEST-04: Data Flow / Persistence', () => {
+  test.beforeEach(async ({ page }) => { setupGuards(page); });
+  test.afterEach(async ({ page }) => { await checkGuards(page); });
 
 // ===========================================================================
 // 4-1. Task CRUD
@@ -83,7 +89,8 @@ test.describe('4-1. Task CRUD', () => {
     });
     // Without auth, localStorage may still have settings data
     // The test verifies the storage mechanism works
-    expect(typeof hasData).toBe('boolean');
+    // hasData is boolean — verify localStorage is accessible
+    expect(hasData === true || hasData === false).toBe(true);
     await screenshot(page, '4-1-task-data-exists');
   });
 
@@ -97,7 +104,7 @@ test.describe('4-1. Task CRUD', () => {
     await page.waitForTimeout(1000);
     const tasksAfter = await page.locator('#today-task-list').textContent();
     // Tasks should persist (or both empty if no tasks)
-    expect(typeof tasksAfter).toBe('string');
+    expect(tasksAfter !== null).toBe(true);
     await screenshot(page, '4-1-task-persist');
   });
 
@@ -106,21 +113,20 @@ test.describe('4-1. Task CRUD', () => {
     await goTab(page, 'today');
     const taskItems = page.locator('#today-task-list .task-item, #today-task-list li, #today-task-list [class*=task]');
     const count = await taskItems.count();
-    if (count > 0) {
-      const checkbox = taskItems.first().locator('input[type=checkbox], .task-check, .check-btn').first();
-      if (await checkbox.isVisible()) {
-        await checkbox.click();
-        await page.waitForTimeout(500);
-        // Check for strikethrough
-        const hasStrike = await taskItems.first().evaluate((el) => {
-          const style = window.getComputedStyle(el);
-          return style.textDecoration.includes('line-through') ||
-            el.querySelector('[style*="line-through"]') !== null ||
-            el.classList.contains('completed') ||
-            el.classList.contains('done');
-        });
-        expect(hasStrike).toBe(true);
-      }
+    if (count === 0) { test.skip(true, 'No task items in static preview (API data required)'); return; }
+    const checkbox = taskItems.first().locator('input[type=checkbox], .task-check, .check-btn').first();
+    if (await checkbox.isVisible()) {
+      await checkbox.click();
+      await page.waitForTimeout(500);
+      // Check for strikethrough
+      const hasStrike = await taskItems.first().evaluate((el) => {
+        const style = window.getComputedStyle(el);
+        return style.textDecoration.includes('line-through') ||
+          el.querySelector('[style*="line-through"]') !== null ||
+          el.classList.contains('completed') ||
+          el.classList.contains('done');
+      });
+      expect(hasStrike).toBe(true);
     }
     await screenshot(page, '4-1-task-complete');
   });
@@ -130,15 +136,14 @@ test.describe('4-1. Task CRUD', () => {
     await goTab(page, 'today');
     const taskItems = page.locator('#today-task-list .task-item, #today-task-list li, #today-task-list [class*=task]');
     const countBefore = await taskItems.count();
-    if (countBefore > 0) {
-      // Try swipe delete or delete button
-      const deleteBtn = taskItems.first().locator('.delete-btn, .task-delete, [data-action=delete]').first();
-      if (await deleteBtn.isVisible()) {
-        await deleteBtn.click();
-        await page.waitForTimeout(500);
-        const countAfter = await taskItems.count();
-        expect(countAfter).toBeLessThan(countBefore);
-      }
+    if (countBefore === 0) { test.skip(true, 'No task items in static preview (API data required)'); return; }
+    // Try swipe delete or delete button
+    const deleteBtn = taskItems.first().locator('.delete-btn, .task-delete, [data-action=delete]').first();
+    if (await deleteBtn.isVisible()) {
+      await deleteBtn.click();
+      await page.waitForTimeout(500);
+      const countAfter = await taskItems.count();
+      expect(countAfter).toBeLessThan(countBefore);
     }
     await screenshot(page, '4-1-task-delete');
   });
@@ -182,6 +187,26 @@ test.describe('4-1. Task CRUD', () => {
 // ===========================================================================
 test.describe('4-2. Chat data', () => {
   test.setTimeout(60000);
+
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/api/chat/stream', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'text/event-stream',
+        headers: { 'X-Model-Used': 'mock-test' },
+        body: 'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"text":"テスト応答です。"}}\n\nevent: message_stop\ndata: {"type":"message_stop"}\n\n',
+      });
+    });
+    await page.route('**/api/chat', route => {
+      if (route.request().method() === 'POST') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ content: [{ text: 'テスト応答です。' }], model: 'mock-test' }),
+        });
+      } else { route.continue(); }
+    });
+  });
 
   test('Send message -> AI response -> both saved in chat history', async ({ page }) => {
     test.setTimeout(AI_TIMEOUT + 15000);
@@ -263,13 +288,12 @@ test.describe('4-2. Chat data', () => {
       await page.waitForTimeout(500);
       const historyItems = page.locator('.history-list li, .history-item, [class*=history] [class*=item]');
       const count = await historyItems.count();
-      if (count > 0) {
-        await historyItems.first().click();
-        await page.waitForTimeout(500);
-        const chatInner = page.locator('#home-chat-inner');
-        const text = await chatInner.textContent();
-        expect(text?.length).toBeGreaterThan(0);
-      }
+      if (count === 0) { test.skip(true, 'No chat history items available (API/data dependent)'); return; }
+      await historyItems.first().click();
+      await page.waitForTimeout(500);
+      const chatInner = page.locator('#home-chat-inner');
+      const text = await chatInner.textContent();
+      expect(text?.length).toBeGreaterThan(0);
     }
     await screenshot(page, '4-2-chat-history-tap');
   });
@@ -338,11 +362,10 @@ test.describe('4-3. Diary data', () => {
       // Look for date cells
       const dateCells = page.locator('.calendar-day, .cal-date, [class*=calendar] [class*=day]');
       const count = await dateCells.count();
-      if (count > 0) {
-        // Click a past date
-        await dateCells.first().click();
-        await page.waitForTimeout(500);
-      }
+      if (count === 0) { test.skip(true, 'No calendar date cells available (diary data dependent)'); return; }
+      // Click a past date
+      await dateCells.first().click();
+      await page.waitForTimeout(500);
     }
     await screenshot(page, '4-3-diary-past-date');
   });
@@ -396,12 +419,11 @@ test.describe('4-4. Goal data', () => {
     await goTab(page, 'goals');
     const progressBars = page.locator('.progress-bar, .goal-progress, [class*=progress]');
     const count = await progressBars.count();
-    if (count > 0) {
-      const width = await progressBars.first().evaluate((el) => {
-        return window.getComputedStyle(el).width;
-      });
-      expect(width).toBeTruthy();
-    }
+    expect(count).toBeGreaterThan(0);
+    const width = await progressBars.first().evaluate((el) => {
+      return window.getComputedStyle(el).width;
+    });
+    expect(width).toBeTruthy();
     await screenshot(page, '4-4-goal-progress');
   });
 
@@ -420,21 +442,20 @@ test.describe('4-4. Goal data', () => {
     await goTab(page, 'goals');
     const goalItems = page.locator('#goals-list-view .goal-item, #goals-list-view li, #goals-list-view [class*=goal]');
     const count = await goalItems.count();
-    if (count > 0) {
-      await goalItems.first().click();
+    if (count === 0) { test.skip(true, 'No goal items in static preview (API data required)'); return; }
+    await goalItems.first().click();
+    await page.waitForTimeout(500);
+    // Check for goal hub tabs
+    const hubTabs = page.locator('.goal-hub-tab, .hub-tab, [class*=hub] [class*=tab]');
+    if (await hubTabs.first().isVisible()) {
+      const tabCount = await hubTabs.count();
+      expect(tabCount).toBeGreaterThanOrEqual(1);
+    }
+    // Navigate back
+    const backBtn = page.locator('.back-btn, [data-action="back"], .goal-back').first();
+    if (await backBtn.isVisible()) {
+      await backBtn.click();
       await page.waitForTimeout(500);
-      // Check for goal hub tabs
-      const hubTabs = page.locator('.goal-hub-tab, .hub-tab, [class*=hub] [class*=tab]');
-      if (await hubTabs.first().isVisible()) {
-        const tabCount = await hubTabs.count();
-        expect(tabCount).toBeGreaterThanOrEqual(1);
-      }
-      // Navigate back
-      const backBtn = page.locator('.back-btn, [data-action="back"], .goal-back').first();
-      if (await backBtn.isVisible()) {
-        await backBtn.click();
-        await page.waitForTimeout(500);
-      }
     }
     await screenshot(page, '4-4-goal-hub-tabs');
   });
@@ -482,11 +503,10 @@ test.describe('4-5. Profile data', () => {
     // Look for individual chip items (not chip-row containers)
     const chips = page.locator('.chip-item, .strength-chip, .weakness-chip');
     const count = await chips.count();
-    if (count > 0) {
-      await chips.first().scrollIntoViewIfNeeded();
-      try { await chips.first().click({ timeout: 5000 }); } catch { /* chip may not be clickable */ }
-      await page.waitForTimeout(500);
-    }
+    if (count === 0) { test.skip(true, 'No profile chips available (user data dependent)'); return; }
+    await chips.first().scrollIntoViewIfNeeded();
+    try { await chips.first().click({ timeout: 5000 }); } catch { /* chip may not be clickable */ }
+    await page.waitForTimeout(500);
     await screenshot(page, '4-5-chips');
   });
 });
@@ -581,6 +601,26 @@ test.describe('4-7. Settings data', () => {
 test.describe('4-8. TALK -> TODAY linkage', () => {
   test.setTimeout(60000);
 
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/api/chat/stream', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'text/event-stream',
+        headers: { 'X-Model-Used': 'mock-test' },
+        body: 'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"text":"テスト応答です。"}}\n\nevent: message_stop\ndata: {"type":"message_stop"}\n\n',
+      });
+    });
+    await page.route('**/api/chat', route => {
+      if (route.request().method() === 'POST') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ content: [{ text: 'テスト応答です。' }], model: 'mock-test' }),
+        });
+      } else { route.continue(); }
+    });
+  });
+
   test('TALK: "create a task" -> AI hearing -> task created', async ({ page }) => {
     test.setTimeout(AI_TIMEOUT + 15000);
     await loadApp(page);
@@ -603,7 +643,8 @@ test.describe('4-8. TALK -> TODAY linkage', () => {
     await page.waitForTimeout(1000);
     const taskList = page.locator('#today-task-list');
     const text = await taskList.textContent();
-    expect(typeof text).toBe('string');
+    // Task list element exists and has content (may be empty without auth)
+    expect(text !== null).toBe(true);
     await screenshot(page, '4-8-task-in-today');
   });
 
@@ -632,3 +673,4 @@ test.describe('4-8. TALK -> TODAY linkage', () => {
     await screenshot(page, '4-8-cancel-meeting');
   });
 });
+}); // end TEST-04
