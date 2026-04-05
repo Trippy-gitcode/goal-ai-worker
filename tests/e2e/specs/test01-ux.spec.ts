@@ -9,6 +9,8 @@
 
 import { test, expect, Page } from '@playwright/test';
 import * as path from 'path';
+import { setupGuards, checkGuards } from '../helpers/test-guards';
+import { loadAppReady } from '../helpers/test-setup';
 
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:4173';
 const SCREENSHOT_DIR = path.resolve(__dirname, '../screenshots/test01');
@@ -23,9 +25,7 @@ async function screenshot(page: Page, name: string) {
 
 /** Navigate to app and wait for auth / initial render */
 async function loadApp(page: Page) {
-  await page.goto(BASE, { waitUntil: 'networkidle' });
-  // ensureAuth runs on load — wait for bottom tabs to appear
-  await page.waitForSelector('#btab-today', { timeout: 15000 });
+  await loadAppReady(page, BASE);
 }
 
 /** Switch to a bottom tab */
@@ -74,9 +74,11 @@ test.describe.configure({ mode: 'parallel' });
 
 test.describe('1-1. TODAY "+" button task creation', () => {
   test.beforeEach(async ({ page }) => {
+    setupGuards(page);
     await loadApp(page);
     await goTab(page, 'today');
   });
+  test.afterEach(async ({ page }) => { await checkGuards(page); });
 
   test('1-1-a: + button tap opens half-modal sheet (not TALK)', async ({ page }) => {
     await page.click('#today-add-fab');
@@ -1288,10 +1290,9 @@ test.describe('6. Sidebar', () => {
     await page.waitForTimeout(1000);
     // handleModeClick shows a confirm modal with #_mode-confirm-btn ("設定する")
     const confirmBtn = page.locator('#_mode-confirm-btn');
-    if (await confirmBtn.count() > 0 && await confirmBtn.isVisible()) {
-      await confirmBtn.click();
-      await page.waitForTimeout(1000);
-    }
+    await expect(confirmBtn).toBeVisible();
+    await confirmBtn.click();
+    await page.waitForTimeout(1000);
     // Re-open sidebar to check chip state
     const sbVisible = await page.locator('#sb').isVisible();
     if (!sbVisible) {
@@ -1315,10 +1316,9 @@ test.describe('6. Sidebar', () => {
     await page.waitForTimeout(400);
     const historyItems = page.locator('#sb-chat-records > *');
     const count = await historyItems.count();
-    if (count > 0) {
-      await historyItems.first().click();
-      await page.waitForTimeout(500);
-    }
+    if (count === 0) { test.skip(true, 'No chat history records available (API/data dependent)'); return; }
+    await historyItems.first().click();
+    await page.waitForTimeout(500);
     await screenshot(page, '6-d_chat_history');
   });
 

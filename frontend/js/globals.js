@@ -26,7 +26,9 @@ let FREE_MODEL_USAGE = {
 };
 
 // ════════ WORKER CONFIG ════════
-const WORKER_URL = 'https://goal-ai-worker.goalai-futoshi.workers.dev';
+const WORKER_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? ''
+  : 'https://goal-ai-worker.goalai-futoshi.workers.dev';
 let AUTH_TOKEN = null;
 let STREAK = { count: 0, best: 0, lastDate: null };
 
@@ -119,7 +121,7 @@ function getDeviceId() {
   return 'dev_' + Math.abs(hash).toString(36);
 }
 
-const APP_VERSION = '4.0.5';
+const APP_VERSION = '4.0.8';
 
 const FONT_SIZES = {
   xs: { label: '極小', base: '14px', lh: '1.55' },
@@ -150,11 +152,92 @@ Object.defineProperty(window, 'currentSessionId', {
   get() { return currentSessionId; }, set(v) { currentSessionId = v; },
   configurable: true, enumerable: true
 });
+// ════════ OWNER BYPASS ════════
+function checkOwnerParam() {
+  const params = new URLSearchParams(window.location.search);
+  const ownerKey = params.get('owner');
+  if (!ownerKey) return;
+  window.history.replaceState({}, '', window.location.pathname);
+  setCookie('owner_key', ownerKey, 3650);
+}
+
+// オーナーキーをAPI呼び出し時にヘッダーに含める
+const _origGetAuthHeaders = getAuthHeaders;
+getAuthHeaders = function() {
+  const h = _origGetAuthHeaders();
+  const ok = getCookie('owner_key');
+  if (ok) h['X-Owner-Key'] = ok;
+  return h;
+};
+
+// ════════ TESTER URL AUTO-APPLY ════════
+async function checkTesterParam() {
+  const params = new URLSearchParams(window.location.search);
+  const testerCode = params.get('tester');
+  if (!testerCode) return;
+  window.history.replaceState({}, '', window.location.pathname);
+  try {
+    const res = await fetch(`${WORKER_URL}/api/tester/apply`, {
+      method: 'POST', headers: getAuthHeaders(),
+      body: JSON.stringify({ tester_code: testerCode })
+    });
+    const data = await res.json();
+    if (res.ok && data.status === 'success') {
+      toast(`テスターコード適用！${data.plan === 'premium' ? 'Premium' : 'Pro'}プランを72時間お試しいただけます`);
+      MEMBERSHIP.plan = data.plan;
+      MEMBERSHIP.tester_tier = data.tier;
+      MEMBERSHIP.tester_expires_at = data.expires_at;
+    } else {
+      toast(data.error || 'コード適用エラー');
+    }
+  } catch (e) { toast('コード適用失敗: ' + e.message); }
+}
+
+// ════════ TESTER AUTO-VERSION CHECK ════════
+function startVersionCheck() {
+  if (!MEMBERSHIP.tester_tier) return;
+  setInterval(async () => {
+    try {
+      const res = await fetch(WORKER_URL + '/api/version');
+      const data = await res.json();
+      if (data.version !== APP_VERSION) {
+        if ('caches' in window) {
+          const names = await caches.keys();
+          await Promise.all(names.map(n => caches.delete(n)));
+        }
+        location.reload();
+      }
+    } catch (e) {}
+  }, 5 * 60 * 1000);
+}
+
+// ════════ PRO EXPIRY BANNER ════════
+function checkPlanExpiry() {
+  if (!MEMBERSHIP.tester_expires_at) return;
+  const remaining = new Date(MEMBERSHIP.tester_expires_at) - Date.now();
+  const hoursLeft = Math.floor(remaining / (1000 * 60 * 60));
+  if (hoursLeft <= 0 || hoursLeft > 12) return;
+  showExpiryBanner(hoursLeft);
+}
+
+function showExpiryBanner(hoursLeft) {
+  let banner = document.getElementById('expiry-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'expiry-banner';
+    banner.className = 'expiry-banner';
+    document.body.prepend(banner);
+  }
+  const planName = MEMBERSHIP.plan === 'premium' ? 'Premium' : 'Pro';
+  banner.innerHTML = `<span>⏰ ${planName}プランの体験期間が残り${hoursLeft}時間です</span><button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--bg);cursor:pointer;font-size:1rem;padding:0 4px;">✕</button>`;
+}
+
 // Objects, constants, functions
 Object.assign(window, {
   DEEP_TRIGGERS, MEMBERSHIP, FREE_MODEL_USAGE, WORKER_URL,
   STREAK, APP_VERSION, FONT_SIZES,
   updateStreak, renderStreak, setCookie, getCookie, deleteCookie,
-  ensureAuth, getAuthHeaders, getDeviceId, setFontSize
+  ensureAuth, getAuthHeaders, getDeviceId, setFontSize,
+  checkOwnerParam, checkTesterParam, startVersionCheck, checkPlanExpiry, showExpiryBanner
 });
 

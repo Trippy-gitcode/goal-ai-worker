@@ -9,6 +9,8 @@
 
 import { test, expect, Page } from '@playwright/test';
 import * as path from 'path';
+import { setupGuards, checkGuards } from '../helpers/test-guards';
+import { loadAppReady } from '../helpers/test-setup';
 
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:4173';
 const WORKER = 'https://goal-ai-worker.goalai-futoshi.workers.dev';
@@ -23,8 +25,7 @@ async function screenshot(page: Page, name: string) {
 }
 
 async function loadApp(page: Page) {
-  await page.goto(BASE, { waitUntil: 'networkidle' });
-  await page.waitForSelector('#btab-today', { timeout: 15000 });
+  await loadAppReady(page, BASE);
 }
 
 async function goTab(page: Page, tab: 'today' | 'talk' | 'goals' | 'me') {
@@ -43,6 +44,11 @@ async function goOffline(page: Page) {
 async function goOnline(page: Page) {
   await page.unrouteAll({ behavior: 'ignoreErrors' });
 }
+
+// ===========================================================================
+test.describe('TEST-06: Error Handling', () => {
+  test.beforeEach(async ({ page }) => { setupGuards(page, { expectErrors: true }); });
+  test.afterEach(async ({ page }) => { await checkGuards(page); });
 
 // ===========================================================================
 // 6-1. Network errors
@@ -455,7 +461,7 @@ test.describe('6-5. Input edge cases', () => {
     try { await page.goForward(); } catch { /* no forward entry */ }
     await page.waitForTimeout(500);
     // App should still be functional
-    const tabVisible = await page.locator('#btab-today').isVisible().catch(() => false);
+    let tabVisible = await page.locator('#btab-today').isVisible();
     // Re-navigate if needed
     if (!tabVisible) {
       await page.goto(BASE, { waitUntil: 'networkidle' });
@@ -465,3 +471,4 @@ test.describe('6-5. Input edge cases', () => {
     await screenshot(page, '6-5-browser-back');
   });
 });
+}); // end TEST-06

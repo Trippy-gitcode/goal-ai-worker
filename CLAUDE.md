@@ -26,6 +26,7 @@ Free(¥0,20回/日,Sonnet+mini+3Flash) / Light(¥500~980,¥8/t,cap¥980) / Pro(�
 - 旧KVフェアユースはv6.3で完全削除済み（I/O半減）
 - このチャット(Claude.ai)は経営者+アドバイザーの場。実務は全てCode
 - **デザイン照合は双方向必須。** 正方向（mockup→実装）だけでは、後から追加した要素・JS動的生成要素を検出できない。逆方向（実装→mockup）+視覚検証を必ず行う（C14-B, C16）
+- **チェックリスト検証の一括PASS禁止（C20）。** 各項目に個別のタイムスタンプ＋スクショパスがなければ✅無効。「実装したので全PASS」は禁止。verify.sh/canopyで未検証項目をブロック
 - **mockup HTMLは原本。手書き再構成禁止。** localhostで元ファイルを配信してブラウザレンダリングする。コードを読んで推測して描くのは不正確（要素順序入替・SVG省略・CSS省略が発生する）。Claude.ai側はA8、Code側はC16で規定
 - **UI変更フロー（A9）:** 新規=Claude.aiがビジュアライザーでデザイン案→ふとし承認→Codeがmockup HTML化+実装。変更=Codeが差分調査レポート→Claude.aiが推奨判断付きで提示→ふとし判断→Codeがmockup更新→**C16 Stage 0: mockup更新前後の比較画像をふとしに提示→ふとし承認→実装修正→Stage A（localhost比較）→デプロイ→Stage B（本番比較）。** mockup承認なしに実装に着手しない。Claude.aiはHTML編集しない（鉄則2・7）。ファイル書き込みはふとし承諾後（鉄則追加）
 - **「忘れた」「間違えた」「見落とした」等の人間的ミス表現は禁止。** AIにうっかりは存在しない。エラー発生時は構造的原因（ルール不在/検証不在/参照フロー欠如/コンテキスト制約/指示の曖昧さ）を特定し、機械的ゲートの改善を提案する。Code側はC19、Claude.ai側は鉄則8の拡張で適用
@@ -108,6 +109,16 @@ session_progress.md のミッションキュー参照
 - デザイン実装手順（How）: instructions/design_impl_001.md（※spec_v3の一部をCode向け手順に変換したもの。specが上流・正）
 - Stripe: instructions/stripe_005_frontend.md / stripe_amendment_001.md / stripe_amendment_002.md
 - ルール: development_rules.md
+
+---
+
+## Compact Instructions
+auto-compact発動時に以下を必ず保持:
+1. session_progress.mdの5行サマリー全文
+2. 現在実行中のミッションIDと完了コマンド
+3. テスト実行中の場合: 最後に記録した中間結果（PASS/FAIL/SKIP数とFAILしたテストID）
+4. 未解決のエラーメッセージ（直近3件）
+5. 直前のgit diff --stat出力
 
 ---
 

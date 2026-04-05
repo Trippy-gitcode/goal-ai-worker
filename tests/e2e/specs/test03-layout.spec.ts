@@ -9,6 +9,8 @@
 
 import { test, expect, Page } from '@playwright/test';
 import * as path from 'path';
+import { setupGuards, checkGuards } from '../helpers/test-guards';
+import { loadAppReady } from '../helpers/test-setup';
 
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:4173';
 const SCREENSHOT_DIR = path.resolve(__dirname, '../screenshots/test03');
@@ -22,8 +24,7 @@ async function screenshot(page: Page, name: string) {
 }
 
 async function loadApp(page: Page) {
-  await page.goto(BASE, { waitUntil: 'networkidle' });
-  await page.waitForSelector('#btab-today', { timeout: 15000 });
+  await loadAppReady(page, BASE);
 }
 
 async function goTab(page: Page, tab: 'today' | 'talk' | 'goals' | 'me') {
@@ -68,6 +69,11 @@ async function getZIndex(page: Page, sel: string): Promise<number> {
 }
 
 // ===========================================================================
+test.describe('TEST-03: Layout / Collision / Display', () => {
+  test.beforeEach(async ({ page }) => { setupGuards(page); });
+  test.afterEach(async ({ page }) => { await checkGuards(page); });
+
+// ===========================================================================
 // 3-1. Bottom tabs and content collision
 // ===========================================================================
 test.describe('3-1. Bottom tabs and content collision', () => {
@@ -105,14 +111,14 @@ test.describe('3-1. Bottom tabs and content collision', () => {
     await goTab(page, 'talk');
     // Use the scroll container (visible area), not the inner content div
     const chatWrapEl = page.locator('#home-chat-wrap');
-    const chatWrapVisible = await chatWrapEl.isVisible().catch(() => false);
+    const chatWrapVisible = await chatWrapEl.isVisible();
+    if (!chatWrapVisible) { test.skip(true, 'No chat messages — #home-chat-wrap not visible'); return; }
     const inputBox = await page.locator('#home-input-area').boundingBox();
-    // If chat wrap is hidden (no messages yet), skip overlap check
-    if (chatWrapVisible && inputBox) {
-      const chatWrap = await chatWrapEl.boundingBox();
-      if (chatWrap) {
-        expect(chatWrap.y + chatWrap.height).toBeLessThanOrEqual(inputBox.y + 2);
-      }
+    expect(inputBox).not.toBeNull();
+    const chatWrap = await chatWrapEl.boundingBox();
+    expect(chatWrap).not.toBeNull();
+    if (chatWrap && inputBox) {
+      expect(chatWrap.y + chatWrap.height).toBeLessThanOrEqual(inputBox.y + 2);
     }
     await screenshot(page, '3-1-talk-chat-input');
   });
@@ -140,13 +146,11 @@ test.describe('3-1. Bottom tabs and content collision', () => {
   test('All pages: bottom tabs z-index above content', async ({ page }) => {
     await loadApp(page);
     const tabZ = await getZIndex(page, '#bottom-tabs');
-    // Check each page content z-index is lower
+    // Check each page content z-index is lower (page content divs are always present)
     for (const sel of ['#pg-today', '#pg-home', '#pg-goal-hub-wrap', '#pg-myself']) {
-      const visible = await page.locator(sel).isVisible().catch(() => false);
-      if (visible) {
-        const contentZ = await getZIndex(page, sel);
-        expect(tabZ).toBeGreaterThan(contentZ);
-      }
+      await expect(page.locator(sel)).toBeAttached();
+      const contentZ = await getZIndex(page, sel);
+      expect(tabZ).toBeGreaterThan(contentZ);
     }
     await screenshot(page, '3-1-zindex-tabs');
   });
@@ -366,12 +370,10 @@ test.describe('3-4. Half modal', () => {
         await page.keyboard.press('Escape');
       }
       await page.waitForTimeout(500);
-      // Verify modal is gone
+      // Verify modal is gone — sheet should be hidden after close
       const sheet = page.locator('#task-add-sheet');
-      const visible = await sheet.isVisible().catch(() => false);
-      // If sheet exists, it should be hidden
       if (await sheet.count() > 0) {
-        expect(visible).toBe(false);
+        await expect(sheet).not.toBeVisible();
       }
       // Verify main content is interactive
       await expect(page.locator('#pg-today')).toBeVisible();
@@ -437,11 +439,12 @@ test.describe('3-5. Sidebar', () => {
         await overlay.click({ position: { x: vp.width - 20, y: vp.height / 2 } });
         await page.waitForTimeout(500);
         const sb = page.locator('#sb');
-        // Sidebar should be hidden or off-screen
-        const sbVisible = await sb.isVisible().catch(() => false);
-        // Check if it's translated off-screen or hidden
+        // Sidebar should be hidden or off-screen after overlay click
+        const sbVisible = await sb.isVisible();
         if (sbVisible) {
+          // If still technically visible, it must be translated off-screen
           const box = await sb.boundingBox();
+          expect(box).not.toBeNull();
           if (box) {
             expect(box.x + box.width).toBeLessThanOrEqual(0);
           }
@@ -492,17 +495,16 @@ test.describe('3-6. Text overflow', () => {
     // Check CSS on task items for overflow handling
     const taskItems = page.locator('#today-task-list .task-item, #today-task-list li, #today-task-list [class*=task]');
     const count = await taskItems.count();
-    if (count > 0) {
-      const overflow = await taskItems.first().evaluate((el) => {
-        const style = window.getComputedStyle(el);
-        return { overflow: style.overflow, textOverflow: style.textOverflow, whiteSpace: style.whiteSpace };
-      });
-      // Either text-overflow: ellipsis or word-wrap/break applied
-      const handlesOverflow = overflow.textOverflow === 'ellipsis' ||
-        overflow.overflow === 'hidden' ||
-        overflow.whiteSpace === 'normal';
-      expect(handlesOverflow).toBe(true);
-    }
+    if (count === 0) { test.skip(true, 'No task items present — data dependent'); return; }
+    const overflow = await taskItems.first().evaluate((el) => {
+      const style = window.getComputedStyle(el);
+      return { overflow: style.overflow, textOverflow: style.textOverflow, whiteSpace: style.whiteSpace };
+    });
+    // Either text-overflow: ellipsis or word-wrap/break applied
+    const handlesOverflow = overflow.textOverflow === 'ellipsis' ||
+      overflow.overflow === 'hidden' ||
+      overflow.whiteSpace === 'normal';
+    expect(handlesOverflow).toBe(true);
     await screenshot(page, '3-6-long-task-name');
   });
 
@@ -511,16 +513,15 @@ test.describe('3-6. Text overflow', () => {
     await goTab(page, 'goals');
     const goalItems = page.locator('#goals-list-view .goal-item, #goals-list-view li, #goals-list-view [class*=goal]');
     const count = await goalItems.count();
-    if (count > 0) {
-      const overflow = await goalItems.first().evaluate((el) => {
-        const style = window.getComputedStyle(el);
-        return { overflow: style.overflow, textOverflow: style.textOverflow, whiteSpace: style.whiteSpace };
-      });
-      const handlesOverflow = overflow.textOverflow === 'ellipsis' ||
-        overflow.overflow === 'hidden' ||
-        overflow.whiteSpace === 'normal';
-      expect(handlesOverflow).toBe(true);
-    }
+    if (count === 0) { test.skip(true, 'No goal items present — data dependent'); return; }
+    const overflow = await goalItems.first().evaluate((el) => {
+      const style = window.getComputedStyle(el);
+      return { overflow: style.overflow, textOverflow: style.textOverflow, whiteSpace: style.whiteSpace };
+    });
+    const handlesOverflow = overflow.textOverflow === 'ellipsis' ||
+      overflow.overflow === 'hidden' ||
+      overflow.whiteSpace === 'normal';
+    expect(handlesOverflow).toBe(true);
     await screenshot(page, '3-6-long-goal-name');
   });
 
@@ -529,13 +530,12 @@ test.describe('3-6. Text overflow', () => {
     await goTab(page, 'talk');
     const chatBubbles = page.locator('#home-chat-inner .message, #home-chat-inner .chat-bubble, #home-chat-inner [class*=msg]');
     const count = await chatBubbles.count();
-    if (count > 0) {
-      const viewport = page.viewportSize();
-      for (let i = 0; i < Math.min(count, 5); i++) {
-        const box = await chatBubbles.nth(i).boundingBox();
-        if (box && viewport) {
-          expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 2);
-        }
+    if (count === 0) { test.skip(true, 'No chat messages present — data dependent'); return; }
+    const viewport = page.viewportSize();
+    for (let i = 0; i < Math.min(count, 5); i++) {
+      const box = await chatBubbles.nth(i).boundingBox();
+      if (box && viewport) {
+        expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 2);
       }
     }
     await screenshot(page, '3-6-long-chat-msg');
@@ -546,19 +546,19 @@ test.describe('3-6. Text overflow', () => {
     await goTab(page, 'talk');
     const badges = page.locator('.ai-badge, .model-badge, [class*=badge]');
     const count = await badges.count();
-    if (count > 0) {
-      for (let i = 0; i < Math.min(count, 3); i++) {
-        const overflow = await badges.nth(i).evaluate((el) => {
-          const style = window.getComputedStyle(el);
-          return style.overflow;
-        });
-        expect(['hidden', 'visible', '']).toContain(overflow);
-        // Check text is not wider than its container
-        const box = await badges.nth(i).boundingBox();
-        if (box) {
-          expect(box.width).toBeGreaterThan(0);
-          expect(box.width).toBeLessThan(300); // Badge should be reasonably sized
-        }
+    // No AI badges = no overflow issue = PASS
+    if (count === 0) return;
+    for (let i = 0; i < Math.min(count, 3); i++) {
+      const overflow = await badges.nth(i).evaluate((el) => {
+        const style = window.getComputedStyle(el);
+        return style.overflow;
+      });
+      expect(['hidden', 'visible', '']).toContain(overflow);
+      // Check text is not wider than its container
+      const box = await badges.nth(i).boundingBox();
+      if (box) {
+        expect(box.width).toBeGreaterThan(0);
+        expect(box.width).toBeLessThan(300); // Badge should be reasonably sized
       }
     }
     await screenshot(page, '3-6-ai-badge');
@@ -568,13 +568,13 @@ test.describe('3-6. Text overflow', () => {
     await loadApp(page);
     const tabs = page.locator('#bottom-tabs .tab-label, #bottom-tabs span, #bottom-tabs label');
     const count = await tabs.count();
-    if (count > 0) {
-      for (let i = 0; i < count; i++) {
-        const box = await tabs.nth(i).boundingBox();
-        if (box) {
-          expect(box.width).toBeGreaterThan(5);
-          expect(box.height).toBeGreaterThan(5);
-        }
+    expect(count).toBeGreaterThan(0); // Bottom tab labels are always present
+    for (let i = 0; i < count; i++) {
+      const box = await tabs.nth(i).boundingBox();
+      expect(box).not.toBeNull();
+      if (box) {
+        expect(box.width).toBeGreaterThan(5);
+        expect(box.height).toBeGreaterThan(5);
       }
     }
     await screenshot(page, '3-6-tab-labels');
@@ -677,7 +677,8 @@ test.describe('3-8. Scroll behavior', () => {
         window.getComputedStyle(el).overflowY === 'scroll';
     });
     // Either already scrollable or has overflow set correctly
-    expect(scrollable || true).toBe(true); // Pass if overflow CSS is set correctly
+    if (!scrollable) { test.skip(true, 'TODAY scroll not testable (insufficient content)'); return; }
+    expect(scrollable).toBe(true);
     await screenshot(page, '3-8-today-scroll');
   });
 
@@ -895,3 +896,4 @@ test.describe('3-10. Icons / SVG', () => {
     await screenshot(page, '3-10-hamburger');
   });
 });
+}); // end TEST-03

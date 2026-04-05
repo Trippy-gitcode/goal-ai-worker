@@ -172,18 +172,19 @@ function showPage(pg) {
   curPage = pg;
   closeSidebar();
   if(pg==='today'){
-    document.getElementById('pg-today-wrap').classList.add('active');
-    document.getElementById('topbar').style.display='none';
+    document.getElementById('pg-today-wrap')?.classList.add('active');
+    const tb1 = document.getElementById('topbar'); if(tb1) tb1.style.display='none';
+    const hp = document.getElementById('home-presets'); if(hp) hp.style.display='none';
     if(typeof renderTodayScreen === 'function') renderTodayScreen();
   } else if(pg==='home'){
-    document.getElementById('pg-home-wrap').classList.add('active');
-    document.getElementById('nav-home').classList.add('active');
-    document.getElementById('topbar').style.display='none';
+    document.getElementById('pg-home-wrap')?.classList.add('active');
+    document.getElementById('nav-home')?.classList.add('active');
+    const tb2 = document.getElementById('topbar'); if(tb2) tb2.style.display='none';
     renderHomeSummary();
     _restoreScroll('home');
   } else if(pg==='goal-hub'){
-    document.getElementById('pg-goal-hub-wrap').classList.add('active');
-    document.getElementById('topbar').style.display='none';
+    document.getElementById('pg-goal-hub-wrap')?.classList.add('active');
+    const tb3 = document.getElementById('topbar'); if(tb3) tb3.style.display='none';
     // D-02: Show goals list view, hide hub detail
     const listView = document.getElementById('goals-list-view');
     const hubView = document.getElementById('pg-goal-hub');
@@ -192,29 +193,29 @@ function showPage(pg) {
     if(typeof renderGoalsList === 'function') renderGoalsList();
     _restoreScroll('goal-hub');
   } else if(pg==='myself'){
-    document.getElementById('pg-myself-wrap').classList.add('active');
-    document.getElementById('topbar').style.display='none';
+    document.getElementById('pg-myself-wrap')?.classList.add('active');
+    const tb4 = document.getElementById('topbar'); if(tb4) tb4.style.display='none';
     renderMyselfProfile();
     runConnectAnalysis();
   } else if(pg==='tasks'){
     document.getElementById('pg-tasks-wrap')?.classList.add('active');
-    document.getElementById('topbar').style.display='none';
+    const tb5 = document.getElementById('topbar'); if(tb5) tb5.style.display='none';
     if(typeof renderTasks === 'function') renderTasks();
   } else if(pg==='calendar'){
     document.getElementById('pg-calendar-wrap')?.classList.add('active');
     if(typeof renderCalendar === 'function') renderCalendar();
-    document.getElementById('topbar').style.display='none';
+    const tb6 = document.getElementById('topbar'); if(tb6) tb6.style.display='none';
   } else if(pg==='analytics'){
     document.getElementById('pg-analytics-wrap')?.classList.add('active');
     if(typeof renderCharts === 'function') renderCharts();
     if(typeof updateAnalyticsExtras === 'function') updateAnalyticsExtras();
-    document.getElementById('topbar').style.display='none';
+    const tb7 = document.getElementById('topbar'); if(tb7) tb7.style.display='none';
   } else if(pg==='settings'){
     document.getElementById('pg-settings-wrap')?.classList.add('active');
-    document.getElementById('topbar').style.display='none';
+    const tb8 = document.getElementById('topbar'); if(tb8) tb8.style.display='none';
   } else if(pg==='welcome'){
-    document.getElementById('pg-welcome-wrap').classList.add('active');
-    document.getElementById('topbar').style.display='none';
+    document.getElementById('pg-welcome-wrap')?.classList.add('active');
+    const tb9 = document.getElementById('topbar'); if(tb9) tb9.style.display='none';
   }
   // UX-01: 入力ボックスはTALK(home)ページでのみ表示
   const inputArea = document.getElementById('home-input-area');
@@ -475,7 +476,7 @@ function showDeepConfirm(containerId, scrollId, onYes, onNo) {
       3つのAIが連携して深く分析します。<br>
       Gemini（リサーチ）→ GPT（アイデア）→ Claude（戦略）<span style="color:var(--amber)">　約30〜60秒</span>
     </div>
-    <div style="font-size:9.5px;color:var(--muted2);margin-bottom:5px;">出力形式を選択：</div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:5px;">出力形式を選択：</div>
     <div class="deep-format-row" id="deep-fmt-row">
       ${OUTPUT_FORMATS.map(f =>
         `<button class="deep-fmt-btn${f.id===_selectedFormat?' selected':''}" onclick="selectDeepFormat('${f.id}',this)">
@@ -523,7 +524,7 @@ function createDeepProgressPanel(containerId, scrollId) {
   panel.innerHTML = `
     <div class="deep-progress-title">
       <span style="animation:spin 1s linear infinite;display:inline-block">${getLogoSVG(16)}</span>
-      ディープ分析実行中… <span style="font-size:9px;color:var(--muted2);font-weight:400;margin-left:4px;">出力：${fmtLabel}</span>
+      ディープ分析実行中… <span style="font-size:12px;color:var(--muted2);font-weight:400;margin-left:4px;">出力：${fmtLabel}</span>
     </div>
     ${phases.map(p => `
       <div class="deep-phase-row" id="${p.id}">
@@ -704,7 +705,7 @@ function renderDeepResult(containerId, scrollId, results, userQuery) {
   const wrap = document.createElement('div');
   wrap.className = 'deep-result-wrap';
   wrap.innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:12px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:8px;font-size:10px;color:var(--amber);font-family:var(--fm);">
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:12px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:8px;font-size:12px;color:var(--amber);font-family:var(--fm);">
       <span>🔍 Gemini</span><span style="color:var(--border2)">→</span>
       <span>→ GPT</span><span style="color:var(--border2)">→</span>
       <span>→ Claude</span>
@@ -713,8 +714,8 @@ function renderDeepResult(containerId, scrollId, results, userQuery) {
     <div class="deep-result-header">
       <span style="color:var(--amber);">${getLogoSVG(18)}</span>
       <div style="flex:1">
-        <div style="font-size:11px;font-weight:600;color:var(--amber);">ディープ分析 — 完了</div>
-        <div style="font-size:9px;color:var(--muted2);">Gemini × GPT × Claude + デュアルレビュー</div>
+        <div style="font-size:12px;font-weight:600;color:var(--amber);">ディープ分析 — 完了</div>
+        <div style="font-size:12px;color:var(--muted2);">Gemini × GPT × Claude + デュアルレビュー</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
         <div class="deep-label-row" style="margin:0;">
@@ -722,7 +723,7 @@ function renderDeepResult(containerId, scrollId, results, userQuery) {
           ${inferCount > 0 ? `<span class="deep-label deep-label-infer">🟡 推論 ${inferCount}</span>` : ''}
           ${suggestCount > 0 ? `<span class="deep-label deep-label-suggest">🟠 提案 ${suggestCount}</span>` : ''}
         </div>
-        <span style="font-size:9px;color:var(--muted2);">今月の残り：<span style="color:${remaining<=2?'var(--amber)':'var(--green)'};">${remaining}回</span></span>
+        <span style="font-size:12px;color:var(--muted2);">今月の残り：<span style="color:${remaining<=2?'var(--amber)':'var(--green)'};">${remaining}回</span></span>
       </div>
     </div>
     <div class="deep-result-body">
@@ -733,11 +734,11 @@ function renderDeepResult(containerId, scrollId, results, userQuery) {
       </div>
       <div class="deep-review-content">
         <div style="margin-bottom:10px;">
-          <div style="font-size:9.5px;color:var(--green);margin-bottom:4px;font-weight:600;">🟡 GPT レビュー（事実・推論・実現性）</div>
+          <div style="font-size:12px;color:var(--green);margin-bottom:4px;font-weight:600;">🟡 GPT レビュー（事実・推論・実現性）</div>
           <div>${renderMsgContent(results.gptReview)}</div>
         </div>
         <div>
-          <div style="font-size:9.5px;color:var(--blue);margin-bottom:4px;font-weight:600;">🔵 Gemini レビュー（エビデンス・競合整合性）</div>
+          <div style="font-size:12px;color:var(--blue);margin-bottom:4px;font-weight:600;">🔵 Gemini レビュー（エビデンス・競合整合性）</div>
           <div>${renderMsgContent(results.geminiReview)}</div>
         </div>
       </div>
@@ -792,7 +793,7 @@ function exportDeepFormat(format, results, title) {
       h1{font-size:18px;border-bottom:2px solid #e4b86a;padding-bottom:6px;color:#b8882a;}
       h2{font-size:14px;color:#555;margin-top:24px;}
       .review{background:#f8f8f8;border-left:3px solid #ccc;padding:10px 14px;margin:10px 0;font-size:12px;}
-      .meta{font-size:11px;color:#888;margin-bottom:20px;}
+      .meta{font-size:12px;color:#888;margin-bottom:20px;}
       pre{white-space:pre-wrap;font-family:inherit;}</style>
       </head><body>
       <h1>GOAL AI ディープ分析レポート</h1>
@@ -885,20 +886,20 @@ function renderAPIKeySettings() {
   if (AUTH_TOKEN) {
     el.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg4);border-radius:6px;border:1px solid var(--border-card);">
-        <span style="font-size:9.5px;color:var(--muted2);">今月のディープ分析</span>
-        <span style="font-size:10px;font-family:var(--fm);color:${remaining<=2?'var(--amber)':'var(--green)'};">${used} / ${limit}回　残り${remaining}回</span>
+        <span style="font-size:12px;color:var(--muted2);">今月のディープ分析</span>
+        <span style="font-size:12px;font-family:var(--fm);color:${remaining<=2?'var(--amber)':'var(--green)'};">${used} / ${limit}回　残り${remaining}回</span>
       </div>`;
   } else {
     el.innerHTML = `
       <div style="padding:10px;background:var(--amber-d);border-radius:8px;border:1px solid var(--mode-normal-border);margin-bottom:10px;">
-        <div style="font-size:10px;color:var(--amber);margin-bottom:6px;font-weight:600;">プロモコードで接続</div>
+        <div style="font-size:12px;color:var(--amber);margin-bottom:6px;font-weight:600;">プロモコードで接続</div>
         <div style="display:flex;gap:6px;">
           <input type="text" id="settings-promo-input" placeholder="コードを入力..."
-            style="flex:1;background:var(--bg4);border:1px solid var(--border-card);border-radius:6px;padding:7px 10px;font-size:11px;color:var(--cream);outline:none;font-family:var(--fm);">
-          <button onclick="applyPromoFromSettings()" style="background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:6px;padding:7px 14px;font-size:11px;cursor:pointer;font-weight:600;">適用</button>
+            style="flex:1;background:var(--bg4);border:1px solid var(--border-card);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--cream);outline:none;font-family:var(--fm);">
+          <button onclick="applyPromoFromSettings()" style="background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:6px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:600;">適用</button>
         </div>
       </div>
-      <div style="font-size:9px;color:var(--muted2);">プロモコードを入力するとAI機能が利用可能になります。</div>`;
+      <div style="font-size:12px;color:var(--muted2);">プロモコードを入力するとAI機能が利用可能になります。</div>`;
   }
 }
 
@@ -1167,14 +1168,14 @@ function renderArchiveList(){
         ${isDone?`<svg width=12 height=12><use href='#ic-award'/></svg> 達成済み`:`<svg width=12 height=12><use href='#ic-archive'/></svg> アーカイブ`}
       </div>
       <div style="font-size:13px;font-weight:500;color:var(--cream);margin-bottom:6px;">${escapeHtml(g.title || '')}</div>
-      <div style="display:flex;gap:12px;font-size:10px;color:var(--muted);">
+      <div style="display:flex;gap:12px;font-size:12px;color:var(--muted);">
         <span>最終進捗 ${g.actual}%</span>
         <span>目標期限 ${escapeHtml(g.deadline || '')}</span>
         ${daysAgo!==null?`<span>${daysAgo}日前にアーカイブ</span>`:''}
       </div>
       <div style="margin-top:10px;display:flex;gap:7px;">
-        <button onclick="event.stopPropagation();restoreGoal('${g.id}')" style="padding:5px 12px;background:var(--amber-g);border:1px solid var(--mode-normal-border);border-radius:6px;font-size:10.5px;color:var(--amber);cursor:pointer;"><svg width="13" height="13" class="svg-ic"><use href="#ic-restore"/></svg> 復元する</button>
-        <button onclick="event.stopPropagation();openArchivedGoalDetail('${g.id}')" style="padding:5px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;font-size:10.5px;color:var(--muted);cursor:pointer;"><svg width="13" height="13" class="svg-ic"><use href="#ic-memo"/></svg> 詳細を見る</button>
+        <button onclick="event.stopPropagation();restoreGoal('${g.id}')" style="padding:5px 12px;background:var(--amber-g);border:1px solid var(--mode-normal-border);border-radius:6px;font-size:12px;color:var(--amber);cursor:pointer;"><svg width="13" height="13" class="svg-ic"><use href="#ic-restore"/></svg> 復元する</button>
+        <button onclick="event.stopPropagation();openArchivedGoalDetail('${g.id}')" style="padding:5px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;font-size:12px;color:var(--muted);cursor:pointer;"><svg width="13" height="13" class="svg-ic"><use href="#ic-memo"/></svg> 詳細を見る</button>
       </div>
     </div>`;
   }).join('');
@@ -1359,19 +1360,19 @@ function renderPlanModal(){
   const cur = document.getElementById('plan-current-badge');
   if(cur){
     if(lbl.badge==='trial'){
-      cur.style.cssText='background:var(--green-d);border:1px solid var(--green-d);color:var(--green);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
+      cur.style.cssText='background:var(--green-d);border:1px solid var(--green-d);color:var(--green);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:12px;';
       cur.innerHTML=`✓ 無料体験中 <span style="opacity:.7">${document.getElementById('sb-trial-days')?.textContent||''}</span>`;
     } else if(lbl.badge==='ultra'){
-      cur.style.cssText='background:linear-gradient(135deg,var(--amber-d),var(--know-purple-border));border:1px solid var(--amber);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;';
+      cur.style.cssText='background:linear-gradient(135deg,var(--amber-d),var(--know-purple-border));border:1px solid var(--amber);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;';
       cur.innerHTML=`👑 現在のプラン：Ultra`;
     } else if(lbl.badge==='max'){
-      cur.style.cssText='background:linear-gradient(90deg,var(--amber-d),var(--amber-g));border:1px solid var(--amber);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;';
+      cur.style.cssText='background:linear-gradient(90deg,var(--amber-d),var(--amber-g));border:1px solid var(--amber);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;';
       cur.innerHTML=`👑 現在のプラン：Max`;
     } else if(lbl.badge==='pro'){
-      cur.style.cssText='background:var(--amber-g);border:1px solid var(--amber-d);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
+      cur.style.cssText='background:var(--amber-g);border:1px solid var(--amber-d);color:var(--amber);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:12px;';
       cur.innerHTML=`★ 現在のプラン：${lbl.text}`;
     } else {
-      cur.style.cssText='background:var(--bg3);border:1px solid var(--border2);color:var(--muted);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:11px;';
+      cur.style.cssText='background:var(--bg3);border:1px solid var(--border2);color:var(--muted);display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:12px;';
       cur.innerHTML='現在のプラン：Free（無料）';
     }
   }
@@ -1391,7 +1392,7 @@ function renderPlanModal(){
         const link = document.createElement('div');
         link.className = 'plan-downgrade-link';
         link.style.cssText = 'margin-top:8px;text-align:right;';
-        link.innerHTML = `<span onclick="event.stopPropagation();openCustomerPortal();" style="font-size:10px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px;">ダウングレード</span>`;
+        link.innerHTML = `<span onclick="event.stopPropagation();openCustomerPortal();" style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px;">ダウングレード</span>`;
         el.appendChild(link);
       }
       // Show "現在のプラン" badge on current plan card
@@ -1400,7 +1401,7 @@ function renderPlanModal(){
       if(p === MEMBERSHIP.plan) {
         const badge = document.createElement('div');
         badge.className = 'plan-current-inline';
-        badge.style.cssText = 'margin-top:8px;text-align:right;font-size:9px;color:var(--amber);font-family:var(--fm);';
+        badge.style.cssText = 'margin-top:8px;text-align:right;font-size:12px;color:var(--amber);font-family:var(--fm);';
         badge.textContent = '✓ 現在のプラン';
         el.appendChild(badge);
       }
@@ -1518,9 +1519,9 @@ function updatePlanPrices(){
     const priceEl = document.getElementById('plan-price-' + plan);
     if(!priceEl) return;
     if(planBilling === 'annual'){
-      priceEl.innerHTML = `<div style="font-size:20px;font-family:var(--fd);color:var(--amber);">${prices[plan].annual}</div><div style="font-size:9px;color:var(--muted2);">/年（${prices[plan].annualMonthly}）</div>`;
+      priceEl.innerHTML = `<div style="font-size:20px;font-family:var(--fd);color:var(--amber);">${prices[plan].annual}</div><div style="font-size:12px;color:var(--muted2);">/年（${prices[plan].annualMonthly}）</div>`;
     } else {
-      priceEl.innerHTML = `<div style="font-size:20px;font-family:var(--fd);color:var(--amber);">${prices[plan].monthly}</div><div style="font-size:9px;color:var(--muted2);">/月（税込）</div>`;
+      priceEl.innerHTML = `<div style="font-size:20px;font-family:var(--fd);color:var(--amber);">${prices[plan].monthly}</div><div style="font-size:12px;color:var(--muted2);">/月（税込）</div>`;
     }
   });
 }
@@ -1588,7 +1589,7 @@ async function subscribePlan(){
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1100;display:flex;align-items:center;justify-content:center;';
     overlay.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:320px;width:90%;text-align:center;">
       <div style="font-size:14px;font-weight:600;color:var(--cream);margin-bottom:12px;">${names[p]||p}プラン（${priceLabel}）に変更しますか？</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6;">決済ページに移動します。<br>いつでもキャンセル可能です。</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6;">決済ページに移動します。<br>いつでもキャンセル可能です。</div>
       <div style="display:flex;gap:8px;justify-content:center;">
         <button id="plan-confirm-no" style="padding:8px 20px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">キャンセル</button>
         <button id="plan-confirm-yes" style="padding:8px 20px;background:var(--amber);color:var(--bg);border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">決済に進む</button>
@@ -1658,7 +1659,7 @@ function renderFreeUsageBar(){
   const remaining = Math.max(0, limit - used);
   const pct = Math.round(used / limit * 100);
   bar.style.display = 'block';
-  bar.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted2);margin-bottom:3px;"><span>今日の残り</span><span>${remaining}/${limit}回</span></div><div style="height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${pct>=90?'var(--red)':pct>=70?'var(--amber)':'var(--green)'};border-radius:2px;transition:width .3s;"></div></div>`;
+  bar.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted2);margin-bottom:3px;"><span>今日の残り</span><span>${remaining}/${limit}回</span></div><div style="height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${pct>=90?'var(--red)':pct>=70?'var(--amber)':'var(--green)'};border-radius:2px;transition:width .3s;"></div></div>`;
 }
 
 function renderUsageBar(){
@@ -1672,16 +1673,16 @@ function renderUsageBar(){
   const pct = Math.min(d.percent || 0, 100);
   const barColor = pct >= 100 ? 'var(--red)' : pct >= 80 ? '#e8a040' : 'var(--amber)';
   container.innerHTML = `
-    <div style="font-size:10px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;">
       <span>今月の利用額</span>
       <span style="color:${pct>=100?'var(--red)':'var(--cream)'};font-family:var(--fm);">¥${(d.current_amount||0).toLocaleString()} / ¥${(d.cap||0).toLocaleString()}</span>
     </div>
     <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;">
       <div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px;transition:width .4s;"></div>
     </div>
-    ${pct>=100?'<div style="font-size:9px;color:var(--red);margin-top:4px;">上限到達 · モデルが自動降格されています</div>':''}
-    <div style="font-size:9px;color:var(--muted2);margin-top:2px;">${d.turns_used||0}ターン使用 · ¥${d.per_turn}/ターン</div>
-    ${d.et ? `<div style="font-size:9px;color:var(--muted2);margin-top:2px;">ET残り: ${d.et.remaining}/${d.et.limit}回/週</div>` : ''}
+    ${pct>=100?'<div style="font-size:12px;color:var(--red);margin-top:4px;">上限到達 · モデルが自動降格されています</div>':''}
+    <div style="font-size:12px;color:var(--muted2);margin-top:2px;">${d.turns_used||0}ターン使用 · ¥${d.per_turn}/ターン</div>
+    ${d.et ? `<div style="font-size:12px;color:var(--muted2);margin-top:2px;">ET残り: ${d.et.remaining}/${d.et.limit}回/週</div>` : ''}
   `;
 }
 
@@ -1691,7 +1692,7 @@ function showDegradeBadge(reason){
   if(!existing){
     existing = document.createElement('div');
     existing.id = 'degrade-badge';
-    existing.style.cssText = 'padding:6px 12px;background:var(--red-d);border:1px solid var(--red-d);border-radius:8px;font-size:11px;color:var(--red);text-align:center;margin:4px 12px;';
+    existing.style.cssText = 'padding:6px 12px;background:var(--red-d);border:1px solid var(--red-d);border-radius:8px;font-size:12px;color:var(--red);text-align:center;margin:4px 12px;';
     const toolbar = document.getElementById('home-chat-toolbar');
     if(toolbar) toolbar.after(existing);
   }
@@ -1785,7 +1786,7 @@ async function showAIMemo(type, goalId) {
       <button onclick="this.closest('.modal-overlay').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;">×</button>
     </div>
     ${accordionHtml}
-    <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5;">内容が違うと感じたら、チャットで「もっと厳しくして」「私の強みは〇〇」など伝えてください。</p>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5;">内容が違うと感じたら、チャットで「もっと厳しくして」「私の強みは〇〇」など伝えてください。</p>
     <div style="display:flex;justify-content:flex-end;margin-top:12px;">
       <button onclick="navigator.clipboard.writeText(${JSON.stringify(memo).replace(/</g,'\\u003c')});toast('コピーしました')" style="padding:8px 16px;background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-right:8px;font-size:12px;">コピー</button>
       <button onclick="this.closest('.modal-overlay').remove()" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;">閉じる</button>
@@ -1924,7 +1925,7 @@ function renderLifeTasks(){
   wrap.innerHTML = pending.map(t =>
     `<div class="sb-task-item" onclick="completeLifeTask('${t.id}')" style="cursor:pointer;">
       <span class="sb-task-name">🟢 ${escapeHtml(t.title)}</span>
-      <span class="sb-task-meta" style="font-size:9px;color:var(--green);">タップで完了</span>
+      <span class="sb-task-meta" style="font-size:12px;color:var(--green);">タップで完了</span>
     </div>`
   ).join('');
 }
@@ -1978,7 +1979,7 @@ function _renderCoachStep(){
   // 吹き出し
   const tip = document.createElement('div');
   tip.style.cssText = `position:absolute;left:50%;transform:translateX(-50%);top:${rect.bottom+12}px;background:var(--amber);color:var(--bg);padding:10px 18px;border-radius:10px;font-size:12px;font-family:var(--ff);max-width:280px;text-align:center;z-index:2;box-shadow:0 4px 16px rgba(0,0,0,.3);`;
-  tip.innerHTML = `${step.text}<div style="font-size:9px;margin-top:6px;opacity:.7;">タップで次へ (${_coachStep+1}/${COACH_STEPS.length})</div>`;
+  tip.innerHTML = `${step.text}<div style="font-size:12px;margin-top:6px;opacity:.7;">タップで次へ (${_coachStep+1}/${COACH_STEPS.length})</div>`;
   overlay.appendChild(tip);
 
   document.body.appendChild(overlay);

@@ -3,7 +3,10 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './specs',
   timeout: 30000,
+  globalTimeout: 300000, // 5分で全テスト強制終了（Codeセッション保護）
   retries: 1,
+  fullyParallel: true,
+  workers: 4,
   use: {
     baseURL: process.env.FRONTEND_BASE || 'https://goal-ai-frontend.pages.dev',
     headless: true,
