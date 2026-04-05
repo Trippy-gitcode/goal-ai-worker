@@ -1,7 +1,7 @@
 import { authenticateRequest } from '../middleware/auth.js';
 import { jsonRes } from '../utils/helpers.js';
 import { getModel, FREE_MODEL_LIMITS, getPlanConfig, getCurrentMonth, USAGE_BATCH_SIZE } from '../utils/constants.js';
-import { checkRateLimit, checkDailyChatUsage, incrementDailyChatUsage, canUseModel, incrementFreeModelUsage, getEffectiveModel } from '../utils/rate-limit.js';
+import { checkRateLimit, checkDailyChatUsage, incrementDailyChatUsage, canUseModel, incrementFreeModelUsage, getEffectiveModel, incrementEmbeddingTurnCount } from '../utils/rate-limit.js';
 import { getDayKey } from '../utils/helpers.js';
 import { saveChatMessage } from '../utils/supabase.js';
 import { updateStreak } from '../utils/streak.js';
@@ -200,9 +200,7 @@ export async function handleChatStream(request, env, ctx) {
         // A8: embedding生成は5ターンに1回（RAG検索は毎ターン実行済み）
         if (env.RAG_ENABLED === 'true' && userMessage) {
           ctx.waitUntil((async () => {
-            const tcKey = `emb_tc:${auth.tokenId}`;
-            const tc = parseInt(await env.TOKEN_KV.get(tcKey) || '0') + 1;
-            try { await env.TOKEN_KV.put(tcKey, String(tc), { expirationTtl: 86400 }); } catch(_) {}
+            const tc = await incrementEmbeddingTurnCount(env, auth.tokenId);
             if (tc % 5 === 0) await generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage);
           })().catch(() => {}));
         }
@@ -262,9 +260,7 @@ export async function handleChatStream(request, env, ctx) {
     // A8: embedding生成は5ターンに1回（RAG検索は毎ターン実行済み）
     if (env.RAG_ENABLED === 'true' && userMessage) {
       ctx.waitUntil((async () => {
-        const tcKey = `emb_tc:${auth.tokenId}`;
-        const tc = parseInt(await env.TOKEN_KV.get(tcKey) || '0') + 1;
-        try { await env.TOKEN_KV.put(tcKey, String(tc), { expirationTtl: 86400 }); } catch(_) {}
+        const tc = await incrementEmbeddingTurnCount(env, auth.tokenId);
         if (tc % 5 === 0) await generateAndStoreEmbedding(env, auth.tokenId, sessionId, goalId, userMessage);
       })().catch(() => {}));
     }
