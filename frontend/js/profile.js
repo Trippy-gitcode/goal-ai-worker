@@ -466,6 +466,7 @@ function _initObScroll(){
 function openMyselfHub(){
   showPage('myself');
   switchMyselfTab(myselfTab);
+  loadIdentityFromServer();
 }
 function openProfileDirect(){
   showPage('myself');
@@ -596,7 +597,7 @@ async function sendKnowMsg(){
       knowState.active = false;
       document.getElementById('know-input-row').style.display = 'none';
       document.getElementById('know-summary-box').style.display = 'block';
-      document.getElementById('know-summary-content').textContent = (knowState.summary||'').replace(/```json[\s\S]*?```\s*/, '').trim();
+      document.getElementById('know-summary-content').textContent = (knowState.summary||'').replace(/```json[\s\S]*?```\s*/g, '').replace(/\[IDENTITY_UPDATE\][\s\S]*?\[\/IDENTITY_UPDATE\]\s*/g, '').trim();
       document.getElementById('know-status-title').textContent = 'セッション完了 ✓';
       document.getElementById('know-status-sub').textContent = '最終更新：' + new Date().toLocaleDateString('ja-JP');
       document.getElementById('know-start-btn').textContent = '再セッション';
@@ -618,22 +619,28 @@ async function generateKnowSummary(){
     body: JSON.stringify({
       system:`あなたはパーソナルコーチです。ユーザーの自己分析セッションの回答を元に、2つのブロックを生成してください。
 
-■ ブロック1: JSON（プロフィール自動入力用）
-以下のJSON形式で、回答から読み取れる情報を抽出してください。読み取れない項目はnullにしてください。
-\`\`\`json
-{"nickname":"","age":null,"occupation":"","field":"","constraints":"","strengths":[],"weaknesses":[],"interests":[],"energyGain":[],"energyDrain":[],"mbtiGuess":""}
-\`\`\`
-- nickname: 呼び名
-- age: 数値
-- occupation: 職業カテゴリ（学生/会社員/フリーランス/経営者/クリエイター/主婦・主夫/その他）
-- field: 専門分野
-- constraints: 使える時間・条件
-- strengths: 強みキーワード3つ（短い単語で）
-- weaknesses: 弱みキーワード2つ（短い単語で）
-- interests: 興味あるジャンル
-- energyGain: エネルギーをもらうもの
-- energyDrain: エネルギーを奪われるもの
-- mbtiGuess: 回答から推測されるMBTI 4文字（推測不能ならnull）
+■ ブロック1: [IDENTITY_UPDATE]タグ（自動保存用）
+[IDENTITY_UPDATE]
+{
+  "vision": "ビジョンステートメント",
+  "identity": {
+    "age": null,
+    "income_range": "",
+    "area": "",
+    "desired_image": ["見られたい姿3つ"],
+    "strengths": ["強みキーワード3つ"],
+    "weaknesses": ["弱みキーワード2つ"],
+    "values": ["大切にしている価値観3つ"],
+    "occupation": "職業カテゴリ",
+    "field": "専門分野",
+    "interests": ["興味あるジャンル"],
+    "background": "背景の要約1文",
+    "ideal_day": "5年後の理想の平日",
+    "unwanted_life": "やりたくない生活"
+  }
+}
+[/IDENTITY_UPDATE]
+読み取れない項目はnullにしてください。
 
 ■ ブロック2: デザインサマリー（以下の形式）
 
@@ -657,22 +664,113 @@ async function generateKnowSummary(){
 
 最後に「この分析結果、しっくりきますか？違和感がある部分があれば教えてください」と確認を入れてください。日本語で、本人に語りかける温かいトーンで。`,
       messages:[{role:'user', content: answersText}],
-      maxTokens:900
+      maxTokens:1200
     })
   });
   const data = await res.json();
   const summary = data.content?.map(b=>b.text||'').join('') || '';
   knowState.summary = summary;
-  // Extract JSON block for profile auto-fill
+  // Extract [IDENTITY_UPDATE] tag for auto-save to user_identity
+  try {
+    const identityMatch = summary.match(/\[IDENTITY_UPDATE\]\s*([\s\S]*?)\[\/IDENTITY_UPDATE\]/);
+    if(identityMatch){
+      const identityData = JSON.parse(identityMatch[1].trim());
+      knowState.identityData = identityData;
+      await saveIdentityToServer(identityData);
+    }
+  } catch(e){ console.warn('IDENTITY_UPDATE parse failed', e); }
+  // Fallback: extract profile JSON from ```json block
   try {
     const jsonMatch = summary.match(/```json\s*([\s\S]*?)```/);
-    if(jsonMatch) knowState.profileData = JSON.parse(jsonMatch[1].trim());
+    if(jsonMatch && !knowState.identityData) knowState.profileData = JSON.parse(jsonMatch[1].trim());
   } catch(e){ console.warn('Profile JSON parse failed', e); }
   return 'セッションが完了しました！あなたのデザインサマリーを生成しました。下のボックスを確認してください。';
 }
 
+// ── user_identity API保存・読み込み ──
+async function saveIdentityToServer(data){
+  try {
+    await fetch(`${WORKER_URL}/api/me/identity`,{
+      method:'PUT', headers:getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    console.log('Identity saved to server');
+  } catch(e){ console.warn('Identity save failed', e); }
+}
+
+async function loadIdentityFromServer(){
+  try {
+    const res = await fetch(`${WORKER_URL}/api/me/identity`,{ headers:getAuthHeaders() });
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!data || !data.vision) return;
+    // Apply to USER_PROFILE
+    if(data.vision) USER_PROFILE.vision = data.vision;
+    const id = data.identity || {};
+    if(id.desired_image) USER_PROFILE.wantedImage = id.desired_image;
+    if(id.strengths) USER_PROFILE.strengths = id.strengths;
+    if(id.weaknesses) USER_PROFILE.weaknesses = id.weaknesses;
+    if(id.ideal_day) USER_PROFILE.ideal_day = id.ideal_day;
+    if(id.unwanted_life) USER_PROFILE.unwanted_life = id.unwanted_life;
+    if(id.values) USER_PROFILE.values = id.values;
+    if(id.age) USER_PROFILE.age = id.age;
+    if(id.occupation) USER_PROFILE.occupation = id.occupation;
+    if(id.field) USER_PROFILE.field = id.field;
+    if(id.interests) USER_PROFILE.interests = id.interests;
+    // Render on ME screen
+    renderVision();
+    renderIdentityOnME(id);
+  } catch(e){ console.warn('Identity load failed', e); }
+}
+
+function renderIdentityOnME(id){
+  // desired_image tags
+  const imgList = document.getElementById('vision-image-list');
+  if(imgList && id.desired_image?.length){
+    imgList.innerHTML = id.desired_image.map(img =>
+      `<span style="display:inline-block;padding:5px 12px;background:var(--know-purple-bg);border:1px solid var(--know-purple-border);border-radius:var(--pill-radius);color:var(--know-purple);font-size:12px;">${escapeHtml(img)}</span>`
+    ).join('');
+  }
+  // strengths
+  const strList = document.getElementById('vision-strength-list');
+  if(strList && id.strengths?.length){
+    strList.innerHTML = id.strengths.map(s =>
+      `<span style="display:inline-block;padding:5px 12px;background:var(--green-d);border:1px solid var(--green-d);border-radius:var(--pill-radius);color:var(--green);font-size:12px;">${escapeHtml(s)}</span>`
+    ).join('');
+  }
+  // weaknesses
+  const weakList = document.getElementById('vision-weakness-list');
+  if(weakList && id.weaknesses?.length){
+    weakList.innerHTML = id.weaknesses.map(w =>
+      `<span style="display:inline-block;padding:5px 12px;background:var(--red-d);border:1px solid var(--red-d);border-radius:var(--pill-radius);color:var(--red);font-size:12px;">${escapeHtml(w)}</span>`
+    ).join('');
+  }
+}
+
 function applySummaryToProfile(){
-  const pd = knowState.profileData;
+  // Use identityData (from [IDENTITY_UPDATE]) if available, fallback to profileData
+  const id = knowState.identityData;
+  const pd = knowState.profileData || (id ? {
+    nickname: null,
+    age: id.identity?.age,
+    occupation: id.identity?.occupation,
+    field: id.identity?.field,
+    constraints: null,
+    strengths: id.identity?.strengths,
+    weaknesses: id.identity?.weaknesses,
+    interests: id.identity?.interests,
+    energyGain: null,
+    energyDrain: null,
+    mbtiGuess: null
+  } : null);
+  // Apply identity vision/desired_image to profile state
+  if(id){
+    if(id.vision) USER_PROFILE.vision = id.vision;
+    if(id.identity?.desired_image) USER_PROFILE.wantedImage = id.identity.desired_image;
+    if(id.identity?.ideal_day) USER_PROFILE.ideal_day = id.identity.ideal_day;
+    if(id.identity?.unwanted_life) USER_PROFILE.unwanted_life = id.identity.unwanted_life;
+    if(id.identity?.values) USER_PROFILE.values = id.identity.values;
+  }
   if(pd){
     if(pd.nickname){ USER_PROFILE.nickname = pd.nickname; const el=document.getElementById('mp-nickname'); if(el) el.value=pd.nickname; }
     if(pd.age){ USER_PROFILE.age = pd.age; const el=document.getElementById('mp-age'); if(el) el.value=pd.age; }
@@ -724,7 +822,7 @@ function applySummaryToProfile(){
   }
   // Apply vision data from summary text
   const summary = knowState.summary || '';
-  const cleanSummary = summary.replace(/```json[\s\S]*?```\s*/, '').trim();
+  const cleanSummary = summary.replace(/```json[\s\S]*?```\s*/g, '').replace(/\[IDENTITY_UPDATE\][\s\S]*?\[\/IDENTITY_UPDATE\]\s*/g, '').trim();
   const visionMatch = cleanSummary.match(/【あなたのビジョン】\s*([\s\S]*?)(?=【|$)/);
   if(visionMatch){ USER_PROFILE.vision = visionMatch[1].trim(); const el=document.getElementById('vision-statement'); if(el) el.textContent=USER_PROFILE.vision; }
   const catchMatch = cleanSummary.match(/【キャッチコピー】\s*「?([\s\S]*?)」?\s*(?=【|$)/);
@@ -1406,7 +1504,7 @@ Object.assign(window, {
   closeOnboarding, checkOnboarding,
   openMyselfHub, openProfileDirect, switchMyselfTab,
   startKnowSession, updateKnowChips, appendKnowMsg, sendKnowMsg,
-  generateKnowSummary, applySummaryToProfile,
+  generateKnowSummary, applySummaryToProfile, saveIdentityToServer, loadIdentityFromServer,
   knowResize, knowKey, editVision, saveVision, renderVision, addVisionItem, editVisionField, editMyCharacter, shareCharacter, toggleReanalyzeChip, runReanalysis,
   regenCatchcopy, runConnectAnalysis, renderConnectContent, hubChatFromConnect,
   updateProfile, saveProfile, updateAge, selGender, toggleInterest,
