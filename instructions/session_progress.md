@@ -8,39 +8,28 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.6（デプロイ済み 2026-04-05）
-- **Next:** UX-01 Phase B（UI実装。B-1 TODAY刷新→B-2 TALK UI→B-3 GOALS Hub→B-4 ME画面→B-5 Calendar/Analytics）
-- **Last done:** UX-01 Phase A全5ミッション完了（A-8 identity DB, A-6 mindset, A-1 intent, A-2 GOAL_CREATE, A-5 goal links）
+- **Version:** v4.0.8（デプロイ済み 2026-04-05）
+- **Next:** UX-01 Phase B（UI実装。B-1 ME構造化ヒアリング→B-2 TODAY刷新→B-3 TALK UI→B-4 GOALS Hub→B-5 Calendar/Analytics）
+- **Last done:** P14 Phase Aデプロイ完了（v4.0.8, canopy PASS, Worker+Pages正常）
 - **Open issues:** TEST-E2E途中（E2E-01 PASS, E2E-02 1FAIL残）→ UX-01後に再開
 - **方針変更:** テスト配布より「自分が毎日使いたいツール」を優先。新コンセプト「君の人生をより素敵に」。マインドセットプリセット導入
 
 ## 現在地
-- **バージョン:** v4.0.6
-- **チェーン:** ~~UX-01 Phase A~~ → UX-01 Phase B → TEST-E2E → UX-01 Phase C-D
-- **次のミッション:** P14（デプロイ）→ UX-01-B1（ME構造化ヒアリング）
+- **バージョン:** v4.0.8
+- **チェーン:** ~~UX-01 Phase A~~ → ~~P14 デプロイ~~ → UX-01 Phase B → TEST-E2E → UX-01 Phase C-D
+- **次のミッション:** UX-01-B1（ME構造化ヒアリング）
 
 ---
 
 ## ミッションキュー（上から順に実行）
 
-### P14: Phase Aデプロイ（C2基準フロー）
-> リスク: 🟢低
-> 対象: build→canopy→deploy→tag→push
-
-**完了コマンド:**
-```bash
-curl -s https://goal-ai-worker.goalai-futoshi.workers.dev/api/version | grep "4.0"
-curl -s -o /dev/null -w "%{http_code}" https://goal-ai-worker.goalai-futoshi.workers.dev/api/me/identity
-# 期待: 401
-```
+### ~~P14: Phase Aデプロイ（C2基準フロー）~~ ✅ 完了 2026-04-05
+> v4.0.8 デプロイ済み。canopy PASS, Worker version=4.0.8, Pages version=4.0.8, /api/me/identity→401
 
 ---
 
-### UX-01-B1: ME構造化ヒアリングセッション
-> リスク: 🟡中
-> 推定: 2時間
-> 参照: docs/ux_redesign_v2.md §Phase B, §A-8
-> 対象ファイル: frontend/js/profile.js, frontend/index.html, frontend/style.css, src/services/prompt.js
+### ~~UX-01-B1: ME構造化ヒアリングセッション~~ ✅ 完了 2026-04-05
+> IDENTITY_SESSION_PROMPT追加、[IDENTITY_UPDATE]タグ検出→user_identity API自動保存、ME画面identity表示（desired_image/strengths/weaknesses）、loadIdentityFromServer()追加。canopy PASS
 
 **目的:** ME画面に「自分を知るセッション」を実装。20問以上の構造化ヒアリングで信念・価値観・強み・弱み・見られたい姿を掘り下げ、矛盾を指摘し、結果をuser_identityに自動保存
 
@@ -76,11 +65,8 @@ bash tests/smoke/canopy.sh 2>&1 | tail -1
 
 ---
 
-### UX-01-B2: TODAY画面刷新（タスク自動展開の表示）
-> リスク: 🟡中
-> 推定: 1.5時間
-> 参照: docs/ux_redesign_v2.md §Phase A フロー, §TODAY画面
-> 対象ファイル: frontend/js/goals.js, frontend/js/ui.js, frontend/index.html, frontend/style.css
+### ~~UX-01-B2: TODAY画面刷新（タスク自動展開の表示）~~ ✅ 完了 2026-04-05
+> QOL提案カード枠(qol-proposal-slot)追加、関連ゴール表示(hub-linked-goals+renderLinkedGoals)追加。goal-tagは既存実装済み。canopy PASS
 
 **目的:** Phase Aで実装したGOAL_CREATE→タスク自動展開の結果がTODAY画面に適切に表示される。ゴール横断タスク表示、QOL提案カード枠、ゴールタグ表示
 
