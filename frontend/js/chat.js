@@ -2908,6 +2908,12 @@ function renderTodayScreen(){
       if(ib === -1) return -1;
       return ia - ib;
     });
+    // P26: 完了タスクを下部に自動ソート（done→bottom）
+    items.sort((a,b) => {
+      const aDone = a.task.status === 'done' ? 1 : 0;
+      const bDone = b.task.status === 'done' ? 1 : 0;
+      return aDone - bDone;
+    });
     const pColors = {high:'var(--red)',mid:'var(--amber)',low:'var(--green)'};
     list.innerHTML = items.map((item, idx) => {
       const t = item.task;
