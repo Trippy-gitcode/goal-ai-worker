@@ -2655,6 +2655,97 @@ function startGoalCreation(){
   }, 200);
 }
 
+// ═══ UX-01-B6: ゲーミフィケーション（EXP/レベル/ストリーク） ═══
+const EXP_TABLE = {low:10, medium:15, high:25};
+const LEVEL_THRESHOLDS = [
+  {lv:1,  exp:0,     title:'はじまり'},
+  {lv:5,  exp:500,   title:'動き出した'},
+  {lv:10, exp:2000,  title:'習慣化'},
+  {lv:20, exp:8000,  title:'コーディネーター'},
+  {lv:50, exp:50000, title:'人生デザイナー'},
+];
+
+function loadEXP(){
+  try {
+    const s = localStorage.getItem('goal_exp');
+    return s ? JSON.parse(s) : { total:0, today:0, todayDate:null };
+  } catch(e){ return { total:0, today:0, todayDate:null }; }
+}
+
+function saveEXP(exp){
+  try{ localStorage.setItem('goal_exp', JSON.stringify(exp)); }catch(e){}
+}
+
+function getLevel(totalExp){
+  let lv = 1, title = 'はじまり';
+  // Linear formula: 1 level per 100 EXP up to thresholds
+  for(const t of LEVEL_THRESHOLDS){
+    if(totalExp >= t.exp){ lv = t.lv; title = t.title; }
+  }
+  // Interpolate between thresholds
+  for(let i = 0; i < LEVEL_THRESHOLDS.length - 1; i++){
+    const cur = LEVEL_THRESHOLDS[i], next = LEVEL_THRESHOLDS[i+1];
+    if(totalExp >= cur.exp && totalExp < next.exp){
+      const progress = (totalExp - cur.exp) / (next.exp - cur.exp);
+      lv = cur.lv + Math.floor(progress * (next.lv - cur.lv));
+      break;
+    }
+  }
+  if(totalExp >= 50000) lv = 50 + Math.floor((totalExp - 50000) / 2000);
+  return { lv, title, nextExp: getNextLevelExp(totalExp) };
+}
+
+function getNextLevelExp(totalExp){
+  for(const t of LEVEL_THRESHOLDS){
+    if(totalExp < t.exp) return t.exp;
+  }
+  // Beyond max threshold: every 2000 EXP
+  return Math.ceil(totalExp / 2000) * 2000 + 2000;
+}
+
+function awardEXP(amount, reason){
+  const exp = loadEXP();
+  const today = new Date().toISOString().slice(0,10);
+  if(exp.todayDate !== today){ exp.today = 0; exp.todayDate = today; }
+  const oldLevel = getLevel(exp.total);
+  exp.total += amount;
+  exp.today += amount;
+  const newLevel = getLevel(exp.total);
+  saveEXP(exp);
+  // Float EXP text
+  showEXPFloat(amount);
+  // Level up notification
+  if(newLevel.lv > oldLevel.lv){
+    setTimeout(() => {
+      toast(`🎉 Lv.${newLevel.lv} に到達！${newLevel.title}`);
+      launchConfetti();
+    }, 500);
+  }
+  return exp;
+}
+
+function showEXPFloat(amount){
+  const el = document.createElement('div');
+  el.textContent = `+${amount} EXP`;
+  el.style.cssText = 'position:fixed;top:40%;left:50%;transform:translateX(-50%);font-size:18px;font-weight:700;color:var(--amber);text-shadow:0 2px 8px rgba(200,146,10,0.4);z-index:9999;pointer-events:none;animation:expFloat 1.2s ease-out forwards;';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
+}
+
+function showTodayClearEffect(){
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);animation:fadeIn .3s;pointer-events:auto;';
+  overlay.innerHTML = `<div style="text-align:center;animation:scaleIn .4s ease-out;">
+    <div style="font-size:48px;margin-bottom:8px;">🎉</div>
+    <div style="font-size:24px;font-weight:700;color:var(--amber);text-shadow:0 0 20px rgba(228,184,106,0.5);">TODAY CLEAR!</div>
+    <div style="font-size:13px;color:var(--cream);margin-top:8px;">全タスク完了おめでとう！</div>
+  </div>`;
+  overlay.onclick = () => overlay.remove();
+  document.body.appendChild(overlay);
+  launchConfetti();
+  setTimeout(() => overlay.remove(), 3000);
+}
+
 // ═══ UX-01-B5: AIスケジューリングロジック ═══
 function autoSchedule(tasks, routines, pref){
   const HOUR_START = 6, HOUR_END = 23;
@@ -2817,5 +2908,6 @@ Object.assign(window, {
   showTaskSetupPhase, addTaskSetupItem, renderBreadcrumb, renderStepIndicator,
   showRoleSelection, confirmGoalRole,
   startDeepAnalysis,
-  autoSchedule
+  autoSchedule,
+  EXP_TABLE, LEVEL_THRESHOLDS, loadEXP, saveEXP, getLevel, getNextLevelExp, awardEXP, showEXPFloat, showTodayClearEffect
 });
