@@ -63,6 +63,21 @@ function renderStreak(){
   }
 }
 
+// HOTFIX-01: バージョンタップで更新確認
+async function checkForUpdate(){
+  toast('更新を確認中...');
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration();
+    if(reg){ await reg.update(); }
+    const keys = await caches.keys();
+    for(const k of keys) await caches.delete(k);
+    toast('新しいバージョンに更新しました');
+    setTimeout(() => location.reload(true), 500);
+  } catch(e){
+    toast('最新です');
+  }
+}
+
 // Safari IME対策: compositionstart/endで自前フラグ管理
 let _isComposing = false;
 document.addEventListener('compositionstart', () => { _isComposing = true; });
@@ -121,7 +136,7 @@ function getDeviceId() {
   return 'dev_' + Math.abs(hash).toString(36);
 }
 
-const APP_VERSION = '4.0.16';
+const APP_VERSION = '4.0.17';
 
 const FONT_SIZES = {
   xs: { label: '極小', base: '14px', lh: '1.55' },
@@ -238,6 +253,7 @@ Object.assign(window, {
   STREAK, APP_VERSION, FONT_SIZES,
   updateStreak, renderStreak, setCookie, getCookie, deleteCookie,
   ensureAuth, getAuthHeaders, getDeviceId, setFontSize,
-  checkOwnerParam, checkTesterParam, startVersionCheck, checkPlanExpiry, showExpiryBanner
+  checkOwnerParam, checkTesterParam, startVersionCheck, checkPlanExpiry, showExpiryBanner,
+  checkForUpdate
 });
 
