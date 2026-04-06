@@ -312,7 +312,109 @@ function editWorriesSummary(){
 function worriesResize(el) { chatResize(el, 80); }
 function worriesKey(e) { chatKey(sendWorriesMsg, e); }
 
-function delRoutine(btn){ btn.closest('.routine-row').remove(); }
+// ═══ UX-01-B4: ルーティン管理 ═══
+let _routines = [];
+let _schedulingPref = { hard_tasks_first:true, batch_errands:true, buffer_minutes:15, focus_hours:'morning', max_daily_tasks:5 };
+
+function renderRoutineList(){
+  const list = document.getElementById('routine-list');
+  if(!list) return;
+  if(!_routines.length){
+    list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">ルーティンが未登録です</div>';
+    return;
+  }
+  const dayLabels = {mon:'月',tue:'火',wed:'水',thu:'木',fri:'金',sat:'土',sun:'日'};
+  list.innerHTML = _routines.map((r, i) => {
+    const daysStr = r.days === 'daily' ? '毎日' : (r.days||[]).map(d => dayLabels[d]||d).join('');
+    const timeStr = r.time + (r.end ? ' – '+r.end : r.duration ? ` (${r.duration}分)` : '');
+    return `<div class="routine-row" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;">
+      <span style="font-size:12px;color:var(--amber);min-width:90px;font-weight:500;">${escapeHtml(timeStr)}</span>
+      <span style="flex:1;font-size:13px;color:var(--cream);">${escapeHtml(r.title)}</span>
+      <span style="font-size:11px;color:var(--muted);min-width:40px;">${daysStr}</span>
+      <button onclick="editRoutine(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:4px;">✎</button>
+      <button onclick="delRoutine(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px;">×</button>
+    </div>`;
+  }).join('');
+}
+
+function renderSchedulingPref(){
+  const form = document.getElementById('scheduling-pref-form');
+  if(!form) return;
+  const p = _schedulingPref;
+  const focusOpts = [{l:'朝',v:'morning'},{l:'午後',v:'afternoon'},{l:'夜',v:'evening'}];
+  form.innerHTML = `
+    <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--cream);cursor:pointer;">
+      <input type="checkbox" ${p.hard_tasks_first?'checked':''} onchange="_schedulingPref.hard_tasks_first=this.checked;saveRoutinesToServer()"> 難しいタスクを先に
+    </label>
+    <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--cream);cursor:pointer;">
+      <input type="checkbox" ${p.batch_errands?'checked':''} onchange="_schedulingPref.batch_errands=this.checked;saveRoutinesToServer()"> 外出タスクをまとめる
+    </label>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:12px;color:var(--cream);">集中タイム</span>
+      <select onchange="_schedulingPref.focus_hours=this.value;saveRoutinesToServer()" style="padding:4px 8px;background:var(--bg);border:0.5px solid var(--border);border-radius:6px;color:var(--cream);font-size:12px;">
+        ${focusOpts.map(o => `<option value="${o.v}" ${p.focus_hours===o.v?'selected':''}>${o.l}</option>`).join('')}
+      </select>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:12px;color:var(--cream);">タスク間バッファ</span>
+      <input type="number" value="${p.buffer_minutes}" min="0" max="60" style="width:50px;padding:4px 6px;background:var(--bg);border:0.5px solid var(--border);border-radius:6px;color:var(--cream);font-size:12px;text-align:center;" onchange="_schedulingPref.buffer_minutes=parseInt(this.value)||15;saveRoutinesToServer()">
+      <span style="font-size:12px;color:var(--muted);">分</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:12px;color:var(--cream);">1日の最大タスク数</span>
+      <input type="number" value="${p.max_daily_tasks}" min="1" max="20" style="width:50px;padding:4px 6px;background:var(--bg);border:0.5px solid var(--border);border-radius:6px;color:var(--cream);font-size:12px;text-align:center;" onchange="_schedulingPref.max_daily_tasks=parseInt(this.value)||5;saveRoutinesToServer()">
+    </div>`;
+}
+
+function addRoutine(){
+  const title = prompt('ルーティン名（例: ヨガ、通勤）:','');
+  if(!title) return;
+  const time = prompt('開始時間（例: 06:00）:','');
+  if(!time) return;
+  const durOrEnd = prompt('所要時間（分）or 終了時間（例: 30 or 07:00）:','30');
+  const daysInput = prompt('曜日（mon,tue,wed,thu,fri,sat,sun / daily）:','daily');
+  const routine = { title, time };
+  if(durOrEnd && durOrEnd.includes(':')) routine.end = durOrEnd;
+  else routine.duration = parseInt(durOrEnd, 10) || 30;
+  routine.days = daysInput === 'daily' ? 'daily' : (daysInput||'daily').split(',').map(d=>d.trim());
+  _routines.push(routine);
+  renderRoutineList();
+  saveRoutinesToServer();
+}
+
+function editRoutine(idx){
+  const r = _routines[idx];
+  if(!r) return;
+  const title = prompt('ルーティン名:', r.title);
+  if(title === null) return;
+  const time = prompt('開始時間:', r.time);
+  if(time === null) return;
+  const durOrEnd = prompt('所要時間（分）or 終了時間:', r.end || String(r.duration||30));
+  const daysInput = prompt('曜日:', r.days === 'daily' ? 'daily' : (r.days||[]).join(','));
+  r.title = title || r.title;
+  r.time = time || r.time;
+  if(durOrEnd && durOrEnd.includes(':')){ r.end = durOrEnd; delete r.duration; }
+  else { r.duration = parseInt(durOrEnd, 10) || 30; delete r.end; }
+  r.days = daysInput === 'daily' ? 'daily' : (daysInput||'daily').split(',').map(d=>d.trim());
+  renderRoutineList();
+  saveRoutinesToServer();
+}
+
+function delRoutine(idx){
+  _routines.splice(idx, 1);
+  renderRoutineList();
+  saveRoutinesToServer();
+}
+
+async function saveRoutinesToServer(){
+  try {
+    await fetch(`${WORKER_URL}/api/me/identity`, {
+      method:'PUT', headers:{ ...getAuthHeaders(), 'Content-Type':'application/json' },
+      body:JSON.stringify({ routines:_routines, scheduling_preference:_schedulingPref })
+    });
+  } catch(e){ console.warn('Routine save failed', e); }
+}
+
 function cyclePri(el){
   const cycle = [
     {label:'高優先',bg:'var(--green-d)',color:'var(--green)',border:'var(--green-d)'},
@@ -328,23 +430,6 @@ function cyclePri(el){
   el.style.background = next.bg;
   el.style.color = next.color;
   el.style.borderColor = next.border;
-}
-function addRoutine(){
-  const start = prompt('開始時間（例: 21:00）:','');
-  if(!start) return;
-  const end = prompt('終了時間（例: 22:00）:','');
-  if(!end) return;
-  const label = prompt('活動内容（例: 読書・運動など）:','');
-  if(!label) return;
-  const list = document.getElementById('routine-list');
-  const row = document.createElement('div');
-  row.className = 'routine-row';
-  row.innerHTML = `
-    <span class="routine-time">${escapeHtml(start)} – ${escapeHtml(end)}</span>
-    <span class="routine-label">${escapeHtml(label)}</span>
-    <span class="routine-pri" style="border-color:var(--mode-normal-border);color:var(--amber);background:var(--amber-d);" onclick="cyclePri(this)">目標時間</span>
-    <span class="routine-del" onclick="delRoutine(this)">×</span>`;
-  list.appendChild(row);
 }
 
 
@@ -480,6 +565,7 @@ function switchMyselfTab(tab){
   document.getElementById('mtab-' + tab).classList.add('active');
   document.getElementById('myself-pane-' + tab).classList.add('active');
   if(tab === 'connect') renderConnectContent();
+  if(tab === 'routine'){ renderRoutineList(); renderSchedulingPref(); }
   if(tab === 'profile') initProfileScrollHandler();
 }
 
@@ -721,6 +807,11 @@ async function loadIdentityFromServer(){
     if(data.qol_proposals && typeof window.loadQOLProposals === 'function'){
       window._qolProposalsCache = data.qol_proposals;
     }
+    // B4: ルーティン + スケジューリング設定
+    if(data.routines) _routines = data.routines;
+    if(data.scheduling_preference) _schedulingPref = { ..._schedulingPref, ...data.scheduling_preference };
+    renderRoutineList();
+    renderSchedulingPref();
     // Render on ME screen
     renderVision();
     renderIdentityOnME(id);
@@ -1572,7 +1663,7 @@ Object.assign(window, {
   selRadio, selMBTI, saveGoal, openProfile, closeProfile, closeProfileOutside,
   WORRIES_SYS, initWorriesChat, appendWorryBubble, sendWorriesMsg,
   editWorriesSummary, worriesResize, worriesKey,
-  delRoutine, cyclePri, addRoutine, KNOW_THEMES,
+  delRoutine, cyclePri, addRoutine, editRoutine, renderRoutineList, renderSchedulingPref, saveRoutinesToServer, KNOW_THEMES,
   closeOnboarding, checkOnboarding,
   openMyselfHub, openProfileDirect, switchMyselfTab,
   startKnowSession, updateKnowChips, appendKnowMsg, sendKnowMsg,
