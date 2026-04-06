@@ -403,7 +403,10 @@ function addTask(phaseNum){
   const phases = getActiveGoalPhases();
   const phase = phases.find(p=>p.phase===phaseNum);
   const newId = 't_' + Date.now();
-  phase.tasks.push({id:newId, title, status:'todo', due:'', priority:'mid', note:'', chatLog:[]});
+  phase.tasks.push({id:newId, title, status:'todo', due:'', priority:'mid', note:'', chatLog:[],
+    deadline:null, context:null, risk:null, worst_case:null, estimated_minutes:null,
+    location:null, time_constraint:null, dependencies:[], energy_level:null, repeatable:null, priority_score:null
+  });
   renderTasks();
   toast('タスクを追加しました');
 }
@@ -896,7 +899,12 @@ function addTaskFromModal() {
       if (!goal.phases || goal.phases.length === 0) {
         goal.phases = [{ title: 'タスク', tasks: [] }];
       }
-      goal.phases[0].tasks.push({ id: 'task_'+Date.now(), title: name, done: false, status:'todo', deadline, due: deadline, source: 'user', recurrence });
+      goal.phases[0].tasks.push({
+        id: 'task_'+Date.now(), title: name, done: false, status:'todo', deadline, due: deadline, source: 'user', recurrence,
+        context:null, risk:null, worst_case:null, estimated_minutes:null,
+        location:null, time_constraint:null, dependencies:[], energy_level:null,
+        repeatable: recurrence || null, priority_score:null
+      });
     }
   }
 

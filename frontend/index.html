@@ -156,7 +156,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v4.0.12</span>
+      <span class="version" title="バージョン確認">v4.0.13</span>
     </div>
   </div>
 </div>
@@ -256,19 +256,40 @@
         <button id="today-add-fab" onclick="openTodayAddTask()" style="position:absolute;bottom:60px;right:16px;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#c8920a,#f5d380);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(200,146,10,0.3);z-index:10;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
-        <!-- Step 2.6: タスク追加ハーフモーダル -->
+        <!-- UX-01-B3: 3ステップタスク追加ハーフモーダル -->
         <div id="task-add-overlay" onclick="closeTodayAddTask()" style="display:none;position:absolute;inset:0;z-index:299;background:rgba(0,0,0,.3);"></div>
-        <div id="task-add-sheet" style="display:none;position:absolute;bottom:0;left:0;right:0;z-index:300;background:var(--bg2);border-top:1px solid var(--border2);border-radius:16px 16px 0 0;max-height:60vh;flex-direction:column;box-shadow:0 -4px 24px rgba(0,0,0,.4);">
+        <div id="task-add-sheet" style="display:none;position:absolute;bottom:0;left:0;right:0;z-index:300;background:var(--bg2);border-top:1px solid var(--border2);border-radius:16px 16px 0 0;max-height:70vh;flex-direction:column;box-shadow:0 -4px 24px rgba(0,0,0,.4);overflow-y:auto;">
           <div style="display:flex;align-items:center;padding:12px 16px;border-bottom:0.5px solid var(--border);">
-            <div style="font-size:13px;font-weight:500;color:var(--cream);flex:1;">タスクを追加</div>
+            <div id="task-step-title" style="font-size:13px;font-weight:500;color:var(--cream);flex:1;">タスクを追加</div>
             <button onclick="closeTodayAddTask()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 8px;">✕</button>
           </div>
-          <div id="task-add-chat" style="flex:1;overflow-y:auto;padding:10px 16px;max-height:30vh;"></div>
-          <div style="padding:8px 16px 12px;display:flex;gap:6px;align-items:center;">
-            <input id="task-add-input" placeholder="やりたいことを入力..." style="flex:1;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;color:var(--cream);font-family:var(--ff);font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')sendTaskAddMsg()">
-            <button onclick="sendTaskAddMsg()" style="width:36px;height:36px;border-radius:50%;background:var(--amber);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </button>
+          <!-- Step 1: タスク名 + 期日 -->
+          <div id="task-step-1" style="padding:16px;">
+            <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">タスク名</label>
+            <input id="task-step1-name" placeholder="やりたいことを入力..." style="width:100%;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;color:var(--cream);font-family:var(--ff);font-size:13px;outline:none;box-sizing:border-box;margin-bottom:12px;" onkeydown="if(event.key==='Enter')taskStepNext(1)">
+            <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">いつまで？（任意）</label>
+            <div id="task-step1-deadline-btns" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;"></div>
+            <input id="task-step1-date-picker" type="date" style="display:none;padding:8px 10px;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;color:var(--cream);font-family:var(--ff);font-size:12px;margin-bottom:16px;">
+            <button onclick="taskStepNext(1)" style="width:100%;padding:10px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">次へ →</button>
+          </div>
+          <!-- Step 2: ローカル推論 + 選択カード -->
+          <div id="task-step-2" style="display:none;padding:16px;">
+            <div id="task-step2-title" style="font-size:13px;color:var(--cream);margin-bottom:12px;font-weight:500;"></div>
+            <div id="task-step2-cards" style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;"></div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="taskStepComplete()" style="flex:1;padding:10px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">これでOK</button>
+              <button onclick="taskStepNext(2)" style="flex:1;padding:10px;background:var(--bg3);color:var(--cream);border:1px solid var(--border-card);border-radius:10px;font-size:13px;cursor:pointer;">もう少し詳しく</button>
+            </div>
+          </div>
+          <!-- Step 3: AI対話で詳細 -->
+          <div id="task-step-3" style="display:none;padding:0;">
+            <div id="task-add-chat" style="overflow-y:auto;padding:10px 16px;max-height:30vh;"></div>
+            <div style="padding:8px 16px 12px;display:flex;gap:6px;align-items:center;">
+              <input id="task-add-input" placeholder="詳細を入力..." style="flex:1;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;color:var(--cream);font-family:var(--ff);font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')sendTaskAddMsg()">
+              <button onclick="sendTaskAddMsg()" style="width:36px;height:36px;border-radius:50%;background:var(--amber);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
