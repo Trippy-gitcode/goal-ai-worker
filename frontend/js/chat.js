@@ -2899,6 +2899,22 @@ function renderTodayScreen(){
   const opts = {month:'long',day:'numeric',weekday:'short'};
   greetDate.textContent = now.toLocaleDateString('ja-JP', opts);
 
+  // B6: EXP/Level/Streak display
+  const exp = typeof loadEXP === 'function' ? loadEXP() : { total:0, today:0 };
+  const level = typeof getLevel === 'function' ? getLevel(exp.total) : { lv:1, title:'', nextExp:100 };
+  const levelEl = document.getElementById('today-level');
+  const expProgress = document.getElementById('today-exp-progress');
+  const expText = document.getElementById('today-exp-text');
+  const streakEl = document.getElementById('today-streak');
+  if(levelEl) levelEl.textContent = `Lv.${level.lv}`;
+  if(expProgress){
+    const prevThreshold = LEVEL_THRESHOLDS ? [...LEVEL_THRESHOLDS].reverse().find(t => exp.total >= t.exp)?.exp || 0 : 0;
+    const pct = level.nextExp > prevThreshold ? Math.min(100, Math.round((exp.total - prevThreshold) / (level.nextExp - prevThreshold) * 100)) : 0;
+    expProgress.style.width = pct + '%';
+  }
+  if(expText) expText.textContent = `${exp.total} / ${level.nextExp} EXP`;
+  if(streakEl && typeof STREAK !== 'undefined' && STREAK.count > 0) streakEl.textContent = `🔥${STREAK.count}日`;
+
   const todayStr = now.toISOString().slice(0,10);
   const timeline = document.getElementById('today-timeline');
   const list = document.getElementById('today-task-list');
@@ -3474,9 +3490,21 @@ function toggleTodayTask(taskId){
     for(const phase of (goal.phases||[])){
       for(const task of (phase.tasks||[])){
         if(String(task.id) === String(taskId)){
-          task.status = task.status === 'done' ? 'current' : 'done';
+          const wasDone = task.status === 'done';
+          task.status = wasDone ? 'current' : 'done';
+          // B6: EXP award on completion
+          if(!wasDone && task.status === 'done'){
+            const energy = task.energy_level || 'medium';
+            const expAmount = (typeof EXP_TABLE !== 'undefined' ? EXP_TABLE[energy] : null) || 15;
+            if(typeof awardEXP === 'function') awardEXP(expAmount, task.title);
+            // Check TODAY CLEAR
+            const allTasks = getTodayTasks();
+            const remaining = allTasks.filter(i => i.task.status !== 'done' && String(i.task.id) !== String(taskId)).length;
+            if(remaining === 0 && allTasks.length > 0){
+              setTimeout(() => { if(typeof showTodayClearEffect === 'function') showTodayClearEffect(); }, 300);
+            }
+          }
           renderTodayScreen();
-          // Save to Supabase
           if(typeof saveGoals === 'function') saveGoals();
           return;
         }
