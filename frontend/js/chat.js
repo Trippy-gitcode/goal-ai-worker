@@ -2873,6 +2873,14 @@ async function confirmTaskCard() {
 
 // ═══ ES Module: expose to window ═══
 // ═══ TODAY SCREEN (UX-01) ═══
+let _todayViewMode = localStorage.getItem('today_view_mode') || 'timeline';
+
+function toggleTodayView(){
+  _todayViewMode = _todayViewMode === 'timeline' ? 'list' : 'timeline';
+  localStorage.setItem('today_view_mode', _todayViewMode);
+  renderTodayScreen();
+}
+
 function renderTodayScreen(){
   const greetMsg = document.getElementById('today-greet-msg');
   const greetDate = document.getElementById('today-greet-date');
@@ -2891,46 +2899,21 @@ function renderTodayScreen(){
   const opts = {month:'long',day:'numeric',weekday:'short'};
   greetDate.textContent = now.toLocaleDateString('ja-JP', opts);
 
-  // Tasks
+  const todayStr = now.toISOString().slice(0,10);
+  const timeline = document.getElementById('today-timeline');
   const list = document.getElementById('today-task-list');
-  if(!list) return;
-  const todayStr = new Date().toISOString().slice(0,10);
-  const items = allTasks; // B-06: 全件表示（上限なし）
-  if(items.length === 0){
-    list.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--muted2);font-size:12px;">タスクがありません</div>';
+  const toggleBtn = document.getElementById('today-view-toggle');
+
+  if(_todayViewMode === 'timeline'){
+    if(timeline) timeline.style.display = '';
+    if(list) list.style.display = 'none';
+    if(toggleBtn) toggleBtn.textContent = 'リスト表示';
+    renderTodayTimeline(allTasks, todayStr);
   } else {
-    // 1-7: ドラッグ並替順序をlocalStorageから復元
-    const savedOrder = JSON.parse(localStorage.getItem('today_task_order') || '[]');
-    if(savedOrder.length) items.sort((a,b) => {
-      const ia = savedOrder.indexOf(String(a.task.id)), ib = savedOrder.indexOf(String(b.task.id));
-      if(ia === -1 && ib === -1) return 0;
-      if(ia === -1) return 1;
-      if(ib === -1) return -1;
-      return ia - ib;
-    });
-    // P26: 完了タスクを下部に自動ソート（done→bottom）
-    items.sort((a,b) => {
-      const aDone = a.task.status === 'done' ? 1 : 0;
-      const bDone = b.task.status === 'done' ? 1 : 0;
-      return aDone - bDone;
-    });
-    const pColors = {high:'var(--red)',mid:'var(--amber)',low:'var(--green)'};
-    list.innerHTML = items.map((item, idx) => {
-      const t = item.task;
-      const isDone = t.status === 'done';
-      const isOverdue = t.due && t.due < todayStr && !isDone;
-      const goalName = item.goalName || '';
-      const timeStr = t.estimated_time ? `${t.estimated_time}` : '';
-      return `<div data-task-id="${t.id}" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);${isDone?'opacity:0.35;':''}cursor:pointer;">
-        <div data-drag="1" style="width:16px;height:28px;display:flex;flex-direction:column;gap:1.5px;align-items:center;justify-content:center;opacity:0.2;flex-shrink:0;touch-action:none;cursor:grab;"><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span></div>
-        <div onclick="event.stopPropagation();toggleTodayTask('${t.id}')" style="width:28px;height:28px;border-radius:50%;${isDone?'':'border:1px solid '+(idx===0&&!isDone?'var(--amber)':'var(--border2)')+';'}display:flex;align-items:center;justify-content:center;font-size:12px;color:${idx===0&&!isDone?'var(--amber)':'var(--muted2)'};flex-shrink:0;${idx===0&&!isDone?'background:rgba(228,184,106,0.1);':''}cursor:pointer;">${isDone?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':(idx+1)}</div>
-        <div style="flex:1;min-width:0;" onclick="openHomeTaskById('${t.id}')">
-          <div style="font-size:12px;color:${isOverdue?'var(--red)':'var(--cream)'};line-height:1.3;${isDone?'text-decoration:line-through;':''}overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(t.title)}</div>
-          ${timeStr ? `<div style="font-size:12px;color:${isOverdue?'var(--red)':'var(--muted2)'};margin-top:1px;">${isOverdue?'期限切れ':timeStr}</div>` : (isOverdue ? '<div style="font-size:12px;color:var(--red);margin-top:1px;">期限切れ</div>' : '')}
-        </div>
-        ${goalName ? `<div style="font-size:12px;padding:2px 6px;border-radius:3px;background:rgba(228,184,106,0.1);color:var(--amber);border:0.5px solid rgba(228,184,106,0.2);flex-shrink:0;white-space:nowrap;">${escapeHtml(goalName)}</div>` : ''}
-      </div>`;
-    }).join('');
+    if(timeline) timeline.style.display = 'none';
+    if(list) list.style.display = '';
+    if(toggleBtn) toggleBtn.textContent = 'タイムライン表示';
+    renderTodayList(allTasks, todayStr);
   }
 
   // Goal progress
@@ -2949,12 +2932,141 @@ function renderTodayScreen(){
   // C: QOL提案カード表示
   renderQOLProposals();
 
-  // B-08: ドラッグ並替初期化
-  initTodayDrag();
+  // B-08: ドラッグ並替初期化（リストモードのみ）
+  if(_todayViewMode === 'list') initTodayDrag();
   // B-16: 日記読込
   loadTodayDiary();
   // B-02: 心がけ欄（当日キャッシュ）
   loadTodayMindset(allTasks);
+}
+
+// ═══ B5: タイムラインレンダリング ═══
+function renderTodayTimeline(allTasks, todayStr){
+  const timeline = document.getElementById('today-timeline');
+  if(!timeline) return;
+
+  // Get routines and scheduling pref from profile
+  const routines = window._routines || [];
+  const pref = window._schedulingPref || {};
+  const schedule = autoSchedule(allTasks, routines, pref);
+  const PX_PER_HOUR = 60;
+  const HOUR_START = 6, HOUR_END = 23;
+  const totalHeight = (HOUR_END - HOUR_START) * PX_PER_HOUR;
+
+  // Current time indicator position
+  const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+  const nowPx = Math.max(0, Math.min(totalHeight, (nowMin - HOUR_START*60) / 60 * PX_PER_HOUR));
+
+  // Build hour grid
+  let html = `<div style="position:relative;height:${totalHeight}px;margin-left:42px;">`;
+  // Hour labels + lines
+  for(let hour = HOUR_START; hour <= HOUR_END; hour++){
+    const y = (hour - HOUR_START) * PX_PER_HOUR;
+    html += `<div style="position:absolute;top:${y}px;left:-42px;width:36px;text-align:right;font-size:10px;color:var(--muted2);line-height:1;transform:translateY(-5px);">${hour}:00</div>`;
+    html += `<div style="position:absolute;top:${y}px;left:0;right:0;height:0.5px;background:var(--border);opacity:0.5;"></div>`;
+  }
+
+  // Current time indicator
+  if(nowMin >= HOUR_START*60 && nowMin <= HOUR_END*60){
+    html += `<div style="position:absolute;top:${nowPx}px;left:-6px;right:0;height:2px;background:var(--red);z-index:5;border-radius:1px;"></div>`;
+    html += `<div style="position:absolute;top:${nowPx-3}px;left:-9px;width:8px;height:8px;border-radius:50%;background:var(--red);z-index:5;"></div>`;
+  }
+
+  // Render schedule slots
+  schedule.slots.forEach(slot => {
+    const top = Math.max(0, (slot.startMin - HOUR_START*60) / 60 * PX_PER_HOUR);
+    const height = Math.max(20, (slot.endMin - slot.startMin) / 60 * PX_PER_HOUR);
+    const startTime = `${Math.floor(slot.startMin/60)}:${String(slot.startMin%60).padStart(2,'0')}`;
+
+    if(slot.type === 'routine'){
+      // Routine: gray background block
+      html += `<div style="position:absolute;top:${top}px;left:4px;right:4px;height:${height}px;background:rgba(255,255,255,0.03);border:0.5px solid var(--border);border-radius:6px;display:flex;align-items:center;padding:0 8px;overflow:hidden;">
+        <span style="font-size:11px;color:var(--muted2);">░ ${escapeHtml(slot.title)}</span>
+      </div>`;
+    } else if(slot.type === 'task-done'){
+      // Skip done tasks in timeline (they show in summary)
+    } else {
+      // Task card
+      const item = slot.data;
+      const t = item.task;
+      const isDone = t.status === 'done';
+      const isOverdue = t.due && t.due < todayStr && !isDone;
+      const durStr = t.estimated_minutes ? `${t.estimated_minutes}分` : '';
+      const goalName = item.goal?.title?.slice(0,6) || '';
+      html += `<div onclick="openHomeTaskById('${t.id}')" style="position:absolute;top:${top}px;left:4px;right:4px;height:${Math.max(28,height-2)}px;background:${isDone?'rgba(76,175,80,0.08)':'rgba(228,184,106,0.06)'};border:0.5px solid ${isDone?'var(--green-d)':isOverdue?'var(--red-d)':'rgba(228,184,106,0.2)'};border-radius:8px;padding:4px 8px;cursor:pointer;overflow:hidden;display:flex;align-items:${height>36?'flex-start':'center'};gap:6px;z-index:2;">
+        <div onclick="event.stopPropagation();toggleTodayTask('${t.id}')" style="width:18px;height:18px;border-radius:50%;${isDone?'':'border:1px solid '+(isOverdue?'var(--red)':'var(--amber)')+';'}display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;margin-top:1px;">
+          ${isDone?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;color:${isDone?'var(--green)':isOverdue?'var(--red)':'var(--cream)'};${isDone?'text-decoration:line-through;opacity:0.6;':''}overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;">${escapeHtml(t.title)}</div>
+          ${height > 36 ? `<div style="font-size:10px;color:var(--muted2);margin-top:2px;">${startTime}${durStr ? ' · '+durStr : ''}${goalName ? ' · '+goalName : ''}</div>` : ''}
+        </div>
+      </div>`;
+    }
+  });
+
+  html += '</div>';
+
+  // Summary bar: done count
+  const doneCount = allTasks.filter(i => i.task.status === 'done').length;
+  const totalCount = allTasks.length;
+  if(totalCount > 0){
+    html += `<div style="margin-top:8px;padding:8px 0;border-top:0.5px solid var(--border);display:flex;align-items:center;gap:8px;">
+      <span style="font-size:11px;color:var(--muted2);">完了 ${doneCount}/${totalCount}</span>
+      <div style="flex:1;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;"><div style="height:100%;background:var(--green);border-radius:2px;width:${totalCount?Math.round(doneCount/totalCount*100):0}%;transition:width .3s;"></div></div>
+    </div>`;
+  }
+
+  // Overflow warning
+  if(schedule.overflow > 0){
+    html += `<div style="font-size:11px;color:var(--amber);padding:4px 0;">⚠ ${schedule.overflow}件のタスクが今日に収まりません。明日に回す検討を。</div>`;
+  }
+
+  timeline.innerHTML = html;
+
+  // Scroll to current time
+  const scrollParent = timeline.closest('[style*="overflow"]') || timeline.parentElement;
+  if(scrollParent && nowPx > 100) scrollParent.scrollTop = nowPx - 80;
+}
+
+// ═══ B5: リストビュー（旧renderTodayScreen互換） ═══
+function renderTodayList(allTasks, todayStr){
+  const list = document.getElementById('today-task-list');
+  if(!list) return;
+  const items = allTasks;
+  if(items.length === 0){
+    list.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--muted2);font-size:12px;">タスクがありません</div>';
+  } else {
+    const savedOrder = JSON.parse(localStorage.getItem('today_task_order') || '[]');
+    if(savedOrder.length) items.sort((a,b) => {
+      const ia = savedOrder.indexOf(String(a.task.id)), ib = savedOrder.indexOf(String(b.task.id));
+      if(ia === -1 && ib === -1) return 0;
+      if(ia === -1) return 1;
+      if(ib === -1) return -1;
+      return ia - ib;
+    });
+    items.sort((a,b) => {
+      const aDone = a.task.status === 'done' ? 1 : 0;
+      const bDone = b.task.status === 'done' ? 1 : 0;
+      return aDone - bDone;
+    });
+    list.innerHTML = items.map((item, idx) => {
+      const t = item.task;
+      const isDone = t.status === 'done';
+      const isOverdue = t.due && t.due < todayStr && !isDone;
+      const goalName = item.goalName || '';
+      const timeStr = t.estimated_time ? `${t.estimated_time}` : '';
+      return `<div data-task-id="${t.id}" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);${isDone?'opacity:0.35;':''}cursor:pointer;">
+        <div data-drag="1" style="width:16px;height:28px;display:flex;flex-direction:column;gap:1.5px;align-items:center;justify-content:center;opacity:0.2;flex-shrink:0;touch-action:none;cursor:grab;"><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span></div>
+        <div onclick="event.stopPropagation();toggleTodayTask('${t.id}')" style="width:28px;height:28px;border-radius:50%;${isDone?'':'border:1px solid '+(idx===0&&!isDone?'var(--amber)':'var(--border2)')+';'}display:flex;align-items:center;justify-content:center;font-size:12px;color:${idx===0&&!isDone?'var(--amber)':'var(--muted2)'};flex-shrink:0;${idx===0&&!isDone?'background:rgba(228,184,106,0.1);':''}cursor:pointer;">${isDone?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':(idx+1)}</div>
+        <div style="flex:1;min-width:0;" onclick="openHomeTaskById('${t.id}')">
+          <div style="font-size:12px;color:${isOverdue?'var(--red)':'var(--cream)'};line-height:1.3;${isDone?'text-decoration:line-through;':''}overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(t.title)}</div>
+          ${timeStr ? `<div style="font-size:12px;color:${isOverdue?'var(--red)':'var(--muted2)'};margin-top:1px;">${isOverdue?'期限切れ':timeStr}</div>` : (isOverdue ? '<div style="font-size:12px;color:var(--red);margin-top:1px;">期限切れ</div>' : '')}
+        </div>
+        ${goalName ? `<div style="font-size:12px;padding:2px 6px;border-radius:3px;background:rgba(228,184,106,0.1);color:var(--amber);border:0.5px solid rgba(228,184,106,0.2);flex-shrink:0;white-space:nowrap;">${escapeHtml(goalName)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
 }
 
 function renderSecretaryMemo(allTasks, todayStr){
@@ -3741,7 +3853,7 @@ Object.assign(window, {
   requestTaskBreakdown, showTaskCard, confirmTaskCard,
   setPreset, taskCheckAnim,
   retryWithRoute, recordRoutingFeedback, stopHomeStream,
-  renderTodayScreen, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask,
+  renderTodayScreen, renderTodayTimeline, renderTodayList, toggleTodayView, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask,
   saveTodayDiary, loadTodayDiary, getDiaryDate, generateDiaryTitle, processTaskUpdateTags, processIntentTags, acceptGoalProposal, initTodayDrag,
   loadQOLProposals, renderQOLProposals, acceptQOLProposal, expandQOLCard,
   openTodayAddTask, closeTodayAddTask, sendTaskAddMsg,
