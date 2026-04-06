@@ -255,7 +255,7 @@ echo "--- Vite tree-shake safety (onclick vs window.assign) ---"
 # HTML静的onclick関数を抽出
 HTML_ONCLICK=$(grep -o 'onclick="[a-zA-Z_]*(' frontend/index.html 2>/dev/null | sed 's/onclick="//;s/($//' | sort -u)
 # 全JSファイルのObject.assign(window,{...})内の関数名を抽出
-WINDOW_FNS=$(for f in frontend/js/ui.js frontend/js/chat.js frontend/js/goals.js frontend/js/profile.js frontend/js/api.js frontend/js/app.js; do sed -n '/Object\.assign(window/,/});/p' "$f" 2>/dev/null; done | grep -o '[a-zA-Z_]*' | sort -u)
+WINDOW_FNS=$(for f in frontend/js/ui.js frontend/js/chat.js frontend/js/goals.js frontend/js/profile.js frontend/js/api.js frontend/js/app.js frontend/js/globals.js; do sed -n '/Object\.assign(window/,/});/p' "$f" 2>/dev/null; done | grep -o '[a-zA-Z_]*' | sort -u)
 ONCLICK_FAIL=0
 for fn in $HTML_ONCLICK; do
   if ! echo "$WINDOW_FNS" | grep -qw "$fn"; then
