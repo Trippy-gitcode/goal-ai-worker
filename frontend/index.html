@@ -156,7 +156,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v4.0.13</span>
+      <span class="version" title="バージョン確認">v4.0.14</span>
     </div>
   </div>
 </div>
@@ -684,6 +684,7 @@
             <div class="hub-tab active" id="mtab-know"    onclick="switchMyselfTab('know')"><svg width="16" height="16" class="svg-ic"><use href="#ic-mirror"/></svg> 自分を知る</div>
             <div class="hub-tab"        id="mtab-vision"  onclick="switchMyselfTab('vision')"><svg width="16" height="16" class="svg-ic"><use href="#ic-target"/></svg> ビジョン</div>
             <div class="hub-tab"        id="mtab-connect" onclick="switchMyselfTab('connect')"><svg width="16" height="16" class="svg-ic"><use href="#ic-link"/></svg> ゴールとの連携</div>
+            <div class="hub-tab"        id="mtab-routine" onclick="switchMyselfTab('routine')"><svg width="16" height="16" class="svg-ic"><use href="#ic-clock"/></svg> ルーティン</div>
             <div class="hub-tab"        id="mtab-profile" onclick="switchMyselfTab('profile')"><svg width="16" height="16" class="svg-ic"><use href="#ic-user"/></svg> プロフィール</div>
           </div>
         </div>
@@ -889,6 +890,25 @@
                   <button onclick="runConnectAnalysis()" style="padding:6px 14px;background:var(--purple-d);border:1px solid var(--know-purple-border);border-radius:7px;font-size:12px;color:var(--know-purple);cursor:pointer;font-family:var(--ff);">↺ 再分析</button>
                 </div>
                 <div id="connect-content"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 🕐 ルーティン -->
+          <div class="hub-pane" id="myself-pane-routine">
+            <div style="overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 28px;">
+              <div style="max-width:680px;margin:0 auto;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                  <h3 style="font-size:15px;font-weight:600;color:var(--cream);margin:0;">ルーティン</h3>
+                  <button onclick="addRoutine()" style="padding:6px 12px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:8px;font-size:12px;cursor:pointer;font-family:var(--ff);font-weight:600;">＋ 追加</button>
+                </div>
+                <div id="routine-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+                  <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">ルーティンが未登録です</div>
+                </div>
+                <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:10px;border:0.5px solid var(--border);">
+                  <div style="font-size:13px;font-weight:500;color:var(--cream);margin-bottom:8px;">スケジューリング設定</div>
+                  <div id="scheduling-pref-form" style="display:flex;flex-direction:column;gap:8px;"></div>
+                </div>
               </div>
             </div>
           </div>
