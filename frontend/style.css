@@ -2263,6 +2263,9 @@ body,body *{transition:background-color .3s ease,color .3s ease,border-color .3s
 .task-check-anim{animation:taskCheckC .5s ease;}
 .task-confetti-particle{position:absolute;width:4px;height:4px;border-radius:50%;pointer-events:none;animation:confettiPop .6s ease-out forwards;}
 @keyframes confettiPop{0%{opacity:1;transform:translate(0,0) scale(1);}100%{opacity:0;transform:translate(var(--cx),var(--cy)) scale(0);}}
+@keyframes expFloat{0%{opacity:1;transform:translateX(-50%) translateY(0);}100%{opacity:0;transform:translateX(-50%) translateY(-60px);}}
+@keyframes scaleIn{0%{transform:scale(0.5);opacity:0;}100%{transform:scale(1);opacity:1;}}
+@keyframes fadeIn{0%{opacity:0;}100%{opacity:1;}}
 
 /* ════════ Analytics: Streak display ════════ */
 .analytics-streak{display:flex;align-items:center;gap:8px;padding:10px 16px;margin:0 12px 8px;}

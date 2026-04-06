@@ -156,7 +156,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v4.0.15</span>
+      <span class="version" title="バージョン確認">v4.0.16</span>
     </div>
   </div>
 </div>
@@ -210,6 +210,13 @@
             <div id="today-greet-msg" style="font-size:20px;color:var(--cream);font-weight:300;margin-top:2px;line-height:1.3;">おはよう。</div>
             <div id="today-greet-date" style="font-size:12px;color:var(--muted);margin-top:4px;"></div>
             <div id="today-mindset" style="font-size:12px;color:var(--amber);margin-top:6px;font-style:italic;display:none;"></div>
+          </div>
+          <!-- B6: EXP/Level/Streak bar -->
+          <div id="today-exp-bar" style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:6px 0;">
+            <span id="today-level" style="font-size:12px;font-weight:600;color:var(--amber);"></span>
+            <div style="flex:1;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;"><div id="today-exp-progress" style="height:100%;background:linear-gradient(90deg,var(--amber),#f5d380);border-radius:2px;width:0%;transition:width .5s;"></div></div>
+            <span id="today-exp-text" style="font-size:10px;color:var(--muted2);"></span>
+            <span id="today-streak" style="font-size:12px;color:var(--red);font-weight:500;"></span>
           </div>
           <!-- Secretary memo -->
           <div id="today-memo" style="margin:12px 0 0;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg2);overflow:hidden;display:none;">
