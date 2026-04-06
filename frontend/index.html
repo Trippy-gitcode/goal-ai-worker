@@ -156,7 +156,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="バージョン確認">v4.0.14</span>
+      <span class="version" title="バージョン確認">v4.0.15</span>
     </div>
   </div>
 </div>
@@ -220,10 +220,14 @@
             </div>
             <div id="today-memo-body" style="padding:0 10px 8px;"></div>
           </div>
-          <!-- Task list -->
+          <!-- B5: Timeline view -->
           <div style="margin-top:12px;">
-            <div style="font-size:12px;font-weight:500;color:var(--muted2);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;">Today's Tasks</div>
-            <div id="today-task-list"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <div style="font-size:12px;font-weight:500;color:var(--muted2);letter-spacing:0.5px;text-transform:uppercase;">Timeline</div>
+              <button id="today-view-toggle" onclick="toggleTodayView()" style="font-size:11px;color:var(--muted);background:none;border:1px solid var(--border-card);border-radius:6px;padding:3px 8px;cursor:pointer;font-family:var(--ff);">リスト表示</button>
+            </div>
+            <div id="today-timeline" style="position:relative;min-height:200px;"></div>
+            <div id="today-task-list" style="display:none;"></div>
           </div>
           <!-- Goal progress strip -->
           <div id="today-goals" style="display:flex;gap:10px;margin-top:12px;padding-top:8px;border-top:0.5px solid var(--border);"></div>

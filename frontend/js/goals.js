@@ -2655,6 +2655,136 @@ function startGoalCreation(){
   }, 200);
 }
 
+// ═══ UX-01-B5: AIスケジューリングロジック ═══
+function autoSchedule(tasks, routines, pref){
+  const HOUR_START = 6, HOUR_END = 23;
+  const slots = []; // {type:'routine'|'task', title, startMin, endMin, data}
+  const bufferMin = (pref && pref.buffer_minutes) || 15;
+  const maxTasks = (pref && pref.max_daily_tasks) || 5;
+  const focusHours = (pref && pref.focus_hours) || 'morning';
+  const batchErrands = pref && pref.batch_errands !== false;
+  const hardFirst = pref && pref.hard_tasks_first !== false;
+
+  // Helper: time string "HH:MM" → minutes from midnight
+  const toMin = s => { const p = (s||'0:00').split(':'); return (parseInt(p[0])||0)*60 + (parseInt(p[1])||0); };
+
+  // Step 1: Place routines (fixed blocks)
+  (routines || []).forEach(r => {
+    const startMin = toMin(r.time);
+    const endMin = r.end ? toMin(r.end) : startMin + (r.duration || 30);
+    const todayDay = ['sun','mon','tue','wed','thu','fri','sat'][new Date().getDay()];
+    const days = r.days === 'daily' ? ['mon','tue','wed','thu','fri','sat','sun'] : (r.days || []);
+    if(!days.includes(todayDay)) return;
+    slots.push({ type:'routine', title:r.title, startMin, endMin, data:r });
+  });
+
+  // Step 2: Find free slots
+  slots.sort((a,b) => a.startMin - b.startMin);
+  function findFreeSlots(){
+    const free = [];
+    let cursor = HOUR_START * 60;
+    const sorted = [...slots].sort((a,b) => a.startMin - b.startMin);
+    sorted.forEach(s => {
+      if(cursor + bufferMin <= s.startMin) free.push({ startMin:cursor, endMin:s.startMin - bufferMin });
+      cursor = Math.max(cursor, s.endMin + bufferMin);
+    });
+    if(cursor < HOUR_END * 60) free.push({ startMin:cursor, endMin:HOUR_END * 60 });
+    return free;
+  }
+
+  // Step 3-4: Sort tasks by priority
+  const taskList = [...tasks].filter(i => i.task.status !== 'done');
+  const todayStr = new Date().toISOString().slice(0,10);
+
+  // Separate constrained vs free tasks
+  const constrained = taskList.filter(i => i.task.time_constraint && i.task.time_constraint !== 'いつでも');
+  const free = taskList.filter(i => !i.task.time_constraint || i.task.time_constraint === 'いつでも');
+
+  // Sort free tasks by scheduling priority
+  free.sort((a,b) => {
+    // Deadline proximity
+    const dA = a.task.deadline || a.task.due || '9999';
+    const dB = b.task.deadline || b.task.due || '9999';
+    if(dA !== dB) return dA < dB ? -1 : 1;
+    // Energy level placement (high energy tasks first if hardFirst)
+    if(hardFirst){
+      const eA = a.task.energy_level === 'high' ? 0 : 1;
+      const eB = b.task.energy_level === 'high' ? 0 : 1;
+      if(eA !== eB) return eA - eB;
+    }
+    return 0;
+  });
+
+  // Batch errands together
+  if(batchErrands){
+    const errands = free.filter(i => i.task.location === '外出先');
+    const nonErrands = free.filter(i => i.task.location !== '外出先');
+    free.length = 0;
+    free.push(...nonErrands.slice(0, Math.ceil(nonErrands.length/2)), ...errands, ...nonErrands.slice(Math.ceil(nonErrands.length/2)));
+  }
+
+  // Place constrained tasks first
+  let placed = 0;
+  constrained.forEach(item => {
+    if(placed >= maxTasks) return;
+    const dur = item.task.estimated_minutes || 30;
+    const tc = item.task.time_constraint;
+    let targetStart = null;
+    if(tc === '営業時間内') targetStart = 9 * 60;
+    else if(tc === '午前のみ') targetStart = 8 * 60;
+    else if(tc === '午後のみ') targetStart = 13 * 60;
+    const freeSlots = findFreeSlots();
+    for(const fs of freeSlots){
+      const start = targetStart ? Math.max(fs.startMin, targetStart) : fs.startMin;
+      if(start + dur <= fs.endMin){
+        slots.push({ type:'task', title:item.task.title, startMin:start, endMin:start+dur, data:item });
+        placed++;
+        break;
+      }
+    }
+  });
+
+  // Place remaining free tasks
+  // Determine focus range for high-energy tasks
+  const focusRange = focusHours === 'morning' ? [6*60, 12*60] : focusHours === 'afternoon' ? [12*60, 17*60] : [18*60, 23*60];
+
+  free.forEach(item => {
+    if(placed >= maxTasks) return;
+    const dur = item.task.estimated_minutes || 30;
+    const isHighEnergy = item.task.energy_level === 'high';
+    const freeSlots = findFreeSlots();
+    let bestSlot = null;
+    for(const fs of freeSlots){
+      if(fs.endMin - fs.startMin >= dur){
+        if(isHighEnergy && fs.startMin >= focusRange[0] && fs.startMin < focusRange[1]){
+          bestSlot = fs; break;
+        }
+        if(!bestSlot) bestSlot = fs;
+      }
+    }
+    if(bestSlot){
+      const start = isHighEnergy ? Math.max(bestSlot.startMin, focusRange[0]) : bestSlot.startMin;
+      if(start + dur <= bestSlot.endMin){
+        slots.push({ type:'task', title:item.task.title, startMin:start, endMin:start+dur, data:item });
+        placed++;
+      } else if(bestSlot.startMin + dur <= bestSlot.endMin){
+        slots.push({ type:'task', title:item.task.title, startMin:bestSlot.startMin, endMin:bestSlot.startMin+dur, data:item });
+        placed++;
+      }
+    }
+  });
+
+  // Also include done tasks (for display) - place at original time or compact at top
+  const doneTasks = [...tasks].filter(i => i.task.status === 'done');
+  doneTasks.forEach(item => {
+    const dur = item.task.estimated_minutes || 30;
+    slots.push({ type:'task-done', title:item.task.title, startMin:HOUR_START*60, endMin:HOUR_START*60+dur, data:item });
+  });
+
+  slots.sort((a,b) => a.startMin - b.startMin);
+  return { slots, placed, overflow: taskList.length - placed };
+}
+
 // Constants, arrays, functions
 Object.assign(window, {
   TASKS, ALL_GOALS, GOAL_COLORS, getGoalColor, renderGoalsList, openGoalHubById, switchGoalsTab, renderWishlist, addWish, toggleWish, promoteWish, startGoalCreation,
@@ -2686,5 +2816,6 @@ Object.assign(window, {
   openGoalModal, toggleGoalModalTask, onGoalAssistComplete,
   showTaskSetupPhase, addTaskSetupItem, renderBreadcrumb, renderStepIndicator,
   showRoleSelection, confirmGoalRole,
-  startDeepAnalysis
+  startDeepAnalysis,
+  autoSchedule
 });
