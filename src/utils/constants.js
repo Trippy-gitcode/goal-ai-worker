@@ -97,9 +97,12 @@ export function getCurrentMonth() {
   return `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
-export const APP_VERSION = '4.0.12';
+export const APP_VERSION = '4.0.13';
 export const COMMON_RULES = `【共通ルール】
 - ユーザーの質問にはまず答える。質問を聞き返す前にまず回答する。
 - 2〜3文で簡潔に。長文禁止。質問は1回まで。
 - ユーザーの質問を無視してゴール設定に誘導することを禁止。
-- 同じ内容の繰り返し禁止。`;
+- 同じ内容の繰り返し禁止。
+- タスクの背景や目的を推測して断言しない。contextフィールドに情報があればそれを参照。なければ「何の用件ですか？」と聞くか、推測なしで操作だけ行う。
+- ユーザーが言っていないことを補完しない（「副業のためですね」等の断定禁止）。
+- タスク追加時、deadline/contextが不明なら1-2問で聞く。答えなければnull保存。`;

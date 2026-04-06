@@ -3022,6 +3022,26 @@ function renderSecretaryMemo(allTasks, todayStr){
 }
 
 // C-10/11: TASK_UPDATEタグを検出してタスク操作
+// UX-01-B3: 拡張フォーマット [TASK_UPDATE:add:タイトル:deadline=xx:context=yy:estimated_minutes=30]
+function parseTaskUpdateParams(raw){
+  const parts = raw.split(':');
+  const title = parts[0];
+  const meta = { deadline:null, context:null, risk:null, worst_case:null, estimated_minutes:null, location:null, time_constraint:null, dependencies:[], energy_level:null, repeatable:null, priority_score:null };
+  for(let i=1; i<parts.length; i++){
+    const eq = parts[i].indexOf('=');
+    if(eq > 0){
+      const k = parts[i].slice(0, eq);
+      const v = parts[i].slice(eq+1);
+      if(k in meta){
+        if(k === 'estimated_minutes' || k === 'priority_score') meta[k] = parseInt(v, 10) || null;
+        else if(k === 'dependencies') meta[k] = v ? v.split(',') : [];
+        else meta[k] = v || null;
+      }
+    }
+  }
+  return { title, ...meta };
+}
+
 async function processTaskUpdateTags(text){
   if(!text) return;
   const regex = /\[TASK_UPDATE:(add|done|move):([^\]]+)\]/g;
@@ -3029,8 +3049,8 @@ async function processTaskUpdateTags(text){
   let changed = false;
   while((match = regex.exec(text)) !== null){
     const action = match[1];
-    const params = match[2].split(':');
-    const taskName = params[0];
+    const parsed = parseTaskUpdateParams(match[2]);
+    const taskName = parsed.title;
     if(action === 'add'){
       // ゴールが無い場合はデフォルトゴールを作成（await で完了を待つ）
       if(ALL_GOALS.length === 0){
@@ -3043,7 +3063,14 @@ async function processTaskUpdateTags(text){
       }
       const goal = ALL_GOALS[0];
       if(!goal.phases?.length) goal.phases = [{title:'タスク',tasks:[]}];
-      goal.phases[0].tasks.push({id:'task_'+Date.now(), title:taskName, status:'current', source:'ai'});
+      goal.phases[0].tasks.push({
+        id:'task_'+Date.now(), title:taskName, status:'current', source:'ai',
+        deadline:parsed.deadline, context:parsed.context, risk:parsed.risk,
+        worst_case:parsed.worst_case, estimated_minutes:parsed.estimated_minutes,
+        location:parsed.location, time_constraint:parsed.time_constraint,
+        dependencies:parsed.dependencies, energy_level:parsed.energy_level,
+        repeatable:parsed.repeatable, priority_score:parsed.priority_score
+      });
       changed = true;
     } else if(action === 'done'){
       for(const goal of ALL_GOALS){
@@ -3369,8 +3396,33 @@ function sendTodayComment(){
   }, 100);
 }
 
-// Step 2.6: ハーフモーダルでタスク追加
+// ═══ UX-01-B3: 3ステップタスク追加 ═══
 let _taskAddHistory = [];
+let _taskAddDraft = { name:'', deadline:null, location:null, estimated_minutes:null, energy_level:null, time_constraint:null, context:null, risk:null, worst_case:null };
+
+// ── ローカル推論辞書（AI呼び出しゼロ） ──
+const LOCATION_HINTS = {
+  '役所|区役所|市役所|銀行|郵便局|病院|クリニック|歯医者|美容院|美容室|整体|ジム': { location:'外出先', time_constraint:'営業時間内', energy_level:'low' },
+  '買い物|スーパー|コンビニ|ドラッグストア|ホームセンター|百均': { location:'外出先', energy_level:'low' },
+  '調査|調べ|リサーチ|投稿|メール|レポート|資料|企画|設計': { location:'自宅', energy_level:'high' },
+  '掃除|洗濯|片付け|整理|ゴミ出し': { location:'自宅', energy_level:'low', estimated_minutes:30 },
+  '勉強|学習|読書|本を読む|資格': { location:'自宅', energy_level:'high', estimated_minutes:60 },
+  '電話|連絡|予約|申し込み': { location:'自宅', energy_level:'low', estimated_minutes:15 },
+  '打ち合わせ|ミーティング|MTG|会議': { location:'オフィス', energy_level:'high', estimated_minutes:60 },
+  '引っ越し|転居届|転入届|住民票': { location:'外出先', time_constraint:'営業時間内', estimated_minutes:60 },
+};
+
+function localInferTask(title){
+  const result = { location:null, time_constraint:null, energy_level:null, estimated_minutes:null };
+  for(const [pattern, defaults] of Object.entries(LOCATION_HINTS)){
+    const re = new RegExp(pattern);
+    if(re.test(title)){
+      Object.assign(result, defaults);
+      break;
+    }
+  }
+  return result;
+}
 
 function openTodayAddTask(){
   const sheet = document.getElementById('task-add-sheet');
@@ -3379,8 +3431,132 @@ function openTodayAddTask(){
   const ov = document.getElementById('task-add-overlay');
   if(ov) ov.style.display = 'block';
   _taskAddHistory = [];
-  document.getElementById('task-add-chat').innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0;">やりたいことを入力してください</div>';
-  setTimeout(() => document.getElementById('task-add-input')?.focus({ preventScroll: true }), 100);
+  _taskAddDraft = { name:'', deadline:null, location:null, estimated_minutes:null, energy_level:null, time_constraint:null, context:null, risk:null, worst_case:null };
+  // Reset to step 1
+  document.getElementById('task-step-1').style.display = 'block';
+  document.getElementById('task-step-2').style.display = 'none';
+  document.getElementById('task-step-3').style.display = 'none';
+  document.getElementById('task-step-title').textContent = 'タスクを追加';
+  document.getElementById('task-step1-name').value = '';
+  // Render deadline buttons
+  const today = new Date(); const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
+  const weekEnd = new Date(today); weekEnd.setDate(today.getDate()+(7-today.getDay()));
+  const nextWeekEnd = new Date(weekEnd); nextWeekEnd.setDate(weekEnd.getDate()+7);
+  const fmt = d => d.toISOString().slice(0,10);
+  const presets = [
+    {label:'今日', value:fmt(today)}, {label:'明日', value:fmt(tomorrow)},
+    {label:'今週中', value:fmt(weekEnd)}, {label:'来週中', value:fmt(nextWeekEnd)},
+    {label:'日付選択', value:'pick'}, {label:'なし', value:''}
+  ];
+  const btnBox = document.getElementById('task-step1-deadline-btns');
+  btnBox.innerHTML = presets.map(p =>
+    `<button class="task-dl-btn" data-val="${p.value}" onclick="pickTaskDeadline(this)" style="padding:6px 12px;background:var(--bg3);border:1px solid var(--border-card);border-radius:8px;font-size:12px;color:var(--cream);cursor:pointer;font-family:var(--ff);transition:all .15s;">${p.label}</button>`
+  ).join('');
+  document.getElementById('task-step1-date-picker').style.display = 'none';
+  setTimeout(() => document.getElementById('task-step1-name')?.focus({ preventScroll: true }), 100);
+}
+
+function pickTaskDeadline(btn){
+  document.querySelectorAll('.task-dl-btn').forEach(b => { b.style.background='var(--bg3)'; b.style.borderColor='var(--border-card)'; });
+  btn.style.background='rgba(228,184,106,0.15)'; btn.style.borderColor='var(--amber)';
+  const val = btn.dataset.val;
+  const picker = document.getElementById('task-step1-date-picker');
+  if(val === 'pick'){
+    picker.style.display = 'block';
+    picker.focus();
+  } else {
+    picker.style.display = 'none';
+    _taskAddDraft.deadline = val || null;
+  }
+}
+
+function taskStepNext(step){
+  if(step === 1){
+    const name = document.getElementById('task-step1-name')?.value?.trim();
+    if(!name){ toast('タスク名を入力してください'); return; }
+    _taskAddDraft.name = name;
+    // date picker value
+    const picker = document.getElementById('task-step1-date-picker');
+    if(picker.style.display !== 'none' && picker.value) _taskAddDraft.deadline = picker.value;
+    // Step 2: ローカル推論でデフォルト値を設定
+    const inferred = localInferTask(name);
+    _taskAddDraft.location = inferred.location;
+    _taskAddDraft.time_constraint = inferred.time_constraint;
+    _taskAddDraft.energy_level = inferred.energy_level;
+    _taskAddDraft.estimated_minutes = inferred.estimated_minutes;
+    renderTaskStep2(inferred);
+    document.getElementById('task-step-1').style.display = 'none';
+    document.getElementById('task-step-2').style.display = 'block';
+    document.getElementById('task-step-title').textContent = `「${name}」の詳細`;
+  } else if(step === 2){
+    // Step 3: AI対話
+    document.getElementById('task-step-2').style.display = 'none';
+    document.getElementById('task-step-3').style.display = 'block';
+    document.getElementById('task-step-title').textContent = 'もう少し詳しく';
+    const chat = document.getElementById('task-add-chat');
+    chat.innerHTML = `<div style="margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--cream);">「${escapeHtml(_taskAddDraft.name)}」について教えてください。何の用件ですか？</span></div>`;
+    _taskAddHistory = [];
+    setTimeout(() => document.getElementById('task-add-input')?.focus({ preventScroll: true }), 100);
+  }
+}
+
+function renderTaskStep2(inferred){
+  const titleEl = document.getElementById('task-step2-title');
+  titleEl.textContent = `「${_taskAddDraft.name}」の詳細`;
+  const cards = document.getElementById('task-step2-cards');
+  const locationOpts = ['自宅','外出先','オフィス'];
+  const minuteOpts = [{l:'15分',v:15},{l:'30分',v:30},{l:'1時間',v:60},{l:'2時間',v:120},{l:'半日',v:240}];
+  const energyOpts = [{l:'軽い',v:'low'},{l:'普通',v:'medium'},{l:'集中必要',v:'high'}];
+  const timeOpts = ['営業時間内','午前のみ','午後のみ','いつでも'];
+
+  function chipRow(icon, label, opts, field, isObj){
+    const chips = opts.map(o => {
+      const val = isObj ? o.v : o;
+      const lbl = isObj ? o.l : o;
+      const sel = (String(_taskAddDraft[field]) === String(val));
+      return `<button onclick="taskStep2Pick('${field}','${val}',this)" class="ts2-chip" style="padding:5px 10px;border-radius:8px;font-size:11px;cursor:pointer;font-family:var(--ff);border:1px solid ${sel?'var(--amber)':'var(--border-card)'};background:${sel?'rgba(228,184,106,0.15)':'var(--bg3)'};color:var(--cream);transition:all .15s;">${sel?'▶ ':''}${lbl}</button>`;
+    });
+    return `<div style="margin-bottom:2px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${icon} ${label}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">${chips.join('')}</div>
+    </div>`;
+  }
+  cards.innerHTML = chipRow('📍','場所は？', locationOpts, 'location', false)
+    + chipRow('⏱','どのくらい？', minuteOpts, 'estimated_minutes', true)
+    + chipRow('🔋','集中力は？', energyOpts, 'energy_level', true)
+    + chipRow('🕐','時間の制約は？', timeOpts, 'time_constraint', false);
+}
+
+function taskStep2Pick(field, val, btn){
+  if(field === 'estimated_minutes') val = parseInt(val, 10);
+  _taskAddDraft[field] = val;
+  // Re-render only this row's chips
+  const row = btn.parentElement;
+  row.querySelectorAll('.ts2-chip').forEach(c => {
+    const cv = c.onclick.toString().match(/'([^']+)'/g)?.[1]?.replace(/'/g,'');
+    const sel = (String(val) === String(cv));
+    c.style.borderColor = sel ? 'var(--amber)' : 'var(--border-card)';
+    c.style.background = sel ? 'rgba(228,184,106,0.15)' : 'var(--bg3)';
+    c.textContent = (sel ? '▶ ' : '') + c.textContent.replace(/^▶ /, '');
+  });
+}
+
+async function taskStepComplete(){
+  // Create task with draft metadata
+  const d = _taskAddDraft;
+  const metaParts = [];
+  if(d.deadline) metaParts.push(`deadline=${d.deadline}`);
+  if(d.location) metaParts.push(`location=${d.location}`);
+  if(d.estimated_minutes) metaParts.push(`estimated_minutes=${d.estimated_minutes}`);
+  if(d.energy_level) metaParts.push(`energy_level=${d.energy_level}`);
+  if(d.time_constraint) metaParts.push(`time_constraint=${d.time_constraint}`);
+  if(d.context) metaParts.push(`context=${d.context}`);
+  if(d.risk) metaParts.push(`risk=${d.risk}`);
+  const tag = `[TASK_UPDATE:add:${d.name}${metaParts.length ? ':'+metaParts.join(':') : ''}]`;
+  await processTaskUpdateTags(tag);
+  closeTodayAddTask();
+  renderTodayScreen();
+  toast('タスクを追加しました');
 }
 
 function closeTodayAddTask(){
@@ -3401,10 +3577,10 @@ async function sendTaskAddMsg(){
   chat.innerHTML += `<div style="text-align:right;margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:rgba(228,184,106,0.1);border-radius:8px;font-size:12px;color:var(--cream);max-width:80%;">${escapeHtml(text)}</span></div>`;
   chat.scrollTop = chat.scrollHeight;
 
-  // First message: task creation prompt (immediate creation, then optional follow-up)
   const isFirst = _taskAddHistory.length === 0;
+  const taskCtx = `タスク「${_taskAddDraft.name}」(期日:${_taskAddDraft.deadline||'未設定'}, 場所:${_taskAddDraft.location||'未設定'})`;
   const prompt = isFirst
-    ? `ユーザーが「${text}」をタスクにしたい。必ず最初の返答に[TASK_UPDATE:add:${text}]を含めてタスクを即座に作成し、一言応援コメントを添える。追加情報が必要なら作成後に聞く。`
+    ? `${taskCtx}について、ユーザーが「${text}」と答えた。contextやriskを聞き出して、最終的にJSON形式 {"context":"...","risk":"...","worst_case":"...","estimated_minutes":数値} で返して。推測禁止。ユーザーの回答だけを使う。`
     : text;
 
   _taskAddHistory.push({role:'user', content: prompt});
@@ -3412,39 +3588,36 @@ async function sendTaskAddMsg(){
   try{
     const res = await fetch(`${WORKER_URL}/api/chat/gpt-simple`, {
       method:'POST', headers:getAuthHeaders(),
-      body:JSON.stringify({ system:'タスク作成アシスタント。ユーザーの入力から即座にタスクを作成する。必ず最初の返答に[TASK_UPDATE:add:タスク名]を含める。作成後に追加情報を聞いてもよい。', messages:_taskAddHistory, maxTokens:200 })
+      body:JSON.stringify({ system:'タスク詳細ヒアリングアシスタント。ユーザーのタスクについて1-2問で背景を聞き、JSON形式で構造化する。推測禁止。', messages:_taskAddHistory, maxTokens:300 })
     });
     const data = await res.json();
     const reply = (data.choices?.[0]?.message?.content || '').trim();
     _taskAddHistory.push({role:'assistant', content: reply});
 
-    // Process TASK_UPDATE tags
-    const cleaned = reply.replace(/\[TASK_UPDATE:[^\]]+\]/g, '').trim();
-    const hadTag = /\[TASK_UPDATE:add:/.test(reply);
-    await processTaskUpdateTags(reply);
-
-    // Fallback: if first message and AI didn't include TASK_UPDATE, create task directly
-    if(isFirst && !hadTag && text.length > 0){
-      await processTaskUpdateTags(`[TASK_UPDATE:add:${text}]`);
+    // Try to parse JSON from reply for metadata update
+    const jsonMatch = reply.match(/\{[\s\S]*?\}/);
+    if(jsonMatch){
+      try{
+        const meta = JSON.parse(jsonMatch[0]);
+        if(meta.context) _taskAddDraft.context = meta.context;
+        if(meta.risk) _taskAddDraft.risk = meta.risk;
+        if(meta.worst_case) _taskAddDraft.worst_case = meta.worst_case;
+        if(meta.estimated_minutes) _taskAddDraft.estimated_minutes = meta.estimated_minutes;
+        // JSON found → auto-complete
+        const cleaned = reply.replace(/\{[\s\S]*?\}/, '').trim();
+        chat.innerHTML += `<div style="margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--cream);max-width:85%;">${escapeHtml(cleaned || '情報を取得しました')}</span></div>`;
+        chat.innerHTML += `<div style="margin:8px 0;text-align:center;"><button onclick="taskStepComplete()" style="padding:8px 20px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">確定する</button></div>`;
+        chat.scrollTop = chat.scrollHeight;
+        return;
+      }catch(e){}
     }
-
-    // Show AI response
-    chat.innerHTML += `<div style="margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--cream);max-width:80%;">${escapeHtml(cleaned)}</span></div>`;
+    // Show AI response as conversation
+    chat.innerHTML += `<div style="margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--cream);max-width:85%;">${escapeHtml(reply)}</span></div>`;
     chat.scrollTop = chat.scrollHeight;
-
-    // Auto-close if task was created
-    if(hadTag || (isFirst && text.length > 0)){
-      setTimeout(() => { closeTodayAddTask(); renderTodayScreen(); toast('タスクを追加しました'); }, 1000);
-    }
   }catch(e){
-    // API error fallback: create task directly from user input
-    if(isFirst && text.length > 0){
-      await processTaskUpdateTags(`[TASK_UPDATE:add:${text}]`);
-      chat.innerHTML += `<div style="margin:6px 0;font-size:12px;color:var(--muted);">タスクを追加しました</div>`;
-      setTimeout(() => { closeTodayAddTask(); renderTodayScreen(); toast('タスクを追加しました'); }, 1000);
-    } else {
-      chat.innerHTML += `<div style="margin:6px 0;font-size:12px;color:var(--red);">エラーが発生しました</div>`;
-    }
+    // Error → just complete with what we have
+    chat.innerHTML += `<div style="margin:6px 0;font-size:12px;color:var(--muted);">接続エラー。現在の情報でタスクを作成します。</div>`;
+    setTimeout(() => taskStepComplete(), 1000);
   }
 }
 
@@ -3571,6 +3744,7 @@ Object.assign(window, {
   renderTodayScreen, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask,
   saveTodayDiary, loadTodayDiary, getDiaryDate, generateDiaryTitle, processTaskUpdateTags, processIntentTags, acceptGoalProposal, initTodayDrag,
   loadQOLProposals, renderQOLProposals, acceptQOLProposal, expandQOLCard,
-  openTodayAddTask, closeTodayAddTask, sendTaskAddMsg
+  openTodayAddTask, closeTodayAddTask, sendTaskAddMsg,
+  pickTaskDeadline, taskStepNext, taskStepComplete, taskStep2Pick, localInferTask
 });
 
