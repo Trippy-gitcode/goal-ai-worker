@@ -8,6 +8,14 @@ const DEFAULT_IDENTITY = {
   identity: {},
   mindset_preset: 'futoshi',
   qol_proposals: [],
+  routines: [],
+  scheduling_preference: {
+    hard_tasks_first: true,
+    batch_errands: true,
+    buffer_minutes: 15,
+    focus_hours: 'morning',
+    max_daily_tasks: 5,
+  },
 };
 
 export async function handleIdentityGet(request, env) {
@@ -38,6 +46,8 @@ export async function handleIdentityPut(request, env) {
   if (body.identity !== undefined) updates.identity = body.identity;
   if (body.mindset_preset !== undefined) updates.mindset_preset = body.mindset_preset;
   if (body.qol_proposals !== undefined) updates.qol_proposals = body.qol_proposals;
+  if (body.routines !== undefined) updates.routines = body.routines;
+  if (body.scheduling_preference !== undefined) updates.scheduling_preference = body.scheduling_preference;
   updates.updated_at = new Date().toISOString();
 
   const result = await supabaseQuery(env, 'user_identity', 'POST', {
