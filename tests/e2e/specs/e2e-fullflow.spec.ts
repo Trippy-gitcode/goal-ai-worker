@@ -405,7 +405,7 @@ test.describe('E2E-03: TALK Chat Flow', () => {
     let hasWaitAnim = false;
     for (let i = 0; i < 30; i++) {
       await page.waitForTimeout(500);
-      const chatText = await page.locator('#home-chat-inner, #home-chat-wrap').textContent() || '';
+      const chatText = await page.locator('#home-chat-inner, #home-chat-wrap').first().textContent() || '';
       if (chatText.includes('相談中') || chatText.includes('考えています') ||
           chatText.includes('・・・') || chatText.includes('ChatGPT') ||
           chatText.includes('Claude') || chatText.includes('Gemini')) {
