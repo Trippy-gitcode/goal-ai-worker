@@ -13,6 +13,8 @@
 > 推定: 30分以内 / 1時間 / 2時間超（分割検討）
 > 参照: docs/xxx.md, docs/yyy.md（全ファイル列挙。省略禁止）
 > 対象ファイル: src/xxx.js, frontend/yyy.html（変更してよいファイルを列挙）
+> テスト影響: E2E-02, E2E-05（該当するE2Eセクション。影響なしなら「なし」と明記）
+> STATUS: QUEUED
 
 **目的:** 1行で記述
 
@@ -27,6 +29,7 @@ grep -c '^\- \[ \]' docs/xxx.md     # テスト項目数の期待値を記録
 cmd1: grep -c "test(" tests/spec.ts | awk '{if($1>=N) exit 0; else exit 1}'
 cmd2: npx playwright test --project=mobile 2>&1 | grep "0 failed"
 cmd3: ls tests/e2e/screenshots/MISSION_ID/*.png | wc -l | awk '{if($1>=1) exit 0; else exit 1}'
+cmd4: npx playwright test --grep "E2E-02|E2E-05" --project=mobile --timeout=90000 2>&1 | grep "0 failed"  # テスト影響欄のE2Eが全PASS
 ```
 
 **FAIL条件（1つでも該当したら未完了）:**
@@ -93,6 +96,10 @@ MISSION-ID: XX/YYY PASS, ZZ FAIL, WW 未実施
 6. **UIコンポーネント追加なら7項目チェックを含めたか？**（v3追加）
 7. **画面遷移があるなら状態遷移表を書いたか？**（v3追加）
 8. **テストミッションなら実行戦略を明記したか？**（v3追加）
+9. **UI変更を含むなら「テスト影響」欄にE2Eセクションを特定し、e2e_fullflow_test.mdの該当セクションも更新したか？**（v4追加）
+   → テスト影響「なし」の場合も明記必須。完了コマンドに該当E2Eテスト実行を含める
+10. **プラン間で挙動が変わる機能なら、各プランでの検証テストを含めたか？**（v4追加）
+   → モデル切替・機能制限・UI表示差分をプラン別に検証。テスト用ユーザーのプラン設定方法も明記
 
 ---
 

@@ -148,6 +148,7 @@ input,textarea,select{font-family:var(--ff);outline:none}
     position:fixed;left:-280px;top:0;bottom:0;width:272px;min-width:272px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
     z-index:1000;transition:left .28s ease;
     box-shadow:4px 0 24px rgba(0,0,0,.4);
+    display:flex;flex-direction:column;
   }
   #sb.open{left:0}
   #sb.open ~ #sb-overlay,
