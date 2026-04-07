@@ -62,6 +62,8 @@ Codeがバグ発見
 > リスク: 🟢低 / 🟡中 / 🔴高
 > 参照: docs/xxx.md, docs/yyy.md（全ファイルをフルパスで列挙）
 > 対象ファイル: src/xxx.js, frontend/yyy.html（変更してよいファイルを列挙）
+> テスト影響: E2E-02, E2E-05（該当E2Eセクション。「なし」なら明記）
+> STATUS: QUEUED
 
 **目的:** 1行
 
@@ -72,6 +74,7 @@ Codeがバグ発見
 **完了コマンド（全て期待出力でPASS判定）:**
   cmd1: grep -c "xxx" file | awk '{if($1>=N) exit 0; else exit 1}'
   cmd2: npx playwright test 2>&1 | grep "0 failed"
+  cmd3: npx playwright test --grep "E2E-02|E2E-05" --timeout=90000 2>&1 | grep "0 failed"  # テスト影響のE2E
 
 **FAIL条件:** cmd1の出力 < N / cmd2でfailed > 0
 **完了報告:** MISSION-ID: XX/YYY PASS, ZZ FAIL
@@ -99,6 +102,8 @@ Codeがバグ発見
     - UIコンポーネント追加なら7項目チェック（open/close/復帰/z-index/overlay/キーボード/テスト追加）を含めたか？
     - 画面遷移があるなら状態遷移表を書いたか？
     - テストミッションなら実行戦略（フォアグラウンド/分割/タイムアウト）を明記したか？
+    - UI変更を含むなら「テスト影響」欄にE2Eセクションを特定し、e2e_fullflow_test.mdも更新したか？完了コマンドに該当E2Eを含めたか？
+    - プラン間で挙動が変わる機能なら、各プランでの検証テスト（モデル切替・制限・UI差分）を含めたか？
 11. **仕様協議時の操作フロー確認（毎回必須）:**
     - ユーザーが開始する操作は何か
     - ユーザーが中断/キャンセルする手段はあるか
