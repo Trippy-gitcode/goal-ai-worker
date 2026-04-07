@@ -717,3 +717,18 @@ spec_v3.md × mockup HTML × 実装コードの3点照合。全22画面を検証
 
 ## Stripe / Supabase
 - Price ID・接続情報は tests/.env.test を参照（git管理外）
+
+---
+## アーカイブ 2026-04-05（実装27セッション）
+
+- KV-OPT ✅ KV write削減完了（rate-limit/usageをSupabaseに移行。usage_countersテーブル作成済み）
+- TEST-AC ✅ 480 PASS / 0 FAIL / 14 SKIP。バグ8件修正
+- P14 ✅ Phase Aデプロイ v4.0.8
+- UX-01-A8 ✅ ME identity DB + API（user_identity テーブル + GET/PUT /api/me/identity）
+- UX-01-A6 ✅ マインドセットプリセット v1（ふとし固定。システムプロンプト注入）
+- UX-01-A1 ✅ TALK意図分類エンジン（5種分類 + [INTENT:xxx] + [GOAL_PROPOSAL]カード）
+- UX-01-A2 ✅ GOAL_CREATEフロー（会話→ゴール→タスク→スケジュール自動展開）
+- UX-01-A5 ✅ ゴール間参照（goal_links テーブル + API + related_goals自動提案）
+- UX-01-B1 ✅ ME構造化ヒアリング（IDENTITY_SESSION_PROMPT + [IDENTITY_UPDATE]タグ自動保存）
+- UX-01-B2 ✅ TODAY刷新（QOL提案カード枠 + 関連ゴール表示 + renderLinkedGoals）
+- v4.0.9デプロイ済み（B1+B2）

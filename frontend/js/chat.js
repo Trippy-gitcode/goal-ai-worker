@@ -2067,6 +2067,7 @@ function recalcGoalProgress(goal){
 // ════════ HOME TASK PANEL ════════
 let htpTask = null;
 let htpPhase = null;
+let htpGoal = null;
 let htpHistory = [];
 let htpLoading = false;
 
@@ -2080,16 +2081,43 @@ function openHomeTaskById(taskId){
 function openHomeTaskPanel(item){
   htpTask = item.task;
   htpPhase = item.phase;
+  htpGoal = item.goal || null;
   htpHistory = [];
 
   document.getElementById('htp-name').textContent = htpTask.title;
   const tag = document.getElementById('htp-phase-tag');
-  tag.textContent = htpPhase?.phaseTitle || '';
-  tag.style.background = (htpPhase?.phaseColor||'var(--amber)') + '22';
-  tag.style.color = htpPhase?.phaseColor || 'var(--amber)';
-  tag.style.border = '1px solid ' + (htpPhase?.phaseColor||'var(--amber)') + '44';
+  // BUG-02: 「日常タスク」の場合はゴールタグを非表示
+  const goalTitle = htpGoal?.title || '';
+  const showGoalTag = goalTitle && goalTitle !== '日常タスク' && htpTask.goalLinked !== false;
+  tag.textContent = showGoalTag ? goalTitle : '';
+  tag.style.display = showGoalTag ? '' : 'none';
+  if(showGoalTag){
+    tag.style.background = (htpPhase?.phaseColor||'var(--amber)') + '22';
+    tag.style.color = htpPhase?.phaseColor || 'var(--amber)';
+    tag.style.border = '1px solid ' + (htpPhase?.phaseColor||'var(--amber)') + '44';
+  }
   document.getElementById('htp-due').textContent = htpTask.due ? '期限: ' + htpTask.due : '';
   document.getElementById('htp-status-sel').value = htpTask.status || 'todo';
+
+  // UX-02: メタデータ表示
+  const metaEl = document.getElementById('htp-metadata');
+  if(metaEl){
+    const t = htpTask;
+    const rows = [];
+    if(t.deadline) rows.push({label:'期限', value:t.deadline});
+    if(t.estimated_minutes) rows.push({label:'所要時間', value:`${t.estimated_minutes}分`});
+    if(t.energy_level) rows.push({label:'エネルギー', value:{low:'低',medium:'中',high:'高'}[t.energy_level]||t.energy_level});
+    if(t.location) rows.push({label:'場所', value:t.location});
+    if(t.time_constraint) rows.push({label:'時間制約', value:t.time_constraint});
+    if(t.context) rows.push({label:'背景', value:t.context});
+    if(t.risk) rows.push({label:'リスク', value:t.risk});
+    metaEl.innerHTML = rows.length ? rows.map(r =>
+      `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:12px;">
+        <span style="color:var(--muted2);width:60px;flex-shrink:0;">${r.label}</span>
+        <span style="color:var(--cream);flex:1;">${escapeHtml(r.value)}</span>
+      </div>`
+    ).join('') : '<div style="font-size:12px;color:var(--muted2);padding:4px 0;">メタデータなし</div>';
+  }
 
   // Init chat
   const chat = document.getElementById('htp-chat');
@@ -2101,6 +2129,45 @@ function openHomeTaskPanel(item){
 
   document.getElementById('home-task-panel').classList.add('open');
   document.getElementById('htp-msg-in').focus();
+}
+
+// UX-02: タスク削除
+function htpDeleteTask(){
+  if(!htpTask) return;
+  if(!confirm(`「${htpTask.title}」を削除しますか？`)) return;
+  for(const goal of ALL_GOALS){
+    for(const phase of (goal.phases||[])){
+      const idx = phase.tasks.indexOf(htpTask);
+      if(idx >= 0){
+        phase.tasks.splice(idx, 1);
+        if(goal.supabaseId){
+          apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
+        }
+        break;
+      }
+    }
+  }
+  closeHomeTaskPanel();
+  renderTodayScreen();
+  toast('タスクを削除しました');
+}
+
+// UX-02: タスク名編集
+function htpEditTitle(){
+  const nameEl = document.getElementById('htp-name');
+  const current = nameEl.textContent;
+  const newTitle = prompt('タスク名を変更', current);
+  if(newTitle && newTitle.trim() && newTitle !== current){
+    htpTask.title = newTitle.trim();
+    nameEl.textContent = htpTask.title;
+    // 永続化
+    for(const goal of ALL_GOALS){
+      if(goal.supabaseId && goal.phases.some(p=>p.tasks.includes(htpTask))){
+        apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
+        break;
+      }
+    }
+  }
 }
 
 function closeHomeTaskPanel(){
@@ -3008,8 +3075,10 @@ function renderTodayTimeline(allTasks, todayStr){
       const isDone = t.status === 'done';
       const isOverdue = t.due && t.due < todayStr && !isDone;
       const durStr = t.estimated_minutes ? `${t.estimated_minutes}分` : '';
-      const goalName = item.goal?.title?.slice(0,6) || '';
-      html += `<div onclick="openHomeTaskById('${t.id}')" style="position:absolute;top:${top}px;left:4px;right:4px;height:${Math.max(28,height-2)}px;background:${isDone?'rgba(76,175,80,0.08)':'rgba(228,184,106,0.06)'};border:0.5px solid ${isDone?'var(--green-d)':isOverdue?'var(--red-d)':'rgba(228,184,106,0.2)'};border-radius:8px;padding:4px 8px;cursor:pointer;overflow:hidden;display:flex;align-items:${height>36?'flex-start':'center'};gap:6px;z-index:2;">
+      // BUG-02: 「日常タスク」(自動ゴール)の名前は表示しない
+      const rawGoalName = item.goal?.title || '';
+      const goalName = (rawGoalName === '日常タスク' || t.goalLinked === false) ? '' : rawGoalName.slice(0,6);
+      html += `<div data-task-id="${t.id}" data-start-min="${slot.startMin}" onclick="openHomeTaskById('${t.id}')" style="position:absolute;top:${top}px;left:4px;right:4px;height:${Math.max(28,height-2)}px;background:${isDone?'rgba(76,175,80,0.08)':'rgba(228,184,106,0.06)'};border:0.5px solid ${isDone?'var(--green-d)':isOverdue?'var(--red-d)':'rgba(228,184,106,0.2)'};border-radius:8px;padding:4px 8px;cursor:pointer;overflow:hidden;display:flex;align-items:${height>36?'flex-start':'center'};gap:6px;z-index:2;touch-action:none;">
         <div onclick="event.stopPropagation();toggleTodayTask('${t.id}')" style="width:18px;height:18px;border-radius:50%;${isDone?'':'border:1px solid '+(isOverdue?'var(--red)':'var(--amber)')+';'}display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;margin-top:1px;">
           ${isDone?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}
         </div>
@@ -3043,6 +3112,78 @@ function renderTodayTimeline(allTasks, todayStr){
   // Scroll to current time
   const scrollParent = timeline.closest('[style*="overflow"]') || timeline.parentElement;
   if(scrollParent && nowPx > 100) scrollParent.scrollTop = nowPx - 80;
+
+  // UX-02: タイムラインドラッグ&ドロップ（タスクを時間帯移動）
+  initTimelineDrag(timeline, PX_PER_HOUR, HOUR_START);
+}
+
+// UX-02: タイムラインドラッグ&ドロップ — タスクカードを上下に移動して時間帯変更
+function initTimelineDrag(timeline, pxPerHour, hourStart){
+  let dragEl = null, startY = 0, origTop = 0, taskId = null, dragTimer = null;
+  const container = timeline.querySelector('div[style*="position:relative"]');
+  if(!container) return;
+
+  container.addEventListener('touchstart', (e) => {
+    const card = e.target.closest('[data-task-id]');
+    if(!card || e.target.closest('[onclick*="toggleTodayTask"]')) return;
+    // Long-press to activate drag (300ms)
+    dragTimer = setTimeout(() => {
+      dragEl = card;
+      taskId = card.dataset.taskId;
+      origTop = parseInt(card.style.top) || 0;
+      startY = e.touches[0].clientY;
+      card.style.zIndex = '10';
+      card.style.boxShadow = '0 4px 16px rgba(0,0,0,0.3)';
+      card.style.transition = 'none';
+      if(navigator.vibrate) navigator.vibrate(30);
+    }, 300);
+  }, {passive:true});
+
+  container.addEventListener('touchmove', (e) => {
+    if(dragTimer){ clearTimeout(dragTimer); dragTimer = null; }
+    if(!dragEl) return;
+    e.preventDefault();
+    const dy = e.touches[0].clientY - startY;
+    dragEl.style.top = `${origTop + dy}px`;
+  }, {passive:false});
+
+  container.addEventListener('touchend', () => {
+    if(dragTimer){ clearTimeout(dragTimer); dragTimer = null; }
+    if(!dragEl) return;
+    // Calculate new time from position
+    const newTop = parseInt(dragEl.style.top) || 0;
+    // Snap to 15-minute intervals
+    const minFromTop = (newTop / pxPerHour) * 60 + hourStart * 60;
+    const snappedMin = Math.round(minFromTop / 15) * 15;
+    const snappedTop = (snappedMin - hourStart * 60) / 60 * pxPerHour;
+    dragEl.style.top = `${Math.max(0, snappedTop)}px`;
+    dragEl.style.zIndex = '2';
+    dragEl.style.boxShadow = '';
+    dragEl.style.transition = 'top .2s ease';
+    // Update task time in data
+    updateTaskTime(taskId, snappedMin);
+    dragEl = null; taskId = null;
+  }, {passive:true});
+}
+
+// UX-02: タスクの時間を更新
+function updateTaskTime(taskId, newStartMin){
+  const h = Math.floor(newStartMin / 60);
+  const m = newStartMin % 60;
+  const timeStr = `${h}:${String(m).padStart(2,'0')}`;
+  for(const goal of ALL_GOALS){
+    for(const phase of (goal.phases||[])){
+      const task = phase.tasks.find(t => String(t.id) === String(taskId));
+      if(task){
+        task.scheduled_time = timeStr;
+        task.time_constraint = timeStr;
+        // 永続化
+        if(goal.supabaseId) apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
+        toast(`${task.title} → ${timeStr}に移動`);
+        return;
+      }
+    }
+  }
 }
 
 // ═══ B5: リストビュー（旧renderTodayScreen互換） ═══
@@ -3070,7 +3211,9 @@ function renderTodayList(allTasks, todayStr){
       const t = item.task;
       const isDone = t.status === 'done';
       const isOverdue = t.due && t.due < todayStr && !isDone;
-      const goalName = item.goalName || '';
+      // BUG-02: 「日常タスク」(自動ゴール)の名前はバッジ表示しない
+      const rawGN = item.goalName || '';
+      const goalName = (rawGN === '日常タスク' || t.goalLinked === false) ? '' : rawGN;
       const timeStr = t.estimated_time ? `${t.estimated_time}` : '';
       return `<div data-task-id="${t.id}" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);${isDone?'opacity:0.35;':''}cursor:pointer;">
         <div data-drag="1" style="width:16px;height:28px;display:flex;flex-direction:column;gap:1.5px;align-items:center;justify-content:center;opacity:0.2;flex-shrink:0;touch-action:none;cursor:grab;"><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span></div>
@@ -3129,8 +3272,12 @@ function renderSecretaryMemo(allTasks, todayStr){
   if(activeTasks.length > 0 && !overdue.length){
     const first = activeTasks[0];
     const goalName = first.goal?.title || '';
-    if(goalName){
+    // BUG-02: 「日常タスク」(自動作成ゴール)や未リンクタスクにはゴール名を表示しない
+    const isExplicitGoal = goalName && goalName !== '日常タスク' && first.task.goalLinked !== false;
+    if(isExplicitGoal){
       memos.push({type:'note', icon:noteIcon, text:`まずは「${first.task.title}」から。${goalName}の進捗に直結します。`});
+    } else {
+      memos.push({type:'note', icon:noteIcon, text:`まずは「${first.task.title}」から。日常タスクの進捗に直結します。`});
     }
   }
 
@@ -3191,8 +3338,11 @@ async function processTaskUpdateTags(text){
       }
       const goal = ALL_GOALS[0];
       if(!goal.phases?.length) goal.phases = [{title:'タスク',tasks:[]}];
+      // BUG-02: ゴール未選択タスクにはgoalLinked:falseフラグ。推測紐付け防止
+      const isDefaultGoal = goal.title === '日常タスク';
       goal.phases[0].tasks.push({
         id:'task_'+Date.now(), title:taskName, status:'current', source:'ai',
+        goalLinked: !isDefaultGoal,
         deadline:parsed.deadline, context:parsed.context, risk:parsed.risk,
         worst_case:parsed.worst_case, estimated_minutes:parsed.estimated_minutes,
         location:parsed.location, time_constraint:parsed.time_constraint,
@@ -3492,10 +3642,14 @@ function toggleTodayTask(taskId){
         if(String(task.id) === String(taskId)){
           const wasDone = task.status === 'done';
           task.status = wasDone ? 'current' : 'done';
-          // B6: EXP award on completion
+          // UX-02 + B6: EXP award on completion with vibration + popup
           if(!wasDone && task.status === 'done'){
             const energy = task.energy_level || 'medium';
             const expAmount = (typeof EXP_TABLE !== 'undefined' ? EXP_TABLE[energy] : null) || 15;
+            // UX-02: 振動フィードバック
+            if(navigator.vibrate) navigator.vibrate(50);
+            // UX-02: EXPポップアップ
+            showExpPopup(expAmount, taskId);
             if(typeof awardEXP === 'function') awardEXP(expAmount, task.title);
             // Check TODAY CLEAR
             const allTasks = getTodayTasks();
@@ -3512,6 +3666,26 @@ function toggleTodayTask(taskId){
     }
   }
 }
+
+// UX-02: +EXP フロートポップアップ
+function showExpPopup(amount, taskId){
+  const el = document.querySelector(`[data-task-id="${taskId}"]`) || document.querySelector('[onclick*="toggleTodayTask"]');
+  const rect = el ? el.getBoundingClientRect() : {top:window.innerHeight/2,left:window.innerWidth/2};
+  const popup = document.createElement('div');
+  popup.textContent = `+${amount} EXP`;
+  popup.style.cssText = `position:fixed;top:${rect.top - 10}px;left:${rect.left + 30}px;font-size:14px;font-weight:700;color:var(--amber);z-index:9999;pointer-events:none;animation:expFloat .8s ease-out forwards;`;
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 900);
+}
+
+// UX-02: EXPフロートアニメーション用CSS注入
+(function(){
+  if(document.getElementById('ux02-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'ux02-styles';
+  style.textContent = `@keyframes expFloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-30px)}}`;
+  document.head.appendChild(style);
+})();
 
 function sendTodayComment(){
   const inp = document.getElementById('today-comment-in');
@@ -3865,7 +4039,7 @@ Object.assign(window, {
   toggleSelectAll, deleteSelectedSessions,
   renderModelUsageBadge, showModelUsageDetail, homeKey,
   renderHomeSummary, switchHsTaskTab, getThisWeekTasks, renderHsTaskList,
-  hsToggleTask, recalcGoalProgress, openHomeTaskById, openHomeTaskPanel, closeHomeTaskPanel,
+  hsToggleTask, recalcGoalProgress, openHomeTaskById, openHomeTaskPanel, closeHomeTaskPanel, htpDeleteTask, htpEditTitle,
   htpUpdateStatus, htpQuickChat, sendHtpMsg, htpResize, htpKey,
   refreshQuote, FB_SYS, openFeedbackChat, closeFeedback, appendFbMsg,
   appendFbButtons, sendFeedbackMsg, extractThemes, continueFeedback,
@@ -3881,7 +4055,7 @@ Object.assign(window, {
   requestTaskBreakdown, showTaskCard, confirmTaskCard,
   setPreset, taskCheckAnim,
   retryWithRoute, recordRoutingFeedback, stopHomeStream,
-  renderTodayScreen, renderTodayTimeline, renderTodayList, toggleTodayView, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask,
+  renderTodayScreen, renderTodayTimeline, renderTodayList, toggleTodayView, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask, showExpPopup, initTimelineDrag, updateTaskTime,
   saveTodayDiary, loadTodayDiary, getDiaryDate, generateDiaryTitle, processTaskUpdateTags, processIntentTags, acceptGoalProposal, initTodayDrag,
   loadQOLProposals, renderQOLProposals, acceptQOLProposal, expandQOLCard,
   openTodayAddTask, closeTodayAddTask, sendTaskAddMsg,

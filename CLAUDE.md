@@ -108,7 +108,7 @@ session_progress.md のミッションキュー参照
 - 旧版仕様（補助参照）: docs/mockups/goal_ai_design_spec_v2.md / design_review_changelog.md / session_handoff_v8.md
 - デザイン実装手順（How）: instructions/design_impl_001.md（※spec_v3の一部をCode向け手順に変換したもの。specが上流・正）
 - Stripe: instructions/stripe_005_frontend.md / stripe_amendment_001.md / stripe_amendment_002.md
-- ルール: development_rules.md
+- ルール: development_rules.md（索引）+ docs/rules/（詳細: g2_ui_verification/g4_testing/g5_reporting/mission_status）
 
 ---
 
@@ -133,3 +133,4 @@ docs/: goal_ai_project_v6_4.md, goal_ai_reference_v2.md, goal_ai_design_spec_v3.
 - ルーティング廃止 / プラン構成変更 / テーブル削除 / API削除 / 実装スキップ / 契約変更(署名なし) / canopy項目削除
 - **UI変更をgrep確認だけで「完了」にすること** — 関数が存在してもレンダリングパスで実際に呼ばれていなければ意味がない。UI変更は必ずHTMLの実際の出力パスを追跡して検証する
 - **design_spec_v3.mdの仕様と矛盾するUI実装** — specが正。矛盾を発見したら提案ログに記録して停止
+- **`⛔ BLOCKED` がキュー先頭にある場合の実装実行** — Claude.aiが設計変更をドキュメントに反映中。ふとしに「BLOCKED状態です。Claude.aiの書き込み完了を待ってください」と報告して即停止する

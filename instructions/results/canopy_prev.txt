@@ -1,5 +1,5 @@
-=== CANOPY TEST (23:19:17) ===
-Worker: "version":"4.0.10"
+=== CANOPY TEST (01:14:01) ===
+Worker: "version":"4.0.17"
 --- HTTP Smoke Tests ---
 OK: GET /api/version → 200
 OK: GET /health → 200
@@ -68,8 +68,8 @@ OK: plan-compare-table (1 refs)
 OK: フェアユース制限 (1 refs)
 OK: goal-detect-toast\|showGoalDetectToast (8 refs)
 --- Version sync (C10) ---
-  globals.js=4.0.11  sw.js=4.0.11  index.html=4.0.11
-OK: version sync (4.0.11)
+  globals.js=4.0.17  sw.js=4.0.17  index.html=4.0.17
+OK: version sync (4.0.17)
 --- Style integrity (C12) ---
 OK: no 'border-radius:24px' in JS
 OK: no 'border-radius:20px' in JS
@@ -79,7 +79,7 @@ OK: no '#323855' in JS
 WARN: hardcoded model color '#5b8def' in JS (1)
 WARN: hardcoded model color '#e07070' in JS (1)
 WARN: hardcoded model color '#e8913a' in JS (1)
-INFO: inline style= count in JS: 461 (baseline)
+INFO: inline style= count in JS: 509 (baseline)
 --- UI spec values (design_spec_v3 8a-8c) ---
 OK: CRN-01 crown SVG (5 refs)
 OK: CRN-02 model name gray
@@ -93,7 +93,7 @@ OK: --model-gemini (3 refs)
 OK: --card-radius (3 refs)
 OK: --popup-radius (3 refs)
 OK: --pill-radius (3 refs)
-OK: 8b hub-tabs (11)
+OK: 8b hub-tabs (12)
 OK: 8b onboarding slides (5)
 OK: 8c plan cards (5 refs)
 OK: 8c goal detect toast (8 refs)
@@ -123,12 +123,12 @@ OK: 'chip-row' sync (src=1 dist=1)
 OK: 'mode-f' cleanup (src=0 dist=0)
 OK: 'mode-row-f' cleanup (src=0 dist=0)
 OK: 'ゴールプロジェクト' cleanup (src=0 dist=0)
-  frontend-dist version=4.0.11  source version=4.0.11
+  frontend-dist version=4.0.17  source version=4.0.17
 OK: frontend-dist version sync
 --- Vite tree-shake safety (onclick vs window.assign) ---
 OK: all onclick functions registered in window
 --- SP version sync ---
-  session_progress=v4.0.10  APP_VERSION=4.0.11
+  session_progress=v4.0.17  APP_VERSION=4.0.17
 --- B4/B5 KV invalidate ---
 OK: B4 profile KV invalidate (4 refs)
 OK: B5 userId KV cache (1 refs)
@@ -142,7 +142,7 @@ OK: test count (475) >= spec count (427)
 --- G4-v3: Test report ---
 OK: HTML test report exists
 --- G5-v3: Report format ---
-INFO: no structured test report found in session_progress.md (OK if tests not yet run)
+OK: session_progress.md has structured report
 --- G5-v4: Test anti-pattern check ---
 OK: test-guards.ts IGNORED_ERRORS count=15 (max 15)
 WARN: .catch(() => {}) found 4 times. Verify each is intentional
@@ -150,4 +150,4 @@ OK: no critical test anti-patterns
 OK: test.skip() count 19/475 (4%)
 --- UI overlay check ---
   sheets/modals=1  overlays=1
-=== CANOPY PASS (8s) ===
+=== CANOPY PASS (9s) ===
