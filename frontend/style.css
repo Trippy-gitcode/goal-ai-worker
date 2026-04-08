@@ -332,7 +332,8 @@ input,textarea,select{font-family:var(--ff);outline:none}
 .sb-logo{padding:16px 20px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;background:var(--bg2)}
 /* グラステーマでもロゴは不透明（ブランド品位保持） */
 [data-theme$="-glass"] .sb-logo{background:var(--bg2)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
-.sb-logo-mark{font-family:var(--fd);font-size:13px;font-weight:500;letter-spacing:.08em;background:var(--logo-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 100%;animation:logo-shimmer 4s var(--spring-gentle) infinite alternate;}
+/* DESIGN-01: ロゴはaccent色テキスト。グラデーション文字はNGリスト違反 */
+.sb-logo-mark{font-family:var(--fd);font-size:13px;font-weight:500;letter-spacing:.08em;color:var(--accent);}
 @keyframes logo-shimmer{0%{background-position:0% 0%}100%{background-position:100% 0%}}
 .sb-logo-sub{font-size:12px;color:var(--muted2);letter-spacing:.22em;text-transform:uppercase;margin-top:3px;font-family:var(--fm)}
 
@@ -2330,6 +2331,7 @@ body,body *{transition:background-color .3s ease,color .3s ease,border-color .3s
 /* ════════ BOTTOM TAB BAR ════════ */
 /* DESIGN-01 Phase C-1: Pill active tabs */
 .btab{color:var(--muted2);transition:all var(--dur-fast) var(--spring-default);opacity:0.5;position:relative;}
+.btab svg{width:20px;height:20px;}
 .btab span{color:inherit;font-size:11px;letter-spacing:0.5px;display:none;}
 .btab.active{color:var(--pill-text,var(--accent));opacity:1;background:var(--pill-bg,var(--bg2));border-radius:var(--pill-radius);padding:6px 14px;}
 .btab.active span{display:block;}

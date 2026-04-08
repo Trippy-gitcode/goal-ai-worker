@@ -3187,7 +3187,8 @@ function initTimelineDrag(timeline, pxPerHour, hourStart){
     const newTop = parseInt(dragEl.style.top) || 0;
     // Snap to 15-minute intervals
     const minFromTop = (newTop / pxPerHour) * 60 + hourStart * 60;
-    const snappedMin = Math.round(minFromTop / 15) * 15;
+    // #17 FIX: 6:00-23:00の範囲にclamp
+    const snappedMin = Math.max(hourStart * 60, Math.min(23 * 60, Math.round(minFromTop / 15) * 15));
     const snappedTop = (snappedMin - hourStart * 60) / 60 * pxPerHour;
     dragEl.style.top = `${Math.max(0, snappedTop)}px`;
     dragEl.style.zIndex = '2';
@@ -3730,8 +3731,12 @@ async function loadTodayMindset(allTasks){
   }catch(e){}
 }
 
-// B-10: タスクタップで完了切替
+// B-10: タスクタップで完了切替（#14 FIX: デバウンスでダブルタップ防止）
+let _toggleDebounce = {};
 function toggleTodayTask(taskId){
+  if(_toggleDebounce[taskId]) return;
+  _toggleDebounce[taskId] = true;
+  setTimeout(() => { delete _toggleDebounce[taskId]; }, 500);
   for(const goal of ALL_GOALS){
     for(const phase of (goal.phases||[])){
       for(const task of (phase.tasks||[])){
@@ -3764,12 +3769,29 @@ function toggleTodayTask(taskId){
 }
 
 // UX-02: +EXP フロートポップアップ
+// #253 FIX: saveGoals — 全ゴールのphasesをサーバーに永続化
+function saveGoals(){
+  for(const goal of ALL_GOALS){
+    if(goal.supabaseId){
+      apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
+    }
+  }
+  // localStorageバックアップ
+  try{
+    const backup = ALL_GOALS.map(g => ({id:g.id, supabaseId:g.supabaseId, title:g.title, phases:g.phases, status:g.status}));
+    localStorage.setItem('goal_phases_backup', JSON.stringify(backup));
+  }catch(e){}
+}
+
 function showExpPopup(amount, taskId){
   const el = document.querySelector(`[data-task-id="${taskId}"]`) || document.querySelector('[onclick*="toggleTodayTask"]');
   const rect = el ? el.getBoundingClientRect() : {top:window.innerHeight/2,left:window.innerWidth/2};
+  // #30 FIX: 画面外に飛ばないようclamp
+  const popTop = Math.max(20, Math.min(window.innerHeight - 40, rect.top - 10));
+  const popLeft = Math.max(10, Math.min(window.innerWidth - 80, rect.left + 30));
   const popup = document.createElement('div');
   popup.textContent = `+${amount} EXP`;
-  popup.style.cssText = `position:fixed;top:${rect.top - 10}px;left:${rect.left + 30}px;font-size:14px;font-weight:700;color:var(--amber);z-index:9999;pointer-events:none;animation:expFloat .8s ease-out forwards;`;
+  popup.style.cssText = `position:fixed;top:${popTop}px;left:${popLeft}px;font-size:14px;font-weight:700;color:var(--amber);z-index:9999;pointer-events:none;animation:expFloat .8s ease-out forwards;`;
   document.body.appendChild(popup);
   setTimeout(() => popup.remove(), 900);
 }
@@ -4177,7 +4199,7 @@ Object.assign(window, {
   requestTaskBreakdown, showTaskCard, confirmTaskCard,
   setPreset, taskCheckAnim,
   retryWithRoute, recordRoutingFeedback, stopHomeStream,
-  renderTodayScreen, renderTodayTimeline, renderTodayList, toggleTodayView, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask, showExpPopup, initTimelineDrag, updateTaskTime, updateTaskDuration, learnSchedulingPreference,
+  renderTodayScreen, renderTodayTimeline, renderTodayList, toggleTodayView, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask, showExpPopup, initTimelineDrag, updateTaskTime, updateTaskDuration, learnSchedulingPreference, saveGoals,
   saveTodayDiary, loadTodayDiary, getDiaryDate, generateDiaryTitle, processTaskUpdateTags, processIntentTags, acceptGoalProposal, initTodayDrag,
   loadQOLProposals, renderQOLProposals, acceptQOLProposal, expandQOLCard,
   openTodayAddTask, closeTodayAddTask, sendTaskAddMsg,
