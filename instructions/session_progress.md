@@ -9,10 +9,10 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.23（デプロイ済み 2026-04-08）
-- **Next:** TEST-AUDIT（780項目テスト検証+バグ全修正）→ DESIGN-01 Phase B/C → DEV-03
-- **Last done:** DESIGN-01 Phase A ✅ テーマ4種CSS基盤（Night Sky/Dawn/Harajuku L/D）v4.0.23
-- **Open issues:** DESIGN-01 Phase B/C（Vertical journal構造、20画面個別更新、ハードコード色置換）
+- **Version:** v4.0.24（デプロイ済み 2026-04-08）
+- **Next:** TEST-AUDIT（780項目テスト検証+バグ全修正）→ DESIGN-01 Phase C → DEV-03
+- **Last done:** DESIGN-01 Phase B ✅ Vertical Journal timeline + Open Air cards v4.0.24
+- **Open issues:** DESIGN-01 Phase C残件（20画面チェック+JS内ハードコード色66件CSS変数化）
 - **方針:** テスト配布より「自分が毎日使いたいツール」を優先。コンセプト「君の人生をより素敵に」
 
 ## 現在地
@@ -159,6 +159,12 @@
 
 ### TEST-AUDIT: 全機能検証+バグ全修正+テストライブラリ化
 > リスク: 🔴高（アプリ品質の根幹）
+> STATUS: IN_PROGRESS（Phase 0完了+Phase 1修正中）
+
+**Phase 0結果（2026-04-09）:**
+- 23枚スクリーンショット撮影済み（tests/e2e/screenshots/TEST-AUDIT/）
+- バグ11件検出: 🔴2件 / 🟡6件 / 🟢2件 / ✅修正済み4件(B1,B4,B5,B8)
+- Phase 0テスト: 19/20 PASS（プラン選択=テストアプローチ修正済み）
 > 参照: docs/potential_bugs_300.md（780項目）, dev-system/tests/test_library.md（構造テンプレ）
 > 対象ファイル: frontend/, src/, tests/e2e/specs/, dev-system/tests/test_library.md
 > テスト影響: 全セクション
