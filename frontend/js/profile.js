@@ -229,7 +229,8 @@ function appendWorryBubble(m){
   if(m.role==='ai'){av.innerHTML=getLogoSVG(12);}else{const ut=getUserAvatarText();if(ut)av.textContent=ut;else av.textContent='U';}
   const bub = document.createElement('div');
   bub.style.cssText = `max-width:85%;padding:9px 13px;border-radius:11px;font-size:12px;line-height:1.75;${m.role==='ai'?'background:var(--bg3);border:1px solid var(--border);border-radius:3px 11px 11px 11px;color:var(--cream)':'background:var(--mencare-d);border:1px solid var(--mencare-d);border-radius:11px 3px 11px 11px;color:var(--cream)'}`;
-  bub.innerHTML = m.content.replace(/\n/g,'<br>');
+  // #356 FIX: XSS防止
+  bub.innerHTML = escapeHtml(m.content).replace(/\n/g,'<br>');
   wrap.appendChild(av); wrap.appendChild(bub);
   chat.appendChild(wrap);
   chat.scrollTop = chat.scrollHeight;
@@ -1314,6 +1315,14 @@ async function saveProfileToServer(){
     interestsFree: USER_PROFILE.interestsFree,
     energyGain: USER_PROFILE.energyGain,
     energyDrain: USER_PROFILE.energyDrain,
+    // #119 FIX: 欠落フィールド追加
+    constraints: USER_PROFILE.constraints,
+    vision: USER_PROFILE.vision,
+    ideal_day: USER_PROFILE.ideal_day,
+    unwanted_life: USER_PROFILE.unwanted_life,
+    wantedImage: USER_PROFILE.wantedImage,
+    mbtiName: USER_PROFILE.mbtiName,
+    catchcopy: USER_PROFILE.catchcopy,
   };
   // localStorageバックアップ（同期復元用）
   try{ localStorage.setItem('goal_ai_profile', JSON.stringify(profileData)); }catch(e){}
@@ -1344,6 +1353,14 @@ function restoreProfileFromLocalStorage(){
     if(p.interestsFree) USER_PROFILE.interestsFree = p.interestsFree;
     if(p.energyGain?.length) USER_PROFILE.energyGain = p.energyGain;
     if(p.energyDrain?.length) USER_PROFILE.energyDrain = p.energyDrain;
+    // #119 FIX: 追加フィールド復元
+    if(p.constraints) USER_PROFILE.constraints = p.constraints;
+    if(p.vision) USER_PROFILE.vision = p.vision;
+    if(p.ideal_day) USER_PROFILE.ideal_day = p.ideal_day;
+    if(p.unwanted_life) USER_PROFILE.unwanted_life = p.unwanted_life;
+    if(p.wantedImage) USER_PROFILE.wantedImage = p.wantedImage;
+    if(p.mbtiName) USER_PROFILE.mbtiName = p.mbtiName;
+    if(p.catchcopy) USER_PROFILE.catchcopy = p.catchcopy;
     renderMyselfProfile();
     // サイドバーにも反映
     const displayName = USER_PROFILE.nickname || USER_PROFILE.name || '';
