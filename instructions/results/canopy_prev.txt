@@ -1,5 +1,5 @@
-=== CANOPY TEST (21:39:08) ===
-Worker: "version":"4.0.21"
+=== CANOPY TEST (23:07:11) ===
+Worker: "version":"4.0.22"
 --- HTTP Smoke Tests ---
 OK: GET /api/version → 200
 OK: GET /health → 200
@@ -68,8 +68,8 @@ OK: plan-compare-table (1 refs)
 OK: フェアユース制限 (1 refs)
 OK: goal-detect-toast\|showGoalDetectToast (8 refs)
 --- Version sync (C10) ---
-  globals.js=4.0.21  sw.js=4.0.21  index.html=4.0.21
-OK: version sync (4.0.21)
+  globals.js=4.0.22  sw.js=4.0.22  index.html=4.0.22
+OK: version sync (4.0.22)
 --- Style integrity (C12) ---
 OK: no 'border-radius:24px' in JS
 OK: no 'border-radius:20px' in JS
@@ -83,16 +83,16 @@ INFO: inline style= count in JS: 518 (baseline)
 --- UI spec values (design_spec_v3 8a-8c) ---
 OK: CRN-01 crown SVG (5 refs)
 OK: CRN-02 model name gray
-OK: CRN-03 input radius (11 refs)
-OK: send-btn-size (7 refs)
-OK: send-btn-grad (8 refs)
-OK: send-btn round (32 refs)
-OK: --model-claude (3 refs)
-OK: --model-gpt (3 refs)
-OK: --model-gemini (3 refs)
+OK: CRN-03 input radius (9 refs)
+OK: send-btn-size (5 refs)
+OK: send-btn-grad (9 refs)
+OK: send-btn round (31 refs)
+OK: --model-claude (4 refs)
+OK: --model-gpt (4 refs)
+OK: --model-gemini (4 refs)
 OK: --card-radius (3 refs)
 OK: --popup-radius (3 refs)
-OK: --pill-radius (3 refs)
+OK: --pill-radius (4 refs)
 OK: 8b hub-tabs (12)
 OK: 8b onboarding slides (5)
 OK: 8c plan cards (5 refs)
@@ -123,12 +123,12 @@ OK: 'chip-row' sync (src=1 dist=1)
 OK: 'mode-f' cleanup (src=0 dist=0)
 OK: 'mode-row-f' cleanup (src=0 dist=0)
 OK: 'ゴールプロジェクト' cleanup (src=0 dist=0)
-  frontend-dist version=4.0.21  source version=4.0.21
+  frontend-dist version=4.0.22  source version=4.0.22
 OK: frontend-dist version sync
 --- Vite tree-shake safety (onclick vs window.assign) ---
 OK: all onclick functions registered in window
 --- SP version sync ---
-  session_progress=v4.0.18  APP_VERSION=4.0.21
+  session_progress=v4.0.22  APP_VERSION=4.0.22
 --- B4/B5 KV invalidate ---
 OK: B4 profile KV invalidate (4 refs)
 OK: B5 userId KV cache (1 refs)
@@ -150,4 +150,4 @@ OK: no critical test anti-patterns
 OK: test.skip() count 19/475 (4%)
 --- UI overlay check ---
   sheets/modals=1  overlays=1
-=== CANOPY PASS (9s) ===
+=== CANOPY PASS (19s) ===
