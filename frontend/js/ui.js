@@ -922,16 +922,18 @@ async function applyPromoFromSettings() {
 
 // ════════ THEME SYSTEM ════════
 const THEMES = {
-  dark:  { label:'ダーク',    emoji:'🌙' },
-  light: { label:'ライト',   emoji:'☀️' },
-  harajuku: { label:'ハラジュク', emoji:'🌈' },
-  'bright-glass': { label:'ライトグラス', emoji:'💎' },
-  'dark-glass':   { label:'ダークグラス',   emoji:'🔮' },
-  'harajuku-glass': { label:'ハラジュクグラス', emoji:null },
+  'night-sky':  { label:'Night Sky',       emoji:'🌙' },
+  'dawn':       { label:'Dawn',            emoji:'☀️' },
+  'harajuku-light': { label:'Harajuku Light', emoji:'🌸' },
+  'harajuku-dark':  { label:'Harajuku Dark',  emoji:'🌈' },
+  // backward compat aliases
+  'dark':  { label:'Night Sky', emoji:'🌙' },
+  'light': { label:'Dawn',     emoji:'☀️' },
+  'harajuku': { label:'Harajuku Light', emoji:'🌸' },
 };
-let currentTheme = 'dark';
+let currentTheme = 'night-sky';
 let currentFontSize = 'md';
-let currentBaseTheme = 'dark';
+let currentBaseTheme = 'night-sky';
 let glassMode = false;
 
 function applyTheme(t){
