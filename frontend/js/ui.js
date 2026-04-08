@@ -1999,9 +1999,9 @@ function updateAnalyticsExtras(){
   }
   // Task backlog warning
   const backlogBar = document.getElementById('analytics-backlog-bar');
-  if(backlogBar && typeof GOALS !== 'undefined'){
+  if(backlogBar && typeof ALL_GOALS !== 'undefined'){
     let pending = 0;
-    (GOALS || []).forEach(g => { (g.tasks || []).forEach(t => { if(!t.done) pending++; }); });
+    ALL_GOALS.forEach(g => { (g.phases||[]).forEach(p => { (p.tasks||[]).forEach(t => { if(t.status!=='done') pending++; }); }); });
     backlogBar.style.display = pending >= 5 ? '' : 'none';
   }
 }

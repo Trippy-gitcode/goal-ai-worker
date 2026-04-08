@@ -174,10 +174,10 @@ function chatKey(sendFn, e) {
 
 function _routeBadgeHTML(route) {
   if (route === 'gemini') {
-    return `<div class="route-badge" style="display:flex;align-items:center;gap:5px;padding:10px 14px;color:var(--model-gemini);font-size:12px;white-space:nowrap;"><svg width="14" height="14" class="svg-ic" style="color:var(--model-gemini);flex-shrink:0;animation:route-pulse 1.5s ease-in-out infinite"><use href="#ic-search"/></svg>リサーチ中...</div>`;
+    return `<div class="route-badge" style="display:flex;align-items:center;gap:5px;padding:10px 14px;color:var(--model-gemini);font-size:12px;white-space:nowrap;"><svg width="14" height="14" class="svg-ic" style="color:var(--model-gemini);flex-shrink:0;animation:route-pulse 1.5s linear infinite"><use href="#ic-search"/></svg>リサーチ中...</div>`;
   }
   if (route === 'gpt') {
-    return `<div class="route-badge" style="display:flex;align-items:center;gap:5px;padding:10px 14px;color:var(--model-gpt);font-size:12px;white-space:nowrap;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="color:var(--model-gpt);flex-shrink:0;animation:route-pulse 1.5s ease-in-out infinite"><path d="M8 1C5.24 1 3 3.24 3 6c0 1.83 1 3.43 2.5 4.3V12h5v-1.7C12 9.43 13 7.83 13 6c0-2.76-2.24-5-5-5z" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="5.5" y1="13.5" x2="10.5" y2="13.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="15" x2="10" y2="15" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>アイデアを生成中...</div>`;
+    return `<div class="route-badge" style="display:flex;align-items:center;gap:5px;padding:10px 14px;color:var(--model-gpt);font-size:12px;white-space:nowrap;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="color:var(--model-gpt);flex-shrink:0;animation:route-pulse 1.5s linear infinite"><path d="M8 1C5.24 1 3 3.24 3 6c0 1.83 1 3.43 2.5 4.3V12h5v-1.7C12 9.43 13 7.83 13 6c0-2.76-2.24-5-5-5z" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="5.5" y1="13.5" x2="10.5" y2="13.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="15" x2="10" y2="15" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>アイデアを生成中...</div>`;
   }
   return '';
 }

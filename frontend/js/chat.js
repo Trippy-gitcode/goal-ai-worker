@@ -2028,9 +2028,16 @@ function hsToggleTask(taskId,el){
       if(t.status==='done') taskCheckAnim(el);
       const titleEl=el.nextElementSibling;
       if(titleEl) titleEl.className='hs-task-title '+(t.status==='done'?'done':'');
-      // 進捗再計算＆マイルストーンチェック
+      // #381/#14 FIX: EXP付与+永続化
+      if(!wasDone && t.status==='done'){
+        const energy = t.energy_level || 'medium';
+        const expAmount = (typeof EXP_TABLE !== 'undefined' ? EXP_TABLE[energy] : null) || 15;
+        if(navigator.vibrate) navigator.vibrate(50);
+        if(typeof awardEXP === 'function') awardEXP(expAmount, t.title);
+      }
       recalcGoalProgress(goal);
       checkMilestone(goal);
+      if(typeof saveGoals === 'function') saveGoals();
       return;
     }
   }}
@@ -3016,8 +3023,8 @@ function renderTodayScreen(){
 
   // Goal progress
   const goalsEl = document.getElementById('today-goals');
-  if(goalsEl && typeof GOALS !== 'undefined'){
-    const activeGoals = (GOALS || []).filter(g => g.status !== 'archived').slice(0,4);
+  if(goalsEl && typeof ALL_GOALS !== 'undefined' && ALL_GOALS.length > 0){
+    const activeGoals = ALL_GOALS.filter(g => !g.archived && g.status !== 'archived').slice(0,4);
     goalsEl.innerHTML = activeGoals.map(g => {
       const pct = g.progress || 0;
       return `<div style="display:flex;align-items:center;gap:4px;"><span style="font-size:12px;color:var(--muted2);">${escapeHtml(g.title?.slice(0,6)||'')}</span><span style="font-size:12px;font-weight:600;color:var(--amber);">${pct}%</span></div>`;
