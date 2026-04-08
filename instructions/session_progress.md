@@ -9,16 +9,16 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.18（デプロイ済み 2026-04-08）
-- **Next:** BUG-03（プロフィール消失）→ UX-02b（タスクUI残件）→ DEV-03（dev-playbook.md）
-- **Last done:** BUG-02 ✅ + UX-02 ✅（タスクインタラクション刷新）
-- **Open issues:** BUG-03 プロフィール消失（🔴高）。UX-02b残件
+- **Version:** v4.0.20（デプロイ済み 2026-04-08）
+- **Next:** DESIGN-01（Night Sky Journalデザイン全面適用）→ UX-02b → DEV-03
+- **Last done:** BUG-03 ✅ プロフィール永続化修正（v4.0.20）+ design_system.md作成 + CLAUDE.md Design Context追記
+- **Open issues:** UX-02b残件。design_system.mdのテーマ4種をCSSとして実装する必要あり
 - **方針:** テスト配布より「自分が毎日使いたいツール」を優先。コンセプト「君の人生をより素敵に」
 
 ## 現在地
 - **バージョン:** v4.0.18
 - **チェーン:** BUG-02 + UX-02完了
-- **次のミッション:** BUG-03 → UX-02b → DEV-03
+- **次のミッション:** DESIGN-01 → UX-02b → DEV-03
 
 ---
 
@@ -30,6 +30,86 @@
 **根本原因:** saveProfile()がUIのみ更新でサーバー/localStorage保存なし + CORS PUT未許可 + loadIdentityが初期化時未実行
 **修正:** localStorage二重保存 + CORS PUT追加 + 初期化時restoreProfileFromLocalStorage + identityマージ
 **E2E-11: 12/12 PASS**
+
+---
+
+### DESIGN-01: Night Sky Journal デザイン全面適用
+> リスク: 🔴高（UI全面変更）
+> 参照: docs/design_system.md（テーマ4種+NGリスト+チェックリスト）, CLAUDE.md Design Context
+> 対象ファイル: frontend/style.css, frontend/index.html, frontend/js/（UI描画関連全般）
+> テスト影響: TEST-E2E-v2全セクション + TEST-DESIGN
+
+**目的:** docs/design_system.mdのNight Sky Journalデザインを既存UIの全画面・全コンポーネントに適用する
+
+**対象画面（全件。漏れなく更新すること）:**
+| # | 画面ID | 名前 | 更新確認 |
+|---|--------|------|----------|
+| 1 | pg-today | TODAY（タイムライン） | □ |
+| 2 | pg-home | TALK（チャット） | □ |
+| 3 | pg-goals | GOALS一覧 | □ |
+| 4 | pg-goal-hub | ゴール詳細ハブ | □ |
+| 5 | pg-myself | ME（プロフィール） | □ |
+| 6 | pg-calendar | カレンダー | □ |
+| 7 | pg-analytics | アナリティクス | □ |
+| 8 | pg-settings | 設定 | □ |
+| 9 | pg-tasks | タスク一覧 | □ |
+| 10 | sidebar | サイドバー | □ |
+| 11 | bottom-tab-bar | ボトムタブ | □ |
+| 12 | home-task-panel | タスク詳細パネル | □ |
+| 13 | task-add-modal | タスク追加モーダル | □ |
+| 14 | goal-create-flow | ゴール作成フロー | □ |
+| 15 | home-input-area | チャット入力エリア | □ |
+| 16 | secretary-memo | 秘書メモ | □ |
+| 17 | qol-suggestions | QOL提案 | □ |
+| 18 | login/onboarding | ログイン/初回フロー | □ |
+| 19 | plan-selection | プラン選択画面 | □ |
+| 20 | toast/snackbar | トースト通知 | □ |
+
+**完了条件: 上記20項目すべてに□→✅を付けること。1つでも□が残っていたら未完了。**
+
+**Phase A: CSSトークン基盤（テーマ切替の土台）**
+1. CSS custom propertiesでテーマ4種（Night Sky / Dawn / Harajuku Light / Harajuku Dark）を定義
+2. 既存のハードコードされた色値をすべてCSS変数に置換
+3. テーマ切替関数（設定画面から切替可能）
+4. body data-theme属性でテーマ適用
+
+**Phase B: レイアウト更新（Vertical Journal + Open Air）**
+1. TODAY画面をVertical journal構造に変更（縦ライン+ドット進行、NOW詳細/NEXT控えめ）
+2. 余白リズムをdesign_system.mdのspacingトークンに統一（セクション間40px、タスク間20px+）
+3. カード囲みを除去（余白+0.5px borderで区切る）
+4. タイポグラフィ階層（weight 200/400/500、letter-spacing差）
+
+**Phase C: コンポーネント更新**
+1. ボトムタブをPill active方式に変更（Active=pill+icon+label、非Active=icon only）
+2. 完了⭕️をdesign_system.md仕様に（サイズ、EXP表示、springアニメーション）
+3. ease-in-outをすべてspring-based cubic-bezierに置換
+4. NGリスト違反を全除去（ゴールド色、グラデーション文字、equal spacing等）
+
+**仕様↔検証マッピング（G7準拠）:**
+  Phase A-1 テーマ4種CSS → cmd1(grep 4テーマ定義)
+  Phase A-2 ハードコード色除去 → cmd2(grep ハードコード色=0)
+  Phase B-1 Vertical journal → cmd3(grep timeline dot構造)
+  Phase B-2 余白リズム → cmd4(E2E: spacing検証)
+  Phase C-1 Pill tab → cmd5(grep pill-tab)
+  Phase C-3 ease-in-out除去 → cmd6(grep ease-in-out=0)
+  Phase C-4 NGリスト違反除去 → cmd7(NGリスト全項目grep=0)
+
+**プリフライト:**
+  wc -l docs/design_system.md                    # デザイン仕様の存在確認
+  grep -c "ease-in-out" frontend/style.css       # 現在のease-in-out使用数
+  grep -c "gold\|#FFD700\|#DAA520" frontend/     # 現在のゴールド色使用数
+
+**完了コマンド:**
+  cmd1: grep -c "night-sky\|dawn\|harajuku-light\|harajuku-dark" frontend/style.css | awk '{if($1>=4) exit 0; else exit 1}'
+  cmd2: grep -c "#FFD700\|#DAA520\|gold" frontend/style.css | awk '{if($1==0) exit 0; else exit 1}'
+  cmd3: grep -c "timeline-dot\|dot-active\|dot-inactive" frontend/style.css | awk '{if($1>=2) exit 0; else exit 1}'
+  cmd4: grep -c "ease-in-out" frontend/style.css | awk '{if($1==0) exit 0; else exit 1}'
+  cmd5: grep -c "pill.*tab\|tab.*pill\|pill-active" frontend/ -r | awk -F: '{s+=$2}END{if(s>=1) exit 0; else exit 1}'
+  cmd6: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
+  cmd7: スクリーンショット8枚（TODAY/TALK/GOALS/ME × Night Sky + Dawn）
+
+**FAIL条件:** cmd1-6のいずれかFAIL / スクリーンショットでNGリスト違反が目視確認される
+**完了報告:** DESIGN-01: Phase A/B/C 各cmd PASS/FAIL + スクリーンショット8枚 + NGリスト違反ゼロ確認
 
 ---
 
@@ -243,3 +323,5 @@
 - TEST-E2E-v2 ✅ 120 PASS / 0 FAIL / 0 SKIP（KV plan修正+SKIP全解消）
 - BUG-02 ✅ ゴール勝手紐付け修正（秘書メモ+タイムライン+リスト）
 - UX-02 ✅ タスクインタラクション刷新（詳細カード+ドラッグ+振動+EXPポップアップ）
+- BUG-03 ✅ プロフィール永続化修正 v4.0.20
+- DEV-04 ✅ design_system.md作成（Night Sky Journal。QnA9問+4000件調査。テーマ4種。CLAUDE.md Design Context追記）

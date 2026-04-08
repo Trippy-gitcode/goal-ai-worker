@@ -62,7 +62,7 @@ Free(¥0,20回/日,Sonnet+mini+3Flash) / Light(¥500~980,¥8/t,cap¥980) / Pro(�
 ## 鉄則（常に意識する8つだけ。詳細はdevelopment_rules.md）
 
 1. **仕様変更禁止。** 契約セクション参照。設計判断は自由、根拠を記録
-2. **C2基準フロー厳守:** 実装→bump-version→build→canopy→デプロイ→ヘルスチェック→git tag→push。省略・順序変更禁止
+2. **C2基準フロー厳守:** 実装→**E2E(該当セクション)**→bump-version→build→canopy→デプロイ→ヘルスチェック→git tag→push。省略・順序変更禁止。**frontend/ or src/ の変更が1行でもあればE2E必須。** テスト省略はdocs/, instructions/, *.md のみの変更に限定
 3. **verify.shを自分で作り自分で実行。** canopyに新項目を累積追加（削除禁止）
 4. **判断根拠・結果・提案をsession_progress.mdに記録。** レポート規約に従う
 5. **ミッション遂行に必要なバグ修正はOK（記録必須）。無関係なバグは報告のみ**
@@ -125,7 +125,22 @@ auto-compact発動時に以下を必ず保持:
 ## ファイル構成（v3.10.0）
 src/: index.js, routes/(chat,checkout,plan,deep,goals,history,memo,misc,referral,tester,token,voice,admin), services/ai/(gpt,gemini,routing,claude), services/(embedding,history,memo,profile,prompt), utils/(constants,helpers,rate-limit,streak,supabase)
 frontend/js/: globals,api,chat,goals,profile,ui,app,location,main
-docs/: goal_ai_project_v6_4.md, goal_ai_reference_v2.md, goal_ai_design_spec_v3.md, design_review_changelog_v3.md, design_amendment_001.md, mockups/(21画面HTML+旧版仕様)
+docs/: goal_ai_project_v6_4.md, goal_ai_reference_v2.md, goal_ai_design_spec_v3.md, design_review_changelog_v3.md, design_amendment_001.md, design_system.md, mockups/(21画面HTML+旧版仕様)
+
+---
+
+## Design Context（全UI変更時に参照必須）
+- **Brand:** Night Sky Journal — 月明かりの下で静かにジャーナルを書いている感覚
+- **Audience:** 20-40代、自分の人生を整理したい人
+- **Tone:** 静かな安心感。深呼吸したくなる
+- **Reference:** Apple Reminders dark mode + GitHub Dark
+- **Color:** `docs/design_system.md` のCSSトークンのみ使用。テーマ4種（Night Sky / Dawn / Harajuku Light / Harajuku Dark）
+- **Layout:** Vertical journal（縦ライン+ドット進行）、Open air（余白で区切る。カードで囲まない）
+- **Tab:** Pill active（Active=pill+icon+label、非Active=icon only）
+- **Font:** system-ui のみ。Inter/Roboto/Arial 禁止
+- **Animation:** spring-based のみ。ease-in-out 禁止
+- **Anti-patterns:** `docs/design_system.md` のNGリスト全項目を遵守
+- **テーマ実装:** CSS custom properties でテーマ切替。root変数差し替え方式
 
 ---
 
