@@ -1326,7 +1326,7 @@ function renderHubTasks(){
 function renderHubTaskSuggestions(goal, container){
   const card = document.createElement('div');
   card.className = 'ai-suggest';
-  card.innerHTML = `<div class="ai-suggest-head"><svg viewBox="0 0 32 32" width="12" height="12"><defs><linearGradient id="crown-sg" x1="6" y1="6" x2="26" y2="24" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown-sg)"/></svg> AIが提案するタスク</div>`;
+  card.innerHTML = `<div class="ai-suggest-head"><svg viewBox="0 0 32 32" width="12" height="12"><defs><linearGradient id="crown-sg" x1="6" y1="6" x2="26" y2="24" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="var(--accent)"/><stop offset="100%" stop-color="var(--accent-hover)"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown-sg)"/></svg> AIが提案するタスク</div>`;
   container.appendChild(card);
 
   const cached = hubTaskSuggestions[goal.id];
@@ -1823,11 +1823,11 @@ async function extractGoalsFromHistory(){
     const card = document.createElement('div');
     card.id = 'extract-goals-card';
     card.className = 'extract-goal-card';
-    card.innerHTML = `<div style="font-size:12px;font-weight:500;color:#c8920a;margin-bottom:6px;">◇ 会話から見つかったゴール候補</div>`;
+    card.innerHTML = `<div style="font-size:12px;font-weight:500;color:var(--accent);margin-bottom:6px;">◇ 会話から見つかったゴール候補</div>`;
     goals.forEach(g => {
       const row = document.createElement('div');
       row.className = 'extract-goal-item';
-      row.innerHTML = `<div><div style="color:var(--cream)">${escapeHtml(g.title)}</div><div style="font-size:12px;color:var(--muted2);margin-top:1px">${escapeHtml(g.reason||'')}</div></div><span style="color:#c8920a;cursor:pointer;font-size:12px;flex-shrink:0;" onclick="adoptExtractedGoal('${escapeHtml(g.title).replace(/'/g,"\\'")}')">＋ 作成</span>`;
+      row.innerHTML = `<div><div style="color:var(--cream)">${escapeHtml(g.title)}</div><div style="font-size:12px;color:var(--muted2);margin-top:1px">${escapeHtml(g.reason||'')}</div></div><span style="color:var(--accent);cursor:pointer;font-size:12px;flex-shrink:0;" onclick="adoptExtractedGoal('${escapeHtml(g.title).replace(/'/g,"\\'")}')">＋ 作成</span>`;
       card.appendChild(row);
     });
     btn.after(card);
@@ -2018,7 +2018,7 @@ function renderAIUnderstanding(){
 
 // ════════ FEATURE 8: マイルストーン演出＆シェア ════════
 function launchConfetti(){
-  const colors = ['#e4b86a','#5db896','#9d78d8','#e8785e','#6aafe4'];
+  const colors = ['var(--accent)','#5db896','#9d78d8','#e8785e','#6aafe4'];
   for(let i=0;i<40;i++){
     const p = document.createElement('div');
     p.className = 'confetti-piece';
@@ -2203,10 +2203,10 @@ async function exportTorisetsuPDF(){
   const container = document.createElement('div');
   container.style.cssText = 'position:fixed;left:-9999px;top:0;width:800px;padding:48px;background:#fff;font-family:"Hiragino Sans","Noto Sans JP",sans-serif;color:#333;line-height:1.8;';
 
-  const section = (title, content) => `<div style="margin-bottom:20px;"><div style="font-size:16px;font-weight:700;color:#e4b86a;margin-bottom:8px;border-bottom:2px solid #e4b86a;padding-bottom:4px;">${title}</div><div style="font-size:13px;padding-left:4px;">${content}</div></div>`;
+  const section = (title, content) => `<div style="margin-bottom:20px;"><div style="font-size:16px;font-weight:700;color:var(--accent);margin-bottom:8px;border-bottom:2px solid var(--accent);padding-bottom:4px;">${title}</div><div style="font-size:13px;padding-left:4px;">${content}</div></div>`;
 
   let html = `<div style="text-align:center;margin-bottom:24px;">
-    <div style="font-size:28px;font-weight:700;color:#e4b86a;letter-spacing:.15em;">GOAL AI</div>
+    <div style="font-size:28px;font-weight:700;color:var(--accent);letter-spacing:.15em;">GOAL AI</div>
     <div style="font-size:14px;color:#999;margin-top:4px;">— 自分のトリセツ —</div>
     <div style="font-size:12px;color:#bbb;margin-top:4px;">${new Date().toLocaleDateString('ja-JP')} 作成</div>
   </div>`;
@@ -2576,7 +2576,7 @@ function renderGoalsList(){
         <div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:500;color:var(--cream);line-height:1.3;">${escapeHtml(g.title)}</div></div>
         <div style="font-size:16px;font-weight:600;color:var(--amber);flex-shrink:0;">${pct}%</div>
       </div>
-      <div style="height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#c8920a,#f5d380);border-radius:2px;"></div></div>
+      <div style="height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:var(--accent);border-radius:2px;"></div></div>
       <div style="font-size:12px;color:var(--muted2);margin-top:6px;">タスク ${doneTasks}/${totalTasks}完了</div>
     </div>`;
   }).join('');
@@ -2731,7 +2731,7 @@ function awardEXP(amount, reason){
 function showEXPFloat(amount){
   const el = document.createElement('div');
   el.textContent = `+${amount} EXP`;
-  el.style.cssText = 'position:fixed;top:40%;left:50%;transform:translateX(-50%);font-size:18px;font-weight:700;color:var(--amber);text-shadow:0 2px 8px rgba(200,146,10,0.4);z-index:9999;pointer-events:none;animation:expFloat 1.2s ease-out forwards;';
+  el.style.cssText = 'position:fixed;top:40%;left:50%;transform:translateX(-50%);font-size:18px;font-weight:700;color:var(--amber);text-shadow:0 2px 8px rgba(88,166,255,0.4);z-index:9999;pointer-events:none;animation:expFloat 1.2s ease-out forwards;';
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 1500);
 }
@@ -2741,7 +2741,7 @@ function showTodayClearEffect(){
   overlay.style.cssText = 'position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);animation:fadeIn .3s;pointer-events:auto;';
   overlay.innerHTML = `<div style="text-align:center;animation:scaleIn .4s ease-out;">
     <div style="font-size:48px;margin-bottom:8px;">🎉</div>
-    <div style="font-size:24px;font-weight:700;color:var(--amber);text-shadow:0 0 20px rgba(228,184,106,0.5);">TODAY CLEAR!</div>
+    <div style="font-size:24px;font-weight:700;color:var(--amber);text-shadow:0 0 20px rgba(88,166,255,0.5);">TODAY CLEAR!</div>
     <div style="font-size:13px;color:var(--cream);margin-top:8px;">全タスク完了おめでとう！</div>
   </div>`;
   overlay.onclick = () => overlay.remove();

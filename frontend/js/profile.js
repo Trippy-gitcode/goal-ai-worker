@@ -880,7 +880,7 @@ function renderQOLOnME(proposals){
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
         <span style="font-size:14px;">${catIcons[p.category] || '💡'}</span>
         <span style="font-size:13px;color:var(--cream);font-weight:500;flex:1;">${escapeHtml(p.title)}</span>
-        <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(228,184,106,0.1);color:var(--amber);">${urgLabels[p.urgency] || p.urgency}</span>
+        <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--amber-d);color:var(--amber);">${urgLabels[p.urgency] || p.urgency}</span>
       </div>
       <div style="font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:8px;">${escapeHtml(p.description)}</div>
       <button onclick="startQOLGoal(${i})" style="padding:6px 14px;background:var(--amber);color:#1a1a2e;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">やる</button>
@@ -1107,9 +1107,9 @@ function toggleReanalyzeChip(el){
     el.style.background = 'transparent';
     el.style.color = 'var(--muted)';
   } else {
-    el.style.border = '1px solid rgba(200,146,10,0.4)';
-    el.style.background = 'rgba(200,146,10,0.08)';
-    el.style.color = '#c8920a';
+    el.style.border = '1px solid var(--amber-d)';
+    el.style.background = 'var(--amber-g)';
+    el.style.color = 'var(--accent)';
   }
 }
 function runReanalysis(){
@@ -1202,10 +1202,10 @@ function renderConnectContent(loading=false, data=null){
     data.goals.forEach(g=>{
       const pct = g.compatibility || 0;
       const isWarn = pct <= 60;
-      const barColor = isWarn ? '#ef9f27' : 'linear-gradient(90deg,#c8920a,#f5d380)';
-      const pctColor = isWarn ? '#ef9f27' : '#c8920a';
+      const barColor = isWarn ? '#ef9f27' : 'var(--accent)';
+      const pctColor = isWarn ? '#ef9f27' : 'var(--accent)';
       const goalSafe = (g.goal||'').replace(/'/g,"\\'");
-      html += `<div class="connect-card" style="border-color:${isWarn?'rgba(239,159,39,0.3)':'rgba(200,146,10,0.3)'}">
+      html += `<div class="connect-card" style="border-color:${isWarn?'rgba(239,159,39,0.3)':'var(--amber-d)'}">
         <div class="connect-card-hd">${g.goal}</div>
         <div class="connect-card-body">${g.description||''}</div>
         <div style="display:flex;align-items:center;gap:6px;margin:8px 0;">
@@ -1215,10 +1215,10 @@ function renderConnectContent(loading=false, data=null){
           </div>
           <span style="font-size:12px;font-weight:500;color:${pctColor};">${pct}%</span>
         </div>
-        ${g.advice?`<div style="padding:8px 10px;border-radius:6px;background:rgba(200,146,10,0.04);border:0.5px solid rgba(200,146,10,0.15);margin-top:6px;font-size:12px;color:var(--muted);line-height:1.5;">
+        ${g.advice?`<div style="padding:8px 10px;border-radius:6px;background:var(--amber-g);border:0.5px solid var(--amber-d);margin-top:6px;font-size:12px;color:var(--muted);line-height:1.5;">
           <div style="font-size:12px;font-weight:500;color:var(--amber);margin-bottom:3px;">${getLogoSVG(10)} AIアドバイス</div>${g.advice}
         </div>`:''}
-        ${isWarn?`<div onclick="hubChatFromConnect('${goalSafe}','改善方法を教えて')" style="display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;border:0.5px solid rgba(200,146,10,0.3);color:#c8920a;font-size:12px;cursor:pointer;width:fit-content;margin-top:6px;">→ 改善方法をAIに相談する</div>`:''}
+        ${isWarn?`<div onclick="hubChatFromConnect('${goalSafe}','改善方法を教えて')" style="display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;border:0.5px solid var(--amber-d);color:var(--accent);font-size:12px;cursor:pointer;width:fit-content;margin-top:6px;">→ 改善方法をAIに相談する</div>`:''}
       </div>`;
     });
   }

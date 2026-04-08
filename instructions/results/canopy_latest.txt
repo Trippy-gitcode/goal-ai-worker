@@ -1,5 +1,5 @@
-=== CANOPY TEST (00:14:22) ===
-Worker: "version":"4.0.24"
+=== CANOPY TEST (00:34:00) ===
+Worker: "version":"4.0.25"
 --- HTTP Smoke Tests ---
 OK: GET /api/version → 200
 OK: GET /health → 200
@@ -68,17 +68,14 @@ OK: plan-compare-table (2 refs)
 OK: フェアユース制限 (2 refs)
 OK: goal-detect-toast\|showGoalDetectToast (10 refs)
 --- Version sync (C10) ---
-  globals.js=4.0.25  sw.js=4.0.25  index.html=4.0.25
-OK: version sync (4.0.25)
+  globals.js=4.0.26  sw.js=4.0.26  index.html=4.0.26
+OK: version sync (4.0.26)
 --- Style integrity (C12) ---
 OK: no 'border-radius:24px' in JS
 OK: no 'border-radius:20px' in JS
 OK: no '#c4a0e8' in JS
 OK: no '#252a40' in JS
 OK: no '#323855' in JS
-WARN: hardcoded model color '#5b8def' in JS (1)
-WARN: hardcoded model color '#e07070' in JS (1)
-WARN: hardcoded model color '#e8913a' in JS (1)
 INFO: inline style= count in JS: 519 (baseline)
 --- UI spec values (design_spec_v3 8a-8c) ---
 OK: CRN-01 crown SVG (10 refs)
@@ -123,12 +120,12 @@ OK: 'chip-row' sync (src=1 dist=1)
 OK: 'mode-f' cleanup (src=0 dist=0)
 OK: 'mode-row-f' cleanup (src=0 dist=0)
 OK: 'ゴールプロジェクト' cleanup (src=0 dist=0)
-  frontend-dist version=4.0.25  source version=4.0.25
+  frontend-dist version=4.0.26  source version=4.0.26
 OK: frontend-dist version sync
 --- Vite tree-shake safety (onclick vs window.assign) ---
 OK: all onclick functions registered in window
 --- SP version sync ---
-  session_progress=v4.0.22  APP_VERSION=4.0.25
+  session_progress=v4.0.22  APP_VERSION=4.0.26
 --- B4/B5 KV invalidate ---
 OK: B4 profile KV invalidate (4 refs)
 OK: B5 userId KV cache (1 refs)
@@ -150,4 +147,4 @@ OK: no critical test anti-patterns
 OK: test.skip() count 19/495 (3%)
 --- UI overlay check ---
   sheets/modals=1  overlays=1
-=== CANOPY PASS (10s) ===
+=== CANOPY PASS (9s) ===

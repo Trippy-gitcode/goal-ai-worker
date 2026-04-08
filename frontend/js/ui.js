@@ -790,7 +790,7 @@ function exportDeepFormat(format, results, title) {
     // HTML→print PDF (browser built-in)
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
       <style>/* PDF/print: hardcoded colors intentional */body{font-family:sans-serif;max-width:800px;margin:40px auto;font-size:13px;line-height:1.7;color:#222;}
-      h1{font-size:18px;border-bottom:2px solid #e4b86a;padding-bottom:6px;color:#b8882a;}
+      h1{font-size:18px;border-bottom:2px solid var(--accent);padding-bottom:6px;color:#b8882a;}
       h2{font-size:14px;color:#555;margin-top:24px;}
       .review{background:#f8f8f8;border-left:3px solid #ccc;padding:10px 14px;margin:10px 0;font-size:12px;}
       .meta{font-size:12px;color:#888;margin-bottom:20px;}
@@ -853,10 +853,10 @@ function exportDeepFormat(format, results, title) {
     ];
     const slideHTML = slides.map((s,i)=>` /* PDF/print: hardcoded colors intentional */
       <div style="width:25.4cm;height:14.3cm;padding:1.5cm 2cm;background:${i===0?'#0c0e14':'#fff'};
-        color:${i===0?'#e4b86a':'#222'};border:1px solid #ddd;page-break-after:always;
+        color:${i===0?'var(--accent)':'#222'};border:1px solid #ddd;page-break-after:always;
         display:flex;flex-direction:column;justify-content:center;box-sizing:border-box;">
         <div style="font-size:${i===0?'28':'22'}pt;font-weight:700;margin-bottom:16px;
-          color:${i===0?'#e4b86a':'#b8882a'}">${s.title}</div>
+          color:${i===0?'var(--accent)':'#b8882a'}">${s.title}</div>
         <div style="font-size:12pt;line-height:1.65;white-space:pre-wrap;">${s.body}</div>
         ${i===0?'<div style="margin-top:24px;font-size:10pt;color:#8a8fa8;">Gemini × GPT × Claude + デュアルレビュー</div>':''}
       </div>`).join('');
@@ -1065,7 +1065,7 @@ const CHAT_BG_PRESETS = [
   { id:'dots', label:'ドット', css:'radial-gradient(circle, var(--amber-g) 1px, transparent 1px)' },
   { id:'grid', label:'グリッド', css:'linear-gradient(var(--amber-g) 1px, transparent 1px), linear-gradient(90deg, var(--amber-g) 1px, transparent 1px)' },
   { id:'wave', label:'ウェーブ', css:'repeating-linear-gradient(135deg, transparent, transparent 20px, var(--amber-g) 20px, var(--amber-g) 40px)' },
-  { id:'sunset', label:'夕焼け', css:'linear-gradient(180deg, rgba(200,80,50,0.08) 0%, rgba(200,146,10,0.06) 40%, transparent 100%)' },
+  { id:'sunset', label:'夕焼け', css:'linear-gradient(180deg, rgba(200,80,50,0.08) 0%, var(--amber-g) 40%, transparent 100%)' },
   { id:'starry', label:'星空', css:'radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.15) 0%, transparent 100%), radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.12) 0%, transparent 100%), radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 100%), radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.08) 0%, transparent 100%)' },
   { id:'aurora', label:'オーロラ', css:'linear-gradient(135deg, rgba(100,200,150,0.05) 0%, rgba(80,120,200,0.05) 50%, rgba(150,80,180,0.05) 100%)' },
 ];
@@ -1122,7 +1122,7 @@ function showHelpGuide() {
     const modal = document.createElement('div');
     modal.id = 'help-guide-modal';
     modal.className = 'modal-overlay';
-    modal.innerHTML = `<svg style="position:absolute;width:0;height:0;"><defs><linearGradient id="helpGoldG" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs></svg><div class="modal-content" style="max-width:400px;padding:32px;text-align:center;">
+    modal.innerHTML = `<svg style="position:absolute;width:0;height:0;"><defs><linearGradient id="helpGoldG" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="var(--accent)"/><stop offset="100%" stop-color="var(--accent-hover)"/></linearGradient></defs></svg><div class="modal-content" style="max-width:400px;padding:32px;text-align:center;">
       <div style="margin-bottom:12px;">${slide.icon}</div>
       <h3 style="font-size:1.2rem;font-weight:700;color:var(--cream);margin-bottom:8px;">${slide.title}</h3>
       <p style="font-size:0.9rem;color:var(--muted);line-height:1.6;margin-bottom:16px;">${slide.body}</p>

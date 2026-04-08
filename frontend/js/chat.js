@@ -15,7 +15,7 @@ function showNanoFallbackBanner(hours) {
 function hideNanoFallbackBanner(){ document.getElementById('nano-fallback-banner')?.remove(); }
 
 // ════════ CHAT ════════
-function getLogoSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 32 32"><defs><linearGradient id="crown${size}" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown${size})"/></svg>`;}
+function getLogoSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 32 32"><defs><linearGradient id="crown${size}" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="var(--accent)"/><stop offset="100%" stop-color="var(--accent-hover)"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#crown${size})"/></svg>`;}
 
 // UX-01: 三賢者アイコン（route/modelから選択）
 function getSageIcon(size, route){
@@ -27,7 +27,7 @@ function getSageIcon(size, route){
   // claude or default: quill
   return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="rgba(220,160,80,0.9)" stroke-width="1.5"><path d="M20 2c-2 0-6 2-8 6-1 2-1 4-1 6 0 1-1 3-3 4l-1 1 2 2 1-1c1-2 3-3 4-3 2 0 4 0 6-1 4-2 6-6 6-8V2z"/><path d="M8 18l-3 3"/></svg>`;
 }
-function getGptSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><defs><linearGradient id="bulb${size}" x1="12" y1="3" x2="12" y2="21"><stop offset="0%" stop-color="#f5d380"/><stop offset="100%" stop-color="#c8920a"/></linearGradient></defs><path d="M9 21h6M12 3a6 6 0 00-4 10.5V17h8v-3.5A6 6 0 0012 3z" stroke="url(#bulb${size})"/></svg>`;}
+function getGptSVG(size){return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><defs><linearGradient id="bulb${size}" x1="12" y1="3" x2="12" y2="21"><stop offset="0%" stop-color="var(--accent-hover)"/><stop offset="100%" stop-color="var(--accent)"/></linearGradient></defs><path d="M9 21h6M12 3a6 6 0 00-4 10.5V17h8v-3.5A6 6 0 0012 3z" stroke="url(#bulb${size})"/></svg>`;}
 function getUserAvatarText(){const n=USER_PROFILE.nickname||USER_PROFILE.name||'';return n?n.charAt(0):'';}
 function renderUserAvatarInner(av){
   if(USER_PROFILE.avatar_base64){
@@ -1764,7 +1764,7 @@ function renderChatHistoryList(sessions){
     const dateStr = d.toLocaleDateString('ja-JP',{month:'short',day:'numeric'});
     const preview = (s.firstMsg || '会話').substring(0, 30);
     const star = s.goal_candidate ? '<span class="goal-star" style="color:var(--amber);margin-right:4px;">★</span>' : '';
-    const tagPill = s.session_tag ? `<span style="display:inline-block;background:rgba(200,146,10,0.15);color:var(--amber);font-size:0.6rem;padding:1px 5px;border-radius:6px;margin-left:4px;">${escapeHtml(s.session_tag)}</span>` : '';
+    const tagPill = s.session_tag ? `<span style="display:inline-block;background:var(--amber-d);color:var(--amber);font-size:0.6rem;padding:1px 5px;border-radius:6px;margin-left:4px;">${escapeHtml(s.session_tag)}</span>` : '';
     return `<div style="display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
       <div onclick="loadChatSession('${s.sessionId}')" style="flex:1;min-width:0;cursor:pointer;">
         <div style="font-size:13px;color:var(--cream);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${star}${escapeHtml(preview)}…${tagPill}</div>
@@ -2039,7 +2039,7 @@ function hsToggleTask(taskId,el){
 function taskCheckAnim(el){
   el.classList.add('task-check-anim');
   el.addEventListener('animationend',()=>el.classList.remove('task-check-anim'),{once:true});
-  const colors=['#c8920a','#e07070','#5b8def','#28b464','#e8913a'];
+  const colors=['var(--accent)','var(--danger)','var(--blue)','var(--green)','var(--orange)'];
   const rect=el.getBoundingClientRect();
   for(let i=0;i<5;i++){
     const p=document.createElement('div');
@@ -3313,12 +3313,12 @@ function renderTodayList(allTasks, todayStr){
       const timeStr = t.estimated_time ? `${t.estimated_time}` : '';
       return `<div data-task-id="${t.id}" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);${isDone?'opacity:0.35;':''}cursor:pointer;">
         <div data-drag="1" style="width:16px;height:28px;display:flex;flex-direction:column;gap:1.5px;align-items:center;justify-content:center;opacity:0.2;flex-shrink:0;touch-action:none;cursor:grab;"><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span><span style="display:flex;gap:2px;"><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span><span style="width:2px;height:2px;border-radius:50%;background:var(--muted2);"></span></span></div>
-        <div onclick="event.stopPropagation();toggleTodayTask('${t.id}')" style="width:28px;height:28px;border-radius:50%;${isDone?'':'border:1px solid '+(idx===0&&!isDone?'var(--amber)':'var(--border2)')+';'}display:flex;align-items:center;justify-content:center;font-size:12px;color:${idx===0&&!isDone?'var(--amber)':'var(--muted2)'};flex-shrink:0;${idx===0&&!isDone?'background:rgba(228,184,106,0.1);':''}cursor:pointer;">${isDone?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':(idx+1)}</div>
+        <div onclick="event.stopPropagation();toggleTodayTask('${t.id}')" style="width:28px;height:28px;border-radius:50%;${isDone?'':'border:1px solid '+(idx===0&&!isDone?'var(--amber)':'var(--border2)')+';'}display:flex;align-items:center;justify-content:center;font-size:12px;color:${idx===0&&!isDone?'var(--amber)':'var(--muted2)'};flex-shrink:0;${idx===0&&!isDone?'background:var(--amber-d);':''}cursor:pointer;">${isDone?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':(idx+1)}</div>
         <div style="flex:1;min-width:0;" onclick="openHomeTaskById('${t.id}')">
           <div style="font-size:12px;color:${isOverdue?'var(--red)':'var(--cream)'};line-height:1.3;${isDone?'text-decoration:line-through;':''}overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(t.title)}</div>
           ${timeStr ? `<div style="font-size:12px;color:${isOverdue?'var(--red)':'var(--muted2)'};margin-top:1px;">${isOverdue?'期限切れ':timeStr}</div>` : (isOverdue ? '<div style="font-size:12px;color:var(--red);margin-top:1px;">期限切れ</div>' : '')}
         </div>
-        ${goalName ? `<div style="font-size:12px;padding:2px 6px;border-radius:3px;background:rgba(228,184,106,0.1);color:var(--amber);border:0.5px solid rgba(228,184,106,0.2);flex-shrink:0;white-space:nowrap;">${escapeHtml(goalName)}</div>` : ''}
+        ${goalName ? `<div style="font-size:12px;padding:2px 6px;border-radius:3px;background:var(--amber-d);color:var(--amber);border:0.5px solid var(--amber-d);flex-shrink:0;white-space:nowrap;">${escapeHtml(goalName)}</div>` : ''}
       </div>`;
     }).join('');
   }
@@ -3869,7 +3869,7 @@ function openTodayAddTask(){
 
 function pickTaskDeadline(btn){
   document.querySelectorAll('.task-dl-btn').forEach(b => { b.style.background='var(--bg3)'; b.style.borderColor='var(--border-card)'; });
-  btn.style.background='rgba(228,184,106,0.15)'; btn.style.borderColor='var(--amber)';
+  btn.style.background='var(--amber-d)'; btn.style.borderColor='var(--amber)';
   const val = btn.dataset.val;
   const picker = document.getElementById('task-step1-date-picker');
   if(val === 'pick'){
@@ -3927,7 +3927,7 @@ function renderTaskStep2(inferred){
       const val = isObj ? o.v : o;
       const lbl = isObj ? o.l : o;
       const sel = (String(_taskAddDraft[field]) === String(val));
-      return `<button onclick="taskStep2Pick('${field}','${val}',this)" class="ts2-chip" style="padding:5px 10px;border-radius:8px;font-size:11px;cursor:pointer;font-family:var(--ff);border:1px solid ${sel?'var(--amber)':'var(--border-card)'};background:${sel?'rgba(228,184,106,0.15)':'var(--bg3)'};color:var(--cream);transition:all .15s;">${sel?'▶ ':''}${lbl}</button>`;
+      return `<button onclick="taskStep2Pick('${field}','${val}',this)" class="ts2-chip" style="padding:5px 10px;border-radius:8px;font-size:11px;cursor:pointer;font-family:var(--ff);border:1px solid ${sel?'var(--amber)':'var(--border-card)'};background:${sel?'var(--amber-d)':'var(--bg3)'};color:var(--cream);transition:all .15s;">${sel?'▶ ':''}${lbl}</button>`;
     });
     return `<div style="margin-bottom:2px;">
       <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${icon} ${label}</div>
@@ -3938,7 +3938,7 @@ function renderTaskStep2(inferred){
   const dialHtml = `<div style="margin-bottom:2px;">
     <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">⏱ どのくらい？</div>
     <div id="drum-picker" style="position:relative;height:100px;overflow:hidden;border:1px solid var(--border-card);border-radius:10px;background:var(--bg3);">
-      <div style="position:absolute;top:50%;left:0;right:0;height:32px;transform:translateY(-50%);background:rgba(228,184,106,0.1);border-top:1px solid var(--amber);border-bottom:1px solid var(--amber);pointer-events:none;z-index:1;"></div>
+      <div style="position:absolute;top:50%;left:0;right:0;height:32px;transform:translateY(-50%);background:var(--amber-d);border-top:1px solid var(--amber);border-bottom:1px solid var(--amber);pointer-events:none;z-index:1;"></div>
       <div id="drum-scroll" style="overflow-y:scroll;height:100%;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;">
         <div style="height:34px;"></div>
         ${minuteValues.map(m => {
@@ -3972,7 +3972,7 @@ function taskStep2Pick(field, val, btn){
     const cv = c.onclick.toString().match(/'([^']+)'/g)?.[1]?.replace(/'/g,'');
     const sel = (String(val) === String(cv));
     c.style.borderColor = sel ? 'var(--amber)' : 'var(--border-card)';
-    c.style.background = sel ? 'rgba(228,184,106,0.15)' : 'var(--bg3)';
+    c.style.background = sel ? 'var(--amber-d)' : 'var(--bg3)';
     c.textContent = (sel ? '▶ ' : '') + c.textContent.replace(/^▶ /, '');
   });
 }
@@ -4010,7 +4010,7 @@ async function sendTaskAddMsg(){
   const text = inp.value.trim();
   inp.value = '';
   // Show user message
-  chat.innerHTML += `<div style="text-align:right;margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:rgba(228,184,106,0.1);border-radius:8px;font-size:12px;color:var(--cream);max-width:80%;">${escapeHtml(text)}</span></div>`;
+  chat.innerHTML += `<div style="text-align:right;margin:6px 0;"><span style="display:inline-block;padding:6px 10px;background:var(--amber-d);border-radius:8px;font-size:12px;color:var(--cream);max-width:80%;">${escapeHtml(text)}</span></div>`;
   chat.scrollTop = chat.scrollHeight;
 
   const isFirst = _taskAddHistory.length === 0;
