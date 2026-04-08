@@ -9,16 +9,16 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.22（デプロイ済み 2026-04-08）
-- **Next:** DEV-03（dev-playbook.md作成）
-- **Last done:** UX-02b ✅ タスクUI残件（ダイヤルピッカー/リサイズ/集中力AI化/scheduling学習）v4.0.22
-- **Open issues:** DEV-03残。design_system.mdのテーマ4種CSS実装は未着手
+- **Version:** v4.0.23（デプロイ済み 2026-04-08）
+- **Next:** TEST-AUDIT（780項目テスト検証+バグ全修正）→ DESIGN-01 Phase B/C → DEV-03
+- **Last done:** DESIGN-01 Phase A ✅ テーマ4種CSS基盤（Night Sky/Dawn/Harajuku L/D）v4.0.23
+- **Open issues:** DESIGN-01 Phase B/C（Vertical journal構造、20画面個別更新、ハードコード色置換）
 - **方針:** テスト配布より「自分が毎日使いたいツール」を優先。コンセプト「君の人生をより素敵に」
 
 ## 現在地
 - **バージョン:** v4.0.22
 - **チェーン:** UX-02b完了
-- **次のミッション:** DESIGN-01 → UX-02b → DEV-03
+- **次のミッション:** TEST-AUDIT → DESIGN-01 B/C → DEV-03
 
 ---
 
@@ -154,6 +154,72 @@
 
 **FAIL条件:** cmd1で集中力UIが残存 / cmd2-3で実装不在 / cmd4-5でテストFAIL
 **完了報告:** UX-02b: cmd1-cmd5 各PASS/FAIL + スクリーンショット5枚（タップ→編集カード/名前変更後/ダイヤルピッカー/リサイズ中/リサイズ後）
+
+---
+
+### TEST-AUDIT: 全機能検証+バグ全修正+テストライブラリ化
+> リスク: 🔴高（アプリ品質の根幹）
+> 参照: docs/potential_bugs_300.md（780項目）, dev-system/tests/test_library.md（構造テンプレ）
+> 対象ファイル: frontend/, src/, tests/e2e/specs/, dev-system/tests/test_library.md
+> テスト影響: 全セクション
+
+**目的:** 全機能を実際に操作して壊れているものを全部見つけて直す。テストで再発を防止する。ふとしに渡す前にCodeが品質を担保する仕組みを確立する
+
+**最重要原則: テストを書く前にアプリを触る。アプリを触って壊れているものを直す。直したらテストで固める。**
+
+**Phase 0: 全機能手動検証（最優先）**
+全画面・全操作を実際にPlaywrightで操作し、スクリーンショットを撮影して壊れている箇所を全件リストアップする:
+1. TODAY: タスク表示→タップ→編集→保存→リロード→残存確認
+2. TODAY: タスク追加→3ステップ完了→タイムライン反映確認
+3. TODAY: タスクドラッグ移動→時間変更→永続化確認
+4. TODAY: タスク完了→EXP加算→アニメーション確認
+5. TALK: メッセージ送信→AI応答受信→スクロール追従
+6. TALK: 画像添付→送信→エラーなし確認
+7. TALK: 長文入力→送信→表示確認
+8. GOALS: ゴール一覧表示→ゴール作成→完了→一覧反映
+9. GOALS: ゴール詳細→AI相談→応答確認
+10. ME: プロフィール入力→保存→リロード→残存確認
+11. ME: AI理解メモ表示→スクロール
+12. 設定: テーマ切替→全画面に適用確認
+13. 設定: プラン表示→正確性確認
+14. カレンダー: 月表示→日付タップ→タスク表示
+15. アナリティクス: データ表示→グラフ表示
+16. サイドバー: 開閉→各リンク遷移→閉じる
+17. ボトムタブ: 全4タブ切替→高速連打耐性
+18. タスクパネル: 全タブからのアクセス確認
+19. ログイン: ログイン→ログアウト→再ログイン→データ復帰
+20. 入力: 日本語IME→変換確定→送信が誤発動しない
+**各操作でスクリーンショット撮影→壊れている箇所を全件記録**
+
+**Phase 1: 全バグ修正**
+Phase 0で発見した全バグを修正。1件修正するたびにE2Eで回帰確認。
+
+**Phase 2: 780項目タグ付け+テスト化**
+1. docs/potential_bugs_300.mdの780項目にタグ+優先度+カバレッジ付与
+2. 🔴致命的+🟡重要のNOT_COVEREDを全件テスト化
+3. テスト実行→全PASS確認→FAIL項目はバグとして修正
+
+**Phase 3: フルテスト+パフォーマンス計測**
+1. 全テスト一括実行
+2. LCP/CLS/TTI計測（パフォーマンスが悪いとの報告あり）
+3. レスポンシブテスト（320/375/414px）
+
+**プリフライト:**
+  wc -l docs/potential_bugs_300.md
+  curl -s https://goal-ai-frontend.pages.dev/ | head -5  # 本番アクセス確認
+
+**完了コマンド:**
+  cmd1: Phase 0のスクリーンショット20枚以上がtests/e2e/screenshots/TEST-AUDIT/に存在
+  cmd2: Phase 0で発見したバグの全件修正確認（バグリストの全項目に✅）
+  cmd3: grep -c "NOT_COVERED.*🔴" dev-system/tests/test_library.md | awk '{if($1==0) exit 0; else exit 1}'
+  cmd4: grep -c "NOT_COVERED.*🟡" dev-system/tests/test_library.md | awk '{if($1==0) exit 0; else exit 1}'
+  cmd5: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
+
+**FAIL条件:** cmd1-5のいずれかFAIL
+**完了報告:** TEST-AUDIT: Phase0発見バグ数/修正数 + 780項目カバレッジ内訳 + テスト総数 + 全PASS確認 + パフォーマンス計測結果
+
+**FAIL条件:** cmd1-4のいずれかFAIL
+**完了報告:** TEST-AUDIT: 780項目中 COVERED/PARTIAL/NOT_COVERED の内訳 + テスト総数 + 全PASS確認
 
 ---
 
