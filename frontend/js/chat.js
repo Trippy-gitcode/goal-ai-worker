@@ -2172,9 +2172,10 @@ function htpEditTitle(){
 
 function closeHomeTaskPanel(){
   document.getElementById('home-task-panel').classList.remove('open');
-  htpTask = null; htpPhase = null; htpHistory = [];
-  // Refresh task list
+  htpTask = null; htpPhase = null; htpGoal = null; htpHistory = [];
+  // Refresh task list + TODAY screen
   renderHsTaskList(document.getElementById('hs-today-tasks'), _hsTaskTab);
+  if(typeof renderTodayScreen === 'function') renderTodayScreen();
 }
 
 function htpUpdateStatus(val){
