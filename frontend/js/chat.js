@@ -3055,19 +3055,25 @@ function renderTodayTimeline(allTasks, todayStr){
   const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
   const nowPx = Math.max(0, Math.min(totalHeight, (nowMin - HOUR_START*60) / 60 * PX_PER_HOUR));
 
-  // Build hour grid
+  // DESIGN-01 Phase B: Vertical Journal — 縦ライン + ドット進行
   let html = `<div style="position:relative;height:${totalHeight}px;margin-left:42px;">`;
-  // Hour labels + lines
+  // Vertical journal line (背景の縦ライン)
+  html += `<div class="timeline-line" style="position:absolute;top:0;bottom:0;left:7px;width:1px;background:var(--timeline-line,var(--border));z-index:0;"></div>`;
+  // Hour labels + dots (横線ではなくドット)
   for(let hour = HOUR_START; hour <= HOUR_END; hour++){
     const y = (hour - HOUR_START) * PX_PER_HOUR;
-    html += `<div style="position:absolute;top:${y}px;left:-42px;width:36px;text-align:right;font-size:10px;color:var(--muted2);line-height:1;transform:translateY(-5px);">${hour}:00</div>`;
-    html += `<div style="position:absolute;top:${y}px;left:0;right:0;height:0.5px;background:var(--border);opacity:0.5;"></div>`;
+    const isPast = nowMin > hour * 60;
+    const isCurrent = Math.abs(nowMin - hour * 60) < 30;
+    const dotColor = isCurrent ? 'var(--dot-active,var(--accent))' : isPast ? 'var(--dot-inactive,var(--border))' : 'var(--dot-inactive,var(--border))';
+    html += `<div style="position:absolute;top:${y}px;left:-42px;width:36px;text-align:right;font-size:10px;color:var(--text-tertiary,var(--muted2));line-height:1;transform:translateY(-5px);letter-spacing:0.5px;">${hour}:00</div>`;
+    // ドット（時刻マーカー）
+    html += `<div class="timeline-dot ${isCurrent?'dot-active':'dot-inactive'}" style="position:absolute;top:${y - 3}px;left:4px;width:7px;height:7px;border-radius:50%;background:${dotColor};z-index:3;"></div>`;
   }
 
-  // Current time indicator
+  // Current time indicator (NOW = アクセント色ドット)
   if(nowMin >= HOUR_START*60 && nowMin <= HOUR_END*60){
-    html += `<div style="position:absolute;top:${nowPx}px;left:-6px;right:0;height:2px;background:var(--red);z-index:5;border-radius:1px;"></div>`;
-    html += `<div style="position:absolute;top:${nowPx-3}px;left:-9px;width:8px;height:8px;border-radius:50%;background:var(--red);z-index:5;"></div>`;
+    html += `<div style="position:absolute;top:${nowPx}px;left:-6px;right:0;height:1.5px;background:var(--dot-active,var(--accent));z-index:5;border-radius:1px;opacity:0.6;"></div>`;
+    html += `<div style="position:absolute;top:${nowPx-4}px;left:3px;width:9px;height:9px;border-radius:50%;background:var(--dot-active,var(--accent));z-index:5;box-shadow:0 0 6px var(--dot-active,var(--accent));"></div>`;
   }
 
   // Render schedule slots
@@ -3093,8 +3099,9 @@ function renderTodayTimeline(allTasks, todayStr){
       // BUG-02: 「日常タスク」(自動ゴール)の名前は表示しない
       const rawGoalName = item.goal?.title || '';
       const goalName = (rawGoalName === '日常タスク' || t.goalLinked === false) ? '' : rawGoalName.slice(0,6);
-      html += `<div data-task-id="${t.id}" data-start-min="${slot.startMin}" onclick="openHomeTaskById('${t.id}')" style="position:absolute;top:${top}px;left:4px;right:4px;height:${Math.max(28,height-2)}px;background:${isDone?'rgba(76,175,80,0.08)':'rgba(228,184,106,0.06)'};border:0.5px solid ${isDone?'var(--green-d)':isOverdue?'var(--red-d)':'rgba(228,184,106,0.2)'};border-radius:8px;padding:4px 8px;cursor:pointer;overflow:hidden;display:flex;align-items:${height>36?'flex-start':'center'};gap:6px;z-index:2;touch-action:none;">
-        <div onclick="event.stopPropagation();toggleTodayTask('${t.id}')" style="width:18px;height:18px;border-radius:50%;${isDone?'':'border:1px solid '+(isOverdue?'var(--red)':'var(--amber)')+';'}display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;margin-top:1px;">
+      // DESIGN-01: Open Air style — 薄いborder、CSS変数のみ
+      html += `<div data-task-id="${t.id}" data-start-min="${slot.startMin}" onclick="openHomeTaskById('${t.id}')" style="position:absolute;top:${top}px;left:20px;right:4px;height:${Math.max(28,height-2)}px;background:${isDone?'var(--green-d)':'var(--bg2)'};border:0.5px solid ${isDone?'var(--success)':isOverdue?'var(--danger)':'var(--border)'};border-radius:var(--card-radius);padding:4px 8px;cursor:pointer;overflow:hidden;display:flex;align-items:${height>36?'flex-start':'center'};gap:6px;z-index:2;touch-action:none;">
+        <div onclick="event.stopPropagation();toggleTodayTask('${t.id}')" style="width:18px;height:18px;border-radius:50%;${isDone?'':'border:1px solid '+(isOverdue?'var(--danger)':'var(--accent)')+';'}display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;margin-top:1px;">
           ${isDone?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}
         </div>
         <div style="flex:1;min-width:0;">
