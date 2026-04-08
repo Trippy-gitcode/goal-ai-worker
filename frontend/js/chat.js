@@ -1040,6 +1040,7 @@ function editAndResend(btn){
 
 async function sendHomeMsg(){
   if(homeLoading) return;
+  homeLoading = true; // #711 FIX: ensureAuth前にロック
   if(!AUTH_TOKEN){ await ensureAuth(); }
   document.getElementById('home-send-btn').disabled = true;
 

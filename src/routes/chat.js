@@ -64,7 +64,8 @@ export async function handleChat(request, env, ctx) {
   return jsonRes(data, 200, { 'X-RateLimit-Remaining': String(rl.remaining), 'X-Model-Used': claudeModel, 'X-Show-NPS': show_nps ? '1' : '0' });
   } catch (e) {
     console.error('handleChat error:', e);
-    return jsonRes({ error: e.message || 'Chat handler error' }, 500);
+    // #613 FIX: stack trace漏洩防止
+    return jsonRes({ error: 'エラーが発生しました。' }, 500);
   }
 }
 
