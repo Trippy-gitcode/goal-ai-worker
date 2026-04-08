@@ -31,6 +31,8 @@ export async function handleGoalUpdate(request, env, url) {
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
   const goalId = url.pathname.split('/').pop();
+  // #619 FIX: UUID形式検証
+  if (!goalId || !/^[0-9a-f-]{36}$/.test(goalId)) return jsonRes({ error: 'Invalid goalId' }, 400);
   const body = await request.json();
   const updates = {};
   if (body.title !== undefined) updates.title = body.title;
