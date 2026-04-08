@@ -803,6 +803,27 @@ async function loadIdentityFromServer(){
     if(id.occupation) USER_PROFILE.occupation = id.occupation;
     if(id.field) USER_PROFILE.field = id.field;
     if(id.interests) USER_PROFILE.interests = id.interests;
+    // BUG-03: identity.profileから基本プロフィール復元
+    const prof = id.profile;
+    if(prof){
+      if(prof.nickname) USER_PROFILE.nickname = prof.nickname;
+      if(prof.name) USER_PROFILE.name = prof.name;
+      if(prof.age) USER_PROFILE.age = prof.age;
+      if(prof.gender) USER_PROFILE.gender = prof.gender;
+      if(prof.dob) USER_PROFILE.dob = prof.dob;
+      if(prof.occupation) USER_PROFILE.occupation = prof.occupation;
+      if(prof.field) USER_PROFILE.field = prof.field;
+      if(prof.family) USER_PROFILE.family = prof.family;
+      if(prof.mbti) USER_PROFILE.mbti = prof.mbti;
+      if(prof.strengths?.length) USER_PROFILE.strengths = prof.strengths;
+      if(prof.weaknesses?.length) USER_PROFILE.weaknesses = prof.weaknesses;
+      if(prof.interests?.length) USER_PROFILE.interests = prof.interests;
+      if(prof.interestsFree) USER_PROFILE.interestsFree = prof.interestsFree;
+      if(prof.energyGain?.length) USER_PROFILE.energyGain = prof.energyGain;
+      if(prof.energyDrain?.length) USER_PROFILE.energyDrain = prof.energyDrain;
+      // ME画面のフォーム反映
+      renderMyselfProfile();
+    }
     // C: QOL提案キャッシュ（TODAY画面用）
     if(data.qol_proposals && typeof window.loadQOLProposals === 'function'){
       window._qolProposalsCache = data.qol_proposals;
@@ -1242,6 +1263,7 @@ function hubChatFromConnect(goalTitle, message){
 }
 
 // ─ プロフィール state helpers ─
+let _profileSaveTimer = null;
 function updateProfile(){
   const n = v => document.getElementById(v)?.value || '';
   USER_PROFILE.nickname    = n('mp-nickname');
@@ -1254,6 +1276,9 @@ function updateProfile(){
   USER_PROFILE.interests   = [...document.querySelectorAll('#interest-chips .interest-chip.active')].map(c=>c.textContent.trim());
   USER_PROFILE.energyGain  = [...document.querySelectorAll('#energy-gain-tags .energy-tag')].map(t=>t.firstChild.textContent.trim());
   USER_PROFILE.energyDrain = [...document.querySelectorAll('#energy-drain-tags .energy-tag')].map(t=>t.firstChild.textContent.trim());
+  // BUG-03: デバウンス3秒でサーバー自動保存（入力の度にAPIコールしない）
+  clearTimeout(_profileSaveTimer);
+  _profileSaveTimer = setTimeout(() => saveProfileToServer(), 3000);
 }
 function saveProfile(){
   updateProfile();
@@ -1263,7 +1288,67 @@ function saveProfile(){
   if(pn) pn.textContent = displayName;
   const avEl = document.getElementById('sb-avatar');
   if(avEl) avEl.textContent = displayName ? displayName.charAt(0) : '?';
+  // BUG-03: サーバーに永続化（identity.profileフィールドに保存）
+  saveProfileToServer();
   toast('プロフィールを保存しました。全AIチャットに反映済み ✓');
+}
+
+// BUG-03: プロフィール基本情報をサーバー+localStorageに保存
+async function saveProfileToServer(){
+  const profileData = {
+    nickname: USER_PROFILE.nickname,
+    name: USER_PROFILE.name,
+    age: USER_PROFILE.age,
+    gender: USER_PROFILE.gender,
+    dob: USER_PROFILE.dob,
+    occupation: USER_PROFILE.occupation,
+    field: USER_PROFILE.field,
+    family: USER_PROFILE.family,
+    mbti: USER_PROFILE.mbti,
+    strengths: USER_PROFILE.strengths,
+    weaknesses: USER_PROFILE.weaknesses,
+    interests: USER_PROFILE.interests,
+    interestsFree: USER_PROFILE.interestsFree,
+    energyGain: USER_PROFILE.energyGain,
+    energyDrain: USER_PROFILE.energyDrain,
+  };
+  // localStorageバックアップ（同期復元用）
+  try{ localStorage.setItem('goal_ai_profile', JSON.stringify(profileData)); }catch(e){}
+  // サーバー保存（非同期）
+  try{
+    await saveIdentityToServer({ identity: { profile: profileData } });
+  } catch(e){ console.warn('Profile server save failed', e); }
+}
+
+// BUG-03: localStorageからプロフィール復元（init時に同期的に呼ぶ）
+function restoreProfileFromLocalStorage(){
+  try{
+    const saved = localStorage.getItem('goal_ai_profile');
+    if(!saved) return;
+    const p = JSON.parse(saved);
+    if(p.nickname) USER_PROFILE.nickname = p.nickname;
+    if(p.name) USER_PROFILE.name = p.name;
+    if(p.age) USER_PROFILE.age = p.age;
+    if(p.gender) USER_PROFILE.gender = p.gender;
+    if(p.dob) USER_PROFILE.dob = p.dob;
+    if(p.occupation) USER_PROFILE.occupation = p.occupation;
+    if(p.field) USER_PROFILE.field = p.field;
+    if(p.family) USER_PROFILE.family = p.family;
+    if(p.mbti) USER_PROFILE.mbti = p.mbti;
+    if(p.strengths?.length) USER_PROFILE.strengths = p.strengths;
+    if(p.weaknesses?.length) USER_PROFILE.weaknesses = p.weaknesses;
+    if(p.interests?.length) USER_PROFILE.interests = p.interests;
+    if(p.interestsFree) USER_PROFILE.interestsFree = p.interestsFree;
+    if(p.energyGain?.length) USER_PROFILE.energyGain = p.energyGain;
+    if(p.energyDrain?.length) USER_PROFILE.energyDrain = p.energyDrain;
+    renderMyselfProfile();
+    // サイドバーにも反映
+    const displayName = USER_PROFILE.nickname || USER_PROFILE.name || '';
+    const pn = document.querySelector('.prof-name');
+    if(pn) pn.textContent = displayName;
+    const avEl = document.getElementById('sb-avatar');
+    if(avEl) avEl.textContent = displayName ? displayName.charAt(0) : '?';
+  }catch(e){}
 }
 function updateAge(){
   const dob = document.getElementById('mp-dob')?.value;
@@ -1671,7 +1756,7 @@ Object.assign(window, {
   knowResize, knowKey, editVision, saveVision, renderVision, addVisionItem, editVisionField, editMyCharacter, shareCharacter, toggleReanalyzeChip, runReanalysis,
   renderQOLOnME, refreshQOLProposals, startQOLGoal,
   regenCatchcopy, runConnectAnalysis, renderConnectContent, hubChatFromConnect,
-  updateProfile, saveProfile, updateAge, selGender, toggleInterest,
+  updateProfile, saveProfile, saveProfileToServer, restoreProfileFromLocalStorage, updateAge, selGender, toggleInterest,
   addEnergyTag, setNetworkQ, renderMyselfProfile,
   MBTI_QUICK, MBTI_FULL, MBTI_TYPES,
   startMbtiTest, renderMbtiQuestion, answerMbti, calcMbtiType,

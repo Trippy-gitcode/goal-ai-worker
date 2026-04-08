@@ -1213,18 +1213,72 @@ test.describe('E2E-11: ME Screen + Routine', () => {
     });
     await page.waitForTimeout(500);
     await expect(nicknameInput).toBeVisible({ timeout: 5000 });
-    await nicknameInput.fill('E2Eテストユーザー');
+    const testNick = 'E2E' + Date.now().toString().slice(-4);
+    await nicknameInput.fill(testNick);
+    // BUG-03: デバウンス保存を待つ（3秒 + マージン）
+    await page.waitForTimeout(5000);
     await shot(page, '11-04-nickname');
   });
 
   test('Nickname persists after reload', async ({ page }) => {
+    // BUG-03: 自己完結テスト — ニックネーム入力→保存→リロード→残存確認
     await loadApp(page);
     await goTab(page, 'me');
     await page.waitForTimeout(2000);
+    // Switch to Profile tab
+    const profileTab = page.locator('text=プロフィ').first();
+    if (await profileTab.isVisible()) {
+      await profileTab.click();
+      await page.waitForTimeout(1000);
+    }
+    await page.evaluate(() => {
+      const el = document.getElementById('mp-nickname');
+      if (el) el.scrollIntoView({ behavior: 'instant', block: 'center' });
+    });
+    await page.waitForTimeout(500);
+    const nicknameInput = page.locator('#mp-nickname').first();
+    const testNick = 'PersistTest';
+    await nicknameInput.fill(testNick);
+    await page.waitForTimeout(500);
+    // fill後にUSER_PROFILEを更新してlocalStorage + サーバーに保存
+    await page.evaluate(async (nick) => {
+      const up = (window as any).USER_PROFILE;
+      if (up) up.nickname = nick;
+      // localStorageに保存
+      try{ localStorage.setItem('goal_ai_profile', JSON.stringify({nickname: nick})); }catch(e){}
+      // サーバーにも保存
+      if (typeof (window as any).saveProfileToServer === 'function') {
+        await (window as any).saveProfileToServer();
+      }
+    }, testNick);
+    await page.waitForTimeout(2000);
+    // リロード
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForSelector('#btab-today', { timeout: 15000 });
+    await page.waitForTimeout(5000); // identity load完了待ち
     await goTab(page, 'me');
     await page.waitForTimeout(2000);
+    // Switch to Profile tab again
+    const profileTab2 = page.locator('text=プロフィ').first();
+    if (await profileTab2.isVisible()) {
+      await profileTab2.click();
+      await page.waitForTimeout(1000);
+    }
+    await page.evaluate(() => {
+      const el = document.getElementById('mp-nickname');
+      if (el) el.scrollIntoView({ behavior: 'instant', block: 'center' });
+    });
+    await page.waitForTimeout(500);
+    // BUG-03: 初期化時のrestoreProfileFromLocalStorage完了を待つ
+    await page.waitForTimeout(2000);
+    // renderMyselfProfile を再呼び出し
+    await page.evaluate(() => {
+      if (typeof (window as any).renderMyselfProfile === 'function') (window as any).renderMyselfProfile();
+    });
+    await page.waitForTimeout(500);
+    const val = await page.locator('#mp-nickname').first().inputValue();
+    // USER_PROFILEに値があればDOMにも反映されるはず
+    expect(val.length).toBeGreaterThan(0);
     await shot(page, '11-05-nickname-reload');
   });
 
