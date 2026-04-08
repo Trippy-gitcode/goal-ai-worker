@@ -9,15 +9,15 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.20（デプロイ済み 2026-04-08）
-- **Next:** DESIGN-01（Night Sky Journalデザイン全面適用）→ UX-02b → DEV-03
-- **Last done:** BUG-03 ✅ プロフィール永続化修正（v4.0.20）+ design_system.md作成 + CLAUDE.md Design Context追記
-- **Open issues:** UX-02b残件。design_system.mdのテーマ4種をCSSとして実装する必要あり
+- **Version:** v4.0.22（デプロイ済み 2026-04-08）
+- **Next:** DEV-03（dev-playbook.md作成）
+- **Last done:** UX-02b ✅ タスクUI残件（ダイヤルピッカー/リサイズ/集中力AI化/scheduling学習）v4.0.22
+- **Open issues:** DEV-03残。design_system.mdのテーマ4種CSS実装は未着手
 - **方針:** テスト配布より「自分が毎日使いたいツール」を優先。コンセプト「君の人生をより素敵に」
 
 ## 現在地
-- **バージョン:** v4.0.18
-- **チェーン:** BUG-02 + UX-02完了
+- **バージョン:** v4.0.22
+- **チェーン:** UX-02b完了
 - **次のミッション:** DESIGN-01 → UX-02b → DEV-03
 
 ---
@@ -33,8 +33,9 @@
 
 ---
 
-### DESIGN-01: Night Sky Journal デザイン全面適用
+### DESIGN-01: Night Sky Journal デザイン全面適用 — Phase A完了
 > リスク: 🔴高（UI全面変更）
+> STATUS: IN_PROGRESS（Phase A完了。Phase B/Cは次回）
 > 参照: docs/design_system.md（テーマ4種+NGリスト+チェックリスト）, CLAUDE.md Design Context
 > 対象ファイル: frontend/style.css, frontend/index.html, frontend/js/（UI描画関連全般）
 > テスト影響: TEST-E2E-v2全セクション + TEST-DESIGN
@@ -106,10 +107,12 @@
   cmd4: grep -c "ease-in-out" frontend/style.css | awk '{if($1==0) exit 0; else exit 1}'
   cmd5: grep -c "pill.*tab\|tab.*pill\|pill-active" frontend/ -r | awk -F: '{s+=$2}END{if(s>=1) exit 0; else exit 1}'
   cmd6: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
-  cmd7: スクリーンショット8枚（TODAY/TALK/GOALS/ME × Night Sky + Dawn）
+  cmd7: grep -c "Inter\|Roboto\|Arial" frontend/style.css | awk '{if($1==0) exit 0; else exit 1}'  # NGフォント除去
+  cmd8: 対象画面20項目のスクリーンショット各1枚（計20枚）をtests/e2e/screenshots/DESIGN-01/に保存
+  cmd9: grep -c "□" instructions/session_progress.md | awk '{if($1==0) exit 0; else exit 1}'  # 全画面チェック完了
 
-**FAIL条件:** cmd1-6のいずれかFAIL / スクリーンショットでNGリスト違反が目視確認される
-**完了報告:** DESIGN-01: Phase A/B/C 各cmd PASS/FAIL + スクリーンショット8枚 + NGリスト違反ゼロ確認
+**FAIL条件:** cmd1-7のいずれかFAIL / cmd8でスクリーンショット20枚未満 / cmd9で未チェック画面あり
+**完了報告:** DESIGN-01: 20/20画面更新 + cmd1-cmd9 各PASS/FAIL + スクリーンショット20枚
 
 ---
 
@@ -325,3 +328,4 @@
 - UX-02 ✅ タスクインタラクション刷新（詳細カード+ドラッグ+振動+EXPポップアップ）
 - BUG-03 ✅ プロフィール永続化修正 v4.0.20
 - DEV-04 ✅ design_system.md作成（Night Sky Journal。QnA9問+4000件調査。テーマ4種。CLAUDE.md Design Context追記）
+- UX-02b ✅ タスクUI残件（ダイヤルピッカー/リサイズ/集中力AI化/scheduling学習）v4.0.22
