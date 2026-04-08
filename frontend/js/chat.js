@@ -2152,22 +2152,36 @@ function htpDeleteTask(){
   toast('タスクを削除しました');
 }
 
-// UX-02: タスク名編集
+// UX-02b仕様1: タスク名インライン編集
 function htpEditTitle(){
   const nameEl = document.getElementById('htp-name');
-  const current = nameEl.textContent;
-  const newTitle = prompt('タスク名を変更', current);
-  if(newTitle && newTitle.trim() && newTitle !== current){
-    htpTask.title = newTitle.trim();
-    nameEl.textContent = htpTask.title;
-    // 永続化
-    for(const goal of ALL_GOALS){
-      if(goal.supabaseId && goal.phases.some(p=>p.tasks.includes(htpTask))){
-        apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
-        break;
+  nameEl.contentEditable = 'true';
+  nameEl.style.borderBottom = '1px solid var(--amber)';
+  nameEl.style.outline = 'none';
+  nameEl.focus();
+  // Select all text
+  const range = document.createRange();
+  range.selectNodeContents(nameEl);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+  // Save on blur or Enter
+  const save = () => {
+    nameEl.contentEditable = 'false';
+    nameEl.style.borderBottom = '';
+    const newTitle = nameEl.textContent.trim();
+    if(newTitle && newTitle !== htpTask.title){
+      htpTask.title = newTitle;
+      for(const goal of ALL_GOALS){
+        if(goal.supabaseId && goal.phases.some(p=>p.tasks.includes(htpTask))){
+          apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
+          break;
+        }
       }
+      toast('タスク名を更新しました');
     }
-  }
+  };
+  nameEl.onblur = save;
+  nameEl.onkeydown = (e) => { if(e.key === 'Enter'){ e.preventDefault(); nameEl.blur(); } };
 }
 
 function closeHomeTaskPanel(){
@@ -3087,6 +3101,7 @@ function renderTodayTimeline(allTasks, todayStr){
           <div style="font-size:12px;color:${isDone?'var(--green)':isOverdue?'var(--red)':'var(--cream)'};${isDone?'text-decoration:line-through;opacity:0.6;':''}overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;">${escapeHtml(t.title)}</div>
           ${height > 36 ? `<div style="font-size:10px;color:var(--muted2);margin-top:2px;">${startTime}${durStr ? ' · '+durStr : ''}${goalName ? ' · '+goalName : ''}</div>` : ''}
         </div>
+        ${!isDone && height > 36 ? `<div data-resize-handle="${t.id}" style="position:absolute;bottom:0;left:0;right:0;height:8px;cursor:ns-resize;touch-action:none;display:flex;align-items:center;justify-content:center;"><div style="width:24px;height:3px;border-radius:2px;background:var(--border2);"></div></div>` : ''}
       </div>`;
     }
   });
@@ -3150,7 +3165,17 @@ function initTimelineDrag(timeline, pxPerHour, hourStart){
 
   container.addEventListener('touchend', () => {
     if(dragTimer){ clearTimeout(dragTimer); dragTimer = null; }
-    if(!dragEl) return;
+    if(!dragEl && !resizeEl) return;
+    if(resizeEl){
+      // UX-02b仕様2: リサイズ完了 → 所要時間を15分スナップで更新
+      const newH = parseInt(resizeEl.style.height) || 30;
+      const newMin = Math.round((newH / pxPerHour) * 60 / 15) * 15;
+      resizeEl.style.transition = 'height .2s ease';
+      resizeEl.style.height = `${Math.max(20, (newMin / 60) * pxPerHour)}px`;
+      updateTaskDuration(resizeTaskId, Math.max(15, newMin));
+      resizeEl = null; resizeTaskId = null;
+      return;
+    }
     // Calculate new time from position
     const newTop = parseInt(dragEl.style.top) || 0;
     // Snap to 15-minute intervals
@@ -3165,6 +3190,26 @@ function initTimelineDrag(timeline, pxPerHour, hourStart){
     updateTaskTime(taskId, snappedMin);
     dragEl = null; taskId = null;
   }, {passive:true});
+
+  // UX-02b仕様2: リサイズハンドル — 下端ドラッグで所要時間変更
+  let resizeEl = null, resizeStartY = 0, resizeOrigH = 0, resizeTaskId = null;
+  container.addEventListener('touchstart', (e) => {
+    const handle = e.target.closest('[data-resize-handle]');
+    if(!handle) return;
+    e.stopPropagation();
+    resizeTaskId = handle.dataset.resizeHandle;
+    resizeEl = handle.closest('[data-task-id]');
+    resizeOrigH = parseInt(resizeEl.style.height) || 30;
+    resizeStartY = e.touches[0].clientY;
+    resizeEl.style.transition = 'none';
+    if(navigator.vibrate) navigator.vibrate(20);
+  }, {passive:true});
+  container.addEventListener('touchmove', (e) => {
+    if(!resizeEl) return;
+    e.preventDefault();
+    const dy = e.touches[0].clientY - resizeStartY;
+    resizeEl.style.height = `${Math.max(20, resizeOrigH + dy)}px`;
+  }, {passive:false});
 }
 
 // UX-02: タスクの時間を更新
@@ -3180,7 +3225,50 @@ function updateTaskTime(taskId, newStartMin){
         task.time_constraint = timeStr;
         // 永続化
         if(goal.supabaseId) apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
+        // UX-02b仕様6: scheduling_preference学習（ドラッグパターン記録）
+        learnSchedulingPreference(task, newStartMin);
         toast(`${task.title} → ${timeStr}に移動`);
+        return;
+      }
+    }
+  }
+}
+
+// UX-02b仕様6: ドラッグ移動からスケジューリング嗜好を学習
+function learnSchedulingPreference(task, newStartMin){
+  const pref = window._schedulingPref || {};
+  const h = Math.floor(newStartMin / 60);
+  // 集中タスクの移動先時間帯を記録
+  if(task.energy_level === 'high'){
+    if(h < 12) pref.focus_hours = 'morning';
+    else if(h < 17) pref.focus_hours = 'afternoon';
+    else pref.focus_hours = 'evening';
+  }
+  // ドラッグ履歴を記録（最大20件）
+  if(!pref.drag_history) pref.drag_history = [];
+  pref.drag_history.push({ task: task.title, energy: task.energy_level, hour: h, ts: Date.now() });
+  if(pref.drag_history.length > 20) pref.drag_history = pref.drag_history.slice(-20);
+  window._schedulingPref = pref;
+  // サーバー保存（デバウンス）
+  clearTimeout(window._prefSaveTimer);
+  window._prefSaveTimer = setTimeout(() => {
+    fetch(`${WORKER_URL}/api/me/identity`, {
+      method: 'PUT', headers: getAuthHeaders(),
+      body: JSON.stringify({ scheduling_preference: pref })
+    }).catch(() => {});
+  }, 3000);
+}
+
+// UX-02b: タスクの所要時間を更新
+function updateTaskDuration(taskId, newMinutes){
+  for(const goal of ALL_GOALS){
+    for(const phase of (goal.phases||[])){
+      const task = phase.tasks.find(t => String(t.id) === String(taskId));
+      if(task){
+        task.estimated_minutes = newMinutes;
+        if(goal.supabaseId) apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
+        const durLabel = newMinutes >= 60 ? `${Math.floor(newMinutes/60)}h${newMinutes%60?newMinutes%60+'m':''}` : `${newMinutes}分`;
+        toast(`${task.title} → ${durLabel}`);
         return;
       }
     }
@@ -3728,7 +3816,8 @@ const LOCATION_HINTS = {
 };
 
 function localInferTask(title){
-  const result = { location:null, time_constraint:null, energy_level:null, estimated_minutes:null };
+  // UX-02b仕様5: energy_levelはAI自動判定（デフォルトmedium。LOCATION_HINTSで上書き）
+  const result = { location:null, time_constraint:null, energy_level:'medium', estimated_minutes:null };
   for(const [pattern, defaults] of Object.entries(LOCATION_HINTS)){
     const re = new RegExp(pattern);
     if(re.test(title)){
@@ -3820,8 +3909,10 @@ function renderTaskStep2(inferred){
   titleEl.textContent = `「${_taskAddDraft.name}」の詳細`;
   const cards = document.getElementById('task-step2-cards');
   const locationOpts = ['自宅','外出先','オフィス'];
-  const minuteOpts = [{l:'15分',v:15},{l:'30分',v:30},{l:'1時間',v:60},{l:'2時間',v:120},{l:'半日',v:240}];
-  const energyOpts = [{l:'軽い',v:'low'},{l:'普通',v:'medium'},{l:'集中必要',v:'high'}];
+  // UX-02b仕様3: ダイヤルピッカー（5分刻み、5分〜4時間）
+  const minuteValues = [];
+  for(let m=5;m<=240;m+=5) minuteValues.push(m);
+  const selectedMin = _taskAddDraft.estimated_minutes || 30;
   const timeOpts = ['営業時間内','午前のみ','午後のみ','いつでも'];
 
   function chipRow(icon, label, opts, field, isObj){
@@ -3836,10 +3927,33 @@ function renderTaskStep2(inferred){
       <div style="display:flex;flex-wrap:wrap;gap:6px;">${chips.join('')}</div>
     </div>`;
   }
+  // UX-02b仕様3: ダイヤルピッカーで所要時間選択
+  const dialHtml = `<div style="margin-bottom:2px;">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">⏱ どのくらい？</div>
+    <div id="drum-picker" style="position:relative;height:100px;overflow:hidden;border:1px solid var(--border-card);border-radius:10px;background:var(--bg3);">
+      <div style="position:absolute;top:50%;left:0;right:0;height:32px;transform:translateY(-50%);background:rgba(228,184,106,0.1);border-top:1px solid var(--amber);border-bottom:1px solid var(--amber);pointer-events:none;z-index:1;"></div>
+      <div id="drum-scroll" style="overflow-y:scroll;height:100%;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;">
+        <div style="height:34px;"></div>
+        ${minuteValues.map(m => {
+          const lbl = m >= 60 ? `${Math.floor(m/60)}時間${m%60?m%60+'分':''}` : `${m}分`;
+          return `<div data-min="${m}" style="height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--cream);scroll-snap-align:center;cursor:pointer;" onclick="taskStep2Pick('estimated_minutes','${m}',this)">${lbl}</div>`;
+        }).join('')}
+        <div style="height:34px;"></div>
+      </div>
+    </div>
+  </div>`;
+  // UX-02b仕様4: 集中力の質問を削除（AI自動判定に移行）
   cards.innerHTML = chipRow('📍','場所は？', locationOpts, 'location', false)
-    + chipRow('⏱','どのくらい？', minuteOpts, 'estimated_minutes', true)
-    + chipRow('🔋','集中力は？', energyOpts, 'energy_level', true)
+    + dialHtml
     + chipRow('🕐','時間の制約は？', timeOpts, 'time_constraint', false);
+  // ダイヤルを選択値にスクロール
+  setTimeout(() => {
+    const scroll = document.getElementById('drum-scroll');
+    if(scroll){
+      const target = scroll.querySelector(`[data-min="${selectedMin}"]`);
+      if(target) target.scrollIntoView({block:'center',behavior:'instant'});
+    }
+  }, 100);
 }
 
 function taskStep2Pick(field, val, btn){
@@ -4056,7 +4170,7 @@ Object.assign(window, {
   requestTaskBreakdown, showTaskCard, confirmTaskCard,
   setPreset, taskCheckAnim,
   retryWithRoute, recordRoutingFeedback, stopHomeStream,
-  renderTodayScreen, renderTodayTimeline, renderTodayList, toggleTodayView, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask, showExpPopup, initTimelineDrag, updateTaskTime,
+  renderTodayScreen, renderTodayTimeline, renderTodayList, toggleTodayView, renderSecretaryMemo, sendTodayComment, openTodayAddTask, toggleTodayTask, showExpPopup, initTimelineDrag, updateTaskTime, updateTaskDuration, learnSchedulingPreference,
   saveTodayDiary, loadTodayDiary, getDiaryDate, generateDiaryTitle, processTaskUpdateTags, processIntentTags, acceptGoalProposal, initTodayDrag,
   loadQOLProposals, renderQOLProposals, acceptQOLProposal, expandQOLCard,
   openTodayAddTask, closeTodayAddTask, sendTaskAddMsg,
