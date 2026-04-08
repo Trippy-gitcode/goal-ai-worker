@@ -72,6 +72,7 @@ MAP=$(grep -c "^  仕様[0-9]" session_progress.md)      # マッピングの数
 
 ### ホットフィックスパス（🟢低リスク限定）
 mockup変更なし+対象2ファイル以内+仕様変更なしの全条件→Code自律実行可。提案ログに記録。
+**frontend/ or src/ の変更を含む場合はE2E該当セクション実行必須。テスト省略はdocs/instructions/のみの変更に限定。**
 
 ### セッション開始プリフライト
 `wc -l instructions/session_progress.md` → 300行超ならアーカイブ。`head -10`で5行サマリー確認。
