@@ -10,7 +10,8 @@ let history = [];
 let isLoading = false;
 let isNewGoal = false;
 let curGoal = '';
-let calYear = 2026, calMonth = 2; // 0-indexed month
+// #156 FIX: 現在月で初期化（ハードコード2026-03を廃止）
+let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
 
 // ════════ TASK DATA ════════
 const TASKS = [];
@@ -492,7 +493,8 @@ function mkTdpMsg(m){
   if(m.role==='ai'){av.innerHTML=getLogoSVG(14);}else{const ut=getUserAvatarText();if(ut)av.textContent=ut;else av.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>';}
   const bub = document.createElement('div');
   bub.className = 'tdp-bubble';
-  bub.innerHTML = m.content.replace(/\n/g,'<br>');
+  // #356 FIX: XSS防止
+  bub.innerHTML = escapeHtml(m.content).replace(/\n/g,'<br>');
   wrap.appendChild(av);
   wrap.appendChild(bub);
   return wrap;
@@ -567,7 +569,8 @@ let calSelectedDay = null;
 let calFilterGoal = -1;
 let calChatLoading = false;
 
-const GOAL_COLORS = ['#FF6B6B','#4ECDC4','#45B7D1','#F7B731','#A55EEA','#26DE81','#FC5C65','#778CA3'];
+// #296 FIX: CSS変数ベースの色（テーマ対応）
+const GOAL_COLORS = ['var(--red)','var(--green)','var(--blue)','var(--orange)','var(--purple)','var(--success)','var(--danger)','var(--muted)'];
 function getGoalColor(idx){ return GOAL_COLORS[idx % GOAL_COLORS.length]; }
 
 // ── B-16: Japanese holidays ──

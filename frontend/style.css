@@ -2054,6 +2054,8 @@ input,textarea,select{font-family:var(--ff);outline:none}
 [data-theme="dark-glass"] body,
 [data-theme="harajuku-glass"] body { min-height:100dvh;background-attachment:fixed; }
 @media(prefers-reduced-motion:reduce){
+  /* #313 FIX: 全アニメーション無効化 */
+  *,*::before,*::after{animation-duration:0.001ms!important;transition-duration:0.001ms!important;}
   [data-theme="bright-glass"] *,
   [data-theme="dark-glass"] *,
   [data-theme="harajuku-glass"] * { backdrop-filter:none!important;-webkit-backdrop-filter:none!important; }
