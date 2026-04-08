@@ -1268,6 +1268,9 @@ function updateProfile(){
   const n = v => document.getElementById(v)?.value || '';
   USER_PROFILE.nickname    = n('mp-nickname');
   USER_PROFILE.name        = n('mp-name') || USER_PROFILE.name;
+  // #122 FIX: occupationも読み取る
+  const occSel = document.getElementById('mp-occupation');
+  if(occSel) USER_PROFILE.occupation = occSel.value || '';
   USER_PROFILE.field       = n('mp-field');
   USER_PROFILE.family      = n('mp-family');
   USER_PROFILE.interestsFree = n('mp-interests-free');
