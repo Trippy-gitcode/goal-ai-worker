@@ -9,20 +9,107 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.17（デプロイ済み 2026-04-07）→ v4.0.18未デプロイ
-- **Next:** キュー空。C2基準フロー（bump-version→build→canopy→デプロイ）待ち
+- **Version:** v4.0.18（デプロイ済み 2026-04-08）
+- **Next:** BUG-03（プロフィール消失）→ UX-02b（タスクUI残件）→ DEV-03（dev-playbook.md）
 - **Last done:** BUG-02 ✅ + UX-02 ✅（タスクインタラクション刷新）
-- **Open issues:** なし。デプロイ待ち
+- **Open issues:** BUG-03 プロフィール消失（🔴高）。UX-02b残件
 - **方針:** テスト配布より「自分が毎日使いたいツール」を優先。コンセプト「君の人生をより素敵に」
 
 ## 現在地
-- **バージョン:** v4.0.17 → v4.0.18準備中
+- **バージョン:** v4.0.18
 - **チェーン:** BUG-02 + UX-02完了
-- **次のミッション:** キュー空。C2基準フロー実行
+- **次のミッション:** BUG-03 → UX-02b → DEV-03
 
 ---
 
 ## ミッションキュー（上から順に実行）
+
+### BUG-03: ✅ 完了（2026-04-08）
+> STATUS: DONE
+
+**根本原因:** saveProfile()がUIのみ更新でサーバー/localStorage保存なし + CORS PUT未許可 + loadIdentityが初期化時未実行
+**修正:** localStorage二重保存 + CORS PUT追加 + 初期化時restoreProfileFromLocalStorage + identityマージ
+**E2E-11: 12/12 PASS**
+
+---
+
+### UX-02b: タスクUI残件（所要時間伸縮+ダイヤル+集中力AI化）
+> リスク: 🟡中
+> 参照: docs/ux_redesign_v2.md, docs/design_spec_v3.md
+> 対象ファイル: frontend/index.html, frontend/js/（TODAY関連モジュール）, src/worker/prompts/（スケジューリング関連）
+> テスト影響: TEST-E2E-v2のTODAYセクション
+
+**目的:** UX-02で未実装の項目＋タスクタップ編集を完了する
+
+**仕様:**
+1. **タスクタップ→編集可能な詳細カード:** タップで詳細カードを開き、タスク名・時間・メモを直接編集して保存できる（UX-02で「実装済み」報告だが実際は未動作。修正必須）
+2. **所要時間伸縮:** タイムライン上のタスクブロック上下端をドラッグして所要時間を変更（Googleカレンダー式）。15分スナップ。変更をDB永続化
+3. **ダイヤルピッカー:** タスク作成・編集時の所要時間入力をOption選択からドラムロール式ピッカーに変更（5分刻み、5分〜4時間）
+4. **集中力の質問削除:** 3ステップタスク作成から「集中力は？」（軽い/普通/集中必要）の質問UIを削除
+5. **集中度AI自動判定:** AIスケジューリング時にタスク名+MEコンテキスト（職業・スキル・過去パターン）から集中度を自動判定。ユーザーには聞かない
+6. **scheduling_preference学習:** ドラッグ移動の傾向（朝型/夜型、集中タスクの配置パターン等）をAIが学習してスケジューリングに反映
+
+**仕様↔検証マッピング（G7準拠: 全仕様に対応cmd必須）:**
+  仕様1 タスクタップ→編集保存 → cmd5(E2E: タップ→名前変更→保存→表示確認)
+  仕様2 所要時間伸縮 → cmd3(grep resizeHandle) + cmd6(E2E: リサイズ→時間変更確認)
+  仕様3 ダイヤルピッカー → cmd2(grep drum-picker) + cmd5(E2E: ピッカー操作確認)
+  仕様4 集中力質問削除 → cmd1(grep 集中力=0)
+  仕様5 集中度AI判定 → cmd7(AIスケジューリングログで集中度判定結果を確認)
+  仕様6 scheduling学習 → cmd8(ドラッグ後にpreference保存を確認)
+
+**プリフライト:**
+  grep -c "集中力\|軽い.*普通.*集中" frontend/index.html   # 現在の集中力UI特定
+  grep -c "energy_level\|concentration" frontend/js/*.js   # 関連JS特定
+  grep -c "task-detail-edit\|editTask" frontend/js/*.js     # 現在のタスク編集実装状態
+
+**完了コマンド:**
+  cmd1: grep -c "集中力" frontend/index.html | awk '{if($1==0) exit 0; else exit 1}'
+  cmd2: grep -c "drum-picker\|wheel-picker\|dial" frontend/js/*.js | awk -F: '{s+=$2}END{if(s>=1) exit 0; else exit 1}'
+  cmd3: grep -c "resize.*task\|resizeHandle\|resize-handle" frontend/js/*.js | awk -F: '{s+=$2}END{if(s>=2) exit 0; else exit 1}'
+  cmd4: npx playwright test --grep "TODAY" 2>&1 | grep "0 failed"
+  cmd5: npx playwright test --grep "タスク編集\|task edit" 2>&1 | grep "0 failed"  # タップ→編集→保存のE2E
+
+**FAIL条件:** cmd1で集中力UIが残存 / cmd2-3で実装不在 / cmd4-5でテストFAIL
+**完了報告:** UX-02b: cmd1-cmd5 各PASS/FAIL + スクリーンショット5枚（タップ→編集カード/名前変更後/ダイヤルピッカー/リサイズ中/リサイズ後）
+
+---
+
+### DEV-03: dev-playbook.md作成（暗黙知のリポジトリ集約）
+> リスク: 🟢低
+> 参照: bootstrap.md（プロジェクトナレッジ）, CLAUDE.md, development_rules.md, docs/rules/
+> 対象ファイル: docs/dev-playbook.md（新規作成）
+
+**目的:** Claude.aiのメモリにしか存在しない開発体制・フロー・実戦知見をリポジトリに集約し、プロジェクト移管・新規立ち上げ時の情報漏れを防ぐ
+
+**含める内容:**
+1. 鉄則ルール全文（v3: ①〜⑫）
+2. 開発フローv2 + v4-v5追記（テスト影響連動ゲート、仕様↔検証マッピング）
+3. 実戦知見（planのSoT=TOKEN_KV、Code完了報告の検証義務、デバイス依存バグ対処等）
+4. ふとしのコミュニケーションスタイル（短く直接的、コードは読まない、承認のみ）
+5. 将来TODO優先順位リスト
+6. ロードマップ方針（GOAL AI→別アプリ→開発オーケストレーター。LIFE AI=GOAL AIの進化形）
+7. 3層間フロー図（ステートマシン形式: 仕様協議→ミッション定義→Code実行→報告→検証→デプロイ）
+8. 判断基準の構造化（仕様判断要否/コスト影響の分岐条件をif-then形式で明文化）
+
+**プリフライト:**
+  ls docs/dev-playbook.md 2>&1   # 既存ファイルなし確認
+
+**完了コマンド:**
+  cmd1: wc -l docs/dev-playbook.md | awk '{if($1>=100) exit 0; else exit 1}'  # 100行以上
+  cmd2: grep -c "鉄則\|ルール" docs/dev-playbook.md | awk '{if($1>=5) exit 0; else exit 1}'  # 鉄則セクション存在
+  cmd3: grep -c "ステートマシン\|フロー図\|状態遷移" docs/dev-playbook.md | awk '{if($1>=1) exit 0; else exit 1}'  # フロー図存在
+  cmd4: grep -c "判断基準\|if.*then\|分岐" docs/dev-playbook.md | awk '{if($1>=3) exit 0; else exit 1}'  # 判断基準構造化
+
+**仕様↔検証マッピング（G7準拠）:**
+  含める内容1-2 鉄則+フロー → cmd2(grep鉄則)
+  含める内容3-5 知見+TODO → cmd1(100行以上で網羅性担保)
+  含める内容7 フロー図 → cmd3(ステートマシン)
+  含める内容8 判断基準 → cmd4(分岐条件)
+
+**FAIL条件:** cmd1-4のいずれかFAIL
+**完了報告:** DEV-03: cmd1-cmd4 各PASS/FAIL + docs/dev-playbook.md行数
+
+---
 
 ### BUG-02: ✅ 完了（2026-04-08）
 > STATUS: DONE
@@ -45,7 +132,7 @@
 4. BUG-02連動: ゴールタグ表示でも「日常タスク」非表示
 
 **cmd1-cmd4 全PASS:** drag=7, detail=1, vibrate=2, E2E-05/06=19 PASS/0 FAIL
-**未実装（次回）:** 所要時間伸縮（Googleカレンダー式リサイズ）/ ダイヤルピッカー / scheduling_preference学習
+**未実装（次回）:** 所要時間伸縮（Googleカレンダー式リサイズ）/ ダイヤルピッカー / scheduling_preference学習 / 集中力質問削除→AI自動判定
 
 ---
 

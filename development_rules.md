@@ -41,7 +41,17 @@ failed=0が完了の前提条件。テスト影響連動(v5)+プラン別テス�
 # 1. canopy（G1-G5）  2. テスト  3. Stage A（UI変更時）
 # 4. git diff --stat  5. git tag vX.Y.Z  6. git push --tags  7. npm run deploy
 ```
-G1-G5のいずれかがFAILならgit tag禁止。
+G1-G7のいずれかがFAILならgit tag禁止。
+
+### G7: 仕様↔完了コマンド対応検証（v5追加）
+ミッション定義の全仕様項目に対応する完了コマンド（grep/E2E/目視スクショ）が存在すること。
+対応なしの仕様項目があるミッションは開始不可。Codeはプリフライト時にマッピングを確認し、不足があれば即FAIL報告。
+```bash
+# ミッション定義の仕様項目数と検証マッピングの項目数を比較
+SPEC=$(grep -c "^\*\*仕様[0-9]" session_progress.md)  # 仕様の数
+MAP=$(grep -c "^  仕様[0-9]" session_progress.md)      # マッピングの数
+[ "$SPEC" -eq "$MAP" ] && echo "G7 PASS" || echo "G7 FAIL: $SPEC specs vs $MAP mappings"
+```
 
 ---
 
