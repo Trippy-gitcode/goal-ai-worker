@@ -2572,8 +2572,9 @@ function renderGoalsList(){
   }
   el.innerHTML = goals.map(g => {
     const pct = g.progress || 0;
-    const totalTasks = ALL_GOALS.find(ag=>String(ag.id)===String(g.id))?.phases?.reduce((s,p)=>s+p.tasks.length,0) || 0;
-    const doneTasks = ALL_GOALS.find(ag=>String(ag.id)===String(g.id))?.phases?.reduce((s,p)=>s+p.tasks.filter(t=>t.status==='done').length,0) || 0;
+    // #706 FIX: null-safe access
+    const totalTasks = ALL_GOALS.find(ag=>String(ag.id)===String(g.id))?.phases?.reduce((s,p)=>s+(p.tasks||[]).length,0) || 0;
+    const doneTasks = ALL_GOALS.find(ag=>String(ag.id)===String(g.id))?.phases?.reduce((s,p)=>s+(p.tasks||[]).filter(t=>t.status==='done').length,0) || 0;
     return `<div onclick="openGoalHubById('${g.id}')" style="border-radius:8px;border:0.5px solid var(--border2);background:var(--bg2);padding:12px;margin-bottom:10px;cursor:pointer;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:500;color:var(--cream);line-height:1.3;">${escapeHtml(g.title)}</div></div>

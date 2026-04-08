@@ -138,6 +138,7 @@ async function validateToken() {
 async function fetchUsage() {
   try {
     const res = await fetch(`${WORKER_URL}/api/usage`, { headers: getAuthHeaders() });
+    if(!res.ok) return null; // #599 FIX
     return await res.json();
   } catch { return null; }
 }

@@ -136,7 +136,7 @@ function getDeviceId() {
   return 'dev_' + Math.abs(hash).toString(36);
 }
 
-const APP_VERSION = '4.0.28';
+const APP_VERSION = '4.0.29';
 
 const FONT_SIZES = {
   xs: { label: '極小', base: '14px', lh: '1.55' },
@@ -209,9 +209,12 @@ async function checkTesterParam() {
 }
 
 // ════════ TESTER AUTO-VERSION CHECK ════════
+// #650 FIX: interval cleanup
+let _versionCheckTimer = null;
 function startVersionCheck() {
   if (!MEMBERSHIP.tester_tier) return;
-  setInterval(async () => {
+  if(_versionCheckTimer) clearInterval(_versionCheckTimer);
+  _versionCheckTimer = setInterval(async () => {
     try {
       const res = await fetch(WORKER_URL + '/api/version');
       const data = await res.json();
