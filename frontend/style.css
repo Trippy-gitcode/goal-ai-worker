@@ -870,11 +870,12 @@ input,textarea,select{font-family:var(--ff);outline:none}
 .sort-btn.active{background:rgba(200,146,10,.18);border-color:rgba(200,146,10,.5);color:#c8920a;font-weight:600}
 
 /* ═══ Myself Hub Gold Header ═══ */
-.myself-hub-hd{background:#c8920a!important;border-bottom:1px solid rgba(200,146,10,.6)!important;}
-.myself-hub-hd .hub-goal-title{color:#fff}
-.myself-hub-hd .hub-tab{color:rgba(255,255,255,.7)}
-.myself-hub-hd .hub-tab.active{color:#fff;border-color:#fff}
-.myself-hub-hd .hub-tab:hover{color:#fff}
+/* DESIGN-01: ME header — accent色ベース（NGゴールド除去） */
+.myself-hub-hd{background:var(--bg2)!important;border-bottom:0.5px solid var(--border)!important;}
+.myself-hub-hd .hub-goal-title{color:var(--cream)}
+.myself-hub-hd .hub-tab{color:var(--muted)}
+.myself-hub-hd .hub-tab.active{color:var(--accent);border-color:var(--accent)}
+.myself-hub-hd .hub-tab:hover{color:var(--cream)}
 
 /* ═══ MY CHARACTER Card (gold frame) ═══ */
 .my-character-card{
