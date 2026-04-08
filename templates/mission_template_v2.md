@@ -32,6 +32,12 @@ cmd3: ls tests/e2e/screenshots/MISSION_ID/*.png | wc -l | awk '{if($1>=1) exit 0
 cmd4: npx playwright test --grep "E2E-02|E2E-05" --project=mobile --timeout=90000 2>&1 | grep "0 failed"  # テスト影響欄のE2Eが全PASS
 ```
 
+**仕様↔検証マッピング（G7準拠: 全仕様に対応cmd必須）:**
+  仕様1 xxx → cmd1(grep) + cmd4(E2E)
+  仕様2 yyy → cmd2(grep) + cmd4(E2E)
+  仕様3 zzz → cmd3(目視スクリーンショット)
+  ※ 対応cmdなしの仕様項目があるミッション定義は不完全。Codeは実行開始前にFAIL報告すること
+
 **FAIL条件（1つでも該当したら未完了）:**
 - cmd1の出力 < 期待値N
 - cmd2でfailedが1件以上
@@ -100,6 +106,8 @@ MISSION-ID: XX/YYY PASS, ZZ FAIL, WW 未実施
    → テスト影響「なし」の場合も明記必須。完了コマンドに該当E2Eテスト実行を含める
 10. **プラン間で挙動が変わる機能なら、各プランでの検証テストを含めたか？**（v4追加）
    → モデル切替・機能制限・UI表示差分をプラン別に検証。テスト用ユーザーのプラン設定方法も明記
+11. **仕様↔完了コマンドの1:1対応があるか？**（v5追加 — G7準拠）
+   → 全仕様項目に対応する完了コマンド（またはE2Eテスト）が存在するか確認。対応なしの仕様があればミッション定義不完全
 
 ---
 

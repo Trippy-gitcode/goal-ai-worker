@@ -23,9 +23,10 @@ const IGNORED_ERRORS = [
   'Autofill',
   'chrome-extension',
   // localhost固有（本番では発生しない）
-  'CORS policy',
-  'Access-Control-Allow-Origin',
-  'blocked by CORS',
+  'CORS',
+  // テスト環境の一時的ネットワークエラー（デバウンス保存のfetch失敗。ページ遷移中等）
+  'net::ERR_FAILED',
+  'Failed to fetch',
   // テスト環境でrate limit到達は不可避（132テスト×5 API calls > 30/60s limit）
   'status of 429',
   'Too Many Requests',

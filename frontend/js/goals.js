@@ -1965,6 +1965,10 @@ async function init(){
       }catch(e){}
     }
   }
+  // BUG-03: プロフィール復元（localStorage同期 + サーバー非同期）
+  if(typeof restoreProfileFromLocalStorage === 'function') restoreProfileFromLocalStorage();
+  if(typeof loadIdentityFromServer === 'function') loadIdentityFromServer();
+
   if(typeof renderLifeTasks === 'function') renderLifeTasks();
   // リロード時は常に新しいチャット開始画面を表示
   showHomeScreen();

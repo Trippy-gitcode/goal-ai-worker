@@ -43,7 +43,14 @@ export async function handleIdentityPut(request, env) {
   const body = await request.json();
   const updates = { user_id: userId };
   if (body.vision !== undefined) updates.vision = body.vision;
-  if (body.identity !== undefined) updates.identity = body.identity;
+  // BUG-03: identityはマージ（profile追加時に既存のstrengths/vision等を消さない）
+  if (body.identity !== undefined) {
+    const existing = await supabaseQuery(env, 'user_identity', 'GET', {
+      filters: `user_id=eq.${userId}`, select: 'identity',
+    });
+    const existingIdentity = existing?.[0]?.identity || {};
+    updates.identity = { ...existingIdentity, ...body.identity };
+  }
   if (body.mindset_preset !== undefined) updates.mindset_preset = body.mindset_preset;
   if (body.qol_proposals !== undefined) updates.qol_proposals = body.qol_proposals;
   if (body.routines !== undefined) updates.routines = body.routines;
