@@ -732,3 +732,68 @@ spec_v3.md × mockup HTML × 実装コードの3点照合。全22画面を検証
 - UX-01-B1 ✅ ME構造化ヒアリング（IDENTITY_SESSION_PROMPT + [IDENTITY_UPDATE]タグ自動保存）
 - UX-01-B2 ✅ TODAY刷新（QOL提案カード枠 + 関連ゴール表示 + renderLinkedGoals）
 - v4.0.9デプロイ済み（B1+B2）
+
+---
+
+### 実装29（2026-04-08〜09）セッション詳細
+
+#### BUG-02 ✅ ゴール勝手紐付け修正
+- renderSecretaryMemo Rule4: 「日常タスク」ゴール非表示
+- processTaskUpdateTags: goalLinked:false フラグ
+- renderTodayTimeline/List: ゴール名バッジ非表示
+
+#### UX-02 ✅ タスクインタラクション刷新
+- タスク詳細カード拡張: メタデータ表示+編集/削除ボタン
+- タイムラインドラッグ&ドロップ: 長押し→上下→15分スナップ
+- 完了⭕️改善: vibrate(50)+EXPフロートポップアップ
+- タスクパネルposition:fixed化（全タブからアクセス可）
+
+#### UX-02b ✅ タスクUI残件
+- ダイヤルピッカー（5分刻み5分〜4時間）
+- タイムラインリサイズハンドル（下端ドラッグ）
+- 集中力質問削除→AI自動判定（localInferTask default:medium）
+- scheduling_preference学習（ドラッグパターン→focus_hours/drag_history）
+- インライン名前編集（contentEditable）
+
+#### BUG-03 ✅ プロフィール永続化
+- saveProfile()→saveProfileToServer()（localStorage+サーバー二重保存、デバウンス3秒）
+- CORS PUT追加
+- identity PUT: 既存データマージ
+- restoreProfileFromLocalStorage(): 初期化時同期復元
+- loadIdentityFromServer(): init時await呼び出し
+
+#### DESIGN-01 Phase A/B ✅ Night Sky Journal
+- 4テーマCSS定義: night-sky/dawn/harajuku-light/harajuku-dark
+- ease-in-out→spring-based cubic-bezier（5箇所）
+- Pill Active tabs（active=pill+icon+label）
+- Vertical Journal timeline（縦ライン+ドット進行）
+- ハードコード色59件→0件（全CSS変数化）
+- MEヘッダー金色除去、FABボタン、テーマカード名更新、ロゴ表示修正
+
+#### TEST-AUDIT バグ修正27件
+- #253: saveGoals未定義→関数定義追加（致命的データ消失）
+- #14: EXPダブルカウント→500msデバウンス
+- #17: ドラッグ範囲外→6:00-23:00clamp
+- #122: occupation未読み取り→updateProfile修正
+- #30: EXPポップアップ画面外→viewport clamp
+- #119: プロフィール7フィールド未保存→追加
+- #253b: GOALS→ALL_GOALS参照ミス（ゴール進捗非表示）
+- #381: hsToggleTask永続化+EXP付与欠落
+- #356: XSS（task detail chat innerHTML→escapeHtml）
+- #156: カレンダー2026-03固定→現在月初期化
+- #296: GOAL_COLORSハードコード→CSS変数
+- #297: api.js ease-in-out除去
+- #313: prefers-reduced-motion全アニメーション無効化
+- #619: goalId UUID検証（PostgREST injection防止）
+- #613: エラーレスポンスstack trace除去
+- #599: fetchUsage res.ok チェック追加
+- #650: setInterval cleanup（version check leak防止）
+- #711: sendHomeMsg race condition（homeLoading早期ロック）
+- #706: goals reduce null-safe access
+
+#### DEV-04 ✅ design_system.md作成
+- Night Sky Journalブランド定義
+- QnA 9問+4000件コミュニティ調査
+- テーマ4種（Night Sky/Dawn/Harajuku Light/Dark）
+- NGリスト（色/フォント/レイアウト/エフェクト/UX）
+- OKリスト+QnAチェックリスト9項目
