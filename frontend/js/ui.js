@@ -176,13 +176,20 @@ function showPage(pg) {
     const tb1 = document.getElementById('topbar'); if(tb1) tb1.style.display='none';
     const hp = document.getElementById('home-presets'); if(hp) hp.style.display='none';
     if(typeof renderTodayScreen === 'function') renderTodayScreen();
+    // ARCH-00: Preact Today mount（ハイブリッド検証。?preact=1で有効）
+    if(window.location.search.includes('preact=1') && typeof window.mountPreactToday === 'function'){
+      window.mountPreactToday();
+    }
   } else if(pg==='home'){
+    // ARCH-00: 他タブへ遷移時にPreact TodayをUnmount
+    if(typeof window.unmountPreactToday === 'function') window.unmountPreactToday();
     document.getElementById('pg-home-wrap')?.classList.add('active');
     document.getElementById('nav-home')?.classList.add('active');
     const tb2 = document.getElementById('topbar'); if(tb2) tb2.style.display='none';
     renderHomeSummary();
     _restoreScroll('home');
   } else if(pg==='goal-hub'){
+    if(typeof window.unmountPreactToday === 'function') window.unmountPreactToday();
     document.getElementById('pg-goal-hub-wrap')?.classList.add('active');
     const tb3 = document.getElementById('topbar'); if(tb3) tb3.style.display='none';
     // D-02: Show goals list view, hide hub detail
@@ -193,6 +200,7 @@ function showPage(pg) {
     if(typeof renderGoalsList === 'function') renderGoalsList();
     _restoreScroll('goal-hub');
   } else if(pg==='myself'){
+    if(typeof window.unmountPreactToday === 'function') window.unmountPreactToday();
     document.getElementById('pg-myself-wrap')?.classList.add('active');
     const tb4 = document.getElementById('topbar'); if(tb4) tb4.style.display='none';
     renderMyselfProfile();
