@@ -10,19 +10,124 @@
 
 ## 5行サマリー
 - **Version:** v4.0.29（デプロイ済み 2026-04-09）
-- **Next:** session_progressアーカイブ(300行化) → TEST-AUDIT残件(780項目テスト化) → BUG-04(テストガード4xx) → DESIGN-01 B/C → DEV-03(仕様書整理+ID付番+重複解消)
-- **Last done:** TEST-AUDIT バグ修正バッチ3完了。v4.0.25→v4.0.29で計27件修正
+- **Next:** ARCH-00(Preact技術検証) → ARCH-01〜10(段階的アーキ移行) → TEST-AUDIT残件 → DESIGN-01 B/C → DEV-05(dev-system逆流) → DEV-06(ボイラープレート)
+- **Last done:** 開発フロー大改訂: G8テストファースト/G9セルフテスト/AT6項目テンプレ/Preactアーキ移行決定。TEST-AUDIT 27件修正。BUG-04完了。DEV-03完了
 - **Open issues:** 年齢欄P39未修正
 - **方針:** ユーザーがバグを見つける前に修正されていること。テスト配布より「自分が毎日使いたいツール」を優先
 
 ## 現在地
 - **バージョン:** v4.0.22
 - **チェーン:** UX-02b完了
-- **次のミッション:** session_progressアーカイブ → TEST-AUDIT → BUG-04 → DESIGN-01 B/C → DEV-03
+- **次のミッション:** ARCH-00 → ARCH-01〜10 → TEST-AUDIT → DESIGN-01 B/C → DEV-05 → DEV-06
 
 ---
 
 ## ミッションキュー（上から順に実行）
+
+### ARCH-00: 技術検証（Preact 1画面で検証→採否判定）
+> リスク: 🔴高（アーキテクチャ判断）
+> STATUS: QUEUED
+> 参照: docs/claude_ai_protocol.md §11, development_rules.md G8/G9
+
+**目的:** Preactで1画面（TODAY）をコンポーネント化し、既存画面と共存できるか検証。結果でPreact採用 or Vanilla+PageControllerにフォールバック
+
+**背景（WHY）:**
+画面状態管理がグローバル変数+DOM直接操作（show/hide）に依存。unmountがないため状態が漏れ、同じバグが何度も再発（BUG-05 タスク詳細→TALK漏れ/BUG-06 編集未動作/BUG-02再発 ゴール推測紐付け）。テストで守るのは対症療法。構造を直す。
+
+**仕様:**
+1. Preact + Vite導入（既存index.htmlと共存するハイブリッド構成）
+2. TODAY画面をPreactコンポーネントに移行（state/mount/unmountがフレームワーク管理）
+3. 既存のshowPage()からPreactコンポーネントのrender/unmountを呼び出すブリッジ
+4. 他の画面は既存Vanilla JSのまま動作
+
+**AT（Claude.ai記述。Codeはspec.tsにコード化）:**
+
+AT-1: TODAY画面表示
+  操作: ボトムタブのTODAYをtap
+  期待: タイムラインが表示される
+  検証: タスクが1件以上表示。時間表示あり
+  否定検証: TALK画面のチャット入力欄が見えない
+  データ検証: N/A
+  スクショ: TODAY画面全体
+
+AT-2: TODAY→TALK→TODAY往復
+  操作: TODAY→TALKタブtap→TODAYタブtap を3回繰り返す
+  期待: 毎回正しい画面が表示される
+  検証: 3回目のTODAYでタスクが表示されている
+  否定検証: 3回目のTODAYにチャット入力欄/チャットメッセージが見えない
+  データ検証: N/A
+  スクショ: 3回目のTODAY画面
+
+AT-3: タスクタップ→詳細→閉じる→TALK
+  操作: タスクをtap→詳細画面表示→閉じる→TALKタブtap
+  期待: TALK画面にチャット入力欄が表示される
+  検証: チャット入力欄が見える。送信ボタンが見える
+  否定検証: タスク詳細の「編集」「削除」ボタンが見えない
+  データ検証: N/A
+  スクショ: TALK画面
+
+ストレスパス: AT-3の操作を3回連続で実行し、最後も正常
+
+**完了コマンド:**
+  cmd1: npx playwright test tests/e2e/specs/arch-00.spec.ts --project=mobile 2>&1 | grep "0 failed"
+  cmd2: Preactコンポーネントのファイルが存在: ls frontend/components/Today.jsx
+  cmd3: 既存画面（TALK/GOALS/ME/設定）が全て正常動作: npx playwright test --grep "TALK|GOALS|ME|設定" 2>&1 | grep "0 failed"
+
+**FAIL条件:** cmd1-3のいずれかFAIL
+**判定:** PASS→Preact採用（ARCH-01以降続行）/ FAIL→Vanilla+PageControllerに切替（ARCH-01の仕様を差替え）
+**完了報告:** ARCH-00: cmd1-3 PASS/FAIL + 採用判定 + スクショ5枚
+
+---
+
+### ARCH-01: 基盤構築（ルーター+画面コントローラー）
+> リスク: 🔴高
+> STATUS: QUEUED（ARCH-00の判定後に仕様確定）
+
+**目的:** ARCH-00の結果に基づき、全画面移行の基盤を構築
+
+**仕様（Preact採用の場合）:**
+1. Preactルーター導入（preact-router or 自作軽量ルーター）
+2. showPage()をPreactルーター経由に変更
+3. 未移行画面は互換ラッパー（Vanilla DOM をPreactでマウント/アンマウント）で動作維持
+4. 画面遷移時にunmountが自動で走ることを検証
+
+**AT:** ARCH-00確定後にClaude.aiが記述
+
+---
+
+### ARCH-02: TODAY画面移行 + AT
+> STATUS: QUEUED
+**目的:** TODAY画面を完全にPreactコンポーネント化。BUG-05（詳細→TALK漏れ）をアーキレベルで解消
+**AT:** Claude.aiが記述（BUG-05のATを含む）
+
+### ARCH-03: TALK画面移行 + AT
+> STATUS: QUEUED
+**目的:** TALK画面を完全にPreactコンポーネント化。BUG-06（編集未動作）・BUG-02再発（推測紐付け）をアーキレベルで解消
+**AT:** Claude.aiが記述（BUG-06/BUG-02再発のATを含む）
+
+### ARCH-04: GOALS画面移行 + AT
+> STATUS: QUEUED
+
+### ARCH-05: ME画面移行 + AT
+> STATUS: QUEUED
+
+### ARCH-06: 設定画面移行 + AT
+> STATUS: QUEUED
+
+### ARCH-07: カレンダー画面移行 + AT
+> STATUS: QUEUED
+
+### ARCH-08: アナリティクス画面移行 + AT
+> STATUS: QUEUED
+
+### ARCH-09: モーダル/パネル類移行 + AT
+> STATUS: QUEUED
+
+### ARCH-10: 旧コード削除 + フルテスト
+> STATUS: QUEUED
+**目的:** 全画面移行完了後にグローバル状態変数・旧showPage()・旧イベントリスナーを削除。L3フルテスト実行
+
+---
 
 ### BUG-03 ✅ | DESIGN-01 Phase A/B ✅ | UX-02 ✅ | UX-02b ✅
 > 詳細: instructions/results/session_history.md（実装29セクション）
@@ -146,7 +251,62 @@ docs/dev-playbook.md 228行作成。cmd1-4全PASS。
 
 ---
 
+### DEV-05: dev-systemテンプレート逆流（GOAL AIノウハウ→テンプレート反映）
+> リスク: 🟢低
+> STATUS: QUEUED
+> 参照: dev-system/templates/, docs/claude_ai_protocol.md, development_rules.md
+> 対象ファイル: dev-system/templates/（全テンプレート）, dev-system/docs/（新規）
+
+**目的:** GOAL AI開発で確立した全ノウハウをdev-systemテンプレートに反映し、次のアプリ開発で同じ失敗を繰り返さない
+
+**仕様:**
+1. mission_template.md に6項目ATテンプレ標準装備
+2. development_rules_template.md にG8/G9標準装備（各ルールにWHY付き）
+3. claude_ai_protocol_template.md 新規作成（アプリ共通行動ルール）
+4. dev-system/docs/anti_patterns.md 新規作成（症状→根本原因→対策→検出方法）
+5. dev-system/docs/architecture_decisions.md テンプレート新規作成（問題→選択肢→判断→根拠）
+6. 棚卸しチェックリストに「テンプレ逆流確認」追加
+7. init_app.sh 更新（新ファイル群をコピー対象に追加）
+
+**完了コマンド:**
+  cmd1: grep -c "AT-N" dev-system/templates/mission_template*.md | awk -F: '{if($2>=1) exit 0; else exit 1}'
+  cmd2: grep -c "G8\|G9" dev-system/templates/development_rules_template.md | awk '{if($1>=2) exit 0; else exit 1}'
+  cmd3: wc -l dev-system/templates/claude_ai_protocol_template.md | awk '{if($1>=50) exit 0; else exit 1}'
+  cmd4: wc -l dev-system/docs/anti_patterns.md | awk '{if($1>=30) exit 0; else exit 1}'
+  cmd5: wc -l dev-system/docs/architecture_decisions.md | awk '{if($1>=20) exit 0; else exit 1}'
+
+**FAIL条件:** cmd1-5のいずれかFAIL
+
+---
+
+### DEV-06: フロントエンドボイラープレート作成（ARCH完了後）
+> リスク: 🟢低
+> STATUS: QUEUED（ARCH-10完了後）
+> 対象ファイル: dev-system/templates/frontend/
+
+**目的:** ARCH-00〜10で確立したPreact構成をdev-systemのボイラープレートとして抽出
+
+**仕様:**
+1. Preact + Vite + ルーター + テストヘルパーの雛形
+2. mount/unmount/stateのサンプルコンポーネント
+3. init_app.sh --frontend=preact オプション追加
+
+**完了コマンド:**
+  cmd1: ls dev-system/templates/frontend/package.json && echo "PASS"
+  cmd2: grep -c "preact" dev-system/templates/frontend/package.json | awk '{if($1>=1) exit 0; else exit 1}'
+  cmd3: grep -c "frontend.*preact\|--frontend" dev-system/init_app.sh | awk '{if($1>=1) exit 0; else exit 1}'
+
+**FAIL条件:** cmd1-3のいずれかFAIL
+
+---
+
 ## 保留事項
+
+### BUG-05/06/02再発: アーキ移行で解消予定
+- BUG-05: タスクタップ→詳細が別画面に漏れる → ARCH-02で解消
+- BUG-06: 編集がタイトルしか動かない → ARCH-02で解消
+- BUG-02再発: ゴール推測紐付け → ARCH-03で解消
+- 個別修正不要。アーキ移行のATに含める
 
 ### BUG-01b: iOSキーボード問題（HOLD）
 - 修正試行3回制限到達。テスト配布後のFBで判断
