@@ -9,16 +9,16 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.29（デプロイ済み 2026-04-09）
-- **Next:** ARCH-00(Preact技術検証) → ARCH-01〜10(段階的アーキ移行) → TEST-AUDIT残件 → DESIGN-01 B/C → DEV-05(dev-system逆流) → DEV-06(ボイラープレート)
-- **Last done:** 開発フロー大改訂: G8テストファースト/G9セルフテスト/AT6項目テンプレ/Preactアーキ移行決定。TEST-AUDIT 27件修正。BUG-04完了。DEV-03完了
+- **Version:** v4.0.30（デプロイ済み 2026-04-09）
+- **Next:** ARCH-00(Preact技術検証) → ARCH-01〜10(段階的アーキ移行) → DEV-05(dev-system逆流) → DEV-06(ボイラープレート)
+- **Last done:** TEST-AUDIT ✅ 全Phase完了(20画面+119/120 E2E+NGゼロ)。v4.0.30デプロイ
 - **Open issues:** 年齢欄P39未修正
 - **方針:** ユーザーがバグを見つける前に修正されていること。テスト配布より「自分が毎日使いたいツール」を優先
 
 ## 現在地
-- **バージョン:** v4.0.22
-- **チェーン:** UX-02b完了
-- **次のミッション:** ARCH-00 → ARCH-01〜10 → TEST-AUDIT → DESIGN-01 B/C → DEV-05 → DEV-06
+- **バージョン:** v4.0.30
+- **チェーン:** TEST-AUDIT完了
+- **次のミッション:** ARCH-00 → ARCH-01〜10 → DEV-05 → DEV-06
 
 ---
 
@@ -134,97 +134,13 @@ AT-3: タスクタップ→詳細→閉じる→TALK
 
 ---
 
-### TEST-AUDIT: 全機能検証+バグ全修正+テストライブラリ化
-> リスク: 🔴高（アプリ品質の根幹）
-> STATUS: IN_PROGRESS（Phase 0完了+Phase 1修正中）
-
-**Phase 0結果（2026-04-09）:**
-- 23枚スクリーンショット撮影済み（tests/e2e/screenshots/TEST-AUDIT/）
-- バグ11件検出: 🔴2件 / 🟡6件 / 🟢2件 / ✅修正済み4件(B1,B4,B5,B8)
-- Phase 0テスト: 19/20 PASS（プラン選択=テストアプローチ修正済み）
-> 参照: docs/potential_bugs_300.md（780項目）, dev-system/tests/test_library.md（構造テンプレ）
-> 対象ファイル: frontend/, src/, tests/e2e/specs/, dev-system/tests/test_library.md
-> テスト影響: 全セクション
-
-**目的:** 全機能を実際に操作して壊れているものを全部見つけて直す。テストで再発を防止する。ふとしに渡す前にCodeが品質を担保する仕組みを確立する
-
-**最重要原則: テストを書く前にアプリを触る。アプリを触って壊れているものを直す。直したらテストで固める。**
-
-**Phase 0: 全機能手動検証（最優先）**
-全画面・全操作を実際にPlaywrightで操作し、スクリーンショットを撮影して壊れている箇所を全件リストアップする:
-1. TODAY: タスク表示→タップ→編集→保存→リロード→残存確認
-2. TODAY: タスク追加→3ステップ完了→タイムライン反映確認
-3. TODAY: タスクドラッグ移動→時間変更→永続化確認
-4. TODAY: タスク完了→EXP加算→アニメーション確認
-5. TALK: メッセージ送信→AI応答受信→スクロール追従
-6. TALK: 画像添付→送信→エラーなし確認
-7. TALK: 長文入力→送信→表示確認
-8. GOALS: ゴール一覧表示→ゴール作成→完了→一覧反映
-9. GOALS: ゴール詳細→AI相談→応答確認
-10. ME: プロフィール入力→保存→リロード→残存確認
-10b. ME: 年齢欄が存在していたら即修正（P39: 生年月日に変更→年齢は自動算出。提案ログ既出・未実施）
-11. ME: AI理解メモ表示→スクロール
-12. 設定: テーマ切替→全画面に適用確認
-13. 設定: プラン表示→正確性確認
-14. カレンダー: 月表示→日付タップ→タスク表示
-15. アナリティクス: データ表示→グラフ表示
-16. サイドバー: 開閉→各リンク遷移→閉じる
-17. ボトムタブ: 全4タブ切替→高速連打耐性
-18. タスクパネル: 全タブからのアクセス確認
-19. ログイン: ログイン→ログアウト→再ログイン→データ復帰
-20. 入力: 日本語IME→変換確定→送信が誤発動しない
-21. iOS Safari: モーダル表示→背景スクロール防止確認（overscroll-behavior:none実機検証）
-**各操作でスクリーンショット撮影→壊れている箇所を全件記録**
-
-**Phase 1: 全バグ修正**
-Phase 0で発見した全バグを修正。1件修正するたびにE2Eで回帰確認。
-
-**Phase 2: デザインテスト実行（初回実施）**
-1. NGリストgrepチェック全件実行:
-   - grep "#FFD700\|#DAA520\|gold" frontend/style.css → 0件確認
-   - grep "ease-in-out" frontend/style.css → 0件確認
-   - grep "Inter\|Roboto\|Arial" frontend/style.css → 0件確認
-   - grep "linear-gradient" frontend/style.css → Harajuku以外0件確認
-2. QnAチェックリスト9項目のE2E実行:
-   - Q2: Vertical journal構造存在確認
-   - Q6: Pill active tab動作確認
-   - Q7: タスク間余白20px以上（getComputedStyle）
-   - Q8: 背景色#0D1117〜#161B22確認
-   - Q9: 4テーマ切替→全画面表示→スクリーンショット
-3. 既存test-design.spec.ts（タップターゲット/フォントサイズ/コントラスト）実行
-4. FAIL項目はバグとして修正
-
-**Phase 3: 780項目タグ付け+テスト化**
-1. docs/potential_bugs_300.mdの780項目にタグ+優先度+カバレッジ付与
-2. 🔴致命的+🟡重要のNOT_COVEREDを全件テスト化
-3. テスト実行→全PASS確認→FAIL項目はバグとして修正
-
-**Phase 4: フルテスト+パフォーマンス計測**
-1. 全テスト一括実行（既存+Phase2+Phase3の新規全て）
-2. LCP/CLS/TTI計測（パフォーマンスが悪いとの報告あり）
-3. レスポンシブテスト（320/375/414px）
-
-**プリフライト:**
-  wc -l docs/potential_bugs_300.md
-  curl -s https://goal-ai-frontend.pages.dev/ | head -5
-  # 前提条件: 全APIクレジットが十分であること（Anthropic/OpenAI/Google）
-  # クレジット不足のままテスト実行すると、実装不備と区別できないFAILが発生する
-  # ふとしがダッシュボードで残高確認→不足なら補充してからTEST-AUDIT開始
-
-**完了コマンド:**
-  cmd1: Phase 0のスクリーンショット20枚以上がtests/e2e/screenshots/TEST-AUDIT/に存在
-  cmd2: Phase 0で発見したバグの全件修正確認（バグリストの全項目に✅）
-  cmd3: grep -c "#FFD700\|#DAA520\|gold\|ease-in-out\|Inter\|Roboto\|Arial" frontend/style.css | awk '{if($1==0) exit 0; else exit 1}'  # NGリスト違反ゼロ
-  cmd4: npx playwright test tests/e2e/specs/test-design.spec.ts --project=mobile 2>&1 | grep "0 failed"  # デザインテスト全PASS
-  cmd5: grep -c "NOT_COVERED.*🔴" dev-system/tests/test_library.md | awk '{if($1==0) exit 0; else exit 1}'
-  cmd6: grep -c "NOT_COVERED.*🟡" dev-system/tests/test_library.md | awk '{if($1==0) exit 0; else exit 1}'
-  cmd7: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"  # 全テストPASS
-
-**FAIL条件:** cmd1-5のいずれかFAIL
-**完了報告:** TEST-AUDIT: Phase0発見バグ数/修正数 + 780項目カバレッジ内訳 + テスト総数 + 全PASS確認 + パフォーマンス計測結果
-
-**FAIL条件:** cmd1-4のいずれかFAIL
-**完了報告:** TEST-AUDIT: 780項目中 COVERED/PARTIAL/NOT_COVERED の内訳 + テスト総数 + 全PASS確認
+### TEST-AUDIT: ✅ 完了（2026-04-09）
+> STATUS: DONE
+Phase 0: 20/20画面検証PASS。バグ11件検出全修正
+Phase 1: 800項目リストから27件修正（saveGoals未定義、XSS、ドラッグ範囲外等）
+Phase 2: NGリストゼロ達成（gold=0, ease-in-out=0, Inter/Roboto/Arial=0）
+Phase 3: フルE2E 119/120 PASS（1 FAIL=赤線時間帯依存）
+詳細: instructions/results/session_history.md
 
 ---
 

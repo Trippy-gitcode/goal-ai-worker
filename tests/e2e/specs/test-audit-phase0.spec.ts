@@ -185,11 +185,20 @@ test.describe('TEST-AUDIT Phase 0: 全画面検証', () => {
     await expect(hamburger).toBeVisible();
     await hamburger.click();
     await page.waitForTimeout(500);
-    const planLink = page.locator('[onclick*="plan"], text=プラン').first();
-    if (await planLink.isVisible()) {
-      await planLink.click();
-      await page.waitForTimeout(1000);
+    // セレクター分離: CSS と text を別々に試行
+    let clicked = false;
+    const planByAttr = page.locator('[onclick*="plan"]').first();
+    if (await planByAttr.count() > 0 && await planByAttr.isVisible()) {
+      await planByAttr.click();
+      clicked = true;
+    } else {
+      const planByText = page.locator('text=プラン').first();
+      if (await planByText.count() > 0 && await planByText.isVisible()) {
+        await planByText.click();
+        clicked = true;
+      }
     }
+    if (clicked) await page.waitForTimeout(1000);
     await shot(page, '15-plan-selection');
   });
 
