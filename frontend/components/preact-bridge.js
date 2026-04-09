@@ -7,18 +7,13 @@ import { Today } from './Today.jsx';
 // 現在マウントされているPreactコンポーネント追跡
 let _currentMount = null; // { name, container, cleanup }
 
-// 画面定義: showPageが渡すpg値に合わせる（today/home/goal-hub/myself/tasks/calendar/analytics）
-// ARCH-01: TODAYは?preact=1フラグでPreact版、デフォルトはvanilla（レガシー互換）
-const _usePreactToday = typeof window !== 'undefined' && window.location?.search.includes('preact=1');
+// 画面定義: showPageが渡すpg値に合わせる
+// ARCH-02: TODAY は常にPreact（?preact=1フラグ廃止）
 const SCREENS = {
-  today: _usePreactToday ? {
+  today: {
     type: 'preact',
     mount: () => mountPreactToday(),
     unmount: () => unmountPreactToday(),
-  } : {
-    type: 'vanilla',
-    mount: () => mountVanillaWrapper('today'),
-    unmount: () => unmountVanillaWrapper('today'),
   },
   home: {
     type: 'vanilla',
@@ -85,22 +80,19 @@ export function routeToScreen(name) {
 let _todayContainer = null;
 
 function mountPreactToday() {
-  const wrap = document.getElementById('pg-today-wrap');
-  if (!wrap) return false;
+  // ARCH-02: Preact Today を既存の #today-timeline 要素内に直接マウント
+  // #today-timeline ID を Preact が管理（既存E2Eテスト互換）
+  // レガシー DOM (グリーティング、EXPバー、秘書メモ等) は既存のまま
+  const timelineSlot = document.getElementById('today-timeline');
+  if (!timelineSlot) return false;
 
-  _todayContainer = document.getElementById('preact-today-container');
-  if (!_todayContainer) {
-    _todayContainer = document.createElement('div');
-    _todayContainer.id = 'preact-today-container';
-    _todayContainer.style.cssText = 'width:100%;height:100%;overflow-y:auto;';
-    wrap.appendChild(_todayContainer);
-  }
+  // レガシー #today-task-list は非表示（Preact内で両ビュー切替）
+  const listSlot = document.getElementById('today-task-list');
+  if (listSlot) listSlot.style.display = 'none';
+  timelineSlot.style.display = '';
 
-  // レガシーTODAYを非表示
-  const legacy = wrap.querySelector('#pg-today');
-  if (legacy) legacy.style.display = 'none';
-
-  _todayContainer.style.display = '';
+  // Preact Today は #today-timeline 内にマウント
+  _todayContainer = timelineSlot;
   render(h(Today, {}), _todayContainer);
   return true;
 }
@@ -108,11 +100,8 @@ function mountPreactToday() {
 function unmountPreactToday() {
   if (_todayContainer) {
     render(null, _todayContainer);  // Preactのunmount
-    _todayContainer.style.display = 'none';
+    _todayContainer = null;
   }
-  // レガシーTODAYを復元（他画面からTODAY以外に戻ったときのため）
-  const legacy = document.querySelector('#pg-today-wrap #pg-today');
-  if (legacy) legacy.style.display = '';
 }
 
 // ═══ Vanilla互換ラッパー ═══
