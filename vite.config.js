@@ -4,6 +4,14 @@ export default defineConfig({
   root: 'frontend',
   base: '/',
   publicDir: 'public',
+  // ARCH-00: Preact支援
+  resolve: {
+    alias: {
+      'react': 'preact/compat',
+      'react-dom': 'preact/compat',
+      'react/jsx-runtime': 'preact/jsx-runtime',
+    },
+  },
   build: {
     outDir: '../frontend-dist',
     emptyOutDir: true,
