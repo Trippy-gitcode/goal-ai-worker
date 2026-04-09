@@ -9,16 +9,16 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.31（デプロイ済み 2026-04-09）
-- **Next:** ARCH-01〜10(段階的アーキ移行) → DEV-05(dev-system逆流) → DEV-06(ボイラープレート)
-- **Last done:** ARCH-00 ✅ Preact hybrid検証 4/4 PASS。採用決定
+- **Version:** v4.0.33（デプロイ済み 2026-04-09）
+- **Next:** ARCH-02〜10(画面別Preact移行) → DEV-05 → DEV-06
+- **Last done:** ARCH-01 ✅ 共通ルーター+Vanilla互換ラッパー。10/10 PASS
 - **Open issues:** 年齢欄P39未修正
 - **方針:** ユーザーがバグを見つける前に修正されていること。テスト配布より「自分が毎日使いたいツール」を優先
 
 ## 現在地
-- **バージョン:** v4.0.31
-- **チェーン:** ARCH-00完了（Preact採用決定）
-- **次のミッション:** ARCH-01〜10 → DEV-05 → DEV-06
+- **バージョン:** v4.0.33
+- **チェーン:** ARCH-01完了（共通ルーター基盤）
+- **次のミッション:** ARCH-02〜10 → DEV-05 → DEV-06
 
 ---
 
@@ -76,9 +76,21 @@ AT-3: タスクタップ→詳細→閉じる→TALK
 
 ---
 
-### ARCH-01: 基盤構築（ルーター+画面コントローラー）
+### ARCH-01: ✅ 完了（2026-04-09 v4.0.33）
+> STATUS: DONE
+
+**実装:**
+- preact-bridge.js: routeToScreen() 共通ルーター + SCREENS map
+- 画面遷移時に前画面のunmount自動実行
+- VANILLA_CLEANUP: home(入力欄リセット), today(タスクパネル閉)
+- ui.js showPage() から routeToScreen() 呼び出し
+- main.js: preact-bridge を app.js より前にimport（window.routeToScreen を init() 前に設定）
+- Preact Today は ?preact=1 フラグ維持（ARCH-00互換）
+
+**テスト:** ARCH-00+01 10/10 PASS、既存E2E 47/48 PASS（1 FAIL=時間帯依存）
+
+### ARCH-01 元定義（参考）
 > リスク: 🔴高
-> STATUS: QUEUED
 > 参照: docs/claude_ai_protocol.md §11, frontend/components/preact-bridge.js, frontend/components/Today.jsx
 
 **目的:** ARCH-00で検証済みのPreactブリッジを全画面対応に拡張。showPage()を経由する全画面遷移でunmountが自動で走る基盤を構築。未移行画面はVanilla互換ラッパーで動作維持
@@ -144,37 +156,330 @@ AT-5: 既存機能の回帰（Vanilla互換ラッパー動作）
 
 ---
 
-### ARCH-02: TODAY画面移行 + AT
+### ARCH-02: TODAY画面 完全Preact移行
+> リスク: 🔴高
 > STATUS: QUEUED
-**目的:** TODAY画面を完全にPreactコンポーネント化。BUG-05（詳細→TALK漏れ）をアーキレベルで解消
-**AT:** Claude.aiが記述（BUG-05のATを含む）
+> 参照: frontend/components/Today.jsx, docs/ux_redesign_v2.md §TODAY
 
-### ARCH-03: TALK画面移行 + AT
+**目的:** TODAY画面のVanilla JSロジック（タイムライン描画、タスク詳細パネル、タスク追加3ステップ、ドラッグ&ドロップ、完了⭕️）を全てPreactコンポーネントに移行。BUG-05/BUG-06をアーキレベルで解消
+
+**仕様:**
+1. タイムライン描画をPreact化（既存DOM操作→JSXレンダリング）
+2. タスク詳細パネルをPreactモーダルコンポーネントに（state管理でopen/close。unmount時に確実にリセット）
+3. タスク追加3ステップをPreactフロー化
+4. ドラッグ&ドロップをPreact内のイベントハンドラで管理
+5. 完了⭕️アニメーション+EXPポップアップをPreactコンポーネント化
+6. タスク編集: タイトル・所要時間・メモ・ステータスを全て編集可能に（BUG-06解消）
+
+**AT（Claude.ai記述。Codeはspec.tsにコード化）:**
+
+AT-1: タスクタップ→詳細表示
+  操作: タイムラインの最初のタスクをtap
+  期待: タスク詳細パネルが表示される
+  検証: 「編集」「削除」「進め方を聞く」「詰まりを相談」ボタンが見える。タスク名が見える
+  否定検証: TALK画面のチャット入力欄が見えない
+  データ検証: N/A
+  スクショ: 詳細パネル表示後
+
+AT-2: 詳細パネルから画面切替（BUG-05再現防止）
+  操作: AT-1の状態 → TALKタブtap
+  期待: TALK画面が表示される（詳細パネルが消える）
+  検証: チャット入力欄が見える
+  否定検証: タスク詳細パネルの要素（編集/削除ボタン）が見えない
+  データ検証: N/A
+  スクショ: TALK画面
+
+AT-3: 編集で全フィールド変更可能（BUG-06解消）
+  操作: タスクtap→詳細表示→「編集」tap→タスク名を「テスト編集」に変更→所要時間を変更→保存
+  期待: 変更が保存されタイムラインに反映
+  検証: タイムライン上のタスク名が「テスト編集」に変わっている
+  否定検証: 編集前のタスク名が残っていない
+  データ検証: ページリロード後も「テスト編集」が残っている
+  スクショ: 編集画面 + 保存後のタイムライン + リロード後
+
+AT-4: タスク追加3ステップ→タイムライン反映
+  操作: タスク追加ボタンtap→タスク名「新規テスト」入力→所要時間選択→保存
+  期待: タイムラインに「新規テスト」が追加
+  検証: 「新規テスト」がタイムラインに表示。時間が表示
+  否定検証: エラーメッセージが表示されない
+  データ検証: リロード後も「新規テスト」が残っている
+  スクショ: 追加後のタイムライン
+
+AT-5: タスク完了→EXP+アニメーション
+  操作: タスクの完了⭕️をtap
+  期待: 完了アニメーション+EXPポップアップが表示される
+  検証: タスクが完了状態になる。EXP数値が表示される
+  否定検証: タスクが未完了のまま残っていない
+  データ検証: リロード後もタスクが完了状態
+  スクショ: アニメーション中 + 完了後
+
+AT-6: ドラッグ&ドロップで時間変更
+  操作: タスクを長押し→上下にドラッグ→別の時間にドロップ
+  期待: タスクの開始時間が変更される
+  検証: タイムライン上のタスク位置が変わっている
+  否定検証: 元の位置にタスクが残っていない
+  データ検証: リロード後も移動後の時間が反映
+  スクショ: ドラッグ中 + ドロップ後
+
+ストレスパス: AT-1→AT-2（詳細→TALK→TODAY）を3回連続。3回目も詳細パネルが正しく表示・消去される
+
+**完了コマンド:**
+  cmd1: npx playwright test tests/e2e/specs/arch-02.spec.ts --project=mobile 2>&1 | grep "0 failed"
+  cmd2: grep -rn "renderTodayTimeline\|renderTodayList" frontend/js/ | wc -l | awk '{if($1==0) exit 0; else exit 1}'  # 旧Vanilla描画関数が除去されている
+  cmd3: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"  # 全テスト回帰
+
+**FAIL条件:** cmd1-3のいずれかFAIL
+**完了報告:** ARCH-02: cmd1-3 PASS/FAIL + AT1-6各結果 + スクショ15枚
+
+---
+
+### ARCH-03: TALK画面 完全Preact移行
+> リスク: 🔴高
 > STATUS: QUEUED
-**目的:** TALK画面を完全にPreactコンポーネント化。BUG-06（編集未動作）・BUG-02再発（推測紐付け）をアーキレベルで解消
-**AT:** Claude.aiが記述（BUG-06/BUG-02再発のATを含む）
+> 参照: frontend/js/chat.js, docs/ux_redesign_v2.md §TALK
+
+**目的:** TALK画面のVanilla JSロジック（チャット送受信、ストリーミング表示、メッセージレンダリング、入力エリア）を全てPreactに移行。BUG-02再発（ゴール推測紐付け）のAI応答表示をコンポーネント化
+
+**仕様:**
+1. チャットメッセージリストをPreactコンポーネント化（メッセージ配列→JSXリスト）
+2. 入力エリア（テキストボックス+送信ボタン+画像添付）をPreactコンポーネント化。unmount時に入力内容リセット
+3. AIストリーミング応答をPreact state更新で表示（DOM直接操作廃止）
+4. ゴール紐付け表示: AIが返すゴール紐付けタグの表示ロジックをPreactで管理。「日常タスク」(自動ゴール)の場合はゴール名非表示（BUG-02再発防止）
+5. 秘書メモコンポーネント化
+
+**AT（Claude.ai記述。Codeはspec.tsにコード化）:**
+
+AT-1: チャット送受信
+  操作: TALK画面でチャット入力欄に「こんにちは」と入力→送信ボタンtap
+  期待: ユーザーメッセージが表示され、AI応答が受信・表示される
+  検証: ユーザーメッセージ「こんにちは」が見える。AI応答メッセージが1件以上見える
+  否定検証: エラーメッセージ/エラートーストが表示されない
+  データ検証: リロード後にチャット履歴が残っている
+  スクショ: 応答完了後
+
+AT-2: unmount時の入力リセット
+  操作: チャット入力欄に「途中のテキスト」と入力（送信しない）→TODAYタブtap→TALKタブtap
+  期待: チャット入力欄が空
+  検証: 入力欄が空 or プレースホルダー表示
+  否定検証: 「途中のテキスト」が残っていない
+  データ検証: N/A
+  スクショ: 戻った後のTALK画面
+
+AT-3: ゴール非紐付けタスクの表示（BUG-02再発防止）
+  操作: 「役所に行く」等の日常タスクについてAIに質問→応答を確認
+  期待: AI応答にゴール名が表示されない
+  検証: AI応答が表示される
+  否定検証: 応答内に無関係なゴール名（「副業で月10万円稼ぎたい」等）が表示されない
+  データ検証: N/A
+  スクショ: AI応答表示後
+
+AT-4: 画像添付送信
+  操作: 画像添付ボタンtap→画像選択→送信
+  期待: 画像付きメッセージが送信され、AI応答が返る
+  検証: 画像サムネイルが表示。AI応答が表示
+  否定検証: エラーが表示されない
+  データ検証: N/A
+  スクショ: 画像送信後
+
+AT-5: 長文入力+スクロール追従
+  操作: 200文字以上のメッセージを入力→送信→AI応答を待つ
+  期待: 応答が画面下部にスクロール追従して表示
+  検証: AI応答の末尾が画面内に見える（自動スクロール）
+  否定検証: 応答が画面外に隠れていない
+  データ検証: N/A
+  スクショ: 応答完了時の画面位置
+
+ストレスパス: TALK→TODAY→TALK→メッセージ送信→TODAY→TALK を3回繰り返し、3回目も正常に送受信可能
+
+**完了コマンド:**
+  cmd1: npx playwright test tests/e2e/specs/arch-03.spec.ts --project=mobile 2>&1 | grep "0 failed"
+  cmd2: grep -rn "appendMessage\|renderMessage" frontend/js/chat.js | wc -l | awk '{if($1==0) exit 0; else exit 1}'  # 旧DOM操作が除去
+  cmd3: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
+
+**FAIL条件:** cmd1-3のいずれかFAIL
+**完了報告:** ARCH-03: cmd1-3 PASS/FAIL + AT1-5各結果 + スクショ10枚
+
+---
 
 ### ARCH-04: GOALS画面移行 + AT
+> リスク: 🟡中
 > STATUS: QUEUED
+
+**目的:** GOALS画面（一覧+詳細ハブ+ゴール作成フロー）をPreactコンポーネント化
+
+**AT:**
+AT-1: ゴール一覧表示
+  操作: GOALSタブtap
+  期待: ゴール一覧が表示
+  検証: ゴール名+進捗バーが見える
+  否定検証: 他画面の要素が見えない
+  データ検証: N/A
+  スクショ: 一覧画面
+
+AT-2: ゴール作成→一覧反映
+  操作: 「+新しいゴール」tap→ゴール名入力→保存
+  期待: 一覧に新規ゴールが追加
+  検証: 新規ゴール名が一覧に見える
+  否定検証: エラーなし
+  データ検証: リロード後もゴールが残存
+  スクショ: 作成後の一覧
+
+AT-3: ゴール詳細→AI相談
+  操作: ゴール名tap→詳細ハブ表示→AI相談ボタンtap→質問送信
+  期待: AI応答が表示
+  検証: 応答メッセージが見える
+  否定検証: エラーなし
+  データ検証: N/A
+  スクショ: 詳細ハブ + AI応答
+
+ストレスパス: GOALS→TODAY→GOALS→詳細→TODAY→GOALS を3往復
+
+**完了コマンド:**
+  cmd1: npx playwright test tests/e2e/specs/arch-04.spec.ts --project=mobile 2>&1 | grep "0 failed"
+  cmd2: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
+
+---
 
 ### ARCH-05: ME画面移行 + AT
+> リスク: 🟡中
 > STATUS: QUEUED
+
+**目的:** ME画面（プロフィール入力+AI理解メモ+ヒアリングセッション）をPreact化
+
+**AT:**
+AT-1: プロフィール入力→保存→永続化
+  操作: MEタブtap→名前欄を「テスト太郎」に変更→保存
+  期待: 保存成功
+  検証: 名前が「テスト太郎」に表示
+  否定検証: エラーなし
+  データ検証: リロード後も「テスト太郎」が残っている
+  スクショ: 保存後 + リロード後
+
+AT-2: AI理解メモ表示
+  操作: MEタブtap→AI理解メモセクションまでスクロール
+  期待: AI理解メモが表示
+  検証: メモテキストが見える
+  否定検証: 空白/エラーではない
+  データ検証: N/A
+  スクショ: メモ表示
+
+ストレスパス: ME→TALK→ME→プロフィール編集→TALK→ME を3往復。最後も編集内容が保持
+
+**完了コマンド:**
+  cmd1: npx playwright test tests/e2e/specs/arch-05.spec.ts --project=mobile 2>&1 | grep "0 failed"
+  cmd2: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
+
+---
 
 ### ARCH-06: 設定画面移行 + AT
+> リスク: 🟢低
 > STATUS: QUEUED
+
+**AT:**
+AT-1: テーマ切替→全画面反映
+  操作: 設定→テーマ切替（Night Sky→Dawn）→各画面確認
+  期待: 全画面でDawnテーマが適用
+  検証: 背景色がDawnカラーに変化
+  否定検証: Night Skyカラーが残っていない
+  データ検証: リロード後もDawnテーマ
+  スクショ: 設定画面 + 別画面でのテーマ確認
+
+ストレスパス: テーマ4種を高速切替（Night Sky→Dawn→Harajuku Light→Harajuku Dark→Night Sky）
+
+**完了コマンド:**
+  cmd1: npx playwright test tests/e2e/specs/arch-06.spec.ts --project=mobile 2>&1 | grep "0 failed"
+  cmd2: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
+
+---
 
 ### ARCH-07: カレンダー画面移行 + AT
+> リスク: 🟢低
 > STATUS: QUEUED
+
+**AT:**
+AT-1: 月表示→日付タップ→タスク表示
+  操作: カレンダー画面→日付tap
+  期待: その日のタスクが表示
+  検証: 日付がハイライト。タスクリストが表示
+  否定検証: 他画面の要素なし
+  データ検証: N/A
+  スクショ: カレンダー画面
+
+ストレスパス: カレンダー→TODAY→カレンダー→日付tap→TODAY を3往復
+
+**完了コマンド:**
+  cmd1: npx playwright test tests/e2e/specs/arch-07.spec.ts --project=mobile 2>&1 | grep "0 failed"
+  cmd2: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
+
+---
 
 ### ARCH-08: アナリティクス画面移行 + AT
+> リスク: 🟢低
 > STATUS: QUEUED
+
+**AT:**
+AT-1: データ+グラフ表示
+  操作: アナリティクス画面を開く
+  期待: チャートが表示
+  検証: グラフ要素（canvas/svg）が見える
+  否定検証: 他画面要素なし
+  データ検証: N/A
+  スクショ: アナリティクス画面
+
+**完了コマンド:**
+  cmd1: npx playwright test tests/e2e/specs/arch-08.spec.ts --project=mobile 2>&1 | grep "0 failed"
+  cmd2: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
+
+---
 
 ### ARCH-09: モーダル/パネル類移行 + AT
+> リスク: 🟡中
 > STATUS: QUEUED
 
+**目的:** サイドバー、ボトムタブ、タスク追加モーダル、トースト等の共通UIをPreact化
+
+**AT:**
+AT-1: サイドバー開閉
+  操作: ☰tap→サイドバー開く→各リンクtap→閉じる
+  期待: 開閉がスムーズ。リンク先に正しく遷移
+  検証: サイドバー内メニューが見える→遷移後に消える
+  否定検証: サイドバーが遷移後に残っていない
+  データ検証: N/A
+  スクショ: 開いた状態 + 閉じた後
+
+AT-2: ボトムタブ全タブ切替+高速連打
+  操作: 4タブを0.2秒間隔で10回tap
+  期待: 最後のタブ画面が正常表示
+  検証: 最後の画面の固有要素が見える
+  否定検証: コンソールエラーなし
+  データ検証: N/A
+  スクショ: 最終画面
+
+AT-3: トースト通知表示→自動消去
+  操作: トースト発火するアクション（タスク完了等）実行
+  期待: トーストが表示→数秒後に自動消去
+  検証: トーストが一時的に見える
+  否定検証: トーストが永久に残らない
+  データ検証: N/A
+  スクショ: トースト表示中
+
+ストレスパス: サイドバー開→閉→タブ切替→サイドバー開→閉 を3往復
+
+**完了コマンド:**
+  cmd1: npx playwright test tests/e2e/specs/arch-09.spec.ts --project=mobile 2>&1 | grep "0 failed"
+  cmd2: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
+
+---
+
 ### ARCH-10: 旧コード削除 + フルテスト
+> リスク: 🟡中
 > STATUS: QUEUED
+
 **目的:** 全画面移行完了後にグローバル状態変数・旧showPage()・旧イベントリスナーを削除。L3フルテスト実行
+
+**完了コマンド:**
+  cmd1: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
+  cmd2: grep -rn "showPage\|hideAllPages" frontend/js/ | wc -l | awk '{if($1==0) exit 0; else exit 1}'
 
 ---
 
