@@ -9,16 +9,16 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.30（デプロイ済み 2026-04-09）
-- **Next:** ARCH-00(Preact技術検証) → ARCH-01〜10(段階的アーキ移行) → DEV-05(dev-system逆流) → DEV-06(ボイラープレート)
-- **Last done:** TEST-AUDIT ✅ 全Phase完了(20画面+119/120 E2E+NGゼロ)。v4.0.30デプロイ
+- **Version:** v4.0.31（デプロイ済み 2026-04-09）
+- **Next:** ARCH-01〜10(段階的アーキ移行) → DEV-05(dev-system逆流) → DEV-06(ボイラープレート)
+- **Last done:** ARCH-00 ✅ Preact hybrid検証 4/4 PASS。採用決定
 - **Open issues:** 年齢欄P39未修正
 - **方針:** ユーザーがバグを見つける前に修正されていること。テスト配布より「自分が毎日使いたいツール」を優先
 
 ## 現在地
-- **バージョン:** v4.0.30
-- **チェーン:** TEST-AUDIT完了
-- **次のミッション:** ARCH-00 → ARCH-01〜10 → DEV-05 → DEV-06
+- **バージョン:** v4.0.31
+- **チェーン:** ARCH-00完了（Preact採用決定）
+- **次のミッション:** ARCH-01〜10 → DEV-05 → DEV-06
 
 ---
 
@@ -26,10 +26,7 @@
 
 ### ARCH-00: 技術検証（Preact 1画面で検証→採否判定）
 > リスク: 🔴高（アーキテクチャ判断）
-> STATUS: QUEUED
-> 参照: docs/claude_ai_protocol.md §11, development_rules.md G8/G9
-
-**目的:** Preactで1画面（TODAY）をコンポーネント化し、既存画面と共存できるか検証。結果でPreact採用 or Vanilla+PageControllerにフォールバック
+> STATUS: DONE（Preact採用決定。v4.0.31）
 
 **背景（WHY）:**
 画面状態管理がグローバル変数+DOM直接操作（show/hide）に依存。unmountがないため状態が漏れ、同じバグが何度も再発（BUG-05 タスク詳細→TALK漏れ/BUG-06 編集未動作/BUG-02再発 ゴール推測紐付け）。テストで守るのは対症療法。構造を直す。
@@ -81,17 +78,69 @@ AT-3: タスクタップ→詳細→閉じる→TALK
 
 ### ARCH-01: 基盤構築（ルーター+画面コントローラー）
 > リスク: 🔴高
-> STATUS: QUEUED（ARCH-00の判定後に仕様確定）
+> STATUS: QUEUED
+> 参照: docs/claude_ai_protocol.md §11, frontend/components/preact-bridge.js, frontend/components/Today.jsx
 
-**目的:** ARCH-00の結果に基づき、全画面移行の基盤を構築
+**目的:** ARCH-00で検証済みのPreactブリッジを全画面対応に拡張。showPage()を経由する全画面遷移でunmountが自動で走る基盤を構築。未移行画面はVanilla互換ラッパーで動作維持
 
-**仕様（Preact採用の場合）:**
-1. Preactルーター導入（preact-router or 自作軽量ルーター）
-2. showPage()をPreactルーター経由に変更
-3. 未移行画面は互換ラッパー（Vanilla DOM をPreactでマウント/アンマウント）で動作維持
-4. 画面遷移時にunmountが自動で走ることを検証
+**仕様:**
+1. showPage()をPreactブリッジ経由に全面切替（?preact=1フラグ不要にする）
+2. 未移行画面（TALK/GOALS/ME/設定/カレンダー/アナリティクス）用のVanilla互換ラッパー: 既存DOMをPreactコンポーネントでラップし、mount時にshow+初期化、unmount時にhide+イベントリスナー解除+状態リセット
+3. 画面遷移時に前画面のunmountが必ず走ることを保証する共通ルーター
+4. ARCH-00で作成したToday.jsx（Preact移行済み）はそのまま新ルーターに接続
 
-**AT:** ARCH-00確定後にClaude.aiが記述
+**AT（Claude.ai記述。Codeはspec.tsにコード化）:**
+
+AT-1: 全画面順次遷移
+  操作: TODAY→TALK→GOALS→ME→設定→カレンダー→アナリティクス→TODAYの順にボトムタブ/サイドバーで遷移
+  期待: 全画面が正しく表示される
+  検証: 各画面の固有要素が見える（TODAY=タイムライン、TALK=チャット入力、GOALS=ゴール一覧、ME=プロフィール、設定=テーマ切替、カレンダー=月グリッド、アナリティクス=チャート）
+  否定検証: 各画面で前の画面の固有要素が見えない
+  データ検証: N/A
+  スクショ: 全7画面各1枚
+
+AT-2: 高速タブ連打
+  操作: ボトムタブ4つ（TODAY/TALK/GOALS/ME）を0.3秒間隔で20回ランダムにtap
+  期待: 最後にtapした画面が正しく表示される
+  検証: 最後の画面の固有要素が見える
+  否定検証: 他の画面の要素が見えない。コンソールエラーなし
+  データ検証: N/A
+  スクショ: 最終画面
+
+AT-3: unmount検証（状態漏れ防止）
+  操作: TALK画面でチャット入力欄に「テスト」と入力（送信しない）→TODAYタブtap→TALKタブtap
+  期待: チャット入力欄が空（入力途中のテキストがリセットされている）
+  検証: 入力欄が空 or プレースホルダーが表示
+  否定検証: 「テスト」というテキストが入力欄に残っていない
+  データ検証: N/A
+  スクショ: 戻った後のTALK画面
+
+AT-4: タスク詳細→画面切替→戻り（BUG-05再現防止）
+  操作: TODAY→タスクtap→詳細画面表示→TALKタブtap→TODAYタブtap
+  期待: TODAY画面のタイムラインが表示される（詳細画面ではない）
+  検証: タイムラインが見える。タスク一覧が見える
+  否定検証: タスク詳細の「編集」「削除」ボタンが見えない。TALK画面のチャット入力欄が見えない
+  データ検証: N/A
+  スクショ: 戻った後のTODAY画面
+
+AT-5: 既存機能の回帰（Vanilla互換ラッパー動作）
+  操作: TALK画面で「こんにちは」送信→AI応答を待つ
+  期待: AI応答が表示される
+  検証: AI応答メッセージが1件以上表示
+  否定検証: エラーメッセージ/エラートーストが表示されない
+  データ検証: ページリロード後にチャット履歴に「こんにちは」と応答が残っている
+  スクショ: 応答表示後
+
+ストレスパス: AT-4の操作（TODAY→詳細→TALK→TODAY）を3回連続で実行し、3回目も正常
+
+**完了コマンド:**
+  cmd1: npx playwright test tests/e2e/specs/arch-01.spec.ts --project=mobile 2>&1 | grep "0 failed"
+  cmd2: grep -c "unmount\|cleanup" frontend/components/preact-bridge.js | awk '{if($1>=3) exit 0; else exit 1}'
+  cmd3: grep -c "?preact=1" frontend/js/*.js | awk '{if($1==0) exit 0; else exit 1}'  # フラグ不要化の確認
+  cmd4: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"  # 全テスト回帰
+
+**FAIL条件:** cmd1-4のいずれかFAIL
+**完了報告:** ARCH-01: cmd1-4 PASS/FAIL + AT1-5各結果 + スクショ12枚（7画面+高速連打+unmount+BUG-05再現+回帰+ストレス）
 
 ---
 
