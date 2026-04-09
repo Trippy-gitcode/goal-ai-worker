@@ -1,5 +1,5 @@
-=== CANOPY TEST (08:18:04) ===
-Worker: "version":"4.0.27"
+=== CANOPY TEST (09:24:37) ===
+Worker: "version":"4.0.29"
 --- HTTP Smoke Tests ---
 OK: GET /api/version → 200
 OK: GET /health → 200
@@ -68,8 +68,8 @@ OK: plan-compare-table (2 refs)
 OK: フェアユース制限 (2 refs)
 OK: goal-detect-toast\|showGoalDetectToast (10 refs)
 --- Version sync (C10) ---
-  globals.js=4.0.27  sw.js=4.0.27  index.html=4.0.27
-OK: version sync (4.0.27)
+  globals.js=4.0.29  sw.js=4.0.29  index.html=4.0.29
+OK: version sync (4.0.29)
 --- Style integrity (C12) ---
 OK: no 'border-radius:24px' in JS
 OK: no 'border-radius:20px' in JS
@@ -120,12 +120,12 @@ OK: 'chip-row' sync (src=1 dist=1)
 OK: 'mode-f' cleanup (src=0 dist=0)
 OK: 'mode-row-f' cleanup (src=0 dist=0)
 OK: 'ゴールプロジェクト' cleanup (src=0 dist=0)
-  frontend-dist version=4.0.27  source version=4.0.27
+  frontend-dist version=4.0.29  source version=4.0.29
 OK: frontend-dist version sync
 --- Vite tree-shake safety (onclick vs window.assign) ---
 OK: all onclick functions registered in window
 --- SP version sync ---
-  session_progress=v4.0.22  APP_VERSION=4.0.27
+  session_progress=v4.0.22  APP_VERSION=4.0.29
 --- B4/B5 KV invalidate ---
 OK: B4 profile KV invalidate (4 refs)
 OK: B5 userId KV cache (1 refs)
@@ -139,7 +139,7 @@ OK: test count (495) >= spec count (427)
 --- G4-v3: Test report ---
 OK: HTML test report exists
 --- G5-v3: Report format ---
-OK: session_progress.md has structured report
+INFO: no structured test report found in session_progress.md (OK if tests not yet run)
 --- G5-v4: Test anti-pattern check ---
 OK: test-guards.ts IGNORED_ERRORS count=15 (max 15)
 WARN: .catch(() => {}) found 4 times. Verify each is intentional
@@ -147,4 +147,4 @@ OK: no critical test anti-patterns
 OK: test.skip() count 19/495 (3%)
 --- UI overlay check ---
   sheets/modals=1  overlays=1
-=== CANOPY PASS (9s) ===
+=== CANOPY PASS (10s) ===
