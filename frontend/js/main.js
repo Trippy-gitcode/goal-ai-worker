@@ -9,3 +9,5 @@ import './ui.js';
 import './chat.js';
 import './goals.js';
 import './app.js';
+// ARCH-00: Preact bridge (hybrid with legacy Vanilla JS)
+import '../components/preact-bridge.js';
