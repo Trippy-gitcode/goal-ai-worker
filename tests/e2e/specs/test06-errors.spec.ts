@@ -432,20 +432,22 @@ test.describe('6-5. Input edge cases', () => {
     await screenshot(page, '6-5-send-during-response');
   });
 
-  test('Tab switch during input -> input content preserved', async ({ page }) => {
+  // ARCH-03: unmount時に入力欄リセットが正式動作となった（AT-2）
+  // 旧挙動（入力保持）はPreactライフサイクルで置き換え、状態漏れ防止を優先
+  test('Tab switch during input -> input content cleared (ARCH-03)', async ({ page }) => {
     await loadApp(page);
     await goTab(page, 'talk');
     const input = page.locator('#home-msg-in');
-    await input.fill('Preserved input text');
+    await input.fill('draft text');
     // Switch to another tab
     await goTab(page, 'today');
     await page.waitForTimeout(500);
     // Switch back
     await goTab(page, 'talk');
     await page.waitForTimeout(500);
-    // Check input value
+    // Input is cleared by Preact Talk unmount cleanup
     const value = await input.inputValue();
-    expect(value).toBe('Preserved input text');
+    expect(value).toBe('');
     await screenshot(page, '6-5-tab-switch-input');
   });
 

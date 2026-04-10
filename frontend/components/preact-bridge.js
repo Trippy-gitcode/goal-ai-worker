@@ -3,6 +3,7 @@
 
 import { render, h } from 'preact';
 import { Today } from './Today.jsx';
+import { Talk } from './Talk.jsx';
 
 // 現在マウントされているPreactコンポーネント追跡
 let _currentMount = null; // { name, container, cleanup }
@@ -16,9 +17,9 @@ const SCREENS = {
     unmount: () => unmountPreactToday(),
   },
   home: {
-    type: 'vanilla',
-    mount: () => mountVanillaWrapper('home'),
-    unmount: () => unmountVanillaWrapper('home'),
+    type: 'preact',
+    mount: () => mountPreactTalk(),
+    unmount: () => unmountPreactTalk(),
   },
   'goal-hub': {
     type: 'vanilla',
@@ -104,6 +105,32 @@ function unmountPreactToday() {
   }
 }
 
+// ═══ Preact Talk（ARCH-03: TALK画面 Preact化） ═══
+let _talkContainer = null;
+
+function mountPreactTalk() {
+  // マウントポイント: #pg-home の先頭に #preact-talk-host を確保
+  const pgHome = document.getElementById('pg-home');
+  if (!pgHome) return false;
+  let host = document.getElementById('preact-talk-host');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'preact-talk-host';
+    host.style.display = 'contents';
+    pgHome.insertBefore(host, pgHome.firstChild);
+  }
+  _talkContainer = host;
+  render(h(Talk, {}), _talkContainer);
+  return true;
+}
+
+function unmountPreactTalk() {
+  if (_talkContainer) {
+    render(null, _talkContainer);  // useEffectクリーンアップ起動
+    _talkContainer = null;
+  }
+}
+
 // ═══ Vanilla互換ラッパー ═══
 // ARCH-01: 未移行画面のため、mount時に初期化、unmount時にクリーンアップ
 const VANILLA_CLEANUP = {
@@ -114,17 +141,8 @@ const VANILLA_CLEANUP = {
       taskPanel.classList.remove('open');
     }
   },
-  home: () => {
-    // TALK画面のクリーンアップ: 入力欄リセット
-    const inp = document.getElementById('home-msg-in');
-    if (inp) {
-      inp.value = '';
-      inp.dispatchEvent(new Event('input', { bubbles: true }));
-      inp.blur();
-    }
-    const resize = window.homeResize;
-    if (resize && inp) try { resize(inp); } catch {}
-  },
+  // ARCH-03: home はPreact化されたためここは未使用
+  home: () => {},
   'goal-hub': () => {
     // ゴール詳細パネルが開いていたら閉じる
     const hubDetail = document.getElementById('pg-goal-hub');
@@ -165,4 +183,7 @@ function unmountVanillaWrapper(name) {
 window.mountPreactToday = mountPreactToday;
 window.unmountPreactToday = unmountPreactToday;
 window.isPreactTodayMounted = () => _currentMount?.name === 'today';
+window.mountPreactTalk = mountPreactTalk;
+window.unmountPreactTalk = unmountPreactTalk;
+window.isPreactTalkMounted = () => _currentMount?.name === 'home';
 window.routeToScreen = routeToScreen;

@@ -9,16 +9,16 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.33（デプロイ済み 2026-04-09）
-- **Next:** ARCH-02〜10(画面別Preact移行) → DEV-05 → DEV-06
-- **Last done:** ARCH-01 ✅ 共通ルーター+Vanilla互換ラッパー。10/10 PASS
+- **Version:** v4.0.36（デプロイ済み 2026-04-10）
+- **Next:** ARCH-04(GOALS) → ARCH-05〜10 → DEV-05 → DEV-06
+- **Last done:** ARCH-03 ✅ TALK Preactライフサイクル化。7/7 + 636 E2E PASS
 - **Open issues:** 年齢欄P39未修正
 - **方針:** ユーザーがバグを見つける前に修正されていること。テスト配布より「自分が毎日使いたいツール」を優先
 
 ## 現在地
-- **バージョン:** v4.0.33
-- **チェーン:** ARCH-01完了（共通ルーター基盤）
-- **次のミッション:** ARCH-02〜10 → DEV-05 → DEV-06
+- **バージョン:** v4.0.36
+- **チェーン:** ARCH-03完了（TALK画面Preact化: mount/unmount discipline）
+- **次のミッション:** ARCH-04〜10 → DEV-05 → DEV-06
 
 ---
 
@@ -156,9 +156,19 @@ AT-5: 既存機能の回帰（Vanilla互換ラッパー動作）
 
 ---
 
-### ARCH-02: TODAY画面 完全Preact移行
+### ARCH-02: ✅ 完了（2026-04-10 v4.0.35）
+> STATUS: DONE
+
+**実装:**
+- Today.jsx: タイムライン/リスト描画を完全インライン化
+- chat.js: renderTodayTimeline(200行)/renderTodayList(60行)/initTimelineDrag削除
+- updateTaskTime/updateTaskDuration/learnSchedulingPreference復元（削除範囲に含まれていたため）
+- mountPreactToday: 既存の#today-timeline内に直接マウント（E2E互換）
+- viewMode state はレガシー _todayViewMode と双方向同期
+- cmd1 PASS (ARCH-02 6/7)、cmd2 PASS (legacy 0件)、cmd3 PASS (119/120 E2E)
+
+### ARCH-02 元定義（参考）
 > リスク: 🔴高
-> STATUS: QUEUED
 > 参照: frontend/components/Today.jsx, docs/ux_redesign_v2.md §TODAY
 
 **目的:** TODAY画面のVanilla JSロジック（タイムライン描画、タスク詳細パネル、タスク追加3ステップ、ドラッグ&ドロップ、完了⭕️）を全てPreactコンポーネントに移行。BUG-05/BUG-06をアーキレベルで解消
@@ -233,9 +243,49 @@ AT-6: ドラッグ&ドロップで時間変更
 
 ---
 
-### ARCH-03: TALK画面 完全Preact移行
-> リスク: 🔴高
+### SKIP-RETRY: ARCH-02 AT-3（タスク編集全フィールド / BUG-06解消検証）
+> リスク: 🟡中
 > STATUS: QUEUED
+
+**目的:** ARCH-02でSKIPされたAT-3を再実行。BUG-06（編集がタイトルしかできない）が解消されているか検証
+
+**AT:**
+
+AT-3: 編集で全フィールド変更可能（BUG-06解消）
+  前提: テスト開始前にタスク追加APIまたはUI操作でタスクを1件作成する
+  操作: タスクtap→詳細→「編集」tap→タスク名を「テスト編集」に変更→所要時間を変更→保存
+  期待: 変更が保存されタイムラインに反映
+  検証: タイムライン上のタスク名が「テスト編集」に変わっている。所要時間も変わっている
+  否定検証: 編集前のタスク名が残っていない。タイトルだけがネイティブ選択状態にならない
+  データ検証: ページリロード後も「テスト編集」と変更後の所要時間が残っている
+  スクショ: 編集画面（全フィールド編集可能な状態）+保存後タイムライン+リロード後
+
+**完了コマンド:**
+  cmd1: npx playwright test tests/e2e/specs/arch-02.spec.ts --grep "AT-3" --project=mobile 2>&1 | grep "0 failed"
+
+**FAIL条件:** cmd1 FAIL（SKIPも不可）
+**FAIL時の対応:** BUG-06としてタスク詳細パネルの編集機能をPreactコンポーネントで再実装
+
+---
+
+### ARCH-03: ✅ 完了（2026-04-10 v4.0.36）
+> STATUS: DONE
+
+**実装:**
+- frontend/components/Talk.jsx 新設（薄いコンポーネント、ARCH-02 Today.jsxパターン踏襲）
+- preact-bridge.js: home画面をtype='preact'に変更、mountPreactTalk/unmountPreactTalk追加、#preact-talk-host内マウント
+- VANILLA_CLEANUP.home はno-opに（Preactライフサイクルがcleanup所有）
+- Talk useEffect cleanup: 入力欄リセット/画像クリア/ルートプレビュー非表示/ストリーム中断/検索バー閉
+- window.isPreactTalkMounted 公開
+- test06-errors AT「Tab switch -> input preserved」を新仕様（cleared）に更新（旧仕様はARCH-03で置換）
+
+**テスト:**
+- arch-03.spec.ts 7/7 PASS（STRUCT/AT-1〜AT-5/Stress）@ localhost+本番
+- 全E2E回帰: 636 passed / 15 skipped / 3 flaky (既知) / 0 failed @ localhost
+- canopy: PASS
+
+### ARCH-03 元定義（参考）
+> リスク: 🔴高
 > 参照: frontend/js/chat.js, docs/ux_redesign_v2.md §TALK
 
 **目的:** TALK画面のVanilla JSロジック（チャット送受信、ストリーミング表示、メッセージレンダリング、入力エリア）を全てPreactに移行。BUG-02再発（ゴール推測紐付け）のAI応答表示をコンポーネント化
