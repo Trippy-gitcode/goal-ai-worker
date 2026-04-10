@@ -4,6 +4,7 @@
 import { render, h } from 'preact';
 import { Today } from './Today.jsx';
 import { Talk } from './Talk.jsx';
+import { GoalHub } from './GoalHub.jsx';
 
 // 現在マウントされているPreactコンポーネント追跡
 let _currentMount = null; // { name, container, cleanup }
@@ -22,9 +23,9 @@ const SCREENS = {
     unmount: () => unmountPreactTalk(),
   },
   'goal-hub': {
-    type: 'vanilla',
-    mount: () => mountVanillaWrapper('goal-hub'),
-    unmount: () => unmountVanillaWrapper('goal-hub'),
+    type: 'preact',
+    mount: () => mountPreactGoalHub(),
+    unmount: () => unmountPreactGoalHub(),
   },
   myself: {
     type: 'vanilla',
@@ -131,6 +132,31 @@ function unmountPreactTalk() {
   }
 }
 
+// ═══ Preact GoalHub（ARCH-04: GOALS画面 Preact化） ═══
+let _goalHubContainer = null;
+
+function mountPreactGoalHub() {
+  const pgGoalHub = document.getElementById('pg-goal-hub');
+  if (!pgGoalHub) return false;
+  let host = document.getElementById('preact-goal-hub-host');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'preact-goal-hub-host';
+    host.style.display = 'contents';
+    pgGoalHub.insertBefore(host, pgGoalHub.firstChild);
+  }
+  _goalHubContainer = host;
+  render(h(GoalHub, {}), _goalHubContainer);
+  return true;
+}
+
+function unmountPreactGoalHub() {
+  if (_goalHubContainer) {
+    render(null, _goalHubContainer);
+    _goalHubContainer = null;
+  }
+}
+
 // ═══ Vanilla互換ラッパー ═══
 // ARCH-01: 未移行画面のため、mount時に初期化、unmount時にクリーンアップ
 const VANILLA_CLEANUP = {
@@ -143,11 +169,8 @@ const VANILLA_CLEANUP = {
   },
   // ARCH-03: home はPreact化されたためここは未使用
   home: () => {},
-  'goal-hub': () => {
-    // ゴール詳細パネルが開いていたら閉じる
-    const hubDetail = document.getElementById('pg-goal-hub');
-    if (hubDetail) hubDetail.style.display = 'none';
-  },
+  // ARCH-04: goal-hub はPreact化されたためここは未使用
+  'goal-hub': () => {},
   myself: () => {
     // ME画面: 編集中のニックネーム保存
     if (typeof window.saveProfileToServer === 'function') {
@@ -186,4 +209,7 @@ window.isPreactTodayMounted = () => _currentMount?.name === 'today';
 window.mountPreactTalk = mountPreactTalk;
 window.unmountPreactTalk = unmountPreactTalk;
 window.isPreactTalkMounted = () => _currentMount?.name === 'home';
+window.mountPreactGoalHub = mountPreactGoalHub;
+window.unmountPreactGoalHub = unmountPreactGoalHub;
+window.isPreactGoalHubMounted = () => _currentMount?.name === 'goal-hub';
 window.routeToScreen = routeToScreen;
