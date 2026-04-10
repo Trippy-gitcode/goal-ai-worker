@@ -139,7 +139,7 @@ function initSwipeToOpenSidebar(){
 window.addEventListener('popstate', (e) => {
   const pg = e.state?.page || 'today';
   const validTabs = ['today','home','goal-hub','myself'];
-  if(validTabs.includes(pg)) showPage(pg);
+  if(validTabs.includes(pg)) goPage(pg);
 });
 
 // ════════ TAB SWIPE ════════
@@ -165,7 +165,7 @@ function _restoreScroll(pg){
   const saved = sessionStorage.getItem('scroll_'+pg);
   if(el && saved) requestAnimationFrame(()=>{ el.scrollTop = parseInt(saved); });
 }
-function showPage(pg) {
+function goPage(pg) {
   _saveScroll();
   // ARCH-01: Preactルーター経由で前画面のunmount→次画面mount（全画面共通）
   if(typeof window.routeToScreen === 'function') window.routeToScreen(pg);
@@ -335,7 +335,7 @@ function applyModeUI(mode) {
   // Update pill buttons
   if(typeof updateModePills === 'function') updateModePills();
 
-  showPage('home');
+  goPage('home');
 }
 
 // Keep stubs so settings page toggles still work
@@ -1721,7 +1721,7 @@ if (document.querySelector('.sb-logo')) {
 document.getElementById('sb')?.addEventListener('click', (e) => {
   if (e.target.closest('a, button, .nav-item, .mode-box, .goal-card, .upgrade-box, .sb-logo, .prof-row, .btn-add-goal, select, input, .upgrade-nudge, .nav-section, .mode-selector, .sb-bottom')) return;
   closeSidebar();
-  showPage('home');
+  goPage('home');
 });
 
 // ════════ AI理解メモ表示 ════════
@@ -1877,7 +1877,7 @@ function updateSidebarTaskList() {
     var dot = t.priority === 'high' ? '🔴' : t.priority === 'low' ? '🟢' : '🟡';
     var dl = t.deadline ? t.deadline.slice(5) : '';
     return '<div class="sb-task-item"><span class="sb-task-name">' + escapeHtml((t.title || '').slice(0, 20)) + '</span><span class="sb-task-meta">' + dot + ' ' + dl + '</span></div>';
-  }).join('') + '<div class="sb-task-more" onclick="showPage(\'tasks\')">全タスク →</div>';
+  }).join('') + '<div class="sb-task-more" onclick="goPage(\'tasks\')">全タスク →</div>';
 }
 
 // ════════ UX-001: 初期タスク段階式 ════════
@@ -1940,7 +1940,7 @@ document.addEventListener('keydown', (e) => {
     const modal = document.querySelector('.modal-overlay');
     if (modal) { modal.remove(); return; }
     document.getElementById('goal-fullscreen-modal')?.remove();
-    showPage('home');
+    goPage('home');
   }
 });
 
@@ -2074,7 +2074,7 @@ Object.assign(window, {
   DEMO_MSGS, CHART_DATA, FAIL_HISTORY, getCalEvents,
   toggleSidebar, closeSidebar, renderGlobalHeader,
   initSwipeToOpenSidebar, initTabSwipe,
-  showPage, selectMode, activateMencare, applyModeUI,
+  goPage, selectMode, activateMencare, applyModeUI,
   toggleSpartan, toggleMencare, getActiveMode, updateModeUI, updateMencareTimer,
   DEEP_LIMITS, getDeepMonthKey, getDeepUsedCount, getDeepLimit,
   getDeepRemaining, incrementDeepUsage, getDeepUsageBadgeHTML,

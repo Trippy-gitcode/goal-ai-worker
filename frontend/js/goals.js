@@ -1200,7 +1200,7 @@ function openGoalHub(idx){
   if(!hubMemos[goal.id]) hubMemos[goal.id] = [];
 
   // Switch to hub page
-  showPage('goal-hub');
+  goPage('goal-hub');
   switchHubTab(hubTab === 'chat' ? 'chat' : hubTab);
   renderHubChat();
   renderHubTasks();
@@ -1739,7 +1739,7 @@ function executeDeleteGoal(){
   renderSidebarGoals();
 
   // Go back to home
-  showPage('home');
+  goPage('home');
   toast(`「${goal.title}」を削除しました`);
 }
 
@@ -1755,7 +1755,7 @@ function archiveGoal(reason){
   }
   renderSidebarGoals();
   renderArchiveList();  // update count badge
-  showPage('home');
+  goPage('home');
   toast(reason==='done' ? `★「${goal.title}」を達成済みにしました！` : `「${goal.title}」をアーカイブしました`);
 }
 
@@ -1874,8 +1874,8 @@ async function init(){
   updateNotifSettingUI();
   // H-08: コーチングモード復元
   try{ const savedMode = localStorage.getItem('goal_ai_mode'); if(savedMode && savedMode !== 'normal' && typeof selectMode === 'function') selectMode(savedMode); }catch(e){}
-  showPage('today');
-  window._appInitDone = true; // 初回ロード完了フラグ（以降のshowPageでアニメーション有効）
+  goPage('today');
+  window._appInitDone = true; // 初回ロード完了フラグ（以降のgoPageでアニメーション有効）
   if(typeof renderTodayScreen === 'function') renderTodayScreen();
   initAvatarDisplay();
 
@@ -2417,7 +2417,7 @@ function toggleGoalModalTask(goalId, taskId, done) {
 function onGoalAssistComplete(goal) {
   toast('ゴールとタスクを設定しました！');
   setTimeout(() => {
-    showPage('home');
+    goPage('home');
     const inner = document.getElementById('home-chat-inner');
     if (inner) {
       const msg = document.createElement('div');
@@ -2448,7 +2448,7 @@ function showTaskSetupPhase(goalObj) {
       </div>
       <div id="task-setup-list" style="margin-bottom:16px;"></div>
       <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button onclick="document.getElementById('task-setup-modal')?.remove();showPage('home');" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border-card);border-radius:8px;cursor:pointer;">ホームに戻る</button>
+        <button onclick="document.getElementById('task-setup-modal')?.remove();goPage('home');" style="padding:8px 16px;background:var(--bg3);color:var(--cream);border:1px solid var(--border-card);border-radius:8px;cursor:pointer;">ホームに戻る</button>
         <button onclick="document.getElementById('task-setup-modal')?.remove();onGoalAssistComplete({title:'${escapeHtml(goalObj.title).replace(/'/g, "\\'")}',id:'${goalObj.id}'});" style="padding:8px 16px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:8px;cursor:pointer;font-weight:600;">完了</button>
       </div>
     </div>`;
@@ -2470,7 +2470,7 @@ function addTaskSetupItem() {
 
 // ════════ D-4: Breadcrumb ════════
 function renderBreadcrumb(current) {
-  return `<div class="breadcrumb"><a onclick="showPage('home');closeSidebar();">ホーム</a><span class="sep">›</span><a onclick="showPage('goal');">ゴール</a><span class="sep">›</span><span>${escapeHtml(current)}</span></div>`;
+  return `<div class="breadcrumb"><a onclick="goPage('home');closeSidebar();">ホーム</a><span class="sep">›</span><a onclick="goPage('goal');">ゴール</a><span class="sep">›</span><span>${escapeHtml(current)}</span></div>`;
 }
 
 // ════════ D-12: Progress stepper for goal setup ════════
@@ -2652,7 +2652,7 @@ function promoteWish(idx){
 
 // 4: ゴール作成をTALKで開始（GOALS画面から遷移）
 function startGoalCreation(){
-  showPage('home');
+  goPage('home');
   setTimeout(() => {
     const msgIn = document.getElementById('home-msg-in');
     if(msgIn){

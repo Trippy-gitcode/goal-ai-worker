@@ -8,6 +8,6 @@ import './profile.js';
 import './ui.js';
 import './chat.js';
 import './goals.js';
-// ARCH-01: Preact bridge must load BEFORE app.js which calls init()→showPage('today')
+// ARCH-01: Preact bridge must load BEFORE app.js which calls init()→goPage('today')
 import '../components/preact-bridge.js';
 import './app.js';
