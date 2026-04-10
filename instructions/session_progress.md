@@ -10,15 +10,15 @@
 
 ## 5行サマリー
 - **Version:** v4.0.41（デプロイ済み 2026-04-11）
-- **Next:** DEV-05 → DEV-06
-- **Last done:** ARCH-10 ✅ 旧showPage除去+goPage統合。本番22/22 PASS（ARCHチェーン全完了）
+- **Next:** キュー空（自律フロー: 仕様差分検出→提案ログ→報告）
+- **Last done:** DEV-05/06 ✅ dev-systemテンプレート逆流+Preactボイラープレート。全cmd PASS
 - **Open issues:** 年齢欄P39未修正
 - **方針:** ユーザーがバグを見つける前に修正されていること。テスト配布より「自分が毎日使いたいツール」を優先
 
 ## 現在地
 - **バージョン:** v4.0.41
-- **チェーン:** ARCH-10完了（ARCHチェーン全完了: ARCH-00〜10）
-- **次のミッション:** DEV-05 → DEV-06
+- **チェーン:** DEV-06完了（ARCHチェーン+DEVチェーン全完了）
+- **次のミッション:** キュー空→自律フロー
 
 ---
 
@@ -669,9 +669,8 @@ docs/dev-playbook.md 228行作成。cmd1-4全PASS。
 
 ---
 
-### DEV-05: dev-systemテンプレート逆流（GOAL AIノウハウ→テンプレート反映）
-> リスク: 🟢低
-> STATUS: QUEUED
+### DEV-05: ✅ 完了（2026-04-11）
+> STATUS: DONE
 > 参照: dev-system/templates/, docs/claude_ai_protocol.md, development_rules.md
 > 対象ファイル: dev-system/templates/（全テンプレート）, dev-system/docs/（新規）
 
@@ -697,9 +696,20 @@ docs/dev-playbook.md 228行作成。cmd1-4全PASS。
 
 ---
 
-### DEV-06: フロントエンドボイラープレート作成（ARCH完了後）
-> リスク: 🟢低
-> STATUS: QUEUED（ARCH-10完了後）
+### DEV-06: ✅ 完了（2026-04-11）
+> STATUS: DONE（DEV-05と一括）
+
+**実装（DEV-05/06共通）:**
+- dev-system/ ディレクトリ新設
+- templates/mission_template_v3.md: 6項目AT + RED/GREEN + GOAL AI教訓
+- templates/development_rules_template.md: G8/G9標準装備 + 全ルールWHY付き
+- templates/claude_ai_protocol_template.md: 80行（役割分担/キュー運用/AT記述/UI変更フロー）
+- docs/anti_patterns.md: 8パターン（状態漏れ/テスト≠動作/投機的修正等）
+- docs/architecture_decisions.md: ADRテンプレート + GOAL AI参考例2件
+- templates/frontend/: Preact+Vite+ルーター+サンプルコンポーネント
+- init_app.sh: --frontend=preact オプション対応
+
+**検証:** DEV-05 cmd1-5 全PASS / DEV-06 cmd1-3 全PASS
 > 対象ファイル: dev-system/templates/frontend/
 
 **目的:** ARCH-00〜10で確立したPreact構成をdev-systemのボイラープレートとして抽出
