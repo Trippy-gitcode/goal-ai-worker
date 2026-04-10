@@ -43,7 +43,7 @@ function hideTyping() { hideChatTyping('typing-indicator'); }
 function updateTypingRoute(route) { updateTypingPhase('typing-indicator', route); }
 
 function startReview() {
-  showPage('home');
+  goPage('home');
   const reviewMsg = spartanMode
     ? 'スパルタレビューを開始します。今月の進捗と遅延理由を正直に報告してください。'
     : '月次レビューを始めましょう。今月どうでしたか？';
@@ -52,7 +52,7 @@ function startReview() {
 }
 
 // ════════ WELCOME / NEW GOAL ════════
-function showWelcome(){showPage('welcome');}
+function showWelcome(){goPage('welcome');}
 function setEx(t){document.getElementById('wlc-in').value=t;document.getElementById('wlc-in').focus();}
 async function startGoal(){
   const v=document.getElementById('wlc-in').value.trim();if(!v)return;
@@ -669,7 +669,7 @@ function getAiOptPct(){
 }
 function getAiOptBadgeHTML(){
   const pct = getAiOptPct();
-  return `<div id="ai-opt-badge" onclick="showPage('myself');switchMyselfTab('profile');" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:var(--pill-radius);cursor:pointer;margin-bottom:16px;transition:all .15s;" onmouseover="this.style.borderColor='var(--mode-normal-border)'" onmouseout="this.style.borderColor='var(--amber-d)'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span style="font-size:12px;color:var(--amber);font-family:var(--fm);">AI最適化 ${pct}%</span></div>`;
+  return `<div id="ai-opt-badge" onclick="goPage('myself');switchMyselfTab('profile');" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--amber-g);border:1px solid var(--amber-d);border-radius:var(--pill-radius);cursor:pointer;margin-bottom:16px;transition:all .15s;" onmouseover="this.style.borderColor='var(--mode-normal-border)'" onmouseout="this.style.borderColor='var(--amber-d)'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span style="font-size:12px;color:var(--amber);font-family:var(--fm);">AI最適化 ${pct}%</span></div>`;
 }
 
 function buildEmptyHomeHTML(){
@@ -1615,14 +1615,14 @@ function showProfileHint() {
   const hint = document.createElement('div');
   hint.className = 'msg ai';
   hint.style.marginBottom = '16px';
-  hint.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="font-size:13px;">こんにちは！何でも聞いてください。<br>もしよかったら<a onclick="showPage('myself');closeSidebar();" style="color:var(--amber);cursor:pointer;text-decoration:underline;">「私をデザイン」</a>であなたのことを教えてもらえると、より的確なアドバイスができるようになります。</div></div>`;
+  hint.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="font-size:13px;">こんにちは！何でも聞いてください。<br>もしよかったら<a onclick="goPage('myself');closeSidebar();" style="color:var(--amber);cursor:pointer;text-decoration:underline;">「私をデザイン」</a>であなたのことを教えてもらえると、より的確なアドバイスができるようになります。</div></div>`;
   inner.appendChild(hint);
 
   setCookie('profile_hint_shown', 'true', 365);
 }
 
 function newHomeChat(){ showHomeScreen(); }
-function goHomeNewChat(){ closeSidebar(); showPage('home'); showHomeScreen(); }
+function goHomeNewChat(){ closeSidebar(); goPage('home'); showHomeScreen(); }
 
 let chatRecords = []; // {sessionId, title, date, count}
 
@@ -1785,7 +1785,7 @@ function filterChatHistory(q){
 async function loadChatSession(sessionId){
   closeSidebar();
   closeChatHistory();
-  showPage('home');
+  goPage('home');
   // ローディング表示
   const inner = document.getElementById('home-chat-inner');
   if(inner) inner.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">読み込み中…</div>';
@@ -1914,7 +1914,7 @@ function renderHomeTaskBox(){
   let html='<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">'
     +'<span style="font-size:12px;font-weight:500;color:var(--cream);">タスク</span>'
     +'<span style="font-size:12px;color:var(--muted);margin-left:2px;">残り <span style="color:var(--amber);font-weight:600;">'+remaining+'</span>/'+total+'件</span>'
-    +'<span style="margin-left:auto;font-size:12px;color:var(--amber);cursor:pointer;" onclick="showPage(\'tasks\')">タスク画面 →</span>'
+    +'<span style="margin-left:auto;font-size:12px;color:var(--amber);cursor:pointer;" onclick="goPage(\'tasks\')">タスク画面 →</span>'
     +'</div>';
   // Group by date
   const todayStr=new Date().toISOString().slice(0,10);
@@ -2678,7 +2678,7 @@ function renderGoalProposalCard(title, why, deadline) {
 function startGoalAssist(goalData) {
   const wlcIn = document.getElementById('wlc-in');
   if (wlcIn) wlcIn.value = goalData.title || '';
-  showPage('welcome');
+  goPage('welcome');
 }
 
 // ════════ E-5: Track declined goal proposals ════════
@@ -3597,7 +3597,7 @@ function sendTodayComment(){
     `${idx+1}. ${i.task.title}${i.task.due?' (〆'+i.task.due+')':''}${i.task.estimated_time?' '+i.task.estimated_time:''}`
   ).join('\n');
   const msg = `【状況変更】${comment}\n\n現在のタスク:\n${taskList}\n\nこの状況変更を踏まえて、タスクの順序や時間配分を再提案してください。`;
-  showPage('home');
+  goPage('home');
   setTimeout(() => {
     const msgIn = document.getElementById('home-msg-in');
     if(msgIn){

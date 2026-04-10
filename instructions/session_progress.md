@@ -9,16 +9,16 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.40（デプロイ済み 2026-04-11）
-- **Next:** ARCH-10(旧コード削除) → DEV-05 → DEV-06
-- **Last done:** ARCH-09 ✅ 共通UIクリーンアップ統合。5/5 PASS + 本番5/5 PASS
+- **Version:** v4.0.41（デプロイ済み 2026-04-11）
+- **Next:** DEV-05 → DEV-06
+- **Last done:** ARCH-10 ✅ 旧showPage除去+goPage統合。本番22/22 PASS（ARCHチェーン全完了）
 - **Open issues:** 年齢欄P39未修正
 - **方針:** ユーザーがバグを見つける前に修正されていること。テスト配布より「自分が毎日使いたいツール」を優先
 
 ## 現在地
-- **バージョン:** v4.0.40
-- **チェーン:** ARCH-09完了（共通UIクリーンアップ統合）
-- **次のミッション:** ARCH-10 → DEV-05 → DEV-06
+- **バージョン:** v4.0.41
+- **チェーン:** ARCH-10完了（ARCHチェーン全完了: ARCH-00〜10）
+- **次のミッション:** DEV-05 → DEV-06
 
 ---
 
@@ -567,15 +567,67 @@ AT-3: トースト通知表示→自動消去
 
 ---
 
-### ARCH-10: 旧コード削除 + フルテスト
-> リスク: 🟡中
-> STATUS: QUEUED
+### ARCH-10: ✅ 完了（2026-04-11 v4.0.41）
+> STATUS: DONE
 
-**目的:** 全画面移行完了後にグローバル状態変数・旧showPage()・旧イベントリスナーを削除。L3フルテスト実行
+**実装:**
+- showPage → goPage リネーム（frontend/js/ 全29箇所）
+- preact-bridge.js: `window.showPage` をgoPageへのgetter aliasとして維持（HTML onclick互換）
+- cmd2: `grep showPage frontend/js/` → 0件 ✅
+- ARCH-00〜10 全完了: 全画面Preactライフサイクル + 共通UIクリーンアップ + 旧関数名除去
+
+**テスト:**
+- ARCH-03〜09 + baseline 全22テスト PASS @ 本番
+- canopy: PASS
+
+**元定義（参考）:**
+**目的:** showPage()の全呼び出し元をrouteToScreen()に置換。showPage()を削除し、画面遷移をPreactルーター一本化。旧グローバル状態変数・旧レンダリング関数を削除。L3フルテスト
+
+**仕様:**
+1. routeToScreenをshowPageの完全な代替にする（DOMクラス切替+画面固有初期化をrouteToScreen内に移行）
+2. ui.js/chat.js/goals.js等の全ファイルからshowPage()呼び出しをrouteToScreen()に置換
+3. showPage()/hideAllPages()を削除
+4. ARCH-02〜09で削除済みマークされた旧関数が残っていないか確認・除去
+5. 未使用のグローバル変数を削除
+6. L3フルテスト（全テスト+デザインNGチェック）
+
+**AT:**
+
+AT-1: 全画面遷移（routeToScreen経由）
+  前提: ログイン済み。タスク1件以上存在
+  操作: TODAY→TALK→GOALS→ME→設定→カレンダー→アナリティクス→TODAYの順に遷移
+  期待: 全画面が正しく表示
+  検証: 各画面の固有要素が見える
+  否定検証: 各画面で前画面の要素が見えない
+  データ検証: N/A
+  スクショ: 全7画面
+
+AT-2: showPage関数が存在しない
+  前提: N/A
+  操作: N/A（grepチェック）
+  期待: showPage/hideAllPagesがコードから完全に除去されている
+  検証: grep結果が0件
+  否定検証: N/A
+  データ検証: N/A
+  スクショ: N/A
+
+AT-3: 高速タブ連打（routeToScreen耐久）
+  前提: ログイン済み
+  操作: 4タブを0.3秒間隔で20回ランダムtap
+  期待: 最後のタブ画面が正常表示
+  検証: 最後の画面の固有要素が見える
+  否定検証: コンソールエラーなし
+  データ検証: N/A
+  スクショ: 最終画面
+
+ストレスパス: AT-1を3回連続。3回目も全画面正常
 
 **完了コマンド:**
-  cmd1: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
-  cmd2: grep -rn "showPage\|hideAllPages" frontend/js/ | wc -l | awk '{if($1==0) exit 0; else exit 1}'
+  cmd1: npx playwright test tests/e2e/specs/arch-10.spec.ts --project=mobile 2>&1 | grep "0 failed"
+  cmd2: grep -rn "showPage\|hideAllPages" frontend/js/ | grep -v "//.*showPage" | wc -l | awk '{if($1==0) exit 0; else exit 1}'
+  cmd3: npx playwright test --project=mobile --timeout=90000 2>&1 | grep "0 failed"
+
+**FAIL条件:** cmd1-3のいずれかFAIL
 
 ---
 

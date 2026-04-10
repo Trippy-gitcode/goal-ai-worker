@@ -550,12 +550,12 @@ function _initObScroll(){
 }
 
 function openMyselfHub(){
-  showPage('myself');
+  goPage('myself');
   switchMyselfTab(myselfTab);
   loadIdentityFromServer();
 }
 function openProfileDirect(){
-  showPage('myself');
+  goPage('myself');
   switchMyselfTab('profile');
 }
 
@@ -1260,7 +1260,7 @@ function renderConnectContent(loading=false, data=null){
 function hubChatFromConnect(goalTitle, message){
   const idx = ALL_GOALS.findIndex(g=>g.title.includes(goalTitle.slice(0,6)));
   if(idx>=0){ openGoalHub(idx); return; }
-  showPage('home');
+  goPage('home');
 }
 
 // ─ プロフィール state helpers ─
