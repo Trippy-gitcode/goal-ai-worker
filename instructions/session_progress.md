@@ -9,16 +9,16 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.38（デプロイ済み 2026-04-10）
-- **Next:** ARCH-06(設定) → ARCH-07〜10 → DEV-05 → DEV-06
-- **Last done:** ARCH-05 ✅ ME Preactライフサイクル化。4/4 PASS + 本番16/16 PASS
+- **Version:** v4.0.39（デプロイ済み 2026-04-10）
+- **Next:** ARCH-09(モーダル/パネル) → ARCH-10 → DEV-05 → DEV-06
+- **Last done:** ARCH-06/07/08 ✅ 設定+カレンダー+アナリティクス Preact化。本番25/25 PASS
 - **Open issues:** 年齢欄P39未修正
 - **方針:** ユーザーがバグを見つける前に修正されていること。テスト配布より「自分が毎日使いたいツール」を優先
 
 ## 現在地
-- **バージョン:** v4.0.38
-- **チェーン:** ARCH-05完了（ME画面Preact化）
-- **次のミッション:** ARCH-06〜10 → DEV-05 → DEV-06
+- **バージョン:** v4.0.39
+- **チェーン:** ARCH-08完了（設定/カレンダー/アナリティクスPreact化）
+- **次のミッション:** ARCH-09 → ARCH-10 → DEV-05 → DEV-06
 
 ---
 
@@ -448,9 +448,8 @@ AT-2: AI理解メモ表示
 
 ---
 
-### ARCH-06: 設定画面移行 + AT
-> リスク: 🟢低
-> STATUS: QUEUED
+### ARCH-06: ✅ 完了（2026-04-10 v4.0.39）
+> STATUS: DONE（ARCH-07/08と一括）
 
 **AT:**
 AT-1: テーマ切替→全画面反映
@@ -469,9 +468,8 @@ AT-1: テーマ切替→全画面反映
 
 ---
 
-### ARCH-07: カレンダー画面移行 + AT
-> リスク: 🟢低
-> STATUS: QUEUED
+### ARCH-07: ✅ 完了（2026-04-10 v4.0.39）
+> STATUS: DONE（ARCH-06/08と一括）
 
 **AT:**
 AT-1: 月表示→日付タップ→タスク表示
@@ -490,9 +488,19 @@ AT-1: 月表示→日付タップ→タスク表示
 
 ---
 
-### ARCH-08: アナリティクス画面移行 + AT
-> リスク: 🟢低
-> STATUS: QUEUED
+### ARCH-08: ✅ 完了（2026-04-10 v4.0.39）
+> STATUS: DONE（ARCH-06/07と一括）
+
+**実装（ARCH-06/07/08共通）:**
+- frontend/components/ScreenShell.jsx 新設（汎用薄いシェルコンポーネント）
+- preact-bridge.js: calendar/analytics/settingsをtype='preact'化
+- mountScreenShell/unmountScreenShell 汎用マウント関数
+- window.isPreactScreenMounted(name) 公開
+
+**テスト:**
+- arch-06/07/08.spec.ts 各3テスト × 3 = 9/9 PASS @ localhost
+- ARCH-03〜08 全25テスト PASS @ 本番
+- canopy: PASS
 
 **AT:**
 AT-1: データ+グラフ表示
