@@ -11,7 +11,7 @@ import { ScreenShell } from './ScreenShell.jsx';
 // 現在マウントされているPreactコンポーネント追跡
 let _currentMount = null; // { name, container, cleanup }
 
-// 画面定義: showPageが渡すpg値に合わせる
+// 画面定義: goPageが渡すpg値に合わせる
 // ARCH-02: TODAY は常にPreact（?preact=1フラグ廃止）
 const SCREENS = {
   today: {
@@ -58,7 +58,7 @@ const SCREENS = {
 
 /**
  * 共通ルーター: 画面切替時に前画面のunmount→次画面のmountを自動実行
- * ARCH-01: showPage()から呼び出される。前画面のクリーンアップを保証
+ * ARCH-01: goPage()から呼び出される。前画面のクリーンアップを保証
  */
 export function routeToScreen(name) {
   // ARCH-09: 画面遷移時の共通UIクリーンアップ
@@ -222,7 +222,7 @@ function unmountScreenShell(name) {
 // ═══ ARCH-09: 共通UIクリーンアップ ═══
 // 画面遷移時にモーダル/パネル/オーバーレイを閉じる
 function _cleanupSharedUI() {
-  // 1. サイドバーが開いていたら閉じる（closeSidebar()は既にshowPage内で呼ばれるが二重保証）
+  // 1. サイドバーが開いていたら閉じる（closeSidebar()は既にgoPage内で呼ばれるが二重保証）
   const sb = document.getElementById('sb');
   if (sb && sb.classList.contains('open')) {
     sb.classList.remove('open');
@@ -284,7 +284,7 @@ const VANILLA_CLEANUP = {
 };
 
 function mountVanillaWrapper(name) {
-  // Vanilla画面は既存のshowPage()ロジックで表示される
+  // Vanilla画面は既存のgoPage()ロジックで表示される
   // ここでは追加の初期化のみ（必要に応じて）
   return true;
 }
@@ -303,7 +303,7 @@ function unmountVanillaWrapper(name) {
 }
 
 // ═══ Legacy API 互換 ═══
-// グローバル公開（レガシーshowPageから呼べるように）
+// グローバル公開（goPageから呼べるように）
 window.mountPreactToday = mountPreactToday;
 window.unmountPreactToday = unmountPreactToday;
 window.isPreactTodayMounted = () => _currentMount?.name === 'today';
@@ -318,3 +318,5 @@ window.unmountPreactMyself = unmountPreactMyself;
 window.isPreactMyselfMounted = () => _currentMount?.name === 'myself';
 window.isPreactScreenMounted = (name) => _currentMount?.name === name;
 window.routeToScreen = routeToScreen;
+// ARCH-10: HTML onclick backward compat (frontend/js/ uses goPage instead)
+
