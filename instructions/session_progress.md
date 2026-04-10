@@ -9,16 +9,16 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.37（デプロイ済み 2026-04-10）
-- **Next:** ARCH-05(ME) → ARCH-06〜10 → DEV-05 → DEV-06
-- **Last done:** ARCH-04 ✅ GOALS Preactライフサイクル化。5/5 PASS + 本番18/18 PASS
+- **Version:** v4.0.38（デプロイ済み 2026-04-10）
+- **Next:** ARCH-06(設定) → ARCH-07〜10 → DEV-05 → DEV-06
+- **Last done:** ARCH-05 ✅ ME Preactライフサイクル化。4/4 PASS + 本番16/16 PASS
 - **Open issues:** 年齢欄P39未修正
 - **方針:** ユーザーがバグを見つける前に修正されていること。テスト配布より「自分が毎日使いたいツール」を優先
 
 ## 現在地
-- **バージョン:** v4.0.37
-- **チェーン:** ARCH-04完了（GOALS画面Preact化）
-- **次のミッション:** ARCH-05〜10 → DEV-05 → DEV-06
+- **バージョン:** v4.0.38
+- **チェーン:** ARCH-05完了（ME画面Preact化）
+- **次のミッション:** ARCH-06〜10 → DEV-05 → DEV-06
 
 ---
 
@@ -404,9 +404,22 @@ AT-3: ゴール詳細→AI相談
 
 ---
 
-### ARCH-05: ME画面移行 + AT
+### ARCH-05: ✅ 完了（2026-04-10 v4.0.38）
+> STATUS: DONE
+
+**実装:**
+- frontend/components/Myself.jsx 新設
+- preact-bridge.js: myself をtype='preact'化、mountPreactMyself/unmountPreactMyself追加
+- Myself unmount cleanup: プロフィール自動保存+ヒアリングモーダル閉
+- window.isPreactMyselfMounted 公開
+
+**テスト:**
+- arch-05.spec.ts 4/4 PASS @ localhost+本番
+- ARCH-03/04/05 全16テスト PASS @ 本番
+- canopy: PASS
+
+### ARCH-05 元定義（参考）
 > リスク: 🟡中
-> STATUS: QUEUED
 
 **目的:** ME画面（プロフィール入力+AI理解メモ+ヒアリングセッション）をPreact化
 
