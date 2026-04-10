@@ -3,6 +3,7 @@ const USER_PROFILE = {
   nickname:   '',
   name:       '',
   age:        null,
+  birthday:   null,
   gender:     null,
   dob:        null,
   occupation: '',
@@ -26,6 +27,21 @@ const USER_PROFILE = {
   ideal_day:  '',
   unwanted_life: ''
 };
+
+// P39: 生年月日→年齢自動算出
+function updateBirthdayAge(dateStr) {
+  if (!dateStr) return;
+  USER_PROFILE.birthday = dateStr;
+  const birth = new Date(dateStr);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  USER_PROFILE.age = age > 0 ? age : null;
+  const display = document.getElementById('mp-age-auto');
+  if (display && age > 0) display.textContent = `${age}歳`;
+  invalidateCtxCache();
+}
 
 // ─ Build full AI context string from all profile + goals data ─
 function buildAIContext(){
@@ -958,7 +974,8 @@ function applySummaryToProfile(){
   }
   if(pd){
     if(pd.nickname){ USER_PROFILE.nickname = pd.nickname; const el=document.getElementById('mp-nickname'); if(el) el.value=pd.nickname; }
-    if(pd.age){ USER_PROFILE.age = pd.age; const el=document.getElementById('mp-age'); if(el) el.value=pd.age; }
+    if(pd.birthday){ USER_PROFILE.birthday = pd.birthday; const el=document.getElementById('mp-birthday'); if(el) el.value=pd.birthday; updateBirthdayAge(pd.birthday); }
+    else if(pd.age){ USER_PROFILE.age = pd.age; }
     if(pd.occupation){ USER_PROFILE.occupation = pd.occupation; const el=document.getElementById('mp-occupation'); if(el) el.value=pd.occupation; }
     if(pd.field){ USER_PROFILE.field = pd.field; const el=document.getElementById('mp-field'); if(el) el.value=pd.field; }
     if(pd.constraints){ USER_PROFILE.constraints = pd.constraints; const el=document.getElementById('mp-constraints'); if(el) el.value=pd.constraints; }
@@ -1303,6 +1320,7 @@ async function saveProfileToServer(){
     nickname: USER_PROFILE.nickname,
     name: USER_PROFILE.name,
     age: USER_PROFILE.age,
+    birthday: USER_PROFILE.birthday,
     gender: USER_PROFILE.gender,
     dob: USER_PROFILE.dob,
     occupation: USER_PROFILE.occupation,
