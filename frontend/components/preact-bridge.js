@@ -6,6 +6,7 @@ import { Today } from './Today.jsx';
 import { Talk } from './Talk.jsx';
 import { GoalHub } from './GoalHub.jsx';
 import { Myself } from './Myself.jsx';
+import { ScreenShell } from './ScreenShell.jsx';
 
 // 現在マウントされているPreactコンポーネント追跡
 let _currentMount = null; // { name, container, cleanup }
@@ -39,14 +40,19 @@ const SCREENS = {
     unmount: () => unmountVanillaWrapper('tasks'),
   },
   calendar: {
-    type: 'vanilla',
-    mount: () => mountVanillaWrapper('calendar'),
-    unmount: () => unmountVanillaWrapper('calendar'),
+    type: 'preact',
+    mount: () => mountScreenShell('calendar', 'pg-calendar'),
+    unmount: () => unmountScreenShell('calendar'),
   },
   analytics: {
-    type: 'vanilla',
-    mount: () => mountVanillaWrapper('analytics'),
-    unmount: () => unmountVanillaWrapper('analytics'),
+    type: 'preact',
+    mount: () => mountScreenShell('analytics', 'pg-analytics'),
+    unmount: () => unmountScreenShell('analytics'),
+  },
+  settings: {
+    type: 'preact',
+    mount: () => mountScreenShell('settings', 'pg-settings'),
+    unmount: () => unmountScreenShell('settings'),
   },
 };
 
@@ -183,6 +189,33 @@ function unmountPreactMyself() {
   }
 }
 
+// ═══ ScreenShell 汎用マウント（ARCH-06/07/08: 設定/カレンダー/アナリティクス） ═══
+const _shellContainers = {};
+
+function mountScreenShell(name, pgId) {
+  const pg = document.getElementById(pgId);
+  if (!pg) return false;
+  const hostId = `preact-${name}-host`;
+  let host = document.getElementById(hostId);
+  if (!host) {
+    host = document.createElement('div');
+    host.id = hostId;
+    host.style.display = 'contents';
+    pg.insertBefore(host, pg.firstChild);
+  }
+  _shellContainers[name] = host;
+  render(h(ScreenShell, { id: `preact-${name}-root` }), host);
+  return true;
+}
+
+function unmountScreenShell(name) {
+  const container = _shellContainers[name];
+  if (container) {
+    render(null, container);
+    delete _shellContainers[name];
+  }
+}
+
 // ═══ Vanilla互換ラッパー ═══
 // ARCH-01: 未移行画面のため、mount時に初期化、unmount時にクリーンアップ
 const VANILLA_CLEANUP = {
@@ -200,8 +233,7 @@ const VANILLA_CLEANUP = {
   // ARCH-05: myself はPreact化されたためここは未使用
   myself: () => {},
   tasks: () => {},
-  calendar: () => {},
-  analytics: () => {},
+  // ARCH-06/07/08: calendar, analytics, settings はPreact化済み
 };
 
 function mountVanillaWrapper(name) {
@@ -237,4 +269,5 @@ window.isPreactGoalHubMounted = () => _currentMount?.name === 'goal-hub';
 window.mountPreactMyself = mountPreactMyself;
 window.unmountPreactMyself = unmountPreactMyself;
 window.isPreactMyselfMounted = () => _currentMount?.name === 'myself';
+window.isPreactScreenMounted = (name) => _currentMount?.name === name;
 window.routeToScreen = routeToScreen;
