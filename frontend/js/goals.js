@@ -1866,6 +1866,15 @@ async function init(){
   if(savedFontSize) applyFontSize(savedFontSize);
 
   initSwipeToOpenSidebar();
+  // P1: ボトムタブ間スワイプ接続
+  const mainContent = document.getElementById('main-content') || document.body;
+  const TAB_ORDER = ['today', 'home', 'goal-hub', 'myself'];
+  initTabSwipe(mainContent, (dir) => {
+    const curIdx = TAB_ORDER.indexOf(curPage);
+    if (curIdx < 0) return;
+    const next = dir === 'left' ? curIdx + 1 : curIdx - 1;
+    if (next >= 0 && next < TAB_ORDER.length) goPage(TAB_ORDER[next]);
+  });
   initHomePlaceholder();
   renderMembershipUI();
   if(typeof initChatBg === 'function') initChatBg();

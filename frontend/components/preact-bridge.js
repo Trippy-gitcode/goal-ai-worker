@@ -319,4 +319,5 @@ window.isPreactMyselfMounted = () => _currentMount?.name === 'myself';
 window.isPreactScreenMounted = (name) => _currentMount?.name === name;
 window.routeToScreen = routeToScreen;
 // ARCH-10: HTML onclick backward compat (frontend/js/ uses goPage instead)
-
+// Deferred assignment: goPage is set by ui.js Object.assign which runs after this module
+setTimeout(() => { if (window.goPage && !window.showPage) window.showPage = window.goPage; }, 0);

@@ -1,4 +1,4 @@
-=== CANOPY TEST (02:27:20) ===
+=== CANOPY TEST (03:06:38) ===
 Worker: "version":"4.0.35"
 --- HTTP Smoke Tests ---
 OK: GET /api/version → 200
@@ -68,8 +68,8 @@ OK: plan-compare-table (2 refs)
 OK: フェアユース制限 (2 refs)
 OK: goal-detect-toast\|showGoalDetectToast (10 refs)
 --- Version sync (C10) ---
-  globals.js=4.0.41  sw.js=4.0.41  index.html=4.0.41
-OK: version sync (4.0.41)
+  globals.js=4.0.42  sw.js=4.0.42  index.html=4.0.42
+OK: version sync (4.0.42)
 --- Style integrity (C12) ---
 OK: no 'border-radius:24px' in JS
 OK: no 'border-radius:20px' in JS
@@ -120,12 +120,12 @@ OK: 'chip-row' sync (src=1 dist=1)
 OK: 'mode-f' cleanup (src=0 dist=0)
 OK: 'mode-row-f' cleanup (src=0 dist=0)
 OK: 'ゴールプロジェクト' cleanup (src=0 dist=0)
-  frontend-dist version=4.0.41  source version=4.0.41
+  frontend-dist version=4.0.42  source version=4.0.42
 OK: frontend-dist version sync
 --- Vite tree-shake safety (onclick vs window.assign) ---
 OK: all onclick functions registered in window
 --- SP version sync ---
-  session_progress=v4.0.41  APP_VERSION=4.0.41
+  session_progress=v4.0.41  APP_VERSION=4.0.42
 --- B4/B5 KV invalidate ---
 OK: B4 profile KV invalidate (4 refs)
 OK: B5 userId KV cache (1 refs)
@@ -147,4 +147,4 @@ OK: no critical test anti-patterns
 OK: test.skip() count 19/495 (3%)
 --- UI overlay check ---
   sheets/modals=1  overlays=1
-=== CANOPY PASS (9s) ===
+=== CANOPY PASS (10s) ===
