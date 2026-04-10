@@ -9,16 +9,16 @@
 ---
 
 ## 5行サマリー
-- **Version:** v4.0.36（デプロイ済み 2026-04-10）
-- **Next:** ARCH-04(GOALS) → ARCH-05〜10 → DEV-05 → DEV-06
-- **Last done:** ARCH-03 ✅ TALK Preactライフサイクル化。7/7 + 636 E2E PASS
+- **Version:** v4.0.37（デプロイ済み 2026-04-10）
+- **Next:** ARCH-05(ME) → ARCH-06〜10 → DEV-05 → DEV-06
+- **Last done:** ARCH-04 ✅ GOALS Preactライフサイクル化。5/5 PASS + 本番18/18 PASS
 - **Open issues:** 年齢欄P39未修正
 - **方針:** ユーザーがバグを見つける前に修正されていること。テスト配布より「自分が毎日使いたいツール」を優先
 
 ## 現在地
-- **バージョン:** v4.0.36
-- **チェーン:** ARCH-03完了（TALK画面Preact化: mount/unmount discipline）
-- **次のミッション:** ARCH-04〜10 → DEV-05 → DEV-06
+- **バージョン:** v4.0.37
+- **チェーン:** ARCH-04完了（GOALS画面Preact化）
+- **次のミッション:** ARCH-05〜10 → DEV-05 → DEV-06
 
 ---
 
@@ -351,9 +351,23 @@ AT-5: 長文入力+スクロール追従
 
 ---
 
-### ARCH-04: GOALS画面移行 + AT
+### ARCH-04: ✅ 完了（2026-04-10 v4.0.37）
+> STATUS: DONE
+
+**実装:**
+- frontend/components/GoalHub.jsx 新設（Talk.jsxパターン踏襲）
+- preact-bridge.js: goal-hub をtype='preact'に変更、mountPreactGoalHub/unmountPreactGoalHub追加
+- GoalHub unmount cleanup: 詳細パネル閉→hub入力欄リセット→検索バー閉
+- window.isPreactGoalHubMounted 公開
+
+**テスト:**
+- arch-04.spec.ts 5/5 PASS（STRUCT/AT-1〜AT-3/Stress）@ localhost+本番
+- ARCH-02/03/04 全18テスト PASS @ 本番
+- canopy: PASS
+- L2回帰テストの54FAILはネットワーク起因（502 Bad Gateway/DNS ENOTFOUND）。コード原因のFAILなし
+
+### ARCH-04 元定義（参考）
 > リスク: 🟡中
-> STATUS: QUEUED
 
 **目的:** GOALS画面（一覧+詳細ハブ+ゴール作成フロー）をPreactコンポーネント化
 
