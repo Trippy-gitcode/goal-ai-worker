@@ -5,6 +5,7 @@ import { render, h } from 'preact';
 import { Today } from './Today.jsx';
 import { Talk } from './Talk.jsx';
 import { GoalHub } from './GoalHub.jsx';
+import { Myself } from './Myself.jsx';
 
 // 現在マウントされているPreactコンポーネント追跡
 let _currentMount = null; // { name, container, cleanup }
@@ -28,9 +29,9 @@ const SCREENS = {
     unmount: () => unmountPreactGoalHub(),
   },
   myself: {
-    type: 'vanilla',
-    mount: () => mountVanillaWrapper('myself'),
-    unmount: () => unmountVanillaWrapper('myself'),
+    type: 'preact',
+    mount: () => mountPreactMyself(),
+    unmount: () => unmountPreactMyself(),
   },
   tasks: {
     type: 'vanilla',
@@ -157,6 +158,31 @@ function unmountPreactGoalHub() {
   }
 }
 
+// ═══ Preact Myself（ARCH-05: ME画面 Preact化） ═══
+let _myselfContainer = null;
+
+function mountPreactMyself() {
+  const pgMyself = document.getElementById('pg-myself');
+  if (!pgMyself) return false;
+  let host = document.getElementById('preact-myself-host');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'preact-myself-host';
+    host.style.display = 'contents';
+    pgMyself.insertBefore(host, pgMyself.firstChild);
+  }
+  _myselfContainer = host;
+  render(h(Myself, {}), _myselfContainer);
+  return true;
+}
+
+function unmountPreactMyself() {
+  if (_myselfContainer) {
+    render(null, _myselfContainer);
+    _myselfContainer = null;
+  }
+}
+
 // ═══ Vanilla互換ラッパー ═══
 // ARCH-01: 未移行画面のため、mount時に初期化、unmount時にクリーンアップ
 const VANILLA_CLEANUP = {
@@ -171,12 +197,8 @@ const VANILLA_CLEANUP = {
   home: () => {},
   // ARCH-04: goal-hub はPreact化されたためここは未使用
   'goal-hub': () => {},
-  myself: () => {
-    // ME画面: 編集中のニックネーム保存
-    if (typeof window.saveProfileToServer === 'function') {
-      try { window.saveProfileToServer(); } catch {}
-    }
-  },
+  // ARCH-05: myself はPreact化されたためここは未使用
+  myself: () => {},
   tasks: () => {},
   calendar: () => {},
   analytics: () => {},
@@ -212,4 +234,7 @@ window.isPreactTalkMounted = () => _currentMount?.name === 'home';
 window.mountPreactGoalHub = mountPreactGoalHub;
 window.unmountPreactGoalHub = unmountPreactGoalHub;
 window.isPreactGoalHubMounted = () => _currentMount?.name === 'goal-hub';
+window.mountPreactMyself = mountPreactMyself;
+window.unmountPreactMyself = unmountPreactMyself;
+window.isPreactMyselfMounted = () => _currentMount?.name === 'myself';
 window.routeToScreen = routeToScreen;
