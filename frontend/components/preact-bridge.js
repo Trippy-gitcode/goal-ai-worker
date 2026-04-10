@@ -61,6 +61,9 @@ const SCREENS = {
  * ARCH-01: showPage()から呼び出される。前画面のクリーンアップを保証
  */
 export function routeToScreen(name) {
+  // ARCH-09: 画面遷移時の共通UIクリーンアップ
+  try { _cleanupSharedUI(); } catch (e) { console.warn('shared UI cleanup failed:', e); }
+
   // 1. 前画面のunmount
   if (_currentMount && _currentMount.name !== name) {
     try {
@@ -213,6 +216,50 @@ function unmountScreenShell(name) {
   if (container) {
     render(null, container);
     delete _shellContainers[name];
+  }
+}
+
+// ═══ ARCH-09: 共通UIクリーンアップ ═══
+// 画面遷移時にモーダル/パネル/オーバーレイを閉じる
+function _cleanupSharedUI() {
+  // 1. サイドバーが開いていたら閉じる（closeSidebar()は既にshowPage内で呼ばれるが二重保証）
+  const sb = document.getElementById('sb');
+  if (sb && sb.classList.contains('open')) {
+    sb.classList.remove('open');
+    const ov = document.getElementById('sb-overlay');
+    if (ov) ov.classList.remove('open');
+    const hb = document.getElementById('hamburger-btn');
+    if (hb) hb.style.display = '';
+    document.body.style.overflow = '';
+  }
+
+  // 2. タスク詳細パネルが開いていたら閉じる（BUG-05防止の構造的ゲート）
+  const taskPanel = document.getElementById('home-task-panel');
+  if (taskPanel && taskPanel.classList.contains('open')) {
+    taskPanel.classList.remove('open');
+  }
+
+  // 3. 動的モーダルオーバーレイを除去
+  document.querySelectorAll('.modal-overlay, .quick-goal-toast').forEach(m => {
+    try { m.remove(); } catch {}
+  });
+
+  // 4. タスク追加ステップモーダルを閉じる
+  const addTask = document.getElementById('today-add-overlay');
+  if (addTask && addTask.style.display !== 'none') {
+    addTask.style.display = 'none';
+  }
+
+  // 5. フィードバックモーダル閉じる
+  const fbModal = document.getElementById('feedback-modal');
+  if (fbModal && fbModal.style.display !== 'none') {
+    fbModal.style.display = 'none';
+  }
+
+  // 6. チャット履歴モーダル閉じる
+  const chatHistory = document.getElementById('chat-history-modal');
+  if (chatHistory && chatHistory.style.display !== 'none') {
+    chatHistory.style.display = 'none';
   }
 }
 
