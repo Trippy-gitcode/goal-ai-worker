@@ -50,6 +50,14 @@ function updateStreak(){
   if(STREAK.count === 3) toast('3日連続！いい調子です');
   if(STREAK.count === 7){ toast('1週間連続！素晴らしい'); launchConfetti(); }
   if(STREAK.count === 30){ toast('★ 30日連続達成！'); launchConfetti(); }
+  // P33: 朝7時前起動EXPボーナス
+  const hour = new Date().getHours();
+  const earlyKey = 'early_bird_' + today;
+  if(hour < 7 && !localStorage.getItem(earlyKey)){
+    localStorage.setItem(earlyKey, '1');
+    if(typeof showExpPopup === 'function') showExpPopup(10);
+    toast('🌅 早起きボーナス +10 EXP');
+  }
 }
 
 function renderStreak(){
@@ -136,7 +144,7 @@ function getDeviceId() {
   return 'dev_' + Math.abs(hash).toString(36);
 }
 
-const APP_VERSION = '4.0.41';
+const APP_VERSION = '4.0.42';
 
 const FONT_SIZES = {
   xs: { label: '極小', base: '14px', lh: '1.55' },

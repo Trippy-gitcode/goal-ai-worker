@@ -156,7 +156,7 @@
       <span style="color:var(--muted3);">|</span>
       <a href="privacy.html" target="_blank">プライバシー</a>
       <span style="color:var(--muted3);">|</span>
-      <span class="version" title="タップで更新確認" onclick="checkForUpdate()" style="cursor:pointer;">v4.0.41</span>
+      <span class="version" title="タップで更新確認" onclick="checkForUpdate()" style="cursor:pointer;">v4.0.42</span>
     </div>
   </div>
 </div>
@@ -1004,8 +1004,9 @@
                       </select>
                     </div>
                     <div class="field">
-                      <div class="field-lbl">年齢</div>
-                      <input class="field-input" type="number" id="mp-age" min="10" max="120" placeholder="例：25" oninput="USER_PROFILE.age=parseInt(this.value)||null;invalidateCtxCache();">
+                      <div class="field-lbl">生年月日</div>
+                      <input class="field-input" type="date" id="mp-birthday" oninput="updateBirthdayAge(this.value)">
+                      <div id="mp-age-auto" style="font-size:11px;color:var(--muted);margin-top:4px;"></div>
                     </div>
                     <div class="field">
                       <div class="field-lbl">専門分野</div>

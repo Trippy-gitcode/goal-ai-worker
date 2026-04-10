@@ -1685,13 +1685,19 @@ function homeSendRestore(){
 function _setHomeSendIcon(mode){
   const icon = document.getElementById('home-send-icon');
   if(!icon) return;
-  if(mode==='stop'){
-    icon.innerHTML = '<rect x="6" y="6" width="12" height="12" rx="2" fill="var(--text-on-accent)"/>';
-    icon.closest('button')?.setAttribute('onclick','stopHomeStream()');
-  } else {
-    icon.innerHTML = '<path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>';
-    icon.closest('button')?.setAttribute('onclick','sendHomeMsg()');
-  }
+  const btn = icon.closest('button');
+  // P28: fade transition on stop/send icon switch
+  if(btn) { btn.style.transition = 'opacity .15s,transform .15s'; btn.style.opacity = '0'; btn.style.transform = 'scale(0.85)'; }
+  setTimeout(() => {
+    if(mode==='stop'){
+      icon.innerHTML = '<rect x="6" y="6" width="12" height="12" rx="2" fill="var(--text-on-accent)"/>';
+      if(btn) btn.setAttribute('onclick','stopHomeStream()');
+    } else {
+      icon.innerHTML = '<path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>';
+      if(btn) btn.setAttribute('onclick','sendHomeMsg()');
+    }
+    if(btn) { btn.style.opacity = '1'; btn.style.transform = 'scale(1)'; }
+  }, 150);
 }
 function stopHomeStream(){
   if(_homeAbort){ _homeAbort.abort(); _homeAbort=null; }
