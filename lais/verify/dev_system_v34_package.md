@@ -299,6 +299,9 @@ echo "OK: G15 spec and impl reference identical TDD files"
 # scripts/lib/risk_match.sh (R2.1.1 AFTER)
 . "$(cd "$(dirname "$0")" && pwd)/risk_patterns.sh"
 ```
+```
+```
+```
 
 is_risk_path() {
   target="$1"
@@ -433,11 +436,15 @@ check_precommit_logic || exit 1
 echo "OK: G13 pre-commit/pre-push fire log present + logic check"
 ```
 
-#### γ'-7: append_deploy_fail.sh 改行変数を ENVIRON 経由に
+#### γ'-7: append_deploy_fail.sh 改行変数を ENVIRON 経由に（PATCH-13 / PATCH-19 Bug F 反映: STRIKE 1→BLOCKED 化、DEPLOY-RECOVER 自動生成廃止、OVERRIDE 引上げ）
+
+> **更新（v3.4）**: 旧版（R2.1.1 初版）は STRIKE 失敗時に DEPLOY-RECOVER ミッションを自動挿入していたが、PATCH-13（R3-H-08）で auto RECOVER 暴走抑止のため **STRIKE 1 → STATUS=BLOCKED + 自動 DEPLOY-RECOVER 生成廃止** に変更。ADV が目視レビュー後、BLOCKED 解除 + 手動 DEPLOY-RECOVER 起票 or correct_status で IN_PROGRESS 戻し（PATCH-12）。
 
 ```sh
 #!/bin/sh
-# scripts/append_deploy_fail.sh (R2.1.1 AFTER)
+# scripts/append_deploy_fail.sh (v3.4 AFTER、PATCH-13 / PATCH-19 Bug F 反映)
+set -eu
+
 MISSION_ID="$1"
 STDOUT_TAIL="$2"
 TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -445,11 +452,35 @@ TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 PROGRESS=instructions/session_progress.md
 [ -f "$PROGRESS" ] || exit 2
 
+# PATCH-19 Bug F: OVERRIDE は if 外部に引上げ（set -eu 下での unset 参照防止）
+# ミッション ID 別に承認ファイルを分離（誤承認防止）
+OVERRIDE="instructions/approvals/${MISSION_ID}.strike_override.json"
+
 # γ' 対応: 改行含む変数は環境変数経由で awk に渡す
 export STDOUT_TAIL
 export MISSION_ID
 export TIMESTAMP
 
+# STRIKE カウンタ更新（instructions/deploy_strikes.json）
+STRIKES_FILE=instructions/deploy_strikes.json
+[ -f "$STRIKES_FILE" ] || echo '{}' > "$STRIKES_FILE"
+strikes=$(jq -r --arg mid "$MISSION_ID" '.[$mid] // 0' "$STRIKES_FILE")
+strikes=$((strikes + 1))
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+jq --arg mid "$MISSION_ID" --argjson n "$strikes" '.[$mid] = $n' "$STRIKES_FILE" > "$tmp" && mv "$tmp" "$STRIKES_FILE"
+
+# STRIKE 別 BLOCKED 理由決定（PATCH-13）
+# 注: append_deploy_fail.sh は失敗記録を最後まで実行する（途中 exit しない）。
+# OVERRIDE 存在チェックは次回 deploy.sh 冒頭で実施（失敗ログを隠蔽しないため）。
+case "$strikes" in
+  1) BLOCKED_REASON="DEPLOY_STRIKE_1_REVIEW_REQUIRED" ;;
+  2) BLOCKED_REASON="DEPLOY_STRIKE_2_PO_ESCALATION" ;;
+  *) BLOCKED_REASON="DEPLOY_STRIKE_3_PO_OVERRIDE_PENDING" ;;
+esac
+export BLOCKED_REASON
+
+# DEPLOY-FAIL 提案ログ追記（DEPLOY-RECOVER 自動生成は廃止 — PATCH-13）
 awk '
   /^## 提案ログ/ && !done {
     print
@@ -457,44 +488,34 @@ awk '
     print "### DEPLOY-FAIL " ENVIRON["MISSION_ID"] " (" ENVIRON["TIMESTAMP"] ")"
     print "- **STATUS:** WAITING_PO"
     print "- **提案日:** " substr(ENVIRON["TIMESTAMP"], 1, 10)
+    print "- **BLOCKED 理由:** " ENVIRON["BLOCKED_REASON"]
     print "- **最終stdout (tail30):**"
     print "```"
     print ENVIRON["STDOUT_TAIL"]
     print "```"
-    print "- **次ミッション:** DEPLOY-RECOVER-" ENVIRON["MISSION_ID"] " (自動挿入済み)"
+    print "- **次アクション:** ADV 目視レビュー後に BLOCKED 解除 + 手動 DEPLOY-RECOVER 起票 or correct_status で IN_PROGRESS 戻し（PATCH-12 / PATCH-13、自動 DEPLOY-RECOVER 生成は廃止）"
     done=1; next
   }
   { print }
 ' "$PROGRESS" > "${PROGRESS}.tmp" && mv "${PROGRESS}.tmp" "$PROGRESS"
 
-# η' 対応: 元ミッションの STATUS を READY_FOR_DEPLOY → IN_PROGRESS に自動書戻し
-awk -v mid="$MISSION_ID" '
+# PATCH-13 対応: 元ミッションの STATUS を READY_FOR_DEPLOY → BLOCKED に書換え + BLOCKED 理由行を STATUS 直下に追記
+awk -v mid="$MISSION_ID" -v reason="$BLOCKED_REASON" '
   $0 ~ "^### " mid ":" { in_block=1 }
   in_block && /^- \*\*STATUS:\*\*[[:space:]]*READY_FOR_DEPLOY/ {
-    sub(/READY_FOR_DEPLOY/, "IN_PROGRESS")
+    sub(/READY_FOR_DEPLOY/, "BLOCKED")
+    print
+    print "- **BLOCKED 理由:** " reason
     in_block=0
+    next
   }
   in_block && /^### [A-Z0-9-]+:/ && NR>1 { in_block=0 }
   { print }
 ' "$PROGRESS" > "${PROGRESS}.tmp2" && mv "${PROGRESS}.tmp2" "$PROGRESS"
 
-# DEPLOY-RECOVER 挿入（R2.1 §4.19.2 templates/deploy_recover_template.md 参照）
-if [ -f templates/deploy_recover_template.md ]; then
-  sed "s/{MISSION_ID}/$MISSION_ID/g; s/{TIMESTAMP}/$TIMESTAMP/g" \
-    templates/deploy_recover_template.md > /tmp/deploy_recover.md
-  awk '
-    /^## ミッションキュー/ && !done {
-      print
-      print ""
-      while ((getline line < "/tmp/deploy_recover.md") > 0) print line
-      close("/tmp/deploy_recover.md")
-      done=1; next
-    }
-    { print }
-  ' "$PROGRESS" > "${PROGRESS}.tmp3" && mv "${PROGRESS}.tmp3" "$PROGRESS"
-fi
+# DEPLOY-RECOVER 自動生成は PATCH-13 で廃止（ADV 手動起票に委ねる）
 
-echo "OK: DEPLOY-FAIL appended and DEPLOY-RECOVER inserted for $MISSION_ID"
+echo "OK: DEPLOY-FAIL appended, STATUS → BLOCKED ($BLOCKED_REASON) for $MISSION_ID. ADV review required (auto DEPLOY-RECOVER abolished)."
 ```
 
 #### γ'-8: shellcheck ゲート強化（R2.1 §4.4.5 追記）
@@ -775,58 +796,51 @@ fi
 MISSION_RISK=$(scripts/mission_risk_classifier.sh "instructions/session_progress.md" || echo "low")
 if [ "$MISSION_RISK" = "high" ]; then
   status=$(awk "/^### $MISSION_ID:/,/^### [A-Z]/" instructions/session_progress.md | \
-    grep -E '^- \*\*STATUS:\*\*' | head -1 | sed -E 's/.*STATUS:\*\*[[:space:]]*//' | awk '{print $1}')
-  if [ "$status" != "READY_FOR_DEPLOY" ]; then
-    echo "FAIL: high-risk mission $MISSION_ID must be READY_FOR_DEPLOY (current: $status)"
-    echo "  cmd-unit + cmd-e2e PASS を先に実行してください"
-    exit 1
-  fi
-fi
+```
+grep -E '^- \*\*STATUS:\*\*' | head -1 | sed -E 's/.*STATUS:\*\*[[:space:]]*//' | awk '{print $1}')
+```
+
+if \[ "$status" != "READY_FOR_DEPLOY" \]; then echo "FAIL: high-risk mission $MISSION_ID must be READY_FOR_DEPLOY (current: $status)" echo " cmd-unit + cmd-e2e PASS を先に実行してください" exit 1 fi fi
 
 # --- deploy 実行 ---
-echo "[deploy] starting $MISSION_ID at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-mkdir -p logs
-deploy_stdout=$(mktemp)
-npx wrangler pages deploy dist --project-name="${CF_PROJECT:-myproject}" > "$deploy_stdout" 2>&1
-deploy_rc=$?
-cat "$deploy_stdout"
-if [ "$deploy_rc" -ne 0 ]; then
-  tail=$(tail -30 "$deploy_stdout")
-  scripts/append_deploy_fail.sh "$MISSION_ID" "$tail"
-  rm -f "$deploy_stdout"
-  exit 1
-fi
-rm -f "$deploy_stdout"
+
+echo "\[deploy\] starting $MISSION_ID at $(date -u +%Y-%m-%dT%H:%M:%SZ)" mkdir -p logs deploy_stdout=$(mktemp) npx wrangler pages deploy dist --project-name="${CF_PROJECT:-myproject}" &gt; "$deploy_stdout" 2&gt;&1 deploy_rc=$? cat "$deploy_stdout" if \[ "$deploy_rc" -ne 0 \]; then tail=$(tail -30 "$deploy_stdout") scripts/append_deploy_fail.sh "$MISSION_ID" "$tail" rm -f "$deploy_stdout" exit 1 fi rm -f "$deploy_stdout"
 
 # --- post-deploy ---
-URL=$(wrangler pages deployment list --project-name="${CF_PROJECT:-myproject}" --json 2>/dev/null | \
-  jq -r '.[0].url' 2>/dev/null || echo "")
-if [ -n "$URL" ]; then
-  # Step 8: hash ポーリング（α クラスター）
-  scripts/deploy_poll_hash.sh "$URL" "$(git rev-parse HEAD)" || { echo "FAIL: hash poll"; exit 1; }
-fi
+
+URL=$(wrangler pages deployment list --project-name="${CF_PROJECT:-myproject}" --json 2&gt;/dev/null | \
+jq -r '.\[0\].url' 2&gt;/dev/null || echo "") if \[ -n "$URL" \]; then
+
+# Step 8: hash ポーリング（α クラスター）
+
+scripts/deploy_poll_hash.sh "$URL" "$(git rev-parse HEAD)" || { echo "FAIL: hash poll"; exit 1; } fi
 
 # logs/deploy.log 記録（β'-3 対応）
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) DEPLOY-OK $MISSION_ID" >> logs/deploy.log
+
+echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) DEPLOY-OK $MISSION_ID" &gt;&gt; logs/deploy.log
 
 # 高リスク系: L1-realworld + G17
-if [ "$MISSION_RISK" = "high" ]; then
-  # ζ' 5操作スモーク
-  if ! MISSION_ID="$MISSION_ID" npx playwright test --config=playwright.realworld.config.ts; then
-    scripts/append_deploy_fail.sh "$MISSION_ID" "realworld L1 smoke failed"
-    exit 1
-  fi
-  # G17: realworld 証跡検証
-  scripts/realworld_proof_check.sh "$MISSION_ID" || { echo "FAIL: G17"; exit 1; }
 
-  # η' 対応: STATUS: READY_FOR_DEPLOY → DONE 自動書換え
-  sed -i.bak -E "/^### $MISSION_ID:/,/^### /{
-    s/^(- \*\*STATUS:\*\*)[[:space:]]*READY_FOR_DEPLOY/\1 DONE/
-  }" instructions/session_progress.md
-  rm -f instructions/session_progress.md.bak
-fi
+if \[ "$MISSION_RISK" = "high" \]; then
 
-echo "[deploy] $MISSION_ID DONE"
+# ζ' 5操作スモーク
+
+if ! MISSION_ID="$MISSION_ID" npx playwright test --config=playwright.realworld.config.ts; then scripts/append_deploy_fail.sh "$MISSION_ID" "realworld L1 smoke failed" exit 1 fi
+
+# G17: realworld 証跡検証
+
+scripts/realworld_proof_check.sh "$MISSION_ID" || { echo "FAIL: G17"; exit 1; }
+
+# η' 対応: STATUS: READY_FOR_DEPLOY → DONE 自動書換え（v3.4 確定 5状態モデル、§15 §C3.2 SSoT に整合）
+
+sed -i.bak -E "/^### $MISSION_ID:/,/^### /{ s/^(- \*\*STATUS:\*\*)[[:space:]]\*READY_FOR_DEPLOY/\\1 DONE/ }" instructions/session_progress.md rm -f instructions/session_progress.md.bak
+
+# Step 12: STRIKE カウンタクリア（成功時、PATCH-13）+ logs/deploy.log 記録 + git tag
+
+STRIKES_FILE=instructions/deploy_strikes.json if \[ -f "$STRIKES_FILE" \]; then tmp=$(mktemp) jq --arg mid "$MISSION_ID" 'del(.\[$mid\])' "$STRIKES_FILE" &gt; "$tmp" && mv "$tmp" "$STRIKES_FILE" fi fi
+
+echo "\[deploy\] $MISSION_ID DONE"
+
 ```
 
 #### ε'-3: hflow_trigger_check.sh main 直 push 対応
@@ -865,6 +879,7 @@ get_changed_files() {
       else
         get_changed_files pre-push
       fi
+```
       ;;
     *)
       echo "ERROR: unknown CONTEXT '$ctx'" >&2; return 2 ;;
@@ -890,11 +905,13 @@ exit 0
 ```
 
 pre-push フック側で以下を追加:
+
 ```sh
 # .git/hooks/pre-push (抜粋)
 while read local_ref local_sha remote_ref remote_sha; do
   export GIT_PUSH_REMOTE_SHA="$remote_sha"
   HFLOW_CONTEXT=pre-push scripts/hflow_trigger_check.sh
+```
 done
 ```
 
@@ -952,30 +969,35 @@ done
 
 ---
 
-### §2.η' — STATUS 遷移 全自動化
+### §2.η' — STATUS 遷移 全自動化（5状態モデル、PD-109 + PATCH-12/13/19 反映）
 
-**Target**: R2.1 §4.7.1, §4.7.2, §4.19.4, §4.19.1
+**Target**: R2.1 §4.7.1, §4.7.2, §4.19.4, §4.19.1（v3.4 確定で §15 §C3.2 SSoT に統合済み）
 
-**根拠**: Golden R1 gemini_solo R-008, gemini_tech_writer R-003
+**根拠**: Golden R1 gemini_solo R-008, gemini_tech_writer R-003 + PATCH-12（STATUS_CORRECTION）+ PATCH-13（STRIKE 1→BLOCKED）+ PATCH-19 Bug L（表組同期）
 
-**R2.1.1 確定: STATUS 遷移は全自動化**（手動遷移禁止）
+**R2.1.1 確定（v3.4 PATCH-12/13/19 で更新）: STATUS 遷移は順方向全自動 + 逆方向は ADV/PO 限定**
+
+正本は §15 §C3.2 STATUS 5状態モデル表（QUEUED / IN_PROGRESS / READY_FOR_DEPLOY / DONE / BLOCKED）。本節は実装サンプルとして §C3.2 SSoT に整合する形で再掲する（§C3.2 と矛盾発生時は §C3.2 優先）。
 
 ```markdown
-### §4.7.1 STATUS 遷移ルール（R2.1.1 AFTER）
+### §4.7.1 STATUS 遷移ルール（v3.4 AFTER、§15 §C3.2 SSoT に整合）
 
-ミッション STATUS の遷移はすべて**スクリプト経由で自動**。ENG の手動書換えは禁止。
+ミッション STATUS の順方向遷移はすべて**スクリプト経由で自動**。ENG の独断手動書換えは BLOCKED への手動遷移（理由行必須）以外禁止。逆方向遷移は ADV/PO のみ `correct_status` 経由（PATCH-12）。
 
 | 遷移 | 書換え主体 | トリガー |
 |---|---|---|
-| (init) → IN_PROGRESS | ENG または session_progress.md 作成時 | ミッション定義記述時 |
-| IN_PROGRESS → READY_FOR_DEPLOY | canopy_common.sh::check_test_pass | 高リスク系で cmd-unit + cmd-e2e PASS 時（check_test_pass 内で sed 書換え） |
-| READY_FOR_DEPLOY → DONE | deploy.sh | deploy 成功 + G17 PASS 時（deploy.sh 末尾で sed 書換え） |
-| READY_FOR_DEPLOY → IN_PROGRESS | append_deploy_fail.sh | deploy 失敗時（§2.γ'-7 参照） |
-| IN_PROGRESS → DONE（低/中リスク） | canopy_common.sh::check_test_pass | 低リスク: cmd-unit PASS / 中リスク: cmd-unit + cmd-e2e PASS |
+| QUEUED → IN_PROGRESS | canopy pre-commit hook（pre_commit_status_check.sh）| ミッション初回コミット |
+| IN_PROGRESS → READY_FOR_DEPLOY | canopy_common.sh::check_test_pass | 高リスク系で cmd-unit + cmd-e2e PASS（N/A 明示含む）+ G8 RED→GREEN 最低1種類 |
+| READY_FOR_DEPLOY → DONE | deploy.sh | deploy 成功 + G17 PASS（高リスク系）|
+| IN_PROGRESS → DONE（低/中リスク or no_deploy:true）| canopy_common.sh::check_test_pass | 低/中リスク: cmd-unit + cmd-e2e PASS（N/A 明示含む）、READY_FOR_DEPLOY 経由せず |
+| * → BLOCKED（手動例外）| ENG 手動 | 外部障害・ツール故障等で続行不能、「**BLOCKED 理由:**」行必須（canopy::check_blocked_integrity 検証）|
+| READY_FOR_DEPLOY → BLOCKED（STRIKE 1）| append_deploy_fail.sh | deploy 失敗（PATCH-13、自動 DEPLOY-RECOVER 生成廃止、ADV 目視レビュー必須）|
+| 逆方向 4 種（DONE→READY_FOR_DEPLOY / DONE→IN_PROGRESS / READY_FOR_DEPLOY→IN_PROGRESS / IN_PROGRESS→QUEUED）| **ADV / PO のみ**（canopy_common.sh::correct_status 経由、status_corrections.log 記録必須）| AI 誤判定の事後訂正（PATCH-12、ENG 独断禁止、BLOCKED への correct_status 禁止）|
 
 **pre-deploy ゲートで STATUS 検証**（ε'-1 パッチで deploy.sh 冒頭に組込済み）:
 - 高リスク系ミッションで STATUS != READY_FOR_DEPLOY ならデプロイ拒否
 - これにより「ENG が遷移を忘れた」状態での誤デプロイを防止
+- deploy.sh Step 0 で直近 1h 以内の STATUS_CORRECTION を通知（中断はしない、PATCH-12）
 ```
 
 canopy_common.sh::check_test_pass の STATUS 自動書換え実装:
@@ -1342,9 +1364,9 @@ G7 仕様↔完了対応 / G8 TDD(unit/e2e) / G9 UI / G10 シークレット /
 G11 Step0 / G12 提案ログ / G13 フック発火 / G14 仕様ファースト /
 G15 TDD同期 / G16 hash埋込 / G17 realworld
 
-#### §C0.5 3状態 STATUS モデル（§C3 参照）
-IN_PROGRESS → [高リスク: READY_FOR_DEPLOY →] DONE
-STATUS 遷移は全自動（canopy_common.sh / deploy.sh / append_deploy_fail.sh が sed で書換え）
+#### §C0.5 5状態 STATUS モデル（PD-109、§C3.2 SSoT 参照）
+QUEUED → IN_PROGRESS → READY_FOR_DEPLOY → DONE（BLOCKED は例外、PATCH-13 で STRIKE 1→BLOCKED 化）
+STATUS 順方向遷移は全自動（canopy_common.sh / deploy.sh が sed で書換え）。逆方向遷移は ADV/PO のみ correct_status 経由（PATCH-12、§C3.2 表）。append_deploy_fail.sh は STRIKE 1 で BLOCKED 化（DEPLOY-RECOVER 自動生成廃止、PATCH-13）
 
 #### §C0.6 証跡SSOTパス
 evidence/<MISSION_ID>/before-{unit,e2e}.json, after-{unit,e2e}.json, realworld-proof.json
@@ -1438,8 +1460,8 @@ PD-001〜008（既決定）+ PD-101〜103（既決定）+ PD-104〜107（dev-sys
 #### §C3.4 証跡SSOTパス（R2.1.1 確定）
 evidence/<MISSION_ID>/ 配下（§C0.6 と §4.2.2 参照）
 
-#### §C3.5 STATUS 3状態モデル
-§C0.5 と §4.7.1 参照
+#### §C3.5 STATUS 5状態モデル（PD-109、§15 §C3.2 SSoT を参照）
+QUEUED / IN_PROGRESS / READY_FOR_DEPLOY / DONE / BLOCKED の 5状態。§C0.5 と §4.7.1 参照（§15 §C3.2 が正本）
 ```
 
 ### 3.5 §C4 デプロイ & デバッグ（推定 55行）
@@ -1457,12 +1479,14 @@ evidence/<MISSION_ID>/ 配下（§C0.6 と §4.2.2 参照）
 - Step 9-11: 高リスク系のみ realworld smoke + G17
 - Step 12: STATUS: DONE 自動書換え
 
-#### §C4.2 デプロイ失敗時のリカバリ
+#### §C4.2 デプロイ失敗時のリカバリ（PATCH-13 反映: STRIKE 1→BLOCKED 化、自動 DEPLOY-RECOVER 廃止）
 - deploy.sh が append_deploy_fail.sh を自動呼出
 - session_progress.md に DEPLOY-FAIL 追記
-- DEPLOY-RECOVER-<MISSION_ID> をキュー先頭に挿入
-- 元ミッション STATUS を READY_FOR_DEPLOY → IN_PROGRESS 自動書戻し
-- 3回試行で POエスカレーション
+- 元ミッション STATUS を READY_FOR_DEPLOY → BLOCKED に書換え + 「**BLOCKED 理由:**」行を追加（PATCH-13）
+- STRIKE 1: BLOCKED + DEPLOY_STRIKE_1_REVIEW_REQUIRED → ADV 目視レビュー後、BLOCKED 解除 + 手動 DEPLOY-RECOVER 起票 or correct_status で IN_PROGRESS 戻し（PATCH-12）
+- STRIKE 2: BLOCKED + DEPLOY_STRIKE_2_PO_ESCALATION（通知のみ）
+- STRIKE ≥3: PO 承認ファイル（`instructions/approvals/<MISSION_ID>.strike_override.json`）必須、なければ次回 deploy.sh 冒頭で exit 1（append_deploy_fail.sh 内では失敗記録を最後まで実行）
+- **自動 DEPLOY-RECOVER 生成は廃止**（ADV 手動起票に委ねる、auto RECOVER 暴走抑止）
 
 #### §C4.3 デバッグ（§9 要約）
 - ログ確認→実装→検証の順
@@ -1671,8 +1695,8 @@ node scripts/ai_review.js \
 
 **検証**:
   grep -c '^## §21\.' docs/plans/dev_system_spec.md    # 期待: 1
-  grep -c '^### §C[0-6]' docs/plans/dev_system_spec.md  # 期待: 7（C0-C6）
-  wc -l docs/plans/dev_system_spec.md                   # 期待: 1,422 + ~410 = ~1,832
+grep -c '^### §C\[0-6\]' docs/plans/dev_system_spec.md # 期待: 7（C0-C6） wc -l docs/plans/dev_system_spec.md # 期待: 1,422 + \~410 = \~1,832
+
 ```
 
 ### 6.2 R2.1 §6.8 development_rules.md 連鎖更新（L1 SSOT 同期）
@@ -1707,9 +1731,9 @@ BEFORE（R2.1 までの mission_template_v3.md）:
 AFTER（R2.1.1 確定）:
   **完了コマンド（リスク別3区分、R2.1.1 厳格化）:**
 ```
-cmd-unit: <bash command | N/A（理由）| SKIP（理由+リトライ予定）>
-cmd-e2e: <bash command | N/A（理由）| SKIP（理由+リトライ予定）>
-cmd-realworld: <bash command | N/A（理由）| SKIP（理由+リトライ予定）>
+
+cmd-unit: &lt;bash command | N/A（理由）| SKIP（理由+リトライ予定）&gt; cmd-e2e: &lt;bash command | N/A（理由）| SKIP（理由+リトライ予定）&gt; cmd-realworld: &lt;bash command | N/A（理由）| SKIP（理由+リトライ予定）&gt;
+
 ```
 
 **書き込み主体**: Code G_47 **検証**: mission_template_v3.md 内に「cmd-unit:」「cmd-e2e:」「cmd-realworld:」の3行が出現、「cmd1:」が消失していることを grep で確認
@@ -1735,7 +1759,6 @@ R2.1 §4.19.2 で定義された deploy_recover_template.md が実在し、{MISS
 > リスク: 🔴高 / 前ミッション: {MISSION_ID} / FAIL時刻: {TIMESTAMP} 参照: instructions/session_progress.md（DEPLOY-FAIL エントリ）
 
 **目的:** デプロイ失敗の原因修正と再デプロイ **完了コマンド**:cmd-unit: &lt;元ミッションのcmd-unit&gt; cmd-e2e: &lt;元ミッションのcmd-e2e&gt; cmd-realworld: &lt;元ミッションのcmd-realworld&gt; **FAIL条件:** 3回試行で POエスカレーション
-
 ```
 
 ### 6.4 R2.1 §6.10 canopy/canopy_common.sh 連鎖更新（STATUS 自動化 + 証跡パス）
@@ -1743,13 +1766,15 @@ R2.1 §4.19.2 で定義された deploy_recover_template.md が実在し、{MISS
 **R2.1.1 での追加**: R2.1 §6.10 に以下を追加:
 
 ```markdown
-#### 6.10.1 canopy_common.sh::check_test_pass STATUS 自動書換え追加（η' 対応）
+#### 6.10.1 canopy_common.sh::check_test_pass STATUS 自動書換え追加（η' 対応、5状態モデル準拠）
 
-本R2.1.1 §2.η' 実装サンプルの check_test_pass に STATUS 自動遷移ロジックを組込む。
+本R2.1.1 §2.η' 実装サンプルの check_test_pass に STATUS 自動遷移ロジックを組込む（v3.4 5状態モデル / §15 §C3.2 SSoT 準拠）。
 - リスク判定: scripts/mission_risk_classifier.sh を呼出
-- 高リスク: IN_PROGRESS → READY_FOR_DEPLOY
-- 低/中リスク: IN_PROGRESS → DONE
+- 高リスク: IN_PROGRESS → READY_FOR_DEPLOY（cmd-unit + cmd-e2e PASS + G8 RED→GREEN 最低1種類）
+- 低/中リスク（or no_deploy:true）: IN_PROGRESS → DONE（READY_FOR_DEPLOY 経由せず）
 - sed -i で session_progress.md を直接書換え
+- BLOCKED への手動遷移は別途 ENG が「**BLOCKED 理由:**」行付きで実施（canopy::check_blocked_integrity 検証）
+- 逆方向遷移は ADV/PO のみ correct_status 経由（PATCH-12、status_corrections.log 記録必須）
 
 #### 6.10.2 canopy_common.sh::check_tdd 証跡パス修正（β' 対応）
 
@@ -1779,9 +1804,9 @@ evidence/<MISSION_ID>/ 配下を参照するよう check_tdd を書き直し。�
 
 **書き込み主体**: Code G_47 **内容**: 本R2.1.1 §2.ε'-3 の hflow_trigger_check.sh を書き込み（main 直push フォールバック含む） **検証**: `grep -c 'GIT_PUSH_REMOTE_SHA' scripts/hflow_trigger_check.sh >= 1`
 
-#### 6.5.3 §6.13 scripts/append_deploy_fail.sh 完全書き換え（γ'-7 + η' 対応）
+#### 6.5.3 §6.13 scripts/append_deploy_fail.sh 完全書き換え（γ'-7 + PATCH-13 / PATCH-19 Bug F 対応）
 
-**書き込み主体**: Code G_47 **内容**: 本R2.1.1 §2.γ'-7 の append_deploy_fail.sh を書き込み（ENVIRON 経由 + STATUS 書戻し） **検証**: `grep -c 'ENVIRON' scripts/append_deploy_fail.sh >= 1` かつ `grep -c 'READY_FOR_DEPLOY' scripts/append_deploy_fail.sh >= 1`
+**書き込み主体**: Code G_47 **内容**: 本R2.1.1 §2.γ'-7 の append_deploy_fail.sh を書き込み（ENVIRON 経由 + STATUS=BLOCKED + BLOCKED 理由行追記、PATCH-13 で STRIKE 1→BLOCKED 化、自動 DEPLOY-RECOVER 生成廃止、PATCH-19 Bug F で OVERRIDE if 外引上げ） **検証**: `grep -c 'ENVIRON' scripts/append_deploy_fail.sh >= 1` かつ `grep -c 'BLOCKED' scripts/append_deploy_fail.sh >= 1` かつ `grep -c 'DEPLOY_STRIKE_1_REVIEW_REQUIRED' scripts/append_deploy_fail.sh >= 1`
 
 #### 6.5.4 §6.14 G13/G14/G15/G16/G17 各スクリプトの POSIX 化書き直し
 
@@ -1896,7 +1921,6 @@ evidence/<MISSION_ID>/ 配下を参照するよう check_tdd を書き直し。�
 ## §8. Cumulative Context Part X（149件要約）
 
 ### 8.1 R1 採用 76件（R2.1 で反映済み）
-
 R2.1 Cumulative Context Part VIII で詳細。本R2.1.1 では **参照のみ**、再議論しない。主要テーマ:
 
 - A クラスター: Step 8 hash ポーリング確定
@@ -1906,7 +1930,7 @@ R2.1 Cumulative Context Part VIII で詳細。本R2.1.1 では **参照のみ**�
 - E クラスター: ストレージ同期ルール
 - F クラスター: 必須Read 定義
 - G クラスター: ADV/ENG 責務分担
-- H クラスター: 3状態 STATUS モデル
+- H クラスター: 5状態 STATUS モデル（PD-109、QUEUED/IN_PROGRESS/READY_FOR_DEPLOY/DONE/BLOCKED、PATCH-12/13/19 反映）
 - I クラスター: C6 C11 C18 C19 統合
 - J クラスター: LP 運用
 - K クラスター: 段階的ロールアウト
@@ -2009,7 +2033,7 @@ R2.1 §8.4 で列挙、R2.1.1 でも同様に disregard。再浮上時は Filter
 | 6.3 | docs/plans/sub_adv_protocol.md | ADV 書込可リスト更新（§4.16 反映）|
 | 6.4 | docs/plans/sub_testing.md | 証跡 SSOT パス evidence/<MID>/ |
 | 6.5 | docs/plans/sub_infrastructure.md | deploy.sh / logs/deploy.log 記述 |
-| 6.6 | docs/plans/sub_data_model.md | STATUS 遷移モデル |
+| 6.6 | docs/plans/sub_data_model.md | STATUS 5状態モデル（QUEUED/IN_PROGRESS/READY_FOR_DEPLOY/DONE/BLOCKED、PD-109 + PATCH-12/13 反映）|
 | 6.7 | CLAUDE.md | §C0 参照先更新 |
 | 6.8 | development_rules.md | L1 SSOT 同期 |
 | 6.9 | templates/mission_template_v3.md + templates/dev-system.yaml.template | 3区分 + yaml 新設 |
@@ -2089,7 +2113,8 @@ R2.1.1 確定後、以下を learned-patterns.md に LP-020〜027 として追�
 - §2.8 deploy.sh 完全パッチを追加（§2.ε' 参照、約60行）
 - `logs/deploy.log` 生成処理の記載
 - G17 実行タイミング（post-deploy の高リスク系のみ）
-- STATUS 自動遷移の deploy.sh 側実装
+- STATUS 自動遷移の deploy.sh 側実装（5状態モデル、§15 §C3.2 SSoT 準拠）
+- append_deploy_fail.sh の STRIKE 1→BLOCKED 化（PATCH-13、自動 DEPLOY-RECOVER 生成廃止）
 
 ### 6.6 sub_review_flow.md（R2.1 §6.6 への修正は小幅）
 
@@ -2112,7 +2137,7 @@ R2.1.1 確定後、以下を learned-patterns.md に LP-020〜027 として追�
 
 **追加・修正内容**:
 - `templates/mission_template_v3.md`: 完了コマンド欄を `cmd-unit / cmd-e2e / cmd-realworld` 3行構成に書換え（θ' 対応）
-- `templates/deploy_recover_template.md`: 既存のまま維持（R2.1 で既定義）
+- `templates/deploy_recover_template.md`: 既存のまま維持（R2.1 で既定義、PATCH-13 で自動生成は廃止、ADV 手動起票時のテンプレートとして残置）
 - `templates/dev-system.yaml`: **新規追加**（ι' 対応）。subdirs 列挙形式
 
 ### 6.10 scripts/（R2.1 §6.10 の全面書直し + deploy.sh 追加）
@@ -2132,27 +2157,23 @@ R2.1.1 確定後、以下を learned-patterns.md に LP-020〜027 として追�
 - `scripts/tdd_trace_consistency.sh`: §2.β' + §2.γ'-2 の一時ファイル版
 - `scripts/verify_hooks.sh`: §2.γ'-6 の sh 側 date 変換版
 - `scripts/append_deploy_fail.sh`: §2.γ'-7 の ENVIRON 版 + §2.η' STATUS 自動書戻し
-- **`scripts/deploy.sh`: §2.ε'-1 の完全パッチ（R2.1.1 新規追加、§6.10 に明示）**
-- **`scripts/shellcheck_lint.sh`: §2.γ'-8 の shellcheck ゲート新設（または pre-commit 内蔵）**
+- `scripts/deploy.sh`**: §2.ε'-1 の完全パッチ（R2.1.1 新規追加、§6.10 に明示）**
+- `scripts/shellcheck_lint.sh`**: §2.γ'-8 の shellcheck ゲート新設（または pre-commit 内蔵）**
 
 ---
 
 ## §7. レビュアー指示 Part IX（ゴールデン R2 用）
 
-本R2.1 と本R2.1.1 を**両方読んで**、以下の観点でレビューする。ゴールデン R2 は**最終確定前の最後のゲート**。CRITICAL 0 で v3.4 確定、CRITICAL > 0 で POエスカレーション。
+本R2.1 と本R2.1.1 を**両方読んで**、以下の観点でレビューする。ゴールデン R2 は**最終確定前の最後のゲート**。CRITICAL 0 で v3.4 確定、CRITICAL &gt; 0 で POエスカレーション。
 
 ### 7.1 severity 基準（sub_review_flow §2 Filter 1-7 準拠）
 
-| severity | 基準 | 例 |
-|---|---|---|
-| CRITICAL | 仕様矛盾・実装不能・セキュリティ抜け・PD方針違反が残存 | 証跡パスがまだ不整合、POSIX違反残存、§C0-C6 が実体化していない |
-| HIGH | 実装品質改善・運用改善・明確化 | shellcheck 強度改善、lint 追加、命名改善 |
-| MED | 軽微なドキュメント改善 | typo、句読点、表記ゆれ |
-| LOW | 好み・スタイル | インデント、コメント |
+severity基準例CRITICAL仕様矛盾・実装不能・セキュリティ抜け・PD方針違反が残存証跡パスがまだ不整合、POSIX違反残存、§C0-C6 が実体化していない
 
 ### 7.2 PD 方針異議禁止（§5.5 棄却強化）
 
 以下への「反対意見」は**即棄却**（severity に関わらず出さない）:
+
 - PD-104（dev-system SPEC 分割）
 - PD-105（完了コマンド3区分）
 - PD-106（Hフロー機械発火）
@@ -2323,6 +2344,7 @@ node scripts/ai_review.js \
 # 行数確認
 wc -l lais/verify/dev_system_v34_r2_1_1_package.md
 # 期待: 1,400-1,900 行
+```
 
 # 14クラスター網羅
 grep -cE '^### §2\.(α|β|γ|δ|ε|ζ|η|θ|ι|κ|λ|μ|ξ)' lais/verify/dev_system_v34_r2_1_1_package.md
@@ -2330,21 +2352,28 @@ grep -cE '^### §2\.(α|β|γ|δ|ε|ζ|η|θ|ι|κ|λ|μ|ξ)' lais/verify/dev_sy
 ```
 
 # §C0-C6 設計の網羅
-grep -cE '^### 3\.[1-7]' lais/verify/dev_system_v34_r2_1_1_package.md
+
+grep -cE '^### 3.\[1-7\]' lais/verify/dev_system_v34_r2_1_1_package.md
+
 # 期待: 7 (§3.1 §C0 〜 §3.7 §C6) + §3.8 書き込み手順 = 8
 
 # PD-108 却下の記録
+
 grep -c 'PD-108' lais/verify/dev_system_v34_r2_1_1_package.md
+
 # 期待: 6以上
 
-# 証跡パス evidence/<MISSION_ID>/ 統一確認
-grep -c 'evidence/<MISSION_ID>/\|evidence/\$MISSION_ID/\|evidence/\${MISSION_ID}/\|evidence/<MID>/' lais/verify/dev_system_v34_r2_1_1_package.md
+# 証跡パス evidence/&lt;MISSION_ID&gt;/ 統一確認
+
+grep -c 'evidence/&lt;MISSION_ID&gt;/|evidence/$MISSION_ID/|evidence/${MISSION_ID}/|evidence//' lais/verify/dev_system_v34_r2_1_1_package.md
+
 # 期待: 8以上（複数箇所で統一されているか）
 
 # POSIX 修正サンプルの存在
-grep -cE 'cut -c1-7|ENVIRON\["|awk.*BEGIN.*exit|<<EOF' lais/verify/dev_system_v34_r2_1_1_package.md
-# 期待: 4以上
 
+grep -cE 'cut -c1-7|ENVIRON\["|awk.\*BEGIN.\*exit|&lt;&lt;EOF' lais/verify/dev_system_v34_r2_1_1_package.md
+
+# 期待: 4以上
 # ai_review.js 改修指示の存在
 grep -c 'response_format.*json_object\|AI-REVIEW-JS-JSON-MODE-FIX' lais/verify/dev_system_v34_r2_1_1_package.md
 # 期待: 3以上
@@ -2642,49 +2671,35 @@ cmd-3区分:
 | Step | 内容 | ゲート | 失敗時 |
 |---|---|---|---|
 | 0 | MISSION_ID 解決 + extract_mission_block + STATUS 検証 + 直近 STATUS_CORRECTION 通知（PATCH-12） | — | exit 1 |
-| 1 | version_sync + bump commit + eval "$BUILD_CMD" | — | exit 1 |
-| 2 | tests/smoke/canopy.sh（G1-G10 + check_test_pass）| G1-G10 | exit 1 |
-| 3 | G8 TDD 証跡検証（canopy 内）| G8 | exit 1 |
-| 4 | G16 deploy_hash_verify.sh（dist/ にcommit sha埋込）| G16 | exit 1 |
-| 5 | Hフロー承認ゲート（§C4.5、verify_approval_authenticity.sh）| — | exit 1 |
-| 6 | L1 スモーク（playwright @smoke、extract_cmd.sh cmd-e2e SSOT）| G4 | exit 1 |
-| 7 | L2 影響範囲（affected-tests.sh）| G4 | exit 1 |
-| 8 | wrangler pages deploy | — | append_deploy_fail + exit 1 |
-| 9 | deploy_poll_hash.sh（URL hash 検証）| G16 | append_deploy_fail + exit 1 |
-| 10 | normalize_realworld_report + G17 proof_check（high のみ）| G17 | append_deploy_fail + exit 1 |
-| 11 | STATUS → DONE 書換え | — | — |
-| 12 | logs/deploy.log 追記 + STRIKE クリア + git tag | — | — |
+| 1 | version_sync + bump commit + eval "$BUILD_CMD" | — | exit 1 | | 2 | tests/smoke/canopy.sh（G1-G10 + check_test_pass）| G1-G10 | exit 1 | | 3 | G8 TDD 証跡検証（canopy 内）| G8 | exit 1 | | 4 | G16 deploy_hash_verify.sh（dist/ にcommit sha埋込）| G16 | exit 1 | | 5 | Hフロー承認ゲート（§C4.5、verify_approval_authenticity.sh）| — | exit 1 | | 6 | L1 スモーク（playwright @smoke、extract_cmd.sh cmd-e2e SSOT）| G4 | exit 1 | | 7 | L2 影響範囲（[affected-tests.sh](http://affected-tests.sh)）| G4 | exit 1 | | 8 | wrangler pages deploy | — | append_deploy_fail + exit 1 | | 9 | deploy_poll_hash.sh（URL hash 検証）| G16 | append_deploy_fail + exit 1 | | 10 | normalize_realworld_report + G17 proof_check（high のみ）| G17 | append_deploy_fail + exit 1 | | 11 | STATUS → DONE 書換え | — | — | | 12 | logs/deploy.log 追記 + STRIKE クリア + git tag | — | — |
 
-実装: sub_infrastructure.md §2.8 deploy.sh 完全版（PATCH-20 で 12 Step + scripts/ 22 本実装、PATCH-26 で Phase 3 cost_usd 拡張）。
+実装: sub_infrastructure.md §2.8 [deploy.sh](http://deploy.sh) 完全版（PATCH-20 で 12 Step + scripts/ 22 本実装、PATCH-26 で Phase 3 cost_usd 拡張）。
 
 #### §C4.2 デプロイリトライ（STRIKE カウンタ、PATCH-13 / R3-H-08）
+
 - instructions/deploy_strikes.json に MISSION_ID → 試行回数
 - STRIKE 1 回: STATUS=BLOCKED（`DEPLOY_STRIKE_1_REVIEW_REQUIRED`）。**自動 DEPLOY-RECOVER 生成なし**。ADV がレビュー後、BLOCKED 解除 + DEPLOY-RECOVER 手動起票 or correct_status で IN_PROGRESS 戻し
 - STRIKE 2 回: STATUS=BLOCKED（`DEPLOY_STRIKE_2_PO_ESCALATION`、PATCH-19 §3.6 で「通知のみ」記述に整合）。PO 承認ファイル要求
-- STRIKE 3 回以上: PO 明示承認（instructions/approvals/<MID>.strike_override.json）なしでは再実行拒否
+- STRIKE 3 回以上: PO 明示承認（`instructions/approvals/<MISSION_ID>.strike_override.json`、ミッション ID 別）なしでは次回 deploy.sh 冒頭で再実行拒否
 - DEPLOY-RECOVER プレフィックス重畳防止（§C4 実装）
 
 #### §C4.3 ロールバック（既存 §8 incident_runbook）
+
 - scripts/rollback.sh: 直近タグへ revert commit で戻す（clean state 保証）
 - L1 FAIL 即 rollback、本番エラー率 3倍以上 で rollback + PO 報告
 
 #### §C4.4 デバッグ 4フェーズ（Systematic Debugging、既存 §9）
 
-| Phase | 名称 | 内容 | 禁止 |
-|---|---|---|---|
-| 1 | 証拠収集 | エラーログ → データフロー → 再現手順 | 修正コード記述 |
-| 2 | 仮説構築 | 最大3仮説、各検証方法1行 | 検証方法なき仮説 |
-| 3 | 仮説テスト | 1つずつ検証、複数同時変更禁止 | 複数同時変更 |
-| 4 | 修正+テスト | バグ再現テスト → FAIL → 修正 → PASS → 回帰 | テストなき修正 |
+Phase名称内容禁止1証拠収集エラーログ → データフロー → 再現手順修正コード記述2仮説構築最大3仮説、各検証方法1行検証方法なき仮説3仮説テスト1つずつ検証、複数同時変更禁止複数同時変更4修正+テストバグ再現テスト → FAIL → 修正 → PASS → 回帰テストなき修正
 
-修正試行 3回制限: 同一バグ → 3回失敗 → HOLD → ADV エスカレーション。
-デバイス依存バグ: 静的解析のみで断言禁止（鉄則⑧）。シミュレーター/実機で確認。
+修正試行 3回制限: 同一バグ → 3回失敗 → HOLD → ADV エスカレーション。 デバイス依存バグ: 静的解析のみで断言禁止（鉄則⑧）。シミュレーター/実機で確認。
 
 #### §C4.5 Hフロー承認ゲート（PD-110 + PATCH-14 二重証跡 + R2.2 §3.5 SSOT 埋込版）
 
 発火判定: scripts/hflow_trigger_check.sh が CONTEXT 別に git diff を取得、RISK_PATHS prefix match。
 
-承認証跡: instructions/approvals/<MISSION_ID>.hflow.approved
+承認証跡: instructions/approvals/&lt;MISSION_ID&gt;.hflow.approved
+
 ```json
 {
   "approver": "ADV" | "PO",
@@ -2919,18 +2934,18 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
 > PATCH-19 §6.10 22 本 + PATCH-20 で実装、PATCH-22/24/26 で Phase 1-3 拡張、合計 29 本。
 
 ### §6.10 scripts/ 一覧（番号付きリスト、SSoT）
-> 連鎖更新監査（G18 / chain_update_audit.sh）対応のため、basename ベースで列挙。
-> 配置パスは全て scripts/ 配下（lib/* は scripts/lib/* に配置）。
 
-1. append_deploy_fail.sh — §2.4 / §3.6 / PATCH-13 / PATCH-19 Bug F（OVERRIDE if 外引上げ、STRIKE 1→BLOCKED_REVIEW、DEPLOY-RECOVER 自動生成廃止）
-2. changed_files_allowlist.sh — §16.5 / §C6.2（対象ファイル外変更検出）
-3. check_blocked_integrity.sh — §3.2 / §C3.2（BLOCKED 理由行 必須検証）
-4. deploy.sh — §2.8 / §C4.1（12 Step デプロイフロー、PATCH-20 で完全実装）
-5. deploy_hash_verify.sh — §3.3 / G16（dist/ commit sha 埋込検証）
-6. deploy_poll_hash.sh — §3.3 / G16（URL hash 検証ループ）
-7. extract_cmd.sh — §3.4 / PATCH-11（cmd-unit/cmd-e2e/cmd-realworld 抽出 SSOT）
-8. extract_mission_block.sh — §3.1 / G11（session_progress.md からミッションブロック抽出）
-9. hflow_trigger_check.sh — §C2.3 / PD-106（RISK_PATHS prefix match 発火判定）
+> 連鎖更新監査（G18 / chain_update_audit.sh）対応のため、basename ベースで列挙。 配置パスは全て scripts/ 配下（lib/\* は scripts/lib/\* に配置）。
+
+ 1. append_deploy_fail.sh — §2.4 / §3.6 / PATCH-13 / PATCH-19 Bug F（OVERRIDE if 外引上げ、STRIKE 1→BLOCKED_REVIEW、DEPLOY-RECOVER 自動生成廃止）
+ 2. changed_files_allowlist.sh — §16.5 / §C6.2（対象ファイル外変更検出）
+ 3. check_blocked_integrity.sh — §3.2 / §C3.2（BLOCKED 理由行 必須検証）
+ 4. [deploy.sh](http://deploy.sh) — §2.8 / §C4.1（12 Step デプロイフロー、PATCH-20 で完全実装）
+ 5. deploy_hash_verify.sh — §3.3 / G16（dist/ commit sha 埋込検証）
+ 6. deploy_poll_hash.sh — §3.3 / G16（URL hash 検証ループ）
+ 7. extract_cmd.sh — §3.4 / PATCH-11（cmd-unit/cmd-e2e/cmd-realworld 抽出 SSOT）
+ 8. extract_mission_block.sh — §3.1 / G11（session_progress.md からミッションブロック抽出）
+ 9. hflow_trigger_check.sh — §C2.3 / PD-106（RISK_PATHS prefix match 発火判定）
 10. lib/risk_patterns.sh — §C2.3 / PATCH-23（10 項目 RISK_PATHS SSoT）
 11. lib/runtime_preflight.sh — §3.7 / PATCH-15 / R3-H-10（require_runtimes / require_dev_system_runtimes SSOT）
 12. max_lines_lint.sh — §C2.1 / 300行制限（1ファイル 300行以内検証）
@@ -2938,10 +2953,10 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
 14. normalize_realworld_report.sh — §C4.1 Step 10 / G17（realworld 証跡の正規化）
 15. post_deploy_status_update.sh — §C4.1 Step 11（STATUS → DONE 書換え）
 16. pre_commit_status_check.sh — §C2 Step 4 / G13（QUEUED → IN_PROGRESS 自動遷移）
-17. pre-commit-sub.sh — §C2 / G13（pre-commit サブルーチン）
+17. [pre-commit-sub.sh](http://pre-commit-sub.sh) — §C2 / G13（pre-commit サブルーチン）
 18. proposal_log_lint.sh — §2.9 / PATCH-3（STALE_DATA use-after-rm 修正済の 1 回 awk パス）
 19. realworld_proof_check.sh — §2.7 / §3.3 / PATCH-16（risk_tags SSOT 1:1、ui_change 条件化、epoch 数値比較）
-20. secret_scan.sh — §C6.3 / G10（sk-*, AIza*, ghp_*, BEGIN PRIVATE KEY 検出）
+20. secret_scan.sh — §C6.3 / G10（sk-*, AIza*, ghp\_\*, BEGIN PRIVATE KEY 検出）
 21. shellcheck_lint.sh — §C6.4 / εcrit'（shellcheck --shell=sh --severity=error）
 22. spec_first_lint.sh — §C2 / G14（仕様書ファースト検証、PATCH-19 Bug E で追加）
 23. step0_lint.sh — §C4.1 Step 0 / G11（extract_mission_block 連動、PATCH-19 Bug E で追加）
