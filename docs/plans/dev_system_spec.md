@@ -920,8 +920,10 @@ ux_v*.md記載の機能を変更しない + 対象2ファイル以内 → ENG自
 |---------|------|---------|---------|
 | **sub_infrastructure.md** | 全bashスクリプトのフルコード + ディレクトリ構成 + app_config.yaml | ~500行 | スクリプト実装コードが大量 |
 | **sub_testing.md** | テストガード・アンチパターン・テストライブラリ・affected-tests.sh | ~250行 | テスト基盤の詳細手順が大量 |
-| **sub_adv_protocol.md** | ADVのトリガー→アクション対応表・報告検証・AT詳細 | ~200行 | ADV行動ルールの網羅的記述 |
+| **sub_adv_protocol.md** | ADVのトリガー→アクション対応表・報告検証・AT詳細・§11 STATUS_CORRECTION 手順（PATCH-12）| ~200行 | ADV行動ルールの網羅的記述 |
 | **sub_hflow_protocol.md** | Hフロー発火・承認・再承認フロー（PD-110 + PATCH-14 二重証跡）| ~200行 | v3.4 新設。承認ゲート固有の手順 |
+| **sub_review_flow.md** | AIレビューフロー v3（7種別 A-G + Pre-Review + 7段階フィルター + 主審制 + ゴールデン）+ **§9 外部レビュープロトコル連携**（v3.5、案 D'、sub_external_review_protocol.md と統合）| ~458行 | レビュー運用 SSoT、§19.10 から参照、§C5 連携 |
+| **sub_external_review_protocol.md** | 外部レビュープロトコル（案 D'、subagent 並列 + pre-commit 外部 API + post-commit 監査ログ + daemon なし）| ~404行 | v3.5 新設（DEV-SYSTEM-V35-EXTERNAL-REVIEW-PROTOCOL）。同一セッション self-critique 限界（LP-030/Bug O）の構造解消、sub_review_flow §9 と双方向参照 |
 
 ### テンプレート（アプリ固有仕様書の雛形）
 > これらはdev-systemのサブ仕様書ではない。§1.2の棲み分け原則に従い、アプリ仕様書として管理する。
@@ -937,9 +939,16 @@ ux_v*.md記載の機能を変更しない + 対象2ファイル以内 → ENG自
 - サブに分離した場合、メインスペックの該当箇所に「詳細: sub_xxx.md」と参照を明記
 
 ### レビュー時の送信ルール
-- メインスペック1本 + サブ仕様書3本（合計4ファイル）を省略なしでレビュアーに送信
+- メインスペック 1 本 + サブ仕様書 6 本（sub_infrastructure / sub_testing / sub_adv_protocol / sub_hflow_protocol / sub_review_flow / sub_external_review_protocol、合計 7 ファイル）を省略なしでレビュアーに送信
+- v3.5 で `sub_review_flow.md §9 連携節`（案 D'）と `sub_external_review_protocol.md`（案 D' 仕様 SSoT）が双方向参照する構造になっているため、両方を同時送信する（片方のみは禁止、§9 連携節が前提）
 - sub_system_map.mdはテンプレートのため、dev-systemレビューには含めない（アプリ仕様書レビュー時に別途確認）
 - **仕様書構成の妥当性もレビュー対象**（メイン/サブの分離基準、参照の整合性、重複の有無）
+
+### サブ仕様書間の参照関係（v3.5 確定時点）
+- `sub_review_flow.md §1-§8`（既存温存、AIレビュー基本フロー）↔ `sub_external_review_protocol.md`（v3.5 新設、案 D' 自動化レイヤ）の **双方向参照**: §9 連携節が「既存 §1-§8 不変 + 上位自動化レイヤ」を宣言
+- `sub_adv_protocol.md §11 STATUS_CORRECTION` ↔ `dev_system_spec.md §21 §C3.2` PATCH-12 反映
+- `sub_hflow_protocol.md §3.3` ↔ `dev_system_spec.md §21 §C4.5` PATCH-14 二重証跡（noreply@github.com 含む）
+- `sub_infrastructure.md §2.6 / §2.8` ↔ `lais/verify/dev_system_v34_package.md §6.10` の scripts/ 22 本一覧（PATCH-20）
 
 ---
 
@@ -1367,12 +1376,13 @@ design_system.md作成時にこの形式のCSSトークンブロックを必ず�
 
 ### 19.10 AIレビューフロー（v3）
 
-**詳細定義:** `docs/plans/sub_review_flow.md`（312行）
+**詳細定義:** `docs/plans/sub_review_flow.md`（458行、§1-§8 = 既存 7 種別フロー + §9 = v3.5 案 D' 連携節）
+**v3.5 連携:** `docs/plans/sub_external_review_protocol.md`（404行、案 D' SSoT）と双方向参照。`sub_review_flow.md §9` が連携層を宣言（既存 §1-§8 温存 + 上位自動化レイヤ）
 
 **基本原則:**
 - ミッション = 「問題を見つける」ではなく「仕様通りか検証する」。問題なければPASS（空配列）
 - 指摘数ノルマなし。各指摘に `spec_reference`（仕様引用）必須。引用なし→機械棄却
-- 2プロバイダー（GPT-5 + Gemini 2.5 Pro）+ Code Pre-Review
+- 2プロバイダー（GPT-5/5.4 + Gemini 2.5/3.1 Pro）+ Code Pre-Review
 - 妥当性判定: 7段階フィルター（事実確認→仕様照合→既決定→スコープ→合意度→影響度→影響範囲）
 
 **7種別:**
