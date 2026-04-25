@@ -1283,6 +1283,371 @@ ADV が §2.25.1〜§2.25.4 のいずれかに違反した場合、以下の手�
 
 ---
 
+#### §2.25.16 メインセッション運用ルール（テクニカル PM）
+
+**目的**: メインセッション（ADV）を PO 補佐（テクニカル PM）として運用。直接実装・直接書込を禁止し、subagent 経由でのみ実装・書込を行う。コンテキスト管理 + SSOT 4 ファイル参照を毎セッション必須化することで、長期 PO 不在 / 夜間自律実行を成立させる。
+
+##### §2.25.16.1 役割定義
+
+メインセッション（ADV）の役割は **PO 補佐（テクニカル PM）** に限定する。
+
+- **可能**: 設計議論 / PO 質問対応 / subagent 起動 / 完了報告レビュー / 運用記録ファイル書込
+- **禁止**: §2.25.16.2 対象ファイルへの直接 Edit / Write（subagent 経由必須）
+
+##### §2.25.16.2 書込禁止対象（直接 Edit / Write 禁止、subagent 経由必須）
+
+メインセッションは以下のファイル / ディレクトリへの直接書込を禁止する:
+
+- `docs/plans/*`（仕様書本体）
+- `lais/verify/*`（レビューパッケージ + パッチ記録、ただし `adv_violation_log.md` は §2.25.16.3 で例外化）
+- `scripts/*`（実行スクリプト）
+- `templates/*`（テンプレート）
+- `.git/hooks/*`（Git hook 凍結ファイル）
+- `development_rules.md`
+- `bootstrap.md`
+- `app_config.yaml`
+
+これらは subagent（Task tool 経由）で起動した別エージェントに実装委任する。
+
+##### §2.25.16.3 例外（運用記録ファイル、ADV 直接書込可）
+
+以下は ADV メインセッションが直接 Edit / Write 可能（運用記録 / 即時更新が必要なファイル）:
+
+- `instructions/session_progress.md`（5 行サマリー / ミッションキュー）
+- `lais/verify/adv_violation_log.md`（違反記録）
+- `docs/po-decisions.md`（PO 判断履歴）
+- `docs/learned-patterns.md`（学習パターン）
+- `docs/decision_log.md`（意思決定履歴、§2.25.17 で新設）
+- `instructions/in_flight_topics.md`（進行中論点、§2.25.19 で新設）
+- `instructions/subagent_status.md`（subagent 状態、本節で新設）
+
+##### §2.25.16.4 コンテキスト管理閾値
+
+`scripts/context_monitor.sh` で機械検知:
+
+- **70%（警告）**: 整理候補の提案（不要な転記の削減）
+- **85%（整理）**: SSOT 4 ファイルへの圧縮 + 引継ぎ準備開始
+- **95%（引継ぎ準備）**: 強制引継ぎ準備（次セッション向け handoff_validator.sh 実行）
+
+stdin で `context_size`（int、token 数 or 推定 ratio %）を受信。
+
+##### §2.25.16.5 SSOT 4 ファイル運用（毎セッション必須 Read）
+
+メインセッション開始時に必ず Read する 4 ファイル（SSOT）:
+
+1. `instructions/session_progress.md`（5 行サマリー）
+2. `docs/decision_log.md`（直近の意思決定、§2.25.17）
+3. `instructions/in_flight_topics.md`（進行中論点、§2.25.19）
+4. `instructions/subagent_status.md`（subagent 状態、本節）
+
+これら 4 ファイルが揃って Read されない場合、`scripts/handoff_validator.sh` が WARN を返す。
+
+**few-shot 例（正例）**:
+- ADV セッション開始 → `Read session_progress.md` → `Read decision_log.md` → `Read in_flight_topics.md` → `Read subagent_status.md` → PO 質問対応開始
+- PO「scripts ディレクトリにスクリプトを新規作成して」→ ADV「subagent 経由で実装します」→ Task tool で subagent 起動 → 完了報告レビュー → ADV メインで Edit 実行ゼロ
+
+**few-shot 例（違反例）**:
+- ADV メインセッションで scripts 配下のスクリプトに対して直接 Edit 実行 → §2.25.16.2 違反、PreToolUse hook `main_session_writeguard.sh` で BLOCK
+- ADV セッション開始時に `decision_log.md` を Read せずミッション着手 → §2.25.16.5 違反、`handoff_validator.sh` が WARN
+
+**機械チェック**:
+- `~/.claude/settings.json` PreToolUse に `main_session_writeguard.sh` を結線、Edit / Write の対象パスが §2.25.16.2 リストに合致したら BLOCK
+- `scripts/handoff_validator.sh` で SSOT 4 ファイル Read 履歴の存在確認（transcript_path から grep）
+
+---
+
+#### §2.25.17 意思決定の記録と参照
+
+**目的**: 全 PO 判断 + ADV 自律判定（§2.25.3 該当）を `docs/decision_log.md` に集約し、同じ議論の繰り返しを防止する。
+
+##### §2.25.17.1 記録対象
+
+- 全 PO 判断（承認 / 却下 / 方針指示）
+- ADV 自律判定（§2.25.3 PO 判断必須事項に該当しない範囲での判断）
+- 重要な仕様変更 / プロセス変更
+
+##### §2.25.17.2 記録経路
+
+- ADV はメインで運用記録ファイル `docs/decision_log.md` を直接 Edit 可（§2.25.16.3）
+- 大規模追記（10 行超 / 複雑な合議記録）は subagent 経由
+
+##### §2.25.17.3 重複検出
+
+ADV は新規論点に着手する前に `grep -n "<keyword>" docs/decision_log.md` で過去議論を検索。同一論点の再議論は PD-XXX 番号 + 過去結論を提示して PO 確認を求める。
+
+##### §2.25.17.4 記録フォーマット
+
+```markdown
+## YYYY-MM-DD HH:MM <ID>: <短いタイトル>
+- **判断者**: PO / ADV
+- **論点**: ...
+- **結論**: ...
+- **根拠**: ...
+- **影響範囲**: ...
+```
+
+**few-shot 例（正例）**:
+- PO「Phase 0 を承認」→ ADV `docs/decision_log.md` に「2026-04-25 PD-G49-P0: Phase 0 承認、§2.25.16-.22 新設」を追記 → 後日 PO「Phase 0 ってどうだっけ？」→ ADV grep で当該決定参照、即時回答
+
+**few-shot 例（違反例）**:
+- 同じ論点（夜間自動着手の是非）が 3 セッション連続で議論される → §2.25.17.3 違反、ADV は過去結論を提示せず再議論を許容
+- ADV 自律判定（§2.25.3 該当なし）を実行したが decision_log.md に未記録 → §2.25.17.1 違反
+
+**機械チェック**:
+- `grep -c "^## " docs/decision_log.md` で記録件数を週次集計、ゼロ更新セッションが 5 連続で WARN
+- 同一日内に同じキーワード（タイトル先頭 5 文字）が 2 件以上記録された場合、`proposal_log_lint.sh` 系を流用した重複検査（Phase 1 で新設）で WARN
+
+---
+
+#### §2.25.18 PO 発言矛盾検出と質問明確化
+
+**目的**: PO 発言の前後矛盾を ADV が検出し、確認質問で曖昧性を排除する。LLM 既知の「PO の言うことに無条件追従」癖（§2.25.4 リスク回避禁止）を補完。
+
+##### §2.25.18.1 矛盾検出範囲
+
+- 直近 10 ターンの PO 発言を ADV 内部で参照
+- 同一論点で逆方向の指示（例: 「A 採用」→ 数ターン後「A 却下」）を検出 → ADV から確認質問
+
+##### §2.25.18.2 確認質問のフォーマット
+
+```
+[整合性確認] 直近の発言と矛盾検出
+- N ターン前: 「<引用>」（時刻 / 参照）
+- 今回: 「<引用>」
+- 矛盾点: <具体>
+- 確認: いずれを採用しますか？（過去発言 / 今回発言 / 両立する第 3 案）
+```
+
+##### §2.25.18.3 曖昧質問の選択肢化
+
+PO の曖昧な質問（例: 「これでいいの？」）は AskUserQuestion ツール（または同等の選択肢提示）で選択肢化:
+
+- 選択肢 A / B / C を ADV が提示
+- PO は選択するだけ（自由記述不要、§2.25.6 応答スタイル「PO 手間最小化」と整合）
+
+**few-shot 例（正例）**:
+- PO（10:00）「Phase A を最優先」→ PO（10:30）「Phase B を最優先」→ ADV「[整合性確認] 10:00 と 10:30 で優先度が逆転。どちらを採用？」
+- PO「これでいい？」→ ADV「以下から選択ください: A) 提案通り承認 / B) 修正後再提示 / C) 却下」
+
+**few-shot 例（違反例）**:
+- PO 矛盾発言を ADV が無視して直近発言だけに従う → §2.25.18.1 違反、過去判断との整合性破綻
+- 曖昧質問に ADV が長文回答（PO 再質問が必要） → §2.25.18.3 違反、PO 手間増加
+
+**機械チェック**:
+- PO 矛盾検出スクリプト（Phase 1 で新設予定、本 Phase 0 では仕様化のみ）で transcript の直近 10 ターンを grep、同一キーワードで反対指示を検出 → ADV プロンプト注入
+
+---
+
+#### §2.25.19 優先順位・依存関係管理
+
+**目的**: 進行中論点 / タスクのステータスを `instructions/in_flight_topics.md` で SSOT 化し、ブロッカー検出 + 並列実行可能タスクを ADV から PO に提示。
+
+##### §2.25.19.1 ステータス値
+
+| ステータス | 意味 |
+|---|---|
+| `pending` | 未着手、依存なし or 全依存解消済 |
+| `in_progress` | 着手中（subagent 起動中含む） |
+| `blocked` | 依存タスク完了待ち or PO 判断待ち |
+| `completed` | 完了 |
+
+##### §2.25.19.2 ブロッカー検出
+
+ADV は `in_flight_topics.md` を Read 時に `blocked` 状態のタスクを集計:
+
+- ブロッカー詳細（待ち相手 / 期限 / 影響）を PO に報告
+- 解消提案（並列実行可能タスクへの切替 / 依存解消の subagent 起動）を提示
+
+##### §2.25.19.3 並列実行可能タスクの自動提案
+
+依存関係グラフ（`in_flight_topics.md` の `depends_on` フィールド）から、現在並列実行可能なタスクを ADV が自動抽出 → PO に提示:
+
+```
+[並列着手可能] N 件
+- TASK-A（依存なし、即着手可）
+- TASK-B（依存 TASK-X 完了済）
+```
+
+##### §2.25.19.4 記録フォーマット
+
+```markdown
+## TASK-<ID>: <タイトル>
+- **status**: pending / in_progress / blocked / completed
+- **owner**: ADV / subagent-N / PO
+- **depends_on**: [TASK-X, TASK-Y]
+- **created**: YYYY-MM-DD
+- **updated**: YYYY-MM-DD
+- **note**: ...
+```
+
+**few-shot 例（正例）**:
+- ADV セッション開始 → `Read in_flight_topics.md` → `blocked` 2 件検出 → PO 報告「TASK-A は TASK-X 完了待ち、TASK-X subagent 起動可能ですか？」→ PO 承認 → ADV が subagent 起動
+
+**few-shot 例（違反例）**:
+- `in_flight_topics.md` 未更新で ADV が「全タスク完了」と PO 報告 → §2.25.19.4 違反、状態不整合
+- ブロッカー検出未実施で PO 不在中に ADV が `blocked` タスクに着手 → §2.25.19.2 違反
+
+**機械チェック**:
+
+- in_flight_topics.md ステータス検証スクリプト（Phase 1 で新設予定）で `in_flight_topics.md` のステータス値検証 + 循環依存検出
+- 本 Phase 0 では `instructions/in_flight_topics.md` ヘッダーテンプレに `status` 列の必須化のみ
+
+---
+
+#### §2.25.20 障害検出と暴走停止
+
+**目的**: subagent エラー / 外部 API 失敗 / ファイル破損を早期検出し、暴走（無限ループ / 想定外副作用）を防止する。
+
+##### §2.25.20.1 障害検出対象
+
+- subagent タイムアウト（30 分超 / app_config.yaml 設定値）
+- subagent エラー応答（exit code != 0 / 完了報告に "FAIL" / "ERROR" 含む）
+- 出力欠落（subagent 完了報告ファイル不在 or 空）
+- 外部 API 失敗（Gemini / GPT-5.4 の 503 / timeout）
+
+##### §2.25.20.2 暴走停止権限
+
+ADV は障害検出時、subagent に対して終了シグナル（TaskStop or 同等）を発行可。本権限は §2.25.3 PO 判断必須事項に該当しない（暴走停止は安全側、PO 不在中も実行可）。
+
+##### §2.25.20.3 連続失敗 fail-open
+
+`scripts/subagent_health_check.sh` で連続失敗 3 回到達 → fail-open（gate 停止）+ PO 通知:
+
+- 通知先: `instructions/po_alerts.md`（新設、ADV 例外書込可）
+- 通知内容: 失敗 subagent ID / エラー詳細 / 推定原因
+
+##### §2.25.20.4 健全性チェックフロー
+
+```
+subagent 起動 → 5 分ごとに subagent_health_check.sh 実行
+  ├─ 正常: 継続
+  ├─ 異常 1 回: 警告ログ
+  ├─ 異常 2 回: 警告 + PO 通知準備
+  └─ 異常 3 回: fail-open + 強制停止 + PO 通知
+```
+
+**few-shot 例（正例）**:
+
+- subagent A がタイムアウト → ADV が `subagent_health_check.sh` で検出 → TaskStop 発行 → `instructions/subagent_status.md` に "failed_timeout" 記録 → PO 通知
+
+**few-shot 例（違反例）**:
+
+- subagent エラー応答を ADV が無視して完了扱い → §2.25.20.1 違反、ファイル状態と完了報告の不整合
+- 連続 5 回失敗してもオートフェイルオープンせず PO 通知なし → §2.25.20.3 違反
+
+**機械チェック**:
+
+- `scripts/subagent_health_check.sh` がタイムアウト / エラー応答 / 出力欠落を検知、ステータス JSON を `logs/subagent_health.log` に追記
+- 連続 3 失敗で `instructions/po_alerts.md` に通知エントリ追加（ADV 自動）
+
+---
+
+#### §2.25.21 完了条件検証と要約生成
+
+**目的**: subagent の完了報告を機械検証し、長文出力を非エンジニア（PO）向け短文に変換する。
+
+##### §2.25.21.1 完了報告の機械検証
+
+`scripts/completion_verifier.sh` で以下を grep / コマンド検証:
+
+- 完了コマンド（subagent 指示書記載）の全 PASS
+- 期待ファイル（新規作成 / 更新）の存在確認
+- 完了報告フォーマット（MISSION-ID / 結果 / 検証コマンド）の必須項目存在
+
+##### §2.25.21.2 PO 向け要約テンプレ（3-5 行）
+
+```
+[完了報告 - <MISSION-ID>]
+1. やったこと: <1 行>
+2. 結果: PASS / FAIL（PASS 数 / FAIL 数）
+3. 検証: <主要な完了コマンド 1-2 個>
+4. 影響: <PO 確認事項、なければ「なし」>
+5. 次: <ADV が次に提案するアクション>
+```
+
+##### §2.25.21.3 長文出力の自動変換
+
+subagent 完了報告が 30 行超の場合、ADV は §2.25.21.2 テンプレに自動変換して PO 提示。原文は `instructions/subagent_status.md` の `note` 欄にリンク参照（行数のみ表示）。
+
+**few-shot 例（正例）**:
+
+- subagent 完了報告 200 行 → ADV が 5 行サマリーに変換 → PO 提示「完了。3 ファイル新設 / 全 PASS / 次は Phase A 着手」
+
+**few-shot 例（違反例）**:
+
+- 200 行をそのまま PO に貼付 → §2.25.21.3 違反、PO 手間増加（§2.25.6 応答スタイル違反）
+- 完了報告に PASS / FAIL 件数欠落 → §2.25.21.1 違反、機械検証通過不可
+
+**機械チェック**:
+
+- `scripts/completion_verifier.sh` で報告フォーマット必須項目（MISSION-ID / 完了コマンド全 PASS / 5 行サマリー存在）を grep 検証
+
+---
+
+#### §2.25.22 夜間自動着手モード
+
+**目的**: PO 不在時間（夜間）に ADV が自律的に保守タスクへ着手し、朝に PO へサマリー報告する。本機能は本指示書 MISSION-G49-PKG-FINAL-V2 で PO 事前同意済（§2.25.3 該当）。
+
+##### §2.25.22.1 起動条件（全 AND 条件）
+
+- 時刻: **23:00 - 06:00 JST**
+- PO 不在シグナル: `instructions/po_offline.flag` 存在
+- /usage 残量: 30% 以上
+- PO 同意フラグ: `instructions/night_mode_consent.flag` 存在（本指示書承認時に PO が設置）
+
+##### §2.25.22.2 対象タスク
+
+`instructions/in_flight_topics.md` の `pending` タスクのうち以下条件を満たすもの:
+
+- `auto_eligible: true`（記録時に明示）
+- §2.25.3 PO 判断必須事項に該当しない（コスト追加 / プロセス追加 / ブランド変更 / データスキーマ / 外部依存追加なし）
+- 依存タスクが全 `completed`
+
+##### §2.25.22.3 障害時動作
+
+- subagent エラー検出（§2.25.20）→ 即停止 → 朝報告キュー追加（`logs/night_mode_alerts.log`）
+- 連続 2 タスク失敗で夜間モード自動 OFF（`instructions/night_mode_consent.flag` 自動削除）
+
+##### §2.25.22.4 朝報告
+
+06:00 JST に PO 向け朝報告生成:
+
+- 出力先: `logs/night_mode_report_YYYY-MM-DD.md`
+- 内容: 起動時刻 / 完了タスク / 失敗タスク / 残課題 / コスト消費（/usage 推定）
+
+##### §2.25.22.5 PO 事前同意フラグ運用
+
+- 設置: PO が `touch instructions/night_mode_consent.flag` で同意
+- 撤回: PO が `rm instructions/night_mode_consent.flag` で停止
+- 自動削除: §2.25.22.3 障害時 / コスト超過時
+
+##### §2.25.22.6 ガード（多重防衛）
+
+`scripts/night_mode_dispatcher.sh` で以下全 PASS のみ起動:
+
+1. 時刻判定（JST 23:00-06:00）
+2. `night_mode_consent.flag` 存在
+3. `po_offline.flag` 存在
+4. /usage 残量 30% 以上（API 経由取得 or 環境変数）
+5. `in_flight_topics.md` に `auto_eligible: true` の `pending` タスクが存在
+
+**few-shot 例（正例）**:
+
+- 23:30 JST、PO 不在シグナル + 同意フラグ存在 + /usage 残 50% → `night_mode_dispatcher.sh` 起動 → `auto_eligible: true` タスク 2 件着手 → 06:00 朝報告生成 → PO 起床時に確認
+
+**few-shot 例（違反例）**:
+
+- 同意フラグ不在で夜間着手 → §2.25.22.1 違反、本指示書 PO 承認前提を破壊
+- §2.25.3 該当タスク（コスト追加）を `auto_eligible: true` で着手 → §2.25.22.2 違反
+
+**機械チェック**:
+
+- `scripts/night_mode_dispatcher.sh` で多重ガード（§2.25.22.6）を全 PASS でのみ subagent 起動
+- 朝報告 `logs/night_mode_report_YYYY-MM-DD.md` の存在 + フォーマット検証（`scripts/completion_verifier.sh` 流用）
+
+---
+
+
 ### §2.26 — STATUScrit クラスター（PATCH-12 / R3-H-07、STATUS_CORRECTION プロトコル）
 
 **Target**: dev_system_spec.md / 新設クラスター（§2.25 の直後、§4 の直前）
@@ -2983,6 +3348,15 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
 - external_review_guardrail.sh — PATCH-22 / V35 Phase 1
 - external_review_postcommit.sh — PATCH-24 / PATCH-25 / V35 Phase 2
 - spawn_subagent_review.sh — PATCH-26 / PATCH-27 / V35 Phase 3
+
+
+**MISSION-G49-PKG-FINAL-V2 Phase 0 PO 補佐再構成（PATCH-G49-P0 / §2.25.16-.22）**:
+- main_session_writeguard.sh — PATCH-G49-P0 / PreToolUse hook 本体 / §2.25.16.2 書込禁止対象 8 種を BLOCK
+- context_monitor.sh — PATCH-G49-P0 / §2.25.16.4 コンテキスト監視（70/85/95% 閾値判定、stdin で context_size 受信）
+- handoff_validator.sh — PATCH-G49-P0 / §2.25.16.5 SSOT 4 ファイル運用検証（存在 + Read 履歴 grep）
+- subagent_health_check.sh — PATCH-G49-P0 / §2.25.20 障害検出（タイムアウト/エラー/出力欠落、連続 3 失敗 fail-open + PO 通知）
+- completion_verifier.sh — PATCH-G49-P0 / §2.25.21 完了条件検証（必須項目 grep + 30 行超 LONG 検出）
+- night_mode_dispatcher.sh — PATCH-G49-P0 / §2.25.22 夜間自動着手（5 重ガード: 時刻 + 同意フラグ + PO 不在 + /usage + auto_eligible タスク）
 
 ### §6.11 scripts/ 詳細表（リファレンス、補足含む）
 
