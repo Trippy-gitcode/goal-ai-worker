@@ -122,7 +122,7 @@ R2.1 本体（1,931行）の §1-§9 および §10 検証コマンドは**完�
 
 **BEFORE（R2.1）**:
 
-> 必須Read = §C0 要約 + [CLAUDE.md](http://CLAUDE.md) + development_rules.md + session_progress.md §C1-C6 は条件付き再読
+> 必須Read = §C0 要約 + `CLAUDE.md` + development_rules.md + session_progress.md §C1-C6 は条件付き再読
 
 **AFTER（R2.1.1）**: §C0-C6 は dev_system_spec.md 末尾（**新設§21**）に追加される「起動時要約版」。既存 §1-§20 は**不変**。
 
@@ -158,7 +158,7 @@ R2.1 本体（1,931行）の §1-§9 および §10 検証コマンドは**完�
 
 ### §2.β' — G8/G17 証跡パス統一（evidence/<MISSION_ID>/）
 
-**Target**: R2.1 §4.2.2, §4.6.3, §5.2 (G15), §5.4 (G17), §4.12.1 (playwright.realworld.config.ts), §6.10 ([deploy.sh](http://deploy.sh) 連鎖更新欠落)
+**Target**: R2.1 §4.2.2, §4.6.3, §5.2 (G15), §5.4 (G17), §4.12.1 (playwright.realworld.config.ts), §6.10 (`deploy.sh` 連鎖更新欠落)
 
 **根拠**: Golden R1 gemini_ai_ops R-003, gemini_solo R-005, R-006, gpt54_devops R-001
 
@@ -171,7 +171,7 @@ R2.1 本体（1,931行）の §1-§9 および §10 検証コマンドは**完�
 | G17 realworld 証跡 | logs/realworld//realworld-proof.json | **evidence/<MISSION_ID>/realworld-proof.json** |
 | G17 スクショ | logs/realworld//realworld-screenshots/ | **evidence/<MISSION_ID>/realworld-screenshots/** |
 | playwright config outputFile | logs/realworld/latest/realworld-proof.json | **evidence/${MISSION_ID}/realworld-proof.json** |
-| deploy.log | logs/deploy.log（未生成） | **logs/deploy.log**（[deploy.sh](http://deploy.sh) が生成、§2.ε' 参照） |
+| deploy.log | logs/deploy.log（未生成） | **logs/deploy.log**（`deploy.sh` が生成、§2.ε' 参照） |
 
 **canopy_common.sh::check_tdd 差替（R2.1 §4.2.3 を置換）**:
 
@@ -286,16 +286,16 @@ fi
 echo "OK: G15 spec and impl reference identical TDD files"
 ```
 
-**§6.10 への追加（[deploy.sh](http://deploy.sh) 連鎖更新、β'-3 + ε' 対応）**:
+**§6.10 への追加（`deploy.sh` 連鎖更新、β'-3 + ε' 対応）**:
 
-- [deploy.sh](http://deploy.sh) 本体を**完全に書き直す**（§2.ε' 参照）
+- `deploy.sh` 本体を**完全に書き直す**（§2.ε' 参照）
 - `logs/deploy.log` への完了記録を末尾に追加
 
 ---
 
 ### §2.γ' — POSIX 互換違反・実装バグ 修正（7件）
 
-**Target**: R2.1 §4.4.2 (risk_match.sh), §4.4.3 (mission_risk_classifier.sh), §5.2 (G15), §5.3 (G16), §5.4 (G17), §4.17.4 (G13), §4.19.1 (append_deploy_fail.sh), §4.5.2 ([deploy.sh](http://deploy.sh) hflow)
+**Target**: R2.1 §4.4.2 (risk_match.sh), §4.4.3 (mission_risk_classifier.sh), §5.2 (G15), §5.3 (G16), §5.4 (G17), §4.17.4 (G13), §4.19.1 (append_deploy_fail.sh), §4.5.2 (`deploy.sh` hflow)
 
 **根拠**: Golden R1 gemini_devops R-001, R-002, R-004, R-005, R-006, gemini_qa R-005, gemini_ai_ops R-001
 
@@ -840,12 +840,24 @@ if [ "$MISSION_RISK" = "high" ]; then
     scripts/append_deploy_fail.sh "$MISSION_ID" "realworld L1 smoke failed"
     exit 1
   fi
+
   # G17: realworld 証跡検証
   scripts/realworld_proof_check.sh "$MISSION_ID" || { echo "FAIL: G17"; exit 1; }
 
   # η' 対応: STATUS: READY_FOR_DEPLOY → DONE 自動書換え（v3.4 確定 5状態モデル、§15 §C3.2 SSoT に整合）
-  sed -i.bak -E "/^### $MISSION_ID:/,/^### /{ s/^(- \*\*STATUS:\*\*)[[:space:]]*READY_FOR_DEPLOY/\\1 DONE/ }" instructions/session_progress.md
-  rm -f instructions/session_progress.md.bak
+  # POSIX 互換: sed -i は GNU/BSD 非互換のため awk + tmp + mv パターン（§C6.4 規約遵守）
+  tmp=$(mktemp)
+  awk -v mid="$MISSION_ID" '
+    BEGIN { in_block = 0 }
+    /^### / {
+      if ($0 ~ "^### " mid ":") { in_block = 1 }
+      else if (in_block) { in_block = 0 }
+    }
+    in_block && /^- \*\*STATUS:\*\*[[:space:]]+READY_FOR_DEPLOY/ {
+      sub(/READY_FOR_DEPLOY/, "DONE")
+    }
+    { print }
+  ' instructions/session_progress.md > "$tmp" && mv "$tmp" instructions/session_progress.md
 
   # Step 12: STRIKE カウンタクリア（成功時、PATCH-13）+ logs/deploy.log 記録 + git tag
   STRIKES_FILE=instructions/deploy_strikes.json
@@ -1033,10 +1045,20 @@ check_test_pass() {
         target_status="DONE"
         ;;
     esac
-    sed -i.bak -E "/^### $mission_id:/,/^### /{
-      s/^(- \*\*STATUS:\*\*)[[:space:]]*IN_PROGRESS/\1 $target_status/
-    }" instructions/session_progress.md
-    rm -f instructions/session_progress.md.bak
+    # POSIX 互換: sed -i は GNU/BSD 非互換のため awk + tmp + mv パターン（§C6.4 規約遵守）
+    local tmp
+    tmp=$(mktemp)
+    awk -v mid="$mission_id" -v ts="$target_status" '
+      BEGIN { in_block = 0 }
+      /^### / {
+        if ($0 ~ "^### " mid ":") { in_block = 1 }
+        else if (in_block) { in_block = 0 }
+      }
+      in_block && /^- \*\*STATUS:\*\*[[:space:]]+IN_PROGRESS/ {
+        sub(/IN_PROGRESS/, ts)
+      }
+      { print }
+    ' instructions/session_progress.md > "$tmp" && mv "$tmp" instructions/session_progress.md
     echo "STATUS auto-updated: $mission_id → $target_status"
   fi
 }
@@ -1280,6 +1302,92 @@ ADV が §2.25.1〜§2.25.4 のいずれかに違反した場合、以下の手�
 | 違反 #5 | 冗長な状況報告（「現在 X 実行中、次に Y」） | §2.25.6 |
 
 各違反の詳細は `lais/verify/adv_violation_log.md` を参照。
+
+---
+
+#### §2.25.9 PO 作業発生提案の事前ゲート（PD-111 起源、違反 #6 #7 #8）
+
+PO に新規作業を発生させる承認質問を発信する前に、`scripts/adv_response_gate.sh` で承認パターン（「PO 様」「ご承認」「お願いします」「確認させてください」「YES/NO」「ABCD 選択肢」等）を機械検査する。検出時は §2.25.3 該当判定（コスト影響 / 新プロセス追加 / ブランド変更）を ADV 自身が再確認 → 該当しない場合は ADV 自律判断、該当する場合のみ §2.25.23 14 票投票機構を経由した上で承認質問を発信。
+
+#### §2.25.10 違反の事前回避原則（PD-111 起源、違反 #10、LP-034 連動）
+
+§2.25.5 違反自己申告義務は再発検出のセーフティネットであり、第一義は事前回避。同型違反 2 回以上で即時仕様改定（本 §2.25.X 拡張）を行い、事後記録の免罪符化（記録だけして再発を許容するパターン）を禁止する。
+
+#### §2.25.11 応答整合性義務（PD-111 起源、違反 #5 #9）
+
+同一セッション内で過去発言と矛盾する方針反転を行う場合、明示的撤回宣言（「§X の方針を撤回」）が必須。撤回宣言なしの方針反転は §2.25.5 違反 #11 として扱う。
+
+#### §2.25.12 外部権威ソース参照義務（PD-111 起源、LP-033 連動）
+
+外部仕様（CLI / API / hook / ツール挙動）を引用する際は、公式 docs（一次情報）の URL + 取得日 + 該当行を必須記載。LLM 推測 / ブログ参照 / 記憶ベース引用は禁止。違反時は §2.25.5 違反 #12 として扱う。
+
+#### §2.25.13 ログ出力量制御（PD-111 起源、違反 #5）
+
+完了報告は 3-5 行以内、subagent 完了報告は 1 行サマリ。冗長な状況報告（「現在 X 実行中、次に Y」「これから Z を実施します」等）は §2.25.6 違反 #5 として扱う。
+
+#### §2.25.14 全応答ペルソナレビュー（PD-111 起源、PD-112 で §2.25.23 連動）
+
+##### §2.25.14.1 適用範囲
+
+ADV の全応答（PO 質問への回答 / 提案 / 設計議論 / subagent 起動指示）は本節のペルソナレビューを通過したのち発信する。承認質問（§2.25.3 該当）の場合は本節 + §2.25.23 14 票投票機構を併用。
+
+##### §2.25.14.2 必須 3 ペルソナ（全応答固定）
+
+| ペルソナ | 主視点 |
+|---|---|
+| LLM アプリケーション設計者 | 応答が LLM らしい一貫性 / 自己完結性 / attention 独立を持つか |
+| プロンプトエンジニア | 応答が PO の意図を正確に解釈し、過剰拡張 / 過小実装をしていないか |
+| SW PM | 応答がプロダクト価値 / コスト / 進行ペースに整合しているか |
+
+##### §2.25.14.3 追加候補表（grep ベース発火トリガ）
+
+下表の発火トリガに該当する語彙が応答 / 質問内容に含まれる場合、対応ペルソナを追加候補から最大 3 名選抜（合計 6 名上限、`scripts/persona_selector.sh` で機械選抜）。
+
+| ペルソナ | 主視点 | 発火トリガ（grep ベース） |
+|---|---|---|
+| **SW アーキテクト** | 実装方式 / 責務境界 / 依存方向 / SSoT 整合 | 「実装」「アーキテクチャ」「責務」「依存」「SSoT」 |
+| **SRE** | 障害対応 / 復旧手順 / ガードレール / 監視 / リトライ | 「障害」「復旧」「ガードレール」「監視」「リトライ」 |
+| **QA テストエンジニア** | テスト戦略 / カバレッジ / 証跡 / TDD 実施 | 「テスト」「検証」「カバレッジ」「証跡」「TDD」 |
+| **テクニカルライター** | 仕様書整合 / 用語統一 / 章番号連続性 | 「仕様書」「§」「用語」「文書」「整合」 |
+| **セキュリティエンジニア** | auth / 秘密情報 / RLS / CSP / XSS 対策 | 「auth」「秘密」「rls」「csp」「xss」「シークレット」 |
+| **AI コンサルタント** | コスト / モデル選定 / ROI / 効果測定 | 「コスト」「モデル」「opus」「roi」「効果」 |
+| **データガバナンス専門家** | SSoT / バージョン管理 / バックアップ戦略 / 監査ログ整合性 / データ整合性 | 「SSoT」「バックアップ」「git」「監査ログ」「データ整合」「バージョン管理」 |
+
+##### §2.25.14.4 反復ラウンド（CRITICAL 0 / HIGH 0 まで反復、上限 5R）
+
+各ラウンドで全選抜ペルソナが順に応答候補を批判 → CRITICAL 0 / HIGH 0 になるまで応答を改稿。5 ラウンド到達でも CRITICAL / HIGH が残る場合は §2.25.20 障害検出経路に escalate。
+
+##### §2.25.14.5 機械チェック
+
+`scripts/persona_selector.sh` で発火トリガ判定 + ペルソナ選抜 + `logs/persona_review.log` 記録。応答末尾に `[Review: N rounds, M personas]` 付記必須（`scripts/adv_response_gate.sh` で末尾検査、欠落時 BLOCK）。
+
+##### §2.25.14.6 ログ
+
+`logs/persona_review.log` に TAB 区切り 6 列（ts / response_id / rounds / personas_csv / severity_summary / trigger_tags）で記録。週次ローテ + 4 週間保持。
+
+##### §2.25.14.7 ペルソナ定義詳細
+
+- **LLM アプリケーション設計者**: 「応答が LLM らしい一貫性を持ち、attention 独立 / 自己完結プロンプト / dedupe 設計に従っているかを評価。LP-030 自己完結形プロンプト指針との整合確認。」
+- **プロンプトエンジニア**: 「PO の意図解釈が正確で、過剰拡張 / 過小実装 / 暗黙仮定がないかを評価。提案された応答が PO 質問に逐語応答しているか、横道に逸れていないか確認。」
+- **SW PM**: 「プロダクト価値 / コスト影響 / 進行ペースとの整合を評価。提案された応答が dev-system 全体の進行を阻害せず、リソース配分が妥当であるか確認。」
+- **SW アーキテクト**: 「実装方式選定 / 責務境界 / 依存方向 / SSoT 整合を評価。新規モジュール追加時に既存責務との重複や循環依存が発生していないか、SSoT が一本化されているか確認。」
+- **SRE**: 「障害対応経路 / 復旧手順 / ガードレール / 監視可能性を評価。fail-closed / fail-open 切替条件、連続失敗カウンタ、自動 PO 通知の設計が妥当か確認。」
+- **QA テストエンジニア**: 「テスト戦略 / カバレッジ / 証跡 / TDD 実施を評価。e2e テスト網羅性、回帰防止、証跡 SSoT 整合を確認。」
+- **テクニカルライター**: 「仕様書整合 / 用語統一 / 章番号連続性 / §C1.5 用語 SSoT 遵守を評価。新節追加時に既存節との矛盾、用語ブレ、章番号穴抜けがないか確認。」
+- **セキュリティエンジニア**: 「auth / 秘密情報 / RLS / CSP / XSS 対策の妥当性を評価。新規スクリプト / hook 追加時に脆弱性が混入していないか、シークレット露出経路がないか確認。」
+- **AI コンサルタント**: 「コスト / モデル選定 / ROI / 効果測定の妥当性を評価。外部 AI 呼出しのコスト効率、モデル選定理由、効果測定指標が明示されているか確認。」
+- **データガバナンス専門家**: 「SSoT 管理 / バージョン管理 / バックアップ戦略 / 監査ログ整合性を評価。提案が SSoT を一本化しているか、バージョン履歴を保持しているか、データ消失リスクを低減しているか、監査証跡が連鎖しているか。」
+
+##### §2.25.14.8 §2.25.23 との関係
+
+- §2.25.14: 全応答ペルソナレビュー（応答品質、必須 3 + 追加候補最大 3）
+- §2.25.23: PO 承認取得前 14 票投票機構（承認発信前の拮抗判定、10 ペルソナ + 外部 AI 4 票）
+
+承認質問が必要と判定された場合 → §2.25.14 でレビュー → §2.25.23 で投票機構走行 → 拮抗なら PO 承認取得、圧倒的なら ADV 自律。
+
+#### §2.25.15 承認質問運用ルール（PD-111 連動、§2.25.23 で機械化）
+
+§2.25.3 PO 判断必須事項に該当する承認質問は、AskUserQuestion を用いて構造化し、(1) 質問題目、(2) ADV 推奨案 + 根拠、(3) 各案メリデメ、(4) 投票結果（§2.25.23 経由時）の 4 セクションを必須記載。質問発信前に §2.25.23 14 票投票機構で拮抗判定を行う。
 
 ---
 
@@ -1736,11 +1844,12 @@ deploy.sh Step 0（MISSION_ID 解決）で、対象 mission_id について直�
 4. Hフロー発火は git diff による機械判定（PD-106）
 5. 提案ログに記録→キュー空時に自律修正（C11 バグ対応フロー）
 
-#### §C0.4 G1-G17 ゲート一覧（§C3 / §4 詳細参照）
+#### §C0.4 G1-G18 ゲート一覧（§C3 / §4 詳細参照）
 G1 バージョン同期 / G2 Stage A / G3 テスト数 / G4 全PASS / G5 報告 / G6 デプロイ /
 G7 仕様↔完了対応 / G8 TDD(unit/e2e) / G9 UI / G10 シークレット /
 G11 Step0 / G12 提案ログ / G13 フック発火 / G14 仕様ファースト /
-G15 TDD同期 / G16 hash埋込 / G17 realworld
+G15 TDD同期 / G16 hash埋込 / G17 realworld /
+G18 連鎖更新監査（PATCH-21、Phase 1 MVP）
 
 #### §C0.5 5状態 STATUS モデル（PD-109、§C3.2 SSoT 参照）
 QUEUED → IN_PROGRESS → READY_FOR_DEPLOY → DONE（BLOCKED は例外、PATCH-13 で STRIKE 1→BLOCKED 化）
@@ -2178,7 +2287,7 @@ evidence/<MISSION_ID>/ 配下を参照するよう check_tdd を書き直し。�
 
 #### 6.5.1 §6.11 scripts/deploy.sh 完全書き換え（ε' 対応）
 
-**書き込み主体**: Code G_47 **内容**: 本R2.1.1 §2.ε'-1 の [deploy.sh](http://deploy.sh) 完全パッチを scripts/deploy.sh として書き込み **既存deploy.shがある場合**: バックアップして書き換え **検証**:
+**書き込み主体**: Code G_47 **内容**: 本R2.1.1 §2.ε'-1 の `deploy.sh` 完全パッチを scripts/deploy.sh として書き込み **既存deploy.shがある場合**: バックアップして書き換え **検証**:
 
 - pre-deploy ゲート（G16 + Hフロー + STATUS 検証）3つ全て存在
 - post-deploy ゲート（G17 + STATUS → DONE 自動書換え）存在
@@ -2284,7 +2393,7 @@ evidence/<MISSION_ID>/ 配下を参照するよう check_tdd を書き直し。�
 ### 7.5 重点レビュー領域
 
 - §C0-C6 マッピング表（§3）の妥当性: 既存 §1-§20 からの引用元が正確か
-- [deploy.sh](http://deploy.sh) 完全パッチ（§2.ε'）のロジック完全性: pre/post ゲート抜けなし
+- `deploy.sh` 完全パッチ（§2.ε'）のロジック完全性: pre/post ゲート抜けなし
 - 証跡パス統一（evidence/<MISSION_ID>/）が全箇所に適用されているか（β' + 他クラスター整合）
 - G13-G17 実装サンプルの POSIX 互換性（shellcheck error 相当なし）
 - STATUS 遷移全自動化（η'）の完全性: 手動遷移が残っていないか
@@ -2456,270 +2565,8 @@ R2.1.1 確定後、以下を learned-patterns.md に LP-020〜027 として追�
 **次ミッション:**
 - Code G_46: `AI-REVIEW-JS-JSON-MODE-FIX` → `DEV-SYSTEM-V34-REVIEW-GOLDEN-R2`
 - ゴールデン R2 CRITICAL 0 確定後 → Code G_47: `DEV-SYSTEM-V34-WRITE`
-## §6. 連鎖更新指示（R2.1 §6 への追加/修正）
 
-本節は R2.1 §6「連鎖更新指示（9カテゴリ）」への**追加・修正**を列挙する。Code G_47 が v3.4 確定後に連鎖更新を書込む際、R2.1 §6 と本R2.1.1 §6 を**両方**参照して書込する。
-
-### 6.1 dev_system_spec.md（R2.1 §6.1 への追加）
-
-**追加内容**: §21「共通規範集（起動時要約版）」新設指示
-
-詳細は本R2.1.1 §3 参照。§6.1 の既存内容（PD-104/105/106/107 反映）に加えて:
-- 末尾に「## §21. 共通規範集（起動時要約版）」を新設
-- §21.0 〜 §21.6 を §3.1-§3.7 の構成で記述（約410行追加）
-- 既存 §1-§20 完全不変
-- 章間相互参照（§C1 → §1/§3, §C2 → §2, 等）
-- 既存 §3 鉄則15個 → §C1 マッピング表を §6.1 末尾に付記
-
-### 6.2 sub_adv_protocol.md（R2.1 §6.2 への修正）
-
-**修正内容**: PD-108 却下反映
-
-- 書込可リストから `scripts/lib/*.sh`, `scripts/*_lint.sh` を削除
-- `templates/**` は追加のまま維持
-- 「ADV は設計文書内で実装サンプル提示可、実ファイル scripts/** への書込は不可」を明記
-- R2.1.1 §4.2 の対応表を正本として参照
-
-### 6.3 sub_hflow_protocol.md（R2.1 §6.3 はそのまま維持）
-
-本R2.1.1 では変更なし。PD-106 による機械発火ルールはそのまま。
-
-### 6.4 sub_testing.md（R2.1 §6.4 への修正）
-
-**修正内容**: 証跡パス統一 + L1 SSOT
-
-- R2.1 の `logs/<mission>/before-*.json` 表記をすべて **`evidence/<MISSION_ID>/before-*.json`** に置換（β' 対応）
-- L1 スモーク定義を §4.2.3 SSOT 5項目表と完全一致させる（ζ' 対応）
-- L1/L2/L3 層名と証跡種別（unit/e2e/realworld 証跡）の用語衝突解消（ζ'-2 対応）
-
-### 6.5 sub_infrastructure.md（R2.1 §6.5 への修正）
-
-**修正内容**:
-- §2.8 deploy.sh 完全パッチを追加（§2.ε' 参照、約60行）
-- `logs/deploy.log` 生成処理の記載
-- G17 実行タイミング（post-deploy の高リスク系のみ）
-- STATUS 自動遷移の deploy.sh 側実装（5状態モデル、§15 §C3.2 SSoT 準拠）
-- append_deploy_fail.sh の STRIKE 1→BLOCKED 化（PATCH-13、自動 DEPLOY-RECOVER 生成廃止）
-
-### 6.6 sub_review_flow.md（R2.1 §6.6 への修正は小幅）
-
-**修正内容**:
-- §2 Filter 7（severity inflation）に Golden R1 棄却例を追記（μ'/ν' 処理）
-- モデル使い分け: ゴールデン R は **GPT-5.4（response_format: json_object なし）+ Gemini 3.1 Pro** と明記（判定3 C 反映）
-
-### 6.7 sub_knowledge_flow.md（R2.1 §6.7 はそのまま維持）
-
-本R2.1.1 では変更なし。LP-025-027 候補は learned-patterns.md 側で管理。
-
-### 6.8 development_rules.md（R2.1 §6.8 への修正）
-
-**修正内容**:
-- L1 スモーク定義を §4.2.3 SSOT 5項目表と完全一致させる（ζ'-3 対応）
-- 既存の「起動/タスク追加/タスク編集保存/AI送信応答/プロフィール保存リロード残存」を SSOT 抽象枠（L1-1〜L1-5）に書換え
-- 完了報告フォーマットの3区分化（cmd-unit/cmd-e2e/cmd-realworld）を明記
-
-### 6.9 templates/（R2.1 §6.9 への追加/修正）
-
-**追加・修正内容**:
-- `templates/mission_template_v3.md`: 完了コマンド欄を `cmd-unit / cmd-e2e / cmd-realworld` 3行構成に書換え（θ' 対応）
-- `templates/deploy_recover_template.md`: 既存のまま維持（R2.1 で既定義、PATCH-13 で自動生成は廃止、ADV 手動起票時のテンプレートとして残置）
-- `templates/dev-system.yaml`: **新規追加**（ι' 対応）。subdirs 列挙形式
-
-### 6.10 scripts/（R2.1 §6.10 の全面書直し + deploy.sh 追加）
-
-**R2.1 §6.10 は R2.1.1 §2 の各実装サンプルで置換される**:
-- `scripts/lib/canopy_common.sh`: §2.β' の check_tdd + §2.η' の check_test_pass 自動 STATUS 書換え
-- `scripts/lib/risk_match.sh`: §2.γ'-1 のヒアドキュメント版
-- `scripts/lib/risk_patterns.sh`: R2.1 §6.10 のまま維持
-- `scripts/mission_risk_classifier.sh`: §2.δ'-1 の形式1+形式2両対応版
-- `scripts/hflow_trigger_check.sh`: §2.ε'-3 の main 直 push 対応版
-- `scripts/spec_first_lint.sh`: §2.δ'-3 の next バグ修正 + κ' 正規表現緩和版
-- `scripts/proposal_log_lint.sh`: §2.δ'-4 のインプレース書換え版
-- `scripts/verify_external_services.sh`: §2.δ'-2 の代替証跡チェック版
-- `scripts/deploy_hash_verify.sh`: §2.γ'-3 の cut 版
-- `scripts/deploy_poll_hash.sh`: R2.1 §6.10 のまま維持
-- `scripts/realworld_proof_check.sh`: §2.β' + §2.γ'-4 の POSIX版 + 5操作版
-- `scripts/tdd_trace_consistency.sh`: §2.β' + §2.γ'-2 の一時ファイル版
-- `scripts/verify_hooks.sh`: §2.γ'-6 の sh 側 date 変換版
-- `scripts/append_deploy_fail.sh`: §2.γ'-7 の ENVIRON 版 + §2.η' STATUS 自動書戻し
-- `scripts/deploy.sh`**: §2.ε'-1 の完全パッチ（R2.1.1 新規追加、§6.10 に明示）**
-- `scripts/shellcheck_lint.sh`**: §2.γ'-8 の shellcheck ゲート新設（または pre-commit 内蔵）**
-
----
-
-## §7. レビュアー指示 Part IX（ゴールデン R2 用）
-
-本R2.1 と本R2.1.1 を**両方読んで**、以下の観点でレビューする。ゴールデン R2 は**最終確定前の最後のゲート**。CRITICAL 0 で v3.4 確定、CRITICAL > 0 で POエスカレーション。
-
-### 7.1 severity 基準（sub_review_flow §2 Filter 1-7 準拠）
-
-severity基準例CRITICAL仕様矛盾・実装不能・セキュリティ抜け・PD方針違反が残存証跡パスがまだ不整合、POSIX違反残存、§C0-C6 が実体化していない
-
-### 7.2 PD 方針異議禁止（§5.5 棄却強化）
-
-以下への「反対意見」は**即棄却**（severity に関わらず出さない）:
-
-- PD-104（dev-system SPEC 分割）
-- PD-105（完了コマンド3区分）
-- PD-106（Hフロー機械発火）
-- PD-107（起動時Read 約400行）
-- **PD-108（却下: ADV書込可拡張）の「却下決定」そのものへの再提案**
-
-方針はすでに PO 承認済。異議は受理しない。方針内の**実装改善提案**は可（例: 「PD-107 の 400行を守るために §C0 をさらに圧縮する案」は可）。
-
-### 7.3 Filter 1-7 の適用（sub_review_flow.md §2 参照）
-
-- Filter 1（既採用テーマ再提案）: R2 採用 98件 + HIGH 21件 + Golden R1 採用 30件 = **149件への再異議は棄却**
-- Filter 2（LOW 蒸し返し）: R1/R2 で LOW 棄却された 4件の再提案は棄却
-- Filter 3（FEASIBILITY 根拠欠落）: 「難しい」だけで根拠なしは MED 降格
-- Filter 4（MISSING 自己参照）: 「§X が §X を参照していない」類は HIGH 以下
-- Filter 5（CONTRADICTION 原本誤読）: 原本確認せず矛盾主張は棄却
-- Filter 6（UNDEFINED 用語汚染）: 既定義用語への「未定義」指摘は棄却
-- **Filter 7（severity inflation）**: 既採用テーマの再発見は MED 以下。既存 CRITICAL の補強指摘は HIGH 上限
-
-### 7.4 ゴールデン R2 の重点領域
-
-R2.1.1 で修正した14クラスターが**完全に解消されているか**:
-
-- α' §C0-C6 物理化: §6.1 連鎖更新指示にマッピング表・移行マップがあるか
-- β' 証跡パス統一: evidence/<MISSION_ID>/ が全文で一貫しているか
-- γ' POSIX 互換: shellcheck が通る実装サンプルになっているか
-- δ' 個別バグ: awk/grep/regex が実動作するか（机上でトレース可）
-- ε' [deploy.sh](http://deploy.sh): pre-deploy + post-deploy ゲートが連続実行可能か
-- ζ' L1 SSOT: 5項目表と G17 5操作が一致するか
-- η' STATUS 自動化: 手動遷移箇所が残っていないか
-- θ' mission_template: cmd-unit/cmd-e2e/cmd-realworld 3行構成か
-- ι' pre-commit: ハードコード除去 + dev-system.yaml 方式か
-- κ' G14 regex: 通常アプリ docs/\*\*/\*.md でも通るか
-- λ' G17 5操作: auth.png が高リスク認証ミッションで必須化されているか
-- μ' PD-108: R2.1 §4.16 から scripts/lib/\*\* 除去が反映されているか
-- ν' LP-025 候補: 記録のみで本R2.1.1 本文に影響がないか
-- ξ' G8 AFTER: 「realworld は G8対象外、G17 の対象」に訂正されているか
-
-### 7.5 R2.1.1 自体の新規論点
-
-R2.1.1 で**新たに**導入された内容に対して新規指摘可:
-
-- §3 §C0-C6 マッピング設計の妥当性（行数目安が守れそうか、抜け・重複がないか）
-- §5 ai_review.js 改修方針（json_object 削除で本当に出力改善するか）
-- §6 連鎖更新指示の網羅性（書込対象が漏れていないか）
-
-ただしこれらも **severity は CRITICAL 上限**（方針レベルの破綻時のみ CRITICAL）、通常は HIGH 以下で指摘。
-
-### 7.6 出力形式（ai_review.js 改修後の期待）
-
-```json
-[
-  {
-    "id": "R-001",
-    "severity": "CRITICAL",
-    "category": "MISSING" | "CONTRADICTION" | "FEASIBILITY" | "STRUCTURE" | "EDGE_CASE" | "ROBUSTNESS" | "UNDEFINED" | "AMBIGUITY",
-    "location": "R2.1 §X.Y または R2.1.1 §Z.W",
-    "issue": "問題の具体記述（100-300字）",
-    "suggestion": "修正提案（100-300字）"
-  }
-]
-```
-
-**5-10件必須**（1件のみは R1 の GPT-5.4 のような出力抑制パターンとして扱われ、再実行対象）。
-
----
-
-## §8. Cumulative Context Part X（149件要約 + 本R2.1.1 採用）
-
-### 8.1 累積採用テーマ（ゴールデン R2 レビュアーが同じ指摘を出さないため）
-
-段階件数出典R1 採用76R1 トリアージR2 採用22R2 パッケージ §XHIGH 採用（R1+R2）21同上Golden R1 採用30本R2.1.1 §2 全クラスターGolden R1 却下（PD-108）1本R2.1.1 §4Golden R1 HIGH 降格1ν' = LP-025 候補**合計採用149**
-
-### 8.2 既棄却 LOW 4件（R1/R2 で却下、再提案禁止）
-
-1. docs/ 配下のフォルダ構造再編（ファイル場所変更、仕様への影響なし）
-2. コメントスタイル統一（LOW、好み）
-3. 変数命名の microstyle 改善（LOW、可読性差小）
-4. ログ出力時刻フォーマット統一（LOW、既存ツール依存）
-
-### 8.3 本R2.1.1 採用 30件（§2 全クラスターを再掲）
-
-ID 系列クラスター件数方針α'-1〜3§C0-C6 実体化 + マッピング3採用（§2.α' + §3）β'-1〜4証跡パス evidence/<MISSION_ID>/ 統一4採用（§2.β'）γ'-1〜7POSIX 互換修正7採用（§2.γ'）δ'-1〜4個別スクリプトバグ修正4採用（§2.δ'）ε'-1〜3[deploy.sh](http://deploy.sh) 完全パッチ + Hフロー main 直push3採用（§2.ε'）ζ'-1〜2L1 SSOT 5項目 + 層名衝突解消2採用（§2.ζ'）η'-1〜2STATUS 全自動化2採用（§2.η'）θ'-1mission_template 3区分化1採用（§2.θ'）ι'-1pre-commit ハードコード解消1採用（§2.ι'）κ'-1G14 regex 緩和1採用（δ'-3 と統合）λ'-1G17 5操作（auth 含む）1採用（ζ' と統合）ξ'-1G8 AFTER タイポ訂正1採用（§2.ξ'）
-
-### 8.4 PO 決定（PD 全件、R2.1.1 までの確定状況）
-
-- PD-001〜008: Goal AI 時代の基本決定（CODE委任、dev-system共通基盤等）
-- PD-101〜103: Lais 開始時の決定
-- PD-104: dev-system SPEC 分割（メイン + sub 5本）
-- PD-105: 完了コマンド3区分（cmd-unit/cmd-e2e/cmd-realworld）
-- PD-106: Hフロー機械発火（git diff ベース）
-- PD-107: 起動時Read 約400行（§C0 固定 + §C1-C6 条件付き再読）
-- **PD-108: ADV書込可拡張を却下**（本R2.1.1 §4）
-
-**再提案・異議 禁止**。方針内の実装改善提案は可。
-
-### 8.5 LP 候補（ゴールデン R2 完了後に正式追加予定）
-
-- LP-020: 既存提案
-- LP-021: 既存提案
-- LP-022: 既存提案
-- LP-023: 既存提案
-- LP-024: 既存提案
-- **LP-025 候補（ν' 由来）**: dev-system改訂セッション用の最小起動コンテキスト別定義
-- **LP-026 候補（α' 由来）**: 章番号体系変更は「新章新設+既存章参照」パターン採用、renumbering 禁止
-- **LP-027 候補（γ' 由来）**: 新設スクリプトは shellcheck --shell=sh --severity=error で pre-commit 検査
-
----
-
-## §9. ゴールデン R2 実行計画
-
-### 9.1 前提条件
-
-ゴールデン R2 実行**前**に以下が完了している必要:
-
-1. ✅ Golden R1 トリアージ完了（dev_system_v34_golden_r1_triage.md 738行）
-2. ✅ R2.1.1 パッケージ完成（本ファイル、\~1,800行想定）
-3. ✅ PD-108 却下記録（[po-decisions.md](http://po-decisions.md)）
-4. ⏳ **ai_review.js 改修**（Code G_46 ミッション `AI-REVIEW-JS-JSON-MODE-FIX`、GPT-5.4 側 json_object 削除）
-
-### 9.2 実行構成
-
-項目値入力`lais/verify/dev_system_v34_r2_1_package.md`（R2.1 本体）+ `lais/verify/dev_system_v34_r2_1_1_package.md`（本R2.1.1 差分）モデルGemini 3.1 Pro Preview + GPT-5.4ペルソナai_ops / devops_engineer / qa_lead / solo_dev / tech_writer（全5）並列実行数10本（2モデル × 5ペルソナ）コスト見込み$3-5（Golden R1 と同水準）実行時間10-15分
-
-### 9.3 ai_review.js 実行コマンド（R2.1.1 前提）
-
-```sh
-node scripts/ai_review.js \
-  --input "lais/verify/dev_system_v34_r2_1_package.md,lais/verify/dev_system_v34_r2_1_1_package.md" \
-  --models gemini,gpt54 \
-  --personas ai_ops,devops_engineer,qa_lead,solo_dev,tech_writer \
-  --severity CRITICAL,HIGH,MEDIUM \
-  --output lais/verify \
-  --prefix dev_system_v34_golden_r2
-```
-
-### 9.4 完了条件（R2 PASS）
-
-- **CRITICAL 0 件**（全ペルソナ × 全モデル合算）
-- ファイルサイズ: 各ペルソナ 3,000+ chars（GPT-5.4 も Gemini 並みに回復）
-- Filter 7 違反 0 件（既採用テーマ再発指摘が 0）
-
-### 9.5 FAIL 条件 と 対処
-
-結果対処CRITICAL 0 件v3.4 **確定**。Code G_47 で連鎖更新書込ミッション開始CRITICAL 1-5 件ADV トリアージで**棄却余地ありか判定**。PD方針違反以外なら R2.1.2 差分パッケージ作成 → ゴールデン R3（**sub_review_flow §1.6 上限2R超過でPOエスカレーション必要**）CRITICAL 6+ 件POエスカレーション（R2.1.1 の設計レベル欠陥が疑われる）GPT-5.4 出力抑制再発ai_review.js 改修不完全 → Code G_46 で再修正 → R2 再実行
-
-### 9.6 Code G_47 連鎖更新書込ミッション（CRITICAL 0 後）
-
-`DEV-SYSTEM-V34-WRITE` として実行:
-
- 1. dev_system_spec.md §21 新設（§C0-C6、約410行追加）
- 2. sub_adv_protocol.md §1 書込可リスト更新（PD-108 反映）
- 3. sub_testing.md 証跡パス evidence/<MISSION_ID>/ 統一
- 4. sub_infrastructure.md §2.8 [deploy.sh](http://deploy.sh) パッチ追加
- 5. sub_review_flow.md §2 Filter 7 + モデル使い分け追記
- 6. development_rules.md L1 SSOT 同期
- 7. templates/mission_template_v3.md cmd 3区分化
- 8. templates/dev-system.yaml 新規追加
- 9. scripts/\*\* 全体を R2.1.1 §2 / §6.10 の実装サンプルで書込
-10. 最終検証コマンド実行
-
-推定工数: 60-90分（15ファイル程度、合計 \~3,000行の書込）
+<!-- §6/§7/§8/§9 の重複サマリー版（旧 行 2459-2731）は MISSION-G49-PKG-FINAL-V2 Phase A PATCH-G49-PA で削除。詳細版は前段（§6 / §7 / §8 / §9）を参照。 -->
 
 ---
 
@@ -2787,7 +2634,7 @@ grep -c 'response_format.*json_object\|AI-REVIEW-JS-JSON-MODE-FIX' lais/verify/d
 #### §C0.3 変更フロー 6ステップ（詳細は §C2）
 Step 1 仕様確定 → Step 2 モックアップ → Step 2.5 AT記述 → Step 3 キュー登録 → Step 4 ENG実装 → Step 5 G9検証 + C2デプロイ + PO確認
 
-#### §C0.4 品質ゲート G1-G17（詳細は §C3）
+#### §C0.4 品質ゲート G1-G18（詳細は §C3）
 | G番号 | 名称 |
 |---|---|
 | G1 | バージョン同期 |
@@ -3018,7 +2865,11 @@ AT-N: テスト名
 
 #### §C3.4 L1/L2/L3 と cmd-3区分 SSOT（R2.2 §3.4 埋込版、§7 正本）
 
-層定義実行媒体必須ゲートL1 スモーク起動+認証+主機能1+主機能2/API+永続化の5項目cmd-e2e @smoke or cmd-realworldG4, G17（realworld時）L2 影響範囲変更ファイル周辺cmd-unit + cmd-e2eG8L3 フル全テスト（週次）cmd-unit + cmd-e2eG4
+| 層 | 定義 | 実行媒体 | 必須ゲート |
+|---|---|---|---|
+| L1 スモーク | 起動 + 認証 + 主機能1 + 主機能2/API + 永続化 の 5項目 | cmd-e2e @smoke or cmd-realworld | G4, G17（realworld 時）|
+| L2 影響範囲 | 変更ファイル周辺 | cmd-unit + cmd-e2e | G8 |
+| L3 フル | 全テスト（週次）| cmd-unit + cmd-e2e | G4 |
 
 cmd-3区分:
 
@@ -3047,9 +2898,20 @@ cmd-3区分:
 | Step | 内容 | ゲート | 失敗時 |
 |---|---|---|---|
 | 0 | MISSION_ID 解決 + extract_mission_block + STATUS 検証 + 直近 STATUS_CORRECTION 通知（PATCH-12） | — | exit 1 |
-| 1 | version_sync + bump commit + eval "$BUILD_CMD" | — | exit 1 | | 2 | tests/smoke/canopy.sh（G1-G10 + check_test_pass）| G1-G10 | exit 1 | | 3 | G8 TDD 証跡検証（canopy 内）| G8 | exit 1 | | 4 | G16 deploy_hash_verify.sh（dist/ にcommit sha埋込）| G16 | exit 1 | | 5 | Hフロー承認ゲート（§C4.5、verify_approval_authenticity.sh）| — | exit 1 | | 6 | L1 スモーク（playwright @smoke、extract_cmd.sh cmd-e2e SSOT）| G4 | exit 1 | | 7 | L2 影響範囲（[affected-tests.sh](http://affected-tests.sh)）| G4 | exit 1 | | 8 | wrangler pages deploy | — | append_deploy_fail + exit 1 | | 9 | deploy_poll_hash.sh（URL hash 検証）| G16 | append_deploy_fail + exit 1 | | 10 | normalize_realworld_report + G17 proof_check（high のみ）| G17 | append_deploy_fail + exit 1 | | 11 | STATUS → DONE 書換え | — | — | | 12 | logs/deploy.log 追記 + STRIKE クリア + git tag | — | — |
+| 1 | version_sync + bump commit + eval "$BUILD_CMD" | — | exit 1 |
+| 2 | tests/smoke/canopy.sh（G1-G10 + check_test_pass）| G1-G10 | exit 1 |
+| 3 | G8 TDD 証跡検証（canopy 内）| G8 | exit 1 |
+| 4 | G16 deploy_hash_verify.sh（dist/ に commit sha 埋込）| G16 | exit 1 |
+| 5 | Hフロー承認ゲート（§C4.5、verify_approval_authenticity.sh）| — | exit 1 |
+| 6 | L1 スモーク（playwright @smoke、extract_cmd.sh cmd-e2e SSOT）| G4 | exit 1 |
+| 7 | L2 影響範囲（`scripts/affected-tests.sh`）| G4 | exit 1 |
+| 8 | wrangler pages deploy | — | append_deploy_fail + exit 1 |
+| 9 | deploy_poll_hash.sh（URL hash 検証）| G16 | append_deploy_fail + exit 1 |
+| 10 | normalize_realworld_report + G17 proof_check（high のみ）| G17 | append_deploy_fail + exit 1 |
+| 11 | STATUS → DONE 書換え | — | — |
+| 12 | logs/deploy.log 追記 + STRIKE クリア + git tag | — | — |
 
-実装: sub_infrastructure.md §2.8 [deploy.sh](http://deploy.sh) 完全版（PATCH-20 で 12 Step + scripts/ 22 本実装、PATCH-26 で Phase 3 cost_usd 拡張）。
+実装: sub_infrastructure.md §2.8 `deploy.sh` 完全版（PATCH-20 で 12 Step + scripts/ 22 本実装、PATCH-26 で Phase 3 cost_usd 拡張）。
 
 #### §C4.2 デプロイリトライ（STRIKE カウンタ、PATCH-13 / R3-H-08）
 
@@ -3066,7 +2928,12 @@ cmd-3区分:
 
 #### §C4.4 デバッグ 4フェーズ（Systematic Debugging、既存 §9）
 
-Phase名称内容禁止1証拠収集エラーログ → データフロー → 再現手順修正コード記述2仮説構築最大3仮説、各検証方法1行検証方法なき仮説3仮説テスト1つずつ検証、複数同時変更禁止複数同時変更4修正+テストバグ再現テスト → FAIL → 修正 → PASS → 回帰テストなき修正
+| Phase | 名称 | 内容 | 禁止 |
+|---:|---|---|---|
+| 1 | 証拠収集 | エラーログ → データフロー → 再現手順 | 修正コード記述 |
+| 2 | 仮説構築 | 最大 3 仮説、各検証方法 1 行 | 検証方法なき仮説 |
+| 3 | 仮説テスト | 1 つずつ検証、複数同時変更禁止 | 複数同時変更 |
+| 4 | 修正 + テスト | バグ再現テスト → FAIL → 修正 → PASS → 回帰 | テストなき修正 |
 
 修正試行 3回制限: 同一バグ → 3回失敗 → HOLD → ADV エスカレーション。 デバイス依存バグ: 静的解析のみで断言禁止（鉄則⑧）。シミュレーター/実機で確認。
 
@@ -3097,7 +2964,7 @@ Phase名称内容禁止1証拠収集エラーログ → データフロー → �
 3. approval_git_author ドメインマッチ（`*claude_ai*|*claude@*|*anthropic*|*noreply@anthropic.com|*noreply@github.com` or PO メール。PATCH-19 / Bug H で `noreply@github.com` 追加: Desktop Code ADV が GitHub 経由で commit する場合の author 識別子に対応）
 4. HEAD sha == commit_sha
 
-`scripts/verify_approval_authenticity.sh` が [deploy.sh](http://deploy.sh) Step 5 で一括検査。いずれか失敗で exit 1。 app_config.yaml の hflow.enabled で全体オプトアウト可（ソロ開発者向け、§2.18 PD疑義2、PATCH-19 Bug F で OVERRIDE 引上げ修正）。
+`scripts/verify_approval_authenticity.sh` が `deploy.sh` Step 5 で一括検査。いずれか失敗で exit 1。 app_config.yaml の hflow.enabled で全体オプトアウト可（ソロ開発者向け、§2.18 PD疑義2、PATCH-19 Bug F で OVERRIDE 引上げ修正）。
 
 詳細フロー: sub_hflow_protocol.md
 
@@ -3120,7 +2987,16 @@ severity inflation 対策: 構造的問題解消後のエッジケース過剰�
 
 #### §C5.3 7種別フロー（A-G + H、詳細は sub_review_flow §4）
 
-フロー対象ペルソナ主審Aデザインモックアップ6web_designer + color_coordinatorBアプリ仕様8pm + ux_researcherCdev-system5devops_engineer + solo_devD実装6code_reviewer + security_engineerE技術文書3全員Fテスト仕様3全員Gプロンプト3全員H統合フローレビュー6code_reviewer + security_engineer（Hフロー発火時、PD-110）
+| フロー | 対象 | ペルソナ | 主審 |
+|---|---|---:|---|
+| A | デザインモックアップ | 6 | web_designer + color_coordinator |
+| B | アプリ仕様 | 8 | pm + ux_researcher |
+| C | dev-system | 5 | devops_engineer + solo_dev |
+| D | 実装 | 6 | code_reviewer + security_engineer |
+| E | 技術文書 | 3 | 全員 |
+| F | テスト仕様 | 3 | 全員 |
+| G | プロンプト | 3 | 全員 |
+| H | 統合フローレビュー | 6 | code_reviewer + security_engineer（Hフロー発火時、PD-110）|
 
 #### §C5.4 レビュー上限 SSOT（βcrit' 対応）
 
@@ -3149,12 +3025,12 @@ ADV（判断）→ QA（ルール検証）→ PO代理（方針検証）の3者�
 
 #### §C5.8 棚卸し（5セッションごと）
 
-1. [CLAUDE.md](http://CLAUDE.md) / development_rules.md / session_progress.md 整合性
+1. `CLAUDE.md` / development_rules.md / session_progress.md 整合性
 2. session_progress.md ≤ 300行
 3. development_rules.md 過度な肥大化なし
 4. 提案ログ未処理確認
 5. ルールファイル間矛盾チェック
-6. [CLAUDE.md](http://CLAUDE.md) 改善提案
+6. `CLAUDE.md` 改善提案
 7. dev-system 逆流すべき教訓確認
 8. metrics.jsonl トレンド → 改善提案1件以上
 9. 技術負債比率 30% 超で負債返済スプリント
@@ -3171,11 +3047,11 @@ ADV（判断）→ QA（ルール検証）→ PO代理（方針検証）の3者�
 #### §C6.2 絶対禁止（§16.5、正本）
 
 - canopy 項目削除（追加は可、削除は PO 承認必須）
-- 契約変更（[CLAUDE.md](http://CLAUDE.md) 無断変更）
+- 契約変更（`CLAUDE.md` 無断変更）
 - UI 変更を grep 確認だけで「完了」
 - ログ確認前の投機的修正
 - 分母なしの「ALL PASS」「全件完了」報告
-- 対象ファイル外変更（[changed-files-allowlist.sh](http://changed-files-allowlist.sh) で FAIL）
+- 対象ファイル外変更（`changed-files-allowlist.sh` で FAIL）
 - TDD 証跡なしの完了報告（evidence/ に before/after 必須）
 - コードへのシークレット埋込（G10 で検出）
 
@@ -3196,28 +3072,41 @@ ADV（判断）→ QA（ルール検証）→ PO代理（方針検証）の3者�
 #### §C6.5 runtime 依存集約（PATCH-15 / R3-H-10、§3.7 拡張）
 
 - `scripts/lib/runtime_preflight.sh` が python3 / jq / yq の存在を一括検査（`require_dev_system_runtimes` 関数）
-- [deploy.sh](http://deploy.sh) / [canopy.sh](http://canopy.sh) 冒頭で `source` して呼出し、個別 `command -v` は廃止
+- `deploy.sh` / `canopy.sh` 冒頭で `source` して呼出し、個別 `command -v` は廃止
 - いずれか不在時は exit 1 + 不足ツール列挙
 
 ---
 
 ## §16. PATCH-19〜27 履歴記録（CHAIN-UPDATE-DISPATCH 〜 V35 Phase 3）
 
-> 本節は [patches.md](http://patches.md) PATCH-19〜27（2026-04-23〜2026-04-25）の AFTER 内容と 3ペルソナ合議結果を本パッケージに集約。 v3.4 仕様（PATCH-1〜18）確定後の連鎖実装フェーズ + V35 Phase 1-3 拡張の記録。
+> 本節は `patches.md` PATCH-19〜27（2026-04-23〜2026-04-25）の AFTER 内容と 3ペルソナ合議結果を本パッケージに集約。 v3.4 仕様（PATCH-1〜18）確定後の連鎖実装フェーズ + V35 Phase 1-3 拡張の記録。
 
 ### §16.1 PATCH-19: PART1 着手前バグ修正一括（Code G_50 / Desktop Code ADV G_48、2026-04-23）
 
-**背景**: CHAIN-UPDATE-DISPATCH PART1 完遂直後の Code 内部検証で発見された 10 件のバグ修正。
+**背景**: CHAIN-UPDATE-DISPATCH PART1 完遂直後の Code 内部検証で発見された 12 件のバグ修正（当初 10 件想定だったが内部検証で 2 件追加発見、計 12 件で確定）。
 
-**Bug 一覧（10件）**:
+**Bug 一覧（12件、A〜L）**:
 
-Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 手順 新設（PATCH-12 波及）+ instructions/status_corrections.log 書込リスト追加BCRIT§6.2 canopy_common.sh 関数追加列5番目に correct_status 明示（PATCH-12 反映）CHIGH§6.4 sub_adv_protocol §11同 A（STATUS_CORRECTION 手順記述）DHIGH§6.9 templates/risk_tags（PATCH-16）+ session_history_ref / approval_git_author / commit_sha（PATCH-14）必須フィールド明記EHIGH§6.10 22 本拡張step0_lint / verify_hooks / spec_first_lint + extract_cmd / verify_approval_authenticity / terminology_lint / lib/runtime_preflight 追加FHIGH§2.4 append_deploy_fail.shOVERRIDE 変数を if 外部に引き上げ（set -eu 対応、Bug F 修正）GHIGH§10.11 terminology_lintgrep 排除パターン縮小（code/Protocol/Policy/Rules + §/sub\_\*.md は除外）HHIGHapproval_git_author`*noreply@github.com` 追加（Desktop Code ADV の GitHub 経由 commit 対応）IMED§3.6 STRIKE 2 記述「通知のみ」に整合（PATCH-13 との同期）JMED§0.1 クラスター数「+4=26 クラスター」累計注記（PATCH-7/12/18 増分、§1.2 22 は歴史表記として残存）KMED§6.12 pre-pushverify_hooks.sh 結線追加LMED§C3.2 STATUS 表STATUS_CORRECTION 行追加（§21 §C4.5 と同期）
+| Bug | 重要度 | 領域 | 修正内容 |
+|---|---|---|---|
+| A | CRIT | §6.4 sub_adv_protocol §11 | STATUS_CORRECTION 手順 新設（PATCH-12 波及）+ `instructions/status_corrections.log` 書込リスト追加 |
+| B | CRIT | §6.2 canopy_common.sh 関数追加列 | 5 番目に `correct_status` 明示（PATCH-12 反映）|
+| C | HIGH | §6.4 sub_adv_protocol §11 | 同 A（STATUS_CORRECTION 手順記述）|
+| D | HIGH | §6.9 templates/ | risk_tags（PATCH-16）+ session_history_ref / approval_git_author / commit_sha（PATCH-14）必須フィールド明記 |
+| E | HIGH | §6.10 22 本拡張 | step0_lint / verify_hooks / spec_first_lint + extract_cmd / verify_approval_authenticity / terminology_lint / lib/runtime_preflight 追加 |
+| F | HIGH | §2.4 append_deploy_fail.sh | OVERRIDE 変数を if 外部に引き上げ（`set -eu` 対応、Bug F 修正）|
+| G | HIGH | §10.11 terminology_lint | grep 排除パターン縮小（code/Protocol/Policy/Rules + §/sub_\*.md は除外）|
+| H | HIGH | approval_git_author | `*noreply@github.com` 追加（Desktop Code ADV の GitHub 経由 commit 対応）|
+| I | MED | §3.6 | STRIKE 2 記述「通知のみ」に整合（PATCH-13 との同期）|
+| J | MED | §0.1 クラスター数 | 「+4=26 クラスター」累計注記（PATCH-7/12/18 増分、§1.2 22 は歴史表記として残存）|
+| K | MED | §6.12 pre-push | verify_hooks.sh 結線追加 |
+| L | MED | §C3.2 STATUS 表 | STATUS_CORRECTION 行追加（§21 §C4.5 と同期）|
 
 **§2.25 ADVcrit クラスター新設**: PATCH-18 由来の §2.25.1〜§2.25.8 を本パッケージ §2.25 に新設（本ファイル §2.25 参照）。
 
 **3ペルソナ合議**: §7.3 CRITICAL 定義「Howの欠落」に Bug A/B/F が該当（スクリプト実装時に参照不能 or 実行失敗）。§7.4 既棄却テーマ衝突ゼロ（PD-104-108 / PD-109/110 / §C0-C6 分量のいずれとも無関係）。Bug L は PATCH-1 / PATCH-12 の自然な可視化改善で、PART1 §C3.2 の表に行を追加しただけで新規思想の導入ではない。**合意**: 採用。
 
-**注記**: PATCH-19 のリネーム指示（仮にあった場合）はスキップ、§2.25 新設 + 上記 12 Bug 修正のみ反映。
+**注記**: PATCH-19 のリネーム指示（仮にあった場合）はスキップ、§2.25 新設 + 上記 12 Bug 修正のみ反映。Bug 件数の SSoT は本表（A〜L = 12 件）。MISSION-G49-PKG-FINAL-V2 Phase A PATCH-G49-PA で「10 件」記述を「12 件」に統一。
 
 ### §16.2 PATCH-20: PART2 連鎖実装（sub_infrastructure §2.6/§2.8 + scripts/ 22 本、Code G_50、2026-04-24）
 
@@ -3227,9 +3116,9 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
 
 **§2.6 canopy_common.sh 関数 5 種**: update_status / check_test_pass / check_blocked_integrity / wait_for_lock / **correct_status**（4 種逆方向遷移、ADV/PO 限定、status_corrections.log 7 列追記、PATCH-12）。
 
-**§2.8 [deploy.sh](http://deploy.sh) 12 Step**: 上記 §C4.1 表参照。
+**§2.8 `deploy.sh` 12 Step**: 上記 §C4.1 表参照。
 
-**Stage 2 Pre-Review 1R/2R**: Stage 1 で混入した独自改変 2 箇所（`2>/dev/null || true`）の除去 + stub 2 本新設 + [canopy.sh](http://canopy.sh) 物理反映を実施、CRITICAL 0 達成。
+**Stage 2 Pre-Review 1R/2R**: Stage 1 で混入した独自改変 2 箇所（`2>/dev/null || true`）の除去 + stub 2 本新設 + `canopy.sh` 物理反映を実施、CRITICAL 0 達成。
 
 **3ペルソナ合議**: ADV/QA/PO代理 全員合意。v3.4 仕様（R2.2 本体）は PATCH-1〜18 + Pre-Review 4R/5R で CRITICAL 0 確定済み、本 PATCH-20 は連鎖更新の実装フェーズ。§2.25.1 仕様書駆動原則に従い、v3.4 本体から逐語転記（推測・改変なし）。
 
@@ -3237,7 +3126,7 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
 
 **G18 新設**: サブエージェント外部レビュー結果検証ゲート（V35 Phase 1 MVP 連動、§C0.4 G ゲート表に追加）。
 
-**Bug PART2-S2-01 修正**: PATCH-20 Stage 2 で発見されたバグ修正（具体内容は [patches.md](http://patches.md) PATCH-21 参照）。
+**Bug PART2-S2-01 修正**: PATCH-20 Stage 2 で発見されたバグ修正（具体内容は `patches.md` PATCH-21 参照）。
 
 **ENG 領域**: development_rules.md / .git/hooks 系の物理反映（PATCH-22 への前段階）。
 
@@ -3282,7 +3171,7 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
 - subagent prompts ファイル（外部レビュー観点定義）
 - record_api 結線（外部レビュー結果の Anthropic API record）
 
-### §16.7 PATCH-25: Phase 2 Bug V35-P2-S2-01 解消（[postcommit.sh](http://postcommit.sh) 配列対応化、Code subagent、2026-04-25）
+### §16.7 PATCH-25: Phase 2 Bug V35-P2-S2-01 解消（`postcommit.sh` 配列対応化、Code subagent、2026-04-25）
 
 **修正**: external_review_postcommit.sh の配列対応化（Bash 配列 → POSIX 互換空白分割）。Phase 2 Stage 2 で発見されたバグ修正。
 
@@ -3316,7 +3205,7 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
  1. append_deploy_fail.sh — §2.4 / §3.6 / PATCH-13 / PATCH-19 Bug F（OVERRIDE if 外引上げ、STRIKE 1→BLOCKED_REVIEW、DEPLOY-RECOVER 自動生成廃止）
  2. changed_files_allowlist.sh — §16.5 / §C6.2（対象ファイル外変更検出）
  3. check_blocked_integrity.sh — §3.2 / §C3.2（BLOCKED 理由行 必須検証）
- 4. [deploy.sh](http://deploy.sh) — §2.8 / §C4.1（12 Step デプロイフロー、PATCH-20 で完全実装）
+ 4. `deploy.sh` — §2.8 / §C4.1（12 Step デプロイフロー、PATCH-20 で完全実装）
  5. deploy_hash_verify.sh — §3.3 / G16（dist/ commit sha 埋込検証）
  6. deploy_poll_hash.sh — §3.3 / G16（URL hash 検証ループ）
  7. extract_cmd.sh — §3.4 / PATCH-11（cmd-unit/cmd-e2e/cmd-realworld 抽出 SSOT）
@@ -3329,7 +3218,7 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
 14. normalize_realworld_report.sh — §C4.1 Step 10 / G17（realworld 証跡の正規化）
 15. post_deploy_status_update.sh — §C4.1 Step 11（STATUS → DONE 書換え）
 16. pre_commit_status_check.sh — §C2 Step 4 / G13（QUEUED → IN_PROGRESS 自動遷移）
-17. [pre-commit-sub.sh](http://pre-commit-sub.sh) — §C2 / G13（pre-commit サブルーチン）
+17. `pre-commit-sub.sh` — §C2 / G13（pre-commit サブルーチン）
 18. proposal_log_lint.sh — §2.9 / PATCH-3（STALE_DATA use-after-rm 修正済の 1 回 awk パス）
 19. realworld_proof_check.sh — §2.7 / §3.3 / PATCH-16（risk_tags SSOT 1:1、ui_change 条件化、epoch 数値比較）
 20. secret_scan.sh — §C6.3 / G10（sk-*, AIza*, ghp\_\*, BEGIN PRIVATE KEY 検出）
@@ -3342,6 +3231,11 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
 27. verify_hooks.sh — §6.12 / G13 / PATCH-19 Bug K（pre-commit/pre-push hook 結線検証）
 28. chain_update_audit.sh — PATCH-21（連鎖更新監査、CHAIN-UPDATE-DISPATCH 用）
 29. resolve_target_mission.sh — §3.1 / PATCH-20（MISSION_ID 解決 SSOT）
+30. tdd_trace_consistency.sh — §3.5 / G15（TDD 証跡名 仕様↔実装同期、unit/e2e 限定）
+31. terminology_lint.sh — §C1.5 / PATCH-10 / PATCH-19 Bug G（5 語並列検知 + 排除パターン縮小）
+32. verify_approval_authenticity.sh — §3.5 / PATCH-14 / PATCH-19 Bug H（3 層検証 + noreply@github.com 対応）
+33. version_sync.sh — §C4.1 Step 1 / G1（バージョン同期 + bump commit）
+34. rollback.sh — §C4.2（直近タグへ revert commit で戻す、L1 FAIL 即発火、Bug PA-G49-1 で §6.10 numbered list 登録）
 
 **Phase 1-3 凍結ファイル（参照のみ、変更禁止）**:
 - external_review_precommit.sh — PATCH-22 / V35 Phase 1
@@ -3349,6 +3243,11 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
 - external_review_postcommit.sh — PATCH-24 / PATCH-25 / V35 Phase 2
 - spawn_subagent_review.sh — PATCH-26 / PATCH-27 / V35 Phase 3
 
+**MISSION-G49-PKG Phase 2 機械ゲート（PATCH-G49 / PD-111）**:
+35. adv_response_gate.sh — PATCH-G49 / Stop hook 本体 / §2.25.9-.14 機械検査
+36. adv_hot_summary.sh — PATCH-G49 / SessionStart hook / §2.25 + §C0 ホットサマリー注入
+37. persona_selector.sh — PATCH-G49 / §2.25.14.3 発火トリガ / 必須 3 + 追加候補最大 3 自動選択
+38. spec_lint_extended.sh — PATCH-G49 / 仕様書 grep 矛盾検出（§2.25.X 重複 / 必須セクション存在）
 
 **MISSION-G49-PKG-FINAL-V2 Phase 0 PO 補佐再構成（PATCH-G49-P0 / §2.25.16-.22）**:
 - main_session_writeguard.sh — PATCH-G49-P0 / PreToolUse hook 本体 / §2.25.16.2 書込禁止対象 8 種を BLOCK
@@ -3390,6 +3289,7 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
 | 26 | scripts/verify_external_services.sh | §3.3 / 代替証跡 | 外部サービス疎通検証 + 代替証跡チェック |
 | 27 | scripts/verify_hooks.sh | §6.12 / G13 / PATCH-19 Bug K | pre-commit/pre-push hook 結線検証 |
 | 28 | scripts/version_sync.sh | §C4.1 Step 1 / G1 | バージョン同期 + bump commit |
+| 29 | scripts/rollback.sh | §C4.2 / Bug PA-G49-1 | 直近タグへ revert commit で戻す（clean state 保証、L1 FAIL 即発火）|
 
 **Phase 1-3 拡張（PATCH-22/24/26/27、追加 7 本）**:
 
@@ -3403,7 +3303,27 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
 | 28. | scripts/external_review_postcommit.sh | PATCH-24 / PATCH-25 / V35 Phase 2 | post-commit 外部レビュー記録（Phase 2 凍結、配列対応化） |
 | 29. | scripts/spawn_subagent_review.sh | PATCH-26 / PATCH-27 / V35 Phase 3 | claude CLI 起動（--add-dir + --allowedTools フラグ訂正済） |
 
-**注記**: 上記 No.28 の version_sync.sh と Phase 1-3 拡張の番号体系は重複しないよう、本表内では No.1〜28（PART2 22 本 + 6 本実装 = 28）と Phase 1-3 拡張 No.23〜29（重複あり）の二段表記。SSoT は実体 29 本（重複除去後）。Phase 1/2 凍結ファイル（external_review_precommit/guardrail/postcommit、spawn_subagent_review）は変更禁止（本ミッションでも触らない）。
+**MISSION-G49-PKG Phase 2 機械ゲート（PATCH-G49 / PD-111、追加 4 本）**:
+
+| # | スクリプト | 根拠 | 内容 |
+|---|---|---|---|
+| 30. | scripts/adv_response_gate.sh | PATCH-G49 / MISSION-G49-PKG / PD-111 | Stop hook 本体: §2.25.9-.14 機械検査、fail-closed + dedupe + PO override + 連続失敗 fail-open |
+| 31. | scripts/adv_hot_summary.sh | PATCH-G49 / MISSION-G49-PKG / PD-111 | SessionStart hook: §2.25 + §C0 ホットサマリー注入（additionalContext） |
+| 32. | scripts/persona_selector.sh | PATCH-G49 / MISSION-G49-PKG / PD-111 / §2.25.14.3 | grep ベース発火トリガで必須 3 + 追加候補最大 3 ペルソナ自動選択 |
+| 33. | scripts/spec_lint_extended.sh | PATCH-G49 / MISSION-G49-PKG / PD-111 | 仕様書 grep 矛盾検出（§2.25.X 重複 / 必須セクション存在 / §C1.5 並列使用） |
+
+**MISSION-G49-PKG-FINAL-V2 Phase 0 PO 補佐再構成（PATCH-G49-P0 / §2.25.16-.22、追加 6 本）**:
+
+| # | スクリプト | 根拠 | 内容 |
+|---|---|---|---|
+| 34. | scripts/main_session_writeguard.sh | PATCH-G49-P0 / §2.25.16.2 | PreToolUse hook 本体（書込禁止対象 8 種を BLOCK） |
+| 35. | scripts/context_monitor.sh | PATCH-G49-P0 / §2.25.16.4 | コンテキスト監視（70/85/95% 閾値判定、stdin で context_size 受信） |
+| 36. | scripts/handoff_validator.sh | PATCH-G49-P0 / §2.25.16.5 | SSOT 4 ファイル運用検証（存在 + Read 履歴 grep） |
+| 37. | scripts/subagent_health_check.sh | PATCH-G49-P0 / §2.25.20 | 障害検出（連続 3 失敗 fail-open + PO 通知） |
+| 38. | scripts/completion_verifier.sh | PATCH-G49-P0 / §2.25.21 | 完了条件検証（必須項目 grep + 30 行超 LONG 検出） |
+| 39. | scripts/night_mode_dispatcher.sh | PATCH-G49-P0 / §2.25.22 | 夜間自動着手（5 重ガード: 時刻 + 同意フラグ + PO 不在 + /usage + auto_eligible タスク） |
+
+**注記**: 上記 No.28 の version_sync.sh と Phase 1-3 拡張の番号体系は重複しないよう、本表内では No.1〜29（PART2 22 本 + 6 本実装 + rollback.sh 1 本 = 29）と Phase 1-3 拡張 No.23〜29（重複あり）+ PATCH-G49 No.30〜33（4 本新設）+ PATCH-G49-P0 No.34〜39（6 本新設）。SSoT は実体 39 本（PATCH-G49-PA で rollback.sh + PATCH-G49 4 本 + PATCH-G49-P0 6 本を追加登載、計 +11）。Phase 1/2 凍結ファイル（external_review_precommit/guardrail/postcommit、spawn_subagent_review）は変更禁止（本ミッションでも触らない）。
 
 ---
 
@@ -3425,7 +3345,7 @@ Bug重要度領域修正内容ACRIT§6.4 sub_adv_protocol §11STATUS_CORRECTION 
 ### §18.3 PATCH 累計（28 PATCH、PATCH-1〜PATCH-27 + PATCH-18 別系統 = 28）
 
 PATCH-1〜18: v3.4 設計確定（CRITICAL 0 達成）
-PATCH-19: PART1 着手前バグ修正一括（10 件、§2.25 ADVcrit 新設含む）
+PATCH-19: PART1 着手前バグ修正一括（12 件、§2.25 ADVcrit 新設含む）
 PATCH-20: PART2 連鎖実装（sub_infrastructure + scripts/ 22 本）
 PATCH-21: PART3 ENG 領域 + G18 新設
 PATCH-22: V35 Phase 1 MVP
@@ -3476,12 +3396,18 @@ grep -c "^#### §2.25" lais/verify/dev_system_v34_package.md
 # §C1.5 用語 SSOT（期待: 1）
 grep -c "^#### §C1.5" lais/verify/dev_system_v34_package.md
 
-# §6.10 scripts 数（期待: 29、§17 表内）
-grep -cE "^[0-9]+\\." <(sed -n '/^## §17\. §6\.10/,/^## §18/p' lais/verify/dev_system_v34_package.md)
+# §6.10 scripts 数（期待: 39、§17 表内、本数は §6.10 + Phase 1-3 拡張 + PATCH-G49 + PATCH-G49-P0 含む）
+# POSIX 互換: 一時ファイル経由（process substitution `<()` は §C6.4 禁止構文）
+sed -n '/^## §17\. §6\.10/,/^## §18/p' lais/verify/dev_system_v34_package.md > /tmp/section17.txt
+grep -cE "^[0-9]+\\." /tmp/section17.txt
+rm -f /tmp/section17.txt
 
 # §C0-C6 照合（dev_system_spec.md と本パッケージ §15.1-§15.7）
-diff <(awk '/^## 21\. /,/^---$/' docs/plans/dev_system_spec.md | grep -E "§C[0-6]") \
-     <(awk '/^## §15\. /,/^## §16\./' lais/verify/dev_system_v34_package.md | grep -E "§C[0-6]")
+# POSIX 互換: process substitution の代わりに一時ファイル経由
+awk '/^## 21\. /,/^---$/' docs/plans/dev_system_spec.md | grep -E "§C[0-6]" > /tmp/c0c6_spec.txt
+awk '/^## §15\. /,/^## §16\./' lais/verify/dev_system_v34_package.md | grep -E "§C[0-6]" > /tmp/c0c6_pkg.txt
+diff /tmp/c0c6_spec.txt /tmp/c0c6_pkg.txt
+rm -f /tmp/c0c6_spec.txt /tmp/c0c6_pkg.txt
 
 # git commit 確認
 git log --oneline -1
