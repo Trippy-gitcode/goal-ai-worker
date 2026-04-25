@@ -1,8 +1,41 @@
+# Secrets — never commit
 .dev.vars
+.env
+.env.*
+!.env.example
+!.env.*.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+!frontend/.env.*.example
+tests/.env.*
+!tests/.env.*.example
+
+# Secrets — extra coverage（api_budget_guard.md §5.1 推奨）
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+.credentials
+.credentials.*
+credentials.json
+service-account*.json
+gcp-key*.json
+firebase-adminsdk*.json
+aws-credentials
+.aws/
+secrets/
+.secrets/
+.vault-token
+.netrc
+
+# Dependencies
 node_modules/
+
+# Build
 .wrangler/
 .mf/
 .netlify/
-frontend/.env.development
 frontend/dist/
 frontend-dist/
