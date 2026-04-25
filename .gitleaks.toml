@@ -1,0 +1,33 @@
+title = "Lais / dev-system gitleaks config"
+
+[extend]
+# gitleaks 既定ルールセットを継承
+useDefault = true
+
+[allowlist]
+description = "False positives — env var names, masked examples, review JSON quotes"
+paths = [
+  '''docs/plans/lais_reference_v1\.md''',
+  '''docs/ops/api_budget_guard\.md''',
+  '''docs/ops/api_incident_playbook\.md''',
+  '''docs/ops/gitleaks_setup\.md''',
+  '''lais/verify/external_review/.*\.json''',
+  '''lais/verify/.*_pre_review.*\.md''',
+  '''lais/verify/dev_system_v34_package\.md''',
+  '''lais/verify/dev_system_v34_patches\.md''',
+]
+
+# 解説文・例示・テスト用ダミーキーの除外
+regexes = [
+  '''ANTHROPIC_API_KEY=\*\*\*''',
+  '''OPENAI_API_KEY=\*\*\*''',
+  '''GEMINI_API_KEY=\*\*\*''',
+  '''sk-(ant-)?api03-EXAMPLE''',
+  '''sk-proj-EXAMPLE''',
+]
+
+stopwords = [
+  "EXAMPLE",
+  "REPLACE_ME",
+  "YOUR_KEY_HERE",
+]
