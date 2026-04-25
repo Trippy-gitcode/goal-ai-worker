@@ -156,7 +156,7 @@ R2.1 本体（1,931行）の §1-§9 および §10 検証コマンドは**完�
 
 ---
 
-### §2.β' — G8/G17 証跡パス統一（evidence/&lt;MISSION_ID&gt;/）
+### §2.β' — G8/G17 証跡パス統一（evidence/<MISSION_ID>/）
 
 **Target**: R2.1 §4.2.2, §4.6.3, §5.2 (G15), §5.4 (G17), §4.12.1 (playwright.realworld.config.ts), §6.10 ([deploy.sh](http://deploy.sh) 連鎖更新欠落)
 
@@ -164,7 +164,14 @@ R2.1 本体（1,931行）の §1-§9 および §10 検証コマンドは**完�
 
 **R2.1.1 確定パス体系（BEFORE → AFTER 一覧）**:
 
-項目BEFORE（R2.1）AFTER（R2.1.1）G8 unit 証跡logs//before-unit.json**evidence/&lt;MISSION_ID&gt;/before-unit.json**G8 e2e 証跡logs//before-e2e.json**evidence/&lt;MISSION_ID&gt;/before-e2e.json**G17 realworld 証跡logs/realworld//realworld-proof.json**evidence/&lt;MISSION_ID&gt;/realworld-proof.json**G17 スクショlogs/realworld//realworld-screenshots/**evidence/&lt;MISSION_ID&gt;/realworld-screenshots**/playwright config outputFilelogs/realworld/latest/realworld-proof.json**evidence/${MISSION_ID}/realworld-proof.json**deploy.loglogs/deploy.log（未生成）**logs/deploy.log**（[deploy.sh](http://deploy.sh) が生成、§2.ε' 参照）
+| 項目 | BEFORE（R2.1） | AFTER（R2.1.1） |
+|---|---|---|
+| G8 unit 証跡 | logs//before-unit.json | **evidence/<MISSION_ID>/before-unit.json** |
+| G8 e2e 証跡 | logs//before-e2e.json | **evidence/<MISSION_ID>/before-e2e.json** |
+| G17 realworld 証跡 | logs/realworld//realworld-proof.json | **evidence/<MISSION_ID>/realworld-proof.json** |
+| G17 スクショ | logs/realworld//realworld-screenshots/ | **evidence/<MISSION_ID>/realworld-screenshots/** |
+| playwright config outputFile | logs/realworld/latest/realworld-proof.json | **evidence/${MISSION_ID}/realworld-proof.json** |
+| deploy.log | logs/deploy.log（未生成） | **logs/deploy.log**（[deploy.sh](http://deploy.sh) が生成、§2.ε' 参照） |
 
 **canopy_common.sh::check_tdd 差替（R2.1 §4.2.3 を置換）**:
 
@@ -298,10 +305,6 @@ echo "OK: G15 spec and impl reference identical TDD files"
 #!/bin/sh
 # scripts/lib/risk_match.sh (R2.1.1 AFTER)
 . "$(cd "$(dirname "$0")" && pwd)/risk_patterns.sh"
-```
-```
-```
-```
 
 is_risk_path() {
   target="$1"
@@ -796,51 +799,63 @@ fi
 MISSION_RISK=$(scripts/mission_risk_classifier.sh "instructions/session_progress.md" || echo "low")
 if [ "$MISSION_RISK" = "high" ]; then
   status=$(awk "/^### $MISSION_ID:/,/^### [A-Z]/" instructions/session_progress.md | \
-```
-grep -E '^- \*\*STATUS:\*\*' | head -1 | sed -E 's/.*STATUS:\*\*[[:space:]]*//' | awk '{print $1}')
-```
-
-if \[ "$status" != "READY_FOR_DEPLOY" \]; then echo "FAIL: high-risk mission $MISSION_ID must be READY_FOR_DEPLOY (current: $status)" echo " cmd-unit + cmd-e2e PASS を先に実行してください" exit 1 fi fi
+    grep -E '^- \*\*STATUS:\*\*' | head -1 | sed -E 's/.*STATUS:\*\*[[:space:]]*//' | awk '{print $1}')
+  if [ "$status" != "READY_FOR_DEPLOY" ]; then
+    echo "FAIL: high-risk mission $MISSION_ID must be READY_FOR_DEPLOY (current: $status)"
+    echo "  cmd-unit + cmd-e2e PASS を先に実行してください"
+    exit 1
+  fi
+fi
 
 # --- deploy 実行 ---
-
-echo "\[deploy\] starting $MISSION_ID at $(date -u +%Y-%m-%dT%H:%M:%SZ)" mkdir -p logs deploy_stdout=$(mktemp) npx wrangler pages deploy dist --project-name="${CF_PROJECT:-myproject}" &gt; "$deploy_stdout" 2&gt;&1 deploy_rc=$? cat "$deploy_stdout" if \[ "$deploy_rc" -ne 0 \]; then tail=$(tail -30 "$deploy_stdout") scripts/append_deploy_fail.sh "$MISSION_ID" "$tail" rm -f "$deploy_stdout" exit 1 fi rm -f "$deploy_stdout"
+echo "[deploy] starting $MISSION_ID at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+mkdir -p logs
+deploy_stdout=$(mktemp)
+npx wrangler pages deploy dist --project-name="${CF_PROJECT:-myproject}" > "$deploy_stdout" 2>&1
+deploy_rc=$?
+cat "$deploy_stdout"
+if [ "$deploy_rc" -ne 0 ]; then
+  tail=$(tail -30 "$deploy_stdout")
+  scripts/append_deploy_fail.sh "$MISSION_ID" "$tail"
+  rm -f "$deploy_stdout"
+  exit 1
+fi
+rm -f "$deploy_stdout"
 
 # --- post-deploy ---
-
-URL=$(wrangler pages deployment list --project-name="${CF_PROJECT:-myproject}" --json 2&gt;/dev/null | \
-jq -r '.\[0\].url' 2&gt;/dev/null || echo "") if \[ -n "$URL" \]; then
-
-# Step 8: hash ポーリング（α クラスター）
-
-scripts/deploy_poll_hash.sh "$URL" "$(git rev-parse HEAD)" || { echo "FAIL: hash poll"; exit 1; } fi
+URL=$(wrangler pages deployment list --project-name="${CF_PROJECT:-myproject}" --json 2>/dev/null | \
+  jq -r '.[0].url' 2>/dev/null || echo "")
+if [ -n "$URL" ]; then
+  # Step 8: hash ポーリング（α クラスター）
+  scripts/deploy_poll_hash.sh "$URL" "$(git rev-parse HEAD)" || { echo "FAIL: hash poll"; exit 1; }
+fi
 
 # logs/deploy.log 記録（β'-3 対応）
-
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) DEPLOY-OK $MISSION_ID" &gt;&gt; logs/deploy.log
+echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) DEPLOY-OK $MISSION_ID" >> logs/deploy.log
 
 # 高リスク系: L1-realworld + G17
+if [ "$MISSION_RISK" = "high" ]; then
+  # ζ' 5操作スモーク
+  if ! MISSION_ID="$MISSION_ID" npx playwright test --config=playwright.realworld.config.ts; then
+    scripts/append_deploy_fail.sh "$MISSION_ID" "realworld L1 smoke failed"
+    exit 1
+  fi
+  # G17: realworld 証跡検証
+  scripts/realworld_proof_check.sh "$MISSION_ID" || { echo "FAIL: G17"; exit 1; }
 
-if \[ "$MISSION_RISK" = "high" \]; then
+  # η' 対応: STATUS: READY_FOR_DEPLOY → DONE 自動書換え（v3.4 確定 5状態モデル、§15 §C3.2 SSoT に整合）
+  sed -i.bak -E "/^### $MISSION_ID:/,/^### /{ s/^(- \*\*STATUS:\*\*)[[:space:]]*READY_FOR_DEPLOY/\\1 DONE/ }" instructions/session_progress.md
+  rm -f instructions/session_progress.md.bak
 
-# ζ' 5操作スモーク
+  # Step 12: STRIKE カウンタクリア（成功時、PATCH-13）+ logs/deploy.log 記録 + git tag
+  STRIKES_FILE=instructions/deploy_strikes.json
+  if [ -f "$STRIKES_FILE" ]; then
+    tmp=$(mktemp)
+    jq --arg mid "$MISSION_ID" 'del(.[$mid])' "$STRIKES_FILE" > "$tmp" && mv "$tmp" "$STRIKES_FILE"
+  fi
+fi
 
-if ! MISSION_ID="$MISSION_ID" npx playwright test --config=playwright.realworld.config.ts; then scripts/append_deploy_fail.sh "$MISSION_ID" "realworld L1 smoke failed" exit 1 fi
-
-# G17: realworld 証跡検証
-
-scripts/realworld_proof_check.sh "$MISSION_ID" || { echo "FAIL: G17"; exit 1; }
-
-# η' 対応: STATUS: READY_FOR_DEPLOY → DONE 自動書換え（v3.4 確定 5状態モデル、§15 §C3.2 SSoT に整合）
-
-sed -i.bak -E "/^### $MISSION_ID:/,/^### /{ s/^(- \*\*STATUS:\*\*)[[:space:]]\*READY_FOR_DEPLOY/\\1 DONE/ }" instructions/session_progress.md rm -f instructions/session_progress.md.bak
-
-# Step 12: STRIKE カウンタクリア（成功時、PATCH-13）+ logs/deploy.log 記録 + git tag
-
-STRIKES_FILE=instructions/deploy_strikes.json if \[ -f "$STRIKES_FILE" \]; then tmp=$(mktemp) jq --arg mid "$MISSION_ID" 'del(.\[$mid\])' "$STRIKES_FILE" &gt; "$tmp" && mv "$tmp" "$STRIKES_FILE" fi fi
-
-echo "\[deploy\] $MISSION_ID DONE"
-
+echo "[deploy] $MISSION_ID DONE"
 ```
 
 #### ε'-3: hflow_trigger_check.sh main 直 push 対応
@@ -879,7 +894,6 @@ get_changed_files() {
       else
         get_changed_files pre-push
       fi
-```
       ;;
     *)
       echo "ERROR: unknown CONTEXT '$ctx'" >&2; return 2 ;;
@@ -911,7 +925,6 @@ pre-push フック側で以下を追加:
 while read local_ref local_sha remote_ref remote_sha; do
   export GIT_PUSH_REMOTE_SHA="$remote_sha"
   HFLOW_CONTEXT=pre-push scripts/hflow_trigger_check.sh
-```
 done
 ```
 
@@ -1695,7 +1708,8 @@ node scripts/ai_review.js \
 
 **検証**:
   grep -c '^## §21\.' docs/plans/dev_system_spec.md    # 期待: 1
-grep -c '^### §C\[0-6\]' docs/plans/dev_system_spec.md # 期待: 7（C0-C6） wc -l docs/plans/dev_system_spec.md # 期待: 1,422 + \~410 = \~1,832
+  grep -c '^### §C\[0-6\]' docs/plans/dev_system_spec.md # 期待: 7（C0-C6）
+  wc -l docs/plans/dev_system_spec.md                  # 期待: 1,422 + ~410 = ~1,832
 
 ```
 
@@ -1730,10 +1744,9 @@ BEFORE（R2.1 までの mission_template_v3.md）:
 
 AFTER（R2.1.1 確定）:
   **完了コマンド（リスク別3区分、R2.1.1 厳格化）:**
-```
-
-cmd-unit: &lt;bash command | N/A（理由）| SKIP（理由+リトライ予定）&gt; cmd-e2e: &lt;bash command | N/A（理由）| SKIP（理由+リトライ予定）&gt; cmd-realworld: &lt;bash command | N/A（理由）| SKIP（理由+リトライ予定）&gt;
-
+    cmd-unit: <bash command | N/A（理由）| SKIP（理由+リトライ予定）>
+    cmd-e2e: <bash command | N/A（理由）| SKIP（理由+リトライ予定）>
+    cmd-realworld: <bash command | N/A（理由）| SKIP（理由+リトライ予定）>
 ```
 
 **書き込み主体**: Code G_47 **検証**: mission_template_v3.md 内に「cmd-unit:」「cmd-e2e:」「cmd-realworld:」の3行が出現、「cmd1:」が消失していることを grep で確認
@@ -1743,9 +1756,10 @@ cmd-unit: &lt;bash command | N/A（理由）| SKIP（理由+リトライ予定�
 templates/dev-system.yaml.template を新規作成:
 
 # dev-system.yaml - プロジェクトルートに配置
-
-version: "3.4" subdirs: - lais - goal-ai-worker
-
+version: "3.4"
+subdirs:
+  - lais
+  - goal-ai-worker
 # 将来追加プロジェクトはここに追記
 
 **書き込み主体**: Code G_47 **検証**: ls templates/dev-system.yaml.template、subdirs セクション存在確認
@@ -1756,9 +1770,15 @@ R2.1 §4.19.2 で定義された deploy_recover_template.md が実在し、{MISS
 
 ### DEPLOY-RECOVER-{MISSION_ID}: デプロイ失敗リカバリ
 
-> リスク: 🔴高 / 前ミッション: {MISSION_ID} / FAIL時刻: {TIMESTAMP} 参照: instructions/session_progress.md（DEPLOY-FAIL エントリ）
+> リスク: 🔴高 / 前ミッション: {MISSION_ID} / FAIL時刻: {TIMESTAMP}
+> 参照: instructions/session_progress.md（DEPLOY-FAIL エントリ）
 
-**目的:** デプロイ失敗の原因修正と再デプロイ **完了コマンド**:cmd-unit: &lt;元ミッションのcmd-unit&gt; cmd-e2e: &lt;元ミッションのcmd-e2e&gt; cmd-realworld: &lt;元ミッションのcmd-realworld&gt; **FAIL条件:** 3回試行で POエスカレーション
+**目的:** デプロイ失敗の原因修正と再デプロイ
+**完了コマンド**:
+  cmd-unit: <元ミッションのcmd-unit>
+  cmd-e2e: <元ミッションのcmd-e2e>
+  cmd-realworld: <元ミッションのcmd-realworld>
+**FAIL条件:** 3回試行で POエスカレーション
 ```
 
 ### 6.4 R2.1 §6.10 canopy/canopy_common.sh 連鎖更新（STATUS 自動化 + 証跡パス）
@@ -1884,7 +1904,7 @@ evidence/<MISSION_ID>/ 配下を参照するよう check_tdd を書き直し。�
 - PD-108 の却下決定への異議
 - Golden R1 採用14クラスターの**方針**への異議（実装詳細改善は HIGH まで可）
 
-**方針**とは: 例「α' F-1 採用（§C1-C6 を §21 新設）」「β' evidence// 統一」「γ' POSIX化」「ζ' L1 5項目 SSOT」など。
+**方針**とは: 例「α' F-1 採用（§C1-C6 を §21 新設）」「β' evidence/<MISSION_ID>/ 統一」「γ' POSIX化」「ζ' L1 5項目 SSOT」など。
 
 ### 7.4 Filter 1-7 の適用（sub_review_flow §2 準拠）
 
@@ -1900,7 +1920,7 @@ evidence/<MISSION_ID>/ 配下を参照するよう check_tdd を書き直し。�
 
 - §C0-C6 マッピング表（§3）の妥当性: 既存 §1-§20 からの引用元が正確か
 - [deploy.sh](http://deploy.sh) 完全パッチ（§2.ε'）のロジック完全性: pre/post ゲート抜けなし
-- 証跡パス統一（evidence//）が全箇所に適用されているか（β' + 他クラスター整合）
+- 証跡パス統一（evidence/<MISSION_ID>/）が全箇所に適用されているか（β' + 他クラスター整合）
 - G13-G17 実装サンプルの POSIX 互換性（shellcheck error 相当なし）
 - STATUS 遷移全自動化（η'）の完全性: 手動遷移が残っていないか
 - L1 SSOT 5項目（ζ'）が認証/決済ミッションで適切に機能するか
@@ -2164,7 +2184,7 @@ R2.1.1 確定後、以下を learned-patterns.md に LP-020〜027 として追�
 
 ## §7. レビュアー指示 Part IX（ゴールデン R2 用）
 
-本R2.1 と本R2.1.1 を**両方読んで**、以下の観点でレビューする。ゴールデン R2 は**最終確定前の最後のゲート**。CRITICAL 0 で v3.4 確定、CRITICAL &gt; 0 で POエスカレーション。
+本R2.1 と本R2.1.1 を**両方読んで**、以下の観点でレビューする。ゴールデン R2 は**最終確定前の最後のゲート**。CRITICAL 0 で v3.4 確定、CRITICAL > 0 で POエスカレーション。
 
 ### 7.1 severity 基準（sub_review_flow §2 Filter 1-7 準拠）
 
@@ -2197,7 +2217,7 @@ severity基準例CRITICAL仕様矛盾・実装不能・セキュリティ抜け�
 R2.1.1 で修正した14クラスターが**完全に解消されているか**:
 
 - α' §C0-C6 物理化: §6.1 連鎖更新指示にマッピング表・移行マップがあるか
-- β' 証跡パス統一: evidence/&lt;MISSION_ID&gt;/ が全文で一貫しているか
+- β' 証跡パス統一: evidence/<MISSION_ID>/ が全文で一貫しているか
 - γ' POSIX 互換: shellcheck が通る実装サンプルになっているか
 - δ' 個別バグ: awk/grep/regex が実動作するか（机上でトレース可）
 - ε' [deploy.sh](http://deploy.sh): pre-deploy + post-deploy ゲートが連続実行可能か
@@ -2255,7 +2275,7 @@ R2.1.1 で**新たに**導入された内容に対して新規指摘可:
 
 ### 8.3 本R2.1.1 採用 30件（§2 全クラスターを再掲）
 
-ID 系列クラスター件数方針α'-1〜3§C0-C6 実体化 + マッピング3採用（§2.α' + §3）β'-1〜4証跡パス evidence/&lt;MISSION_ID&gt;/ 統一4採用（§2.β'）γ'-1〜7POSIX 互換修正7採用（§2.γ'）δ'-1〜4個別スクリプトバグ修正4採用（§2.δ'）ε'-1〜3[deploy.sh](http://deploy.sh) 完全パッチ + Hフロー main 直push3採用（§2.ε'）ζ'-1〜2L1 SSOT 5項目 + 層名衝突解消2採用（§2.ζ'）η'-1〜2STATUS 全自動化2採用（§2.η'）θ'-1mission_template 3区分化1採用（§2.θ'）ι'-1pre-commit ハードコード解消1採用（§2.ι'）κ'-1G14 regex 緩和1採用（δ'-3 と統合）λ'-1G17 5操作（auth 含む）1採用（ζ' と統合）ξ'-1G8 AFTER タイポ訂正1採用（§2.ξ'）
+ID 系列クラスター件数方針α'-1〜3§C0-C6 実体化 + マッピング3採用（§2.α' + §3）β'-1〜4証跡パス evidence/<MISSION_ID>/ 統一4採用（§2.β'）γ'-1〜7POSIX 互換修正7採用（§2.γ'）δ'-1〜4個別スクリプトバグ修正4採用（§2.δ'）ε'-1〜3[deploy.sh](http://deploy.sh) 完全パッチ + Hフロー main 直push3採用（§2.ε'）ζ'-1〜2L1 SSOT 5項目 + 層名衝突解消2採用（§2.ζ'）η'-1〜2STATUS 全自動化2採用（§2.η'）θ'-1mission_template 3区分化1採用（§2.θ'）ι'-1pre-commit ハードコード解消1採用（§2.ι'）κ'-1G14 regex 緩和1採用（δ'-3 と統合）λ'-1G17 5操作（auth 含む）1採用（ζ' と統合）ξ'-1G8 AFTER タイポ訂正1採用（§2.ξ'）
 
 ### 8.4 PO 決定（PD 全件、R2.1.1 までの確定状況）
 
@@ -2325,7 +2345,7 @@ node scripts/ai_review.js \
 
  1. dev_system_spec.md §21 新設（§C0-C6、約410行追加）
  2. sub_adv_protocol.md §1 書込可リスト更新（PD-108 反映）
- 3. sub_testing.md 証跡パス evidence/&lt;MISSION_ID&gt;/ 統一
+ 3. sub_testing.md 証跡パス evidence/<MISSION_ID>/ 統一
  4. sub_infrastructure.md §2.8 [deploy.sh](http://deploy.sh) パッチ追加
  5. sub_review_flow.md §2 Filter 7 + モデル使い分け追記
  6. development_rules.md L1 SSOT 同期
@@ -2344,36 +2364,27 @@ node scripts/ai_review.js \
 # 行数確認
 wc -l lais/verify/dev_system_v34_r2_1_1_package.md
 # 期待: 1,400-1,900 行
-```
 
 # 14クラスター網羅
 grep -cE '^### §2\.(α|β|γ|δ|ε|ζ|η|θ|ι|κ|λ|μ|ξ)' lais/verify/dev_system_v34_r2_1_1_package.md
 # 期待: 13（κ/λ が統合参照のみなので独立節表示）※ もしくは 14
-```
 
 # §C0-C6 設計の網羅
-
 grep -cE '^### 3.\[1-7\]' lais/verify/dev_system_v34_r2_1_1_package.md
-
 # 期待: 7 (§3.1 §C0 〜 §3.7 §C6) + §3.8 書き込み手順 = 8
 
 # PD-108 却下の記録
-
 grep -c 'PD-108' lais/verify/dev_system_v34_r2_1_1_package.md
-
 # 期待: 6以上
 
-# 証跡パス evidence/&lt;MISSION_ID&gt;/ 統一確認
-
-grep -c 'evidence/&lt;MISSION_ID&gt;/|evidence/$MISSION_ID/|evidence/${MISSION_ID}/|evidence//' lais/verify/dev_system_v34_r2_1_1_package.md
-
+# 証跡パス evidence/<MISSION_ID>/ 統一確認
+grep -c 'evidence/<MISSION_ID>/|evidence/$MISSION_ID/|evidence/${MISSION_ID}/|evidence//' lais/verify/dev_system_v34_r2_1_1_package.md
 # 期待: 8以上（複数箇所で統一されているか）
 
 # POSIX 修正サンプルの存在
-
-grep -cE 'cut -c1-7|ENVIRON\["|awk.\*BEGIN.\*exit|&lt;&lt;EOF' lais/verify/dev_system_v34_r2_1_1_package.md
-
+grep -cE 'cut -c1-7|ENVIRON\["|awk.\*BEGIN.\*exit|<<EOF' lais/verify/dev_system_v34_r2_1_1_package.md
 # 期待: 4以上
+
 # ai_review.js 改修指示の存在
 grep -c 'response_format.*json_object\|AI-REVIEW-JS-JSON-MODE-FIX' lais/verify/dev_system_v34_r2_1_1_package.md
 # 期待: 3以上
@@ -2654,13 +2665,13 @@ cmd-3区分:
 
 #### §C3.5 G8 TDD 証跡
 - evidence/<MISSION_ID>/before-unit.json（.stats.unexpected > 0 で RED 確認）
-- evidence/&lt;MISSION_ID&gt;/after-unit.json（.stats.unexpected == 0 で GREEN 確認）
+- evidence/<MISSION_ID>/after-unit.json（.stats.unexpected == 0 で GREEN 確認）
 - e2e も同様
 - realworld は G8 対象外、G17 が所管（§C4 参照）
 
 #### §C3.6 G9 UIスクショ判定
 
-- evidence/&lt;MISSION_ID&gt;/before_AT-N.png, after_AT-N.png
+- evidence/<MISSION_ID>/before_AT-N.png, after_AT-N.png
 - 前後一致（バイナリ同一）= FAIL
 - hasClass/getAttribute 等 DOM API 判定禁止（鉄則⑨）
 
@@ -2698,7 +2709,7 @@ Phase名称内容禁止1証拠収集エラーログ → データフロー → �
 
 発火判定: scripts/hflow_trigger_check.sh が CONTEXT 別に git diff を取得、RISK_PATHS prefix match。
 
-承認証跡: instructions/approvals/&lt;MISSION_ID&gt;.hflow.approved
+承認証跡: instructions/approvals/<MISSION_ID>.hflow.approved
 
 ```json
 {
