@@ -1341,7 +1341,7 @@ ADV の全応答（PO 質問への回答 / 提案 / 設計議論 / subagent 起�
 
 ##### §2.25.14.3 追加候補表（grep ベース発火トリガ）
 
-下表の発火トリガに該当する語彙が応答 / 質問内容に含まれる場合、対応ペルソナを追加候補から最大 3 名選抜（合計 6 名上限、`scripts/persona_selector.sh` で機械選抜）。
+下表の発火トリガに該当する語彙が応答 / 質問内容に含まれる場合、対応ペルソナを追加候補から最大 4 名選抜（合計 7 名上限、必須 3 + 追加候補 7 = 全 10 ペルソナ、`scripts/persona_selector.sh` で機械選抜）。
 
 | ペルソナ | 主視点 | 発火トリガ（grep ベース） |
 |---|---|---|
@@ -1752,6 +1752,93 @@ subagent 完了報告が 30 行超の場合、ADV は §2.25.21.2 テンプレ�
 
 - `scripts/night_mode_dispatcher.sh` で多重ガード（§2.25.22.6）を全 PASS でのみ subagent 起動
 - 朝報告 `logs/night_mode_report_YYYY-MM-DD.md` の存在 + フォーマット検証（`scripts/completion_verifier.sh` 流用）
+
+---
+
+#### §2.25.23 PO 承認取得前 14 票投票機構（PD-112 起源、§2.25.15 機械化）
+
+**目的**: §2.25.3 PO 判断必須事項に該当する承認質問を発信する直前に、10 ペルソナ + 外部 AI 2 種（GPT-5.4 / Gemini 3.1 Pro、各 2 票分）= 計 14 票の多数決で「拮抗（PO 承認取得）/ 圧倒的（ADV 自律）」を機械判定する。LLM 単体判断によるリスク回避バイアス（§2.25.4）と過剰承認質問（§2.25.9 違反）を構造的に抑止し、PO 負担を最小化する。
+
+##### §2.25.23.1 適用範囲
+
+§2.25.15 承認質問運用ルール経由で PO に発信する全ての承認質問が対象。具体的には §2.25.3 PO 判断必須事項該当時（コスト影響 / 新プロセス追加 / ブランド変更 / データスキーマ変更 / 外部依存追加）に発信前判定を行う。§2.25.3 非該当（実装方式選択 / レビュー観点 / リファクタリング判断 / API 失敗時の対応等）は §2.25.14 全応答ペルソナレビューのみで完結し、本節の対象外。
+
+##### §2.25.23.2 投票配分（合計 14 票）
+
+| 投票主体 | 票数 | 重み根拠 |
+|---|---|---|
+| 内部 10 ペルソナ（§2.25.14.7 定義詳細、LLM アプリ設計者 / プロンプトエンジニア / SW PM / SW アーキテクト / SRE / QA テストエンジニア / テクニカルライター / セキュリティエンジニア / AI コンサルタント / **データガバナンス専門家**） | 10 票（各 1 票） | LLM 内多視点シミュレーション、応答品質の構造的多角化 |
+| GPT-5.4（外部 LLM） | 2 票 | OpenAI 系の独立判断、Anthropic 系バイアス補正 |
+| Gemini 3.1 Pro（外部 LLM） | 2 票 | Google 系の独立判断、コスト/品質ベンチマーク |
+| **合計** | **14 票** | — |
+
+GPT-5.4 / Gemini に各 2 票分の重みを与える根拠: (a) 外部 LLM は内部ペルソナよりも訓練データ・推論経路が独立しており、(b) 外部一致時に有意なアラインメント信号となり、(c) PO 提案 (2026-04-25) で確定済。
+
+##### §2.25.23.3 判定式
+
+各投票は FOR（承認質問発信不要、ADV 自律可）/ AGAINST（PO 承認必要）/ ABSTAIN（保留）の 3 値で集計。
+
+```
+score_for = sum(FOR votes × weight)       # 0..14
+score_against = sum(AGAINST votes × weight) # 0..14
+margin = |score_for - score_against|
+```
+
+- **margin ≤ 4 → 拮抗（PO 承認取得）**: AskUserQuestion で PO に承認質問を発信、投票結果を §2.25.15 (4) 投票結果セクションに転記。
+- **margin ≥ 5 → 圧倒的（ADV 自律）**: ADV が自律判断、承認質問発信せず。`logs/vote_log.log` に判定経路を記録。
+- **ABSTAIN は分母に含めず**（保留票は判定式から除外、margin 計算は FOR/AGAINST のみ）。
+
+few-shot 例（圧倒的 ADV 自律）: FOR 11 / AGAINST 2 / ABSTAIN 1 → margin 9 ≥ 5 → ADV 自律実行、PO 承認質問なし。
+few-shot 例（拮抗 PO 承認）: FOR 7 / AGAINST 6 / ABSTAIN 1 → margin 1 ≤ 4 → AskUserQuestion 発火。
+few-shot 例（境界圧倒的）: FOR 9 / AGAINST 4 / ABSTAIN 1 → margin 5 ≥ 5 → ADV 自律。
+few-shot 例（境界拮抗）: FOR 8 / AGAINST 4 / ABSTAIN 2 → margin 4 ≤ 4 → PO 承認取得。
+
+##### §2.25.23.4 投票プロセス（5 ステップ）
+
+1. **トリガ判定**: ADV が承認質問起草時に `scripts/adv_response_gate.sh` が §2.25.3 該当を検出 → `scripts/vote_dispatcher.sh` 起動。
+2. **内部 10 ペルソナ投票**: `scripts/persona_vote.sh` 経由で §2.25.14.7 の 10 ペルソナを順次評価（grep ベース簡易判定 MVP）、FOR/AGAINST/ABSTAIN を `logs/vote_log.log` に記録。
+3. **外部 AI 投票**: `scripts/ai_review.js --mode=vote --provider=gpt5` および `--provider=gemini` を順次起動、各 FOR/AGAINST/ABSTAIN を 2 票分の重みで集計。
+4. **集計 + margin 算出**: `scripts/vote_dispatcher.sh` が 14 票を集計、margin ≤ 4 → exit 2、margin ≥ 5 → exit 0。
+5. **後処理**: exit 2 時は呼出側（ADV）が AskUserQuestion 発火、exit 0 時は ADV 自律実行 + 投票結果を `logs/vote_log.log` に追記。
+
+few-shot 例（正例）: 「scripts/<example-name>.sh を新設してよいか PO 承認取得すべきか」を ADV が起草 → §2.25.3 新プロセス追加該当 → vote_dispatcher.sh 起動 → 14 票集計 margin 7 → 圧倒的 ADV 自律 → ADV が承認質問発信せず subagent 起動。
+few-shot 例（違反例）: §2.25.3 該当承認質問を vote_dispatcher.sh 経由せず直接 PO に AskUserQuestion 発信 → §2.25.23.4 違反、§2.25.5 違反自己申告。
+
+##### §2.25.23.5 ガードレール（コスト管理 + 月次上限時 fallback）
+
+外部 AI 呼出しは `scripts/external_review_guardrail.sh`（既存 v3.5 Phase 1 実装）の月次 \$30 / 日次 \$5 共有上限を継承する（共有原則: 14 票投票 + 外部レビュー pre-commit を合算カウント）。
+
+- **月次上限到達時**: GPT-5.4 / Gemini を 0 票として扱い、内部 10 ペルソナのみで判定する fallback 経路に切替。判定閾値も再計算: **margin ≤ 3 → 拮抗 / margin ≥ 4 → 圧倒的**（10 票時、4 票差以上を圧倒的とする保守側設定）。
+- **3 連続失敗時**: 既存 `record_api_failure` で 1 時間 paused_until 設定、その間は 10 票 fallback 経路を継続。
+- **月次上限増額**: PO が `~/.dev-system/guardrail_state.json` の `monthly.limit_usd` を編集することで反映、ADV は編集しない（§2.25.16.2 該当外、PO 操作）。
+
+few-shot 例（fallback 正例）: 月初日に \$30 到達 → vote_dispatcher.sh が `check_guardrail` で skip 判定 → 内部 10 ペルソナのみ集計 → margin 5 → 圧倒的 ADV 自律。
+few-shot 例（fallback 違反例）: 月次上限到達中に GPT-5.4 を強制呼出し → §2.25.23.5 違反、ガードレール無効化禁止。
+
+##### §2.25.23.6 ログ運用
+
+- **出力先**: `logs/vote_log.log`（TAB 区切り 8 列）
+- **列**: ts / vote_id / mode（14vote|10vote_fallback）/ score_for / score_against / score_abstain / margin / verdict（escalate|autonomous）
+- **ローテ**: `logs/vote_log.log` が 1MB 超で `logs/vote_log.log.YYYYMMDD.gz` に gzip rotate（週次想定、`scripts/vote_dispatcher.sh` 内蔵処理）
+- **保持期間**: 4 週間（28 日）、`find logs/ -name "vote_log.log.*.gz" -mtime +28 -delete` で清掃
+
+##### §2.25.23.7 §2.25.14 / §2.25.15 との関係
+
+- §2.25.14: 全応答ペルソナレビュー（必須 3 + 追加候補最大 3、応答品質 CRITICAL 0 / HIGH 0 担保）
+- §2.25.15: 承認質問運用ルール（AskUserQuestion 発信フォーマット 4 セクション必須）
+- §2.25.23: PO 承認取得前 14 票投票機構（§2.25.15 発信直前の拮抗判定、機械化）
+
+実行順序: ADV 応答起草 → §2.25.14 ペルソナレビュー（CRITICAL/HIGH 0 化） → §2.25.3 該当判定 → 該当時のみ §2.25.23 14 票投票 → margin 結果に応じて §2.25.15 経由 PO 承認 or ADV 自律。
+
+##### §2.25.23.8 機械チェック
+
+- `scripts/vote_dispatcher.sh` が `scripts/persona_vote.sh`（10 ペルソナ並列判定）+ `scripts/ai_review.js --mode=vote`（外部 AI 2 種）を起動 → 14 票集計 → exit 0/2 で呼出側（ADV）に伝播
+- `scripts/adv_response_gate.sh` 内に §2.25.3 該当検出時 `vote_dispatcher.sh` 起動条件を組込（既存 hook フローへ結線、`hooks` JSON に新規 hook 追加なし、call-out のみ）
+- exit 2 時に呼出側 ADV は AskUserQuestion 発火必須、exit 0 時は ADV 自律実行
+- `logs/vote_log.log` 行数 + verdict 列分布を `scripts/spec_lint_extended.sh` で月次確認
+
+few-shot 例（機械チェック正例）: vote_dispatcher.sh 起動 → 14 票集計完了 → exit 0 → ADV 自律実行 → vote_log.log に `autonomous` 行追加。
+few-shot 例（機械チェック違反例）: vote_dispatcher.sh exit 2 を ADV が無視して自律実行 → §2.25.23.8 違反、`logs/adv_violation_gate.log` に記録。
 
 ---
 
@@ -3257,6 +3344,10 @@ ADV（判断）→ QA（ルール検証）→ PO代理（方針検証）の3者�
 - completion_verifier.sh — PATCH-G49-P0 / §2.25.21 完了条件検証（必須項目 grep + 30 行超 LONG 検出）
 - night_mode_dispatcher.sh — PATCH-G49-P0 / §2.25.22 夜間自動着手（5 重ガード: 時刻 + 同意フラグ + PO 不在 + /usage + auto_eligible タスク）
 
+**MISSION-G49-PKG-FINAL-V2 §2.25.23 14 票投票機構（PATCH-G49-VOTE / PD-112）**:
+- vote_dispatcher.sh — PATCH-G49-VOTE / §2.25.23.4 / §2.25.23.8 / 14 票集計 + margin 判定 + exit 0/2、external_review_guardrail 共有 source、月次上限時 10 票 fallback
+- persona_vote.sh — PATCH-G49-VOTE / §2.25.23.4 step 2 / 10 ペルソナ別 grep ベース簡易判定 MVP（FOR/AGAINST/ABSTAIN 出力）
+
 ### §6.11 scripts/ 詳細表（リファレンス、補足含む）
 
 | # | スクリプト | 根拠 | 内容 |
@@ -3323,7 +3414,14 @@ ADV（判断）→ QA（ルール検証）→ PO代理（方針検証）の3者�
 | 38. | scripts/completion_verifier.sh | PATCH-G49-P0 / §2.25.21 | 完了条件検証（必須項目 grep + 30 行超 LONG 検出） |
 | 39. | scripts/night_mode_dispatcher.sh | PATCH-G49-P0 / §2.25.22 | 夜間自動着手（5 重ガード: 時刻 + 同意フラグ + PO 不在 + /usage + auto_eligible タスク） |
 
-**注記**: 上記 No.28 の version_sync.sh と Phase 1-3 拡張の番号体系は重複しないよう、本表内では No.1〜29（PART2 22 本 + 6 本実装 + rollback.sh 1 本 = 29）と Phase 1-3 拡張 No.23〜29（重複あり）+ PATCH-G49 No.30〜33（4 本新設）+ PATCH-G49-P0 No.34〜39（6 本新設）。SSoT は実体 39 本（PATCH-G49-PA で rollback.sh + PATCH-G49 4 本 + PATCH-G49-P0 6 本を追加登載、計 +11）。Phase 1/2 凍結ファイル（external_review_precommit/guardrail/postcommit、spawn_subagent_review）は変更禁止（本ミッションでも触らない）。
+**MISSION-G49-PKG-FINAL-V2 §2.25.23 14 票投票機構（PATCH-G49-VOTE / PD-112、追加 2 本）**:
+
+| # | スクリプト | 根拠 | 内容 |
+|---|---|---|---|
+| 40. | scripts/vote_dispatcher.sh | PATCH-G49-VOTE / §2.25.23.4 / §2.25.23.8 / PD-112 | 14 票集計 + margin 判定 + exit 0/2（拮抗 escalate / 圧倒的 autonomous）。external_review_guardrail.sh 共有 source、月次上限時 10 票 fallback（margin ≤ 3 拮抗 / ≥ 4 圧倒的）。logs/vote_log.log TAB 8 列記録 + 週次 1MB rotate + 4 週間保持 |
+| 41. | scripts/persona_vote.sh | PATCH-G49-VOTE / §2.25.23.4 step 2 / §2.25.14.7 / PD-112 | 10 ペルソナ別 grep ベース簡易判定 MVP（FOR/AGAINST/ABSTAIN 出力）。完全版は subagent 起動だが本 MVP は提案テキストの語彙パターンから保守側判定 |
+
+**注記**: 上記 No.28 の version_sync.sh と Phase 1-3 拡張の番号体系は重複しないよう、本表内では No.1〜29（PART2 22 本 + 6 本実装 + rollback.sh 1 本 = 29）と Phase 1-3 拡張 No.23〜29（重複あり）+ PATCH-G49 No.30〜33（4 本新設）+ PATCH-G49-P0 No.34〜39（6 本新設）+ PATCH-G49-VOTE No.40〜41（2 本新設）。SSoT は実体 41 本（PATCH-G49-PA で rollback.sh + PATCH-G49 4 本 + PATCH-G49-P0 6 本を追加登載、PATCH-G49-VOTE で +2 本、計 +13）。Phase 1/2 凍結ファイル（external_review_precommit/guardrail/postcommit、spawn_subagent_review）は変更禁止（本ミッションでも触らない）。
 
 ---
 

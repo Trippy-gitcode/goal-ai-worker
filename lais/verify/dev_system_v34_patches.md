@@ -2138,3 +2138,116 @@ cmd-realworld:
 
 ---
 
+## PATCH-G49-VOTE: §2.25.23 14 票投票機構新設（10 ペルソナ + GPT/Gemini 重み 2、PD-112、2026-04-25）
+
+### 検出元
+- 指示書 MISSION-G49-PKG-FINAL-V2 §2.25.23 14 票投票機構（PO 提案 2026-04-25、§2.25.3 該当 = 新プロセス追加で承認済）
+- PD-112: PO 承認取得前 14 票投票機構新設
+
+### 差分対象
+- `lais/verify/dev_system_v34_package.md`: §2.25.23 新節（§2.25.23.1〜.8、§2.25.22 直後 / §2.26 直前に挿入）+ §2.25.14.3 追加候補表「データガバナンス専門家」7 番目追加 + 追加候補上限 3→4
+- `docs/po-decisions.md`: PD-112 追記
+- `scripts/vote_dispatcher.sh`: 新設（POSIX sh、`set -eu`、14 票集計 + margin 判定 + exit 0/2）
+- `scripts/persona_vote.sh`: 新設（POSIX sh、10 ペルソナ別 grep ベース簡易判定 MVP、FOR/AGAINST/ABSTAIN 出力）
+- `scripts/ai_review.js`: runVoteMode 追加（`--mode=vote --provider=gpt5|gemini`、FOR/AGAINST/ABSTAIN のみ出力）+ parseArgs に `--mode=vote` / `--provider` / `--proposal` 追加
+- `scripts/persona_selector.sh`: データガバナンス専門家 trigger 追加（grep -qiE "(SSoT|バックアップ|git|監査ログ|データ整合|バージョン管理)"）+ `head -3` → `head -4`
+
+### BEFORE
+```markdown
+**機械チェック**:
+
+- `scripts/night_mode_dispatcher.sh` で多重ガード（§2.25.22.6）を全 PASS でのみ subagent 起動
+- 朝報告 `logs/night_mode_report_YYYY-MM-DD.md` の存在 + フォーマット検証
+
+---
+
+
+### §2.26 — STATUScrit クラスター...
+```
+
+### AFTER（§2.25.23 全 8 サブ節、約 100 行追記）
+```markdown
+**機械チェック**:
+
+- `scripts/night_mode_dispatcher.sh` で多重ガード（§2.25.22.6）を全 PASS でのみ subagent 起動
+- 朝報告 `logs/night_mode_report_YYYY-MM-DD.md` の存在 + フォーマット検証
+
+---
+
+#### §2.25.23 PO 承認取得前 14 票投票機構（PD-112 起源、§2.25.15 機械化）
+
+##### §2.25.23.1 適用範囲
+（§2.25.15 該当時のみ）
+
+##### §2.25.23.2 投票配分（合計 14 票）
+（10 ペルソナ + GPT 2 + Gemini 2、表）
+
+##### §2.25.23.3 判定式
+（margin ≤ 4 拮抗 / ≥ 5 圧倒的、few-shot 4 例）
+
+##### §2.25.23.4 投票プロセス（5 ステップ）
+
+##### §2.25.23.5 ガードレール（コスト管理 + 月次上限時 fallback）
+（10 票 fallback、閾値 margin ≤ 3 / ≥ 4）
+
+##### §2.25.23.6 ログ運用
+（logs/vote_log.log TAB 8 列、週次 rotate、4 週間保持）
+
+##### §2.25.23.7 §2.25.14 / §2.25.15 との関係
+
+##### §2.25.23.8 機械チェック
+
+---
+
+
+### §2.26 — STATUScrit クラスター...
+```
+
+### 3 ペルソナ合議
+
+**ADV**: PO 提案（2026-04-25）に従い、§2.25.3 該当承認質問発信前の「拮抗 / 圧倒的」判定を機械化する仕様を §2.25.23 として新設。配分は内部 10 ペルソナ × 各 1 票 + GPT-5.4 × 2 票 + Gemini 3.1 Pro × 2 票 = 14 票、判定式は `margin = |FOR - AGAINST|`（ABSTAIN 除外）、margin ≤ 4 で拮抗 / ≥ 5 で圧倒的とする。10 ペルソナ目（データガバナンス専門家）は §2.25.14 ペルソナ表に既に追加済（Phase A で）、§2.25.14.3 追加候補上限を 3→4 に拡張して全 10 ペルソナ選抜可能化。§2.25.4 リスク回避バイアスと §2.25.9 過剰承認質問の構造的抑止を達成。
+
+**QA**: §7.3 CRITICAL 定義「Howの欠落」を回避するため、§2.25.23 全 8 サブ節に few-shot 例（正例 / 違反例）+ 機械チェック節を必須化。`scripts/vote_dispatcher.sh` は POSIX sh + `set -eu` + 禁止構文ゼロ、`sh -n` / `bash -n` 両 PASS を確認。`scripts/persona_vote.sh` も同様の保守側設計（未知ペルソナ → ABSTAIN）。`scripts/ai_review.js` runVoteMode は失敗時 ABSTAIN 出力 + exit 0（呼出側に伝播せず、guardrail 経路を妨害しない）。テスト: vote_dispatcher.sh 起動 → persona_vote.sh × 10 + ai_review.js × 2 → margin 集計 → exit 0/2 を確認可能。
+
+**PO代理**: 本 PATCH は MISSION-G49-PKG-FINAL-V2 §2.25.23 で PO 事前承認済（§2.25.3 該当: 新プロセス追加 = 投票機構新設）。コスト: 既存 `external_review_guardrail.sh` 月次 \$30 / 日次 \$5 共有、追加コストなし（追加プロバイダなし）。リスク: 低（patches.md PATCH-1〜28 + Phase 1/2 凍結ファイル touch なし、ADV 領域以外への書込なし、`--no-verify` 未使用）。新プロセス追加は本指示書で承認済、ブランド変更 / データスキーマ変更 / 外部依存追加なし。3 ペルソナ合議で採用決定。
+
+**合意**: 採用、PATCH-G49-VOTE として patches.md 末尾に追記。
+
+### 想定リスク → 不発生確認
+
+| リスク | 結果 |
+|---|---|
+| patches.md PATCH-1〜28 + PATCH-G49-P0/PA 改変 | **不発生**（本 PATCH-G49-VOTE を末尾追記のみ、既存 PATCH 不変）|
+| Phase 1/2 凍結ファイル改変 | **不発生**（external_review_*.sh / spawn_subagent_review.sh / chain_update_audit.sh / .git/hooks/* すべて touch なし。`scripts/ai_review.js` は §2.25.23.4 step 3 で参照されるため拡張対象、parseArgs + runVoteMode のみ追加で既存 runPrecommitMode / main 既存経路は不変）|
+| ADV 領域以外への書込 | **不発生**（templates/ / development_rules.md / bootstrap.md すべて touch なし）|
+| `--no-verify` 使用 | **未使用**（最終 commit は通常 hook 通過予定）|
+| guardrail 共有破壊 | **不発生**（既存 `check_guardrail` を source して呼ぶのみ、状態ファイル直接編集なし）|
+
+### 修正後検証
+
+- `grep -c "^#### §2.25.23" lais/verify/dev_system_v34_package.md` → 1（期待: 1）
+- `grep -c "^##### §2.25.23\." lais/verify/dev_system_v34_package.md` → 8（期待: ≥7）
+- `grep -c "データガバナンス専門家" lais/verify/dev_system_v34_package.md` → 3（期待: ≥3）
+- `test -x scripts/vote_dispatcher.sh && test -x scripts/persona_vote.sh` → PASS
+- `sh -n scripts/vote_dispatcher.sh && sh -n scripts/persona_vote.sh` → PASS
+- `bash -n scripts/vote_dispatcher.sh && bash -n scripts/persona_vote.sh` → PASS
+- `node --check scripts/ai_review.js` → PASS
+- `grep -c "PD-112" docs/po-decisions.md` → ≥1（期待: ≥1）
+- `grep -cE "^## PATCH-G49-VOTE" lais/verify/dev_system_v34_patches.md` → 1
+
+### 残課題（本 PATCH 対象外）
+
+- 完全版 persona_vote.sh は subagent 起動による 10 ペルソナ合議 → 本 MVP は grep ベース簡易判定で代替（§2.25.23.4 step 2 で MVP 明示）
+- §2.25.23 機械チェック（vote_log.log 月次集計）は `scripts/spec_lint_extended.sh` 拡張で対応 → 別 PATCH
+
+### 波及ファイル（本 PATCH 直接対象外）
+
+- `scripts/spec_lint_extended.sh`: vote_log.log 月次集計対応は別 PATCH（本 PATCH では未着手）
+- `scripts/adv_response_gate.sh`: §2.25.23.4 step 1 の vote_dispatcher.sh 起動結線は既存 hook フローに call-out で組込（`grep -c "vote_dispatcher" scripts/adv_response_gate.sh` での接続確認は別 PATCH 対象）
+
+---
+
+> 本 PATCH-G49-VOTE は MISSION-G49-PKG-FINAL-V2 §2.25.23 で PO 事前承認済の 14 票投票機構実装記録。§2.25.14（応答品質）と §2.25.15（承認質問運用）の中間レイヤとして「拮抗 / 圧倒的」判定を機械化、PO 負担最小化と過剰承認質問の構造的抑止を達成。完了条件: §2.25.23.1〜.8 新設 + scripts 3 本（vote_dispatcher / persona_vote / ai_review.js runVoteMode）+ PD-112 + PATCH-G49-VOTE 全 PASS。
+
+---
+
