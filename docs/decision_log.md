@@ -29,4 +29,14 @@
 
 ---
 
+## 2026-04-27 PD-SPEC-ARCHIVE-COMPRESS-EXECUTE-V1: β 軸抜本改革 (仕様書アーカイブ実行) 完了
+- **判断者**: PO（2026-04-27 承認「β 軸 (仕様書 80% 削除) OK。ただしアーカイブしてね」）
+- **論点**: v3.4 系仕様書 (約 23,800 行想定) を `lais/archive/spec_v34_pre_reform/` 配下に履歴保持型 git mv で移動し、コア 500 行と分離
+- **結論**: 採用、4 バッチコミット (88955fd / f0c30fe / 5457833 / 2138dba) で実 git mv 完了。実態として archive 13 ファイル (docs/plans 6 + instructions 5 + verify/README 1 + package_full snapshot 1)、計画書想定 350+ は repo state 上不在のため実態反映で reduce、対象外 (lais/verify/dev_system_v34_package.md / patches.md) は保持
+- **根拠**: 計画書 `/tmp/spec_archive_compress_plan_v1.md` §4.3 (4 バッチ手順) + PO 承認「アーカイブで履歴保持」
+- **影響範囲**: docs/plans/ (6 ファイル archive で空化)、instructions/ (5 ファイル archive、SSoT 4 ファイル + README + results/ は保持)、lais/verify/ (2 ファイル保持、別フェーズで原本 archive 移動予定)、安全ブランチ `backup/pre-archive-20260427` 作成済 (rollback 用)
+- **次フェーズ**: コア 500 行 (`lais/core_spec_v4.md`) 新設 + scripts × §2.25 path 連動修正 + dev-system-adv/skills 参照置換
+
+---
+
 <!-- 以降、新規エントリは上に追記する形で記録 -->

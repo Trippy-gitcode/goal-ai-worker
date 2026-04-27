@@ -2251,3 +2251,44 @@ cmd-realworld:
 
 ---
 
+## PATCH-SPEC-ARCHIVE-COMPRESS-EXECUTE-V1（2026-04-27）
+
+ミッション ID: SPEC-ARCHIVE-COMPRESS-EXECUTE-V1
+PO 承認: 2026-04-27「β 軸 (仕様書 80% 削除) OK。ただしアーカイブしてね」
+計画書: `/tmp/spec_archive_compress_plan_v1.md` (561 行、4 バッチ手順)
+
+### 目的
+
+β 軸抜本改革 (PO 承認) の実 git mv 実行。`lais/archive/spec_v34_pre_reform/` 新設 + 履歴保持型 git mv によるアーカイブを 1 コミット 1 バッチで実施。コア 500 行 (`lais/core_spec_v4.md`) 新設は別フェーズ。
+
+### 実施内容
+
+| バッチ | 対象 | 件数 | コミット SHA |
+|---|---|---:|---|
+| 1 | docs/plans/ → archive/spec_v34_pre_reform/docs_plans/ | 6 ファイル | 88955fd |
+| 2 | lais/verify/ アーカイブ階層確定 (no-op + README) | 1 ファイル (README) | f0c30fe |
+| 3 | instructions/ → archive/spec_v34_pre_reform/instructions/ | 5 ファイル | 5457833 |
+| 4 | dev_system_v34_package.md スナップショット保全 | 1 ファイル (3,516 行 cp) | 2138dba |
+
+### 実態と計画書差分
+
+計画書 §1.2 / §2.1 では verify 配下に 350+ ファイル (Pre-Review / Golden / 画面別 review_package_r2/r3/r4/r5 / 単発 debug ログ等) を想定したが、実 repo state では既に該当ファイル群は不在。verify 配下追跡ファイル数 = 2 (package.md と patches.md、両者ともアーカイブ対象外)。同様に docs/plans/ は計画書 19 ファイル想定 → 実 6 ファイル、instructions/ は 12 ファイル想定 → 実 5 ファイル。
+
+### 検証結果
+
+- `ls -d lais/archive/spec_v34_pre_reform/` → 存在確認 PASS
+- `git log --oneline lais/archive/spec_v34_pre_reform/` → 4 commits PASS
+- `find lais/archive/spec_v34_pre_reform -type f -name "*.md" | wc -l` → 13 (計画書 §3 期待値 350+ は実態反映で更新)
+- `git log --follow lais/archive/spec_v34_pre_reform/docs_plans/dev_system_spec.md` → 旧 path commit 履歴連結 PASS
+- `ls lais/verify/dev_system_v34_package.md / patches.md` → 対象外ファイル保持確認 PASS
+- 安全ブランチ `backup/pre-archive-20260427` 作成済 (rollback 用)
+
+### 残課題（別フェーズ対象）
+
+- コア 500 行新設 (`lais/core_spec_v4.md`、計画書 §3 章構成)
+- scripts/ × §2.25 連動箇所の path 追従 (`required_refs_matcher.sh` / `handoff_validator.sh` 等)
+- dev-system-adv/skills/ 配下の §2.25 path 参照置換
+- 原本 `lais/verify/dev_system_v34_package.md` の archive 移動 (コア新設後)
+
+---
+
