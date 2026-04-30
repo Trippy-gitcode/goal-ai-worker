@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "S10-10 BottomTabBar（components/shared/BottomTabBar.jsx）",
+    "issue": "ボトムナビに role=\"tablist\" と各ボタンに role=\"tab\" を付与しているが、対応する tabpanel が存在せず、タブのキーボード操作（左右矢印移動、Home/End、選択状態管理）も未実装。ページ/ルート遷移用のナビゲーションとしては不適切なARIAロールで、WCAG 2.2 4.1.2（Name, Role, Value）不適合の恐れ。",
+    "suggestion": "タブロールを撤廃し、nav/ul/li + a（href付き）によるナビゲーションに変更。現在地には aria-current=\"page\" を付与。もしボタンで制御するSPA遷移に留める場合は、role を付けずに button のまま aria-current=\"page\" を用い、必要ならばグループに role=\"navigation\"（既に nav 使用）を維持。タブロールを使う場合は必ず対応する tabpanel とキーボードインタラクションを実装すること。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "S10-4 Today タスク行（.s10-check, S10Grow.css 22×22）",
+    "issue": "チ��ックボタンのタップターゲットが 22×22px と 44×44px を下回る。要求事項でタップターゲット 44×44 未満は CRITICAL 指摘対象。また WCAG 2.5.8 Target Size (Minimum) 24×24 も下回る。",
+    "suggestion": "視覚サイズは22pxのままでも、ヒットエリアを 44×44px 以上に拡大する。例: .s10-check に position: relative を付与し、::before で不可視の拡張ヒットエリア（absolute/inset で 44px 相当）を重ねる、もしくは padding を増やして見た目のレイアウトは負の margin で調整。CSS: `.s10-check{min-width:44px;min-height:44px;padding:11px}` など。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "S10-4 Today タスク行（Check コンポーネント）",
+    "issue": "role=\"checkbox\" を用いているが、状態が scheduled→active→done の三段階でローテーションする挙動。ARIA上のチェックボックスは二値（true/false）または tri-state の mixed を想定するが、本実装は tri-state の意味づけが不明確で、aria-checked は true/false のみ。UI挙動とARIAの状態が一致しておらず、WCAG 4.1.2 違反。",
+    "suggestion": "選択肢A: 完了状態のみをチェックボックスで表し、aria-checked は true/false の二値に限定。進行中（active）はカード側のメタ情報で示す。選択肢B: tri-state を明示するなら、active を aria-checked=\"mixed\" とし、支援技術向けに状態遷移を明確化（ラベル/説明更新）する。あるいは role=\"button\"（aria-pressed では三値表現不可）＋ aria-label で状態/次アクションを明示し、完了切替操作は別UIに分離。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "S10-2 Overdue 行（OverdueRow → Check コンポーネント流用）",
+    "issue": "Overdue 行のチェックUIは onClick で「明日に延期」を実行しているが、Check コンポーネントの aria-label は「タップで完了にする」等となり、実際のアクションとアクセシブルネームが不一致。WCAG 4.1.2（Name, Role, Value）に反する。",
+    "suggestion": "延期操作は別ボタン（role=button, ラベル「明日に延期」）に限定し、チェックUIは表示しないか、見た目を保ちつつ role=button + aria-label=\"明日に延期\" に変更。Check コンポーネントの流用は避け、機能に一致したラベル/ロールを付与すること。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "S10-10 BottomTabBar（components/shared/BottomTabBar.jsx）",
+    "issue": "ルート遷移用途に button を使用しており、リンクの意味付けが欠落。スクリーンリーダーのコマンド（リンク一覧、履歴、コンテキストメニュー）との親和性が下がる。",
+    "suggestion": "a 要素（href つき）で実装し、クライアントルーティングへは preventDefault + pushState を併用。現在タブには aria-current=\"page\" を付与。SPA でもリンクのセマンティクスを優先することを推奨。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "S10-4 Today タスク行（.s10-task-category に aria-hidden=\"true\"）",
+    "issue": "カテゴリ名（例: Work/Health/Learn）が視覚的には提示されているが、aria-hidden により支援技術には非表示。情報の欠落につながる可能性。",
+    "suggestion": "aria-hidden を外してカテゴリ名を読み上げ可能にするか、カードのアクセシブルネーム/説明へカテゴリを統合（例: aria-label に「… — カテゴリ: Work」を追加、または aria-describedby で関連付け）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S10-4 Today タスク行（.s10-task-card の aria-label）",
+    "issue": "aria-label でカード内テキスト（タスク名・メタ）を上書きしており、将来内容が変わった際に視覚と読み上げの不整合が起きやすい。",
+    "suggestion": "aria-label は削除し、可視テキストを名前として利用。メタ情報を併読させたい場合は、meta 要素に id を付与して aria-describedby で関連付ける。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S10-6 Upcoming 折りたたみ（s10-upcoming-header / s10-upcoming-panel）",
+    "issue": "aria-expanded/aria-controls は付与済みだが、展開時のフォーカス管理や状態アナウンスがないため、キーボード/スクリーンリーダー利用者が内容変化を見落とす可能性。",
+    "suggestion": "展開時にパネル内の先頭アイテムへフォーカス移動、またはパネルに aria-live=\"polite\" を付与。折りたたみ時はトグルボタンへフォーカスを戻すなど、状態変化を追跡しやすくする。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "App.jsx Suspense fallback（route-fallback）",
+    "issue": "fallback が <main role=\"status\" aria-live=\"polite\"> になっており、一時的に main ランドマークが重複する可能性。表示テキストがなく、読み上げ環境で状況が伝わりにくい。",
+    "suggestion": "fallback は <div role=\"status\" aria-live=\"polite\">読み込み中…</div> のように main 以外で実装するか、ルートの main に aria-busy=\"true\" を付与して状態を示す。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S10-8 Goals 行（.s10-goal ボタン）",
+    "issue": "明示的な min-height がなく、環境やズーム設定によっては 44px を下回る恐れ（他の操作要素は 44px を確保）。",
+    "suggestion": ".s10-goal に min-height: 44px を追加し、全インタラクティブ要素で一貫して最小タップターゲットを担保する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S10-3 Today カウンタ（.s10-today-counter）",
+    "issue": "ラベルが英語混在（\"completed\"）。読み上げや理解の一貫性の観点でローカライズが望ましい。",
+    "suggestion": "アプリ全体の言語方針に合わせて日本語化（例: \"完了\"）し、必要に応じて aria-label も更新。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S10-6 Upcoming 行（.s10-check-scheduled の疑似チェック表示）",
+    "issue": "非インタラクティブな装飾チェック（span）が支援技術にとって意味のない要素として露出している可能性がある。",
+    "suggestion": "装飾目的であれば aria-hidden=\"true\" を付与するか、role=\"presentation\" を適用してノイズを減らす。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

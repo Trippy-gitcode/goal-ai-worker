@@ -19,7 +19,7 @@
 #   1: WARN（欠落あり、caller は再 Read を促す）
 #
 # 根拠:
-#   - lais/verify/dev_system_v34_package.md §2.25.16.5
+#   - core_spec.md §6.1 SSoT 4 ファイル運用 (legacy v34 spec §2.25.16.5, archived 2026-04-30)
 
 set -eu
 

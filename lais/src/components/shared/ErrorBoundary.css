@@ -1,0 +1,78 @@
+/*
+ * ErrorBoundary fallback UI スタイル（PATCH-PB4-ERROR-BOUNDARY）
+ *
+ * トークン: docs/plans/lais_design_system.md §2 / §7
+ * - 全寸法 / 色は既存トークン参照（LP-011: 魔法の数字禁止）
+ * - prefers-reduced-motion 影響なし（アニメーション不在）
+ * - WCAG: アイコンは aria-hidden、本文 / ボタンで意味伝達
+ */
+
+.error-boundary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: var(--space-lg);
+  text-align: center;
+  gap: var(--space-sm);
+}
+
+.error-boundary__icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  margin: 0 0 var(--space-xs);
+}
+
+.error-boundary__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-sm);
+}
+
+.error-boundary__message {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-lg);
+  word-break: break-word;
+  max-width: 32em;
+}
+
+.error-boundary__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  align-items: stretch;
+  width: 100%;
+  max-width: 18rem;
+}
+
+.error-boundary__retry,
+.error-boundary__home {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-pill);
+  padding: var(--space-sm) var(--space-lg);
+  min-height: 44px;
+  min-width: 44px;
+  cursor: pointer;
+}
+
+.error-boundary__retry {
+  color: var(--bg-primary);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.error-boundary__home {
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+}
+
+.error-boundary__retry:focus-visible,
+.error-boundary__home:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

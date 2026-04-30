@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"CONTRADICTION\",\n    \"location\": \"§3.6, §4.2 S01-7, §4.4 S10-4\",\n    \"issue\": \"タップターゲットの最小サイズに関する仕様が矛盾しており、WCAG 2.5.5に違反しています。§3.6では全タップ要素の最小サイズを44x44pxと規定していますが、§4.2の同意チェックボックス(S01-7)は20x20px、§4.4のタスクチェック(S10-4)は22x22pxと定義されており、明確な矛盾が存在します。このまま実装すると、特に手の震えがあるユーザーや運動障害のあるユーザーの操作性を著しく損ないます。\",\n    \"suggestion\": \"§4.2 S01-7および§4.4 S10-4のチェックボックス自体の視覚的なサ��ズは維持しつつ、周囲の余白を含めてタップ可能な領域が最低でも44x44pxを確保するように仕様を修正してください。例えば、`padding",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  }
+]

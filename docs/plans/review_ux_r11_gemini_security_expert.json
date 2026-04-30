@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"MISSING\",\n    \"location\": \"project_v1.md §6\",\n    \"issue\": \"AIパートナーに対するプロンプトインジェクション（システムプロンプトの抽出や不適切発言の強制）への対策方針が定義されていません。AI機能が核心であるため、これが悪用されるとブランドリスクやAPIコストの枯渇に直結します。\",\n    \"suggestion\": \"入力テキストのサニタイズ、システムプロンプトの保護レイヤー（例: ユーザー入力とシステム指示の厳格な分離）、および出力の安全性フィルタリング（OpenAI Moderation API等の活用）をアーキテクチャ要件として明記してください��\"\n  },\n  {\n    \"id\": \"R-002\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"CONTRADICTION\",\n    \"location\": \"pr",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

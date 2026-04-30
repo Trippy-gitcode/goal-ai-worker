@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "サブタイトル「あなたの人生を、あなたらしく」",
+    "issue": "文字サイズが14pxで色も控えめ（#7A8593）なため、アプリの価値提案を伝える第一印象としての訴求力が弱い。",
+    "suggestion": "文字サイズを16px（--font-size-base）に上げ、色を `--text-secondary` (#9BA7B4) に変更して可読性とメッセージ性を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "「+ タスクを追加」「+ ゴールを作成」のリンク",
+    "issue": "主要なCTA���次のアクション）であるにもかかわらず、通常のテキストリンクと同等の視覚的ウェイトしかなく、画面内で埋もれてしまっている。",
+    "suggestion": "アイコンを伴うゴーストボタン（border付き）にするか、背景に `--accent-subtle` を敷くなどして、タップ可能なアクションエリアとして視覚的に際立たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "完了済みタスク（09:00 企画書を仕上げる）",
+    "issue": "完了済みタスクの背景色（緑のsubtle）とチェックマークが鮮やかで、未完了タスクよりも視覚的に目立ってしまっている。これからやるべきタスクへの視線誘導を阻害している。",
+    "suggestion": "完了済みタスクは全体の不透明度を下げるか、背景色を外し、未完了タスク（特に「進行中」）に最も視線が集まるよう情報設計を調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s14_goal_detail",
+    "location": "画面下部のボタン群（AI相談、編集、削除）",
+    "issue": "Laisのコア機能で��る「AI相談」が、破壊的アクションの「削除」や管理用の「編集」と同じ並び・同じ視覚的ウェイトで配置されており、特別な機能としての訴求力が弱い。",
+    "suggestion": "「AI相談」ボタンを幅100%のプライマリボタンとして上部に独立させるか、「編集」「削除」とは明確にグループを分けて配置する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の「登録する」ボタン",
+    "issue": "チャットのインライン要素であるにもかかわらず、青ベタ（#1A5FC8）のPrimaryボタンが使われており、画面内で最も強い視覚的コントラストを持っている。会話の流れよりもボタンに視線が奪われる。",
+    "suggestion": "チャット内のアクションはセカンダリボタン（border付き）や、背景を `--accent-subtle` にしたソフトなボタンに変更し、会話の文脈を邪魔しないようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s15_goal_create",
+    "location": "カテゴリ選択チップ",
+    "issue": "選択済み��仕事、学習）と未選択の視覚的差異が枠線の色とアイコンのみで、パッと見のコントラスト差が弱く、現在の選択状態が直感的に把握しづらい。",
+    "suggestion": "選択済みのチップは背景色を少し濃くする（--accent-subtle-hover等）か、未選択チップのテキスト色を少し落として、選択状態をより際立たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "「単発タスク」「習慣」のトグルボタン",
+    "issue": "選択中の「単発タスク」が `--accent-subtle` 背景で表現されているが、隣の「習慣」との境界が弱く、2つの選択肢が排他関係にあるトグルUIとして認識しづらい。",
+    "suggestion": "2つの選択肢を包む親コンテナ（背景色付き）を設け、その中でアクティブな側がスライドするようなピル型トグルデザインにするなど、排他選択であることを視覚的に明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s02_onboarding",
+    "location": "上部のプログレスバー",
+    "issue": "インジケーターが��く、画面上端に近いため、現在の進行度（5ステップ中2ステップ目）が直感的に伝わりにくい。離脱防止のための「あとどれくらいか」という情報提示が弱い。",
+    "suggestion": "インジケーターの太さを少し増すか、ステップ数（2/5）のテキスト表記を併記して進行度を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  }
+]

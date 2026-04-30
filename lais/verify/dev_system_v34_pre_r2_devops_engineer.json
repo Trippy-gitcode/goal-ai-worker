@@ -1,0 +1,13 @@
+[
+  {
+    "id": "R-001-RESOLVED",
+    "severity": "RESOLVED",
+    "category": "連鎖更新・権限",
+    "screen": "改訂案⑦ §D / CLAUDE.md",
+    "location": "review_package §1.1 行83-84 + 改訂案① §G 行1019-1049 + 改訂案⑦ §D 行3155-3165",
+    "issue": "R1で指摘したCLAUDE.md契約セクション変更の実行主体未区別が修正済み",
+    "spec_reference": "dev_system_spec.md §16.5 項目2",
+    "actual": "3箇所で修正: (1) §1.1表でCLAUDE.mdを7a(Code)/7b(Claude.ai)に分割、(2) 改訂案①§Gで項目1-6(Code)と項目7-8(Claude.ai)を明示、(3) 改訂案⑦§Dで(A)Code実行可能/(B)Claude.ai経由必須に分離。全て§16.5項目2への参照あり",
+    "suggestion": "修正十分。CRITICALクリア"
+  }
+]

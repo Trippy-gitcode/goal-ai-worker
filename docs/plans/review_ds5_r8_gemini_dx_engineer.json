@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "§18の依存関係マップと§19.6の依存チェーンで、ファイル名（`ux_redesign_v*.md` vs `ux_v1.md`）が不一致であり、依存の方向性にも差異がある（§18ではdesign_specとdesign_systemが双方向確認だが、§19.6では一方向）。",
+    "suggestion": "ファイル名を統一（例: `ux_v1.md` に統一し§18を修正）し、§19.6の依存チェーンを§18の定義と完全に整合させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7",
+    "issue": "Phase 0の完了基準に「8ペルソナ×2モデルのAIレビュー」とあるが、§13.4の「標準5ペルソナ」および§13.2の「1セッション最大10呼び出し」のコスト制約と矛盾する（8×2=16回となり上限を超過する）。",
+    "suggestion": "完了基準を「標準5ペルソナでのAIレビュー」に修正するか、Phase 0の初回レビュー時のみ§13.2の呼び出し上限を除外する特例ルールを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダーの依存メタデータに「上流ファイルのパス + バージョン」を要求しているが、上流のマイナーバージョンまでハードコードすると、上流更新時に全下流ファイルのヘッダー更新が強制され、Gitコンフリクトや更新漏れの温床となる。",
+    "suggestion": "依存メタデータはファイルパスのみとするか、破壊的変更を伴うメジャーバージョン（例: v1）のみの指定に留める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "競合ベンチマークで「App Storeレビュー分析（★1-2離脱要因、★4-5継続要因）」を要求しているが、ADV���Claude.ai）は最新のストアレビューを直接スクレイピング・網羅的に取得できず、ハルシネーションを起こすリスクが極めて高い。",
+    "suggestion": "レビュー分析は「POがテキストデータを提供した場合」などの条件付きにするか、Web検索で取得可能な一般的な評判・機能比較に要件を緩和する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "各仕様書の必須セクションテンプレートにおいて、多言語対応（i18n）やオフライン時のUX（エラーハンドリングとは別の状態定義）の明示的なプレースホルダーが欠落している。",
+    "suggestion": "`project_v1.md` に多言語対応方針を、`ux_v1.md` にオフライン状態のUX定義セクションを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.6",
+    "issue": "依存チェーンがシンプルなツリー構造で表現されているため、複数の上流に依存するファイル（例: `design_spec_v1.md` が `ux_v1.md` と `design_system.md` の両方に依存するDAG構造）の関係性が正確に表現できていない。",
+    "suggestion": "ツリー表現ではなく、各ファイルごとの「依存元リスト」形式に変更するか、DAG（有向非巡回グラフ）であることを注記して多重依存を明示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  }
+]

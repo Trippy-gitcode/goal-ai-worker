@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.4",
+    "issue": "project_v1.md §4.2で定義されている「ゴール作成から7日未満で全タスク完了した場合は『完了待ち』状態になり『あとN日で完了！』と表示」という仕様が、ux_v1.mdのゴール詳細画面（S-14）のUI定義に一切含まれていません。実装者が即時完了させるか待機させるか判断できず、不正防止のコアロジックが破綻します。",
+    "suggestion": "S-14のゴール詳細画面に、7日未満で全タスクが完了した場合の進捗バーの表示状態（例: 100%だが待機色）と、「あとN日で完了！」のテキスト表示、および手動完了ボタンの無効化（グレーアウト）の仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2",
+    "issue": "プラン管理（S-38）からStripe Checkout（外部ページ）に遷移し、決済完了またはキャンセルしてアプリに戻ってきた際のハンドリング（リダイレクトURLの受け口、成功/キャンセルトーストの表示、プラン状態の再取得）が未定義です。決済直後にアプリの表示が更新されないと、ユーザーが二重決済を行う重大なリスクがあります。",
+    "suggestion": "Stripe Checkoutの success_url / cancel_url をアプリの特定パス（例: /settings/plan?status=success）に設定し、アプリ起動時にクエリパラメータを検知してトースト表示およびセッション（プラン情報）の強制再取得を行うフローを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.4",
+    "issue": "TALK画面でレベルアップ条件を満たした場合、TALKではバナーのみ表示し、次回GROW画面でフル演出（アバター進化等）を再生す���と定義されています。しかし、TALKからME画面に遷移した場合、ME画面のヒーロー領域が静的更新されて新アバターが先に表示されてしまうため、その後にGROW画面を開いて進化演出を見てもネタバレ後となり、コア体験（アハ体験）が損なわれます。",
+    "suggestion": "TALK画面でレベルアップした場合、ME画面のヒーロー領域も「未進化（旧レベル・旧アバター）」のまま維持し、ユーザーがGROW画面を開いてフル演出を再生した後に初めて、全画面のステートを新レベルに更新するようフラグ管理を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3",
+    "issue": "project_v1.md §3.2.3で定義されている「週N回習慣で今日非表示のものを手動でTodayに追加する『今日やる』ボタン」のUIが、ux_v1.mdのUpcomingセクションや詳細パネル内に存在しません。",
+    "suggestion": "Upcomingセクションの習慣タスク行、またはS-11詳細パネル内に「今日やる（Todayに追加）」ボタンを追加し、タップ時にTodayセクションへタスクが移動する挙動を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALK画面で画像（最大10MB）を添付した際の、Storageへのアップロード中のUI（プログレス表示等）、アップロード中の送信ボタンの制御（無効化するか）、およびアップロード失敗時のエラーハンドリングが未定義です。",
+    "suggestion": "画像選択後、入力バー上のサムネイルにローディングインジケータを重ね、アップロード完了まで送信ボタンを無効化する仕様、および失敗時はトーストでエラーを表示しサムネイルを削除する仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.1",
+    "issue": "GROWやTALKタブからMEタブに切り替えた際、前回開いていたサブタブ（例: FRIENDS）が復元されるのか、常にデフォルト（PROFILE）に戻るのかが未定義です。",
+    "suggestion": "「MEタブへの切り替え時は、セッション内で最後に開いていたサブタブを復元する。アプリ再起動時はPROFILEをデフォルトとする」等のサブタブ状態の永続性ルールを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3",
+    "issue": "タスク完了後、Undoスナックバーが30秒間表示されている間にユーザーがアプリをスワイプキル（強制終了）した場合、タスクの完了状態とEXP付与がどう扱われるか明記されていません。",
+    "suggestion": "「タスク完了操作の時点でサーバーにはPOST済み（楽観的UI）であるため、Undo前にアプリを終了した場合は完了確定として扱う」旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALK画面でAIの応答がストリーミングされている最中に、GROWやMEタブに切り替えた場合、ストリーミング処理がバックグラウンドで継続されるのか、中断されるのかが未定義です。",
+    "suggestion": "「タブを切り替えてもストリーミング処理はバックグラウンドで継続し、TALKタブに戻った際に最新のテキストが表示されている状態を維持する」旨を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.4",
+    "issue": "「QRを表示」でフルスクリーンモーダルを開いたまま24時間経過し、一時トークンの有効期限が切れた場合の挙動（自動更新されるのか、エラーになるのか）が未定義です。",
+    "suggestion": "QRコード表示モーダルを開いたまま有効期限が切れた場合、バックグラウンドで新しいトークンを取得してQRコードを自動再描画するか、「有効期限が切れました」と表示して再生成ボタンを出す仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §9.1",
+    "issue": "オフライン時のTALK画面の挙動として「入力フィールドを無効化」とありますが、画像添付ボタン（📎）の扱いが明記されていません。",
+    "suggestion": "オフライン時は画像添付ボタン（📎）も無効化（グレーアウト）し、タップ時に「オフライン時は画像を添付できません」のトーストを表示する仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

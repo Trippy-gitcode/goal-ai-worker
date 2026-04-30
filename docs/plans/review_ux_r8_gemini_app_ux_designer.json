@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§1.4, §2.4",
+    "issue": "S-14（フルスクリーン）やS-11（モーダル）からTALKタブへ「AI相談」で遷移する際、`replaceState`で履歴を書き換えると履歴スタックに同じ階層（S-10）が重複し、Androidの物理戻るボタンやブラウザバック時のナビゲーションが完全に破綻する。",
+    "suggestion": "タブ切り替えを伴うショートカット遷移時は、現在のフルスクリーン/モーダルの履歴を `history.back()` でポップし、その完了を待ってからタブ状態をTALKに更新する（またはSPAルーターでスタックとタブ状態を完全に分離管理する）よう修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§13.3",
+    "issue": "iOS Safari（PWA未インストール状態）ではWeb Push APIがサポートされていないため、通知設定トグルをONにしてOS許可リクエストを呼ぶとJSエラーが発生し、設定画面が機能不全に陥る。",
+    "suggestion": "`window.Notification` および `ServiceWorkerRegistration.pushManager` の存在判定を行い、非対応環境（未インストールiOS等）では通知トグルをグレーアウトし、「通知を利用するにはアプリをホーム画面に追加してください」という案内とインストール誘導UIを表示するよう明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.2",
+    "issue": "画像添付時（最大10MB、指定フォーマット）のクライアントサイドでのバリデーションエラーUI、およびアップロード中のプログレス表示（または送信ボタンのローディング状態）が未定義。大きな画像を送信した際にフリーズしたように見える。",
+    "suggestion": "ファイル選択直後にサイズとMIMEタイプを検証し、違反時はインラインエラーまたはトーストを表示。アップロード中は入力バーの送信ボタンをスピナーに変更し、二重送信を防ぐ仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§1.2, §1.4",
+    "issue": "ボトムタブ切り替え時に各タブ（特に縦に長いGROWとME）のスクロール位置を保持する仕組み（Scroll Restoration）が未定義。タブを往復するたびにトップに戻ってしまい、UXを著しく損なう。",
+    "suggestion": "Preact Signals等のグローバルステート、または `sessionStorage` に各タブの `scrollTop` を保存し、タブ切り替え時に元のスクロール位置を復元する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§6.6, §10.2",
+    "issue": "インラインエラーが「赤テキスト」と「枠線が赤に変化」という色のみに依存した情報伝達となっており、WCAG 1.4.1 (Use of Color) に違反している。色覚多様性のユーザーに伝わらない。",
+    "suggestion": "エラーメッセージの先頭に警告アイコン（⚠️など）を追加し、色覚に依存せずエラーであることを明確に認識できるように修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.4, §9.4",
+    "issue": "シェアリンクによる友達追加でトークン期限切れエラー画面が表示された後、アプリのメイン画面（GROW等）へ遷移する手段（ボタンや自動リダイレクト）が定義されておらず、ユーザーが行き止まり（デッドエンド）になる。",
+    "suggestion": "エラー画面に「ホームに戻る」ボタンを配置し、タップでS-10 GROW画面へ遷移させるリカバリーパスを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§7, §8",
+    "issue": "QRスキャン成功時以外の主要なアクション（タスク完了、ゴール達成、エラー発生、D&Dでの並び替え時）におけるハプティクス（Vibration API）が定義されておらず、モバイルネイティブらしい操作感が不足している。",
+    "suggestion": "タスク完了時（軽めの振動）、エラー時（重めの2回振動）、D&D開始時（短い振動）�� `navigator.vibrate` を使用する仕様をジェスチャー/アニメーション定義に追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.2",
+    "issue": "AIの応答生成（ストリーミング）が開始された後、応答が長すぎる場合や誤送信に気づいた場合に、ユーザーが生成を途中で停止（キャンセル）するUIがない。",
+    "suggestion": "ストリーミング中は送信ボタン（➤）を「停止ボタン（■）」に変更し、タップでストリーミングを中断できる仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§6.1, §2.3",
+    "issue": "S-12 タスク追加などの入力項目が多いハーフモーダルでスクロールが発生した際、終端までスクロールすると背景（GROW画面）がスクロールしてしまう（scroll chaining）問題への対策が未定義。",
+    "suggestion": "モーダル表示中は `body` に `overflow: hidden` を設定するか、モーダルコンテナに `overscroll-behavior: contain` を指定して背景スクロールをロックする仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§8.6",
+    "issue": "タスク完了直後にTALKタブ等へ切り替えた場合、直列実行される演出キュー（EXPバー伸長、レベルアップ等）が中断されるのか、バックグラウンドで進行するのか、次回GROW表示時に再開されるのかが不明確。",
+    "suggestion": "演出キューはGROW画面がアクティブな場合のみ進行し、タブ切り替え時はキューを一時停止、再度GROW画面に戻った際に残りの演出を再開する（または即時最終状態を反映してスキップする）仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

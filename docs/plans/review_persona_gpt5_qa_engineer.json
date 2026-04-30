@@ -1,0 +1,210 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §4.1 → sub_infrastructure.md canopy/canopy_common.sh",
+    "issue": "G1 バージョン同期の実装が存在せず、コメントのみ。さらに version.ts のパス指定が曖昧（メインはversion.ts、canopyはfrontend/src/version.ts）。",
+    "suggestion": "canopy_common.sh にG1実装を追加し、存在するファイルのみ検証する条件分岐を実装。例: yq/grepで app_config.yaml(app.version), package.json(version), frontend/src/version.ts(存在時のみ), CLAUDE.md の4箇所一致を厳格比較。パスは dev-system/templates/frontend に version.ts を同梱するか、『存在時のみ検証』に統一。"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §4.1（G3） → sub_infrastructure.md canopy/canopy_common.sh",
+    "issue": "G3 テスト項目数の検証が仕様にあるが、canopyに実装されていない。",
+    "suggestion": "canopy_common.sh に G3 を追加。期待件数の単一ソース（tests/.expected_count または app_config.yaml:test.expected_count）を導入し、`grep -rc \"^test\\(\" tests/e2e/specs` などで実測と比較。乖離があれば FAIL。"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §4.1（G4）/ §8 C2フロー",
+    "issue": "G4（Playwright 全PASSの終了コード判定）がゲートとして自動実行される箇所がない。C2フロー中も L1/L2 実行に分かれているが、G4基準の全件Pass判定が欠落。",
+    "suggestion": "canopy.sh 実行後に G4 ステップを追加し、`npx playwright test --project=mobile || exit 1` を実行。L1/L2 実行に加え、C2フローに『G4: 全件 or 該当スイートPASS』の明確な実行位置を追記。"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §4.1（G5）",
+    "issue": "G5 報告フォーマットが人手判定のみで、ソロ運用かつAI実装主体に合っていない。曖昧語や分母なしALL PASSの自動検出がない。",
+    "suggestion": "instructions/results/配下のレポートを linterで検証するスクリプト（report_lint.sh）を追加。禁止12語の検出と『x/y PASS』形式の強制。canopyにG5チェックとして組み込み。"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §4.1（G6） → sub_infrastructure.md canopy/canopy_common.sh",
+    "issue": "G6 ビルド同期（build.out_dir とデプロイコマンドの整合）がコメントのみで、実装がない。",
+    "suggestion": "canopy_common.sh に yq で app_config.yaml の build.out_dir を取得し、deploy.frontend_cmd/ backend_cmd に同値が文字列として埋め込まれているか正規表現で検証。乖離時 FAIL。"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §4.1（G7） → sub_infrastructure.md scripts/mission_linter.sh",
+    "issue": "G7の『仕様↔完了コマンドの対応』は bash コマンド存在チェックのみで、1:1対応や SPEC/AT項目の網羅性を担保できていない。",
+    "suggestion": "mission_linter.sh を拡張し、AT各項目（AT-N）に対応する検証コマンド行（cmdN）の存在を検証。さらに SPEC-ID タグ（SPEC-XXXX）を完了コマンドかテストファイルに必須化し、grepで双方向参照を検証。"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §4.1（G8）",
+    "issue": "G8 テストファースト（全FAIL→実装→全PASS）の遵守が『ENG自律』のみで、機械検証がない。",
+    "suggestion": "Playwright の JSON レポーターを活用し、実装前実行結果（全FAIL）と実装後実行結果（全PASS）の2つのresults.jsonを instructions/results/ に保存させるルール化。canopyに『直近ミッションの before: unexpected>0 and after: unexpected=0』チェックを追加。"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §4.1（G9）/ §4.2 / sub_testing.md",
+    "issue": "スクショベース受入の運用詳細（ゴールデン画像の格納場所、差分許容閾値、フォント・OS差異吸収、マスク、更新手順）が未定義で、フレークと誤判定リスクが高い。",
+    "suggestion": "PlaywrightのtoHaveScreenshotを標準化。tests/e2e/__screenshots__を正本にし、maxDiffPixelRatio/threshold/maskの既定値をplaywright.configに設定。環境依存要因（OSフォント/スクロールバー）をドキュメント化し、ゴールデン更新手順（`npx playwright test --update-snapshots`）をゲート付きで許可。"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §4.2（G2/G9の役割）/ §4.1（G9）/ sub_adv_protocol.md §3",
+    "issue": "『DOM API禁止』がPOの受入根拠に限るのか、テスト実装全体に及ぶのかが曖昧で、現在の記述は実装テストのDOMアサーションまで禁止するように読める。",
+    "suggestion": "G9の適用対象を『PO受入の根拠（完了報告の証拠）』に限定すると明文化。テスト実装ではDOMアサーションを許容しつつ、完了報告はスクショ比較を必須とする旨を §4.2 に追記。"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §7（L1 スモーク）",
+    "issue": "L1の『基本5操作』が抽象で、具体的なテストケースID/配置が未定義。ENG/AIにとって再現性が低い。",
+    "suggestion": "tests/e2e/specs/smoke に固定ファイル名（smoke-01_startup.spec.ts 等）と SPEC-ID を定義。5操作（起動/機能A/機能B/AI送受信/永続化）を必須化し、G3の期待件数にも反映。"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md §5 affected-tests.sh",
+    "issue": "L2 影響範囲の自動特定がコメント例のみで、実運用のマッピング定義が存在しない。HEAD~1のみも不十分。",
+    "suggestion": "app_config.yaml に『test_map』YAML（glob→タグ/grepパターン）を追加し、affected-tests.sh で yq を用いて解決。比較レンジは環境変数 DIFF_BASE（デフォルト: git merge-base origin/main HEAD）を使用可能にする。"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §7（L3 フル+性能）",
+    "issue": "L3の『パフォーマンス計測』に基準と実行方法がない。",
+    "suggestion": "L3に Lighthouse CI もしくは Playwright traces/measure を導入し、TTI/CLS/LCP/First Byte 等の閾値を app_config.yaml: performance.thresholds に定義。canopyにレポートJSONの閾値チェックを追加。"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md §4 テストライブラリ",
+    "issue": "テストライブラリがMarkdownで人手抽出（grep）に依存し、機械可検証・自動カバレッジ計測が困難。",
+    "suggestion": "test_library.md を JSON/YAML（id/title/tags/risk/covered_by）に変更。Playwright テストに @tags メタを付け、ライブラリと双方向に紐付ける linter（未カバー項目を FAIL）を追加。"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §4.4（SKIPルール）/ sub_testing.md §2（AP-4）",
+    "issue": "SKIP許容が『プラットフォーム非対応のみ』だが、検出は単純grepで『platform』文字列に依存。Playwright標準の条件式（browserName==='webkit'）等を誤検知する恐れ。",
+    "suggestion": "SKIPの許容形式を正規化（例: `test.skip(isWebKit, 'platform: ios')` または `// @skip-platform: ios` 注釈）。test_lint.sh はASTベース（eslint-plugin-playwright）で test.skip の引数/メッセージを解析し、許容注釈以外は FAIL。"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md §2 test_lint.sh（AP-4/他grep）",
+    "issue": "grepベース検出は誤検知/見逃しが多い（コメント命中・文字列内命中・識別子未分離）。",
+    "suggestion": "test_lint.sh を Nodeスクリプト + @typescript-eslint/parser に置換し、ASTで期待パターンを厳密検出。代替として eslint-plugin-playwright のルールセットを導入。"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md §1.2 test-guards.config.ts",
+    "issue": "モジュールスコープで未宣言のpageを参照して isLocal を判定しており、型/実行時エラーのリスク。CI/Node読込時に未定義。",
+    "suggestion": "環境判定は process.env.BASE_URL / CI フラグに切替。例: `const isLocal = process.env.BASE_URL?.includes('localhost') || process.env.CI==='true';` page依存はテスト本体側のフックで処理。"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md canopy/canopy_common.sh（ガード件数チェック）",
+    "issue": "単一引用符行数のgrepで件数算出しており、コメント/別配列/コード内文字列もカウントされる恐れ。",
+    "suggestion": "configファイル内の配列定義ブロックのみを sed/awk で抽出してから要素行を数える、もしくは簡易TSパーサ（ts-nodeスクリプト）で配列長を取得して厳密化。"
+  },
+  {
+    "id": "R-018",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "sub_infrastructure.md §1.1（canopy_app_template.sh 最小10行） → canopy_common.sh（最小5行判定）",
+    "issue": "canopy_app.sh の最小行数要件が10行（ドキュメント）と5行（実装チェック）で矛盾。",
+    "suggestion": "要件を10行に統一し、canopy_common.sh の下限を10に修正。テンプレート側コメントも一致させる。"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §4.1（G1） → sub_infrastructure.md templates/frontend",
+    "issue": "G1がversion.tsを必須化しているが、テンプレートにversion.tsの提供がなく、フロントなしアプリも想定されている。",
+    "suggestion": "G1の仕様を『存在すれば検証』に変更し、テンプレートに version.ts を追加。フロント未導入のアプリでは3箇所（app_config.yaml/package.json/CLAUDE.md）のみでPASSとする。"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md app_config_template.yaml（deploy.*cmd）",
+    "issue": "deploy.frontend_cmd に ${build.out_dir} 文字列が含まれるが、外部スクリプトがYAML値を読み取り生成しない限り展開されない。現状は未実装。",
+    "suggestion": "デプロイスクリプト（deploy.sh）を追加し、yq で build.out_dir を取得してコマンドを構築/実行。canopyのG6でも実際のコマンド生成結果を検証。"
+  },
+  {
+    "id": "R-021",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md §7（プラン別挙動テスト）/ dev_system_spec.md §11",
+    "issue": "KV直更新（wrangler kv:key put）がCI/ローカルで資格情報・バインディング未設定だと実行不能。SKIP禁止ルールと衝突。",
+    "suggestion": "Miniflare等でローカルKVを提供し、テスト時は `--env=test` バインディングを使用。app_config.yaml に test.env.kvNamespace を定義し、テスト前フックでセットアップ。資格情報未設定時は即 FAIL として明示。"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §4.4（SKIP-RETRY）/ sub_testing.md",
+    "issue": "SKIP検出後に『次キューにSKIP-RETRYとして追記』する自動化がないため、人手記録漏れが発生しうる。",
+    "suggestion": "Playwright JSON結果を post-process するスクリプトを追加し、skipped>0 の場合は instructions/session_progress.md に SKIP-RETRY エントリを自動追記。追記がない場合は FAIL。"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md §5 affected-tests.sh",
+    "issue": "git diff のベースが HEAD~1 固定で、複数コミット連結やリベース時に取りこぼしが起きる。",
+    "suggestion": "DIFF_BASE 環境変数（デフォルト: git merge-base origin/main HEAD）と DIFF_HEAD（デフォルト: HEAD）を導入し、`git diff --name-only \"$DIFF_BASE\" \"$DIFF_HEAD\"` に変更。"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md §15.4 metrics.jsonl",
+    "issue": "テストスキップ数（tests_skip）が記録される設計だが、0以外をゲートで扱う規定がない。SKIP禁止方針と整合しない。",
+    "suggestion": "canopy に metrics.jsonl 直近行を読み取り tests_skip==0 を強制（プラットフォーム許容SKIPに限り例外）。違反時 FAIL。"
+  },
+  {
+    "id": "R-025",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "sub_testing.md §3（アンチパターン #1/ネガティブアサーション） × G9",
+    "issue": "スクショのみでネガティブアサーションを厳密化する手続きが未定義（隠れている要素や同一クラス問題の検知が難しい）。",
+    "suggestion": "スクショとDOMアサーションの併用を許可（テスト実装）。特に否定検証は `locator().toBeHidden()` 等のDOMチェックで補完し、PO受入はスクショで提示、と二層化を §4.2 に明記。"
+  },
+  {
+    "id": "R-026",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md §17（構成）/ sub_infrastructure.md §1.1",
+    "issue": "rules/development_rules_common.md が『G1-G6共通ゲート』までを含むとあるが、メイン仕様で定義される G7-G9 は共通ルールの格納/実装位置が不明瞭。",
+    "suggestion": "rules/development_rules_common.md に G7-G9 の運用定義（どのスクリプトが検証するか、どの成果物を確認するか）を追記し、canopy_common.sh からの実行手順を明文化。"
+  }
+]

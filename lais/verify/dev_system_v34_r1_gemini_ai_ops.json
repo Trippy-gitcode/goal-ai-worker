@@ -1,0 +1,80 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "screen": "scripts/verify_env.sh",
+    "location": "改訂案② D.1 scripts/verify_env.sh",
+    "issue": "Viteのビルド仕様上、`VITE_*` などの環境変数はビルド時に値に置換されるため、`dist/` 内の成果物に変数名そのもの（例：`VITE_SUPABASE_URL`）は残らない。そのため `grep -rq \"$VAR\" dist/` は常に失敗し、デプロイフローが確実にFAILして進行不能になる。",
+    "spec_reference": "改訂案② D.1 scripts/verify_env.sh",
+    "actual": "変数名（$VAR）でdist/内をgrepしている",
+    "suggestion": "`dist/` 内のgrepを変数名ではなく、`.env` 等から取得した「実際の値��で検索するか、ビルド前のソースコードで `import.meta.env.$VAR` が参照されているかをチェックする方式に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "screen": "dev_system_spec.md",
+    "location": "改訂案① A. §0 新設（本仕様書の利用フロー）",
+    "issue": "全セッションの共通起動フローとして「キュー先頭のミッション判定」「該当フローの先頭に移動」が定義されている。これにより、POの指示（棚卸しやレビュー判定など）を受けて動くべきADVが、指示を無視してミッションキューの処理を優先してしまう（AIの暴走）リスクが高い。",
+    "spec_reference": "改訂案① A. §0 Step 0-4, 0-5",
+    "actual": "全層共通でミッションキュー先頭の処理を強制している",
+    "suggestion": "Step 0-4, 0-5 を「ENGの場合」と「ADVの場合」で分岐させる。ADVは「POの指示内容に基づくフロー判定」、ENGは「キュー先頭のミッション判定」とする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "screen": "dev_system_spec.md",
+    "location": "改訂案⑦ C. §16.8.3 auto-compact 発���後の確認フロー",
+    "issue": "Claude Code（ENG）は、バックグラウンドで発生するコンテキスト圧縮（auto-compact）を自律的に検知するイベントフックやシステムプロンプト上の通知を持たない。そのため「ENGが検知したら」というトリガーは発火せず、コンテキスト喪失による暴走が防げない。",
+    "spec_reference": "改訂案⑦ C. §16.8.3",
+    "actual": "AIが自律検知不可能な「auto-compact 発動を検知したら」をトリガーとしている",
+    "suggestion": "「auto-compact発動を検知したら」という実現不可能なトリガーを廃止し、「ミッション再開時」「エラー連続時」「テスト実行前」などAIが自律認識できるタイミングをトリガーとするか、常に `session_progress.md` を正本として都度Readする運用を徹底する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "screen": "dev_system_spec.md",
+    "location": "改訂案③ A. §1.5.4 滞留セッション数の更新",
+    "issue": "「各セッション開始時、ADV は提案ログを Read し、全項目の滞留セッション数を +1 する」とあるが、AIに毎セッションの正確なインクリメントと���ァイル書き換え（状態管理）を依存するのはAI Opsのアンチパターンであり、カウント漏れや不正確な更新が高確率で発生する。",
+    "spec_reference": "改訂案③ A. §1.5.4",
+    "actual": "AI（ADV）の手作業によるインクリメントに依存している",
+    "suggestion": "滞留セッション数のインクリメントをAIの手作業に依存せず、スクリプト（例：`proposal_log_lint.sh`）による自動更新にするか、提案日からの経過時間（日数）ベースの閾値判定に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "screen": "dev_system_spec.md",
+    "location": "改訂案④ A. §5.1 ミッションタイプ別 完了コマンド必須マトリクス",
+    "issue": "「認証・セッション関連」で `cmd-realworld` が「例外なしで必須」とされている。アプリ初期開発フェーズでPaaSへのデプロイ環境が未構築の段階で認証UI等を実装する場合、実機検証ができずミッションが完了できない（デッドロックに陥る）。",
+    "spec_reference": "改訂案④ A. §5.1",
+    "actual": "認証系ミッションで cmd-realworld が例外なく必須",
+    "suggestion": "認証系であっても、PaaS環境構築前のフェーズを考慮し、「デプロイ環境構築前はN/A（理由明記）を許容する」または「ローカルエミュレータに対するE2Eで代替可」とするエスケープハッチを設ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "screen": "dev_system_spec.md",
+    "location": "改訂案⑦ A. §4.7.1.5 チェックリスト検証の一括PASS禁止",
+    "issue": "「全項目PASSのみの報告は曖昧用語12語違反としてFAIL扱い」と明記されているが、これを自動検証する `report_lint.sh`（G5）へのロジック追加が改訂案に含まれていない。",
+    "spec_reference": "改訂案⑦ A. §4.7.1.5",
+    "actual": "ルールとして明記されているが、機械検証の実装（スクリプト改訂）が漏れている",
+    "suggestion": "`report_lint.sh` に「全項目PASS」等の文字列を弾く正規表現を追加する記述を改訂案に含める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

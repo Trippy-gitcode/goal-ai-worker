@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§8.7 ボトムタブバー",
+    "issue": "非アクティブタブはラベル非表示（アイコンのみ）と明記されており、初見の学習コストが高い。Habitify等に比べても“どのアイコンが何か”を覚えるまで迷いそう（友人に勧めづらいポイント）。",
+    "suggestion": "全タブに常時ラベル表示に変更、もしくは最初の数回はラベルを表示→学習後に自動でアイコンのみへ縮退する設定（アクセシビリティ上は常時ラベル推奨）。少なくとも視覚的には非アクティブでも短いラベルやツールチップを併用する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§8.7 ボトムタブバー と ux_v1.md §10.4",
+    "issue": "ボトムタブのARIAが設計書間で矛盾。design_systemではaria-current=\"page\"想定、UXではrole=\"tablist\"/role=\"tab\"+aria-selectedを要求。ナビゲーション（ページ遷移）かウィジェット（タブ）か定義が二重になっている。",
+    "suggestion": "SPAのページナビとして実装する前提で��nav+リンク（a/button）+aria-current=\"page\"に統一するか、完全にタブウィジェットとしてrole=\"tablist\"に統一するかを決定し、両仕様を同一に更新。推奨は前者（ボトムナビ=ページナビ）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§3.2 フォントサイズスケール",
+    "issue": "最小文字サイズが11px（--font-size-xs）。日本語UIでは11pxは可読性が低く、長時間利用で疲労を感じる可能性がある（続けにくさに直結）。",
+    "suggestion": "--font-size-xsを12pxへ引き上げ、行間も1.4〜1.5を確保。小型端末での実測コントラスト・可読性をテーマ別にレビューする。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.2 入力フィールド",
+    "issue": "read-only状態の視覚仕様が未定義。編集不可フィールドとdisabledの見た目の差が不明で、実装時に混乱・不一致が起きやすい。",
+    "suggestion": "read-only用のトークン（例: --bg-readonly, --text-readonly, cursor: default）とスタイルを追加し、disabledとの差異（操作不能/フォーム送信可否/フォーカス可否）を明確化する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§5.5 グラスモーフィズムトグル",
+    "issue": "Glass ON時のコントラスト要件が定量的に示されていない。背後コンテンツの影響で文字コントラストが4.5:1を下回る可能性がある（ライト系で特にリスク）。",
+    "suggestion": "Glass適用面の文字色コントラストをWCAG AAで保証するための基準を追加（例: 背景合成後の最低不透明度やオーバーレイスクラム値の下限）。必要に応じてガラス面ではテキストに軽いテキスチャ/シャドウ使用を許可する但し書きを追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§8.6/§8.6a",
+    "issue": "コンポーネント章の小見出し番号が重複（8.6 トースト と 8.6a 入力ARIA）。索引性が下がり、参照時に混乱を招く。",
+    "suggestion": "見出し番号を連番に再採番（例: 8.6 トースト → 8.6、8.6a 入力ARIA → 8.7、以降繰り下げ）し、他箇所の参照も更新する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§5.0 テーマ切替（FOUC/テーマカラー）",
+    "issue": "meta name=\"theme-color\"を--bg-primaryに同期とあるが、実装例コードが未記載。PWAのステ��タスバー色が一瞬不一致（ちらつき）になる恐れがある。",
+    "suggestion": "FOUC対策スクリプト直後にtheme-colorを即時同期する短いスニペットを提示（document.querySelector('meta[name=theme-color]').setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim()) 等）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§7.1 イージングトークン / §1.4 NGリスト",
+    "issue": "NGリストではease-in-outの長時間使用を避けるとしつつ、トークンに--ease-in-outが定義されている。どのケースで使用可かが曖昧。",
+    "suggestion": "使用ガイドを明記（例: 短時間のフェード/クロスフェードのみ可、>500msの繰り返し/注目演出には禁止）。あるいはトークン自体を削除して運用ルールを単純化する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.4 z-indexトークン",
+    "issue": "コメントでは「トーストは最前面」と明記だが、値は--z-toast:600 < --z-tooltip:700。実装するとツールチップがトーストの上に重なり、仕様と矛盾。",
+    "suggestion": "--z-toastを--z-tooltip以上（例: --z-toast: 800）に引き上げ、コメントと実値を一致させる。モーダル内トーストの優先度も合わせて確認。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§8.1 ボタン（Danger subtle行）",
+    "issue": "テーブル内でhover/pressedに生のrgba(*danger*, 0.18/0.24)記述が残っており、他所ではトークン参照に統一。記述揺れがAI実装時の誤コピペを誘発。",
+    "suggestion": "hover/pressedも--danger-subtle-hover/--danger-subtle-pressedトークン参照に統一して表を修正。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

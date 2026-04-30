@@ -1,0 +1,76 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§3.3, §6.4",
+    "issue": "画像添付時のプライバシー保護（EXIF情報および外部API送信）が未定義",
+    "suggestion": "§3.3で「画像添付」が可能とされていますが、§6.4の外部API送信時のPIIマスキング対象に画像が含まれていません。ユーザーが個人情報を含む画像を送信した場合、そのまま外部AIに送信されるリスクがあります。また、画像のEXIF情報（GPS位置情報等）の削除や保存先ストレージのアクセス制御が未定義です。クライアント側またはエッジでのEXIF情報のストリップ処理、保存先（Supabase Storage等）のRLS（本人のみアクセス可）の設定、およびUIでの「個人情報を含む画像は送信しないでください」という警告表示を必須として明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§6.5",
+    "issue": "退会時のStripe顧客データ（Customerオブジェクト）の削除が未定義",
+    "suggestion": "退会フローにおいて「Stripeサブスクを即時キャンセル」とありますが、Stripe上のCustomerオブジェクト（メールアドレス、決済履歴等の個人情報）の削除について言及がありません。GDPRの忘れられる権利（Right to Erasure）に準拠するため、退会処理のCronジョブにて、Stripe API経由で該当ユーザーのCustomerオブジェクトを削除（または匿名化）する処理を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§5.3, §5.5",
+    "issue": "自由記述メッセージのXSSおよびフィッシングリンク対策が未定義",
+    "suggestion": "簡易メッセージで「短文100文字以内」のテキスト送信が可能ですが、URLの送信可否やサニタイズ処理について定義されていません。悪意のあるユーザーがフィッシングリンクを送信したり、XSS攻撃を試みるリスクを防ぐため、「メッセージ内のURLは自動リンク化しない（または送信自体をエラーで弾く）」こと、および「フロントエンドでの表示時にHTMLエスケープを徹底する」旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5.1, §5.4",
+    "issue": "シェアリンク拡散時のスパム対策（トークンの即時無効化）が未定義",
+    "suggestion": "リモート友達追加用のシェアリンク（24時間有効な一時トークン付き）がSNS等で拡散された場合、24時間以内であれば不特定多数から大量の友達リクエストが届くスパムリスクがあります。ユーザーが任意に「現在のシェアリンク（QRトークン）を即時無効化して新しく生成する」機能を追加し、短時間での大量リクエストに対するサーバーサイドのレートリミットを設けることを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§7.2, §6.4",
+    "issue": "保存データ（Data at Rest）の暗号化方針が不明確",
+    "suggestion": "AI対話履歴やAI理解メモなど、極めてセンシティブな個人情報をSupabaseに保存しますが、データベースレベルでの暗号化方針が未定義です。Supabaseのデフォルトの暗号化（TDE）に依存する旨を明記するか、特にセンシティブな対話履歴テーブルについてはpgcrypto等を用いたカラムレベルの暗号化（Application-Level Encryption）を導入するか、セキュリティ方針を明確に定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.4",
+    "issue": "QRコードへのユーザーUUIDの直接埋め込み",
+    "suggestion": "QRコードに「ユーザーUUID + 一時トークン」を含めるとありますが、内部IDであるUUIDを直接露出させる必要はありません。QRコードに含める情報を「サーバー発行のCSPRNGによる十分なエントロピーを持つ一時トークン」のみとし、スキャン時にAPIがトークンを検証してサーバー側で対象ユーザーを特定する設計に変更することで、ID漏洩リスクを低減できます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§7.3",
+    "issue": "PWAオフライン同期時のローカル保存データの保護",
+    "suggestion": "オフライン対応としてタスク完了や送信待ちメッセージをローカル（IndexedDB等）に保存しますが、平文で保存される場合、デバイス紛失時や共有端末でのデータ漏洩リスクがあります。ローカルに保存するデータは最小限にする、センシティブな送信待ちメッセージはセッションベースで暗号化する、または共有端末での利用リスクについてプライバシーポリシー等でユーザーに周知する方針を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

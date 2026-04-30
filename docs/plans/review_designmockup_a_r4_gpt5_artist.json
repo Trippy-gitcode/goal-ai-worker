@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "各画面のチップ/トグル/チェック系（例: s01_signinの同意チェック20×20px、s12_task_addの「単発タスク/習慣」タブと所要時間チップ、s14_goal_detailのチェック丸22px、s10_growのタイムライン丸12px）",
+    "issue": "インタラクティブ要素の可視サイズが44×44px未満で一貫して小さい。WCAG 2.5.5/Apple HIGのタップターゲット最小要件に不適合",
+    "suggestion": "可視デザインはそのままでも良いので、paddingや::beforeで透明ヒットエリアを拡張し、最小44×44pxを保証。リスト系は行全体をタップ可能にするなど親要素で補完",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "全体の配色・アイコン・ロゴ（Night Sky + ブルーアクセント基調）",
+    "issue": "洗練はあるが、ダーク+青の定番構成に留まりブランドの輪郭が立ちにくい。ロゴもプレースホルダで個性が��い",
+    "suggestion": "Night Skyの物語性を前面化（微細な星座パターン/ルナハロー/季節で星の密度変化）。タブ/ヒーローのアイコン形状に独自癖を付与。暫定ロゴタイプの字間・端末曲率に呼応する角丸など『Laisらしさ』を一貫導入",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayタイムライン（縦スパインと各行の丸アイコン）",
+    "issue": "縦スパインの線が強く目を引く一方、ステータス丸が小さく弱い。視線が線に吸われて肝心のタスク名へ流れにくい",
+    "suggestion": "スパインはborder色をさらに薄く（不透明度0.2〜0.3相当）に。ステータス丸を16–20pxへ拡大し内側の完了/未完を形状差で明確化。タスク名左の余白を+4〜6px取り、視線の停留点をテキストに移す",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カード（メッセージ直後のカード）",
+    "issue": "チャットバブルと同系のsurfaceでカードが埋もれ、行為（登録）の主役感が弱い。左のアクセントバーも細く、図と地が曖昧",
+    "suggestion": "カードにelevated面（--bg-elevated）を用い、左ボーダーを3→4pxへ強調。タイトル行を強め（📋 + 太字ラベル）、上下に12–16pxの余白を追加し、会話から半歩浮かせる",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "アバター3択〜フッターCTA間の広い余白",
+    "issue": "余白は美しいが、画面下部に重心が落ちて決定の緊張感が薄れる。中央域が間延びして見える",
+    "suggestion": "選択ブロックを垂直中央寄せに再配置し、説明文や微アニメ（呼吸するリング）で視線を保つ。フッターCTAとの距離は8–12px程度詰めて決定行為の臨場感を高める",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーローEXPの両端数値（1,240 / 2,000、11px）",
+    "issue": "数値が小さくコントラストも控えめで、達成度の読み取りに一拍遅れが出る",
+    "suggestion": "12–13pxへサイズアップ、またはtext-secondary相当までコントラストを引き上げ。桁区切りの可読性向上に僅かなトラッキングも付与",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "「編集」「削除」ボタン行",
+    "issue": "削除がアウトラインで中立操作と同格に見え、破壊性が視覚的に伝わりにくい",
+    "suggestion": "削除はdanger-subtleの塗り（またはbutton-danger-bgの小面積）で階層差を明示。編集はアウトライン維持で安全性と対比を作る",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "基本情報リストの行区切り（罫線多用）",
+    "issue": "罫線が連続し、Open Air原則（余白と薄い境界で区切る）からやや離れる。静けさが損なわれる",
+    "suggestion": "交互の罫線を削除し、行の上下パディングを増加。セクション見出しとの間にspace-xlを取り、設計された沈黙で区切る",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "ロゴ周辺の星背景",
+    "issue": "星の配置が極めて控えめで静止しており、初見の印象がやや薄い（AI定番の“ダーク+ブルー”に埋没）",
+    "suggestion": "ごく微細な瞬き/パララックスを追加し、中央に淡いルナハローを重ねる。演出は200–350msのease-outで短く、静けさを保ちつつ記憶点を作る",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "大きな「60%」と進捗バーの間隔",
+    "issue": "数値とバーの距離が近く、呼吸感がやや詰まって見える",
+    "suggestion": "数値下のマージンを+4〜8px拡張し、タイトルの左グリッドに数値/バーの左端を揃えて安定感を出す",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "OTHER",
+    "screen": "s20_talk",
+    "location": "ヘッダー右側の2アイコン（履歴/新規）",
+    "issue": "同じ視覚重量で並び、どちらが主要アクションか判別しづらい",
+    "suggestion": "主要側（新規）をアクティブ色/塗り/軽いピル背景で差別化。もしくは順序入れ替え+薄い区切り線で群化を明快に。ロングプレ���でラベルツールチップも検討",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

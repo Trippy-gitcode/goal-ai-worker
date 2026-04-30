@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.10 S30-4",
+    "issue": "AI メモの 800 文字上限がコンポーネント内のモック定数(AI_MEMO_MOCK)にのみ適用されており、実運用での取得データ/保存経路への確実なガード（レンダ時・保存時）の実装証跡が提示されていない。",
+    "suggestion": "表示・保存双方で共通利用する sanitizeAiMemo(text) を実装し、実文字列に対して常に 800 文字（後述の書記素単位）でカットする。データ取得時/prop 受領時/保存直前で適用し、DB 側にも CHECK 制約やトリガで 800 文字超を拒否。UI の line-clamp は補助に留め、機能要件の担保はロジックで行う。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.10 S30-4",
+    "issue": "CSS の -webkit-line-clamp: 30 は「1行≈26文字×30行≈780字」というヒューリスティック依存で、実際の文字数はフォント/ビューポート/言語で大きく変動し、800 文字上限の厳密担保にならない。視覚上 800 字相当でも支援技術は全文を読み得る。",
+    "suggestion": "line-clamp は視覚的省略のみに使用し、要件充足はロジック側で 800 文字に確実にトリミング。併せて末尾に省略記号やツールチップ/aria-label 等で省略を示す。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§S30-3 / WCAG 2.5.5 (AAA)",
+    "issue": ".s30-info-button に 44×44 の最小タップ領域は確保されたが、負の margin (-10px -12px) により隣接要素とのヒット領域が重なりやすく、実使用で誤タップ/ヒットターゲットの競合を誘発する恐れがある。",
+    "suggestion": "見た目の整列はレイアウト側（余白トークンやラッパ）で行い、ヒット領域拡張は疑似要素や padding で確保して負の margin は避ける。隣接コントロールとの 8px 以上の間隔も確認。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "WCAG 2.4.7 (AA) / §S30-3, §S30-5",
+    "issue": ".s30-info-button と .s30-mbti-manual のキーボードフォーカス可視化スタイルが提示されていない。グローバルリセットの影響次第ではフォーカスリング不在となり、WCAG 2.4.7 に抵触し得る。",
+    "suggestion": ":focus-visible で 2px 程度のフォーカスリング（デザイントークン --focus-ring-color / --focus-ring-offset / --focus-ring-radius）を明示し、Hover/Active と視覚的に識別可能な差を付与。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-105",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§DS-Spacing-Tokens",
+    "issue": "padding/margin に px の直書き（10px/12px/−10px 等）が混在。パッケージから��余白トークン使用ルールの有無が読み取れないが、デザイントークン方針がある場合に逸脱している可能性がある。",
+    "suggestion": "余白はデザイントークン（例: --space-2, --space-3 等）へ置換し統一。必要であればスペーススケールに 12px 相当を追加定義して負の余白もトークン化する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§4.10 S30-4",
+    "issue": "line-clamp のブラウザ実装差（Firefox 等で非対応）があり、-webkit 系に依存した現状では多行省略が効かず UI が破綻する可能性がある。",
+    "suggestion": "プロダクティブなフォールバックを追加（例: 行高×行数で max-height を算出し overflow:hidden を併用、または JS で行単位のクランプを実装）。Progressive Enhancement として -webkit-line-clamp は維持。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§S30-3",
+    "issue": ".s30-info-button に text-align: right と justify-content: flex-end の重複指定があり、将来的な調整で相反挙動を招く恐れがある。",
+    "suggestion": "インラインフレッ���スでの整列に統一し、text-align は削除。必要に応じて内容器を設けて整列責務を分離する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§S30-5",
+    "issue": ".s30-mbti-manual の状態別スタイル（hover/active/disabled/visited）が未定義。アクセント色のコントラスト要件も不明。",
+    "suggestion": "状態別トークン（--accent-hover, --accent-active, --opacity-disabled 等）で各状態を定義し、コントラスト 4.5:1（通常テキスト）を満たすようカラーペアリングを検証。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.10 S30-4",
+    "issue": "String.slice(0, 800) は UTF-16 コードユニット基準であり、絵文字・結合文字を途中で切断して文字化けを生む可能性がある。",
+    "suggestion": "書記素単位でのトリミングを実装（Intl.Segmenter または grapheme-splitter 等を使用）し、800 書記素上限を担保する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "LP-012 lazy import",
+    "issue": "lazy import に対する ErrorBoundary がアプリ横断で未整備。M4-H 個別対応ではなく Phase B 横断課題として扱う方針は妥当だが、現時点での復旧経路が欠如しているリスクは残存。",
+    "suggestion": "Phase B にて App ルート直下に ErrorBoundary（再試行/キャッシュクリア導線つき）を実装し、lazy チャンク読込例外を集約処理。設計決定が下るまでの暫定として、/me 画面に限定したローカル Boundary を feature flag で有効化できるようにすることも検討。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

@@ -1,0 +1,252 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §5.1 オンボーディング Step 5 / design_system.md §5（全3テーマ）",
+    "issue": "プロダクト仕様ではテーマが4種（Night Sky / Dawn / Harajuku Light / Harajuku Dark）だが、デザインシステムでは3テーマ（Night Sky / Dawn / Adventure）のみ定義。オンボーディングで選べるが実装側にトークンが存在せず確実に破綻する。",
+    "suggestion": "いずれかに統一する。推奨: デザインシステムにHarajuku Light/Darkの2テーマを追加し、Adventureを残すか置換する方針を決定。追加する場合は各テーマの--bg-*, --text-*, --accent, --accent-hover, --accent-subtle, セマンティックカラー（--success/--danger/--warning/--info）を必ず定義。オンボーディング表記も同期。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "design_system.md §9 AI実装向けCSSトークンブロック",
+    "issue": "CSSコードブロックが途中で閉じており（--info直後で```）、以降のトークンがコードフェンス外に出ている。コピーペースト時に未完・文���エラーとなるリスクが高い。",
+    "suggestion": "コードフェンスを1ブロックに統合し、閉じカッコとフェンス位置を修正。合わせて最終行に改行を入れる。例: 1つの```cssブロック内に全トークンを収めてから```で閉じる。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system.md §2.2 / §5.1-5.3 / §9",
+    "issue": "セマンティックカラー（--success/--danger/--warning/--info）は「テーマごとに調整」とあるが、Night Skyの:rootにしか値がなく、Dawn/Adventureでの上書き定義がない。",
+    "suggestion": "各テーマの:root[data-theme=...]に--success/--danger/--warning/--infoを上書き定義。併せてコントラスト検証（ライトテーマでは彩度/明度を調整）。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system.md §8.1 ボタン",
+    "issue": "ボタンの状態トークン（hover/pressed/disabled/focus）が未定義。プライマリは--accent-hoverのみだがpressedやdisabled、フォーカスリングの仕様がない。Danger/Secondary/Ghostも同様。",
+    "suggestion": "各ボタン種別に状態トークンを追���: --btn-primary-bg/hover/active/disabled, --btn-primary-text/disabled, --btn-primary-focus-ring-color/width/offset。同様にsecondary/ghost/dangerも定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "design_system.md §8.1 ボタン",
+    "issue": "Danger行の「--danger / subtle」「#FFFFFF / --danger」のようにスラッシュで2通りを示唆する表記が曖昧で実装解釈が分かれる。",
+    "suggestion": "Dangerを2バリアント（Filled/Soft）として明示分離し、各々の背景/テキスト/ボーダー/状態トークンを定義。例: --btn-danger-filled-bg/text/... と --btn-danger-soft-bg/text/...",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system.md §8.2 入力フィールド",
+    "issue": "入力のエラー/無効化/プレースホルダー/フォーカスリングの色やヘルプ/エラーテキストのタイポ/色トークンが未定義。",
+    "suggestion": "追加トークン: --input-bg, --input-border, --input-border-hover, --input-border-focus, --input-border-error, --input-text, --input-placeholder, --input-disabled-bg/text/border, --input-focus-ring-color/width, --field-helper-text-color, --field-error-text-color。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system.md §3.3 / §9",
+    "issue": "タイポグラフィで行間（line-height）とletter-spacingの推奨はあるが、トークンとして未定義。画面一貫性と実装性が下がる。",
+    "suggestion": "--line-height-body/heading/hero, --letter-spacing-heading/body/label などのトークンを定義し、適用先をマッピング。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system.md §2-5 / §9",
+    "issue": "アクセシビリティ必須のフォーカスリング（色/幅/オフセット/形状）トークンがない。PWAのキーボード/スクリーンリーダー利用時に不可視になるリスク。",
+    "suggestion": "グローバルトークンを定義: --focus-ring-color (推奨: --accent), --focus-ring-width (2px), --focus-ring-offset (2px), --focus-ring-style (outline or box-shadow)。コンポーネントが上書きできるよう命名を統一。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system.md §5.4 グラスモーフィズム / §8.5 ボトムシート",
+    "issue": "���レベーション/シャドウ/スクラム（オーバーレイ）/z-indexの階層トークンが未定義。モーダル/ボトムシート/ドロップダウン/トーストの重なり順や影の一貫性が保てない。",
+    "suggestion": "追加トークン: --elevation-1..5（shadow値）, --scrim-color（例: rgba(0,0,0,0.4)）, --z-index-header/overlay/modal/dropdown/toast/snackbar。Glass ON時のシャドウは低減または0にする指針も併記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §1.4 NGリスト（色） vs §5.2 Dawn/§5.3 Adventure",
+    "issue": "NGで「純白 #FFFFFF をそのまま使用 禁止」とある一方、Dawn/Adventureで--bg-surfaceと--bg-elevatedが#FFFFFFを指定。ブランド原則とテーマ定義が矛盾。",
+    "suggestion": "どちらかに統一。推奨: ライト系サーフェスは#FFFFFF禁止を撤回し、代わりにコントラスト/光量のガイドラインを明記するか、#FAFAFA等のオフホワイトへ差し替える。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §7.1 基本イージング / ux_v1.md §1.3, §8.1 他",
+    "issue": "デザインシステムは「spring系のみ許可、ease-in-out禁止」と記載だが、UX仕様ではease-outやease-in等の使用が多数。規範と適用が不整合。",
+    "suggestion": "許可するイージングをトークン化（--ease-spring-default, --ease-spring-gentle, --ease-spring-bouncy, --ease-out 等）し、UX仕様の全アニメーションをいずれかのトークンに置換。禁止方針を「標準はspring、必要に応じてease-out可」に見直すか、UX側表記を全面的にspringトークンに修正。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §4.2 レイアウト原則 / §4.1 スペーシング",
+    "issue": "タスク間余白「20px以上」と規定する一方、スペーシングスケールに20pxトークンがない（8/16/24）。実装時に個別px指定が混入しスケール逸脱の恐れ。",
+    "suggestion": "スペーシングスケールに--space-ml: 20px（行間/要素間推奨）を追加するか、20px記述を--space-lg=24pxへ合わせる。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md §4.2 角丸 / §9",
+    "issue": "角丸ルール（4/8/12/999px）は文中記述のみでトークン化されていない。デバイス/密度に応じた一貫適用が困難。",
+    "suggestion": "トークン化: --radius-sm:4px, --radius-md:8px, --radius-lg:12px, --radius-pill:999px。ボタン/シート/チップ等のコンポーネント表に対応マッピングを追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system.md §6 タブアイコン / §8 コンポーネント",
+    "issue": "押下/アクティブ/無効などのアイコン状態色・不透明度が未定義。アクティブ=--accentのみの記述で、disabledやpressed時の扱いが不明。",
+    "suggestion": "アイコン用トークン追加: --icon-color, --icon-color-active, --icon-color-disabled（例: --text-secondaryの0.4）, --icon-opacity-pressed（0.8）等。タブのpill背景もhover/pressedの濃度差分を定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system.md §8.3 チップ/バッジ",
+    "issue": "「セマンティックカラーのsubtle版」とあるが、--success-subtle等が未定義。テーマ間で一貫性が取れない。",
+    "suggestion": "各セマンティックにsubtle背景とテキスト用on-colorを���加: --success-subtle-bg, --success-subtle-text, （danger/warning/infoも同様）。透明度/明度ルールを記載。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md §2 カラー",
+    "issue": "「on-color」系トークン（--on-accent, --on-danger 等）がなく、色替え時に可読性とAA達成の保証ができない。",
+    "suggestion": "--on-accent, --on-success, --on-danger, --on-warning, --on-info を追加（通常#FFFFFF想定）。ライトテーマでは最小コントラストを満たすよう検証ルールを追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md §8 コンポーネント",
+    "issue": "トグル/スイッチ/チェックボックス/ラジオ/タブ/トースト/スナックバー/プログレスバー等、UX仕様で使用している主要コンポーネントのトークン定義が不足。",
+    "suggestion": "最小限で良いので各コンポーネントの色/高さ/角丸/アイコンサイズ/状態（on/off/hover/disabled/focus）トークンを追加。特にプログレスバー（EXPバー）のtrack/fill色と高さは必須。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §9",
+    "issue": "一部トークンがプロパティ込み（--card-border: 1px solid var(--border)）。デザイントークンとしては値（色/幅）と用途（border）を分離した方が再利用性が高い。",
+    "suggestion": "色/幅/スタイルを分離: --card-border-color, --card-border-width, --card-border-style。利用側で組み立てるポリシーへ。既存変数は後方互換のため残しつつ段階的移行。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md §5.4 グラスモーフィズム",
+    "issue": "Glass ONの濃度/blur/saturateが固定で、ライト/ダーク/アクセシビリティ配慮（可読性）差分のポリシーがない。",
+    "suggestion": "ガラス強度のトークン化: --glass-blur, --glass-saturate, --glass-bg-opacity（ライト/ダーク別の推奨値）。背景画像・コントラストに応じた最小文字コントラスト基準を注記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "design_system.md §6.1 アイコンスタイル",
+    "issue": "アイコンサイズは記述があるがトークン化されていない。24/32px等が散逸する恐れ。",
+    "suggestion": "トークン化: --icon-size-sm:20px, --icon-size-md:24px, --icon-size-lg:32px, --icon-stroke-width:1.5px。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "design_system.md §7.1 コメント",
+    "issue": "cubic-bezierを「物理ベースspring」と記述しているが、厳密には物理シミュレーションではない。用語の誤用によりアニメーション品質議論で齟齬が生じうる。",
+    "suggestion": "用語を「spring風のオーバーシュートを持つイージング」に修正。将来的に物理ベース（spring()）採用時の方針を別途記述。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md §2-5",
+    "issue": "テキスト色の階層がprimary/secondary/hintのみで、disabledやinverse（暗色面上のテキスト）などが未定義。",
+    "suggestion": "追加トークン: --text-disabled（推奨: secondaryの0.5-0.6相当）, --text-inverse（暗背景上での反転用）。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "design_system.md §2.1 アクセント色制限 / §5.3 Adventure",
+    "issue": "Adventureはマルチカラー例外だが、同時使用範囲（どのコンポーネントで複数色を許��するか）が不明瞭。無秩序な虹色化で一貫性が崩れる懸念。",
+    "suggestion": "許容範囲を明記（例: タイムライン/バッジ/グラフのみマルチカラー可。ボタン/リンク/選択状態は単一アクセント維持）。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "design_system.md §4.3 グリッド",
+    "issue": "ブレークポイント/コンテナ/ガターのトークンが未定義。UXでレスポンシブ説明はあるが実装トークンがない。",
+    "suggestion": "トークン追加: --container-max:480px（既存の明示もトークン化）, --content-padding-x:16px, --breakpoint-sm/md/lg など。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §2-9（全般）",
+    "issue": "状態色（hover/pressed/disabled）の濃度変化ルール（アルファ/明度）が未定義で、テーマ追加時に個別調整が必要になる。",
+    "suggestion": "状態生成ルールをガイド化（例: hover=+8明度または+0.08アルファ、pressed=+16明度/0.16アルファ、disabled=baseの0.38不透明度）。各テーマに適用できる共通ポリシーとして記載。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  }
+]

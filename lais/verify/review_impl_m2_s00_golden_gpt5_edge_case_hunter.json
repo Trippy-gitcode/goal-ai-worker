@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "実装: 3. S00Splash.css (.s00-center absolute + .s00-cta absolute)",
+    "issue": "小さい縦寸法（例: 320×568 や横向き 812×375）で、上部のセンター塊と下部CTAが双方絶対配置のため衝突/重なりやすく、スクロールでも回避できない。CTAが他要素に隠れてタップ不能になるリスクがある。",
+    "suggestion": "絶対配置を避け、.s00 を min-height: 100svh（fallbackに100vh）で縦flex（column）にし、上部はmargin-topで中央付近に寄せ、CTAはmargin-top: autoで下寄せする。どうしても絶対配置を使う場合は、.s00 に overflow-y: auto を許可し、衝突時に縦スクロール可能にする。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "実装: 3. S00Splash.css (.s00-center)",
+    "issue": "ロゴのY座標指定（画面中央から上60px）を“ロゴ＋タグラインの塊”に対して適用しているため、タグラインの行数や文字サイズでロゴの最終Yが変動する。実測でも想定Yからズレ（約20px）が発生。",
+    "suggestion": "ロゴ要素（.s00-logo）���体を基準に絶対配置（top: 50%; transform: translateY(calc(-50% - 60px))) し、タグラインはロゴ直下に通常フローで配置する。これによりタグラインが複数行でもロゴ位置が仕様に準拠し続ける。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "実装: 3. S00Splash.css (.s00-cta-primary / .s00-cta-secondary)",
+    "issue": "CTAの高さが固定（52px）のため、ラベルが長文（多言語化/コピー変更）やユーザーのフォント拡大で折り返すと、テキストがはみ出し/クリップされる恐れがある。非ASCIIや長文ケースに弱い。",
+    "suggestion": "height固定を避け、min-height: 52px + paddingで実装し、複数行を許容（white-space: normal; line-height適切化）するか、逆に1行縛りにするならwhite-space: nowrap + text-overflow: ellipsisで視覚破綻を防ぐ。文字サイズ拡大時にも破綻しないように余白をやや増やす。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "実装: 3. S00Splash.css (.s00-cta bottom: 76px)",
+    "issue": "デバイスのセーフエリア（env(safe-area-inset-bottom)）未考慮。特に横向きや一��端末では下部の安全領域が増え、CTAがUIに近接/干渉する可能性がある。",
+    "suggestion": "bottomやパディングにセーフエリアを加味する。例: bottom: calc(76px + env(safe-area-inset-bottom)); あるいは .s00 に padding-bottom: calc(var(--space-lg) + env(safe-area-inset-bottom)) を付与してCTAはmargin-bottomで整える。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "実装: 3. S00Splash.css（:active + global.css の reduced-motion）",
+    "issue": "prefers-reduced-motion: reduce でtransition-durationは0msにしているが、:activeのscale(0.98)自体は残るため、環境によっては“瞬間的な拡大縮小のポップ”が不快に感じられる可能性。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) 内で :active の transform を無効化（transform: none）するか、:activeの適用を no-preference メディアクエリ側に限定する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "実装: 1. App.jsx / 2. S00Splash.jsx",
+    "issue": "JSXでclass属性を使用。Preactなら問題ないが、React環境ではclassNameが必須。実行基盤が明示されていないため、将来的な移行やツールチェーン変更時に不具合化するリスクがある。",
+    "suggestion": "実行フレームワークを明記（Preactである旨）し、プロジェクト規約を統一。互換性を重視するならclassNameへ置換。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "実測スクショ事実（本文の箇条書き）",
+    "issue": "本文の説明で「secondary（ログイン）の下辺が画面下端から140px」と記載があるが、付随のJSONおよび実装は primaryが140px・secondaryが76pxで整合している。記述と実態が逆転。",
+    "suggestion": "本文の説明文を修正し、primary（はじめる）= 140px / secondary（ログイン）= 76px に統一する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "実装: 3. S00Splash.css / themes.css / tokens.css",
+    "issue": "CSSカスタムプロパティにフォールバック値が無く、テーマCSS未適用（読み込み順序/ネットワーク不調/ビルド欠落）時に背景や文字色が初期化され視認性が大きく低下する恐れがある（オフライン初回ロード等）。",
+    "suggestion": "重要トークンにはフォールバックを指定（例: color: var(--text-muted, #7A8593); background: var(--bg-primary, #0D1117)）。テーマ適用スクリプト失敗時にも最低限の可読性を担保する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "実装: 2. S00Splash.jsx（<main aria-label>）",
+    "issue": "メインランドマークにaria-labelを与えるのは冗長になりうる（ページにメインが1つでコンテンツが自明なため）。一部スクリーンリーダーで余計なアナウンスに感じられる可能性。",
+    "suggestion": "aria-labelは不要。見出し（h1）と主要ボタン群で意味が明確なため、<main>は素のままにする。複数ランドマークを区別する必要が生じた時のみラベル付与を検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

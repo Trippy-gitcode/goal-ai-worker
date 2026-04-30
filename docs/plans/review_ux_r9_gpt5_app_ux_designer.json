@@ -1,0 +1,172 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §5.0.2（パスワードリセット Step 2）/ §1.1 画面一覧",
+    "issue": "新パスワード設定画面（メール内リンク遷移）の画面IDが未定義。S-05のStep 2として説明はあるが、S-xxとしての画面ID・戻り動作・履歴積み方がリストに存在しない。",
+    "suggestion": "新規画面ID（例: S-06 パスワード再設定）を追加し、遷移元/戻り先/ブラウザバック挙動（成功時はS-02へ戻る等）を明記。history.pushStateポリシーも追記。E2Eテスト観点でURL/ディープリンクも定義すると良い。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1/§3.5/§7.3（TALKヘッダーと履歴ドロワー）",
+    "issue": "TALKヘッダーに「☰=履歴ドロワー」「🕐=履歴」の2経路が併存。どちらも履歴アクセスを指すため冗長で、ユーザーの学習コストと誤タップを増やす。",
+    "suggestion": "履歴アクセスを1つに統一。推奨は☰（ドロワー）に集約し、🕐は削除または別機能（例: 履歴フィルタ/検索）に割当て��アイコンのアクセシビリティラベルも統一（例: aria-label=\"会話履歴\"）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §1.4（ドロワー戻り）/§3.5（会話行の左スワイプ削除）",
+    "issue": "ドロワーは「左スワイプで閉じる」と定義。一方ドロワー内リスト項目は「左スワイプで削除ボタン露出」。同一ジェスチャーが同一領域で異機能に割当てられ、競合する恐れが高い。",
+    "suggestion": "ドロワーのクローズは「backdropタップ＋右端からのエッジスワイプ」のみに限定し、ドロワー内部コンテンツでの横スワイプは項目操作に専用化。もしくは項目操作をロングプレスメニューに変更。Materialの『スワイプで項目操作』とiOSの『エッジスワイプで戻る』を明確に分離。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §7（ジェスチャー）/§2.3/§8（演出）/§4.4（QR）",
+    "issue": "ハプティクス設計が全体で未定義。完了操作・ドラッグ開始・Pull-to-refresh閾値到達・QR検出などでの触覚フィードバックの有無���強度が不明。",
+    "suggestion": "OS別に定義: iOS（UIImpactFeedbackGenerator: light/medium/heavy、UINotificationFeedbackGenerator: success/warning/error）、Android（HapticFeedbackConstants）。例: タスク完了=notification.success、Undo=light、ドラッグ開始=selection、Pull-to-refresh閾値=light、QR検出=success。ウェブ/PWAではデバイス対応状況に応じてノーオペ/ビジュアル代替にフォールバックを明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4（QRスキャン Step 3）",
+    "issue": "QR検出時のVibration API利用が想定されているが、iOS Safari/PWAはVibration API非対応。iOSユーザーには触覚が発火しない可能性が高い。",
+    "suggestion": "プラットフォーム検出でVibration API非対応時はハプティクス非依存の代替（視覚エフェクト＋サウンドまたはアニメーション）を定義。iOS PWAではCSS/Canvasのハイライトとバナー表示で確実にフィードバック。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.2（ヒーロー縮小）/§6.5（Pull-to-refresh）",
+    "issue": "GROWのPull-to-refreshとヒーロー領域のスクロール縮小トリガーの優先順位が未定義。上端での下スワイプが縮小・更新どちらを発火するか条件が曖昧。",
+    "suggestion": "発火条件を厳密化: 1) スクロール位置0かつヒーローが最小化済み+さらに60px超の下方向移動→Pull-to-refresh、2) それ以外はまずヒーロー縮小/展開を優先。閾値とインジケータ（矢印→スピナー切替）を明示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（Undoスナックバー）/§6.2（トースト）/§10（アクセシビリティ）",
+    "issue": "スナックバー/トーストの安全領域対応（iOS Safe Area, Android ナビゲーションバー上）が未定義。端末によりホームインジケータと重なる懸念。",
+    "suggestion": "CSS env(safe-area-inset-bottom/top)を考慮したマージンと、WebView/PWAでの安全領域適用方針を定義。端末回転時の再計算や、ボトムタブ上16pxに加えてsafe-area加算をルール化。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.1/§3.2（画像添付）",
+    "issue": "TALKの画像添付にアップロード進捗/失敗/取消UIが未定義。10MB上限・リサイズ処理があるため待機が長く、キャンセルや再試行が必要。",
+    "suggestion": "送信キューUIを定義: サムネイル上の円形進捗/キャンセル✕、失敗時のリトライ矢印/エラーツールチップ、複数同時送信時のキュー並列上限、ネットワーク断時の自動再送ポリシーを明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘッダー📝）/§3.5（履歴）",
+    "issue": "📝（新規チャット）押下時の挙動（現在スレッドを保持した新規か、完全新規か、下書き状態か）が未定義。履歴側の「新しいチャット」との関係も不明。",
+    "suggestion": "スレッドモデルを明確化。例: 📝=新規スレッド作成→空タイムラインを生成し入力にフォーカス、履歴の「新しいチャット」と同一動作に統一。作成直後の一時保存（下書き）有無も定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §10（アクセシビリティ）",
+    "issue": "動的文字サイズ（OSのフォントスケール）・色覚多様性・絵文字依存のラベルなどの配慮が不足。現状はタップターゲット/コントラスト/フォーカス中心。",
+    "suggestion": "追加要件: 1) OS文字スケールに追従（最大200%での崩れ検証）、2) 絵文字にaria-label付与（例: 「💪 頑張れ！」= aria-label=\"応援を送る\"）、3) 色のみに依存しない状態表現（Overdueにアイコン/ラベル併用）、4) スナックバーのUndo有効時間をスクリーンリーダーに明示（aria-liveで『取り消しは30秒間有効』）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3（Undoスナックバーのタブ跨ぎ維持）",
+    "issue": "Undoスナックバーをタブ跨ぎで維持する仕様は、プラットフォーム慣習上やや非直感的（タブは独立コンテキスト）。他タブ作業中に表示され続けると注意分散の恐れ。",
+    "suggestion": "代替案: 同一タブ内のみ表示を基本とし、タブ切替時は一時的に非表示→戻った際に残り時間で再掲。または全タブ維持のままでも、[閉じる]を追加し任意で隠せるようにする。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.4（Today並び替え）/§2.3（Todayソート）",
+    "issue": "Todayの手動並び替えが開始時刻ソートを恒久的に上書きするが、ユーザーが元の「時刻順」に戻す明示的操作がない。",
+    "suggestion": "ヘッダーに『並び替え: [時刻順/手動]』トグルまたは『手動順をリセット』アクションを追加。手動順から時刻順へ戻した際の優先ルールを定義（同時刻は作成順など）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.1（MEサブタブ横スワイプ）/§7.3",
+    "issue": "サブタブ横スワイプと縦スクロールの誤検出閾値が未定義。縦リスト中の横スワイプ誤発火はモバイルで頻出。",
+    "suggestion": "横スワイプ発火条件を定義（例: 水平方向移動>24pxかつ垂直<16px、もしくは水平速度>0.3px/ms）。Materialのtouch slopに準拠し、リスト内部は水平ジェスチャー開始時のみページング許可。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.4（S-14→S-20のreplaceState遷移���",
+    "issue": "ゴール詳細（S-14）からAI相談でTALKへ遷移時、戻るとGROW（S-10）に戻る設計は、直前に見ていた詳細に戻れず文脈喪失の可能性。",
+    "suggestion": "戻り先の一貫性を再検討。候補: 1) S-14をスタックに残し通常の戻りで復帰、2) TALKに『GROWに戻る/直前のゴールに戻る』2ボタンを一時表示、3) TALKヘッダーに出自コンテキストのパンくず（『← {ゴール名}』）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §3.1（ボトム3タブ）/ux_v1.md §1.3（タブ切替演出）",
+    "issue": "ボトムタブの基本はプラットフォーム準拠だが、タブ再タップ時のスクロール挙動（iOS慣習の『トップへスクロール』）が未定義。",
+    "suggestion": "同一タブを再タップでコンテンツ先頭へスクロール（iOS慣習）。Androidでは任意（Materialでは明確ではないが実装例多数）。設定でON/OFF可能にするか、iOSのみ適用でもよい。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §13.2（プラン管理→Stripe Checkout）",
+    "issue": "iOS PWAで外部Stripe Checkoutに遷移後、ユーザーがSafariで終了しPWAに戻らないケースがある。復帰時の状態同期や『戻る』導線が未定義。",
+    "suggestion": "Checkout完了後のreturn_urlでステータス同期ページを挟み、自動リダイレクトでPWAにフォーカス復帰（または『アプリに戻る』CTA）を明示。失敗/中断時の再開導線（S-38でリトライ）も定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（QRスキャン）",
+    "issue": "QRスキャンUIにトーチ（ライト）ON/OFF、ピント遅延時のガイド、スキャン中インジケータが未定義。低照度環境や手ブレ時の失敗が多発しうる。",
+    "suggestion": "トーチ切替（対応端末のみ）、『枠内に収めてください』ガイド、スキャン中インジケータ（アニメーションライン）、失敗時のリトライ文言を追加。アクセシビリティ上の代替テキストも付与。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

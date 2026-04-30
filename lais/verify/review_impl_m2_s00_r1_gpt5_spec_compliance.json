@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.1 S00-1",
+    "issue": "ロゴの垂直位置が仕様より約20px高い。仕様は「ロゴ中心＝画面中央から上に60px（Y≈340〜346）」だが、実測ではロゴ中心Y=326。実装はコンテナ(.s00-center)を−60pxしており、グループ中心を基準にしているためロゴ自身が更に持ち上がっている。",
+    "suggestion": "ロゴ要素そのものを基準に配置する。例: .s00-logo を position:absolute とし、top: calc(50% - 60px - 24px)（48pxの半分を控除）で配置。もしくは .s00-center のオフセットを廃し、ロゴ中心が-60pxになるようにタグライン分のバランスをとる（タグラインを別ブロックに出してボトム側に寄せる等）。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.1 レイアウト原則 / §4.1 S00-3",
+    "issue": "「下140px」の基準が曖昧。レイアウト原則は「CTAスタックを下140px」に読める一方、要素仕様S00-3は「はじめるが下端から140px」にも解釈できる。実装と実測はスタック下端=140px（＝セカンダリ下端=140px、��ライマリ下端=204px）。",
+    "suggestion": "仕様を「CTAスタックコンテナのbottom: 140px、gap: 12px、ボタン高さ: 52px。従って下段(ログイン)下端=140px、上段(はじめる)下端=204px」に明記して統一する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§4.1 S00-2",
+    "issue": "タグラインに letter-spacing(--letter-spacing-ja) と line-height(--line-height-ja-body) を適用しているが、仕様にこれらの指定はない（未定義）。",
+    "suggestion": "タイポグラフィ指針として和文の字詰め/行間を採用するなら §4.1 に明記する。S-00で未指定とする場合はブラウザ既定に戻すか、グローバル規定を参照する旨を仕様へ追記する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.1 状態・インタラクション",
+    "issue": "タップ時のトランジションに var(--spring-default)（スプリング系easing）を使用。仕様はタップフィードバックについて duration(--duration-fast)とscale(0.98)のみの指示でeasingは未定義だが、スプリングは指離し時にバウンス感が出る可能性がある。",
+    "suggestion": "タップフィードバックのeasingを 'ease-out' 等に固定し、仕様側にもeasingを明記する（例: transition: transform var(--duration-fast) ease-out）。画面遷移(350ms ease-out)との一貫性も確保できる。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "実装 lais/src/components/App.jsx, lais/src/components/screens/S00Splash.jsx",
+    "issue": "JSXで class 属性を使用（Reactでは通常 className を使用）。ビルド環境がPreact等で class を許容している可能性はあるが、リポジトリからはフレームワーク特定ができないため曖昧。",
+    "suggestion": "採用フレームワークをCONTRIBUTING等に明記する。Reactを前提とする場合は className へ置換。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.1 S00-3 / S00-4",
+    "issue": "ボタンの disabled 状態スタイル（--button-disabled-*）が追加定義されているが、当該画面の仕様では未定義・使用もされていない。",
+    "suggestion": "将来用途の先行実装であれば設計側に合意を取り、デザイン仕様に状態定義として追記。もしくはS-00スコープでは削除またはコメント化して差分を明確化。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "実装 lais/src/components/App.jsx, lais/src/components/screens/S00Splash.jsx",
+    "issue": "app-root と main の双方に aria-label があり、ランドマーク名の重複による読上げの冗長化が起こりうる。",
+    "suggestion": "main 要���側の aria-label(\"Lais スプラッシュ\") のみに絞るか、上位コンテナの aria-label を削除してランドマークの一意性を保つ。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

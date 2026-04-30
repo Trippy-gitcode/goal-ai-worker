@@ -1,0 +1,242 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.2 遷移マトリクス",
+    "issue": "S-42（メール変更）とS-43（パスワード変更）の遷移が遷移マトリクスに未記載。画面一覧と設定詳細では定義があるが、主要パスから辿れない。",
+    "suggestion": "S-37 設定配下の遷移に「[メール変更]→ S-42」「[パスワード変更]→ S-43」を追加し、戻り先も明記。ブラウザバック時の挙動も history.pushState に反映する。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.3（スワイプ）/ §1.4（戻りナビゲーション）/ §3（TALK）",
+    "issue": "左端からの右スワイプが画面により「戻る」（フルスクリーン詳細）と「ドロワー展開」（TALK）で動作が異なる。ジェスチャー一貫性要件に抵触。",
+    "suggestion": "左端スワイプは全画面で「戻る」に統一。TALKの履歴はハンバーガー（☰）タップまたは画面中央付近からのスワイプで開く等、衝突しないジェスチャーに変更。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.1（TALKヘッダー）",
+    "issue": "☰（履歴ドロワー）と🕐（履歴）が同じ機能を指し示す可能性があり、冗長で混乱を招く。",
+    "suggestion": "履歴の呼び出しは1つに統一（☰のみ等）。📝は「新規チャット」に専念。アイコンごとの役割をヘルプテキストやツールチップで補足。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4 S-36（QRスキャン）",
+    "issue": "カメラ権限拒否・再要求・OS設定誘導などの権限エラー時のUXが未定義。",
+    "suggestion": "初回拒否時は理由説明モーダル→[設定で許可]（OS設定への導線）/[後で]。常時拒否時は代替導線（シェアリンク貼付）を提示。権限ダイアログ再表示の可否も明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.1, §3.5（TALK：📝 新規チャット）",
+    "issue": "新規チャット作成時の挙動（現スレの保存/タイトル付与/未送信テキストの扱い/初期プロンプト）が未定義。",
+    "suggestion": "新規チャ��ト押下で新スレ作成→現スレはそのまま。未送信テキストがある場合は確認ダイアログ。新規スレは『無題のチャット（日時）』等の命名規則を定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §13.2（プラン管理）/ project_v1.md §2.1-2.2",
+    "issue": "プランカードに Premier のフェアユース上限（1,000回/日）やモデル構成、Basic/Pro との差分がUI上で明示されていない。Premierの『チケット遡及』等もS-38で未表記。",
+    "suggestion": "各プランカードに対話上限/モデル/特典を明記（例: Premier=無制限※フェアユース1,000/日, Claude Opus, 限定フレーム, 優先サポート, チケットはショップ開始時に遡及配布）。注釈の表記規約も固定。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §2.1 / ux_v1.md §13.1（設定）",
+    "issue": "Premier特典『優先サポート』の利用導線・SLA・差別化UIが未定義。MVP時点での具体価値がUIに現れていない。",
+    "suggestion": "設定に『サポート』を追加し、Premierは専用フォーム/返信目安表示/優���バッジを付与。問い合わせ送信時にプラン別SLA文言を表示し期待値を管理。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §13.2 / §3（TALK）",
+    "issue": "「冒険EXP検出精度向上」や「モデル品質差」の価値訴求がアプリ内で具体的に可視化されておらず、課金動機に繋がりにくい。",
+    "suggestion": "TALKヘッダーや上限到達バナーに『現在: GPT-4o mini。共感コーチングを強化するにはProへ』等の軽量ラベルを表示。プラン比較に具体例（応答例/要約精度/画像理解）を掲載。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3（Today表示）/ §7.4（ドラッグ&ドロップ）",
+    "issue": "開始時刻による自動ソートと手動並び替えの優先順位・新規追加タスクの挿入位置・手動順序のリセット方法が不明瞭で、複数解釈が可能。",
+    "suggestion": "明示ルール化: 初回ドラッグで『手動順序モード』に移行→以後Todayは手動順序優先。新規タスクは直近タスクの下に挿入。ヘッダーに『時刻順に戻す』を設置。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3 / ux_v1.md §3.2（画像添付）",
+    "issue": "非対応形式/10MB超過/複数枚添付/アップロード失敗時のエラーUIが未定義。",
+    "suggestion": "選択時にクライアント検証→超過はインラインエラー『10MB以下のJPEG/PNG/GIF/WebPのみ』。複数可否を明記（例: MVPは1枚のみ）。送信中は進捗表示、失敗時は[再送]。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5 / ux_v1.md §3.4（冒険EXP演出）",
+    "issue": "冒険EXPが日次上限（2回）に達した後の検出時のユーザーフィードバックが未定義（重複文脈はサイレント抑止だが、上限到達は不明）。",
+    "suggestion": "3回目以降は小さなバナー『本日の冒険EXPは上限に達しました（リセット 04:00）』を1回表示。以降はサイレントでよい。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §7.3（PWAオフライン）/ ux_v1.md §9.1",
+    "issue": "オフライン時はEXPに『同期待ち』バッ��を出すが、タスク/ゴール自体の未同期状態表示や一括同期状況の可視化がない。",
+    "suggestion": "Today行やゴールに『未同期』バッジを付与。ヘッダーに同期インジケータ（スピナー）と『N件の変更を同期中』トースト。競合/失敗時の解決UIも追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2（プラン管理）",
+    "issue": "Stripe Checkoutのキャンセル/エラー戻り時の挙動（トースト/状態復帰）が未定義。",
+    "suggestion": "キャンセル→ S-38に復帰し『購入をキャンセルしました』。決済失敗→『決済に失敗しました（詳細: XXX）』+ [再試行]。history/stateの巻き戻しを明示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.3（通知設定）/ project_v1.md §5.3",
+    "issue": "iOSはPWA（ホーム追加）時のみWeb Push可、Safari単体不可という制約が通知設定UIに反映されていない。",
+    "suggestion": "iOSで未インストール検出時は『PWAをインストールすると通知が有効になります』モーダルを通知設定内に表示し、��順導線を設ける。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.4（戻りナビゲーション）",
+    "issue": "ブラウザバックで『前タブへ戻る』はWebアプリの期待値とずれる可能性が高い（タブはトップレベルで履歴に載せないのが一般的）。",
+    "suggestion": "既定ではタブ切替をhistoryに積まず、バックはモーダル/詳細のクローズに限定。必要なら設定で『タブ履歴を有効化』を提供。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.3（週N回習慣）/ ux_v1.md §2.3",
+    "issue": "『週N回習慣を手動でTodayに追加（今日やる）』のUIがUX仕様に未定義。",
+    "suggestion": "習慣の詳細パネル（S-11相当）に『今日やる』トグルを追加し、Today表示を強制。Upcoming内の習慣行にも同ボタンを配置。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §2.1 / §3.3",
+    "issue": "Freeで20回/日のAI対話＋画像添付（10MB, Vision推論含む）はAPI原価のばらつきが大きく、ARPUと原価のバランス面で持続性リスクがある。",
+    "suggestion": "MVPはFreeの対話上限を10〜15回/日に暫定設定、Freeの画像添付は1日1枚/1会話1枚に制限、1応答のトークン上限を明示。利用状況に応じて上限再調整。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §7.4（90日保存）/ ux_v1.md §3.5",
+    "issue": "AI対話履歴と画像が90日で自動削除される点がチャットUI上で周知されていない。",
+    "suggestion": "S-21ドロワー下部または設定>データに『会話と画像は90日で自動削除』の注記を追加。初回のみチュートリアルバナー表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §15 / §14.3",
+    "issue": "通知タップのディープリンク処理と、削除クーリングオフ中の復帰フローの優先関係が曖昧（どちらのモーダル/遷移を優先するか）。",
+    "suggestion": "クーリングオフ復帰確認を最優先で表示→復帰承諾後にディープリンクへ遷移。拒否時はログアウト。優先順位を明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §7.4（ドラッグ&ドロップ）/ §10（アクセシビリティ）",
+    "issue": "Today並び���えのキーボード/スクリーンリーダー代替操作が未定義（D&Dのみ）。アクセシビリティ要件未充足。",
+    "suggestion": "各行の『その他』メニューに『上へ/下へ』を追加し、キーボード操作で移動可能に。ARIA liveで並び位置の変化を告知。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3（Upcoming）",
+    "issue": "計画視点としては7日先までのUpcomingのみだと不足を感じるユーザーが一部出る可能性（カレンダービューの不在）。",
+    "suggestion": "MVPはUpcomingで妥協しつつ、設定に『カレンダービュー（近日公開）』のティーザを表示。v0.2.0で月間ビューを検討。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-022",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.2（ゴール達成7日ルール）/ ux_v1.md §2.4（ゴール詳細）",
+    "issue": "ゴール作成から7日未満で全タスク完了時の『完了待ち』UI（カウントダウン/再完了時の扱い）がUX側で未定義。",
+    "suggestion": "S-14に『完了待ち（あとN日で完了）』バナーと日時表示。完了待ち中は[手動完了]を無効化。7���到達時は自動達成演出を再生するフラグを定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §0.3 / §13.2",
+    "issue": "Premierの『Coming Soon特典（チケット遡及）』の注意書きがプラン管理UIに無く、決済直前の期待値コントロールが不十分。",
+    "suggestion": "S-38 Premierカードに『チケットはショップ開始時に配布（遡及付与）/現時点の特典=限定フレーム+優先サポート』の明記と詳細モーダルを追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8.6（演出キュー）/ §3.4（TALK）",
+    "issue": "TALK内のレベルアップとGROW内の演出再生の跨ぎ発火順が明記されていない（同一タイミングでGROWに戻った場合の優先順位）。",
+    "suggestion": "グローバル演出キューを定義し、画面跨ぎ時は『タスク完了→ゴール→レベルアップ→TALK内バナー』の順で直列処理、未再生演出は次回該当画面で再生するルールを明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  }
+]

@@ -1,0 +1,100 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "scripts/persona_selector.sh",
+    "issue": "ADDITIONALが空の場合、`paste -sd ',' -` が改行のみを出力し、`[ -n \"$ADDITIONAL_TRIMMED\" ]` が真となるため、PERSONAS変数に改行が混入します。これによりTSV形式のログファイルが破壊されます。",
+    "suggestion": "`if [ -z \"$ADDITIONAL\" ]; then ADDITIONAL_TRIMMED=\"\"; else ADDITIONAL_TRIMMED=$(...); fi` のように分岐するか、出力から改行を削除する処理を追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "GNU coreutilsのmktempでは`-t`オプションの挙動が異なり、`mktemp -t adv_gate_resp.XXXXXX`はエラーになるか予期せぬ動作をします。Linux環境での互換性に問題があります。",
+    "suggestion": "`mktemp /tmp/adv_gate_resp.XXXXXX` のように絶対パスでテンプレートを指定するか、単に `mktemp` を使用して一時ファイルを作成してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "`INPUT=$(cat 2>/dev/null || true)`で数MBに及ぶ可能性のあるJSONをシェル変数に格納し、`printf`で展開しています。メモリ枯渇や引数長制限エラー（Argument list too long）を引き起こすリスクがあります。",
+    "suggestion": "標準入力を直接一時ファイルにリダイレクトし（`cat > \"$TMP_INPUT\"`）、そのファイルをPythonスクリプトなどで読み込む設計に変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "scripts/persona_selector.sh",
+    "issue": "ログローテーション時に`ROT=\"${LOG_FILE}.$(date -u +%Y%m%d).gz\"`としているため、同日に複���回1MBを超えてローテーションが発生した場合、以前の.gzファイルが上書きされログが消失します。",
+    "suggestion": "ファイル名に時刻（秒）を含める（例: `$(date -u +%Y%m%dT%H%M%S)`）か、連番を付与して上書きを防ぐように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "scripts/spec_lint_extended.sh",
+    "issue": "節番号重複チェックで`grep -E \"^####? §2\\.25\\.[0-9]+\" \"$TARGET\" | sort | uniq -d`としていますが、見出しのテキスト全体が完全に一致しないと重複として検出されず、タイトルが異なる重複を見逃します。",
+    "suggestion": "`grep -oE \"^####? §2\\.25\\.[0-9]+\"` のように `-o` オプションを使用して節番号部分のみを抽出し、それを比較するように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "`tail -c 16384 \"$TP\"`でマルチバイト文字の途中で切断された場合、後続の`grep`がテキストをバイナリファイルと誤認し、マッチ結果を正常に処理できなくなる��能性があります。",
+    "suggestion": "`grep -a` オプションを使用してテキストとして強制的に処理させるか、文字単位での切り出しを行うように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "最初のPythonスクリプトでJSONをパースしているにもかかわらず、後段で再度`python3 -c`を呼び出して`transcript_path`を抽出しています。パフォーマンスの無駄でありDRY原則に反します。",
+    "suggestion": "最初のPythonスクリプトの出力（`META`）に`transcript_path`を含めるようにし、シェル側で一度に受け取るように設計を統合してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "scripts/adv_hot_summary.sh",
+    "issue": "`python3 - <<'PYEOF' \"$TRIMMED\"` という構文は、bashでは動作しますがPOSIX shでは動作が未定義またはエラーになる可能性があります。",
+    "suggestion": "`python3 - \"$TRIMMED\" <<'PYEOF'` のように引数をリダイレクトの前に配置するか、環境変数経由で値を渡すよ���に修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "`TMP_PARSED=$(mktemp ...)`で一時ファイルを作成していますが、スクリプト内で一度も使用されていません。無駄なファイルI/Oが発生するデッドコードです。",
+    "suggestion": "`TMP_PARSED` の作成および `trap` での削除処理を取り除いてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0845,
+    "input_tokens": 62134,
+    "output_tokens": 1376,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

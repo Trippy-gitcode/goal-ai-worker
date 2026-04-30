@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "resolveFiles および readSpecs",
+    "issue": "--input にディレクトリパスが指定された場合や、ワイルドカード展開結果にディレクトリが含まれる場合、readSpecs内の fs.readFileSync が EISDIR エラーをスローしてスクリプトが確実にクラッシュします。",
+    "suggestion": "resolveFiles 内でファイルを配列に追加する前に、fs.statSync(path).isFile() を使用してディレクトリを除外する判定を追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "main 関数のエラーハンドリングと終了コード",
+    "issue": "API呼び出しで例外が発生した場合、catch ブロックでエラー結果は生成されますが totalCritical は増加しません。結果として全APIが失敗しても exit(0) で正常終了し、CIでエラーが握りつぶされレビュー未実施のままパスします。",
+    "suggestion": "main関数に let hasError = false; を定義し、catch ブロック内で hasError = true; とした上で、最終判定を if (totalCritical > 0 || hasError) process.exit(1); に修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "extractJson 関数の正規表現",
+    "issue": "正規表現 /```(?:json)?\\s*(\\[[\\s\\S]*\\])\\s*```/ の [\\s\\S]* が貪欲マッチであるため、AIがJSONの後に別のコードブロックを出力した場合、後続のブロックまで含んで抽出され JSON.parse に確実に失敗します。",
+    "suggestion": "[\\s\\S]*? と最短一致（非貪欲マッチ）に変更し、最初のJSONコードブロックのみを正確に抽出するように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "runJob 関数の集計ロジック",
+    "issue": "results.push({ id: '_metadata', ... }) でメタデータを追加した直後に for (const item of results) で集計を行っているため、メタデータ自体が totalItems にカウントされ、sevs['?'] として不正に集計されます。",
+    "suggestion": "集計ループの先頭に if (item.id === '_metadata') continue; を追加し、メタデータをレビュー指摘事項のカウントや severity 集計から除外してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "resolveFiles 関数の正規表現生成",
+    "issue": "new RegExp('^' + base.replace(/\\*/g, '.*') + '$') において、base に含まれる . などの正規表現メタ文字がエスケープされていません。ファイル名にドットが含まれると任意の一文字にマッチし、意図しないファイルを読み込みます。",
+    "suggestion": "base のメタ文字をエスケープする処理（例: base.replace(/[.+?^${}()|[\\]\\\\]/g, '\\\\$&')）を適用してから、* を .* に置換するように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "loadEnv 関数",
+    "issue": ".dev.vars の値をパースする際、値がダブルクォーテーションで囲まれている場合（例: OPENAI_API_KEY=\"sk-...\"）、クォーテーションがそのまま値に含まれてしまい、APIリクエスト時に認証エラーが発生します。",
+    "suggestion": "env[k.trim()] = v.join('=').trim().replace(/^[\"']|[\"']$/g, ''); のように、値の前後のクォーテーションを除去する処理を追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0216,
+    "input_tokens": 13475,
+    "output_tokens": 949,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

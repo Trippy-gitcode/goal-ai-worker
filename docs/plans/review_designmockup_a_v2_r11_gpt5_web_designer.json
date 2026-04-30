@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "タスクリスト2行目「ジムで筋トレ」— メタ情報のダッシュ/右端カテゴリドット",
+    "issue": "進行中の示唆色に #E8A855（アンバー）がHEX直指定。デザインシステムのセマンティック --warning は #D29922で、不一致（トークン外の直指定）。",
+    "suggestion": "色はトークン参照に統一。var(--warning) もしくは var(--warning-hover) 系へ置換するか、進行中専用の --progress-ongoing をDSに新設して #E8A855 を登録し、直指定を廃止。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "タスクリスト1行目「企画書を仕上げる」行全体",
+    "issue": "完了行が緑の塗り背景（rgba(63,185,80,0.12)）＋大きなチェックで最も強く見え、未完了/進行中より視線を奪う。優先順位が逆転している。",
+    "suggestion": "完了行は背景塗りを外し、テキスト減彩（var(--text-secondary)）＋取り消し線のみの弱スタイルに。もしくは「Completed」を折りたたみセクションに退避して、未完了/進行中を主役に。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s02_onboarding",
+    "location": "左上 戻る矢印アイコン（stroke-width:1.8）／同パターン: s14_goal_detailの戻る矢印",
+    "issue": "アイコン線幅がDSの規定（stroke-width:1.5px）から外れており、全体の線密度が不揃いに見える。",
+    "suggestion": "stroke-widthを1.5pxに統一。共通アイコンスタイル（§6.1）へ合わせ、各画面の戻る矢印も棚卸しで整合させる。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "「タスクにしますか？」提案カード（margin-left:6px）",
+    "issue": "コンテンツ列（左右16pxグリッド）から外れた6pxの半端インデントで、AIバブルの左ボーダーとも揃っていない。列の起点がずれて見える。",
+    "suggestion": "左インデントを0または16pxにスナップし、チャット本文列と水平位置を揃える。上下マージンも16/24pxスケールに統一してリズムを安定させる。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "送���ボタン内「➤」アイコン（width:18px）",
+    "issue": "アイコン寸法がDS推奨（インライン20px/タブ24px/アクション32px）から外れ、やや小さく見える。",
+    "suggestion": "アイコンを20pxに統一。アイコンの視認性と一貫性を高めるため、全画面のアイコン寸法をトークンスケールで棚卸し。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "下部リンクリスト「アバター設定」「設定」の区切り線",
+    "issue": "最初の行のみborder-topで、末尾にボーダーがなくグルーピングの境界が曖昧。タップ可能領域のかたまりが読み取りにくい。",
+    "suggestion": "リストグループの上下に--borderを引く（外枠方式）か、各行に均一な分割線パターン（上:なし/中:上のみ/下:上下）を適用して塊の輪郭を明確化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s12_task_add",
+    "location": "「所要時間」チップ行→「予定日」フィールド間（約16〜20px）",
+    "issue": "セクション感のあるブロック間隔がやや詰まり、視線の節が作りづらい（DS §4.2 セクション間≧32px基準に対して不足）。",
+    "suggestion": "以下をセクション単位として間隔を32pxに拡張: ①種別/タイトル、②開始時刻/所要時間、③予定日/ゴール紐付け、④メモ/アクション。項目間は8〜16pxで維持。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s01_signin",
+    "location": "同意チェックボックス行（チェックボックス＋説明テキスト）",
+    "issue": "2行折返し時にテキストブロックの起点がやや上にずれて見え、行頭の視線誘導が弱い。",
+    "suggestion": "テキスト側のline-height/余白を微調整してベースライン合わせを明確化（例: テキストコンテナにpadding-topを追加）し、行頭を揃えて読みやすくする。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

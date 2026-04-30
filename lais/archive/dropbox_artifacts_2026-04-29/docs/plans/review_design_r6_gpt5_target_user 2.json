@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §1.4 / ux_v1.md §8.3, §8.4, §8.5, §3.4",
+    "issue": "トーンオブボイスで「絵文字は使用しない」と明記している一方、UX仕様ではゴール達成・レベルアップ・冒険検出・応援ボタンなどに絵文字（🎉⚔️☀️💪など）を多用している。ブランド基調とUIコピーが食い違っている。",
+    "suggestion": "どちらかに統一する。A) 絵文字使用OKに方針変更（design_system.md §1.4を更新し、使い方ガイドと例外条件を定義）または B) UXの絵文字を全てアイコン/イラストに置換してテキストは絵文字なしにする。ハラジュク系のみ許容などテーマ別例外を設ける場合も明文化する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5, §4.5",
+    "issue": "日次リセットの基準が常にJST 4:00固定。出張や海外在住/時差生活だと、習慣の切替やEXP上限リセット・ゴール達成ボーナスの1日上限が体感とズレて混乱する可能性が高い。",
+    "suggestion": "MVPでもユーザーのローカルタイムゾーンを選択式で提供（初期値=端末TZ）。後方互換として「JST固定」も選べるようにし、設定画面に明記。通知・日次サマリー・週次の基準日も同一TZで統一表示する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §2.5",
+    "issue": "通知（タスクリマインダー/日次サマリー/週次レポート）の送信時刻がJST基準か端末ローカルかが仕様上明記されていない。日次リセットJST固定との関係も不透明。",
+    "suggestion": "通知のスケジューリングは「端末ローカル時刻」を明記し、日次リセットTZとは独立であることを仕様化。設定画面に現在のTZと通知時刻を併記し、将来TZ変更時の移行ルール（自動再計算or据え置き）も追記する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.4 / project_v1.md §4.3",
+    "issue": "冒険EXP（+50）の誤検出に対するユーザー側の取り消し手段が定義されていない。タスク完了は30秒Undoがあるが、冒険検出カードには否定/取消UIがないため、誤付与時に不満��不正確な成長ログになる懸念。",
+    "suggestion": "冒険検出カードに「取り消す（30秒）」アクションを追加し、サーバー側も仮確定→本確定に変更。取���消し時はEXP返却・演出取り消し・学習抑制フラグ（同様の文脈で再提案頻度を下げる）を保存する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5 / ux_v1.md §2.3, §8.1",
+    "issue": "1日のEXP上限到達時のGROW側フィードバックが未定義。サーバーで上限検証はあるが、到達後にタスク完了してもユーザーには「なぜ増えないのか」が分かりにくい。",
+    "suggestion": "EXPバー付近に「本日のEXP: 280/300（残り20）」の残量表示を常設し、上限到達時は完了時に「本日の上限に達しました」のトースト＋EXPバーは無変化で明示。冒険EXP側と同等のUI一貫性を持たせる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1-§2.2",
+    "issue": "Premier（¥4,980/月）はMVP時点で実質Pro相当＋限定フレーム1種＋優先サポートのみ。ショップ/チケットはComing Soon。価格に対する即時価値が弱く、早期課金の心理的ハードルが高い。",
+    "suggestion": "MVPではPremier販売を見送り、早期アクセス割引/年額ディスカウント/限��アイテム2-3種即時同梱など、即時の差別化価値を強化。販売継続の場合は「返金不可」「後日特典付与」を明記し、誤認購入を防ぐ。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2",
+    "issue": "タスクEXPが一律+10で、所要時間や難易度の差が反映されない。Habiticaでの「飽き」経験的に、挑戦の大小が可視化されないとモチベーションが頭打ちになりやすい。",
+    "suggestion": "MVPでも軽量な重み付けを検討（例: タスク作成時に「小/中/大」の手動難易度フラグ→+5/+10/+15で付与、もしくはゴール紐付タスクのみ+15）。将来的にAI推定難易度で自動調整も視野に。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.3 / ux_v1.md §2.3",
+    "issue": "週N回習慣のToday表示ロジックが賢い一方、ユーザー視点では「今日は表示されないの？」と迷いやすい。仕様を知らないと、習慣が消えたと誤認する可能性。",
+    "suggestion": "習慣行にインフォチップ（i）を設置し、「今週の残り必要回数/残日数」の簡易説明と『今日やる』ボタンを常時見える位置に。初回作成時に1回だけ説明ツアー/ツールチップを出す。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3",
+    "issue": "Undoは直近1件のみ＋30秒。連続完了時に直前のタスクしか取り消せず、誤タップが重なるとストレスになりうる。",
+    "suggestion": "「最近の完了」シート（直近3件まで）を検討。あるいは設定で「Undoキュー（最大3件）」を有効化できる上級者向けオプションを用意。デフォルト挙動は現状維持でも、救済経路を確保する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.2.1",
+    "issue": "アバター設定に未所持アイテム（🔒）が並ぶが、MVPではSHOP未提供のため購入導線がなく、空振りトーストが続く体験になりがち。",
+    "suggestion": "MVPでは未所持アイテム群は「近日公開」セクションに隔離し、デフォルトで折りたたみ。Premier特典アイテムは常に上位表示し、即時に得られる満足感を強調する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2（所要時間）, §4.2",
+    "issue": "所要時間はタイムライン幅計算のみに使用し、EXPには影響しない仕様。UI上でその意図が分からないと「時間を長く設定したのにEXPが増えない」誤解が起きそう。",
+    "suggestion": "タスク作成画面の所要時間ラベルに「スケジュール用（EXPには影響しません）」の補足を追記。ヘルプ/FAQにも同旨を明記する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §6.4 / ux_v1.md §3.2",
+    "issue": "AI対話データ外部送信（PIIマスキング前提）は仕様にあるが、初回利用時の明示が画像添付時のみ。テキスト対話でも初回に安心感を与える説明が欲しい。",
+    "suggestion": "TALK初回送信前に軽量なインライン通知（『AI回答のため外部APIに内容を送信します。個人情報の送信はお控えください』＋「今後表示しない」）を表示。設定>プライバシーから再確認可能にする。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §5.4",
+    "issue": "QR承認リクエストの有効期限切れが「送信者にもフィードバックなし」。安全配慮は理解できるが、善意の送信でも相手が気づいていないだけのケースで混乱する。",
+    "suggestion": "送信者側のFRIENDS画面に『承認待ち（期限◯/◯まで）』の期限表示のみ出す（相手通知はなし）。期限切れ時は自分にだけ『期限切れ』を表示して再送誘導する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.5 / ux_v1.md §13.3, §16.4",
+    "issue": "iOSでプッシュ通知を使うにはPWAインストール必須。インストール誘導はあるが、通知が重要なタスクリマインダー用途で導入ハードルが高い。",
+    "suggestion": "PWA未インストール時は代替導線を用意（カレンダー/リマインダーへワンタップでイベント登録、メール通知ONの選択肢）。オンボーディング完了時に『通知を最大化するにはホーム画面に追加』の再促進も。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.4",
+    "issue": "TALK画面ではレベルアップ時にバナーのみで、EXPバーやアバター変化は次回GROWで再生。ユーザーは「本当に反映された？」と不安になる可能性がある。",
+    "suggestion": "TALKのレベルアップバナーに『GROWで演出を再生します』のサブテキストを追加し、MEタブのヒーローは即時静的反映済みである旨も同時に小さく案内する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §5.5, §7.6",
+    "issue": "Glass ON時のbackdrop-filterは端末/負荷によって体感差が大きい。reduce-motion時は無効化するが、低性能端末検知のフォールバックが未記載。",
+    "suggestion": "初回起動時にFPS/paint時間の軽量計測でしきい値以下なら自動でGlass OFFにし、『視覚効果を減らす』設定とも連動。設定で常時ONを選べるがデフォルトは端末性能に応じて自動最適化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §3.3",
+    "issue": "見出しのletter-spacingを-0.5px固定にしており、端末フォント/言語により合成で文字が潰れる/切れる可能性（特にAndroidの一部フォントや太字日本語）。",
+    "suggestion": "見出しのトラッキングは相対値（em）かテーマ別微調整トークンを用意し、プラットフォームごとに最適化。日本語/英字の混在でも視認性が落ちない範囲に再検証する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §9.1（離脱要因と対策）との整合",
+    "issue": "Freeで主要機能解放は魅力だが、AI対話20回/日は初日〜1週目の『ハマり期』に枯渇しやすい。Finchで「物足りない」と感じた層は、序盤での制限が動機を削ぐ懸念。",
+    "suggestion": "オンボーディング完了から7日間はFree上限を一時的に40回/日に引き上げる『ウェルカム期間』を検討。以降20回に戻す。課金動線は体験の質向上（モデル/回数）として自然に提示する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

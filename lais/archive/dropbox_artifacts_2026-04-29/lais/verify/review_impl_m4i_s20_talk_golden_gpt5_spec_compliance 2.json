@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.9 S20-8",
+    "issue": "オートスクロール制御バナーのボーダー色が --accent になっており、仕様の「1px solid --accent-subtle」と不一致。",
+    "suggestion": ".s20-autoscroll の border を 1px solid var(--accent-subtle) に修正し、文字色は --accent のまま維持してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.9 S20-8",
+    "issue": "オートスクロール制御バナーの位置が bottom: calc(60px + 82px + var(--space-md)) となっており、仕様の「画面下から80px」に一致していない。",
+    "suggestion": "位置指定を bottom: calc(env(safe-area-inset-bottom) + 80px) に変更し、入力バーやタブバーとの重なりが懸念される場合は表示制御で回避してください（位置は80px基準を維持）。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.9 S20-9",
+    "issue": "テキスト入力の高さ/パディングが仕様と不一致。仕様は高さ40px・padding: 0 16pxだが、実装は min-height:40px + padding:10px 16px で実質60px相当。",
+    "suggestion": ".s20-input-field を height: 40px; padding: 0 16px; に揃え、オートリサイズ時のみ高さ拡張（max 4行≒100px）するよう JS/CSS を調整してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.9 レイアウト原則（S20-2/S20-9）",
+    "issue": "チャットスクロール領域が入力バー60px分の余白を確保しておらず（コンテナは82pxのみ）、固定配置の入力バーと重なって末尾メッセージが視覚的に隠れる恐れがある。",
+    "suggestion": ".s20-scroll もしくは .s20-talk に padding-bottom: calc(60px + 82px + var(--space-md))（safe-area 加味）を追加して、チャット内容が入力バーに隠れないようにしてください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.9 S20-3",
+    "issue": "AIバブルに max-width: 280px の仕様外制約が追加されている。",
+    "suggestion": "max-width を削除するか、必要性がある場合は §4.9 S20-3 に寸法要件として追記してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.9 S20-4",
+    "issue": "ユーザーバブルに 1px solid --accent のボーダーが追加されており、仕様外の視覚要素となっている。",
+    "suggestion": "ボーダーを撤去するか、非テキストコントラストの根拠とともに §4.9 S20-4 に正式要件として追記してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.9 S20-5 / §4.9 S20-6",
+    "issue": "タスク提案カード／冒険EXPカードに、左ボーダー以外の 1px border（top/right/bottom）が追加されている（仕様外）。",
+    "suggestion": "追加ボーダーを削除するか、カードの視覚的レイヤリング方針として仕様に明記してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.9 S20-5 / §4.9 S20-6",
+    "issue": "カードに max-width: 320px の仕様外制約が追加されている。",
+    "suggestion": "max-width を削除するか、ブレークポイント設計に基づく寸法要件として仕様に追記してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.9 S20-6",
+    "issue": "冒険EXPカードの出現アニメーション（scale 0.8→1 + opacity 0→1 / 300ms spring-default）が未実装。",
+    "suggestion": "カード初回マウント時にアニメーションを適用（reduced-motion 時は無効化/短縮）する CSS/JS を追加してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.9 S20-6",
+    "issue": "1日上限超過時の表示（「+0 EXP（本日の上限）」とアクセント色を --text-muted に変更）が未実装。",
+    "suggestion": "上限状態の分岐を実装し、テキストと色トークンを仕様どおりに切り替えてください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.9 S20-7",
+    "issue": "レベルアップ時の紙吹雪パーティクル演出（Phase 4 実装指定）が未実装（スコープ外扱い）。",
+    "suggestion": "後続対応としてパーティクル演出を追加する計画を明記するか、仕様のスコープ記述を更新してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.9 状態・インタラクシ���ン",
+    "issue": "AIのタイピングインジケータ（3ドットのtranslateY演出）とストリーミング置換が未実装（スコープ外）。",
+    "suggestion": "簡易プレースホルダを追加し、将来のストリーミング連携で置換する実装方針を仕様・実装コメントに明記してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.9 S20-3 / A11y",
+    "issue": "AIバブルそれぞれに aria-live=\"polite\" を付与しており、履歴更新時にスクリーンリーダーが過去メッセージも誤って読み上げる可能性がある。",
+    "suggestion": "最新応答のみを対象にした専用ライブリージョンを用意し、履歴項目からは aria-live を外してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.9 S20-3 / S20-4",
+    "issue": "仕様の letter-spacing（-0.02em）と line-height（1.7）が、トークン（var(--letter-spacing-ja), var(--line-height-ja-body)）で設定され数値確認ができない。",
+    "suggestion": "トークンの実数値をデザイン文書に追記するか、CSSコメントで数値を明示して仕様準���を確認可能にしてください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.9 全体（タップ領域）",
+    "issue": "タップ領域 44×44 は --tap-target-min トークンに依存しており、値が資料に明示されていないため確認不可。",
+    "suggestion": "設計トークン --tap-target-min を 44px と明記し、コンポーネント側にもコメントで根拠を残してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.9 S20-5（ボタン）",
+    "issue": "「登録する」プライマリボタンに 1px solid --button-primary-bg のボーダーが追加されており、仕様記載にない。",
+    "suggestion": "ボーダーを削除するか、ボタンの視覚定義として仕様に追記してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

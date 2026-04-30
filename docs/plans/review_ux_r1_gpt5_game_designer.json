@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4, §4.5, §3.2（例: 1,240/2,000）",
+    "issue": "レベル必要EXPと累計EXPの数値が式・表・UI例で不一致。§4.5では「Lv.1→2=1,000EXP」とあるが、§4.4の式では100EXP。累計EXPテーブル（例: Lv40→41累計40,950）も式((N-1)×(50+25N))の結果(43,000)と一致しない。GROWのUI例(1,240/2,000)も式と乖離。",
+    "suggestion": "単一の正準式を採用し、全表・UI例を一括再計算して更新。推奨: 次Lv必要EXP=100+(Lv-1)×50、累計=(N-1)×(25N+50)。校正後に到達目安（月/年）と日次上限との整合も再算出。演出や通知の例文内の数値も置換テストで整合を保証。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1/§2.3/§2.3→S-13",
+    "issue": "S-13（タスク編集）画面の具体仕様が未定義。フィールド/バリデーション/エラー/オフライン/Undo/ゴール再紐付けなど編集時の挙動が不明。",
+    "suggestion": "S-12（追加）と同等のフィールド定義をS-13に明記し、差分（例: 既存値の表示、完了済みタ��ク編集可否、変更履歴、ゴール紐付け解除時の進捗再計算）を追記。0件/エラー/オフライン/キーボード表示の各状態も追加。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1/§2.4→S-16",
+    "issue": "S-16（ゴールタスク追加）ハーフモーダルの仕様未定義。ゴール詳細からの追加時に、Today表示条件、予定日/開始時刻、既存ゴール配色/タグ継承、重複検知などが不明。",
+    "suggestion": "S-16のフィールド順・デフォルト（親ゴールのカテゴリ/期限の継承可）・Today反映/Overdue扱い・エラーハンドリング・オフライン同期・UIフィードバック（トースト/スクロール）を定義。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1/§4.2→S-41",
+    "issue": "S-41（アバター設定）のUI/操作が未定義。Premier特典フレーム装備の具体フロー、プレビュー、保存/取消、レベル到達での自動進化との競合が不明。",
+    "suggestion": "S-41に装備スロット（フレーム/オーラ/背景/衣装）・プレビュー（Before/After）・保存/取消・装備要��（Lv/入手済み）・競合ルール（進化時の装飾維持/解除）・アクセシビリティ（alt/ARIA）を明記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8（演出）/ project_v1.md §3.2.6",
+    "issue": "同時発火（タスク完了+レベルアップ+ゴール達成+冒険EXP）が発生した際の演出優先順位/キュー処理が未定義。画面跨ぎ（TALKで冒険→GROWのバー反映）時の重複/レースも未整理。",
+    "suggestion": "グローバル演出キューを導入し優先度を定義（LevelUp > Goal達成 > 冒険 > ログイン）。各演出はモーダル/バナーを直列化。クロス画面は1イベント=1トランザクションIDで重複抑止。Reduced Motion時の代替順序も併記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5 / ux_v1.md §9.3",
+    "issue": "日次リセット時刻がJST固定だが、UI表示は「明日 04:00」で��イムゾーンが明示されず、海外ユーザーで混乱の恐れ。",
+    "suggestion": "UIは絶対カウントダウン（残りHH:MM）を主とし、補助で「JST 04:00」を明記。将来TZ対応までの暫定措置としてFAQリンクを併設。通知文言も同様に統一。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §7.3（オフライン同期）/ §4.5（上限）",
+    "issue": "オフライン中の大量完了→同期時に日次上限超過分のEXPが無言で不付与。ユーザーにとって「努力が消えた」体験になりうる。",
+    "suggestion": "同期完了トーストで「本日上限に達したため、X件はEXP付与対象外」と明示。任意で翌日の“Rested Bonus”として一部持ち越し（例: 翌日最初のYタスクに+2EXP）を検討。履歴画面に当日のEXP内訳も表示。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §4.5（不正対策）",
+    "issue": "「同名タスク5分以内無効」だけでは、名前微変更や一括生成→即完了のスパムに弱い。EXP経済の健全性リスク。",
+    "suggestion": "サーバー側でタスク名の正規化+類似度（Levenshtein/トークン化）判定、短期作成→即完了へのクールダウン（例: 作成後2分以内の完了はEXP半減）、同一ゴール連続完了のレート制限、ユーザー日次完了回数に対する減衰（20件超は+5EXPなど）を追加。監査ログ/アラートも実装。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §2.2, §4.4, ux_v1.md §4.5",
+    "issue": "アバター経済の基礎仕様（価格帯、レアリティ、入手経路、レベル解放、限定/常設、チケット面価、在庫/復刻方針）が未定義。Premier特典の価値訴求も弱い。",
+    "suggestion": "MVP前に仮カタログを定義：レア度3段（R/SR/UR）、価格帯（¥200/¥600/¥1,200）、レベル解放条件、週次/季節限定、成就解放（無課金入手）を混在。Premierチケット=任意アイテム≤¥600×3/月（差額支払可）を明記。インフレ対策として限定品の再販ルール（半年後復刻/色替え）と供給スケジュールを設定。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2（EXP 3層）/ ux_v1.md §2.3",
+    "issue": "タスクEXPが所要時間に関係なく一律+10のため、マイクロタスク分割が相対的に有利。日次上限で抑制はされるが行動設計が歪む恐れ。",
+    "suggestion": "所要時間を重み付けに活用（例: ≤15分=+5、16-45分=+10、>45分=+15）。または1日あたり異なる所要時間帯を満たすとボーナス（バランス型デイリーボーナス+10）で分割誘因を相殺。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.4 / ux_v1.md 全体（継続動機）",
+    "issue": "飽きポイント対策が弱い（2〜4週で新規性低下）。称号/進化以外の周期的目標や新鮮味が不足。",
+    "suggestion": "週次クエスト（AI提案×3種から選択→達成で限定バッジ/装飾）、月次「Act」（テーマ別ミニパス：無料/有料報酬帯）、フレンド協働マイクロゴール（2人で週合計X完了→記念スタンプ）を追加。DISCOVERに“今週の発見”ハイライトも導入。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §7.4 / §2.3",
+    "issue": "Todayの手動並び替えが開始時刻ソートを上書きするが、��の時間順へ戻す手段や優先ルール（編集で時刻変更した場合）が未定義。",
+    "suggestion": "ソートメニューを追加（自動/手動/ゴール→時間）。「自動」に戻す操作と、時刻編集時は自動ソートが優先に戻る等のルールを明記。手動順は日跨ぎでリセットするかの方針も定義。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.3（スワイプ）/ §1.3（遷移アニメ）",
+    "issue": "右端から左スワイプ＝戻る（フルスクリーン）と、MEサブタブの左右スワイプ＝タブ切替が同時に存在し、S-35等で競合の恐れ。",
+    "suggestion": "詳細系フルスクリーンではサブタブスワイプを無効化し、戻るジェスチャーを優先。ジェスチャーの優先度表を追記し、ヒット領域（画面端20pxは戻る専用等）を明記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.4 / ux_v1.md（表示のみ）",
+    "issue": "称号一覧/解放条件の参照UIがない。長期目標の見通しが立たずモチベーションに繋がりにくい。",
+    "suggestion": "ME > PROFILEに���称号図鑑」を追加し、各称号の解放Lv/ビジュアル/次の称号までの残EXPを表示。将来の称号はシルエットでティザー表示。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §0（ベンチマーク）→全体反映",
+    "issue": "ベンチマークでの「Free版制限による反発」回避は実装されているが、Finchで不満の強かった“待機メカニクス”回避の方針が明示的にUI要件へ落ちていない。",
+    "suggestion": "仕様内に「待機/エネルギー/クールダウンでのブロッキングを採用しない」ガイドラインを明記。タスク/冒険/ゴールの操作はいつでも可能である旨を共通原則に追記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘッダー）",
+    "issue": "TALKヘッダーのアイコン（☰/🕐/📝）の意味が重複または不明瞭（☰と🕐が双方履歴に見える）。",
+    "suggestion": "アイコン役割を一本化（☰=ドロワー/履歴、📝=新規）。🕐は削除か別機能（最近のプロンプト）に再割当。ツールチップ/ARIAで説明を追加。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  }
+]

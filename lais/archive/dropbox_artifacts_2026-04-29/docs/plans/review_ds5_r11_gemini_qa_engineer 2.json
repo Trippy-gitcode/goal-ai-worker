@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6 / §18",
+    "issue": "§19.6の依存チェーンで `design_system.md` が `project_v1.md` の直下に2回記載されている。また、§19.6では `design_system.md` → `design_spec_v1.md` の順（上流→下流）だが、§18では `design_spec_v1.md` 変更時に `design_system.md` を確認する双方向の依存関係が示唆されており、§19.6の「循環参照の禁止」と矛盾する。",
+    "suggestion": "§19.6の重複した `design_system.md` を削除する。§18と§19.6の依存方向を統一し、`design_system.md`（基盤）を上流、`design_spec_v1.md`（具体画面）を下流として一方向に整理する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.4 / sub_testing.md §5",
+    "issue": "§19.4ではテストID命名ルールとして `[GREP-KEY]`（例: `[AUTH-001]`）を要求しているが、`sub_testing.md` の `test_map.yaml` テンプレートでは `tests: [\"rewrite-01\"]` のように角括弧なしの形式になっている。`affected-tests.sh` はこれをそのまま `grep` に渡すため、角括弧の有無や正規表現のエスケープ扱いでテストが正しく抽出されず、L2影響範囲テストが漏れるリスクがある。",
+    "suggestion": "`test_map.yaml` のテンプレートの `tests` 配列の値を `[\"AUTH-001\"]` のように命名ルールと一致させ、`affected-tests.sh` で `grep` する際に角括弧を含めた完全一致（例: `grep \"\\[$TEST_KEY\\]\"`）で検索するよう仕様を明確化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1 / §14 / sub_infrastructure.md 2.14",
+    "issue": "§19.1では必須仕様書のパスが `docs/project_v1.md` のように `docs/` 直下となっているが、§14では `docs/plans/xxx_v1.md` となっている。また、`review_gate.sh` は `docs/plans/review_*.json` をスキャンする。ディレクトリ構成の揺れにより、AIレビューの品質ゲートが正しく機能しない（スキャン漏れ）懸念がある。",
+    "suggestion": "仕様書およびレビュー結果JSONの保存先を `docs/` または `docs/plans/` のいずれかに完全に統一する。`docs/` 直下とする場合、`review_gate.sh` のスキャンパスも `docs/review_*.json` に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.5",
+    "issue": "ヘッダーに `> 依存: {上流ファイルのパス + バージョン}` を記載するルールだが、上流ファイルが更新されてバージョンが上がった際、下流ファイルのヘッダーを更新する自動化手段や明確なプロセスが定義されていない。手動管理ではすぐに陳腐化し、依存チェーンの追跡が破綻する。",
+    "suggestion": "§16.7の「変更時の一括更新義務」に、下流ファイルのヘッダー依存バージョンの更新を含める旨を明記するか、`version_sync.sh` に仕様書間のバージョン同期機能を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4",
+    "issue": "`ux_v1.md` の §1 に「画面遷移（全画面ID/遷移マトリクス）」があり、`system_map.md` の §3 にも「画面遷移図」がある。Single Source of Truth (SST) の原則（§1.1）に反し、二重管理による矛盾が生じる懸念がある。",
+    "suggestion": "`system_map.md` の §3 は `ux_v1.md` の §1 への参照（リンク）のみとするか、`ux_v1.md` はユーザー視点の遷移、`system_map.md` はルーティングや状態管理（Redux/Context等）を含む実装レベルの遷移図として明確に定義を分ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの `> 依存:` フィールドで、複数の上流ファイルに依存する場合のフォーマット（カンマ区切り、複数行など）が定義されていない。将来的な機械可検証（スクリプトでのパース等）を考慮するとフォーマットの統一が必要。",
+    "suggestion": "複数依存の場合はカンマ区切りとするか、YAMLフロントマターのリスト形式を採用するなど、機械的にパース可能なフォーマットを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "Phase 0で `project_v1.md` を作成する際、ベンチマークの差別化マッピングで「対応セクション」を記入するルールだが、この時点では下流の仕様書（`ux_v1.md` 等）はまだ存在しないため、具体的なセクション番号を紐付けることが困難。",
+    "suggestion": "「対応セクション」は、作成中の仕様書（例: `project_v1.md` ならその中の §3 や §4）に限定するか、将来作成予定の仕様書名（例: `ux_v1.md で定義予定`）の記載を許容するよう注記を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

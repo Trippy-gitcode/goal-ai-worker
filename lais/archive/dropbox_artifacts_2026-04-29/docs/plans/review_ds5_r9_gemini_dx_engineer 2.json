@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4 vs §18",
+    "issue": "§18の依存関係マップではUX仕様書が「ux_redesign_v*.md」と定義されているが、§19では「ux_v1.md」となっている。同様に「design_spec_v*.md」と「design_spec_v1.md」の表記揺れがあり、変更時の一括更新義務（§16.7）の対象ファイル特定において漏れが発生するリスクがある。",
+    "suggestion": "ファイル名の命名規則を統一するか、§18に「新規作成時はux_v1.md、改修時はux_redesign_v*.mdとする」等のエイリアス・移行ルールを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7 vs §13.4",
+    "issue": "Phase 0の完了基準として「8ペルソナ×2モデルのAIレビューでCRITICAL 0を達成」と記載されているが、§13.4ではAIレビューのペルソナは「標準5ペルソナ」と定義されており、数が一致しない。",
+    "suggestion": "§19.7の記述を「§13.4で定義された標準5ペルソナ（必要に応じて追加）によるAIレビュー」に修正するか、§13.4の標準ペルソナ定義を8つに拡張する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "競合ベンチマーク要件において、AI（ADV）単独で「App Storeの最新レビュー分析」や「他社アプリのアニメーション・ジェスチャー」を調査することは、LLMのブラウジング制限やネイティブアプリ内部へのアクセス不可という制約上不可能に近い。これを必須要件とすると、AIがハルシネーション（架空のレビューや仕様の捏造）を起こして完了条件を満たそうとする危険性が高い。",
+    "suggestion": "ベンチマーク要件に「ADVがアクセス不可能な視覚的・動的情報や最新ストアレビューについ���は、POがスクショやテキストデータを提供する、または推測であることを明記する」という免責・人間との協働プロセスを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6 vs §18",
+    "issue": "§19.6の依存チェーンでは「e2e_fullflow_test.md」が「project_v1.md」の直下に配置されているが、§18のマップではUX、Design、Referenceの各仕様書変更時にテストを更新すると規定されている。§19.6の「依存メタデータに含まれるファイルに影響するか」という連鎖更新の判断基準に従うと、UXや機能詳細が変更されてもテスト仕様書に更新が伝播しない構造になっている。",
+    "suggestion": "§19.6の依存チェーンを修正し、「e2e_fullflow_test.md」が「ux_v1.md」「design_spec_v1.md」「reference_v1.md」の全てを下流として依存する（または検証層として全HOW仕様書から参照される）構造に改める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.5",
+    "issue": "ヘッダー標準に「依存: {上流ファイルのパス + バージョン}」を記載するルールがあるが、上流ファイルがバージョンアップ（例: v1.1 → v1.2）された際、下流ファイルのヘッダーの依存バージョンをいつ・誰が更新するのか（連鎖更新時に自動で上げるのか、内容の整合性確認後に上げるのか）が定義されていない。",
+    "suggestion": "§19.6の「上流変更時の連鎖更新」ルールに、「下流ファイルの内容を検証・更新した上で、ヘッダーの依存バージョンを上流の最新バージョンに手動（またはADV）で更新する」という手順を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.4",
+    "issue": "「ux_v1.md」の§1に「画面遷移（全画面ID/遷移マトリクス/遷移アニメーション/戻りナビ）」があり、「system_map.md」の§3にも「画面遷移図」が存在する。system_map側に「ux_v1.mdの§1と対応」とあるものの、開発者がどちらを正として更新すべきか迷い、二重管理による乖離が発生しやすい。",
+    "suggestion": "責務をより明確に分離する。ux_v1.mdは「ユーザー体験としての画面フロー（What/UX）」、system_map.mdは「ルーターやコンポーネントのルーティング状態遷移（How/実装）」と明記し、system_map.md側はコード構造に直結する内容のみに限定する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.4",
+    "issue": "「project_v1.md」の§7に「セキュリティ」があり、「reference_v1.md」の§5にも「セキュリティ（RLS全ルール/認証フロー/トークン管理）」があるため、記載内容が重複する可能性がある。",
+    "suggestion": "project_v1.mdの§7は「セキュリティ方針・非機能要件（コンプライアンス等）」とし、reference_v1.mdの§5は「具体的な実装仕様（RLSのコードレベルの定義等）」とするよう、スコープの違いをテンプレート内に明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  }
+]

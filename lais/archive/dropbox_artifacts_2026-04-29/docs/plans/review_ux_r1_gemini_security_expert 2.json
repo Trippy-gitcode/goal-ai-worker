@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §5",
+    "issue": "サインアップ(S-01)またはオンボーディング(S-03)において、利用規約およびプライバシーポリシー（特にAIへのデータ送信に関する同意）への明示的な同意UIが定義されていません。GDPR等のプライバシー法規制において重大なコンプライアンス違反となり、アプリストアの審査でもリジェクトされる確実なリスクがあります。",
+    "suggestion": "S-01（サインアップ画面）に「利用規約とプライバシーポリシーに同意する」チェックボックスを追加し、チェック必須とするフローを定義し���ください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §13.1",
+    "issue": "設定画面(S-37)に「ログアウト」のメニュー・ボタンが存在しません。共有端末での利用や、セキュリティ上の理由でセッションを破棄したいユーザーが行き止まりになり、アカウントの安全性が担保できません。",
+    "suggestion": "S-37のリスト最下部（アカウント削除の上など）に「ログアウト」ボタンを追加し、タップ時に確認ダイアログを経てS-00へ遷移しセッション（JWT）を破棄するフローを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §1.1, §14.2",
+    "issue": "ログイン画面(S-02)から遷移する「パスワードを忘れた場合（パスワードリセット）」の画面および操作フローが定義されていません。パスワードを忘れたユーザーがログインできず、完全にアプリから締め出される行き止まりが発生します。",
+    "suggestion": "S-02に「パスワードを忘れた場合」のリンクを追加し、メールアドレス入力→リ��ットリンク送信→新パスワード設定画面への遷移パスとUIを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md §4.4",
+    "issue": "project_v1.md §5.5で「各メッセージに「通報」ボタン」と定義されていますが、ux_v1.mdのFRIENDS画面（お知らせ展開時や友達詳細）に「通報」ボタンのUIおよびタップ後のフロー（理由選択、完了トースト等）が定義されていません。悪用防止の要件がUXに反映されていません。",
+    "suggestion": "メッセージバブルのロングプレス（§7.2）またはメッセージ横のメニューに「通報」アクションを追加し、通報理由を選択して送信するハーフモーダルのフローを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md §4.4, §13.1",
+    "issue": "project_v1.md §5.4で「ブロック/解除機能」と定義されていますが、ux_v1.md §4.4の友達詳細(S-35)メニューには「友達をやめる」しかなく「ブロック」がありません。また、ブロックしたユーザーを管理・解除する設定画面��UIも存在しません。",
+    "suggestion": "S-35の「...」メニューに「ブロックする」を追加し、S-37(設定)に「ブロックリスト管理」画面を追加して、ブロック解除ができるフローを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §8.2, §8.3",
+    "issue": "タスク完了により「レベルアップ」と「ゴール達成」が同時に発生した場合、両方の演出（紙吹雪パーティクル、画面上部/中央のバナー）が同時に発火し、UIが競合・崩壊する可能性があります。アニメーションの優先順位やキューイングが未定義です。",
+    "suggestion": "複数のフルスクリーン演出が同時にトリガーされた場合のキューイング機構（例：ゴール達成演出が完了した後にレベルアップ演出を開始する）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §13.1",
+    "issue": "設定画面(S-37)に「メール変更」「パスワード変更」のメニュー項目がありますが、タップ後の遷移先画面（S-XX）や、現在のパスワード確���・新メールへの認証リンク送信などの具体的な操作フローが定義されていません。",
+    "suggestion": "「メール変更」「パスワード変更」用のフルスクリーン画面またはハーフモーダルを画面一覧(§1.1)に追加し、それぞれの入力・バリデーション・保存フローを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §4.4",
+    "issue": "QRスキャン(S-36)において、QR検出後にサーバーでトークンを検証して相手のプロフィールを取得する間のローディング状態（スピナーやスケルトン）が定義されていません。ネットワーク遅延時にアプリがフリーズしたように見え、フィードバックの即時性が損なわれます。",
+    "suggestion": "QR検出後、カメラを停止し「ユーザー情報を取得中...」のスピナー付きハーフモーダルまたはフルスクリーンローディングを表示するステップを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §14.3",
+    "issue": "退会クーリングオフ期間中のキャンセル���作が「ログイン画面でメール/パスワード入力」をトリガーとしていますが、Supabase AuthのMagic Link（パスワードレス）でログインした場合のキャンセルフローが定義されていません。",
+    "suggestion": "Magic LinkのURLを踏んでアプリに戻り、セッションが確立された直後に `account_status = deleted_pending` を判定し、同様のキャンセルダイアログを表示するフローを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md §4.4",
+    "issue": "友達リクエスト（QRシェアリンク経由等）を無差別に送信されるスパム攻撃への対策として、1ユーザーが保持できる「承認待ちリクエスト」の受信上限や、短時間の送信上限が定義されていません。",
+    "suggestion": "承認待ちリクエストの最大保持数（例: 50件）を定義し、超過時の古いリクエストの自動削除、または送信側へのエラー表示（「相手のリクエスト枠が一杯です」）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §2.3",
+    "issue": "タスク完了時のUndoスナックバーが「3秒後に自動消去」と定義されていますが、運動機能や視覚に制限があるユーザーにとって3秒は短すぎ、アクセシビリティ（WCAGの十分な時間）の観点で不適切です。",
+    "suggestion": "スナックバーの表示時間を5秒以上に延長するか、設定画面の「アクセシビリティ」項目で表示時間を変更・無期限化できるオプションを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §1.4",
+    "issue": "戻りナビゲーションに「ブラウザバック」の記載はありますが、PWAとしてAndroidにインストールされた場合の物理/システムバックボタンの挙動（ハーフモーダルが開いている時はモーダルを閉じる、ドロワーを閉じる等）が明記されていません。",
+    "suggestion": "§1.4に「Androidシステムバックボタン」の挙動を追加し、ハーフモーダルやドロワー表示時はそれらを閉じる（history APIのpopstateイベントでハンドリングする）旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md §2.γ' / deploy.sh サンプル",
+    "issue": "STATUS 更新処理で `tmp=$(mktemp)` 後に `awk ... > \"$tmp\" && mv \"$tmp\" instructions/session_progress.md` としていますが、awk 失敗時や mv 失敗時に一時ファイルが残留し、さらに mktemp 失敗時の明示チェックもありません。失敗系で後続処理が継続すると状態更新漏れやゴミファイル蓄積が起き、運用スクリプトの再実行時に誤判断を招く実害が出ます。",
+    "suggestion": "`tmp=$(mktemp)` の直後に空判定と終了処理を入れ、`trap 'rm -f \"$tmp\"' EXIT HUP INT TERM` で必ず掃除してください。さらに `awk ... > \"$tmp\" || exit 1`、`mv \"$tmp\" ... || exit 1` のように段階ごとに失敗を即時停止し、成功時のみ `trap - EXIT` で解除する形にすると fail-closed を維持できます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais/verify/dev_system_v34_package.md §2.25.14.5",
+    "issue": "全応答の末尾に `[Review: N rounds, M personas]` を必須化して��ますが、機械的にどの応答種別が対象かの境界が曖昧です。コードブロックのみの返答、1行 ACK、hook が注入する補助メッセージまで一律に要求すると正当な応答も BLOCK されやすく、運用開始後に誤検知で会話停止するバグを生みます。",
+    "suggestion": "対象を「ADV が外部に送信する自然言語応答」に限定し、除外対象としてコードブロック単体、定型 hook メッセージ、subagent 内部ログ、エラー時の最小応答を明文化してください。`adv_response_gate.sh` 側でも本文長や role、送信先種別を条件に分岐し、誤 BLOCK 時の監査ログと bypass 条件を仕様化すると安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §17 §6.10 scripts 一覧",
+    "issue": "同一セクション内で番号付きリストと表形式の二重管理を継続しており、しかも注記で重複番号体系を容認しています。今回も rollback.sh や PATCH-G49 系の追加で整合説明が複雑化しており、今後の更新で片方だけ修正されると scripts 数や根拠が再び不一致になり、SSoT として破綻する可能性が高いで���。",
+    "suggestion": "scripts 一覧は 1 つの表だけを正本にし、別形式の番号付き一覧は削除してください。どうしても別表現が必要なら正本表を生成元とし、総数・カテゴリ別内訳・凍結対象は同一ブロックから参照する構造に統一するべきです。少なくとも『実体 39 本』の算出式は 1 箇所に集約し、検証コマンドもその形式だけを数えるよう合わせてください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais/verify/dev_system_v34_package.md §19.4 検証コマンド",
+    "issue": "`/tmp/section17.txt` や `/tmp/c0c6_spec.txt` など固定ファイル名を使っており、並列実行や複数セッション同時検証で相互上書きが発生します。別プロセスが同時に走ると diff 対象が混線し、PASS/FAIL が不定になるため、CI やローカル並列実行時に再現性のない誤判定バグを招きます。",
+    "suggestion": "固定パスではなく `mktemp` でユニークな一時ファイルを作成し、`trap` で必ず削除してください。例として `tmp1=$(mktemp)` `tmp2=$(mktemp)` を使い、diff 後に cleanup する形へ変更します。検証例自体が POSIX 安全性を示���見本なので、一時ファイル競合のないパターンにしておくと後続実装の写経バグも防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "instructions/session_progress.md 5行サマリー",
+    "issue": "`Last done` と `Last done (前回)` が複数並び、しかも旧内容をほぼ全文残したまま新内容を追加しています。進捗要約としての責務を超えて履歴ログ化しており、起動時参照や grep ベースの自動取得で最新イベントの特定が曖昧になります。後続スクリプトが最初の一致を拾う実装だと誤ったフェーズを最新と誤認します。",
+    "suggestion": "5行サマリーは『最新 1 件のみ』を維持し、過去履歴は別セクションへ退避してください。キー名も固定し、`Last done` は常に単数、履歴は `Recent history` など別見出しで箇条書き化すると機械可読性が上がります。最新/前回/前々回を残す場合でも構造化リストにし、同一キーの重複を避けるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md §2.25.14.3",
+    "issue": "ペルソナ追加トリガが grep ベースの単純キーワード一致で、`git` `model` `test` など一般語に近い語を含みます。文脈を見ずに発火すると過剰選抜が多発し、全応答レビューのラウンド数とコストが不安定になります。仕様上は最大 3 名選抜でも、実運用ではノイズ語で常時上限に張り付きやすい設計です。",
+    "suggestion": "単語境界、大小文字、否定文、コードブロック除外などのマッチ条件を定義し、優先度付きルールにしてください。さらにトリガ語はカテゴリ別設定ファイルへ分離し、仕様書本文にハードコードしない方が保守しやすいです。誤検知率の計測指標も追加し、一定割合を超えたら語彙調整する運用ループを入れるとよいです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md 全体",
+    "issue": "`/tmp/...`、`70/85/95%`、`3-5 行`、`最大 3 名`、`5R`、`4 週間保持` などの閾値や上限が多数散在しています。多くは妥当でも、変更理由や基準との紐付けが弱く、後日の調整時に仕様書全体を横断修正する必要が出ます。特に機械ゲート系の数値は実運用で最初に揺れやすく、将来の不整合の温床です。",
+    "suggestion": "閾値は『運用定数』として集約し、本文では定数名参照に寄せてください。少なくとも context 閾値、review round 上限、ログ保持期間、完了報告行数は一覧化し、根拠と変更手順を添えるべきです。スクリプト実装時も同じ定数ファイルまたは設定節を参照させれば、仕様・実装間のドリフトを減らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md / instructions/session_progress.md 全体",
+    "issue": "今回 `http://CLAUDE.md` などの phantom リンクを一部修正していますが、patches 側でも残存を認めており、表記ゆれがまだ混在しています。即時障害ではないものの、Markdown レンダラやリンク抽出ツールで外部URL扱いされ、ドキュメント探索性を下げます。将来の自動リンク検査を導入した際にノイズ原因になります。",
+    "suggestion": "ファイル参照表記はバッククォートに統一し、`[name](http://file)` 形式を一括禁止する lint を追加してください。既存文書は一括置換ルールを作り、対象外パターンだけ除外する方が保守しやすいです。patches.md でも『別PATCH対応』のまま残さず、文書品質修正として早めにまとめて解消するのが安全です.",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0582,
+    "input_tokens": 27939,
+    "output_tokens": 2328,
+    "model_id": "gpt-5.4"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7",
+    "issue": "Phase 0の完了基準に「8ペルソナ×2モデルのAIレビューでCRITICAL 0を達成」と記載されているが、§13.4で定義されている標準ペルソナは5つであり、数字が矛盾している。",
+    "suggestion": "「§13.4で定義された標準ペルソナ（必要に応じてカスタム追加）によるAIレビューでCRITICAL 0を達成」など、§13と整合する表現に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "依存チェーンのツリー図で `e2e_fullflow_test.md` が `project_v1.md` のみに依存しているように描かれているが、§18の依存関係マップでは `ux_v1.md`, `design_spec_v1.md`, `design_system.md` からも `e2e_fullflow_test.md` への連鎖更新が定義されており、矛盾している。",
+    "suggestion": "ツリー図を修正し、`e2e_fullflow_test.md` が `ux_v1.md` や `design_spec_v1.md` 等の「HOW」を定義する下流仕様書にも依存（またはそれらを検証する位置付け）であることを正確に表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4",
+    "issue": "`ux_v1.md` の「§1 画面遷移」と `system_map.md` の「§3 画面遷移図」が重複している。§1.1の「Single Source of Truth」原則に反し、仕様変更時に二重管理による乖離が発生するリスクがある。",
+    "suggestion": "`system_map.md` の§3は画面遷移そのものではなく「ルーティング定義/状態遷移（State Machine）」に特化させるか、`ux_v1.md` への単なる参照（リンク）にとどめる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.5",
+    "issue": "ヘッダー標準に `dev-system準拠: docs/plans/dev_system_spec.md §19` とあるが、dev-system自体のバージョン指定がない。将来dev-systemが更新された際、どの時点のルールに従って書かれた仕様書か追跡できなくなる。",
+    "suggestion": "ヘッダーのメタデータに `dev-systemバージョン: {バージョン番号}` を追加し、準拠した基盤のバージョンを固定・明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "詳細設計（reference_v1.md）の必須セクションにおいて、システム全体のエラーハンドリング方針やログ監視設計（Observability）の項目が欠落している。",
+    "suggestion": "`reference_v1.md` のテンプレートに「§7 エラーハンドリング・ログ設計」を追加し、フロントエンド・バックエンド共通の例外処理や監視方針を定義させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7",
+    "issue": "競合ベンチマークの出力フォーマット（マトリクス表のヘッダー）に「Lais方針」と特定のプロジェクト名がハードコードされている。",
+    "suggestion": "汎用的なテンプレートとして機��させるため、「{アプリ名}方針」または「自社方針」に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

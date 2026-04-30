@@ -1,0 +1,68 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "実行権限・ワークフロー",
+    "screen": "改訂案⑦ §D / CLAUDE.md 契約セクション",
+    "location": "review_package 行3143-3149",
+    "issue": "改訂案⑦ §D は CLAUDE.md 契約セクション内の「ふとしの方針メモ」から2項目を削除する提案を含む。しかしソロ開発者として Code を実行する場合、契約セクションは Code 変更禁止（CLAUDE.md 冒頭ルール）。この改訂を Code が自律実行しようとすると §16.5 違反でブロックされるか、違反して実行すれば信頼性が崩壊する。改訂チェーンが途中で止まり、CLAUDE.md だけ未更新の中途半端な状態になるリスクがある。",
+    "spec_reference": "CLAUDE.md「🔒 契約セクション（Code変更禁止）」+ dev_system_spec.md §16.5 項目2",
+    "actual": "§1.1 表が CLAUDE.md を Code の改訂対象ファイルとして一律リスト。契約セクション内/外の区別なし",
+    "suggestion": "改訂案⑦ §D の「削除対象」を2つに分割: (A) Code 実行可能な変更（鉄則セクション削除、Compact Instructions 縮退、【絶対禁止】縮退）、(B) Claude.ai 経由必須の変更（ふとしの方針メモ内2項目削除）。§4.7 連鎖更新チェックリストの CLAUDE.md 行に「実行者: Code / Claude.ai」カラムを追加"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "運用負荷・命名規則",
+    "screen": "改訂案① §D / §C1-C6 新設",
+    "location": "review_package 行616-882",
+    "issue": "現行 dev_system_spec.md は §1〜§20 の連番体系。新設 §C1-C6 は英字プレフィックス体系で、既存の番号体系と異なる。1,900行の仕様書内で §4.7 の次が §C1 になり、§C6 の次が §4.7.1 になるなど、セクション間のナビゲーションが非直感的になる。ソロ開発者が仕様を検索する際「§の番号順に読めば全体が分かる」前提が崩れる。",
+    "spec_reference": "dev_system_spec.md 現行目次（§1-§20 連番体系）",
+    "actual": "§C1-C6 を §3 と §4 の間に挿入。数字と英字の混在",
+    "suggestion": "2つの選択肢: (A) §3.7 以降のサブセクション（§3.7.1 書き込み規約 ... §3.7.6 セキュリティ規範）として数字体系内に配置。(B) §C を独立 appendix として文書末尾に配置し、各フローの Step 0 は「Appendix C を参照」とする。どちらも数字体系を崩さない"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "運用負荷",
+    "screen": "改訂案④ §A / dev_system_spec.md §5",
+    "location": "review_package 行1904-1905",
+    "issue": "ミッション定義 v4 では cmd-unit / cmd-e2e / cmd-realworld の3区分全てに記載必須。ドキュメント更新やdev-system仕様改訂（§5.1マトリクスで全て N/A）でも「cmd-unit: N/A — ..., cmd-e2e: N/A — ..., cmd-realworld: N/A — ...」と3行分の理由記載が必要。ソロ開発者がドキュメント修正の度に3行のN/A理由を書くのは形式的オーバーヘッド。",
+    "spec_reference": "review_package §5.1 ミッションタイプ別マトリクス（ドキュメント更新 / dev-system仕様改訂: 全 N/A）",
+    "actual": "全 N/A でも理由記載3行が必要",
+    "suggestion": "ミッションタイプ「ドキュメント更新」「dev-system仕様改訂」に限り、3区分を省略可能とする（ミッションタイプ宣言自体が「テスト不要」を意味する）。mission_linter.sh でミッションタイプが doc/spec 系の場合は3区分チェックをスキップ"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "運用負荷・脆弱性",
+    "screen": "改訂案③ §D / proposal_log_lint.sh",
+    "location": "review_package 行1697-1705",
+    "issue": "proposal_log_lint.sh は `### [STATUS] PROP-NNN (提案日: YYYY-MM-DD, 滞留セッション数: N)` の厳密なフォーマットを要求。手動編集で起きやすいズレ（全角括弧、コロン後スペース欠落、ハイフン違い等）で FAIL する。ソロ開発者の提案ログは ADV（Claude.ai）が手動記述するため、微妙な書式ズレは避けられない。",
+    "spec_reference": "sub_review_flow.md §1.5.1 提案ログ書式定義",
+    "actual": "grep -oP パターンが厳密すぎ。例: `滞留セッション数:` の後にスペースがない場合 FAIL",
+    "suggestion": "proposal_log_lint.sh に寛容パース（フォールバック正規表現）を追加。例: `滞留セッション数[: ：]+\\s*[0-9]+` で全角コロンもマッチ。FAIL ではなく WARN + 推奨フォーマットを出力し、3回連続 WARN で FAIL に昇格"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "運用負荷",
+    "screen": "development_rules.md",
+    "location": "development_rules.md 行126（120行制限ルール）",
+    "issue": "development_rules.md は現在126行で自己設定の120行上限を超過。改訂案①（G1-G9 に Step 0 参照追加）と改訂案④（G7 拡張）で更に14行以上追加され、約140行になる。canopy は150行で WARN のため即 FAIL にはならないが、自己ルール違反が常態化する。",
+    "spec_reference": "development_rules.md 行126「このファイルは120行以内を維持」+ sub_infrastructure.md §2.6 canopy 150行 WARN",
+    "actual": "現行126行 → 改訂後約140行（+14行）",
+    "suggestion": "G7 の拡張内容（3区分コマンド検証ロジック）を docs/rules/g7_mission_commands.md に委譲。development_rules.md には1行サマリー + 参照パスのみ残す。Step 0 参照は G1 の前に1行だけ追加し、個別ゲートへの追加は不要（G1 の前で一括参照）"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "運用負荷",
+    "screen": "改訂案④ §5.3 / v3→v4 移行",
+    "location": "review_package 行1978-1990",
+    "issue": "v3→v4 テンプレート移行に「2セッション後方互換」を設定しているが、mission_linter.sh v3.4 改訂版（改訂案④ §D）がミッションタイプ宣言と3区分コマンドを必須チェックする。後方互換期間中に v3 ミッションが linter に FAIL する可能性がある。",
+    "spec_reference": "review_package §5.3「既存キューの v3 ミッションはそのまま実行可（後方互換を2セッションのみ許容）」",
+    "actual": "mission_linter.sh が v3/v4 を判別するロジックが未記述",
+    "suggestion": "mission_linter.sh に v3/v4 判別を追加: `> ミッションタイプ:` 行がなければ v3 扱い → 3区分チェックスキップ。2セッション後（日数ベース or セッション番号ベース）に判別ロジックを削除して v4 必須化"
+  }
+]

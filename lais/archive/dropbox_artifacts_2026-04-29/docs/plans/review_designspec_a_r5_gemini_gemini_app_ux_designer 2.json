@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§1.1, §4",
+    "issue": "主要画面におけるローディング状態の定義が欠落しています。",
+    "suggestion": "S-10 GROWやS-14 Goal Detailなどのリスト画面で、データ取得中の状態を示すスケルトンUIやスピナーの仕様を定義してください。これが無いと、ユーザーはデータ読み込み中にフリーズしたと誤解する可能性があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§1.1, §4.4, §4.9",
+    "issue": "主要画面における空状態（Empty State）の定義が欠落しています。",
+    "suggestion": "S-10 GROWでタスクが0件の場合、S-20 TALKでチャット履歴がまだない場合など、コンテンツが空の時の表示を定義してください。ユーザーが次に行うべきアクションを促す（例：「最初のタスクを追加してみましょう」）グラフィックやテキストが必要です。Phase C対象外とありますが、MVPの初期体験として不可欠です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§1.1",
+    "issue": "ネットワークエラーなど、アプリ全体のエラー状態とリトライUIの定義が欠落しています。",
+    "suggestion": "API通信失敗時などに表示するエラーメッセージ、画面、およびリトライ（再試行）ボタンの共通コンポーネントを定義してください。Phase C対象外とありますが、オフラインやサーバーエラーはMVPでも発生しうるため、最低限のフォールバック設計が必要です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "N/A",
+    "issue": "プッシュ通知に関するUI/UX設計が一切定義されていません。",
+    "suggestion": "タスクのリマインダーやAIからのメッセージなど、アプリのエンゲージメントに不可欠なプッシュ通知について、オプトインのタイミング、通知の文面、タップ時の遷移先、設定画面での管理方法などを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§6.5",
+    "issue": "アクセシビリティに関して、Dynamic Type（フォントサイズの動的変更）への対応が未定義です。",
+    "suggestion": "ユーザーがOS設定でフォントサイズを変更した場合に、アプリ内のテキストサイズが追従し、レイアウトが崩れないことを保証するための設計ガイドラインを追加してください。特に複数行にわたるテキストや固定高さのコンポーネントで問題が発生しやすいため、具体的な対応方針が必要です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.3 S02-5",
+    "issue": "S-02 オンボーディングのアバター選択肢（3列）が、指定されたサイズとマージンでは標準的なモバイル画面幅（375px）に収まらない可能性があります。",
+    "suggestion": "アバター選択肢のレイアウト計��（(100px * 3) + (gap 24px * 2) = 348px）が、画面左右パディング（24px * 2 = 48px）を考慮すると、コンテンツ領域（327px）を超過します。アバターサイズ、gap、または列数を調整し、レイアウトが破綻しないことを確認してください。例えば、2列にするか、gapを縮小するなどの対策が考えられます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.5",
+    "issue": "S-12 Task Add（ハーフモーダル）で、テキスト入力フィールドにフォーカスした際のキーボード表示時の挙動が未定義です。",
+    "suggestion": "キーボードが表示された際に、モーダル全体が上にスライドするのか、モーダル内のコンテンツがスクロール可能になるのかなど、入力フィールドがキーボードに隠れないようにするための具体的な挙動を定義してください。特に画面下部にある「メモ」欄で問題となります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.4, §4.7",
+    "issue": "S-10 GROWやS-14 Goal Detailなど、リスト形式の画面における手動更新（Pull-to-refresh）のジェスチャーとUIが定義されていません。",
+    "suggestion": "ユーザーが画面を下に引っ張ってコンテンツを最新の状態に更新するためのPull-to-refreshジェスチャーをサポートし、その際のローディングインジケーターの挙動を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6",
+    "issue": "アプリ全体を通して、ハプティクス（触覚フィードバック）に関する設計が欠落しています。",
+    "suggestion": "タスク完了、ボタンのタップ、レベルアップ、重要なアラートなど、ユーザーのアクションに対する物理的なフィードバックとしてハプティクスを導入する方針を定義してください。iOS/Androidそれぞれのプラットフォーム標準（Core Haptics / HapticFeedbackConstants）に合わせた強度やパターンのガイドラインを設けることで、アプリの体感品質が向上します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§6.1",
+    "issue": "親子関係を持つ画面（例: S-10 → S-14）における、プラットフォーム標準の「スワイプで戻る」ジェスチャーへの対応が未定義です。",
+    "suggestion": "iOSの画面左端からのスワイプや、Androidのナビゲーションジェスチャーで前の画面に戻るインタラクションをサポートすることを明記してください。これにより、アプリの操作性がネイティブアプリとしてより自然になります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.1, §4.4 S10-10",
+    "issue": "ボトムタブバーの非アクティブ（Inactive）なタブにラベルが表示されない仕様は、AndroidのMaterial Designのガイドラインと異なります。",
+    "suggestion": "iOS/Android両プラットフォームでの一貫性と分かりやすさを考慮し、非アクティブなタブにもラベルを常に表示することを推奨します。アイコンだけでは機能が直感的に伝わりにくい場合があり、特に新規ユーザーの学習コストを増加させる可能性があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.2 S01-6",
+    "issue": "S-01 Authのパスワード入力フィールドに、入力内容を表示/非表示に切り替える機能がありません。",
+    "suggestion": "パスワード入力フィールドの右端に「目」のアイコンを配置し、ユーザーが入力したパスワードを確認できるトグル機能を追加してください。これはユーザビリティとアクセシビリティの観点から標準的な機能です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.5 S12-8",
+    "issue": "S-12の所要時間チップが横スクロール式のため、選択肢の発見可能性が低く、また任意の時間を入力する手段がありません。",
+    "suggestion": "よく使われる時間を初期表示で見えるように配置し、リストの最後に「カスタム」や「その他」の選択肢を追加して、ユーザーが任意の時間を入力できる機能を提供することを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.9",
+    "issue": "Undoスナックバーの持続時間が30秒と設定されており、一般的なUIパターンに比べて非常に長いです。",
+    "suggestion": "Undo操作の持続時間を5〜10秒程度に短縮することを検討してください。30秒間表示され続けると、他���UI要素を隠してしまったり、ユーザーが画面遷移した後の挙動が不確かになったりする可能性があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.4 S10-4",
+    "issue": "完了したタスクに打ち消し線を使用せず、文字色を`--text-secondary`に変更するのみの仕様は、完了状態の視認性が低い可能性があります。",
+    "suggestion": "デザイン原則「呼吸する表現」を尊重しつつ、完了状態がより明確に認識できるよう、文字色に加えてアイコンの変更や背景色の調整などで視覚的な差を強調することを検討してください。現状のコントラスト比（4.30:1）はAA基準をギリギリ満たしているものの、状態変化の認知しやすさは別の問題です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

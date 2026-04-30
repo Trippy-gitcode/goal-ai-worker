@@ -1,0 +1,50 @@
+[
+  {
+    "id": "R-001",
+    "verdict": "STAND",
+    "reason": "運営側は「利用規約」等の下線対応を主張しているが、本指摘は画面下部の「ログイン」リンクに対するものだ。インラインリンクの視認性確保は一部だけやっても意味がない。HTMLで即時修正可能なため棚上げは許さない。",
+    "harsh_comment": "自分の都合の良い箇所だけ見て「対応済み」と勘違いするのは三流の証拠。画面全体のリンクをくまなく確認しろ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "verdict": "WAIVE_IMPL",
+    "reason": "フォーカスリングの動的制御および正確なコントラスト調整は、静的モックアップの責務を超えている。Phase 4の実装時���CSSの:focus-visible等を用いて適切にコントラスト比3:1以上を確保すること。",
+    "harsh_comment": "実装時に「モック通りに作りました」と言い訳してコントラスト不足を放置しないよう、実装担当の首根っこを掴んでおけ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "verdict": "WAIVE_INTENT",
+    "reason": "s10における「時刻の直後にチェック円」という配置は、スワイプ操作の文脈を考慮した意図的設計としてPO/ADV間で合意済みであることを確認した。UX仕様書側を実態に合わせて更新すること。",
+    "harsh_comment": "意図的変更ならさっさと仕様書を直せ。ドキュメントと実装の乖離は後続フェーズで必ずバグの温床になるぞ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "verdict": "WAIVE_SPEC_UPDATED",
+    "reason": "累積修正リスト#21にて、s30_meのヒーロー領域をs10_growと一致させる修正が完了していることを確認した。これによりレイアウトの矛盾は解消されているため、本指摘は取り下げる。",
+    "harsh_comment": "最初からコンポーネントを共通化する意識を持て。コピペで済ませて後から辻褄を合わせるような設計は二度とするな。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "verdict": "WAIVE_INTENT",
+    "reason": "累積修正リスト#18にて、AI提案カードに左ボーダーを追加する対応が完了しており、これが現在の正のUXであると判断。バブルスタイルと記載されている仕様書側の記述を速やかに更新すること。",
+    "harsh_comment": "モックアップを正とするなら、古い仕様書の記述はただのゴミだ。レビューアを混乱させる前にドキュメントの掃除をしろ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "verdict": "WAIVE_IMPL",
+    "reason": "入力文字数に応じたボタンの活性/非活性（グレーアウト）の切り替えはJavaScriptによる動的制御が必須であり、静的HTMLモックアップでは表現不能。Phase 4での実装要件として引き継ぐ。",
+    "harsh_comment": "モックで表現できないからといって実装時に忘れるなよ。状態遷移のテストケースに必ず組み込んでおけ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  }
+]

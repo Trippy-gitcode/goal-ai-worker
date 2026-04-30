@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s00_splash",
+    "location": "ロゴ直下のサブコピー「あなたの人生を、あなたらしく」周辺",
+    "issue": "初見3秒でアプリの機能が伝わらない。抽象的なタグラインのみで、タスク管理/AIコーチ/目標達成などの具体が不明。",
+    "suggestion": "サブコピーを機能系の一文に差し替え（例:「AIと計画を立て、毎日のタスクと目標を進める」）。または3つの短い価値提案（AI相談/タスク自動提案/ゴール進捗可視化）をアイコン付きでロゴ下に配置（行間=1.5、各アイテム間=8px、ブロック下マージン=32px）。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "主要CTA「はじめる」ボタン文言",
+    "issue": "主要CTAの文言が抽象で、次に起こること（サインアップ開始）が直感しづらい。",
+    "suggestion": "ボタン文言を「無料ではじめる」または「サインアップ」に変更し、期待行動を明確化。ボタン下に「ログイン」リンクとの距離を16px→20〜24pxに拡大して主従をはっきりさせる。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s01_signin",
+    "location": "ページ冒頭の見出し/サブコピー周辺",
+    "issue": "サインアップ画面でも機能価値の補助説明がなく、初見ユーザーの理解が深まらない。",
+    "suggestion": "見出し下に短い価値提案（1行）を追加（例:「AIがタスクを提案し、目標達成をサポートします」）。フォーム下に安心材料の1行（例:「メールはログインのみに使用。通知はいつでも設定変更できます」）を追記。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "フッター主要CTA「次へ」",
+    "issue": "ボタン文言が全角2文字で、デザインシステムの推奨（ボタン=全角4〜8文字）より短く視認性が弱い。",
+    "suggestion": "文言を「次のステップ」または「続ける」に変更して可読性と視線誘導を向上。ボタンのfont-weightは他画面の主要CTAに合わ��て600に統一。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayリスト末尾の「+ タスクを追加」リンク",
+    "issue": "追加CTAがテキストリンクスタイルで見落とされやすい。主要行動に対する視線誘導が弱い。",
+    "suggestion": "アクセント系のpillボタン（bg: var(--accent-subtle)、fg: var(--accent)、角丸=999px、左右アイコン+文言）に昇格。もしくは右下にFAB（--z-fab）を設置。セクション見出し直下に配置して一貫性を確保。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "TodayセクションとGoalsセクション間の余白",
+    "issue": "セクション間マージンが約28pxで、DS §4.2の基準（≧32px）を下回りブロックの区切りが弱い。",
+    "suggestion": "Today末尾のマージンを32px以上に拡大（推奨: 40px）。同画面内のセクション区切りを32/40pxで統一して呼吸感と可読性を向上。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Today小���出し下のKPIテキスト「1 / 4 completed」(font-size:11px)",
+    "issue": "当日の進捗KPIが11pxで小さく、重要度に対して視認性が不足。",
+    "suggestion": "サイズを--font-size-sm(14px)に引き上げ、色は--text-secondaryに。数字部分のみfont-weight:600で強調。KPIはToday見出し行に右寄せで併記し、一読性を高める。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "入力バー右端 送信（➤）ボタン",
+    "issue": "非アクティブ時とアクティブ時の視覚差が弱く、主要CTAとしての存在感が不足しがち。",
+    "suggestion": "入力が1文字以上のとき、ボタンをブランドプライマリ（bg: var(--button-primary-bg), fg: var(--button-primary-fg)）に切替え。アイコンサイズは24px、パディングをやや拡張してタップ誘引を強化。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s13_task_detail",
+    "location": "ハーフモーダル内「編集」「削除」横並びボタン",
+    "issue": "非破壊（編集）と破壊（削除）が同列・同サイズで並び、誤タップリスクと視線の迷��を生む。",
+    "suggestion": "「削除」を1段下に分離し、セクション間余白32pxを確保。編集系は上段にまとめ、破壊系は遠ざける。削除はボタン幅を最小化し、サブラベルで確認を促す（例:「削除（確認あり）」）。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "OTHER",
+    "screen": "s12_task_add",
+    "location": "フッター主要CTA「作成」",
+    "issue": "ボタン文言が全角2文字で短く、行為対象が不明瞭（何を作成するのかが一瞥で分かりにくい）。",
+    "suggestion": "文言を「タスク作成」に変更（全角4文字以上）。主要CTAの役割を明確化し、コンテキストレスでも理解できるコピーに。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "OTHER",
+    "screen": "s15_goal_create",
+    "location": "フッター主要CTA「作成」",
+    "issue": "ボタン文言が短く対象が不明瞭。ゴール作成であることが即時に伝わりにくい。",
+    "suggestion": "文言を「ゴール作成」に変更（全角4〜6文字）。フォーム上部見出しとCTAの意味連動を高め、完了イメージを想起させる。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧下の行動ボタン群（AI相談/編集/削除）および「+ タスクを追加」",
+    "issue": "複数の次アクションが同等の視覚ウェイトで並び、どれが推奨行動か分かりにくい。「+ タスクを追加」もテキストリンクで埋もれがち。",
+    "suggestion": "推奨行動を1つに定義し階層化。例: 主要=「+ タスクを追加」（pill/アクセント）、副次=「AI相談」（accent-subtle）、三次=「編集」「削除」（outline/テキスト）。ボタン間隔=8px、ブロック上余白=24pxを確保。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

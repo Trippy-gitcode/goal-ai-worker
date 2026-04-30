@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§19.6 依存チェーン ↔ §18 連鎖更新マップ",
+    "issue": "e2e_fullflow_test.mdの依存先が§19.6ではproject_v1.mdのみになっているが、§18ではdesign_spec_v*.md/ux_redesign_v*.md/reference_v*.mdの変更時にもe2eテスト更新が必要と定義されており不一致。下流更新判定を「依存メタデータ」に依拠する旨が§19.6にあり、この不一致によりUX/デザイン/参照仕様変更時のテスト更新が見落とされる恐れが高い。",
+    "suggestion": "§19.6の依存チェーンを修正し、e2e_fullflow_test.mdの上流にproject_v1.mdだけでなくux_v1.md/design_spec_v1.md/reference_v1.mdを明示的に追加。あわせて§19.5ヘッダー「依存」欄へ複数ファイルの列挙を必須化。docs依存リンタ（例: scripts/docs_dep_lint.sh）を追加し、見落としがないようにcanopyでFAIL化する。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§19.4/§19.5/§7（L2影響範囲）/sub_testing.md §5",
+    "issue": "affected-tests.shはtest_map.yamlのtests値を--grepでマッチさせて実行するが、§19.4のe2e_fullflow_testテンプレートに「grepキー/テストIDをtest()タイトルへ必ず埋め込む」規定がない。結果としてテスト名にキーが含まれない場合、L2が無音でテスト未実行（Playwrightが0件でも成功として終了）し、影響範囲テストの実効性が崩れる。",
+    "suggestion": "§19.4 e2e_fullflow_testテンプレートへ「テストID/grepキー」列を追加し、各test()タイトルに必ず含める規則を明記（例: test('[arch-03] ○○', ...)）。test_map.yamlのtests値はそのgrepキーと1:1対応させる。affected-tests.shを拡張し、--grepで0件一致だった場合はFAILにするか、テストファイル直指定フォールバックを実装。さらにテスト名中のキー存在を検査するリンタ（scripts/test_id_lint.sh）を追加し、canopyで実行。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.5 仕様書ヘッダー標準",
+    "issue": "「依存」メタデータの存在・版数整合・循環の有無を機械検証する手段が定義されていない。現状のMarkdown行形式ではパースも不安定で、§19.6の「連鎖更新の判断基準」に実装的裏付けがない。",
+    "suggestion": "ヘッダ���をYAMLフロントマター化し、dependenciesを配列で持つ構造に変更（例: --- name: ..., version: v1.2.0, dependencies: [{path: docs/ux_v1.md, version: v1.1.0}] ---）。canopyでdocs_dep_lint.shを追加し、(1) 依存宣言必須 (2) バージョン表記必須 (3) 循環検出 (4) §18マップに対する不足依存の検出 を実装してFAIL化する。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5 仕様書ヘッダー標準",
+    "issue": "「依存: {上流ファイルのパス + バージョン}」の記法が単数前提に見え、複数依存の表記方法が曖昧。",
+    "suggestion": "複数依存を前提とした表記に明確化し、YAML配列での列挙を推奨（例を差し替え）。既存Markdown記法を残す場合でも「カンマ区切りで複数可」と明文化し、canopyリンタで複数可を許容する。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7 競合ベンチマーク要件",
+    "issue": "ベンチマーク出力がMarkdownテーブルのみで、機械可検証に不向き。直接競合5社以上や「Lais方針」列の全行充足、差別化3点以上などの完了基準を自動判定できないため、品質ゲートとしての実効性が弱い。",
+    "suggestion": "Markdownに加え、同内容のbench_{domain}.yaml（またはJSON）を必須化。構造: apps[], matrix[], mapping[]等。scripts/bench_lint.shを追加し、(1) 直接競合>=5 (2) Matrix全行にLais方針非空 (3) 差別化>=3 を検査。canopyに組み込みFAIL化する。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.7 ベンチマーク完了基準 ↔ §13.2 コスト制御",
+    "issue": "Phase 0完了基準の「8ペルソナ×2モデルAIレビュー」は最低16呼び出しが必要。一方§13.2は1セッションあたり最大10呼び出し制限。セッション跨ぎ実施が前提なのかが不明確。",
+    "suggestion": "「ベンチマークAIレビューは複数セッションに分割可。上限超過時はPhase 0に限りPO事前承認で上限緩和可」などの運用ルールを§19.7に追記。metrics.jsonlでレビュー呼び出し数の記録を必須化し、review_gate.shで日単位/セッション単位の上限遵守を補助する。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 e2e_fullflow_test.md テンプレート",
+    "issue": "テスト分離に関する規定（初期化/クリーンアップ/テストデータ一意化/共有状態の禁止）がテンプレート内に明記されていない。",
+    "suggestion": "e2e_fullflow_testテンプレートに「テスト分離」の必須セクションを追加（例: セッションごとに一意なテストユーザー/テストデータ、各ケースでの前処理・後処理、順序依存の禁止、再実行可能性の要件）。sub_testing.md §3のアンチパターン2/8と相互参照する。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md テンプレート",
+    "issue": "APIの共通エラーモデル、レート制限、リトライ/タイムアウト/冪等性の設計がテンプレートに含まれていない。E2E・L2の再現性や異常系テスト設計が不安定になる。",
+    "suggestion": "reference_v1.mdに「§7 エラーモデル/リトライ・タイムアウト/冪等性/レート制限」を追加。共通エラースキーマ（code/message/details/traceId等）、HTTPステータスの準拠表、Idempotency-Key使用方針、クライアントの再試行ポリシーを規定。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 design_system.md テンプレート",
+    "issue": "アクセシビリティの定量要件（コントラスト比/WCAG達成基準）やフォーカスリング/ホバー/無効状態などのステートトークンの数値定義が欠落。",
+    "suggestion": "design_system.mdに「§9 アクセシビリティ基準」を追加し、WCAG 2.1 AA（通常4.5:1、Large 3:1、UIコンポーネント3:1）を明記。state tokens（:hover/:active/:focus/:disabled）のelevation/opacity/border/outline幅などをトークン化して列挙。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 e2e_fullflow_test.md テンプレート ↔ §12 仕様書ID付番",
+    "issue": "e2eテストケースとSPEC-ID（§12）のマッピングをテンプレート上で要求していないため、仕様変更トレーサビリティが弱い。",
+    "suggestion": "e2e_fullflow_test.mdの各ケースにSPEC-ID必須列を追加し、testsのタイトル/コメントにも[SPEC-XXXX]を付与する規約を明記。canopyにSPEC参照件数の突合（§12の例）を取り込み、乖離が大きい場合はFAIL化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5 仕様書ヘッダー標準",
+    "issue": "一意なドキュメントID（DOC-ID）がなく、参照や監査時の識別がファイル名/版に依存している。",
+    "suggestion": "ヘッダーにDOC-ID（例: APP-PROJECT-v1, APP-UX-v1等）を追加し、依存宣言や差分ログでの識別キーとして使用。spec_changelog.mdにもDOC-IDを記録し、変更追跡を簡易化する。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.6 参照表記法",
+    "issue": "セクション番号ベースの参照は改番でリンク切れや誤参照が生じやすい。",
+    "suggestion": "各主要見出しに安定アンカー（例: §1をh1#ux-structure等）を付与し、「ファイル名 §番号（#アンカー）」の二段参照に変更。docs_dep_lint.shで存在確認を自動化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 system_map.md テンプレート",
+    "issue": "「ファイル変更チェックリスト」とL2影響範囲（test_map.yaml）更新の接続が規定されていない。変更時にtest_map.yaml更新が漏れる恐れ。",
+    "suggestion": "system_map.mdのチェッ��リストに「tests/test_map.yamlの該当マッピングを更新」項目を追加。変更箇所がtest_map.yamlで未マップだった場合、affected-tests.shがFAILすることを併記して運用整合を高める。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5 仕様書ヘッダー標準",
+    "issue": "「dev-system準拠: docs/plans/dev_system_spec.md §19」が相対パス/固定文字列で、アプリ側の配置差異や将来のリネームで参照が不安定。",
+    "suggestion": "ヘッダーにdev-systemのバージョンとリポジトリURL/コミットハッシュを併記（例: dev-system: v3.0 @ https://.../commit/xxxx）。review_gate.shでバージョン整合のWARN/FAIL条件を拡張。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.7 差別化マッピング",
+    "issue": "「対応セクション」の表記形式が規定されていないため、追跡性にばらつきが出る。",
+    "suggestion": "対応セクションは「{ファイル名} §{番号}（#アンカー）」形式で統一する規定を追記。bench_lint.shで該当見出しの存在を検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7 競合ベンチマーク要件",
+    "issue": "ベンチマーク完了基準（直接競合5社以上、Lais��針全行、差別化3点以上）を合否判定する品質ゲートが定義されていない。Phase 0完了条件の実効性が不足。",
+    "suggestion": "canopyにbench_lint.sh（R-005で提案）を統合し、project_v1.mdのステータスをCONFIRMEDに変更可能なのはbench_lint PASS時のみとする運用を§19.7に明記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.4 design_spec_v1.md テンプレート",
+    "issue": "画面単位の仕様における「コンポーネント状態（enabled/disabled/error/loading）とバリアント」の列挙が明示されていないため、UI状態のE2E検証観点が抜けやすい。",
+    "suggestion": "各画面仕様セクションに「状態/バリアント」小節を追加し、主要コンポーネントの状態別スタイル差分（トークン参照）を表で列挙。否定検証に繋がる観点をe2e_fullflow_testへ自動展開できるようにする。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5/§19.6",
+    "issue": "依存のバージョンは記載必須だが、互換性ポリシー（例: ^1.3を許容/メジャーアップ時の見直し必須）が未定義。",
+    "suggestion": "SemVer互換方針を追記し、ヘッダーdependenciesにversion_rangeを許容（例: ^1.3）。docs_dep_lint.shでメジャー差異検出時はWARN/FAILを切替。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

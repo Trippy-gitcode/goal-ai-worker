@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "R2.1.1 §2.ε'-1",
+    "issue": "deploy.sh の完全パッチから、ビルドコマンド（eval \"$BUILD_CMD\"）、canopy.sh の実行、L1スモーク、L2影響範囲テストの実行ステップが完全に消失しています。これにより、ビルドされずに古い dist がデプロイされるかエラーになり、デプロイ前の品質ゲートがすべてバイパスされる致命的な構造的欠陥となっています。",
+    "suggestion": "deploy.sh に eval \"$BUILD_CMD\"、bash \"$APP_DIR/tests/smoke/canopy.sh\"、L1/L2テストの実行ステップを復元してください。STATUS検証は canopy.sh 実行後に配置するか、canopy.sh 内で STATUS を更新した後に評価するよう順序を調整してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "R2.1.1 §2.γ'-7",
+    "issue": "append_deploy_fail.sh の awk スクリプトで、$0 ~ \"^### \" mid \":\" により in_block=1 となった直後、同じ行が in_block && /^### [A-Z0-9-]+:/ && NR>1 の条件にもマッチするため、即座に in_block=0 にリセットされてしまいます。結果として、次の行にある STATUS が置換されることは絶対にありません。",
+    "suggestion": "ミッションブロックの終了判定を「次のミッションヘッダ（^### ）が来た時」とし、現在のミッションヘッダ行自身で in_block=0 にならないようロジックを修正してください。例: if ($0 ~ \"^### \" mid \":\") { in_block=1; next } if (in_block && /^### /) { in_block=0 }",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "R2.1.1 §2.β' (G17 実装)",
+    "issue": "Playwright の JSON レポーターが出力する timestamp はミリ秒を含む ISO 8601 形式（例: ...T08:15:32.123Z）ですが、deploy.log はミリ秒なしです。awk の文字列���較で `.` (ASCII 46) < `Z` (ASCII 90) となるため、テストがデプロイ直後に実行されても p < d が真となり、常に「テストがデプロイより前」と誤判定されて FAIL します。",
+    "suggestion": "awk 内でタイムスタンプのミリ秒部分を削除（例: sub(/\\.[0-9]+Z$/, \"Z\", p)）してから比較するか、両方を epoch 秒に変換して数値比較するロジックに変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "R2.1.1 §2.η'",
+    "issue": "STATUS を自動遷移させるロジックを canopy_common.sh::check_test_pass に組み込むとされていますが、dev_system_spec.md や sub_infrastructure.md の既存の canopy_common.sh はベタ書きのスクリプトであり、check_test_pass という関数は存在しません。関数が定義・呼び出されないため、自動遷移は機能しません。",
+    "suggestion": "canopy_common.sh を関数化して再構築するか、既存のベタ書きスクリプトの G4（テスト全PASS）検証ブロック内に STATUS 自動遷移ロジックを直接インラインで組み込むよう修正指示を変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "R2.1.1 §2.θ' および §6.9",
+    "issue": "完了コマンドが cmd-unit, cmd-e2e, cmd-realworld の3区分に変更されましたが、mission_linter.sh は依然として cmd[0-9] を検索する仕様のままです。また、N/A や SKIP が指定された場合、bash コマンドが含まれないため G7 ゲートで「bashコマンドなし」として誤 FAIL します。",
+    "suggestion": "mission_linter.sh の正規表現を cmd-(unit|e2e|realworld) に対応させ、値が N/A または SKIP で始まる場合は bash コマンドの存在チェックをスキップする（PASS 扱いとする）よう、mission_linter.sh の修正パッチを §6 に追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "R2.1.1 §2.β' (check_tdd)",
+    "issue": "check_tdd 関数は unit か e2e のどちらか一方の証跡が存在し、RED/GREEN 条件を満たせば has_trace=1 となり PASS します。しかし、中・高リスク系ミッションでは cmd-e2e が必須であり、e2e 証跡がない場合は FAIL とすべきです。リスクレベルに応じた必須チェックが欠落しています。",
+    "suggestion": "check_tdd 内で mission_risk_classifier.sh を呼び出し、中・高リスクの場合は e2e 証跡の存在を必須とするロジックを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "ROBUSTNESS",
+    "location": "R2.1.1 §2.ι'",
+    "issue": "pre-commit 内で dev-system.yaml の subdirs を awk でパースしていますが、インデントのスペース数やフォーマットの揺れ（例: `- lais` の前のスペースが2つ以外）に弱く、正しく抽出できないリスクがあります。プロジェクト内で yq が標準利用されているため、一貫性がありません。",
+    "suggestion": "awk によるパースを廃止し、yq e '.subdirs[]' dev-system.yaml を使用してディレクトリリストを抽出する方式に統一してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "R2.1.1 §2.ζ'-1",
+    "issue": "L1-2 が「認証 / セッション復元」と定義され、G17 スクショに auth.png が必須化されましたが、「既存セッションの復元」の場合に auth.png として何を撮影すべきか（ログイン画面か、ログイン後のプロフィール要素か）が定義されていないため、ENG が混乱します。",
+    "suggestion": "auth.png の撮影対象について、「ログイン画面、またはログイン済みであることを示す要素（プロフィールアイコン等）」のように具体的な許容条件を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  }
+]

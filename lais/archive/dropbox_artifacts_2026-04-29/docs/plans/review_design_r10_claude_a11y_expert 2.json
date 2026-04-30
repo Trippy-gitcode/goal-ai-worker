@@ -1,0 +1,4 @@
+[
+  {"id":"R-001","severity":"LOW","category":"MISSING","location":"§5","issue":"コントラスト検証表が未添付のまま。v1.0 までに必須。","suggestion":"v1.0 までに各テーマのコントラスト検証表を §5 末尾に追加。","model":"Claude Opus 4.6","persona":"a11y_expert"},
+  {"id":"R-002","severity":"LOW","category":"BEST_PRACTICE","location":"§8.7 タブ ARIA","issue":"nav + aria-current は妥当だが、実装ミスで `<ul>` 省略・`<a>` ではなく `<button>` にした場合 SR の読み上げが劣化する。","suggestion":"§8.7 に推奨 DOM 構造（nav>ul>li>a[aria-current=page]）を明記。","model":"Claude Opus 4.6","persona":"a11y_expert"}
+]

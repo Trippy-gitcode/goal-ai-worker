@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.1–5.4（--focus-ring定義）, §8.1, §8.2, §8.8, §8.13",
+    "issue": "フォーカス可視化をoutline方式に統一と明記している一方、複数箇所でbox-shadow: var(--focus-ring)の記述が残存し、--focus-ring自体もbox-shadow値として定義されている。入力フィールドの「border --accent + --focus-ring」記述も実装手段が不明瞭。",
+    "suggestion": "フォーカス用トークンをoutline前提に再定義し、全箇所を置換する。例: --focus-outline-color, --focus-outline-width, --focus-outline-offset を各テーマで定義（Night Sky例: #58A6FF, 3px, 2px）。コンポーネント（ボタン/入力/トグル/状態マトリクス）の記述を outline: var(--focus-outline-width) solid var(--focus-outline-color); outline-offset: var(--focus-outline-offset); に統一。--focus-ring（box-shadow値）は非推奨として残すか、完全削除する。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.1, §4.2",
+    "issue": "スペーシングスケールに12px/20px等の中間値トークンがなく、本文で「タスク間余白: 20px」など固定値指定が出現しているためトークン不整合が生じる。",
+    "suggestion": "スペーシングスケールを拡張し、中間値をトークン化する。例: --space-2sm: 12px, --space-md-plus: 20px, --space-2lg: 32px。本文中の固定値（20pxなど）を対応トークン参照に置換して実装一貫性を確保。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§8.1（Secondary/semantic subtleボタン）, §8.3（チップ）, §5.2–§5.3（ライト系テーマ）",
+    "issue": "ライト系テーマで「アクセントのsubtle背景上にアクセント色テキスト」を使用するUI（Secondaryボタン/チップ等）は、背景と文字の色相・明度が近くなるため、テキストコントラストが4.5:1を下回るリスクが高い。",
+    "suggestion": "subtle系上のテキスト専用トークンを追加し、テーマ別に4.5:1を担保する。例: --on-accent-subtle, --on-danger-subtle 等。代替としてsubtle背景の不透明度を引き上げ（例: 0.26→0.32）またはテキス��色を--text-primaryにフォールバックするガイドラインを明記。主要組合せのコントラスト表（各テーマ×Secondary/Chip）を追記し、AA基準充足を確認。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.13（状態マトリクス）, §2.1–§2.3",
+    "issue": "リスト行/カード/メニューなど“中立面”のhover/pressed用トークンが未定義。現状はopacityやaccent-subtleで代替の記述があるが、デスクトップ操作やPWAでの一貫性確保が難しい。",
+    "suggestion": "中立面のインタラクション用に共通トークンを追加。例: --surface-hover, --surface-pressed（各テーマでrgbaの重ねを定義。ダーク: rgba(255,255,255,0.06/0.10)、ライト: rgba(0,0,0,0.04/0.08)）。行ハイライトやメニュー項目、カード押下時はこれらを参照するガイドを明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§6.1",
+    "issue": "アイコンの状態色で「押下=--accent-hover」と記載されており、他コンポーネントのpressed定義（--accent-pressed）と不一致。",
+    "suggestion": "押下時のアイコン色を --accent-pressed に統一。6.1の表記を「非アクティブ=--text-secondary / アクティブ=--accent / 無効=--text-disabled / 押下=--accent-pressed」に修正。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§4.4, §8.6, §8.12a",
+    "issue": "トーストとUndoスナックバーのz-indexがどちらも--z-toast=700で同値。優先順位（スナックバー優先）は仕様にあるが、DOM順序依存となり、バグ時に重なり競合の恐れがある。",
+    "suggestion": "Undoスナックバー専用の層を追加し、トーストより上に設定。例: --z-snackbar: 710。コンポーネント定義でz-index参照を分離（トースト=--z-toast、スナックバー=--z-snackbar）して視覚優先を強制。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§8.11（CSS）, §8.13（状態マトリクス: loading記述）",
+    "issue": "スケルトンの色指定が本文では「--bg-disabled ⇆ --bg-elevated」だが、実装CSSは「--bg-secondary / --bg-elevated」を使用しており不一致。",
+    "suggestion": "どちらを正式とするか決定し、両箇所を統一。推奨: 視認性の高い --bg-secondary ⇆ --bg-elevated を採用し、状態マトリクスの文言を修正。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2.2",
+    "issue": "テキストリンクのvisited状態用トークンが未定義。PWA/デスクトップ環境では情報設計上の区別が有用。",
+    "suggestion": "リンクvisited色トークンを追加。例: --link-visited（各テーマでaccentより僅かに暗い/彩度低い値）。実装ガイドにa:visited { color: var(--link-visited) } + underline維持を追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§6.1",
+    "issue": "アイコンサイズ/線幅が数値で記述のみで、トークン未定義。テーマやメディアクエリでの一括調整がしにくい。",
+    "suggestion": "アイコン用トークンを追加。例: --icon-size-sm: 20px, --icon-size-md: 24px, --icon-size-lg: 32px, --icon-stroke-width: 1.5px。コンポーネントは原則トークン参照とする。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2（ボーダー系）, §8（各コンポーネント）",
+    "issue": "ボーダー幅が全体で1px前提だが、幅用トークンが存在しない。forced-colorsや高解像度環境では幅の一括調整需要がある。",
+    "suggestion": "ボーダー幅トークンを追加し、参照に切替。例: --border-width-1: 1px, --border-width-2: 2px。入力/カード/タブバー等の定義を border: var(--border-width-1) solid var(--border-strong) のように統一。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  }
+]

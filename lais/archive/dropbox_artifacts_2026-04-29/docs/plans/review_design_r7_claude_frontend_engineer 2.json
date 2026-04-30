@@ -1,0 +1,5 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"FEASIBILITY","location":"§5.0 setTheme","issue":"サーバー同期を fetch で書いたが、認証トークン（Cookie/Bearer）の扱いが未記載。実装時にどう認証するか不明。","suggestion":"§5.0 に『認証は Cookie 同送または Bearer トークン注入。詳細は API 仕様書参照』を追記。","model":"Claude Opus 4.6","persona":"frontend_engineer"},
+  {"id":"R-002","severity":"MEDIUM","category":"MISSING","location":"§9 / §5","issue":"各テーマで使う --accent / --danger 等の検証 (contrast 実測) が §5 内のコメントに散在。検証サマリー表が一覧化されていない。","suggestion":"§5 末尾にコントラスト検証表を追加（各テーマ × 主要組み合わせ）。","model":"Claude Opus 4.6","persona":"frontend_engineer"},
+  {"id":"R-003","severity":"LOW","category":"BEST_PRACTICE","location":"§8.11 shimmer keyframes","issue":"shimmer のキーフレーム名を `lais-shimmer` にしているが、仕様書内で名前空間プレフィックス(`lais-`)のルールが統一されていない。","suggestion":"§8 冒頭に『仕様書で定義する keyframes/class はすべて `lais-` プレフィックス必須』を追記。","model":"Claude Opus 4.6","persona":"frontend_engineer"}
+]

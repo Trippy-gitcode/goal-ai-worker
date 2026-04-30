@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3.1 / 3.3",
+    "issue": "ルートレベルのコード分割がなく、S01Auth とその依存（supabase-js など）が初期バンドルに同梱されるため、スプラッシュ表示時点でも数十KB〜100KB級の不要コードを読み込む可能性がある。初回描画/TTI の悪化を招く。",
+    "suggestion": "- 画面コンポーネントを動的 import で遅延読込（Preact.lazy + Suspense など）し、/auth アクセス時のみ S01Auth を取得する。\n- 画面遷移直前にプリフェッチ（リンク hover/focus/touchstart や viewport in で import('./screens/S01Auth.jsx')）。\n- 認証アクション（signIn/signUp）も遅延 import（S01Auth マウント時に import、または初回フォーカス/入力時にウォームアップ）。\n- これにより supabase-js を初期バンドルから分離し、FCP/TTI を短縮。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "3.2",
+    "issue": "auth.js が import 時に副作用（getSession 実行と onAuthStateChange 購読）を起こすため、このモジュールを参照するだけでネットワーク I/O と���ローバル購読が発生する。Router のコード分割がない現状では初期表示時に必ず叩かれ、無駄な往復と初期負荷増に繋がる。",
+    "suggestion": "- 副作用を関数化（bootstrapAuth など）して App ルートの useEffect で1回だけ実行。HMR/再マウント時の多重起動を防ぐためのシングルトンガードを設ける。\n- S01Auth 側は signIn/Up など「純粋なアクション」だけをインポートし、セッション初期化はアプリ起動時に限定。\n- 可能なら idle 時に getSession をウォームアップ（requestIdleCallback）して、主導線の操作と競合しないようにする。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.2",
+    "issue": "onAuthStateChange の購読解除が実装されていない。SPA では単一購読でも動作するが、HMR 環境では重複購読・リーク・重複 setState による無駄な再レンダリングが起きうる。",
+    "suggestion": "- 購読時に unsubscribe を受け取り、モジュール外へ公開 or bootstrapAuth から返す。\n- App ルートで一度だけ購読し、unmount/HMR dispose で unsubscribe を確実に実行。\n- dev 環境では import.meta.hot?.dispose で購���解除、二重起動防止のフラグを設置。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.2 / 3.3",
+    "issue": "auth.js が @preact/signals を常に import し、かつセッション初期化の副作用と結合しているため、S01Auth が signIn/Up だけを必要とする場合でも signals を含む重めの依存がチャンクに入りやす���（ツリーシェイク阻害）。",
+    "suggestion": "- モジュール分割：auth.actions.js（signIn/Up/Out のみ、副作用なし）と auth.state.js（signals と onAuthStateChange/getSession を含む）に分離。\n- S01Auth は auth.actions.js のみを import。App ルートで auth.state.js の bootstrapAuth を1回呼ぶ。\n- パッケージに sideEffects:false を設定し、未使用エクスポートの除外が確実に働くようビルド設定も確認。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3（HTML/head 相当）",
+    "issue": "Supabase への最初のリクエスト時レイテンシ削減のための接続最適化（preconnect/dns-prefetch）が未提示。特にモバイル回線では初回 TLS ハンドシェイクが体感劣化要因になりやすい。",
+    "suggestion": "- index.html の <head> に preconnect/dns-prefetch を追加：\n  <link rel=\"preconnect\" href=\"https://<your-project>.supabase.co\" crossorigin>\n  <link rel=\"dns-prefetch\" href=\"https://<your-project>.supabase.co\">\n- 認証ルートを遅延読込する場合は、/auth 遷移直前の idle 時に軽量フェッチ（例: getSession）をプリウォームして TTFB を短縮。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.3",
+    "issue": "text/password 入力に onInput と onChange を両方付与しており、ブラウザや入力条件（オートフィル/IME確定）によっては同一変更に対して2回 setState が発火し余計な再レンダリングが起きる可能性がある。",
+    "suggestion": "- 片方に統一し、オートフィル検知は別手段（オートフィル擬似クラスの animationstart ハック、または短い setTimeout 後の値同期）に切り出す。\n- もしくは重複検知用フラグで直近の同一値更新を無視し、再レンダリングを抑制。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.1",
+    "issue": "AuthRoute で URLSearchParams を毎レンダリングごとに生成しており、将来 URL 変化が頻繁な場合に不要なパースコストになる（現状は微小だが積み重ねを避けたい）。",
+    "suggestion": "- url を依存に useMemo で mode を算出（もしくは preact-router の props から mode を直接受け取る専用ルートにする）ことで、不要な再計算を回避。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

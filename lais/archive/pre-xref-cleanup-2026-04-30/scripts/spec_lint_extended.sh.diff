@@ -1,0 +1,20 @@
+--- /Users/futoshi/Desktop/goal-ai-worker/lais/archive/pre-xref-cleanup-2026-04-30/scripts/spec_lint_extended.sh	2026-04-30 21:22:52
++++ /Users/futoshi/Desktop/goal-ai-worker/scripts/spec_lint_extended.sh	2026-04-30 21:25:42
+@@ -3,7 +3,7 @@
+ # MISSION-G49-PKG Phase 2.2（PD-111 機械ゲート補助）
+ #
+ # 用途:
+-#   仕様書（dev_system_v34_package.md / development_rules.md / sub_*.md 等）の
++#   仕様書（core_spec.md / archived legacy v34 spec / development_rules.md / sub_*.md 等）の
+ #   grep ベース矛盾検出 + 章番号連続性 + 必須セクション存在チェック。
+ #   pre-commit に結線、CRITICAL 検出で BLOCK。
+ #
+@@ -23,7 +23,7 @@
+ #   exit: 0 (PASS) / 1 (CRITICAL) / 0 (WARN は通過)
+ #
+ # 根拠:
+-#   - lais/verify/dev_system_v34_package.md §C1.5 / §2.25 / §C0-C6
++#   - core_spec.md §3 / §6 (legacy v34 spec §C1.5 / §2.25 / §C0-C6, archived 2026-04-30)
+ #   - docs/po-decisions.md PD-111
+ 
+ set -eu

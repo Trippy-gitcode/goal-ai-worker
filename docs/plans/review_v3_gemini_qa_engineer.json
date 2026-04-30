@@ -1,0 +1,138 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "sub_adv_protocol.md → §1 書き込みホワイトリスト",
+    "issue": "The spec allows ADV to modify `development_rules_app.md` and `CLAUDE.md` without PO approval. These files define quality rules and contracts checked by automated gates. This contradicts the 'quality first' and PO-approval principles, as it would allow an AI agent to silently disable or alter quality gates, creating a major governance loophole that could lead to deploying defective code.",
+    "suggestion": "Require PO approval for any changes to `development_rules_app.md` and `CLAUDE.md`. Update the whitelist to mark these files as '必須' (Required) for PO approval."
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §10.2 バージョンpin方式",
+    "issue": "The rule states that a dev-system version mismatch will be a WARN, escalating to a FAIL if ignored for 3 sessions. However, there is no described mechanism or implementation in `canopy_common.sh` to track the number of sessions a warning has persisted. The check only ever produces a WARN, making the escalation rule unenforceable.",
+    "suggestion": "Implement a mechanism to track persistent warnings, for example by writing a timestamp or session ID to a file (e.g., `.canopy_warnings`) and having `canopy_common.sh` check its age or count. Alternatively, remove the escalation rule to reflect the actual implementation."
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → §2.6 canopy_common.sh",
+    "issue": "The G8 TDD evidence check identifies the latest mission by grepping for 'STATUS: IN_PROGRESS' or 'STATUS: DONE'. A mission that has just been started and is still in the default 'QUEUED' state (or has no status tag) will be skipped, allowing an ENG agent to bypass the TDD check for the first part of its work.",
+    "suggestion": "Modify the grep pattern in `canopy_common.sh` to identify the last mission entry in `session_progress.md` that is not explicitly marked as 'DONE' or archived, ensuring the currently active mission is always checked."
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "sub_system_map.md → §1 アプリ起動シーケンス",
+    "issue": "The app startup sequence states '各ステップは独立。1つが失敗しても他は実行される' (Each step is independent; if one fails, others still execute). This is ambiguous and potentially risky. For instance, if `loadIdentity()` fails, `loadTasks()` will likely fail or fetch incorrect data, leading to cascaded errors shown to the user. The desired behavior in case of partial failure is not clearly defined.",
+    "suggestion": "Define the dependency graph for startup steps explicitly. Specify which failures are recoverable and which should halt the sequence or trigger a specific error state (e.g., redirect to login if identity fails)."
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → §2.9 rollback.sh",
+    "issue": "The `rollback.sh` script automates reverting commits and re-deploying the previous version. However, it does not define what should happen if the re-deploy step fails. This could leave the production environment in an inconsistent state (codebase is rolled back, but the failed version is still live).",
+    "suggestion": "Add a verification step after the re-deploy within `rollback.sh`. If verification fails, the script should exit with a clear error message and instructions for manual intervention, which should also be added to the `incident_runbook.md`."
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §8 C2デプロイフロー",
+    "issue": "The C2 deploy flow executes `canopy.sh` (which runs linting and source checks) *after* the potentially time-consuming `build.cmd`. Since `canopy.sh` operates on source files, not build artifacts, running it before the build would provide faster feedback and fail earlier, saving CI resources.",
+    "suggestion": "Change the order in `deploy.sh` to run `canopy.sh` before `eval \"$BUILD_CMD\"`."
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §12 canopyでの検証",
+    "issue": "The section describes a check for linking spec IDs to tests, providing a shell command snippet. However, this snippet only uses `echo` to print the counts. It is not integrated into `canopy.sh` as a real gate that can cause a FAIL, making it an informational check rather than an enforced quality gate.",
+    "suggestion": "Integrate this logic into `canopy_app.sh` or `canopy_common.sh`. Add a rule that fails the gate if the ratio of tested specs to total specs falls below a certain threshold (e.g., 95%)."
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → §2.6 canopy_common.sh",
+    "issue": "The G4 check (`npx playwright test`) redirects stderr to `/dev/null`. While this may make the output cleaner, it suppresses valuable error messages if the Playwright runner itself fails for reasons other than a test failure (e.g., configuration error, out of memory). This makes debugging CI failures harder.",
+    "suggestion": "Remove `2>/dev/null` from the G4 check command in `canopy_common.sh` to ensure all error output is logged."
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §6 承認ルール",
+    "issue": "The hotfix path is limited to '連続2セッションまで' (up to 2 consecutive sessions). The specification does not define the cool-down period required before the hotfix path can be used again, leaving it open to interpretation.",
+    "suggestion": "Specify a cool-down period, for example, 'After two consecutive sessions using the hotfix path, at least one regular session (🟡中 or 🔴高 risk) must be completed before it can be used again.'"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → §2.13 changed-files-allowlist.sh",
+    "issue": "The script's fallback mechanism to find changed files is `git diff --name-only HEAD~1`. This is brittle because a single mission can often involve multiple commits. The fallback would only check files changed in the very last commit, missing changes from earlier commits in the same mission.",
+    "suggestion": "Change the fallback to a more robust method, such as `git diff --name-only $(git merge-base origin/main HEAD)..HEAD`, to compare against the main branch, which correctly captures all changes in a feature branch."
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "COMPLETENESS",
+    "location": "sub_adv_protocol.md → §9 ミッションステータス管理",
+    "issue": "The defined mission statuses (`QUEUED`, `IN_PROGRESS`, `BLOCKED`, `DONE`) do not include a state for missions that are intentionally abandoned or cancelled by the PO. This can lead to clutter in the `session_progress.md` file.",
+    "suggestion": "Add a `CANCELLED` status to the list of official mission statuses."
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → §2.14 review_gate.sh",
+    "issue": "The `review_gate.sh` script scans all files matching `docs/plans/review_*.json`. This means it will re-evaluate old review files from previous sessions. If a CRITICAL issue was accepted or resolved without removing the file, it could cause future runs to fail incorrectly.",
+    "suggestion": "Modify the script to only scan review JSON files that have been added or modified since the last git tag, aligning its scope with the current work being validated."
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "sub_system_map.md → §2 データフロー",
+    "issue": "The data flow describes an optimistic UI pattern with a merge strategy of 'API優先' (API priority). This is ambiguous. It does not specify how to handle complex conflict scenarios, such as when a user edits an item locally that has been deleted on the server.",
+    "suggestion": "Provide a brief but clear definition of the merge logic for at least 2-3 common conflict scenarios (e.g., local edit vs. server delete, local edit vs. server edit)."
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §4.1 ゲート一覧",
+    "issue": "The G3 quality gate for test count has a failure threshold of >±20% deviation from the expected number. This is a very large tolerance and could allow a significant number of tests (e.g., 24 out of 120) to be accidentally deleted without triggering the gate.",
+    "suggestion": "Reduce the tolerance to a stricter value, such as ±5%, or implement a tiered system where >5% is a WARN and >10% is a FAIL."
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §18 仕様書の依存関係",
+    "issue": "The document provides a detailed and valuable dependency map for manual change propagation. However, it does not define a process or assign responsibility for keeping this map accurate as the system architecture and file structure evolve, creating a high risk of it becoming outdated and misleading.",
+    "suggestion": "Add a step to the '棚卸し' (inventory) process (§15.3) or the spec review flow (§14) to explicitly validate and update the dependency map in §18."
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §1.3 バグ対応フロー",
+    "issue": "For simple bugs, the flow states 'POがENGに直接伝える' (PO tells ENG directly). This is ambiguous and contradicts the primary workflow where ADV acts as the intermediary and creates formal missions in `session_progress.md`. It's unclear what 'directly' means (e.g., chat message?) and how this informal instruction is tracked.",
+    "suggestion": "Clarify the process. Either remove this exception and route all bug reports through ADV, or define the 'direct' channel and require ENG to immediately create a formal mission record in `session_progress.md` based on the PO's instruction."
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "sub_infrastructure.md → §2.10 report_lint.sh",
+    "issue": "The `report_lint.sh` script is configured to lint `instructions/results/session_history.md`. This means it lints the entire history of all past reports on every run, which is inefficient and may re-flag old, accepted reports. The linting should apply only to the report for the currently completed mission.",
+    "suggestion": "Modify the process so that ENG generates a mission-specific report file first. The linter should run on this new file. After passing, the new report can be appended to the session history."
+  }
+]

@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§8.1 ボタン",
+    "issue": "Danger（塗りつぶし）でhover/pressedの色指定にcolor-mix()を直接使用しており、テーマ別の制御がしづらい上、iOS/Safari系での互換性・forced-colors時の代替が不明確。",
+    "suggestion": "Primaryと同様にDanger用の専用トークンを追加し、各テーマで事前計算値を割り当てる。例: --button-danger-bg, --button-danger-bg-hover, --button-danger-bg-pressed（AAコントラストを満たす値をテーマごとに検証）。コンポーネント定義からcolor-mix()は排除し、forced-colors時はButtonのoutline優先で可視化。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.1 ボタン／§2.3 セマンティックカラー",
+    "issue": "セマンティックのsubtle系（success/danger/warning/info）のhover/pressedトークンが未定義。表では「（強）」とだけ記述され具体値がないため、実装時に各所で不一致が起きるリスク。",
+    "suggestion": "以下のトークンを全テーマで定義: --success-subtle-hover/pressed, --danger-subtle-hover/pressed, --warning-subtle-hover/pressed, --info-subtle-hover/pressed（アルファ段階を明示）。§8.1のSecondary/Danger(subtle)でもこれらを参照させ、文言「（強）」は具体値に置き換える。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§8.5 ボトムシート",
+    "issue": "オーバーレイ色がrgba(0,0,0,0.4)でハードコードされており、§5各テーマで定義済みの--scrimトークン（テーマ別値）と不整合。テーマ切替時に見え方が崩れる可能性。",
+    "suggestion": "オーバーレイは--scrimを参照（background: var(--scrim)）。モーダル/ドロワー/メニューのオーバーレイも同ポリシーで統一。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§6.1 アイコンスタイル",
+    "issue": "押下色が--accent-hoverと記載されているが、全体では押下用に--accent-pressedが定義済み。命名と意味がズレており状態表現が不統一。",
+    "suggestion": "アイコン押下色は--accent-pressedに統一。hoverは--accent-hover、pressedは--accent-pressedを全コンポーネントで一貫使用。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.2 余白原則（Open Air）",
+    "issue": "「タスク間余白: 20px以上」とトークンスケール（16/24）にズレがあり、“以上”表現も実装判断をばらつかせる。",
+    "suggestion": "タスク行の縦マージン用に --space-task-y を新設（推奨: 24px）し、明示的に指定。もしくは「タスク間余白= --space-lg（24px）」と固定で定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": "コメントで「フォールバック: 半透明単色」とあるが、@supports notブロックでは`.glass-surface { background: var(--bg-surface); }`となっており半透明にならない。記述と実装が不一致。",
+    "suggestion": "フォールバック用に --glass-fallback-bg を追加（例: ダーク=rgba(255,255,255,0.06)/ライト=rgba(255,255,255,0.65)）。@supports notブロックは background: var(--glass-fallback-bg) を使用し、記述と実装を一致させる。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8 コンポーネント（未定義）",
+    "issue": "ア���リの主要ナビであるボトムタブバーのコンポーネントトークンが未定義（高さ/背景/ボーダー/影/アクティブ・非アクティブ色/安全領域対応）。",
+    "suggestion": "「8.x タブバー」を追加し、--tabbar-height, --tabbar-bg, --tabbar-border, --tabbar-shadow, --tabbar-active-icon, --tabbar-inactive-icon, --tabbar-active-label, --tabbar-badge-bg/fg などを定義。全テーマで値を用意し、z-indexは--z-tabbarを参照。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8 コンポーネント（未定義）／設定画面（UX依存）",
+    "issue": "設定画面で必須のトグルスイッチ（ON/OFF）のトークンが未定義（トラック/サムの色・サイズ・状態: hover/pressed/disabled/focus）。",
+    "suggestion": "「8.x スイッチ（トグル）」を追加し、--switch-height/width, --switch-track-on/off, --switch-thumb-on/off, --switch-disabled-track/thumb, --switch-focus-ring などを定義。最小タップ領域44pxを満たす寸法も明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8 コンポーネント（未定義）／§3.2, §8.2（UX参照）",
+    "issue": "アプリの象徴であるEXPバー/ゴール進捗バーのトークン（トラック/フィル/高さ/角丸/アニメ速度）が未定義。テーマ間で見え方がぶれるリスク。",
+    "suggestion": "「8.x プログレスバー」を追加し、--progress-height, --progress-radius, --progress-track, --progress-fill（EXP/Goalで別トークン許可）, --progress-indeterminate-anim を定義。アクセシビリティ上のコントラストも各テーマで検証。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.6 トースト",
+    "issue": "トーストのセマンティック（success/danger/warning/info）バリアントが未定義。全て同一スタイルだと状態伝達力が弱い。",
+    "suggestion": "トーストにバリアントトークンを追加（--toast-bg, --toast-fg, --toast-success-bg/fg, --toast-danger-bg/fg, ...）。アイコン色も合わせてセマンティック別に指定。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4 z-index／§8 コンポーネント（未定義）",
+    "issue": "z-indexに--z-tooltipがあるが、ツールチップの見た目トークン（背景/テキスト/影/パディング/矢印）が���定義。",
+    "suggestion": "「8.x ツールチップ」を追加し、--tooltip-bg, --tooltip-fg, --tooltip-shadow, --tooltip-radius, --tooltip-padding, --tooltip-max-width, （必要なら）--tooltip-arrow-size/color を定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5 テーマ定義（全体）／§8.1 ボタン",
+    "issue": "塗りつぶし系（accent/dangerなど）上のテキスト色が個別に散在（button-primary-fg, button-danger-fg 等）。将来の“塗りつぶしバッジ/バナー”で一貫適用しづらい。",
+    "suggestion": "共通の“on-＊”トークンを用意（--on-accent, --on-danger, --on-success, --on-warning, --on-info）。ボタン以外の塗りつぶし要素でも再利用し、AAコントラストをテーマ別に担保。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§5.5 グラスモーフィズム／§9 CSSトークン",
+    "issue": "ボーダー系トークンに“1px solid …”のような複合値が含まれており、幅/スタイル/色の独立変更やハイコントラスト対応で柔軟性が低い。",
+    "suggestion": "ボーダーは分離トークン化（--card-border-width, --card-border-style, --card-border-color）。同様に汎用 --border-width/style/color も用意し、プロパティ組成側で結合。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2.2 リンク色の役割分離",
+    "issue": "リンクのvisited状態の扱いが未定義。アプリ内リンクでもブラウザ既定が干渉しうるため、色/下線ポリシーの不一致が起きる可能性。",
+    "suggestion": "visitedは“同色+下線維持”で統一するか、--link-visitedトークンを明示（例: --link-visited = --accent）。アプリ内ナビはrole=button化する等の指針も追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§7.7 状態マトリクス／共通",
+    "issue": "ローディング用のスピナー/インジケータのビジュアルトークン（サイズ/色/ストローク/スピード）が未定義。Skeleton以外の待機表現が画面ごとにばらつく恐れ。",
+    "suggestion": "「8.x ローディングインジケータ」を追加し、--spinner-size, --spinner-stroke, --spinner-color（通常/反転）, --spinner-speed を定義。セマンティック別色（success等）が必要なら拡張。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5 フォーカス／§7.5 forced-colors",
+    "issue": "通常時のフォーカス可視化はbox-shadow依存。overflow:hidden要素や境界付近でクリップされる場合があり、forced-colors以外でも見失う可能性。",
+    "suggestion": "共通でoutlineも併用できる仕組みを追加（--focus-outline-color, --focus-outline-width, --focus-outline-offset）。button/input/a以外のフォーカス可能要素にも適用ルールを明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  }
+]

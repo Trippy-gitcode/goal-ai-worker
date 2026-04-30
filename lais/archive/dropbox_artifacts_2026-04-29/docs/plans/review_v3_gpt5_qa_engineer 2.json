@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "canopy/canopy_common.sh — G6 build/deploy check",
+    "issue": "ALL_DEPLOY_CMDS is iterated with word-splitting (for CMD in $ALL_DEPLOY_CMDS), so multi-word deploy commands are split into tokens. Tokens like 'npx' or 'wrangler' won’t match BUILD_OUT and cause false FAIL, blocking deploys.",
+    "suggestion": "Read commands line-by-line and check the whole command string. Example: ALL_DEPLOY_CMDS=$(yq -r '[.deploy.frontend_cmd // empty, (.env[]?.frontend_cmd // empty)] | .[]' app_config.yaml); while IFS= read -r CMD; do ... done <<< \"$ALL_DEPLOY_CMDS\""
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "canopy/canopy_common.sh — G8 TDD証跡 LATEST_MISSION",
+    "issue": "LATEST_MISSION is derived with head -1 from a grep -B1 set, which can select an older mission rather than the most recent active one. G8/G9 may validate the wrong mission, causing false FAIL/PASS and blocking or bypassing gates.",
+    "suggestion": "Select the latest queued/in-progress mission deterministically (e.g., take the last '### MISSION-ID' block with STATUS not DONE using tail -1; or parse session_progress.md by blocks rather than grep)."
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "canopy/canopy_common.sh — G8 jq usage",
+    "issue": "G8 uses jq without checking availability; fallback sets UNEXPECTED=0 and then fails with 'RED not confirmed', hard-blocking deployments on environments without jq.",
+    "suggestion": "Gate G8 on jq presence (if ! command -v jq; then echo 'FAIL: G8 requires jq'; FAIL=1). Or vendor a tiny Node one-liner to read stats.unexpected from JSON to avoid external dependency."
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "COMPLETENESS",
+    "location": "canopy/canopy_common.sh — G8/G9 evidence dir check",
+    "issue": "G8/G9 checks are only executed if evidence/$LATEST_MISSION directory exists. If the directory is missing for an AT-required mission, no FAIL is raised, allowing TDD証跡とスクショ欠落のまま通過可能。",
+    "suggestion": "For AT-required missions, explicitly FAIL when evidence/$LATEST_MISSION does not exist. Only skip when the mission block contains an approved AT不要 marker."
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "scripts/changed-files-allowlist.sh",
+    "issue": "When no tag exists, the script falls back to git diff HEAD~1. In a repo with a single commit or shallow clone, HEAD~1 is invalid, yielding an empty CHANGED list and silently passing the allowlist gate (bypass).",
+    "suggestion": "Use a robust base: BASE=$(git merge-base HEAD HEAD~1 2>/dev/null || git hash-object -t tree /dev/null); then git diff --name-only \"$BASE\"..HEAD. Or require a baseline tag and fail clearly if not found."
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "scripts/version_sync.sh — CLAUDE.md update",
+    "issue": "sed uses \\+ without -E, which is GNU extension. On BSD/macOS sed, this likely fails to match and leaves CLAUDE.md unmodified, causing G1 mismatch and blocking deployment on macOS runners.",
+    "suggestion": "Use portable extended regex: sed -E -i.bak 's/\\*\\*Version:\\*\\* v[0-9]+\\.[0-9]+\\.[0-9]+/**Version:** v'"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "canopy/canopy_common.sh — test-guards.config.ts entry count",
+    "issue": "GUARD_COUNT greps lines starting with quotes, counting both IGNORED_ERRORS and ERROR_PATTERNS entries. Large ERROR_PATTERNS arrays will trigger false FAIL over the 15-item soft limit.",
+    "suggestion": "Count only IGNORED_ERRORS entries (e.g., awk between 'export const IGNORED_ERRORS' and the closing bracket, counting lines with quoted entries)."
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "scripts/review_gate.sh",
+    "issue": "If python3 is not installed, COUNT defaults to 0 and the gate silently passes even with CRITICAL issues present in review_*.json.",
+    "suggestion": "Require a JSON parser (prefer jq, already used elsewhere) and fail if neither jq nor python3 is available, or vendor a Node one-liner."
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "canopy/canopy_common.sh — G4 test execution guard",
+    "issue": "G4 runs Playwright tests only if node_modules/.bin/playwright exists. In environments relying on npx installation or missing node_modules, canopy may skip tests and still pass.",
+    "suggestion": "Attempt npx playwright test regardless and rely on exit code, or explicitly fail if Playwright cannot be executed."
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/affected-tests.sh",
+    "issue": "BASE falls back to HEAD~1 and origin/main is assumed. On repos without origin/main or with shallow history, FILES may be empty leading to L2 being skipped silently.",
+    "suggestion": "Resolve a safe base: BASE=$(git merge-base @{upstream} HEAD 2>/dev/null || git merge-base --independent HEAD~1 HEAD 2>/dev/null || echo \"$(git rev-list --max-parents=0 HEAD | tail -1)\"); and document remote/branch assumptions."
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "canopy/canopy_common.sh — G3 test count",
+    "issue": "Counts only occurrences of test(, ignoring it( and test.describe( or parameterized tests. This can cause false FAIL (>±20%) and block deployment even when test coverage is correct.",
+    "suggestion": "Use a more comprehensive pattern (e.g., grep -E '\\b(test|it)\\s*\\(') and exclude describe-only lines, or parse Playwright JSON report to count tests reliably."
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "scripts/screenshot_lint.sh",
+    "issue": "Does not enforce 1 before + 1 after per AT. A single pair can satisfy the check even if multiple ATs exist, weakening G9 evidence requirements.",
+    "suggestion": "Require at least N pairs where N = number of AT items in the mission block (parse session_progress.md for AT-* count) and verify paired filenames exist for each AT."
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/changed-files-allowlist.sh",
+    "issue": "ALLOWED is extracted as 'the line after the last occurrence' of '対象ファイル:' across the entire file, not the current mission block, risking mismatched allowlists if the active mission is not the last one.",
+    "suggestion": "Parse the current mission block explicitly (from '### MISSION-ID' to the next '### ') and extract its '対象ファイル:' list only."
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §8 vs scripts/deploy.sh",
+    "issue": "Spec Step 8 shows 'curl ... | grep version' while deploy.sh verifies by HTTP status code only. The implementation follows the accepted decision to use status codes, but the doc is outdated.",
+    "suggestion": "Update §8 Step 8 to reflect SPA-compatible status-code verification instead of body grep, to avoid confusion."
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "scripts/rollback.sh + docs/incident_runbook.md",
+    "issue": "rollback.sh requires a previous tag; with only one tag present, it errors out, yet the runbook prescribes immediate rollback via this script. This can leave no automated rollback path in early releases.",
+    "suggestion": "Add a fallback: if no previous tag, perform 'git checkout <last_tag>; deploy' or instruct manual redeploy of the last known-good artifact; update runbook to cover this edge case."
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "scripts/affected-tests.sh",
+    "issue": "TESTS regex is built by joining unescaped test labels with '|'. Labels containing regex metacharacters can break grep and cause unintended matches or errors, failing L2.",
+    "suggestion": "Escape regex metacharacters in test labels before building the pattern, or pass labels via '--grep' multiple times rather than a single regex."
+  },
+  {
+    "id": "R-017",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "scripts/mission_linter.sh — G7 claim",
+    "issue": "Spec states 'AT-ID↔完了コマンド対応検証' for G7, but mission_linter.sh only checks for presence of bash-like commands and '前提:'; it does not validate 1:1 mapping between AT items and completion commands.",
+    "suggestion": "Implement mapping checks (e.g., ensure each listed cmdN matches an AT-N in the mission block, or validate that completion commands cover all AT IDs)."
+  },
+  {
+    "id": "R-018",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/version_sync.sh — version.ts replacement",
+    "issue": "The sed pattern s/[\"'][0-9.]*[\"']/ may replace the first quoted numeric string in the file, potentially clobbering unrelated constants if version.ts contains other numbers.",
+    "suggestion": "Anchor to a specific export (e.g., s/^(export const VERSION = \")[^\"]*(\")/\\1'"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "canopy/canopy_common.sh — dependencies",
+    "issue": "Multiple gates depend on external tools (yq, jq, node, npx, curl, git), but there is no single preflight dependency check. Missing tools can produce misleading WARN/FAIL patterns or silent bypasses across gates.",
+    "suggestion": "Add a preflight 'canopy doctor' or early dependency check listing required tools per gate and failing fast with actionable messages."
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "init_app.sh vs sub_infrastructure.md",
+    "issue": "The directory map shows instructions/results/canopy_latest.txt, but canopy.sh never writes it. This reduces traceability for CI artifacts expected by PO.",
+    "suggestion": "Have canopy.sh tee its summary to instructions/results/canopy_latest.txt (and rotate if needed), or update the directory map to remove the unused file."
+  }
+]

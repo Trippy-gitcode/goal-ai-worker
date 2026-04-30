@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-101",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.4 / lais/src/components/screens/S10Grow.jsx (handleToggle, TodayRow→Check)",
+    "issue": "タップ時のアニメ発火を top-level state (tappingId) で管理しており、1 回のタップで全 TodayRow が2回再レンダリング（付与→解除）される。リストが増えると不必要な再レンダリングが増えフレーム落ちの原因になる。",
+    "suggestion": "- DOM 直操作で当該ボタンにのみ class を付与し animationend で除去（state を使わない）\n  onClick={(e)=>{const btn=e.currentTarget;btn.classList.add('s10-check-tap');btn.addEventListener('animationend',()=>btn.classList.remove('s10-check-tap'),{once:true});onToggle();}}\n- もしくは TodayRow を memo 化し、tappingId を渡さない（Check 内で局所 state/refs で制御）",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-102",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.4 / lais/src/components/screens/S10Grow.jsx (tapTimerRef 400ms)",
+    "issue": "アニメーション終了の判定を setTimeout(400ms) に依存しており、CSS の --duration-fast と乖離した場合にクラス残存や早期解除のリスクがある。",
+    "suggestion": "setTimeout ではなく animationend を監視してクラスを除去し、CSS の実時間に追従させる。どうしてもタイマーを使う場合は、getComputedStyle で animationDuration を参照して動的に決定する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S10Grow.jsx (setTasks 内の O(n) map)",
+    "issue": "トグル毎に全タスクを map して新配列を生成しており O(n)。リストが大きい場合クリック応答性が劣化。",
+    "suggestion": "- TodayRow を React.memo/Preact.memo で包み、該当行のみ再描画されるよう props を最小化\n- onToggle は id を引数に取る安定コールバックにし、Row 側で useCallback で安定化\n- データ構造を {ids:[], byId:{}} に分離し、状態更新は対象 id のみで済ませる",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S10Grow.jsx (TodayRow → onClick={() => onToggle(task.id)})",
+    "issue": "各行でインラインアロー関数を毎回生成しており、メモ化してもハンドラ参照が変わるため再レンダリングを誘発しやすい��GC 負荷も微増。",
+    "suggestion": "onToggle を useCallback((id)=>{...},[]) のまま、TodayRow には onToggle と id を別 props で渡し、Check 側で onClick={() => onToggle(id)} を避ける（例: const handleClick = useCallback(()=>onToggle(id),[onToggle,id])）。もしくはイベントデリゲーションで 1 ハンドラ化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-105",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.4 / lais/src/components/screens/S10Grow.css (.s10-check::before 44x44)",
+    "issue": "ヒット領域拡張を ::before で実現しており、視覚外へ 44x44 をはみ出させるため隣接 UI のヒットを奪う可能性。ホバー/アクティブのペイント領域も拡大し、軽微ながら余計な再描画が発生。",
+    "suggestion": "クリック領域を実 DOM で確保するラッパ要素を用意し、ラッパを 44x44、内部のアイコンを 22x22 中央配置にする（例: <button class=\"hit-44\"><span class=\"vis-22\"/></button>）。これによりオーバーラップを回避し、ヒット領域も明確になる。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "スクロール圧縮処理（R1 から変更なしと記載の useEffect）",
+    "issue": "スクロール監視が window/scroll を使う場合、passive:true 未指定だとブラウザがスクロールを最適化できず、メインスレッドがビジー時にジャンクの原因となる。",
+    "suggestion": "addEventListener('scroll', handler, { passive: true }) を使用。併せて rAF 内で read→write を分離し、スタイル/レイアウトスラッシングを回避。可能であれば CSS position:sticky や IntersectionObserver で置換。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "スクロール圧縮処理（R1 実装）",
+    "issue": "スクロール中に layout 情報（getBoundingClientRect など）を読み書き同フレームで混在させると強制同期レイアウトのリスク。記述は確認できないが tickingRef パターン採用時の典型的落とし穴。",
+    "suggestion": "計測は rAF フレームの先頭で 1 回だけ行い、書き込み（class 切替等）は次フレームに分離。必要ならば CSS contain や will-change を短時間だけ付与して影響範囲を限定。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S10Grow.jsx（console.log）",
+    "issue": "本ミッションの便宜上 console.log だが、プロダクションビルドに残ると I/O コストとログ肥大の原因になる。",
+    "suggestion": "Vite/Rollup の設定で本番は console をストリップ（esbuild/terser の drop_console や rollup-plugin-strip）し、開発のみ許可。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S10Grow 画面全体（Upcoming 折りたたみ領域など）",
+    "issue": "折りたたみや下部セクションが初期レンダリング対象のままだと、初回ペイント/更新コストが増える。長いリスト時に顕著。",
+    "suggestion": "折りたたみ領域や画面下部のセクションには content-visibility: auto; contain-intrinsic-size を付与し、ビューポート外のレンダリング/スタイル計算をスキップ。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/shared/BottomTabBar.jsx, S10Grow Check ボタン",
+    "issue": "モバイルでのタップ応答をさらに改善できる余地（古い環境での遅延やダブルタップズーム抑止）。",
+    "suggestion": ".bottom-tab-bar-btn と .s10-check に touch-action: manipulation を付与。可能であれば onPointerDown で即座に視覚フィードバック（クラス付与）し、click と二重発火しないよう分岐。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

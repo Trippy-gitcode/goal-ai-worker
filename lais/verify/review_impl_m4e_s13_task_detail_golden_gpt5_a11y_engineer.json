@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.6 S-13 モーダル（キーボードナビゲーション／フォーカス管理）",
+    "issue": "モーダルオープン時に初期フォーカスをモーダル内部へ移動していない。Tab トラップも現在フォーカスがモーダル外にある場合を考慮しておらず、背景要素へフォーカスが移動し得る。",
+    "suggestion": "section.s13-modal に tabIndex=\"-1\" を付与し、open 時に dialogRef.current.focus() で初期フォーカスを移動。Tab 処理では、document.activeElement が dialogRef.current に含まれていない場合は e.preventDefault() の上で最初のフォーカス可能要素へ移動する分岐を追加。focusables から [aria-disabled=\"true\"] も除外する。可能ならドキュメント全体ではなくモーダル内で keydown を監視する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§4.6 S13-3 ヘッダー／ダイアログ命名",
+    "issue": "aria-labelledby が view 時は h2、edit 時は入力要素（id 再利用）を参照するため、モーダルの名称がインタラクティブ要素に変わる���スクリーンリーダーでモーダル名の読み上げが不安定になり得る。",
+    "suggestion": "モーダル専用の見出し要素（例: <h2 id=\"dialogTitle\">）を常設し、aria-labelledby は常にその見出しを参照。edit 用の入力には別 id を割り当てる。見出しは視覚的に非表示（sr-only）でも可。例: aria-labelledby=\"dialogTitle\" とし、編集時は見出し文言を「タスクを編集：{タスク名}」に更新する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.6 S13-6/8/9（編集モードの各入力）",
+    "issue": "時刻・所要時間・メモの可視ラベルとフォームコントロールがプログラム的に関連付いていない（aria-label はあるが、可視ラベルと不一致）。クリックでラベルからフォーカス移動もできない。",
+    "suggestion": "各 dt に id を振り、対応する input/select/textarea に aria-labelledby で関連付ける、または <label for> を用いる。例: <dt id=\"timeLabel\">時刻</dt> とし、<input aria-labelledby=\"timeLabel\">。必須項目には aria-required=\"true\" も付与。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.6 S13-12 AI ボタン／S13-10 保存ボタン",
+    "issue": "無効状態のボタンが aria-disabled のみ（保存）または aria-disabled + pointer-events:none（AI）で、HTML の disabled を併用していないためタブ移動可能・挙動が不統一。",
+    "suggestion": "無効時は disabled 属性を併用してタブ順から除外し、:disabled のスタイルを適用。AI ボタンは aria-disabled と disabled を両方付ける（SR に状態伝達、キーボードでも非フォーカス化）。保存ボタンも isValid=false のときは disabled を付与し、クリック防止ロジックを簡素化。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§4.6 S13-11 削除 → クローズ（フォーカス復帰）",
+    "issue": "削除後に元のトリガ要素へフォーカス復帰しているが、当該要素は削除により DOM から消える可能性があり、フォーカス喪失（空フォーカス）が発生し得る。",
+    "suggestion": "handleClose の復帰時に returnFocusRef.current?.isConnected を確認し、未接続なら代替フォーカスターゲット（例: 次のタスク行、一覧の先頭、または一覧見出し）へ移動する��ォールバックを実装。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.6 S13-6 メタデータ（dl マークアップ）",
+    "issue": "dl 直下に div で dt/dd をラップしており、HTML 構文上、dl の子要素は dt/dd のみが妥当。AT が定義リストとして正しく解釈しない可能性がある。",
+    "suggestion": "dl の直下に dt, dd を並べる構造に修正（CSS でレイアウト調整）。グループ化が必要な場合は複数の dt/dd の組を連続配置し、必要に応じて role=\"group\" + aria-labelledby などで意味付けを補強。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.6 モーダル全体（背景コンテンツの隠蔽）",
+    "issue": "aria-modal=\"true\" は付与されているが、背景コンテンツに inert/aria-hidden を付けていないため、実装や環境によっては SR の仮想カーソルで背景へ移動できる可能性がある。",
+    "suggestion": "モーダルオープン中はアプリのルート直下の兄弟要素に inert を付与（非対応ブラウザには aria-hidden=\"true\" をフォールバック）し、背景のフォー��ス・探索を確実に遮断。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§LP-014 フォーカス可視リング",
+    "issue": "focus ring の色・太さのトークン値が提示されておらず、WCAG 2.2 AA（2.4.11 Focus Appearance (Min)）を満たすか検証不能。",
+    "suggestion": "focus ring の太さを少なくとも 2 CSS px、リングと隣接背景（またはコンポーネント未フォーカス時の外周）とのコントラスト比を 3:1 以上に設定することを確認。トークン値と実測値を記録。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.6 S13-10/11/共通 input（非テキストコントラスト）",
+    "issue": "ボタンや入力の境界線（非テキスト）について、背景とのコントラスト実測値が未提示（AI active のみ提示）。",
+    "suggestion": "s13-edit（border-strong vs bg-surface）、s13-input（border-strong vs 周囲背景）などで 1.4.11 Non-text Contrast の 3:1 を実測し、必要に応じてトークンを調整。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.6 編集モード���保存操作）",
+    "issue": "編集 UI が form 要素外で組まれており、Enter で送信できない。エラーメッセージ（必須未入力など）の提示・関連付けも未実装。",
+    "suggestion": "編集ブロックを <form onSubmit={handleSave}> でラップし、保存ボタンは type=\"submit\"。name 未入力時は aria-invalid=\"true\" とエラーテキスト（role=\"alert\" または aria-live）を関連付け（aria-describedby）して理由を明示。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

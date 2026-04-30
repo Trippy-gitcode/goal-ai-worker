@@ -1,0 +1,57 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾",
+    "issue": "UX仕様書§2.3で定義されている「Upcomingタスク表示（明日以降のタスクへのアクセス）」セクションが存在しません。",
+    "suggestion": "Todayセクションの末尾に「📅 Upcoming (N件)」の折りたたみセクションを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクション最上部",
+    "issue": "UX仕様書§2.3で定義されている「Overdueタスク表示（期限切れラ���ル + 赤系アクセントカラー背景）」が存在しません。",
+    "suggestion": "Todayセクションの最上部にOverdueタスクの表示領域を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "PROFILEサブタブ内",
+    "issue": "UX仕様書§4.2で定義されている「MBTI/性格タイプ」のカードが存在しません。",
+    "suggestion": "AI理解メモの下にMBTI/性格タイプのカード（4文字+説明文、または未推定時メッセージ）を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s12_task_add",
+    "location": "予定日入力フィールド",
+    "issue": "予定日フィールドのテキスト「今日」にcolor指定がなく、親要素のデフォルト色（#E6EDF3）が継承されています。他のフィールド（開始時刻等）と視覚的な一貫性がありません。",
+    "suggestion": "入力済みテキストまたはプレースホルダーとして適切な色（例: var(--text-primary) または var(--text-hint)）を明示的に指定してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧の「企画書を仕上げる」行",
+    "issue": "未完了タスクのチェックボックスのボーダー色が青（#79C0FF）になっていますが、デザインシステムやUX仕様書に青い未完了チェックボックスの定義がありません。",
+    "suggestion": "特別な状態（Todayタスク等）を示す意図であれば仕様書に追記するか、通常の未完了状態（#6E7681）に統一してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

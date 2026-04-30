@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "3",
+    "issue": "S14GoalDetail が props の id 変更に追従せず、表示が古いままになる（useState 初期化に GOALS_MOCK[id] を使用しているため、同一ルート内 param 切替で再計算されない）。preact-router は同一パスで param だけ変わると再マウントされないことがある。",
+    "suggestion": "状態として保持せず props から直接導出するか、id 変化で更新する。例) 1) const goal = GOALS_MOCK[id] || DEFAULT_GOAL; のように useState を排除。2) もしくは <S14GoalDetail key={id} id={id}/> として param 変更時に再マウントを強制。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "タスクリスト描画で onClick={() => handleOpenTask(task.id)} を毎行生成しており、再レンダリング毎に N 個のクロージャが再生成される。",
+    "suggestion": "デリゲーションまたは data-* 経由で 1 ハンドラに集約し、再生成を抑制。例) ボタンに data-tid を付与し onClick={handleOpenTask}、実装は const handleOpenTask = useCallback((e)=>{ const tid=e.currentTarget.dataset.tid; ... },[]);",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "1",
+    "issue": "Suspense フォールバックの <main class=\"route-fallback\"> に高さ確保が無く、低速回線でルート遷移時にコンテンツが一瞬消える（CLS の原因）。",
+    "suggestion": "route-fallback に min-height: 100dvh と背景色を付与し、実画面の骨格を維持。例) .route-fallback { min-height: 100dvh; background: var(--bg-primary); } 必要に応じて簡易スケルトンを表示して視覚的安定性を確保。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1/2",
+    "issue": "ルートレベル lazy によりクリック後に JS/CSS を取得するため初回遷移が待たされる。ユーザー操作直後の待機は体感を悪化させやすい。",
+    "suggestion": "事前フェッチで初回遷移を隠蔽。例) S10Grow 側で hover/focus/viewport で import('./screens/S14GoalDetail.jsx') を fire-and-forget、またはクリック直前に先行読み込みしてから route。<link rel=\"prefetch\"> も併用可。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4",
+    "issue": "プログレスバーの width トランジションは layout を伴い、狭いデバイスで頻回更新時にペイントコストがかさむ可能性。",
+    "suggestion": "レイアウトを発生させない transform: scaleX を用いた実装に変更。例) .s14-progress-bar-fill{width:100%;transform-origin:left center;transform:scaleX(var(--pct,0));transition:transform var(--duration-slow) var(--ease-out);} とし、style={{\"--pct\": goal.progress/100}} を指定。ARIA は現状の role/valuenow を維持。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "4",
+    "issue": ".s14-title の padting-top タイポにより padding-top 指定が無効化され、spec §4.7 のパディング要件と不一致。",
+    "suggestion": "padting-top を padding-top に修正して意図した余白を反映。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "3",
+    "issue": "将来タスク状態更新（チェックトグル等）で親が再レンダリングされると、全行の再評価が走る構造。大規模リストでの無駄な再描画が発生しうる。",
+    "suggestion": "行コンポーネントを分離し memo 化。例) const TaskRow = memo(({task,onOpen})=>...); 親は tasks.map(t => <TaskRow key={t.id} task={t} onOpen={...}/>) とし、onOpen は R-002 の 1 ハンドラ方式で安定化させる。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "チェックアイコン SVG を行ごとにフルパスで埋め込んでおり���行数が多いと DOM ノードとパースコストが増える。",
+    "suggestion": "<symbol>/<use> でアイコンを共有し DOM を削減。例) ルートに <symbol id=\"icon-check\"> を 1 度定義し、各行は <svg><use href=\"#icon-check\"/></svg> を使用。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "useId は SSR 環境での安定 ID には有用だが、本画面は CSR 前提かつ h1 単一用途のためフックコストが過剰。",
+    "suggestion": "静的 ID へ置換してフックを削減。例) id={`s14-title-${id}`} を直接付与し、aria-labelledby も同値を参照。これにより微小ながらフック数・実行コストを削減。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

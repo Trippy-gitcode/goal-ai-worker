@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. App.jsx",
+    "issue": "非ランドマーク要素の div.app-root に aria-label=\"Lais\" が付与されており、スクリーンリーダーに不要な名前付きコンテナーとして露出する可能性がある（ランドマークでないためナビゲーション上の意味は薄く、重複読み上げの一因）。",
+    "suggestion": "aria-label は削除する。もしアプリ全体のリージョン名が本当に必要なら role=\"region\" と aria-label を併用するが、この画面では <main> ランドマークがあるため div への付与は不要。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. S00Splash.jsx",
+    "issue": "<main> に aria-label=\"Lais スプラッシュ\" を付与しているが、直下にページタイトルの <h1>Lais</h1> が存在するため、ランドマーク名と見出しの読み上げが重複しやすい。",
+    "suggestion": "aria-label は削除するか、見出しと整合させるため aria-labelledby で <h1> を参照する。例: <h1 id=\"s00-logo\">Lais</h1> とし、<main aria-labelledby=\"s00-logo\"> にする。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "global.css :focus-visible ルール",
+    "issue": "フォーカスインジケーターは :focus-visible のみに依存。旧ブラウザ（古い Safari 等）で :focus-visible が未対応の場合、キーボードフォーカスが可視にならない恐れがある。",
+    "suggestion": "フォールバックを追加する。例: :focus { outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color); outline-offset: var(--focus-ring-offset); } とし、:focus:not(:focus-visible) { outline: none; } を併用してマウスユーザーへの不要なリング表示は抑制する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. S00Splash.css .s00-cta-* :active",
+    "issue": "prefers-reduced-motion: reduce 環境でも transform: scale(0.98) は残り、遷移時間が 0ms になるため“カクッ”とした瞬間的な拡大縮小が発生する。相性の悪い利用者がいる。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) で押下時の変形自体を無効化する。例: @media (prefers-reduced-motion: reduce) { .s00-cta-primary:active, .s00-cta-secondary:active { transform: none; } }",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. S00Splash.jsx .s00-logo",
+    "issue": "ブラ��ド名「Lais」は日本語音声合成で意図しない発音になる場合がある。",
+    "suggestion": "読み上げ改善のため、必要に応じて <h1><span lang=\"en\">Lais</span></h1> のように言語タグを付与��る。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "1. App.jsx / 2. S00Splash.jsx",
+    "issue": "JSX で class を使用している。React 環境では className の使用が一般的で、ビルド設定によっては警告や予期しないスタイル不適用の原因になり得る。",
+    "suggestion": "React を使用している場合は className に統一する。Preact 等で class が許容されている場合は現状のままでも可だが、プロジェクトのフレームワーク方針に合わせて統一する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

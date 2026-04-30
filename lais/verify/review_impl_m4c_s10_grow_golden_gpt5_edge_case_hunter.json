@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.4 S10-4 / 状態・インタラクション（チェックタップ → spring アニメーション）",
+    "issue": "チェックタップ時のspringアニメーション（scale 0.9→1.1→1）が未実装。CSSにtransformのtransitionはあるが、transform値を変更するトリガがどこにも無いため発火しない。",
+    "suggestion": "クリック時に一時的なクラス（例: .s10-check-bump）を付与してkeyframesでscaleを駆動、アニメ完了でクラス除去。LP-001に従い@media (prefers-reduced-motion: reduce)では無効化。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.4 S10-10 BottomTabBar / components/shared/BottomTabBar.jsx",
+    "issue": "ボトムナビにrole=\"tablist\"/role=\"tab\"を付与しているが、実体はタブパネルではなくページナビゲーション。ARIAパターンに反し、キーボード操作（左右矢印移動、tabindex管理、aria-controls等）も未実装のため支援技術に誤解を与える。",
+    "suggestion": "単なるナビ: <nav>内の<button>または<a>でrole=\"tab*\"は削除（role=button/なし）。もしくは真のタブとして実装するならWAI-ARIA Authoring PracticesのTabs要件（tabindex, aria-controls, 矢印キー、tabpanel管理）を実装。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§4.4 S10-4 Check / components/screens/S10Grow.jsx: <Check/>",
+    "issue": "チェックは三状態（予定→進行中→完了）だがrole=\"checkbox\"かつaria-checked={true/false}のみ。進行中（active）がスクリーンリーダーに未チェックとして伝わり、実際の状態と不整合。",
+    "suggestion": "三状態を表すならaria-checked=\"mixed\"を進行中に適用。あるいはrole=\"button\" + aria-pressed（トグル）か、独自状態をaria-roledescription/aria-labelで明確化。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.4 S10-4 / .s10-check（22×22）",
+    "issue": "チェックのタップターゲットが22×22で、モバイル推奨の44×44に未達。誤タップや操作困難の可能性。",
+    "suggestion": "見た目22×22のままでも、タップ領域はヒットスロップやpaddingで44×44以上を確保（周囲に透明padding、または親要素でクリ��ク委譲）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "components/screens/S10Grow.jsx useEffect(scroll)",
+    "issue": "スクロールハンドラ内でrequestAnimationFrameのキャンセル処理がなく、アンマウント直後にsetStateが走る可能性（まれなメモリリーク/警告）。",
+    "suggestion": "useEffectのcleanupでpendingなrAFをcancelAnimationFrame。rAF idをrefに保持し、次回スケジュール時に先行rAFをキャンセルする。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "components/App.jsx LP-012 Suspense fallback",
+    "issue": "fallbackが<main role=\"status\" aria-live=\"polite\">で、画面に複数のmainランドマークが同時に存在する恐れ。またaria-live領域にテキストがなく、支援技術に読み上げられにくい。",
+    "suggestion": "fallbackは<div role=\"status\" aria-live=\"polite\">に変更し、視覚/音声の両方に“読み込み中…”等の文言を含める。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.4 S10-6 Upcoming 折りたたみ",
+    "issue": "aria-controlsが閉状態では存在しないDOM id（s10-upcoming-panel）を参照。技術的には許容だが、推奨はパネルをDOMに保持したまま非表示にする方式。",
+    "suggestion": "パネルは常にDOMに残し、hiddenやaria-hiddenで可視状態を制御。これによりaria-controlsの参照一貫性とフォーカス管理が容易に。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.4 S10-1 ヒーロー / @media (max-height: 400px)",
+    "issue": "キーボード表示検知の暫定対応として高さ400px以下でヒーローを非表示にしているため、横画面の小型端末等でキーロードなしでも常時非表示になりうる。",
+    "suggestion": "VisualViewportやvirtual keyboard API等で実際のキーボード表示に連動。暫定条件でも閾値を端末別に緩和するか、オプトアウト設定を用意。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "components/screens/S10Grow.css .s10-grow",
+    "issue": "min-height: 100dvhのみ指定。dvh非対応環境で期待より短くなる可能性（古いSafari/Android WebView）。",
+    "suggestion": "フォールバックとしてmin-height: 100vhを併記し、後勝ちで100dvhを上書き。例: min-height: 100vh; min-height: 100dvh;",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.4 S10-8 Goals 進捗バー",
+    "issue": "g.progressが0–100範囲外の場合、widthスタイルが負値/100%超となりUI破綻の恐れ。",
+    "suggestion": "描画前に0–100へclampし、ARIAのaria-valuenowも同様に制限。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.4 S10-2 Overdue / OverdueRow",
+    "issue": "期限切れ行のチェックがonDefer（明日へ延期）に紐づいており、見た目はチェックだが動作は延期実行。ユーザー/支援技術双方で行為の予測が困難。",
+    "suggestion": "チェックは完了/状態変更に限定し、延期は明示的なボタン/リンクに限定。延期ボタンのaria-labelにタスク名を含めて文脈を明確化。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.4 S10-4 Today タスク行ボタン",
+    "issue": "s10-task-cardにaria-labelを付与しており、内部の可視テキストがアクセシブル名に反映さ���ない（上書き）。情報欠落や重複読み上げの恐れ。",
+    "suggestion": "aria-labelを削除し、必要ならaria-describedbyでメタ情報を関連付け。可視テキスト（タスク名/メタ）をそのままアクセシブル名に活用。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.4 ラベル（TODAY/UPCOMING/GOALS/OVERDUE, カテゴリWork/Health/Learn）",
+    "issue": "日本語UI内に英語ラベルが混在。スクリーンリーダーの言語切替や読み上げ品質に影響、ユーザー混乱の可能性。",
+    "suggestion": "ローカライズ方針を明確化し、見出し/カテゴリ名を言語別辞書から取得。必要に応じてlang属性をセクションごとに付与。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§4.4 S10-4/S10-6/S10-8 リスト描画",
+    "issue": "大量データ時（タスク/ゴール数が多い）、固定ヘッダ+多量DOMでスクロール/メモリ負荷が増大。仮想化や段階ロードが未考慮。",
+    "suggestion": "将来API接続時に無限スクロール/ページングやリスト仮想化（交差Observer/virtual list）を検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.4 S10-4 時刻列（幅40px固定）",
+    "issue": "高倍率ズーム（200%+）や長いローカライズ時刻表示で40pxでは折返し/はみ出しの恐れ。",
+    "suggestion": "ch単位やminmaxで可変幅にする、もしくはタイポグラフィ縮小/折返し制御（overflow-wrap, word-spacing調整）を検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "LP-012 ルートレベルコード分割 / App.jsx",
+    "issue": "遅延ロード失敗（オフライン/ネットワークタイムアウト）時のリトライ/エラーハンドリングがなく、fallbackが無限表示の可能性。",
+    "suggestion": "lazy importの読み込み失敗をErrorBoundaryで捕捉し、再試行ボタン/オフライン案内を表示。Service Workerでルートチャンクを事前キャッシュすることも検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

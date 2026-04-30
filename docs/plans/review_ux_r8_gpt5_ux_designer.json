@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§1.2 遷移マトリクス",
+    "issue": "画面一覧にS-42（メール変更）/S-43（パスワード変更）/S-44（ブロックリスト）があるが、主要遷移マトリクスに遷移パスが記載されていない。",
+    "suggestion": "S-37 設定からの分岐としてS-42/S-43/S-44への遷移（右スライド）と戻り先（S-37）を追記し、ブラウザバックの動作（pushState）も明記する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.1 TALKヘッダー, §3.5 チャット履歴",
+    "issue": "TALKヘッダーに「☰（履歴ドロワー）」と「🕐（履歴）」の2つの履歴入口が併存し、役割が重複している。どちらが何を開くかが曖昧。",
+    "suggestion": "履歴入口は1つに統一する。例: ☰＝ドロワー（会話一覧/新規チャット含む）、🕐は削除 or 別機能（例: 最近の提案カード一覧）に再割当。ヘッダーアイコンのラベル/説明を仕様に明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.5 チャット履歴, §7.3 スワイプ",
+    "issue": "会話行のスワイプ方向が不一致。§3.5では「左スワイプで削除露出」、§7.3では「左→右で削除ボタン露出」と矛盾。",
+    "suggestion": "一般的なパターンに合わせ「右→左（左スワイプ）で削除露出」に統一。§7.3の表を修正し、他画面でも同一方向に揃える。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §3.2.3, ux §2.3 Today/Upcoming",
+    "issue": "週N回習慣の「今日やる」手動追加ボタンがUX仕様に具体配置されていない（プロダクト仕様では可能と定義）。",
+    "suggestion": "Upcoming内の「習慣」グループ各行に「今日やる」ボタン（またはスワイプアクション）を追加し、Todayに一時ピン留めされる挙動を明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §4.2, ux §2.4 ゴール詳細",
+    "issue": "ゴール達成ボーナスの「作成から7日未満は完了待ち」状態とUI（100%後の『あとN日で完了！』表示）がUX仕様に未定義。",
+    "suggestion": "S-14に『完了待ち』ステー��スを追加し、進捗バー100%時のサブテキスト『あとN日で完了！』表示、達成ボタンの無効化/ツールチップ、7日経過時の自動完了演出を定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §4.5, ux §2.3/§8.1/§9.2",
+    "issue": "1日のEXP上限（300）到達時のGROWでのユーザーフィードバックが未定義。完了操作は通るがEXPが付与されない場合の混乱が想定される。",
+    "suggestion": "上限到達時はタスク完了のチェックは維持しつつ、トースト『本日のEXP上限に達しました（ゴールボーナスは別枠）』を表示。EXPバーは変化させない。連続到達時は1日1回のインフォバナーで抑制。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§2.3 Today/Upcoming, §4.4 FRIENDS, §3.5 TALK",
+    "issue": "大量データ時のパフォーマンス配慮が不十分（Today/Upcomingの仮想スクロール未定義、FRIENDS 500人時の描画最適化未定義）。",
+    "suggestion": "タスクリスト/ゴール一覧/友達グリッドにwindowing（仮想リスト）を導入。画像は遅延読み込み。タスクは日付/状態でセクション化し折りたたみをデフォルトにする。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.4 S-36 QRスキャン",
+    "issue": "カメラ権限拒否/ブロック時のUIが未定義。スキャンが開始できない状態のガイダンスがない。",
+    "suggestion": "権限拒否時はフル画面説明を表示（『カメラ権限が必要です』→[設定で許可]リンク/[QR画像から読み込む]代替）。恒久的ブロック時の復帰手順も追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §3.3 画像添付, ux §3.1 入力バー",
+    "issue": "画像サイズ>10MB/非対応形式/アップロード失敗時のエラー表示が未定義。",
+    "suggestion": "選択直後のバリデーションでブロックし、インラインエラー『10MB以下のJPEG/PNG/GIF/WebPのみ対応』を表示。送信時失敗はサムネイル上に再試行ボタンをオーバーレイ。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.1 MEサブタブ, §7.3 スワイプ",
+    "issue": "横スワイプでサブタブ切替が、横スクロール要素（チップ/カード）操作と競合し誤作動の恐れ。",
+    "suggestion": "横スワイプ発火のしきい値（開始X移動>24px、Y移動<10px）と開始��ーン（コンテンツ上部空白/ヒーロー下端のみ）を定義。チップ/カード上のパン中はタブ切替ジェスチャーを無効化。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§3.4 TALKのレベルアップ挙動",
+    "issue": "TALKではEXPバーが常時不可視で、累積進捗が把握しづらい（バナーのみ）。",
+    "suggestion": "TALKヘッダー右に小型EXPピル（Lv/進捗%）を追加し、タップでGROWにジャンプ。Reduced Motion時もテキスト更新のみで伝達。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.3 Today セクション",
+    "issue": "当日完了タスクの扱い（非表示/グループ化/末尾退避）が未定義。多数完了時に情報密度が上がり、未完タスクの可視性が低下。",
+    "suggestion": "Today末尾に『完了（N）』セクションを追加（デフォルト折りたたみ）。[表示/非表示]はユーザー設定に保存。Undo 30秒経過後に自動で完了セクションへ移動。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§2.3 並び替え",
+    "issue": "手動並び替えが開始時刻ソートを上書きするが、元の自動ソートへ戻す方法が未定義。",
+    "suggestion": "Todayセクションヘッダーに『並び順』トグル（自動/手動）を追加し、切り替え時のルール（手動順は保持、再度手動に戻すと以前の手動順を復元）を定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.1 TALKヘッダー📝, §3.5 ドロワー",
+    "issue": "『📝 新規チャット』の具体挙動が未定義（現在スレッドのクリア/新スレッドID発行/履歴への追加タイミング）。",
+    "suggestion": "新規チャット押下で新スレッドを作成し、ドロワー先頭に追加→表示切替。未送信の下書きがある場合は確認ダイアログを挟む仕様を明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.4 FRIENDS, §0.3 ベンチマーク",
+    "issue": "SHOP（Coming Soon）がMEのサブタブとして常時見えるため、MVPで機能不在のタブが認知負荷/期待落差を生む可能性。",
+    "suggestion": "MVPではSHOPタブを非表示にし、PROFILE内『アバター設定』に限定フ��ーム装備のみを集約。将来SHOP実装時にサブタブを追加する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§2.3 タスク行 表示要素",
+    "issue": "タスク行の『ゴールドット（ゴール色）』の色とゴールの対応関係がUI上で学習しづらい。",
+    "suggestion": "S-14ゴール詳細のカラーと一致させ、S-10のGoalsリストに凡例（ドット+ゴール名）か、タスク長押しでツールチップ『この色＝{ゴール名}』を表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

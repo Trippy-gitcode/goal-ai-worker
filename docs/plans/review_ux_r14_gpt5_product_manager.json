@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 / §4.5（ux_v1.md §15 内部矛盾#1でも指摘）",
+    "issue": "レベル必要EXPが「100（Lv1→2）」と「1,000（Lv1→2）」で矛盾。実装時に進行度・演出・通知すべてが不定になり、UX/分析/データ整合に致命的",
+    "suggestion": "正とする計算式を1つに確定（例: 次Lv必要=100+(L-1)*50）。確定後、project/ux/デザイン/レベルテーブル/テキスト文言/テストケースを一括更新。acceptance基準: タスク5件(+50) + ログイン(+5) + 冒険(+50)で初日に確実にLv2到達し、全画面で同一表示",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（タスク完了→EXP）/ project_v1.md §4.5（日次上限300EXP）",
+    "issue": "日次EXP上限到達時のタスク完了UIが未定義。現在はサーバー検証OK時のみ演出発火だが、上限超過時の「完了は成立/EXPは不付与」の部分成功パスがない",
+    "suggestion": "分岐を明記: 上限未到達→通常演出。上限到達→チェック確定＋トースト「本日のEXP上限に達しました（タスクは完了）」＋EXPフロートは表示しない。Undoは通常どおり（EXPは元々付与なし）。GROWヒーローに当日残りEXPを任意で表示",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3（Todayの並び替え/開始時刻/Overdue）",
+    "issue": "Todayの自動時刻ソート・Overdue固定上位表示・手動並び替えの優先順位が未定義。開始時刻の有無変更時や新規タスク挿入時に並びが予測不能になりうる",
+    "suggestion": "優先順位ルールを数式化して明記: 例) グループ順=Overdue→時刻あり→時刻なし。各グループ内: デフォルトは自動ソート、手動並び替えは『時刻なし』グループ内のみ許可。開始時刻付与/変更時の挙動（手動順の破棄/維持）と新規追加タスクの挿入位置も定義",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘッダー）/ §3.5（履歴ドロワー）",
+    "issue": "TALKヘッダーで☰=履歴ドロワーに加え、🕐=履歴と重複定義があり、履歴起動アイコンが二重に見える",
+    "suggestion": "履歴起動を1アイコンに���一（推奨: ☰のみ）。🕐は削除または別機能（例: 最近の会話ジャンプ）に再割当し、ラベル/aria-labelも一貫化",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §2.1（価格/回数/モデル品質）",
+    "issue": "Basic(¥580/100回/日, GPT-5系)・Pro(¥1,580/300回/日, マルチルーティング)はCOGS過大化のリスク。画像Visionや長文ストリーミングで月間トークン原価が月額を超える懸念",
+    "suggestion": "プランごとに1回あたりトークン上限/最大出力長/添付回数上限/日次トークン上限を明記（例: Basic=合計150k tokens/日、画像添付は5回/日まで）。VisionはPro以上、検索/外部ツールはPro以上など差別化。フェアユース具体化と自動スロットリング/警告UIをS-20に追加",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2（BM全般）/ §4（EXP）/ ux_v1.md §8（演出）",
+    "issue": "課金動機がAI回数/質に偏重し、ゲーミフィケーション（称号/演出/アバター）とプレミアム価値が弱く結びついていない。Freeで核心体験が完結し、アップセルの必然性が薄い",
+    "suggestion": "課金で『見た目/体験の格上げ』を即実感できる要素をMVP内に注入: 例) Basic以上でレベルアップ演出の拡張（特別紙吹雪/称号フレーム）、月替わり限定フレーム/背景1点付与、DISCOVERのディープ分析更新頻度UP、レベル到達演出の共有カード（友達に映える）。UIはS-38/アバター設定(S-41)に明記",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3（画像添付仕様）/ ux_v1.md §3.2（送信）",
+    "issue": "画像添付はフォーマット/サイズ上限のみ定義。1メッセージの最大添付枚数、同時添付合計サイズ、非対応時/超過時のエラーメッセージ、リサイズ失敗時の処理が未定義",
+    "suggestion": "最大枚数（例: 3枚/メッセージ）、合計上限（例: 15MB/メッセージ）、個別/合計超過時のトースト文言、リサイズ/アップロード失敗時のリトライ/個別削除UIを定義。添付あり応答はPro以上などのガードも検討",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §5.3 / ux_v1.md §4.4（メッセージ/応援���",
+    "issue": "スパム抑制のレート制限（回数/時間あたり/ユーザーあたり）が未定義。RLS/通報はあるがUXの即時フィードバックがない",
+    "suggestion": "送信クールダウン（例: 同一相手にテキストは30秒間隔/日20件、応援は日10件）、全体上限（例: 日50件）を明記。超過時はインラインエラー「短時間に送信が多すぎます（残りX秒）」を表示",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §3.2.5（日次リセット04:00 JST）/ ux_v1.md §2.3, §9.1（Undo/オフライン同期）",
+    "issue": "04:00リセットがアプリ起動中・Undoカウントダウン中・オフライン完了キュー滞留中に跨る場合の基準時刻が未定義。どの日のEXP/上限に計上するかがあいまい",
+    "suggestion": "各イベントにサーバー受領時刻で日付確定（JST）。Undoが日付跨ぎになった場合は『元イベント日』を基準に取り消し可否を判定（30秒以内なら許可）。オフライン完了のサーバー同期待ちイベントもサーバー受領時刻起算で日次上限検証、と明記。UIは『上限到達』等の文言に『JST基準』脚注を追加",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.2（ストリーミング）",
+    "issue": "長文応答時の『生成停止』UIがない。誤送信/方針変更時の摩擦",
+    "suggestion": "ストリーミング中は停止ボタンを表示（停止は1カウントとして扱う/扱わないの定義も§6.1に追記）。停止後は『続き/要約/別案』のクイックアクション提供",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §2.5（通知）/ ux_v1.md §13.3, §15",
+    "issue": "通知スケジュールのタイムゾーン/DST/端末時計ずれの扱いが未定義。日次/週次の時間指定がJSTかローカルかが不明",
+    "suggestion": "通知は『ユーザー端末ローカル時刻』基準に統一（デフォルト21:00など）。DST/時計ずれ考慮の許容誤差（±5分）と再スケジュールポリシーを定義。設定画面にタイムゾーン明記、PWA制約下のiOS案内も追記",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §7.2 / §7.4（messages vs social_messages）",
+    "issue": "AI対話messagesとソーシャルmessagesの命名が混在。RLSの適用先誤りでAI対話が他者に可視化されるリスク",
+    "suggestion": "テーブル命名を明確化（例: ai_messages, social_messages）。RLSサンプルも両者で分離し、ドキュメントとクエリ例を差し替え。UX内の表記も統一",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §9.4（ブロック時サイレント失敗）",
+    "issue": "ブロック済み相手に送信がサイレント失敗だと、送信側は『届いた』と誤解しがち",
+    "suggestion": "サイレントを維持するなら送信側UIに軽い手掛かり（例: 送信ボタンを無効+ツールチップ『この相手には送信できません』）。あるいは一般化した失敗トースト（理由を明かさない）",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（お知らせ/未読バッジ）",
+    "issue": "未読/既読の定義・既読化タイミング（一覧表示時/詳細表示時）・未読保持期間が未定義。未読バッジの一貫性が担保できない",
+    "suggestion": "既読条件を明文化（例: 受信一覧を開いた時に可視範囲分を既読化、詳細を開いたら強制既読）。未読は90日で自動クローズ等の寿命設定。タブ/お知らせ/通知バッジの同期タイミングも記載",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §2.1, §2.2 / ux_v1.md §13.2（プラン管理）/ S-34（SHOP）",
+    "issue": "Premierの『チケットComing Soon/遡及配布』の重要情報がS-38/UI上で確約表現になっていないと誤認課金のリスク",
+    "suggestion": "S-38に『現在は限定フレーム+優先サポートのみ』『ショップ公開時に当月分から遡及配布』を明記。Checkout前に同意チェック（未チェックで決済不可）とメールレシート文言の整合を取る",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §6.1（AI対話カウント）/ ux_v1.md §3.2（送信/再送/停止）",
+    "issue": "『1カウント』の境界が未定義（再送/編集再送/生成停止/ネットワーク再送）。上限直前の体験や請求期待値に影響",
+    "suggestion": "定義を明記: 例) 送信ボタン押下→AIが最初のトークンを返すまでで1回。失敗は��ーカウント、ユーザー発の再送は新規カウント。『生成停止』はカウント維持。編集再送は新規カウント。UIは上限到達バナーに説明リンクを追加",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2（GROW全体）",
+    "issue": "タスク/ゴールが増えた際の探索性（検索/フィルタ：Overdueのみ、ゴール別、未予定のみ等）がMVP内にない。中長期利用で操作負荷が上がる懸念",
+    "suggestion": "MVP範囲で最小のフィルタを追加（例: Todayヘッダーに『Overdueのみ』トグル/Goalsにカテゴリフィルタ）。検索はv0.2.0以降の予定でも可だが、UX仕様にロードマップ明記",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §10（アクセシビリティ）/ §2.3（Undoスナックバー）",
+    "issue": "Undoスナックバーの残り時間が視覚のみ。スクリーンリーダーでカウントダウン認知が難しい",
+    "suggestion": "aria-liveで『取り消しは残りN秒』を1秒ごとに更新または2回（残り30秒/10秒）通知。Reduced Motion時は演出簡略でも通知は維持。フォーカス移動（取り消しボタンへ）も検討",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  }
+]

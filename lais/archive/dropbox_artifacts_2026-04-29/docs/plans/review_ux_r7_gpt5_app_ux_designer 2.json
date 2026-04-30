@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4, §4.5（ux_v1.md §15 備考でも指摘）",
+    "issue": "レベルアップ必要EXPが「Lv1→2=100」と「Lv1→2=1,000」で矛盾。EXPバー・初回体験・通知文面の一貫性が保てず、正しい演出条件を実装不能。",
+    "suggestion": "正値を単一の式/表に統一（推奨: §4.4の式とテーブルを正とし§4.5の1,000を削除）。UX側の演出トリガー（初日Lv2到達等）と文言も同時に更新。E2Eテストに「初回ログイン→Lv2到達」を追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2, §7.4（ux_v1.md §15: 内部矛盾3）",
+    "issue": "AI対話の保存テーブルが「messages」と「social_messages」で混在。RLS誤適用でAI対話が友達に露出するリスク（重大なプライバシー侵害）。",
+    "suggestion": "テーブル命名を厳密分離し全箇所修正（例: ai_messages, social_messages）。RLSポリシーをテーブル単位で明文化し、参照系APIのスキーマも見直す。危険な共通ビューを禁止。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §6.5（Pull-to-refresh）, §7.3（PWA実装注記）",
+    "issue": "Android ChromeのネイティブPull-to-RefreshとカスタムPull-to-Refreshの競合対策が未定義。ページリロードが発生すると編集中モーダルやUndo状態が失われる恐れ。",
+    "suggestion": "ルート/主要スクロール領域に overscroll-behavior-y: contain と touch-action 設定でブラウザ既定のプルリフレッシュを抑止。スクロールコンテナを明示し、カスタムPTRのみ有効化。ポップアップ中はPTRを無効化。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §1.4（戻りナビゲーション）, §1.3（遷移アニメーション）",
+    "issue": "ボトムタブの状態保持（各タブのスクロール位置・子スタック維持）が未定義。HIG/Materialではタブ間移動で各タブの前回状態を保持するのが標準。",
+    "suggestion": "タブごとに独立ナビゲーションスタックとスクロールオフセットを保持（例: keep-alive/ルーターキー分離）。GROWでS-14を開いた後にTALK→GROWでS-14直前の位置に��帰する振る舞いを明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §3.1（TALKヘッダー）",
+    "issue": "TALKヘッダーに☰（ドロワー）と🕐（履歴）の両方が存在し、役割の重複が不明瞭。",
+    "suggestion": "ヘッダーアイコンの職責を一本化。推奨: ☰=履歴ドロワー起動のみ、📝=新規チャット。🕐は削除。アクセシビリティ向けにaria-labelを明示（例: aria-label=\"履歴を開く\"）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §7.4（ドラッグ&ドロップ）",
+    "issue": "手動並び替えが「開始時刻の自動ソートを上書き」するが、元の自動ソートへ戻すUIが未定義。予期せぬ永久固定で混乱の恐れ。",
+    "suggestion": "Todayヘッダーに「並び替え」メニューを追加し「自動（時刻順）/手動」をトグル。手動順クリア（時刻順へリセット）アクションを用意。設定は永続化し明示表示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §7.2, §7.4",
+    "issue": "タスク行のロングプレス開始による並び替えは縦スクロールと競合し誤作動を招きやすい（モバイル一般の課題）。",
+    "suggestion": "行���端にドラッグハンドルを設置し、D&Dはハンドル限定で開始。ロングプレス閾値を>500msにし、スクロールベクトル検知でドラッグ誤認を抑制。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §10（アクセシビリティ）",
+    "issue": "並び替え・スワイプ等のジェスチャー操作にスクリーンリーダー代替が未定義。",
+    "suggestion": "アクセシブルな「編集モード」を用意し、各行に「上へ/下へ」ボタン（aria-label付き）を配置。並び替え完了時にaria-liveで変更結果を読み上げ。スワイプ専用操作には同等のボタンも併設。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §2.5（通知設計）, lais_ux_v1.md §13.3（通知設定）",
+    "issue": "通知の時刻/タイムゾーンの扱いが不明瞭。日次サマリー/リマインダーはユーザーのローカル時刻基準が望ましいが、日次リセットはJST固定と記載が混在。",
+    "suggestion": "通知はユーザー端末のタイムゾーンでスケジューリング（IANA TZをプロフィールに保存しDST対応）。日次リセットJST固定はMVP範囲として注記しつつ、通知はローカル時刻優先で運用。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §7.3（PWA実装注記）",
+    "issue": "iOS PWAのエッジスワイプ無効化は端末/OSバージョンにより抑止できない場合があり、戻り挙動が壊れるリスク。",
+    "suggestion": "OS既定のスワイプバックを前提に設計（display: standalone時のみカスタム）。history管理は最小限にし、戻り連打で破綻しないようpopstate処理を冪等化。テスト対象にiOS 16/17両系統を追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §6.4（スケルトン）, §10.4（スクリーンリーダー）",
+    "issue": "ローディング中のスクリーンリーダー通知（aria-busy/aria-live）の明記が不足。",
+    "suggestion": "主要リスト/詳細領域にaria-busy=trueを付与し、ロード完了でfalseへ。スケルトンにはrole=\"status\" aria-live=\"polite\"で「読み込み中」を一度だけ通知。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md 全体（ジェスチャー/ハプティクス）",
+    "issue": "ハプティクス設計がQRスキャン時のVibrationのみ。完了・レベルアップ・エラー等の重要操作に対する触覚フィードバック方針が未定義（iOS PWAは非対応だがAndroidでは有効）。",
+    "suggestion": "ハプティクスマップを定義（Android: タスク完了=10–20ms、レベルアップ=40–60ms、エラー=短い2連）。iOSは視覚/音で代替。設定で「触覚フィードバック」トグルを提供。Vibration非対応時は自動フォールバック。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §6.2（トースト）, §2.3（Undoスナックバー）",
+    "issue": "トースト/スナックバーのアクセシビリティ仕様が抽象的（フォーカス移動・role/ariaの詳細未定義）。",
+    "suggestion": "スナックバーはrole=\"status\" aria-live=\"polite\"で非フォーカス表示、アクションボタンに明確ラベル（例: aria-label=\"取り消す\"）。画面リーダー利用時は表示時間を延長/固定。スワイプでの明示的Dismissも定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.1（TALKヘッダー）",
+    "issue": "📝「新規チャット」の具体挙動（スレッド生成、編集中テキストの扱い、コンテキスト引き継ぎ）が未定義。",
+    "suggestion": "新規チャット＝新スレッド作成・入力欄クリア・ドラフト破棄確認を明記。ヒアリングモード中は確認ダイアログを必須化。スレッド名の命名規則（先頭消息の要約）も規定。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §2.3（Overdue）, §4.3（DISCOVERチップ色）, §10（コントラスト）",
+    "issue": "状態表現が色依存（Overdue=赤、強み=緑/課題=橙）に偏り、色覚多様性に配慮不足。",
+    "suggestion": "色＋アイコン/ラベルの二重表現に変更（例: Overdueに『期限切れ』バッジ+時計アイコン、強み/課題にそれぞれ✓/!のシンボル）。SR向けにaria-labelで状態を明示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §2.2, §4.1（ヒーロー/ボトムタブ）",
+    "issue": "セーフ��リア（ノッチ/ホームインジケータ）対応の明記がない。スナックバー/ボトムタブ/入力バーの被りリスク。",
+    "suggestion": "レイアウトにenv(safe-area-inset-*)を適用し、ボトム固定要素・スナックバー・入力バーのpaddingを調整。デバイス別スナップショットで検証項目に追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §1.1（タブ）",
+    "issue": "ボトムタブのアイコン/ラベル仕様が未定義（テキストのみの図示）。HIG/Materialではアイコン+ラベル常時表示が基本。",
+    "suggestion": "各タブにシステムアイコンを割当（例: GROW=checklist/target、TALK=chat、ME=person）＋常時ラベル表示。選択状態のカラー/ラベルコントラストをAA準拠で定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §4.1/§7.3（サブタブ横スワイプ）",
+    "issue": "MEのサブタブ横スワイプと、DISCOVERの横スクロール要素（チップ）でジェスチャー競合の恐れ。",
+    "suggestion": "ネストされた横スクロールがパン中はサブタブスワイ���を無効化（gesture priority/thresholdを設定）。余白スワイプのみでタブ切替を発火。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §3.5（チャット履歴スワイプ削除）",
+    "issue": "会話削除にUndoがなく、ユーザーの誤操作リスクが残る（確認ダイアログのみ）。",
+    "suggestion": "削除後にスナックバーでUndo（5秒）を提供。ストレージはソフトデリート→Undoで復元。完全削除は一定時間後のバッチで実行。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "全体（S-00〜S-43）",
+    "issue": "画面遷移の網羅性は高いが、タブ横断のUndoスナックバー30秒維持時にアプリをバックグラウンド→復帰した場合の残り時間/表示継続の扱いが未定義。",
+    "suggestion": "Undoタイマーはモノトニッククロック基準で持続し、バックグラウンド中も減算。復帰時に残り時間で再描画。セッション終了/リロード時はUndo不可を明示。仕様を§2.3に追記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

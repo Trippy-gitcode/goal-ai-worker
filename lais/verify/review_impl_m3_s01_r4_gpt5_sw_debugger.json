@@ -1,0 +1,132 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "2.2",
+    "issue": "タイムアウト発生後も実リクエストは中断できないため、遅延して成功応答が返ると、タイムアウトエラー表示後に予期せず route('/') が実行されるなど、状態・画面が後から上書きされるレースが起こりうる。",
+    "suggestion": "各送信ごとに requestId/generation を付与し、setTimeout 側で timedOut=true と generation を進める。await 後は (timedOut || currentGeneration !== myGeneration) の場合は一切の state 更新・route を行わないようガードする。例: const id=++seqRef.current; let timedOut=false; const to=setTimeout(()=>{timedOut=true;},...); try { await ...; if (timedOut || seqRef.current!==id) return; ... } finally { if (seqRef.current===id) cleanup(); }",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "2.2",
+    "issue": "タイムアウト時に inFlightRef.current=false に戻るため、前回リクエストが未解決のまま再送が可能になる。古いリクエストが後から resolve/reject すると新しい試行結果を上書きする恐れ（多重 in-flight による���合）。",
+    "suggestion": "boolean ではなく世代IDでアクティブ送信を管理し、再送時に旧世代の結果は必ず無視する。UI 上も「前回をキャンセルして再試行中」である旨を示し、遅延完了の副作用を遮断する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "2.1",
+    "issue": "sessionStorage が使用不可（Safari プライベートモード/ITP/サンドボックス等）だと STATIC_PATHS でのガードが働かず、window.location.replace(path) を繰り返して無限リロードに陥る可能性がある。",
+    "suggestion": "セッションストレージ非使用時のフォールバックガードを用意する（window.__laisStaticNavGuard[path] のメモリ保持、URL ハッシュ/クエリに一度だけフラグ付与、一定回数以上でホームに退避など）。ガード作動時は dev で警告ログを出す。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.1",
+    "issue": "パス正規化不足。'/terms/'（末尾スラッシュ）や '/terms#...'（ハッシュ付）が STATIC_PATHS に一致せず、意図せず '/' にリダイレクトされるケースがある。",
+    "suggestion": "URL API で正規化し、search と hash を除去、末尾スラッシュを削除して比較する。例: const u=new URL(url, location.origin); const path=u.pathname.replace(/\\/$/,'');",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2.1",
+    "issue": "sessionStorage の setItem/removeItem 例外を握りつぶしており（/* ignore */）、ガード挙動や無限リロード時の診断が困難。デグレ検出のためのログが不足。",
+    "suggestion": "開発ビルド時のみ一度だけ console.warn を出すユーティリティを挟む（例: warnOnce('storage-unavailable')）。本番ではサイレントでも、メトリクス送出や Sentry breadcrumb 追加を検討。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "2.2",
+    "issue": "オートフィル同期が 0ms/100ms の単発同期のみで、1Password/Bitwarden/iOS Safari 等の遅延注入を取りこぼす可能性。さらに handleSubmit は state を参照して検証しており、DOM 実値との差異で CTA 無効化/入力エラー誤判定が起こりうる。",
+    "suggestion": "handleSubmit 冒頭で必ず ref.current.value を再読込して state に反映 or 直接参照して検証する。加えて、マウント後 1〜2 秒間は 100ms ポーリング or MutationObserver or -webkit-autofill の animationstart ハックで同期精度を上げる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "mountedRef の初期値が true のため、将来的な変更で pre-mount フェーズに safeSetState が誤って許容されるリスクがわずかにある（現在の実装では顕在化していない）。",
+    "suggestion": "mountedRef の初期値を false にし、useEffect マウントで true、クリーンアップで false にする一般的パターンへ変更して予防する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.2",
+    "issue": "catch 節で err.message をそのままユーザーに表示するため、英語・内部コード・詳細技術情報が露出する恐れ。メッセージの一貫性/ローカライズ品質も低下しうる。",
+    "suggestion": "Supabase のエラーコードをマッピングして日本語メッセージに変換し、未知コードは汎用文言＋サポート用トレースIDを提示。元メッセージはログ/モニタリングにのみ送出する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "オフライン検知時に��ッセージは出すが、CTA は押下可能なままでスパムクリック/不要な状態遷移の恐れ。アクセシビリティ的にも状態連動が弱い。",
+    "suggestion": "navigator.onLine===false の間は CTA を disabled/aria-disabled にし、window の online/offline イベントで自動再評価。視覚と SR 双方に状態変化を通知。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.3",
+    "issue": "リンクのヒットエリア拡張を負マージンで行っており、隣接要素と重なって意図しないクリック/フォーカスを拾う可能性。特に小画面での要素密集時に顕在化しうる。",
+    "suggestion": "拡張は @media (pointer: coarse) 条件下のみに限定、または ::after 疑似要素でヒット領域のみ拡張し視覚/レイアウトと分離する。重なり検知の E2E（クリックヒートマップ/重なり検査）を追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3",
+    "issue": "重要な退行検出シナリオのテスト不足（private mode での storage 無効時のループ抑止、'/terms#...'・末尾スラッシュの正規化、遅延オートフィル、タイムアウト後の遅延成功と再送の競合、offline→online 遷移）。",
+    "suggestion": "Playwright/Unit で以下を追加: 1) storage API 例外モックで STATIC_PATHS ループ抑止確認 2) '/terms/', '/terms#x' で期待遷移確認 3) password manager の遅延注入シミュレーション 4) 16秒後 resolve をモックし、タイムアウト後に UI が上書きされないこと 5) navigator.onLine トグルに伴う CTA/メッセージの遷移。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2.1",
+    "issue": "window.location.replace(path) がアプリのベースパス/配下デプロイ（例: /app/）前提に依存し、'/terms' 直叩きが 404 を誘発する可能性。ルーター/配信形態の前提が不明瞭。",
+    "suggestion": "ベースパス考慮（new URL(path, location.origin + BASE_PATH)）で絶対URLを構築、または一時的に route('/terms', true) を用いて SPA 内で遷移処理。配信形態をコメントで明示。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "SUBMIT_TIMEOUT_MS が固定（15s）で状況適応性や観測性がない。ネットワーク環境により短��ぎ/長すぎになりうる。タイムアウト発生の監視も欠如。",
+    "suggestion": "環境変数/設定で調整可能にし、タイムアウト発生を計測（メトリクス/ロギング）。必要に応じて指数バックオフの自動リトライや、ユーザー主導の再試行 UI を提供する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

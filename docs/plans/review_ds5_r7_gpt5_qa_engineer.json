@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存」項目が単一行テキストで、複数上流ファイルや機械検証に耐える構造になっていない。依存追加/更新時に抜け・表記ゆれ・順序違いが起こりやすい。",
+    "suggestion": "全仕様書ヘッダーをYAMLフロントマター化し、depends_onを配列で必須化（{path, version, section}）。例: depends_on: [{path: docs/project_v1.md, version: 1.3.0, section: \"§3\"}, ...]。これをlint可能にする。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.5",
+    "issue": "ヘッダーメタデータ（ステータス/依存/バージョン）の自動検証手段が未定義で、依存管理を人手に委ねている。Gatesに組み込まれていないため実効性が弱い。",
+    "suggestion": "header_lint.sh（新規）を追加し、必須フィールド存在、depends_onのファイル実在確認、参照先のヘッダー版数一致、ステータス遷移（CONFIRMEDはreview_gate.sh=PASSのみ）を検証。canopy_common.shから実行させる。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§19.6",
+    "issue": "「バージョンなしの依存宣言禁止」とあるが、design_system.md等の固定ファイル名に対するバージョンの付与・採番規則が不明確。",
+    "suggestion": "全仕様書にヘッダー内versionを必須化（ファイル名にvがなくても内部でvX.Y）。採番規則（MAJOR:情報構造変更/MINOR:セクション追記/PATCH:誤記修正）を§19.5に明記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "競合ベンチマークの出力がMarkdown表のみで機械検証に不向き。必須基準（直接5社/方針列埋め/差別化3点）を自動で判定できない。",
+    "suggestion": "benchmark.yaml（またはCSV/JSON）を併記し、apps/bench_lint.shで件数・必須列（Lais方針/対応セクション）充足を検証。canopy_common.shに統合。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§19.7",
+    "issue": "App Storeレビュー分析を前提にしているが、Web専用/未公開アプリの場合の代替情報源が未定義。",
+    "suggestion": "代替ソ���ス（Play Store/SimilarWeb/Trustpilot/Reddit/公開Issue等）を許容し、どれか1つ以上必須と定義。ヘッダーに\"benchmark.sources: [app_store, similarweb]\"等で宣言させlint対象にする。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.mdテンプレート）",
+    "issue": "テスト分離（データ汚染防止/セットアップ・クリーンアップ/再実行可能性）に関する必須セクションがない。フレークや順序依存の温床になる。",
+    "suggestion": "「§0 テスト分離ポリシー」を追加し、テスト用識別子命名規約、固有データ生成、KV/DB初期化手順、リトライ禁止、順序非依存を必須化。各ケースに前提/クリーンアップを明記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md / 全テンプレート横断）",
+    "issue": "各テストケースに一意なSPEC-IDやgrepキーの必須化がなく、§12のID体系やL2 affected-testsのマッピングと疎結合。影響範囲テストの信頼性が下がる。",
+    "suggestion": "各ケースに必ずSPEC-ID（SPEC-{AREA}-{NNN}）とgrepキー��例: [e2e:today-001]）を付与。tests/test_map.yamlはSPEC-ID/grepキー双方で解決可能とし、affected-tests.shが両方を解釈。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（design_spec_v1.md）",
+    "issue": "画面ごとの「状態定義（hover/pressed/disabled/error/focus/読み込み/空状態）」の必須化がなく、G9の視覚差分根拠が不足しやすい。",
+    "suggestion": "各画面仕様セクションに状態一覧（対話状態/エラー/ローディング/空）と視覚トークン適用を必須化。スクショ撮影ポイントも指定してG9の検証性を高める。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（reference_v1.md）",
+    "issue": "APIのレート制限/冪等性/リトライ・バックオフ/スロットリング/整合性保証（Exactly-once/At-least-once）の記述がテンプレにない。",
+    "suggestion": "「§1.5 API共通ポリシー」を追加し、Idempotency-Key、429/5xx時のバックオフ、再送戦略、整合性レベル、Webhook再送と署名検証を必須化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§19.5",
+    "issue": "ヘッダー例の依存パスが「docs/plans/lais_project_v1.md」だが、§19.1の実ファイルはdocs/配下（/plansなし）。読者が誤配置する恐れ。",
+    "suggestion": "例をdocs/project_v1.md等に修正。もしくはヘッダーに相対/絶対/外部リポジトリURLの許容形式を明記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.6",
+    "issue": "循環参照/逆参照の禁止は規定されているが、検出方法が未定義。手作業では検出漏れが起きる。",
+    "suggestion": "deps_graph_lint.sh（新規）で各仕様書ヘッダーdepends_onをDAG化し、循環・自己参照・未存在ノードを検出。canopy_common.shに統合。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.7",
+    "issue": "「Phase 0の完了基準: 8ペルソナ×2モデルのAIレビュー」とあるが、§13.4の標準は5ペルソナ。整合が取れていない。",
+    "suggestion": "どちらかに統一。例: §13.4を拡張して8ペルソナ定義を追記するか、§19.7を「標準5ペルソナ＋任意追加（合計≥8可）」等に修正。ヘッダ��に実施ペルソナ数を記録してreview_gateで検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.6",
+    "issue": "affected-tests.shはtests名のgrepやディレクトリパターンに依存。テスト名変更や曖昧なパターンで誤検出/未検出のリスクがある。",
+    "suggestion": "テストタイトルの命名規約（prefixにSPEC-ID/grepキー必須）を§19.4 e2eテンプレに追加。test_map.yamlへtags（正規表現ではなく列挙タグ）項目を追加し、affected-testsはタグ解決を優先。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md）",
+    "issue": "「N+2 パフォーマンステスト」の閾値/指標/出力形式が未定義で、実行可能性が低い。",
+    "suggestion": "必須KPI（TTFB/LCP/CLS/交互応答p95/バックエンドp95/エラー率）と閾値を定義し、測定出力をJSON（metrics/perf_{date}.json）で保存。canopyで閾値超過をFAIL化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "「dev-system準拠」の参照先がアプリ側か���相対参照できない可能性（別リポジトリ）。解決策が記載されていない。",
+    "suggestion": "dev-systemのGit URL + タグ/コミットSHAをヘッダーメタに含める（dev_system_ref: {repo, tag, section}）。.dev-system.versionと一致検証をheader_lint.shに追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4（e2e_fullflow_test.md）",
+    "issue": "待機/同期ポリシーがテンプレ内に明示されておらず、固定waitの混入を招きやすい（§9.4では原則は提示済み）。",
+    "suggestion": "e2eテンプレに「同期ルール」を追加（waitForSelector/waitForResponse必須、waitForTimeout禁止）。test_lint.shにwaitForTimeout検出（FAIL）を追加して二重に防止。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

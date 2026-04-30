@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8 コンポーネント（共通）",
+    "issue": "フォーム用のチェックボックス/ラジオコンポーネントの定義がない。UX仕様（S-01 サインアップ）で同意チェックが必要だが、サイズ/状態/アクセシビリティ/トークンが未定義。",
+    "suggestion": "チェックボックス/ラジオのコンポーネントトークンを追加（サイズ20/24px、ラベル間隔、--control-bg/--control-border/--control-checked/--control-hover/--control-pressed/--control-disabled、focus-visibleリング）。ARIA: input[type=checkbox/radio]のネイティブ使用＋label関連付け。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.10 状態マトリクス",
+    "issue": "コンポーネント横断で使う汎用の“面”のホバー/押下背景トークン（surface系）が未定義。説明文に「opacity +0.04」の指針はあるが、トークン化されておらず実装が分散・不一致になりやすい。",
+    "suggestion": "各テーマに --surface-hover / --surface-pressed / --elevated-hover / --elevated-pressed を定義（ライト=濃度+α、ダーク=明度-α）。リスト行/カード/メニュー等はこれを参照して一元化。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5.1–5.4 テーマ定義, §9 CSSトークン",
+    "issue": "semantic subtleのhover/pressedトークンがdanger以外に未定義。さらに--danger-subtle-hover/pressedもNight Skyの§9にしかなく、ライト系テーマでNight Sky値がリークする恐れ。",
+    "suggestion": "全テーマに --success-subtle-hover/pressed, --warning-subtle-hover/pressed, --info-subtle-hover/pressed, --danger-subtle-hover/pressed を明示定義。各テーマのsubtle濃度は既存subtle値と整合するαで再計算。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§8.1 ボタン",
+    "issue": "Ghostボタンのpressed背景が--accent-subtle-hoverになっており、他種別のpressedが“*-pressed”を使うルールと不整合。",
+    "suggestion": "Ghostのpressed背景は--accent-subtle-pressedを使用に修正。ホバー/押下の名称と適用ルールを全ボタンで統一。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§8.5 ���トムシート, §8.6 トースト, §8.7 ボトムタブバー",
+    "issue": "各所で“shadow:”と記載されているが、有効なCSSプロパティはbox-shadow。実装時に誤解・コ���ペ不具合を招く恐れ。",
+    "suggestion": "表記を“box-shadow: var(--shadow-*)”に統一。上方向のみの影はトークン化（例: --shadow-top: 0 -1px 0 var(--border)）して明確化。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§6.1 アイコンスタイル",
+    "issue": "アイコンの押下色が--accent-hoverになっており、ボタン等での“pressed”概念と不一致。",
+    "suggestion": "Pressed状態は--accent-pressedを使用に変更。非アクティブ/hover/pressed/disabledの色ルールをアイコンとボタンで統一。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4 z-index階層トークン（drawer記載あり）/ §8 コンポーネント",
+    "issue": "ドロワー（TALKの履歴ドロワーで使用）のコンポーネント定義が欠落。背景/幅/遷移/スクラム/フォーカストラップ/ARIAが未定義。",
+    "suggestion": "ドロワーを追加定義（幅: 80vw/最大320px、高さ: 100%、背景: --bg-surface、scrim: --scrim、z: --z-drawer、box-shadow: --shadow-lg、アニメ: translateX + --ease-out、ARIA: role=\"dialog\" + aria-modal=\"true\"、フォーカス���ラップ/閉じる操作定義）。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2.2 リンク色の役割分離",
+    "issue": "visitedリンク色のトークンが未定義。PWAの文中リンクで訪問済み区別が必要な場合に一貫性が担保できない。",
+    "suggestion": "—link-*トークンを導入（--link: var(--accent), --link-hover: var(--accent-hover), --link-pressed: var(--accent-pressed), --link-visited: 色相/明度差のある値）。下線は維持。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.1 スペーシング, §4.2 Open Air原則",
+    "issue": "ガイドで「タスク間余白: 20px以上」と明記されているが、スペーシングスケールに20pxトークンが存在しない（16/24の間が空白）。",
+    "suggestion": "スケールに--space-ml: 20px を追加、またはガイドを--space-lg(24px)に合わせて修正。実装者が固定値をハードコードしないよう整合。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§8.1 ボタン（フォーカス状態）/ §8.5–§8.9",
+    "issue": "focus可視化をbox-shadow: var(--focus-ring)で上書き指定しているため、shadowを持つコンポーネントで既存の影が消える恐れ（カンマ結合前提が不明）。",
+    "suggestion": "パターンを明示: box-shadowは“既存影, var(--focus-ring)”の順でカンマ結合、またはoutlineで実装（forced-colors以外でもoutline許容）。必要なら--component-shadowトークンを導入し、結合をガイドライン化。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.2 入力フィールド",
+    "issue": "エラー時のfocusリング（--focus-ring-error）やhover境界、read-only状態の視覚仕様が未定義。エラー時に枠=--danger＋リング=--accentの併用は競合の恐れ。",
+    "suggestion": "--focus-ring-errorを追加（色は--danger由来）。hover境界（--input-border-hover），read-only背景/カーソル/境界のトークンを追加。状態優先順位（error > focus > hover）も明文化。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8 コンポーネント（未定義）",
+    "issue": "トップバー/ヘッダー（タイトル/戻る/アクション）のコンポーネント定義がない。TALKや詳細画面で使用されるが高さ/背景/区切り線/タイポ/安全域が未定義。",
+    "suggestion": "App Barを追加（高さ56px + safe-area-inset-top、背景: --bg-surface、下線: 1px solid --border、タイトル: --font-size-lg/--font-weight-semibold、左右アクション48pxタッチ領域）。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4 z-index（--z-dropdown）/ §8 コンポーネント",
+    "issue": "ドロップダウン/セレクトのコンポーネント仕様が未定義。メニュー面の背景/角丸/影/項目のホバー・押下・選択状態/最大高さ/スクロール/キーボード操作が不明。",
+    "suggestion": "Dropdown/Selectを追加（メニュー背景: --bg-elevated、角丸: --radius-md、影: --shadow-md、項目パディング: --space-sm --space-lg、hover/pressedは--surface-hover/--surface-pressed、選択済みにチェック/強調、max-height: 56vh/Auto scroll、ARIA: role=\"listbox\"/\"option\"）。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.10 状態マトリクス（loading）",
+    "issue": "スケルトンの色が“--bg-disabled ⇆ --bg-elevated”の指示のみで、���イライト/ベースのトークンが未定義。テーマ間で一貫しない可能性。",
+    "suggestion": "—skeleton-base / --skeleton-highlight を各テーマに定義（ライト=明/暗の近接トーン、ダーク=明度差控えめ）。reduced-motion時はアニメ停止し静的配色に。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§8.8 トグルスイッチ",
+    "issue": "スイッチ配色が--button-primary-bg/--button-primary-fgに依存しており、ボタンと連動した意図しない色変化やテーマ間の整合性崩れの恐れ。",
+    "suggestion": "スイッチ専用トークンを追加（--switch-track-on / --switch-track-off / --switch-thumb / --switch-track-on-hover/pressed）。ボタン系トークンから独立させる。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.1 ボタン（disabled）/ §8.10（disabled）",
+    "issue": "disabledで“text-disabled”指定に加えopacity:0.6を併用しており、可読性が過度に低下するケースがある（WCAGではdisabledは対象外だが実用上の視認性が下がる）。",
+    "suggestion": "disabledは原則不透明（opacity 1）で配色トークンのみで表現する運用に変更、またはopacity値をコンポーネント別に最適化。タップ不可の見た目はカーソル/インジケータで補完。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  }
+]

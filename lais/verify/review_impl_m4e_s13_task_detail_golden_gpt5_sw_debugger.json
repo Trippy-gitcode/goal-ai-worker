@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "1. S13TaskDetail.jsx ヘッダ/aria-labelledby（editモード時）",
+    "issue": "role=\"dialog\" が aria-labelledby={titleId} を参照しているが、editモードではその id を持つ要素が <input> に置換され、見出しテキストがなくなるためダイアログのアクセシブルネームが消失する（WCAG 2.4.6/4.1.2 違反）。",
+    "suggestion": "ダイアログのタイトル要素（<h2 id=...>）は常に DOM に残し、視覚的に非表示にしてでも aria-labelledby が実テキストノードを参照するようにする。edit 用 <input> には別 id を割り当て、dialog 側は常に <h2> の id を参照。もしくは section[role=dialog] に aria-label を付与する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1. S13TaskDetail.jsx フォーカス管理/トラップ",
+    "issue": "open 時にダイアログへ初期フォーカスを移動していない。現在のタブトラップは first/last の境界でしか介入しないため、フォーカスが背景（トリガ）に残ったまま Tab で背景要素へ逸脱できる（キーボード操作で操作不能/裏要素にフォーカス移動）。",
+    "suggestion": "open 直後に dialogRef.current.focus()（section に tabIndex=\"-1\" 付与）や最初の操作可能要素へ programmatic focus を移す。トラップ処理では document.activeElement が dialog 内かを判定し、外にある場合は e.preventDefault の上で first に強制移動する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "2. S13TaskDetail.css S13-12（AIボタン inactive スタイル）/ design_spec_v1.md §4.6",
+    "issue": "仕様では「Inactive は真の disabled ではない（§5.0 B）」なのに、実装は .s13-ai-btn-inactive に pointer-events:none と aria-disabled を常時付与して実質 disabled にしている。仕様との不一致かつアクセシビリティ上の混乱を招く。",
+    "suggestion": "Inactive は操作可能（ただし弱スタイル）とするなら aria-disabled/pointer-events:none を外し、純粋に配色/weight のみ変更。真に押下不可の条件（§5.0 A）のみ aria-disabled + opacity + pointer-events:none を付与する分岐を導入する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. S13TaskDetail.jsx フォーカス可能要素抽出（Tab トラップ）",
+    "issue": "トラップの focusables 抽出で [disabled] は除外しているが [aria-disabled=\"true\"] を除外していない。結果として非操作要素（AI inactive/保存不可ボタン等）がタブ順に残り、ループの端点になる可能性がある。",
+    "suggestion": "querySelectorAll 後のフィルタで [aria-disabled='true'] を除外するか、非操作要素側に tabIndex=\"-1\" を付与してタブ順から外す。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. S13TaskDetail.jsx 保存ボタン有効/無効制御",
+    "issue": "保存ボタンは aria-disabled を用いて見た目のみ無効化しているが、ボタンは依然としてタブ移動/フォーカス/Enter で onClick が発火し得る（実装ではガードしているが UX 的に不自然）。",
+    "suggestion": "保存不可時は disabled 属性を用い、スタイルは .s13-save:disabled で適用する。onClick 内の手動ガードは不要となり、スクリーンリーダーの振る舞いも一貫する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. S13TaskDetail.jsx body scroll lock useEffect",
+    "issue": "scroll lock を document.body.style.overflow に直接上書き/復元しており、モーダルが複数同時/連続で開閉された場合に復元順序で競合しうる（他のロックを解除してしまう）。",
+    "suggestion": "グローバルなロックカウンタ（ref もしくはモジュールスコープ）で参照カウントし、0 になった時のみ overflow を元に戻す。もしくは body に専用クラスを付与して CSS 側で lock する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "1. S13TaskDetail.jsx handleClose/returnFocus",
+    "issue": "削除直後に handleClose でトリガ要素へ focus 復帰しているが、リストから削除された要素は DOM から消えており focus() に失敗（無効）する。ユーザのフォーカスが失われる可能性。",
+    "suggestion": "focus 復帰前に returnFocusRef.current?.isConnected を確認し、未接続なら近傍の生存要素（例: 次の行 or 親コンテナ）や main へフォールバック。focus({ preventScroll: true }) と requestAnimationFrame で描画完了後に実行。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "1. S13TaskDetail.jsx open/task 依存 useEffect",
+    "issue": "open と task の変更で常に mode を 'view' に戻し draft を再初期化しているため、編集中に親の tasks 更新（別所の変更や定期同期など）が入ると編集中の内容が破棄され得る（見た目は動くが特定条件で壊れる）。",
+    "suggestion": "初期化は「open が false→true へ遷移した時」または「task.id が変わった時」に限定する。prevOpen, prevTaskId を useRef で保持し、不要なリセットを避ける。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "1. S13TaskDetail.jsx ESC ハンドラ",
+    "issue": "document への ESC リスナで e.stopPropagation() を実行しており、他の上位ハンドラをブロックする。モーダルが前面にある間は問題になりにくいが、複合ショートカット等と衝突の恐れ。",
+    "suggestion": "発火条件を「フォーカスが dialog 内にある場合」に限定し、必要に応じて e.preventDefault のみに留める。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "1. S13TaskDetail.jsx S13-6 <dl> 構造",
+    "issue": "<dl> 直下に <div> ラッパを置くパターンは一部バリデータで警告となる場合がある（dt/dd の直接子を推奨）。",
+    "suggestion": "各グループを <div> で包むなら、その内部に dt と dd をセットで配置し、必要に応じて role=\"group\" を付与。もしくは CSS レイアウトを見直し、<dl> 直下に dt/dd のみとする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体（テスト）",
+    "issue": "E2E テスト未整備（Playwright）。フォーカストラップ/初期フォーカス/ESC/overlay/編集スワップ/AI inactive の相互作用は回帰しやすく、現状検出手段がない。",
+    "suggestion": "E2E で以下を追加: (1) open 時に dialog に初期フォーカスが移る, (2) Tab/Shift+Tab が dialog 内で循環, (3) 編集→キャンセルで draft 破棄, (4) 保存無効時にボタン disabled, (5) Escape/overlay/✕ で閉じる+フォーカス復帰, (6) AI inactive の動作（disabled or inactive の仕様準拠）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. S13TaskDetail.jsx onSave/onDelete 例外処理",
+    "issue": "onSave/onDelete ���失敗時 UI フィードバックがなく、保存前に mode を変更する可能性がある（将来 Supabase 連携時に顕在化）。",
+    "suggestion": "onSave/onDelete を Promise 対応し、処理中はボタンを disabled、失敗時はエラートースト/メッセージ表示・mode を維持。ログは console ではなく集中トラッキングへ。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. S13TaskDetail.css .s13-ai-btn-inactive/.s13-save[aria-disabled]",
+    "issue": "非活性/無効状態のフォーカス可能性と見た目が一貫していない（pointer-events ではキーボード操作を防げない/aria-disabled のみではマウスを防げない）。",
+    "suggestion": "真の無効 = disabled 属性 + :disabled スタイル。疑似無効（inactive）= tabindex=\"-1\" でタブから外し、クリック/Enter で no-op なら aria-disabled を付けた上で明確な SR 文言（例: \"現在は利用できません\"）を追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. S13TaskDetail.jsx handleClose フォーカス復帰タイミング",
+    "issue": "setTimeout(0) による復帰はレンダリングタイミング依存で稀にフォーカス失敗（Safari 等）を起こす可能性。",
+    "suggestion": "requestAnimationFrame もしくは queueMicrotask -> rAF の二段階で復帰し、focus ターゲットが接続済みか検査。失敗時にフォールバック要素へ。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

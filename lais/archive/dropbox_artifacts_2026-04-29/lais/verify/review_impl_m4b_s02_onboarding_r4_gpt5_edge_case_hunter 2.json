@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-401",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "修正後の該当 CSS（.s02-onboarding:focus-visible）",
+    "issue": "WCAG 2.2 AA 2.4.11 Focus Appearance (Minimum) への適合可否が未確認。outline 色が var(--accent) に依存しており、背景（--bg-primary）とのコントラストが 3:1 を満たさない可能性がある。",
+    "suggestion": "デザイントークン側で --accent と --bg-primary のコントラスト保証（≥3:1）を明文化し、自動テストに組み込む。必要に応じて outline 幅を 3px 以上にし、@media (prefers-contrast: more) で太さ・色を強化するか、outline: auto をフォールバックとして用意する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-402",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "R4 レビュー観点（古いブラウザ対応）",
+    "issue": ":focus-visible 非対応ブラウザ（例: Safari < 15.4）では「programmatic focus 時のみアウトライン非表示」の意図が働かず、遷移直後にアウトラインが表示される（視覚ノイズ）。",
+    "suggestion": "@supports selector(:focus-visible) で分岐し、非対応環境では JS で入力モダリティ検知（keyboard/mouse/touch）しつつ .is-keyboard-modality .s02-onboarding:focus { outline: 3px solid ... } のような代替を適用、programmatic focus 直後は一時的に .-prog-focused を付与して無表示→初回キー入力で解除する。あるいは WICG/focus-visible ポリフィルを採用する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-403",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "修正後の該当 CSS（.s02-onboarding:focus-visible）",
+    "issue": "Windows 高コントラスト（forced-colors: active）時の可視性担保が未定義。カスタム色の outline がシステム色に置換・簡略化される実装差で見えにくくなる恐れがある。",
+    "suggestion": "@media (forced-colors: active) で outline-color: Highlight または CanvasText を明示し、outline-offset: 0（または 1）に調整。必要に応じて forced-color-adjust: auto を確認。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-404",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "R3 指摘の CRITICAL 対応説明（「Shift+Tab で main に戻した場合」）",
+    "issue": "main 要素を Tab 移動順に入れる運用を前提としているように読めるが、キーボードユーザーに余分なタブ停止点を追加しうるため操作負荷���増える可能性がある。",
+    "suggestion": "キーボード UX 方針を明記。一般的には main は tabindex=\"-1\"（プログラムフォーカスのみ）+ スキップリンクで到達を推奨。もし tabindex=\"0\" を採用するなら、余分なタブ停止が許容される理由と一貫性を設計ガイドに追記。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-405",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "R3 指摘の CRITICAL 対応説明（LP-002 mainRef.current.focus()）",
+    "issue": "programmatic focus を成立させる前提（main の tabindex 設定）が本文から読み取れない。tabindex 未設定だと一部ブラウザで focus() が無効（no-op）になる。",
+    "suggestion": "main に tabindex=\"-1\"（または 0）を付与する仕様を明文化し、E2E テストで「遷移直後に main が focus を受ける」ことを検証。role=main と合わせてアクセシブルネーム・アナウンスの確認も含める。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-406",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "修正後の該当 CSS（outline-offset: -3px と display:flex の組合せ）",
+    "issue": "WebKit/Safari で flex 要素かつ outline-offset 負値のアウトライン���描画欠落・断線する既知問題がある（環境依存）。main コンテナが flex のため、環境によりフォーカスリングが部分的に不可視になる恐れ。",
+    "suggestion": "Safari 15.4–17 系で実機検証。問題が出る場合は outline-offset: 0 に変更し太さでカバー、または box-shadow によるフォーカスリング（内外二重リング）に切替。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-407",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": ".s02-onboarding レイアウト（パディングと固定要素の共存）",
+    "issue": "outline-offset: -3px によりアウトラインが要素内側に描かれるため、Windows の非オーバーレイスクロールバー環境では右辺がスクロールバーと競合して視認性が低下し得る。加えて固定配置の .s02-next が下辺アウトラインを覆う可能性。",
+    "suggestion": "アウトラインの視認性を四辺で確保できるよう、offset を 0 以上にするか、外側リングとして box-shadow を追加。下部固定要素と重なる領域がある場合はリングを外側に出す（正の offset）か、main の下パディングを再調整。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-408",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "スタイルカスケード（全体 CSS と本ブロックの相互作用）",
+    "issue": "他所の汎用 :focus / :focus-visible スタイルが後勝ちすると、本ブロックの可視リング仕様が上書きされ、期待表示にならない恐れがある。",
+    "suggestion": "本ブロックをビルド最終近くに配置し、E2E のビジュアルスナップショットで .s02-onboarding へのキーボード到達時のリングが一意になることを検証。必要に応じてより局所的なセレクタ（.s02-onboarding:where(:focus-visible)）と重要度管理を行う。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-409",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "R4 レビュー観点（ブラウザ範囲と互換方針）",
+    "issue": "ターゲットブラウザ範囲に対して :focus-visible 未対応・実装差（一致条件の差異）発生時の挙動をどう扱うか（受容か、ポリフィル適用か）が未定義。",
+    "suggestion": "サポートポリシーに「:focus-visible 非対応では UA デフォルトアウトライン表示を許容（視覚ノイズ容認）」等の方針を明記。もしくは必ず同一 UX を担保するならポリフィル導入を決定。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-410",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "修正後の該当 CSS（outline 設計）",
+    "issue": "prefers-contrast / OS アクセシビリティ設定（強調表示）への最適化が未考慮。高コントラスト希望ユーザーに対してリング太さ・色の強化がない。",
+    "suggestion": "@media (prefers-contrast: more) で outline 幅を 4px 程度に増やす・二重リングにする、色は currentColor ベースにしてテーマと同期させるなど、強調設定を反映する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

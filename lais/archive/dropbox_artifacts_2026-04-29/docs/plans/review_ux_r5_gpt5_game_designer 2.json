@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 / §4.5",
+    "issue": "レベル計算に矛盾。§4.4の式ではLv1→2=100EXPだが、§4.5説明文に「Lv.1→2=1,000EXP」「最速でも約3日」と記載。デイリー上限の説明とも整合しないため、実装時に難易度が崩壊する恐れ。",
+    "suggestion": "正とする計算式/数値を単一化する。推奨: 次レベル必要EXP=100+(Lv-1)*50（現行テーブルと一致）。§4.5の説明文を削除/修正し、日次上限例も再計算（例: 通常日=ログイン5+タスク5件50+冒険1件50=105EXPでDay1にLv2達成）。全箇所の数値をe2eテストに落とし込む。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.4 / ux_v1.md §4.2.1",
+    "issue": "称号・到達報酬の一覧性が不足。称号レンジは記載があるが、全レンジの明細と「次の解放内容（称号/見た目/機能）」の可視化がないため中期以降の動機付けが弱い。",
+    "suggestion": "ME > PROFILEに「称号図鑑/次の解放」UIを追加（各レンジの名称、必要EXP、解放されるアバター��化/装飾のプレビュー）。称号レンジを全8段階で確定し、各段階の固有バフは付与せず（P2W回避）、視覚的報酬のみを明記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §2.2 / §4.4 / ux_v1.md §4.5",
+    "issue": "アバター経済（SHOP）の設計不足。価格帯/レアリティ/入手経路（直接購入/チケット/期間限定）/レベル解放条件/重複購入防止/返金方針/試着UIが未定義で、実装後のバランス崩壊・収益機会損失のリスク。",
+    "suggestion": "v0.2.0に向けてSHOP仕様を追加: 1) カテゴリ（フレーム/背景/オーラ/衣装）×レア度（Common/Uncommon/Rare/Epic）定義 2) 価格レンジ（例: 240/480/960/1,600円相当 or チケット1/2/3/5枚） 3) レベルゲート（例: Rare=Lv10+、Epic=Lv20+） 4) 期間限定/シーズン品（再販ポリシー） 5) 試着→購入→保存のUX 6) Premierチケットの等価交換リストと端数持ち越しルール 7) 重複購入防止とギフト非対応（MVP）。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §7.3 / ux_v1.md §9.1",
+    "issue": "オフライン完了の同期時に日次上限で一部EXPが不付与となるケースのユーザー通知が不足。「巻き戻しは発生しない」一方で、どの完了がEXP対象外になったかの説明がなく混乱を招く。",
+    "suggestion": "同期完了モーダルに集計を表示: 「同期: 12件/ 付与EXP: 210/300（上限到達のため2件はEXP対象外）」＋対象外タスクに「上限超過」バッジ。ヘルプリンクで上限仕様を明記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §4.2 / §4.5 / ux_v1.md §3.4",
+    "issue": "冒険EXPの誤判定に対するユーザー側の救済が未定義。誤付与/未付与の申告経路がないと公平性を欠く（ゲームの信頼性低下）。",
+    "suggestion": "冒険EXPカードに「誤判定を報告」リンクを追加し、サーバでレビューキューに積む。誤判定承認時は当日枠に限り訂正（±50）を反映。頻回報告の乱用対策として1日1回まで。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.2",
+    "issue": "EXP源の多様性が不足（呼吸5/日常10固定/冒険50固定のみ）。全タスク一律10EXPは、��大タスクの分割」最適化（名前変更で5分制限回避）を誘発し得る。",
+    "suggestion": "MVP段階の一律10は維持しつつ、将来フラグとして「AI推定の努力度タグ（S/M/L）」を追加し、日常EXPを10/15/20の可変に拡張する計画をreferenceに追記。サーバ側で同一日・同一ゴール配下の短時間連続完了に対する減衰（例: 3件目以降は+5）も検討。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.4 / §2.5 / ux_v1.md §15",
+    "issue": "1週間/1ヶ月/3ヶ月の中期継続フックが不足。週次レポートはあるが、到達ごほうび（称号/装飾/フレーム）やシーズン目標がない。",
+    "suggestion": "週/月マイルストーンを導入: 週の合計EXP到達（例: 300/500/800）で限定バッジ/フレーム配布。月次は「テーマ別シーズン（健康/学習）」でシーズンパス風に無料トラックのみ実装（P2W回避）。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §4.4",
+    "issue": "Lv50到達後の進行（Master以降）のUXが薄い。累計EXP表示のみでは長期継続の報酬設計��して弱い。",
+    "suggestion": "プレstige（星）を導入（例: Master★1〜★5、各★=累計+20,000EXP）。見た目強化（オーラ彩度/トレイル）とプロフィールに星を表示。数値インフレを避け、称号は「Master」のまま星のみ加算。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4 / §5.3 / project_v1.md §5.3",
+    "issue": "ソーシャル動機の深さ不足。応援/短文のみで、共同目標・デュオの軽量協力が未導入（MVP後検討とあるがUXでの布石がない）。",
+    "suggestion": "FRIENDSに「デュオ目標」プロトタイプを追加（1対1でゴール共有、進捗%を相互に表示）。報酬はコスメのみ（共通フレーム/背景）。通知は既存の応援チャンネルを流用。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8.6",
+    "issue": "同時発火の演出優先度は定義済みだが、EXPバー伸長の合算/分割演出ルールが長押し連打・複数完了時に冗長化する懸念がある（最大8秒制限はあるがユーザー体感が重い）。",
+    "suggestion": "複数完了が1秒以内に連続した場合、EXPバー伸長は合算して1回で再生（フロートテキストはスタックしてカウンタ表示「+10×3」）。ゴール/レベルアップのみ個別演出を維持。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §4.5",
+    "issue": "不正対策の“同名5分”ルールは名前変更で回避可能。同一内容の微修正（句読点/絵文字）でも通る可能性が高い。",
+    "suggestion": "サーバ側で完了イベントの近接重複判定を強化: 正規化したタスク名の類似度（例: Jaccard/Levenshtein）、同一ゴール配下・同一予定日の1分以内多発などを多条件でブロック。疑わしい場合はEXP付与を保留＋サイレント無効化。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §6.2 / §7.1",
+    "issue": "全操作100ms以内のフィードバック方針は暗黙だが、AI提案カードやSHOP遷移（将来）など重量処理のプレースホルダー明文化が弱い。",
+    "suggestion": "AI提案カードにスケルトン/プレースホルダーを必ず挟む規定を追加（200ms以内にプレースホルダー出現）。SHOPは試着時に低解像度プレビュー→高解像度遅延読込を明文化。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §7.2 / §7.4（UX側の指摘済み）",
+    "issue": "messagesテーブル命名の混同（AI対話とソーシャルの混在）。RLS誤設定でAI対話が友達に露出する重大リスク。",
+    "suggestion": "AI対話=ai_messages、ソーシャル= social_messagesに分離し、RLSを分ける。reference_v1.mdにRLSサンプルを明記（SELECT対象、JOIN禁止、行単位ポリシー）。データライフサイクル表の命名も統一。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.4 / ux_v1.md §4.2.1",
+    "issue": "アバター進化段階（Phase）の解放条件と演出再生条件の境界が曖昧（Phase変更レベル/プレビュー/再生抑止のトグル未定義）。",
+    "suggestion": "Phase境界を明記（P1:1-5/P2:6-15/P3:16-30/P4:31-45/P5:46-50）。ME>アバター設定に「進化演出を簡略化する」トグルを追加（Reduced Motionとは別）。プロフィールで各Phaseのプレビューを閲覧可能に。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "project_v1.md §4.5 / ux_v1.md §9.4",
+    "issue": "日次上限とゴールボーナス別枠の境界ケースが未定義（例: 上限到達後にゴール達成→+50は必ず付与/演出？ 同時刻に複数ゴールは？）。",
+    "suggestion": "ルールを明文化: 1) 上限300到達後でもゴールボーナス+50は常に付与（1日1回） 2) 複数ゴール完了時は最初の1件のみ+50（残りは0） 3) 同時刻衝突は作成日時が古い順で処理。UXにその旨を注記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.3 / §3.4",
+    "issue": "TALK画面でのEXP/レベル変化はバナーのみで、GROW復帰時に再生とあるが、ユーザーが「いつ上がったか」を見逃す可能性がある。",
+    "suggestion": "タブ復帰時に“前回のハイライト”を1回だけ再提示（小型バナー「さっきLvXに到達 — EXPバーで確認」）。通知センター（ME>FRIENDSのお知らせと別枠）に進行ログ簡易履歴を追加。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §4.2 / §2.5",
+    "issue": "ログインボーナスが固定+5のみで成長曲線に寄与が小さい。復帰者/新規7日間の初期体験の押し上げが弱い。",
+    "suggestion": "“や���しいストリーク”を導入（ペナルティなし）: 連続日数に応じ+5→+10→+15（最大+20、途切れても+10にソフトリセット）。復帰者には3日間限定で+10を保証。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §4.3 / §6.2",
+    "issue": "冒険EXPの検出・付与が応答生成と並行だが、サーバ権威・冪等性・重複抑止のイベントID仕様がUX/参照仕様に未記載（多重発火やリトライ時の二重付与リスク）。",
+    "suggestion": "冒険検出イベントに一意のevent_id（message_id + classifier_hash）を付与し、user_expトランザクションをevent_idでUPSERT。UXにはリトライ/再送時は再付与されない旨を注記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §0 / §12",
+    "issue": "UXベンチマークの学びは記載されているが、具体的な数値的反映（例: Free版の体験比較、日次/週次アクション必要量のベンチ基準）が不足。",
+    "suggestion": "ベンチからKPI目標を明記: Day1タスク登録率≥60%、Week1継続率≥35%、日次平均完了数3〜5件、冒険検出率1/日。UXテレメトリ（計測イベント）をe2eテストと合わせて定義。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.2 / §1.3",
+    "issue": "画面ID S-34（SHOP）は“Coming Soon”だが、S-41（アバター設定）からの未所持アイテム「SHOPへ」遷移がv0.1.0でデッドリンク化する可能性。",
+    "suggestion": "MVPではS-41の未所持タップ時はS-34へ遷移せず、軽量な「準備中」モーダルに留める。S-34が有効化されたビルドから遷移を開放。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  }
+]

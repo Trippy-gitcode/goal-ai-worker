@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"BEST_PRACTICE\",\n    \"screen\": \"CLAUDE.md\",\n    \"location\": \"改訂案① G. CLAUDE.md / development_rules.md 連鎖更新\",\n    \"issue\": \"CLAUDE.mdから鉄則を全削除し外部ファイル（dev_system_spec.md）への参照に置き換えると、Claude Code（ENG）のシステムプロンプトから最重要ルールが欠落します。「起動時Read指示」があっても、auto-compact発動時やコンテキスト溢れ時にAIが鉄則（DOM API禁止、仕様変更禁止など）を忘れ、アンチパターンを頻発するリスクが極めて高いです。\",\n    \"spec_reference\": \"dev_system_spec.md §1.1 基本思想「Single Source of Truth」\",\n    \"actual\": \"CLAUDE.mdの鉄",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  }
+]

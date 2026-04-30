@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_system §8.12a / project_v1 §3.2.6 / ux_v1 §2.3",
+    "issue": "Undoスナックバーの表示時間が文書間で不一致。design_systemは5,000ms、project_v1は3秒、ux_v1は30秒としている。",
+    "suggestion": "アプリ基準を30秒に統一するなら、design_systemに --snackbar-undo-duration: 30000ms を追加し、各所の記述と実装例を統一。プロダクト仕様（取消可能時間=30秒）と完全一致させる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_system §8.8 / §8.13（および§8.2の文言）",
+    "issue": "フォーカス表現をoutlineに統一と明記されている一方、トグルや共通ステート表では依然としてbox-shadow: var(--focus-ring)が記載されている。",
+    "suggestion": "全コンポーネントのfocus-visibleをoutline方式（例: outline: 3px solid var(--accent); outline-offset: 2px）に統一し、box-shadow参照の記述を削除。forced-colors時のfallbackも再確認。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system §7.5 / §8.1 / §9",
+    "issue": "outline方式への移行方針に対し、outline用のトークン（色・太さ・オフセット）が未定義。--focus-ringはbox-shadow前提の値になっており流用しにくい。",
+    "suggestion": "focus用に --focus-outline-color / --focus-outline-width / --focus-outline-offset を追加し、各コンポーネント仕様から参照する形に変更。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "ux_v1 §1.3 ↔ design_system §7.1",
+    "issue": "ハーフモーダル/フルスクリーン遷移のeasingがUXでは独自のcubic-bezier(0.32, 0.72, 0, 1)だが、design_systemのトークンに存在せず整合しない。",
+    "suggestion": "design_systemに --ease-modal を追加してその値を定義するか、UX側の遷移定義を --ease-out など既存トークンに合わせて統一。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "design_system §4.4 / §8.6 / §8.12a",
+    "issue": "トーストとUndoスナックバーのz-indexがどちらも--z-toast(700)で同値。優先度は文面で規定されているがスタッキング順が不定になり得る。",
+    "suggestion": "Undoスナックバー用に --z-snackbar を新設（例: 710）し、重なり順をCSSトークンで明確化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system §5.2",
+    "issue": "Dawnテーマの--danger-hoverと--danger-pressedが同一色（#8A1520）で、押下とhoverの区別が視覚的に弱い。",
+    "suggestion": "hover/pressedで明確に差が出る色に再調整（例: hoverをやや暗く、pressedをさらに暗く）して状態差を強化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "design_system §7.6",
+    "issue": "prefers-reduced-motion: reduce 時に全要素のtransition/animationを1msに上書きしており、必要な状態変化まで不自然になりうる。",
+    "suggestion": "装飾的アニメーションのみを対象クラスで抑制し、UI理解に必要な最小のトランジション（開閉/焦点移動など）は短縮に留めるポリシーへ限定。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1 §3.2.5 / §4.5",
+    "issue": "日次リセットがJST固定（4:00）で、海外滞在・���張・時差生活時に混乱や不公平感が出そう。習慣/週N回の達成判定にも影響。",
+    "suggestion": "ユーザーごとにタイムゾーンを選択可能にし、日次/週次のリセットもユーザーTZ基準へ。MVPで難しければ少なくとも明示設定とUI上の注記を追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1 §2.1-2.2",
+    "issue": "Premier（¥4,980/月）はMVP時点でショップ未実装かつ即時価値が限定的（フレーム1種＋優先サポート）。価格に対する納得感が乏しく、課金意欲/友人推薦にブレーキ。",
+    "suggestion": "Premier販売開始をショップ実装後にする、または即時価値（限定AI機能/毎月の限定装飾2-3種/長期保管容量拡張など）を追加。無料トライアルや初月割引も検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1 §3.4（PROFILE: AI理解メモ）",
+    "issue": "AI理解メモが上書きのみで履歴を保持しないため、以前の洞察が消える“データ喪失感”がある。",
+    "suggestion": "更新履歴の保持（最新3件の差分表示/復元���や“固定メモ”機能を追加。少なくとも上書き時に「前回との差分」表示で納得感を補強。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1 §6.4 / §7.4",
+    "issue": "AI対話履歴が90日で自動削除。コーチング文脈では長期の振り返りニーズがあり、継続利用・課金動機に逆行する恐れ。",
+    "suggestion": "“ピン留め（保存除外）”やエクスポートをMVPに近いタイミングで提供。プラン別に保存期間延長のオプションを設ける。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "ux_v1 §4.4（通報の証拠保全） ↔ project_v1 §7.4（メッセージ90日削除）",
+    "issue": "通報メッセージは“別途保存”とあるが、データライフサイクル上はメッセージ90日自動削除。保全対象/保持期間/保存先の扱いが不明確。",
+    "suggestion": "通報用アーカイブの保存先・保持期間・削除条件を明文化（例: 別テーブルに180日保持、審査完了後に削除）。ユーザー向けプライバシー表記も追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1 §3.2.3",
+    "issue": "週N回習慣のToday表示ロジック（“今日やらなくても達成可能なら非表示”）は、先延ばし癖のあるユーザーには逆効果で、気づけば連日表示の“詰め込み”になりがち。",
+    "suggestion": "習慣ごとに“常に表示/ロジック準拠”の切替を用意。常時軽いリマインドを好むユーザー向けに“控えめ表示”オプションも追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1 §3.4",
+    "issue": "TALKでのレベルアップは簡易バナーのみで、フル演出はGROWに戻ったときに再生。達成の瞬間を見逃した感が出やすい。",
+    "suggestion": "TALKでもミニEXPバーや“レベルアップ演出を再生”ボタンを一時表示し、達成感を即時に補完。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_system §8.7 ↔ ux_v1 §10.4",
+    "issue": "ボトムタブのARIAが文書間で不一致。design_systemはaria-current=\"page\"想定、UXはrole=tablist/role=tabを想定。",
+    "suggestion": "アプリ全体ナビは通常“navigation + aria-current”が適切。どちらかに統一し、もう一方の記述を修正。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "design_system §5.5",
+    "issue": "Glass ONの“同時30要素以内”制約は実装上の検証/強制手段が不明で、運用で逸脱しやすい。",
+    "suggestion": "glass-surfaceユーティリティを限定的に配布し、Lint/CIで“glass要素の出現数”を計測するビルドチェックやE2E可観測性を追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

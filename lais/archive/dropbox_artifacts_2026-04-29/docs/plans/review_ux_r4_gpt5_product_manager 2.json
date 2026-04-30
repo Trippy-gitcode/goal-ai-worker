@@ -1,0 +1,252 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §7.3（PWAオフライン） vs ux §9.1（ネットワーク断）",
+    "issue": "オフライン時のEXP表示方針が矛盾。projectは「クライアント側ではEXP付与を表示しない（同期待ちバッジ）」だが、uxは「通常どおり楽観的に+10EXPやバー伸長を表示し、後でサーバー値に補正」と記載。巻き戻しの有無も相反しており、レベルアップ演出の整合性が取れない。",
+    "suggestion": "どちらかに統一する。推奨はproject準拠（サーバー権威・巻き戻しなし）: オフラインは「同期待ち」バッジのみ表示、EXP/レベル演出は同期完了後にサーバー確定値で一度だけ再生。ux §9.1を修正し、Undoや同時演出（§8.6）との整合ロジックも追記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux §3.1（TALKヘッダー）, §3.5（S-21）",
+    "issue": "TALKヘッダーに☰と🕐が併存し、どちらが履歴ドロワー/履歴一覧を開くのか役割が重複・曖昧。さらに左端スワイプも同機能で、3経路が競合。",
+    "suggestion": "ヘッダーの履歴トリガーを1つに統一（例: ☰=ドロワーのみ）。🕐は削除か別機能に割当。スワイプは残すなら☰と完全同等動作と明記。アクセシビリティ名（aria-label）も一意に。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §3.2（📎画像添付）",
+    "issue": "画像添付の制約・異常系が未定義。projectでは形式/サイズ上限(10MB)/リサイズ/EXIF除去/90日保存を定義しているが、UXにサイズ超過・非対応形式・アップロード進捗/キャンセル/失敗時のUIがない。",
+    "suggestion": "画像選択時にクライアントで形式/サイズを検証（>10MBや未対応形式はインラインエラー）。アップロード進捗バーとキャンセルを追加。失敗時はサムネにエラーバッジ+再試行ボタン。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §2.3（S-12 タスク追加）, §3.3（インライン編集）, project §3.2.1",
+    "issue": "タスク名/メモ等の入力制約（タスク名1-100文字、メモ最大500文字）がUX側で明記されていない。TALK内の「編集して登録」も同様。",
+    "suggestion": "S-12/インライン編集の各フィールドに同一バリデーション（文字数/必須）を明記し、超過時のインラインエラー文言とカウンタを追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §2.4（S-14 ゴール詳細）",
+    "issue": "ゴール削除の挙動が未定義。確認ダイアログの有無、削除後の遷移（前画面へ戻る/ゴール一覧更新）、関連タスクの扱い（紐づく単発タスクをどうするか）が不明。",
+    "suggestion": "削除確認ダイアログを追加し、削除後はS-10へ戻りGoalsリストを更新。紐づく未完了の単発タスクは併せて削除するか、紐付け解除の上で残すか方針を定義（推奨: 紐付け解除で残す）。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux §1.4（戻りナビ）, §3.5（ドロワー）",
+    "issue": "ドロワー表示中のブラウザバック動作が未定義。戻るでドロワーを閉じるのか、直前画面に戻るのかが分からず、履歴管理（pushState）の仕様不足。",
+    "suggestion": "ドロワー展開時にhistory.pushStateを積み、ブラ��ザバック/edge swipeでまずドロワーを閉じる→さらに戻ると前画面、の二段階動作を明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §7.4（ドラッグ&ドロップ）",
+    "issue": "Todayの手動並び替えと開始時刻による自動ソートの優先度/衝突解決が未定義。後から開始時刻を編集した場合や日跨ぎ時の手動順の保持ルールが不明。",
+    "suggestion": "優先順位を定義（例: 当日タブは手動順>開始時刻。予定日変更でToday外れる場合は手動順を破棄。翌日リセット時に自動ソートへ復帰）。サーバー保存するorderキーのスコープ（当日のみ/恒久）も明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §13.2（S-38 プラン管理）",
+    "issue": "Stripe Checkoutのキャンセル/失敗時のUXが未定義。外部ページから戻った際の復帰先、バナー/トースト表示、再試行導線がない。",
+    "suggestion": "キャンセル戻りURL→S-38へ復帰し、バナー「購入がキャンセルされました」を表示。失敗は「決済に失敗しました。もう一度お試しくださ��」+再試行ボタンを定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux §13.2（プラン管理）, project §2.1-2.2",
+    "issue": "PremierプランはMVPでチケットが未提供（Coming Soon）だが、S-38のアップグレードUIに即時の明確な差別化価値/但し書きが不足。誤認購入・返金リスク。",
+    "suggestion": "Premierカードに明確な注意書き「チケットはショップ提供開始時に遡及配布。現時点の追加価値=限定フレーム+優先サポート」を太字で表示し、購入確認モーダルでも再掲。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §9.3（AI対話上限到達）",
+    "issue": "アップグレードCTAに価格/税込表記がなく、プラン比較への導線のみ。価格表記の一貫性/コンバージョン配慮が不足。",
+    "suggestion": "バナーに「Basicにアップグレード（¥580/月・税込）で100回/日」等の価格と主要差分1行を表示。タップでS-38へ遷移。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux §0.3（差別化）, §3.4（冒��EXP演出）, §13.2（プラン管理）",
+    "issue": "ゲーミフィケーションが課金動機に繋がるUIが不足。Proの「冒険EXP検出精度向上」等の価値がUXに可視化されず、Freeとの差が体感しづらい。",
+    "suggestion": "冒険EXPカード/タスク提案カードに「Proで精度がさらに向上」等のディスクリート・ラベル/アイコンを表示（頻度は控えめ）。S-38にも価値比較表（例: モデル品質/提案精度/返信の一貫性）を追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §4.4（FRIENDS お知らせ/受信一覧）",
+    "issue": "受信お知らせ一覧の項目フォーマット、最大件数/ページング、既読/未読の定義と既読化トリガーが未定義。",
+    "suggestion": "受信一覧のカード仕様（送信者/種類/本文/時刻）、既読化条件（一覧表示時/個別開封時）、最大50件表示+無限スクロールのロード仕様を定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux §3.5（S-21 チャット履歴）, §3.1（📝新規チャット）",
+    "issue": "「新規チャット」の概念が未定義。会���スレッドの単位、既存スレッドとの切替条件、ホーム（デフォルト）スレッドの扱い、削除時の影響（AI対話履歴90日保存との整合）が不明。",
+    "suggestion": "会話スレッドモデルを明文化（新規=新スレID作成、履歴はスレごとに表示、削除=当該スレの全メッセージをソフト/ハードどちらで削除かを定義）。新規作成/切替/削除のUXとデータ保持期間を揃える。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §13.1（メール/パスワード変更）",
+    "issue": "メール変更/パスワード変更のエラーケースが未定義（現パスワード不一致、メール重複、トークン期限切れ時のUI）。",
+    "suggestion": "各フォームの失敗時メッセージと再送導線を定義（例: 現パスワード不一致→インラインエラー、メール重複→別メールを促す、トークン期限切れ→再送ボタン表示）。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux §4.2.1（S-41 アバター設定）",
+    "issue": "未所持アイテムタップで「SHOPへ」遷移するが、MVPではSHOPがComing Soon���ユーザー落胆・ミスリードの恐れ。",
+    "suggestion": "MVP中は遷移前にモーダルで告知（ショップ準備中/提供開始時にお知らせ）を表示し、遷移は行わないかS-34のComing Soonに限定。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "project §3.2（小型端末ヒーロー:64→32）, ux §2.2（通常80→32）, §11.2（小型64→48）",
+    "issue": "ヒーロー領域のアバターサイズ遷移（通常/小型/スクロール時）で数値が一致していない。",
+    "suggestion": "デバイス別の初期サイズとスクロール時の最終サイズを表で統一（例: 通常80→32, 小型64→32）。design_systemにトークン化して参照一元化。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §15（通知タップ遷移）",
+    "issue": "通知タップ時に対象データが削除/期限切れの場合のフォールバックが未定義（例: タスク削除済み、QR期限切れ）。",
+    "suggestion": "対象が見つからない場合は親画面へ遷移し、画面内トーストで状況を通知（例: 「タスクは見つかりませんでした（削除済み）」）。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §6.2（トースト）, §2.3（Undoスナックバー）, §9.3（上限到達バナー）",
+    "issue": "Undoスナックバー（30秒常駐）とトースト/各種バナーの同時表示時のレイヤー優先順位・最大同時数が未定義で、視認性競合の恐れ。",
+    "suggestion": "グローバルレイヤー順を定義（例: スナックバー>上限/オフラインバナー>トースト）。同時表示上限と重なり時の押し出し/スタック動作を記載。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §2.3（Upcoming）, §3.2.3（週N回の表示）",
+    "issue": "Upcomingにおける習慣（週N回）の表示基準・日付グルーピングが曖昧。週の残回数とユーザーが「今日やる」手動追加の相互作用も未定義。",
+    "suggestion": "Upcomingでは週N回を「今週の残回数」グループで集約し、「今日やる」実行時はTodayに移動+残回数デクリメントの明確なルールを追記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §4.2（PROFILE 基本情報）",
+    "issue": "年齢の数値ピッカーに範囲/フォーマット（整数のみ/最小・最大値）の定義なし。",
+    "suggestion": "整数限定、範囲は例: 13〜120歳などを明記。未入力はnullで保存。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §1.4（戻りナビ）, §6.1（ハーフモーダル）",
+    "issue": "モーダル表示中に別画面（例: S-11からAI相談でS-20）へ遷移する際、モーダルをどう扱うか（自動クローズ/状態保持）が未定義。",
+    "suggestion": "外部画面へ遷移する操作時はモーダルを自動クローズし、戻るで元画面へ復帰（モーダルは再表示しない）と明記。未保存編集がある場合は遷移前に保存確認を挟む。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §10（アクセシビリティ）, §7.4（ドラッグ&ドロップ）",
+    "issue": "ドラッグ&ドロップのキーボード代替操作が未定義。キーボード/スクリーンリーダー利用者がTodayの順序変更を行えない。",
+    "suggestion": "タスク項目に「移動」ボタンを提供し、キーボードで上下に位置変更可能に。aria-grabbed/aria-dropeffectの適用を追記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux §12.2（レビュー観点）",
+    "issue": "「全操作に対して100ms以内のビジュアルフィードバック」基準は方針として記載あるが、主要操作ごとの実装チェックリスト化がない。",
+    "suggestion": "重要操作（タブ切替/タスクタップ/送信/チェック/ボタン）ごとに即時反応の具体（press state/スケルトン/ローディングインジケータ）をチェックリスト化し、design_specの必須要件に落とし込む。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §3.3（複数タスク提案）",
+    "issue": "「個別に編集」時の編集項目の制約（S-12と同一か）、ゴール紐付けの候補/推奨提示、登録時のエラー処理が未定義。",
+    "suggestion": "S-12と完全同一のフィールド/バリデーションを適用と明記し、ゴール紐付けはAI推薦表示（スコア順）をUXにも追記。保存失敗時のインラインエラー/再試行も定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §11.4（PWAインストールバナー）",
+    "issue": "「今後表示しない」選択時の保存先（localStorage/IndexedDB/Cookie）の優先順位・期限が未定義。プライバシー設定やブラウザ制限時のフォールバックが曖昧。",
+    "suggestion": "保存先と期限を明記（優先: localStorage→IndexedDB→Cookie、期限=1年）。シークレットモード時の非表示維持不可も注記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  }
+]

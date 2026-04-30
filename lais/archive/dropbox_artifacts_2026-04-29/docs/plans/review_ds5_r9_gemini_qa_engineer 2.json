@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§19.6, §18",
+    "issue": "§19.6の依存チェーンと§18の依存関係マップで、テスト仕様書（e2e_fullflow_test.md）の依存元が矛盾している。§19.6ではproject_v1.mdのみに依存しているが、§18ではux_redesign_v*.mdやdesign_system.mdからも依存している。§19.6に従うと、UXやデザイン変更時にテスト仕様書が連鎖更新されず、古いテストでG4/G8ゲートが実行され品質保証が破綻する。",
+    "suggestion": "§19.6の依存チェーンを修正し、e2e_fullflow_test.mdをux_v1.md、design_spec_v1.md、reference_v1.mdの全ての下流に配置して§18と完全に整合させること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.4",
+    "issue": "ux_v1.mdの§1に「画面遷移（全画面ID/遷移マトリクス）」があり、system_map.mdの§3にも「画面遷移図」が存在する。Single Source of Truth（§1.1）に反しており、二重管理による仕様の乖離が確実に発生する。",
+    "suggestion": "system_map.mdの§3を削除し「ux_v1.md §1を参照」とするか、system_map.md側は画面遷移ではなく「内部状態遷移（ステートマシン）」に特化するようセクション名と責務を明確に分離すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ベンチマーク要件において「DL数/評価」「App Storeレビュー分析」を要求しているが、ADV（Claude）はリアルタイムのストアデータや外部サイトに自律アクセスできない場合があり、鉄則⑧（事実確認せずに断言禁止）に違反するハルシネーションを誘発するリスクが高い。",
+    "suggestion": "「ストアレビューやDL数などの動的データはPOが提供する」という前提を追記するか、ADVがアクセ���可能な静的知識の範囲内で分析を行うよう要件を緩和すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.5",
+    "issue": "ヘッダー標準で「依存: {上流ファイルのパス + バージョン}」を定義しているが、上流ファイルが更新された際に下流ファイルの依存バージョン表記を同期・検証する仕組み（canopy等）がないため、手動管理となり確実に形骸化する。",
+    "suggestion": "依存宣言は「ファイルパスのみ」とするか、review_gate.sh等のスクリプトで上流ファイルの実際のバージョンと下流ファイルの依存宣言バージョンが一致しているかを自動検証する仕組みを追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "§11やsub_testing.md §7で「プラン別挙動テスト」を強く要求しているにもかかわらず、e2e_fullflow_test.mdのテンプレートにプラン別テストのセクションが明示されていないため、テスト設計漏れが発生しやすい。",
+    "suggestion": "e2e_fullflow_test.mdのテンプレートに「§N プラン別機能制限・挙動テスト（TOKEN_KV切替）」のセクションを追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.1, §19.5",
+    "issue": "ファイル名が「project_v1.md」と固定されている一方で、ヘッダーで「v{バージョン}」を管理している。マイナーアップデート（v1.1等）は問題ないが、メジャーアップデート時にファイル名を_v2.mdに変更するのか、ファイル名は固定でヘッダーのみ更新するのかの規則が不明確。",
+    "suggestion": "ファイル名の「v*」はメジャーバージョンのみを示し、マイナーバージョンはヘッダーで管理する旨を明記するか、ファイル名からバージョン表記を削除しGitとヘッダーに一任すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.4",
+    "issue": "system_map.mdの§4に「ファイル変更チェックリスト」が存在するが、これはtest_map.yamlやaffected-tests.shによる自動化と役割が重複しており、手動メンテナンスの温床になる（鉄則: 自動化最大に反する）。",
+    "suggestion": "system_map.mdの§4を削除し��「影響範囲の定義はtests/test_map.yamlで行う」旨の参照に置き換えること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

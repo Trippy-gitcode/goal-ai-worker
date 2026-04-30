@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js 冒頭 import 部",
+    "issue": "path モジュールから glob を分割代入していますが、Node.js の path に glob は存在しません。現状では未使用のため即時クラッシュはしないものの、実際に glob を使う想定で追加実装された際に undefined 前提の誤実装を誘発しやすく、import パスの誤認を固定化します。レビュー対象としては dead code かつ誤解を招く記述です。",
+    "suggestion": "const { glob } = require('path') は削除してください。将来本当に glob 展開を使うなら fast-glob や glob パッケージを明示導入し、resolveFiles をその API に置き換える方が安全です。未使用 import を CI で検出できるよう eslint の no-unused-vars / import 系ルールも有効化してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "scripts/ai_review.js callGPT5 / JSON_INSTRUCTION",
+    "issue": "JSON_INSTRUCTION は配列のみを要求している一方、gpt-5 では response_format に json_object を指定しています。API 側がオブジ��クト出力を強制すると配列要件と衝突し、モデルが {items:[...]} のような包み方を返しやすくなります。extractJson で救済しているものの、プロンプト仕様と API 制約が矛盾しており出力安定性を落とします。",
+    "suggestion": "配列を厳密に要求したいなら response_format を外すか、schema 対応 API に切り替えてトップレベル配列を表現できる方式を選んでください。少なくとも gpt-5 でも『トップレベル object に items 配列を入れて返す』へ仕様を統一するか、逆に全モデルで配列のみへ統一するかのどちらかに寄せるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "scripts/ai_review.js parseArgs",
+    "issue": "--max-tokens と --timeout を parseInt した結果の NaN を検証していません。不正値や値欠落で NaN が入ると、そのまま API リクエストの max_completion_tokens や timeout に渡され、実行時に 400 エラーやタイムアウト不全を起こします。CLI ツールとしては入力検証不足で、後日原因追跡しづらい障害になります。",
+    "suggestion": "数値オプションは次要素の存在確認と Number.isFinite に���る検証を追加してください。無効なら『--timeout must be a positive integer』のように明示エラーで終了すべきです。0 以下も拒否し、共通の parsePositiveInt ヘルパ��へ切り出すと DRY かつ保守しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "scripts/ai_review.js runPrecommitMode / main",
+    "issue": "main と runPrecommitMode の両方で process.exit を直接呼んでおり、制御フローと副作用が強く結合しています。この構造だと将来ライブラリ利用やテスト実行で関数単体を呼び出しにくく、途中で finally 相当の後処理を入れたい場合にも拡張しづらいです。責務分離の観点でも戻り値による終了コード伝播の方が保守的です。",
+    "suggestion": "各関数は終了コードを return し、最上位の main().then(code => process.exit(code)) に集約してください。エラー時も throw と return code を分離すると、ユニットテストで『終了コード 1 を返す』を確認しやすくなります。ログ出力・判定・終了を分けることで可読性も上がります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js extractJson",
+    "issue": "配列抽出で /\\[[\\s\\S]*\\]/ を使っており最長一致になるため、本文中に余分な角括弧��含まれると不正な巨大断片を拾いやすいです。AI 応答には説明文やコード断片が混ざることがあり、この実装は一見動いていても特定レスポンスで誤パースし、レビュー結果を PARSE-ERROR に落とす温床になります。",
+    "suggestion": "正規表現による総取りではなく、最初の [ から括弧深度を数えて対応する ] までを抜く簡易パーサにしてください。あるいは code fence 内 JSON を最優先し、次に全文 JSON.parse、最後に objects/items ラッパーのみ許容する順に絞ると誤検出を減らせます。raw_response 全文保存もデバッグに有効です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js resolveFiles",
+    "issue": "glob 解決が『ファイル名中の * を .* に置換』するだけの独自実装で、その他の正規表現メタ文字をエスケープしていません。入力に + や [] などが含まれると意図しないマッチを起こします。またコメントでは trailing * のみ対応とあるのに実装は任意位置の * を許容しており、仕様とコードもずれています。",
+    "suggestion": "独自実装をやめて glob ライブラ���へ置き換えるのが最善です。最低限維持するなら base の正規表現メタ文字を escape した上で * のみを変換し、コメントも実装に合わせて更新してください。仕様どおりに制限するなら trailing * 以外をエラーにして曖昧さをなくすべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "scripts/ai_review.js runJob / runPrecommitMode",
+    "issue": "fs.writeFileSync で出力していますが、通常モードでは opts.output ディレクトリの存在を保証していません。デフォルトでは docs/plans/ がある前提で動きますが、CLI で別ディレクトリを指定した場合に ENOENT で失敗します。利用者入力に依存する典型的な実行時障害で、事前に潰せる種類のバグです。",
+    "suggestion": "出力前に fs.mkdirSync(path.dirname(outputPath), { recursive: true }) を実行してください。precommit モードと同様に通常モードでもディレクトリ作成を共通化すると安全です。併せて書き込み失敗時は outputPath を含む明示ログを出し、どこで失敗したか分かるようにしてください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js 全体（定数・リトライ・並列実行）",
+    "issue": "5秒バックオフ、2回/3回リトライ、Gemini maxOutputTokens=16384、diff maxBuffer=32MB などの数値が散在しており、意味の共有がコード上から読み取りづらいです。現時点では動作するものの、将来レート制限やコスト方針が変わった際に調整漏れが起きやすく、魔法の数字として保守性を下げています。",
+    "suggestion": "API_RETRY_COUNT、RETRY_BACKOFF_MS、PRECOMMIT_DIFF_MAX_BUFFER、GEMINI_MAX_OUTPUT_TOKENS のような名前付き定数へ集約してください。用途ごとにコメントで根拠も残すと後日の変更判断が容易です。CLI オプション化までは不要でも、少なくとも定数化で変更点を一箇所に寄せるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0366,
+    "input_tokens": 12853,
+    "output_tokens": 2058,
+    "model_id": "gpt-5.4"
+  }
+]

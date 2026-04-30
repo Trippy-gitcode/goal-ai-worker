@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "タスクリスト「ジムで筋トレ」の右端ドット",
+    "issue": "ゴール紐付けを示すドットが緑色になっており、s13やs14で定義されているタスク完了状態の緑（success）と視覚的に衝突している。未完了タスクであるにもかかわらず完了済みと誤認させる。",
+    "suggestion": "ゴール紐付けの色は、セマンティックカラー（緑、赤、黄）を避け、紫やティールなど別の色相を使用するか、彩度を落として状態表示と明確に区別する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s02_onboarding",
+    "location": "アバター選択肢のイラスト",
+    "issue": "アバターの服の色（青、緑、黄）の彩度が高く原色に近いため、「洗練された大人向けのジャーナル」「実世界との地続き感」というNight Skyテーマのブランドトーンから浮いており、子供っぽい印象を与えている。",
+    "suggestion": "アバターの服の色を、テーマに合わせた落ち着いたトーン（くすんだ青、オリーブグリーン、マスタードなど）に調整し、洗練されたトーンを維持する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "入力フィールドのプレースホルダーテキスト",
+    "issue": "「you@example.com」や「8文字以上」のテキスト色が背景色（bg-surface）に沈んでおり、視認性が低くWCAG AAのテキストコントラスト基準（4.5:1）を満たしていない懸念がある。",
+    "suggestion": "プレースホルダーテキスト（--text-hint）の明度を少し上げ、暗い入力フィールド背景上でも十分なコントラストを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s14_goal_detail",
+    "location": "画面上部の「60%」テキスト",
+    "issue": "進捗の「60%」という数字がアクセントカラー（青）で巨大に配置されており、「静かな情報設計」というブランド原則に反して主張が強すぎ、過度な緊張感やゲームっぽさを与えている。",
+    "suggestion": "数字の色をテキストプライマリ（白系）に変更し、プログレスバーのみをアクセントカラーにすることで、「静かな達成感」を表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダルの上部境界",
+    "issue": "ハーフモーダルの背景色と親画面の背景色のコントラストが低く、境界線やシャドウも視認しづらいため、空間の前後関係（Z軸）が把握しづらく視線が迷う。",
+    "suggestion": "ハーフモーダルの上部境界に非常に薄いボーダー（--border）を追加するか、ドロップシャドウを強調して、空間の重なりによる安心感を視覚的に補強する。（s13, s15も同様）",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "ユーザー吹き出しとタスク提案カード",
+    "issue": "ユーザーの吹き出し背景（青系）と、直下のタスク提案カードの左ボーダー・ボタン（青系）が同化しており、ユーザーにアクションを促すカードの視認性が相対的に低下している。",
+    "suggestion": "ユーザー吹き出しの背景色をよりニュートラルなグレーに寄せるか、タスク提案カードのアクセントカラーの明度を上げて、アクション要素を際立たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "ヒーロー領域とサブタブ",
+    "issue": "ヒーロー領域のEXPプログレスバー（青）と、直下のサブタブ「PROFILE」のアクティブ表示（青テキスト＋青下線）が近接しており、視覚的な重みが競合して情報階層が分かりにくい。",
+    "suggestion": "プログレスバーの青とタブのアクティブ状態の青で、明度や不透明度に差をつける（例：タブ側を少し落ち着かせる）ことで、情報の階層を整理する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "「削除」ボタン",
+    "issue": "破壊的アクションである「削除」ボタンが、テキスト色のみ赤（danger）でボーダーが通常ボタンと同じ色のため、誤操作を防ぐ感情的な警告（緊張感）としてやや弱い。",
+    "suggestion": "削除ボタンのボーダーにも微かな赤み（danger-subtleなど）を持たせるか、背景に極薄い赤を敷いて、直感的なストッパーとして機能させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s12_task_add",
+    "location": "「単発タスク」トグルと「30分」チップ",
+    "issue": "トグルとチップの両方でアクセントカラーのベタ塗り背景が使われており、画面内の青の面積が多く、Open Airの「呼吸するリズム」に対して少し重たい印象を与えている。",
+    "suggestion": "チップの選択状態は、背景を塗りつぶすのではなく、ボーダーをアクセントカラーにするか、subtle背景を使用して、画面全体の青の分量を減らす。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s00_splash",
+    "location": "背景上部の星空ドット",
+    "issue": "背景に配置された星空のドットの不透明度が低すぎ、ほとんど視認できないため、「夜空のジャーナル」という感情的な導入効果が十分に発揮されていない。",
+    "suggestion": "星空ドットの不透明度をわずかに上げるか、サイズに微小な強弱をつけて、静かな夜空の雰囲気をより効果的に演出する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "§18の依存関係マップと§19.6の依存チェーンツリーで、`e2e_fullflow_test.md` の依存元が矛盾している。§18ではUXやDesignからの連鎖更新が定義されているが、§19.6では `project_v1.md` からしか依存線が引かれておらず、UXやデザイン変更時にテスト仕様の更新が漏れるリスクがある。",
+    "suggestion": "§19.6の依存チェーンツリーで、`e2e_fullflow_test.md` を `ux_v1.md`、`design_spec_v1.md`、`reference_v1.md` の下流（複数依存）として配置し、§18の定義と整合させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の「依存」フィールドが単一ファイルを想定した記述（例: `docs/plans/lais_project_v1.md v1.3`）になっているが、§19.6のツリーが示す通り `system_map.md` や `e2e_fullflow_test.md` は複数ファイルに依存する。",
+    "suggestion": "ヘッダーの「依存」フィールドで複数ファイルの指定（カンマ区切りやリスト形式）を許可・明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ベンチマーク要件に「App Storeレビュー分析（★1-2離脱要因、★4-5継続要因）」が含まれているが、AI（ADV）はApp Storeのレビューを直接スクレイピングする機能を持たないため、自律的な実行が困難。",
+    "suggestion": "「POがレビューデータを提供する」または「Web検索で取得可能な範囲のレビューサマリを利用する」など、AIの能力限界を考慮した実行可能な条件を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.1 / sub_infrastructure.md",
+    "issue": "§19.1���必須とされている仕様書のうち、`system_map.md` だけが `init_app.sh` で物理テンプレートとしてコピーされ、`project_v1.md` や `ux_v1.md` はコピーされない。テンプレートの提供方式に非対称性がある。",
+    "suggestion": "全必須ファイルの物理テンプレートを `dev-system/templates/` に用意して `init_app.sh` で一括コピーするか、全てADVが§19.4のテキストを元に自律生成する方針に統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の依存パス例が `docs/plans/lais_project_v1.md` となっているが、§19.1の必須ファイル一覧では `docs/project_v1.md` となっており、ディレクトリ構成（`plans/` の有無）にブレがある。",
+    "suggestion": "パス例を§19.1の定義に合わせて `docs/project_v1.md` に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "§1.2で「アプリ固有の許容する閾値の具体値」はアプリ仕様書に書くと定義されているが、§19.4の各テンプレートに品質閾値（APIレスポンスタイム、L1スモーク実行時間上限など）を明記する専用セクションがない。",
+    "suggestion": "`project_v1.md` の§7（技術アーキテクチャ）または `e2e_fullflow_test.md` に「品質閾値・非機能要件」のセクションを明示的に追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

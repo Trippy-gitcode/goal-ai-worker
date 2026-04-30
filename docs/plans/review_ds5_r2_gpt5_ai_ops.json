@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4, §17, §18",
+    "issue": "UX仕様書の命名が不一致（§17/§18は ux_redesign_v*.md、§19.1/§19.4は ux_v1.md）。依存チェーン記述とテンプレート名が食い違う。",
+    "suggestion": "UX仕様書の正準ファイル名を1つに統一（例: docs/ux_v1.md）。§17の一覧、§18の依存マップ、§19.4テンプレート、他箇所の表記を一括置換し、旧名→新名の移行ガイドを追記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存」が単数を想定しており、複数上流（例: design_spec_v1.mdはux_v1.mdとdesign_system.mdに依存）を機械可検証に落とし込めない。",
+    "suggestion": "依存を配列で定義できるスキーマに変更（例: Dependencies: [{path, version, sections?}]）。将来のlint対象にするため、YAML front-matter等の機械可読ブロックを追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.6",
+    "issue": "参照ルール/依存チェーン��定義されているが、循環・バージョン欠落・未宣言依存を検出する自動ゲートが存在しない。",
+    "suggestion": "spec_header_lint.sh（新規）を追加し、各仕様書ヘッダーの依存配列をパースしてDAG検証・バージョン必須・存在確認を実装。canopyで実行する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-104",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（design_spec_v1.md）",
+    "issue": "コンポーネントの状態・インタラクション（hover/focus/active/disabled/error/読み込み/空状態）とヒットスロップ/フォーカスリング等が必須セクションに含まれていない。",
+    "suggestion": "「コンポーネント状態/インタラクション仕様」節を必須化し、各状態の視覚仕様・アニメーション・アクセシビリティ要件・タップ領域を規定。G9のスクショ検証観点に紐づける。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-105",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（reference_v1.md）",
+    "issue": "API/業務ロジックの障害時動作・タイムアウト・リトライ/バックオフ・レート制限・SLO/SLA・可観測性（メトリクス/ログ/アラート）が必須化され��いない。",
+    "suggestion": "「耐障害性/タイムアウト/リトライ」「レート制限/SLO・SLA」「可観測性（メトリクス/ログ/トレース/しきい値）」の各節を必須追加。incident_runbook.mdとの整合も明記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（system_map.md）",
+    "issue": "処理・データフローは定義されているが、失敗時のリカバリ（ロールバック/再試行/冪等性）やトランザクション境界がテンプレートに含まれない。",
+    "suggestion": "「失敗時フロー/リカバリ戦略」「冪等性キー/再試行方針」「トランザクション/一貫性境界」節を必須化。主要操作ごとにIN/OUTに加えてFAIL→RETRY/ROLLBACKを図示。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力がMarkdown表のみで機械可検証に不向き。dev-systemの原則「機械可検証」に対する裏付けが弱い。",
+    "suggestion": "Markdownに加えて同内容のJSON/YAMLブロック（code fence）を必須化し、schema（apps[], features[], laisPolicy[]）を定義。ベンチマークlintをcanopyに追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-108",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7 ↔ §13.4",
+    "issue": "Phase 0完了基準で「8ペルソナ×2モデル」とあるが、標準ペルソナは§13.4で5種のみ。要件が不一致。",
+    "suggestion": "ペルソナ数を統一。選択肢: (a) §13.4を8種に拡張して列挙、(b) §19.7を「標準5ペルソナ×2モデル」に修正し、追加ペルソナは任意扱いに変更。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダーに承認・責務情報（オーナー/レビュワー/リスク/変更影響）がなく、§6のリスクベース承認と接続していない。",
+    "suggestion": "ヘッダーに owner, reviewers, risk_level(🟢/🟡/🔴), change_impact（UI/DB/コスト/プラン）を追加。canopyで🔴はPO承認フラグ必須を検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "依存パス例が docs/plans/... だが他箇所では docs/ を使用。パス規約が揺れている。",
+    "suggestion": "ファイル配置規約を明文��（原則: アプリ仕様書はdocs/直下、レビュー成果物はdocs/plans/等）。ヘッダーの例も統一。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-111",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4（e2e_fullflow_test.md）",
+    "issue": "G9のスクショ命名規約（before_/after_）やSPEC-IDとの対応がテンプレートに明記されていない。",
+    "suggestion": "各テストケースにSPEC-ID参照必須、スクショ命名（evidence/MISSION-ID/before_AT-*.png, after_AT-*.png）準拠を明記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-112",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4（design_system.md）",
+    "issue": "アクセシビリティの数値トークン（コントラスト比/フォーカスリング色・太さ等）がテンプレートに含まれていない。",
+    "suggestion": "「A11yトークン」節を追加し、WCAG準拠のコントラストペア、フォーカス可視化、キーボードナビ規則を数値で規定。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-113",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（ux_v1.md）",
+    "issue": "入力バリデーション規則・エラーメッセージのマイクロコピー原本がテン��レートに欠落し、G9での視覚判定基準が曖昧になり得る。",
+    "suggestion": "「入力バリデーション/エラーメッセージ辞書」節を必須化。各フィールドの規則・文言・表示位置・状態遷移を定義。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-114",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.6",
+    "issue": "複数上流からの定義が衝突した場合の優先順位・解決手順が未定義（例: ux_v1.mdとdesign_system.mdのトークン/余白差分）。",
+    "suggestion": "優先順位ルールを明示（例: brand invariants: design_system優先、操作手順: ux優先）。衝突時の責任者（ADV/PO）と承認ゲートを規定。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-115",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7",
+    "issue": "B2B/ニッチ分野等でApp Storeレビューが十分に存在しない場合の代替情報源が未定義。",
+    "suggestion": "代替: G2/Gartner/StackShare/公開ドキュメント/コミュニティフォーラム/GitHub issues等を許容し、ヘッダーに情報源種別を明記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

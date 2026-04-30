@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-201",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§S30-3 info-button (.s30-info-button)",
+    "issue": "フォーカスインジケータが明示定義されていない。既定のoutlineに依存している可能性が高く、デザイン上見えにくい/コントラスト不足となるリスクがある（WCAG 2.2: 2.4.13 Focus Appearance/2.4.7 Focus Visible 影響）。",
+    "suggestion": ":focus-visibleを明示し、少なくとも3:1コントラストを満たす太さ>=2pxのアウトラインを付与。例: .s30-info-button:focus-visible { outline: 3px solid var(--focus-ring, #0B5FFF); outline-offset: 2px; border-radius: 4px; } 併せて :hover と同等以上の可視性を確保。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-202",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§S30-5 MBTI manual (.s30-mbti-manual)",
+    "issue": "フォーカスインジケータが明示定義されていない。下線付きテキスト風スタイルはキーボードフォーカス時に見失いやすい（WCAG 2.2: 2.4.13/2.4.7 影響）。",
+    "suggestion": ".s30-mbti-manual:focus-visible { outline: 3px solid var(--focus-ring, #0B5FFF); outline-offset: 2px; border-radius: 4px; text-decoration-thickness: from-font; } フォーカスリングのコントラスト>=3:1を確認。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-203",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§Global tokens",
+    "issue": "タップターゲット確保がCSSカスタムプロパティ --tap-target-min に依存。トークンの定義値が提示されておらず、実効44pxが保証できない。",
+    "suggestion": ":rootで --tap-target-min: 44px; を定義し、ブレークポイントで44px未満に縮まないことを確認。デザイントークン定義書にも数値を明記。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-204",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§S30-3 info-button (.s30-info-button)",
+    "issue": "負のマージン（margin: -10px -12px）が隣接ターゲットとの重なり/誤タップリスクを増やす可能性。2.5.8 Target Size (Minimum)の“8px間隔”要件を満たしにくくなる恐れ。",
+    "suggestion": "配置調整は親コンテナ側で行い、ターゲット自体の拡張はpaddingで実現。隣接要素と8px以上の余白を確保。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-205",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§S30-5 MBTI manual",
+    "issue": "“マニュアル��が遷移（外部/内部リンク）ならbuttonではなくa要素が適切。現在button風スタイルは役割と見た目が乖離する恐れ（セマンティクス不一致）。",
+    "suggestion": "遷移なら <a class=\"s30-mbti-manual\" href=\"/mbti-manual\" rel=\"noopener\">MBTIマニュアル</a> を使用。モーダル/ポップオーバーを開く操作なら button のままにし、type=\"button\" aria-controls/aria-expanded を適切設定。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-206",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§S30-3 / §S30-5",
+    "issue": "button要素のtype未指定だとフォーム内でsubmitとなる既定動作により、意図せぬ送信が起きる可能性。",
+    "suggestion": "<button type=\"button\" class=\"s30-info-button\">…</button> / <button type=\"button\" class=\"s30-mbti-manual\">…</button> のように明示。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-207",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§S30-3 info-button",
+    "issue": "アイコン/短文ラベルの情報ボタンのアクセシブルネーム/状態が不明。トグル表示の場合、aria-label/aria-expanded/aria-controlsなどが必要（SR操作性）。",
+    "suggestion": "��: <button type=\"button\" class=\"s30-info-button\" aria-label=\"このセクションの説明を表示\" aria-controls=\"s30-info-panel\" aria-expanded=\"false\">i</button>。開閉時にaria-expandedを更新。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-208",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§S30-4 AIメモ（.s30-ai-memo-body）",
+    "issue": "line-clampによる視覚的トリミングはスクリーンリーダー間で読上げ挙動が不一致となる場合があり、全文アクセス手段がないと情報欠落に繋がる恐れ。",
+    "suggestion": "「もっと読む/閉じる」トグルを追加し、aria-controls/aria-expandedで状態を通知。展開時はline-clampを解除。視覚的省略時はsr-onlyで「概要のみ表示中」を補足（aria-describedby）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-209",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§テーマトークン（--text-secondary / --text-primary / --accent / 背景色）",
+    "issue": "色値が提示されておらず、テキスト/アイコン/フォーカスリングのコントラスト実測が未検証。WCAG 1.4.3（テキスト 4.5:1）、非テキスト要素/フォーカス指標（3:1）に不適合となるリスク。",
+    "suggestion": "色コードを提示し実測（例: --text-secondary vs 背景 >=4.5:1、--accent上の下線/文字も >=4.5:1、フォーカスリング >=3:1）。結果をデザイントークン表に記載し、必要に応じて色を補正。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-210",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§Global CSS",
+    "issue": "prefers-reduced-motion への配慮が記載なし。将来アニメーション/トランジション追加時に感覚過敏ユーザーへ負荷の可能性。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; } } をベースに、必要最小限のみ例外化。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-211",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§S30-3 info-button（ツールチップ/ポップオーバー想定）",
+    "issue": "ホバー専用ツールチップの場合、キーボード/タッチでアクセス不能となりうる（2.1.1 Keyboard/1.4.13 Content on Hover or Focus 影響）。",
+    "suggestion": "ツールチップはフォーカス/クリック/タップでも表示し、aria-describedbyで関連付け。持続表示や操作要素を含む場合はdialog/ポップオーバーパターン（role=\"dialog\" aria-modal=\"true\"）を用い、Escで閉じる・フォーカストラップ・復帰フォーカスを実装。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-212",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§S30 ヘッダー/アバター（想定）",
+    "issue": "プロフィール画像のaltテキストが不明。装飾の場合は空alt、意味がある場合は適切な代替テキストが必要。",
+    "suggestion": "装飾: <img alt=\"\" role=\"presentation\">。意味あり: <img alt=\"Laisさんのプロフィール写真\"> のように文脈に即した代替文を設定。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-213",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§S30 全体（フォーム要素の有無不明）",
+    "issue": "本画面にフォーム要素が存在するか不明なため、ラベル/グルーピング（label/fieldset/legend）適合状況が確認できない。",
+    "suggestion": "フォームが存在する場合は、各入力にlabel要素とfor/idを関連付け、選択肢グループはfieldset/legendで意味付け。プレースホルダのみでの説明は不可。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-214",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§S30-3 info-button",
+    "issue": "インタラクティブ性の手掛かりが色依存になる可能性（テキストボタン/ゴーストボタン）。色のみに依存すると気づかれにくい（WCAG「色のみで情報伝達」配慮）。",
+    "suggestion": "アイコンの追加や下線/境界線/形状変化など非色依存の手掛かりを併用。ホバー/フォーカス時の視覚変化も併せて提供。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

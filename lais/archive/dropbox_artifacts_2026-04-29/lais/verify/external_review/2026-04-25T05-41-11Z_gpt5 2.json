@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§2.η' / §3.1 §C0.5 / §15.1 §C0.5 / §15.4 §C3.2",
+    "issue": "STATUS モデルの定義が文書内で相互矛盾しています。§2.η' と §3.4 では実質 3 状態運用（IN_PROGRESS→READY_FOR_DEPLOY→DONE）を前提にしている一方、§15 では PD-109 に基づく 5 状態モデル（QUEUED/BLOCKED 含む）と STATUS_CORRECTION まで確定済みとして再定義しています。実装主体がどの状態集合を正本として扱うべきか判定不能で、スクリプト実装と運用手順が分岐して破綻します。",
+    "suggestion": "STATUS の正本を 1 箇所に固定し、R2.1.1 全体の表記を統一してください。少なくとも §2.η'、§3.4、§15.1、§15.4 の状態数・遷移表・例外規定を一致させ、QUEUED/BLOCKED/STATUS_CORRECTION を v3.4 範囲に含めるのか、将来版の参考情報として分離するのかを明記する必要があります。deploy.sh / canopy_common.sh の遷移ロジックもその正本に完全準拠させてください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§2.ε' deploy.sh / §2.γ'-7 append_deploy_fail.sh / §15.5 §C4.2 / §17 #1",
+    "issue": "デプロイ失敗時の回復フローが真逆に記述されています。§2.γ'-7 の append_deploy_fail.sh は DEPLOY-RECOVER ミッションを自動挿入する設計ですが、§15.5 §C4.2 と §17 #1 では PATCH-13 反映として『STRIKE 1 で自動 DEPLOY-RECOVER 生成なし』『自動生成廃止』と明記されています。どちらを採用するかで session_progress.md の更新内容が完全に変わり、実装不能です。",
+    "suggestion": "deploy 失敗時の正本フローを 1 つに決め、append_deploy_fail.sh のサンプルと §15/§17 の説明を同じ内容に揃えてください。PATCH-13 以後が正本なら、§2.γ'-7 のテンプレ挿入処理と DEPLOY-RECOVER 生成処理を削除し、STRIKE カウンタと BLOCKED への遷移仕様へ置き換えるべきです。逆に自動生成を残すなら §15.5 と §17 の『廃止』記述を訂正してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§2.ε' deploy.sh",
+    "issue": "deploy.sh 冒頭で set -e を有効化した状態で `npx wrangler pages deploy ...` をそのまま実行し、その直後に `deploy_rc=$?` で終了コードを拾う実装にな���ています。set -e 下では deploy が非 0 で即時終了するため、append_deploy_fail.sh による失敗記録や tail 抜粋処理へ到達しない可能性が高く、想定したエラーハ��ドリングが機能しません。",
+    "suggestion": "失敗時も後続処理を必ず実行したい箇所は `if npx ... > \"$deploy_stdout\" 2>&1; then ... else ... fi` に変更するか、一時的に `set +e` へ落として rc を取得後に `set -e` を戻してください。これにより deploy 失敗時でも stdout の保存、append_deploy_fail.sh 呼出、クリーンアップ、明示的な exit 1 が安定して実行されます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§2.ε' deploy.sh / §2.η' check_test_pass",
+    "issue": "高リスク判定に `scripts/mission_risk_classifier.sh \"instructions/session_progress.md\"` を使っていますが、同スクリプトは単一ミッションファイルを前提に `対象ファイル:` ブロックを抽出する設計です。session_progress.md 全体を渡すと先頭で見つかった別ミッションの情報や複数ミッション混在に引きずられ、対象 MISSION_ID のリスクを誤判定する恐れがあります。誤判定は READY_FOR_DEPLOY / DONE の誤遷移を直接生みます。",
+    "suggestion": "MISSION_ID 単位のブロック抽出を先に行い、その抽出結果だけを classifier に渡すようにしてください。例えば extract_mission_block.sh 相当の処理で一時ファイルを作成し、それを mission_risk_classifier.sh の入力にする構成が必要です。check_test_pass と deploy.sh の両方で同一の抽出ロジックを共有し、SSOT 化すると保守性も上がります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.γ'-8 / §15.1 §C0.4 / §15.7 §C6.4",
+    "issue": "shellcheck の位置づけが文書内で食い違っています。§2.γ'-8 では pre-commit 内の追加 lint もしくは G1 拡張として扱っていますが、§15.1 では G10 に『shellcheck 拡張』が含まれると明記され、§15.7 でも G10 統合とされています。ゲート番号が揺れると review / 実装 / 運用報告でどの gate failure と扱うべきか不一致になります。",
+    "suggestion": "shellcheck を G1/G10 のどちらに属させるかを一意に定義し、全節の記述を揃えてください。既存のセキュリティ/静的検査群に寄せるなら G10、汎用 lint 群に寄せるなら G1 とし、その理由を 1 箇所に記載します。さらに pre-commit・仕様書・完了報告テンプレートの失敗メッセージも同じゲート番号を返すように統一してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§0〜§10 と §15〜§19 全体",
+    "issue": "R2.1.1 差分パッケージの途中から、別版と思われる §15〜§19 の巨大な SSoT 埋込と PATCH-19〜27 履歴が混入しており、前半の差分修正版と後半の復元版が同居しています。その結果、同じテーマについて古い仕様と新しい仕様が二重定義され、レビュー対象・正本・適用範囲が判別不能です。このまま実装すると後半の別定義を参照して前半の修正が無効化されるバグを必ず生みます。",
+    "suggestion": "R2.1.1 の目的を『R2.1 に対する差分パッチ』へ絞り、§15〜§19 の復元版・v3.5/Phase 1-3 系の内容は別ファイルへ分離してください。少なくとも本ファイル内で「この文書の正本範囲」「参考情報」「将来版履歴」を明確にレイヤ分けし、同一論点の二重定義を禁止する編集が必要です。差分パッケージとして残すなら後半の SSoT 埋込は削除し参照リンクのみ残すのが安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§2.γ'-7 append_deploy_fail.sh / §2.ε' deploy.sh / §2.η' check_test_pass",
+    "issue": "複数箇所で `sed -i.bak` に依存した in-place 更新を採用していますが、同文書内では POSIX 互換性を強く要求している一方で、sed -i の挙動差は BSD/GNU 間で壊れやすく、`.bak` 生成やブロック終端の解釈も環境差の温床です。特に session_progress.md の STATUS 書換えは重要な副作用であり、失敗時に中途半端な更新やバックアップ残骸を生みやすいです。",
+    "suggestion": "重要ファイル更新は awk/sed のパイプで一時ファイルへ出力し、検証後に mv で置換する方式へ統一してください。すでに append_deploy_fail.sh では tmp 経由を使っているため、そのパターンを STATUS 更新処理へも横展開すると一貫性が出ます。副作用のある更新処理を関数化し、成功条件とロールバック手順を明示すると保守しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.ι' / §6.3 / §6.9.2",
+    "issue": "dev-system.yaml のファイル名とテンプレート名が節ごとに揺れています。§2.ι' では `dev-system.yaml` を読む前提で、テンプレは `templates/` に新規追加とだけ記述されていますが、§6.9 では `templates/dev-system.yaml.template` と `templates/dev-system.yaml` の両方が現れます。生成元ファイル名が不明確なため、pre-commit がどの実体を参照するか実装者が迷います。",
+    "suggestion": "テンプレート実体名と配置先を固定してください。例えば『テンプレートは templates/dev-system.yaml.template、利用時にプロジェクトルートへ dev-system.yaml として配置』のように 1 文で明記し、全節で同一名に統一します。pre-commit のサンプルにも、その生成・配置前提をコメントで添えて import/参照パスの混乱を防いでください.",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0934,
+    "input_tokens": 54074,
+    "output_tokens": 2585,
+    "model_id": "gpt-5.4"
+  }
+]

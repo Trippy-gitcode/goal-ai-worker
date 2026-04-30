@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.4.2, §4.4.3",
+    "issue": "risk_match.sh および mission_risk_classifier.sh において、`echo \"$RISK_PATHS\" | while ...` のパイプラインを使用しているため、whileループがサブシェルで実行される。内部での `exit 0` はサブシェルを抜けるだけで親シェルには伝播せず、is_risk_path は常に `return 1` を実行する。また mission_risk_classifier.sh では while ループが正常終了するため、マッチの有無に関わらず常に `high` を出力してしまう。",
+    "suggestion": "パイプラインを避け、ヒアドキュメント（`while IFS= read -r pattern; do ... done <<EOF\n$RISK_PATHS\nEOF`）を使用するか、マッチ結果を変数に保存してループ外で判定する構造に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§5.2, §5.3",
+    "issue": "§4.4.5 で POSIX 互換を必須とし bash 拡張を禁止しているにもかかわらず、G15 (tdd_trace_consistency.sh) で `<(echo ...)`（プロセス置換）、G16 (deploy_hash_verify.sh) で `${COMMIT:0:7}`（部分文字列展開）を使用している。シバンが `#!/bin/sh` のため実行時エラーとなる。",
+    "suggestion": "G15 は一時ファイルを使用するか `[ \"$SPEC_FILES\" = \"$IMPL_FILES\" ]` で判定する。G16 は `SHORT=$(echo \"$COMMIT\" | cut -c1-7)` に書き換える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§5.1",
+    "issue": "G14 (spec_first_lint.sh) の awk スクリプト内で `/^### [A-Z0-9-]+: /` のブロックが `next` を呼ぶため、直後の `in_mission && /^### /` ブロックが評価されない。結果として、連続するミッション定義の境界で前のミッションの参照チェックがスキップされ、最後のミッションしか検証されない。",
+    "suggestion": "ミッション開始行の検知時に、まず前のミッションの検証を行ってから変数をリセットするロジックに修正し、`next` の使用箇所を見直す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§5.4",
+    "issue": "G17 (realworld_proof_check.sh) の `if [ \"$proof_ts\" \\< \"$deploy_ts\" ]; then` において、`\\<` は POSIX `test` (`[`) コマンドの標準的な文字列比較演算子ではない。`/bin/sh` 環境ではエラーになるか予期せぬ動作を引き起こす。",
+    "suggestion": "awk を用いて比較する（例: `if awk 'BEGIN{exit !(ARGV[1] < ARGV[2])}' \"$proof_ts\" \"$deploy_ts\"; then`）か、日付をエポック秒に変換して数値比較する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.17.4",
+    "issue": "G13 (verify_hooks.sh) の awk 内で `gsub(\"-\", \" \", d[1])` によりハイフンをスペースに置換した日付文字列を GNU date (`date -d`) に渡しているが、GNU date はスペース区切りの日付を解釈できず `invalid date` エラーとなる。Linux 環境で G13 が常に FAIL する。",
+    "suggestion": "ハイフンを置換せず `YYYY-MM-DD` 形式のまま `date -d` に渡す。macOS の BSD date 用には `date -j -f \"%Y-%m-%d\"` を使用するようコマンド文字列を修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.19.1",
+    "issue": "append_deploy_fail.sh で `awk -v tail=\"$STDOUT_TAIL\"` として改行を含む複数行の文字列を `-v` オプションで渡しているが、POSIX awk では改行を含む変数の代入はエラーになる。デプロイ失敗時のリカバリミッション追記が機能しない。",
+    "suggestion": "`STDOUT_TAIL` を環境変数としてエクスポートし、awk 内で `ENVIRON[\"STDOUT_TAIL\"]` として参照する方式に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.1.1, §4.5.2, §5.3, §6.10",
+    "issue": "ドキュメント上で deploy.sh の冒頭に hflow_trigger_check.sh を追加（§4.5.2）、pre-deploy に deploy_hash_verify.sh を追加（§5.3）、Step 8 に deploy_poll_hash.sh を使用（§4.1.1）すると指示しているが、連鎖更新指示（§6）に deploy.sh 自体のパッチが含まれておらず、自動化パイプラインに組み込まれない。",
+    "suggestion": "deploy.sh の具体的な修正パッチ（AFTER コードブロック）を R2.1 パッケージ内に明記し、各新設スクリプトの呼び出し位置を確定させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§4.10.1",
+    "issue": "pre-commit-sub の呼び出しにおいて `for SUBDIR_ROOT in lais goal-ai-worker; do` と特定のアプリのディレクトリ名が共通基盤である dev-system のフックにハードコードされており、汎用性が損なわれている。",
+    "suggestion": "`find . -mindepth 2 -maxdepth 2 -name pre-commit-sub.sh` 等で動的に探索するか、設定ファイルからサブディレクトリ一覧を読み込む方式に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  }
+]

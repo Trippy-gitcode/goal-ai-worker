@@ -1,0 +1,57 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "SPACING",
+    "screen": "s10_grow",
+    "location": "TODAY タスク行 margin-bottom:8px",
+    "issue": "v2_r1 で指摘された 4px タスク間余白を 8px に増やしたが、design_system §4.2「タスク間余白 20px以上（呼吸するリズム）」には依然として未達。改善方向は正しいが、Open Air 原則からは控えめ。",
+    "suggestion": "spec §4.2 を 8px に緩和するか、8px → 16〜20px に再調整。spec を Single Source of Truth として整合させる。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "ACCESSIBILITY",
+    "screen": "s10_grow",
+    "location": "完了タスク『企画書を仕上げる』グレーアウト",
+    "issue": "完了タスクの文字色が背景にほぼ沈んでおり、『積み重ね』を可視化する機能が弱い。v2_r1 から未改善。",
+    "suggestion": "完了文字色を #7890A8 程度に引き上げ、取り消し線で完了表現。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "VISUAL_HIERARCHY",
+    "screen": "s30_me",
+    "location": "62% の数値位置",
+    "issue": "EXPバー右端の小さな 62% は視線上バー進行と分離。情報階層が薄い。",
+    "suggestion": "62% をバー直下中央またはバー内ラベルへ。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s13_task_detail",
+    "location": "✕ボタン配置",
+    "issue": "B群v2 #3 ✕ボタン追加は完了 ✅。ただし完了チェックマーク右隣に近接配置で、誤タップリスクあり（間隔 ~8px）。",
+    "suggestion": "✕ボタンは右上角に単独配置、チェックマークは別領域。間隔 16px 以上。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "LABELING",
+    "screen": "s14_goal_detail",
+    "location": "60% 巨大数字",
+    "issue": "LOCK #11 で Phase B/C 吸収予定。現時点は仕様通り。",
+    "suggestion": "(対応不要・情報提示のみ)",
+    "model": "Code",
+    "persona": "web_designer"
+  }
+]

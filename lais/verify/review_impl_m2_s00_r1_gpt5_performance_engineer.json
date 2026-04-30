@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "1. lais/src/components/App.jsx, 2. lais/src/components/screens/S00Splash.jsx",
+    "issue": "JSXにclass属性を使用。React DOMではclassName推奨で、ランタイムがReactかPreactかが明示されていないため将来の互換性やリンタ警告の原因になりうる。",
+    "suggestion": "採用ランタイムを明記（READMEやtsconfig/jsconfigのpathsなど）し、ReactならclassNameへ統一＋eslint-plugin-reactのjsx-uses-react/jsx-no-undef等を有効化。Preactならpreact/compat使用やeslint設定でclass許容を明示。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx",
+    "issue": "onStart/onLoginの無名関数が再レンダリング毎に新規生成され、子の再レンダリングトリガになる可能性。",
+    "suggestion": "useCallbackで関数参照を安定化、または<S00Splash>側をmemo化（React.memo/Preact.memo）して親の再レンダでの無駄な再描画を回避。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S00Splash.jsx",
+    "issue": "S00Splashは静的UIでpropsも関数2つのみ。親由来の再レンダで無駄に再描画されうる。",
+    "suggestion": "React.memo/Preact.memoでメモ化し、props比較は浅い比較で十分。M2規模では微小だが将来のバンドル/状態増加に備えやすい。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S00Splash.css (.s00-center)",
+    "issue": "中央寄せにtransformを用いた絶対配置。テキスト親へのtransformはデバイス依存のサブピクセル丸めやアンチエイリアス差分を招くことがある。",
+    "suggestion": "テキストには極力transformを避け、flex/gridでの中央寄せ＋マージン/ギャップで60pxオフセットにするか、logo自体をtop: calc(50% - 60px); transform: translateY(-50%);に限定して親のtransformを外す。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1.md §4.1（表: S00-3/S00-4）と 3. S00Splash.css(.s00-cta)",
+    "issue": "仕様表ではS00-3「はじめる」が下端140pxと読める一方、実装はCTAコンテナをbottom:140pxにして最下段の「ログイン」が140pxになる。スクショ検証事実では『140px以内』として容認だが、QAで解釈差が出る可能性。",
+    "suggestion": "仕様側に『スタック最下段が下端から140px（許容±Xpx）』等の明文化を依頼。もしくは実装を仕様表に厳密整合させる（必要ならボタン順序/アンカー基準を見直し）。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "Playwright実測スクショ / design_spec_v1.md §4.1（S00-1）",
+    "issue": "ロゴY座標が約326で、仕様の『中央から上に60px（Y≈340〜346想定）』より約20px上振れ。『付近』表現で許容範囲かもしれないが安定再現性の観点で誤差要因が残る。",
+    "suggestion": "ロゴ単体にオフセットを適用し（タグラインを含むグループではなく）、意図したYを直接制御。CSS例: .s00-logo { position:absolute; top: calc(50% - 60px); transform: translateY(-50%); left:50%; transform: translate(-50%,-50%); } など。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3. lais/src/components/screens/S00Splash.css (.s00-cta, .s00)",
+    "issue": "固定のbottom:140pxと中央固定配置は、短縦画面/ランドスケープ/小端末でロゴ・CTAの衝突やはみ出しを招く可能性がある（エッジケース対応は本スコープ対象）。",
+    "suggestion": "レスポンシブ調整を追加。例: 1) .s00 { min-height: 100dvh; } 2) .s00-cta { bottom: clamp(16px + env(safe-area-inset-bottom), 8vh, 140px); } 3) 高さが閾値未満ならロゴのオフセットを縮小（clampで調整）し、衝突を回避。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "global.css (@media (prefers-reduced-motion: reduce))",
+    "issue": "reduced-motionで全てのtransition/animationを0msにしており、色/不透明度など移動を伴わない変化まで一律でカットされる。意図しない可用性低下や視覚的フィードバック喪失の恐れ。",
+    "suggestion": "モーション由来のプロパティに限定。例: @media (prefers-reduced-motion: reduce) { *,*::before,*::after { transition-property: none !important; animation: none !important; } } あるいは対象をtransform/opacityに限定し、フォーカスリング等は維持。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S00Splash.css",
+    "issue": "未使用状態（:disabled, [aria-disabled]）のスタイルが現段階のM2スコープではバンドル増加要因になるだけ。",
+    "suggestion": "当面未使用の状態スタイルは削除、もしくは将来の状態管理導入後に追加。CSS最適化（postcss/purgecss）で未使用セレクタ除去を有効化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "1. lais/src/components/App.jsx",
+    "issue": "ルートdivにaria-label=\"Lais\"が付与されており、main側にもaria-labelがあるためスクリーンリーダーで冗長になりうる（性能影響は無いが情報設計上のノイズ）。",
+    "suggestion": "意味を持たないコンテナのaria-labelは削除し、landmark要素（main）のみを音声出力対象に。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

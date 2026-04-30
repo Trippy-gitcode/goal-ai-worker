@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "中央ロゴ「Lais」",
+    "issue": "ロゴのフォントウェイトが細く（Regular程度）、ブランドDNAで指定された「font-weight 600, letter-spacing -0.5px」の力強さ・洗練さが表現されていない。画面の「顔」としての求心力が弱い。",
+    "suggestion": "指定通りfont-weightを600に上げ、文字間を少し詰めることで、タイトルとしての品格と明暗のコントラストを持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン",
+    "issue": "非アクティブ状態のボタン背景色とテキスト色のコントラスト比が極めて低く、背景の黒に完全に沈んでいる。WCAGの非テキストコントラスト要件を満たさない。",
+    "suggestion": "disabled状態でもボタンの輪郭またはテキストが視認できるよう、明度差を確保する（テキストを明るいグレーにする等）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタスク行",
+    "issue": "UX仕様書では「[完了⭕] [時刻] [タスク名] [所要時間] [ゴール色ドット]」の1行構成と定義されているが、モックアップではタスク名が上段、時刻・所要時間が下段の2行構成になっている。",
+    "suggestion": "仕様書に合わせて1行構成にするか、情報密度を考慮して仕様書側を2行構成にアップデートする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタスクリスト",
+    "issue": "タスク間の縦の余白が狭く、デザイン原則の「Open Air（呼吸するリズム、タスク���余白20px以上）」が体現されていない。情報が詰まって見え、余白が「間」として機能していない。",
+    "suggestion": "タスク行間のマージンを広げ（20px以上）、一つ一つのタスクが独立した要素として認識できるよう「間」を持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "タスク提案カード",
+    "issue": "UX仕様書で定義されている「[✕]」ボタン（カード非表示アクション）がUI上に存在しない。ユーザーが提案を拒否してカードを消す手段がない。",
+    "suggestion": "カードの右下、または右上に[✕]ボタン（または「キャンセル」等のテキストボタン）を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "「基本情報」「AI理解メモ」のセクション見出し",
+    "issue": "セクション見出しの文字サイズが本文と同じかそれ以下に見え、ジャンプ率が低いため、情報の階層構造が視覚的に伝わりにくい。視線がスムーズに流れない。",
+    "suggestion": "見出��のfont-sizeを一段階上げる（--font-size-lg等）、またはfont-weightを太くして、本文とのコントラストを明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "入力フィールドの配置（開始時刻、予定日、所要時間）",
+    "issue": "UX仕様書では「開始時刻」→「所要時間」→「予定日」の順で縦に並ぶ仕様だが、モックアップでは「開始時刻」と「予定日」が横並びになり、その下に「所要時間」が配置されている。",
+    "suggestion": "仕様書通りに上から下へ1カラムで配置するか、横並びにするなら仕様書のフォーカス順序定義を修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "ヒーロー領域の「60%」と進捗バー",
+    "issue": "「60%」の数字が極端に大きく、青い進捗バーと合わせて視線を強烈に奪いすぎる。結果として、肝心の「タスク一覧」への視線誘導（上から下へのZ/N字フロー）が分断されている。",
+    "suggestion": "数字のウェイトを細くする（--font-weight-thin）、またはサイズを一段階下げて、画面全体の明暗・大小のバランス（コントラスト）を整える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s15_goal_create",
+    "location": "「カテゴリ」の非アクティブチップ",
+    "issue": "非アクティブなチップ（健康、学習など）のボーダー色とテキスト色が暗すぎ、ダーク背景に沈んでしまっている。選択肢としての視認性が低く、情報が埋没している。",
+    "suggestion": "チップのボーダーとテキストの明度を上げ、背景とのコントラスト比を確保する（--text-secondaryや--border-strongを適切に適用する）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "下部のアクションボタン群",
+    "issue": "「編集」「削除」「進め方を聞く」「詰まりを相談」の4つのボタンが同じ視覚的重みで2x2グリッドに配置されており、どのアクションが主役なのか視覚的な優先順位が不明瞭。視線が迷う。",
+    "suggestion": "ユーザーに最も期待するアクション（例：AIへの相���）をPrimaryボタンにし、他をSecondaryやGhostボタンにするなど、明暗のコントラストをつけて視線を誘導する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  }
+]

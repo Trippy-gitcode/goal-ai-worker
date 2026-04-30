@@ -1,0 +1,222 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3 / project_v1.md §3.2",
+    "issue": "Todayの表示はprojectでは「開始時刻でソート」と明記されている一方、UXではToday内タスクをロングプレスで手動並び替えし「開始時刻による自動ソートを手動で上書き。手動順は保存」としており矛盾する。ユーザー視点でも同一画面で並び順の規則が二重になり混乱の恐れ。",
+    "suggestion": "どちらかに統一する。推奨: デフォルトは開始時刻順、手動並び替えを許可する場合は「並び替えモード」トグルを設け、Todayヘッダーに現在の並び規則（時刻順/手動順）を常時表示。project_v1.md側の文言も更新して整合を取る。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1",
+    "issue": "TALKヘッダーに☰（履歴ドロワー）と🕐（履歴）の両方があり、履歴導線が二重化している。どちらが何を開くのか判別しづらい。",
+    "suggestion": "履歴導線は1つに統一し、☰は一般的にナビゲーションの意味を持つため削除して🕐（または「履歴」ラベル）に一本化。ドロワーでなくフル／ハーフの履歴UIにするならアイコンもそれに合わせる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.2 / ux_v1.md §2.4",
+    "issue": "ゴール達成ボーナスは作成から7日未満の場合「完了待ち」状態にして自動達成とあるが、UX側に「完了待ち」UI（ラベル、残日数表示、手動完了ボタンの無効化/理由提示）が定義されていない。",
+    "suggestion": "S-14に完了待ち用の状態UIを追加（例: 進捗100%時に「あとN日で完了！」バッジ＋手動完了ボタンはdisabledでツールチップに理由と解禁日を表示）。Undoや再達成時のメッセージも同ルールに合わせる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3 / ux_v1.md §3.2",
+    "issue": "画像添付のサイズ上限（10MB）や非対応形式時のエラーメッセージ、アップロード進捗表示、リサイズ/失敗時の再試行UIがUXに未定義。",
+    "suggestion": "送信前バリデーション（形式/サイズ超過はインラインエラー）���送信中の進捗インジケータ、失敗時の「再送信」アクションをカード内に定義。サイズ超過時は「10MB以下にして再選択」ガイダンスを出す。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.3",
+    "issue": "AIの複数タスク提案カードで「明日 朝/午後/夜」のような曖昧表現が表示されるが、具体的な開始時刻へのマッピング規則（例: 朝=9:00等）がUXに未定義。",
+    "suggestion": "時帯→時刻の標準マッピング表を定義（朝=09:00、午後=14:00、夜=19:00など）。ユーザーの地域/好みに合わせてS-39に「時帯の既定時刻」設定も検討。カード編集時は推定値を初期値として明示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.3 / ux_v1.md §2.3",
+    "issue": "週N回習慣の「今週の達成回数/残り必要回数」の可視化がToday/Upcoming上で定義されていない。ロジックは記載されているが進捗の視覚フィードバックが不足。",
+    "suggestion": "習慣行に「本週 1/3」バッジやプログレスピルを表示。Upcomingの「習慣」グループ���も同様の指標を表示して、Today表示/非表示の理由をユーザーに理解させる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.3 / ux_v1.md §2.3",
+    "issue": "週N回習慣を手動でTodayに追加できる「今日やる」導線がUXではどこにあるか未定義。",
+    "suggestion": "Upcomingの習慣行に「今日やる」テキストボタン（または三点メニュー内）を追加し、押下でTodayへピン留め（当日限り）する動作を定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5 / ux_v1.md §9.3",
+    "issue": "日次リセットがJST 04:00固定。海外出張や夜型生活だと「昨日のタスクが突然翌日に回される」体験になり混乱しそう。どこでその前提を把握できるかも不明瞭。",
+    "suggestion": "S-39に「日次リセット時刻（現在はJST 04:00固定）」の説明リンクを追加。将来のローカルタイムゾーン対応を明記したヘルプを用意。Todayヘッダーに小さく「リセット: 04:00 JST」を表示しておくと混乱が減る。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §6.4 / ux_v1.md §3.2",
+    "issue": "テキスト対話のPIIマスキングは仕様にあるが、UIで常時参照できる「AIへのデータ送信とプライバシーの要点」導線が見当たらず、安心感に欠ける（画像添付時のみ警告）。",
+    "suggestion": "TALK画面ヘッダーまたは設定（S-37）に「AIとデータの取り扱い」リンクを設置し、要点（外部API送信/学習不使用/保存90日/個人情報入力の注意）を簡潔に掲示。初回送信時に軽量ツアーを表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3",
+    "issue": "Undoスナックバー表示中に当該タスクを削除した場合の挙動が未定義。取り消し可能時間中に削除が通ると、完了/削除のどちらが優先か不明瞭。",
+    "suggestion": "Undoウィンドウ中の当該タスク削除はブロックし、ダイアログで「完了を取り消してから削除」または「完了確定後に削除」を選ばせる。優先順位を定義して実装を単純化するなら『完了取消を優先』を推奨。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4（S-36 カメラ拒否時の[設定を開く]）",
+    "issue": "PWA/モバイルWebからiOSのアプリ設定画面を直接開くことは基本的に不可（intent URL等も制約が多い）。「設定を開く」遷移は動作保証が難しい。",
+    "suggestion": "iOSでは遷移は試行せず、代わりにモーダルで手順（設定 > Safari > カメラ > 許可 など）を画像付きで案内。Androidは可能な範囲でIntentを使用し、不可時は同じく手順ガイドにフォールバック。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §7.4 / ux_v1.md §3.5",
+    "issue": "AI対話/画像が90日で自動削除される仕様のUI反映がない。長期間の会話スレッドで突然履歴が途切れるように見え、ユーザーが驚く可能性。",
+    "suggestion": "S-21履歴リストやチャット上部に「90日より前のメッセージは自動的に削除されます」情報アイコンを設置。削除直前の会話に「古い履歴は順次クリーンアップされます」一次通知を出すことも検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5 / ux_v1.md §8",
+    "issue": "1日のEXP上限（300）に到達した際のUIが未定義。以後タスク完了してもEXPが伸びない理由が分からず不信感に繋がる恐れ。",
+    "suggestion": "EXPバーの下に「本日のEXP上限に達しました（リセット 04:00）」バナーを表示。タスク完了時は通常演出を抑制し、上限到達トーストに切り替える。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（メッセージ）/ §9.1（オフライン）",
+    "issue": "ソーシャルの短文メッセージ送信について、オフライン時の挙動（入力の可否、送信キュー、再送ポリシー）が未定義。",
+    "suggestion": "TALK同様にメッセージ入力を無効化し「オフライン」バナーを表示するか、送信キュー方式にするかを定義。推奨: 送信キュー＋「送信待ち…」状態表示＋復帰時自動再送。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.3",
+    "issue": "単一タスク提案は「編集して登録」でS-12モーダルに遷移（チャット内���ンライン編集は不採用）と明記する一方、複数タスク提案では「各タスクの編集フィールドをアコーディオン展開」（チャット内インライン編集）になっておりパターンが不整合。",
+    "suggestion": "どちらかに統一。推奨: いずれもS-12モーダル（連続表示）で編集、または複数時もカード内編集は簡易フィールドのみに限定し、編集項目の差と理由を明記する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3 / §11",
+    "issue": "週や月の俯瞰カレンダーがなく、日次＋Upcoming折りたたみのみ。仕事終わりの時間配分を俯瞰で見たい時に物足りない可能性（Habitify/Todoist系からの乗り換えユーザー視点）。",
+    "suggestion": "将来のv0.2.0以降で週ビュー（簡易カレンダー）やカレンダー連携を検討。MVPではUpcomingを初期展開し、7日間の見通しをより視覚的に示す工夫（曜日見出し固定）を追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.2 / §8.1",
+    "issue": "完了直後100ms以内のフィードバック（行ハイライト/チェック）やEXP演出の定義は良いが、Reduced Motion時に演出をどこまで省略するかが一部曖昧（EXPバーは維持とあるが他の微アニメは？）。",
+    "suggestion": "prefers-reduced-motion時の挙動を一覧で再掲（チェックのscaleや行ハイライトは維持or省略）してぶれをなくす。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "全体評価（競合比較観点）",
+    "issue": "自分が使いたいか: Yes。罰なし設計とFreeで主要機能開放はHabitica/Habitifyの不満を解消。Finchに足りなかった本格タスク/ゴールも十分。ただし週俯瞰/カレンダーが無い点とJST固定はやや不安。",
+    "suggestion": "週俯瞰の補助（Upcoming強化）とJSTリセットの明示で初期不安を下げる。オンボード時に「罰なし」「Freeでも全機能」の強調を追加すると初期定着に効く。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "全体評価（継続性）",
+    "issue": "続けられるか: かなりYes。EXP3層/称号/アバター進化/自己発見カードでループが多層。過去に3ヶ月で飽きた身としては、週次レポートや発見カードの“新規性”供給頻度が鍵。",
+    "suggestion": "週次に小さな新規要素（週の発見サマリー、ミニ挑戦提案）をUIで明確に提示。DISCOVERに「今週のハイライト」を追加し、飽きを緩和。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "全体評価（課金意欲）",
+    "issue": "課金したいか: Basicは十分検討（100回/日）。Pro以上はAIの質差をどこで実感できるかが鍵。PremierはMVPでショップ未実装のため即価値が限定的（限定フレームのみ）。",
+    "suggestion": "TALKヘッダーに小さく「本応答はClaude/GPT/Geminiで生成」などのモデルバッジを表示（OFF可）。Basic→Proでの応答差を体験的に理解できるようにする。Premierは期間限定特典や優先サポートUI（返信目安時間）を見せる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "全体評価（友達に勧めるか）",
+    "issue": "友達に勧めるか: Yes（QR+相互承認+短文メッセは安全）。ただし承認待ちの期限切れが送信者に通知されない点は、意図がわかりにくく「届いた？」と不安になる可能性。",
+    "suggestion": "FRIENDSに「承認待ちは7日で自動消滅」ヘルプ文を常時表示し、期限切れ直前に送信者側のみローカル通知（アプリ内バナー）を出す。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §2.3（所要時間UI）/ project_v1.md §3.2",
+    "issue": "projectでは所要時間はタイムライン幅計算に使用とあるが、UX側は小画面で「数字省略→色付きバー幅で表現」記載のみで、標準画面での視覚化ポリシーが不明確。",
+    "suggestion": "標準画面でも所要時間のバー表示（行右端に相対幅のバー）を導入し、数値とバーの両方で把握できるよう統一。small端末では数値を省略、バーは維持とする。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

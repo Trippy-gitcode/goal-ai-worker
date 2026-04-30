@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "S20-9 入力バー（S20Talk.jsx form/button）",
+    "issue": "送信ボタンの onClick と form の onSubmit の双方で sendMessage が実行され、クリック時に二重送信が発生する。state 更新が非同期なため二度目も同じ inputValue を参照し、同一内容が重複追加される。さらに id を Date.now/getTime で生成しており、同一 ms 内で重複 key が発生しレンダリング不整合の可能性。",
+    "suggestion": "送信経路を一つに統一する。例: ボタンは type=\"button\" にして onClick のみで送信（form onSubmit は削除）、またはボタン type=\"submit\" にして onSubmit のみで送信（ボタン onClick は削除）。onSubmit 側で canSend をガード。加えてメッセージ id は衝突のない生成方法（インクリメントカウンタや nanoid/crypto.randomUUID）に変更。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "S20-2 スクロール領域 / S20-9 入力バー（S20Talk.css）",
+    "issue": "スクロール領域に入力バー 60px 分の下部余白が未実装（コメントのみ��。入力バーが position:fixed で重なるため、最下部メッセージが常時 60px 隠れる可能性がある。レイアウト原則（ヘッダ + チャットスクロール + 入力バー + タブバー）に反する。",
+    "suggestion": ".s20-scroll に padding-bottom: calc(60px + var(--space-md)); を付与し、@supports (bottom: env(safe-area-inset-bottom)) で padding-bottom: calc(env(safe-area-inset-bottom) + 60px + var(--space-md)) に上書きして被りを解消。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "S20-9 キーハンドリング（S20Talk.jsx）",
+    "issue": "IME 日本語変換中（isComposing=true）に Enter を押すと確定ではなく送信が走る可能性がある（e.isComposing 未考慮）。日本語入力時の誤送信リスクが高い。",
+    "suggestion": "handleKeyDown で if (e.isComposing || e.keyCode === 229) return; を追加し、確定後のみ Enter=送信を実行。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "App.jsx / lazy ルート読み込み",
+    "issue": "Suspense の fallback のみでエラーバウンダリやリトライがない。オフラインやチャンク取得失敗時に永久にロー���ィング状態となり回復不能。",
+    "suggestion": "ErrorBoundary を追加し、import 失敗時にエラーメッセージ＋「再試行」ボタンを表示する。dynamic import にリトライラッパ（例: importWithRetry）を適用し、タブホバー/先読みの prefetch も検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "S20-3 / S20-4 バブル本文（S20Talk.css）",
+    "issue": "長い非改行文字列（URL・長い英数字）で改行制御がなく、バブル max-width をはみ出す可能性（横スクロールやレイアウト崩れ）。",
+    "suggestion": ".s20-bubble-*-text に overflow-wrap:anywhere; word-break: break-word; hyphens:auto; を追加し、長大文字列の折返しを保証する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S20-3 AI バブル aria-live",
+    "issue": "AI メッセージ毎に aria-live=\"polite\" を付与しており、初期マウント時や再描画で過去メッセージが読み上げられる可能性。ライブリージョンが複数存在するのは非推奨。",
+    "suggestion": "リスト末尾に単一のライブリージョン（role=\"status\" aria-live=\"polite\" aria-atomic=\"false\"）を設置し、新規 AI 返信テキストのみを流し込む構成へ変更。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S20Talk.jsx（id 生成）",
+    "issue": "Date.now()/getTime 由来の id は同一 ms で衝突しうる。高頻度操作や端末クロックの粒度差で key 重複リスク。",
+    "suggestion": "単調増加カウンタ併用、nanoid/crypto.randomUUID などの衝突耐性の高い id 生成に切替。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S20-3 / S20-4 <time>",
+    "issue": "<time> 要素に datetime 属性がないため、機械可読な時刻が提供されない。",
+    "suggestion": "<time datetime=\"2026-04-15T09:31:00+09:00\">09:31</time> のように ISO 8601 形式を付与。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "S20-1 ヘッダ / S20-9 入力バー（固定高）",
+    "issue": "固定高さ（56px/60px）が高倍率ズームや大きなフォント設定でコンテンツをクリップする可能性（可読性低下）。",
+    "suggestion": "min-height を基準にし、行高と余白から高さを算出（clamp/auto レイアウト）するか、ズーム時は高さが自動伸長する CSS を許容。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S20Talk.css コンテナ",
+    "issue": "min/max-height に 100dvh を使用。モバイルの UI バー出現/消失でレイアウトジャンプや隠れが発生することがある。",
+    "suggestion": "対応ブラウザでは 100svh/100lvh/100dvh を適切に使い分け（@supports 分岐）、不安定な d vh を回避。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S20-9 テキストエリア自動伸長",
+    "issue": "lineHeight=20px をハードコードしており、フォント/ズーム/OS 設定変更で実測と齟齬が出る。",
+    "suggestion": "getComputedStyle(ta).lineHeight から算出、または CSS の max-height のみで自動伸長を制御し JS は height:auto → scrollHeight のみで設定。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "App.jsx Suspense fallback",
+    "issue": "fallback 要素が視覚的に空（aria-label はあるが文言非表示）。��速回線時にユーザーへ進行状況が伝わりにくい。",
+    "suggestion": "『読み込み中…』テキストやスケルトン UI を視覚的にも表示（SR 向けには role=status/aria-live を維持）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "S20-8 オートスクロールバナー",
+    "issue": "バナーが position:fixed でキーボード表示時に隠れる可能性（特にモバイル）。",
+    "suggestion": "visualViewport API でビューポート高さ変化を監視し bottom を調整、もしくは入力フォーカス時は一時的にバナーを隠す。対応端末では env(keyboard-inset-height) の併用も検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S20-9 入力フィールドのラベリング",
+    "issue": "textarea がラップされた <label> と aria-label の二重ラベル状態。AT での名前解決に一貫性を欠く可能性。",
+    "suggestion": "どちらか一方に統一。推奨: 視覚的に非表示の <label for>＋ id を用いたネイティブ関連付けにし、aria-label は削除。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "S20Talk.jsx（AI 応答タイマー）",
+    "issue": "pendingTimer を新規送信時に常に clear しており、連投時に先のユーザー発話への AI 応答が消失する（1:1 対応が崩れる）。仕様上の期待が不明。",
+    "suggestion": "送信ごとにキュー/配列で保留応答を保持し、各ユーザー発話に 1 対 1 でダミー応答を返すか、UI 上で『応答待ちは最新のみ』を明示。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S20-2 メッセージリスト",
+    "issue": "大量履歴で仮想化がなくパフォーマンス劣化の恐れ（メモリ・スクロール jank）。",
+    "suggestion": "後続でストリーミング/履歴実装時に windowing/virtualization（例: react-virtual/自前 IntersectionObserver）を計画に入れる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

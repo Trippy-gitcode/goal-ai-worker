@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "4. S20Talk.jsx — S20-9 入力バー",
+    "issue": "送信ボタンに onClick で sendMessage を呼び、フォーム onSubmit でも sendMessage を呼んでいるため、ボタンクリック時に二重送信が発生する（onClick→onSubmit の順で両方実行）。setState の非同期性により2回とも同じ inputValue が送られ、同内容メッセージが重複追加される。",
+    "suggestion": "二重経路の片方を廃止する。推奨: ボタン type=\"submit\" を維持し、ボタンの onClick を削除して onSubmit のみで送信をハンドリングする（Enter/クリックの両方を網羅）。もしくはボタンを type=\"button\" にし、onClick のみに統一して onSubmit は preventDefault のみで sendMessage を呼ばない。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "4. S20Talk.jsx — handleKeyDown (S20-9)",
+    "issue": "IME（日本語入力）編集中に Enter で確定すると送信してしまう恐れがある。e.isComposing を考慮していないため、変換確定 Enter を誤って送信として扱う。",
+    "suggestion": "handleKeyDown で IME 合成中は送信しないようガードを入れる。例: if (e.isComposing || e.keyCode === 229 || e.nativeEvent?.isComposing) return; その上で Enter 単独のみ送信、Shift+Enter で改行。E2E/手動で日本語IME確認テストを追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "5. S20Talk.css — .s20-scroll（S20-2）",
+    "issue": "固定配置の入力バー（60px）がスクロール領域上にオーバーレイされるが、.s20-scroll にその分の下部余白が無く、最下部メッセージが入力バーの下に隠れる（コメントに「入力バー 60px 分の余白」とあるが未実装）。",
+    "suggestion": ".s20-scroll に入力バー分の padding-bottom を追加する。例: padding-bottom: calc(var(--space-md) + 60px); @supports (padding-bottom: env(safe-area-inset-bottom)) 時は calc(env(safe-area-inset-bottom) + var(--space-md) + 60px) として安全域も加味。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "4. S20Talk.jsx — sendMessage (AI 応答)",
+    "issue": "AI 応答のタイムスタンプ time を setTimeout 設定前に算出・クロージャ捕捉しており、実際の��答時刻と表示が一致しない（常にユーザー送信時刻になる）。",
+    "suggestion": "AI 応答の time は setTimeout のコールバック内で都度 new Date() から算出する。ユーザー送信時刻と応答時刻を分離して一貫性を担保。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "4. S20Talk.jsx — S20-3 AI バブル",
+    "issue": "各 AI バブルに aria-live=\"polite\" を付与しており、初回マウントや再描画で履歴メッセージがスクリーンリーダーに再通知される可能性がある。ライブリージョンは通常1コンテナに限定し、追加差分のみ通知すべき。",
+    "suggestion": "メッセージリスト全体に role=\"log\" aria-live=\"polite\" aria-relevant=\"additions\" を付与し、各バブルから aria-live を外す。もしくは最新挿入要素のみを短時間 aria-live 対象にする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4. S20Talk.jsx — S20-1 ヘッダ",
+    "issue": "header 要素に role=\"banner\" を付与している。role=banner はページ全体のランドマークに一意であることが推奨され、���ブ内局所ヘッダでは冗長・不適切になり得る。",
+    "suggestion": "role=\"banner\" を削除し、セマンティックな header のままにする。アプリ全体で banner を一意にする方針に統一。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "5. S20Talk.css — .s20-autoscroll（S20-8）",
+    "issue": "spec §4.9 S20-8 のバナー border 指定は「1px solid --accent-subtle」だが、実装は var(--accent) を使用しており仕様逸脱（見た目強調が増す）。",
+    "suggestion": "デザイン仕様に合わせ border: 1px solid var(--accent-subtle) へ修正。Non-text コントラスト要件と相反するなら PO/デザイナ合意の上で仕様書側を更新し根拠（1.4.11）を追記。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4. S20Talk.jsx — import 行",
+    "issue": "useMemo を import しているが未使用。不要 import は将来的なデグレや静的解析ノイズの温床。",
+    "suggestion": "未使用の useMemo import を削除し、ESLint no-unused-vars/no-unused-imports で検出できるようルールを有効化。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4. S20Talk.jsx — メッセージID生成",
+    "issue": "ID を Date.now()/getTime() のみで生成しており、極短時間の連打や将来の並行送信で衝突の可能性がわずかにある（とくにユニットテストや高速実行環境）。",
+    "suggestion": "単調カウンタ併用や nanoid/uuid など衝突耐性のある ID 生成へ。最低でもプレフィックス + インクリメントカウンタを組み合わせる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4. S20Talk.jsx — S20-9 textarea ラベリング",
+    "issue": "textarea に可視外ラベル（label+span）と aria-label の重複指定がある。支援技術に重複読み上げや混乱を招く恐れ。",
+    "suggestion": "どちらかに統一。推奨: label 要素＋視覚的に隠したテキストでラベルを提供し、aria-label は削除。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4. S20Talk.jsx — time 要素（S20-3, S20-4）",
+    "issue": "time 要素に machine-readable な datetime 属性が無い。機械可読性/アクセシビリティの観点で情報欠落。",
+    "suggestion": "datetime 属性を ISO 8601 で付与（例: datetime=\"2026-04-15T09:31:00+09:00\"）。少なくとも HH:MM しかない現状は Date から生成し付加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "全体（E2E/単体テスト観点）",
+    "issue": "デグレ検出のためのテスト不足。特に二重送信（R-001）、IME 送信誤爆（R-002）、スクロール最下部が入力バーに隠れないこと（R-003）、reduced-motion 分岐、aria-live の読み上げ挙動などの回帰を検出できない。",
+    "suggestion": "E2E: 送信ボタンクリックでメッセージが1件のみ追加されること、IME 合成中は送信されないこと、末尾メッセージの可視判定（IntersectionObserver/スクショ比較）を追加。単体: prefers-reduced-motion 分岐、autoscroll バナー表示条件（distance>80）をテスト。a11y: axe-core/スクリーンリーダー実測用スクリプトで aria-live/role=log の検証を組み込む。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

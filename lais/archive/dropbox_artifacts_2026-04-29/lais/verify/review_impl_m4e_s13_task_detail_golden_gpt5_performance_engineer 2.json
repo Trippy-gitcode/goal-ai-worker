@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "S13TaskDetail を S10Grow で静的 import しているため、モーダル未使用時も JS/CSS が初期バンドルに含まれ初回描画コストが増える。",
+    "suggestion": "モーダルは需要時読み込みの候補。dynamic import でコード分割し、初回 TTI を改善する。例: const S13TaskDetail = lazy(() => import('./S13TaskDetail.jsx')); 表示直前でプリロード(link rel=prefetch/prerender)も検討。CSS もチャンク分割される設定をビルドに反映。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "3",
+    "issue": "毎レンダーで tasks.find(t => t.id===openId) を実行しており、タスク数が増えると O(n) スキャンがボトルネックになり得る。",
+    "suggestion": "id → task の Map を useMemo で保持し O(1) 参照にするか、handleOpenTask 時に選択中 task を state に保持する（openId と二重管理しない）。例: const selected=useMemo(() => map.get(id), [map,id])。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "open 変更時の初期化で setDraftName/Time/Duration/Memo を個別に呼んでおり、Effect 内ではバッチされず最大4回の再レンダーになる可能性がある。",
+    "suggestion": "draft を1つのオブジェクトまたは useReducer に集約して一括更新（setDraft({name,time,duration,memo}))。あるいは setState 関数内でまとめて更新しレンダー回数を1回に抑える。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "Tab フォーカストラップで keydown ごとに dialog 内全要素へ querySelectorAll を実行。モーダル内要素が増えるとキー入力ごとの DOM クエリが負荷になる。",
+    "suggestion": "タブ可能要素リストを open/mode 変更時にキャッシュし、必要時のみ再計算。MutationObserver でモーダル内のフォーカス可能要素変化をフック、または roving tabindex 採用でクエリ回数を削減。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "Escape 用と Tab 用で document に keydown リスナーを2本登録。オープン中のキー入力ごとに2回ディスパッチされ���。",
+    "suggestion": "keydown リスナーを1本に統合し、e.key を分岐処理。イベント登録/解除コストとディスパッチ数を半減。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "onInput や 保存ボタンの onClick にインライン関数があり、入力タイピングで多数のクロージャが生成され��（軽微だが GC 負荷になる）。",
+    "suggestion": "入力ハンドラを useCallback 化し props に安定参照を渡す。保存ボタンは disabled 属性で無効化し、onClick のガード用インライン関数を排除。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "handleClose で setTimeout 後に returnFocusRef.current.focus() を無条件実行。削除等でトリガー要素が DOM から外れている場合、無駄なフォーカス試行とレイアウト計算を誘発し得る。",
+    "suggestion": "focus 前に要素の接続状態と可視性を確認（if (el && el.isConnected) el.focus()）。フォーカス試行後は returnFocusRef.current = null へクリアして不要な DOM 参照を早期解放。rAF でタイミングを合わせるのも有効。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "スクロール可能な .s13-modal にレイアウト/ペイントの包含が無く、内部更新が親ツリーへ波及する可能性がある。",
+    "suggestion": ".s13-modal に contain: layout paint; を付与しレイアウト境界を作る。必要に応じて contain: content; も���討（スクリーンリーダー検証前提）。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "オープン時の transform/opacity アニメーションに will-change 指定が無く、初回フレームでのレイヤー昇格準備が遅れる可能性がある。",
+    "suggestion": "オープン〜アニメーション中のみ一時的に .s13-modal/.s13-overlay に will-change: transform / will-change: opacity を付与し、animationend で除去。過剰な常時 will-change は避ける。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "フォーカストラップの有効要素判定が [disabled] のみで、aria-disabled=\"true\" の要素（AI ボタン inactive 等）が含まれてしまい、無駄なタブ移動が発生する。",
+    "suggestion": "enabled 抽出条件に [aria-disabled=\"true\"] の除外を追加し、必要なら inactive 要素に tabIndex=\"-1\" を付与。キーボード移動のステップ数を削減し操作効率と軽量化の両立。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "console.log が複数箇所に常駐し、本番ビルドで残存すると I/O 負荷やログ肥大の一因になる。",
+    "suggestion": "NODE_ENV チェックで開発時のみ出力、またはビルド時にストリップ。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

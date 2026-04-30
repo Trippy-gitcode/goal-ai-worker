@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "3.S30MeProfile.jsx（S30-6 リンク行）",
+    "issue": "ナビゲーション先（アバター設定/設定）を button 要素で実装しており、nav 内の“リンク”としての意味づけが不十分。キーボード/支援技術的には移動アクションは a/link がより適切。",
+    "suggestion": "遷移先が確定次第、<button>ではなく<a href=\"/settings\">や Link コンポーネントに置換し、role=link ではなく本来のリンクセマンティクスを使用。現段階のプレースホルダでも、onClick の代わりに preventDefault 付き<a href=\"#\">+ aria-disabled などで将来差し替えやすくする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.S30MeProfile.jsx（S30-2 サブタブ）",
+    "issue": "サブタブは同一ページ内のパネル切替（local state）にも関わらず、nav + button + aria-current を用いた“ページナビ”に近い実装。ARIA 的にはタブパターン（tablist/tabs/tabpanel）のほうが適切。",
+    "suggestion": "ul に role=tablist、各ボタンに role=tab/aria-selected/aria-controls、表示中パネルに role=tabpanel を付与。ID を安定供給（useId 等）し、キーボード操作（←→でタブ移動）も将来対応しやすい構造に。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.S30MeProfile.jsx（S30-1 EXP バー）",
+    "issue": "expPercent を clamp しておらず、expCurrent > expNext 時に 100% を超える可能性がある。視覚は overflow: hidden で隠れるが、ARIA 的な一貫性や将来のスタイル変更時に不具合の温床。",
+    "suggestion": "const toPercent = (n, min=0, max=100) => Math.max(min, Math.min(max, n)); const expPercent = toPercent(Math.round(USER_MOCK.expCurrent / USER_MOCK.expNext * 100)); として 0–100 にクリップ。必要なら aria-valuenow も min/max と整合するよう clamp する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "1.App.jsx（Suspense fallback）",
+    "issue": "fallback が視覚的に空（role=status と aria-label のみ）で、読み込み中の可視テキスト/スケルトンがなく UX が弱い。",
+    "suggestion": "視認可能なローディング表示（\"読み込み中…\" テキスト、スケルトン、ま��は progressbar）を追加。例: <main ...>読み込み中…</main> やアクセシブルなスピナーコンポーネントを配置。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.S30MeProfile.jsx（S30-2 サブタブ onClick）",
+    "issue": "map 内で onClick={() => handleSubtabClick(tab.id)} の無名関数が毎レンダー生成される。レンダリングコストは小さいが、LP-003 の「inline handler 最小化」に反する部分が残っている。",
+    "suggestion": "data-id を用いた単一ハンドラ化（onClick={onSubtabClick} → onSubtabClick(e){ setActiveSubtab(e.currentTarget.dataset.id) }）や useMemo で事前バインドし、インラインクロージャ生成を抑制。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.S30MeProfile.jsx（S30-4/5 見出しの id）",
+    "issue": "id=\"s30-ai-memo-label\" や id=\"s30-mbti-label\" が固定文字列で、将来的に同一画面へ複数インスタンス挿入時に重複の恐れ。",
+    "suggestion": "useId() を用いて一意な id を払い出し、aria-labelledby に動的に割り当てる。例: const aiId = useId(); <h2 id={aiId} .../> aria-labelledby={aiId}。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3.S30MeProfile.jsx（非 PROFILE サブタブ placeholder）",
+    "issue": "aria-live=\"polite\" のプレースホルダがタブ切替の度に読み上げを発生させ、冗長になる可能性。頻繁な切替 UI では過度なアナウンスは体験を損ねることがある。",
+    "suggestion": "最初の表示時のみアナウンス、または aria-live を外して、タブボタン側で aria-selected の更新によりコンテキスト変化を伝える。必要に応じて visually-hidden の見出しで状況説明を補う。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.S10Grow.jsx / 3.S30MeProfile.jsx（各ハンドラ）",
+    "issue": "console.log が本番へ残留するとノイズや情報漏洩の一因になり得る。",
+    "suggestion": "ビルド時に除去（babel-plugin-transform-remove-console 等）か、NODE_ENV によるガード付きロガー（if (process.env.NODE_ENV !== 'production') logger.debug(...)）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4.S30MeProfile.css（.s30-info-list）",
+    "issue": "dl に対して list-style を指定しており、セマンティクスとスタイル名が乖離。害はないが可読性を損ねる。",
+    "suggestion": "クラス名やコメントを dt/dd の構造に合わせて整理（例: .s30-info をコンテナ、.s30-info-row を dt/dd ラッパに適用）し、不要プロパティは削除。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "4.S30MeProfile.css（safe-area padding 82px）",
+    "issue": "BottomTabBar 高さ 82px が複数箇所のハードコードで表現されており、将来のデザイン変更時に同期ずれのリスク（魔法の数字）。",
+    "suggestion": ":root またはテーマトークンに --tabbar-height: 82px を定義し、calc(var(--tabbar-height) + var(--space-lg)) / env + var(--tabbar-height) で一元化。BottomTabBar 側の高さと共有。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "3.S30MeProfile.jsx（useId の利用）",
+    "issue": "useId は Preact の比較的新しい API。実行環境の Preact バージョン次第では未提供の可能性があり、ランタイムエラーとなるリスクがある。",
+    "suggestion": "プロジェク��の peerDependencies/lock を確認し、Preact 10.11+ を明示。互換性層やフォールバック（未提供時は静的 ID 生成）を用意し��おくと安全。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "3.S30MeProfile.jsx（S30-5 MBTI 手動入力）",
+    "issue": "仕様では「手動入力リンク（14px / アンダーライン / アクセント）」と明記だが、実装は button。見た目は CSS で合わせられるが、仕様上“リンク”としての指示とセマンティクスが不一致。",
+    "suggestion": "意図が遷移（外部テスト/入力フォームへの遷移）なら<a>へ。モーダル起動等の“操作”なら仕様側の文言を「ボタン」に改訂。少なくとも role とキーボード動作が仕様意図と一致するよう統一。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.S30MeProfile.jsx（S30-5 MBTI 進捗バー）",
+    "issue": "MBTI 進捗バーに aria-valuetext がなく、数値の意味が文脈依存。SR に対して追加説明があると親切。",
+    "suggestion": "aria-valuetext=\"対話ログの解析進捗 35%\" のように意味を補足、または aria-describedby でメッセージ要素を関連付ける。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4.S30MeProfile.css（S30-6 ボーダー）",
+    "issue": "リンク行の最終行に border-bottom を追加しており、仕様（各行 border-top）の厳密さからはわずかに逸脱。視覚差分は軽微だが設計意図と乖離の恐れ。",
+    "suggestion": "仕様に合わせて親コンテナ側で上端/下端の罫線を管理するか、行ごとの top みで統一。デザイナーと結果確認のうえ決定。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

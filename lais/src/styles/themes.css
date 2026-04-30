@@ -1,0 +1,678 @@
+/*
+ * Lais theme tokens — 4 themes (Stage 7-1).
+ * Selected via [data-theme="..."] on <html>. index.html sets this before first paint.
+ *
+ * Stage 7-1 (2026-04-27, STAGE7-1-THEME-FOUNDATION-IMPL-V1):
+ *   - 4 themes: apple (default) / totoro / dq / cyberpunk
+ *   - 30+ tokens per theme: color / typography / spacing-hint / border / shadow / motion / icon-set
+ *   - Backward compatibility tokens (--bg-primary / --accent / --text-primary etc.)
+ *     are maintained so existing component CSS keeps rendering. New components should
+ *     prefer theme-namespaced variables (--theme-color-* / --theme-font-* / etc.).
+ *
+ * Source of truth (PO 確定 2026-04-27):
+ *   - apple:     Apple HIG / System Blue / SF Pro / motion 250ms (iOS 標準)
+ *   - totoro:    暖色 / Yu Gothic / 葉っぱ / motion 350ms (緩やか、ジブリ余韻)
+ *   - dq:        8bit / Press Start 2P / DQ window / motion 0ms (即応 step)
+ *   - cyberpunk: ネオン最大 / Orbitron+VT323 / 黄+紫+シアン / motion 200ms + glitch
+ *
+ * Stage 7-2〜7-7 で:
+ *   - 7-2: 絵文字撲滅 + アイコンセット差替（--theme-icon-set 参照）
+ *   - 7-3: Supabase theme_preference 永続化
+ *   - 7-4: E ネオン最大化（cyberpunk のさらなる調整）
+ *   - 7-5: Apple 純正の HIG 準拠リファイン
+ *   - 7-6: Playwright theme matrix tests
+ *   - 7-7: 本番デプロイ
+ */
+
+/* ========================================================================
+   Theme: apple (default)
+   Apple HIG 準拠 — 白基調 + System Blue + SF Pro + iOS 標準モーション
+   ======================================================================== */
+[data-theme="apple"] {
+  /* --- Theme metadata --- */
+  --theme-name: "apple";
+  --theme-icon-set: "sf-symbols";
+
+  /* --- Stage 7-2 icon tokens (NEW, STAGE7-2-EMOJI-TO-SVG-V1) --- */
+  --theme-icon-primary: #1c1c1e;
+  --theme-icon-accent: #007aff;
+  --theme-icon-bg: transparent;
+  --theme-icon-stroke-width: 1.6;
+
+  /*
+   * Stage 7-4 prep (TASK-STAGE7-4-PREP-DEBT-CLEANUP-V1, 2026-04-29):
+   * Icon highlight token (H-3) — dq の `#fffce8` 直書きを 4 テーマ統一 token 化。
+   * apple では装飾用に主テキスト色を継承する形 (透明) で控えめ。
+   */
+  --theme-icon-highlight: transparent;
+
+  /* --- Color: surface --- */
+  --theme-color-bg: #ffffff;
+  --theme-color-bg-elevated: #fafaf7;
+  --theme-color-bg-card: #f2f2f0;
+  --theme-color-bg-overlay: rgba(28, 28, 30, 0.32);
+
+  /* --- Color: text --- */
+  --theme-color-text: #1c1c1e;
+  --theme-color-text-secondary: #6e6e6a;
+  --theme-color-text-muted: #c7c7c0;
+  --theme-color-text-inverse: #ffffff;
+
+  /* --- Color: accent / brand --- */
+  --theme-color-accent: #007aff;
+  --theme-color-accent-hover: #4d9eff;
+  --theme-color-accent-subtle: rgba(0, 122, 255, 0.12);
+  --theme-color-accent-bg: #e9f2ff;
+
+  /* --- Color: status --- */
+  --theme-color-success: #34c759;
+  --theme-color-warning: #ff9500;
+  --theme-color-danger: #ff3b30;
+  --theme-color-info: #5ac8fa;
+
+  /* --- Color: border / divider --- */
+  --theme-color-border: #e5e5e0;
+  --theme-color-border-strong: #c7c7c0;
+  --theme-color-divider: #e5e5e0;
+
+  /* --- Typography --- */
+  --theme-font-base: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", system-ui, sans-serif;
+  --theme-font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+  --theme-font-mono: "SF Mono", ui-monospace, Menlo, Monaco, monospace;
+  --theme-font-letter-spacing-tight: -0.02em;
+  --theme-font-letter-spacing-normal: -0.01em;
+  --theme-font-letter-spacing-loose: 0.05em;
+  --theme-font-line-height-body: 1.5;
+  --theme-font-line-height-heading: 1.25;
+
+  /* --- Border radius --- */
+  --theme-radius-sm: 8px;
+  --theme-radius-md: 12px;
+  --theme-radius-lg: 16px;
+  --theme-radius-xl: 22px;
+  --theme-radius-pill: 999px;
+
+  /* --- Shadow --- */
+  --theme-shadow-sm: 0 1px 2px rgba(28, 28, 30, 0.04), 0 1px 3px rgba(28, 28, 30, 0.05);
+  --theme-shadow-md: 0 2px 6px rgba(28, 28, 30, 0.06), 0 4px 12px rgba(28, 28, 30, 0.04);
+  --theme-shadow-lg: 0 4px 16px rgba(28, 28, 30, 0.08), 0 8px 24px rgba(28, 28, 30, 0.06);
+
+  /* --- Motion (Stage 7-1: page transition + micro-interaction) --- */
+  --theme-motion-fast: 150ms;
+  --theme-motion-normal: 250ms;
+  --theme-motion-slow: 400ms;
+  --theme-motion-easing: cubic-bezier(0.25, 0.1, 0.25, 1); /* iOS standard */
+  --theme-motion-easing-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  --theme-motion-page-transition: opacity 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* --- Backward-compat aliases (existing components reference these) --- */
+  --bg-primary: var(--theme-color-bg);
+  --bg-surface: var(--theme-color-bg-elevated);
+  --bg-elevated: var(--theme-color-bg-card);
+  --border: var(--theme-color-border);
+  --border-strong: var(--theme-color-border-strong);
+  --text-primary: var(--theme-color-text);
+  --text-secondary: var(--theme-color-text-secondary);
+  --text-muted: var(--theme-color-text-muted);
+  --text-placeholder: var(--theme-color-text-muted);
+  --accent: var(--theme-color-accent);
+  --accent-hover: var(--theme-color-accent-hover);
+  --accent-subtle: var(--theme-color-accent-subtle);
+  --button-primary-bg: var(--theme-color-accent);
+  --button-primary-text: var(--theme-color-text-inverse);
+  --button-disabled-bg: var(--theme-color-bg-card);
+  --button-disabled-text: var(--theme-color-text-muted);
+  --button-disabled-border: var(--theme-color-border);
+  --success: var(--theme-color-success);
+  --success-subtle: rgba(52, 199, 89, 0.14);
+  --warning: var(--theme-color-warning);
+  --danger: var(--theme-color-danger);
+  --danger-subtle: rgba(255, 59, 48, 0.10);
+  --danger-solid: #d70015;
+  --info: var(--theme-color-info);
+  --cat-work: #007aff;
+  --cat-health: #ff9500;
+  --cat-learn: #5ac8fa;
+  --cat-hobby: #af52de;
+  --cat-social: #ff2d55;
+  --cat-other: #8e8e93;
+  --shadow-none: none;
+  --shadow-sm: var(--theme-shadow-sm);
+  --shadow-md: var(--theme-shadow-md);
+  --shadow-lg: var(--theme-shadow-lg);
+  --shadow-drawer: 4px 0 16px rgba(28, 28, 30, 0.08);
+  --focus-ring-color: var(--theme-color-accent);
+
+  /* Stage 7-3 — additional theme tokens for 21 画面適用 */
+  --theme-color-modal-overlay: rgba(28, 28, 30, 0.45);
+  --theme-color-button-text-inverse: #ffffff;
+  --theme-color-status-overdue: #ff9500;
+  --theme-color-overlay-strong: rgba(28, 28, 30, 0.62);
+
+  /*
+   * Stage 7-4 prep (TASK-STAGE7-4-PREP-DEBT-CLEANUP-V1, 2026-04-29):
+   * 新 token カテゴリ (error / glow / glitch / scanline / chromatic / flicker).
+   * 各 token は 4 テーマすべてに同名で定義し、apple/totoro/dq は控えめ値、
+   * cyberpunk のみ最大値 (Stage 7-4 で更に強化される基底値).
+   */
+  /* --- error 系 (H-2 解消、4 テーマで個別定義) --- */
+  --theme-color-error-bg: #fff0f0;
+  --theme-color-error-text: #b00020;
+  /* alias for inline style fallback */
+  --bg-error: var(--theme-color-error-bg);
+  --text-error: var(--theme-color-error-text);
+
+  /* --- glow 系 (cyberpunk 専用、他テーマは無効) --- */
+  --theme-shadow-glow-yellow: none;
+  --theme-text-glow-accent: none;
+
+  /* --- glitch 系 (Stage 7-4 cyberpunk neon transitions) --- */
+  --theme-glitch-rgb-shift: 0;
+  --theme-glitch-hue-rotate-min: 0deg;
+  --theme-glitch-hue-rotate-max: 0deg;
+
+  /* --- scanline 系 (CRT overlay) --- */
+  --theme-scanline-color: transparent;
+  --theme-scanline-spacing: 0;
+
+  /* --- chromatic-aberration (RGB ずれ text-shadow) --- */
+  --theme-chromatic-offset: none;
+
+  /* --- flicker (neon flicker 周期) --- */
+  --theme-flicker-period: 0s;
+}
+
+/* ========================================================================
+   Theme: totoro
+   暖色 + Yu Gothic + 葉っぱ装飾 + 緩やかモーション (350ms / ジブリ余韻)
+   ======================================================================== */
+[data-theme="totoro"] {
+  /* --- Theme metadata --- */
+  --theme-name: "totoro";
+  --theme-icon-set: "leaf-line";
+
+  /* --- Stage 7-2 icon tokens (NEW) --- */
+  --theme-icon-primary: #2b3a25;
+  /*
+   * Stage 7-4 prep (PO 承認 b、2026-04-29):
+   * totoro accent を WCAG AA 通過する暗緑 #3b6e23 (CTA text inverse #ffffff 上で 5.0:1) に調整 (3 rd pass).
+   * brand 緑系の維持 (旧 #5a9e3a 4.0:1 fail → #3b6e23 5.0:1 pass).
+   */
+  --theme-icon-accent: #3b6e23;
+  --theme-icon-bg: rgba(168, 200, 149, 0.18);
+  --theme-icon-stroke-width: 1.8;
+
+  /* Stage 7-4 prep — icon highlight (controlled, leaves of totoro tint) */
+  --theme-icon-highlight: rgba(255, 255, 255, 0.5);
+
+  /* --- Color: surface --- */
+  --theme-color-bg: #fafaf7;
+  --theme-color-bg-elevated: #ffffff;
+  --theme-color-bg-card: #eaf3e4;
+  --theme-color-bg-overlay: rgba(60, 80, 50, 0.28);
+
+  /* --- Color: text --- */
+  --theme-color-text: #2b3a25;
+  --theme-color-text-secondary: #6e6e6a;
+  /*
+   * Stage 7-4 prep (a11y CRITICAL C2 cross-theme small label tightening):
+   * totoro `--text-muted` を `#9aa896` (2.7:1) → `#5e6a59` (5.5:1) に調整 (再調整 3 rd pass).
+   * 11px label でも 1.4.11 / 1.4.3 (small text) を満たす.
+   */
+  --theme-color-text-muted: #5e6a59;
+  --theme-color-text-inverse: #ffffff;
+
+  /* --- Color: accent / brand --- */
+  /*
+   * Stage 7-4 prep (PO 承認 b, 2026-04-29, 再調整 3 rd pass):
+   * totoro accent #5a9e3a → #3b6e23 (button-primary-text #ffffff 上で 5.0:1 = AA pass).
+   * brand 緑系維持しつつ HIGH H-1 / H-2 解消.
+   */
+  --theme-color-accent: #3b6e23;
+  --theme-color-accent-hover: #4d8430;
+  --theme-color-accent-subtle: rgba(168, 200, 149, 0.22);
+  --theme-color-accent-bg: #eaf3e4;
+
+  /* --- Color: status --- */
+  --theme-color-success: #5a9e3a;
+  --theme-color-warning: #f5d97a;
+  --theme-color-danger: #c04040;
+  --theme-color-info: #d6e4ed;
+
+  /* --- Color: border / divider --- */
+  --theme-color-border: #d4e5cd;
+  --theme-color-border-strong: #a8c895;
+  --theme-color-divider: #e5e5e0;
+
+  /* --- Typography (Yu Gothic 主体, 暖色テクスチャ) --- */
+  --theme-font-base: "Yu Gothic Medium", "Yu Gothic", "Hiragino Maru Gothic ProN", "Hiragino Sans", -apple-system, sans-serif;
+  --theme-font-display: "Yu Gothic", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --theme-font-mono: "Hiragino Sans", "Yu Gothic", monospace;
+  --theme-font-letter-spacing-tight: -0.01em;
+  --theme-font-letter-spacing-normal: 0;
+  --theme-font-letter-spacing-loose: 0.06em;
+  --theme-font-line-height-body: 1.7;
+  --theme-font-line-height-heading: 1.4;
+
+  /* --- Border radius (柔らかい) --- */
+  --theme-radius-sm: 10px;
+  --theme-radius-md: 14px;
+  --theme-radius-lg: 18px;
+  --theme-radius-xl: 24px;
+  --theme-radius-pill: 999px;
+
+  /* --- Shadow (緑ベースの暖かい影) --- */
+  --theme-shadow-sm: 0 1px 3px rgba(90, 158, 58, 0.08), 0 2px 4px rgba(90, 158, 58, 0.06);
+  --theme-shadow-md: 0 2px 8px rgba(168, 200, 149, 0.18), 0 4px 14px rgba(90, 158, 58, 0.06);
+  --theme-shadow-lg: 0 4px 16px rgba(168, 200, 149, 0.22), 0 8px 28px rgba(90, 158, 58, 0.08);
+
+  /* --- Motion (緩やか 350ms + ジブリ余韻スプリング) --- */
+  --theme-motion-fast: 200ms;
+  --theme-motion-normal: 350ms;
+  --theme-motion-slow: 550ms;
+  --theme-motion-easing: cubic-bezier(0.34, 1.06, 0.64, 1); /* bouncy soft */
+  --theme-motion-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --theme-motion-page-transition: opacity 350ms cubic-bezier(0.34, 1.06, 0.64, 1), transform 350ms cubic-bezier(0.34, 1.06, 0.64, 1);
+
+  /* --- Backward-compat aliases --- */
+  --bg-primary: var(--theme-color-bg);
+  --bg-surface: var(--theme-color-bg-elevated);
+  --bg-elevated: var(--theme-color-bg-card);
+  --border: var(--theme-color-border);
+  --border-strong: var(--theme-color-border-strong);
+  --text-primary: var(--theme-color-text);
+  --text-secondary: var(--theme-color-text-secondary);
+  --text-muted: var(--theme-color-text-muted);
+  --text-placeholder: var(--theme-color-text-muted);
+  --accent: var(--theme-color-accent);
+  --accent-hover: var(--theme-color-accent-hover);
+  --accent-subtle: var(--theme-color-accent-subtle);
+  --button-primary-bg: var(--theme-color-accent);
+  --button-primary-text: var(--theme-color-text-inverse);
+  --button-disabled-bg: var(--theme-color-bg-card);
+  --button-disabled-text: var(--theme-color-text-muted);
+  --button-disabled-border: var(--theme-color-border);
+  --success: var(--theme-color-success);
+  --success-subtle: rgba(90, 158, 58, 0.14);
+  --warning: var(--theme-color-warning);
+  --danger: var(--theme-color-danger);
+  --danger-subtle: rgba(192, 64, 64, 0.10);
+  --danger-solid: #a83838;
+  --info: #5a9e3a;
+  --cat-work: #5a9e3a;
+  --cat-health: #f5d97a;
+  --cat-learn: #b08968;
+  --cat-hobby: #f8d4d4;
+  --cat-social: #d6e4ed;
+  --cat-other: #9aa896;
+  --shadow-none: none;
+  --shadow-sm: var(--theme-shadow-sm);
+  --shadow-md: var(--theme-shadow-md);
+  --shadow-lg: var(--theme-shadow-lg);
+  --shadow-drawer: 4px 0 16px rgba(59, 110, 35, 0.14);
+  --focus-ring-color: var(--theme-color-accent);
+
+  /* Stage 7-3 — additional theme tokens for 21 画面適用 */
+  --theme-color-modal-overlay: rgba(60, 80, 50, 0.45);
+  --theme-color-button-text-inverse: #ffffff;
+  --theme-color-status-overdue: #c9912b;
+  --theme-color-overlay-strong: rgba(60, 80, 50, 0.62);
+
+  /* Stage 7-4 prep tokens — totoro 控えめ値 (cyberpunk のみ最大値) */
+  --theme-color-error-bg: #fce8e8;
+  --theme-color-error-text: #a83838;
+  --bg-error: var(--theme-color-error-bg);
+  --text-error: var(--theme-color-error-text);
+  --theme-shadow-glow-yellow: none;
+  --theme-text-glow-accent: none;
+  --theme-glitch-rgb-shift: 0;
+  --theme-glitch-hue-rotate-min: 0deg;
+  --theme-glitch-hue-rotate-max: 0deg;
+  --theme-scanline-color: transparent;
+  --theme-scanline-spacing: 0;
+  --theme-chromatic-offset: none;
+  --theme-flicker-period: 0s;
+}
+
+/* ========================================================================
+   Theme: dq (Dragon Quest 8bit)
+   ピクセル + Press Start 2P + DQ window + motion 0ms (即応 step)
+   ======================================================================== */
+[data-theme="dq"] {
+  /* --- Theme metadata --- */
+  --theme-name: "dq";
+  --theme-icon-set: "pixel-8bit";
+
+  /* --- Stage 7-2 icon tokens (NEW) --- */
+  --theme-icon-primary: #fffce8;
+  --theme-icon-accent: #4060c0;
+  --theme-icon-bg: #2c2c54;
+  --theme-icon-stroke-width: 2.5;
+
+  /*
+   * Stage 7-4 prep (TASK-STAGE7-4-PREP-DEBT-CLEANUP-V1, 2026-04-29):
+   * DQ pixel-art icon highlight (`#fffce8`) を 4 テーマ共通 token に格上げ.
+   * 16 SVG (IconHome / IconBell / ... / IconWarning) の dq branch 内 fill 直書きを置換 (H-3).
+   */
+  --theme-icon-highlight: #fffce8;
+
+  /* --- Color: surface --- */
+  --theme-color-bg: #2c2c54;
+  --theme-color-bg-elevated: #fffce8;
+  --theme-color-bg-card: #ffffff;
+  --theme-color-bg-overlay: rgba(26, 26, 46, 0.72);
+
+  /* --- Color: text --- */
+  --theme-color-text: #1a1a2e;
+  --theme-color-text-secondary: #4a4a6e;
+  --theme-color-text-muted: #b0b0c0;
+  --theme-color-text-inverse: #fffce8;
+
+  /* --- Color: accent / brand (DQ blue) --- */
+  --theme-color-accent: #4060c0;
+  --theme-color-accent-hover: #5a7ad8;
+  --theme-color-accent-subtle: rgba(64, 96, 192, 0.16);
+  --theme-color-accent-bg: #1a2a6c;
+
+  /* --- Color: status --- */
+  --theme-color-success: #5a9e3a;
+  --theme-color-warning: #ffd97a;
+  --theme-color-danger: #e85a5a;
+  --theme-color-info: #87ceeb;
+
+  /* --- Color: border / divider (DQ window 4px blue) --- */
+  --theme-color-border: #1a2a6c;
+  --theme-color-border-strong: #4060c0;
+  --theme-color-divider: #b0b0c0;
+
+  /* --- Typography (Press Start 2P + DotGothic16) --- */
+  --theme-font-base: "DotGothic16", "Noto Sans JP", "Press Start 2P", monospace, sans-serif;
+  --theme-font-display: "Press Start 2P", "DotGothic16", monospace;
+  --theme-font-mono: "VT323", "Press Start 2P", "Courier New", monospace;
+  --theme-font-letter-spacing-tight: 0;
+  --theme-font-letter-spacing-normal: 0.05em;
+  --theme-font-letter-spacing-loose: 0.15em;
+  --theme-font-line-height-body: 1.5;
+  --theme-font-line-height-heading: 1.2;
+
+  /* --- Border radius (8bit angular = 0px) --- */
+  --theme-radius-sm: 0px;
+  --theme-radius-md: 0px;
+  --theme-radius-lg: 0px;
+  --theme-radius-xl: 0px;
+  --theme-radius-pill: 0px;
+
+  /* --- Shadow (8bit hard offset) --- */
+  --theme-shadow-sm: 2px 2px 0 0 rgba(0, 0, 0, 0.4);
+  --theme-shadow-md: 4px 4px 0 0 rgba(0, 0, 0, 0.4);
+  --theme-shadow-lg: 6px 6px 0 0 rgba(0, 0, 0, 0.5);
+
+  /* --- Motion (0ms instant step = 8bit characteristic) --- */
+  --theme-motion-fast: 0ms;
+  --theme-motion-normal: 0ms;
+  --theme-motion-slow: 0ms;
+  --theme-motion-easing: steps(1, end);
+  --theme-motion-easing-spring: steps(1, end);
+  --theme-motion-page-transition: none;
+
+  /* --- Backward-compat aliases --- */
+  --bg-primary: var(--theme-color-bg);
+  --bg-surface: var(--theme-color-bg-elevated);
+  --bg-elevated: var(--theme-color-bg-card);
+  --border: var(--theme-color-border);
+  --border-strong: var(--theme-color-border-strong);
+  --text-primary: var(--theme-color-text);
+  --text-secondary: var(--theme-color-text-secondary);
+  --text-muted: var(--theme-color-text-muted);
+  --text-placeholder: var(--theme-color-text-muted);
+  --accent: var(--theme-color-accent);
+  --accent-hover: var(--theme-color-accent-hover);
+  --accent-subtle: var(--theme-color-accent-subtle);
+  --button-primary-bg: var(--theme-color-accent);
+  --button-primary-text: var(--theme-color-text-inverse);
+  --button-disabled-bg: var(--theme-color-text-muted);
+  --button-disabled-text: var(--theme-color-bg);
+  --button-disabled-border: var(--theme-color-border);
+  --success: var(--theme-color-success);
+  --success-subtle: rgba(90, 158, 58, 0.18);
+  --warning: var(--theme-color-warning);
+  --danger: var(--theme-color-danger);
+  --danger-subtle: rgba(232, 90, 90, 0.18);
+  --danger-solid: #c43838;
+  --info: var(--theme-color-info);
+  --cat-work: #4060c0;
+  --cat-health: #ff8db8;
+  --cat-learn: #87ceeb;
+  --cat-hobby: #98d76a;
+  --cat-social: #ffd97a;
+  --cat-other: #b0b0c0;
+  --shadow-none: none;
+  --shadow-sm: var(--theme-shadow-sm);
+  --shadow-md: var(--theme-shadow-md);
+  --shadow-lg: var(--theme-shadow-lg);
+  --shadow-drawer: 4px 0 0 0 rgba(0, 0, 0, 0.5);
+  --focus-ring-color: var(--theme-color-warning);
+
+  /* Stage 7-3 — additional theme tokens for 21 画面適用 */
+  --theme-color-modal-overlay: rgba(26, 26, 46, 0.78);
+  --theme-color-button-text-inverse: #fffce8;
+  --theme-color-status-overdue: #ffd97a;
+  --theme-color-overlay-strong: rgba(26, 26, 46, 0.88);
+
+  /* Stage 7-4 prep tokens — DQ 控えめ値 */
+  --theme-color-error-bg: #3a1a1e;
+  --theme-color-error-text: #ff8db8;
+  --bg-error: var(--theme-color-error-bg);
+  --text-error: var(--theme-color-error-text);
+  --theme-shadow-glow-yellow: none;
+  --theme-text-glow-accent: none;
+  --theme-glitch-rgb-shift: 0;
+  --theme-glitch-hue-rotate-min: 0deg;
+  --theme-glitch-hue-rotate-max: 0deg;
+  --theme-scanline-color: rgba(0, 0, 0, 0.15);
+  --theme-scanline-spacing: 2px;
+  --theme-chromatic-offset: none;
+  --theme-flicker-period: 0s;
+}
+
+/* ========================================================================
+   Theme: cyberpunk (NEON + COOL maximized)
+   黄ネオン #fcee0a + 紫マゼンタ #cf3aff + シアン #00ffe0 + Orbitron/VT323
+   motion 200ms + glitch transition (Stage 7-4 で更に最大化)
+   ======================================================================== */
+[data-theme="cyberpunk"] {
+  /* --- Theme metadata --- */
+  --theme-name: "cyberpunk";
+  --theme-icon-set: "neon-tactical";
+
+  /* --- Stage 7-2 icon tokens (NEW, neon glow optional via filter:drop-shadow) --- */
+  --theme-icon-primary: #fcee0a;
+  --theme-icon-accent: #cf3aff;
+  --theme-icon-bg: rgba(252, 238, 10, 0.10);
+  --theme-icon-stroke-width: 1.4;
+
+  /* Stage 7-4 prep — cyberpunk icon highlight (yellow neon spot accent) */
+  --theme-icon-highlight: #fcee0a;
+
+  /* --- Color: surface --- */
+  --theme-color-bg: #0a0a0a;
+  --theme-color-bg-elevated: #15151a;
+  --theme-color-bg-card: #1a1a22;
+  --theme-color-bg-overlay: rgba(0, 0, 0, 0.78);
+
+  /* --- Color: text --- */
+  --theme-color-text: #e8e8ed;
+  --theme-color-text-secondary: #8a8a99;
+  /*
+   * Stage 7-4 prep (a11y CRITICAL C2, 2026-04-29):
+   * cyberpunk `--theme-color-text-muted` を `#4a4a55` (2.4:1) → `#a3a3b0` (7.5:1) に引上げ.
+   * 16 画面で使われる 11px label 群 (s12-label / s30-info-label / s31-row-desc 等) で WCAG AA 確保.
+   */
+  --theme-color-text-muted: #a3a3b0;
+  --theme-color-text-inverse: #0a0a0a;
+
+  /* --- Color: accent / brand (黄ネオン主役) --- */
+  --theme-color-accent: #fcee0a;
+  --theme-color-accent-hover: #ffea00;
+  --theme-color-accent-subtle: rgba(252, 238, 10, 0.18);
+  --theme-color-accent-bg: rgba(252, 238, 10, 0.10);
+
+  /* --- Cyberpunk additional neon palette (sub-accents) --- */
+  --theme-color-magenta: #cf3aff;
+  --theme-color-magenta-hover: #b127ff;
+  --theme-color-cyan: #00ffe0;
+  --theme-color-cyan-hover: #00d9ff;
+
+  /* --- Color: status --- */
+  --theme-color-success: #00ffe0;
+  --theme-color-warning: #fcee0a;
+  --theme-color-danger: #ff2d55;
+  --theme-color-info: #cf3aff;
+
+  /* --- Color: border / divider --- */
+  --theme-color-border: #2a2a35;
+  --theme-color-border-strong: #444455;
+  --theme-color-divider: #2a2a35;
+
+  /* --- Typography (Orbitron + VT323 + Bebas) --- */
+  --theme-font-base: "Orbitron", "Noto Sans JP", "Hiragino Sans", sans-serif;
+  --theme-font-display: "Orbitron", "Audiowide", "Bebas Neue", "Impact", sans-serif;
+  --theme-font-mono: "VT323", "Courier New", monospace;
+  --theme-font-letter-spacing-tight: 0.02em;
+  --theme-font-letter-spacing-normal: 0.05em;
+  --theme-font-letter-spacing-loose: 0.15em;
+  --theme-font-line-height-body: 1.4;
+  --theme-font-line-height-heading: 1.1;
+
+  /* --- Border radius (鋭角 = 0-2px) --- */
+  --theme-radius-sm: 0px;
+  --theme-radius-md: 2px;
+  --theme-radius-lg: 4px;
+  --theme-radius-xl: 6px;
+  --theme-radius-pill: 0px;
+
+  /* --- Shadow (NEON GLOW heavy) --- */
+  --theme-shadow-sm: 0 0 4px rgba(252, 238, 10, 0.5), 0 0 8px rgba(252, 238, 10, 0.25);
+  --theme-shadow-md: 0 0 6px rgba(252, 238, 10, 0.6), 0 0 16px rgba(252, 238, 10, 0.3);
+  --theme-shadow-lg: 0 0 8px rgba(252, 238, 10, 0.7), 0 0 28px rgba(252, 238, 10, 0.35);
+  --theme-shadow-glow-magenta: 0 0 4px #cf3aff, 0 0 14px rgba(207, 58, 255, 0.65), 0 0 30px rgba(207, 58, 255, 0.3);
+  --theme-shadow-glow-cyan: 0 0 4px #00ffe0, 0 0 12px rgba(0, 255, 224, 0.65), 0 0 24px rgba(0, 255, 224, 0.3);
+
+  /* --- Motion (200ms snap + glitch transitions in animations.css) --- */
+  --theme-motion-fast: 100ms;
+  --theme-motion-normal: 200ms;
+  --theme-motion-slow: 350ms;
+  --theme-motion-easing: cubic-bezier(0.7, 0, 0.3, 1); /* sharp digital snap */
+  --theme-motion-easing-spring: cubic-bezier(0.5, -0.5, 0.3, 1.5);
+  --theme-motion-page-transition: opacity 200ms cubic-bezier(0.7, 0, 0.3, 1), filter 200ms cubic-bezier(0.7, 0, 0.3, 1);
+
+  /* --- Backward-compat aliases --- */
+  --bg-primary: var(--theme-color-bg);
+  --bg-surface: var(--theme-color-bg-elevated);
+  --bg-elevated: var(--theme-color-bg-card);
+  --border: var(--theme-color-border);
+  --border-strong: var(--theme-color-border-strong);
+  --text-primary: var(--theme-color-text);
+  --text-secondary: var(--theme-color-text-secondary);
+  --text-muted: var(--theme-color-text-muted);
+  --text-placeholder: var(--theme-color-text-secondary);
+  --accent: var(--theme-color-accent);
+  --accent-hover: var(--theme-color-accent-hover);
+  --accent-subtle: var(--theme-color-accent-subtle);
+  --button-primary-bg: var(--theme-color-accent);
+  --button-primary-text: var(--theme-color-text-inverse);
+  --button-disabled-bg: var(--theme-color-bg-card);
+  --button-disabled-text: var(--theme-color-text-muted);
+  --button-disabled-border: var(--theme-color-border);
+  --success: var(--theme-color-success);
+  --success-subtle: rgba(0, 255, 224, 0.14);
+  --warning: var(--theme-color-warning);
+  --danger: var(--theme-color-danger);
+  --danger-subtle: rgba(255, 45, 85, 0.14);
+  --danger-solid: #ff2d55;
+  --info: var(--theme-color-magenta);
+  --cat-work: #fcee0a;
+  --cat-health: #00ffe0;
+  --cat-learn: #cf3aff;
+  --cat-hobby: #ff2d55;
+  --cat-social: #00d9ff;
+  --cat-other: #8a8a99;
+  --shadow-none: none;
+  --shadow-sm: var(--theme-shadow-sm);
+  --shadow-md: var(--theme-shadow-md);
+  --shadow-lg: var(--theme-shadow-lg);
+  --shadow-drawer: 0 0 16px rgba(252, 238, 10, 0.45);
+  --focus-ring-color: var(--theme-color-cyan);
+
+  /* Stage 7-3 — additional theme tokens for 21 画面適用 */
+  --theme-color-modal-overlay: rgba(0, 0, 0, 0.78);
+  --theme-color-button-text-inverse: #0a0a0a;
+  --theme-color-status-overdue: #fcee0a;
+  --theme-color-overlay-strong: rgba(0, 0, 0, 0.88);
+
+  /*
+   * Stage 7-4 prep tokens (TASK-STAGE7-4-PREP-DEBT-CLEANUP-V1, 2026-04-29):
+   * cyberpunk のみ最大値 (Stage 7-4 で更に強化される基底値).
+   */
+  --theme-color-error-bg: rgba(255, 45, 85, 0.12);
+  --theme-color-error-text: #ff2d55;
+  --bg-error: var(--theme-color-error-bg);
+  --text-error: var(--theme-color-error-text);
+  --theme-shadow-glow-yellow: 0 0 4px rgba(252, 238, 10, 0.85), 0 0 14px rgba(252, 238, 10, 0.55), 0 0 30px rgba(252, 238, 10, 0.30);
+  --theme-text-glow-accent: 0 0 6px rgba(252, 238, 10, 0.85), 0 0 14px rgba(252, 238, 10, 0.50);
+  --theme-glitch-rgb-shift: 2px;
+  --theme-glitch-hue-rotate-min: -30deg;
+  --theme-glitch-hue-rotate-max: 45deg;
+  --theme-scanline-color: rgba(0, 255, 224, 0.05);
+  --theme-scanline-spacing: 3px;
+  --theme-chromatic-offset: -1px 0 #ff2d55, 1px 0 #00ffe0;
+  --theme-flicker-period: 3.6s;
+}
+
+/* ========================================================================
+   Reduced motion respect (WCAG 2.3.3)
+   ユーザが prefers-reduced-motion: reduce を設定している場合、
+   全テーマでアニメーションを無効化（motion-normal を 0ms 相当へ）
+   ======================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme] {
+    --theme-motion-fast: 1ms;
+    --theme-motion-normal: 1ms;
+    --theme-motion-slow: 1ms;
+    --theme-motion-page-transition: none;
+  }
+}
+
+/* ========================================================================
+   Stage 7-2 — SVG icon base styles (STAGE7-2-EMOJI-TO-SVG-V1, 2026-04-28)
+   30 種 SVG コンポーネントに共通で適用される視覚調整。
+   各 Icon コンポーネントは内部で `.lais-icon` クラスを付与し、
+   ここでテーマ別の glow / 色補正を CSS 側で吸収する。
+   ======================================================================== */
+.lais-icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+/* cyberpunk のみ: ネオングロウ（drop-shadow フィルタ） */
+[data-theme="cyberpunk"] .lais-icon {
+  filter: drop-shadow(0 0 2px currentColor) drop-shadow(0 0 4px rgba(252, 238, 10, 0.45));
+}
+
+/* dq のみ: 8bit pixelated レンダリング (拡大時の鮮明さ確保) */
+[data-theme="dq"] .lais-icon {
+  shape-rendering: crispEdges;
+}
+
+/* totoro のみ: ふんわり余韻 (微小 transition) */
+[data-theme="totoro"] .lais-icon {
+  transition: color var(--theme-motion-fast) var(--theme-motion-easing);
+}
+
+/* apple のみ: SF Symbols 風の薄い optical alignment */
+[data-theme="apple"] .lais-icon {
+  transition: color var(--theme-motion-fast) var(--theme-motion-easing);
+}
+

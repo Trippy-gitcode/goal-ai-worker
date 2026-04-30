@@ -1,0 +1,12 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.16.1 / dev_system_spec.md §1.3, §3鉄則② / sub_adv_protocol.md §1",
+    "issue": "ADVの書き込み権限が既存仕様と衝突しています。現行dev-systemは『ADVはコードを書かない』『スクリプトはENGに委任』を明示している一方、R2.1ではADV書込可に `scripts/lib/*.sh` と `scripts/*_lint.sh` を追加しています。これはAI⇔人間/ADV⇔ENGの責務境界を実質的に変更する新プロセスであり、しかも §4.16.3 では『ADV が雛形提示 → ENG が実装』と書かれているため、設計ドキュメント上はADVが実装物を直接変更可能になります。責務境界の破綻は、誤修正時の責任所在・レビュー経路・承認要否を曖昧にし、暴走防止メカニズムを弱めます。",
+    "suggestion": "ADVの書込可範囲から `scripts/lib/*.sh` と `scripts/*_lint.sh` を外し、現行どおり『ADVは仕様書・テンプレ・ミッション定義のみ』『スクリプト実装はENG専任』に維持してください。必要なら『ADVはR2.1パッケージ内で実装サンプルを提示できるが、実ファイル書込は不可』と明記し、sub_adv_protocol.md / dev_system_spec.md / po-decisions.md の整合を取ってください。もし本当に許可するなら PD-007 対象の新プロセスとしてPO承認・RACI更新・監査ルール追加が必要です。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  }
+]

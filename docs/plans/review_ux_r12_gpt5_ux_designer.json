@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（タスク完了）/ project_v1.md §4.5",
+    "issue": "EXP日次上限（300EXP）到達時のUI挙動が未定義。タスク完了はできるがEXPが付与されない場合のフィードバックがないと、ユーザーは「反応が鈍い/バグ」と誤解する",
+    "suggestion": "サーバーから「上限到達」を受けた場合の専用ハンドリングを追加: ①CHECKは完了のまま ②スナックバーで『本日のEXP上限に達しました。EXPは明日4:00にリセットされます』 ③EXPバーは変化させない ④同日に再度到達した場合は重複表示を抑制（1日1回の教育的トーストに集約）",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §8.2/ project_v1.md §4.4",
+    "issue": "レベルキャップ（Lv.50）到達後のEXP/バー表示・演出方針がUX側で未定義。projectでは累計EXPは蓄積とあるが、バーやレベルアップ演出の有無が不明",
+    "suggestion": "Lv.50時はヒーロー領域を『Lv.50 Master（MAX）｜累計 63,700 + N』の表記に変更し、バーは満タン固定＋微��のシマーに。以降のEXP獲得時は『+EXP』フロートのみ表示（レベルアップ演出なし）。TALK画面のレベルアップバナーも抑止。仕様を§8.2/§2.2に追記",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘッダー）/ §3.5（S-21ドロワー）",
+    "issue": "TALKヘッダーに☰（ドロワー）と🕐（履歴）が併存し、S-21は『ドロワー（左）』と記載。履歴のトリガーが二重定義で混乱の恐れ",
+    "suggestion": "履歴アクセスを1経路に統一。推奨: ☰を廃止し、🕐でS-21（履歴ドロワー）を開く。あるいは☰=設定/メニュー、🕐=履歴で役割を分離し文言・遷移先を明記",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（Todayリスト）",
+    "issue": "大量タスク時のパフォーマンス/可用性対策が未定義（仮想リスト化や日中・夜等のセクション分割、検索/フィルタの無い状態で10,000件上限に耐えない）",
+    "suggestion": "Todayの表示は仮想スクロール必須。さらに『検索』『未完のみ/Overdueのみ』フィルタ、時間帯グルーピングを追加。リスト更新は差分レンダリング（keyed items）を前提に記載",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（FRIENDS）/ project_v1.md §7.4（友達最大500人）",
+    "issue": "友達最大500人に対して一覧のページング/無限スクロール/検索が未定義。2列カード固定はスキャン効率が悪く、操作性/パフォーマンス劣化の恐れ",
+    "suggestion": "FRIENDSに『検索（名前）』『ソート（最近追加/レベル高/名前順）』『無限スクロール（20件ずつ）』を追加。大型端末は3列、超過時はスケルトン→逐次ロード。承認待ちは上部固定で折り畳み",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.4（ゴール詳細）/ project_v1.md §7.4（ゴール最大100件）",
+    "issue": "ゴールが多い場合（100件）に対する一覧のフィルタ/検索/アーカイブUIが未定義。達成済みと進行中が混在すると認知負荷が高い",
+    "suggestion": "Goalsセクションに『進行中/達成済み/完了待ち』タブ、検索、カテゴリフィルタ、古い達成済みの自動折り畳み（最��5件のみ表示）を追加",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2（メッセージ送信/画像添付）",
+    "issue": "画像アップロードで10MB超過や非対応形式時のエラーUIが未定義。ユーザーが失敗理由を理解できない可能性",
+    "suggestion": "アップロード直後にクライアントバリデーション（拡張子/サイズ）。超過時はインラインエラー『10MBを超えています』、非対応時は『対応形式はJPEG/PNG/GIF/WebPです』を表示。再選択動線も明示",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.2（ヒーロー縮小時の1行表示）",
+    "issue": "小型端末で『Lv.+称号+EXP 1行』は視認性が低下しやすい（数値桁あふれ、バーの縮小で意味が伝わりにくい）",
+    "suggestion": "縮小時は『Lv.12 · 1,240/2,000』+極細バーではなく、数値優先表示＋バーを短縮/細化orリング化。称号はツールチップ/タップ時のみ展開にし情報量を最適化",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.1/§11.2（MEサブタブ横スワイプ）",
+    "issue": "横スワイプでサブタブ切替は、縦スクロールとの競合閾値が未定義。誤作動でユーザーが迷う恐れ",
+    "suggestion": "スワイプ判定を『開始角度±20°以内の水平移動/水平移動距離>垂直移動距離の1.5倍/閾値48px』に定義。スクロール中は切替無効。タブインジケータもドラッグ追従で意図を見せる",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（Undoスナックバー）",
+    "issue": "『直近1件のみ30秒Undo可』は合理的だが、連続完了時に直前のUndoが確定される仕様が一見わかりづらい",
+    "suggestion": "新スナックバー出現時に1回だけヒントを表示『新しい完了があると前の取り消しはできなくなります』。設定でヒントをOFF可能に",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §8.6（演出キュー）/ §3.4（TALKのレベルアップ）",
+    "issue": "同時発火のうち『TALKで冒険EXP→同時にGROW側でゴール達成通知が来る』等、異タブ間の演出優先順位・再生タイミングが���定義",
+    "suggestion": "演出キューをグローバル単一キューで管理。非アクティブタブで発火した演出は『簡易バナー』にダウングレードし、当該タブ再表示時にフル演出を1回だけ再生（重複抑止フラグを明記）",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §6.5（Pull-to-refresh）/ §3.5（履歴無限スクロール）",
+    "issue": "TALK画面は上スクロールで履歴ロード、GROW/FRIENDSは下引き更新。ジェスチャーの役割が画面毎に異なることの注意喚起が不足",
+    "suggestion": "TALKの先頭到達で小さなガイダンス『上にスクロールで過去の会話を読み込み』を初回のみ表示。GROW/FRIENDSは下引きでのみ更新する旨をトースト/チュートリアルで周知",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（Overdue/延期）",
+    "issue": "Overdue『明日に延期』後の取り消しはトーストのアクションとあるが、取り消し（Undo）時の予定日の戻し方が未定義（元日付が過去複数日に跨るケース）",
+    "suggestion": "『明日に延期』のUndo���元の予定日に完全復帰することを明記。複数回の延期→Undoチェーンは直近操作のみを対象（1段階戻し）。トーストに『元の日付: 4/10』等を表示して安心感を提供",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3（Upcoming）",
+    "issue": "Upcomingは7日以降を『件数のみ』にしているが、大量タスクユーザーは中長期の見通しが欲しい。件数だけでは操作が続かない可能性",
+    "suggestion": "『7日以降 (N件)』タップで月カレンダー簡易ビューに遷移/展開し、日付ごとの密度ヒートマップ+当日タスク件数を提示するサブビューを追加",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §4.2.1（アバター設定）/ project_v1.md §2.2",
+    "issue": "MVPではSHOP未実装のため未所持アイテムに『SHOPへ』導線を出さない方針だが、未所持が多数の場合リストの可読性が下がる（🔒が大量に並ぶ）",
+    "suggestion": "フィルタ『所持のみ/すべて』トグルを追加。未所持は最後尾に集約しカードの彩度を下げ、視覚的に“今は触れない���域”とわかるよう調整",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §10（アクセシビリティ）/ §2.3（タスク行）",
+    "issue": "タスク完了の⭕はタップ領域拡大とあるが、スクリーンリーダー用の状態変化アナウンス（チェックON/OFFとEXP付与）が具体例のみで網羅定義がない",
+    "suggestion": "⭕にrole=\"checkbox\"とaria-checkedのトグル、完了時はaria-liveで『タスク名、完了、+10EXP』、Undoは『取り消し、-10EXP』をアナウンスすることを明記",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §13.2（Stripe戻り）",
+    "issue": "Checkout後の『処理中…ポーリング最大10秒』はWebhook遅延時に不十分な場合がある。ユーザーが不安になる可能性",
+    "suggestion": "最大30秒まで指数的バックオフで再試行。タイムアウト時は『処理が遅延しています。しばらくしてから再表示』のセカンダリアクションを提示。成功時はバナーで変更点を再通知",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §0 UXベンチマーク → 全体設計反映",
+    "issue": "ベンチマークの『機能過多回避』方針は反映されているが、GROWのヒーロー+Today+Goalsの情報密度が初見でやや高い（学習コスト増）",
+    "suggestion": "初回起動〜3日目まではヒントレイヤー（1回のみ）で『①今日のタスク ②目標（ゴール） ③EXP/レベル』の3ポイントガイドを順番にオーバーレイ表示。以降はメニューから再表示可能に",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

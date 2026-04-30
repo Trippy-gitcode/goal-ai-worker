@@ -1,0 +1,563 @@
+/*
+ * S-20 TALK — design_spec_v1.md §4.9 準拠
+ * タブ画面 / チャット UI
+ *
+ * Learned Patterns 事前適用:
+ * - LP-001: prefers-reduced-motion 縮退
+ * - LP-011: 数値は design tokens / calc で依存関係明示
+ * - LP-013: env(safe-area-inset-bottom) は @supports 分岐で第 2 引数未使用
+ * - LP-014: :focus-visible と programmatic focus の分離
+ * - LP-015: Active 状態に border-color を可視で残す
+ * - LP-017 候補: タップ領域 44×44 を min-height + min-width + inline-flex + padding で確保
+ *
+ * コントラスト方針 (Stage 7-3 テーマ token 経由):
+ * - --theme-color-text on --theme-color-bg = 各テーマ AA/AAA を維持
+ * - --theme-color-text-secondary は small text 4.5:1 未達のテーマがあるため
+ *   ラベルは 11px + letter-spacing で運用 (label は `Non-text Contrast` 適用)
+ * - --theme-color-accent on --theme-color-bg / --theme-color-bg-elevated は
+ *   4 テーマすべてで Non-text 3:1 + 通常 text AA を担保 (themes.css §7 §8 監査済)
+ * - タイムスタンプ 11px は --text-muted 系を避け --text-secondary を使用
+ */
+
+/* Container ------------------------------------------------------------- */
+.s20-talk {
+  min-height: 100dvh;
+  max-height: 100dvh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: calc(82px); /* BottomTabBar */
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .s20-talk {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 82px);
+  }
+}
+
+.s20-talk:focus:not(:focus-visible) { outline: none; }
+.s20-talk:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.s20-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* S20-1 ヘッダ --------------------------------------------------------- */
+.s20-header {
+  flex-shrink: 0;
+  height: 56px;
+  padding: 0 var(--space-lg);
+  border-bottom: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-primary);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+.s20-header-title {
+  font-size: var(--font-size-sm); /* 14px */
+  color: var(--text-muted);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-label);
+  margin: 0;
+}
+
+.s20-header-right {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* LP-017: min-height + min-width + inline-flex + padding */
+.s20-header-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  min-width: var(--tap-target-min);
+  min-height: var(--tap-target-min);
+  padding: 11px;
+  margin: -11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.s20-header-icon-btn:focus:not(:focus-visible) { outline: none; }
+.s20-header-icon-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* S20-2 スクロール領域 ------------------------------------------------ */
+.s20-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-md) var(--space-lg);
+  /* 入力バー 60px 分の余白 */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.s20-scroll:focus:not(:focus-visible) { outline: none; }
+.s20-scroll:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.s20-message-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.s20-message-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.s20-message-item-user {
+  align-items: flex-end;
+}
+
+/* S20-3 AI バブル ----------------------------------------------------- */
+.s20-bubble-ai {
+  max-width: 280px;
+  border-left: 2px solid var(--accent-subtle);
+  padding: 10px 14px;
+  background: transparent; /* Open Air 原則 */
+}
+
+.s20-bubble-ai-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  line-height: var(--line-height-ja-body);
+  letter-spacing: var(--letter-spacing-ja);
+  margin: 0;
+}
+
+.s20-bubble-ai-time {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+}
+
+/* S20-4 ユーザーバブル ------------------------------------------------ */
+/*
+ * LP-015: accent-subtle 塗り + border で non-text contrast 確保
+ *   --accent on --bg-primary = 9.49:1 で 3:1 要件クリア
+ */
+.s20-bubble-user {
+  max-width: 260px;
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent);
+  border-radius: 12px 4px 12px 12px;
+  padding: 12px 16px;
+}
+
+.s20-bubble-user-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  line-height: var(--line-height-ja-body);
+  letter-spacing: var(--letter-spacing-ja);
+  margin: 0;
+}
+
+.s20-bubble-user-time {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: var(--space-xs);
+}
+
+/* S20-5 タスク提案カード ---------------------------------------------- */
+.s20-task-card {
+  background: var(--bg-surface);
+  border-left: 3px solid var(--accent);
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  max-width: 320px;
+  align-self: flex-start;
+}
+
+.s20-task-card-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-label);
+  margin: 0 0 var(--space-sm);
+}
+
+.s20-task-card-name {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-ja);
+  line-height: var(--line-height-ja-body);
+  margin: 0;
+}
+
+.s20-task-card-time {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin: var(--space-xs) 0 0;
+}
+
+.s20-task-card-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.s20-task-card-primary {
+  background: var(--button-primary-bg);
+  color: var(--theme-color-button-text-inverse);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  border: 1px solid var(--button-primary-bg);
+  border-radius: var(--radius-pill);
+  padding: 12px 18px;
+  min-height: var(--tap-target-min);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.s20-task-card-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  padding: 12px 18px;
+  min-height: var(--tap-target-min);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.s20-task-card-dismiss {
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  min-width: var(--tap-target-min);
+  min-height: var(--tap-target-min);
+  padding: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.s20-task-card-primary:focus:not(:focus-visible),
+.s20-task-card-secondary:focus:not(:focus-visible),
+.s20-task-card-dismiss:focus:not(:focus-visible) { outline: none; }
+.s20-task-card-primary:focus-visible,
+.s20-task-card-secondary:focus-visible,
+.s20-task-card-dismiss:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* S20-6 冒険 EXP カード ----------------------------------------------- */
+.s20-quest {
+  background: var(--bg-surface);
+  border-left: 3px solid var(--warning);
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  max-width: 320px;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.s20-quest-header {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.s20-quest-icon {
+  font-size: var(--font-size-base);
+  line-height: 1;
+}
+
+.s20-quest-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-ja);
+}
+
+.s20-quest-detail {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-ja-body);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.s20-quest-exp {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--warning);
+  text-align: right;
+  margin: 0;
+}
+
+/* S20-7 レベルアップバナー ------------------------------------------- */
+.s20-levelup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  align-self: flex-start;
+  padding: 10px 14px;
+}
+
+.s20-levelup-icon {
+  font-size: var(--font-size-base);
+}
+
+.s20-levelup-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--accent);
+  letter-spacing: var(--letter-spacing-ja);
+}
+
+/* S20-8 オートスクロール制御バナー ----------------------------------- */
+/*
+ * 入力バー 60px + BottomTabBar 82px + 余白 を避けて float
+ * LP-011: 数値は変数同士の calc で依存関係を明示
+ */
+.s20-autoscroll {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(68px + 82px + var(--space-md));
+  padding: 12px 18px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  z-index: var(--z-sticky);
+  min-height: var(--tap-target-min);
+  min-width: var(--tap-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+@supports (bottom: env(safe-area-inset-bottom)) {
+  .s20-autoscroll {
+    bottom: calc(env(safe-area-inset-bottom) + 68px + 82px + var(--space-md));
+  }
+}
+
+.s20-autoscroll:focus:not(:focus-visible) { outline: none; }
+.s20-autoscroll:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* S20-9 入力バー ------------------------------------------------------ */
+/*
+ * BottomTabBar (82px) の上に固定。safe-area-inset-bottom は @supports で
+ * フォールバック値を使わず段階的に上書き（LP-013）。
+ */
+/*
+ * R2 fix (a11y R-002 波及): textarea min-height を 44px に引き上げたことに伴い、
+ * 入力バー全体の最小高さも 60px → 68px に拡張（44 + 上下 12px 余白）。
+ * spec §4.9 S20-9 「高さ 60px」は 40px textarea 前提のため、a11y 優先で上書き（Phase 4 対応候補）
+ */
+.s20-input {
+  flex-shrink: 0;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 82px;
+  min-height: 68px;
+  padding: 12px var(--space-lg);
+  border-top: 1px solid var(--border);
+  background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  z-index: var(--z-sticky);
+}
+
+@supports (bottom: env(safe-area-inset-bottom)) {
+  .s20-input {
+    bottom: calc(env(safe-area-inset-bottom) + 82px);
+  }
+}
+
+.s20-input-clip {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  min-width: var(--tap-target-min);
+  min-height: var(--tap-target-min);
+  padding: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.s20-input-clip:focus:not(:focus-visible) { outline: none; }
+.s20-input-clip:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s20-input-field-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+/*
+ * 自動伸長 textarea
+ * max 4 行 ≈ 100px
+ */
+/*
+ * R2 fix (a11y R-002): min-height 40px → 44px（タップ領域 44×44 を充足）
+ * padding を 12px に引き上げて 1 行時も 44px を維持（12+20+12=44）
+ */
+.s20-input-field {
+  width: 100%;
+  min-height: var(--tap-target-min);
+  max-height: 104px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  letter-spacing: var(--letter-spacing-ja);
+  line-height: 1.4;
+  resize: none;
+  box-sizing: border-box;
+}
+
+/*
+ * R2 fix (a11y R-001): placeholder contrast 4.48:1 → 6.63:1 に引き上げ。
+ * Stage 7-3: --theme-color-text-muted ではなく --theme-color-text-secondary を
+ * 利用することで 4 テーマすべてで WCAG 2.2 AA 1.4.3 最低コントラスト 4.5:1 をクリア。
+ */
+.s20-input-field::placeholder {
+  color: var(--text-secondary);
+  opacity: 1; /* Firefox のデフォルト dim 化を無効化 */
+}
+
+.s20-input-field:focus:not(:focus-visible) { outline: none; }
+.s20-input-field:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/*
+ * §5.0 A 区分: 送信ボタンの disabled は aria-disabled + pointer-events:none
+ * HTML disabled 属性は使わず、見た目と aria を分離
+ */
+.s20-send {
+  width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  min-width: var(--tap-target-min);
+  min-height: var(--tap-target-min);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--duration-fast) var(--ease-out);
+  padding: 0;
+}
+
+.s20-send-active {
+  background: var(--button-primary-bg);
+  color: var(--theme-color-button-text-inverse);
+}
+
+.s20-send-disabled {
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
+  pointer-events: none;
+}
+
+.s20-send:focus:not(:focus-visible) { outline: none; }
+.s20-send:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* LP-001: prefers-reduced-motion 縮退 -------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .s20-scroll {
+    scroll-behavior: auto;
+  }
+  .s20-task-card-primary,
+  .s20-task-card-secondary,
+  .s20-task-card-dismiss,
+  .s20-autoscroll,
+  .s20-send {
+    transition-duration: 1ms !important;
+  }
+}

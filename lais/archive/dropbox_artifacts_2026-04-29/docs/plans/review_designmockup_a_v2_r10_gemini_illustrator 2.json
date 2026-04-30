@@ -1,0 +1,14 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "OTHER",
+    "screen": "ALL",
+    "location": "N/A",
+    "issue": "JSON parse failed",
+    "suggestion": "Re-run",
+    "raw": "[\n  {\"id\":\"R-001\",\"severity\":\"CRITICAL\",\"category\":\"UX_CONTRADICTION\",\"screen\":\"s30_me\",\"location\":\"PROFILEサブタブ内\",\"issue\":\"UX仕様書で必須とされている「MBTI/性格タイプ」セクションが完全に欠落している。\",\"suggestion\":\"AI理解メモの下に、4文字のタイプと説明文を含むMBTI/性格タイプカードを追加する。\"},\n  {\"id\":\"R-002\",\"severity\":\"CRITICAL\",\"category\":\"UX_CONTRADICTION\",\"screen\":\"s30_me\",\"location\":\"設定・アバター設定リンク\",\"issue\":\"UX仕様書で指定されているアイコン（⚙️ および 👤）が実装されていない。\",\"suggestion\":\"各リンクテキストの左側に指定されたアイコンを追加する。\"},\n  {\"id\":\"R-003\",\"severity\":\"CRITICAL\",\"category\":\"UX_CONTRADICTION\",\"screen\":\"s30_me\",\"location\":\"AI理解メモ\",\"issue\":\"タイトルが「AI理解メモ」となっており仕様（AIがあなたについて理解していること）と不一致。また、カード形式のスタイリング（背景色やボーダー）が欠落している。\",\"suggestion\":\"タイトルを仕様通りに修正し、要素全体を bg-surface と border で囲みカード形式にする。\"},\n  {\"id\":\"R-004\",\"severity\":\"CRITICAL\",\"category\":\"UX_CONTRADICTION\",\"screen\":\"s10_grow\",\"location\":\"",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  }
+]

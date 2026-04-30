@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "S02-6 CSS (.s02-next bottom) / S02 ルート CSS (.s02-onboarding padding-bottom)",
+    "issue": "env(safe-area-inset-bottom, 0px) を calc() 内で使用しているが、env() 非対応や env のフォールバック引数未対応ブラウザでは宣言全体が無効になり、CTA の bottom 固定やコンテンツ下余白が効かなくなるリスクがある。",
+    "suggestion": "プロパティの多重宣言で堅牢化する。例: bottom: 100px; の直後に bottom: calc(env(safe-area-inset-bottom) + 100px); を上書き指定。padding-bottom も同様に padding-bottom: calc(100px + 52px + var(--space-md)); → padding-bottom: calc(env(safe-area-inset-bottom) + 100px + 52px + var(--space-md)); と二重指定。必要に応じ @supports (bottom: max(0px)) / @supports (padding-bottom: env(safe-area-inset-bottom)) で分岐。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "S02-6 仕様適合（CTA 下端 100px）",
+    "issue": "実装は bottom に safe-area-inset-bottom を加算しており、実効距離が「画面物理下端から 100px + セーフエリア分」となる。仕様の「画面下 100px」が“可視領域の下端から 100px”なのか“物理下端から 100px”なのかが曖昧で、ノッチ端末で見た目が想定より上がる可能性がある。",
+    "suggestion": "仕様に「可視領域下端からの距離（= safe area 加味）」か「物理下端からの距離」かを明記。合意した定義に沿って CSS を固定。あわせて notch あり/なしデバイスでのスクリーンショット比較をスナップショット化して回帰検知を行う。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S02-6 CSS (.s02-next)",
+    "issue": "position: fixed の CTA に z-index が未指定。変形 (transform) を用いる .s02-avatar-tapping などが新たなスタッキングコンテキストを作るため、特定状況で CTA が下に潜る可能性がある。",
+    "suggestion": "CTA に z-index を付与（例: z-index: var(--z-floating, 10)）。デザインシステム側で z-index トークンを定義し、他要素との前後関係を統一。E2E で CTA が常に前面に来ることを確認。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-104",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02-2 CSS (.s02-progress-bar)",
+    "issue": "未完了��ーを border で表現しているため、実効の太さが height(3px) + border(上下 1px) = 5px になり、仕様の 3px から視覚的に乖離する可能性がある。完了/未完了の切替時に太さが変わって見える副作用も起こり得る。",
+    "suggestion": "太さを一定に保つため、未完了バーは border ではなく inset の box-shadow を使用（例: height: 3px; background: transparent; box-shadow: inset 0 0 0 1px var(--border-strong);）。または outline を用いて塗りつぶしとの差分を出す。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "S02-2 JSX（progressbar の配列生成/ARIA 値）",
+    "issue": "TOTAL_STEPS <= 0 や CURRENT_STEP_INDEX の範囲外（負値/上限超過）に対する防御がなく、aria-valuenow/min/max の整合性が崩れる（例: valuemax=0 で valuenow=1）などの a11y 違反や表示不整合が起こり得る。",
+    "suggestion": "レンダ前に値をガード/クランプ（TOTAL_STEPS は 1 以上を保証、CURRENT_STEP_INDEX は [0, TOTAL_STEPS-1] に丸める）。無効値時はコンポーネントを非表示にするか、0/0 表示のフォールバックを表示。ユニットテストで境界値（0, -1, ==TOTAL_STEPS）を追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "S02 ルート CSS (.s02-onboarding min-height)",
+    "issue": "min-height: 100dvh は未対応ブラウザで無視される可能性があり、想定より縦が短くなる（CTA とコンテンツの相対感が崩れる）ことがある。",
+    "suggestion": "フォールバックとして先に min-height: 100vh; を宣言し、その後に min-height: 100dvh; を上書き指定。必要なら @supports (height: 100dvh) で分岐。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "S02-5 CSS (.s02-avatars グリッド)",
+    "issue": "極端に狭い幅（例: <288px）やテーマで --space-lg が大きく上書きされた場合、3 列維持により水平スクロールが再発する余地がある。",
+    "suggestion": "メディアクエリ/コンテナクエリで閾値以下は 2 列/1 列にフォールバック、または auto-fit と minmax を併用して自動段組みにする。回帰検知用に 280px/300px 幅のビジュアルテストを追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "S02-6 CTA 下端固定（将来の入力���テップ影響）",
+    "issue": "本ステップに入力は無いが、将来同一レイアウトでインプットを含む場合、モバイルのソフトキーボード表示時に position: fixed の CTA が隠れる/重なる可能性がある。",
+    "suggestion": "VisualViewport API でキーボード開閉を検知し bottom オフセットを一時的に加算、またはフォーカス時にスクロールで CTA を露出させる処理を検討。E2E でキーボード重なりを検証。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02-2 JSX（progressbar 付近の class 属性）",
+    "issue": "JSX で class を使用しており、React 環境では警告や互換性問題（className が推奨）が出る可能性がある。ツールチェーン依存（Preact/トランスパイラ）で動いている可能性はあるが、移行時のデグレ要因になる。",
+    "suggestion": "プロジェクト方針を明示し、React を前提とするなら className に統一。ESLint（react/no-unknown-property）で検知、既存コードも段階的に置換。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02-2 アクセシビリティ（progressbar セマンティクス）",
+    "issue": "段階的なステップインジケータに role=\"progressbar\" は許容範囲だが、離散ステップでは list + aria-current や stepper パターンの方が意味的に適合する場合がある。",
+    "suggestion": "現行でも a11y 要件は概ね満たすが、将来の汎用性を考慮し stepper パターン（li に aria-current=\"step\" 等）も検討。採用しない場合でも aria-describedby で可視ラベル（2/5）と関連付けると冗長性が増す。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-111",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "回帰テスト（ビジュアル/E2E）",
+    "issue": "R2 修正点（safe-area・固定配置・reflow）の回帰を検出する自動テストの記載が無い。特定条件でのみ壊れる UI（320px/200%・notch 端末・横持ち）に弱い。",
+    "suggestion": "ビジュアルスナップショットを追加（320/375/414px、iOS notch 有無、横持ち、ズーム 200% 等）。CTA と最終コンテンツの重なり、水平スクロール有無、progressbar 形状差を検証。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

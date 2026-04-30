@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "§2.3",
+    "issue": "S-11（タスク詳細ハーフモーダル）からS-14（ゴール詳細フルスクリーン）への遷移時における、ハーフモーダルの状態管理が未定義です。ハーフモーダルを開いたままフルスクリーン画面を上に被せるのか、ハーフモーダルを閉じてから遷移するのか定義しないと、戻りナビゲーション時にZ-indexの破綻や画面のスタック異常が発生します。",
+    "suggestion": "「ゴール紐付けタップ時、S-11ハーフモーダルを自動的に閉じるアニメーション（下降）と同時に、S-14フルスクリーンが右からスライ���インする」または「S-14をS-11の上に被せて表示し、S-14から戻った際にS-11が維持されている状態にする」のいずれかを明記してください。UXとしては後者が自然です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§7.3",
+    "issue": "チャット履歴（S-21）の削除ボタン露出が「左→右」スワイプと定義されていますが、iOS標準のリストアイテム削除ジェスチャーは「右→左」です。また、ドロワーを閉じる操作（左スワイプ＝右→左）とジェスチャーが完全に競合しており、ユーザーが意図せずドロワーを閉じてしまうか、削除ボタンを出してしまう問題が起きます。",
+    "suggestion": "削除ボタン露出を「右→左」スワイプに変更してください。ドロワーを閉じる操作は「backdropのタップ」または「ドロワーの右端（エッジ）からの左→右スワイプ」に限定し、リストアイテム上のスワイプと明確に分離してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§11",
+    "issue": "PWA（モバイルWebアプリ）として必須であるセーフエリア（ノッチやiPhoneのホームインジケーター）への対応が未定義です。このまま実装すると、ボトムタブがホームインジケーターと重なってタップ不能になる、またはヒーロー領域がノッチに隠れる等のレイアウト崩れが確実に発生します。",
+    "suggestion": "レスポンシブまたは共通UIパターンのセクションに、CSSの `env(safe-area-inset-bottom)` および `env(safe-area-inset-top)` を用いたパディング調整の要件を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3 / ux_v1.md §8.2",
+    "issue": "リスト表示用にSVGアバターを64x64のPNGにCanvas経由でラスタライズするとありますが、高DPI（Retina）ディスプレイを考慮していないため、最新のスマートフォンでは画像がぼやけて表示され、「洗練されたビジュアル」というコンセプトを著しく損ないます。",
+    "suggestion": "ラスタライズ時は `window.devicePixelRatio` を考慮し、論理ピクセル64x64に対して物理ピクセル（例: dpr=2なら128x128、dpr=3なら192x192）でCanvas描画してキャッシュする仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§6.1 / §2.3",
+    "issue": "タスク完了直後に「+タスクを追加」等でハーフモーダルを開いた場合、画面下部に固定表示されるUndoスナックバーとハーフモーダルのZ-index関係が未定義です。スナックバーがモーダルの裏に隠れて操作不能になるか、上に被さって入力フィールドを隠す懸念があります。",
+    "suggestion": "「ハーフモーダル表示中は、Undoスナックバーをハーフモーダルの上（z-indexを高く）に表示し、かつキーボードや入力フィールドと被らない位置に動的配置する」または「ハーフモーダルを開いた時点で表示中のUndoスナックバーを即時消去（完了確定）する」仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.2",
+    "issue": "画像添付のサイズ上限が10MBと定義されていますが、10MBを超過した画像をユーザーが選択した際のエラーハンドリングやUXフローが未定義です。",
+    "suggestion": "「10MB超過時はインラインエラーまたはトーストで『画像���イズは10MB以下にしてください』と表示し、添付をキャンセルする」または「クライアントサイドのCanvas APIを用いて自動的にリサイズ・圧縮を行う」旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.4 / §8.6",
+    "issue": "TALK画面で冒険EXPを獲得し、それが同時にレベルアップ条件を満たした場合の演出キュー（冒険EXPカードとレベルアップバナーの表示順序やタイミング）が未定義です。同時に表示されると画面上部のUIが渋滞します。",
+    "suggestion": "TALK画面での演出キューを追加し、「冒険EXPカード表示（インライン） → その直後に画面上部にレベルアップバナー表示」と順序を明確に定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.2.1",
+    "issue": "アバター設定の保存時、「サーバー同期 → トースト → 反映」というフローになっていますが、ネットワーク遅延時にボタンが反応していないように見え、ユーザーが複数回タップする原因になります。",
+    "suggestion": "[保存] タップ時にボタンをローディング状態（スピナー表示）にするか、楽観的UI更新（先にPROFILE画面のプレビューに反映し、バックグラウンドで同期）を採用するよう修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§13.1 / project_v1.md §7.3",
+    "issue": "4つのテーマ（ダーク/ライト含む）を切り替えた際、SVGアバターの線色や肌色・服の色が背景色に溶け込む、またはコントラストが悪化する懸念があります。アバターの配色がテーマに依存するのか独立するのかがデザインシステム要件として欠落しています。",
+    "suggestion": "今後の `lais_design_system.md` 作成に向けた要件として、「アバターのSVGカラーパレットは全テーマの背景色に対してコントラスト比3:1以上を保つ固定パレットとする」または「テーマに応じてSVG内のCSS変数を切り替える」方針を注記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§8.3 / §8.7",
+    "issue": "紙吹雪パーティクルの色が「テーマのアクセントカラーバ��エーション」とされていますが、原色に近い色が多用されると「洗練されたUI」というコンセプトから外れ、安っぽいゲーム画面に見えるリスクがあります。",
+    "suggestion": "デザインシステム（`lais_design_system.md`）において、「パーティクル用の彩度・明度を抑えた（またはパステル調の）専用カラートークン」を定義するよう注記を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "ヘッダー直下の区切り線 / 入力バー上端の区切り線",
+    "issue": "border に rgba(72,79,88,0.4) / rgba(110,118,129,0.4) の半透明直指定を使用。DSの --border(#484F58) / --border-strong(#6E7681) トークン外の色値",
+    "suggestion": "境界線はトークンを使用し、opacity ではなく実色で統一する。例: border-color: var(--border) または var(--border-strong)。必要なら太さで強弱を調整（1px固定）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s30_me, s14_goal_detail",
+    "location": "s30_me 基本情報行/リンク行のボーダー、s14_goal_detail タスク行の区切り線",
+    "issue": "区切り線に rgba(72,79,88,0.2〜0.3) を複数箇所で使用。デザインシステムのボーダートークン不使用",
+    "suggestion": "全区切り線を --border または --border-strong に置換し、面（bg-surface/bg-primary）に応じて1種類に統一。視認性は余白で担保（Open Air）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "ALL",
+    "location": "主要コンテンツ左右パディング（多くの画面で padding: 0 24px）",
+    "issue": "グリッド基準（§4.3 モバイル左右パディング --space-md=16px）と不一致。24px運用でレイアウト基準がブレている",
+    "suggestion": "左右パディングを原則 16px（var(--space-md)）に統一。例外（フル幅カード等）はコンポーネント側で個別調整",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域のEXPバー（横並びコンパクト版）",
+    "issue": "UX仕様 §2.2 で EXPバー高さ=8px と定義が、実装は height:4px",
+    "suggestion": "高さを8pxに変更し仕様に整合。もし“コンパクト版”を採用するなら、DS/UX両方にサイズトークン（normal=8px/compact=6px 等）を追記して明文化",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "ヒーロー領域のEXPバー",
+    "issue": "バーの高さが3pxで、s10_growとも���様とも不整合。ブランドの一貫性を阻害",
+    "suggestion": "s10_growと同一トークン（8px）に統一。コンパクト版を許容する場合もトークン化して全画面で一貫適用",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "「所要時間」チップ群〜「予定日」/ 最下部CTA周辺",
+    "issue": "アイテム間16pxで均一に詰まっており、セクションの切れ目が読み取りにくい（§4.2 セクション間≧32px）",
+    "suggestion": "論理ブロックごとに32pxのセクション間隔を挿入（例: 種別トグル→タスク名→時刻/所要時間→予定日→紐付け/メモ→CTA）。CTA上は40px程度を推奨",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "タスク提案カードのボタン行（登録する/編集して登録/✕）",
+    "issue": "3ボタン横並びで情報密度が高く、視線の優先順位が分散",
+    "suggestion": "主ボタンを1列目（フル幅）/ 二次+閉じるを2列目に分離、または「編集して登録」をテキストボタン右寄せにして、主CTAの優先度を明確化",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "完了タスク行（緑subtle背景 + グレー本文）",
+    "issue": "背景の緑tintに対し本文色(#9BA7B4)が沈み、達成状態の可読性がやや低い",
+    "suggestion": "本文色を --text-primary に近づけるか、背景tintを一段薄く（--success-subtle デフォルト値）してコントラストを底上げ。サブラベルのみ緑で状態表現",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "メッセージ間余白（AI→ユーザー→AI / カード直前直後）",
+    "issue": "margin-bottom が 24px/14px など混在し、縦リズムが不均一に見える",
+    "suggestion": "メッセージ間を 16px、ブロック（カードや連続発話の塊）間を 24px など、スケール（--space-sm/--space-md）で統一して視線のリズムを安定化",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

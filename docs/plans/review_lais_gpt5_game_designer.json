@@ -1,0 +1,204 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "§4.4",
+    "issue": "レベルカーブが部分的な里程標のみで、各レベルの必要EXP（次レベルまで or 累計）が未定義。実装時にレベルアップ判定が不可能。",
+    "suggestion": "Lv1→50の『次レベルまでの必要EXP』テーブルを完全定義するか、閉形式の関数を採用（例: XP_to_next(L)=round(60+40*L^1.6)）。あわせて累計EXPも計算して表に落とし込む。アンカー（例: L2=100、L5=1,000、L10=4,000、L20=12,000、L30=36,000、L40=96,000、L50=240,000 など）を決め、日次獲得想定（例: 150-200EXP/日）に対して『日数/レベル』が意図通りになるよう検証し確定する。",
+    "model": "GPT-5",
+    "persona": "game_designer",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§4.2, §4.4",
+    "issue": "初期レベルの必要EXPが高く、Lv2=1,000だと一般ユーザーの体感で初回〜数日の成長が薄い。1週間以内の離脱リスクが高い。",
+    "suggestion": "初週ブーストを設計（例: L2=100、L3=250、L4=450、L5=700）。オンボーディング用の『はじめの冒険クエスト』を追加し、初週に2–3���のレベルアップを確約する。以降は滑らかに逓増。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§4.2",
+    "issue": "タスク完了=10EXPの一律付与は『細切れ化（マイクロスプリット）』を誘発し、長時間/高難度タスクの相対価値を下げる。",
+    "suggestion": "所要時間や自己申告難易度で重み付け（例: 5–15分=6EXP、15–30分=10、30–60分=16、60分+=24）。同カテゴリでの当日N件目は逓減（例: 100%, 80%, 60%, 40%...）を導入。ゴール紐付けタスクは+αの係数を付与。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§4.5",
+    "issue": "不正対策が『同名タスク5分以内の再完了は無効』に依存し脆弱。名称変更や類似名で回避可能。",
+    "suggestion": "サーバー側で正規化（小文字化・記号除去・類似度しきい値）し、同一/類似タスクの短時間連続完了を拒否。作成直後（例: 60秒以内）の完了は無効や減衰。習慣は1日1回上限。短時間に大量作成→完了のバースト検出でレートリミット/フラグ。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§4.5",
+    "issue": "日次獲得上限300EXPが全レベル共通で固定。高レベル帯で『レベル1つ上げるのに何日も』の停滞感が強くなる一方、全体累計30万EXP（Lv50）だと理論上~857日（350EXP/日換算）と超長期化。",
+    "suggestion": "上限をレベルスケール（例: 上限=200+min(200, 5*L)）または週次上限＋日次サブ上限に変更。もしくはレベル帯ごとに『アドベンチャー倍率』や『週次ミッション報酬』で実質的に進行速度を平準化。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.2, §4.5",
+    "issue": "ゴール達成ボーナス（50EXP, 1日1回, 別枠）の同日複数発生時の処理順序が未定義。自動完了（7日経過）の同日ラッシュでユーザー不満が出る可能性。",
+    "suggestion": "FIFOキューで『1日1件ずつ繰り越し付与』か、1日1回に統合し残りは翌日自動付与。もしくは日次上限に内包して単純化（UIで翌日へのキャリー説明）。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§4.3, §6.2",
+    "issue": "冒険EXPのAI自動検出が対話内容のみ依存で誤判定/悪用の懸念。『初めてやった』の文言連投以外の多様な抜け道が残る。",
+    "suggestion": "軽量な申告フローを必須化（100文字以上の内省 or 写真/位置は任意）、カテゴリの多様性チェック（過去7日同一カテゴリは逓減）、サーバー側で特徴量（語彙多様性/文章長/時刻/過去ログ）を用いたスコアリング＋しきい値超のみ付与。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.4",
+    "issue": "称号（タイトル）の完全一覧・レベル対応表が未定義。UI例『Lv.12 — Explorer』と表の対応が曖昧。",
+    "suggestion": "Lv帯ごとに称号マップを確定（例: 1–4 Beginner, 5–9 Seeker, 10–15 Explorer, 16–25 Adventurer, 26–35 Challenger, 36–45 Voyager, 46–49 Sage, 50 Master）。日本語/英語両表記も定義し、将来のローカライズ拡張に備える。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.4, §8.1",
+    "issue": "MVP資産がPhase1–3のみなのに最大レベル50（Phase5）まで開放予定。Phase4–5到達時のアセッ��欠如時挙動が未定義で表示崩れリスク。",
+    "suggestion": "MVPのレベルキャップを30に制限するか、Phase4–5は暫定でPhase3の派生配色/エフェクトにフォールバックする仕様を明記。到達率予測と合わせてアセット準備計画を記載。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.2, §4.4, §5.2",
+    "issue": "アバター経済が未設計（価格帯、希少度、入手ループ、消費先）。MVP後の継続動機と売上の柱が弱い。",
+    "suggestion": "経済設計を定義: 1) 通貨二層（ソフト=Playで獲得, ハード=課金） 2) レベル/称号で解禁 3) 期間限定/シーズンローテーション 4) カラーリロール/進化開放費用などのシンク 5) Premierチケットの等価交換レートと上限 6) 初期価格帯（例: 通常¥240–¥720, レア¥980–¥1,480, 限定¥1,800+）。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.5",
+    "issue": "『罰なし』方針は有効だが、復帰時のブーストや逓減/逓増の明確なルール（EXP減衰の代替）が未定義。",
+    "suggestion": "EXP減衰の代わりに『レストボ��ナス』を採用（例: 2日以上未ログインで翌日最初の100EXPが1.5倍）、デイリー内での逓減（同カテゴリ反復は付与低下）を明文化してインフレを抑えつつ優しい設計に。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3, §4, §9.2",
+    "issue": "飽きポイント（1週間）: 新鮮な演出と明確な短期目標が乏しく、レベルアップが遠い体感になりやすい。",
+    "suggestion": "『7日間スターターパス』を追加（デイリー小目標, 進捗メーター, 達成で限定フレーム）。初週でPhase2直前まで到達できるXPカーブ/報酬を設計。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§5, §4.2",
+    "issue": "飽きポイント（1ヶ月）: ソロ運用になりがちでソーシャルの駆動力が弱い。応援/短文のみでは共体験が薄い。",
+    "suggestion": "デュオ/小隊クエスト（週1）、共同で『冒険』を1件成立させると両者に小ボーナス。FRIENDSに『今週の共通テーマ』カードを表示し、ペア達成演出を追加。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§4.4, §2.2",
+    "issue": "飽きポイント（3ヶ月）: レベル帯の伸びが鈍化し、見た目の変化（進化/装飾）の供給ペースが不足。ショップ未実装期間は特に危険。",
+    "suggestion": "シーズン制（8–12週）を導入し、シーズン到達報酬/限定称号/色替え。シーズン毎に『進化クエスト』を設定してPhase進行を演出。資産回転（限定/復刻）、週次チャレンジ＋パス型報酬で長期KPIを維持。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5",
+    "issue": "ソーシャル動機付けが閲覧・応援中心で、競合優位になる『共同行動→軽報酬』のループが未設計。",
+    "suggestion": "『フレンドハンドシェイク』（互いに当日1つのゴール関連タスク達成で双方+5EXP, 1日1回）、『紹介クエスト』（QRで友達追加+初回共同冒険で限定スタンプ）など軽量協力ループを追加。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.5",
+    "issue": "日次リセットがJST固定。将来の海外展開時に体感日付と不一致で混乱する���れ。",
+    "suggestion": "ユーザーのローカルタイムゾーン基準（既定はJST）に変更可能な設計にし、内部はUTCで正規化。初期はJST固定でもフラグで切替可能に。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§1.3, §3.2, §4.4",
+    "issue": "『バッジ・ジムリーダー＝マイルストーン演出』が概念のみで、取得条件/一覧/報酬が未定義。",
+    "suggestion": "実績システムを定義（例: 初ゴール達成, 初冒険3件, 連続週達成3週, 月間総EXP閾値など）。各実績に称号/スタンプ/小量ソフト通貨を紐付け、図鑑的に収集可能に。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.4 DISCOVER, §4",
+    "issue": "自己理解（DISCOVER/ヒアリング）のゲーム的報酬接続が未設計。継続ループに寄与しにくい。",
+    "suggestion": "DISCOVERカード/分析完了で微量EXPまたはソフト通貨を付与（週上限あり）。重要発見で限定フレーム解禁など、『理解→見た目/称号』への橋渡しを設計。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.3",
+    "issue": "『新しい出会い』の冒険EXPがソーシャル機能（友達追加）と連動していないため、誤申告/重��が防ぎづらい。",
+    "suggestion": "QRで相互承認が成立した日に限り『出会いボーナス』を1回（例: 20EXP, 冒険枠にカウント）を付与。テキスト申告のみは付与抑制。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§4.2, §4.5",
+    "issue": "EXPインフレ対策が日次上限中心で単調。ユーザー行動の多様性を促すメタ抑制（カテゴリ別上限/多様性ボーナス）が不足。",
+    "suggestion": "『多様性ボーナス』を導入（当日3カテゴリ以上の達成で+10%）、『同カテゴリ反復は逓減』、週次で『未実施カテゴリ』に初回ボーナスを付与。インフレを抑えつつ行動の広がりを誘導。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  }
+]

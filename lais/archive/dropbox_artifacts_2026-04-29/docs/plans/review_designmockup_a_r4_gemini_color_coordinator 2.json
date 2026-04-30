@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「ログイン」リンクテキスト",
+    "issue": "テキストリンクが色(#79C0FF)のみで表現されており、下線がないためWCAG 1.4.1(色のみの使用)に違反しています。",
+    "suggestion": "インラインテキストリンクには必ず text-decoration: underline を併用してください（デザインシステム§2.2準拠）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "入力フィールド、チェックボックス、未完了タスクのボーダー",
+    "issue": "ボーダー色(#484F58)と背景色(#0D1117/#161B22)のコントラスト比が約2.2:1であり、UIコンポーネントの境界に求められる3:1(WCAG 1.4.11)を満たしていません。",
+    "suggestion": "状態や境界を示すインタラクティブ要素には --border-strong (#6E7681) を使用し、3:1以上のコントラストを確保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayセクション タスク行右端のゴール紐付けドット",
+    "issue": "紐づくゴールを色(青や黄)のみで区別しており、WCAG 1.4.1に違反しています。色盲ユーザーにはどのゴールに紐づいているか判別できません。",
+    "suggestion": "色だけでなく、形状を変える（四角やひし形など）か、ゴールの頭文字などのテキストラベルを併用してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "アクティブなチップ、トグルボタン、タスク提案カードのボタン等",
+    "issue": "subtle背景(rgba(121,192,255,0.14))上のテキスト色(#79C0FF)のコントラスト比が約3.8:1であり、通常テキストに求められる4.5:1(WCAG 1.4.3)を満たしていません。",
+    "suggestion": "テキスト色をより明るい色（例: #A5D6FF）にするか、デザインシステム§5.1の --on-accent-subtle の定義を見直し、十分なコントラストを確保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "「完了済み」ステータステキスト",
+    "issue": "背景色(#161B22)に対するテキスト色(#3FB950)のコントラスト比が約3.5:1であり、通常テキストの4.5:1を満たしていません。",
+    "suggestion": "テキスト色をより明るい緑（例: #56D364）に変更し、4.5:1以上のコントラスト比を確保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "「削除」ボタンのテキスト",
+    "issue": "背景色(#161B22)に対するテキスト色(#F85149)のコントラスト比が約4.1:1であり、通常テキストの4.5:1を満たしていません。",
+    "suggestion": "テキスト色をより明るい赤（例: #FF7B72）に変更し、4.5:1以上のコントラスト比を確保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "EXPバーおよびゴール進捗バーの背景",
+    "issue": "バーの背景色(#1C2128)と画面背景色(#0D1117)のコントラスト比が1.3:1であり、WCAG 1.4.11(非テキストのコントラスト)の3:1を満たさず、全体の長さ（分母）が視認しづらいです。",
+    "suggestion": "バーの背景色を明るくするか、周囲に3:1を満たすボーダーを追加して、コンポーネントの境界を明確にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "完了済みタスクにおいてAI相談ボタンが非アクティブ（グレーアウト）になっていますが、UX仕様書§2.3には完了時に無効化する記述がありません。",
+    "suggestion": "完了後も振り返り等で相談できる仕様であればアクティブ状態を維持し、不要であればボタン自体を非表示にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード",
+    "issue": "チャットのインライン要素として表示されるカードの背景色とボーダーが控えめすぎて、AIの通常のメッセージバブルとの視覚的な区別がつきにくく、アクション要素を見落とす可能性があります。",
+    "suggestion": "デザインシステム§5.1の --border-strong を左ボーダーに使用するなど、アクションを促すカードとしての視認性を高めてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "上部プログレスバーの非アクティブ部分",
+    "issue": "非アクティブなバーの色(#1C2128)と背景色(#0D1117)のコントラスト比が1.3:1であり、全体のステップ数（分母）が視認できません(WCAG 1.4.11違反)。",
+    "suggestion": "非アクティブ部分の色を #484F58 等に変更し、背景とのコントラスト比3:1を確保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  }
+]

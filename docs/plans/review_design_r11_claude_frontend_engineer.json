@@ -1,0 +1,56 @@
+[
+  {
+    "id": "R11-FE-01",
+    "persona": "frontend_engineer",
+    "severity": "MEDIUM",
+    "section": "§8.6 / ux_v1 §6.2",
+    "title": "トースト表示時間がドキュメント間で不整合(DS=3000ms, ux_v1=3s/5s)",
+    "detail": "§8.6 はトースト表示時間を『3000ms』と単一値で定義しているが、ux_v1 §6.2 は『3秒(アクション付きは5秒)』と2値を定義。DS のみを参照して実装したエンジニアはアクション付きトーストを誤って3秒にしてしまう。これは §8.12a の Undo 不整合と同種のドキュメント間ドリフト。",
+    "fix": "§8.6 を『通常3000ms / アクション付き5000ms (ux_v1 §6.2 準拠)』と併記。"
+  },
+  {
+    "id": "R11-FE-02",
+    "persona": "frontend_engineer",
+    "severity": "MEDIUM",
+    "section": "§8.12a / ux_v1 §2.3",
+    "title": "TALK画面での Undo スナックバー位置が DS に反映されていない",
+    "detail": "ux_v1 §2.3 (L239) は『TALK画面では入力バーの上に表示。キーボード表示中は入力バーと共に上昇』と明記しているが、§8.12a は『画面下部(ボトムタブの上、16px margin)』のみ。TALK画面での visualViewport API による動的位置調整のフック要件が抜け、実装者は2箇所の仕様を並行参照しないと正しく組めない。",
+    "fix": "§8.12a に『TALK画面では入力バー上(§6.2 visualViewport 規約に準拠)。キーボード表示中は追従上昇』を追記し、ux_v1 §2.3 への相互参照を入れる。"
+  },
+  {
+    "id": "R11-FE-03",
+    "persona": "frontend_engineer",
+    "severity": "MEDIUM",
+    "section": "§8.7 / ux_v1 §10.4",
+    "title": "ボトムタブの ARIA モデルが DS と ux_v1 で矛盾(nav+aria-current vs tablist+tab+aria-selected)",
+    "detail": "§8.7 は『nav + aria-current』を推奨し、ux_v1 §10.4 (L1076) は『role=tablist + role=tab + aria-selected』を明示。DS 側は『提案ログに記録』扱いのまま R11 に持ち越されており、実装着手時にどちらを採るか未決。実装者が先に着手すると別仕様を作ってしまう。",
+    "fix": "R11終了前に Claude.ai で調停し一本化。本質的には『タブ型ルーティング(nav+current)』と『ARIA tabs pattern(tablist+panels)』の違いで、SPA+ルーター構成なら nav+current が現実的。提案ログに『結論: nav+aria-current。ux_v1 §10.4 を該当版数で修正』を書く。"
+  },
+  {
+    "id": "R11-FE-04",
+    "persona": "frontend_engineer",
+    "severity": "LOW",
+    "section": "§5.0",
+    "title": "setTheme() のサーバー PATCH がデバウンスされておらずラピッドトグルで N 回発火",
+    "detail": "setTheme() は呼ばれるたびに即 fetch('/users/preferences', PATCH) する。設定画面でテーマを連続プレビューすると (例: Night Sky→Dawn→Harajuku→… を1秒で切替) クライアントから短時間に複数 PATCH が飛び、サーバー側で順序逆転するリスクがある。localStorage は同期で確実だが、サーバー同期は debounce すべき。",
+    "fix": "setTheme() 内に『500ms デバウンス後に最新値のみ PATCH』ロジックを追加し、実装例コードを差し替える。"
+  },
+  {
+    "id": "R11-FE-05",
+    "persona": "frontend_engineer",
+    "severity": "LOW",
+    "section": "§5.5",
+    "title": "backdrop-filter 30要素上限の enforcement 仕様が未定義",
+    "detail": "§5.5 に『backdrop-filter は同時30要素以内』とあるが、実装側でカウントする機構・ツーリング・警告の仕組みが記載されていない。実装者が単独判断で超過する恐れがあり、iOS Safari でのジャンクに直結する。",
+    "fix": "§5.5 に『.glass-surface 付与時に document.querySelectorAll(\".glass-surface\").length を dev mode でカウントし warn(30超過)』のサンプル or lint ルール案を追記。"
+  },
+  {
+    "id": "R11-FE-06",
+    "persona": "frontend_engineer",
+    "severity": "LOW",
+    "section": "§9",
+    "title": "§9 トークンブロックに --tap-target-min はあるが --scrim が欠落",
+    "detail": "§9 の Night Sky デフォルトトークンブロックに --scrim が含まれていない(§5.1 には存在)。コピペ実装時にスクリム参照(§8.5/§8.10 のオーバーレイ)で undefined が発生する。",
+    "fix": "§9 Background/Text ブロックに --scrim: rgba(0, 0, 0, 0.6); を追加。"
+  }
+]

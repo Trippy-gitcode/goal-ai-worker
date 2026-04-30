@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Lais — S-10 Grow (案 A_v2: Apple+トトロ)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="screen s10 komorebi-bg">
+
+    <!-- 背景の浮遊する葉っぱ (3 個、薄く) -->
+    <div class="leaf" style="top: 100px; right: 14px; transform: rotate(38deg); opacity: 0.16;">
+      <svg width="46" height="46" viewBox="0 0 64 64" fill="none">
+        <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="#a8c895"/>
+        <path d="M32 6 C32 22, 30 40, 28 58" stroke="#7a9c5f" stroke-width="1.2" fill="none" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="leaf" style="top: 380px; left: 10px; transform: rotate(-45deg); opacity: 0.14;">
+      <svg width="38" height="38" viewBox="0 0 64 64" fill="none">
+        <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="#d4e5cd"/>
+      </svg>
+    </div>
+    <div class="leaf" style="bottom: 180px; right: 18px; transform: rotate(75deg); opacity: 0.13;">
+      <svg width="34" height="34" viewBox="0 0 64 64" fill="none">
+        <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="#a8c895"/>
+      </svg>
+    </div>
+
+    <!-- StatusBar -->
+    <div class="statusbar">
+      <span>9:41</span>
+      <div class="island"></div>
+      <div class="icons">
+        <span>●●●</span>
+        <span>◴</span>
+        <span>▮▮</span>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <div class="greeting-block">
+          <div class="greeting">きょうの朝</div>
+          <h1>おはよう、ふとし</h1>
+        </div>
+        <div class="moon-current">
+          <span class="moon gibbous"></span>
+          <span>4/28</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- AI 一言メッセージ (吹き出し + リーフ) -->
+      <div class="ai-message">
+        <!-- 角の葉っぱ装飾 -->
+        <svg class="leaf-deco" viewBox="0 0 64 64" fill="none">
+          <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="currentColor"/>
+          <path d="M32 6 C32 22, 30 40, 28 58" stroke="#5a7a45" stroke-width="2" fill="none"/>
+        </svg>
+
+        <div class="ai-seal">
+          <div class="ai-seal-box">籟</div>
+          <svg class="ai-seal-leaf" viewBox="0 0 64 64" fill="none">
+            <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div>
+          <div class="ai-text">
+            きのうの振り返り、ていねいでしたね。<br>
+            きょうは、まず気になっている<br>
+            ひとつから、はじめてみませんか。
+          </div>
+          <div class="ai-meta">🌿 籟 (lais) より · 朝の問いかけ</div>
+        </div>
+      </div>
+
+      <!-- セクション: 今日のタスク -->
+      <div class="section-title">
+        <svg class="accent-leaf" viewBox="0 0 64 64" fill="none">
+          <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="currentColor"/>
+        </svg>
+        きょうの しごと
+        <span style="margin-left: auto; font-size: 13px; color: var(--apple-gray-text); font-weight: 500;">3件</span>
+      </div>
+
+      <div class="task-list-card">
+        <div class="task-item">
+          <div class="check-mark done"></div>
+          <div class="task-name done">日記を書く</div>
+          <div class="task-meta">🌅 朝</div>
+        </div>
+        <div class="task-item">
+          <div class="check-mark"></div>
+          <div class="task-name">事業計画書 ‧ 第二章まで</div>
+          <div class="task-meta">10:00</div>
+        </div>
+        <div class="task-item">
+          <div class="check-mark"></div>
+          <div class="task-name">読書 ‧ 内省の哲学</div>
+          <div class="task-meta">🌙 夜</div>
+        </div>
+      </div>
+
+      <!-- セクション: 直近の目標進捗 -->
+      <div class="section-title">
+        <svg class="accent-leaf" viewBox="0 0 64 64" fill="none">
+          <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="currentColor"/>
+        </svg>
+        歩みの進捗
+      </div>
+
+      <div class="goal-card">
+        <span class="goal-deco">🌳</span>
+        <div class="goal-title">事業の構想を、ことばにする</div>
+        <div class="goal-meta">期限 ‧ 5月末</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 64%;"></div>
+        </div>
+        <div class="progress-text">
+          <span>八合目</span>
+          <span>64%</span>
+        </div>
+      </div>
+
+      <div class="goal-card">
+        <span class="goal-deco">🌰</span>
+        <div class="goal-title">毎朝、十分の沈黙を</div>
+        <div class="goal-meta">習慣 ‧ 連続12日</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 40%;"></div>
+        </div>
+        <div class="progress-text">
+          <span>12日 / 30日</span>
+          <span>40%</span>
+        </div>
+      </div>
+
+      <!-- 月齢ゲージ -->
+      <div style="margin-top: 14px; display: flex; justify-content: center;">
+        <div class="moon-gauge">
+          <div class="moons">
+            <span class="moon new"></span>
+            <span class="moon crescent"></span>
+            <span class="moon half"></span>
+            <span class="moon gibbous"></span>
+            <span class="moon full"></span>
+          </div>
+          <span style="margin-left: 4px;">今月の銀河、六分目</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FAB (リーフ装飾付き) -->
+    <button class="fab">
+      <span>+</span>
+      <svg class="leaf-on-fab" viewBox="0 0 64 64" fill="none">
+        <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="currentColor"/>
+        <path d="M32 6 C32 22, 30 40, 28 58" stroke="#5a7a45" stroke-width="2" fill="none"/>
+      </svg>
+    </button>
+
+    <!-- BottomTabBar -->
+    <div class="tabbar">
+      <div class="tab active">
+        <div class="ic">🌱</div>
+        <div>歩み</div>
+      </div>
+      <div class="tab">
+        <div class="ic" style="font-family: var(--font-mincho); color: var(--seal-shu);">籟</div>
+        <div>対話</div>
+      </div>
+      <div class="tab">
+        <div class="ic">🌙</div>
+        <div>深掘り</div>
+      </div>
+      <div class="tab">
+        <div class="ic">📖</div>
+        <div>日記</div>
+      </div>
+      <div class="tab">
+        <div class="ic">👤</div>
+        <div>自分</div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,5 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"MISSING","location":"§5 全テーマ","issue":"R6 で主要コントラスト問題は修正されたが、Harajuku Dark テーマの --text-hint #8C7480 が bg-primary #140A10 上で実測が不明。テーマ別コントラスト検証表がまだ追加されていない。","suggestion":"§5 末尾にテーマごとのコントラスト検証表を追加し、各テーマで主要トークンが AA/AAA を満たすか明示。","model":"Claude Opus 4.6","persona":"a11y_expert"},
+  {"id":"R-002","severity":"MEDIUM","category":"MISSING","location":"§6.2 タブアイコン","issue":"非アクティブ状態でアイコンのみ（ラベル非表示）としているが、これは『アイコンラベル併用』の WCAG 推奨に反する。スクリーンリーダー以外のユーザーがアイコンだけで意味を判断するのは辛い。","suggestion":"非アクティブでもラベル表示する選択肢、または aria-label を必須化する旨を §6.2 に明記。","model":"Claude Opus 4.6","persona":"a11y_expert"},
+  {"id":"R-003","severity":"LOW","category":"BEST_PRACTICE","location":"§7.6 prefers-reduced-motion","issue":"CSS `animation-duration: 1ms !important` は問題ないが、JS アニメ（Web Animations API / requestAnimationFrame）での prefers-reduced-motion 検出方法が未記載。","suggestion":"§7.6 に JS 側の `matchMedia('(prefers-reduced-motion: reduce)').matches` チェック例を追記。","model":"Claude Opus 4.6","persona":"a11y_expert"}
+]

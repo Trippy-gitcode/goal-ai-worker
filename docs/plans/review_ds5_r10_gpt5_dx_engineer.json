@@ -1,0 +1,192 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダー項目「依存」の形式が単数例のみで、多数の上流ファイルをどう列挙するか不明。機械可読な記法も未定義のため、連鎖更新判断（§19.6）に一貫して利用しづらい。",
+    "suggestion": "YAMLフロントマター化し、dependencies配列に統一: ```---\ndependencies:\n  - path: docs/project_v1.md\n    version: \">=1.3 <2.0\"\n  - path: docs/design_system.md\n    version: \"1.x\"\n---``` のように複数記述とセムバ許容。参照時は常にこの配列を更新基準にする、と明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー例の「dev-system準拠: docs/plans/dev_system_spec.md §19」は、アプリ側リポジトリには通常そのパスが存在しないため、参照先パスが不整合。",
+    "suggestion": "パス表記をリポジトリ相対ではなく論理参照に変更: 「dev-system v{VERSION} §19」。必要ならdev-systemのWeb URLを併記（例: https://.../dev_system_spec.md#sec19）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.5",
+    "issue": "依存の例が「docs/plans/lais_project_v1.md v1.3」となっており、§19.1の必須ファイル命名・配置（docs/project_v1.md）と矛盾。",
+    "suggestion": "例を「docs/project_v1.md v1.3」に修正し、アプリ固有名（lais_…）の混入を避ける。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "「更新範囲はspec_changelog.mdに記録」とあるが、§19.2ではspec_changelog.mdは任意ファイル。必須を事実上要求しており矛盾。",
+    "suggestion": "spec_changelog.mdを必須（§19.1へ昇格）にするか、存在しない場合の代替（各ドキュメント末尾の変更履歴セクションへ記録）を明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§19.6",
+    "issue": "上流・下流間で仕様が衝突した場合の正本（優先順位）が未定義。新規開発者がどの文書を最終参照にすべきか判断できない。",
+    "suggestion": "アプリ仕様の優先順位を明記（例: project_v*.md > ux_v*.md > design_system.md > design_spec_v*.md > reference_v*.md > system_map.md > e2e_fullflow_test.md）。衝突時の解決フローも定義（PO承認→上流更新→連鎖反映）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5, §19.6",
+    "issue": "依存に記載する「バージョン」表記のフォーマット（セマンティックバージョニングの可否、範囲指定、コミットハッシュ許容など）が未定義。",
+    "suggestion": "セムバ推奨（MAJOR.MINOR.PATCH）＋範囲指定（^, ~, >= <）を許容。ドラフト段階はcommit または短縮ハッシュ参照可と明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7",
+    "issue": "「事実確認: 各項目に調査日と情報源を明記」とあるが、提示された出力フォーマットの表には「情報源」欄がない。",
+    "suggestion": "各テーブルに「情報源（URL/出典）」列を追加し、行単位でソースを必須化。長文になる場合は脚注番号列と末尾に情報源一覧を配置するルールを追記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.7（Phase 0完了基準）, §13.4, §13.2",
+    "issue": "Phase 0完了基準で「8ペルソナ×2モデル」とあるが、標準定義は5ペルソナ（§13.4）。また1セッション10呼��出し上限（§13.2）との整合が不明。",
+    "suggestion": "完了基準を「標準5ペルソナ×最低2モデル」に統一し、追加ペルソナはプロジェクト裁量と明記。呼び出し上限は複数セッション分割で達成可能と補足。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "ベンチマーク表の列名が「Lais方針」と特定アプリ名に依存しており、テンプレートとして汎用性に欠ける。",
+    "suggestion": "列名を「{アプリ名}方針」または「本アプリ方針」に変更し、テンプレート適用時に自動置換する旨を追記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレート）",
+    "issue": "テストケースと仕様ID（§12のSPEC-ID）との明示的な紐付け指針がテンプレート内に記載されていない。",
+    "suggestion": "各テストケース見出しにSPEC-IDを角括弧で併記する規約（例: 「### [SPEC-TODAY-003] 〜」）をテンプレートへ追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（design_spec_v1.md テンプレート）",
+    "issue": "インタラクティブ状態（hover/focus/active/disabled/error/loading）の画面別・要素別仕様がテンプレートから欠落しており、デザインと実装の齟齬が発生しやすい。",
+    "suggestion": "「状態仕様」セクションを追加し、各要素の状態別スタイル・アニメーション・アクセシビリティ対応（フォーカスリング等）を記述するテンプレを用意。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（design_system.md テンプレート）",
+    "issue": "アクセシビリティ要件（コントラスト比、WCAG達成基準との対応、色覚多様性配慮）がデザイントークン側で明文化されていない。",
+    "suggestion": "「アクセシビリティ指針」節を追加し、WCAG 2.1 AA相当のコントラスト基準、色の意味依存禁止ルール、フォーカス可視指針等をトークンと紐付けて定義。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（reference_v1.md テンプレート）",
+    "issue": "APIバージョニング/後方互換・移行ポリシー、レ���ト制限・スロットリング、監視/ログ/メトリクスの定義が欠落。",
+    "suggestion": "以下の節を追加: 「§7 APIバージョニングと互換性」「§8 レート制限・スロットリング」「§9 監視・ロギング・メトリクス（可観測性）」。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（project_v1.md テンプレート）",
+    "issue": "法務・規約・プライバシー・データ保持/削除の法的準拠（GDPR/国内法等）の明記がない。",
+    "suggestion": "「§11 法務・コンプライアンス」を追加し、利用規約/プライバシーポリシー、データ保持期間、削除ポリシー、規制準拠を定義。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダーに「更新日」「改訂ハッシュ/コミット」がなく、版の同定と差分追跡がしづらい。",
+    "suggestion": "ヘッダーに「更新: YYYY-MM-DD」「commit: {短縮ハッシュ}」を追加。変更履歴へのアンカー（#変更履歴）も併記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.6",
+    "issue": "参照ルールは定義されているが、機械可検証の仕組み（依存宣言の収集・差分検出・連鎖更新漏れ検出）が未整備で、実運用での抜け漏れリスクが残る。",
+    "suggestion": "全仕様書にYAMLフロントマターを導入し、canopyに「spec_dep_lint.sh（仮）」を追加。依存の存在/バージョン妥当性/循環検出/未更新検出を自動化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "「直接競合5社」要件はニッチ領域や新規カテゴリで満たせない場合があるが、例外条件や代替基準が未定義。",
+    "suggestion": "例外時の代替基準を追記（例: 入手可能な直接競合n社＋隣接カテゴリm社＋学術/デザインガイドk本、合計≥8ソース）。PO承認で基準差し替え可と明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（system_map.md テンプレート）",
+    "issue": "障害時フォールバック、リトライ/バックオフ、デグレード戦略などの異常系フローがテンプレートに含まれていない。",
+    "suggestion": "「§5 障害時ハンドリング（フォールバック/リトライ/バックオフ/サーキットブレーカ）」「§6 データ不整合時の整合性回復フロー」を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（ux_v1.md テンプレート）",
+    "issue": "国際化/多言語（i18n/L10n）に関するUX仕様（言語切替、右横書き、数値/日付/通貨表記、長文溢れ対応）が欠落。",
+    "suggestion": "「§N+i18n/L10n」を追加し、対応言語、切替動線、文言長の可変設計、RTL対応の有無、地域別フォーマットを定義。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

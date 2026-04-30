@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "§19.6の依存チェーンツリーで `e2e_fullflow_test.md` が `project_v1.md` のみに依存しているように描かれているが、§18の連鎖更新マップでは `ux_redesign_v*.md` や `design_spec_v*.md` からも依存している。ツリーが不完全なため、テスト仕様の更新漏れを誘発する。",
+    "suggestion": "§19.6のツリーで `e2e_fullflow_test.md` が `ux_v1.md`, `design_spec_v1.md`, `reference_v1.md` の下流にも位置するように依存線を修正し、§18と整合させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "AIは実機アプリのインストールや操作ができないため、「競合5社の画面構成/ジェスチャー/アニメーション」を自律的に調査することは不可能。この要件をそのままAIに指示すると、推測に基づく架空のベンチマーク（ハルシネーション）を生成し、鉄則⑧（事実確認せずに断言禁止）に違反する。",
+    "suggestion": "ベンチマークの実施主体と情報源を明確化する。「POが提供したスクショ・動画・テキスト情報に基づく」または「Web上で検索可能な公開情報（LP、ヘルプページ等）に限定する」という制約を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4, §18",
+    "issue": "§18では `ux_redesign_v*.md` と定義されているが、§19では `ux_v1.md` となっている。また、§19で必須とされた `system_map.md` が§18の連鎖更新マップに存在しないため、仕様変更時に `system_map.md` が放置される。",
+    "suggestion": "ファイル名を統一する（例: `ux_v1.md` に統一）。また、§18のマップに `system_map.md` を追加し、`ux_v1.md` および `reference_v1.md` の下流として連鎖更新を義務付ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "`reference_v1.md` に「AI活用設計」があるにもかかわらず、`e2e_fullflow_test.md` のテンプレートにAI固有のテスト（プロンプトインジェクション耐性、ルーティングの妥当性、ストリーミングUIの挙動など）のセクションが存在しない。",
+    "suggestion": "`e2e_fullflow_test.md` の必須セクションに「§N+3 AI機能テスト（ルーティング/ストリーミング/エラーハンドリング）」を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "汎用テンプレートであるべきベンチマーク出力フォーマットに、特定のプロジェクト名（「Lais方針」「Laisの対応方針」）がハードコードされている。",
+    "suggestion": "「Lais方針」を「{アプリ名}方針」などのプレースホルダーに修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§19.5",
+    "issue": "ヘッダー標準で「依存: 上流ファイル vX.Y」を宣言しているが、上流ファイルが更新された際に下流の依存バージョンが古いままになることを防ぐ自動検証（canopy等）が定義されていないため、手動管理となり形骸化するリスクがある。",
+    "suggestion": "`review_gate.sh` または `canopy_common.sh` に、ヘッダーの依存バージョンと実際の上流ファイルのバージョンが一致しているかを検証するロジックを追加する旨を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4",
+    "issue": "`project_v1.md` と `ux_v1.md` のテンプレートに「AIレビュー計画」が含まれているが、AIレビューの基本方針はdev-systemの§13で既に定義されているため、アプリごとに全体計画を再定義すると二重管理になる。",
+    "suggestion": "セクション名を「アプリ固有のAIレビュー計画（追加ペルソナ・特記事項）」とし、基本方針はdev-system §13に従うことを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

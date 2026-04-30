@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5（テーマ定義）/ §7（アニメーション）/ §4（余白・レイアウト）",
+    "issue": "テーマの性格差が主に色（＋わずかなshadow/フォーカス色）に依存しており、トークン全体でのキャラクター表現が弱い。ブランドDNA「洗練＋自然体／文化的ポップ」の違いが、動きや密度、陰影の気配など非色要素に十分落ちていない。",
+    "suggestion": "テーマ別の性格を担保する別名トークン層を追加し、将来の差分拡張余地を確保する。例: --theme-tone (calm | warm | pop)、--shadow-ambient/--shadow-directional をテーマ別に調整、--radius-emphasis（Harajuku系はよりpill強調）、--density-scale（Night Skyはやや疎、Harajukuはやや密）を定義。アニメーションも --motion-profile（calm=--spring-gentle中心／pop=--spring-bouncy許容多め）などのエイリアスを設け、各テーマが色以外でも個性を示せる構造にする。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§5.2 Dawn / §5.3 Harajuku Light",
+    "issue": "ライト系2テ��マ（DawnとHarajuku Light）のニュートラル面（bg-surface/bg-elevated/border系・shadow色味）が近く、アクセント不在の画面では視覚的に似通って見える恐れがある。",
+    "suggestion": "ライト系中立色の色相と温冷方向をより明確に分離する。例: Dawnはウォーム（土・木）方向にもう一段寄せ、Harajuku Lightはピンク系ながら中立面をややクール寄せに。shadowの色相もDawn=黄土寄り、Harajuku Light=赤紫寄りに差別化。小面積UI（区切り線/ハンドル/タブアンダーライン）に用いる中立トークンをテーマ別に1-2種増設し、無彩部でも個性が残るようにする。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§5.1 Night Sky",
+    "issue": "Night Skyのベース（#0D1117系、#58A6FF/#79C0FF系）はGitHub/Primer Darkに非常に近く、開発者以外には“ツール感”の連想が生じるリスク。ブランドの「実世界の夜空・月明かり」の情緒がテック既視感に埋もれる懸念。",
+    "suggestion": "Night Skyのbgとアクセントにわずかな色相シフト（例: 月光の黄味を0.5-1.0ΔE加える、青を僅かにシアン/群青側へ）を入れ、GitHub既視感��回避。アクセントの彩度/明度ステップを再計算し、--accent-subtle/hover/pressedのトーンカーブで“月光の減衰”らしさ（ややロールオフ強め）を演出。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§8.1 ボタン / §8.3 チップ/バッジ / §8.7 ボトムタブバー",
+    "issue": "「ライト系=--text-primary／ダーク系=--accent」など、同一コンポーネント内でテーマにより前景色が分岐するルールが文章で記載されているが、トークンとして定義されていないため実装時に条件分岐が散逸しやすい。",
+    "suggestion": "テーマ毎に役割別の前景トークンを追加し、条件分岐を排除する。例: --btn-secondary-fg, --chip-fg, --tab-active-label-fg を各テーマで明示定義（ライト系は--text-primary、ダーク系は--accentに割当）。同様に --tab-active-bg, --tab-inactive-fg なども役割トークン化して、スタイルシート側は常に役割トークン参照で完結させる。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§6.1 アイコンスタイル",
+    "issue": "アイコンの状態色（default/active/disabled/pressed）が説明文ベースで、デザイントークン化されていない。テーマ差分や将来の微調整が困難。",
+    "suggestion": "状態別アイコントークンを追加する。例: --icon-fg, --icon-fg-muted, --icon-fg-active, --icon-fg-disabled, --icon-fg-pressed を各テーマで定義。stroke幅（現在1.5px）も --icon-stroke-width でトークン化し、サイズ別（20/24/32px）に倍率テーブルを用意してスケールの一貫性を担保。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.1 スペーシングスケール / §4.2 レイアウト原則",
+    "issue": "スペーシングスケールは4/8/16/24/40/64pxだが、§4.2で「タスク間余白: 20px以上」とスケール外の推奨値を提示している。実装側で20px固定にするか24pxトークンに寄せるかが曖昧。",
+    "suggestion": "タスク行など頻出箇所の間隔はスケール準拠に統一する（例: --space-lg=24pxを採用）。もし20pxが望ましいデザイン意図なら、明示の役割トークン --space-list-row-gap: 20px を追加し、スケールからの例外である旨も記載する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§1.6 NGリスト（フォント） / §3.1 フォントファミリー",
+    "issue": "NGに「system-uiのみ」とある一方、フォントスタックに '-apple-system' や 'SF Pro Text/Display' が併記されている。技術的にはOSネイティブ参照で問題ないが、「system-uiのみ」の解釈が実装者に曖昧。",
+    "suggestion": "許容スタックの具体例として「-apple-system, system-ui, sans-serif までは許容。Inter/Roboto/Arial等の明示指定とWebフォント配信は不可」と明記。SF Proのファミリ名は“OSに同梱される場合のみ参照可”と補足し、Web配信禁止と混同されないよう注記する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§1.6 NGリスト（エフェクト） / §8.11 スケルトンローダー",
+    "issue": "NGで「装飾目的のグロー/パルス/フロート等」を禁止している一方、スケルトンはlinear-gradientアニメーションを使用。矛盾ではないが、禁止対象の“装飾アニメ”と“機能的ローディングアニメ”の線引きが実装者に曖昧になり得る。",
+    "suggestion": "NGの文言に例外注記を追加。「読み込み進行の知覚を目的とし���shimmer等の機能アニメは許可。要§7.6のreduced-motion対応」と記載し、装飾と機能の区別基準（目的/時間/反復/誘目性）を1行で追記する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.4 Harajuku Dark",
+    "issue": "Harajuku Darkの--accentがパステルトーンで、夜の“ベルベット/宝石”の語りに対し可愛さ（ライトポップ）に寄る懸念。大人のポップというブランド言語に対し、アクセントのトーンがやや幼い印象を与え得る。",
+    "suggestion": "Harajuku Darkに“宝石系の深み”を持つセカンダリアクセント（--accent-2）を追加し、主要CTA/リンクは--accent（可読性重視）、強調演出や大見出し・進捗ハイライトに--accent-2（深いルビー/プラム系）を併用できる構造にする。あるいは--accent自体を僅かに深めのラズベリー系にシフトし、--button-primary-fgとのコントラストを再検証する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§2.4 Overdue / §8.4 タイムライン",
+    "issue": "Overdue左バー幅（3px）が仕様に直接値で記載されているが、ト���クン化されていない。将来の密度モードやテーマ差分適用が難しい。",
+    "suggestion": "役割トークン --timeline-overdue-bar-width を追加（既定3px）。あわせて --timeline-line-width, --timeline-dot-size もトークン化し、テーマや密度スケールで一括制御できるようにする。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  }
+]

@@ -1,0 +1,4 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"AMBIGUITY","location":"§5 テーマ性格差","issue":"性格差が依然として主に色に依存。radius/shadow/spring を全テーマ共通にしているため、Harajuku 系の『ポップ』が色以外で体現できない。","suggestion":"Harajuku 系テーマ限定で --radius-lg を 12px→16px に上書きし、shadow を少し強めに。ブランド原則の個性表現を強化。","model":"Claude Opus 4.6","persona":"brand_designer"},
+  {"id":"R-002","severity":"LOW","category":"BEST_PRACTICE","location":"§1.4 絵文字ポリシー","issue":"『UIクロームで絵文字禁止』と『フィードバック系で許可』の切り分けは明確だが、実装時にどのコンポーネントがどちらかが曖昧。例: トースト（情報系）は絵文字禁止、トースト（EXP獲得系）は許可？","suggestion":"§1.4 にコンポーネント別の絵文字可否マッピング表を追加。","model":"Claude Opus 4.6","persona":"brand_designer"}
+]

@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§6.1, §2.3, §2.4",
+    "issue": "ハーフモーダル（S-12タスク追加、S-15ゴール作成等）で入力中に下スワイプで閉じた場合の未保存データ破棄確認が定義されていない。誤操作による確実なデータ損失が発生する。",
+    "suggestion": "§6.1のハーフモーダル仕様に「未保存データがある状態で下スワイプ閉じを試みた場合、モーダルは閉じずに『変更を破棄しますか？』の確認ダイアログを表示する」仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§1.2",
+    "issue": "遷移マトリクス（主要パス）のツリーに、S-42（メール変更）、S-43（パスワード変更）、S-44（ブロックリスト）の遷移パスが記載されていない。",
+    "suggestion": "§1.2のS-37（設定）のツリー配下に、S-42, S-43, S-44への遷移パスを追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.2",
+    "issue": "AIのストリーミング応答を途中で停止（Stop generating）するUIが定義されていない。長い応答や意図しない回答が生成され続けた場合、ユーザーがキャンセルできずAPIコストも浪費する。",
+    "suggestion": "§3.2のストリーミング中のUIとして、入力バー付近に「■ 停止」ボタンを表示し、タップで生成を中断できる仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§8.6",
+    "issue": "演出キューの優先順位に「ログインボーナス（§8.5）」と「TALK画面からGROW画面に戻った際の冒険EXP・レベルアップ演出（§3.4）」が含まれていない。これらが同時に発生した場合のアニメーション競合が起きる。",
+    "suggestion": "§8.6の表に「ログインボーナス」と「非同期の冒険EXP/レベルアップ」を追加し、直列実行の完全な順序（例：ログインボーナス→タスク完了→ゴール達成→冒険EXP→レベルアップ）を定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§9.3",
+    "issue": "AI対話上限到達時、Freeユーザー向けの「Basicにアップグレード」CTAは定義されているが、BasicやProユーザーが上限に達した際に上位プラン（Pro/Premier）へ誘導するCTAが定義されていない。",
+    "suggestion": "§9.3に「Basic/Proユーザーの場合は、それぞれPro/Premierプランへのアップグレードを促すCTAを表示する」旨を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§9.4, §2.3",
+    "issue": "「同名タスク5分以内再完了は無効（EXP付与なし）」の不正対策と、Undo機能が競合する。誤って完了して即座にUndoし、再度完了した場合にEXPが付与されないのかが不明確。",
+    "suggestion": "§9.4の不正操作の条件に「ただし、直前の完了がUndoによって取り消された場合は、5分以内であっても再完了を有効としEXPを付与する」という例外ルールを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.2",
+    "issue": "画像添付時のファイルサイズ上限（10MB）超過時のフロントエンドでのエラーUI、およびアップロード中のローディング状態（送信ボタンの無効化など）が定義されていない。",
+    "suggestion": "§3.2に「10MB超過時は選択直後にエラートーストを表示して添付をキャンセルする」「画像アップロード中は送信ボタンをローディングスピナーに変更し、完了まで送信不可とする」仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§13.1",
+    "issue": "project_v1.md §2.1でPremierプランの対価として「優先サポート」が定義されているが、設定画面の「フィードバック」UIにおいてPremierユーザー向けの優先導線や表示が定義されていない。",
+    "suggestion": "§13.1のフィードバック項目に「Premierプランユーザーの場合は『優先サポート』として表示され、送信時に優先タグが付与される」旨を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.4",
+    "issue": "「お知らせ」バナーがFRIENDSタブ内に配置されているが、ソーシャル以外のシステム通知（サポートからの返信、チケット付与、プラン変更完了など）をどこで確認するのかが不明確。",
+    "suggestion": "システム通知とソーシャル通知を分けるか、MEタブのトップレベルに統合的な「お知らせ（Inbox）」を配置する構造を検討する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§10.4, §2.3",
+    "issue": "Undoスナックバーの「残り秒数カウントダウン」がスクリーンリーダーで毎秒読み上げられると、ユーザーの操作を著しく妨害する可能性がある。",
+    "suggestion": "§10.4に「Undoスナックバーのカウントダウン数値部分は `aria-hidden=\"true\"` とし、スクリーンリーダーには『タスクを完了しました。取り消すボタン』のみを読み上げさせる」仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§3.5",
+    "issue": "チャットスレッドの自動命名が「AI応答の冒頭30文字」とされているが、ユーザーが最初のメッセージを送信してからAIが応答を返すまでの間の、一時的なスレッド名が定義されていない。",
+    "suggestion": "§3.5に「AI応答が完了するまでの間は『新規チャット』またはユーザーの送信メッセージの冒頭を一時的なスレッド名として表示する」旨を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

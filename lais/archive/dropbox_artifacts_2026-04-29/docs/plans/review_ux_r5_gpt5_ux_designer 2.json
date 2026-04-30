@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5, ux_v1.md §2.3/§8.1",
+    "issue": "日次EXP上限(300)到達時のUIが未定義。タスク完了は成立するがEXPは加算されない場合のユーザーフィードバックがない。",
+    "suggestion": "サーバー応答で「EXP上限到達」を区別し、完了チェックは維持しつつトースト「本日のEXP上限に達しました。EXPは加算されません」を表示。EXPバー伸長/フロートテキストは抑止。ヒーロー領域のEXPバー下に当日中は小さな「上限」バッジを表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5, ux_v1.md §3.4",
+    "issue": "冒険EXPの1日上限(最大2回/100EXP)に到達した際のTALK画面内フィードバックが未定義。",
+    "suggestion": "冒険EXPカード表示時に上限未到達は通常表示、上限到達後はカードを「本日の冒険EXPは上限に達しました」で置換。以後はカードを出さず、AI応答末尾にサイレント注記(aria-live)のみ。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1/§1.2（全ID網羅性）, §13.1（ブロック解除導線記述）",
+    "issue": "設定からのブロックリスト画面が画面ID一覧に存在せず、遷移パスが未定義（ブロック解除フローが実装不能）。",
+    "suggestion": "画面一覧にS-44「ブロックリスト（フルスクリーン）」を追加し、S-37→S-44→ユーザー詳細/解除の遷移と戻りナビを定義。項目は相手のアバター/名前/解除ボタン/検索(クライアント)を含む。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.1（画面一覧）, §5.0.2（パスワードリセット Step2）",
+    "issue": "パスワードリセットの新パスワード設定画面（メールリンク遷移先）の画面IDが未割当。S-05が2画面状態を兼ねるのか不明で実装時に混乱する。",
+    "suggestion": "S-05を2段階で使うならモード（query: mode=request|reset）を明記。もしくはS-06「新パスワード設定」を新設し、通知・戻り先・エラー（トークン期限切れ）を遷移マトリクスに追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1/§3.5",
+    "issue": "TALKヘッダーに☰（ドロワー）と🕐（履歴）の2つの履歴系アイコンが併存し役割が曖昧。S-21は☰のみで開く仕様とも矛盾。",
+    "suggestion": "履歴アクセスは☰のみに統一し🕐を削除。または🕐＝「最近のチャットをクイック切替」（小モーダル）と定義して機能差別化。ジェスチャー定義にも反映。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §7.4（ドラッグ&ドロップ）, §2.3（Today表示）",
+    "issue": "Todayの手動並び替えと開始時刻による自動ソートの競合ルールが未定義（新規タスク追加・時刻編集時の挿入位置や「手動順の解除」手段が不明）。",
+    "suggestion": "並び順の優先度フラグを定義（auto|manual）。Todayでドラッグ発生時にmanualへ遷移。新規/編集時の挿入はmanual時＝直後位置、auto時＝時刻順。ヘッダーに［並び替えをリセット］でautoへ戻す。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §7.4（上限値）, ux_v1.md §4.4（FRIENDS）, §2.3（タスク��",
+    "issue": "大量データ時のパフォーマンス要件が未定義（FRIENDS最大500人、カード50枚、タスク多数）。無限スクロール/バーチャルリストの指針が不足。",
+    "suggestion": "FRIENDSはページング（20件）+インフィニティでバーチャライズ、DISCOVERカードはintersection observerで遅延描画、Todayは差分レンダリング＋リスト仮想化ポリシーを追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.2/§4.4, ux_v1.md §2.2（ヒーロー圧縮表示）",
+    "issue": "小型端末でEXP/レベル表示が1行圧縮時の可読性要件（最小フォント/数値表示省略ルール/コントラスト）が未定義。",
+    "suggestion": "小型端末の最小文字サイズ（12-13sp以上）、数値は常時表示（1,240/2,000）を保証、プログレスは太さ6px以上、コントラストAA満たすことを明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.2（7日ルール）, ux_v1.md §2.4（S-14）",
+    "issue": "ゴールの「完了待ち」（作成から7日未満で100%）状態のUIがS-14に未定義。",
+    "suggestion": "S-14に「完了待ち」バナー（例: 残りN日で完了）+進捗バー上のロックアイコン+説明ツールチップを追加。Undoや再達成時の表示も定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.4（TALKでのLvアップ挙動）",
+    "issue": "TALK内で複数レベル分のEXPを獲得した場合、次回GROWでの演出再生の回数・連続レベルアップの扱いが未定義。",
+    "suggestion": "累積レベル差Δを計算し、GROW初回表示時に最大N段階まで連続再生（合計上限8秒内）。Reduced Motion時は数字と称号の瞬時更新のみ。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3（画像添付）, ux_v1.md §3.2（入力バー）, §9.2（API失敗）",
+    "issue": "画像添付のサイズ超過(>10MB)・非対応形式・アップロード失敗時の具体的エラーメッセージ/再試行UIが未定義。",
+    "suggestion": "選択時点でクライアント検証し、エラー理由別トースト（サイズ超過/形式不正）＋プレビュー行にエラーラベル/再選択ボタン。アップロード失敗は[再送]アクションをカード上に表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（S-36 QRスキャン）",
+    "issue": "カメラ権限拒否時の代替導線が未定義（QRスキャン不可時のUX不足）。",
+    "suggestion": "権限拒否時は説明モーダル＋「設定で許可」リンクと「シェアリンクを貼り付け」代替入力欄を提示。オフライン時同様にQRボタンは無効化ツールチップを表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2（プラン管理）",
+    "issue": "Stripe Checkoutでのキャンセル/失敗時の戻り挙動とユーザーフィードバックが未定義（結果が分からず離脱を招く）。",
+    "suggestion": "戻りURLにresult=success|canceled|errorを付与し、S-38で結果別トースト（成功/キャンセルしました/失敗しました[再試行]）を表示。状態更新のリトライ戦略も記載。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3（Undoスナックバー）, §3.2（入力バー）",
+    "issue": "Undoスナックバーが全タブに跨って固定表示されるため、TALK入力バーと重なる可能性がある。",
+    "suggestion": "TALKでは入力バー上に自動で1行��の安全余白を追加（キーボード表示時はさらに上にリレイアウト）。またはスナックバーを上部に移動する条件分岐を定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.2.1（アバター設定）, §4.5（S-34 SHOP）",
+    "issue": "SHOP未実装にもかかわらず未所持アイテムから「SHOPへ」遷移できると、Coming Soon画面で行き止まり感が強い。",
+    "suggestion": "MVPでは未所持アイテムをタップ不可（🔒+ツールチップ「ショップ準備中」）。将来実装時に有効化する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（お知らせ/未読）, §6.7（バッジ）",
+    "issue": "FRIENDSのお知らせ一覧での既読化ルール・未読バッジ減算のタイミングが未定義。",
+    "suggestion": "一覧表示時に自動既読 or タップで既読のポリシーを明記し、既読同期遅延時の一時表示（ローカル既読→サーバー反映）を定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（タスク名入力）, §6.6（インラインエラー）",
+    "issue": "タスク名1〜100文字の上限はproject側に定義があるが、UXの入力UIに文字数カウンタや上限エラー文言が未記載。",
+    "suggestion": "S-12/S-13のタスク名フィールドに文字数カウンタ（0/100）と超過時エラー「100文字以内で入力してください」を表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §8.6（演出キュー）, §8.5（ログインボーナス）",
+    "issue": "ログインボーナスとタスク完了/ゴール達成/レベルアップが同一セッション初回表示で連続発火した場合の演出優先順位が未定義。",
+    "suggestion": "優先順位にログインボーナスを最下位（タスク完了→ゴール達成→レベルアップ→ログインボーナス）で直列化する旨を追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

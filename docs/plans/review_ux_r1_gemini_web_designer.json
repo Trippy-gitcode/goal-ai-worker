@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§8.2",
+    "issue": "project_v1.md §7.3では「SVG直接レンダリングはプロフィール詳細画面のみ（他はPNGキャッシュ）」と規定しているが、ux_v1.md §8.2ではGROW画面でのレベルアップ時に「アバター進化アニメーション（旧→新のモーフィング）」を行うとしている。PNGのラスタライズ画像ではSVGパスのモーフィングは不可能であり、実装方針に致命的な矛盾がある。",
+    "suggestion": "GROW画面のヒーロー領域のアバターもSVG直接レンダリングに変更するか、モーフィングを諦めて「クロスフェード（opacityアニメー��ョン）＋パーティクルエフェクト」で進化を表現するか、アーキテクチャとUXの整合性をとること。パフォーマンスを考慮するとクロスフェードが現実的。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8",
+    "issue": "タスク完了、ゴール達成、レベルアップが同時に発生した場合のアニメーションの優先順位やキューイング（Queue）が未定義。同時に発火すると、バナーが重なり、紙吹雪が二重に舞い、EXPバーの伸長アニメーションが競合してUIが破綻する。",
+    "suggestion": "§8に「アニメーションキュー」の概念を追加し、1. タスク完了（EXP加算） → 2. ゴール達成（バナー＋EXP加算） → 3. レベルアップ（バナー＋進化）の順で直列（前の演出が終わってから次が始まる）に再生されるよう定義すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§13",
+    "issue": "S-41（アバター設定画面）のUI仕様が完全に欠落している。project_v1.md §8.1において、MVP特典のフレーム装備のために必要と定義されているが、画面構成や操作���ローが存在しない。",
+    "suggestion": "§13にS-41の画面レイアウト（現在のアバタープレビュー、所持フレーム一覧、装備/外すトグル）と、変更時の即時反映フローを追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§6.1",
+    "issue": "iOS PWAにおけるハーフモーダル（S-12 タスク追加、S-15 ゴール作成など）内のテキスト入力時、ソフトウェアキーボード表示によるビューポートのズレや、入力フィールドがキーボードに隠れる問題への対策が未定義（TALK画面の対策だけでは不十分）。",
+    "suggestion": "§6.1（ハーフモーダル）に、キーボード表示時（visualViewport.height変化時）はモーダルを画面上部に押し上げる、または一時的にフルスクリーンに拡張してスクロール可能にする仕様を追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.4",
+    "issue": "TALK画面で冒険EXPを獲得し、バックグラウンドでレベルアップ閾値を超えた場合のUXが未定義。TALK画面でレベルアップを通知するのか、GROW画面に戻っ���瞬間に唐突にレベルアップ演出が始まるのか不明。",
+    "suggestion": "TALK画面ではレベルアップ通知を行わず、GROW画面のタブを開いた（フォーカスが当たった）瞬間に、保留されていたレベルアップ演出（§8.2）をトリガーする「演出の遅延実行（Pending Animation）」仕様を明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§7.4",
+    "issue": "タスクのドラッグ＆ドロップによる手動並び替えを許可しているが、開始時刻が設定されているタスクを手動で並び替えた場合、UI上の時刻の並びが逆転する（例: 10:00のタスクが08:00の上にくる）ことになり、タイムラインとしての認知が歪む。",
+    "suggestion": "開始時刻が設定されているタスクはD&D不可とするか、D&Dした場合は開始時刻をクリア（またはドロップ位置の前後タスクに合わせて自動調整）する仕様にすること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§6.1",
+    "issue": "S-12（タスク追加）などのハーフモーダルでテキスト入力中に、誤って下ス��イプやバックドロップタップをしてしまった場合、入力内容が即座に破棄されるとユーザーの強いストレスになる。",
+    "suggestion": "入力フィールドに変更がある（dirty状態）場合は、モーダルを閉じる操作をインターセプトし、確認ダイアログ（「入力内容を破棄しますか？」）を表示する仕様を追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§10",
+    "issue": "「洗練」と「ゲーミフィケーション」の両立において、次工程（design_system.md）で定義すべきビジュアル要件（アイコンのウェイト/スタイル統一、パーティクルの色調や形状をポップにしすぎない等）がUX仕様書から要求として明示されていない。",
+    "suggestion": "design_system.mdへ引き継ぐべき要件として、「アイコン体系の統一ルール（Filled/Outlinedの使い分け、線の太さ）」「演出エフェクトの洗練ガイドライン（原色を避けテーマカラーに馴染ませる、形状をミニマルにする）」を明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

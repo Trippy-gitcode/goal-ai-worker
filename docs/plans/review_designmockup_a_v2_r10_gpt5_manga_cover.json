@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "ヒーロー領域のEXPバー",
+    "issue": "UX仕様書 §4.1 に「ME画面のヒーロー領域（GROW同一）」とあるが、バー高さが3pxで表示。通常状態は8px（GROW同一）であるべきところと矛盾。",
+    "suggestion": "通常（トップ位置）は高さ8px、縮小時のみ4pxに。CSS例: .hero-exp{height:8px}（スクロール縮小時は4pxにトグル）",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域の称号ラベル「EXPLORER」（text-transform:uppercase）",
+    "issue": "英字ラベルの字間が1px指定。DS §3.3の --letter-spacing-label:1.5px に未準拠。",
+    "suggestion": "称号ラベルは letter-spacing: var(--letter-spacing-label)（1.5px）に統一。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s30_me",
+    "location": "サブタブラベル「PROFILE/DISCOVER/FRIENDS/SHOP」",
+    "issue": "英字タブラベルの字間が0.5px。DS §3.3の --letter-spacing-label:1.5px に未準拠で一貫性を欠く。",
+    "suggestion": "タブラベルは letter-spacing: var(--letter-spacing-label)（1.5px）へ修正。アクティブ/非アクティブとも同一基準で運用。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Today 09:00 行（完了カード）",
+    "issue": "タイトル文字が #9BA7B4（セカンダリ）で弱く、緑ステータスに視線が奪われる。完了項目でも主情報（タスク名）の可読性と品格がやや損なわれている。",
+    "suggestion": "タスク名は text-primary（#E6EDF3）に戻すか、weightを上げて主従を明確化。ステータス行は11px・color:#7A8593で控えめに。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾（＋タスクを追加）〜 Goals見出しの間",
+    "issue": "セクション間の余白が28px程度。DS §4.2のセクション間≧32pxに不足し、「間」がやや詰まって見える。",
+    "suggestion": "セクション���切りのmargin（またはpadding）を32px以上に拡張。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "サブタブバー下〜基本情報（年齢）行の間",
+    "issue": "区切り余白が約28pxでDS §4.2（セクション間≧32px）に不足。視線の切り替えに必要な呼吸感が弱い。",
+    "suggestion": "サブタブと最初の内容ブロック間のスペースを32〜40pxに。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s02_onboarding",
+    "location": "左上「戻る」アイコン",
+    "issue": "アイコンのstrokeが#E6EDF3（text-primary）。DS §6.1では非アクティブアイコンは --text-secondary（#9BA7B4）基調。",
+    "suggestion": "戻る矢印のstroke色を var(--text-secondary) に変更し、ヘッダー内の他アイコンと基調を統一。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s14_goal_detail",
+    "location": "左上「戻る」アイコン",
+    "issue": "strokeが#E6EDF3（text-primary）。ヘッダークロームの非アクティブ状態としては濃度が強く、DSのアイコン基準（--text-secondary）と不一致。",
+    "suggestion": "stroke色を #9BA7B4（var(--text-secondary)）に調整。タイトル・本文との差を作り視線誘導を改善。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "「AI理解メモ」見出し（カード冒頭ラベル）",
+    "issue": "英字ラベル風の11px + 大文字トラッキングで日本語見出しとしての品格がやや低下。本文とのサイズ対比も弱く、見出しとしての役割が曖昧。",
+    "suggestion": "日本語見出しスタイルに統一: font-size:14px / font-weight:600 / letter-spacing: var(--letter-spacing-heading)(-0.5px) / line-height: var(--line-height-ja-heading)(1.35)。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

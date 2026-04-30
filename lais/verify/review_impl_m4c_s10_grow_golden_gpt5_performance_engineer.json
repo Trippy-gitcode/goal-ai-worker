@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§4 S10Grow.jsx — スクロール圧縮ロジック",
+    "issue": "scroll たびに rAF 内で setHeroCompressed を無条件呼び出ししており（window.scrollY > 60 の真偽を毎フレーム set）、しきい値通過後も再レンダリングが継続するリスクがある。",
+    "suggestion": "次値が前回と異なるときだけ set するガードを入れる（ref で prev を保持）。例: const prevRef=useRef(false); … const next = window.scrollY > TH; if (next !== prevRef.current) { prevRef.current = next; setHeroCompressed(next); }。または IntersectionObserver で 60px の sentry を監視し、状態トグル時のみ更新して React ツリーの再描画を最小化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§4 S10Grow.jsx / TodayRow, OverdueRow",
+    "issue": "ヒーロー圧縮の状態変更による親の再レンダリングで、タスクリストの全行やフッターナビまで毎回再レンダリングされる（リスト行は memo 化されておらず、親が再描画されるたびに関数コンポーネントが全て実行）。スクロール中の���駄な CPU 消費につながる。",
+    "suggestion": "負荷の高い領域を分離・安定化する。具体例: 1) Hero を独立コンポーネントに切り出し（state を内部に保持）、兄弟セクションの再レンダリングを回避。2) TodayRow/OverdueRow を memo 化（preact/compat の memo など）し、task オブジェクト不変時にスキップ。3) スクロールで変わるのは見た目だけなので、DOM を残して CSS クラス切替だけで見た目を変える（VDOM 更新を避ける）。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§2 BottomTabBar.jsx",
+    "issue": "BottomTabBar が memo 化されておらず、親の再レンダリング（例: スクロール圧縮）でも再実行される。固定 UI で変更頻度が低いのに CPU サイクルを消費する。",
+    "suggestion": "export default memo(BottomTabBar)（preact/compat の memo）でメモ化し、active/onSelect が同一のときは再レンダリングをスキップ。TABS の定義は既にモジュール定数なのでそのままで OK。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5 S10Grow.css — .s10-hero-bar-fill / .s10-goal-bar-fill",
+    "issue": "progress バーの width をアニメーションしており、レイアウト計算・再ペイントを誘発する（compositor-only ではない）。低速端末や大量要素時のパフォーマンス低下要因。",
+    "suggestion": "transform: scaleX でのアニメーションに変更し、transform-origin: left; will-change: transform を併用して合成レイヤー化。例: .fill { transform: scaleX(var(--pct)); transition: transform … } とし、スタイルは style={{'--pct': progress/100}} に置換。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5 S10Grow.css — .s10-grow",
+    "issue": "min-height: 100dvh はモバイルの UI クロムの出入りで値が変動し、スクロール中のレイアウト再計算を増やす可能性がある。",
+    "suggestion": "安定高さ優先なら 100svh を優先し、フォールバックを併用。例: @supports (height: 100svh) { min-height: 100svh } @supports not (height: 100svh) { min-height: 100vh }。必要に応じて clamp(min(100svh,100dvh)) のパターンも検討。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S10Grow.jsx — import",
+    "issue": "preact-router の route を import しているが未使用。通常は tree-shaking で落ちるが、不要 import はバンドルの予測可能性を下げる。",
+    "suggestion": "未使用 import を削除。タブ遷移実装時にのみ必要箇所で import。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S10Grow.jsx — イベントハンドラ",
+    "issue": "リスト内で onClick={() => onToggle(task.id)} のようにクロージャを毎レンダリング生成。要素数増加時に GC 負荷が増える。",
+    "suggestion": "data-id を使って単一ハンドラで処理（onClick={handleToggle} → const id=e.currentTarget.dataset.id）。もしくは useCallback で安定化したファクトリを使用。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S10Grow.jsx — 派生計算",
+    "issue": "completedCount の filter と EXP の toLocaleString があらゆる再レンダリングで実行される（スクロール連動の再描画の影響を受けやすい）。",
+    "suggestion": "スクロール起因の再描画を抑えるのが第一（R-001/002）。併せて completedCount は useMemo([tasks]) でメモ化、EXP 表示は定数なので事前計算しておく。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4 S10Grow.jsx — Upcoming 展開レンダリング",
+    "issue": "展開時に日付グループを全て一括レンダリング（将来的に 7 日分以上へ拡張すると初回展開時にスパイクが発生）。",
+    "suggestion": "規模拡大を見据え、content-visibility: auto の適用、グループごとの遅延マウント（requestIdleCallback でバッチ分割）やバーチャライズ（表示範囲のみ描画）を検討。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S10Grow.jsx — console.log",
+    "issue": "本番バンドルに console.log が残ると微小ながら JS バイト数と実行コストが増える。",
+    "suggestion": "ビルド時に strip（esbuild/vite の drop: ['console','debugger']）あるいは if (import.meta.env.DEV) ガードで開発時のみ出力。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5 S10Grow.css — .s10-hero（padding のトランジション）",
+    "issue": "padding のトランジションはレイアウトを伴���、しきい値付近でのチラつきや計算負荷を増やす可能性がある。",
+    "suggestion": "視覚的な圧縮を transform（scaleY/translateY）に置換し、レイアウト変更量を減らす。もしくはトランジションを外して状態トグル時のみ一度描画に留める。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S10Grow.jsx — ヒーロー内の条件描画",
+    "issue": "heroCompressed の真偽で EXP バーやテキストをアンマウント/マウントしており、しきい値付近での往復時に DOM churn が発生する。",
+    "suggestion": "EXP バー/テキストは常時マウントし、CSS（visibility/opacity/height など）で表示制御。コンテンツボックスの高さを固定し、GPU 合成（opacity/transform）で切り替えると安定。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

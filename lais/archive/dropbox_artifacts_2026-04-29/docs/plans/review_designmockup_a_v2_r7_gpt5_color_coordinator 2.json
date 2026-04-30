@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "タスクリスト行右端のカテゴリドット（学習）に使用している紫 #A371F7",
+    "issue": "デザインシステムに未定義のカラー（#A371F7）を使用。Night Skyテーマは accent/info/success/danger/warning のみ定義。カテゴリー色としてもトークン未整備の直指定は逸脱",
+    "suggestion": "カテゴリー用のカラーをトークン化（例: --goal-cat-learning 等）し、Night Skyテーマ値を定義。暫定的には info系(#58A6FF) or accent系(#79C0FF)に統一し、色覚配慮としてテキストラベル併記は継続",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s13_task_detail",
+    "location": "ハーフモーダル下部の「削除」ボタン（文字色 #FF7B72, 枠 rgba(255,123,114,0.5)）",
+    "issue": "danger系の色がトークン(#F85149 / #DA3633)と不一致。HEX直指定でデザインシステム逸脱",
+    "suggestion": "ボタンは --button-danger-bg / --button-danger-fg を使用。テキストボタンにする場合は --danger (#F85149) と --danger-subtle を利用して一貫性を確保",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "見出し「最初のパートナーを選びましょう」（font-size:24px, font-weight:200）",
+    "issue": "フォントサイズ24pxはスケール外（--font-size-lg:20px / --font-size-xl:28px）。タイポグラフィトークン逸脱",
+    "suggestion": "見出しはトークンに合わせて --font-size-xl:28px/--line-height-xl（または --font-size-lg:20px）へ調整し、見出しには --font-weight-semibold:600 を推奨",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダルのタイトル「タスクを追加」（font-size:18px）",
+    "issue": "18pxはフォントスケール外。モーダルタイトルに一貫性がない",
+    "suggestion": "タイトルは --font-size-lg:20px/--line-height-lg または --font-size-base:16px/--line-height-base に統一。日本語見出しには --letter-spacing-heading を適用",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s15_goal_create",
+    "location": "ハーフモーダルのタイトル「ゴールを作成」（font-size:18px）",
+    "issue": "18pxはデザインシステムのサイズスケール外",
+    "suggestion": "s12 と同じく --font-size-lg:20px（推奨）に統一し、line-height/letter-spacingトークンとセットで適用",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s01_signin",
+    "location": "フォームラベル「メールアドレス」「パスワード」（font-size:13px）",
+    "issue": "フォームラベルの文字サイズがスケール外（--font-size-sm:14px が定義）。小さめ表示は可読性/整合性を損なう",
+    "suggestion": "フォームラベルは --font-size-sm:14px / --line-height-sm に統一し、日本語本文ルールとして --letter-spacing-ja を適用",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域のロールラベル「EXPLORER」（text-transform:uppercase, letter-spacing:1px）",
+    "issue": "英字大文字ラベルの字間がトークン(--letter-spacing-label:1.5px)より狭く、全体��ラベルと不整合",
+    "suggestion": "uppercaseラベルは --letter-spacing-label:1.5px を適用してシステム全体の一貫性を確保",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "サブタブ「PROFILE / DISCOVER / FRIENDS / SHOP」（letter-spacing:0.5px）",
+    "issue": "英字大文字タブラベルの字間がトークン(--letter-spacing-label:1.5px)未満で視認性/一貫性が低下",
+    "suggestion": "サブタブラベルすべてに --letter-spacing-label:1.5px を適用（Night Skyテーマ共通）",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "ALL",
+    "location": "s10_grow（ヒーロー/進捗バー: #79C0FF、ドット/ボーダー: #58A6FF）, s20_talk（カード左ボーダー: rgba(121,192,255,0.25)）",
+    "issue": "近似した青系（accent #79C0FF と info #58A6FF）が同一画面内で混在し、役割（ブランド色/情報色）の境界が曖昧になっている",
+    "suggestion": "役割分離の原則 (§2.2) に従い、インタラクティブ/ブランドは accent、情報系クロームのみ info を使用。近似色が並ぶ場所はどちらかに統一",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Today セクション末尾→Goals セクション先頭のセクション間マージン（margin-bottom:28px）",
+    "issue": "セクション間余白が §4.2 の基準（≥32px）を満たしていないため、情報ブロックの区切りが弱い",
+    "suggestion": "Todayブロックのボトムマージンを --space-xl:40px（最小でも32px）に拡大し、Open Airの区切りリズムを回復",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

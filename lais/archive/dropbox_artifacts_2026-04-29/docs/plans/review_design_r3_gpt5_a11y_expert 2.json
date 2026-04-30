@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "WCAG_VIOLATION",
+    "location": "§5.1 Night Sky, §8.1 ボタン",
+    "issue": "Night SkyのPrimaryボタンのhover背景 #388BFD に白文字(#FFFFFF)はコントラスト3.20:1でWCAG 1.4.3 AA(4.5:1)を満たさない。通常(#1F6FEB)は4.59:1で合格だが、hoverで不合格に落ちる。",
+    "suggestion": "hover色を暗くして白文字の4.5:1維持。例: #1A63E0（白で約4.78:1）またはhover時も#1F6FEBのままにする。代替としてhoverで文字色を黒(#0D1117)に変えると#388BFDで約6.56:1だが、通常/pressedとの差で可読性がぶれるため背景側の調整を推奨。全テーマでボタンのhover/pressed/disabled各状態のコントラストを採番・明記すること。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "WCAG_VIOLATION",
+    "location": "§5 各テーマ --focus-ring, §8.7 共通ステート",
+    "issue": "focus-ringが半透明box-shadowのみ（例: Dawn rgba(168,94,40,0.4)）。ライト系テーマで背景(#FEFCF9等)との合成色はコントラストが低くなり2.4.11 Focus Appearance(最小)の3:1を満たさない恐れが高い（概算: 合成色≈#DCBEA5 vs 背景≈#FEFCF9で約1.6:1）。",
+    "suggestion": "focus可視化を不透明アウトライン+オフセットに変更（outline: 2px solid currentThemeFocus; outline-offset: 2px）し、box-shadowは補助に。トークン拡張を追加: --focus-ring-color, --focus-ring-width, --focus-ring-offset, --focus-outline (on/off)。各テーマのfocus色は背景に対し3:1以上を実測・記載。Glass上や濃淡の異なる面でも見えるよう二重リング（外側#000/内側#fff いずれか3:1を満たす）も許容。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "WCAG_VIOLATION",
+    "location": "ux_v1.md §7.4 ドラッグ&ドロップ",
+    "issue": "並び替えがロングプレス+ドラッグのみ。WCAG 2.2の2.5.7 Dragging Movements(AA)ではドラッグの代替となる単一ポインタ操作を提供する必要がある。",
+    "suggestion": "各タスク行にキーボード/単一タップで操作可能な「上へ/下へ」ボタン（aria-label明記、タップ領域≥44px）を提供。キーボード: フォーカス時にAlt+↑/↓で移動。スクリーンリーダーにはaria-liveで並び順の変更を通知。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-104",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §7.6 vs ux_v1.md §10.5",
+    "issue": "prefers-reduced-motion: reduce時の挙動が矛盾。design_systemは全transition/animationを1ms !importantでほぼ無効化する一方、UXは「EXPバー伸長は維持」と記��。",
+    "suggestion": "§7.6のルールを「装飾/非本質の動き」に限定し、情報的進行表現（progressbar等）は短縮（例: 150ms）に留めるスコープ化へ修正。例: @media (prefers-reduced-motion: reduce){ .decorative-anim{animation: none !important; transition: none !important} .progress-anim{transition-duration: 150ms !important} }。design_systemにも例外指針を明記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md §7.5, §5 各テーマ",
+    "issue": "高コントラスト嗜好への対応がforced-colors(Windows)のみ。一般環境向けの@media (prefers-contrast: more)対応トークン/ルールが未定義。",
+    "suggestion": "@media (prefers-contrast: more)を追加し、--border-strongのコントラスト/太さ増強、--accent-subtle濃度↑、focusリングの幅/コントラスト強化等をトークン化（--border-strong-contrast, --accent-subtle-contrast, --focus-ring-width-contrastなど）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_system.md §8.7 共通ステート, §8.* 各コンポーネント",
+    "issue": "focus可視化の適用対象が「全コンポーネント共���」とあるが、具体的なセレクタの網羅（a[href], [role=button], [tabindex], chips, tabs, timeline items等）が未特定。要素によってbox-shadowが可視にならない（overflow隠れ/Glass上等）ケースの指針が不明。",
+    "suggestion": "焦点スタイル適用ポリシーをCSSレベルで明記: button, [role=button], a[href], input, select, textarea, [tabindex]:not([tabindex='-1'])に:focus-visibleでoutline適用。Glass/overflow隠れ要素はoutline優先、必要に応じてoutline-offsetを増やす。コンポーネント実装チェックリストに「キーボードで全要素に明確なfocusが見える」テストを追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md §8.1 ボタン, §8.3 チップ/バッジ, §2.3 セマンティックsubtle",
+    "issue": "インタラクティブ要素のhover/pressed/subtle背景上の文字色コントラストの実測値が未記載（Primary以外）。特にSubtle系（--accent-subtle, --danger-subtle等）やSecondary/Ghostの状態で小サイズ文字がAAを満たすかが不明。",
+    "suggestion": "各テーマ×各状態（default/hover/pressed/disabled）で前景/背景のコントラスト比を一覧化し、AA未満の組合せは色を調整。例: Harajuku Lightのチップ（bg=rgba(196,51,97,0.12), fg=#C43361）→約5.1:1（OK）など実測を明記。Night SkyのGhost hover（bg=accent-subtle 0.18, fg=text-secondary）は背景が暗めのため多くは合格見込みだが、ライト系も合わせて検証表を追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §8.1 ボタン（Ghost）",
+    "issue": "Ghostボタンのdefaultが完全transparentで境界が不明瞭。1.4.11（非テキストのコントラスト）はUIコンポーネント境界に3:1を求める。hover以外でも可視境界があると安心。",
+    "suggestion": "Ghostのdefaultに1px border var(--border-strong)（各テーマで3:1確保済み）または極薄の--accent-subtle(0.06〜0.08)背景を付与し、hoverで濃くする。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §3.2 タイポスケール",
+    "issue": "最小文字サイズが11px（--font-size-xs）。高齢者や視力低下ユーザーには可読性が低い恐れがある（WCAG要件違反ではないが実用上の可読性低下リスク）。",
+    "suggestion": "可能なら最小を12��13pxに引き上げ、時間/キャプション用途でも14px優先を検討。少なくとも小型端末や長文の補助テキストでXSの使用を避けるガイドを追記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §8.4 タイムライン, ux_v1.md §10.4 スクリーンリーダー",
+    "issue": "タイムライン各ステータス（NOW/DONE/NEXT/OVERDUE）のスクリーンリーダー向けラベル/状態がデザインシステム側では未定義（UXには一般方針あり）。",
+    "suggestion": "NOW/DONE/NEXT/OVERDUEに応じてaria-label/aria-describedbyを明記（例: DONE: role='button' aria-pressed='true'、OVERDUE: aria-label='期限切れ: {タスク名}'）。アイコンはaria-hiddenし、テキストで状態を伝える。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  }
+]

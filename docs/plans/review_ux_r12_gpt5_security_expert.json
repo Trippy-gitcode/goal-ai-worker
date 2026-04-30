@@ -1,0 +1,282 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §7.2 認証設計 + §7.4 データライフサイクル + ux §15 注記",
+    "issue": "AI対話とソーシャルメッセージのテーブル命名が混在（messages / social_messages）。RLSの誤適用によりAI対話が友達へ漏洩する重大リスク。",
+    "suggestion": "AI対話とソーシャルを物理的に分離（例: ai_messages と social_messages）。スキーマも分けてRLSを独立定義。参照するAPIやSupabaseポリシー名もファイル別で固定。E2Eで「友達にAI履歴をSELECTできない」回帰テストを追加。既存の『messages』という曖昧名は廃止。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §7.2 認証設計（セッション管理）",
+    "issue": "アクセストークン/リフレッシュトークンの保管場所が未定義（SupabaseのデフォルトではlocalStorage）。XSSでトークン窃取の恐れ。",
+    "suggestion": "Cloudflare Workers経由でhttpOnly+Secure+SameSite=strictクッキー運用へ移行（Supabase auth-helpers for workers/cookiesを利用）。同時にCSP（script-src 'self' + nonce/Trusted Types）、DOMPurify等でXSS対策を明示。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §3.3 画像添付/保存 + §7.4 データライフサイクル",
+    "issue": "TALK画像のSupabase Storageバケットの公開/非公開設定と配信方法（署名付きURL/TTL）が未定義。公開バケットのままだとURL漏洩で第三者が閲覧可能。",
+    "suggestion": "Storageはprivateバケットを必須化。オブジェクトキーは推測困難なUUID。配信は短寿命の署名付きURL（例: 5分）に限定し、閲覧時に都度再取得。RLSでオブジェクトの所有者のみSELECT可を明記。削除時にストレージも即削除。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project §5.4 プライバシー設計（QRコード）",
+    "issue": "QRコードにユーザーUUIDを含める設計。UUIDは安定識別子であり、招待リンク拡散時に被識別性が上がる。",
+    "suggestion": "QR/招待リンクは『opaqueな一時トークンのみ』を埋め込み、サーバ側でtoken→userを解決。UUIDは含めない。トークンは256bit乱数、1ユーザー同時有効数=1で新���発行時に旧トークン無効化。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §5.1 友達登録（QR交換）/ §4.4 FRIENDS（招待リンク）",
+    "issue": "QR/シェアトークンの濫用対策（レート制限、単回使用、監査、失効管理）が未定義。トークン総当たりや横展開のリスク。",
+    "suggestion": "トークンはDBでjti管理（作成時間/失効/使用者）。検証時にIP/UAベースのレート制限（例: 1分間3回、1時間20回）、使い回し禁止（1回承認で失効）、スキャン回数しきい値超過で自動失効。無効トークン時は存在有無を示さない汎用エラーを返す。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §5.3 簡易メッセージ/応援",
+    "issue": "メッセージ/応援の送信レート制限・クールダウン未定義。短文でもPush濫発で通知DoS/嫌がらせが可能。",
+    "suggestion": "バックエンドでユーザー単位・宛先単位の送信レート制限（例: メッセージ 5/分・50/日、応援 3/分・20/日）。拒否・ブロック後は24時間クールダウンで同宛先送信不可。連投時は��数バックオフ。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §5.4 ブロック/解除・悪用防止 + ux §9.4 不正操作",
+    "issue": "「ブロック時: サーバーが無視」の定義が曖昧。サーバー側でINSERTを拒否しないと通知が発火する可能性が残る。",
+    "suggestion": "RLS/サーバーバリデーションでブロック関係にある相手へのINSERT/Push発火を確実に禁止（HTTP 403）。クライアントはUI上の送信を許容してもサーバは強制否認し副作用ゼロを保証。監査ログは保持。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project §6.4 AIデータプライバシー",
+    "issue": "外部AI APIへの送信前マスキングが正規表現のみ。氏名/住所/健康等の特殊カテゴリデータが容易に漏れる。GDPRの特別カテゴリ（Art.9）に抵触しうる。",
+    "suggestion": "サーバ側で高精度NER/ルールハイブリッドの脱識別（日本語人名/住所対応）。『機微情報を送らないモード』トグルを追加し、既定ON。明確な同意UI（特別カテゴリの処理に同意）を設定画面に追加。プ��バイダ別DPA/SCCをプライバシーポリシーに明記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project §6.2 冒険EXP検出（ログ保存）",
+    "issue": "冒険判定ログの保持期間が未定義。AI対話は90日だが分類ログのTTLが書かれておらず、不要な個人データの長期保持になりうる。",
+    "suggestion": "分類ログも90日で自動削除に統一。退会/履歴削除時は連動削除。privacy policyに保持目的と期間を明記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project §6.5 退会・データ削除 + §7.4 バックアップ",
+    "issue": "GDPRの『バックアップ内の個人データの削除タイムライン』が未定義。物理削除後もバックアップからの復元可能性が説明されていない。",
+    "suggestion": "バックアップ保持期間（例: 30日）を明示し、その期間経過後にバックアップからも実質削除される旨をポリシーへ追記。バックアップからの個別レコード削除不可であることも透明化。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project §2.5 通知設計",
+    "issue": "Push通知にメッセージ本文や個人情報を含めるか未定義。ロック画面で内容が露出する恐れ。",
+    "suggestion": "既定で内容を伏せる（例: 『新しいメッセージが届きました』）。設定に『通知に内容を表示』トグルを追加。Web Push payloadは必要最小限、機微情報は含めない。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §6.5 退会・データ削除",
+    "issue": "退会時に外部処理者（OpenAI/Anthropic/Google/Cloudflare Push）側の識別子やログの削除反映について未定義。",
+    "suggestion": "処理者ごとに削除フロー/不可能な場合の保持期間を整理し、DPA/SLAに基づく対応をプライバシーポリシーへ明記。Pushサブスクリプション（VAPID鍵/endpoint）も退会時に無効化・削除。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project §7.2 RLS（profilesのpending/policies）",
+    "issue": "『pending状態＋24hトークンでSELECT可』のRLS実装詳細が未定義。friend_requestsの有効期限連動や1ユーザー多重pending制���が仕様化されていない。",
+    "suggestion": "RLSでfriend_requests(status='pending' AND created_at>now()-7d)に限定。QR/リンクtoken表とJOINし、token.expires_at>now() AND token.consumed=false で限定公開。多重pendingを1件に制限。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §7.1 技術スタック（AIキー取り扱い）",
+    "issue": "AIプロバイダのAPIキーの露出リスク対策が未記載（クライアント直呼びの禁止等）。",
+    "suggestion": "全AI呼び出しはCloudflare Workers経由のサーバサイドのみ。クライアントにキーを配布しない。Workersの環境変数に格納し、ローテーション手順をrunbook化。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project §7.2 セッション管理 + ux §13.1 ログアウト",
+    "issue": "ログアウト時のサーバ側リフレッシュトークン無効化（全デバイス）が明記されていない。ローカル削除のみだと他端末で継続利用が可能。",
+    "suggestion": "supabase.auth.signOut({ scope: 'global' }) 等を用い、全デバイスのリフレッシュトークンを失効。設定に『他���端末からログアウト』機能を追加し、セッション一覧を表示/失効可能にする。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project 全体（セキュリティヘッダ/CSP）",
+    "issue": "CSP/HSTS/X-Frame-Options/Referrer-Policy等のセキュリティヘッダーが未定義。特にlocalStorage運用時にXSS対策が弱い。",
+    "suggestion": "Cloudflare Pages/Workersでヘッダーを強制: CSP（script-src 'self' 'nonce-...'；connect-srcをAI/Stripe/ Supabaseに限定；frame-ancestors 'none'）、HSTS preload、X-Frame-Options DENY、Referrer-Policy no-referrer、Permissions-Policy（camera/microphone最小化）。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project §5.3/§5.4 メッセージ/応援 + ux §4.4 友達詳細",
+    "issue": "サーバ側のメッセージ100文字制限/禁止語フィルタ/URLブロックの記載がない（クライアント制限のみだと迂回可能）。",
+    "suggestion": "サーバでメッセージ本文長を強制検証し、URL/電話番号/メール等を拒否または伏字化。NGワード/誘導リンクをスコアリングし閾値超過は送信拒否またはレート制���増。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project §5.1/§5.4 QR/リンク設計 + ux §4.4 QRスキャン",
+    "issue": "QR/招待リンクの『再発行時に旧トークンを強制失効』が未定義。複数の有効リンクが長時間残存しうる。",
+    "suggestion": "ユーザーごとに同時有効トークン数=1に制限。新発行時にDBで古いtokenを即時失効。UXには『新しいQRを表示すると旧QRは無効になります』注記を追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §1.1 画面一覧/遷移 + §1.2 遷移マトリクス",
+    "issue": "S-34 SHOP（Coming Soon）の戻りパスは暗黙（共通ナビありで機能はする）が、戻り方法の明示文言がない。",
+    "suggestion": "S-34に左上戻るを明記し、『Coming Soon』内に『MEに戻る』リンクを追加（アクセシビリティ向上）。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project §6.4 AIデータプライバシー + ux §13.1 設定",
+    "issue": "『対話履歴を削除』はAI理解メモをリセットとあるが、DISCOVERの強み/弱み・自己分析カード等の二次生成データの削除一括操作が未定義。",
+    "suggestion": "設定に『AI由来の自己理解データ��すべて削除』オプションを追加。対話履歴削除と連動（選択式）で二次データも消去可能にする。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project §2.5 通知設計 + §7.1 プッシュ通知",
+    "issue": "退会時/ブロック時のPush購読解除（endpoint無効化）手順が未定義。退会後も通知送信を試行する恐れ。",
+    "suggestion": "退会・ブロック時にPush購読レコードを削除し、送信側でも無効endpointを検出したら自動クリーンアップ。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §7.5 非機能要件",
+    "issue": "通信の暗号化/鍵管理（TLSバージョン、HSTS、証明書ピンニング）およびデータ暗号化（DB/Storage at-rest）の明記がない。",
+    "suggestion": "CloudflareでTLS1.2+強制、HSTS有効化。Supabaseのat-rest暗号化前提を明記し、特にsoclal_messages/ai_messagesへ列単位暗号（KMS管理鍵）を検討。モバイルPWAは証明書ピンニングは難しいためCSP/Integrityで補完。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project §2.4 プラン変更フロー + §13.2 Stripe",
+    "issue": "Stripe戻りURLのクエリパラメータ（checkout=success/cancel）をクライアントで信頼する設計は改ざん余地がある。",
+    "suggestion": "UI反映はWebhookのサーバ検証（event type/subscription状態）を信頼源に。クエリは『進行中表示』のトリガのみに用い、確定はサーバからの最新状態取得でのみ更新。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project §7.1/§7.2",
+    "issue": "CSRF対策の明示がない。現状はBearer運用なら影響は限定的だが、将来Cookie運用時に必要。",
+    "suggestion": "状態変更APIはSameSite=strictクッキー＋CSRFトークン二重送信方式を採用可能に設計。現時点でもOrigin/Referer検証を実装。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project §5.1/§5.4 友達登録フロー",
+    "issue": "承認/拒否時のサーバ整合性（冪等性/同時処理）が未定義。二重承認や競合時の状態遷移が不明。",
+    "suggestion": "friend_requestsにユニーク制約（requester_id, receiver_id, status IN (pending)）。承認APIはトランザクションでfriends作成＋request更新（accepted）、二重実行は冪等的200/204で無変更。拒否後の再申請クールダウン（例: 14日）を導入。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project §6.4/§11.1 レビュー計画",
+    "issue": "GDPR対応の運用要件（DPIA、処理記録、EU代表者/問い合わせ先、年齢制限）の明記がない。",
+    "suggestion": "プライバシーポリシーに処理目的/法的根拠（契約/正当利益/同意）、DPIA実施有無、EU/UK代表者連絡先、最低年齢（例: 16歳以上）と親権者同意方針を追記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-027",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §4.4 FRIENDS（受信一覧/通知） + project §2.5 通知",
+    "issue": "未読通知/お知らせのスパム対策（スループット上限制御、重複抑止）が未定義。リアルタイム多重配信で負荷・濫用リスク。",
+    "suggestion": "同一送信者→受信者への通知は一定時間内にバッチ化（例: 1分間は件数集約）。PushとRealtimeの重複抑止ID去重を導入。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux §0 UXベンチマーク→設計反映",
+    "issue": "ベンチマークの『SNS検索によるスパム』課題は回避されているが、『招待リンクのインデックス化/漏洩』対策が明文化されていない。",
+    "suggestion": "招待リンクページにnoindexヘッダを付与し、OpenGraph/リンクプレビューへトークンを含めない。Referrer-Policy: no-referrerを適用。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-201",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "CSS: .s02-onboarding padding + @supports (padding-bottom: env(...)) / CSS: .s02-next bottom + @supports (bottom: env(...))",
+    "issue": "safe-area の上書きが 2 つの @supports ブロックに分散しており、同一条件の重複定義になっている。将来的に調整が入った際に宣言の更新漏れや順序依存のリスクが上がる。",
+    "suggestion": "1 つの @supports (env 対応) ブロックに両方の上書きをまとめて記述し、同一の条件で一括管理する。例: @supports (padding-bottom: env(safe-area-inset-bottom)) { .s02-onboarding { ... } .s02-next { ... } }",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-202",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "CSS: .s02-next left/right（安全領域未考慮）",
+    "issue": "CTA の左右余白は safe-area を考慮しておらず、ノッチ端末の横向きや角丸の強い端末で内容が端に寄り過ぎたり視覚的に詰まって���える可能性がある。",
+    "suggestion": "@supports (left: env(safe-area-inset-left)) を用いて、left/right をそれぞれ calc(env(safe-area-inset-left) + var(--space-lg)) / calc(env(safe-area-inset-right) + var(--space-lg)) に上書きする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-203",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "CSS: .s02-onboarding padding-bottom と .s02-next min-height の組み合わせ",
+    "issue": "コンテナの下余白計算が固定値 52px を前提にしており、ユーザーのフォント拡大や多言語で CTA 高さが増えた場合に、コンテンツが固定 CTA の背後に潜るリスクがある。",
+    "suggestion": "CTA 高さを --cta-height カスタムプロパティで単一管理し、ボタン側は height/inline-size 制御、コンテナ側は padding-bottom: calc(env(...) + 100px + var(--cta-height) + var(--space-md)) のように参照する。もしくはフロー末尾に同高さのスペーサー要素を置く。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-204",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "CSS: 100px / 52px の重複（.s02-onboarding, .s02-next）",
+    "issue": "100px（下端固定オフセット）と 52px（CTA 高さ）が複数箇所にベタ書きされ���おり、DRY 違反で変更時の不整合が起きやすい。",
+    "suggestion": "--cta-bottom-offset: 100px; --cta-height: 52px を導入し、calc(...) 内でもそれらを参照する。将来的なデザイン更新に強くなる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-205",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "CSS: @supports env() ブロック（レガシー iOS 互換性）",
+    "issue": "iOS 11 系では env() ではなく constant() が必要なため、safe-area が加算されない環境が残る可能性がある（サポート対象次第では UX 低下）。",
+    "suggestion": "サポート方針に応じて、@supports (padding-bottom: constant(safe-area-inset-bottom)) と @supports (bottom: constant(safe-area-inset-bottom)) のフォールバックを追加する（併記）。不要なら方針として明記する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

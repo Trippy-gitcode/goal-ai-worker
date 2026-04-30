@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "タスク「英語のリスニング」「読書メモまとめ」の左ドット",
+    "issue": "DSに定義されていない紫系の色値（#A371F7）がHEX直指定されています。DS§2.1の「アクセント色の同時使用は1画面につきプライマリ1色＋セマンティック4色まで」に違反しており、Night Skyの自然なトーンから外れネオンカラーのような印象を与えます。",
+    "suggestion": "学習カテゴリのドット色をDSで許可されたセマンティックカラー（例: var(--info) の #58A6FF）に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s13_task_detail",
+    "location": "「完了済み」テキストおよび「削除」ボタン",
+    "issue": "DSのセマンティックカラートークンから逸脱したHEX直指定（完了済みに #56D364、削除に #FF7B72）が使用されています。Night Skyテーマの落ち着いたトーンを損なう彩度の高い色です。",
+    "suggestion": "完了済みテキストには var(--success)（#3FB950）、削除ボタンには var(--danger)（#F85149）を使用してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "ALL",
+    "location": "全画面のテキスト要素",
+    "issue": "DS §3.2で定義されたフォントサイズスケール（11, 14, 16, 20, 28, 36, 48px）以外の値（13px, 15px, 18px, 22px, 24px）が静的スタイルとして多数直指定されています。",
+    "suggestion": "13px/15pxは --font-size-sm (14px) または --font-size-base (16px) に、18px/22px/24pxは --font-size-lg (20px) または --font-size-xl (28px) に統一してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "ALL",
+    "location": "s10, s14, s30のEXPバーおよび進捗バーの背景色",
+    "issue": "バーの背景色に rgba(121,192,255,0.18) が直指定されています。DSの --accent-subtle は不透明度 0.14 であり、トークン値と乖離しています。",
+    "suggestion": "進捗バーの背景色はDS定義の var(--accent-subtle) を参照するように修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン",
+    "issue": "ボタンの色が background:#1C2128 に color:#9BA7B4 となっており、DSの無効状態（--text-disabled: #484F58）とも有効状態（--button-primary-bg）とも一致しない独自の色設定になっています。",
+    "suggestion": "入力前で無効状態を意図している場合はテキスト色を var(--text-disabled) に、有効状態なら背景を var(--button-primary-bg) に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s02_onboarding",
+    "location": "画面上部のプログレスバー未完了部分",
+    "issue": "未完了ステップの背景色に #6E7681（--border-strong相当）が��指定されています。DSの無効/未完了状態の背景トークンから逸脱しています。",
+    "suggestion": "プログレスバーの未完了部分の色をDSのセマンティックに沿った var(--bg-disabled) または var(--bg-secondary) に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "「単発タスク」「習慣」のトグルボタン",
+    "issue": "アクティブな「単発タスク」がアクセント背景で目立つ一方、「習慣」がアウトラインのみで、選択肢としての視認性が不均等であり、対比が弱いです。",
+    "suggestion": "非アクティブ状態の背景色を --bg-secondary などにして、両者が切り替え可能な選択肢であることを視覚的に強調してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内のボタン群",
+    "issue": "「登録する」「編集して登録」「✕」の3つのボタンが横一列に並んでおり、モバイル幅では窮屈で誤タップを誘発しやすい視覚的過密状態になっています。",
+    "suggestion": "プライマリアクションの「登録する」を上段に配置し、二次アクションをその下に配置するなど、情報密度を下げて視線誘導を整理してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE, DISCOVER, FRIENDS, SHOP）",
+    "issue": "4つのタブが等間隔で並んでいますが、文字幅に対して余白が狭く、特に「DISCOVER」と「FRIENDS」の間が窮屈に見え、Open Airの原則に反しています。",
+    "suggestion": "タブのフォントサイズを調整するか、横スクロール可能なタブリストであることを視覚的に示す（右端をフェードさせる等）ことで、窮屈さを解消してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  }
+]

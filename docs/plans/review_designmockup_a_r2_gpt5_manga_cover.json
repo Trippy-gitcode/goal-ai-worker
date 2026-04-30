@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「すでにアカウントをお持ちですか？ ログイン」",
+    "issue": "「ログイン」テキストリンクが下線なしの色区別のみ。WCAG 1.4.1（色のみに依存しない）およびデザインシステム§2.2「テキストリンクは必ず下線」を満たしていない。",
+    "suggestion": "「ログイン」に text-decoration: underline を付与（hover/pressed時は下線濃度のみ変化）。または小さな矢印アイコンを併記して色以外の手掛かりを追加。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow / s14_goal_detail / s15_goal_create",
+    "location": "「＋ タスクを追加」「＋ ゴールを追加」「＋ 最初のタスクを追加」のテキストCTA",
+    "issue": "インラインの追加リンクが下線なしで色のみの識別。デザインシステム§2.2の下線必須とWCAG 1.4.1に反する。",
+    "suggestion": "インラインCTAは text-decoration: underline を常時付与。もしくは小ボタン（Secondary）化して形状で可視化し、色依存を排除。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "「AI理解メモ」段落テキスト",
+    "issue": "日本語本文の行間が詰まり気味で、画数の多い漢字が連続する箇所で読みのリズムが重くなる（可読性・品格の低下）。",
+    "suggestion": "本文に --line-height-ja-body: 1.7 と --letter-spacing-ja: -0.02em を適用。段落上下に --space-md〜lg のマージンを確保して「間」を作る。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "ゴール名直下の「60%」大型数値",
+    "issue": "進捗「60%」が見出しよりも強く先に目に入り、視線の流れ（タイトル→要約→リスト）が逆転している。",
+    "suggestion": "「60%」のサイズを --font-size-lg（20px）程度に縮小しweight=regular、位置はタイトルの右やバー直上に配置して、見出し→進捗→リストのZフローに整える。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Todayタイムラインの縦ガイド線・仕切り線",
+    "issue": "ガイド線のコントラストが低く、行間リズムの把握にやや時間がかかる（暗所で特に）。",
+    "suggestion": "線色を --border-strong に統一し、opacityを上げて非テキスト3:1目安を確保。行頭ドットも同系統で微強調し、視線を左端に集める。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "「TODAY」見出しと最初のタスク行の間",
+    "issue": "見出し下の余白がやや不足し、ヘッダーとリストが視覚的に密着して見える。",
+    "suggestion": "セクション見出し下に --space-lg（24px）以上を配置。水平ルールを残す場合は線下にも8〜12pxのブリージングスペースを追加。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "アクション行「編集」「削除」ボタン（同列）",
+    "issue": "赤の「削除」が同列で強く目立ち、主要行動（編集/AI導線）よりも先に視線を奪う。",
+    "suggestion": "削除は第2列へ分離し間隔を広げるか、Danger subtle（背景=--danger-subtle, 文字=--danger）で視認性は維持しつつ強度を抑える。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "アバター選択行と「次へ」ボタンの間",
+    "issue": "選択エリアとCTAの距離が長く、選択→確定のZフローが一度途切れる印象（間が“空白”として機能していない）。",
+    "suggestion": "選択行直下に補助テキスト（選択済みラベル）を置き、そのすぐ下に「次へ」を配置。間隔は --space-lg（24px）程度に短縮。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s00_splash",
+    "location": "セカンダリ「ログイン」ゴーストボタンの境界",
+    "issue": "ボーダーが暗背景に対してやや弱く、Primaryとの階層は保てているが輪郭が曖昧に見える。",
+    "suggestion": "ボーダーを --border-strong に変更（もしくは hover時のみ --border-strong）。テキスト色は --text-secondary を維持し、静かな対比を確保。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域の「1,240 / 2,000」数値行",
+    "issue": "数値とスラッシュ周辺のトラッキングが詰まり、ダーク背景で視覚ノイズが生じる（微細文字の潰れ感）。",
+    "suggestion": "数値行のみ letter-spacing: 0.02em を付与し、桁区切りの可読性を上げる。数字は等幅タブラーを使用できると尚良い。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "チャットヘッダー（左のメニュー/右のアイコン群と「TALK」タイトル）",
+    "issue": "左右アイコンの存在感が同程度で、中央タイトルの視線捕捉がわずかに弱い。",
+    "suggestion": "タイトルのウェイトを semibold に上げ、左右アイコンの不透明度を90%→80%へ微調整。タイトル左右に8pxの余白を確保し、中央を僅かに強調。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "入力フィールド群の縦リズム",
+    "issue": "各フィールドの上下余白が均一で“等間隔”に見え、��要度（必須/任意）の差が視線に乗りにくい。",
+    "suggestion": "必須の「タスク名」下は --space-lg、それ以降は --space-md を基本に、グループ間（時刻/予定日 vs 所要時間）は --space-xl を挿入して優先度の山谷を作る。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

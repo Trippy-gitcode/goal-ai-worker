@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.3 Harajuku Light, §8.1 ボタン, §8.3 チップ/バッジ, §8.7 ボトムタブバー",
+    "issue": "Harajuku Light の「accent 上に accent-subtle 背景」パターン（Secondaryボタン/チップ/アクティブタブラベル）が WCAG 1.4.3（4.5:1）を満たしていない。実測: テキスト #C43361（accent）/ 背景 accent-subtle 合成色 #F4D6DF で約3.85:1。Danger subtle も同様にテキスト #C93000 / 背景 #F7DEDC で約3.53:1。",
+    "suggestion": "ライト系テーマでの「subtle 背景上のテキスト」は濃色版を使用するトークンを追加し割当を変更する。例: --accent-on-subtle-fg: #8A1D3E（Harajuku Light, 実測≈6.47:1）, --danger-on-subtle-fg: #8A1520（実測>=6:1）。併せて各コンポーネントのテキスト色参照を --*-on-subtle-fg に切替える。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§8.1, §8.8, §8.13, §5.* フォーカス関連",
+    "issue": "「フォーカスは outline 方式に統一」（v0.8変更履歴）とある一方で、複数箇所に box-shadow: var(--focus-ring) を用いた記述が残存��例: §8.8 トグル、§8.13 状態マトリクス）。仕様の不一致は実装ブレと forced-colors 非対応の温床になる。",
+    "suggestion": "フォーカス仕様を outline に一本化し、共通トークンを新設する。例: --focus-outline-color, --focus-outline-width, --focus-outline-offset。全コンポーネントの focus-visible を outline 使用に改修し、--focus-ring（box-shadow値）は廃止または互換レイヤーに限定。forced-colors は現行の @media ルールを維持。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.5 グラスモーフィズム（ライト系上書き）",
+    "issue": "ライト系テーマの Glass ON の card-border: 1px solid rgba(0,0,0,0.08) は周囲（例: bg-surface #FEFCF9 や #FFFAFB）に対して非テキストコントラスト 3:1 を満たさない。シャドウ頼りは WCAG 1.4.11 の『UI部品の可視境界』要件を満たしにくい。",
+    "suggestion": "インタラクティブな glass-surface（ダイアログ/ボトムシート/ドロップダウン）には card-border を rgba(0,0,0,0.18〜0.22) 程度に引き上げるか、1px solid var(--border-strong) を適用。非インタラクティブな装飾カードのみ 0.08 を許容する旨を��記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-104",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.2 Dawn, §5.3 Harajuku Light（accent-subtle の注記）",
+    "issue": "ライト系テーマの accent-subtle について「合成色で非テキスト3:1確保」と記載があるが、実測では未達。例: Dawn 背景 #FEFCF9 と accent-subtle 合成 #E6D6C9 の対比 ≈1.38:1、Harajuku Light 背景 #FFFAFB と accent-subtle 合成 #F4D6DF の対比 ≈1.33:1。",
+    "suggestion": "ライト系の subtle系（accent/success/danger/warning/info）背景は、UI部品の形状可視境界を border-strong（例: Dawn #8A7A65）で補強する設計に変更。『subtle 背景単体での3:1確保』という文言は削除し、境界はボーダーで担保する方針に改める。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2. カラーシステム, §5.1-5.4 テーマ, §8.1/8.3/8.7 コンポーネント",
+    "issue": "テーマごとの主要組合せ（本文/見出し/リンク/ボタン各状態/チップ/タブ/入力 等）のコントラスト実測表が未整備。本文中に散発的に比率が示されるのみで、全状態の網羅性・再検証性が担保できない。",
+    "suggestion": "各テーマ×状態のコントラストマトリクスを付録として追加（JSON/表）。最低でも以下を網羅: text-primary/secondary/hint vs bg-{primary|surface|elevated}、リン��（accent）vs各背景、Primary/Secondary/Danger（通常/hover/pressed）テキスト vs 背景、subtle系テキスト vs subtle背景、タブのラベル vs pill背景、入力ラベル/プレースホルダー/ボーダー。失敗箇所はトークン側を即時補正。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§7.6 prefers-reduced-motion, §5.5 グラス, 全体",
+    "issue": "高コントラスト嗜好（prefers-contrast: more）や reduced-transparency など追加配慮のトークン/挙動が未定義。forced-colors には対応しているが、OSの強制ハイコントラストでない環境の利用者配慮が不足。",
+    "suggestion": "@media (prefers-contrast: more) 用の上書きトークンを新設し、- ボーダー: --border-strong を1段階強化 - subtle背景の不透明度+0.08 - フォーカス outline 幅+1px/色をより濃色化 - シャドウ低減 などを定義。reduced-transparency 相当の設定（存在検知できない場合はユーザー設定トグル）で glass を自動OFFにするオプションも設定画面に追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（ユーティリティ未定義）",
+    "issue": "アイコンのみボタン等でテキスト代替を埋め込むための『視覚的に非表示だが読み上げ可能』ユーティリティ（.visually-hidden / .sr-only）が未定義。",
+    "suggestion": "CSSユーティリティを追加し、使用指針を設ける。例: .visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }。アイコンボタンは aria-label か .visually-hidden のどちらかを必須に。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §1, §10 アクセシビリティ",
+    "issue": "キーボードユーザー向けの『メインコンテンツへスキップ』リンクとランドマーク（header/nav/main）定義がデザインシステム側に記述されていない。",
+    "suggestion": "アプリシェルに skip link を実装（:focus-visible 時のみ表示）。例: <a href=\"#main\" class=\"visually-hidden focusable\">メインコンテンツへスキップ</a>。主要領域に role=main/nav/banner を付与。ボトムタブは nav[aria-label=\"メインナビゲーション\"] とし、tablistロール採用時は roving tabindex と左右矢印操作を定義。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.7 ボトムタブバー, ux_v1.md §10.4",
+    "issue": "ボトムタブのキーボード操作詳細（roving tabindex/矢印キー移動/Enter or Space で選択）が明示されていない。role=tablist/aria-selected のみでは実装差が出やすい。",
+    "suggestion": "ボトムタブを roving tabindex パターンで定義（1つだけ tabindex=0、他は-1）。左右矢印で前後タブへ移動、Enter/Space で選択、Home/End で先頭/末尾に移動のキーバインドをデザインシステムに追記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§7.4 触覚フィードバック, 設定（ux_v1.md §13）",
+    "issue": "ハプティクスは prefers-reduced-motion を尊重して抑止しているが、利用者が個別に触覚の有無を制御する UI（アプリ内設定）がない。",
+    "suggestion": "設定に「触覚フィードバック」トグルを追加（デフォルトON、prefers-reduced-motion: reduce のときは強制OFFかつUI無効化）。ドキュメントに『iOS Safariは未対応→視覚フィードバックに自動フォールバック』の再周知も併記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-111",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§8.2 入力フィールド, §10.4 スクリーンリーダー対応",
+    "issue": "入力のフォーカススタイルが『border --accent + --focus-outline（outline方式）』と読み取れるが、具体の優先順位・組合せ（outline-offset/outline幅、エラー時の視認性との両立）が明文化されていない。",
+    "suggestion": "入力の focus-visible を統一ガイドに明記（例: outline: 3px solid var(--accent); outline-offset: 2px; border-color: var(--accent) は任意、エラー時は outline を優先し border は --danger のまま保持）。Focus Appearance(2.4.11) の 3:1 充足根拠（accent vs 周辺背景の比率）を各テーマで追記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-112",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§8.3 チップ/バッジ, §8.7 ボトムタブバー",
+    "issue": "ライト系テーマの subtle 背景は周囲との非テキスト 3:1 を満たさないため、チップやアクティブタブの『形状の可視境界』が不足（Harajuku Light: #F4D6DF vs #FFFAFB ≈1.33:1、Dawn: #E6D6C9 vs #FEFCF9 ≈1.38:1）。",
+    "suggestion": "ライト系テーマでは、subtle 背景の UI 部品に 1px solid var(--border-strong) を追加（pill/チップ/タブラベルのpill等）。もしくは subtle 背景の不透明度を上げる代わりに、背景色自体をやや暗い単色（例: #E9CFC6 など）に置換して 3:1 を満たす値に調整。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  }
+]

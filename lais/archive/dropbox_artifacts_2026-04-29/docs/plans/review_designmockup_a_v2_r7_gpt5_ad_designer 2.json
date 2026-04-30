@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "入力フォーム（開始時刻/所要時間/予定日）",
+    "issue": "フィールド順が「開始時刻 → 予定日 → 所要時間」となっており、UX仕様（S-12: 開始時刻→所要時間→予定日）と不一致。",
+    "suggestion": "順序を「開始時刻 → 所要時間 → 予定日」に変更し、縦並びで一列に配置する（c→d→eの並びを仕様通りに）。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "例: s10_grow タスク名(15px), Explorerラベル(12px); s20_talk 本文(15px); s01_signin ラベル(13px)",
+    "issue": "デザインシステムのタイポスケール外（12/13/15px）が各所で使用されている。許可トークンは 11/14/16/20/28/36/48px。",
+    "suggestion": "本文は16px(--font-size-base)/line-height:1.7(日本語)へ、ラベル等は14px(--font-size-sm)へ、キャプション/時刻は11px(--font-size-xs)に統一。英字ラベルは letter-spacing 1.5px、日本語本文は letter-spacing:-0.02em を適用。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾「＋ タスクを追加」",
+    "issue": "主要CTAがテキストリンク風で視覚的優先度が低く、初回ユーザーに次のアクションが伝わりにくい。",
+    "suggestion": "主要CTAをボタン化（--button-primary-* もしくは --accent-subtle + 枠）し、セクション内で目立つ位置に配置。もしくは右下にFAB「＋」を常設。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "ロゴ下サブコピー周辺",
+    "issue": "初見3秒で「何ができるアプリか」が伝わりにくい（汎用的なタグラインのみ）。",
+    "suggestion": "サブコピー直下に価値提案を一文で追加（例:「AIと話して計画を立て、タスク化・習慣化できます」）。可能なら3点ピクト「会話→提案→登録」を横並びで簡潔に補強。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "ALL",
+    "location": "主要画面の左右パディング（例: s01/s02/s10/s14 の padding: 0 24px）",
+    "issue": "モバイルの左右パディングが --space-md(16px)規定に対して24pxで統一されていない。",
+    "suggestion": "左右パディングを --space-md(16px) に統一（例外を設ける場合は design_system.md §4.3 を改定/明記）。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s12_task_add",
+    "location": "「開始時刻」「予定日」入力行（2カラム並び）",
+    "issue": "モバイルは1カラム原則（§4.3）だが、2カラム並びで圧縮表示になっている。",
+    "suggestion": "各フィールドを縦積みの1カラムに変更し、視線誘導を上から下の一方向に統一。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "ヒーロー領域のEXP表記",
+    "issue": "EXP表記が s10_grow「1,240 / 2,000 EXP」と s30_me「1,240 / 2,000」で不一致。",
+    "suggestion": "EXP表記フォーマットを全画面で統一（例: 「1,240 / 2,000 EXP」）。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "入力バー右「送信」ボタン（無効状態）",
+    "issue": "無効状態でも塗りの円形背景で存在感が強く、次アクションの有効化条件が直感的に伝わりにくい。",
+    "suggestion": "無効時は枠線のみ/背景なし + アイコン色を --text-disabled に。有効時は --button-primary-bg に切替え、状態差を明確化。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "TodayセクションとGoalsセクションの間（margin-bottom:28px）",
+    "issue": "セクション間スペースが規定の≧32px(§4.2)に対して不足。",
+    "suggestion": "セクション間余白を --space-xl(40px) もしくは最小32pxに拡張し、段落の切れ目を明確化。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

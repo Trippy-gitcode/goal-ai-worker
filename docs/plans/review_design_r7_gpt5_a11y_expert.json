@@ -1,0 +1,192 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§8.1, §8.3, §8.7, §5.2, §5.3",
+    "issue": "ライト系テーマ（Dawn/Harajuku Light）のSecondaryボタン／チップ／タブのアクティブpillで用いる --accent-subtle 背景が、ページ背景（--bg-surface/--bg-primary）に対して非テキスト3:1を満たしていない可能性が高い。実測（sRGB単純合成近似）では Dawn: bg=#FEFCF9 上の rgba(143,77,31,0.22) 合成後 ≈ #E6D5C9 → 対 bg ≈ 1.3:1、Harajuku Light: bg=#FFFAFB 上の rgba(196,51,97,0.18) 合成後 ≈ #F4D6E0 → 対 bg ≈ 1.2:1。WCAG 1.4.11に不適合（UIコンポーネントの可視境界）。",
+    "suggestion": "いずれか（併用可）で是正: 1) Secondary/チップ/pillに1pxボーダー（--border-strong など）を追加し、ボーダー単体で3:1を満たす（Dawn: #8A7A65、Harajuku Light: #9A6070は対--bg-surfaceで≈3.4-3.5:1）; 2) --accent-subtle の不透明度を引き上げ（目安 Dawn≈0.32、Harajuku Light≈0.28）、3:1達成を実測で確認; 3) もしくはコンポーネントの背景を --bg-elevated + 明瞭なボーダーに変更し、サインカラーはテキスト/アイコンに限定。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§5.1–5.4（--focus-ring）, §8.13, §7.5",
+    "issue": "通常モードのフォーカス可視化が box-shadow のみで規定されており、背景やコンポーネント色との合成次第で WCAG 2.2のFocus Appearance (Minimum)（SC 2.4.11: 指標が3:1）を満たせないリスクがある。透明度を含むshadowは背景依存でコントラストが不確定。forced-colors時はoutline対応済だが、通常モードに確実なアウトライン指定がない。",
+    "suggestion": "テーマごとに --focus-outline-color / --focus-outline-width / --focus-outline-offset のトークンを新設し、:focus-visible に outline: var(--focus-outline-width) solid var(--focus-outline-color); outline-offset: var(--focus-outline-offset) を追加（box-shadowは併用可）。色は各テーマの--accent系の不透明色で3:1以上を実測確認。コンポーネント内側に埋もれないよう offset 2px 以上を推奨。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.5 ボトムシート（ハンドル: 40×4px）",
+    "issue": "ボトムシートのドラッグハンドル（40×4px）は、内部規約（§4.5: 44×44px）およびiOS HIG準拠の最小タップ領域を満たさない。代替操作（backdropタップ/スワイプ）はあるが、ハンドル自体のヒット領域が著しく小さい。",
+    "suggestion": "ハンドル周辺に透明ヒット領域を確保（例: ::before で高さ44pxのタップゾーンを追加）。支障がなければ視覚的高さを8–12pxに引き上げ、見た目の触知性も改善。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §8.7 と ux_v1.md §10.4",
+    "issue": "ボトムタブのARIAが「aria-current=\"page\"（ナビゲーション想定）」と「role=\"tablist\"/role=\"tab\" + aria-selected（タブUI想定）」で資料間に不整合がある。支援技術へのロール提示が一貫しない恐れ。",
+    "suggestion": "振る舞いに合わせて統一: 画面遷移（ルーティング）なら<nav>内のリンク + aria-current=\"page\"、同一ページのパネル切替ならrole=tablist/role=tab/aria-selected/aria-controlsを採用。SPAでもURL/履歴を変えるなら前者を推奨。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§8.1（disabled時の定義）",
+    "issue": "disabled時にpointer-events:none/opacityのみの言及があり、フォーカス順からの除外やネイティブ不可操作（disabled属性/aria-disabled）の明示が不足。キーボード操作でフォーカス可能なままになる実装リスク。",
+    "suggestion": "フォーム要素はHTMLのdisabled属性を必ず付与。非フォームのカスタム要素はtabindexを-1にし、aria-disabled=\"true\"を付与。視覚的無効化とキーボード無効化の両面を規定。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§2.4（タスク並び替え）, §7.4（ドラッグ&ドロップ）",
+    "issue": "並び替え操作がドラッグ&ドロップ中心で、キーボード/スクリーンリーダー向けの代替操作が未定義。ドラッグ操作は支援技術では利用困難。",
+    "suggestion": "各行にキーボード用の移動ボタン（上へ/下へ）をSR向けに提供（.visually-hiddenボタン + aria-label）。aria-liveで順序変更の結果を告知。ドラッグハンドルにはaria-describedbyで操作手引きを付与。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§2.3（Undoスナックバー）",
+    "issue": "UndoスナックバーのARIAロール/ライブ領域に関する規定が未記載。重要な状態変化（完了/取り消し可）だが、読み上げ保証が曖昧。",
+    "suggestion": "Undoスナックバーにrole=\"status\" aria-live=\"polite\"、アクションボタンには明確なaria-label（例: 「取り消す（30秒以内）」）。表示/消去をライブで通知。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（グローバルナビ直後）",
+    "issue": "「メインコンテンツへスキップ」リンク（skip link）の定義がない。キーボードユーザーの効率的な移動に配慮不足。",
+    "suggestion": "ページ先頭に.skip-linkを設置し、:focusで可視化。hrefは主要ランドマーク（<main id=\"main\">）へ。SPAでも画面切替後に初回フォーカスがskip linkに移らないよう制御。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.7 ボトムタブ（通知バッジ）",
+    "issue": "バッジ文字サイズ10pxは読解性が低い。またスクリーンリーダー向けに数値（未読件数）を読み上げる要件が明記され��いない。",
+    "suggestion": "視覚は12px以上を推奨（スペース制約があれば字間/太さで補正）。アクセシブルネームで件数を含める（例: aria-label=\"MEタブ、未読3件\"）。バッジがない場合は属性を削除。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "トークン体系（全体）",
+    "issue": "高コントラスト志向ユーザー向けのトークン/メディアクエリ対応（prefers-contrast: more など）の方針が未定義。Windows以外（forced-colors非該当環境）でのコントラスト強化経路がない。",
+    "suggestion": "data-contrast=\"high\" などのフラグと、prefers-contrast: more 対応を追加。--border-strong/--text-secondary/--accent-subtle等を高コントラスト版に上書き（例: ボーダーは4.5:1以上、subtle背景は3.5:1目安）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.13（共通ステート）, §1.4（絵文字方針）",
+    "issue": "祝福系メッセージ等で絵文字使用可だが、支援技術での冗長読み上げ（重複語）や意味不明読み上げの回避要件が未明記。",
+    "suggestion": "絵文字は装飾に限り aria-hidden=\"true\" を付与。意味を持つ場合はテキスト文言を優先し、絵文字はSR非読み上げ。単独絵文字は避け、常に説明テキストを併記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "複数（ボトムタブ直上要素・最下段ボタン群・ダイアログ内）",
+    "issue": "新規フォーカス時にUIが他要素に隠れる可能性（SC 2.4.12 Focus Not Obscured）。固定ボトムタブ/ボトムシート/トーストとフォーカスインジケータの重なりが仕様として未対策。",
+    "suggestion": "focus-visible発火時にscroll-into-view + 余白確保（safe-areaとタブ高を加味）。下端付近の要素にはscroll-margin-bottomを設定。ダイアログ内は最終要素のフォーカスリングが切れないpaddingを確保。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§9 トークンブロック vs §3.3",
+    "issue": "行間トークンが§3.3ではサイズ別（--line-height-xs 等）だが、§9では --line-height-display/heading/body が併記され不整合。可読性・実装参照先が分散。",
+    "suggestion": "行間トーク���をサイズ別に統一し、§9の旧系（display/heading/body）は削除 or エイリアス化。実装ガイドに「本文=1.5以上」を明記し、ユーザーCSSのText Spacing適用時にクリッピングが起きない検証も追記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": "Glass ONでのテキスト可読性要件（背面コンテンツの影響を受けても4.5:1を下回らない）が運用上の検証に依存。背景画像/動画が今後入る場合にリスク。",
+    "suggestion": "glass-surface上の本文/ボタンは、背景の平均輝度を問わず4.5:1を満たすテストを追加（E2EでLCP背景/飽和背景を重ねたケース）。必要に応じ --card-bg の不透明度を自動的に引き上げるテーマ別ガードを用意。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.6 prefers-reduced-motion",
+    "issue": "全体的にtransition/animationを1msに短縮しているが、ユーザーの期待は「基本無効化」であることが多い。1msでも点滅的に見えるケースがある。",
+    "suggestion": "汎用はanimation: none / transition: none ��切替え、必要最小限（進行表示）だけ100ms残す現行例外方針を維持。粒度の高い例外指定（対象セレクタ限定）に変更。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-901",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.1 Night Sky（コントラスト実測）",
+    "issue": "主要組合せのAA検証結果（抜粋）: text-primary #E6EDF3 / bg-primary #0D1117 ≈ 13.8:1、text-secondary #9BA7B4 / bg-primary ≈ 5.6:1、text-hint #7A8593 / bg-primary ≈ 4.7:1、リンク --accent #79C0FF / bg-primary ≈ 6.1:1、Primaryボタン #FFFFFF / #1A5FC8 ≈ 6.0:1、Dangerボタン #FFFFFF / #F85149 ≈ 4.5:1。すべてAA達成。",
+    "suggestion": "現状維持。フォーカスリングはR-002のアウトライン併用で2.4.11の確実性を高める。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-902",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.2 Dawn（コントラスト実測）",
+    "issue": "主要組合せのAA検証結果（抜粋）: text-primary #2C2520 / bg-primary #FBF8F4 ≈ 14:1、text-secondary #5C5045 ≈ 7.1:1、text-hint #6A5E52 ≈ 5.9:1、リンク --accent #8F4D1F / bg-primary ≈ 6.4:1、Danger #FFFFFF / #A71B26 ≈ 6+:1。テキストはAA達成。一方、--accent-subtle 背景はR-001参照（非テキスト3:1未満）。",
+    "suggestion": "R-001の是正（ボーダー追加 or 不透明度引上げ）を実施の上、再計測を推奨。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-903",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.3 Harajuku Light（コントラスト実測）",
+    "issue": "主要組合せのAA検証結果（抜粋）: text-primary #2A1A20 / bg-primary #FDF6F7 ≈ 13+:1、text-secondary #5E434D ≈ 6+:1、text-hint #7C5B66 ≈ 6+:1、リンク --accent #C43361 / bg-primary ≈ 5.3:1、Danger #FFFFFF / #C93000 ≈ 5.4:1。テキストはAA達成。--accent-subtle 背景はR-001参照（非テキスト3:1未満）。",
+    "suggestion": "R-001の指針に沿ってUIコンポーネントの可視境界を強化。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-904",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.4 Harajuku Dark（コントラスト実測）",
+    "issue": "主要組合せのAA検証結果（抜粋）: text-primary #F5E8EE / bg-primary #140A10 ≈ 14+:1、text-hint #8C7480 ≈ 4.5:1、リンク --accent #F5A9BF / bg-primary ≈ 6+:1、Primaryボタン #140A10 / #F5A9BF ≈ 10.3:1、Danger #FFFFFF / #F85149 ≈ 4.5+:1。ダーク系はテキスト/ボタンともにAA達成。",
+    "suggestion": "維持。focus-outline（R-002）を追加し、低視力環境での指標確実性を底上げ。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  }
+]

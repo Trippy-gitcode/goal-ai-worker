@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "実装: 2.AuthCallback.jsx §error_description 処理",
+    "issue": "URLSearchParams.get() で既にデコード済みの error_description をさらに decodeURIComponent しており、値にリテラルの % が含まれる場合に URI malformed で例外→意図せぬエラー分岐になる可能性がある。",
+    "suggestion": "URLSearchParams の戻り値をそのまま使い、'+'→空白置換のみ行う。二重 decode をやめるか、decode は try/catch で安全に行うユーティリティを用意（% が不正なら decode せず素通し）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ミッション定義 要件2-3（/auth/callback 成否分岐・ローディング表示）",
+    "issue": "ネットワーク断・遅延時に exchangeCodeForSession/getSession が解決しない場合、無限に「認証確認中…」のままハングするタイムアウト/リトライ戦略が無い。",
+    "suggestion": "全体タイムアウト（例: 10〜15秒）とオフライン検知（navigator.onLine）を導入し、タイムアウト時はユーザーに明示（再試行ボタン/��動遷移）を提示。Promise.race でタイムアウトと競合させ、AbortController で fetch を中断可能に。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "実装: 2.AuthCallback.jsx フロー(2→3)",
+    "issue": "URL に code があるが交換に失敗し、ローカルに既存の別ユーザー session が残っている場合でも、getSession で非 null を検出して成功扱いで '/' へ遷移してしまう。意図しないアカウントへの継続（アカウント取り違え）を招く恐れ。",
+    "suggestion": "code が存在する場合は「このページ滞在中に新規に確立されたセッションのみ」を成功条件にする（例: マウント前の user.id を保持し、交換後の session.user.id と比較。未更新ならエラー扱い）。あるいは onAuthStateChange の SIGNED_IN 受信を成功条件にする。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §7.5 と 実装: 2.AuthCallback.jsx",
+    "issue": "CSS トークンでは --duration-celebration=800ms だが、JS の WELCOME_HOLD_MS=900ms と不一致。将来的なトークン変更時にずれが発生するリスク。",
+    "suggestion": "JS から CSS 変数を参照して持ち時間を算出（getComputedStyle(document.documentElement).getPropertyValue('--duration-celebration') を ms にパース）。もしくはトークン値に厳密に合わせる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §7.6 と 実装: 2.AuthCallback.jsx（エラー遷移）",
+    "issue": "reduced-motion 時は成功時の演出をスキップしているが、エラー時の2秒ウェイトは残る。アニメーションではないが、感覚過敏ユーザーに不要な待ち時間となる可能性。",
+    "suggestion": "prefers-reduced-motion の場合はエラー時も即座に '/auth?mode=login' へ置換遷移するか、短縮する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "実装: 2.AuthCallback.jsx / 3.AuthCallback.css",
+    "issue": "error_description の生文字列をそのまま表示するため、超長文・非 ASCII・連結記号が多い場合に改行/折返しが効かずレイアウト崩れの恐れがある。",
+    "suggestion": "CSS に word-break: break-word; max-width を適用し、JS 側でメッセージ長を一定以上でトリム（末尾に省��記号）する。詳細は開閉式で表示する等。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ミッション定義 要件5 と 実装: 6.supabase.js",
+    "issue": "SSR/prerender 将来対応の趣旨で bootstrapAuth の実行タイミングはずらしているが、supabase クライアントは import 時に作成され、環境変数未設定で即 throw。SSR 実行環境で評価時に落ちる可能性。",
+    "suggestion": "supabase クライアント初期化を遅延（factory 関数）し、ブラウザ環境でのみ実行。もしくは SSR ではダミークライアント/ノップを返し、環境変数未設定時はクライアント初期化をスキップして警告ログに留める。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "実装: 5.auth.js signUpWithEmail",
+    "issue": "emailRedirectTo を window.location.origin 直結で生成しており、サブパス配備（例: https://example.com/app/）やマルチ環境で不整合が起きる可能性。",
+    "suggestion": "BASE_URL を環境変数で明示し new URL('/auth/callback', BASE_URL) で組み立てるか、<base> / ルーターのベースパス設定を参照して��成する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "実装: 2.AuthCallback.jsx（エラー分岐）",
+    "issue": "Supabase コールバックの type（signup/recovery/magiclink 等）を見ずに、失敗時は常に '/auth?mode=login' に遷移。サインアップ確認失敗時もログイン画面に飛び、文脈がずれる。",
+    "suggestion": "search/hash の type パラメータを参照し、type=signup の場合は '/auth?mode=signup' へ誘導する等、モードに応じた戻り先と文言を出し分ける。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "実装: 2.AuthCallback.jsx（ARIA）",
+    "issue": "role=\"status\" と aria-live=\"polite\" を同時指定しており冗長。さらにウェルカム表示を 900ms で即遷移するため、スクリーンリーダーが全文読み上げ前に画面が遷移する可能性がある。",
+    "suggestion": "role か aria-live のどちらかに統一（role=status で十分）。読み上げ考慮でウェルカム表示中は SR 専用で非表示テキストを残すか、最小表示時間を延ばす（reduced-motion は即遷移で維持）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "Supabase PKCE flow 前提 と 実装: 2.AuthCallback.jsx（PKCE 交換）",
+    "issue": "detectSessionInUrl=true の自動交換と手動 exchangeCodeForSession の重複実行でレースが起き得る。現状は例外を握り潰しているが、不要呼び出しによる無駄なリクエスト・ログ汚染の可能性。",
+    "suggestion": "onAuthStateChange の SIGNED_IN を短時間（例: 300ms）待ってから未サインインなら手動交換を試す、または「手動交換は自動交換が無効なときのみ」に限定するガードを入れる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "実装: 2.AuthCallback.jsx（エラー分岐とタイマー）",
+    "issue": "getSession が未確立で一旦エラー分岐・2秒後に '/auth?mode=login' へ遷移キューをセットした後、遅延して detectSessionInUrl→SIGNED_IN が到達しても、エラータイマーがキャンセルされず誤ってログイン画面へ遷移し得る（ネットワーク遅延・同時操作時のレース）。",
+    "suggestion": "AuthCallback 内でも onAuthStateChange を購読し、SIGNED_IN を受けたらエラータイマーをク��アして成功フローへ遷移。もしくは Promise.race([手動交換, サインインイベント, タイムアウト]) で最終判定する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "実装: 6.supabase.js（storage 設定）",
+    "issue": "Safari プライベートモード等で localStorage が使用不可の場合、persistSession=true により内部で例外が発生する可能性（ライブラリ版差異あり）。アプリ側での安全なストレージ実装がない。",
+    "suggestion": "Supabase クライアント作成時に storage オプションへ safeStorage ラッパー（try/catch で getItem/setItem/removeItem を no-op/メモリ代替）を渡す。利用不可時は persistSession を false に落とすログを出す。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "実装: 3.AuthCallback.css（高さ単位）",
+    "issue": "min-height: 100dvh は新しめの単位で、古いブラウザでは未対応の可能性がある。",
+    "suggestion": "フォールバックとして min-height: 100vh を先に書き、対応環境で 100dvh を上書き。@supports(height: 100dvh) で条件分岐してもよい。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "実装: 5.auth.js signUpWithEmail",
+    "issue": "window 非存在時（将来の SSR/プリレンダやテスト）に emailRedirectTo を undefined にしており、Supabase 側の site_url に依存した不一致（別ドメインに飛ぶ等）が起こり得る。",
+    "suggestion": "常にサーバ構成と一致する BASE_URL を env から与え、クライアントでもサーバでも一貫した redirect URL を生成。window 依存を排除する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "テスト要件（本ミッション後続）と実装: 2.AuthCallback.jsx",
+    "issue": "オフライン・高遅延・PKCE 失敗・used code・reduced-motion など本書で強調されるエッジケースの自動テスト観点が未定義（E2E は後続予定だが単体/結合テストの最低限の形がない）。",
+    "suggestion": "Supabase をモックした単体テストで以下をカバー: 1) code あり/なし + 成功/失敗/タイムアウト 2) 既存 session ありで code 失敗時はエラー扱いにするガード 3) onAuthStateChange 遅延到着でエラータイマーがキャンセルされること 4) prefers-reduced-motion で即遷移。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

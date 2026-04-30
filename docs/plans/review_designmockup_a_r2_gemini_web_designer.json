@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "サインアップボタン",
+    "issue": "disabled状態のボタンの背景色とテキスト色のコントラストが極端に低く、ボタンの存在自体が視認困難確実な状態（WCAG AA不適合）。",
+    "suggestion": "仕様書の `--bg-disabled` と `--text-disabled` の組み合わせを見直し、最低限のコントラスト比（3:1以上）を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択肢のイラスト",
+    "issue": "アバターのイラストが非常に簡素な���文字レベルであり、ブランドDNAの「洗練＋親しみ」や「自分自身のアバターとして自己投影する」というコンセプトから乖離してチープな印象を与える。",
+    "suggestion": "仕様書にある「フラットベクター風、肌/服/髪を単色ベース＋1段濃淡で表現」に沿った、より洗練されたイラストに差し替える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタスクリスト左側",
+    "issue": "タスクの完了状態が色（青丸、緑丸）のみで表現されており、チェックマーク等の形状による区別がないため、色覚多様性への配慮（WCAG 1.4.1 カラーのみ伝達禁止）に抵触している。",
+    "suggestion": "仕様書通り、完了状態のタスクには明確なチェックマークアイコンを表示し、形状でも判別できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "ハーフモーダル下部のアクションボタン",
+    "issue": "ステータスが「完了済み」となっているタスクに対して、「進め方を聞く」「詰まりを相談」というAI相談ボタンが表示されたままになっている。",
+    "suggestion": "完了済みのタスクではAI相談ボタンを非表示にするか、完了タスク用の別のアクション（振り返りなど）に置き換える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧の完了済みタスク",
+    "issue": "完了済みタスクのテキスト（取り消し線が引かれた部分）のコントラストが著しく低く、背景に沈んで文字が読めない（WCAG AA不適合）。",
+    "suggestion": "完了済みテキストの色を `--text-disabled` 等の適切なトークンに設定し、最低限の可読性を担保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s30_me",
+    "location": "サブタブナビゲーション",
+    "issue": "非アクティブなサブタブ（DISCOVER, FRIENDS, SHOP）のテキストカラーのコントラスト比が不足しており、視認性が低い。",
+    "suggestion": "非アクティブタブのテキスト色に `--text-secondary` などを適用し、背景色に対して4.5:1以上��コントラスト比を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s20_talk",
+    "location": "チャット画面左側のAIアイコン",
+    "issue": "AIのアイコンがMEタブのユーザーアイコンと同じ一般的な人型シルエットになっており、AIパートナーとしての独自のキャラクター性や特別感が欠如している。",
+    "suggestion": "AIパートナー専用の独自アイコン（仕様書3.6「AIパートナーアイコン」）をデザインして適用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "ハーフモーダル下部のアクションボタン群",
+    "issue": "4つのボタン（編集、削除、進め方を聞く、詰まりを相談）が同等のサイズと視覚的ウェイトで並んでおり、主要なアクションがどれか直感的に分かりづらく視線が迷う。",
+    "suggestion": "重要度に応じてボタンのスタイル（Primary, Secondary, Ghost, Danger）を使い分け、視覚的な優先順位を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "所要時間選択チップ",
+    "issue": "非アクティブなチップ（5分, 15分など）のテキストコントラストが極めて低く、選択肢として認識しづらい。",
+    "suggestion": "非アクティブチップのテキスト色と枠線色を見直し、WCAG AA基準を満たすコントラストを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

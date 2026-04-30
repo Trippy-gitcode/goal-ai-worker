@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存: {上流ファイルのパス + バージョン}」が自由記述で単一想定のため、複数依存の機械可検証性が低い（自動整合チェックや循環検出が困難）。",
+    "suggestion": "ヘッダーをYAML Front Matter化し、dependenciesを配列で定義（path, version, section可）。例: '---\\ndependencies:\\n  - path: docs/project_v1.md\\n    version: v1.3\\n    section: §3\\n  - path: docs/design_system.md\\n    version: v1.1\\n---'。併せてdoc_header_lint.shを追加して必須キー/複数依存/バージョン形式を検証しcanopyに組み込む。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7（↔ §13.4）",
+    "issue": "Phase 0完了基準で「8ペルソナ×2モデルのAIレビュー」とあるが、§13.4の標準は5ペルソナ。基準が不一致で実行判断が揺れる。",
+    "suggestion": "基準を統一する。推奨: 標準5ペルソナ×2モデルを最低要件にし、最大8まで任意拡張と明記。§13.4か§19.7のいずれかを修正し、review_gate.shに最��件数検証（ペルソナ×モデル）を追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力がMarkdown表のみで、canopyやスクリプトから完了基準（5社以上/「Lais方針」全行記入/差別化≥3）を機械判定しづらい。",
+    "suggestion": "Markdownに加えてJSON出力（benchmark_{scope}.json）を必須化。スキーマ例: {apps:[{name,url,store,dl,rate,checked_at}], matrix:[{feature,competitors:{A:true..}, lais_policy:\"差別化|同等|未対応\", link_to_spec:\"SPEC-...\"}], differentiators:[...] }。benchmark_lint.shを追加し、件数・空欄・差別化数を検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレート）",
+    "issue": "「パフォーマンステスト」の測定方法・指標・閾値・環境定義が未定義で、PASS/FAIL判定が運用依存になる。",
+    "suggestion": "e2e_fullflow_test.mdに性能測定ブロックを必須化（指標: TTI/LCP/入力遅延/SSR応答; 環境: デバイス/ネットワークプロファイル; 閾値: 例TTI≤3s/モバイル3G; 計測方法: Playwright+tracing or Lighthouse CI）。出力JSONを保存しcanopyで閾値検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの「dev-system準拠: docs/plans/dev_system_spec.md §19」は、アプリ側リポジトリにそのパスが存在しない可能性があり参照が不安定。",
+    "suggestion": "ヘッダーにdev-systemの参照を'conforms_to: dev-system@vX.Y.Z (repo_url#tag)'形式で記載し、.dev-system.versionと一致検証するdoc_header_lint.shを追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§19.5 / §19.6",
+    "issue": "「バージョンなしの依存宣言禁止」とあるが、アプリ仕様書のバージョニング規約（SemVer準拠か、vN系か、patchの扱い）が未定義。",
+    "suggestion": "各仕様書のバージョン規約をSemVerに統一（例: major=構造変更、minor=機能/範囲追加、patch=誤記修正）。ヘッダーにversionとprev_version、spec_changelog.mdに差分摘要を必須化し、doc_version_lint.shで遡及整合を検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§19.6",
+    "issue": "依存方向は定義されているが、衝突時のSoT優先度（例: トークンはdesign_systemが正、本画面寸法はdesign_specが正 等）が§19内に明記されていない。",
+    "suggestion": "§19.6にSoT優先マップを追加（例: tokens→design_system、画面遷移→ux、業務ルール→project、API/RLS→reference、テスト仕様→e2e）。下流は上流のSoTを上書き不可と明文化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.6",
+    "issue": "循環参照と矛盾禁止は規定されているが、検出の自動化がない（人的レビュー依存）。",
+    "suggestion": "doc_graph_check.pyを追加し、ヘッダーdependenciesをDAG化→循環/未解決ノード/バージョン不一致を検出。canopyに統合してFAIL条件化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4（design_system.md テンプレート）",
+    "issue": "アクセシビリティの色コントラスト/カラーブラインド配慮トークンがテンプレートに含まれていない（UX側§N+6はあるがトークン化されていない）。",
+    "suggestion": "design_system.mdに'§9 アクセシビリティトークン（WCAG 2.1 AAコントラスト/色覚多様性セーフパレット/フォーカス可視トークン）'を追加。G9スクショ検証にコントラストチェック（Lighthouse CIなど）のレポート添付を必須化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（system_map.md テンプレート）",
+    "issue": "各処理フローの異常系ハンドリング（リトライ/バックオフ/冪等性/補償トランザクション）の書式がテンプレートに欠落。",
+    "suggestion": "system_map.mdに'§5 異常系・リカバリ設計（Retry/Backoff/Idempotency/Compensation/タイムアウト）'を追加。incident_runbook.mdとの対応表（異常→影響→対処）も必須化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-111",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "「調査対象」表にURL/対象プラットフォーム/アプリ版/地域/データ取得方法の列がなく再現性が低い。",
+    "suggestion": "列を拡張: {URL, OS/Store, App Version, 地域, 取得方法（手動/スクレイプ）, 調査日時} を追加。benchmark_lint.shで空欄検出をWARN化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-112",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダーに承認ガバナンス情報（承認者/承認日時/承認方式🟢🟡���）がなく、§6のリスク承認と文書確定の紐付けが人手依存。",
+    "suggestion": "ヘッダーに'approvals: {risk: 🟢/🟡/🔴, approver: PO名, approved_at: 日時, evidence: issue/PR URL}'を追加。status_guard.shでCONFIRMED化を'approval.evidence存在 + review_gate.sh=PASS'のときのみ許可。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-113",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "差別化マッピングの「対応セクション」が自由記述で脆く、セクション名変更でリンク切れが起きる。",
+    "suggestion": "§12のSPEC-ID体系で参照（例: '対応SPEC: SPEC-TODAY-003'）。benchmark_lint.shでID存在を検証し、e2e_fullflow_test.mdの対応テストにラベル付与を必須化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-114",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.5 / §19.7",
+    "issue": "「CONFIRMED: CRITICAL 0達成」の判定と各仕様書ヘッダーStatusの整合を自動で担保する仕組みがない。",
+    "suggestion": "各仕様書ヘッダーに'review_refs: [docs/plans/review_project_v1.json, ...]'を追加し、review_gate.shで当該JSON群のCRITICAL=0を確認→不一致時はStatus=CONFIRMEDをFAIL化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-115",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§19（横断）",
+    "issue": "AI（ADV）が誤った判断で仕様を確定させた場合のリカバリ手順が§19内に明示されていない（運用上の暴走防止が弱い）。",
+    "suggestion": "§19に「仕様誤判定リカバリ」手順を追加: 1) 当該仕様書のStatusを即DRAFTへロールバック 2) spec_changelog.mdにREVERTを追記 3) review_refsを再実行（最低3件） 4) §6承認ルール🔴で再承認 5) 影響下流のdependenciesを自動列挙→一括更新。status_guard.shで'誤判定フラグ'が立っている間はStep 4実装フローを停止。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-116",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダー「責務: 1行」のみでは責任の所在が曖昧で、AI⇔人間の境界が文書単位で可視化されにくい。",
+    "suggestion": "RACIを簡易導入（owner: ADV、approver: PO、consulted: ENG、informed: All）をヘッダーに追加。doc_header_lint.shでowner/approver必須を検証し、変更時は§16.7の一括更新報告に承認者を含める。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

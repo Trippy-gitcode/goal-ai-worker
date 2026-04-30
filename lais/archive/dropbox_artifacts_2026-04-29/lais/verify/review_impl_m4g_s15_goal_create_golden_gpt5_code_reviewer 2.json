@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "1",
+    "issue": "onCreate 実行直後に state をリセットしてモーダルを閉じており、将来的に非同期保存（Supabase 連携など）で失敗した場合にユーザー入力が失われるリスクが高い。",
+    "suggestion": "onCreate を Promise を返す設計にし、成功時のみ close + state リセットを行う。失敗時はエラー表示と入力保持（loading/disabled 状態の付与）を行う。同期でも将来に備え try/catch（または .catch）で保護しておく。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "CTA の無効化が aria-disabled のみで、要素自体はフォーカス可能・クリック可能（onClick ガードで抑止）な実装。スクリーンリーダーやキーボード操作で“有効そうに見える”挙動になりうる。",
+    "suggestion": "実際の無効化には disabled 属性を併用し（必要なら aria-disabled も残す）、tab 移動から除外する。focus trap の対象計算でも disabled を除外済みのため整合がとれる。onClick 側の防御コードは不要���なる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "独自の focus trap が display:none/visibility:hidden や要素の不可視状態、aria-disabled（フォーカス可能だが操作不可）などのケースを考慮していないため、将来拡張で想定外の要素にフォーカスが飛ぶ可能性がある。",
+    "suggestion": "tabbable/focus-trap など実績あるユーティリティの導入、もしくは clientRects/offsetParent 等を用いた可視性チェック、aria-disabled の明示除外などロジックを強化する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "入力の id が固定文字列（s15-name-input）のため、将来的に同コンポーネントが複数マウントされると id 衝突の恐れがある。",
+    "suggestion": "useId を用いて id を動的生成し、label と input を 1:1 に関連付ける。label 側は htmlFor に切り替える。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "label の関連付けに for 属性を使用しており、React 互換���点では htmlFor の方が安全（移行容易性）。",
+    "suggestion": "Preact でも htmlFor は利用可能なため、htmlFor に統一して将来の互換性を高める。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "dueLabel を useState で保持しているが不変値であり再レンダリング原因になりうる。",
+    "suggestion": "単純な定数（const dueLabel = '期限なし'）に置き換える。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "1",
+    "issue": "body スクロールロックが単純に style.overflow を上書き・復元しており、将来的に複数モーダルや別箇所のロックと競合した場合に復元順序で破綻する可能性がある。",
+    "suggestion": "ロック回数の参照カウント方式（open ごとに +1 / close ごとに -1、0 でのみ解除）にするか、既存の body-scroll-lock 系ユーティリティの導入で衝突を回避する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "期限表示ブロックに aria-readonly を付与しているが、div（非ウィジェット）には意味を持たず支援技術に誤解を与える可能性がある。",
+    "suggestion": "aria-readonly は削除する。読み取り専用であることを伝える必要があるなら、適切なロール（例: role=\"textbox\" + aria-readonly=true）か単なるテキスト表現に留める。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "fieldset 内でさらに role=\"group\" を付けたラッパーを入れており、グルーピングが冗長でスクリーンリーダーのアナウンスが過多になる可能性がある。",
+    "suggestion": "fieldset + legend で十分に意味付けされているため、内側の role=\"group\" は削除する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "カテゴリトグルの onClick に毎回新しいクロージャ（`() => toggleCategory(cat.id)`）を生成しており、項目数が増えると再レンダリング負荷の一因になる。",
+    "suggestion": "ハンドラマップを useMemo で構築する、または data-id を用いた単一ハンドラでイベント委譲するなどして、不要な関数生成を減らす。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "SVG 属性に dash-case（stroke-width 等）を使用しており、React 互換性の観点で camelCase（strokeWidth 等）に統一した方が移植性が高い。",
+    "suggestion": "SVG 属性は camelCase に統一する（strokeWidth、strokeLinecap、strokeLinejoin など）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "import パスで拡張子（.jsx）を明示しており、プロジェクト内の他箇所と慣習が混在すると可読性が落ちる。",
+    "suggestion": "ビルド設定に合わせて拡張子の有無を統一する（可能なら拡張子なしに統一）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2",
+    "issue": "CSS が --tap-target-min 等のトークンに依存しているが、提示されたトークン抜粋には未掲載。未定義環境では意図しないサイズになる可能性がある。",
+    "suggestion": "プロジェクト全体のトークン定義を確認し、未定義時のフォールバック（例: min-height: 44px など spec 由来の値）を併記するか、ビルド時検証を導入する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "1",
+    "issue": "Escape 用と Tab 用に document への keydown リスナーを 2 本登録しており、責務が分散している。",
+    "suggestion": "1 本の keydown ハンドラで Escape/Tab を分岐処理することで可読性とデタッチ漏れリスクの低減を図る（現状もリークはしていないが簡潔化できる）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

@@ -1,0 +1,349 @@
+/*
+ * S-14 Goal Detail — design_spec_v1.md §4.7 準拠
+ * フルスクリーン画面（S-10 と同構造）
+ * LP-001/011/013/014 + LP-015候補（S14-6/S14-10a Active border-color 残し）事前適用
+ */
+
+/* Container ------------------------------------------------------------- */
+.s14-goal {
+  min-height: 100dvh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: var(--space-md) var(--space-lg) var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+}
+
+/* LP-013: iOS safe-area 段階的フォールバック */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .s14-goal {
+    padding-bottom: calc(env(safe-area-inset-bottom) + var(--space-2xl));
+  }
+}
+
+/* LP-014: programmatic vs keyboard focus 分離 */
+.s14-goal:focus:not(:focus-visible) { outline: none; }
+.s14-goal:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* S14-1 ナビゲーション ------------------------------------------------- */
+.s14-nav {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap-target-min);
+}
+
+.s14-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: var(--tap-target-min);
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-sm) 0 0;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: var(--font-family-base);
+  margin-left: calc(var(--space-md) * -1);
+  padding-left: var(--space-md);
+  border-radius: var(--radius-sm);
+}
+
+.s14-back-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-label);
+}
+
+.s14-back:focus:not(:focus-visible) { outline: none; }
+.s14-back:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* S14-2 ゴールタイトル ------------------------------------------------ */
+.s14-title {
+  font-size: var(--font-size-xl); /* 28px */
+  font-weight: var(--font-weight-regular);
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  line-height: var(--line-height-ja-heading);
+  margin: 0;
+  padding-top: var(--space-md);
+}
+
+/* S14-3 大進捗表示 ---------------------------------------------------- */
+.s14-progress {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: var(--space-lg) 0 0;
+  color: var(--accent);
+  letter-spacing: -2px;
+}
+
+.s14-progress-pct {
+  font-size: var(--font-size-3xl); /* 48px */
+  font-weight: var(--font-weight-thin); /* 200 */
+}
+
+.s14-progress-unit {
+  font-size: var(--font-size-lg); /* 20px */
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+/* S14-4 大プログレスバー ----------------------------------------------- */
+.s14-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--accent-subtle);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-top: var(--space-sm);
+}
+
+.s14-progress-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-pill);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+/* S14-5 / S14-6 メタデータ行 ----------------------------------------- */
+.s14-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.s14-days-left {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  letter-spacing: var(--letter-spacing-ja);
+}
+
+.s14-days-left svg {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/*
+ * S14-6 カテゴリタグ
+ * LP-015 候補: Active state (--accent-subtle 塗り) は border-color を残して
+ * WCAG 1.4.11 Non-text Contrast 3:1 を確保する。
+ * Stage 7-3: 色値は theme トークン経由 (--theme-color-accent / --theme-color-bg)。
+ */
+.s14-cat-tag {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-size: var(--font-size-xs);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--accent);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  line-height: var(--line-height-label);
+}
+
+/* S14-7 タスクセクションラベル ---------------------------------------- */
+.s14-task-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-label);
+  margin: var(--space-xl) 0 var(--space-sm);
+}
+
+/* S14-8 タスク行（spec で「S10-4 と完全一致」明記） ------------------- */
+.s14-task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.s14-task-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* S10-4 と同状態別チェック */
+.s14-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: transparent;
+}
+
+.s14-check-done {
+  border-color: var(--success);
+  color: var(--success);
+  background: var(--success-subtle);
+}
+
+.s14-check-active {
+  border-color: var(--accent);
+}
+
+.s14-check-scheduled {
+  border-color: var(--border-strong);
+}
+
+.s14-task-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-family-base);
+  text-align: left;
+  min-width: 0;
+  border-radius: var(--radius-sm);
+}
+
+.s14-task-card:focus:not(:focus-visible) { outline: none; }
+.s14-task-card:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s14-task-name {
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--letter-spacing-ja);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.s14-task-name-done,
+.s14-task-name-scheduled {
+  color: var(--text-secondary);
+}
+
+.s14-task-name-active {
+  color: var(--text-primary);
+}
+
+.s14-task-date {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-left: var(--space-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+/* S14-9 + タスクを追加 ------------------------------------------------- */
+.s14-add-task {
+  display: inline-block;
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: var(--space-md) 0;
+  min-height: var(--tap-target-min);
+  margin-left: 0;
+  letter-spacing: var(--letter-spacing-ja);
+}
+
+.s14-add-task:focus:not(:focus-visible) { outline: none; }
+.s14-add-task:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* S14-10 アクションボタン行 ------------------------------------------- */
+.s14-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-xl);
+}
+
+.s14-action-ai,
+.s14-action-edit,
+.s14-action-delete {
+  flex: 1;
+  min-height: var(--tap-target-min);
+  height: var(--tap-target-min);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+/* S14-10a AI 相談（active 既定） — LP-015 候補 border 残し */
+.s14-action-ai {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-weight: var(--font-weight-semibold);
+  border: 1px solid var(--accent);
+}
+
+/* S14-10b 編集 */
+.s14-action-edit {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
+}
+
+/* S14-10c 削除 */
+.s14-action-delete {
+  background: var(--danger-solid);
+  color: var(--theme-color-button-text-inverse);
+  border: 1px solid var(--danger-solid);
+  font-weight: var(--font-weight-semibold);
+}
+
+.s14-action-ai:focus:not(:focus-visible),
+.s14-action-edit:focus:not(:focus-visible),
+.s14-action-delete:focus:not(:focus-visible) { outline: none; }
+
+.s14-action-ai:focus-visible,
+.s14-action-edit:focus-visible,
+.s14-action-delete:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* LP-001: prefers-reduced-motion 縮退 ---------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .s14-progress-bar-fill,
+  .s14-action-ai,
+  .s14-action-edit,
+  .s14-action-delete {
+    transition-duration: 1ms !important;
+  }
+}

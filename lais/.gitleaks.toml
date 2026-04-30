@@ -1,0 +1,15 @@
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+  '''node_modules/''',
+  '''dist/''',
+  '''\.env\.example''',
+  '''verify/.*\.json''',
+  '''verify/.*\.md''',
+]
+# tests/.env.test was committed then deleted. Secret rotation required separately.
+commits = [
+  '''5a0935810832b24c42a4e445f4c0e86b98fe53c5''',
+]

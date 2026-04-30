@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §13.1",
+    "issue": "オフラインで未同期データがある状態での「強制ログアウト」は、IndexedDB等のローカルデータを全消去するため、ユーザーが警告を読み飛ばした場合に確実にデータ損失が発生する。",
+    "suggestion": "オフラインかつ未同期データが存在する場合は、ログアウトボタンを無効化するか、タップ時に「データ同期が完了するまでログアウトできません」というエラートーストを表示し、強制ログアウトの選択肢を排除してデータ損失を構造的に防ぐ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §5.3",
+    "issue": "オンボーディング完了後にGROW画面に遷移し初回タスクが表示されるが、普段シンプルなアプリしか使わないユーザーにとって「⭕をタップして完了する」という操作は自明ではない。操作を促す初回体験（チュートリアル）が定義されていない。",
+    "suggestion": "初回GROW画面表示時に、初回タスクの⭕ボタンをハイライトし、「タップしてタスクを完了してみましょう」というツールチップを表示するチュートリアル仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §5.1.1, §5.2",
+    "issue": "オンボーディングのステップ3（目標ジャンル）と4（最初のゴール）は任意入力だが、「スキップ」ボタンが非表示のため、自己成長に興味がないユーザーは「何か選ばないと進めない」と勘違いし、面倒に感じて離脱するリスクが高い。",
+    "suggestion": "ステップ3と4の画面に、明確な「スキップ」または「あとで設定する」ボタンを配置し、無選択で進めることを視覚的��明示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.4",
+    "issue": "QRスキャン画面でカメラ許可を拒否した場合のフォールバックとして「[リンクで追加する] ボタン（シェアリンク入力欄を表示）」とあるが、この入力欄がどこにどのように表示されるのか（インライン展開か、別モーダルか）が定義されていない。",
+    "suggestion": "カメラ拒否時の画面内にインラインでテキストフィールドと「追加」ボタンを表示する、または専用のハーフモーダルを立ち上げる画面遷移を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §5.0.2",
+    "issue": "メール内のリセットリンクをタップしてアプリに戻った際、URLパラメータ（ワンタイムトークン）をどのように受け取って「Step 2: 新パスワード設定画面」を描画するのか、ルーティングと画面遷移のトリガーが定義されていない。",
+    "suggestion": "URLパス（例: `/reset-password?token=...`）にアクセスした際のルーティング処理と、トークン検証中のローディング状態（スケルトンまたはスピナー）を仕様に追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3",
+    "issue": "S-12 タスク追加ハーフモーダルに7つもの入力フィールドが並んでおり、LINE等しか使わない一般ユーザーにとっては視覚的に重く、「面倒くさい」と感じさせる原因になる。",
+    "suggestion": "必須項目（タスク名）とよく使う項目（予定日）のみを初期表示し、開始時刻や所要時間、ゴール紐付けなどは「詳細設定」としてアコーディオンで折りたたむUIを検討する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3, §6.1",
+    "issue": "Undoスナックバーが「ボトムタブの上16pxで固定表示」とされているが、S-11やS-12などのハーフモーダルが開いた際に、スナックバーがモーダルの裏に隠れるのか、上に表示されるのか（Z-indexの挙動）が定義されていない。",
+    "suggestion": "ハーフモーダル表示中のUndoスナックバーのZ-index挙動を定義する（例：モーダル表示中はスナックバーをモーダルの上に押し上げる、または一時的に非表示にする等）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §3.6",
+    "issue": "自己啓発に興味がないユーザーは自発的にDISCOVERタブを開かない可能性が高い。TALK画面の初回空状態のチップに「ヒアリング」への導線がないため、アプリの核心であるAI自己分析を体験せずに終わる恐れがある。",
+    "suggestion": "TALK画面の初回空状態のチップの一つに「AIからの質問に答える（ヒアリング）」を含めるか、AIの初回メッセージとしてヒアリングを提案する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  }
+]

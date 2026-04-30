@@ -1,0 +1,322 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "1.5 競合ポジショニング",
+    "issue": "Finchで感じた「本格的なタスク管理ができない」はLaisで解消されていそうだが、習慣とゴールの関係性が切り離されており、長期目標（例: 3ヶ月の英語学習）を「習慣×期間」で追えない不満が残る可能性が高い。",
+    "suggestion": "ゴールに対して「習慣の貢献」を紐づけ可能にする（例: ゴール達成条件を『この習慣をN日達成』や『合計X時間』で定義）。少なくともv0.2.0での検討を明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.2 GROW画面",
+    "issue": "タスクのリマインド/通知仕様が未記載。開始時刻・予定日を設定しても通知が来ないと日常運用で致命的な取りこぼしが起きる。",
+    "suggestion": "タスク/ゴールの通知ルール（時刻通知、前日/当日朝のサマリー、スヌーズ、通知チャンネル）とWeb Push非対応環境での代替（メール/アプリ内バナー）を明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3.2 GROW画面",
+    "issue": "Todayに出せなかった未消化タスクの繰り越し/期限超過の扱いが不明。実運用でToDoが埋もれやすい。",
+    "suggestion": "『未消化は翌日に自動繰り越し』『期限超過バッジ表示』『今日にリスケ』等の標準挙動を定義。リストの並び優先度（開始時刻>期限>手動ピン留め等）も追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.2 GROW画面",
+    "issue": "完了の取り消しが30秒限定だと、実生活では後で気づいた誤操作を戻せずストレスになり得る。",
+    "suggestion": "タスク詳細からの再オープン（完了→未完了）を許可し、EXPは差し戻し。履歴に監査ログを残す。取り消し操作は日内に限る等の制限で悪用は防止。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "3.2 GROW画面（EXPプログレス表示） / 4.4 レベルシステム",
+    "issue": "EXPバーの表記が『1,240/2,000』とあるが、4.4では必要累計EXP方式。表示が“このレベル内の必要量”か“累計”か不明で、ユーザ���が成長ペースを誤解する恐れ。",
+    "suggestion": "EXPバーの定義を明記（例: 現レベル開始時点からの進捗）。UIも『レベル内: 240/1,000（累計 1,240）』のように補助表示を検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "4.4 レベルシステム",
+    "issue": "称号の付与タイミングが部分的な抜粋のみで全体基準が不明（例: Lv12でExplorer表示の一方、表では10→11でExplorer）。実装時にズレが生じやすい。",
+    "suggestion": "Lv1〜50の称号マッピング表を完全提示。表示更新のタイミング（到達時/超過時）も定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "4.2 EXP設計",
+    "issue": "タスクEXPが一律10EXPで所要時間・難易度を無視。『30分のメール返信』と『3時間のジム』の価値が同じで、やる気の出しどころが分かりにくい。Habiticaでの“報酬の軽さ”で飽きた問題が再燃しうる。",
+    "suggestion": "一律10を基本にしつつ、AI提案の『挑戦タグ』や所要時間ベースのボーナス（例: 60分以上+5）を“任意”で付与可能に。上限300の中で範囲内調整。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "2.1 プラン / 4.5 EXP上限・不正対策",
+    "issue": "『Pay-to-Win対策：冒険EXPは全プラン共通上限』とある一方、Proで『冒険EXP検出精度向上』を訴求。検出精度差が実質的に冒険EXP獲得率の格差（結果としての獲得量差）を生み、方針に矛盾。",
+    "suggestion": "冒険判定モデルは全プラン同一・共通閾値に統一。上位プランの差別化は“対話品質”や“提案の深さ”に限定。既存文言を修正し矛盾を解消。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "4.3 冒険EXP — AI自動検出",
+    "issue": "AIの誤検出・見逃し時のUXが不明。ユーザーが『本当に冒険だったのに付かなかった/逆に付いた』と感じた際の再判定や手動申請手段がないと不信感につながる。",
+    "suggestion": "付与時にスナックバーで『冒険として記録→取り消し/報告』を提供。未付与時はタスク/ゴール詳細から“冒険として申請”→人手/バッチ再判定キューへ。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2.1 プラン構成",
+    "issue": "Freeが20回/日で核心の『AIパートナー』が制限強め。日中の細かな伴走を想定すると不足で、Basicへの動機にはなるが、まずは継続利用まで辿り着けるか不安。",
+    "suggestion": "Freeの最低保証として『1日3回の“コーチ定例”はカウント消費0』や『週末ロールオーバー最大+20』等、序盤の継続を支える仕組みを検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "6.1 マルチAIルーティング / 7.1 技術スタック",
+    "issue": "GPT-5/Claude Opus/Gemini Proなど将来モデル前提で料金内に収めるのはコストリスクが高い。Premier 1,000回/日はAPI原価次第で赤字化の恐れ。",
+    "suggestion": "MVPは現行・確定提供モデルで試算し、フェアユースを厳格化（例: 300→500/日）または“高コスト応答は自動で長文→要約2段階”など制御を明記。原価連動で将来の上限調整ポリシーも記載。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "6.1 マルチAIルー���ィング",
+    "issue": "モデル名を前面に出すと一般ユーザーには価値が伝わりにくく、期待値ミスマッチ（“GPT-5だから最強”）を招く。",
+    "suggestion": "UIでは『共感モード/調査モード/要約モード』など体験ベース表記にし、モデルはフッターに小さく。プラン比較も体験軸で記述。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "6.3 AI理解メモ / 6.4 AIデータプライバシー",
+    "issue": "対話履歴は90日で削除だが、AI理解メモやDISCOVERの根拠データの保持/更新方針が不明。長期の自己理解が分断される懸念。",
+    "suggestion": "『長期プロファイル（要約ベクトル/カード）は90日制限の対象外』など永続データと短期ログを区別し、更新タイミング・差分学習の仕様を追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3.4 ME - DISCOVER",
+    "issue": "MBTI/性格タイプ表示の根拠や注意喚起がないと“ラベリングの固定化”で逆効果になりうる。",
+    "suggestion": "『参考指標であり固定ではない』注記と、再測タイミング/バイアス注意を明記。任意非表示設定も提供。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5.3 簡易メッセージ/応援",
+    "issue": "ユーザーブロック時の既存スレッド・通知の扱い（既読化/非表示化）が未定義。ハラスメント抑止で重要。",
+    "suggestion": "ブロック即時で互いのメッセージ履歴を非表示（物理削除はしない）・新規送信はRLSで拒否・通知は無効化と定義。通報フローのSLA/対応も追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5.1 友達登録（QR交換）/ 5.3 通知",
+    "issue": "友達リクエスト/メッセージの通知は明記されているが、タスク/ゴール系の重要通知の配信チャネルが未記載。",
+    "suggestion": "『タスク/ゴール通知＝Web Push（PWA時）/アプリ内バナー/メール（任意）』の優先順とユーザー設定を定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2.1 プラン / 2.2 アイテム課金",
+    "issue": "PremierはMVP時にショップ未実装でチケットがComing Soon。即時価値が限定フレーム/優先サポートのみで、価格に対して訴求が弱い印象。",
+    "suggestion": "MVP限定で『月1回の1対1コーチングセッション（テキスト）』や『週次レビューの自動生成』等、即効性のある特典を追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "7.2 認証設計",
+    "issue": "Magic Linkとメール/パスワード併用時の端末紛失・乗っ取り時の復旧フロー（2FA/バックアップコード）が未記載。",
+    "suggestion": "MVPでは少なくとも『新端末ログイン時のメール確認必須』『パスワード再設定のレート制限』『将来的な2FA導入方針』を明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "7.3 PWA",
+    "issue": "PWAのオフライン対応は明記されているが、初回ロードの遅延やアセット競合を防ぐSWのキャッシュ戦略（stale-while-revalidate等）が未記述。",
+    "suggestion": "主要ルートはprecache、APIはnetwork-first＋バックオフ、アバターアセットはcache-first＋versioning等の戦略を記載。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "4.5 EXP上限・不正対策",
+    "issue": "同名タスク5分連打のみを抑制しているが、名称を変えた微小タスク量産で300EXPに容易に到達可能。達成感が薄れ飽きにつながる恐れ。",
+    "suggestion": "短時間に大量作成/完了を検出したら“まとめて1件扱い”や『クールダウン』を導入。AIが“重複/細分化しすぎ”を検知して提案する仕組みも。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3.3 TALK画面 / 6.2 冒険EXP検出",
+    "issue": "TALK以外（例: ゴール作成、新しい友達追加）からの『冒険』行為はAI判定の対象外に見える。自然な行為が評価されない可能性。",
+    "suggestion": "システムイベント（初めてのゴール/新規出会い等）も冒険候補としてキューイング→軽量分類で判定する仕様を追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "3.4 ME画面",
+    "issue": "MEタブにPROFILE/DISCOVER/FRIENDS/SHOPが同居し情報量が多い。初回は“自己理解”と“友達”が混在し、目的地が分散��る恐れ。",
+    "suggestion": "初回はPROFILEとDISCOVERのみ表示し、FRIENDSはオンボーディング後に解放する等のプログレッシブ・ディスクロージャを検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3.5 オンボーディング",
+    "issue": "初回ゴール/タスクがAI提案だが、拒否/再生成/手動入力の自由度や、難易度選択（ライト/標準/チャレンジ）が未定義。",
+    "suggestion": "提案カードを3候補提示し、難易度トグル/スキップを提供。採用した難易度に応じてEXPの“挑戦ボーナス”を自動設定。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "4.2 EXP設計",
+    "issue": "ストリーク罰なしは良いが、ポジティブな継続インセンティブ（可視化）が不明。Finchの“優しさ”に慣れたユーザーでも達成の面白さが薄れる恐れ。",
+    "suggestion": "罰ではなく“祝福”として、連続達成日数に応じた軽い演出/称号/アバターの微アニメを追加（EXPは据え置き）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "9.2 継続要因の取り込み",
+    "issue": "『GitHub風の貢献グラフ』に相当する日/週/月単位の可視化が具体化されていない（どこで、何を集計）。継続モチベが弱まる。",
+    "suggestion": "GROWまたはMEに『カレンダー/ヒートマップ（EXP/完了数/冒険回数）』を明記。フィルタ（ゴール別/カテゴリー別）も最低限定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-026",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "5.3 通知 / 7.1 技術スタック",
+    "issue": "iOSのWeb PushはPWAインストール前提。未インストール時のポーリングではリアルタイム性が大きく低下し、メッセージ/リマインドの体験が劣化。",
+    "suggestion": "未インストール時は『メール通知ON』を初期提案。重要度の高い通知（リクエスト/当日タスク）はメールも併用するフェイルセーフを仕様化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "7.2 RLS",
+    "issue": "QR/シェアリンクの一時トークン失効後のキャッシュ対策（CDN/ブラウザキャッシュ）やリプレイ攻撃耐性（ワンタイム性/スコープ制限）が未記載。",
+    "suggestion": "トークンは単回使用＋IP/UAバインド、レスポンスにno-store付与、サーバー側で使用済みフラグ化・短TTL（例: 10分閲覧）に縮減する等を追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3.2 GROW画面",
+    "issue": "所要時間をタイムライン幅にのみ使用し、予定に落とし込む“時間ブロック”機能がない。仕事後の可処分時間を可視化できず、『結局時間がない』感が解決しづらい。",
+    "suggestion": "簡易カレンダー/時間ブロック（ドラッグ配置）を追加、もしくは外部カレンダー（Google/Apple）へのエクスポート連携を検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-029",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "6.4 AIデータプライバシー",
+    "issue": "PIIマスキングが正規表現中心で氏名・住所などは未検出の可能性を注記しているが、ユーザー向けの“安全ガード”UIが未記載。",
+    "suggestion": "送信前に『個人情報を含めないでください』の常設ヒント、検出時の黄色バナー（送信続行/編集）を実装。将来のNER導入もロードマップ明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-030",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "5.2 図鑑",
+    "issue": "友達のEXP数値非公開は良いが、レベル差がモチベーション低下につながる場合がある。比較より自己内成長を重視したいユーザーに配慮が不足。",
+    "suggestion": "FRIENDSで『レベルを非表示にする/称号のみ表示』のオプションを提供。自分の画面でも“比較を減らす”モードを用意。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-031",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "8.1 MVP",
+    "issue": "『GROW: ゴール達成→大量EXP』とあるが、4.2の定義では+50EXP（別枠）で“大量”という語感と乖離。期待値を誤る可能性。",
+    "suggestion": "文言を『達成演出（花火/称号）を盛大に』に修正し、EXPは+50（別枠）と具体記載。将来はゴール規模に応じた演出強弱を検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-032",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "2.3 収益構造",
+    "issue": "Free→有料の転換導線（アプリ内のどこで、どのタイミングで提示するか）が未定義。価値提案が弱まる。",
+    "suggestion": "TALKの上限到達、ゴール分解時の高度提案、DISCOVERのディープ分析解放時など、文脈別のアップグレードモーダルを定義。A/B方針も記載。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

@@ -1,0 +1,148 @@
+/*
+ * ThemeSwitcher — 4 ラジオ + ミニプレビュー
+ * Stage 7-1 (2026-04-27, STAGE7-1-THEME-FOUNDATION-IMPL-V1)
+ *
+ * 設計:
+ *   - ラジオ input は視覚的非表示（VoiceOver からは読まれる）
+ *   - .lais-theme-switcher-card がクリック可能領域、min-height 44px (WCAG 2.5.5)
+ *   - active 時は --accent カラーで枠線強調
+ *   - 各ミニプレビューは 80 × 40 px の固定サイズ
+ */
+
+.lais-theme-switcher {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 8px);
+  padding: var(--space-md, 16px) 0;
+}
+
+.lais-theme-switcher-label {
+  font-size: var(--font-size-xs, 11px);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label, 1.5px);
+  font-weight: var(--font-weight-semibold, 600);
+  line-height: var(--line-height-label, 1);
+  margin: 0;
+}
+
+.lais-theme-switcher-help {
+  font-size: var(--font-size-xs, 11px);
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.lais-theme-switcher-list {
+  list-style: none;
+  margin: var(--space-sm, 8px) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 8px);
+}
+
+.lais-theme-switcher-item {
+  display: block;
+}
+
+/* Visually hide the radio input but keep it accessible to screen readers / keyboard nav */
+.lais-theme-switcher-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.lais-theme-switcher-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md, 16px);
+  padding: var(--space-md, 16px);
+  min-height: var(--tap-target-min, 44px);
+  background: var(--bg-surface, #fafaf7);
+  border: 1.5px solid var(--border, #e5e5e0);
+  border-radius: var(--theme-radius-md, var(--radius-md, 12px));
+  cursor: pointer;
+  transition: border-color var(--theme-motion-fast, 150ms) var(--theme-motion-easing, ease-out),
+              background-color var(--theme-motion-fast, 150ms) var(--theme-motion-easing, ease-out),
+              box-shadow var(--theme-motion-fast, 150ms) var(--theme-motion-easing, ease-out);
+}
+
+.lais-theme-switcher-card:hover {
+  border-color: var(--border-strong, #c7c7c0);
+}
+
+.lais-theme-switcher-card-active {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Focus ring on label when its input is focus-visible */
+.lais-theme-switcher-input:focus-visible + .lais-theme-switcher-card {
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring-color, var(--accent));
+  outline-offset: 2px;
+}
+
+.lais-theme-switcher-preview {
+  flex-shrink: 0;
+  width: 80px;
+  height: 40px;
+  border-radius: 6px;
+  border: 1.5px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.lais-theme-switcher-preview-accent {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  border-bottom-left-radius: 6px;
+}
+
+.lais-theme-switcher-preview-glyph {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  z-index: 1;
+}
+
+.lais-theme-switcher-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lais-theme-switcher-name {
+  font-size: var(--font-size-sm, 14px);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-ja, -0.02em);
+}
+
+.lais-theme-switcher-desc {
+  font-size: var(--font-size-xs, 11px);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  .lais-theme-switcher-card {
+    transition: none;
+  }
+}

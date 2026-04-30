@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.2 Dawn",
+    "issue": "リンク/アクセントテキスト色 --accent (#A85E28) がライト背景 (--bg-surface #FEFCF9) 上でコントラスト比4.5:1を下回る。実測≈4.43:1（WCAG 1.4.3違反）。",
+    "suggestion": "テキストリンク専用に --link を新設し、Dawnではより濃い色を採用（例: #8F4D1F 実測≈5.9:1）。--accent は背景やボーダー用に限定運用。既存規則「インラインリンクは常に下線」維持。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.1 Night Sky",
+    "issue": "Primaryボタンの既定背景 --button-primary-bg (#1F6FEB) と白文字のコントラストが不足。実測≈4.21:1（AAの4.5:1未満）。hover/pressedは達成しているがdefaultが未達（WCAG 1.4.3違反）。",
+    "suggestion": "既定色をhover相当の #1158C7（実測≈6.5:1）へ引き上げるか、Night Sky専用に --button-primary-bg-default を #1158C7 として採用し、hover/pressedは現状維持。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§8.1 ボ��ン（Secondary）/ §5.2 Dawn",
+    "issue": "Secondaryボタンの「--accent-subtle 背景 + --accent テキスト」がDawnで不足。合成背景（約 #ECDDCF）上の #A85E28 は実測≈4.01:1でAA未達（WCAG 1.4.3違反）。",
+    "suggestion": "「on-subtle」系テキスト色トークンを新設（--on-accent-subtle など）し、ライト系テーマでは #8F4D1F 程度の濃色に切替。あるいはSecondaryは透明背景+1pxボーダー (--border-strong) + テキスト --accent へ設計変更。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§8.1 ボタン（Danger subtle）/ §5.2 Dawn, §5.3 Harajuku Light",
+    "issue": "Danger (subtle)「--danger-subtle 背景 + --danger テキスト」がライト系テーマで不足。Dawnの合成背景（約 #F9E6E5）上の #CF222E は実測≈4.06:1でAA未達（WCAG 1.4.3違反）。",
+    "suggestion": "--on-danger-subtle を新設し #8A1520 程度の濃色を割当、または subtle 背景の濃度を引き上げ（0.10→≥0.20）つつテキストは --button-danger-fg=白へ統一。いずれも実測4.5:1以上を確認。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§8.3 チップ/バッジ, ��8.7 ボトムタブ（Active pill）, §5.1/5.4（Dark系の --accent-subtle）",
+    "issue": "Dark系で --accent-subtle を背景にしたピル/チップの「非テキストコントラスト（UI境界）」が不足。Night Skyの合成背景（≈#243241）と周囲背景（#161B22）は実測≈1.21:1でWCAG 1.4.11（3:1以上）未達。",
+    "suggestion": "ピル/チップ/Activeタブに 1px ボーダー（--border-strong、各テーマで3:1以上）を必須化。あるいは Dark系の subtle 背景は中間階調（例: #253142 近傍の固定色）に変更し、周囲と3:1以上を確保。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8 コンポーネント共通/全体",
+    "issue": "フォーカスリングの適用範囲が明確化されていない。ボタン/入力/トグルには記載があるが、リンク、アイコンボタン、ピル、タブ等の全インタラクティブ要素への一括適用ルールが不足。",
+    "suggestion": "ベースCSSを追加: `a[href], button, [role=\"button\"], [tabindex]:not([tabindex=\"-1\"]) { outline: none } ... :focus-visible { box-shadow: var(--focus-ring) }`。forced-colors時は§7.5のoutline規則が適用されるようセレクタ統一。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§7.5 forced-colors, §8.13 状態マトリクス",
+    "issue": "WCAG 2.2 2.4.11（Focus Appearance）観点で、box-shadow型リングがガラス面/淡色面で3:1を満たさない可能性がある（背景合成に依存）。",
+    "suggestion": "通常時も `outline: 2px solid var(--focus-ring-color); outline-offset: 2px;` を優先し、--focus-ring-color は各テーマで背景と3:1以上となる実測値に調整。box-shadowは補助的に使用。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §8.7 ボトムタブ / ux_v1.md §10.4",
+    "issue": "タブのARIAが不一致。design_systemは aria-current=\"page\"、UXは role=\"tablist\"/role=\"tab\"/aria-selected を指定。スクリーンリーダーの読み上げ前提が揺れる。",
+    "suggestion": "ナビゲーション（画面遷移）扱いに統一するなら nav + リンク + aria-current=\"page\" を採用。単画面内のパネル切替なら tablistパターンに統一。SPAの画面遷移なら前者を推奨。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（Undoスナックバー）",
+    "issue": "UndoスナックバーのARIA要件が未定義（トーストのrole定義は別途あるが、Undoは別コンポーネントとして明記なし）。",
+    "suggestion": "Undoスナックバーに role=\"status\" aria-live=\"polite\" を付与し、アクションボタンに明確なラベル（例: aria-label=\"取り消す\"）。表示時にフォーカス移動はしないが、Tab移動でボタンへ到達可能に。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§7.6/§7.5/§9 トークン",
+    "issue": "高コントラスト嗜好への対応トークンが不足。forced-colorsは定義済みだが、ユーザー嗜好ベースの `prefers-contrast: more`（Safari等）に対する色・線幅の上げ方針がない。",
+    "suggestion": "@media (prefers-contrast: more) で --border-strong を一段階濃色化、outline太さ+1px、--accent-subtleを不使用にして実線ボーダー強調などのHC上書きを定義。`data-theme=\"*-hc\"` の手動切替オプションも検討。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.6 prefers-reduced-motion, §5.0 setTheme()",
+    "issue": "reduce-motion時のテーマ切替アニメーションはCSS側で1ms化されるが、JSの `.theme-switching` 付与は常に行われる設計。視覚過敏ユーザー向けに完全無効が望ましい。",
+    "suggestion": "setTheme() 内で `matchMedia('(prefers-reduced-motion: reduce)')` を確認し、true時は `.theme-switching` を付与しない（トランジション完全無効）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.2 Dawn（--text-hint）",
+    "issue": "Dawnの --text-hint #7A6E62 が --bg-primary #FBF8F4 上で実測≈4.39:1。小サイズ本文（11–16px）でAA未達（WCAG 1.4.3）。",
+    "suggestion": "--text-hint をやや濃く（例: #6C5E52 実測≥4.5:1）へ調整。placeholderにも同値が適用されるため、合わせて達成を確認。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§8.10 ダイアログ, §8.5 ボトムシート",
+    "issue": "✕クローズアイコン等の小型操作の44×44pxタップターゲット確保が明文化されていない（一般原則はあるが当該箇所に未記載）。",
+    "suggestion": "ダイアログ/ボトムシートのクローズ���メニューボタンは最低44×44pxのヒット領域を必須化（paddingまたは::beforeで拡張）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.5 グラスモーフィズム（Glass ON・Dark系）",
+    "issue": "Glass ON時の --card-border: 1px solid rgba(255,255,255,0.12) はDark系背景との非テキストコントラストが不足（実測≈1.3–1.6:1）。コンテナ境界の知覚に影響（WCAG 1.4.11未達）。",
+    "suggestion": "Dark系Glass ONのボーダーを `rgba(255,255,255,0.26–0.32)` 程度に増し、実測3:1以上を確保。もしくは --border-strong をそのままボーダーに使用（テーマ一貫性を維持）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  }
+]

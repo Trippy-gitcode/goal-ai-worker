@@ -1,0 +1,172 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "二重送信レース。canSubmit はレンダー時点の値で固定され、handleSubmit 内で setSubmitting(true) しても同フレーム内の連続 Enter/クリックで再度ハンドラが走り、2 本の signUp/signIn リクエストが並行実行され得る。",
+    "suggestion": "送信ガード用の useRef を導入して同期的に inFlight.current = true を立ててから処理開始し、finally で解除する。またはボタン onMouseDown で直ちに無効化。handleSubmit 冒頭で最新の submitting を読むのではなく、inFlight で多重呼出を確実にブロックする。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "モード切替フッターリンクの無効化もレンダー後に反映されるため、送信直後の再クリックで onClick ガードが効く前にナビゲーションが発火し、処理中に画面遷移するレースが残る。",
+    "suggestion": "リンクの onMouseDown でも submitting を同期ガードし、処理中は pointer-events:none を CSS で付与。加えて inFlight ref を共有して遷移を確実に抑止。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.1 App.jsx (AuthRoute)",
+    "issue": "url から '?' 以降を単純スライスして URLSearchParams に渡しているため、ハッシュ断片 (#...) を含むと mode 値に混入し、mode=login#x などでログイン判定に失敗する可能性がある。",
+    "suggestion": "new URL(location.href).searchParams を使用するか、preact-router の props.location / matches を利用してクエリとハッシュを正確に分離して取得する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "EMAIL_RE が ASCII 前提の簡易検証のため、国際化メールアドレス（例: 山田@例.jp）や一部の IDN を弾く。type=\"email\" と noValidate の組み合わせもブラウザにより入力支援が ASCII キーボード固定になる場合がある。",
+    "suggestion": "クライアント側の厳格検証をやめて『@ を含む程度の緩い検証 + サーバ側で最終判定』にするか、IDN/punycode を考慮したバリデータを採用。少なくとも Unicode ローカルパートを許���する方針を仕様で明確化する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "モード切替時（signup ↔ login）に serverError / confirmNotice などの一時メッセージが状態として残存し、異なるモードでも表示され続ける可能性がある。",
+    "suggestion": "mode 変更を監視して resetTransientMessages() を useEffect([mode]) で実行。必要に応じて agree 状態も初期化する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "画面遷移・アンマウント時やモード切替時に、進行中の signUp/signIn リクエストを中断しないため、完了後に不要な setState が走る・競合する可能性がある。",
+    "suggestion": "AbortController を用いて Supabase の fetch に signal を渡す（可能な範囲で）。少なくとも isMounted ref を用い、アンマウント後は setState しないガードを入れる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "3.2 lib/auth.js",
+    "issue": "onAuthStateChange の unsubscribe 未実装により HMR/再読込時の二重購読が残存（既知事項だが R2 時点では未解決）。",
+    "suggestion": "モジュール初期化ではなくアプリ初期化フェーズで購��し、クリーンアップで必ず unsubscribe 実行。Vite HMR を考慮し、グローバルに重複購読を検知して回避する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 S01Auth.jsx / 3.4 S01Auth.css",
+    "issue": "err.message をそのまま表示しており、英語の長文や技術的詳細が UI を崩したり、余計な内部情報を露出する可能性。さらに表示/非表示でレイアウトジャンプが発生しやすい。",
+    "suggestion": "エラーコード→ユーザー文言のマッピングを導入し、テキストをローカライズ。見た目ではメッセージ領域に最小高さを確保し、長文は改行・折返し・行数制限（line-clamp）を適用。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "3.4 S01Auth.css",
+    "issue": "チェックボックスのヒット領域 44×44px を label の縦 padding で確保とあるが、左右 padding の仕様が不明で、横方向が 44px を下回る端末/ズーム条件が残り得る。",
+    "suggestion": "label を display:inline-flex; align-items:center にし、min-height:44px に加え、左右にも少なくとも 12px 程度の padding を付与。または :before 擬似要素で 44×44 のクリックターゲットを明示的に確保。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3.3 S01Auth.jsx / 3.1 App.jsx",
+    "issue": "規約/ポリシーリンクは新規タブで /terms / /privacy を開くが、未実装のため NotFound → '/' へ自動リダイレクトされ、ユーザーが意図せずスプラッシュ画面を含む別タブに遷移して混乱する可能性。",
+    "suggestion": "Phase B 実装前はプレースホルダーページを用意するか、外部の一時ドキュメント URL を使用。最低限、リンクラベルに『新規タブで開きます』の注記を加える。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "CTA が disabled のため、メール形式が不正のまま Enter/クリックしてもエラー表示が出ず無反応に見える（emailTouched を submit 時に立てていない）。",
+    "suggestion": "handleSubmit 実行時に emailFormatOk が false なら setEmailTouched(true) を実行し、即座にエラー文言を表示する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.1 App.jsx (AuthRoute)",
+    "issue": "mode パラメータの厳密一致のみを許可しており、余計な空白や大文字混在（mode=Login など）で意図せず signup へフォールバックする。",
+    "suggestion": "取得値を trim + 小文字化して比較し、想定外値は明示的にデフォルトを適用する旨を仕様に記載。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "パスワードの前後空白をそのまま受け付けるため、誤ってスペースが入ったまま登録・ログイン失敗を招く UX リスク。",
+    "suggestion": "パスワード先頭/末尾の空白をトリムするか、入力時に可視警告を表示する。セキュリティ要件に応じて仕様を明記。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.3 S01Auth.jsx / 3.2 lib/auth.js",
+    "issue": "ネットワーク遅延・ハング時のタイムアウトやキャンセル UI がなく、送信中… 状態が半永久化する恐れ（オフライン・高遅延で再現）。",
+    "suggestion": "クライアント側タイムアウト��例: 15–30 秒）とリトライ/キャンセルボタンを導入。失敗時は『接続できません。再試行してください』等の専用文言を表示。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "非常に長いメールアドレス（最大 254 文字）や長文エラーで入力/メッセージ領域がはみ出す可能性。",
+    "suggestion": "email に maxLength=254 を設定し、入力/メッセージに word-break: break-word と余白・折返しスタイルを適用する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "target=\"_blank\" のリンクは支援技術にとって文脈変化が分かりにくい。",
+    "suggestion": "リンクテキストに『（新しいタブで開きます）』を付与するか、aria-label で明示。タイトル属性も併用する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4 S01Auth.css",
+    "issue": "prefers-reduced-motion: reduce の詳細が不明で、scroll-behavior や focus 可視化のアニメーションが残る可能性。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) で scroll-behavior: auto とすべての transition/animation を none に、focus リングは非アニメで確実に表示する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

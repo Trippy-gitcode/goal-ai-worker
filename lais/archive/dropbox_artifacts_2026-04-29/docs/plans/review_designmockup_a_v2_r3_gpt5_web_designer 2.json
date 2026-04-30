@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "タスク提案カード [登録する][編集して登録][✕] ボタン",
+    "issue": "各ボタンがfont-size:13px + padding:8pxで実高≈32px。design_system §4.5の--tap-target-min=44pxに未達。頻出の主要操作でタップミスのリスクが高い",
+    "suggestion": "ボタンのmin-height:44pxを設定し、水平はpaddingで調整。もしくはボタン自体の見た目は現状維持のまま、::beforeで透明ヒット領域を拡張（height:44px, negative marginで視覚高さは変えない）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayリスト 各タスク行の右端チェックアイコン",
+    "issue": "チェックアイコンが14×14px（SVG）でタップ領域が44px未満。§4.5の最小タップターゲットに反し、最重要アクションの操作性が低い",
+    "suggestion": "チェック専用のタップ領域（min 44×44px）を用意し、行右端���配置。見た目14pxのままでも親要素で透明ヒット拡張を適用。行全体タップ＝詳細、チェック領域タップ＝完了の二分を明確化",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」チェックボックス",
+    "issue": "チェックボックスが20×20pxで--tap-target-min（44px）未達。フォーム送信の必須操作として致命的に小さい",
+    "suggestion": "チェックボックス行全体をクリック可能化（labelで囲み、paddingで44px以上に）。ボックス自体は20pxのままでもhit-slapで44px確保",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayリスト 09:00「企画書を仕上げる」行（完了表示）",
+    "issue": "完了済みタスクが濃いカード背景＋アクセント枠で未完了より強く目立つ。視線が過去（完了）に引っ張られ、今日の残タスクの優先度が下がる",
+    "suggestion": "完了行は背景=透明/テキスト=secondary/取り消し線のみにし、左枠や濃色背景は外す。未��了を強調、完了は減衰のコントラスト設計に",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s12_task_add",
+    "location": "所要時間チップ群（5分〜120分）／「単発タスク・習慣」トグル",
+    "issue": "各チップがfont-size:13px + padding:6pxで実高≈28–32px。頻用UIなのに--tap-target-min 44pxを満たさない",
+    "suggestion": "チップ/トグルにmin-height:44pxを付与。見た目を小さく保つ場合は周囲に透明paddingを足して44px相当のタップ領域を確保",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s12_task_add, s13_task_detail, s15_goal_create",
+    "location": "ハーフモーダル右上の閉じる[X]（28×28px）",
+    "issue": "閉じるアイコンのタップ領域が28pxで最小サイズに未達。片手操作時に誤タップの恐れ",
+    "suggestion": "ヒット領域を44×44pxに拡張（ボタン自体の視覚サイズは維持しつつ、周囲に透明paddingを追加）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "ボタン行「進め方を聞く」「詰まりを相談」（グレーアウト）",
+    "issue": "UX仕様 §2.3ではS-11詳細パネルからTALKへの導線（2種CTA）を提供と明記。完了済みでも非活性化されており、想定フローから逸脱",
+    "suggestion": "完了状態でも両CTAは常時アクティブにし、タスク名をコンテキストとしてS-20に遷移（仕様通り）。非活性にする場合は理由の説明テキストを併記",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "アバター候補下のラベル（タイプA/B/C）",
+    "issue": "フォントサイズ12pxで日本語UIの読解にはやや小さい（spec §3.2では本文14px推奨、12pxは補助用途）",
+    "suggestion": "ラベルを14px（--font-size-base）に引き上げるか、12pxのままなら選択状態時のみ14pxに拡大して可読性を担保",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "「アバター設定」「設定」行（リンクリスト）",
+    "issue": "UX仕様 §4.2では左にアイコン（👤/⚙️）併記と定義。現状はテキスト+山括弧のみで、一覧スキャン性が弱い",
+    "suggestion": "左側に対応アイコンを追加し、行としての識別子を強化（タップ領域44px確保も同時に）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "WCAG",
+    "screen": "s10_grow, s14_goal_detail",
+    "location": "「+ タスクを追加」「+ ゴールを作成」テキストリンク",
+    "issue": "色と+記号のみでインタラクティブ性を示しており、文脈次第でリンクと認識されにくい。フォーカス/ホバー時の手掛かりも不明",
+    "suggestion": "ボタンスタイル（pill/下線）や右矢印を付与し、hover/focus時に下線/色変化を追加（§2.2 非色依存の手掛かりに準拠）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "ヘッダーの3アイコン（☰/🕐/📝相当。実装は線アイコン）",
+    "issue": "同トーン・ラベル無しで意味が伝わりにくい。初見で『履歴』と『新規』の違いが判別しづらく、ナビ直感性を損なう",
+    "suggestion": "アイコンのペアに短い��ベルを付ける（例: 履歴/新規）。または『履歴』をドロワー内に集約し、ヘッダーは☰+新規の2アクションに簡素化",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s00_splash",
+    "location": "「ログイン」アウトラインボタン（border:#484F58）",
+    "issue": "暗所ディスプレイでは境界がやや弱く、二次CTAとしての存在が見つけにくい可能性",
+    "suggestion": "border-strong（#6E7681）寄りに強化、もしくはhover/activeで—accent-subtleの薄い面を付けて視認性を底上げ",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

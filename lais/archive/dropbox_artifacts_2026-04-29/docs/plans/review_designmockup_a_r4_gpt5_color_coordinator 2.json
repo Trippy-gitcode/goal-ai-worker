@@ -1,0 +1,156 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "メールアドレス/パスワード入力欄の枠線（#484F58, 1px）と入力背景（#161B22）",
+    "issue": "非テキストコントラストが3:1未満の可能性（WCAG 1.4.11）。design_systemでは--border-strong(#6E7681)が約3.6:1だが、現在は装飾用の薄い--border相当(#484F58)をUI境界に使用",
+    "suggestion": "入力欄の境界は--border-strong(#6E7681)へ置換、または境界線の太さを2pxに強化。代替として入力背景と周囲のコントラスト差を拡大（#0D1117↔#161B22の組合せ見直し）",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "モーダル内の各入力・セレクト・未選択チップの枠線（#484F58, 1px）",
+    "issue": "UIコンポーネント境界の非テキストコントラスト不足（WCAG 1.4.11）。背景#161B22/#0D1117に対し枠線#484F58が薄く、視認性が不十分",
+    "suggestion": "--border-strong(#6E7681)に統一、ま��は枠線2px化＋ホバー/フォーカス時はアクセント系で強調。未選択チップは背景濃度を+4〜6%上げて塊としても判別可能に",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s15_goal_create",
+    "location": "「ゴール名」「期限」フィールドの枠線（#484F58, 1px）",
+    "issue": "非テキストコントラストが3:1を満たさない（WCAG 1.4.11）。主要入力境界が背景と混ざり判別しづらい",
+    "suggestion": "--border-strong(#6E7681)採用、または枠線2px化。プレースホルダ背景を#0D1117→#141922程度に上げ、面の差でも境界を示す",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s00_splash",
+    "location": "「ログイン」アウトラインボタン（枠#484F58, 背景#0D1117）",
+    "issue": "ボタンの境界コントラストが低く（WCAG 1.4.11）、ボタンとしての形状が暗所で埋もれる",
+    "suggestion": "枠色を--border-strong(#6E7681)にし、ホバー/フォーカス時は#79C0FF系の内側グロー/アウトラインで強調。もしくは背景を#161B22にして面で区別",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayリスト右端のカラードット（ゴール紐付け示唆）",
+    "issue": "色のみで情報（ゴール紐付け）を伝達（WCAG 1.4.1）。色覚多様性下で判別困難",
+    "suggestion": "色＋形状/テキスト併用。例: ドット横に短いゴール名ラベル/イニシャル、ドットの形（△□○）差、もしくは行左に3pxゴール色バー＋タイトル末尾にゴール名バッジ",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "フッター文「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」リンク",
+    "issue": "インラインリンクが色のみで示され下線なし（WCAG 1.4.1）。通常文中でリンクだと判別しづらい",
+    "suggestion": "インラインリンクは常時text-decoration: underlineを付与（design_system §2.2）。ホバー/フォーカス時は下線太さ/色で強調",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayセクションの「+ タスクを追加」テキストリンク",
+    "issue": "色のみでリンク性を表現（下線なし）。周辺テキストとの差が色頼み（WCAG 1.4.1）",
+    "suggestion": "常時下線を付与。タップ領域を横幅いっぱい44px以上に拡張し、フォーカスリングも表示",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "下部の「+ タスクを追加」テキストリンク",
+    "issue": "インラインリンクの下線欠如で色みに依存（WCAG 1.4.1）",
+    "suggestion": "常時下線＋フォーカス時にアウトライン（2px, #79C0FF）を追加し、色以外の手掛かりを提供",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "未完了タスクのチェックサークル（外枠#484F58）",
+    "issue": "インタラクティブコントロールの境界コントラストが不足（WCAG 1.4.11）。チェック可能領域が背景と同化",
+    "suggestion": "外枠を--border-strong(#6E7681)へ、サイズを22→24px、枠線2px化。フォーカス/ホバー時はアクセントの内側リングで強調",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s01_signin",
+    "location": "「利用規約に同意」チェックボックス（20×20px）",
+    "issue": "タップターゲットが--tap-target-min 44×44px（design_system §4.5）を満たしていない",
+    "suggestion": "可視ボックスは20pxでも、label全体をクリック可能にして44×44px以上のヒットエリアを確保。余白クリックでもON/OFF可能に",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-011",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s02_onboarding",
+    "location": "画面下部の「← 戻る」テキスト",
+    "issue": "タップ領域が小さく、--tap-target-min 44×44pxを満たさない恐れ。テキストのみで押しにくい",
+    "suggestion": "「戻る」全体をボタン化し、左右/上下に十分なパディングを付与（最小44px）。アイコン＋ラベルの組み合わせで視認性も向上",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-012",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "タスク提案カードのアクション（「登録する」「編集して登録」「✕」）と送信ボタン（36×36px）",
+    "issue": "各ボタンの可視サイズが44px未満（カ���ド内は約28〜32px、高さ）。design_systemの--tap-target-minに未達",
+    "suggestion": "各ボタンに上下パディング/透明ヒット領域を追加して44×44pxを確保。カード右上の✕は24pxアイコン＋外側20pxパディングで44px相当へ",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "ボトムタブのアクティブPill背景（rgba(121,192,255,0.14) on #161B22）",
+    "issue": "選択状態の非テキストコントラストが3:1に満たない可能性（WCAG 1.4.11）。ラベル表示で状態は判別できるが、Pill自体の視認性が弱い",
+    "suggestion": "Pillの不透明度を0.20〜0.24へ上げる、または外周に1pxの--border-strongを追加し状態面のコントラストを底上げ",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayタイムラインの縦ルール（#484F58, 2px）",
+    "issue": "グラフィカルオブジェクトのコントラストが低く、時間軸としてのガイドが視認しづらい（WCAG 1.4.11）",
+    "suggestion": "線色を--border-strong(#6E7681)へ引き上げ、モバイルでは2→3pxにして視認性���確保（特に屋外/低輝度環境での判読性向上）",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

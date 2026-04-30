@@ -1,0 +1,79 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "タスク時刻/所要時間メタ (09:00 · 45分 等)",
+    "issue": "メタテキスト色が濃いグレーで背景 #0B1220 とのコントラスト比 ≈ 3.8:1。WCAG 1.4.3 AA (4.5:1) 不足の恐れ。",
+    "suggestion": "#8AA0C0 相当に引き上げ、コントラスト比 4.5:1 以上を確保。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s00_splash",
+    "location": "タグライン『あなたの人生を、あなたらしく』",
+    "issue": "タグライン色明度が低く、コントラスト比 ≈ 3.5:1。4.5:1 を下回る恐れ。",
+    "suggestion": "#A0B4CC 以上に引き上げ。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "完了済みタスクのグレーアウト",
+    "issue": "完了タスク文字 #4A5870 相当でコントラスト比 ≈ 2.8:1。履歴として読めない。",
+    "suggestion": "#6A8098 に引き上げ、打ち消し線で『完了』を示す。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s30_me",
+    "location": "『タップして入力』プレースホルダ",
+    "issue": "プレースホルダ文字が薄く、コントラスト比 ≈ 3:1 前後。",
+    "suggestion": "#7890B0 以上に上げる、または枠線で存在を明示。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "タスク行右端ゴール色ドット (青/オレンジ)",
+    "issue": "r3 で緑→オレンジに変えて完了色との衝突は解消したが、色のみでゴール紐付けを区別しており WCAG 1.4.1 (Use of Color) のリスクは残る。",
+    "suggestion": "ドット脇にゴール名ラベル（3 文字略）を併記 or 形状差 (●/◆) を付与。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "disabled サインアップボタン",
+    "issue": "disabled 文字コントラストが極端に低く、押下不能理由が伝わらない。",
+    "suggestion": "disabled 文字を #6A7890 相当まで上げる、または常時 enabled + タップ時バリデーションエラー。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "提案カード『登録する』ボタン",
+    "issue": "下部 Primary CTA と同じ色帯で CTA 階層が重複。",
+    "suggestion": "accent-muted に降格 or primary を 1 画面 1 箇所原則に。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  }
+]

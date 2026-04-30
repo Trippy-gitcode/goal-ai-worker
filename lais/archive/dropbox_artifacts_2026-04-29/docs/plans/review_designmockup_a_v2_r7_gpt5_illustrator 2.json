@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダル内 フィールド順（開始時刻/予定日 行 と 所要時間チップ）",
+    "issue": "UX仕様 v1.0 §2.3の順序（開始時刻→所要時間→予定日）に反し、所要時間が予定日の後に配置されている。",
+    "suggestion": "入力順を仕様に合わせて再配置する。上から「開始時刻」→「所要時間（チップ）」→「予定日」。横並び配置を維持する場合も、視線の流れが c→d→e になるよう所要時間を予定日より上（または左）に置く。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s13_task_detail",
+    "location": "下部ボタン行「削除」テキストとボーダー（#FF7B72/rgba(255,123,114,0.5)）",
+    "issue": "danger色がデザイントークン外のHEXで直指定されている（規定は --danger: #F85149、ボタンは --button-danger-*）。",
+    "suggestion": "テキスト/アイコン/ボーダ��には var(--danger) を、ボタン背景には var(--button-danger-bg) を使用し、hover/pressedも対応トークンへ統一。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s13_task_detail",
+    "location": "タイトル直下のステータス「完了済み」（color: #56D364）",
+    "issue": "success色がトークン外（#56D364）で直指定。Night Skyの success は #3FB950。",
+    "suggestion": "ステータスの色を var(--success) に統一（#3FB950）。subtle背景やホバー時は --success-subtle / --success-pressed を使用。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "各タスク行右側のカテゴリ/ゴールドット（学習= #A371F7）",
+    "issue": "カテゴリドットにトークン外の紫(#A371F7)を直指定。色数も増え、Night Skyのアクセント/セマンティック制限を逸脱する恐れ。",
+    "suggestion": "カテゴリ色をデザイントークンで定義（例: --goal-color-work / --goal-color-learn など）し、Night Sky内の許容パレットで策定。暫定は info/amber系や --accent の濃淡にマップして直指定を排除。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s01_signin",
+    "location": "フォームラベル（13px）と入力内テキスト（15px）",
+    "issue": "フォントサイズがトークン外（13px/15px）。デザインシステム §3.2 は 11/14/16/20/28/36/48 のスケールを規定。",
+    "suggestion": "ラベルは --font-size-sm:14px、入力本文は --font-size-base:16px に統一。line-height/letter-spacingは §3.3/§3.4に準拠。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s20_talk",
+    "location": "ユーザー/AIメッセージ本文（font-size:15px）",
+    "issue": "本文に15pxを使用しておりトークン外。読み心地と一貫性を損なう。",
+    "suggestion": "本文は --font-size-base:16px / --line-height-ja-body:1.7 に。キャプション（時刻）は --font-size-xs:11px 維持で役割分離。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s01_signin",
+    "location": "画面下部「ログイン」テキストリンク",
+    "issue": "インラインリンクに下線がない。§2.2でカラーのみ伝達禁止のため下線必須。",
+    "suggestion": "「ログイン」に text-decoration: underline を付与（色は --accent）。ホバー/押下は --accent-hover/--accent-pressed を適用。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "Todayセクション内「+ タスクを追加」リンク",
+    "issue": "インラインリンクがアクセント色のみで下線なし。色依存の視覚手掛かりに偏っている。",
+    "suggestion": "text-decoration: underline を併用。周囲の本文と明確に区別し、§2.2準拠に。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "Todayブロック末尾→Goals見出しまでの余白（margin-bottom:28px）",
+    "issue": "セクション間余白が §4.2の基準（≧32px）未満。視線の区切りが弱く、情報が連続して見える。",
+    "suggestion": "Todayセクションの下マージンを --space-xl:40px（最低でも32px）へ増やし、Open Airリズムを回復。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "完了タスク行「企画書を仕上げる」の緑系チップ/背景トーン",
+    "issue": "Night Skyの静けさに対し、完了表示の緑面積が相対的に目立ちやや勝ち気味。安心感より“達成強調”が前面に出て視線が滞留しやすい。",
+    "suggestion": "背景は --success-subtle(0.12)程度に抑え、本文色は --text-secondary へ。バッジ/アイコンのみを --success で強調し、面積の大きい塗りは控える。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

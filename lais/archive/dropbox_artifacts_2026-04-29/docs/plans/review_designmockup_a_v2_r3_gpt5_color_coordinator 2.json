@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「すでにアカウントをお持ちですか？ ログイン」行の「ログイン」リンク",
+    "issue": "インラインのテキストリンクが下線なしで色のみ（#79C0FF）で識別。WCAG 1.4.1（色だけに依存しない）とデザインシステム§2.2「インラインリンクは必ず下線」に不適合。",
+    "suggestion": "「ログイン」に text-decoration: underline を付与し、ホバー/フォーカス時は下線の太さ/色コントラストも強調（例: 2px + #A5D6FF）。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "入力フィールド（メールアドレス/パスワード）の境界線",
+    "issue": "UIコンポーネントの境界が #484F58、背景が #161B22 でコントラストがおよそ2.4:1。WCAG 1.4.11（非テキストコントラスト 3:1）に不足。",
+    "suggestion": "有効状態の境界を --border-strong（例: #6E7681）もしくは #79C0FF に引き上げ（1px→1.5–2pxも可）、ホバー/フォーカスでさらに明確化。無効時のみ薄く。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "送信ボタン（入力バー右の丸ボタン）",
+    "issue": "ボタンの背景 #1C2128 と周囲 #0D1117 のコントラストが低く（≈1.3:1）、内部アイコン #484F58 も背景に対して ≈2.4:1。UIコンポーネント境界とアイコンが3:1未満で、1.4.11に不適合。",
+    "suggestion": "主ボタンは --button-primary を使用（塗り+白アイコン）または輪郭1pxを --border-strong で追加。アイコン色は #E6EDF3 へ。押下/フォーカス時のリングも付与。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "全画面の主要操作（ボタン、リンク、タブ、入力など）のフォーカス状態",
+    "issue": "スクリーンショット上、ほぼ全コンポーネントでキーボードフォーカスの可視指標が確認できない。WCAG 2.4.7（Focus Visible）および 2.4.11（Focus Appearance 最小）に抵触リスク。",
+    "suggestion": "focus-visible時に2px以上・3:1以上のアウトラインを適用（例: outline:2px solid var(--accent); outline-offset:2px）。forced-colors:active では outline:2px solid Highlight を適用。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」チェック用の四角枠（20×20px）",
+    "issue": "タップ/クリックターゲットが20×20pxで、WCAG 2.2 AA 2.5.8 Target Size (Minimum) の24px基準を下回る可能性。",
+    "suggestion": "ヒットエリアを24×24px以上に拡大（見た目は20でもOK。透明パディングで拡張）。ラベル全体をクリック可能にして達成しても良い。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "未完了タスクの丸チェック（外枠 #484F58）",
+    "issue": "未完了状態を示す丸の枠線 #484F58 と背景 #0D1117 のコントラストが約2.4:1で、UIコンポーネントの識別に必要な非テキストコントラスト 3:1 を満たさない。",
+    "suggestion": "未完了の枠線色を --border-strong（例: #6E7681）に変更、または線幅を太くし3:1以上��確保。ホバー/フォーカス/押下でも十分な視認性を維持。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayリスト右端の完了チェックアイコン（薄い青円＋青チェック）",
+    "issue": "チェックマーク #79C0FF が同系色の薄い円背景（rgba(121,192,255,0.2)）上に描かれ、非テキストコントラスト（3:1）に届かない可能性。色覚多様性でも視認が弱い。",
+    "suggestion": "チェックは白(#FFFFFF)または濃色(#0D1117)に、円はより濃いサーフェス色へ。もしくは二重線/太線化でエッジコントラストを上げる。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "「編集して登録」アウトラインボタン（タスク提案カード内）",
+    "issue": "ボタン境界 #484F58 と周囲 #161B22 のコントラストが約2.4:1。UIコンポーネントの輪郭としては 3:1 に満たず、識別が弱い。",
+    "suggestion": "アウトライン色を --border-strong（#6E7681 など）に引き上げるか、塗りボタンへ格上げ。ホバー/フォーカスでコントラスト強化。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayリスト各タスク行の左ボーダー色（例: アンバー #E8A855 など）",
+    "issue": "左ボーダー色で状態/属性（優先度/カテゴリー等）を示しているように見えるが、説明テキストやアイコンが伴わず、色依存の解釈リスク（1.4.1）。",
+    "suggestion": "ボーダー色に加え、ラベル/アイコン/テキスト（カテゴリー名等）を併記。凡例やツールチップでも非色依存の手掛かりを提供。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "ステップインジケータ（上部の横バー：未完了= #1C2128）",
+    "issue": "未完了バー #1C2128 が背景 #0D1117 と近似で視認が弱く（≈1.3:1）、進捗構造の把握が困難になり得る（非テキストコントラスト）。",
+    "suggestion": "未完了バーを #2A3340 など背景と3:1以上になる色に。完了/現在/未完了の3状態を長さ/塗り/枠の違いでも示すと堅牢。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s20_talk",
+    "location": "メッセージのタイムスタンプ（11px、#7A8593）",
+    "issue": "最小可読サイズ寄りで、長文チャットでは視認性が落ちやすい。コントラストは概ね基準域だが余裕が少ない。",
+    "suggestion": "12–13pxへ引き上げ、または色を #9BA7B4 に。高コントラスト設定時は自動でサイズ/色を強化するメディアクエリ対応を推奨。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-012",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add, s15_goal_create",
+    "location": "ボトムシート内の入力フィールド境界（#484F58）",
+    "issue": "ボトムシート背景 #161B22 と周囲の識別に使う境界が薄く、隣接面とのコントラストが3:1を下回る箇所がある。1.4.11に抵触。",
+    "suggestion": "アクティブ/ホバー時は --accent または --border-strong を境界に使用し、未アクティブ時も少なくとも3:1を確保。フォーカスリングは2px以上で明確化。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

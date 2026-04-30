@@ -1,0 +1,264 @@
+# Phase A 全 10 画面 受入基準（Acceptance Criteria SSoT）
+#
+# 親: lais/verify/dev_system_v34_package.md §2.25.21.7（完了報告 禁止語彙 + 必須数値フィールド）
+# 関連: §2.25.21.4（実機 smoke 必須）/ §2.25.21.5（PO 報告前 5 自問）/ §2.25.21.6（subagent 報告転記時の実態裏付け検証）
+# 起点: 2026-04-26 9 件連続虚偽報告（lais/verify/today_false_reports_review_2026-04-26.md §3 採択改善案 #2）
+# SSoT: 本ファイル
+#
+# 各画面の Phase 完了 = ここに記述された全基準が PASS。
+# 静的レビュー / API レベル PASS のみで Phase 完了宣言不可（§2.25.21.4 / §2.25.21.7）。
+# 機械検証: scripts/adv_response_gate.sh が Phase 完了宣言時に本 YAML 全項目を grep + jq で照合。
+
+phase: A
+total_screens: 10
+verification_layers:
+  - layer_1_static: 静的コードレビュー / TypeScript 型チェック / lint
+  - layer_2_api: API レベル PASS（Supabase / CF Pages Functions endpoint テスト）
+  - layer_3_mock_smoke: lais/tests/smoke/ 配下 mock smoke（page.route stub）
+  - layer_4_real_smoke: logs/realmachine_smoke_results.log 5+ 列 PASS 行（signin_success=true && dashboard_reached=true && result=PASS）
+  - layer_5_ios_smoke: lais/logs/ios_smoke_results.log PASS 行 + SUMMARY FAIL=0
+  - layer_6_po_realmachine: ふとし実機検収（実機操作で UX フロー成立確認）
+
+# Phase 完了 = 以下 10 画面全てで全 6 層 PASS
+screens:
+  - id: S-00
+    name: Splash（トップ）
+    route: /
+    purpose: 未認証ユーザーへの入口、認証済ユーザーは /grow へ自動遷移
+    acceptance:
+      - id: AC-S00-1
+        layer: layer_3_mock_smoke
+        criterion: 公開ルート、未認証で http=200 描画、heading="Lais"
+        verify_grep: 'main:s00.*heading:Lais'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S00-2
+        layer: layer_3_mock_smoke
+        criterion: 「はじめる」ボタン → /auth?mode=signup 遷移
+        verify_grep: 'はじめる.*/auth\?mode=signup'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S00-3
+        layer: layer_3_mock_smoke
+        criterion: 「ログイン」ボタン → /auth?mode=login 遷移
+        verify_grep: 'ログイン.*/auth\?mode=login'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S00-4
+        layer: layer_4_real_smoke
+        criterion: 認証済ユーザーが / 到達 → /grow 自動遷移（signed_in_splash_redirect=true）
+        verify_grep: 'signed_in_splash_redirect=true'
+        log_file: logs/realmachine_smoke_results.log
+
+  - id: S-01-login
+    name: Auth Login（ログイン）
+    route: /auth?mode=login
+    purpose: 既存ユーザー signin、ダッシュボード /grow へ遷移
+    acceptance:
+      - id: AC-S01-LOGIN-1
+        layer: layer_3_mock_smoke
+        criterion: 公開ルート、form 描画（email + password + submit）
+        verify_grep: 'form:s01-email\+s01-password\+submit'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S01-LOGIN-2
+        layer: layer_3_mock_smoke
+        criterion: 空欄 submit → button[type=submit] 自動 disabled
+        verify_grep: 'signin_form_validation.*submit-disabled'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S01-LOGIN-3
+        layer: layer_3_mock_smoke
+        criterion: invalid credentials → "Invalid login credentials" UI 表示
+        verify_grep: 'signin_invalid_creds.*supabase400'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S01-LOGIN-4
+        layer: layer_4_real_smoke
+        criterion: 実機 signin → ダッシュボード /grow 到達（signin_success=true && dashboard_reached=true）
+        verify_grep: 'signin_success=true.*dashboard_reached=true.*result=PASS'
+        log_file: logs/realmachine_smoke_results.log
+      - id: AC-S01-LOGIN-5
+        layer: layer_6_po_realmachine
+        criterion: ふとし実機 signin → /grow 遷移体感 PASS
+        verify_method: PO 検収（手動）
+
+  - id: S-01-signup
+    name: Auth Signup（新規登録）
+    route: /auth?mode=signup
+    purpose: 新規ユーザー signup、確認リンク → ダッシュボード /grow へ
+    acceptance:
+      - id: AC-S01-SIGNUP-1
+        layer: layer_3_mock_smoke
+        criterion: 公開ルート、form 描画（email + password + submit）
+        verify_grep: 'splash_to_signup.*form描画OK'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S01-SIGNUP-2
+        layer: layer_3_mock_smoke
+        criterion: 既登録メアド signup → 重複通知 + ログイン切替ボタン表示
+        verify_grep: 'BUG-RT-SIGNUP-DUPLICATE-UX.*PASS'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S01-SIGNUP-3
+        layer: layer_4_real_smoke
+        criterion: 実機 signup → 確認リンク → /grow 到達（hash_fragment_seen=true && session_stored=true）
+        verify_grep: 'BUG-RT-PKCE-FLOWTYPE-FIX.*signin_success=true.*dashboard_reached=true.*result=PASS'
+        log_file: logs/realmachine_smoke_results.log
+
+  - id: S-02
+    name: Onboarding
+    route: /onboarding
+    purpose: 初回サインアップ後のパートナー選択
+    acceptance:
+      - id: AC-S02-1
+        layer: layer_3_mock_smoke
+        criterion: パートナー選択 UI 描画（Lumen/Noct/Spark + 次へボタン）
+        verify_grep: 'main:s02-onboarding.*buttons:\[Lumen,Noct,Spark,次へ\]'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S02-2
+        layer: layer_3_mock_smoke
+        criterion: 認証済セッションで /onboarding 直接到達
+        verify_grep: 'S-02 Onboarding.*PASS'
+        log_file: lais/logs/smoke_results.log
+
+  - id: S-10
+    name: Grow（メインダッシュボード）
+    route: /grow
+    purpose: タスク一覧表示、認証必須、Supabase からタスク取得
+    acceptance:
+      - id: AC-S10-1
+        layer: layer_3_mock_smoke
+        criterion: タスク一覧描画（OVERDUE / 進行中 / 予定 ボタン）
+        verify_grep: 'main:s10-grow.*heading:OVERDUE'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S10-2
+        layer: layer_4_real_smoke
+        criterion: 実 Supabase からタスク取得（mock data 残存ゼロ）
+        verify_grep: 'dashboard_reached=true'
+        log_file: logs/realmachine_smoke_results.log
+      - id: AC-S10-3
+        layer: layer_2_api
+        criterion: GET /api/tasks endpoint で実データ取得
+        verify_method: supabase.from('tasks').select() 実行確認
+
+  - id: S-12
+    name: Task Add（タスク追加モーダル）
+    route: /grow（モーダル）
+    purpose: タスク追加、Supabase に INSERT
+    acceptance:
+      - id: AC-S12-1
+        layer: layer_3_mock_smoke
+        criterion: /grow からハーフモーダル開閉
+        verify_grep: 'S-12 Task Add.*PASS'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S12-2
+        layer: layer_5_ios_smoke
+        criterion: iOS keyboard 出現で入力欄が viewport 内残存（safe-area 適用）
+        verify_grep: 'S-12.*modal-open-close-keyboard-safearea-scrolllock.*PASS'
+        log_file: lais/logs/ios_smoke_results.log
+      - id: AC-S12-3
+        layer: layer_4_real_smoke
+        criterion: タスク追加 → Supabase INSERT 確認 → 画面更新
+        verify_method: supabase.from('tasks').insert() 実行確認 + UI 反映
+
+  - id: S-13
+    name: Task Detail（タスク詳細モーダル）
+    route: /grow（モーダル）
+    purpose: タスク詳細表示、編集、削除
+    acceptance:
+      - id: AC-S13-1
+        layer: layer_3_mock_smoke
+        criterion: タスクタップでハーフモーダル開閉
+        verify_grep: 'S-13 Task Detail.*PASS'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S13-2
+        layer: layer_5_ios_smoke
+        criterion: iOS scroll lock 解除（モーダル閉じた後の body.style.overflow=hidden 残存なし）
+        verify_grep: 'S-13.*scroll-lock.*PASS'
+        log_file: lais/logs/ios_smoke_results.log
+
+  - id: S-14
+    name: Goal Detail（ゴール詳細）
+    route: /goal/:id
+    purpose: ゴール詳細表示、GROW フロー、AI 相談
+    acceptance:
+      - id: AC-S14-1
+        layer: layer_3_mock_smoke
+        criterion: heading="毎日 30 分の読書" + GROW / + タスクを追加 / AI 相談 ボタン
+        verify_grep: 'main:s14-goal.*heading:毎日 30 分の読書'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S14-2
+        layer: layer_4_real_smoke
+        criterion: 実 Supabase からゴール取得 + 関連タスク取得
+        verify_method: supabase.from('goals').select() + supabase.from('tasks').select() 実行確認
+
+  - id: S-15
+    name: Goal Create（ゴール作成）
+    route: /goal/create
+    purpose: 新規ゴール作成 → Supabase INSERT → /grow へ
+    acceptance:
+      - id: AC-S15-1
+        layer: layer_3_mock_smoke
+        criterion: /goal/create 直接到達（BUG-RT-01 解消確認、S14 への route 吸収なし）
+        verify_grep: 'S-15-goal-create.*PASS|S-15 Goal Create.*PASS'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S15-2
+        layer: layer_4_real_smoke
+        criterion: ゴール作成 → Supabase INSERT 確認 → /grow 遷移
+        verify_method: supabase.from('goals').insert() 実行確認 + 画面遷移
+
+  - id: S-20
+    name: Talk（AI チャット）
+    route: /talk
+    purpose: AI と会話、履歴保存
+    acceptance:
+      - id: AC-S20-1
+        layer: layer_3_mock_smoke
+        criterion: textarea + 送信ボタン + 履歴を開く ボタン描画
+        verify_grep: 'main:s20-talk.*textarea\+送信ボタン\+履歴を開く'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S20-2
+        layer: layer_4_real_smoke
+        criterion: 実 AI 応答（Anthropic / OpenAI）+ JST 整形 + 重複防止（client_msg_id）
+        verify_grep: 'BUG-RT-TALK-CRITICAL-3-FIX.*duplicate_prevented=true.*ai_response_unique=true.*tz_jst=true.*result=PASS'
+        log_file: logs/realmachine_smoke_results.log
+
+  - id: S-30
+    name: Me Profile（プロフィール）
+    route: /me
+    purpose: ユーザー設定、PROFILE / DISCOVER / FRIENDS / SHOP メニュー
+    acceptance:
+      - id: AC-S30-1
+        layer: layer_3_mock_smoke
+        criterion: heading=ユーザー名 + PROFILE / DISCOVER / FRIENDS / SHOP ボタン
+        verify_grep: 'main:s30-me.*buttons:\[PROFILE,DISCOVER,FRIENDS,SHOP\]'
+        log_file: lais/logs/smoke_results.log
+      - id: AC-S30-2
+        layer: layer_4_real_smoke
+        criterion: 実 Supabase からユーザー設定取得（auth.user メタデータ）
+        verify_method: supabase.auth.getUser() 実行確認
+
+# Phase A 完了判定
+phase_a_completion:
+  required_layers:
+    - layer_1_static: 全画面 lint / 型チェック PASS
+    - layer_3_mock_smoke: 全画面 mock smoke PASS（lais/logs/smoke_results.log）
+    - layer_4_real_smoke: signin → dashboard 到達 PASS（logs/realmachine_smoke_results.log）
+    - layer_5_ios_smoke: S-12 / S-13 keyboard / safearea / scroll lock PASS（lais/logs/ios_smoke_results.log）
+    - layer_6_po_realmachine: ふとし実機 signin → /grow 遷移体感 PASS
+  forbidden:
+    - 静的レビューのみで Phase 完了宣言（§2.25.21.4 違反）
+    - API レベル PASS のみで Phase 完了宣言（§2.25.21.4 違反、本 YAML 採択改善案 #2）
+    - mock smoke のみで実機 smoke なしの Phase 完了宣言（§2.25.21.4 違反）
+    - 「全完走」「全 PASS」「動作確認済」単独使用 + 必須数値フィールド欠落（§2.25.21.7 違反）
+
+# 機械検証スクリプト想定
+verification_command: |
+  # 想定実装（将来の scripts/acceptance_verifier.sh）
+  for screen_id in S-00 S-01-login S-01-signup S-02 S-10 S-12 S-13 S-14 S-15 S-20 S-30; do
+    yq ".screens[] | select(.id == \"$screen_id\") | .acceptance[]" docs/ops/acceptance_criteria.yml | \
+      while read -r ac; do
+        log_file=$(echo "$ac" | yq '.log_file')
+        verify_grep=$(echo "$ac" | yq '.verify_grep')
+        if [ -n "$log_file" ] && [ -n "$verify_grep" ]; then
+          if grep -qE "$verify_grep" "$log_file"; then
+            echo "PASS: $screen_id $(echo "$ac" | yq '.id')"
+          else
+            echo "FAIL: $screen_id $(echo "$ac" | yq '.id') (verify_grep=$verify_grep, log=$log_file)"
+          fi
+        fi
+      done
+  done

@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "S30-3 基本情報",
+    "issue": "値側の編集ボタン(.s30-info-button)が行全体の高さ(>=44px)を満たしていない。padding:8pxのみで、実効タップ領域がおよそ30〜38px高に留まるため、タップターゲット最小 44×44 を下回る可能性が高い。",
+    "suggestion": "各ボタンの実タップ領域を 44×44 以上にする。例: .s30-info-button { min-inline-size:44px; min-height:44px; align-self:stretch; padding:0 var(--space-sm); margin:0; display:flex; align-items:center; justify-content:flex-end; } または、.s30-info-row 全体をクリック可能にする設計に改め、button要素が行の全高を確実に占めるようにする。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "S30-5 MBTI",
+    "issue": "「外部テスト結果を入力」ボタン(.s30-mbti-manual)に 44×44 の最小タップ領域が確保されていない（スタイル定義が見当たらず、デフォルトのテキストボタン相当）。",
+    "suggestion": ".s30-mbti-manual に min-height:44px; min-inline-size:44px; padding:8px 12px; border-radius:var(--radius-sm); を付与し、フォーカスリング(:focus-visible)も明示。テキストリンク風に見せたい場合はtext-decorationは維持しつつ、ボタン自体のヒットボックスを拡大する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "S30-2 サブタブ",
+    "issue": "サブタブが<nav>内のbuttonで実装され、aria-current=\"page\"を付与しているが、タブUIのWAI-ARIAパターン(ROLE=tablist/tab/tabpanel、aria-selected、roving tabindex、矢印キー移動)が未実装。支援技術に「現在ページ」と読み上げられるなど意味論がやや不自然。",
+    "suggestion": "純粋なページ遷移でないなら、WAI-ARIA Tabsパターンを採用: <div role=\"tablist\">、各ボタンに role=\"tab\"、選択中に aria-selected=\"true\"、非選択は tabindex=\"-1\"、左右矢印で移動。対応するパネルに role=\"tabpanel\" と aria-labelledby を付与。ページ遷移ナビとして扱うなら <a href> + aria-current=\"page\" に変更する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "S30-6 リンク行（および行内アイコン）",
+    "issue": "行内の装飾SVGアイコンに���して aria-hidden/focusable の明示がなく、スクリーンリーダーに無意味なグラフィックとして露出する可能性がある。",
+    "suggestion": "装飾目的の <svg> には aria-hidden=\"true\" focusable=\"false\" を付与（必要に応じて role=\"img\" を外す/付けない）。テキストが隣接しているため代替テキストは不要。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "LP-014（全インタラクティブ要素）",
+    "issue": "説明では .s30-info-button / .s30-mbti-manual / .s30-link-row に :focus-visible の可視リング付与ありとされているが、CSS抜粋では確認できない。ブラウザデフォルト任せだとテーマにより可視性が不足する恐れがある。",
+    "suggestion": "以下を明示追加: .s30-info-button:focus-visible, .s30-mbti-manual:focus-visible, .s30-link-row:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: var(--focus-ring-offset); } 併せて :focus:not(:focus-visible){ outline:none } を統一適用して“キーボードのみ”でリングを出す。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "共通 フォーカスリング",
+    "issue": "フォーカスリングの色(--focus-ring-color)がトークンに示されておらず、背景(--bg-primary / --bg-surface)に対してWCAG 1.4.11の非テキストコントラスト(3:1)を満たす保証が不明。",
+    "suggestion": "night-sky テーマで --focus-ring-color を --accent(#79C0FF)相当などコントラスト>=3:1を満たす色に固定し、リング太さ(--focus-ring-width)も2px以上を推奨。主要背景両方(#0D1117 / #161B22)に対する実測値を記載・回帰テスト化する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S30-6 リンク行",
+    "issue": "設定系ナビゲーションが<button>で実装されており、将来的に他画面へ遷移する導線であれば<a href>が適切（コンテキストメニュー/新規タブなどユーザー期待を満たせる）。",
+    "suggestion": "遷移先がルート（/settings 等）に確定している場合は <a href=\"/settings\" class=\"s30-link-row\">…</a> とし、SPAルーターでクライアント遷移をフック。モーダル起動など“操作”であれば<button>のままで可。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "App.jsx Suspense fallback",
+    "issue": "fallbackが<main role=\"status\" aria-live=\"polite\" aria-label=\"読み込み中\">となっており、landmark(main)の役割とstatusロールが競合。さらにテキストノードがなく、読み上げられない環境がある。",
+    "suggestion": "<div role=\"status\" aria-live=\"polite\">読み込み中…</div> のように、mainは避け、実テキストを含める。必要なら visually-hidden で視覚非表示としつつSRへは確実に通知する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "CSS トークン（--tap-target-min）",
+    "issue": "min-height に使用している --tap-target-min の定義が提示トークン抜粋に存在せず、ビルド環境で未定義の場合、宣言ごと無効化されタップ領域の保証が消えるリスクがある。",
+    "suggestion": ":root などで --tap-target-min: 44px; を確実に定義。E2E/スタイルlintで var(--tap-target-min) 不在を検出する仕組みを追加。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S30-5 MBTI",
+    "issue": "進捗は視覚的バー長のみ��数値表示がない。SRにはaria値が届くが、弱視ユーザーの理解補助として視覚的な数値もあると望ましい。",
+    "suggestion": "バーの近くに 35% 等のテキスト（または .sr-only で%を追加表示）を併記。SR向けには aria-valuetext=\"35%\" のようにパーセンテージも付与しておくと理解しやすい。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "S30-3 基本情報（<dl> 構造）",
+    "issue": "抜粋では各行の実マークアップが省略されており、<dt>/<dd> のペアリングやグルーピング（必要なら<div>での行ラップ）が妥当かを確認できない。",
+    "suggestion": "各行が 1つ以上の<dt>に続く1つの<dd>という妥当な順序になるよう見直し。行全体をラップする<div class=\"s30-info-row\">…</div>を用いる場合も、<dl>直下に<div>を置いて dt+dd を内包する構造にする。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

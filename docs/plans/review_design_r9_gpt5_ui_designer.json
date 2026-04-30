@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.1-5.4, §8.1, §8.2, §8.13, §9",
+    "issue": "フォーカス可視化をoutlineに完全統一と記載している一方、各テーマに--focus-ring(box-shadow値)トークンが残存し、§8.2などで--focus-ring参照の文言も混在。実装者がoutlineとbox-shadowのどちらを使うか迷う。",
+    "suggestion": "箱影ベースの--focus-ringトークンを廃止または非推奨注記し、代わりに--focus-color(=--accent), --focus-width(例:3px), --focus-offset(例:2px)の3トークンを新設。該当セクションの記述を「outline: var(--focus-width) solid var(--focus-color); outline-offset: var(--focus-offset);」に統一して再記載。forced-colors対応は§7.5のdirect outline指定を優先と明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§7.6, §9（AI実装向けトークンブロック）",
+    "issue": "prefers-reduced-motion時はプログレスバーのみ100ms例外を残す仕様だが、§9のトークンブロック内@mediaで全durationを1msに上書きしており、例外が反映されない。AIが§9だけをコピーして実装した���合に仕様破りが発生。",
+    "suggestion": "§9の@media (prefers-reduced-motion: reduce) ブロックを削除し、例外を含む実装コードは§7.6のコンポーネントCSS側で提示する方針に統一。もしくはトークンとして--duration-reduced-fast/normal/slow/celebrationを新設し、プログレスバー用に--duration-reduced-progress=100msを追加、@media内でそれらに切替える運用に変更。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.13（状態マトリクス）",
+    "issue": "「背景 hover トークン（またはopacity +0.04）」とあるが、汎用のサーフェス系hover/pressedトークン（--surface-hover, --surface-pressed等）が未定義。リスト行やカード行ハイライトが各所で必要になるが、参照先がない。",
+    "suggestion": "各テーマに--surface-hover / --surface-pressed（bg-surfaceを基点に不透明度や明度差で定義）と、反転用--surface-inverse-hover / --surface-inverse-pressedを追加。タイムライン行や一般行ハイライトはこれらを参照するガイドラインを§8.4/§6.1にも追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4（z-index）、§8（コンポーネント）",
+    "issue": "z-indexに--z-tooltip/--z-dropdownが定義されているが、TooltipとDropdownのコンポーネント仕様・トークン（背景/文字色/パディング/矢印/ホバー/選択状態/最小幅等）が未定義。",
+    "suggestion": "Tooltip: --tooltip-bg, --tooltip-fg, --tooltip-radius, --tooltip-padding, --tooltip-max-width, フォーカス/キーボード操作指針を追加。Dropdown/Menu: --menu-bg, --menu-fg, --menu-item-height, --menu-item-padding, --menu-item-hover-bg, --menu-item-selected-bg/fg, --menu-divider-colorなどを定義し、ARIA/キーボード操作も併記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§6.1 アイコンスタイル",
+    "issue": "アイコン押下色に「--accent-hover」を指定しているが、全体系ではpressed状態用に--accent-pressedが定義済み。命名と運用が不一致。",
+    "suggestion": "アイコンのpressed状態は--accent-pressed、hoverは--accent-hoverに統一。文言と実装ガイドを修正し、状態マトリクス（§8.13）にも反映。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8（コンポーネン���）",
+    "issue": "フォーム系のチェックボックス/ラジオの定義がない。設定/選択UI（例: プラン選択、複数選択の同意、将来の詳細設定）で必要になる可能性が高い。",
+    "suggestion": "Checkbox/Radioコンポーネントを追加。サイズ（24px推奨）、軌跡/枠色（--border-strong基準）、checked色（--accent）、hover/pressed/focus-visible/disabledの状態トークン、ラベル間隔、ARIAとタップ領域44px保証を定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.2 入力フィールド",
+    "issue": "disabled時のborder色トークンが未定義（本文ではborderかopacity頼み）。UI全体でdisabled境界が曖昧になるリスク。",
+    "suggestion": "各テーマに--border-disabledを追加（bg-disabledと十分な非テキストコントラスト≥3:1を確保）。入力やボタン（outline系）などのdisabled境界に統一適用。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§3.3 ウェイト・行間・字間",
+    "issue": "system-ui前提で--font-weight-thin:200を使用すると、端末/OS/フォントによって未提供ウェイトの��ォールバック挙動が不定（特にAndroid/Windows）。見出しでの200指定は視認性や一貫性に影響し得る。",
+    "suggestion": "見出しの最低ウェイトを300以上に引き上げるか、200使用時はフォールバックを明記（200未提供時は300へ丸める等）。デザイン上も300/400/600の3段で十分な階調が出るか再検証。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.3 字間トークン",
+    "issue": "--letter-spacing-label: 1.5px が固定px指定のため、フォントサイズやDPIによる相対感がずれやすい。多言語/大きい文字サイズでの過度なカーニングに繋がる恐れ。",
+    "suggestion": "字間はem単位（例: 0.06em）に変更し、Uppercase専用適用のルールを併記。日本語UIでは大文字見出し自体を限定的にし、過度なトラッキングを避ける注記を追加。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§5.2 Dawn（ライト）",
+    "issue": "Dawnテーマの--danger-hoverと--danger-pressedが同一値（#8A1520）。hoverとpressedが視覚的に区別されない。",
+    "suggestion": "pressedをhoverよりさらに���色/低明度に再設定（例: hover=#8A1520, pressed=#6F111A など）して状態差を明確化。アクセシビリティ（4.5:1）も再確認。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": "Glass ON（ライト系）で--card-bg: rgba(255,255,255,0.65) としているが、背後コンテンツ次第でテキスト/アイコンの実効コントラストが低下するリスク。非テキスト3:1はborderで確保とあるがテキスト側の保証は明文化されていない。",
+    "suggestion": "ガラス面上の本文/ラベル色を--text-primaryに固定する原則と、背後コンテンツの透過影響下でもWCAG 4.5:1を満たす画面例の検証基準を追記。必要に応じてGlass面専用の--card-fg（テキスト色）トークンを追加。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8（コンポーネント）/ 全体トークン",
+    "issue": "outline統一方針に対し、--focus-width/--focus-offset/--focus-colorなどの汎用フォーカストークンが未定義。各コンポーネントに数値直書きが分散しやすい。",
+    "suggestion": "共通トークン--focus-width, --focus-offset, --focus-colorを定義（--focus-color=--accent）。§8.1/8.2/8.8/8.13の記述・コード例をこれら参照に統一。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§2.2 リンク色の役割分離",
+    "issue": "visitedリンクの扱い（色分けする/しない）が未定義。アプリ内リンクを多用する場合、既読/未読の区別ポリシーの不在は実装判断のブレを生む。",
+    "suggestion": "「アプリUIではvisited色分けを行わない（常に--accent）」等の方針を明記するか、運用する場合は--link-visitedトークンを追加。下線・ホバー挙動（色/下線太さ）も合わせて定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4（--z-fab）/ コンポーネント一覧",
+    "issue": "z-indexに--z-fabがあるが、FAB（フローティングアクションボタン）のコンポーネント仕様（サイズ/位置/安全域/色/陰影/スクロール連動/フォーカス/アクセシビリティ）が未定義。",
+    "suggestion": "FABコンポーネントを追加。直径56px/角丸999px、位置（右下safe-area考慮）、背景--button-primary-bg/fg、shadow--shadow-lg、focus-visible outline、スクロール時のshow/hideルール、aria-label必須等を明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  }
+]

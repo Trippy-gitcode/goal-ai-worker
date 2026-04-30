@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-101",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "session_progress.md 要件9（タスク行タップ）",
+    "issue": "S-13 詳細パネル遷移は本ミッションのスコープ外であることを確認。実装は console.log で代替されている。",
+    "suggestion": "Phase B で S-13 を実装するまで本対応（console.log）を維持し、実装着手時にテレメトリ計測点と遷移契約（パラメータ・イベント名）を仕様に追記。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-102",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "session_progress.md 要件9（Goal 行タップ）",
+    "issue": "S-14 フルスクリーン遷移はスコープ外であることを確認。実装は console.log で代替されている。",
+    "suggestion": "Phase B で S-14 を実装するまで現状維持。遷移時のアニメーション仕様（ease・duration・方向性）を事前に §4.x に定義。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-103",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "R1 パッケージ「スコープ外」節（EXP バー）",
+    "issue": "EXP バーの加算アニメーションはスコープ外であることを確認。HERO_PROFILE は固定 mock 値（62%）。",
+    "suggestion": "/api/me 接続後に加算ロジックと `--duration-slow` のアニメーション仕様（キーフレーム・補間関数）を §4.x に追記し、段階的増分のスナップショットテストを追加。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-104",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "R1 パッケージ「スコープ外」節（Undo スナックバー）",
+    "issue": "Undo 30s スナックバーはスコープ外であることを確認。現状は console.log のみ。",
+    "suggestion": "Phase 4 B-1 着手時にトーストのタイムアウト、フォーカストラップ、キーボードショートカット（Esc/Enter）等の a11y 要件を仕様化。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "design_spec_v1.md §4.4（チェックタップ spring）",
+    "issue": "JS 側で `s10-check-tap` を 400ms 付与しているが、CSS の `--duration-fast` と非同期。将来的にトークン値変更時にアニメーション途中でクラスが外れる／逆に長く残る可能性がある。",
+    "suggestion": "実行時に `getComputedStyle(el).getPropertyValue('--duration-fast')` からミリ秒をパース��、その値＋α（例えば +50ms）でタイマーを設定してドリフトを排除。もしくは `animationend` イベントで確実に解除する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "a11y_engineer R-002（44×44 ヒット領域）",
+    "issue": "ヒット領域拡張を ::before で実現しているが、完全に透明かつ枠線・背景なしの疑似要素は一部ブラウザでヒットテスト対象にならない事例がある。",
+    "suggestion": "より堅牢な実装に変更: `.s10-check::before { content:''; position:absolute; inset:-11px; }` とし、必要に応じて `background: transparent; display:block;` を付与。クロスブラウザ E2E（iOS Safari/Android Chrome/Firefox）でクリックヒットを確認。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "a11y_engineer R-004（OverdueRow 装飾チェック）",
+    "issue": "装飾のみの `<span class=\"s10-check s10-check-overdue\">` に基底クラス由来の `cursor: pointer` が適用され、非インタラクティブにも関わらず手のカーソルが表示される。",
+    "suggestion": ".s10-check-overdue に `cursor: default;`（または `cursor: auto;`）を上書き追加し、誤誘導を回避。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S10Grow.jsx Check コンポーネント（aria-label）",
+    "issue": "aria-label に操作デバイス依存の語（「タップ」）を使用。デスクトップ SR 環境では不適切な文言になりうる。",
+    "suggestion": "「タップすると」を「操作すると」や「押すと」に変更し、入力手段に依存しない表現へ統一。例: `scheduled`: 「予定。操作すると進行中にする」等。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "a11y_engineer R-003（role=button + aria-pressed）",
+    "issue": "プログラム的状態伝達が「done=true / その他=false」に二値化されており、SR 利用者は `scheduled` と `active` の差異を属性からは把握できない。",
+    "suggestion": "以下のいずれかを追加: 1) `active` を `aria-pressed=\"mixed\"` で表現（トグルの中間状態として提示）; 2) 視覚状態文言を `aria-describedby` で関連付け、現在状態（予定/進行中/完了）を明示。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "design_spec_v1.md §4.4（フォーカス表示）",
+    "issue": "44×44 のポインタターゲットに対し、キーボードフォーカスのアウトラインは要素本体 22×22 のまま。低視力/キーボードユーザーにとって可視性が不足する可能性。",
+    "suggestion": ":focus-visible に連動して `::before` 側へも可視リングを付与（例: `.s10-check:focus-visible::before { outline: 2px solid var(--accent); border-radius: 50%; }`）。ターゲットサイズと一致させる。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-111",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "BottomTabBar（WAI-ARIA APG ナビゲーション）",
+    "issue": "画面遷移ナビに `<button>` + `aria-current=\"page\"` を用いている。仕様違反ではないが、支援技術での告知は `<a href>` の方が一貫性が高い。`aria-current` の告知もリンクの方が確実。",
+    "suggestion": "ルーティング基盤に合わせて `<a href>` を使用可能であれば `<a>` + `aria-current=\"page\"` に変更。クライアントサイド遷移でも `<a>` に click ハンドラを付与すれば同等動作が可能。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

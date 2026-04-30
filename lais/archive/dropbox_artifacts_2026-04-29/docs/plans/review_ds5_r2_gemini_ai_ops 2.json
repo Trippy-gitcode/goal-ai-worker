@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "依存チェーンで e2e_fullflow_test.md が project_v1.md の直下に配置されているが、§18の連鎖更新マップでは ux_v1.md, design_spec_v1.md, reference_v1.md 等からテスト仕様書へ更新が波及すると定義されており完全に矛盾している。現在のチェーンではUIやAPIの変更がテストに反映されないリスクがある。",
+    "suggestion": "§19.6の依存チェーンを修正し、e2e_fullflow_test.md を ux_v1.md, design_spec_v1.md, system_map.md などの最下流（末端）に配置する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "AI（ADV）に「App Storeレビュー分析」や「DL数/評価」の調査を要求しているが、AIはリアルタイムのストアデータにアクセスできない場合が多く、ハルシネーション（架空のレビューや数値の捏造）を引き起こす可能性が高い。また、その結果に対するPOの事実確認ゲートが定義されていない。",
+    "suggestion": "ベンチマークの数値・レビューデータはPOが提供するか、AIが検索ツールで取得した事実に基づくことを明記し、調査結果の確定（Phase 0完了）前にPOによる事実確認（承認ゲート）を必須とする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "AI Opsの観点において、アプリ固有の「AI自律実行範囲と承認ゲート」を定義するセクションが欠落している。dev-system §6で基本ルールはあるが、アプリ固有の機能（例：AIプロンプトの微調整、特定の課金ロジック変更）がどのリスクレベル（🔴高/🟡中/🟢低）に該当するかを明文化する場所がない。",
+    "suggestion": "project_v1.md の §7 または reference_v1.md の §3 に「AI自律範囲とアプリ固有承認ルール（プロンプト変更・重要ロジック変更のゲート定義）」のセクションを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の「依存」メタデータにバージョン番号が含まれている（例: v1.3）。上流ファイルが更新されるたびに下流ファイルのヘッダーを手動で追従更新する必要があり、陳腐化しやすくSingle Source of Truthの原則（§1.1）に反する。また複数ファイルへの依存記法が不明確。",
+    "suggestion": "依存メタデータからバージョン番号を外し、ファイルパスのリスト形式（例: `依存: [docs/project_v1.md, docs/ux_v1.md]`）に変更する。バージョン管理はGitに委ねる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.5, §18",
+    "issue": "仕様書のファイル名とパスに不一致がある。§18では `ux_redesign_v*.md` だが§19.1では `ux_v1.md`。また§19.5のヘッダー例で `docs/plans/lais_project_v1.md` となっているが、§19.1の規定パスは `docs/project_v1.md`（plansディレクトリがない）である。",
+    "suggestion": "ファイル名とパスを統一する。§18の記述を `ux_v1.md` に修正し、§19.5のヘッダー例のパスを `docs/project_v1.md` に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力フォーマットのテンプレート内に「Lais方針」という特定のプロジェクト名がハードコードされている。",
+    "suggestion": "テンプレートの記述を「{アプリ名}方針」に汎化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

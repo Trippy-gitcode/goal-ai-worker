@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.6 S13-2",
+    "issue": "チェックアイコンの未完了（active）時に border-color が --accent になっている。仕様では「未完了時は --border-strong」と明記。",
+    "suggestion": ".s13-check-active の border-color を var(--border-strong) に統一し、未完了状態ではアクセント色を使用しない。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.6 S13-2",
+    "issue": "完了時チェックアイコンに --success-subtle の背景塗りが追加されているが、仕様に背景塗り指定はない（28×28、円形、2px 枠線、内部SVGのみ）。",
+    "suggestion": "完了時の .s13-check-done から background を削除するか、仕様に追加採用の承認を取り仕様へ追記する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1.md §4.6 S13-3/S13-5/S13-6/S13-8/S13-9",
+    "issue": "仕様の明示フォントサイズ（20px/14px/11px）がトークン（--font-size-lg/sm/xs）へ置換されているが、トークン値が仕様の絶対値と一致する保証がパッケージ内にない。",
+    "suggestion": "デザイントークンと仕様値の対応表を docs に明記（例: --font-size-lg=20px, --font-size-sm=14px, --font-size-xs=11px）。もしくは当該箇所のみ明示 px を使用。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.6 S13-6/S13-8",
+    "issue": "メタラベルおよびメモラベルに font-weight: semibold が付与されている。仕様ではウェイト指定がなく、追加強調により視覚バランスが変化。",
+    "suggestion": ".s13-meta-label と .s13-memo-label の font-weight を仕様準拠（未指定=継承/regular）に戻すか、追加採用の是非をデザイン側と合意して仕様へ反映。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1.md §4.6 S13-6/S13-8/S13-9",
+    "issue": "ラベルの letter-spacing（1.5px）およびメモ本文の letter-spacing（-0.02em）/ line-height（1.7）がトークン（--letter-spacing-label/ja, --line-height-ja-body）で代替され、仕様の数値と一致するか不明。",
+    "suggestion": "トークン値を仕様��数値に合わせることを確認・文書化するか、当該箇所のみ仕様の数値を明示指定する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "design_spec_v1.md §4.6 S13-6",
+    "issue": "dl 直下に div（.s13-meta-item）を配置しており、HTML の内容モデルに反する（dl は dt/dd の並びのみ許容）。支援技術が定義リストとして正しく解釈できない恐れ。",
+    "suggestion": "div ラッパを廃止し、dl 直下に dt/dd の組を順に配置（例: <dt>時刻</dt><dd>…</dd> を3セット）。レイアウトは dl に display:grid 等で対応。必要ならセクショニングは role=\"group\" ではなく純粋に CSS で行う。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "design_spec_v1.md §4.6（S-12骨格準拠/LP-002）",
+    "issue": "モーダルオープン時にダイアログへ初期フォーカスが移動しておらず、Tab 抜け（フォーカストラップ不全）が発生し得る。LP-002（主要要素への focus 移動）にも不一致。",
+    "suggestion": "開時 useEffect で dialogRef.current に focus を移す（tabindex=\"-1\" を付与）。例: <section ... tabIndex=\"-1\"> とし、open 変化で dialogRef.current?.focus() を実行。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_spec_v1.md §4.6（アクセシビリティ）",
+    "issue": "aria-labelledby が編集モード時に input 要素（id を移譲）を参照するため、ダイアログのラベルが不安定。見出しテキストの恒常的参照が望ましい。",
+    "suggestion": "見出し h2（非表示でも可）を常設し、その id を aria-labelledby に固定。編集 input は別 id とし、aria-label は input 自身に付与する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.6 S13-11",
+    "issue": "削除ボタンに 1px border が追加されている（仕様は背景色・文字色・高さ・角丸・ウェイトのみ明記）。",
+    "suggestion": "デザインと合意のうえ border を削除するか、仕様に追記して公式化する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_spec_v1.md §4.6（編集モードフッター）",
+    "issue": "保存ボタンの無効時に aria-disabled のみで、キーボードフォーカス可能・クリックハンドラ内で制御している。視覚・操作上は機能するが、無効制御の一貫性がやや低い。",
+    "suggestion": "無効時は disabled 属性を併用するか、§5.0 A を踏襲して pointer-events:none + 適切な見た目（必要なら tabindex=-1）を適用し、操作不能をより明確に示す。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

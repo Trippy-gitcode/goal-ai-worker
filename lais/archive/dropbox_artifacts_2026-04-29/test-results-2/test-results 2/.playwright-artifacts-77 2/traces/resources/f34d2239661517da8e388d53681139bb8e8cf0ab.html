@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, interactive-widget=resizes-content">
+<meta property="og:title" content="GOAL AI - AIゴールコーチング">
+<meta property="og:description" content="ゴールだけ教えてくれればいい。3つのAIがあなたの目標達成をサポートします。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://goal-ai-frontend.pages.dev">
+<meta name="description" content="GOAL AI - 3つのAIによるゴールコーチングSaaS。目標設定から達成まで、AIがあなたの伴走者になります。">
+<title>GOAL AI</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='100%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%23c8920a'/%3E%3Cstop offset='100%25' stop-color='%23f5d380'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M26 70 L32 40 L42 55 L50 24 L58 55 L68 40 L74 70 Z' fill='url(%23g)'/%3E%3C/svg%3E">
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GOAL AI">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
+<meta name="theme-color" content="#e8b84b">
+<script src="js/fontsize-init.js"></script>
+<!-- system fonts only — no external load needed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+<!-- ══ SVG Icon Sprites ══ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <defs><linearGradient id="goldG" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs>
+  <!-- nav -->
+  <symbol id="ic-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="ic-tasks" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></symbol>
+  <symbol id="ic-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+  <symbol id="ic-analytics" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <!-- hub tabs -->
+  <symbol id="ic-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></symbol>
+  <symbol id="ic-memo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></symbol>
+  <symbol id="ic-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></symbol>
+  <!-- actions -->
+  <symbol id="ic-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="ic-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="ic-mirror" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="9" rx="7" ry="9"/><path d="M8 22h8M12 18v4"/></symbol>
+  <symbol id="ic-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></symbol>
+  <symbol id="ic-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></symbol>
+  <symbol id="ic-archive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></symbol>
+  <symbol id="ic-award" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></symbol>
+  <symbol id="ic-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></symbol>
+  <symbol id="ic-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></symbol>
+  <symbol id="ic-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+  <symbol id="ic-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="ic-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 017 4.5v0A2.5 2.5 0 014.5 7v0A2.5 2.5 0 012 9.5v5A2.5 2.5 0 004.5 17v0A2.5 2.5 0 007 19.5v0A2.5 2.5 0 009.5 22h5a2.5 2.5 0 002.5-2.5v0a2.5 2.5 0 002.5-2.5v0a2.5 2.5 0 002.5-2.5v-5A2.5 2.5 0 0019.5 7v0A2.5 2.5 0 0017 4.5v0A2.5 2.5 0 0014.5 2z"/></symbol>
+  <symbol id="ic-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="ic-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></symbol>
+  <symbol id="ic-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="ic-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="ic-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></symbol>
+  <symbol id="ic-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="ic-export" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+  <symbol id="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></symbol>
+  <symbol id="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></symbol>
+  <symbol id="ic-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></symbol>
+  <symbol id="ic-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
+  <symbol id="ic-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+  <symbol id="ic-restore" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></symbol>
+  <symbol id="ic-plan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
+  <symbol id="ic-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="ic-fire" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c0 6-6 7-6 13a6 6 0 0012 0c0-6-6-7-6-13z"/><path d="M12 12c0 3-2 4-2 6a2 2 0 004 0c0-2-2-3-2-6z"/></symbol>
+  <symbol id="ic-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></symbol>
+</svg>
+<!-- CSS is bundled by Vite via js/main.js import. Dev fallback: -->
+  <script type="module" crossorigin src="/assets/main-Dc7T5RjI.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-BgMkc5JH.css">
+</head>
+<body>
+<div id="app">
+
+<div id="sb-overlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div id="sb">
+  <div class="sb-logo" style="padding:0 12px 6px;border-bottom:0.5px solid var(--border);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+    <svg width="22" height="22" viewBox="0 0 32 32"><defs><linearGradient id="logo-grad-sb" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#logo-grad-sb)"/></svg>
+    <span class="sb-logo-mark" style="font-size:13px;font-weight:500;">GOAL AI</span>
+    <span id="sb-logo-plan" class="logo-plan-badge" style="display:none;font-size:12px;padding:1px 5px;border-radius:4px;background:rgba(200,146,10,0.1);color:#c8920a;margin-left:auto;" onclick="event.stopPropagation();openPlanModal()"></span>
+  </div>
+
+  <!-- UX-01: Sidebar 4 items only -->
+
+  <!-- 1. コーチングモード切替 -->
+  <div class="nav-section" style="padding:8px 16px 4px;font-size:12px;">コーチングモード</div>
+  <!-- mbox-*: hidden, kept for JS compatibility -->
+  <div id="mbox-normal" style="display:none;"></div>
+  <div id="mbox-mencare" style="display:none;"></div>
+  <div id="mbox-kabeuchi" style="display:none;"></div>
+  <div id="mbox-spartan" style="display:none;"></div>
+  <div id="mbox-mencare-sub" style="display:none;"></div>
+  <div class="mencare-timer" id="mencare-timer" style="display:none;"></div>
+  <div class="chip-row">
+    <span class="mode-chip on" data-mode="normal" onclick="handleModeClick('normal')">通常</span>
+    <span class="mode-chip" data-mode="mencare" onclick="handleModeClick('mencare')">メンケア</span>
+    <span class="mode-chip" data-mode="kabeuchi" onclick="handleModeClick('kabeuchi')">ソクラテス</span>
+    <span class="mode-chip" data-mode="spartan" onclick="handleModeClick('spartan')">スパルタ</span>
+  </div>
+
+  <!-- 2. チャット履歴 -->
+  <div class="nav-section" style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+    チャット履歴
+    <span onclick="openChatHistory()" style="font-size:12px;color:var(--amber);cursor:pointer;">すべて見る →</span>
+  </div>
+  <div id="sb-chat-records"></div>
+
+  <!-- 3. 設定（下部に移動済み — sb-bottomのsettingsボタン） -->
+
+  <!-- 4. プラン -->
+  <div id="sb-upgrade-nudge" class="upgrade-nudge" onclick="openPlanModal()" style="display:none;margin:8px 12px;">
+    <div style="font-size:12px;font-weight:500;color:var(--amber);"><svg width="13" height="13" class="svg-ic"><use href="#ic-zap"/></svg> Proにアップグレード</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:2px;" id="sb-nudge-sub">ゴール無制限・毎週レビュー</div>
+  </div>
+
+  <!-- Hidden: keep IDs for JS compatibility but don't display -->
+  <div id="sb-task-list" style="display:none;"></div>
+  <div id="sb-goals-section" style="display:none;"></div>
+  <div id="nav-home" style="display:none;"></div>
+  <div id="nav-tasks" style="display:none;"></div>
+  <div id="nav-calendar" style="display:none;"></div>
+  <div id="nav-analytics" style="display:none;"></div>
+  <div id="nav-settings" style="display:none;"></div>
+
+  <!-- Feedback -->
+  <div onclick="openFeedbackChat()" style="display:flex;align-items:center;gap:7px;padding:7px 16px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+    <span style="opacity:.55;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg></span>
+    <span style="font-size:12px;color:var(--muted2);">ご意見・フィードバック</span>
+  </div>
+
+  <div class="sb-bottom" style="padding:6px 12px 8px;">
+    <!-- 1行: avatar · name · settings · help -->
+    <div class="prof-row" onclick="openProfileDirect()" style="gap:6px;padding:6px 8px;">
+      <div class="avatar" id="sb-avatar" style="width:22px;height:22px;font-size:12px;">?</div>
+      <div style="flex:1;min-width:0;overflow:hidden;">
+        <div class="prof-name" id="sb-prof-name" style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      </div>
+      <button onclick="event.stopPropagation();openSettingsPanel()" title="設定" class="sb-icon-btn" id="sb-settings-btn" style="flex-shrink:0;">
+        <svg width="15" height="15" class="svg-ic"><use href="#ic-settings"/></svg>
+      </button>
+      <button onclick="event.stopPropagation();showHelpGuide()" title="使い方ガイド" style="width:28px;height:28px;padding:0;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cream)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r="1" fill="var(--cream)" stroke="none"/></svg>
+      </button>
+    </div>
+    <!-- plan badge (hidden, managed by JS renderMembershipUI) -->
+    <div style="display:none;">
+      <span id="sb-plan-badge" class="plan-badge-pro">▲ Pro</span>
+      <span id="sb-trial-days" style="display:none;"></span>
+    </div>
+    <div class="sidebar-footer">
+      <a href="terms.html" target="_blank">利用規約</a>
+      <span style="color:var(--muted3);">|</span>
+      <a href="privacy.html" target="_blank">プライバシー</a>
+      <span style="color:var(--muted3);">|</span>
+      <span class="version" title="バージョン確認">v4.0.6</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div id="main">
+
+  <!-- Topbar -->
+  <div id="topbar">
+    <div class="tb-title" id="tb-title"></div>
+
+    <!-- Progress comparison widget -->
+    <div class="prog-compare" id="prog-compare-widget">
+      <div class="prog-compare-title">進捗 — 今日の予定 vs 実績</div>
+      <div class="prog-compare-bars">
+        <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:var(--muted3);border-radius:3px;"></div>
+        <div style="position:absolute;top:0;left:0;height:100%;width:0%;background:var(--muted2);border-radius:3px;transition:width .6s;" id="prog-actual-bar"></div>
+        <div class="prog-bar-target-marker" id="prog-target-marker" style="left:0%"></div>
+      </div>
+      <div class="prog-compare-labels">
+        <span class="prog-lbl"><span class="prog-dot" style="background:var(--muted2)"></span><span style="color:var(--muted2)" id="prog-actual-label">実績 0%</span></span>
+        <span class="prog-status-chip" style="background:var(--bg3);color:var(--muted2)" id="prog-status-chip">—</span>
+        <span class="prog-lbl"><span class="prog-dot" style="background:var(--amber)"></span><span style="color:var(--amber)" id="prog-target-label">予定 0%</span></span>
+      </div>
+    </div>
+
+    <div class="tb-chip chip-deadline">□ 2026年6月末</div>
+    <div class="tb-chip chip-warn" id="tb-status-chip">⚠ 現ペース +4ヶ月遅延</div>
+    <button class="btn-review" onclick="startReview()">月次レビュー</button>
+  </div>
+
+  <!-- Pages -->
+  <div id="pages">
+
+    <!-- ─── TODAY (新ホーム) ─── -->
+    <div class="page active" id="pg-today-wrap">
+      <div id="pg-today" style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+        <!-- Top bar -->
+        <div style="display:flex;align-items:center;padding:6px 14px;flex-shrink:0;">
+          <button onclick="toggleSidebar()" style="width:28px;height:28px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div style="flex:1;"></div>
+          <svg width="22" height="22" viewBox="0 0 32 32" style="opacity:0.3;"><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="var(--amber)"/></svg>
+        </div>
+        <!-- Scrollable content -->
+        <div id="today-scroll" style="flex:1;overflow-y:auto;padding:0 16px 60px;-webkit-overflow-scrolling:touch;">
+          <!-- Greeting -->
+          <div id="today-greet" style="padding:8px 0 0;">
+            <div id="today-greet-time" style="font-size:12px;color:var(--muted2);letter-spacing:0.5px;">GOOD MORNING</div>
+            <div id="today-greet-msg" style="font-size:20px;color:var(--cream);font-weight:300;margin-top:2px;line-height:1.3;">おはよう。</div>
+            <div id="today-greet-date" style="font-size:12px;color:var(--muted);margin-top:4px;"></div>
+            <div id="today-mindset" style="font-size:12px;color:var(--amber);margin-top:6px;font-style:italic;display:none;"></div>
+          </div>
+          <!-- Secretary memo -->
+          <div id="today-memo" style="margin:12px 0 0;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg2);overflow:hidden;display:none;">
+            <div onclick="document.getElementById('today-memo-body').style.display=document.getElementById('today-memo-body').style.display==='none'?'':'none'" style="display:flex;align-items:center;gap:6px;padding:8px 10px;cursor:pointer;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span style="font-size:12px;font-weight:500;color:var(--amber);flex:1;">秘書メモ</span>
+              <span style="font-size:12px;color:var(--muted2);">v</span>
+            </div>
+            <div id="today-memo-body" style="padding:0 10px 8px;"></div>
+          </div>
+          <!-- Task list -->
+          <div style="margin-top:12px;">
+            <div style="font-size:12px;font-weight:500;color:var(--muted2);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;">Today's Tasks</div>
+            <div id="today-task-list"></div>
+          </div>
+          <!-- Goal progress strip -->
+          <div id="today-goals" style="display:flex;gap:10px;margin-top:12px;padding-top:8px;border-top:0.5px solid var(--border);"></div>
+          <!-- B-16: Diary -->
+          <div style="margin-top:14px;padding-top:10px;border-top:0.5px solid var(--border);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <div style="font-size:12px;font-weight:500;color:var(--muted2);letter-spacing:0.5px;text-transform:uppercase;">Today's Note</div>
+              <div id="today-diary-title" style="display:none;font-size:12px;color:var(--amber);font-style:italic;"></div>
+            </div>
+            <textarea id="today-diary" placeholder="今日どうだった？" style="width:100%;min-height:60px;padding:8px 10px;background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;color:var(--cream);font-family:var(--ff);font-size:12px;line-height:1.5;resize:vertical;outline:none;box-sizing:border-box;" oninput="saveTodayDiary()"></textarea>
+          </div>
+        </div>
+        <!-- Comment input -->
+        <div style="padding:6px 14px;flex-shrink:0;border-top:0.5px solid var(--border);">
+          <div id="today-comment-box" style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg2);">
+            <input id="today-comment-in" placeholder="状況を伝える（例: 午後は外出）" style="flex:1;font-size:12px;color:var(--cream);background:none;border:none;outline:none;font-family:var(--ff);">
+            <button onclick="sendTodayComment()" style="background:none;border:none;cursor:pointer;color:var(--muted);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+          </div>
+        </div>
+        <!-- Calendar FAB (A-14) -->
+        <button onclick="showPage('calendar')" style="position:absolute;bottom:60px;left:16px;width:32px;height:32px;border-radius:50%;border:0.5px solid var(--border2);background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </button>
+        <!-- Add task FAB -->
+        <button id="today-add-fab" onclick="openTodayAddTask()" style="position:absolute;bottom:60px;right:16px;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#c8920a,#f5d380);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(200,146,10,0.3);z-index:10;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <!-- Step 2.6: タスク追加ハーフモーダル -->
+        <div id="task-add-overlay" onclick="closeTodayAddTask()" style="display:none;position:absolute;inset:0;z-index:299;background:rgba(0,0,0,.3);"></div>
+        <div id="task-add-sheet" style="display:none;position:absolute;bottom:0;left:0;right:0;z-index:300;background:var(--bg2);border-top:1px solid var(--border2);border-radius:16px 16px 0 0;max-height:60vh;flex-direction:column;box-shadow:0 -4px 24px rgba(0,0,0,.4);">
+          <div style="display:flex;align-items:center;padding:12px 16px;border-bottom:0.5px solid var(--border);">
+            <div style="font-size:13px;font-weight:500;color:var(--cream);flex:1;">タスクを追加</div>
+            <button onclick="closeTodayAddTask()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 8px;">✕</button>
+          </div>
+          <div id="task-add-chat" style="flex:1;overflow-y:auto;padding:10px 16px;max-height:30vh;"></div>
+          <div style="padding:8px 16px 12px;display:flex;gap:6px;align-items:center;">
+            <input id="task-add-input" placeholder="やりたいことを入力..." style="flex:1;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;color:var(--cream);font-family:var(--ff);font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')sendTaskAddMsg()">
+            <button onclick="sendTaskAddMsg()" style="width:36px;height:36px;border-radius:50%;background:var(--amber);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── TALK (旧HOME) ─── -->
+    <div class="page" id="pg-home-wrap">
+      <div id="pg-home">
+
+        <!-- Summary strip removed (A1 mockup準拠) -->
+
+        <!-- Personal chat + task panel container -->
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;">
+          <!-- Chat toolbar -->
+          <div id="home-chat-toolbar" style="display:flex;align-items:center;gap:4px;padding:5px 14px;flex-shrink:0;border-bottom:0.5px solid var(--border);">
+            <button id="hamburger-btn" onclick="toggleSidebar()" title="メニュー" aria-label="メニュー" style="width:28px;height:28px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <button onclick="openChatHistory()" title="会話履歴" style="width:28px;height:28px;border-radius:50%;background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
+            <button onclick="toggleHomeSearch()" title="検索" style="width:28px;height:28px;border-radius:50%;background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+            <div id="model-usage-badge" style="display:none;"></div>
+            <span id="kabeuchi-indicator" style="display:none;white-space:nowrap;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="12" r="3"/><circle cx="17" cy="12" r="3"/><path d="M10 12h4"/></svg></span>
+            <span id="chat-role-badge" class="chat-role-badge" style="display:none;">
+              <span class="role-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;"><rect x="3" y="8" width="18" height="12" rx="3"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="14" r="1.5"/><path d="M12 2v6"/></svg></span>
+              <span class="role-text"></span>
+            </span>
+            <div style="flex:1;"></div>
+            <button id="goal-modal-btn" onclick="openGoalModal()" title="ゴール＆タスク" style="width:44px;height:44px;border-radius:50%;background:rgba(200,146,10,0.13);color:var(--amber);border:none;cursor:pointer;font-weight:700;font-size:12px;flex-shrink:0;">G</button>
+            <button id="task-toolbar-btn" onclick="showPage('tasks')" title="タスク" style="width:44px;height:44px;border-radius:50%;background:rgba(200,146,10,0.13);color:var(--amber);border:none;cursor:pointer;font-weight:700;font-size:12px;flex-shrink:0;">T</button>
+            <button id="home-new-chat-btn" onclick="newHomeChat()" title="新しい会話" style="width:44px;height:44px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          </div>
+          <div id="home-search-bar" style="display:none;padding:4px 16px 0;max-width:700px;margin:0 auto;width:100%;">
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;">
+                <svg width="13" height="13" class="svg-ic" style="color:var(--muted2);flex-shrink:0"><use href="#ic-search"/></svg>
+                <input id="home-search-in" placeholder="チャット内を検索…"
+                  style="flex:1;background:none;border:none;font-size:13px;color:var(--cream);outline:none;"
+                  oninput="searchHomeChat(this.value)"
+                  onkeydown="if(event.key==='Escape')clearHomeSearch()">
+                <span id="home-search-cnt" style="font-size:12px;color:var(--muted2);font-family:var(--fm);white-space:nowrap;"></span>
+                <button onclick="clearHomeSearch()" style="background:none;border:none;color:var(--muted2);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;">✕</button>
+              </div>
+            </div>
+            <!-- UX-01: Three sages hero (replaces old AI name hero) -->
+            <div id="home-hero" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;max-height:calc(50vh - 50px);text-align:center;padding:0 16px;max-width:700px;margin:0 auto;">
+              <div>
+                <div style="display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:10px;">
+                  <div style="width:36px;height:36px;border-radius:50%;background:rgba(100,160,200,0.1);display:flex;align-items:center;justify-content:center;opacity:0.5;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(100,160,200,0.9)" stroke-width="1.5"><path d="M12 2L2 19h20L12 2z"/><path d="M12 8v5"/><circle cx="12" cy="15" r="0.5" fill="rgba(100,160,200,0.9)"/></svg>
+                  </div>
+                  <div style="width:36px;height:36px;border-radius:50%;background:rgba(220,160,80,0.1);display:flex;align-items:center;justify-content:center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(220,160,80,0.9)" stroke-width="1.5"><path d="M20 2c-2 0-6 2-8 6-1 2-1 4-1 6 0 1-1 3-3 4l-1 1 2 2 1-1c1-2 3-3 4-3 2 0 4 0 6-1 4-2 6-6 6-8V2z"/><path d="M8 18l-3 3"/></svg>
+                  </div>
+                  <div style="width:36px;height:36px;border-radius:50%;background:rgba(120,180,130,0.1);display:flex;align-items:center;justify-content:center;opacity:0.5;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(120,180,130,0.9)" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+                  </div>
+                </div>
+                <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">三人の賢者があなたを支えています</div>
+                <div id="home-ai-badge" style="margin-top:6px;"></div>
+              </div>
+            </div>
+            <!-- B-20: Presets removed (TODAY replaced them) -->
+            <div id="home-presets" style="display:none;"></div>
+            <div id="home-chat-wrap" style="flex:1;overflow-y:auto;position:relative;display:none;">
+            <div id="home-chat-inner" style="max-width:740px;margin:0 auto;padding:8px 20px 100px;"></div>
+          </div>
+          <button id="scroll-latest-btn" onclick="scrollToLatest()" style="display:none;position:absolute;bottom:90px;right:24px;z-index:600;background:var(--amber);color:#fff;border:none;cursor:pointer;padding:8px 18px 8px 14px;border-radius:28px;font-size:13px;font-family:var(--fm);font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.4);align-items:center;gap:6px;opacity:0;transition:opacity .25s ease,transform .25s ease;transform:translateY(8px);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+            最新へ
+          </button>
+          <div id="home-topic-tags" class="topic-tags" style="display:none;"></div>
+          <!-- Task chip (above input, right-aligned) -->
+          <div id="task-chip-wrap" class="task-chip-wrap" style="display:none;">
+            <button id="task-chip-btn" class="task-chip" onclick="openTaskFromChat()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d4a012" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              <span>タスク化</span>
+            </button>
+          </div>
+          <!-- Separator (mockup準拠) -->
+          <div style="height:11px;flex-shrink:0;position:relative;max-width:700px;margin:0 auto;width:100%;"><div style="position:absolute;bottom:0;left:24px;right:24px;height:1px;background:linear-gradient(90deg,transparent,rgba(200,146,10,0.15),transparent);"></div></div>
+          <!-- Task box (spec #02a: 208px, scrollable) -->
+          <div id="home-task-box" style="display:none;max-width:700px;margin:0 auto;flex-shrink:0;">
+            <div style="padding:8px 12px 80px;max-height:208px;overflow-y:auto;">
+              <div id="home-task-box-inner"></div>
+              <div style="text-align:right;margin-top:4px;">
+                <span onclick="showPage('tasks')" style="font-size:12px;color:var(--muted2);cursor:pointer;font-family:var(--fm);">タスク画面 →</span>
+              </div>
+            </div>
+          </div>
+          <!-- Preset editor modal (G4-A) -->
+          <div id="preset-editor-modal" style="display:none;position:absolute;inset:0;z-index:70;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;">
+            <div style="background:var(--bg2);border:1px solid var(--border-card);border-radius:14px;padding:20px;width:90%;max-width:360px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                <span style="font-size:13px;font-weight:500;color:var(--cream);">プリセットを編集</span>
+                <button onclick="closePresetEditor()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;">✕</button>
+              </div>
+              <div id="preset-edit-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;"></div>
+              <button onclick="addPresetItem()" style="width:100%;padding:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--ff);">＋ 追加</button>
+              <button onclick="savePresets()" style="width:100%;margin-top:8px;padding:10px;background:var(--amber);border:none;border-radius:10px;color:var(--text-on-accent);cursor:pointer;font-size:12px;font-weight:500;font-family:var(--ff);">保存</button>
+            </div>
+          </div>
+          <!-- Bottom padding -->
+          <div style="height:16px;flex-shrink:0;"></div>
+
+          <!-- Chat history slide panel -->
+          <div id="chat-history-panel" style="display:none;position:absolute;inset:0;z-index:60;background:var(--bg2);flex-direction:column;overflow:hidden;">
+            <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+              <button onclick="closeChatHistory()" style="width:32px;height:32px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:16px;">←</button>
+              <div style="font-size:14px;font-weight:500;color:var(--cream);flex:1;">過去の会話</div>
+              <button onclick="toggleHistorySelectMode()" style="padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--ff);">選択</button>
+              <div style="position:relative;flex:1;max-width:200px;">
+                <input id="history-search-in" placeholder="検索…" style="width:100%;padding:6px 10px 6px 28px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-size:12px;font-family:var(--ff);outline:none;" oninput="filterChatHistory(this.value)">
+                <svg width="12" height="12" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--muted2)" class="svg-ic"><use href="#ic-search"/></svg>
+              </div>
+            </div>
+            <div id="chat-history-list" style="flex:1;overflow-y:auto;padding:8px;"></div>
+            <div id="history-select-footer" style="display:none;padding:10px 16px;padding-bottom:calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span id="history-select-count" style="font-size:12px;color:var(--muted);flex:1;white-space:nowrap;">0件選択</span>
+              <button id="select-all-btn" onclick="toggleSelectAll()" style="padding:5px 10px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--ff);">すべて選択</button>
+              <button onclick="deleteSelectedSessions()" id="delete-selected-btn" style="padding:5px 10px;background:var(--red);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--ff);">削除</button>
+              <button onclick="toggleHistorySelectMode()" style="padding:5px 10px;background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--ff);">キャンセル</button>
+            </div>
+          </div>
+
+          <!-- Home task detail panel (slides in from right) -->
+          <div id="home-task-panel">
+            <div class="htp-hd">
+              <div class="htp-back" onclick="closeHomeTaskPanel()">←</div>
+              <div class="htp-info">
+                <div class="htp-task-name" id="htp-name">タスク名</div>
+                <div class="htp-meta">
+                  <span class="htp-phase-tag" id="htp-phase-tag"></span>
+                  <span class="htp-due" id="htp-due"></span>
+                </div>
+              </div>
+            </div>
+            <div class="htp-actions">
+              <select class="htp-status-sel" id="htp-status-sel" onchange="htpUpdateStatus(this.value)">
+                <option value="todo">⬜ 未着手</option>
+                <option value="current">🔵 進行中</option>
+                <option value="done">✅ 完了</option>
+                <option value="blocked">🔴 ブロック中</option>
+              </select>
+              <div class="htp-action-btn" onclick="htpQuickChat('このタスクの進め方を教えて')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5" style="vertical-align:middle;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg> 進め方を聞く</div>
+              <div class="htp-action-btn" onclick="htpQuickChat('このタスクで詰まっていることを相談したい')">→ 詰まりを相談</div>
+              <div class="htp-action-btn" onclick="htpQuickChat('このタスクを今日30分で終わらせる方法は？')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5" style="vertical-align:middle;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> 30分で終わらせる</div>
+            </div>
+            <div id="htp-chat"></div>
+            <div id="htp-input-area">
+              <div class="htp-input-wrap">
+                <textarea id="htp-msg-in" rows="1" placeholder="このタスクについて質問する…"
+                  oninput="htpResize(this)" onkeydown="htpKey(event)"></textarea>
+                <button id="htp-send-btn" onclick="sendHtpMsg()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--text-on-accent)"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── CHAT ─── -->
+    <!-- ─── GOAL HUB ─── -->
+    <div class="page" id="pg-goal-hub-wrap">
+      <!-- D-02: Goals list view (shown before entering a goal hub) -->
+      <div id="goals-list-view" style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+        <div style="padding:14px 16px 0;">
+          <div style="font-size:18px;font-weight:300;color:var(--cream);letter-spacing:0.5px;">Goals</div>
+          <!-- Tab: ゴール / やりたいこと -->
+          <div style="display:flex;gap:0;margin-top:10px;border-bottom:0.5px solid var(--border);">
+            <button id="goals-tab-goals" onclick="switchGoalsTab('goals')" style="flex:1;padding:8px 0;background:none;border:none;border-bottom:2px solid var(--amber);color:var(--amber);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff);">ゴール</button>
+            <button id="goals-tab-wishes" onclick="switchGoalsTab('wishes')" style="flex:1;padding:8px 0;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted2);font-size:12px;cursor:pointer;font-family:var(--ff);">やりたいこと</button>
+          </div>
+        </div>
+        <div id="goals-list-content" style="flex:1;overflow-y:auto;padding:10px 14px 80px;"></div>
+        <div id="wishes-list-content" style="flex:1;overflow-y:auto;padding:10px 14px 80px;display:none;"></div>
+        <!-- Add FAB -->
+        <button onclick="startGoalCreation()" style="position:absolute;bottom:60px;right:16px;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#c8920a,#f5d380);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(200,146,10,0.3);z-index:10;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+
+      <div id="pg-goal-hub" style="display:none;">
+
+        <!-- Hub header -->
+        <div class="hub-hd">
+          <div class="hub-hd-top" style="display:flex;align-items:center;gap:8px;">
+            <button onclick="toggleSidebar()" style="display:none;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;padding:0;background:transparent;border:none;cursor:pointer;color:var(--cream);border-radius:8px;" class="mob-hamburger" aria-label="メニュー"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+            <div class="hub-goal-title" style="flex:1;min-width:0;">
+              <div class="hub-goal-dot" id="hub-dot"></div>
+              <span id="hub-title">ゴール名</span>
+            </div>
+            <div class="hub-back" onclick="showPage('goal-hub')" style="font-size:12px;color:var(--amber);cursor:pointer;">← GOALS</div>
+          </div>
+          <div class="hub-progress-row">
+            <div class="hub-prog-bar">
+              <div class="hub-prog-actual" id="hub-prog-actual"></div>
+              <div class="hub-prog-target" id="hub-prog-target"></div>
+            </div>
+            <div class="hub-stat" id="hub-stat-pct"></div>
+            <div class="hub-stat" style="color:var(--muted)">|</div>
+            <div class="hub-stat" id="hub-stat-deadline"></div>
+            <div id="hub-status-chip"></div>
+          </div>
+          <div class="hub-tabs">
+            <div class="hub-tab active" id="htab-chat"    onclick="switchHubTab('chat')"><svg width="16" height="16" class="svg-ic"><use href="#ic-chat"/></svg> チャット</div>
+            <div class="hub-tab"        id="htab-tasks"   onclick="switchHubTab('tasks')"><svg width="16" height="16" class="svg-ic"><use href="#ic-tasks"/></svg> タスク</div>
+            <div class="hub-tab"        id="htab-analytics" onclick="switchHubTab('analytics')"><svg width="16" height="16" class="svg-ic"><use href="#ic-analytics"/></svg> 解析</div>
+            <div class="hub-tab"        id="htab-memo"    onclick="switchHubTab('memo')"><svg width="16" height="16" class="svg-ic"><use href="#ic-memo"/></svg> メモ</div>
+            <div class="hub-tab"        id="htab-settings" onclick="switchHubTab('settings')"><svg width="16" height="16" class="svg-ic"><use href="#ic-settings"/></svg> 設定</div>
+            <button onclick="openExportModal()" style="margin-left:auto;padding:6px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;font-size:12px;font-family:var(--ff);transition:color .15s;flex-shrink:0;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--muted)'"><svg width="13" height="13" class="svg-ic"><use href="#ic-export"/></svg>共有</button>
+          </div>
+        </div>
+
+        <div class="hub-content">
+
+          <!-- <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Chat pane -->
+          <div class="hub-pane active" id="hub-pane-chat">
+            <div id="hub-search-bar" style="display:none;padding:8px 28px 0;">
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;">
+                <svg width="13" height="13" class="svg-ic" style="color:var(--muted2);flex-shrink:0"><use href="#ic-search"/></svg>
+                <input id="hub-search-in" placeholder="このゴールのチャットを検索…"
+                  style="flex:1;background:none;border:none;font-size:12px;color:var(--cream);outline:none;"
+                  oninput="searchHubChat(this.value)"
+                  onkeydown="if(event.key==='Escape')clearHubSearch()">
+                <span id="hub-search-cnt" style="font-size:12px;color:var(--muted2);font-family:var(--fm);white-space:nowrap;"></span>
+                <button onclick="clearHubSearch()" style="background:none;border:none;color:var(--muted2);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;">✕</button>
+              </div>
+            </div>
+            <div id="hub-chat-wrap"><div id="hub-chat-inner"></div></div>
+            <div id="hub-chat-input-row" style="display:flex;align-items:center;gap:7px;">
+              <button onclick="toggleHubSearch()" title="チャット検索" style="width:32px;height:32px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,border-color .15s;" onmouseover="this.style.color='var(--amber)';this.style.borderColor='rgba(228,184,106,.3)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'"><svg width="13" height="13" class="svg-ic"><use href="#ic-search"/></svg></button>
+              <button class="chat-voice-btn" onclick="startVoiceInput(document.getElementById('hub-msg-in'))" title="音声入力" style="width:32px;height:32px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">🎤</button>
+              <div id="hub-chat-input-inner" style="flex:1;">
+                <textarea id="hub-msg-in" rows="1" placeholder="返信する"
+                  oninput="hubMsgResize(this)" onkeydown="hubMsgKey(event)"></textarea>
+                <button id="hub-send-btn" onclick="sendHubMsg()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--text-on-accent)"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ✅ Tasks pane -->
+          <div class="hub-pane" id="hub-pane-tasks">
+            <div id="hub-tasks-wrap"><div id="hub-tasks-inner"></div></div>
+          </div>
+
+          <!-- 📊 Analytics pane -->
+          <div class="hub-pane" id="hub-pane-analytics">
+            <div id="hub-analytics-wrap"><div id="hub-analytics-inner"></div></div>
+          </div>
+
+          <!-- 📝 Memo pane -->
+          <div class="hub-pane" id="hub-pane-memo">
+            <div id="hub-memo-wrap">
+              <div id="hub-memo-inner">
+                <!-- AIの理解メモ (AMEND-001 #4 accordion) -->
+                <div id="hub-ai-memo-section">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <div style="font-size:12px;font-weight:500;color:var(--amber);">AIの理解メモ</div>
+                    <div id="hub-ai-memo-date" style="font-size:12px;color:var(--muted2);"></div>
+                  </div>
+                  <div id="hub-ai-memo-accordion" style="padding:10px 14px;border-radius:8px;background:rgba(228,184,106,0.04);border:0.5px solid rgba(228,184,106,0.2);margin-bottom:14px;"></div>
+                </div>
+                <div style="font-size:12px;font-weight:500;color:var(--cream);margin-bottom:6px;">自分のメモ</div>
+                <button class="memo-add-btn" onclick="openMemoEditor()">＋ メモを追加</button>
+                <textarea id="hub-memo-editor" placeholder="気づき・メモ・考えたことを自由に…" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+                <div class="memo-save-row" id="memo-save-row">
+                  <button onclick="closeMemoEditor()" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;color:var(--muted);cursor:pointer;font-family:var(--ff);font-size:12px;">キャンセル</button>
+                  <button onclick="saveMemo()" style="padding:6px 14px;background:var(--amber);border:none;border-radius:7px;color:var(--bg);cursor:pointer;font-family:var(--ff);font-size:12px;font-weight:500;">保存</button>
+                </div>
+                <div id="hub-memo-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ⚙️ Settings pane -->
+          <div class="hub-pane" id="hub-pane-settings">
+            <div id="hub-settings-wrap">
+              <div id="hub-settings-inner">
+                <div class="settings-card full" style="margin-bottom:16px;">
+                  <div class="sc-hd"><span class="sc-hd-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-target"/></svg></span><div class="sc-hd-title">ゴール設定</div></div>
+                  <div class="sc-body">
+                    <div class="field"><div class="field-lbl">ゴールタイトル</div><input class="field-input" id="hub-goal-title-in"></div>
+                    <div class="prof-grid">
+                      <div class="field"><div class="field-lbl">完了目標日</div><input class="field-input" type="date" id="hub-goal-deadline-in"></div>
+                      <div class="field"><div class="field-lbl">目標KPI</div><input class="field-input" id="hub-goal-kpi-in" placeholder="例: ¥1,000,000"></div>
+                    </div>
+                    <button class="btn-save" onclick="saveHubGoalSettings()">保存</button>
+                  </div>
+                </div>
+                <div class="settings-card full" style="margin-bottom:16px;">
+                  <div class="sc-hd"><span class="sc-hd-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-refresh"/></svg></span><div class="sc-hd-title">レビュー頻度</div></div>
+                  <div class="sc-body">
+                    <div class="radio-group" style="flex-direction:column;align-items:flex-start;">
+                      <div class="radio-opt" onclick="selRadio(this,'hub-freq')">毎週 <span class="badge-pro">Pro</span></div>
+                      <div class="radio-opt" onclick="selRadio(this,'hub-freq')">隔週 <span class="badge-pro">Pro</span></div>
+                      <div class="radio-opt sel" onclick="selRadio(this,'hub-freq')">月2回（1日・15日）</div>
+                      <div class="radio-opt" onclick="selRadio(this,'hub-freq')">月1回</div>
+                    </div>
+                  </div>
+                </div>
+                <!-- ── AIロール (G05E-03) ── -->
+                <div class="settings-card full" style="margin-bottom:16px;">
+                  <div class="sc-hd"><span class="sc-hd-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;"><rect x="3" y="8" width="18" height="12" rx="3"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="14" r="1.5"/><path d="M12 2v6"/></svg></span><div class="sc-hd-title">AIロール</div></div>
+                  <div class="sc-body">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                      <div id="hub-role-display" style="font-size:12px;color:var(--cream);">未設定</div>
+                      <button onclick="toggleHubRoleEdit()" style="font-size:12px;color:var(--amber);background:none;border:none;cursor:pointer;font-family:var(--ff);">変更する</button>
+                    </div>
+                    <div id="hub-role-edit" style="display:none;">
+                      <input id="hub-role-input" placeholder="例: 厳しめのコーチ、優しい相談相手…" style="width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--cream);font-size:12px;font-family:var(--ff);outline:none;margin-bottom:8px;">
+                      <div style="display:flex;gap:6px;">
+                        <button onclick="saveHubRole()" style="padding:6px 14px;background:var(--amber);border:none;border-radius:6px;color:var(--text-on-accent);cursor:pointer;font-size:12px;font-weight:500;">保存</button>
+                        <button onclick="toggleHubRoleEdit()" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;">キャンセル</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- ── 通知 (#05e mockup) ── -->
+                <div class="settings-card full" style="margin-bottom:16px;">
+                  <div class="sc-hd"><span class="sc-hd-icon">🔔</span><div class="sc-hd-title">通知</div></div>
+                  <div class="sc-body">
+                    <div class="hub-notif-row"><span style="font-size:12px;color:var(--cream);">期限リマインダー</span><div class="toggle on" id="hub-notif-deadline" onclick="toggleHubNotif(this)"></div></div>
+                    <div class="hub-notif-row"><span style="font-size:12px;color:var(--cream);">週次レビュー</span><div class="toggle on" id="hub-notif-review" onclick="toggleHubNotif(this)"></div></div>
+                  </div>
+                </div>
+                <!-- ── エクスポート (#05e mockup) ── -->
+                <div class="settings-card full" style="margin-bottom:16px;">
+                  <div class="sc-hd"><span class="sc-hd-icon">📤</span><div class="sc-hd-title">エクスポート</div></div>
+                  <div class="sc-body">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                      <button onclick="exportHubMarkdown()" class="hub-export-btn">Markdown</button>
+                      <button onclick="exportHubICS()" class="hub-export-btn">ICS（カレンダー）</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- ── ゴール管理 ── -->
+                <div class="settings-card full" style="border-color:rgba(224,104,104,.2);">
+                  <div class="sc-hd"><span class="sc-hd-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-warning"/></svg></span><div class="sc-hd-title" style="color:var(--red)">ゴールの管理</div></div>
+                  <div class="sc-body">
+                    <div style="margin-bottom:14px;">
+                      <div style="font-size:12px;color:var(--cream);font-weight:500;margin-bottom:4px;">ゴールを達成済みにする</div>
+                      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;">このゴールを「達成」としてアーカイブします。チャット履歴・タスク・データはすべて保持されます。</div>
+                      <button onclick="archiveGoal('done')" style="padding:7px 16px;background:var(--amber-d);border:1px solid var(--amber);border-radius:8px;color:var(--amber);font-size:12px;cursor:pointer;font-family:var(--ff);"><svg width="14" height="14" class="svg-ic"><use href="#ic-award"/></svg> 達成済みにする</button>
+                    </div>
+                    <div style="padding-top:14px;border-top:1px solid var(--border);">
+                      <div style="font-size:12px;color:var(--cream);font-weight:500;margin-bottom:4px;">ゴールを削除する</div>
+                      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;">このゴールと関連するすべてのデータ（タスク・チャット・メモ）を完全に削除します。<strong style="color:var(--red)">この操作は取り消せません。</strong></div>
+                      <button onclick="confirmDeleteGoal()" style="padding:7px 16px;background:var(--red-d);border:1px solid var(--red-d);border-radius:8px;color:var(--red);font-size:12px;cursor:pointer;font-family:var(--ff);"><svg width="14" height="14" class="svg-ic"><use href="#ic-trash"/></svg> このゴールを削除する</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── MYSELF HUB ─── -->
+    <div class="page" id="pg-myself-wrap">
+      <div id="pg-myself" style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+
+        <!-- Header -->
+        <div class="hub-hd myself-hub-hd">
+          <div class="hub-hd-top" style="display:flex;align-items:center;gap:8px;">
+            <button onclick="toggleSidebar()" style="display:none;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;padding:0;background:transparent;border:none;cursor:pointer;color:#fff;border-radius:8px;" class="mob-hamburger" aria-label="メニュー"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+            <div class="hub-goal-title" style="flex:1;min-width:0;">
+              <span style="font-size:20px">🪞</span>
+              <span style="color:#fff">私をデザイン</span>
+            </div>
+            <div class="hub-back" onclick="showPage('home')" style="color:#fff;border-color:rgba(255,255,255,.3);"><svg width="14" height="14" class="svg-ic"><use href="#ic-arrow-left"/></svg> ホームに戻る</div>
+          </div>
+          <div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:14px;line-height:1.6;">
+            AIとの対話を通じて自分を言語化し、すべてのゴールに反映させるパーソナルベースです。
+          </div>
+          <div class="hub-tabs">
+            <div class="hub-tab active" id="mtab-know"    onclick="switchMyselfTab('know')"><svg width="16" height="16" class="svg-ic"><use href="#ic-mirror"/></svg> 自分を知る</div>
+            <div class="hub-tab"        id="mtab-vision"  onclick="switchMyselfTab('vision')"><svg width="16" height="16" class="svg-ic"><use href="#ic-target"/></svg> ビジョン</div>
+            <div class="hub-tab"        id="mtab-connect" onclick="switchMyselfTab('connect')"><svg width="16" height="16" class="svg-ic"><use href="#ic-link"/></svg> ゴールとの連携</div>
+            <div class="hub-tab"        id="mtab-profile" onclick="switchMyselfTab('profile')"><svg width="16" height="16" class="svg-ic"><use href="#ic-user"/></svg> プロフィール</div>
+          </div>
+        </div>
+
+        <div class="hub-content">
+
+          <!-- 🪞 自分を知る -->
+          <div class="hub-pane active" id="myself-pane-know">
+            <div style="flex:1;overflow-y:auto;padding:20px 28px;">
+              <div style="max-width:680px;margin:0 auto;">
+
+                <!-- Session status -->
+                <div id="know-session-status" style="margin-bottom:18px;padding:12px 16px;background:rgba(157,120,216,.08);border:1px solid var(--know-purple-bg);border-radius:10px;display:flex;align-items:center;justify-content:space-between;">
+                  <div>
+                    <div style="font-size:12px;font-weight:500;color:var(--know-purple)" id="know-status-title">セッション未完了</div>
+                    <div style="font-size:12px;color:var(--muted);margin-top:2px" id="know-status-sub">AIとの対話で自分を言語化しましょう（約10〜15分）</div>
+                  </div>
+                  <button id="know-start-btn" onclick="startKnowSession()"
+                    style="padding:7px 16px;background:var(--know-purple-bg);border:1px solid var(--know-purple-border);border-radius:8px;color:var(--know-purple);font-size:12px;cursor:pointer;font-family:var(--ff);white-space:nowrap;transition:all .15s;"
+                    onmouseover="this.style.background='rgba(157,120,216,.35)'" onmouseout="this.style.background='var(--know-purple-bg)'">
+                    セッションを始める
+                  </button>
+                </div>
+
+                <!-- Theme progress chips -->
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;" id="know-theme-chips">
+                  <div class="know-chip" data-theme="0">あなたについて</div>
+                  <div class="know-chip" data-theme="1">今の自分</div>
+                  <div class="know-chip" data-theme="2">苦手なこと</div>
+                  <div class="know-chip" data-theme="3">大切にしていること</div>
+                  <div class="know-chip" data-theme="4">なりたい自分</div>
+                  <div class="know-chip" data-theme="5">恐れと障壁</div>
+                </div>
+
+                <!-- Chat area -->
+                <div id="know-chat" style="display:none;flex-direction:column;gap:12px;margin-bottom:16px;"></div>
+
+                <!-- Input (CRN-03 unified) -->
+                <div id="know-input-row" style="display:none;">
+                  <div style="background:var(--input-bg);border:var(--input-border-new);border-radius:var(--input-radius);display:flex;align-items:flex-end;overflow:hidden;transition:border-color .2s;" id="know-input-wrap">
+                    <textarea id="know-msg-in" rows="1" placeholder="ここに答えを書いてください…"
+                      style="flex:1;padding:12px 16px;background:transparent;border:none;color:var(--cream);font-family:var(--ff);font-size:16px;resize:none;max-height:110px;min-height:44px;outline:none;line-height:1.5;"
+                      oninput="knowResize(this)" onkeydown="knowKey(event)"></textarea>
+                    <button class="chat-voice-btn" onclick="startVoiceInput(document.getElementById('know-msg-in'))" title="音声入力"
+                      style="width:44px;height:44px;margin:0 0 0 4px;background:transparent;border:0.5px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:16px;">🎤</button>
+                    <button onclick="sendKnowMsg()"
+                      style="width:var(--send-btn-size);height:var(--send-btn-size);margin:8px;background:var(--send-btn-grad);border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;transition:opacity .15s;flex-shrink:0;"
+                      onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--text-on-accent)"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Summary result -->
+                <div id="know-summary-box" style="display:none;margin-top:20px;">
+                  <div style="font-size:12px;color:var(--know-purple);letter-spacing:.15em;font-family:var(--fm);margin-bottom:12px;">AIによるデザインサマリー</div>
+                  <div id="know-summary-content" style="background:rgba(157,120,216,.08);border:1px solid var(--know-purple-bg);border-radius:10px;padding:18px 20px;font-size:12.5px;color:var(--cream);line-height:1.85;white-space:pre-wrap;"></div>
+                  <div style="display:flex;gap:8px;margin-top:12px;">
+                    <button onclick="applySummaryToProfile()" style="padding:8px 18px;background:var(--know-purple-bg);border:1px solid var(--know-purple-border);border-radius:8px;color:var(--know-purple);font-size:12px;cursor:pointer;font-family:var(--ff);transition:all .15s;" onmouseover="this.style.background='rgba(157,120,216,.35)'" onmouseout="this.style.background='var(--know-purple-bg)'">✓ プロフィールに反映する</button>
+                    <button onclick="startKnowSession()" style="padding:8px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--ff);">セッションをやり直す</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> ビジョン -->
+          <div class="hub-pane" id="myself-pane-vision">
+            <div style="flex:1;overflow-y:auto;padding:20px 28px;">
+              <div style="max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:16px;">
+
+                <!-- Vision statement -->
+                <div style="background:rgba(157,120,216,.08);border:1px solid var(--know-purple-bg);border-radius:12px;padding:20px 22px;">
+                  <div style="font-size:12px;color:var(--know-purple);letter-spacing:.15em;font-family:var(--fm);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+                    ビジョンステートメント
+                    <button onclick="editVision()" style="font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--ff);">編集</button>
+                  </div>
+                  <div id="vision-statement" style="font-size:14px;color:var(--cream);line-height:1.9;font-style:italic;">
+                    <span style="color:var(--muted2)">ビジョンを設定すると表示されます</span>
+                  </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  <!-- 見られたい姿 -->
+                  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
+                    <div style="font-size:12px;color:var(--amber);letter-spacing:.12em;font-family:var(--fm);margin-bottom:10px;">見られたい姿</div>
+                    <div id="vision-image-list" style="display:flex;flex-direction:column;gap:6px;">
+                    </div>
+                    <button onclick="addVisionItem('image')" style="margin-top:8px;font-size:12px;color:var(--muted2);background:none;border:none;cursor:pointer;font-family:var(--ff);">+ 追加</button>
+                  </div>
+                  <!-- 強みの言語化 -->
+                  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
+                    <div style="font-size:12px;color:var(--green);letter-spacing:.12em;font-family:var(--fm);margin-bottom:10px;">強みの言語化</div>
+                    <div id="vision-strength-list" style="display:flex;flex-direction:column;gap:6px;">
+                    </div>
+                    <button onclick="addVisionItem('strength')" style="margin-top:8px;font-size:12px;color:var(--muted2);background:none;border:none;cursor:pointer;font-family:var(--ff);">+ 追加</button>
+                  </div>
+                </div>
+
+                <!-- 5年後の理想の平日 -->
+                <div style="position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 14px 28px;">
+                  <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px;">5年後の理想の平日</div>
+                  <div id="vision-ideal-day" style="font-size:13px;line-height:1.8;color:var(--muted);white-space:pre-wrap;">
+                    <span style="color:var(--muted2);font-size:12px;">「自分を知る」セッション完了後に表示されます</span>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="position:absolute;bottom:8px;right:10px;cursor:pointer;" onclick="editVisionField('ideal_day')"><path d="M11.5 1.5l3 3-9 9H2.5v-3l9-9z" stroke="var(--muted2)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+
+                <!-- やりたくない生活 -->
+                <div style="position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 14px 28px;">
+                  <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px;">やりたくない生活</div>
+                  <div id="vision-unwanted-life" style="font-size:13px;line-height:1.8;color:var(--muted);white-space:pre-wrap;">
+                    <span style="color:var(--muted2);font-size:12px;">「自分を知る」セッション完了後に表示されます</span>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="position:absolute;bottom:8px;right:10px;cursor:pointer;" onclick="editVisionField('unwanted_life')"><path d="M11.5 1.5l3 3-9 9H2.5v-3l9-9z" stroke="var(--muted2)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+
+                <!-- キャッチコピー -->
+                <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
+                  <div style="font-size:12px;color:var(--muted2);letter-spacing:.12em;font-family:var(--fm);margin-bottom:8px;">キャッチコピー</div>
+                  <div id="vision-catchcopy" style="font-size:15px;font-family:var(--fd);font-weight:300;color:var(--cream);letter-spacing:.05em;">
+                  </div>
+                  <button onclick="regenCatchcopy()" style="margin-top:10px;padding:5px 12px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--ff);">↺ AIに別の案を出してもらう</button>
+                </div>
+
+                <!-- MY CHARACTER card -->
+                <div class="my-character-card" id="my-character-card">
+                  <div style="font-size:12px;color:#c8920a;letter-spacing:.15em;font-family:var(--fm);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+                    MY CHARACTER
+                    <button onclick="editMyCharacter()" style="font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--ff);">編集</button>
+                  </div>
+                  <div id="my-character-traits" style="display:flex;flex-direction:column;gap:10px;">
+                    <div class="char-trait-row">
+                      <div class="char-trait-label">性格タイプ</div>
+                      <div class="char-trait-value" id="char-personality">--</div>
+                    </div>
+                    <div class="char-trait-row">
+                      <div class="char-trait-label">行動スタイル</div>
+                      <div class="char-trait-value" id="char-action-style">--</div>
+                    </div>
+                    <div class="char-trait-row">
+                      <div class="char-trait-label">コアバリュー</div>
+                      <div class="char-trait-value" id="char-core-value">--</div>
+                    </div>
+                    <div class="char-trait-row">
+                      <div class="char-trait-label">成長エッジ</div>
+                      <div class="char-trait-value" id="char-growth-edge">--</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 再分析6チップ (G06B-04) -->
+                <div style="border-top:0.5px solid var(--border);padding-top:20px;margin-bottom:8px;">
+                  <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:12px;">再分析する</div>
+                  <div id="reanalyze-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+                    <span class="reanalyze-chip" data-section="character" onclick="toggleReanalyzeChip(this)" style="padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;">キャラクター</span>
+                    <span class="reanalyze-chip" data-section="vision" onclick="toggleReanalyzeChip(this)" style="padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;">ビジョン</span>
+                    <span class="reanalyze-chip" data-section="image" onclick="toggleReanalyzeChip(this)" style="padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;">見られたい姿</span>
+                    <span class="reanalyze-chip" data-section="strength" onclick="toggleReanalyzeChip(this)" style="padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;">強みの言語化</span>
+                    <span class="reanalyze-chip" data-section="ideal" onclick="toggleReanalyzeChip(this)" style="padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;">5年後の理想</span>
+                    <span class="reanalyze-chip" data-section="unwanted" onclick="toggleReanalyzeChip(this)" style="padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;">やりたくない生活</span>
+                  </div>
+                  <div style="text-align:center;">
+                    <button onclick="runReanalysis()" style="display:inline-block;background:var(--send-btn-grad);color:var(--text-on-accent);font-size:14px;font-weight:600;padding:12px 28px;border-radius:24px;border:none;cursor:pointer;font-family:var(--ff);">選択した項目を再分析</button>
+                  </div>
+                </div>
+
+                <!-- SNS共有 (G06B-05) -->
+                <div style="text-align:center;padding:16px 0 4px;border-top:0.5px solid var(--border);margin-top:16px;">
+                  <button onclick="shareCharacter()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:20px;border:0.5px solid var(--border);background:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--ff);">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="13" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="13" cy="12" r="2" stroke="currentColor" stroke-width="1.2"/><line x1="5" y1="7" x2="11" y2="5" stroke="currentColor" stroke-width="1.2"/><line x1="5" y1="9" x2="11" y2="11" stroke="currentColor" stroke-width="1.2"/></svg>
+                    キャラクターをシェア
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- 🔗 ゴールとの連携 -->
+          <div class="hub-pane" id="myself-pane-connect">
+            <div style="flex:1;overflow-y:auto;padding:20px 28px;">
+              <div style="max-width:680px;margin:0 auto;" id="connect-inner">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+                  <div style="font-size:12px;color:var(--muted);">ビジョン×現在のゴールをAIが照合しています</div>
+                  <button onclick="runConnectAnalysis()" style="padding:6px 14px;background:var(--purple-d);border:1px solid var(--know-purple-border);border-radius:7px;font-size:12px;color:var(--know-purple);cursor:pointer;font-family:var(--ff);">↺ 再分析</button>
+                </div>
+                <div id="connect-content"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 👤 プロフィール -->
+          <div class="hub-pane profile-page" id="myself-pane-profile">
+            <div style="overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 28px;">
+              <!-- プロフィール画像 -->
+              <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:24px;">
+                <div id="profile-avatar-wrap" style="position:relative;width:48px;height:48px;cursor:pointer;" onclick="document.getElementById('avatar-file-input').click()">
+                  <img id="profile-avatar-img" style="width:48px;height:48px;border-radius:50%;object-fit:cover;display:none;border:2px solid var(--border);">
+                  <div id="profile-avatar-text" style="width:48px;height:48px;border-radius:50%;background:var(--bg3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--amber);"></div>
+                  <div style="position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2.5" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+                </div>
+                <span style="font-size:12px;color:var(--muted);">タップして変更</span>
+                <input type="file" id="avatar-file-input" accept="image/*" style="display:none;" onchange="handleAvatarUpload(this)">
+              </div>
+              <!-- AI理解度（折りたたみ式） -->
+              <div class="profile-completeness">
+                <div class="completeness-header" onclick="toggleCompletenessDetail()">
+                  <span class="completeness-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+                  <span class="completeness-label">AIの理解度</span>
+                  <span class="completeness-score" id="completeness-score">0%</span>
+                  <span class="completeness-toggle" id="completeness-toggle">↓ 詳細</span>
+                </div>
+                <div class="completeness-detail" id="completeness-detail" style="display:none;">
+                  <div id="ai-understand-items" style="display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;"></div>
+                </div>
+              </div>
+              <!-- 旧AI理解度バー（互換性維持・非表示） -->
+              <div style="display:none;"><div class="ai-understand-bar"><div class="ai-understand-fill" id="ai-understand-pct" style="width:0%"></div></div><div id="ai-understand-num">0%</div></div>
+              <div style="max-width:680px;margin:0 auto;" id="myself-profile-inner">
+
+                <!-- ① 基本情報 -->
+                <div class="mp-section">
+                  <div class="mp-section-hd"><svg width="15" height="15" class="svg-ic"><use href="#ic-user"/></svg>基本情報</div>
+                  <div class="prof-grid" style="gap:12px 20px;">
+                    <div class="field">
+                      <div class="field-lbl">なんて呼ばれたい？</div>
+                      <input class="field-input" id="mp-nickname" placeholder="例：たろう、社長" oninput="updateProfile()">
+                    </div>
+                    <div class="field">
+                      <div class="field-lbl">氏名</div>
+                      <input class="field-input" id="mp-name" value="" oninput="updateProfile()">
+                    </div>
+                    <div class="field">
+                      <div class="field-lbl">生年月日</div>
+                      <input class="field-input" type="date" id="mp-dob" onchange="updateProfile();updateAge()">
+                      <div id="mp-age-display" style="font-size:12px;color:var(--muted);margin-top:4px;"></div>
+                    </div>
+                    <div class="field">
+                      <div class="field-lbl">性別</div>
+                      <div style="display:flex;gap:7px;margin-top:4px;" id="mp-gender-group">
+                        <div class="nq-btn" onclick="selGender(this,'男性')">男性</div>
+                        <div class="nq-btn" onclick="selGender(this,'女性')">女性</div>
+                        <div class="nq-btn" onclick="selGender(this,'その他')">その他</div>
+                        <div class="nq-btn" onclick="selGender(this,'未回答')">未回答</div>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <div class="field-lbl">職種</div>
+                      <select class="field-select" id="mp-occupation" onchange="USER_PROFILE.occupation=this.value;invalidateCtxCache();saveProfile();">
+                        <option value="">選択してください</option>
+                        <option value="学生">学生</option>
+                        <option value="フリーター">フリーター</option>
+                        <option value="会社員">会社員</option>
+                        <option value="自営業">自営業</option>
+                        <option value="主婦・主夫">主婦・主夫</option>
+                        <option value="タレント・アイドル">タレント・アイドル</option>
+                        <option value="その他">その他</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <div class="field-lbl">年齢</div>
+                      <input class="field-input" type="number" id="mp-age" min="10" max="120" placeholder="例：25" oninput="USER_PROFILE.age=parseInt(this.value)||null;invalidateCtxCache();">
+                    </div>
+                    <div class="field">
+                      <div class="field-lbl">専門分野</div>
+                      <input class="field-input" id="mp-field" value="" placeholder="例：IT・マーケティング" oninput="updateProfile()">
+                    </div>
+                    <div class="field">
+                      <div class="field-lbl">家族構成</div>
+                      <input class="field-input" id="mp-family" value="" placeholder="例：独身、既婚・子あり" oninput="updateProfile()">
+                    </div>
+                    <div class="field" style="grid-column:1/-1;">
+                      <div class="field-lbl">使える時間・条件</div>
+                      <input class="field-input" id="mp-constraints" placeholder="例：平日は夜のみ、週20時間まで" oninput="USER_PROFILE.constraints=this.value;invalidateCtxCache();">
+                    </div>
+                  </div>
+                  <button class="btn-save" style="margin-top:16px;" onclick="saveProfile()">保存して反映</button>
+                </div>
+
+                <!-- ② MBTI診断 -->
+                <div class="mp-section">
+                  <div class="mp-section-hd"><svg width="15" height="15" class="svg-ic"><use href="#ic-brain"/></svg>MBTI診断</div>
+                  <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+                    <div id="mbti-current-badge" style="padding:6px 18px;background:var(--amber-g);border:1px solid rgba(228,184,106,.4);border-radius:8px;font-family:var(--fd);font-size:20px;color:var(--amber);font-weight:300;letter-spacing:.1em;">—</div>
+                    <div>
+                    <div class="mbti-current-name" style="font-size:12px;color:var(--cream);"></div>
+                      <div style="font-size:12px;color:var(--muted2);">AIが診断 · 「私をデザイン」または再診断で設定</div>
+                    </div>
+                    <button onclick="startMbtiTest('quick')" style="margin-left:auto;padding:6px 14px;background:var(--bg);border:1px solid var(--border2);border-radius:7px;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--ff);transition:all .15s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--muted)'">再診断する</button>
+                  </div>
+                  <div id="mbti-test-wrap" style="display:none;">
+                    <div class="mbti-progress-bar"><div class="mbti-progress-fill" id="mbti-prog" style="width:0%"></div></div>
+                    <div id="mbti-questions-area"></div>
+                  </div>
+                </div>
+
+                <!-- ③ 強み・弱み (E-02: 2カラム) -->
+                <div class="mp-section">
+                  <div class="mp-section-hd"><svg width="15" height="15" class="svg-ic"><use href="#ic-zap"/></svg>強み・弱み</div>
+                  <div style="display:flex;gap:10px;">
+                    <div style="flex:1;">
+                      <div style="font-size:12px;color:var(--muted);margin-bottom:7px;">強み</div>
+                      <div class="chip-group" id="mp-strengths">
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">発想力</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">文章力</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">人間関係構築</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">行動力</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">論理思考</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">継続力</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">分析力</div>
+                      </div>
+                    </div>
+                    <div style="width:1px;background:var(--border);flex-shrink:0;"></div>
+                    <div style="flex:1;">
+                      <div style="font-size:12px;color:var(--muted);margin-bottom:7px;">弱み</div>
+                      <div class="chip-group" id="mp-weaknesses">
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">先延ばし</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">完璧主義</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">自己管理</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">集中力</div>
+                        <div class="pf-chip" onclick="this.classList.toggle('active');updateProfile()">感情コントロール</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ④ 嗜好・興味 -->
+                <div class="mp-section">
+                  <div class="mp-section-hd"><svg width="15" height="15" class="svg-ic"><use href="#ic-sparkle"/></svg>嗜好・興味</div>
+                  <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">好きなこと・興味（複数選択）</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;" id="interest-chips">
+                    <div class="interest-chip" onclick="toggleInterest(this)">映画・動画</div>
+                    <div class="interest-chip" onclick="toggleInterest(this)">音楽</div>
+                    <div class="interest-chip" onclick="toggleInterest(this)">読書</div>
+                    <div class="interest-chip" onclick="toggleInterest(this)">テクノロジー</div>
+                    <div class="interest-chip" onclick="toggleInterest(this)">スポーツ</div>
+                    <div class="interest-chip" onclick="toggleInterest(this)">料理</div>
+                    <div class="interest-chip" onclick="toggleInterest(this)">旅行</div>
+                    <div class="interest-chip" onclick="toggleInterest(this)">アート・デザイン</div>
+                    <div class="interest-chip" onclick="toggleInterest(this)">ビジネス</div>
+                    <div class="interest-chip" onclick="toggleInterest(this)">ゲーム</div>
+                    <div class="interest-chip" onclick="toggleInterest(this)">自然・アウトドア</div>
+                    <div class="interest-chip" onclick="toggleInterest(this)">ファッション</div>
+                  </div>
+                  <div class="field">
+                    <div class="field-lbl">その他・自由記述</div>
+                    <input class="field-input" id="mp-interests-free" placeholder="例：クラシックギター、哲学、街歩き" oninput="updateProfile()">
+                  </div>
+
+                  <div style="font-size:12px;color:var(--muted);margin:16px 0 8px;">エネルギーをもらうもの / 奪われるもの</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div class="energy-box">
+                      <div class="energy-box-hd" style="color:var(--green)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5" style="vertical-align:middle;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> もらうもの</div>
+                      <div id="energy-gain-tags">
+                      </div>
+                      <div style="display:flex;gap:5px;margin-top:8px;">
+                        <input id="energy-gain-in" class="field-input" style="flex:1;padding:5px 9px;font-size:12px;" placeholder="追加…" onkeydown="if(event.key==='Enter'&&!event.isComposing){addEnergyTag('gain');event.preventDefault();}">
+                        <button onclick="addEnergyTag('gain')" style="padding:4px 9px;background:var(--green-d);border:1px solid var(--green-d);color:var(--green);border-radius:6px;font-size:12px;cursor:pointer;">+</button>
+                      </div>
+                    </div>
+                    <div class="energy-box">
+                      <div class="energy-box-hd" style="color:var(--red)">🔋 奪われるもの</div>
+                      <div id="energy-drain-tags">
+                      </div>
+                      <div style="display:flex;gap:5px;margin-top:8px;">
+                        <input id="energy-drain-in" class="field-input" style="flex:1;padding:5px 9px;font-size:12px;" placeholder="追加…" onkeydown="if(event.key==='Enter'&&!event.isComposing){addEnergyTag('drain');event.preventDefault();}">
+                        <button onclick="addEnergyTag('drain')" style="padding:4px 9px;background:var(--red-d);border:1px solid var(--red-d);color:var(--red);border-radius:6px;font-size:12px;cursor:pointer;">+</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ⑤ 人間関係 -->
+                <div class="mp-section">
+                  <div class="mp-section-hd"><svg width="15" height="15" class="svg-ic"><use href="#ic-users"/></svg>人間関係・サポートネットワーク</div>
+                  <div id="network-questions">
+                    <div class="network-q">
+                      <div class="nq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+                      <div class="network-q-text">
+                        困ったとき、率直に相談できる人がいますか？
+                        <div class="network-q-sub">AIはあなたのサポートネットワークの強さに合わせてアドバイスを調整します</div>
+                      </div>
+                      <div class="nq-toggle">
+                        <div class="nq-btn" id="nq0-yes" onclick="setNetworkQ(0,true)">いる</div>
+                        <div class="nq-btn" id="nq0-no"  onclick="setNetworkQ(0,false)">いない</div>
+                      </div>
+                    </div>
+                    <div class="network-q">
+                      <div class="nq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5" style="vertical-align:middle;"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/></svg></div>
+                      <div class="network-q-text">
+                        「それいいね、やろう」と背中を押してくれる人がいますか？
+                        <div class="network-q-sub">チャレンジを応援してくれる存在の有無</div>
+                      </div>
+                      <div class="nq-toggle">
+                        <div class="nq-btn" id="nq1-yes" onclick="setNetworkQ(1,true)">いる</div>
+                        <div class="nq-btn" id="nq1-no"  onclick="setNetworkQ(1,false)">いない</div>
+                      </div>
+                    </div>
+                    <div class="network-q">
+                      <div class="nq-icon">🪞</div>
+                      <div class="network-q-text">
+                        あなたの良いところを客観的に指摘してくれる人がいますか？
+                        <div class="network-q-sub">フィードバックをくれるメンターや友人</div>
+                      </div>
+                      <div class="nq-toggle">
+                        <div class="nq-btn" id="nq2-yes" onclick="setNetworkQ(2,true)">いる</div>
+                        <div class="nq-btn" id="nq2-no"  onclick="setNetworkQ(2,false)">いない</div>
+                      </div>
+                    </div>
+                    <div class="network-q">
+                      <div class="nq-icon">😤</div>
+                      <div class="network-q-text">
+                        失敗しても「また頑張れ」と言ってくれる人がいますか？
+                        <div class="network-q-sub">精神的な安全基地になる存在</div>
+                      </div>
+                      <div class="nq-toggle">
+                        <div class="nq-btn" id="nq3-yes" onclick="setNetworkQ(3,true)">いる</div>
+                        <div class="nq-btn" id="nq3-no"  onclick="setNetworkQ(3,false)">いない</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ⑥ 現実との乖離・課題提案 -->
+                <div class="mp-section">
+                  <div class="mp-section-hd" style="justify-content:space-between;">
+                    <span style="display:flex;align-items:center;gap:7px;"><svg width="15" height="15" class="svg-ic"><use href="#ic-search"/></svg>現実との乖離と課題提案</span>
+                    <button onclick="runGapAnalysis()" style="padding:5px 13px;background:var(--purple-d);border:1px solid var(--know-purple-border);border-radius:7px;font-size:12px;color:var(--know-purple);cursor:pointer;font-family:var(--ff);">↺ 分析を更新</button>
+                  </div>
+                  <div id="gap-analysis-content">
+                    <div style="text-align:center;padding:20px 0;color:var(--muted2);font-size:12px;">「分析を更新」を押すと、AIがゴールの進捗・ビジョン・プロフィールを照合して<br>あなた個人に合った課題と提案を生成します。</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div class="page" id="pg-calendar-wrap">
+      <div id="pg-calendar" style="position:relative;height:100%;overflow:hidden;display:flex;flex-direction:column;">
+        <!-- Hamburger -->
+        <div class="cal-hd">
+          <button onclick="toggleSidebar()" class="mob-hamburger" aria-label="メニュー" style="align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;padding:0;background:transparent;border:none;cursor:pointer;color:var(--cream);border-radius:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+          <div style="flex:1;font-size:15px;font-weight:600;color:var(--cream);text-align:center;">カレンダー</div>
+        </div>
+        <!-- Calendar container (rendered by renderCalendar()) -->
+        <div style="flex:1;overflow-y:auto;padding:0 8px 60px;" id="cal-scroll">
+          <div id="cal-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── ANALYTICS ─── -->
+    <div class="page" id="pg-analytics-wrap">
+      <div id="pg-analytics">
+        <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;"><button onclick="toggleSidebar()" style="display:none;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;padding:0;background:transparent;border:none;cursor:pointer;color:var(--cream);border-radius:8px;" class="mob-hamburger" aria-label="メニュー"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div class="section-hd" style="margin:0;">解析ダッシュボード</div></div>
+
+        <!-- Streak display -->
+        <div class="analytics-streak" id="analytics-streak">
+          <span class="analytics-streak-fire"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5" style="vertical-align:middle;"><path d="M12 2c0 6-6 7-6 13a6 6 0 0012 0c0-6-6-7-6-13z"/></svg></span>
+          <span class="analytics-streak-count" id="analytics-streak-count">0</span>
+          <span class="analytics-streak-label">日連続</span>
+          <span class="analytics-streak-best" id="analytics-streak-best">最高: 0日</span>
+        </div>
+
+        <!-- Period switching chips -->
+        <div class="analytics-period-chips" id="analytics-period-chips">
+          <button class="period-chip" data-period="3" onclick="setAnalyticsPeriod(3)">3ヶ月</button>
+          <button class="period-chip active" data-period="6" onclick="setAnalyticsPeriod(6)">6ヶ月</button>
+          <button class="period-chip" data-period="12" onclick="setAnalyticsPeriod(12)">12ヶ月</button>
+        </div>
+
+        <!-- Task backlog warning bar -->
+        <div class="analytics-backlog-bar" id="analytics-backlog-bar" style="display:none;" onclick="showPage('goals')">
+          ⚠ 未完了タスクがたまっています　<span style="font-weight:600;">整理する →</span>
+        </div>
+
+        <div class="analytics-grid" id="analytics-tiles">
+          <div class="stat-tile">
+            <div class="stat-tile-lbl">実績進捗率</div>
+            <div class="stat-tile-val" id="at-progress">0<span style="font-size:16px;color:var(--muted)">%</span></div>
+            <div class="stat-tile-sub" style="color:var(--muted)" id="at-progress-sub">ゴールを設定すると表示されます</div>
+            <div class="stat-tile-bar"><div class="stat-tile-fill" id="at-progress-bar" style="width:0%;background:var(--muted2)"></div></div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-tile-lbl">完了タスク数</div>
+            <div class="stat-tile-val" id="at-tasks">0<span style="font-size:16px;color:var(--muted)">/0</span></div>
+            <div class="stat-tile-sub" style="color:var(--muted)" id="at-tasks-sub">—</div>
+            <div class="stat-tile-bar"><div class="stat-tile-fill" id="at-tasks-bar" style="width:0%;background:var(--muted2)"></div></div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-tile-lbl">会話件数</div>
+            <div class="stat-tile-val" id="at-hours">—<span style="font-size:16px;color:var(--muted)"></span></div>
+            <div class="stat-tile-sub" style="color:var(--muted)" id="at-hours-sub">—</div>
+            <div class="stat-tile-bar"><div class="stat-tile-fill" id="at-hours-bar" style="width:0%;background:var(--muted2)"></div></div>
+          </div>
+        </div>
+
+        <!-- Progress timeline -->
+        <div class="chart-box">
+          <div class="chart-hd">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div class="chart-title">月別進捗：予定 vs 実績</div>
+              <div id="chart-period-chips" style="display:flex;gap:4px;">
+                <button onclick="setChartPeriod(3)" class="chart-period-chip active" data-period="3" style="padding:3px 8px;border-radius:10px;font-size:12px;cursor:pointer;border:1px solid var(--border2);background:var(--amber);color:var(--text-on-accent);font-family:var(--fm);">3m</button>
+                <button onclick="setChartPeriod(6)" class="chart-period-chip" data-period="6" style="padding:3px 8px;border-radius:10px;font-size:12px;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--muted);font-family:var(--fm);">6m</button>
+                <button onclick="setChartPeriod(12)" class="chart-period-chip" data-period="12" style="padding:3px 8px;border-radius:10px;font-size:12px;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--muted);font-family:var(--fm);">12m</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;font-size:12px;">
+              <span style="display:flex;align-items:center;gap:4px;color:var(--muted)"><span style="width:10px;height:3px;background:rgba(228,184,106,.5);display:inline-block;border-radius:1px"></span>予定</span>
+              <span style="display:flex;align-items:center;gap:4px;color:var(--muted)"><span style="width:10px;height:10px;background:var(--green);display:inline-block;border-radius:2px"></span>実績（順調）</span>
+              <span style="display:flex;align-items:center;gap:4px;color:var(--muted)"><span style="width:10px;height:10px;background:var(--red);display:inline-block;border-radius:2px"></span>実績（遅延）</span>
+            </div>
+          </div>
+          <div class="chart-body">
+            <div class="bar-chart" id="progress-chart"></div>
+            <div style="display:flex;gap:6px;margin-top:8px;" id="chart-labels"></div>
+          </div>
+        </div>
+
+        <!-- Failure reason history -->
+        <div class="chart-box">
+          <div class="chart-hd">
+            <div class="chart-title">停滞ポイント</div>
+            <div style="font-size:12px;color:var(--muted)">根本原因分析</div>
+          </div>
+          <div class="fail-timeline" id="fail-timeline"></div>
+        </div>
+
+        <!-- 3人寄れば文殊の知恵 (#08a mockup) -->
+        <div class="chart-box" id="analytics-deep-section">
+          <div class="chart-hd">
+            <div class="chart-title">3人寄れば文殊の知恵</div>
+            <div style="font-size:12px;color:var(--muted)">3つのAIが多角的にあなたの活動を分析します</div>
+          </div>
+          <div style="padding:16px;text-align:center;">
+            <div style="display:flex;justify-content:center;gap:16px;margin-bottom:12px;">
+              <div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--model-gemini);"></div><span style="font-size:12px;color:var(--muted);">Gemini</span></div>
+              <div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--model-gpt);"></div><span style="font-size:12px;color:var(--muted);">ChatGPT</span></div>
+              <div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--model-claude);"></div><span style="font-size:12px;color:var(--muted);">Claude</span></div>
+            </div>
+            <button onclick="startAnalyticsDeep()" style="width:100%;padding:10px;background:var(--send-btn-grad);border:none;border-radius:10px;color:var(--text-on-accent);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--ff);">ヒアリング開始</button>
+            <div style="font-size:12px;color:var(--muted2);margin-top:6px;" id="analytics-deep-remaining"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── SETTINGS ─── -->
+    <div class="page" id="pg-settings-wrap">
+      <div id="pg-settings">
+        <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;"><button onclick="toggleSidebar()" style="display:none;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;padding:0;background:transparent;border:none;cursor:pointer;color:var(--cream);border-radius:8px;" class="mob-hamburger" aria-label="メニュー"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div class="section-hd" style="margin:0;">設定</div></div>
+        <div class="settings-grid">
+
+          <!-- Goal settings -->
+          <div class="settings-card full">
+            <div class="sc-hd"><span class="sc-hd-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-target"/></svg></span><div class="sc-hd-title">ゴール設定</div></div>
+            <div class="sc-body">
+              <div class="goal-deadline-row">
+                <div class="field" style="flex:2">
+                  <div class="field-lbl">ゴールタイトル</div>
+                  <input class="field-input" value="" id="goal-title-input" placeholder="例：副業で月10万円稼ぎたい">
+                </div>
+                <div class="field">
+                  <div class="field-lbl">目標金額 / KPI</div>
+                  <input class="field-input" value="" id="goal-kpi-input" placeholder="例：¥100,000">
+                </div>
+                <div class="field">
+                  <div class="field-lbl">完了目標日</div>
+                  <input class="field-input" type="date" value="2026-06-30" id="goal-deadline-input">
+                </div>
+              </div>
+              <div class="field">
+                <div class="field-lbl">進捗の算出方法</div>
+                <div class="radio-group">
+                  <div class="radio-opt sel" onclick="selRadio(this,'calc')">タスク完了率</div>
+                  <div class="radio-opt" onclick="selRadio(this,'calc')">金額進捗率</div>
+                  <div class="radio-opt" onclick="selRadio(this,'calc')">手動入力</div>
+                </div>
+              </div>
+              <button class="btn-save" onclick="saveGoal()">変更を保存</button>
+            </div>
+          </div>
+
+          <!-- Review frequency -->
+          <div class="settings-card">
+            <div class="sc-hd"><span class="sc-hd-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-refresh"/></svg></span><div class="sc-hd-title">レビュー頻度</div></div>
+            <div class="sc-body">
+              <div class="field">
+                <div class="field-lbl">頻度を選択</div>
+                <div class="radio-group" style="flex-direction:column;align-items:flex-start;">
+                  <div class="radio-opt" onclick="selRadio(this,'freq')">毎週 <span class="badge-pro">Pro</span></div>
+                  <div class="radio-opt" onclick="selRadio(this,'freq')">隔週 <span class="badge-pro">Pro</span></div>
+                  <div class="radio-opt sel" onclick="selRadio(this,'freq')">月2回（1日・15日）✓</div>
+                  <div class="radio-opt" onclick="selRadio(this,'freq')">月1回</div>
+                </div>
+              </div>
+              <div class="field" style="margin-top:12px;">
+                <div class="field-lbl">次回レビュー</div>
+                <div style="font-size:12px;color:var(--amber);font-family:var(--fm)">2026年3月15日（月）</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Spartan mode settings -->
+          <div class="settings-card">
+            <div class="sc-hd"><span class="sc-hd-icon"><svg width="15" height="15" class="svg-ic"><use href="#ic-fire"/></svg></span><div class="sc-hd-title">スパルタモード設定</div></div>
+            <div class="sc-body" style="padding:0 18px;">
+              <div class="spartan-settings-row">
+                <div><div class="ssl-main">スパルタモード</div><div class="ssl-sub">断定的なフィードバックに切り替わります</div></div>
+                <div class="toggle" id="spartan-toggle-2" onclick="toggleSpartan()" style=""></div>
+              </div>
+              <div class="spartan-settings-row">
+                <div><div class="ssl-main">レビュー期間（毎月1〜7日）</div><div class="ssl-sub">この期間は強制チェックインが来ます</div></div>
+                <div class="toggle on" id="spartan-review-period"></div>
+              </div>
+              <div class="spartan-settings-row">
+                <div><div class="ssl-main">自動オフ禁止</div><div class="ssl-sub">オフにするには「スパルタを解除する」と入力が必要</div></div>
+                <div class="toggle on" id="spartan-lock"></div>
+              </div>
+              <div class="spartan-settings-row">
+                <div><div class="ssl-main">進捗が50%未満でON提案</div><div class="ssl-sub">遅れているときにAIが提案します</div></div>
+                <div class="toggle on" id="spartan-auto-suggest"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personal profile -->
+          <div class="settings-card">
+            <div class="sc-hd"><span class="sc-hd-icon">👤</span><div class="sc-hd-title">個人プロフィール（静的）</div></div>
+            <div class="sc-body">
+              <div class="field">
+                <div class="field-lbl">氏名 / ニックネーム</div>
+                <input class="field-input" value="" id="p-name" placeholder="ニックネームを入力">
+              </div>
+              <div class="field">
+                <div class="field-lbl">MBTI</div>
+                <div class="mbti-grid" id="mbti-grid">
+                  <div class="mbti-btn" onclick="selMBTI(this)">INTJ</div><div class="mbti-btn" onclick="selMBTI(this)">INTP</div>
+                  <div class="mbti-btn" onclick="selMBTI(this)">INFJ</div><div class="mbti-btn" onclick="selMBTI(this)">INFP</div>
+                  <div class="mbti-btn" onclick="selMBTI(this)">ENTJ</div><div class="mbti-btn" onclick="selMBTI(this)">ENTP</div>
+                  <div class="mbti-btn" onclick="selMBTI(this)">ENFJ</div><div class="mbti-btn" onclick="selMBTI(this)">ENFP</div>
+                  <div class="mbti-btn" onclick="selMBTI(this)">ISTJ</div><div class="mbti-btn" onclick="selMBTI(this)">ISTP</div>
+                  <div class="mbti-btn" onclick="selMBTI(this)">ISFJ</div><div class="mbti-btn" onclick="selMBTI(this)">ISFP</div>
+                  <div class="mbti-btn" onclick="selMBTI(this)">ESTJ</div><div class="mbti-btn" onclick="selMBTI(this)">ESTP</div>
+                  <div class="mbti-btn" onclick="selMBTI(this)">ESFJ</div><div class="mbti-btn" onclick="selMBTI(this)">ESFP</div>
+                </div>
+              </div>
+              <div class="field">
+                <div class="field-lbl">家族構成</div>
+                <select class="field-select">
+                  <option>独身</option><option>既婚・子なし</option><option>既婚・子あり</option>
+                </select>
+              </div>
+              <div class="field">
+                <div class="field-lbl">専門・強み</div>
+                <input class="field-input" value="" id="p-skills" placeholder="例：プログラミング・デザイン">
+              </div>
+              <button class="btn-save" onclick="toast('プロフィールを保存しました')">保存</button>
+            </div>
+          </div>
+
+          <!-- Dynamic profile -->
+          <div class="settings-card">
+            <div class="sc-hd"><span class="sc-hd-icon">📈</span><div class="sc-hd-title">現況（動的・毎月更新）</div></div>
+            <div class="sc-body">
+              <div class="field">
+                <div class="field-lbl">今月の週あたり作業可能時間</div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <input class="field-input" type="number" value="5" style="width:80px;" id="p-hours"> 時間/週
+                </div>
+              </div>
+              <div class="field">
+                <div class="field-lbl">今月のモチベーション</div>
+                <div class="radio-group">
+                  <div class="radio-opt" onclick="selRadio(this,'moti')">😴 1</div>
+                  <div class="radio-opt" onclick="selRadio(this,'moti')">😐 2</div>
+                  <div class="radio-opt sel" onclick="selRadio(this,'moti')">🙂 3</div>
+                  <div class="radio-opt" onclick="selRadio(this,'moti')">😊 4</div>
+                  <div class="radio-opt" onclick="selRadio(this,'moti')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5" style="vertical-align:middle;"><path d="M12 2c0 6-6 7-6 13a6 6 0 0012 0c0-6-6-7-6-13z"/></svg> 5</div>
+                </div>
+              </div>
+              <div class="field">
+                <div class="field-lbl">最近の環境変化（任意）</div>
+                <textarea class="field-input" rows="2" placeholder="例：転職した、子供が生まれた…"></textarea>
+              </div>
+              <button class="btn-save" onclick="toast('現況を保存しました')">保存</button>
+            </div>
+          </div>
+
+          <!-- Referral (#08c mockup) -->
+          <div class="settings-card full" id="referral-card" style="display:none;">
+            <div class="sc-hd"><span class="sc-hd-icon">🎁</span><div class="sc-hd-title">友達紹介</div></div>
+            <div class="sc-body">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <div>
+                  <div style="font-size:12px;color:var(--cream);">紹介でPro 1ヶ月無料</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px;">紹介された方: Pro初月75%OFF</div>
+                </div>
+                <button onclick="copyReferralCode()" style="padding:6px 14px;background:none;border:1px solid var(--amber);border-radius:8px;color:var(--amber);font-size:12px;cursor:pointer;font-family:var(--ff);white-space:nowrap;">コードをコピー</button>
+              </div>
+              <div id="referral-code" style="font-size:14px;font-family:var(--fm);color:var(--amber);letter-spacing:2px;padding:8px;background:var(--bg2);border:1px dashed var(--amber);border-radius:8px;text-align:center;user-select:all;"></div>
+            </div>
+          </div>
+
+          <!-- プロモコード (#08c mockup) -->
+          <div class="settings-card full" id="settings-promo-card">
+            <div class="sc-body" style="padding:12px 16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:12px;color:var(--cream);">プロモコード</span>
+                <span style="font-size:12px;color:var(--amber);cursor:pointer;" onclick="openSettingsPromoInput()">入力する →</span>
+              </div>
+              <div id="settings-promo-expand" style="display:none;margin-top:10px;">
+                <div style="display:flex;gap:8px;">
+                  <input id="settings-promo-code-in" class="field-input" placeholder="コードを入力…" style="flex:1;padding:8px 12px;" onkeydown="if(event.key==='Enter'&&!event.isComposing)applySettingsPromo()">
+                  <button onclick="applySettingsPromo()" style="padding:8px 14px;background:var(--amber);border:none;border-radius:8px;color:var(--bg);font-size:12px;cursor:pointer;font-family:var(--ff);white-space:nowrap;">適用</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── TASKS ─── -->
+    <div class="page" id="pg-tasks-wrap">
+      <div id="pg-tasks-layout">
+
+        <!-- Task list -->
+        <div id="task-list-panel">
+          <div id="task-list-scroll">
+            <div class="tasks-hd">
+              <button onclick="toggleSidebar()" style="align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;padding:0;background:transparent;border:none;cursor:pointer;color:var(--cream);border-radius:8px;" class="mob-hamburger" aria-label="メニュー"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+              <!-- View switcher -->
+              <div class="view-switcher" id="view-switcher" style="flex-wrap:wrap;">
+                <div class="vs-btn active" id="vs-goal" onclick="switchTaskView('goal',this)">
+                  <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> ゴール別
+                </div>
+                <div class="vs-btn" id="vs-today" onclick="switchTaskView('today',this)">
+                  <span>☀️</span> 今日
+                </div>
+                <div class="vs-btn" id="vs-3days" onclick="switchTaskView('3days',this)">
+                  <span>📆</span> 3日間
+                </div>
+                <div class="vs-btn" id="vs-week" onclick="switchTaskView('week',this)">
+                  <span>□</span> 今週
+                </div>
+                <div class="vs-btn" id="vs-gantt" onclick="switchTaskView('gantt',this)">
+                  <span>📊</span> ガント
+                </div>
+              </div>
+              <div class="tasks-filter">
+                <div class="filter-btn active" onclick="setFilter('all',this)">すべて</div>
+                <div class="filter-btn" onclick="setFilter('life',this)">ライフ</div>
+                <div class="filter-btn" onclick="setFilter('goal',this)">ゴール</div>
+                <div class="filter-btn" onclick="setFilter('active',this)">進行中</div>
+                <div class="filter-btn" onclick="setFilter('done',this)">完了</div>
+                <div class="sort-btn" id="sort-weight-btn" onclick="toggleWeightSort(this)">重み順</div>
+              </div>
+              <button class="task-add-pc-btn" onclick="openTaskAddModal()"><svg width="14" height="14" class="svg-ic"><use href="#ic-plus"/></svg> タスク追加</button>
+            </div>
+            <!-- Goal selector (shown in goal view) -->
+            <div id="goal-selector-bar"></div>
+            <!-- Today summary (shown in today view) -->
+            <div id="today-summary-bar" style="display:none;"></div>
+            <!-- Time views: today / 3days / week -->
+            <div id="timeview-container" style="display:none;flex:1;overflow:hidden;flex-direction:column;">
+              <div class="task-timeview" id="timeview-content"></div>
+            </div>
+            <div id="phase-list"></div>
+            <!-- Gantt view (replaces phase-list in gantt mode) -->
+            <div id="gantt-container" style="display:none;flex:1;overflow:hidden;display:none;flex-direction:column;">
+              <div id="gantt-scroll">
+                <div class="gantt-wrap" id="gantt-inner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task detail / chat panel -->
+        <div id="task-detail-panel">
+          <div class="tdp-hd">
+            <div class="tdp-close" onclick="closeTaskDetail()"><svg width="12" height="12" class="svg-ic"><use href="#ic-x"/></svg></div>
+            <div class="tdp-phase-badge" id="tdp-phase">フェーズ1</div>
+            <div class="tdp-task-name" id="tdp-title">タスク名</div>
+            <div class="tdp-meta-row">
+              <select class="tdp-status-sel" id="tdp-status-sel" onchange="updateTaskStatus(this.value)"
+                style="border-color:var(--border2);color:var(--muted)">
+                <option value="todo">⬜ 未着手</option>
+                <option value="current">🔵 進行中</option>
+                <option value="done">✅ 完了</option>
+                <option value="blocked">🔴 ブロック中</option>
+              </select>
+              <div style="font-size:12px;color:var(--muted);font-family:var(--fm)" id="tdp-due"></div>
+            </div>
+          </div>
+          <div class="tdp-chat" id="tdp-chat"></div>
+          <div class="tdp-input-area">
+            <div class="tdp-quick-btns" id="tdp-qbtns"></div>
+            <div class="tdp-input-wrap">
+              <textarea id="task-msg-in" rows="1" placeholder="このタスクについて質問する…"
+                oninput="tdpResize(this)" onkeydown="tdpKey(event)"></textarea>
+              <button id="task-send-btn" onclick="sendTaskMsg()">
+                <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <button class="cal-fab task-page-fab" onclick="openTaskAddModal()" aria-label="タスクを追加">＋</button>
+    </div>
+
+    <!-- ─── WELCOME ─── -->
+    <div class="page" id="pg-welcome-wrap">
+      <div id="welcome-pg">
+        <div class="wlc-mark"><svg width="40" height="40" viewBox="0 0 32 32"><defs><linearGradient id="wlg" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="#c8920a"/><stop offset="100%" stop-color="#f5d380"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#wlg)"/></svg></div>
+        <div class="wlc-title">今、何を達成したいですか？</div>
+        <div class="wlc-sub">ゴールを入力するだけで、AIがヒアリングしながら<br>あなた専用のロードマップを作ります。</div>
+        <div class="wlc-box">
+          <div class="wlc-lbl">やりたいこと</div>
+          <input id="wlc-in" placeholder="例：副業で月10万円稼ぎたい、TOEIC 800点を取りたい" autofocus>
+          <div class="wlc-foot">
+            <span class="wlc-hint">Enter で開始</span>
+            <button class="btn-start" onclick="startGoal()">ヒアリングを始める →</button>
+          </div>
+        </div>
+        <div class="wlc-chips">
+          <div class="wlc-chip" onclick="setEx('クラファンで100万円を集めたい')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> クラファン成功</div>
+          <div class="wlc-chip" onclick="setEx('YouTube登録者を1万人にしたい')">📺 YouTube成長</div>
+          <div class="wlc-chip" onclick="setEx('スポンサーを3社獲得したい')">🤝 スポンサー獲得</div>
+          <div class="wlc-chip" onclick="setEx('カフェを開業したい')">☕ 開業・起業</div>
+          <div class="wlc-chip" onclick="setEx('副業で月10万円稼ぎたい')">💰 副業収入</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pages -->
+</div><!-- /main -->
+
+<!-- ═══ FEEDBACK MODAL ═══ -->
+<div id="feedback-modal" style="display:none;position:fixed;inset:0;z-index:2000;background:var(--bg);background-image:var(--bg-grad);flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;flex-shrink:0;border-bottom:1px solid var(--border);">
+    <button onclick="closeFeedback()" style="width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+    <div style="font-size:13px;font-weight:500;color:var(--cream);display:flex;align-items:center;gap:6px;flex:1;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="url(#goldG)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> フィードバック</div>
+  </div>
+  <div id="feedback-chat" style="flex:1;overflow-y:auto;padding:16px 20px;max-width:740px;margin:0 auto;width:100%;"></div>
+  <div id="feedback-input-area" style="padding:0 12px calc(16px + env(safe-area-inset-bottom));background:transparent;flex-shrink:0;">
+    <div style="max-width:700px;margin:0 auto;background:rgba(12,14,20,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0.5px solid rgba(200,146,10,0.3);border-radius:14px;display:flex;align-items:center;gap:4px;padding:4px 8px;">
+      <input type="text" id="feedback-msg-in" placeholder="気になることを教えてください..." style="flex:1;padding:10px 4px;background:transparent;border:none;color:var(--cream);font-family:var(--ff);font-size:16px;outline:none;" onkeydown="if(event.key==='Enter'&&!event.isComposing&&!_isComposing){event.preventDefault();sendFeedbackMsg()}">
+      <button onclick="startVoiceInput(document.getElementById('feedback-msg-in'))" title="音声入力" style="width:36px;height:36px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+      <button onclick="sendFeedbackMsg()" style="width:var(--send-btn-size);height:var(--send-btn-size);background:var(--send-btn-grad);border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="var(--text-on-accent)"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ONBOARDING 3-STEP (#07) ═══ -->
+<div id="onboarding-modal" style="display:none;position:fixed;inset:0;z-index:2100;background:var(--bg);flex-direction:column;overflow:hidden;">
+  <div id="ob-slides" style="flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;">
+    <!-- Step 1 -->
+    <div class="ob-slide" style="min-width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;">
+      <svg class="ob-draw-svg" width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round" style="margin-bottom:24px;opacity:.9;">
+        <circle cx="20" cy="40" r="10" class="ob-draw" style="--d:63;--i:0"/><circle cx="40" cy="30" r="10" class="ob-draw" style="--d:63;--i:1"/><circle cx="60" cy="40" r="10" class="ob-draw" style="--d:63;--i:2"/>
+        <path d="M10 55 Q40 70 70 55" stroke-dasharray="4 3" class="ob-draw" style="--d:80;--i:3"/>
+      </svg>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <span style="padding:3px 10px;background:rgba(224,112,112,.15);border:1px solid rgba(224,112,112,.3);border-radius:12px;font-size:12px;color:var(--model-gemini);">Gemini</span>
+        <span style="padding:3px 10px;background:rgba(91,141,239,.15);border:1px solid rgba(91,141,239,.3);border-radius:12px;font-size:12px;color:var(--model-gpt);">ChatGPT</span>
+        <span style="padding:3px 10px;background:rgba(232,145,58,.15);border:1px solid rgba(232,145,58,.3);border-radius:12px;font-size:12px;color:var(--model-claude);">Claude</span>
+      </div>
+      <div style="font-size:20px;font-weight:600;color:var(--cream);margin-bottom:8px;">毎朝、最善の一日を始めよう</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">三人の賢者があなたを支えます</div>
+    </div>
+    <!-- Step 2 -->
+    <div class="ob-slide" style="min-width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;">
+      <svg class="ob-draw-svg" width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round" style="margin-bottom:24px;opacity:.9;">
+        <circle cx="28" cy="35" r="8" class="ob-draw" style="--d:50;--i:0"/><circle cx="52" cy="35" r="8" class="ob-draw" style="--d:50;--i:1"/>
+        <path d="M20 55 Q40 65 60 55" class="ob-draw" style="--d:60;--i:2"/><path d="M15 60 L65 60" stroke-dasharray="6 4" class="ob-draw" style="--d:50;--i:3"/>
+      </svg>
+      <div style="font-size:20px;font-weight:600;color:var(--cream);margin-bottom:8px;">4つの画面で全てを管理</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">TODAY: タスクを最適順で表示<br>TALK: 賢者に何でも相談<br>GOALS: ゴールを管理<br>ME: 自分を深く知る</div>
+    </div>
+    <!-- Step 3 -->
+    <div class="ob-slide" style="min-width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;">
+      <svg class="ob-draw-svg" width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round" style="margin-bottom:24px;opacity:.9;">
+        <circle cx="28" cy="38" r="9" class="ob-draw" style="--d:57;--i:0"/><circle cx="52" cy="38" r="9" class="ob-draw" style="--d:57;--i:1"/>
+        <path d="M37 38 L43 38" class="ob-draw" style="--d:6;--i:2"/><path d="M28 50 Q40 60 52 50" class="ob-draw" style="--d:40;--i:3"/>
+      </svg>
+      <div style="font-size:20px;font-weight:600;color:var(--cream);margin-bottom:8px;">あなたを理解して進化</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">会話を重ねて学ぶ<br>人生を分析＆デザイン</div>
+    </div>
+  </div>
+  <!-- Dots + CTA -->
+  <div style="padding:0 32px calc(44px + env(safe-area-inset-bottom));text-align:center;">
+    <div id="ob-dots" style="display:flex;justify-content:center;gap:8px;margin-bottom:20px;">
+      <div class="ob-dot active" style="width:8px;height:8px;border-radius:50%;background:var(--amber);transition:all .2s;"></div>
+      <div class="ob-dot" style="width:8px;height:8px;border-radius:50%;background:var(--muted3);transition:all .2s;"></div>
+      <div class="ob-dot" style="width:8px;height:8px;border-radius:50%;background:var(--muted3);transition:all .2s;"></div>
+    </div>
+    <button id="ob-cta" onclick="obNext()" style="width:100%;padding:14px;background:var(--amber);border:none;border-radius:12px;color:var(--bg);font-size:15px;font-weight:600;cursor:pointer;font-family:var(--ff);margin-bottom:16px;">次へ</button>
+    <button onclick="closeOnboarding()" style="width:100%;padding:10px;background:transparent;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--ff);">スキップして始める</button>
+  </div>
+</div>
+
+<!-- ═══ PROFILE MODAL ═══ -->
+<div id="pg-profile-wrap" onclick="closeProfileOutside(event)">
+  <div id="pg-profile-modal">
+    <div class="prof-modal-hd">
+      <div class="prof-modal-title">👤 個人プロフィール</div>
+      <div class="close-btn" onclick="closeProfile()" style="width:28px;height:28px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:14px;transition:all .15s;"><svg width="12" height="12" class="svg-ic"><use href="#ic-x"/></svg></div>
+    </div>
+    <div class="prof-modal-body">
+
+      <!-- Basic -->
+      <div>
+        <div class="prof-section-title"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> 基本情報</div>
+        <div class="prof-grid three">
+          <div class="field"><div class="field-lbl">氏名 / ニックネーム</div><input class="field-input" value="" id="p-name" placeholder="ニックネームを入力"></div>
+          <div class="field"><div class="field-lbl">家族構成</div>
+            <select class="field-select" id="p-family"><option>独身</option><option>既婚・子なし</option><option>既婚・子あり</option></select></div>
+          <div class="field"><div class="field-lbl">MBTI</div><input class="field-input" value="" id="p-mbti" placeholder="例: INFJ"></div>
+        </div>
+        <div class="prof-grid" style="margin-top:10px">
+          <div class="field"><div class="field-lbl">学歴・資格</div><input class="field-input" value="" id="p-edu" placeholder="例：○○大学卒、○○検定"></div>
+          <div class="field"><div class="field-lbl">専門分野</div><input class="field-input" value="" id="p-domain" placeholder="例：IT・マーケティング"></div>
+        </div>
+      </div>
+
+      <!-- Strengths & Weaknesses -->
+      <div>
+        <div class="prof-section-title"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5" style="vertical-align:middle;"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> 強み</div>
+        <div class="strength-grid" id="strength-grid">
+        </div>
+        <div class="prof-section-title" style="margin-top:14px">😔 弱み（AIが補う領域）</div>
+        <div class="strength-grid" id="weakness-grid">
+        </div>
+      </div>
+
+      <!-- Daily routines -->
+      <div>
+        <div class="prof-section-title">⏰ 日課・生活リズム
+          <span style="font-size:12px;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;margin-left:4px">レビュー時に活用されます</span>
+        </div>
+        <div class="routine-list" id="routine-list">
+        </div>
+        <button class="btn-add-routine" onclick="addRoutine()">＋ 日課を追加</button>
+      </div>
+
+      <!-- Personal worries — 廃止（v3.2.5: ホームチャットのメンケアモードに統合） -->
+
+      <!-- Personalization note -->
+      <div style="background:var(--amber-g);border:1px solid rgba(228,184,106,.2);border-radius:var(--r);padding:12px 16px;font-size:12px;color:var(--muted);line-height:1.7;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5" style="vertical-align:middle;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg> このプロフィールはAIが<strong style="color:var(--cream)">月次レビュー時のコメント</strong>や<strong style="color:var(--cream)">タスク提案</strong>をパーソナライズするために使います。
+        強み・弱みは「あなたの個性として否定しない」前提で活用されます。
+      </div>
+
+      <button class="btn-save" onclick="saveProfile()" style="margin-top:0">プロフィールを保存</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+
+
+
+<!-- ══════════════════════════════════════
+     SETTINGS PANEL (slide-in from right)
+══════════════════════════════════════ -->
+<div id="settings-panel" style="position:fixed;inset:0;z-index:8500;display:none;">
+  <div onclick="closeSettingsPanel()" style="position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);"></div>
+  <div style="position:absolute;right:0;top:0;bottom:0;width:360px;max-width:95vw;background:var(--bg2);border-left:1px solid var(--border2);display:flex;flex-direction:column;box-shadow:var(--shadow);overflow-y:auto;">
+    <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--bg2);position:sticky;top:0;z-index:1;">
+      <svg width="22" height="22" class="svg-ic"><use href="#ic-settings"/></svg>
+      <div style="font-size:15px;font-weight:500;color:var(--cream);flex:1;">設定 &amp; テーマ</div>
+      <button onclick="closeSettingsPanel()" style="width:28px;height:28px;border-radius:7px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" class="svg-ic"><use href="#ic-x"/></svg></button>
+    </div>
+    <div style="padding:18px 22px;display:flex;flex-direction:column;gap:20px;">
+
+      <!-- Theme picker -->
+      <div>
+        <div style="font-size:12px;color:var(--muted2);font-family:var(--fm);letter-spacing:.15em;margin-bottom:12px;">テーマ</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;" id="theme-grid">
+          <div class="theme-card" style="flex:1" id="tc-dark" onclick="setBaseTheme('dark')" data-theme-btn="dark" data-theme="dark">
+            <div class="tc-preview" style="background:#0c0e14;border-color:#e4b86a;">
+              <div style="background:#12151f;border-radius:3px;height:8px;width:60%;margin-bottom:3px;"></div>
+              <div style="background:#e4b86a;border-radius:2px;height:5px;width:40%;"></div>
+            </div>
+            <div class="tc-label">⚫ ダーク</div>
+          </div>
+          <div class="theme-card" style="flex:1" id="tc-light" onclick="setBaseTheme('light')" data-theme-btn="light" data-theme="light">
+            <div class="tc-preview" style="background:#eee9e0;border-color:#a8720a;">
+              <div style="background:#edeae4;border-radius:3px;height:8px;width:60%;margin-bottom:3px;"></div>
+              <div style="background:#c2882a;border-radius:2px;height:5px;width:40%;"></div>
+            </div>
+            <div class="tc-label">⚪ ライト</div>
+          </div>
+          <div class="theme-card" style="flex:1" id="tc-harajuku" onclick="setBaseTheme('harajuku')" data-theme-btn="harajuku" data-theme="harajuku">
+            <div class="tc-preview" style="background:linear-gradient(135deg,#FFF44F,#FF69B4);border-color:#FF1493;">
+              <div style="background:rgba(255,255,255,0.5);border-radius:3px;height:8px;width:60%;margin-bottom:3px;"></div>
+              <div style="background:linear-gradient(90deg,#FF1493,#BA55D3);border-radius:2px;height:5px;width:40%;"></div>
+            </div>
+            <div class="tc-label">🌈 ハラジュク</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;background:var(--bg3);border:1px solid var(--border);">
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--cream);">グラスモード</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">半透明のガラス効果を追加</div>
+          </div>
+          <div id="glass-toggle" onclick="toggleGlassMode()" style="width:48px;height:26px;border-radius:13px;background:var(--border);cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;">
+            <div id="glass-toggle-knob" style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:left 0.2s;"></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;background:var(--bg3);border:1px solid var(--border);margin-top:10px;">
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--cream);">端末に合わせる</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">端末のダーク/ライト設定に自動追従</div>
+          </div>
+          <div id="auto-theme-toggle" onclick="toggleAutoTheme()" style="width:48px;height:26px;border-radius:13px;background:var(--border);cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;">
+            <div id="auto-theme-toggle-knob" style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:left 0.2s;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Font size -->
+      <div>
+        <div style="font-size:12px;color:var(--muted2);font-family:var(--fm);letter-spacing:.15em;margin-bottom:10px;">文字サイズ</div>
+        <div style="display:flex;gap:7px;">
+          <div class="size-btn" id="sz-xs" onclick="applyFontSize('xs')">極小</div>
+          <div class="size-btn" id="sz-sm" onclick="applyFontSize('sm')">小</div>
+          <div class="size-btn active" id="sz-md" onclick="applyFontSize('md')">中</div>
+          <div class="size-btn" id="sz-lg" onclick="applyFontSize('lg')">大</div>
+        </div>
+      </div>
+
+      <!-- Chat background preset -->
+      <div>
+        <div style="font-size:12px;color:var(--muted2);font-family:var(--fm);letter-spacing:.15em;margin-bottom:10px;">チャット背景</div>
+        <div style="display:flex;gap:7px;">
+          <div class="size-btn bg-btn active" data-bg="none" onclick="applyChatBg('none')">なし</div>
+          <div class="size-btn bg-btn" data-bg="dots" onclick="applyChatBg('dots')">ドット</div>
+          <div class="size-btn bg-btn" data-bg="grid" onclick="applyChatBg('grid')">グリッド</div>
+          <div class="size-btn bg-btn" data-bg="wave" onclick="applyChatBg('wave')">ウェーブ</div>
+          <div class="size-btn bg-btn" data-bg="sunset" onclick="applyChatBg('sunset')">夕焼け</div>
+          <div class="size-btn bg-btn" data-bg="starry" onclick="applyChatBg('starry')">星空</div>
+          <div class="size-btn bg-btn" data-bg="aurora" onclick="applyChatBg('aurora')">オーロラ</div>
+        </div>
+      </div>
+
+      <!-- API Keys (for 3AI deep analysis) -->
+      <div>
+        <div style="font-size:12px;color:var(--muted2);font-family:var(--fm);letter-spacing:.15em;margin-bottom:10px;">
+          3AI ディープ分析 — API設定
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(228,184,106,.06),rgba(157,120,216,.04));border:1px solid rgba(228,184,106,.18);border-radius:9px;padding:12px 14px;">
+          <div style="font-size:12px;color:var(--amber);margin-bottom:10px;display:flex;align-items:center;gap:5px;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            複雑なテーマは3つのAIが連携して深く分析します。戦略・市場調査・事業計画など、本格的な回答が必要な時に自動で動きます。
+          </div>
+          <div id="api-key-settings"></div>
+        </div>
+      </div>
+
+      <!-- Notification / reminder -->
+      <div>
+        <div style="font-size:12px;color:var(--muted2);font-family:var(--fm);letter-spacing:.15em;margin-bottom:10px;">通知設定</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <!-- Permission row -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border-radius:8px;">
+            <div>
+              <div style="font-size:12px;color:var(--cream);">ブラウザ通知</div>
+              <div style="font-size:12px;color:var(--muted2);">リマインダーを受け取る</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span id="notif-status-lbl" style="font-size:12px;color:var(--muted2);"></span>
+              <button onclick="requestNotifPermission()" style="padding:4px 10px;background:var(--amber-g);border:1px solid rgba(228,184,106,.3);border-radius:6px;font-size:12px;color:var(--amber);cursor:pointer;white-space:nowrap;transition:background .15s;" onmouseover="this.style.background='rgba(228,184,106,.2)'" onmouseout="this.style.background='var(--amber-g)'">許可する</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border-radius:8px;">
+            <div><div style="font-size:12px;color:var(--cream);">デイリーリマインダー</div><div style="font-size:12px;color:var(--muted2);">毎日21時にプッシュ通知</div></div>
+            <div class="toggle on" id="notif-daily"></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border-radius:8px;">
+            <div><div style="font-size:12px;color:var(--cream);">週次レビューリマインダー</div><div style="font-size:12px;color:var(--muted2);">毎週日曜20時</div></div>
+            <div class="toggle on" id="notif-weekly"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Language -->
+      <div>
+        <div style="font-size:12px;color:var(--muted2);font-family:var(--fm);letter-spacing:.15em;margin-bottom:10px;">言語 / Language</div>
+        <select class="field-input" style="padding:8px 12px;" onchange="applyLanguage(this.value)">
+          <option value="ja" selected>🇯🇵 日本語</option>
+          <option value="en">🇺🇸 English</option>
+        </select>
+      </div>
+
+      <!-- Location toggle -->
+      <div>
+        <div style="font-size:12px;color:var(--muted2);font-family:var(--fm);letter-spacing:.15em;margin-bottom:10px;">位置情報</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;background:var(--bg3);border:1px solid var(--border);">
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--cream);">位置情報を使用</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">天気・地域情報の回答に利用</div>
+          </div>
+          <div id="location-toggle" onclick="toggleLocationSetting()" style="width:48px;height:26px;border-radius:13px;background:var(--border);cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;">
+            <div id="location-toggle-knob" style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:left 0.2s;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data export -->
+      <div>
+        <div style="font-size:12px;color:var(--muted2);font-family:var(--fm);letter-spacing:.15em;margin-bottom:10px;">データ管理</div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <button onclick="exportData()" style="padding:9px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;font-size:12px;color:var(--muted);cursor:pointer;text-align:left;"><svg width="14" height="14" class="svg-ic"><use href="#ic-export"/></svg> データをエクスポート（JSON）</button>
+          <button onclick="deleteChatHistory()" style="padding:9px 14px;background:var(--red-d);border:1px solid rgba(224,104,104,0.25);border-radius:8px;font-size:12px;color:var(--red);cursor:pointer;text-align:left;"><svg width="14" height="14" class="svg-ic"><use href="#ic-trash"/></svg> 会話履歴を削除</button>
+          <button onclick="toast('準備中です')" style="padding:9px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;font-size:12px;color:var(--muted);cursor:pointer;text-align:left;">🔗 Notionと連携する <span class="badge-soon">近日</span></button>
+        </div>
+      </div>
+
+      <!-- Account -->
+      <div>
+        <div style="font-size:12px;color:var(--muted2);font-family:var(--fm);letter-spacing:.15em;margin-bottom:10px;">アカウント</div>
+        <button onclick="openPlanModal();closeSettingsPanel();" style="width:100%;padding:10px 14px;background:var(--amber-g);border:1px solid rgba(228,184,106,.3);border-radius:8px;font-size:12px;color:var(--amber);cursor:pointer;text-align:left;margin-bottom:8px;"><svg width="14" height="14" class="svg-ic"><use href="#ic-plan"/></svg> プラン管理 / サブスクリプション</button>
+        <button onclick="confirmDeleteAccount()" style="width:100%;padding:10px 14px;background:var(--red-d);border:1px solid var(--red-d);border-radius:8px;font-size:12px;color:var(--red);cursor:pointer;text-align:left;"><svg width="14" height="14" class="svg-ic"><use href="#ic-trash"/></svg> アカウントを削除</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     ARCHIVE VIEW MODAL
+══════════════════════════════════════ -->
+<div id="modal-archive" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:16px;max-width:560px;width:100%;margin:auto;overflow:hidden;box-shadow:var(--shadow);">
+    <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;">🗄</span>
+      <div style="font-size:15px;font-weight:500;color:var(--cream);flex:1;">アーカイブ済みゴール</div>
+      <button onclick="closeArchiveView()" style="width:28px;height:28px;border-radius:7px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" class="svg-ic"><use href="#ic-x"/></svg></button>
+    </div>
+    <div id="archive-list" style="padding:16px 20px;max-height:65vh;overflow-y:auto;">
+      <div style="text-align:center;padding:30px 0;color:var(--muted2);font-size:12px;">アーカイブ済みのゴールはありません</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     GOAL DELETE CONFIRM MODAL
+══════════════════════════════════════ -->
+<div id="modal-delete-goal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border:1px solid var(--red-d);border-radius:16px;padding:28px 32px;max-width:420px;width:calc(100% - 40px);box-shadow:0 20px 60px rgba(0,0,0,.5);">
+    <div style="font-size:28px;text-align:center;margin-bottom:12px;">🗑</div>
+    <div style="font-size:15px;font-weight:600;color:var(--cream);text-align:center;margin-bottom:8px;">本当に削除しますか？</div>
+    <div id="modal-delete-goal-name" style="text-align:center;font-size:12px;color:var(--amber);font-family:var(--fm);margin-bottom:12px;padding:6px 14px;background:var(--amber-g);border-radius:6px;display:inline-block;width:100%;box-sizing:border-box;"></div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:20px;text-align:center;">このゴールに関連するすべてのタスク・チャット履歴・<br>メモ・分析データが削除されます。<br><strong style="color:var(--red)">この操作は元に戻せません。</strong></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeDeleteModal()" style="flex:1;padding:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--ff);">キャンセル</button>
+      <button onclick="executeDeleteGoal()" style="flex:1;padding:11px;background:var(--red-d);border:1px solid rgba(224,104,104,.4);border-radius:9px;color:var(--red);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--ff);">削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SUBSCRIPTION / PLAN MODAL
+══════════════════════════════════════ -->
+<div id="modal-plan" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);align-items:center;justify-content:center;overflow-y:auto;padding:20px 0;">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:18px;max-width:520px;width:calc(100% - 32px);margin:auto;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6);">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,rgba(228,184,106,.12),rgba(157,120,216,.08));padding:24px 28px 20px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+        <div>
+          <div style="font-family:var(--fd);font-size:22px;color:var(--amber);font-weight:300;letter-spacing:.04em;">GOAL AI</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px;">あなたのAIコーチング</div>
+        </div>
+        <button onclick="closePlanModal()" style="width:28px;height:28px;border-radius:7px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" class="svg-ic"><use href="#ic-x"/></svg></button>
+      </div>
+      <!-- Current plan badge -->
+      <div id="plan-current-badge" style="margin-top:16px;display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:8px;font-size:12px;"></div>
+    </div>
+
+    <!-- Plan cards -->
+    <div style="padding:20px 24px;">
+      <div style="font-size:18px;color:var(--amber);font-family:var(--fd);font-weight:300;letter-spacing:.04em;margin-bottom:4px;">プランを選ぶ</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">使った分だけ。上限があるから安心。</div>
+      <div id="billing-toggle" style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:20px;">
+        <span id="billing-monthly-label" style="font-size:13px;color:var(--cream);font-weight:500;">月額</span>
+        <label style="position:relative;display:inline-block;width:48px;height:26px;cursor:pointer;">
+          <input type="checkbox" id="billing-switch" onchange="toggleBillingPeriod()" style="display:none;">
+          <span style="position:absolute;inset:0;background:var(--bg3);border:1px solid var(--border2);border-radius:13px;transition:background .2s;"></span>
+          <span id="billing-knob" style="position:absolute;top:3px;left:3px;width:20px;height:20px;background:var(--amber);border-radius:50%;transition:transform .2s;"></span>
+        </label>
+        <span id="billing-annual-label" style="font-size:13px;color:var(--muted);font-weight:400;">年間 <span style="font-size:12px;color:var(--green);background:var(--green-d);padding:2px 6px;border-radius:4px;">2ヶ月無料</span></span>
+      </div>
+      <!-- 利用額バー（Step 7） -->
+      <div id="plan-usage-bar" style="display:none;margin-bottom:16px;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;"></div>
+
+      <div style="display:flex;flex-direction:row;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:8px;" id="plan-cards">
+
+        <!-- Free -->
+        <div class="plan-card" id="pc-free" onclick="selectPlan('free')" style="padding:16px 18px;background:var(--bg3);border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;scroll-snap-align:center;min-width:280px;flex-shrink:0;">
+          <div style="font-size:12px;color:var(--muted2);margin-bottom:8px;font-style:italic;">まずは試してみる</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div><div style="font-size:13px;font-weight:500;color:var(--cream);">Free</div></div>
+            <div style="text-align:right;"><div style="font-size:20px;font-family:var(--fd);color:var(--cream);">¥0</div></div>
+          </div>
+          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;">
+            <div><span style="color:var(--muted2)">チャット</span><br><span style="color:var(--cream)">20回/日</span></div>
+            <div><span style="color:var(--muted2)">AIモデル</span><br><span style="color:var(--cream)">Sonnet+mini+Flash</span></div>
+            <div><span style="color:var(--muted2)">ディープ分析</span><br><span style="color:var(--cream)">3回/月</span></div>
+            <div><span style="color:var(--muted2)">AI理解メモ</span><br><span style="color:var(--muted)">—</span></div>
+          </div>
+        </div>
+
+        <!-- Light -->
+        <div class="plan-card" id="pc-light" onclick="selectPlan('light')" style="padding:16px 18px;background:var(--bg3);border:2px solid var(--border2);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;scroll-snap-align:center;min-width:280px;flex-shrink:0;">
+          <div style="font-size:12px;color:var(--muted2);margin-bottom:8px;font-style:italic;">広告なしで3AI</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div><div style="font-size:13px;font-weight:500;color:var(--cream);">Light</div></div>
+            <div style="text-align:right;" id="plan-price-light"><div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥500〜980</div><div style="font-size:12px;color:var(--muted2);">/月（税込）</div></div>
+          </div>
+          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;">
+            <div><span style="color:var(--muted2)">チャット</span><br><span style="color:var(--cream)">¥8/ターン 上限¥980</span></div>
+            <div><span style="color:var(--muted2)">AIモデル</span><br><span style="color:var(--cream)">Sonnet+mini+Flash</span></div>
+            <div><span style="color:var(--muted2)">ディープ分析</span><br><span style="color:var(--cream)">5回/月</span></div>
+            <div><span style="color:var(--muted2)">AI理解メモ</span><br><span style="color:var(--muted)">—</span></div>
+          </div>
+        </div>
+
+        <!-- Pro -->
+        <div class="plan-card" id="pc-pro" onclick="selectPlan('pro')" style="padding:16px 18px;background:var(--amber-g);border:2px solid #c8920a;border-radius:12px;cursor:pointer;transition:all .15s;position:relative;scroll-snap-align:center;min-width:280px;flex-shrink:0;">
+          <div style="position:absolute;top:-1px;right:14px;padding:3px 10px;background:var(--amber);border-radius:0 0 7px 7px;font-size:12px;font-weight:600;color:var(--bg);letter-spacing:.06em;font-family:var(--fm);">人気 No.1</div>
+          <div style="font-size:12px;color:var(--amber);margin-bottom:8px;font-style:italic;opacity:.8;">ChatGPTと同じGPT-5が使える</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div><div style="font-size:13px;font-weight:500;color:var(--amber);">Pro</div></div>
+            <div style="text-align:right;" id="plan-price-pro"><div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥1,500〜2,980</div><div style="font-size:12px;color:var(--muted2);">/月（税込）</div></div>
+          </div>
+          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;">
+            <div><span style="color:var(--amber)">チャット</span><br><span style="color:var(--cream)">¥20/ターン 上限¥2,980</span></div>
+            <div><span style="color:var(--amber)">AIモデル</span><br><span style="color:var(--cream)">Sonnet 4.6+GPT-5+Flash</span></div>
+            <div><span style="color:var(--amber)">ディープ分析</span><br><span style="color:var(--cream)">30回/月</span></div>
+            <div><span style="color:var(--amber)">AI理解メモ</span><br><span style="color:var(--cream)">✓</span></div>
+          </div>
+          <div style="margin-top:10px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;"><div style="height:100%;width:50%;background:var(--amber);border-radius:2px;"></div></div>
+          <div style="font-size:12px;color:var(--muted2);margin-top:4px;">使わない月は¥1,500。74ターンで上限。</div>
+        </div>
+
+        <!-- Max -->
+        <div class="plan-card" id="pc-max" onclick="selectPlan('max')" style="padding:16px 18px;background:linear-gradient(135deg,rgba(228,184,106,.14),rgba(157,120,216,.08));border:2px solid rgba(228,184,106,.9);border-radius:12px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 0 24px rgba(228,184,106,.12);scroll-snap-align:center;min-width:280px;flex-shrink:0;">
+          <div style="position:absolute;top:-1px;right:14px;padding:3px 10px;background:linear-gradient(90deg,#e4b86a,#d4a456);border-radius:0 0 7px 7px;font-size:12px;font-weight:600;color:var(--bg);letter-spacing:.06em;font-family:var(--fm);">最高品質</div>
+          <div style="font-size:12px;color:var(--muted2);margin-bottom:8px;font-style:italic;">上位モデル+1ターン半額</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div><div style="font-size:13px;font-weight:700;color:var(--amber);">Max</div></div>
+            <div style="text-align:right;" id="plan-price-max"><div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥1,500〜9,800</div><div style="font-size:12px;color:var(--muted2);">/月（税込）</div></div>
+          </div>
+          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;">
+            <div><span style="color:var(--amber)">チャット</span><br><span style="color:var(--cream)">¥10/ターン 上限¥9,800</span></div>
+            <div><span style="color:var(--amber)">AIモデル</span><br><span style="color:var(--cream)">Opus 4.6+GPT-5+2.5 Pro</span></div>
+            <div><span style="color:var(--amber)">ディープ分析</span><br><span style="color:var(--cream)">無制限</span></div>
+            <div><span style="color:var(--amber)">AI理解メモ</span><br><span style="color:var(--cream)">✓</span></div>
+          </div>
+        </div>
+
+        <!-- Ultra -->
+        <div class="plan-card" id="pc-ultra" onclick="selectPlan('ultra')" style="padding:16px 18px;background:linear-gradient(135deg,rgba(228,184,106,.2),rgba(157,120,216,.12));border:2px solid transparent;border-image:linear-gradient(135deg,#e4b86a,#BA55D3,#e4b86a) 1;border-radius:12px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 0 30px rgba(228,184,106,.15);scroll-snap-align:center;min-width:280px;flex-shrink:0;overflow:hidden;">
+          <div class="ultra-particles" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"><div style="position:absolute;width:3px;height:3px;background:var(--amber);border-radius:50%;top:20%;left:15%;animation:ultraFloat 3s ease-in-out infinite;opacity:.4;"></div><div style="position:absolute;width:2px;height:2px;background:#BA55D3;border-radius:50%;top:60%;left:75%;animation:ultraFloat 4s ease-in-out 1s infinite;opacity:.3;"></div><div style="position:absolute;width:2px;height:2px;background:var(--amber);border-radius:50%;top:40%;left:50%;animation:ultraFloat 3.5s ease-in-out .5s infinite;opacity:.35;"></div></div>
+          <div style="position:absolute;top:-1px;right:14px;padding:3px 10px;background:linear-gradient(135deg,#e4b86a,#BA55D3);border-radius:0 0 7px 7px;font-size:12px;font-weight:700;color:#fff;letter-spacing:.06em;font-family:var(--fm);">UNLIMITED</div>
+          <div style="font-size:12px;color:var(--amber);margin-bottom:8px;font-style:italic;opacity:.8;">全モデル使い放題+Extended Thinking</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div><div style="font-size:13px;font-weight:700;color:var(--amber);">Ultra</div></div>
+            <div style="text-align:right;" id="plan-price-ultra"><div style="font-size:20px;font-family:var(--fd);color:var(--amber);">¥20,000</div><div style="font-size:12px;color:var(--muted2);">/月（税込）</div></div>
+          </div>
+          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;">
+            <div><span style="color:var(--amber)">チャット</span><br><span style="color:var(--cream)">完全使い放題</span></div>
+            <div><span style="color:var(--amber)">AIモデル</span><br><span style="color:var(--cream)">Maxと同モデル</span></div>
+            <div><span style="color:var(--amber)">ディープ分析</span><br><span style="color:var(--cream)">無制限</span></div>
+            <div><span style="color:var(--amber)">AI理解メモ</span><br><span style="color:var(--cream)">✓</span></div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:10px;">
+            <span style="padding:3px 8px;background:rgba(186,85,211,.15);border:1px solid rgba(186,85,211,.3);border-radius:6px;font-size:12px;color:#BA55D3;font-family:var(--fm);">ET 140回/週</span>
+            <span style="padding:3px 8px;background:rgba(228,184,106,.1);border:1px solid rgba(228,184,106,.3);border-radius:6px;font-size:12px;color:var(--amber);font-family:var(--fm);">コンテキスト2倍</span>
+            <span style="padding:3px 8px;background:rgba(228,184,106,.1);border:1px solid rgba(228,184,106,.3);border-radius:6px;font-size:12px;color:var(--amber);font-family:var(--fm);">降格なし</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ドットインジケーター -->
+      <div id="plan-dots" style="display:flex;justify-content:center;gap:6px;padding:12px 0 4px;">
+        <div class="plan-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .2s;"></div>
+        <div class="plan-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .2s;"></div>
+        <div class="plan-dot active" style="width:16px;height:6px;border-radius:3px;background:var(--amber);transition:all .2s;"></div>
+        <div class="plan-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .2s;"></div>
+        <div class="plan-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .2s;"></div>
+      </div>
+
+      <!-- ChatGPT比較ボックス -->
+      <div style="margin-top:14px;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;">
+        <div style="font-size:12px;color:var(--muted2);font-family:var(--fm);letter-spacing:.1em;margin-bottom:8px;">比較してみてください</div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:12px;">
+          <div style="flex:1;"><span style="color:var(--muted);">ChatGPT Plus</span><br><span style="color:var(--cream);font-family:var(--fm);">¥3,000/月</span></div>
+          <div style="color:var(--muted2);">vs</div>
+          <div style="flex:1;text-align:right;"><span style="color:var(--amber);">GOAL AI Pro</span><br><span style="color:var(--amber);font-family:var(--fm);">¥1,500〜2,980/月</span></div>
+        </div>
+        <div style="font-size:12px;color:var(--muted2);margin-top:6px;"><s>3サービス別々 ¥9,000/月</s> → GOAL AI 1つで3AI</div>
+      </div>
+
+      <!-- 機能比較テーブル（折りたたみ） -->
+      <details style="margin-top:14px;" id="plan-compare-table">
+        <summary style="font-size:12px;color:var(--muted2);cursor:pointer;padding:8px 0;font-family:var(--fm);letter-spacing:.1em;">▸ 機能比較テーブル</summary>
+        <div style="overflow-x:auto;margin-top:8px;">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;color:var(--cream);">
+            <thead><tr style="border-bottom:1px solid var(--border);">
+              <th style="text-align:left;padding:6px 4px;color:var(--muted2);font-weight:400;"></th>
+              <th style="padding:6px 4px;color:var(--muted2);font-weight:400;">Free</th>
+              <th style="padding:6px 4px;color:var(--muted2);font-weight:400;">Light</th>
+              <th style="padding:6px 4px;color:var(--amber);font-weight:500;">Pro</th>
+              <th style="padding:6px 4px;color:var(--muted2);font-weight:400;">Max</th>
+              <th style="padding:6px 4px;color:var(--muted2);font-weight:400;">Ultra</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 4px;">料金</td><td style="padding:5px 4px;text-align:center;">¥0</td><td style="padding:5px 4px;text-align:center;">¥500~980</td><td style="padding:5px 4px;text-align:center;color:var(--amber);">¥1,500~2,980</td><td style="padding:5px 4px;text-align:center;">¥1,500~9,800</td><td style="padding:5px 4px;text-align:center;">¥20,000</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 4px;">チャット</td><td style="padding:5px 4px;text-align:center;">20回/日</td><td style="padding:5px 4px;text-align:center;">¥8/t</td><td style="padding:5px 4px;text-align:center;color:var(--amber);">¥20/t</td><td style="padding:5px 4px;text-align:center;">¥10/t</td><td style="padding:5px 4px;text-align:center;">無制限</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 4px;">GPT</td><td style="padding:5px 4px;text-align:center;">mini</td><td style="padding:5px 4px;text-align:center;">mini</td><td style="padding:5px 4px;text-align:center;color:var(--amber);">GPT-5</td><td style="padding:5px 4px;text-align:center;">GPT-5</td><td style="padding:5px 4px;text-align:center;">GPT-5</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 4px;">Claude</td><td style="padding:5px 4px;text-align:center;">Sonnet</td><td style="padding:5px 4px;text-align:center;">Sonnet</td><td style="padding:5px 4px;text-align:center;color:var(--amber);">Sonnet 4.6</td><td style="padding:5px 4px;text-align:center;">Opus 4.6</td><td style="padding:5px 4px;text-align:center;">Opus 4.6</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 4px;">Gemini</td><td style="padding:5px 4px;text-align:center;">Flash</td><td style="padding:5px 4px;text-align:center;">Flash</td><td style="padding:5px 4px;text-align:center;color:var(--amber);">Flash</td><td style="padding:5px 4px;text-align:center;">2.5 Pro</td><td style="padding:5px 4px;text-align:center;">2.5 Pro</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 4px;">分析</td><td style="padding:5px 4px;text-align:center;">3回</td><td style="padding:5px 4px;text-align:center;">5回</td><td style="padding:5px 4px;text-align:center;color:var(--amber);">30回</td><td style="padding:5px 4px;text-align:center;">無制限</td><td style="padding:5px 4px;text-align:center;">無制限</td></tr>
+              <tr><td style="padding:5px 4px;">理解メモ</td><td style="padding:5px 4px;text-align:center;">—</td><td style="padding:5px 4px;text-align:center;">—</td><td style="padding:5px 4px;text-align:center;color:var(--amber);">✓</td><td style="padding:5px 4px;text-align:center;">✓</td><td style="padding:5px 4px;text-align:center;">✓</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <!-- フェアユース表示 -->
+      <div style="margin-top:10px;font-size:12px;color:var(--muted3);line-height:1.8;">
+        フェアユース制限: Free 10/5h+140/週 · Light 50/5h+200/週 · Pro 80/5h+500/週 · Max 200/5h+1500/週 · Ultra 200/5h+1500/週
+      </div>
+
+      <!-- Promo code -->
+      <div style="margin-top:16px;padding:14px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:11px;">
+        <div style="font-size:12px;color:var(--muted2);font-family:var(--fm);letter-spacing:.1em;margin-bottom:9px;"><svg width="14" height="14" class="svg-ic"><use href="#ic-gift"/></svg> プロモーションコード</div>
+        <div id="promo-applied-banner" style="display:none;padding:8px 12px;background:var(--green-d);border:1px solid var(--green-d);border-radius:8px;margin-bottom:8px;">
+          <div style="font-size:12px;color:var(--green);font-weight:500;" id="promo-applied-text">✓ コードが適用されました</div>
+        </div>
+        <div style="display:flex;gap:8px;" id="promo-input-row">
+          <input id="promo-code-in" class="field-input" placeholder="例: LAUNCH30, INVITE2026…" style="flex:1;padding:8px 12px;" onkeydown="if(event.key==='Enter'&&!event.isComposing)applyPromoCode()">
+          <button onclick="applyPromoCode()" style="padding:8px 16px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--ff);white-space:nowrap;transition:all .15s;" onmouseover="this.style.borderColor='var(--amber)';this.style.color='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">適用</button>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div id="plan-cta-wrap" style="margin-top:16px;">
+        <button id="plan-cta-btn" onclick="subscribePlan()" style="width:100%;padding:13px;background:var(--amber);border:none;border-radius:10px;font-size:14px;font-weight:600;color:var(--bg);cursor:pointer;font-family:var(--ff);letter-spacing:.03em;transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          Pro プランを始める
+        </button>
+        <div style="text-align:center;margin-top:8px;font-size:12px;color:var(--muted2);">14日間無料トライアル・カード不要・いつでもキャンセル</div>
+      </div>
+
+      <!-- サブスクリプション管理（課金ユーザー向け） -->
+      <div id="plan-portal-wrap" style="display:none;margin-top:12px;text-align:center;">
+        <button onclick="openCustomerPortal()" style="padding:8px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--ff);transition:all .15s;" onmouseover="this.style.borderColor='var(--amber)';this.style.color='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">サブスクリプション管理（プラン変更・解約・カード変更）</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Drop overlay -->
+<div id="drop-overlay">
+  <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+    <rect class="drop-icon-box" x="10" y="10" width="100" height="100" rx="16" stroke="var(--amber)" stroke-width="3" stroke-dasharray="20 12" fill="none"/>
+    <g class="drop-icon-plus"><line x1="60" y1="38" x2="60" y2="82" stroke="var(--amber)" stroke-width="4" stroke-linecap="round"/><line x1="38" y1="60" x2="82" y2="60" stroke="var(--amber)" stroke-width="4" stroke-linecap="round"/></g>
+  </svg>
+  <div style="font-size:16px;color:#fff;letter-spacing:.12em;font-weight:500;">ここに画像をドロップ</div>
+</div>
+
+<!-- ═══ BOTTOM TAB BAR ═══ -->
+<nav id="bottom-tabs" style="position:fixed;bottom:0;left:0;right:0;z-index:190;display:flex;height:52px;border-top:0.5px solid var(--border);background:var(--bg);padding-bottom:env(safe-area-inset-bottom);">
+  <button class="btab active" onclick="showPage('today')" id="btab-today" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 8 14"/></svg>
+    <span style="font-size:12px;font-family:var(--ff);">TODAY</span>
+  </button>
+  <button class="btab" onclick="showPage('home')" id="btab-talk" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <span style="font-size:12px;font-family:var(--ff);">TALK</span>
+  </button>
+  <button class="btab" onclick="showPage('goal-hub')" id="btab-goals" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    <span style="font-size:12px;font-family:var(--ff);">GOALS</span>
+  </button>
+  <button class="btab" onclick="showPage('myself')" id="btab-me" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span style="font-size:12px;font-family:var(--ff);">ME</span>
+  </button>
+</nav>
+
+<div id="home-input-area" style="display:none;position:fixed;bottom:52px;left:0;right:0;z-index:200;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:linear-gradient(transparent 0%, var(--bg) 40%);">
+  <div style="max-width:700px;margin:0 auto;background:rgba(12,14,20,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0.5px solid rgba(200,146,10,0.3);border-radius:14px;display:flex;align-items:center;gap:4px;padding:8px 12px;transition:border-color .2s;box-shadow:0 -4px 20px rgba(0,0,0,.25);" id="home-input-wrap" ondragover="event.preventDefault();this.style.borderColor='var(--amber)'" ondragleave="this.style.borderColor=''" ondrop="handleHomeDrop(event);this.style.borderColor=''">
+    <label title="画像を添付" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);flex-shrink:0;transition:color .15s;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--muted)'">
+      <input type="file" id="home-img-in" accept="image/*" style="display:none;" onchange="handleHomeImage(this)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+    </label>
+    <textarea id="home-msg-in" rows="1" placeholder="質問、相談、なんでも..."
+      style="flex:1;padding:10px 4px;background:transparent;border:none;color:var(--cream);font-family:var(--ff);font-size:16px;line-height:1.5;resize:none;max-height:110px;min-height:24px;outline:none;align-self:center;"
+      oninput="homeResize(this);preRouteOnInput()" onkeydown="homeKey(event)" onpaste="handleHomePaste(event)"></textarea>
+    <button id="home-voice-btn" onclick="toggleHomeVoice()" title="音声入力"
+      style="width:44px;height:44px;border-radius:50%;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);flex-shrink:0;transition:all .15s;overflow:visible;position:relative;"
+      onmouseover="if(!homeRecording)this.style.color='var(--amber)'" onmouseout="if(!homeRecording)this.style.color='var(--muted)'">
+      <span class="voice-ring voice-ring-inner"></span>
+      <span class="voice-ring"></span>
+      <svg id="home-voice-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="position:relative;z-index:1;transition:transform .08s ease-out,filter .08s ease-out;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    </button>
+    <button id="home-send-btn" onclick="sendHomeMsg()"
+      style="width:44px;height:44px;background:var(--amber);border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;transition:opacity .15s;flex-shrink:0;"
+      onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+      <svg id="home-send-icon" width="18" height="18" viewBox="0 0 24 24" fill="var(--text-on-accent)"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+      <div class="send-spinner"></div>
+    </button>
+  </div>
+  <div id="home-img-preview" style="max-width:700px;margin:6px auto 0;display:none;">
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;">
+      <img id="home-img-thumb" style="width:36px;height:36px;object-fit:cover;border-radius:5px;">
+      <span id="home-img-name" style="font-size:12px;color:var(--muted);flex:1;"></span>
+      <span onclick="clearHomeImage()" style="font-size:12px;color:var(--muted);cursor:pointer;padding:2px 6px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕ 削除</span>
+    </div>
+  </div>
+</div>
+
+<script src="js/sw-register.js"></script>
+</body>
+</html>

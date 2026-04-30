@@ -1,0 +1,96 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "6.5",
+    "issue": "退会フローで「即時ログアウト」し「72時間以内にログインで削除キャンセル可能」としているが、account_statusが「deleted_pending」の状態でSupabase Authのログイン認証が通るのか、通った後にどのような画面遷移になるかの仕様が欠落している。このままではログインが弾かれキャンセル不能になるか、通常ログインしてしまい不整合が起きる。",
+    "suggestion": "認証設計（7.2）に「deleted_pending状態のユーザーのログインを許可する」旨を追記し、ログイン直後に「削除キャンセル確認モーダ��」を強制表示して通常画面への遷移をブロックする仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "7.3",
+    "issue": "オフライン時のタスク完了同期について、「サーバー側でEXP制限（1日上限300EXP）を再検証」とあるが、オフライン状態で日を跨いで（午前4:00のJSTリセットを越えて）オンライン復帰した場合、EXP上限の判定基準日が「タスク完了時のローカルタイムスタンプ」なのか「サーバー同期時のタイムスタンプ」なのか定義されていないため、EXP計算に確実な矛盾が生じる。",
+    "suggestion": "オフライン同期時のEXP計算は「クライアントで記録されたタスク完了時のタイムスタンプ（JST）」を基準日として上限判定を行う旨を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3.5",
+    "issue": "自己成長に興味がないユーザーにとって、オンボーディングの「目標ジャンル選択」「最初のゴール設定」はハードルが高く、「特にない」「何を入れればいいか分からない」という状態での初回離脱が強く懸念される。",
+    "suggestion": "「特に目標はない」「まずは日常を整えたい」といったハードルの低い選択肢を用意し、AIが「毎日同じ時間に起きる」「1日1回アプリを開く」などの極めて簡単な日常タスクを提案するフォールバックフローを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.5",
+    "issue": "オンボーディング完了後、GROW画面に遷移して最初のタスクが自動提案されるが、アプリのコア体験である「タスクを完了してEXPを得る」「TALK画面でAIと話す」という基本サイクルのチュートリアル（操作案内）が定義されていない。初見で何をすればいいか分からない。",
+    "suggestion": "初回GROW画面表示時に、提案されたタスクをタップして完了させるまでのガイド（ツールチップ等）と、完了後にTALK画面への誘導を行う初回チュートリアルの仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.3",
+    "issue": "TALK画面を開いた際、ユーザーから話しかけるのか、AIから話しかけてくるのか���「初回の会話のきっかけ」が定義されていない。LINE等に慣れたユーザーは、空のチャット画面で何を話せばいいか分からず戸惑う。",
+    "suggestion": "初回TALK画面遷移時、またはオンボーディング完了時に、AIから「今日からよろしく！まずは今日の予定を教えて？」などの初回メッセージを自動送信する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "3.2",
+    "issue": "「習慣（繰り返し）タスクはゴールに紐付け不可」とあるが、一般ユーザーの感覚として「毎日腹筋する（習慣）」を「ダイエット（ゴール）」に紐付けられないのは直感に反し、「意味がわからない」と感じる。",
+    "suggestion": "習慣タスクをゴールに紐付けられない理由（進捗計算の都合等）をUI上でユーザーにどう説明・納得させるか、または「習慣をN回達成する」という単発タスクをゴールに紐付ける代替案を仕様に含める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "3.4",
+    "issue": "PROFILE画面に「MBTI/性格タイプ表示」とあ��が、これがユーザーの手動入力なのか、AIが対話から自動判定するのか取得方法が定義されていない。また「MBTI」という用語を知らないユーザーへの配慮がない。",
+    "suggestion": "MBTI/性格タイプの取得方法（AI自動判定か手動選択か）を明記し、UI上では専門用語だけでなく「あなたの性格傾向」などの分かりやすい補足説明を併記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.2",
+    "issue": "タスク作成時に「所要時間（見積り）」の入力（デフォルト30分）があるが、日常の些細なタスク（例：ゴミ出し、薬を飲む）に対して毎回所要時間を意識させられるのは面倒くさい。",
+    "suggestion": "所要時間の入力を任意（未設定可）にするか、「5分以下のクイックタスク」用のプリセットを用意し、入力の摩擦を減らす。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "4.3",
+    "issue": "「冒険EXP」がAIの自動検出で付与されるが、一般ユーザーは何をすれば冒険EXPがもらえるのか（＝どうすれば大きく成長できるのか）ルールがブラックボックスであり、続ける理由（目標）にしづらい。",
+    "suggestion": "DISCOVER画面やTALK画面で、AIが「こんな新しいことに挑戦すると冒険EXPがもらえるよ」とヒントを出す仕組み、または初回獲得時に判定基準を軽く説明する演出を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  }
+]

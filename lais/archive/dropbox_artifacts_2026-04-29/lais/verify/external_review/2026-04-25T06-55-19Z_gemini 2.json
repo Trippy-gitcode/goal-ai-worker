@@ -1,0 +1,60 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "§7.1 手順6",
+    "issue": "既存の `pre-commit` フックに `bash \"${REPO_ROOT}/scripts/byte_floor_check.sh\"` を追記するよう指示していますが、`REPO_ROOT` が既存スクリプト内で定義されている保証がありません。`set -u` が有効な環境では未定義変数エラーとなり、すべてのコミットが実行不能になる致命的な障害を招きます。",
+    "suggestion": "`REPO_ROOT` 変数に依存せず、フック自身のパスから相対的に解決する `bash \"$(dirname \"$0\")/../../scripts/byte_floor_check.sh\"` に変更するか、`$(git rev-parse --show-toplevel)` を使用して動的にパスを取得してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.4 セットアップ手順 5",
+    "issue": "`rsync -av --delete .../lais/verify/*.md dest/` のように送信元にワイルドカードを指定すると、シェルによってファイルリストとして展開されてから rsync に渡されます。この場合、送信元がディレクトリコンテキストを持たないため `--delete` オプションが機能せず、同期元で削除されたファイルが宛先に残り続けます。",
+    "suggestion": "ディレクトリ自体を対象とし、フィルタリングを使用する構文に変更してください。例: `rsync -av --delete --include=\"*/\" --include=\"*.md\" --exclude=\"*\" /Users/.../lais/verify/ ~/GoogleDrive/.../lais_verify/`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 手順7",
+    "issue": "フックの動作確認として `git commit` を実行していますが、もしフックの設定ミス等で発火しなかった場合、テスト用の空ファイルが実際にコミットされてしまい、リポジトリの履歴を汚染する副作用があります。",
+    "suggestion": "��ックが発火しなかった（意図せずコミットが成功してしまった）場合のクリーンアップ処理として、`else` ブロック内に `git reset --soft HEAD~1` などのロールバック処理を追加し、履歴汚染を防いでください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§7.1 手順5 (byte_floor_check.sh)",
+    "issue": "`[ -f \"$f\" ]` で通常ファイルか判定していますが、読み取り権限がない場合 `wc -c < \"$f\"` がエラーとなり、変数 `size` が空になります。その結果 `[ \"$size\" -lt 8 ]` の評価時に bash の構文エラー（integer expression expected）が発生し、コミットが異常終了します。",
+    "suggestion": "ファイルの読み取り権限も確認する `if [ -f \"$f\" ] && [ -r \"$f\" ]; then` に変更するか、`size=$(wc -c < \"$f\" 2>/dev/null || echo 0)` のようにエラー時のフォールバック値を設けてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§3.1 セットアップ手順 4",
+    "issue": "`fswatch` を用いた即時保護層の構築が提案されていますが、エディタの保存���の一時ファイル生成や頻繁な変更による大量のイベント発火（イベントストーム）に対する考慮が記載されていません。そのまま実装するとCPU負荷や通知スパムの原因になります。",
+    "suggestion": "`fswatch` を実運用する際は、バッチ処理化（デバウンス処理）やエディタの一時ファイル・`.DS_Store` の除外設定が必須である旨の注意書きをドキュメントに追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0181,
+    "input_tokens": 10577,
+    "output_tokens": 978,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

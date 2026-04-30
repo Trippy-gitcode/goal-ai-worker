@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスク行",
+    "issue": "UX仕様書§2.3で定義されたタスク行の構成（[完了⭕] [時刻] [タスク名] [所要時間] [ゴール色ドット]）と異なり、モックアップでは時刻が左端に配置され、ゴール色が左ボーダーとして実装されている。",
+    "suggestion": "仕様書をモックアップの視覚表現（左ボーダー方式）に合わせるか、モックアップを仕様書に準拠させるよう定義の調停を行う。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部の「サインアップ」ボタン",
+    "issue": "チェックボックス未チェック時の非アクティブ状態と思われるが、背景色(#1C2128)とテキスト色(#7A8593)のコントラストが低く、ボタンの存在自体が認識しづらい。",
+    "suggestion": "非アクティブ状態でもボタンの形状が認識できるよう、背景色を少し明るくするか、薄いボーダーを追加して視認性を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "モーダル下部のアクションボタン群",
+    "issue": "「編集」「削除」「振り返りを聞く」「次につなげる」の4つのボタンが同等のサイズ・強い視覚的重みで並んでおり、主要アクションがどれか迷う（視線迷子）。",
+    "suggestion": "ユーザーに最も期待するアクションをプライマリ（塗りつぶし）にし、他をセカンダリ（アウトラインやテキストリンク）に降格させて視線を誘導する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "タスク提案カー���内のボタン群",
+    "issue": "「登録する」「編集して登録」「✕」の3つのボタンが狭い横幅に詰め込まれており、誤タップを誘発しやすい情報過密状態になっている。",
+    "suggestion": "「✕」ボタンをカードの右上にアイコンとして独立配置し、アクションボタンは下部に2つ並べるレイアウトに変更して余白（Open Air）を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "画面上部のゴール名表示領域",
+    "issue": "UX仕様書§2.4の「ゴール行の構成: [🎯] [ゴール名] [進捗バー]」の定義に対し、S-10のリスト表示およびS-14の詳細画面で🎯アイコンが欠落している。",
+    "suggestion": "ブランドDNAの「構造的ゲーミフィケーション」を担保するため、仕様通りに🎯アイコンを配置するか、仕様書からアイコン要件を削除する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "サブタブナビゲーション（PROFILE, DISCOVER...）",
+    "issue": "テキストサイズが12pxと小さく��さらに全大文字（uppercase）であるため、可読性がやや低い。",
+    "suggestion": "タブのテキストサイズを13pxまたは14pxに引き上げるか、先頭のみ大文字（Capitalize）に変更して字形による判読性を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "「+ タスクを追加」「+ ゴールを作成」のテキストリンク",
+    "issue": "テキストのみの表示となっており、タップ可能な最小領域（44x44px）が視覚的に伝わりにくい。",
+    "suggestion": "左側に「+」アイコンを配置するだけでなく、薄い背景色を敷くか、ボタン形状（Pill型など）にしてインタラクティブな要素であることを明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "s12_task_add",
+    "location": "タスク名入力フィールドのフォーカス状態",
+    "issue": "青い太いアウトライン（outline: 3px solid）がシステムデフォルトのように見え、「洗練＋自然体」というブランドDNAから少し浮いている。",
+    "suggestion": "フォーカス時はアウトラインではな���、ボーダー色をアクセントカラーに変更し、微細なbox-shadowを用いるなど、より洗練された表現にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

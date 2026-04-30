@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3",
+    "issue": "連続でタスクを完了した際、「前のUndoスナックバーは即時確定し、新しいスナックバーに置換される」仕様のため、複数タスクを誤って連続タップした場合、最初のタスクの完了を取り消す手段が失われ、意図しないデータ確定（データ損失）が発生する。",
+    "suggestion": "Undoスナックバーをスタック可能にする（複数表示）か、スナックバー方式を廃止し、タスク行自体にインラインで「取り消し」ボタンを30秒間表示する仕様に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §4.4",
+    "issue": "プレイスタイルによるレベル進行速度の乖離が極端。毎日上限（350EXP）稼ぐユーザーはLv.50まで約半年で到達する一方、1日3タスク（35EXP）のユーザーは5年かかる。進行速度のブレが大きすぎ、コンテンツの早期枯渇またはモチベーション低下を招く。",
+    "suggestion": "ログインボーナスや「その日最初のタスク完了」のEXP比重を上げ（例：初回タスク+30EXP）、以降のタスクEXPを減衰させることで、ライトユーザーの進行を底上げしつつヘビーユーザーの進行を抑えるレベルカーブに調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §4.5, ux_v1.md §9.4",
+    "issue": "同名タスクの連続完了は防がれているが、「あ」「い」「う」のような1秒で終わる別名ダミータスクを大量登録・完了すれば、簡単に1日上限の300EXPを獲得できてしまう（インフレ・不正対策の抜け穴）。",
+    "suggestion": "1日のタスク完了による獲得EXPにソフトキャップ（例：10タスク以降は獲得EXP半減、以��1EXPまで減衰）を設けるか、所要時間に応じたEXP変動（最低保証あり）を導入する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §2.2",
+    "issue": "ショップ機能（v0.2.0以降）において、無課金ユーザーが装飾を入手する手段（ゲーム内通貨など）が定義されていない。すべて課金前提だと、ゲームとしての「報酬ループ」が成立せず、無課金層の継続動機が失われる。",
+    "suggestion": "レベルアップ時やゴール達成時に、将来ショップで使える「コイン」や「チケットの欠片」を付与する仕様をMVP段階から組み込み、無課金でも時間をかければ装飾を得られる期待感（アバター経済の基盤）を持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.4",
+    "issue": "TALK画面でレベルアップ後、ME画面に遷移すると静的更新で新しいアバターが表示される。その後GROW画面に戻ると、すでに見た新アバターへの「進化演出」が再生され、体験として不自然（ネタバレ後の演出）。",
+    "suggestion": "ME画面表示��にレベルアップ未演出フラグがある場合はME画面で演出を再生するか、ME画面を見た時点でフラグを消費し、GROW画面での遅延演出をキャンセルする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.4",
+    "issue": "MVPではアバター進化がPhase 3（Lv.16〜）までしかなく、Lv.16からLv.30（約5ヶ月間）アバターの変化がない。ショップ機能もないため、中盤の報酬が枯渇し「飽きポイント」となる。",
+    "suggestion": "アバター進化の合間のレベル（例：Lv.20, 25）で、プロフィール背景色やチャットバブルの色など、アセット追加コストの低い報酬をアンロックする仕組みを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §4.2",
+    "issue": "ゴール達成ボーナス（50EXP）は「作成から7日経過」が必要だが、ユーザーがダミーゴールを大量に作成して放置し、7日後から毎日1つずつ完了させることで、毎日ボーナスを不正受給する「収穫プレイ」が可能。",
+    "suggestion": "同時に進行できるゴール数に上限（例：最大5個）を設けるか、ゴール達成ボーナスを「週に1回まで」などの期間制限に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §4.4, ux_v1.md §4.2.1",
+    "issue": "オンボーディングで3種のアバターから1つを選ぶが、進化時（Phase 2, 3）にその系統（バリエーション）がどう引き継がれるか、または変更可能かが定義されていない。",
+    "suggestion": "アバター設定画面（S-41）に、同Phase内でのバリエーション変更UIを追加するか、初期選択した系統が固定で進化する仕様を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3",
+    "issue": "習慣タスクの周期を「毎日」から「週1回（今日以外）」に変更した場合、すでにTodayセクションに表示されている今日のタスクが即座に消えるのか、残るのかが不明確。",
+    "suggestion": "周期変更時、新しい周期において「今日」が実行日に該当しない場合は、Todayセクションから即座に非表示にする旨を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8.6",
+    "issue": "複数のタスクを素早く連続で完了した場合、演出キューが蓄積し、最大8秒の演出が何度も繰り返されてユーザーの操作を長時間ブロックする可能性がある。",
+    "suggestion": "演出再生中に新しいEXP獲得イベントが発生した場合、現在のアニメーションをスキップして最終状態にジャンプし、新しい演出を開始する（または数値を合算して1回の演出にまとめる）仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  }
+]

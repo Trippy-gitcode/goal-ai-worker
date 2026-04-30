@@ -1,0 +1,132 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "1",
+    "issue": "opId を timeout/catch/finally で 0 に戻し、次回 myOpId を `opIdRef.current + 1` で算出しているため、古い操作(例: #1)のコールバックが新しい操作(再び #1 になる)開始後に発火すると `isCurrent()` が true になり誤って副作用を実行する再利用衝突が起こりうる。",
+    "suggestion": "opId を再利用しない。単調増加カウンタ(seq)を別 ref に保持し `const myOpId = ++opIdSeqRef.current` として採番、currentOpIdRef に代入。終了時は currentOpIdRef を null にするだけで 0 に戻さない。もしくは `Symbol()`/UUID を opId に用いて同値衝突を原理的に排除。さらに、開始時に古い timeout を必ず clear しておく。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1, 5",
+    "issue": "現行操作でなくなった場合(finally で isCurrent=false)に timeout を clear しないため、no-op なタイマーが多数ぶら下がる。連打/再送の多い状況で余分なコールバック実行・メモリ/CPU 負荷が増える。",
+    "suggestion": "最後に必ず `clearTimeout(timeoutId)` を呼ぶ(無害)。さらに `lastTimeoutIdRef` を導入し、新規送信開始時に `clearTimeout(lastTimeoutIdRef.current)` する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "timeout もしくは別操作開始で“UI 無効化”はできているが、ネットワークリクエスト自体は中断されずサーバー負荷やレート制限・ロックアウトの副作用が残る可能性。",
+    "suggestion": "AbortController を導入し、各操作に `signal` を渡して実行。timeout/別操作開始/アンマウント時に abort。supabase-js が signal を直接受け取れない場合は custom fetch でラップ、もしくは Promise.race と abortable fetch を併用。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "1",
+    "issue": "handleSubmit 内で `e.preventDefault()` 実行の明記がなく、フォームのネイティブ submit によるページ遷移/二重送信のリスクが残る。",
+    "suggestion": "handleSubmit 冒頭で `e.preventDefault()` を必ず実行(もしくはボタンを `type='button'` に)。E2E で Enter/クリック双方の経路を検証。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "1",
+    "issue": "再入防止(canSubmit/inFlight ガード)が関数冒頭で確実に実行されるかが不明。ガード抜けすると同時多発送信→古い応答は無効化されるが不要なリクエストが発生する。",
+    "suggestion": "handleSubmit 冒頭で `if (inFlightRef.current) return;` と canSubmit 判定を必ず実行し、UI の `aria-disabled`/見た目とロジックを一致させる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "1",
+    "issue": "catch で `err?.message` をそのまま表示しており、英語/内部実装依存の文言や詳細情報が露出する可能性。i18n/一貫性の観点で品質低下。",
+    "suggestion": "Supabase のエラーコード/分類でマッピングし、利用者向けに安定した日本語メッセージを提示(例: 資格情報不正/レート制限/ネットワーク)。詳細はログにのみ記録。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "4, 5",
+    "issue": "今回の regression(非同期レース)対策に対する単体テストが未実装。将来の改修���再発しても検知困難。",
+    "suggestion": "fake timers を用いたユニットテストを追加: (1) timeout 直後に成功応答到着→副作用なし (2) 旧 timeout が新規送信直後に発火→新規操作に影響しない (3) 高速成功/高速失敗→timeout クリアされる (4) アンマウント中に応答/timeout→setState/route 不発 (5) R-001 の“ID再利用衝突”シナリオの再現テスト。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "4, 5",
+    "issue": "構造化ログ/テレメトリが不足し、再現困難なレースや利用環境依存の不具合解析が難しい。",
+    "suggestion": "デバッグフラグ下で `opId`, 経過時間(ms), イベント種別(start/success/fail/timeout/abort/supersede) を console.debug または計測に送信。ユーザー影響なしにオン/オフ可能に。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "コンポーネントのアンマウント時に timeout/進行中オペレーションの明示的クリーンアップが記載されていない。遅延コールバックが後で発火する可能性。",
+    "suggestion": "useEffect cleanup を��加し、`clearTimeout(lastTimeoutIdRef.current)` と `abortController.abort()`、`currentOpIdRef = null` を実行。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "SUBMIT_TIMEOUT_MS の値検証がなく、0/負値/極端な値で意図せぬ即時タイムアウトや長時間ハングの可能性。",
+    "suggestion": "初期化時に範囲チェックしてクリップ(例: 3s〜60s)。不正値はデフォルト(例: 15_000ms)にフォールバックし、コンソールに警告。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2",
+    "issue": "aria-disabled のみ採用方針は妥当だが、UA/AT 組合せにより読み上げ/操作感が異なる可能性が残る(ユーザー混乱の潜在リスク)。",
+    "suggestion": "主要ブラウザ/スクリーンリーダの回帰 E2E を整備。サーバーエラー/バリデーション失敗時は `aria-live=polite` のエリア更新やエラーサマリへフォーカス移動を追加して確実に理由が伝わるよう補強。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "opId を数値��単調増加させ続ける場合、非常に長寿命セッションでの桁あふれや比較ミスの理論的リスクがわずかに残る。",
+    "suggestion": "Symbol/UUID ベースの opId へ変更、または BigInt と桁あふれチェックを実装。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "1",
+    "issue": "サーバーサイド由来の `setServerError` 時のフォーカス移動/アナウンス手順が明記されておらず、メッセージが読み上げられない/見落とされる恐れ。",
+    "suggestion": "エラー表示後にエラーアラート領域へ `focus()`、もしくは `aria-live` で確実に通達。クライアント検証時と同等のフォーカス誘導を非同期エラーにも適用。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

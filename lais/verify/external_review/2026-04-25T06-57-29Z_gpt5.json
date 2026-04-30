@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.1 / §6.1 / §7.1",
+    "issue": "本文では再発防止策として pre-commit hook に「8 bytes 未満の .md 検知」を追加するとしているが、今回の事故ファイルは 8 bytes ちょうどに縮退したと記載されている。実装例でも `[ \"$size\" -lt 8 ]` となっており、当該事故パターンそのものを検出できないため、資料の主目的と対策が食い違っている。",
+    "suggestion": "閾値条件を事故実例に合わせて `-le 8` へ修正するか、より安全に「最小許容サイズ」を設定して `-lt 100` など文書種別別の閾値にするべきです。あわせて issue 文中の表現も「8 bytes 以下」へ統一し、テストケースに 8 bytes ちょうどのファイルを必ず含めてください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 手順 4",
+    "issue": "`git add lais/ instructions/ docs/ templates/` をそのまま実行させる手順は、意図しない生成物・秘匿情報・大型ファイルまで一括で staged に載せる危険がある。直前に untracked Markdown ��洗い出しをしているのに、実際の add はディレクトリ丸ごとなため、確認結果と実操作が一致しておらず、後日の混入バグやレビュー困難を招く。",
+    "suggestion": "追加対象は洗い出し結果に限定し、`git add --pathspec-from-file=/tmp/untracked_ssot.txt` などで明示的に追跡化する構成へ変更してください。加えて `git status --short` の確認ステップを commit 前に必須化し、Markdown 以外が混入した場合は中断するガードを入れると事故を減らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§7.1 手順 6",
+    "issue": "既存 pre-commit の「最終 exit の前に 1 行だけ追記」としているが、実際には 2 行の挿入が必要であり、既存 hook の制御フロー次第では途中の `exit` や `set -e` により新規チェックへ到達しない。手動編集依存で差し込み位置も曖昧なため、手順どおりに実施してもフックが発火しない実装不良を生みやすい。",
+    "suggestion": "既存 hook 末尾追記ではなく、hook 本体から `scripts/pre-commit.d/*.sh` を順に実行するディスパッチ方式を仕様化してください。少なくとも差し込���位置の具体例、`FAIL=0` の前提、`set -e` 時の挙動、複数 exit 箇所の扱いを明記し、再現可能な編集手順に落とし込むべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.2 / §7.2",
+    "issue": "Time Machine について「1時間以内に気付けば前世代から復元可能」と記す一方、詳細では外部ディスク未接続時のローカルスナップショットも説明している。どの条件でファイル単位復元が可能か、外部 SSD 常時未接続でも今回の事故を救えるのかが曖昧で、運用者が保護レベルを過信するおそれがある。",
+    "suggestion": "外部ディスク接続時の保証、未接続時の APFS ローカルスナップショットの制約、ファイル単位 UI の可否を分けて明記してください。特に推奨構成では「常時接続で初めて時間単位の世代保持を期待できる」と整理し、未接続運用は補助的保護に格下げして記述するのが安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§1.3 / 付録B",
+    "issue": "§1.3 では復元コストを「約4〜6時間」としつつ、���録Bでは「14:44 起点 → 15:09 完了 ≒ 25分」と記載している。注記で commit 発火基準と補足しているが、総復元時間と commit 区間時間が本文中で混在しており、比較表や推奨理由の説得力に影響する。読者によっては被害規模を過小評価しかねない。",
+    "suggestion": "時間指標を「実作業総時間」「証跡に残る commit 区間」「機械復元に要する見込み時間」の3種に明示分離してください。表や結論でも同一指標のみを比較対象にし、25分は『最終仕上げ区間』、4〜6時間は『総損失時間』として表記を統一すると誤読を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§3.1 手順4-5 / §6.1 / §6.3",
+    "issue": "即時保護層として `fswatch` や launchd によるサイズ急減検知を推しているが、検知後の動作が「通知」のみで、誰がどこへ通知されるか、偽陽性時の扱い、ファイル書き込み中の一時縮退をどう除外するかが未定義。監視追加だけ先行するとノイズが増え、実運用で無効化される可能性が高い。",
+    "suggestion": "監視条件を『一定秒数継続した縮退のみ検��』『対象パスを SSoT に限定』『通知先を macOS 通知またはログへ統一』など具体化してください。さらに監視は補助であり、主防御は tracked 化と世代バックアップであることを明示し、優先順位を実装計画にも反映させるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§7.1 手順 7",
+    "issue": "フック動作確認で `git commit -m \"byte_floor_test (must fail)\" | grep` に依存しており、失敗判定がメッセージ文言ベースになっている。既存 pre-commit の別チェックで落ちた場合も区別できず、反対に commit 成功後のロールバックも `git log -1` の文言依存で安全性が低い。検証手順として再現性・保守性に欠ける。",
+    "suggestion": "終了コード中心の検証へ変更し、テスト専用の一時ブランチや `git commit --no-verify` 比較ではなく、`if git commit ...; then ... fi` で成否を判定してください。失敗理由の確認は stderr 保存後に対象メッセージを補助確認する形にし、成功時ロールバックは `HEAD^` 前提ではなくコミットハッシュを退避して戻す方が安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体 / §2 / §5 / §6",
+    "issue": "復元時間や検知閾値、容量見積もりに 30秒・1時間・90%減・200GB など複数の数値が登場するが、どれが実測でどれが運用上の目安かの区別が弱い。将来環境が変わった際に数値だけが独り歩きし、過剰な信頼や誤設定の原因になりうる。",
+    "suggestion": "魔法の数字は『実測』『ベンダー仕様』『推奨初期値』のラベルを付けて整理してください。たとえば閾値は設定値として一箇所へ集約し、将来変更可能であることを明記すると保守しやすくなります。比較表の時間・費用も算定根拠節への参照を付けると読みやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0361,
+    "input_tokens": 11604,
+    "output_tokens": 2158,
+    "model_id": "gpt-5.4"
+  }
+]

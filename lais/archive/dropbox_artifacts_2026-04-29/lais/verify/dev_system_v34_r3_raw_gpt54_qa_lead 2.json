@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§3.2, §2.6, §2.17, §2.20",
+    "issue": "STATUS遷移の定義が相互矛盾しています。§3.2ではREADY_FOR_DEPLOYはcmd-unit+cmd-e2e PASS時に付与とある一方、§2.6のcheck_test_passは「最低1種類の証跡がPASSであれば遷移」としており、さらにno_deploy:true時もREADY_FOR_DEPLOY経由か直接DONEかが混在しています。このままだと低品質な未完了ミッションがREADY_FOR_DEPLOYまたはDONEに誤遷移し、品質ゲートが実質無効化します。",
+    "suggestion": "READY_FOR_DEPLOY/DONE遷移条件をSSOTで一意に固定してください。推奨は「通常ミッション: cmd-unit PASSかつcmd-e2e PASSでREADY_FOR_DEPLOY、deploy成功後DONE」「no_deploy:true: cmd-unit PASSのみでDONE可、cmd-e2eはN/A明示時のみ免除」です。check_test_pass実装例もこの条件に合わせて修正し、『最低1種類PASSで遷移』文言は削除してください。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§3.4, §2.2 Step 10, §2.7, §9",
+    "issue": "3層テスト戦略とcmd-3区分の対応は整理されていますが、ユーザーが特に注目すべき『統合E2E（§9新設）』の定義が本パッケージ内で明示されていません。cmd-e2eがL1スモークにもL2影響範囲にも使われるため、どこまでが統合E2Eで、通常E2Eと何が違うか判定不能です。結果としてテスト作成者が粒度を誤り、L1/L2の穴や過剰重複を招きます。",
+    "suggestion": "§3.4または独立節で『統合E2E』を定義してください。例えば「統合E2E = 複数コンポーネント/画面/外部境界を横断して主要業務フローを検証する非本番E2E。cmd-e2eのうち@smoke以外でL2に該当」と明文化し、L1スモークE2E・L2統合E2E・L3フル回帰E2Eの関係を表で固定してください。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§3.4, §2.17, §2.15, §4.4 §C3.3-§C3.4",
+    "issue": "SKIPルールの一貫性が不足しています。cmd欄ではN/AとSKIPを許容するとしつつ、SKIP時の再試行条件・承認要否・STATUS遷移可否が定義されていません。mission_linterもN/A/SKIPを同列で通すため、実行不能なテストを恒久SKIPのままREADY_FOR_DEPLOYに進める余地があります。これはテストアンチパターンの『赤信号��無害化』を助長します。",
+    "suggestion": "N/AとSKIPを厳密に分離してください。N/Aは構造的に不要、SKIPは一時的未実施と定義し、SKIPには必須項目として理由・再試行予定・代替証跡・承認者を要求してください。さらにSSOTに『SKIPが1つでもある場合はREADY_FOR_DEPLOY不可。ただしADV/PO承認付きの例外のみ可』などのルールを追加し、mission_linterとcheck_test_passへ反映してください。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.4, §2.7, §4.4 §C3.4, §4.5 §C4.1",
+    "issue": "L1スモーク5項目の定義自体は改善されていますが、実装レベルの命名と証跡要件が一致していません。§3.4ではL1-4が『主機能2or外部API』、§2.7ではスクショ名がpayment/api_call、R1系の定義ではprimary2_or_apiでした。認証追加は正しいものの、4番目の必須項目が決済・外部API・第2主機能のどれを意味するかブレており、ミッション別に誤判定が起きます。",
+    "suggestion": "L1の5項目を『論理名』と『証跡名』で固定してください。例: L1-1 launch, L1-2 auth, L1-3 primary1, L1-4 primary2_or_external, L1-5 reload。決済はL1-4���具体例、外部APIもL1-4の具体例として統合し、realworld_proof_check・テンプレ・スクショ保存規約のキー名を同一に揃えてください。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.2 Step 6-7, §3.4, §4.5 §C4.1",
+    "issue": "deploy.shのStep 6『L1 スモーク』とStep 7『L2 影響範囲』がコマンド呼出しだけで定義されており、cmd-e2e/cmd-unit/cmd-realworldとの対応が実行時に結び付いていません。mission_templateに書かれた完了コマンドをdeploy.shが参照せず固定コマンドを実行するため、仕様上のcmd区分と実運用のゲートが乖離します。これはSSOT欠落の再発リスクです。",
+    "suggestion": "deploy.shがMISSIONブロックからcmd-unit/cmd-e2e/cmd-realworldを読み取り、未指定時のみ既定値にフォールバックする仕様へ寄せてください。少なくとも『mission記載コマンド = 証跡用』『deploy.sh固定コマンド = 実ゲート用』なのか、『deploy.shがmissionのcmdを実行する』のかをSSOTで一意化してください。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§2.6, §2.12, §3.3, §4.4 §C3.5",
+    "issue": "TDD証跡（G8）との整合はG15の責務限定で改善されていますが、check_test_passはafter-*.jsonのPASSのみを見ており、before-*.jsonによるRED確認を遷移条件に入れていません。このため『最初から通っていたテストを再実行しただけ』でもREADY_FOR_DEPLOY化でき、TDD証跡の実効性が弱いままです。証跡が存在するだけの形式主義になる恐れがあります。",
+    "suggestion": "READY_FOR_DEPLOY条件にG8のRED→GREEN整合を明示的に組み込んでください。具体的にはbefore-unit/e2eで失敗>0、after-unit/e2eで失敗=0の組を最低1つ、通常はrequiredコマンド分すべて満たすことをcheck_test_passで検証し、G15は命名同期のみに留める形に整理してください。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.18, §3.5, §5.2",
+    "issue": "Hフローのオプトアウト導入により現実性は上がっていますが、PD-110の『ADV/PO限定承認』との関係がやや曖昧です。hflow.enabled=false時に高リスク変更でも警告のみで進めるなら、PD-110は“有効時のみ適用”なのか、“原則適用だがローカル運用で免除可”なのかが読み手に��りづらく、統制レベルの理解が分かれます。",
+    "suggestion": "PD-110本文に適用条件を一文追加してください。例: 『PD-110はhflow.enabled=trueのリポジトリに強制適用される。false時は承認ゲートを運用上無効化するが、警告と理由記録を必須とする』。これでルールの強制度が明確になります。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§7.3, §0.6, §7.4",
+    "issue": "レビュアーに『この論点でCRITICALを出すべきでない』と強く指定している点は、severity inflation対策としては有効ですが、テスト戦略・品質ゲートの実装不備まで過度に抑制する危険があります。特にL1/L2/L3やSKIP運用のような再発しやすい設計穴が『既採用テーマの蒸し返し』として見逃される可能性があります。",
+    "suggestion": "棄却対象の書き方を『方針そのものへの異議は不可。ただし方針を満たす実装・整合性欠陥は通常通り指摘可』に統一してください。レビュー抑制ではなく再議論抑制であることを明示すると、品質ゲートの実効性を保ちつつノイズを減らせます。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  }
+]

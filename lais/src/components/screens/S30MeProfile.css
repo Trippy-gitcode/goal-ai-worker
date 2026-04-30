@@ -1,0 +1,519 @@
+/*
+ * S-30 ME Profile — design_spec_v1.md §4.10 準拠
+ * タブ画面（フルスクリーン）+ サブタブ 4 個
+ * LP-001/011/013/014/015 事前適用
+ */
+
+/* Container ------------------------------------------------------------- */
+.s30-me {
+  min-height: 100dvh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  /* BottomTabBar 82px + 余白 */
+  padding: 0 var(--space-lg) calc(82px + var(--space-lg));
+  display: flex;
+  flex-direction: column;
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .s30-me {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 82px + var(--space-lg));
+  }
+}
+
+.s30-me:focus:not(:focus-visible) { outline: none; }
+.s30-me:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* S30-1 ヒーロー ------------------------------------------------------- */
+.s30-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0 16px;
+}
+
+.s30-hero-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  background: var(--bg-surface);
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.s30-hero-name {
+  font-size: var(--font-size-lg); /* 20px */
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-ja);
+  color: var(--text-primary);
+  line-height: var(--line-height-ja-heading);
+  margin: var(--space-sm) 0 0;
+}
+
+.s30-hero-lv {
+  font-size: var(--font-size-xs); /* 11px */
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-label);
+  margin: var(--space-xs) 0 0;
+}
+
+.s30-hero-bar {
+  width: 120px;
+  height: 4px;
+  background: var(--accent-subtle);
+  border-radius: var(--radius-pill);
+  margin-top: var(--space-sm);
+  overflow: hidden;
+}
+
+.s30-hero-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-pill);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+/* S30-2 サブタブ ------------------------------------------------------- */
+.s30-subtab {
+  border-bottom: 1px solid var(--border);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.s30-subtab-list {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.s30-subtab-item {
+  flex: 1;
+  display: flex;
+}
+
+.s30-subtab-btn {
+  flex: 1;
+  min-height: var(--tap-target-min);
+  padding: 12px 0;
+  text-align: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  cursor: pointer;
+  position: relative;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+/*
+ * LP-015 候補: Active サブタブの下線は --accent で 9.49:1（on --bg-primary）
+ * 非テキストコントラスト要件を大幅にクリア
+ */
+.s30-subtab-btn-active {
+  color: var(--accent);
+  font-weight: var(--font-weight-semibold);
+}
+
+.s30-subtab-btn-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+}
+
+.s30-subtab-btn:focus:not(:focus-visible) { outline: none; }
+.s30-subtab-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* S30-3 基本情報 ------------------------------------------------------ */
+.s30-info-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.s30-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  min-height: var(--tap-target-min);
+}
+
+.s30-info-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-label);
+  margin: 0;
+}
+
+.s30-info-value {
+  margin: 0;
+  display: flex;
+}
+
+/*
+ * R2 a11y fix R-001: min-height 44×44 を明示し、タップ領域を確保
+ */
+.s30-info-button {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  cursor: pointer;
+  min-height: var(--tap-target-min);
+  min-width: var(--tap-target-min);
+  padding: 10px 12px;
+  margin: -10px -12px;
+  letter-spacing: var(--letter-spacing-ja);
+  border-radius: var(--radius-sm);
+  text-align: right;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.s30-info-button-empty {
+  color: var(--text-muted);
+}
+
+.s30-info-button:focus:not(:focus-visible) { outline: none; }
+.s30-info-button:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* S30-4 AI メモ ------------------------------------------------------- */
+.s30-ai-memo {
+  margin-top: var(--space-xl);
+}
+
+.s30-ai-memo-label,
+.s30-mbti-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-label);
+  margin: 0 0 var(--space-sm);
+}
+
+/*
+ * R2 spec fix R-004 (§4.10 S30-4 "max 800 文字"):
+ * CSS 側でも max-height + line-clamp による視覚クランプを行い、
+ * 万が一仕様超過データが流入しても破綻しないようにする
+ */
+.s30-ai-memo-body {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-ja-body);
+  letter-spacing: var(--letter-spacing-ja);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 30; /* 800 文字 / 1 行 ~26 文字 × 30 行 ≈ 780 文字 */
+  line-clamp: 30;
+  overflow: hidden;
+}
+
+.s30-ai-memo-updated {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin: var(--space-sm) 0 0;
+}
+
+/* S30-5 MBTI カード --------------------------------------------------- */
+.s30-mbti {
+  margin-top: var(--space-xl);
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.s30-mbti-message {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-ja-body);
+  margin: 0;
+}
+
+.s30-mbti-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--accent-subtle);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.s30-mbti-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-pill);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+/*
+ * R2 a11y fix R-002: min-height 44px を維持 + padding/inline-flex で確実化
+ */
+.s30-mbti-manual {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  text-decoration: underline;
+  cursor: pointer;
+  min-height: var(--tap-target-min);
+  min-width: var(--tap-target-min);
+  padding: 12px 0;
+  display: inline-flex;
+  align-items: center;
+  letter-spacing: var(--letter-spacing-ja);
+}
+
+.s30-mbti-manual:focus:not(:focus-visible) { outline: none; }
+.s30-mbti-manual:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* S30-6 リンク行 ------------------------------------------------------ */
+.s30-links {
+  margin-top: var(--space-xl);
+}
+
+.s30-link-row {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  cursor: pointer;
+  min-height: var(--tap-target-min);
+  text-align: left;
+}
+
+.s30-link-row:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
+.s30-link-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--text-secondary);
+}
+
+.s30-link-label svg {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.s30-link-row svg:last-child {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.s30-link-row:focus:not(:focus-visible) { outline: none; }
+.s30-link-row:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Placeholder (non-PROFILE subtabs) ---------------------------------- */
+.s30-placeholder {
+  padding: var(--space-2xl) 0;
+  text-align: center;
+}
+
+.s30-placeholder-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin: 0;
+  letter-spacing: var(--letter-spacing-ja);
+}
+
+/* LP-001: prefers-reduced-motion 縮退 -------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .s30-hero-bar-fill,
+  .s30-mbti-bar-fill,
+  .s30-subtab-btn,
+  .s30-info-button,
+  .s30-link-row {
+    transition-duration: 1ms !important;
+  }
+}
+
+/*
+ * Stage 7-4 prep (TASK-STAGE7-4-PREP-DEBT-CLEANUP-V1, 2026-04-29):
+ * a11y HIGH S4/E1 — 旧 native dialog API 撤廃に伴うインライン編集モーダル CSS.
+ * S13 の dialog パターンに準拠 (Rule of three にて将来共通化候補).
+ */
+.s30-edit-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal, 400);
+  background: var(--theme-color-modal-overlay, rgba(0, 0, 0, 0.45));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+}
+
+.s30-edit-modal {
+  width: 100%;
+  max-width: 360px;
+  background: var(--theme-color-bg-elevated, var(--bg-surface));
+  color: var(--theme-color-text, var(--text-primary));
+  border-radius: var(--theme-radius-lg, var(--radius-lg));
+  border: 1px solid var(--theme-color-border, var(--border));
+  box-shadow: var(--theme-shadow-lg, var(--shadow-lg));
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  font-family: var(--theme-font-base, var(--font-family-base));
+}
+
+.s30-edit-label {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--theme-font-letter-spacing-tight, var(--letter-spacing-ja));
+  color: var(--theme-color-text);
+  margin: 0;
+}
+
+.s30-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.s30-edit-input-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--theme-color-text-secondary, var(--text-secondary));
+  font-weight: var(--font-weight-semibold);
+}
+
+.s30-edit-input {
+  min-height: var(--tap-target-min, 44px);
+  padding: 10px 12px;
+  border: 1px solid var(--theme-color-border-strong, var(--border-strong));
+  border-radius: var(--theme-radius-sm, var(--radius-sm));
+  background: var(--theme-color-bg, var(--bg-primary));
+  color: var(--theme-color-text);
+  font-size: var(--font-size-base);
+  font-family: var(--theme-font-base, var(--font-family-base));
+  letter-spacing: var(--theme-font-letter-spacing-tight, var(--letter-spacing-ja));
+}
+
+.s30-edit-input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s30-edit-error {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-error-text, var(--text-error, #b00020));
+  background: var(--theme-color-error-bg, var(--bg-error, #fff0f0));
+  padding: 6px 8px;
+  border-radius: var(--theme-radius-sm, var(--radius-sm));
+}
+
+.s30-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.s30-edit-cancel,
+.s30-edit-submit {
+  min-height: var(--tap-target-min, 44px);
+  min-width: 80px;
+  padding: 10px var(--space-md);
+  border-radius: var(--theme-radius-md, var(--radius-md));
+  font-size: var(--font-size-sm);
+  font-family: var(--theme-font-base, var(--font-family-base));
+  cursor: pointer;
+  letter-spacing: var(--letter-spacing-ja);
+}
+
+.s30-edit-cancel {
+  background: transparent;
+  color: var(--theme-color-text);
+  border: 1px solid var(--theme-color-border-strong, var(--border-strong));
+}
+
+.s30-edit-submit {
+  background: var(--theme-color-accent);
+  color: var(--theme-color-button-text-inverse, var(--theme-color-text-inverse));
+  border: 1px solid var(--theme-color-accent);
+  font-weight: var(--font-weight-semibold);
+}
+
+.s30-edit-cancel:focus-visible,
+.s30-edit-submit:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/*
+ * Stage 7-4 prep — load-error バナー (themes 4 件すべて token 定義済).
+ */
+.s30-load-error {
+  padding: 8px 16px;
+  background: var(--theme-color-error-bg, var(--bg-error));
+  color: var(--theme-color-error-text, var(--text-error));
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s30-edit-modal,
+  .s30-edit-overlay {
+    animation: none !important;
+    transition-duration: 1ms !important;
+  }
+}

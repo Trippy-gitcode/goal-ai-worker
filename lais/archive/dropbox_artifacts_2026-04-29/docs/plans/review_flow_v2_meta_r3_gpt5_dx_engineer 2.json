@@ -1,0 +1,272 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "冒頭「目的」/ 各フローのモデル指定",
+    "issue": "冒頭で「3モデルでレビュー」とあるが、各フローで使用モデルはGPT-5 + Gemini 2.5 Proの2モデルのみになっている。",
+    "suggestion": "実運用に合わせて「2モデル」に統一するか、3モデル目（例: 社内モデル/Code/別ベンダ）の具体名・使用箇所・集計方法を明記する。ゴールデン/初回/主審ラウンドでのモデル数も表で統一記述する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "B. アプリ仕様レビュー / レビュー対象 × フローマッピング",
+    "issue": "B節でペルソナは9種と定義されているが、マッピング表では該当成果物のペルソナ数が8と記載されている。",
+    "suggestion": "マッピング表のペルソナ数を9に修正するか、除外する1ペルソナ（例: tech_writer）とその理由を明示する。併せて初回/ゴールデン本数（18本）との整合を再確認。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "D. 実装レビュー / レビュー対象 × フローマッピング",
+    "issue": "D節でペルソナは7種と定義されているが、マッピング表では実装コードのペルソナ数が6と記載されている。",
+    "suggestion": "マッピング表を7に修正するか、除外するペルソナと除外理由（主審ラウンドで十分等）を明記して整合させる。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改善3: ゴールデンレビュー / 各フローのフロー記述 / 共通ルール",
+    "issue": "改善3で「ゴールデンは1フェーズ最大2回」とある一方、各フローの図では「1回限り」と記述されている。",
+    "suggestion": "ゴールデンの回数を「最大2回」に統一し、2回目の実施条件（例: 1回目でCRITICAL>0、主審ラウンドで0達成後に再試行）とその後のPOエスカレーション手順を明文化する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "D. 実装レビュー「デザインレビュー（§19.10）」/ security_engineer（§20準拠）",
+    "issue": "本ドキュメント内に§19.10や§20の節番号が存在せず、参照先が不明瞭。",
+    "suggestion": "参照先の別文書名・版・URL/パス・対象節を明記するか、本書内に相当項目を併載する。節番号体系を本書にも導入し、相互参照できるよう目次と固定アンカーを付与する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "Filter 4: スコープ判定",
+    "issue": "「B-4のIN/OUT定義と照合」とあるが、当該定義の所在・内容が本書からは参照不能。",
+    "suggestion": "各ステージ（デザイン/仕様/実装/テスト/プロンプト）ごとのIN/OUT一覧表を本書に収録し、固定参照（番号・アンカー）でFilter 4から直接リンクする。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "Filter 3 / Filter 4 / 全体",
+    "issue": "運用上必須の用語・成果物が未定義（CUMULATIVE_CONTEXTの構造・管理者、Phase 4対応リストの形式/オーナー、ミッションの定義など）。",
+    "suggestion": "用語集を追加し、各成果物のスキーマ（例: JSON/YAML）、保管場所、更新責任者、ライフサイクル（作成/更新/参照タイミング）を定義する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体（RACI）",
+    "issue": "RACIが未定義のため、誰が責任を負い、誰が最終判断するか（特にエスカレーション時）が不明。",
+    "suggestion": "各フロー/各ラウンド（Pre-Review/初回/修正/ゴールデン/エスカレーション）ごとにRACIを定義。PO/ADV/Code/レビューモデル/開発者の役割と最終承認者を明示する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "共通ルール / Filter 5 / D. 実装レビュー",
+    "issue": "共通ルールで「ゴールデンで出たCRITICALは信頼度Aのみ修正必須」とあるが、Filter 5ではsecurity_engineerの単独指摘はCRITICAL維持としており両者が競合。security_engineerの信頼度がA未満の場合、重大脆弱性が修正必須から外れる恐れがある。",
+    "suggestion": "セキュリティ/データ破壊/課金誤り等のカテゴリーは信頼度・合意度に依らず「常にMust-Fix」に例外規定する。共通ルールに「Critical Categories Always Must-Fix」を新設して明文化する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "D. 実装レビュー（CRITICAL対象外/重複領域の扱い）",
+    "issue": "「WCAGはCRITICAL対象外（HIGH以下）」と記載がある一方、「重複領域（WCAG等）は実装レビューのCRITICAL対象に含む」と矛盾している。",
+    "suggestion": "実装ステージでのWCAGの扱いを一本化する。例: 仕様上Must（AA準拠）と定義済みの項目はCRITICAL、そうでない任意項目はHIGH以下、という基準表を提示する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "Filter 7: 修正の影響範囲",
+    "issue": "Codeが自動で「上位仕様の変更要否」を判定するのは難易度が高く、誤判定するとPhase Aの再発（機械修正で上位仕様破壊）を防ぎ切れない。",
+    "suggestion": "影響範囲判定にルールベースを追加（例: DSトークン/コンポーネントAPI/画面遷移キーに触れた場合は自動的にADV/PO確認を要求）。依存グラフ（仕様→設計→実装→テスト）で変更伝播を可視化し、該当ノード変更時は強制エスカレーションする。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "改善4: 信頼度スコアリング",
+    "issue": "修正採用率・false positive率の算出方法（分母定義、期間、重み付け、同一指摘のまとめ方）、初期値（コールドスタート）、更新式（移動平均/指数平滑）が未定義。",
+    "suggestion": "信頼度算出仕様を定義（例: 直近Nフェーズの移動加重平均、分母=当該ペルソナ×モデルの有効指摘数、FP=Filter1-3棄却/全指摘等）。初期値と最小サンプル数、信頼区間による昇降格制御も明記する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "改善4: 信頼度スコアリング / 共通ルール",
+    "issue": "「信頼度BのCRITICAL→HIGH扱い」で、セキュリティ以外でも重大障害（データ破壊/決済誤り/仕様重大矛盾）が任意対応化されるリスクがある。",
+    "suggestion": "カテゴリー基準でMust-Fixを定義（セキュリティ・データ整合・課金・本番障害は常にCRITICAL維持）。それ以外のみ信頼度で格下げ可能とする。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "Filter 5: 再現性（合意度）",
+    "issue": "「同一指摘」の同定基準（正規化キー、位置情報、規則ID、しきい値）が未定義。信頼度を合意度に反映する重み付けも未定義。",
+    "suggestion": "同一指摘のクラスタリング仕様を定義（location path + ルールカテゴリ + 正規化メッセージのハッシュ）。合意度は重み付き投票（重み=信頼度A:1.0/B+:0.7/B:0.5）で算出し、閾値（例: 2.0票以上=高確度）を明記する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "改善2: diffレビュー / 共通ルール",
+    "issue": "修正ラウンドでの「全文再スキャン禁止」は、広範囲の影響がある変更でデグレを見落とす恐れがある。",
+    "suggestion": "影響範囲が閾値（変更ファイル数/LOC/依存ノード数）を超える場合は例外的に部分フルスキャンを許可する運用ガードを追加する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体 / 各フロー",
+    "issue": "Severity（CRITICAL/HIGH/MEDIUM/LOW）の定義が実装レビューにのみ詳細化され、他フロー（デザイン/仕様/技術文書/テスト/プロ���プト）における水準が未定義。",
+    "suggestion": "各フローごとにSeverity基準表（判定軸・代表例・対象外）を定義し、Filter 6のレベルと直結させる。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "各フロー「主審選定理由」",
+    "issue": "主審選定の根拠が定性的で、再現性（どの指標で80%カバー等）が不明確。",
+    "suggestion": "各フローで主審候補の過去実績（真CRITICAL検出率、FP率、修正採用率）を数値で提示し、四半期ごとに見直す運用を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "背景と課題 / 改善4",
+    "issue": "モデル間基準差の対処が信頼度スコアのみで、体系的な較正（ゴールドセット/アジャッジメント）が不足。",
+    "suggestion": "定期的にゴールド基準（既知の欠陥セット）で各モデル×ペルソナを較正し、プロンプト/温度/検出閾値をチューニングするステップを追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "背景と課題 / 全体",
+    "issue": "用語の不統一・未定義（CRIT, WAIVE, DOWNGRADE, STANDなど）。新規参画者が意味を取り違える恐れがある。",
+    "suggestion": "用語集を作成し、各用語の定義・使用例・対義語を明記。文書内では略称の初出時に正式名称を併記する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "Filter 5: 再現性（合意度）",
+    "issue": "「3+モデル/ペルソナ」の閾値が、主審ラウンド（最大4本）では達成しづらく、実質的に二者合意と単独の二値運用に寄る可能性がある。",
+    "suggestion": "合意度を絶対人数ではなく重み付きスコアで評価し、主審ラウンド専用の閾値（例: 1.5以上=中確度、2.5以上=高確度）を別途定義する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "改善2: diffレビュー / D. 入力（レビュー対象）",
+    "issue": "diffレビューの入力仕様（修正前/後・影響範囲・確認依頼）の詳細スキーマがフロー間で統一されていない。",
+    "suggestion": "全フロー共通のdiff入力スキーマ（JSON）を定義し、必須/任意フィー���ド、例（サンプル）、バリデーションルールを添付する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "Code Pre-Reviewの改善",
+    "issue": "Pre-Reviewのログ化・7段階フィルター適用・修正根拠のトレーサビリティが未定義で、外部APIレビューとの整合検証が難しい。",
+    "suggestion": "Pre-Reviewでも7フィルターに準拠した判定ログ（判定結果・根拠・参照箇所）を自動記録し、外部レビューとの差分レポートを生成する機能を追加する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "全体",
+    "issue": "節番号・固定アンカーが無く、他文書/本書内からの精確な参照がしづらい。新規参画者が迷いやすい。",
+    "suggestion": "全見出しに番号を付し、目次/固定アンカーを追加。各フロー・各フィルターに一意キー（例: F1〜F7, Flow-A〜G）を付与して参照性を向上させる。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "Filter 2: 仕様照合",
+    "issue": "「最新版か？」の判定方法（��管理、セクションID、コミットハッシュの紐づけ）が未定義で、誤った旧版参照を機械的に検知しづらい。",
+    "suggestion": "仕様書に版ID/セクションID/コミットハッシュを埋め込み、レビュー時に引用元メタデータを必須化。Filter 2で自動照合できる仕組みを定義する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "レビュー対象 × フロー マッピング",
+    "issue": "「主審×2モデル=4本」の例示はあるが、実施順序（並列/直列）、タイムボックス、再試行上限が未定義でスケジュールとコスト見積もりが困難。",
+    "suggestion": "各ラウンドの実行順序、SLA（応答待ち時間）、リトライ/再実行条件と上限、費用見積もりの前提（トークン量/画像点数）を追記する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-026",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "Filter 5〜7",
+    "issue": "Filter 5（合意度）→6（影響度）→7（影響範囲）の判定結果が後続のseverity/エスカレーションにどう最終反映されるかの決定木が文章と表で分散し読み取りにくい。",
+    "suggestion": "��ィルター適用の決定木（フローチャート）を1枚に統合し、各分岐の出力（最終severity/処置: 修正・棄却・POエスカレーション）を明示する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "A〜G 各フロー",
+    "issue": "新規開発者向けの「最初の一歩」（どの成果物をどの順でどこに置けばレビューが走るか）が暗黙的で、着手に時間がかかる可能性がある。",
+    "suggestion": "クイックスタート手順（成果物配置→Pre-Review実行→外部レビュー起動→差分提出）を5〜7手順で記した章を追加し、サンプルコマンド/入出力例を付ける。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

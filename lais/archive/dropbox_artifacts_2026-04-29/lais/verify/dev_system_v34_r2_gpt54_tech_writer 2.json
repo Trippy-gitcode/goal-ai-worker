@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.8, §4.9.1, dev_system_spec.md §4.1 / §20",
+    "issue": "G10-G13 の定義が現行仕様と衝突しています。現行 dev_system_spec.md では G10 は『シークレットスキャン』ですが、§4.8 では G10 を『仕様書ファースト』に再定義しています。さらに G11-G13 を追加しつつ、セキュリティスキャンの再配置先が示されていません。既存ゲート番号の意味を上書きすると、development_rules.md・canopy・sub_infrastructure との相互参照が破損し、読者が G10 を異なる意味で解釈します。",
+    "suggestion": "既存 G1-G10 の意味は維持し、追加分は G11-G13 のみを新設してください。§4.8 の表を『G10=シークレットスキャン』のまま再構成し、G11-G13 に新規ゲートを割り当て、§4.9.1 で development_rules.md 側も同じ番号体系に揃えてください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§0.2, §4.1.2, §4.1.6, §6.2",
+    "issue": "PD-104 の原文では ENG/ADV の必須Readは『§C1-C6 全文』ですが、R2差分では『§C0-C6 ���文』に拡張されています。§C0 はクラスターF対応で新設された要約ですが、PO承認済み方針の確定範囲を超えており、『PD-104 に基づく確定仕様』という説明と一致していません。確定事項とR2差分の境界が曖昧です。",
+    "suggestion": "PD-104 の引用箇所では原文どおり §C1-C6 と記載し、§C0 は『R2で追加する要約補助。PD-104 の拡張だが方針不変更』と明示してください。あるいは PD-104 の適用後補足として §C0 を別枠定義し、必須Readか補助Readかを分離してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§0.1",
+    "issue": "『新たに CRITICAL を出すことは原則抑制』『R1で出ていない論点が R2 初出で CRITICAL 化することは severity inflation 扱い』は、後段の『R1未指摘の新発見』や『R1で見落とされた FEASIBILITY CRITICAL は可』と緊張関係があります。読者によっては“R2では新規CRITICALを実質禁止”と誤解します。",
+    "suggestion": "『R2で新規CRITICALを禁止するものではない。R1既知論点の再評価のみを理由とする格上げを禁止する』と書き換え、許容条件を1文で明確化���てください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.4",
+    "issue": "Filter 1-7 の説明が sub_review_flow.md §2 と一致していません。R2パッケージでは Filter 1 を『既存仕様との照合』、Filter 2 を『PO決定事項』などに再定義していますが、原仕様の Filter 1-7 は『事実確認 / 仕様照合 / 既決定チェック / スコープ判定 / 再現性 / 影響度 / 修正影響範囲』です。番号付き参照を維持したまま中身を変えるのは参照破損です。",
+    "suggestion": "§5.4 は sub_review_flow §2 の原定義をそのまま引用し、R2向け補足は『R2適用上の読み替え』として別箇条書きに分離してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.1.7, §3.1.1",
+    "issue": "PD-105 では『22フロー Step 0 は章単位集約（全フロー個別列挙廃止）』とありますが、§4.1.7 では『全22フローの Step 0 を以下の文言に統一』『該当§C明示リスト』を各フローに持たせるように読めます。これは個別列挙廃止と完全には一致しません。",
+    "suggestion": "Step 0 の記���単位を『各フロー』ではなく『共通前置き章』に集約するのか、『各フローに1行だけ置く』のかを明確に決めてください。PD-105 に合わせるなら、22フロー個別記載ではなく共通章参照方式と明記してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.1.6, §4.8",
+    "issue": "§C0-C6 を導入していますが、本パッケージ内で §C3-§C6 の正式名称と境界が十分定義されていません。§C0要約はありますが、各§Cが何を正本とし、既存の『鉄則』『共通規範』『フロー』のどれに当たるかが不明です。tech writer 観点では §C1-C6 を中心に据える改訂なのに定義が足りません。",
+    "suggestion": "少なくとも §4.1 か §4.8 の前で『§C0-C6 一覧表（名称 / スコープ / 正本セクション / 代表ルール）』を追加してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.1.4, sub_adv_protocol.md §1",
+    "issue": "§4.1.4 では『templates/** はADVが書いて良い』としていますが、現行 sub_adv_protocol.md の書き込みホワイトリストには templates が存在せず、しかも『スクリプト（scripts/, canopy/）禁止』のような明示列挙方式です。§4.9.3 では sub_adv_protocol 更新予定に触れていますが、現時点の差分記述だけでは読者にどちらが正か伝わりません。",
+    "suggestion": "§4.9.3 に具体的な置換後ホワイトリスト表を記載し、templates/** を明示追加、旧表は廃止されると書いてください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§4.1.4",
+    "issue": "『scripts/*実装*.js』という用語定義は曖昧です。どのファイル名が“実装”に当たるか機械判定できず、scripts 配下全体を指すのか一部のみを指すのか不明です。",
+    "suggestion": "ワイルドカード名ではなく『scripts/** のうち実行スクリプト本体』のような意味定義か、具体パス列挙に置き換えてください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.2.5",
+    "issue": "§4.2.5 の表では L3 =『cmd-unit + cmd-e2e 全体』としていますが、§2.8 の対応方針では『L3 = cmd-unit 全体（週次フル）』となっています。同一パッケージ内で L3 定義が二重化しています。",
+    "suggestion": "L1/L2/L3 と cmd-* の対応は1箇所で確定し、他箇所は参照のみにしてください。§2.8 と §4.2.5 のどちらかに統一してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.2.1",
+    "issue": "Step8 のポーリングは『curl 結果に COMMIT_HASH が返る』ことを前提にしていますが、現行仕様・現行 deploy.sh には HTML/HTTP応答へコミットハッシュを露出する仕組みが定義されていません。version 文字列から commit hash へ判定キーを変えているのに、その供給元定義が欠落しています。",
+    "suggestion": "app_config.yaml か version_sync.sh かレスポンス仕様のどこかで『コミットハッシュをどこに埋め込むか』を明記するか、判定対象を既存の version 表示に戻してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§3.1.4, §4.3.4",
+    "issue": "mission_risk_classifier.sh のサンプル実装は `source scripts/lib/risk_patterns.sh` と Bash 配列 `RISK_PATHS[@]` を使っています。クラスターAで『bash 3.2 / POSIX互換』を強く打ち��していますが、ここでは POSIX ではなく Bash 配列依存の設計です。bash3.2では動くものの、『POSIX互換』という表現とズレます。",
+    "suggestion": "この系統は『bash 3.2互換』に表現を統一するか、真に POSIX にしたいなら改行区切り文字列へ変更してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.2.2, §4.6.1",
+    "issue": "PD-106 は Hフローを dev-system の差分候補として扱っていますが、レビューフロー定義の現行 sub_review_flow.md には A〜G しかなく、H は存在しません。本文では『改訂案⑥ sub_review_flow §4.H』と書かれていますが、参照先の基準文書には未定義です。読者は Hフローが新設済みなのか提案段階なのか判断できません。",
+    "suggestion": "『§4.H は改訂案⑥で新設予定の仮番号』と明示し、現行 sub_review_flow の A〜G との関係を説明してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§0.2, §6.2",
+    "issue": "PO承認番号の表記が PD-104/105/106 で統一されている一方、既存決定は PD-001 等で、番号体系の採番ルールが説明されていません。既存連番の続きなのか別カテゴリなのか不明です。",
+    "suggestion": "PD番号の採番ルールを1行追記してください。例: 『PD-100番台はdev-system v3.4改訂専用決定』。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§2.11, §4.1, 全体",
+    "issue": "用語統一ルールで『鉄則は §3.6 のみで使用』としていますが、本R2パッケージ自身が『鉄則呼称統合』『CLAUDE.md 鉄則セクション削除』など『鉄則』を広く使っています。移行中であることは理解できるものの、文書内方針と本文実例がまだ揃っていません。",
+    "suggestion": "『本パッケージでは移行説明のため旧用語“鉄則”を残す。確定版では §3.6 のみ』という注記を追加してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.8",
+    "issue": "ゲート一覧の『参照§C』列は有用ですが、G1 が §C1、G5 が §C5 など、なぜその §C に属するのかの基準が示されていません。分類根拠が読者に自明ではありません。",
+    "suggestion": "��の前に『参照§C = 主たる遵守対象の共通規範』など定義を1文追加してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.9.2",
+    "issue": "『templates/mission_template_v2.md → v3 昇格』とありますが、現行 sub_infrastructure.md では templates/mission_template_v3.md が既に存在します。v2からv3への昇格という説明はベースラインと合っていません。",
+    "suggestion": "現行ファイルに合わせて『mission_template_v3.md を改訂』に修正し、旧v2参照を削除してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.7.2, CLAUDE.md",
+    "issue": "『CLAUDE.md 鉄則セクション削除 + §C 参照へ移管』は dev-system 観点では整合的ですが、現行 CLAUDE.md はプロジェクト固有運用ルールと dev-system 共通ルールが混在しています。差分では『共通知見2項目を削除』としか書かれておらず、どこまで削除対象か不明で、過剰削除の余地があります。",
+    "suggestion": "削除対象を『dev-system と重複する共通ルールのみ』と明記し、残置対象例を2-3個示してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.3.4, §4.3.5, §4.3.6",
+    "issue": "risk_patterns.sh を共通ライブラリ化するとしていますが、クラスターAの macOS/Bash3.2 対応対象にこの新設ライブラリが含まれるかが明示されていません。新設スクリプト群の対象一覧と実際の新設物の範囲がずれています。",
+    "suggestion": "クラスターAの対象に `scripts/lib/risk_patterns.sh` を含めるか、『単純定数定義のみで互換性懸念なし』と補記してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  }
+]

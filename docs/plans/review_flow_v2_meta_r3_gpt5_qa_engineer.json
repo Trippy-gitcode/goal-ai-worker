@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "冒頭: 目的 / 各フローのモデル指定",
+    "issue": "目的に「3モデルでレビュー」とある一方、各フローではGPT-5 + Geminiの2モデルのみを前提としている。",
+    "suggestion": "使用モデル数を統一する。3モデルにする場合は第3モデルを明記し、Filter 5の合意度閾値も再調整（例: 2/3・3/3）する。2モデルに固定するなら冒頭の記述を修正。モデル故障時のフォールバックも定義する。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改善3: ゴールデンレビュー / A, D 各フローの記述",
+    "issue": "改善3では「1フェーズ最大2回」とする一方、AやDのフロー図では「ゴールデン1回限り」と記載がある。",
+    "suggestion": "全フローでゴールデン回数のルールを統一し、図表も更新する。推奨: 原則1回、必要時に最大2回まで（2回目でCRITICAL残存ならPOエスカレーション）と明記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "D. 実装レビュー / レビュー対象×フローマッピング表",
+    "issue": "Dの本文ではペルソナ7種だが、マッピング表では6と記載され不一致。",
+    "suggestion": "正数に統一（7を推奨）し、表・説明・集計ロジック（本数計算）を全て同期させる。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "B. アプリ仕様レビュー / レビュー対象×フローマッピング表",
+    "issue": "Bの本文ではペルソナ9種だが、マッピング表では8と記載され不一致。",
+    "suggestion": "実数に統一し（9推奨）、初回/ゴールデン本数計算も修正する。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "共通ルール / 各フローの完了条件",
+    "issue": "各フロー図では「ゴールデン後CRITICAL 0で確定」とする一方、共通ルールで「ゴールデンで出たCRITICALは信頼度Aのもののみ修正必須」とあり、CRITICAL 0の解釈が矛盾する。",
+    "suggestion": "完了条件を『必須修正対象CRITICALが0』に定義し直す。必須対象=信頼度AかつFilter 6で致命的/重大、例外（セキュリテ��等）を明記。非必須CRITICALはWAIVEとして台帳管理し、承認主体と記録要件を規定する。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "改善4: 信頼度スコアリング / Filter 5 / D. CRITICAL定義",
+    "issue": "『信頼度BのCRITICAL → HIGH扱い』が、Filter 5のセキュリティ例外（単独でもCRITICAL維持）や実装ステージのCRITICAL定義と衝突し、重大脆弱性がダウングレードされる恐れがある。",
+    "suggestion": "優先順位を明示: 影響度カテゴリ（セキュリティ/データ破壊/課金）に関するCRITICALは信頼度に関係なくCRITICAL維持。信頼度は対応優先度や二次チェック要否にのみ影響させ、severityそのものは変更しない。ルール適用の優先序も定義する（影響度>スコープ>信頼度）。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体（A〜G各フロー）",
+    "issue": "実装ステージ以外（デザイン/仕様/技術文書/テスト/プロンプト）でのCRITICAL/HIGH/MEDIUM/LOWの統一的定義が欠落し、品質ゲートの一貫性が担保されない。",
+    "suggestion": "ステージ横���のseverity基準を制定する（例: 利害影響×広がり×修正難易度）。各ステージに例示を付与（デザイン: 仕様矛盾=CRITICAL、UI微差=MEDIUMなど）。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "共通ルール / フィルター / エスカレーション記述",
+    "issue": "RACI（Responsible/Accountable/Consulted/Informed）が未定義。誰がWAIVE承認/信頼度更新/POエスカレーション判断を行うか不明確。",
+    "suggestion": "RACIマトリクスを追加。例: Filter 1-4棄却はCode=Responsible/ADV=Accountable、Filter 7での上位仕様必要時はPO=Accountable、WAIVE承認はADV/PO、信頼度更新はQA Lead=Accountable、関係者へは自動通知（Informed）など。SLAとエビデンス要件も明記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "改善2: diffレビュー / 共通ルール",
+    "issue": "修正ラウンドで全文再スキャンを禁止すると、申告外・想定外の副作用が主審レビューから漏れ、ゴールデンでのみ顕在化して再ラウンド化しやすい。",
+    "suggestion": "リスクベース再検査を導入。変更影響分析に基づく『影響高』領域の周辺スモーク/回帰チェック、低コスト静的チェックの全体走査、Nラウンドに1度の軽量フルスキャン、変更種別ガードレール（DS/ナビゲーション/認可周り変更時は広域検査必須）を定義。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "Filter 1: 事実確認",
+    "issue": "grepや静的HTML照合では動的DOM/スタイル（JS注入・SSR後差分・CSS継承）が検出できず、妥当な指摘を誤ってfalse positive扱いで棄却する恐れがある。",
+    "suggestion": "レンダリング後のDOMスナップショットとcomputed style抽出（Playwright等）を一次資料にし、静的/動的の二系統で事実確認する。画像指摘はピクセル差分/色情報抽出を補助証拠として扱う。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "Filter 5: 再現性（合意度）",
+    "issue": "『同一指摘』の定義・重複集約ルールが未定義。モデル違い/ペルソナ違い/同一ペルソナ×別モデルをどうカウントするか不明確で、合意度が恣意的になりうる。",
+    "suggestion": "同一性判定を『位置（ファイル/行/要素セレクタ）+規則カテゴリ』で正規化し、クラスタリングして一意化してから合意度集計する。ペルソナ重み（主審>非主審）とモデル重みも明記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "改善4: 信頼度スコアリング",
+    "issue": "修正採用率とfalse positive率のみで信頼度を更新するとGoodhart化やサバイバーシップバイアスが生じ、false negative（見逃し）を悪化させる恐れがある。",
+    "suggestion": "ゴールデン真値セットで精度/再現率（Precision/Recall）を計測し、信頼区間（Wilson）付きでランク更新。ドメイン別に分母を確保（min n）、重みはseverity加重。ランク上下はバッチ更新・冷却期間を設け、極端な上下動を防ぐ。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "D. 実装レビュー（入力/Playwrightテスト） / F. テスト仕様レビュー",
+    "issue": "テスト分離に関する明確な品質ゲート（データ初期化、テナント分離、乱数固定、時刻固定、ネットワーク依存排除、並列実行安全性）が未定義。",
+    "suggestion": "E2E/統合テストの分離基準を品質ゲートとして追加。例: 各テストでDBシード/トランザクションロールバック、固定クロック/ID、外部依存をモック、並列実行OKをCIで検証、フレーク率閾値と自動隔離/再試行ポリシーを定義。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改善2: diffレビュー / Filter 7: 修正の影響範囲",
+    "issue": "影響範囲の特定が開発者申告と主観判断に依存しており、影響範囲テストの信頼性が担保されない。",
+    "suggestion": "変更影響分析（CIA）を導入。依存グラフ（import/API/DB/ルーティング）から影響ファイル/画面/テストを自動抽出し、diffレビュー対象と回帰テスト選択を自動補完。影響マニフェストの提出を必須化し、CIで検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "Code Pre-Reviewの改善",
+    "issue": "同一モデル（Code）が自己レビューと自己修正を繰り返すため、確証バイアスがかかりやすく、テスト分離の観点で職務分離が不足。",
+    "suggestion": "Pre-Reviewに異種モデル/逆張りプロンプトを併用し、少なくとも主審の一方は外部モデルでクロスチェック。ランダム化（温度/シード）とレビュー-修正の交差承認を導入する。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "D. 実装レビュー『CRITICAL対象外』/『デザインレビューとの棲み分け』",
+    "issue": "実装ステージではWCAGをHIGH以下とする一方、『デザインレビューでOUT判定されたWCAGは実装でCRITICAL対象』と記載し矛盾。",
+    "suggestion": "WCAGの扱いを統一。例: リーガル/契約要件として明示されたWCAG A/AAは実装でCRITICAL、それ以外はHIGH。デザイン段階でOUTとなった必須項目は実装でCRITICALに昇格する旨を基準表で明文化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "Filter 7: 修正の影響範囲",
+    "issue": "上位仕様破壊を防ぐ仕組みが判断ロジックのみで、機械修正がDS/UXを暗黙変更するパスを実務的に塞げていない。",
+    "suggestion": "保護対象（DSトークン/ナビゲーション/権限/課金）を『保護領域』として宣言し、CIで直接編集を���ロック。該当差分検出時は自動エスカレーション。DSスナップショット/トークン整合性テストを追加し、逸脱時にFAIL。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "改善4: 信頼度スコアリング（更新条件）",
+    "issue": "信頼度更新の最小サンプル、期間、重み（移動平均/減衰）、ドメイン分割、コールドスタートの扱いが未定義。",
+    "suggestion": "minサンプル（例: 20指摘/ステージ）と移動窓（例: 4フェーズ）を定義。ドメイン（セキュリティ/UX/パフォーマンス等）別に個別ランクを持ち、初期はB+固定。統計的有意差が出た場合のみランク変動。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "各フロー 主審選定理由",
+    "issue": "主審2名選定の妥当性は定性的実績のみで、カバレッジ欠落リスク（例: 実装レビューのパフォーマンス/エッジケース）が数値的に管理されていない。",
+    "suggestion": "主審選定をKPI化（主審がカバーしたCRITICAL比率、未検出の後発CRITICAL率）し、一定期間ごとにローテーション/第3のスポット主審を導入。高リスク領域（認可/課金/ナビゲーション変更）では一時的に主審を増員するルールを追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "フィルター適用フロー",
+    "issue": "フィルター適用結果の監査性（誰がいつ何を根拠に棄却/格下げ/エスカレーションしたか）の記録要件が弱い（棄却理由の記録のみ言及）。",
+    "suggestion": "全フィルター判定に共通の監査ログスキーマを定義（フィルターID、入力証拠、判定、根拠リンク、承認者、タイムスタンプ）。WAIVE台帳と信頼度更新の根拠紐付け、ゴールデン時の再評価結果のトレーサビリティを必須化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

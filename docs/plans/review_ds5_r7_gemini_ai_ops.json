@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4 vs §6, §18",
+    "issue": "§19ではUX仕様書のファイル名を `ux_v1.md` と定義しているが、§6（ホットフィックスパスの自律実行条件）や§18（依存関係マップ）では `ux_redesign_v*.md` とハードコードされている。このまま実装すると、ENGがホットフィックスの自律実行可否を判定する際に対象ファイルを見つけられず判定を誤る、または連鎖更新マップが機能しなくなる。",
+    "suggestion": "§19のファイル名定義を `ux_redesign_v1.md` に統一するか、既存の§6および§18の参照を `ux_v*.md` に修正して命名規則を���全に一致させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6 vs §18",
+    "issue": "§19.6の依存チェーン図において、`e2e_fullflow_test.md` が `project_v1.md` の直下に配置されているが、§18の連鎖更新マップでは `design_spec_v*.md`, `ux_redesign_v*.md`, `design_system.md` のすべてから `e2e_fullflow_test.md` への更新矢印が出ている。テスト仕様書は全仕様の最下流で網羅的に依存すべきであり、§19.6のツリー構造は実態と矛盾している。",
+    "suggestion": "§19.6のツリー構造を修正し、`e2e_fullflow_test.md` が `ux_v1.md`, `design_spec_v1.md`, `reference_v1.md` 等の最下流に位置するように再定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "`ux_v1.md` や `design_system.md` のベンチマーク要件において、「競合5社の画面構成/遷移パターン/アニメーション」の調査が求められているが、ADV（Claude）はシミュレーターや実機での操作手段を持たない（§9.3参照）。AI単独では視覚的・動的なUI/UXベンチマークを実行不可能であり、プロセスが停���（BLOCKED）する。",
+    "suggestion": "§19.7に「UI/UXの視覚的・動的ベンチマーク（画面構成、アニメーション等）は、POがスクリーンショットや動画、またはテキストでの構造説明をADVに提供することを前提とする」という人間⇔AIの責務分離ルールを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md",
+    "issue": "AI Ops設計の観点から、アプリ内に組み込まれるAIエージェントの暴走防止・不適切出力制御の定義場所が明確でない。§3「AI活用設計」に「ルーティング/プロンプト設計/分類ロジック」はあるが、安全性・制約事項のセクションが不足している。",
+    "suggestion": "`reference_v1.md` の §3 に「AIガードレール・暴走防止策（プロンプトインジェクション対策、NGワード、出力フィルタ）」を必須セクションとして追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存」メタデータについて、`system_map.md` のように複数ファイル（`ux_v1.md` と `reference_v1.md` 等）��依存する場合の記述フォーマットが定義されていない。将来的な機械可検証（スクリプトでのパース）を考慮すると曖昧。",
+    "suggestion": "依存メタデータのフォーマットを `依存: [docs/ux_v1.md v1.0, docs/reference_v1.md v1.2]` のようにJSON配列ライク、または明確なカンマ区切りリストとして定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§19.6",
+    "issue": "上流ファイルが更新されバージョンが上がった場合（例：v1.0 → v1.1）、下流ファイルのヘッダーにある「依存」のバージョン番号を同期して更新する義務があるのか、それとも古いバージョンに依存したままとみなすのか（追従漏れ検知に使うのか）の運用ルールが不明確。",
+    "suggestion": "§19.6に「上流ファイル更新時、連鎖更新を行った下流ファイルはヘッダーの依存バージョンを最新に更新する。仕様変更の影響を受けない場合でも依存バージョンのみ同期する」等の運用ルールを追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§19.6",
+    "issue": "§19.1で必須ファイルとされている `app_config.yaml` と `tests/test_map.yaml` が、§19.6の依存チェーン図に含まれていない。これらがどの仕様書の変更に追従すべきかが視覚的に不明。",
+    "suggestion": "依存チェーン図に `app_config.yaml`（`project_v1.md` や `reference_v1.md` に依存）および `test_map.yaml`（`system_map.md` や `e2e_fullflow_test.md` に依存）を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "依存チェーン図において、`e2e_fullflow_test.md` が `project_v1.md` のみに依存しており、`ux_v1.md` や `reference_v1.md` などのHOW（詳細仕様）の下流に配置されていない。これは§18の連鎖更新ルール（全仕様書からテストへの更新連鎖）と完全に矛盾しており、ADVが仕様変更時にテスト仕様書の更新を漏らす確実な原因となる。",
+    "suggestion": "依存チェーン図を修正し、`e2e_fullflow_test.md` をすべてのHOW仕様書（ux, design, reference, system_map）から依存される最下流の検証レイヤーとして配置する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1",
+    "issue": "必須ファイル一覧のファイル名（例: `ux_v1.md`）が、§18で定義されているファイル名（`ux_redesign_v*.md`）と一致していない。AIが連鎖更新対象のファイルを検索・特定する際にエラーや更新漏れが発生するリスクがある。",
+    "suggestion": "§19.1のファイル名を§18と統一する（例: `ux_redesign_v1.md`）、または§18側の記述を新体系に合わせて修正し、プロジェクト全体でファイル名規則を単一化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md",
+    "issue": "AI Ops設計において必須となる、AIが誤分類や不適切な出力をした場合の「フォールバックロジック」「人間の介入（Human-in-the-loop）ポイント」「暴走時の遮断メカニズム」を定義するセクションが存在しない。",
+    "suggestion": "reference_v1.mdの「§3 AI活用設計」に、フォールバック手順、リカバリパス、および人間の承認ゲート・介入ポイントの定義を必須項目として追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4 e2e_fullflow_test.md",
+    "issue": "AIの非決定論的出力に対するテスト（プロンプトインジェクション耐性、ハルシネーション対策、禁止語句フィルタリング等）を定義するセクションがテスト仕様書テンプレートに欠落している。",
+    "suggestion": "e2e_fullflow_test.mdの必須セクションに「§N+3 AIガードレール・非決定論的出力テスト」を追加し、AI特有の異常系テストを義務付ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の `依存: {上流ファイルのパス + バージョン}` において、上流のバージョンを手動で同期し続ける運用は更新漏れを招く。また、複数ファイルへの依存を記述するフォーマットが不明確。",
+    "suggestion": "バージョンのハードコードを廃止して `依存: {上流ファイルのパス}` のカンマ区切りリストにするか、バージョン不一致を自動検知するスクリプト（canopy等）の導入を明記する。複数ファイルの指定方法も例示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力フォーマットに特定のプロジェクト名「Lais」がハードコードされており、他アプリでの再利用時に混乱を招く。また、AIがApp Storeレビューを自律取得できない場合のデータ提供フローが未定義。",
+    "suggestion": "「Lais方針」を「{アプリ名}の対応方針」に変数化する。また、外部データ（ストアレビュー等）の取得はPOがデータを提供する前提である旨、またはADVが取得可能な範囲で実施する旨を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

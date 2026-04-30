@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "冒頭/§1.2/§1.3",
+    "issue": "冒頭で「モックアップHTMLを唯一の正」としつつ、§1.2および§1.3では本書がモックアップより優先と明記しており、情報源の優先順位が矛盾している。",
+    "suggestion": "「モックアップHTMLは視覚参考、最終判断は本書（画面別仕様）」に統一する文言へ修正し、優先順位リスト（project > ux > design_system > 本書 > mockups）だけを唯一の判断基準として明文化する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.2.4, §3 全般",
+    "issue": "ブランド原則で「4テーマ＋アバター」による自己表現を掲げているが、Phase A 内でテーマ間の“性格差”が色以外のトークン（角丸/モーション/アイコン線幅/エレベーションなど）に落ちていない。",
+    "suggestion": "各テーマのシグネチャ（例: Night Sky=静/直線、Dawn=しなやか/やわらか角、Harajuku Light/ Dark=ポップ/躍動）を定義し、半径・線幅・エレベーション濃度・モーション係数などのトークン上書き表を design_system.md に追補。§3 の各トークンにテーマ別オーバーライド欄を設ける。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.2.1",
+    "issue": "「自然・文化モチーフ（桜、祭り、ベルベット）」が言語化のみで、視覚トークン/コンポーネントガイドに反映されていないため、ブランドDNAが画面上で可視化されにくい。",
+    "suggestion": "NGを侵さない範囲で使う“微モチーフ”の適用先と密度を規定（例: 空状態イラストの許容スタイル、達成時の小さな桜ピクセル/リボン罫線、バッジ形状）。`--motif-accent` や `--motif-outline` などのトークンと、使用シーン（Empty/達成/季節イベント）を追加定義する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§2.4（NGリスト）/ §4 全体",
+    "issue": "NGで「純黒/純白のベタ使用禁止」とある一方、本文ではボタン文言色 `#FFFFFF`、オーバーレイ `rgba(0,0,0,0.6)` を使用。テキストやスクラムにおける使用可否が曖昧。",
+    "suggestion": "「ベタ塗り（面）での使用禁止。テキス���/スクラムは許容」と例外条件を明記し、実装では `--text-on-primary` `--text-on-danger` `--scrim` の専用トークンに置換してHEX直指定を排除する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§2.3 vs §4.9 S20-5 / §4.10 S30-5",
+    "issue": "Open Air原則で「カードで囲まない」としつつ、TALKのタスク提案カードやMEのMBTIカードは `--bg-surface` を持つ“カード”表現になっている。",
+    "suggestion": "原則を「過度なカード多用禁止（例外: 提案/要約/分析カード）」に再定義し、例外条件と許容スタイル（ボーダーのみ/左罫線のみ/面あり）の優先順位を追記。TALK提案は“左罫線のみ”を第一候補にするなど整合を図る。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.5, §6.3",
+    "issue": "テーマ間の“性格差”を表すモーション指針が未定義。現状は全テーマ同一の `spring-* / ease-out` のみで、Harajuku系の軽やかさ等が表現に落ちていない。",
+    "suggestion": "モーション強度/反発のテーマ別係数（例: bouncyのovershoot係数、duration補正±50ms）をトークン化し、デフォルト（Night Sky）以外の係数テーブルを design_system.md に追加。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.1 / §5.2 / §5.4",
+    "issue": "「ハードコードHEX禁止」としながら、プライマリ/危険ボタンの文言色 `#FFFFFF` がトークン未定義のまま参照されているため、実装でHEX直指定が発生するリスクがある。",
+    "suggestion": "`--text-on-primary` `--text-on-danger` `--text-on-accent-surface` などの前景色トークンを追加し、全ボタン/ピル/カードで参照先を統一する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.2 vs §4.4 S10-3 / §4.4 S10-7",
+    "issue": "タイポ規定で英字ラベルは11px想定（TODAY/GOALS/TASK/EXPLORER等）だが、画面仕様では TODAY/GOALS を14pxで指定しており不一致。",
+    "suggestion": "英字ラベルの基準サイズを統一（11pxへ揃えるか、14pxを新基準として §3.2 を改訂）。該当画面の検証項目も同じ値に更新する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§6.4 vs §5.9 / §5.10",
+    "issue": "モーション/表現の禁止事項で「drop-shadow/blur の装飾目的使用」を禁じている一方、スナックバー/トーストで「box-shadow（軽）」を推奨しており解釈が割れる。",
+    "suggestion": "機能的エレベーション目的の最小shadowは許容、と例外条件（半径/アルファ上限/適用対象限定）を明記。もしくはshadowをやめ、エレベーションはボーダーと背景階調差のみで表現するガイドに統一。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§6.3",
+    "issue": "レベルアップ時の紙吹雪演出の色設計が未定義で、NGリスト（ネオン/サイバーパンク）に触れる危険がある。",
+    "suggestion": "紙吹雪パレットをブランドトークンに限定（`--accent`/`--success`/`--warning`の彩度を下げたセット）し、`--celebration-palette` トークンとして定義。`prefers-reduced-motion` 時は無彩色のフェードのみとする。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§2.1 / §3.1",
+    "issue": "参照がApple Reminders/GitHub Darkで、アクセント `#79C0FF` もGitHub系と近似。差別化の視覚的実現が色頼みのままだと競合想起を避けにくい。",
+    "suggestion": "色以外のシグネチャを追加（例: 三日月端キャップのプログ���ス、アバター外周の月輪リング、チェック形状の個性化）。アクセント色の相対色相を各テーマで±8〜12°ずらすか、彩度/明度でNight Sky独自の“月光青”を再定義する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§5 共通コンポーネント / §3.4",
+    "issue": "アイコンスタイル（線幅、角のラウンド量、終端形状、サイズグリッド）のブランド基準が未定義で、テーマ間や画面間での揺れが発生しうる。",
+    "suggestion": "`--icon-stroke-width`（例1.5px）、`--icon-corner`（rounded/mitre）、`--icon-grid`（24px基準）等のトークンを定義し、SVG作法（外枠有無/対角線の扱い）をガイド化。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  }
+]

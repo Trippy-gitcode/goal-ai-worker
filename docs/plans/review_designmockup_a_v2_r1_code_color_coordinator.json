@@ -1,0 +1,68 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "完了タスク『企画書を仕上げる』のテキスト",
+    "issue": "完了タスクがほぼ背景に沈む濃度まで落とされており、コントラスト比は 2.5:1 未満の可能性が高い。WCAG 1.4.3 AA (4.5:1) を満たさない。",
+    "suggestion": "実装時に完了色を #7890A8 以上まで持ち上げ、打ち消し線で完了を示す。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s00_splash",
+    "location": "タグライン",
+    "issue": "v2 据え置き。コントラスト比 ≈ 3.5:1。",
+    "suggestion": "実装時に #A0B4CC 以上へ引き上げ。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s30_me",
+    "location": "『タップして入力』プレースホルダ（趣味欄）",
+    "issue": "v2 据え置き。コントラスト比 ≈ 3:1 前後。",
+    "suggestion": "実装時に #7890B0 以上。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "disabled サインアップボタン",
+    "issue": "v2 据え置き。disabled コントラスト低下。",
+    "suggestion": "実装時に disabled 文字 #6A7890 相当 or 常時 enabled。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "進行中タスクの黄色縦線 + 完了チェック ✓",
+    "issue": "v2 で 3 状態（未開始/進行中/完了）が導入されたが、凡例が画面内にない。色＋形の併用を確認。",
+    "suggestion": "デザイン仕様書 v1 で 3 状態ルールを明文化。色覚配慮として進行中アイコンも併記。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s30_me",
+    "location": "サブタブ DISCOVER / FRIENDS / SHOP（非アクティブ）",
+    "issue": "非アクティブタブの文字コントラストが低く、選択肢として認識しづらい。",
+    "suggestion": "非アクティブ文字 #8AA0C0 以上に引き上げ。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  }
+]

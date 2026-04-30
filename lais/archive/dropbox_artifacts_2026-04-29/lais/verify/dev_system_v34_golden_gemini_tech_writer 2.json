@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§4.6.1, §4.20.1, §6.1",
+    "issue": "§C0〜§C6（共通行動規範集）という新しい章番号体系が導入されているが、これが dev_system_spec.md 内に新設されるのか、既存の §1〜§20 を再編するのかが定義されていない。§6.1の連鎖更新指示にも §C1-C6 の構築指示がなく、読者（ENG）は §C1-C6 がどこにあるのか分からず参照整合性が完全に破損する。",
+    "suggestion": "§6.1 の連鎖更新指示に、既存の鉄則（§3）や各原則を §C1-C6 として再編・新設する具体的なマッピングと指示を追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§3",
+    "issue": "「旧鉄則→新規範の移行マップ（§3.6）」が R2.1 パッケージ内に存在しない。既存の dev_system_spec.md §3（鉄則15個）をどのように §C1-C6（新規範）へ移行するのかの定義が欠落しており、移行作業が実行不能。",
+    "suggestion": "§3.6 を新設し、現行の鉄則1〜15が §C1-C6 のどこにマッピングされるか（または廃止されるか）の完全な移行表を定義すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.7.1, §4.19.4",
+    "issue": "§4.7.1で「IN_PROGRESS → READY_FOR_DEPLOY: ENG が手動更新」としているが、§4.19.4では「READY_FOR_DEPLOY → IN_PROGRESS 再戻しは deploy.sh 自動」としている。手動と自動が混在しており、ENGが手動更新を忘れた状態で deploy.sh を実行した場合の状態遷移が未定義で破綻するリスクが高い。",
+    "suggestion": "IN_PROGRESS → READY_FOR_DEPLOY の遷移も自動化するか、deploy.sh の実行前提として STATUS が READY_FOR_DEPLOY であることを検証する pre-deploy ゲートを追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§5.2",
+    "issue": "G15の発火条件が説明文では「docs/plans/*.md 変更時」となっているが、実装例の git diff 判定では `(canopy_common\\.sh|dev_system_spec\\.md|sub_testing\\.md)` となっており、スコープに齟齬がある。",
+    "suggestion": "説明文を「docs/plans/dev_system_spec.md または sub_testing.md 変更時」と正確に記述し、実装例と一致させること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "ROBUSTNESS",
+    "location": "§4.1.1",
+    "issue": "scripts/deploy_poll_hash.sh 内で `sed -nE` を使用しているが、macOS (BSD sed) と Linux (GNU sed) で `-E` の挙動や正規表現の解釈に差異が出るリスクがある。クラスターAのPOSIX互換方針と矛盾する。",
+    "suggestion": "`sed -nE` を `awk` または `grep -o` と `cut` の組み合わせに変更し、完全な POSIX 互換を確保すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "ROBUSTNESS",
+    "location": "§4.19.1",
+    "issue": "append_deploy_fail.sh の awk スクリプト内で `print tail` としているが、stdout の末尾30行にエスケープシーケンスや特殊文字が含まれている場合、awk の print 処理で意図しない解釈がされる可能性がある。",
+    "suggestion": "tail 変数を直接 awk で print するのではなく、別の一時ファイルに書き出してから `cat` で結合する方式に変更すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.6.1",
+    "issue": "POの条件付き再読が「なし（必要時 ADV が要約を提示）」となっている。「必要時」の定義が曖昧であり、ADVがいつ提示すべきか判断がブレる。",
+    "suggestion": "「POから仕様の確認を求められた場合」や「仕様変更の承認を求める場合」など、ADVが要約を提示する具体的なトリガーを明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  }
+]

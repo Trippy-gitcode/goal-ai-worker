@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"CONTRADICTION\",\n    \"location\": \"§4.6 S13-12, §5.0 A\",\n    \"issue\": \"disabled状態のスタイル定義に、仕様書内で矛盾が存在します。§5.0 Aでは、真のdisabled状態のスタイルとして`opacity`の使用を明確に禁止し、専用トークン（`--button-disabled-*`）の使用を規定しています。しかし、§4.6 S13-12のAI相談ボタンのdisabled化（§5.0 A相当）の記述では`opacity: 0.5`を使用すると明記されており、これが§5.0 Aの統一規定と直接矛盾しています。このままでは実装者がどちらを正として実装すべきか判断できず、コンポーネント間でdisabledの表現が不統一になることが���実です。\",\n    \"suggestion\": \"仕様を統一してください。§5.0 Aの統一規定を正とし、§4.6 S13-12の",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  }
+]

@@ -1,0 +1,304 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "§3.2 Today/習慣（週N回）",
+    "issue": "「週N回」習慣をTodayに出す判定ロジックが未定義。今週のどの日に出すのかが決まらず実装不能。",
+    "suggestion": "配分ルールを定義: 週N回は週の開始日に残回数= N、残日数で割り当て。判定= ceil(残回数/残営業日) > 0 の日はTodayに表示。ユーザー手動で『今日やる/スキップ』トグル可。週の境界で残回数リセット。UIに『今週の達成 x/N』チップを表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.2 Todayセクション/所要時間",
+    "issue": "「一覧（時間順）」としつつ『所要時間でタイムライン表示の幅計算に使用』とあり、リストUIとタイムラインUIが矛盾。",
+    "suggestion": "MVPはリストのみとし、所要時間はバッジ表示（例: 30m）。タイムライン（幅表現）はv0.2.0で導入。もしくはレイアウト切替（リスト/タイムライン）を明記して両方の振る舞いを仕様化。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2 タスク完了演出＋Undo",
+    "issue": "完了アニメーションの長さ・位置、UndoのUI形式（スナックバー/行内/モーダル）、多件同時完了時の競合、オフライン時のUndo可否が未定義。",
+    "suggestion": "完了演出=0.6sの控えめマイクロアニメ＋軽いパーティクル。画面下スナックバーに『取り消し（30秒）』を表示、キュー制御で直近1件を対象。各行にも30秒間の行内『取り消し』を表示（個別Undo）。オフライン時は状態反転のみ・EXP演出なし。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3.2 ヒーロー領域縮小/非表示",
+    "issue": "キーボード表示時にEXP/レベルが完全に消えるため、成長フィードバックが途切れる可能性。",
+    "suggestion": "入力中は最小ヘッダー（Lvバッジ＋小型プログレスリングのみ）を残す。キーボード閉じ時に『本日のEXP +X』の短いトーストでフィードバック。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2 タスク詳細パネル/AI相談",
+    "issue": "AI相談が別画面（TALK）に遷移するのか、同一パネル内で会話するのか不明。文脈の引き継ぎ方法も未定義。",
+    "suggestion": "TALKへのディープリンク方式を採用し、会話上部に『コンテキストカード（タスク名/期日/所要時間）』を固定表示。戻るでGROWに復帰。詳細はボトムシートと明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2 Today空状態",
+    "issue": "当日タスク0件時の空状態と次アクションが未定義で迷いが生じる。",
+    "suggestion": "空状態イラスト＋メッセージ『今日は予定はありません』。CTA: ①タスクを追加 ②AIに相談（テンプレ3件） ③ゴールを作成。ログインボーナス表示でモチベ維持。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.2 大量データハンドリング",
+    "issue": "1日数十件のタスク/習慣時の視認性・操作性（グルーピング/フィルター）が未定義。",
+    "suggestion": "ヘッダーにクイックフィルター（すべて/習慣/単発/未完）。『時刻あり/なし』『習慣/単発』でセクション分割��折りたたみ可能に。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2 ゴール→Today反映",
+    "issue": "予定日の過去・今日・未来およびタイムゾーン跨ぎの扱いが未定義でToday表示が不安定になる恐れ。",
+    "suggestion": "Today判定はユーザーのローカル日付で固定。期限超過は『期限超過』タグでリスト上部に固定表示。JST 4:00のEXPリセットとは独立運用と明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.4 PROFILE>設定/言語 ＆ §8.2",
+    "issue": "MVPで多言語非対応としつつ、設定に『言語』が含まれており矛盾。",
+    "suggestion": "MVPでは言語項目を非表示または『Coming Soon』に。v0.2.0で有効化する旨を仕様に追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§3.4 MEヒーロー＋サブタブ",
+    "issue": "固定ヒーローで縦の情報量が圧迫。FRIENDS内のネストされたタブ構造が複雑。",
+    "suggestion": "ヒーローはスクロールでコラプス。サブタブは上部固定セグメント���。FRIENDSは『一覧/リクエスト/受信』の3セグメント＋未読バッジに整理。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.4 DISCOVER（初回/空状態）",
+    "issue": "強み・弱み・カードが未生成の初回表示や失敗時の扱いが未定義。",
+    "suggestion": "初回はスケルトン＋『ヒアリングを始める』CTA。生成失敗時のリトライ/保存なしガードを明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3.3 TALK/履歴読み込み",
+    "issue": "初期読み込み時のスクロール位置や『最新へ』ジャンプ、未読導線が未定義。",
+    "suggestion": "初期は最下部にスクロール。上スクロールで過去ロード。新着時は『最新へ』FABを表示しワンタップで最下部へ。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.3 冒険EXP演出",
+    "issue": "冒険EXP付与時の演出強度・表示位置・他画面との同期フローが未定義。",
+    "suggestion": "右上にEXPトースト（50 EXP）＋プログレスリング加算アニメ。GROW/MEの���ッダーに即時反映。トーストタップで『今日の内訳』モーダルを開く。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.5・§7.3 EXP上限×オフライン同期",
+    "issue": "同期時に上限超過で不付与だった分のユーザー通知が未定義。",
+    "suggestion": "同期完了バナーで『付与X/不付与Y（上限）』を表示。不付与タスクに『上限到達』アイコンを履歴/詳細に付与。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.5 リセット時刻",
+    "issue": "リセット04:00 JSTの表示は国内外ユーザーで混乱を招く。",
+    "suggestion": "UIは常にローカル表記（例: 『リセット: 明日 04:00』）。内部JST運用は非表示。将来的にリセット時刻カスタムを検討。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2 Undoの範囲",
+    "issue": "Undoが直近1件限定か、各タスク個別かが未定義。連続完了やスクロール外のアイテムに対する操作が不明。",
+    "suggestion": "各完了に一意IDを付与。グローバ��スナックバー=直近1件、行内『取り消し』=その行のみ（30秒）。履歴画面から直近数件の取り消しを許可。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§3.2 小型端末UI",
+    "issue": "アバター64→32、Lv/EXPの1行圧縮で文言切れ・誤タップの恐れ。",
+    "suggestion": "EXPは数値＋薄いミニバー、レベルは丸バッジ。最小タップ領域44dp確保。長押しで詳細をツールチップ表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§5.3 FRIENDS/お知らせ",
+    "issue": "『お知らせ』のUI位置（タブ名/セグメント）と遷移が曖昧。",
+    "suggestion": "FRIENDS上部に『一覧/リクエスト/お知らせ』のセグメントを明記。MEボトムタブに未読バッジを反映。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.1 QRスキャン",
+    "issue": "PWAでカメラ不可・デスクトップ利用時の代替が未定義。",
+    "suggestion": "『画像から読み取り』『コード手入力』『招待リンク貼り付け』のフォールバックを��意。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.3/§7.3 キーボード対応",
+    "issue": "visualViewport非対応環境での代替ロジックが未記載。",
+    "suggestion": "window.resizeと安全領域インセットでフォールバック。入力バーはオーバースクロール許容のflex配置とする。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3.2 未設定タスクの並び",
+    "issue": "時間未設定タスクが常に末尾で埋もれる可能性。",
+    "suggestion": "『Anytime（未設定）』セクションを独立し、ピン留め可。AIが優先度スコアで並び替え提案。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.x/§8.1 演出・装飾",
+    "issue": "強いアニメーションや発光表現に対する感受性配慮が未記載。",
+    "suggestion": "設定に『動きを減らす』『発光効果を抑える』トグルを追加。OSのReduce Motion設定に追従。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§3.1 タブ境��",
+    "issue": "GROWとTALKの役割が分散し、『AI相談』の入口が複数で迷いやすい。",
+    "suggestion": "GROWヒーローに『クイックTALK』入力を設置→送信でTALKに遷移し継続。TALK上には『タスク化』CTAを常設し往復導線を明確化。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2/§4.4 レベル/EXP表記",
+    "issue": "小画面時の数値省略・表記順のルールが未定義で視認性が担保できない。",
+    "suggestion": "表記パターンを定義（通常: 『Lv.12 Explorer｜1,240/2,000 EXP』、最小: 『Lv12｜62%』）。3桁区切り必須、k表記は不採用。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.5 オンボーディング",
+    "issue": "AI提案・メール認証・アバター取得の失敗時のスキップ/リトライが未定義。",
+    "suggestion": "各ステップに『後で』を用意。AI提案失敗時はテンプレ3件提示。ネットワークエラーはリトライ/スキップ可能に。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.3 画像添付",
+    "issue": "画像送信の失敗・再送・プレビューのUIが未記載。",
+    "suggestion": "送信前プレビュー、送信中プレースホルダー、失敗時の『再送』ボタンを定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-027",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.5 不正対策",
+    "issue": "『同名タスク5分以内無効』のユーザー向け可視化が不足し誤解を招く。",
+    "suggestion": "無効化時に『短時間の同名完了は無効』トーストを表示。回避策（別名にする等）も併記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-028",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.2 ゴール達成ボーナス（7日要件）",
+    "issue": "タスクなしゴールの手動完了にも7日要件が適用されるか不明。",
+    "suggestion": "適用を明記。提案: 作成から7日未満は『完了待ち』に入り、7日経過時に自動完了＋EXP付与。UIに『あとN日』を表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-029",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§5.2 図鑑カード",
+    "issue": "カードがアバター/レベル/称号のみだと識別しづらいケースがある。",
+    "suggestion": "表示名を必ず併記。カードはレスポンシブ（2〜3列）。長押しでクイック『応援/メッセージ』アクション。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-030",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§7.3 SVGアバター",
+    "issue": "リスト用PNGキャッシュのキー/失効条件未定義で描画遅延・更新漏れの恐れ。",
+    "suggestion": "キャッシュキー= avatar_parts_hash + level + decorations。生成中はプレースホルダー。変更時のみ失効を明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

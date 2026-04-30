@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§5, §6.5",
+    "issue": "入力フィールド以外のインタラクティブ要素（ボタン、リンク、タブ、チェックボックス等）に対するフォーカススタイルが定義されていません。§5.6では入力フィールドのフォーカススタイルが定義されていますが、他の全ての要素に対する規定がありません。これにより、キーボード操作のユーザーは、どこにフォーカスがあるか視覚的に識別できず、操作が著しく困難になります（WCAG 2.4.7 Focus Visible違反）。",
+    "suggestion": "デザインシステムにグローバルなフォーカスリング用のトークン（例: `--focus-ring-color: var(--accent); --focus-ring-width: 2px; --focus-ring-offset: 2px;`）を定義してください。そして、全てのインタラクティブ要素に `:focus-visible` 擬似クラスを用いて、このトークンに基づいたアウトラインやbox-shadowが適用されることを共通規定として明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4, §5, §6.5",
+    "issue": "スクリーンリーダー向けのセマンティックな構造（ARIAロール、ステート、プロパティ）に関する仕様がほとんど定義されていません。§6.5の`aria-live`の言及のみでは不十分です。モーダル、タブ、アコーディオン、アイコンボタンなどが非セマンティックな`div`等で実装された場合、スクリーンリーダーユーザーはコンポーネントの役割や状態を理解できません。",
+    "suggestion": "各共通コンポーネント（§5）および画面別仕様（§4）に、実装すべきHTML要素やARIA属性を明記してください。例：モーダルには`role=\"dialog\"`と`aria-modal=\"true\"`、タブUIには`role=\"tablist\"`/`tab`/`tabpanel`、アイコンのみのボタンには`aria-label`���アクセシブルネームを提供するなど、具体的な実装要件を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.1, §6.5",
+    "issue": "OSのハイコントラストモード（Windows HCMやmacOSの「コントラストを上げる」設定）への対応が定義されていません。このモードではCSSの背景色が無効化され、`--border`や`--bg-surface`に依存したUI境界が失われ、コンポーネントの識別が困難になる可能性があります。",
+    "suggestion": "ハイコントラストモード用のスタイルを規定してください。具体的には、`@media (forced-colors: active)`メディアクエリ内でのスタイルを定義し、UIの境界線には`transparent`の代わりにシステムカラーキーワード（例: `ButtonText`）を使用するなどの対応を仕様に追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§3.1, §7 (C-2)",
+    "issue": "仕様書内で自己矛盾があります。§3.1ではカテゴリ色`--cat-learn`が`--accent-hover`を「流用」していると記載されていますが、§7の既知の課題C-2では、この流���が「トークン逸脱」であると指摘されています。仕様書本文と課題リストの記述が矛盾しており、実装者が混乱する原因となります。",
+    "suggestion": "§3.1の記述を修正し、「（※ Phase 4 で専用色へ分離。§7 C-2 参照）」という注記は残しつつ、値の欄は「未定義」またはプレースホルダー値（例: `var(--text-muted)`)と明記し、`--accent-hover`の値を直接記載しないようにしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§4.4 (S10-4)",
+    "issue": "S10-4の進行中タスクのインジケータとして「8×1px amber `#E8A855` のダッシュ」が指定されています。高さ1pxの要素は、高解像度ディスプレイや特定のレンダリング条件下では視認性が著しく低い、あるいは表示されない可能性があり、状態を伝えるインジケータとして信頼性に欠けます。",
+    "suggestion": "ダッシュの高さを最低でも`2px`に変更することを推奨します。または、ダッシュの代わりにアイコンを使用するなど、より堅牢な視覚的インジケータを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§5.1, §4.4 (S10-10)",
+    "issue": "ボトムタブバーのInactiveタブが「SVG 20×20 ... のみ（ラベルなし）」と定義されています。これではタップ領域がSVGのサイズ（20x20px）となり、§3.6で規定された最小タップ領域44x44pxに違反します。また、アイコンのみのナビゲーションは、アイコンの意味が自明でない場合にユーザビリティを損ないます。",
+    "suggestion": "Inactiveタブのタップ領域がCSS（例: padding）によって44x44px以上に確保されることを明確に規定してください。また、アクセシビリティ向上のため、Inactiveタブにも視覚的にラベルを表示することを強く推奨します。それが不可の場合でも、`aria-label`でアクセシブルネームを提供することを必須要件としてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.2 (S01-8)",
+    "issue": "S01-8 同意テキストのリンク部について、色と下線のスタイルは定義されていますが、リンクの飛び先（利用規約やプライバシーポリシーのURL）や、リンクをタップした際の挙動（アプリ内ブラウ��で開くなど）が定義されていません。このままでは実装不可能です。",
+    "suggestion": "リンクテキスト（例: 「利用規約」）と、そのリンク先URL、およびリンクを開く際の挙動（例: Safari View Controllerで表示）を明確に定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.2, §6.5",
+    "issue": "OSのテキストサイズ変更設定（Dynamic Typeなど）にアプリがどのように追従するかについての規定がありません。ユーザーがシステム設定で文字を大きくした場合、レイアウトが崩れたり、テキストが切り捨てられたりする可能性があり、WCAG 1.4.4 (Resize text) への準拠が困難になります。",
+    "suggestion": "フォントサイズ指定に`rem`単位を使用し、コンテナのサイズもテキストサイズに応じてリフローするように設計することを規定に追加してください。少なくとも200%までのテキスト拡大に対応できるレイアウトであることを明記し、テスト要件に含めることを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§6",
+    "issue": "ハプティクス（触覚フィードバック）に関する言及がありません。タスク完了やレベルアップなどの重要なインタラクションで適切な触覚フィードバックを提供することは、ユーザー体験を向上させ、特定のユーザーにとっては重要な確認手段となります。また、`prefers-reduced-motion`と同様に、OSの触覚フィードバック設定を尊重する必要があります。",
+    "suggestion": "デザインシステムにハプティクスの使用ガイドラインを追加してください。どのインタラクションでどの種類のフィードバック（例: success, impact）を生成するかを定義し、OSのアクセシビリティ設定を尊重することを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§3.2",
+    "issue": "`font-weight: 200` (UltraLight/Thin) の使用が`36px`以上のテキストで許可されています。非常に細いウェイトは、特定のディスプレイ環境や視力の弱いユーザーにとって判読が困難になる場合があります。コントラスト比の計算値は満たしていても、実際の視認性が低い可能性があります。",
+    "suggestion": "`font-weight: 200`の使用を避け、最低でも`300` (Light) または`400` (Regular) を使用することを検討してください。もしデザイン上の意図で必須である場合は、コントラスト比を通常より高く設定するなどの配慮が必要であることを注記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  }
+]

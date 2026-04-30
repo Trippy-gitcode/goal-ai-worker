@@ -1,0 +1,57 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "TODAY / GOALS 見出しと本文の関係",
+    "issue": "v2 で TODAY 下に『1 / 4 completed』のサブテキストが追加され階層は向上。ただし見出し『TODAY』と『GOALS』の文字ウェイトが全く同じで、メインセクションと副セクションの主従が弱い。",
+    "suggestion": "TODAY を main（15pt / letter-spacing 0.08em）、GOALS を sub（12pt / 0.1em）に差別化。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "タイトル中央配置",
+    "issue": "v2 据え置き。中央垂直落下の動線で Z/N 字誘導が効かない。",
+    "suggestion": "Phase B で左上配置案を用意。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "名前『ふとし』フォントウェイト",
+    "issue": "名前がメイン化されたのは良いが、Lv.12 EXPLORER のウェイトが太く見えすぎて主従逆転の懸念。",
+    "suggestion": "名前を bold 600 / 20pt、Lv.12 EXPLORER を regular 400 / 12pt の letter-spacing 0.08em 統一。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "TODAY タスク間の余白",
+    "issue": "時刻・タスク名・所要時間が機械的等間隔で呼吸が薄い。",
+    "suggestion": "時間帯境界（午前/午後）で薄い divider、 タスク間余白を 16/24/16/24 等に変化。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s01_signin",
+    "location": "インラインリンクの鮮青",
+    "issue": "v2 据え置き。モノクロ基調にノイズとして乗る。",
+    "suggestion": "#6A8CC8 程度にトーンダウン、下線維持。",
+    "model": "Code",
+    "persona": "manga_cover"
+  }
+]

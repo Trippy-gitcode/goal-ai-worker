@@ -1,0 +1,79 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクションの最上部",
+    "issue": "UX仕様書 §2.3で必須の「期限切れ（Overdue）」セクションが表示されていない。",
+    "suggestion": "Todayの先頭に「期限切れ」グループを追加し、--overdue(=--danger)の左バー+赤系テキスト+「明日に延期」アクションを実装（UX §2.3, DS §2.4）。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクションの末尾",
+    "issue": "UX仕様書 §2.3で規定された「Upcoming（今後7日）」折りたたみセクションが欠落している。",
+    "suggestion": "Today末尾に「📅 Upcoming (N件)」ヘッダーを追加し、展開で日付グループごとの予定タスクを表示。7日以降は件数のみ（UX §2.3に準拠）。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "PROFILEタブ（AI理解メモの下、設定リンクの上）",
+    "issue": "UX仕様書 §4.2の「MBTI/性格タイプ」カードが欠落している。",
+    "suggestion": "「MBTI/性格タイプ」カードを追加（4文字タイプ+説明文+進捗/未推定時プレースホルダ+手動入力リンク）。位置はAI理解メモの直下（UX §4.2）。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "画面上部ヘッダーの下境界線（border-bottom: 1px solid #6E7681）",
+    "issue": "区切り線に --border-strong (#6E7681) が使われており、v2_r11の統一方針（区切り線=--border #484F58）と不一致。",
+    "suggestion": "ヘッダー下線の色を #484F58（--border）へ変更し、区切り線の強度を全画面で統一。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "AIタスク提案カード内のCTA（「登録する」「編集して登録」「✕」）",
+    "issue": "主要CTAがpill形状（border-radius:999px）で、他画面のPrimary���タン（radius:12px）と形状が不統一。ボタン形状のバリアント定義がDSに明記されていない。",
+    "suggestion": "DSに「button-primary--pill」バリアントを定義するか、本カードの主要CTAを標準のradius:12pxに統一。副次CTAはpillでも可と明記して整合を取る。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "称号ラベル（s10_grow: \"Explorer\" / s30_me: \"EXPLORER\"）",
+    "issue": "称号の大文字表記が画面間で不統一（小文字混在 vs 全大文字）。ラベルの字間（--letter-spacing-label:1.5px）適用対象とも齟齬が生じている。",
+    "suggestion": "称号表記を全画面で統一（推奨: 全大文字 \"EXPLORER\" + --letter-spacing-label 適用）。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s00_splash",
+    "location": "下部セカンダリボタン「ログイン」（text-color:#E6EDF3, border:#6E7681）",
+    "issue": "セカンダリボタンの前景色が他画面（例: s13/s14のセカンダリ= #9BA7B4）と不一致で、ボタン種別の視覚ルールが曖昧に見える。",
+    "suggestion": "DSにbutton-secondaryの色仕様（fg/bg/border/hover）を明記し、全画面を統一。例: fg=#9BA7B4, border=#6E7681, bg=transparent（Dark）。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

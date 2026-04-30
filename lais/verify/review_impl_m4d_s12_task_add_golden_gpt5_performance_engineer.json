@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "3.S10Grow.jsx",
+    "issue": "S12TaskAdd を静的 import しており、初期バンドルにモーダルの JS/CSS が常に含まれる（未表示時もコスト発生）。",
+    "suggestion": "モーダルは使用時のみ読み込む遅延ロードに切替。例: const S12TaskAdd = lazy(() => import('./S12TaskAdd.jsx')); <Suspense fallback={null}>…</Suspense>。open トグル時に import を prewarm（useEffect で taskAddOpen===true で import）し、必要なら pointerdown/idle で先読み。併せて CSS もコードスプリットされるように設定。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1.S12TaskAdd.jsx §focus trap",
+    "issue": "Tab 押下のたびに document に keydown を張り、querySelectorAll で都度フォーカス可能要素を走査。グローバルイベント伝播と DOM クエリが毎回発生。",
+    "suggestion": "keydown はモーダル要素（dialogRef）にバインド（useCapture）し、フォーカス可能要素は open 時に一度だけ収集・キャッシュ（必要な state 変化時のみ再収集）。または先頭/末尾にフォ���カス番兵（tabindex=0）を置く方式に変更して DOM 走査を排除。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1.S12TaskAdd.jsx §duration/type",
+    "issue": "名前入力など関係ない state 変更でも所要時間チップ/種別ピルが毎回再レンダリングされる（8+2 ボタンの再 reconciliation）。",
+    "suggestion": "DurationChips/TypePills をメモ化コンポーネントに切り出し（memo + props 最小化）、選択値と onChange だけを渡す。あるいは .s12-duration-row に onClick デリゲーションし、各ボタンに data-minute を付与してハンドラを1本化し、子ボタンの onClick クロージャ生成を削減。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1.S12TaskAdd.jsx",
+    "issue": "onInput/onClick にインライン関数を多用し、毎レンダーでクロージャが生成される。",
+    "suggestion": "頻度の高いハンドラ（name/time/memo 変更、close 等）は useCallback で安定化。デリゲーション適用可能な箇所（所要時間チップ）は R-003 の方針でクロージャ生成自体を削減。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "1.S12TaskAdd.jsx §CTA",
+    "issue": "CTA は aria-disabled のみで :disabled が付与されず、Tab でフォーカス対象に残るためフォーカストラップの対象が増える（微小ながら不要フォーカス移動と判定分岐が増える）。spec §5.0 A には準拠しているが最適ではない。",
+    "suggestion": "PD 合意の��えで disabled 属性も併用し、スタイルは [aria-disabled='true'], :disabled 双方に適用。仕様制約がある場合は aria-disabled 時に tabIndex=-1 を付けてタブ順から除外し、trap の対象を削減。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.S12TaskAdd.css §.s12-modal/.s12-overlay",
+    "issue": "will-change が未指定。合成レイヤー昇格が UA 任せになり、稀に初回アニメでレイヤー確保コストが発生する可能性。",
+    "suggestion": ".s12-modal に will-change: transform、.s12-overlay に will-change: opacity を付与。長時間の常在化を避けたい場合はアニメ完了で削除（animationend でクラス切替等）。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.S12TaskAdd.css §scroll containers",
+    "issue": "モーダル内部スクロールが親へスクロール連鎖しうるため、慣性時に余計なスクロール/再計算が発生する可能性。",
+    "suggestion": ".s12-modal と .s12-duration-row に overscroll-behavior: contain を付与（iOS/Safari では実装状況に留意）。必要に応じて .s12-modal に touch-action: pan-y を指定し縦ス���ロール意図を明示。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1.S12TaskAdd.jsx §console",
+    "issue": "console.log が本番バンドルに残ると I/O コストとバンドル肥大の一因になる。",
+    "suggestion": "ビルド時に drop_console（Terser）を有効化するか、__DEV__ ガードで開発時のみ出力。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1.S12TaskAdd.jsx §scroll lock",
+    "issue": "scroll lock を body.style.overflow 直書きで行っており、多重モーダルや OSK 表示時にリフロー/レイアウトシフトが起きやすい。",
+    "suggestion": "ドキュメントルートにロック用クラスを付与し、ロックカウンタで多重管理。必要に応じてスクロールバー幅分のパディング補正を行い、CLS を回避。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.S12TaskAdd.css §paint",
+    "issue": "box-shadow（--shadow-lg）は端末によってはペイントコストが高め。モーダルが transform アニメ中に影も再描画される可能性がある。",
+    "suggestion": "影のブラー半径を控えめにする、レイヤー分離（疑似要素での影）や filter: drop-shadow の検討を行い、低スペック端末でのパフォーマンスを確認。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

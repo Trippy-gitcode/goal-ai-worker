@@ -1,0 +1,212 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1/§1.2/§4.2/§13（S-41）",
+    "issue": "画面ID S-41（アバター設定）のUXフロー/UI仕様が未定義。リンクと遷移は定義されているが、具体的な操作（装飾/フレーム装備、プレビュー、保存、未保存警告、アクセシビリティ）が不明。",
+    "suggestion": "S-41の専用セクションを追加し、以下を定義: 1) レイアウト（現在のアバター大プレビュー＋装飾/フレーム/オーラのセクション化、グリッド表示、選択状態） 2) 操作（タップで即時プレビュー、[適用]で保存、[元に戻す]/[デフォルトに戻す]） 3) Premier特典フレームの装備動線とラベル 4) 未保存状態での閉じる/戻る時の確認ダイアログ 5) アクセシビリティ（選択項目にaria-selected、プレビューに代替テキスト） 6) ローディング/エラー（装飾一覧のスケルトン、購入未実装時のEmpty/Coming Soon文言）",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §1.4/§3.5/§7.3（TALK左端スワイプ）",
+    "issue": "TALK画面で「左端から右スワイプで履歴ドロワー」を定義しているが、iOSのエッジスワイプ（システム戻る操作）と衝突する。PWA（Safari/Standalone）ではブラウザ履歴戻りが発火し制御不能な場合がある。",
+    "suggestion": "ドロワー展開はヘッダーのボタン操作（☰または「履歴」アイコン）のみに限定し、エッジスワイプは無効化。どうしてもスワイプを残す場合は「画面端から16-24pxを除くコンテンツ領域内のスワイプ」で発火させ、iOSではエッジ領域を明示的に避ける。ブラウザ履歴戻りを誤発火させないようhistoryスタック設計も見直す。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.4（ブラウザバックの定義）",
+    "issue": "「ブラウザバック: ボトムタブ間は前タブに戻る」という定義はAndroidのシステムバック慣習（現在のスタック内の戻り→タブルートでアプリ終了）に反する。",
+    "suggestion": "AndroidではBackは「モーダル/ドロワー閉じる → 子画面から親へ���る → タブルートでアプリ終了（confirmは不要）」に統一。タブの切替はBackで遷移しない。iOSのジェスチャー戻りは個別画面の戻りのみ有効。history.pushStateは各タブ内スタックに限定し、タブ間はpushしない。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.4 / project_v1.md §4.2",
+    "issue": "ゴール達成ボーナスの「作成から7日経過までは完了待ち」状態のUI/操作がUX側に未定義。ユーザーは100%到達後の待機状態と残り日数、操作可否が分からない。",
+    "suggestion": "S-14に「完了待ち」状態を追加: 1) 進捗バー100%＋バッジ「あとN日で完了」 2) 「ゴール完了にする」ボタンは無効化/非表示 3) ヘルプテキストと情報アイコンで理由説明 4) N=0になったタイミングのアプリ内バナー＋自動完了演出の定義 5) 早期完了を試みた場合のトースト文言。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3（タスク並び替え）",
+    "issue": "Today内のタスクは「開始時刻で自動ソート」だが「ロングプレスで手動順が保存」とあり、ルールの優先関係や復帰方法が不明。開始時刻変更時・翌日繰越時の順序も未定義。",
+    "suggestion": "明示的なソートモードを導入: 「時間順（デフォルト）/手動順」トグルをTodayヘッダーに追加。手動順は当日限定で保持、翌日リセット（設定で持続可）。開始時刻更新時は時間順モードでのみ自動反映。手動順→時間順へ戻す操作も明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3（Undoスナックバー30秒）",
+    "issue": "Undoスナックバーを30秒間固定表示は、モバイルUIのボトム領域（タブ、FAB、キーボード開閉時）と競合し視覚的負担が大きい。Material/HIGのガイドライン（3–6秒）からも逸脱。",
+    "suggestion": "スナックバーは5秒に短縮し、その後は右下に「取り消す」フローティングチップまたはTodayヘッダーに「最近の操作を元に戻す」リンクを一定時間（30秒）表示。長時間の操作猶予は別の軽量UIで提供し、ボトム常駐は避ける。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §3.2���Enterキー送信）",
+    "issue": "日本語IME変換中でもEnterで送信される可能性がある旨の考慮がない。誤送信のリスクが高い（特にモバイルIME）。",
+    "suggestion": "送信条件を「composition中はEnter送信無効（確定のみ）」に変更。送信は明示の送信ボタン（➤）を推奨。オプションで「Enterで送信」トグルを設定に用意し、既定はOFF。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §6.1/§2.3/§2.4（モーダル編集の未保存）",
+    "issue": "タスク/ゴール作成・編集のハーフモーダルをスワイプやbackdropタップで閉じた際の未保存内容の扱いが未定義。誤って閉じるとデータ消失感が強い。",
+    "suggestion": "入力が変更されている場合は閉じる前に確認ダイアログ（保存/破棄/キャンセル）を表示。自動保存を採用する場合は保存タイミング（フィールド確定時/閉じる時）と失敗時のインラインエラーを明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（S-36 QRスキャン）",
+    "issue": "カメラ権限拒否/非対応端���/暗所で読み取り不可時の代替フローが未定義。",
+    "suggestion": "S-36に失敗ハンドリングを追加: 1) 権限拒否→権限説明とOS設定への導線 2) カメラ非対応→シェアリンク入力/貼り付け代替 3) スキャン失敗→リトライガイダンスと明るさ改善ヒント 4) ネットワークエラー→リトライ/後で試す。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.1（TALKヘッダー表記）",
+    "issue": "ヘッダーに「☰=履歴ドロワー」と「🕐=履歴」の2種類の履歴起点が併存。機能重複で学習コストが上がる。",
+    "suggestion": "履歴は1つの起点に統一。推奨は「会話一覧」アイコン（リスト/時計）に置換し、左は戻る用に空けるか非表示。ドロワー形式を維持するなら左にメニューアイコンのみ配置。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.5/§7.3（会話行のスワイプ方向）",
+    "issue": "「チャット履歴の会話行: 左→右で削除ボタン露出」はiOS/Androidの慣例（右→左で削除）と逆で混乱を招く。",
+    "suggestion": "スワイプ方向を「右→左でアクション（削除/その他）露出」に統一。左→右はピン固定など別アクションがある場合のみ使用。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.4（ドラッグ&ドロップの開始）",
+    "issue": "ロングプレス500msは反応が遅く感じられる。iOS HIG/Materialでは~300ms程度が多く、開始時の触覚/視覚フィードバックが望ましい。",
+    "suggestion": "ロングプレス閾値を300ms前後に短縮し、開始時に軽いハプティクス＋影の強調を追加。ドラッグ中のスナップ/キャンセル時の最小ハプティクスも定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §7（ジェスチャー）/§8（演出）",
+    "issue": "ハプティクス設計がQRスキャン時のVibration以外未定義。主要アクション（タスク完了、レベルアップ、プル閾値到達、エラー等）に触覚がない。",
+    "suggestion": "ハプティクスマップを追加（OS依存でフォールバック）: 1) タスク完了= 軽い成功（iOS UIImpactFeedbackGenerator.light / Android VibrationEffect 15–20ms） 2) レベルアップ/ゴール達成= 成功（notificationSuccess/やや強め） 3) エラー= notificationError 4) プル閾値到達= selectionChanged 5) 並び替え開始/確定= medium/light。Reduced Haptics設定尊重。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4（S-36）/project_v1.md §7.1",
+    "issue": "Vibration APIはiOS Safari/PWAでは未サポートのため、QRスキャン成功時のバイブが発火しない可能性が高い。",
+    "suggestion": "プラットフォーム判定でVibration非対応時はUI上の強調（カラー/小さなアニメーション）とサウンド（ユーザー許可済み時のみ）にフォールバック。iOSでは可能ならHaptics API（Web未提供）を想定せず、視覚フィードバックを主にする。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §10（アクセシビリティ）",
+    "issue": "動的文字サイズ（OSの文字サイズ/ズーム）への対応方針が未定義。小型端末の省略ルールのみで、拡大時の折返し・省略・コンポーネント拡張が不明。",
+    "suggestion": "フォントは相対単位で実装し��OSのフォントスケール（最大200%目安）で主要画面の崩れがないことを定義。長文要素は行数制限時に『もっと見る』展開、タブ/ボタンはラップ許容、プログレス/バッジの最小可読サイズも規定。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §6.5/§9.1（Pull-to-refresh とオフライン同期）",
+    "issue": "Pull-to-refresh時にローカル未同期の変更（追加/完了/編集）を保持・マージするかのルールが未定義。競合時の優先順位も不明。",
+    "suggestion": "リフレッシュはまずローカルキューをサーバーへフラッシュ→サーバー最新取得の順で直列化。競合解決はサーバー権威で上書きし、上書きが発生した項目はインラインバナーで通知。オフライン中はPull無効化（スピナー表示のみ）も検討。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（Undoスナックバーとキーボード）",
+    "issue": "スナックバーの表示位置がキーボード開時のリレイアウトに未対応。入力中にUndoがキーボード裏に隠れる恐れ。",
+    "suggestion": "visualViewportの変化時はスナックバーをキーボード上端に再配置（または上部に折り返し表示）。Snackの安全域（safe-area-inset-bottom）も考慮してマージンを調整。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.1/§1.3（ボトムタブ）",
+    "issue": "タブラベルが全て大文字（GROW/TALK/ME）で、アイコン仕様が未定。iOS/Materialの慣例（Title Case＋アイコン併記）から外れる。",
+    "suggestion": "ラベルはTitle Case（Grow / Talk / Profile）に統一し、意味のあるアイコン（進捗/チャット/人物）を併記。Androidは選択時のみラベル表示の可否も検討（Material推奨）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.3（タスク提案カード）",
+    "issue": "AIのタスク抽出中状態が未定義。応答後にカードが遅れて出る場合、ユーザーに処理中であることが伝わらない。",
+    "suggestion": "AI応答直後にインラインプレースホルダー（スケルトン/『タスク候補を分析中…』）を表示。結果確定で置換、該当なしならフェード���ウト。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.3（DISCOVER 強み/弱みチップ）",
+    "issue": "削除がロングプレス専用で代替操作がない。スクリーンリーダー/マウス環境で到達困難。",
+    "suggestion": "各チップに明示の『✕』削除ボタンを併記（視覚的最小化可、アクセシビリティラベル必須）。ロングプレスは追加手段として残す。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（Overdue『明日に延期』）",
+    "issue": "『明日に延期』実行時の失敗/オフライン時の扱いが未定義。楽観的更新後に失敗した場合の巻き戻しや再試行導線が必要。",
+    "suggestion": "延期は楽観的にTodayから除去→失敗時に復元＋エラートースト（[再試行]）。オフライン時はローカルキューに追加し『同期待ち』バッジをタスク列に一時表示、復帰時に同期。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

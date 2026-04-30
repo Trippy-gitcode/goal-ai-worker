@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "AIの直後に出る「タスクにしますか？」提案カード",
+    "issue": "仕様§3.3で『カード背景=surface + 左ボーダー（アクセント色）』と定義されているが、スクリーンでは左ボーダーが無く単なるラウンドカードに見えるため、AI提案であることの視覚的手掛かりが弱い",
+    "suggestion": "カードに border-left: 2px solid var(--accent)（もしくは var(--accent-subtle) を重ねる）を追加し、左端のアクセントバーで“AI提案”を一目で判別可能にする。背景は var(--bg-surface) を維持",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Today > 12:00『ジムで筋トレ』カード左ボーダー",
+    "issue": "左ボーダーに #E8A855（アンバー系）が使用されているが、Night Skyのwarningトークン（--warning: #D29922 系）と不一致。色トークン不整合でテーマ切替時の一貫性が崩れる恐れ",
+    "suggestion": "左ボーダー色を var(--warning) へ置換。強度が必要なら var(--warning-subtle) を背景に併用し、非色手掛かり（アイコン/ラベル）も補う",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "「ゴール」行のドット色",
+    "issue": "ゴールドットに info系ブルー（#58A6FF）が使われ、§2.2の『--accent（リンク/ブランド）と--info（情報クローム）の役割分離』を曖昧にしている。情報チップ色とカテゴリ色が混同されうる",
+    "suggestion": "カテゴリ/ゴール識別用の専用色（ゴールカテゴリトークン）またはニュートラル（--text-secondary）に変更。リンクや情報要素と色機能を混在させない",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "WCAG",
+    "screen": "s10_grow, s14_goal_detail",
+    "location": "『+ タスクを追加』『+ ゴールを作成』テキストリンク",
+    "issue": "単独行のテキストリンクが色のみで可視化されており、文中リンクほどではないが1.4.1（色のみに依存しない）観点で手掛かりが弱い",
+    "suggestion": "下��（text-decoration: underline）または矢印/プラスのアイコンを常時併記し、色以外の手掛かりを追加。もしくは小ボタン（pill）に昇格して形状で示す",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Today リスト内『完了済み』カード（緑の塗り背景）",
+    "issue": "完了カードが面で着色され、未完了よりも視線を強く奪う。Night Skyの“静けさ/集中”トーンに対してやや主張が強く、次にやるタスクから注意が逸れる",
+    "suggestion": "面塗りをやめ、左ストライプ+チェックアイコン+打消し線の3点で完了を示すか、背景はより控えめな subtle（透明度高め）に縮退。テキストは中間色に落とし、未完了タスクの視認性を優先",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s12_task_add",
+    "location": "入力フィールド背景（タイトル、開始時刻、予定日など）",
+    "issue": "複数の入力が --bg-primary (#0D1117) を背景に用いており、フォーム面としての“面/段差”が弱く見える。Night Skyの推奨は面要素に --bg-surface (#161B22)",
+    "suggestion": "入力系のデフォルト背景を var(--bg-surface) に統一し、フォーカス時はアクセントのoutline/borderで状態差を示す。フォームの面（elevation）を安定させ、階層感を明瞭に",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "『ログイン』アウトラインボタン",
+    "issue": "1pxの淡いボーダーと透過背景で、背景（--bg-primary）と同化気味。タップ可能要素としての存在感が弱く、ファーストビューの選択肢として迷いやすい",
+    "suggestion": "ボタン背景に var(--bg-surface) を敷く、または border を var(--border-strong) に強化（例: 1.5–2px）。Night Skyの静けさを保ちつつ操作の明瞭性を上げる",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "『削除』ゴーストボタン（赤枠）",
+    "issue": "境界が rgba(248,81,73,0.3) の細い1pxで、--bg-surface 上で非テキストコントラスト（1.4.11の3:1目安）を満たしにくい。操作要素としての境界視認性が不足",
+    "suggestion": "境界を var(--danger) の不透明線にするか、塗り（--button-danger-bg）に切替。ゴースト維持なら border色を濃く（≥3:1）＋hover/pressedで明確に強化",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "全画面の基調色（#0D1117/#161B22 とアクセント #79C0FF 系）",
+    "issue": "GitHub Darkに極めて近い配色バランスで、ブランドの独自性がやや弱い。『夜空のジャーナル』らしさ（星明かり/静謐感）の物語性が色だけでは伝わりにくい",
+    "suggestion": "Night Skyの物語要素を微量追加：1) 見出しやヒーロー周辺にごく淡い“星明かり”ドット/星座パターン（装飾は最小・非アニメ）、2) アクセントをわずかに“月光寄り”の青緑へ色相シフト（+5〜10°）したサブトーンをUI部品の一部に限定適用、3) 祝祭/達成時のみ微弱な星粒のフェード演出。NGのネオン/グラデは避け、分量を極小で統一感を保つ",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "フッター文『すでに〜？ ログイン』内の“ログイン”リンク",
+    "issue": "文中リンク���アクセント色のみで下線なし。§2.2の『インラインテキストリンクは必ず下線』および1.4.1（色のみに依存しない）に抵触",
+    "suggestion": "“ログイン”に text-decoration: underline を付与。ホバー/フォーカスで下線太さ/色の変化も併用し、キーボード操作時の可視リングとも整合させる",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

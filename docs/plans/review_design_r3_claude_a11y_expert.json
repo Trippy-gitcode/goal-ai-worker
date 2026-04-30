@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§8.3 チップ/バッジ / §4.5",
+    "issue": "チップの視覚高さは padding 8px + font-size 14px × line-height 1.5 で約 29px。タップ領域を `::before` で 44×44px 拡張するルールだが、インラインでチップを並べる場合（例: ゴール詳細のタグ群）、連続するチップの hit area 同士が重なり、意図しないチップが選ばれる。さらに、スクリーンリーダー利用者に対して「ボタン」としての role が明記されていない。",
+    "suggestion": "チップは連続配置時に --space-sm 以上の間隔を義務化。インタラクティブチップには role=\"button\" を付与する旨を明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.2 入力フィールド / §8 全体",
+    "issue": "入力フィールドに `aria-describedby` でエラー/ヘルプテキストを結びつけるルール、`aria-invalid=\"true\"` をエラー状態で付与するルールが未定義。スクリーンリーダー利用者にフォームエラーが伝わらない。",
+    "suggestion": "§8.2 にフォーム ARIA 属性の最小要件（label/aria-describedby/aria-invalid）を追記。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§8.5 ボトムシート / §8.6 トースト",
+    "issue": "モーダル/ボトムシート/ドロワーの ARIA role (role=\"dialog\" / aria-modal=\"true\")、フォーカストラップ、閉じた時のフォーカス復元先、トースト (role=\"status\" / aria-live=\"polite\" / role=\"alert\") の ARIA 定義が未記載。",
+    "suggestion": "§8 の各コンポーネントに ARIA role / aria-* 属性の必須セットを明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.4 Overdue / §8.4 タイムライン",
+    "issue": "Overdue の視覚表現を「赤＋左 3px バー」としているが、§8.4 タイムラインでは OVERDUE を「! マーク入り円 + left 3px バー」と記述。左バーが行全体に付くのか、ドット部分のみに付くのか仕様が曖昧。スクリーンリーダーは色/位置で理解できないため、テキストラベル（「期限超過」）の伴走が必須だがそれも未定義。",
+    "suggestion": "左バーは「行全体」に付くと明記。`aria-label=\"期限超過\"` を overdue 行に付与する旨を追記。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3 タイポグラフィ",
+    "issue": "最小フォントサイズ --font-size-xs: 11px はスマホ閲覧で WCAG には違反しないが、実際の可読性が低い。高齢ユーザーや弱視ユーザー向けの「テキスト拡大」設定（OS の Dynamic Type 相当）への対応方針が未定義。rem/em 基底なら OS 設定に追従するが、px 固定だと追従しない。",
+    "suggestion": "--font-size-* を rem 単位で定義するか、px 併用時は CSS の @media (text-size-adjust) 対応方針を明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.2 タブアイコン",
+    "issue": "ボトムタブの選択状態をスクリーンリーダーに伝える `aria-current=\"page\"` の指定が未定義。タブ切替時の音声フィードバックが欠落する。",
+    "suggestion": "§6.2 にタブの ARIA 属性（aria-current）の必須化を明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.1 Night Sky --text-hint / §5.3 Harajuku Light / §5.4 Harajuku Dark",
+    "issue": "--text-hint が各テーマで約 4.5:1 ちょうど。WCAG AA の通常文字は 4.5:1 以上が必要だが、わずかな色調変動（アンチエイリアス、ディスプレイキャリブレーション）で基準を下回るリスク。補助テキスト用途とはいえギリギリを狙うのは脆弱。",
+    "suggestion": "全テーマで --text-hint を 5.0:1 相当の値に引き上げ（マージン確保）。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.5 タップターゲット",
+    "issue": "WCAG 2.5.5 は 44x44px を要求するが、WCAG 2.5.8 (Target Size Minimum, Level AA) は 24x24px を要求し、間隔での緩和条件がある。仕様として WCAG 2.2 AA 準拠を名乗るなら 2.5.8 も参照する必要がある。",
+    "suggestion": "§4.5 に WCAG 2.5.8 を参照する注記を追加。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  }
+]

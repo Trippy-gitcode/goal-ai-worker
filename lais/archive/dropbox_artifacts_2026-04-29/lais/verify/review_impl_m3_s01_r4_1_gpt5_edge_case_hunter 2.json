@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "2.2",
+    "issue": "15秒タイムアウト後にリクエストが成功しても成功ハンドラが実行され、直前に表示されたタイムアウトエラーのままホームへ遷移するレースが起こり得る（UI表示と実際の遷移が矛盾）。",
+    "suggestion": "送信ごとに opId/requestId を採番して ref に保持し、try/catch/timeout 双方で一致確認してから状態更新・route を行う。タイムアウト時は “timedOut” フラグを立て、後着の成功結果は無視（ルーティングもしない）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "2.2",
+    "issue": "旧リクエストのタイムアウトコールバックが新規送信開始直後に発火すると、inFlightRef を false に戻しつつエラー表示を出してしまい、新規送信の進行表示を潰すレースがある。",
+    "suggestion": "R-001 と同様に timeout 側も opId を検証して現行オペレーションにのみ作用するよう制御。setTimeout のクロージャに opId を閉じ込め、発火時に一致しなければ何もしない。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "2.2",
+    "issue": "オートフィル同期が 0ms/100ms の二度実行のみで、遅延オートフィル（数百ms〜数秒、フォーカス時注入、パスワードマネージャ介入）を取りこぼす可能性が高い。",
+    "suggestion": "以下のいずれかを追加: 1) マウント後 2〜3 秒間のポーリング（50〜100ms 間隔）で変化検知 2) MutationObserver で input.value 変化監視 3) CSS の :-webkit-autofill + animationstart フック 4) focus/blur 時にも DOM→state 再同期。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2.1",
+    "issue": "STATIC_PATHS 判定が厳密一致のため、/terms/（末尾スラッシュ）や /terms#anchor を NotFound と誤判定してホームへ戻してしまう。",
+    "suggestion": "pathname を URL API で厳密取得し、末尾スラッシュを正規化（/terms/ → /terms）。フラグメント（#〜）も無視する。例: const { pathname } = new URL(window.location.href); const norm = pathname.replace(/\\/$/, '');",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2.1",
+    "issue": "クエリは除去しているが、フラグメント（#）除去が未実装で /terms#x が STATIC_PATHS に一致しない。",
+    "suggestion": "R-004 の URL API で pathname を使用し、path 生成時に '?' だけでなく '#' も除外する（または split(/[?#]/)[0] で正規化）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.1",
+    "issue": "オフライン時にも NotFound から location.replace('/terms') を試み、ブラウザのオフラインエラーページへ遷移して UX が分断される。",
+    "suggestion": "navigator.onLine === false の場合は SPA 内でオフライン案内にフォールバック（route('/', true) + トースト/ダイアログ）し、再試行導線を出す。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "タップターゲット拡張を negative margin で実現しており、高倍率ズームや複数行折返し時に隣接要素とヒット領域が重なり誤タップを誘発し得る。",
+    "suggestion": "親を position:relative とし、リンクの ::before で absolute な拡張ヒットボックスを敷く（pointer-events: none; on ::before, ただし a 自身には残す）か、インラインではなく block-level でパディング確保してレイアウト重なりを回避。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2.2",
+    "issue": "email/password に maxLength が無く、極端に長い入力（数万文字）の貼り付けでレンダリングや検証コストが増大、リクエストペイロードも肥大化する。",
+    "suggestion": "email は RFC 制約に沿って maxlength≈320、password は実用上の上限（例 128〜1024）を設定。フロント・バック双方で上限検証し、超過時は即時エラー表示。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.2",
+    "issue": "メール入力の正規化戦略が未定義。全角＠・ゼロ幅スペース・Unicode 正規化差（NFC/NFKC）により“見た目同一”でも別文字列となり、利用者が原因不明のエラーに遭遇しやすい。",
+    "suggestion": "表示用は NFKC 正規化・全角英数の半角化・一般的な不可視文字の除去を行いつつ、送信用は原文と正規化版の双方で試験的検証→不一致時にガイダンス表示。最低限、ド��イン部は punycode 正規化。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "送信中にモード切替（ログイン/サインアップ）用リンクが有効なままで、進行中リクエストの結果と UI 状態が食い違う可能性がある（例: サインアップ結果の確認文言がログイン画面に出る）。",
+    "suggestion": "submitting 中はモード切替リンクを無効化（tabindex=-1, aria-disabled, pointer-events:none）。またはオペレーション開始時のモードを opId に紐付け、結果適用時に一致チェック。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "複数の role=\"alert\"/aria-live が同時に出現すると、スクリーンリーダーでの読み上げが氾濫し理解しづらい。",
+    "suggestion": "エラーまとめ用の単一 aria-live=\"polite\" リージョンに集約し、個別エラー要素は視覚表示のみにするか aria-hidden。緊急度の高い一件のみ assertive。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.2, 4",
+    "issue": "固定 15 秒タイムアウトはネット環境により短すぎ/長すぎの両リスクがある。再試行も自動化されていない。",
+    "suggestion": "NetworkInformation.effectiveType 等を参考に 10〜30s で可変化、または“待機を続ける/再試行”UI を提示。バックオフ付きリトライ（例: 3 回、500ms→1s→2s）を導入。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "navigator.onLine は信頼性が低く、キャプティブポータルや DNS 不全などを検出できない場合がある。",
+    "suggestion": "軽量なヘルスチェック（/health に HEAD）でオンライン実判定を行い、onLine 判定はヒューリスティックとしてのみ使用。online/offline イベントで UI を更新。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2.3",
+    "issue": "高倍率ズーム/テキストサイズ拡大時、.s01-link のフォーカスリングが負のマージン領域まで描画され、親の overflow 制約によって視覚的に切れる可能性がある。",
+    "suggestion": "focus-visible の outline-offset を適切に取り、必要に応じて親コンテナの overflow:visible（もしくはフォーカスリング用に box-shadow ベース）へ切替。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2.1",
+    "issue": "STATIC_PATHS の固定リストはローカライズや将来のパス追加（/ja/terms, /legal/terms 等）に弱く、SPA 側で誤って 404→ホームへフォールバックしやすい。",
+    "suggestion": "正規表現やプレフィックス許可（^/(?:ja|en)?/(terms|privacy)/?$）で許容、もしくはビルド時に静的パスのマニフェストを自動生成して参照。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

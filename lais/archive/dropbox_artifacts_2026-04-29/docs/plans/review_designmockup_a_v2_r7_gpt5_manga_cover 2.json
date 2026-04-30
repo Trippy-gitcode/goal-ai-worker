@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s13_task_detail",
+    "location": "ボタン行の「削除」ボタン（テキストと枠線）",
+    "issue": "危険色にトークン外の色 (#FF7B72 / rgba(255,123,114,0.5)) を使用。デザインシステムの --danger 系トークンから逸脱",
+    "suggestion": "テキスト色=var(--danger) (#F85149)、枠線=1px solid var(--danger) または var(--danger-subtle)。ボタンバリアントを統一（outline danger）し、ホバー/押下も --danger-hover / --danger-pressed へ揃える",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s20_talk",
+    "location": "メッセージ本文（AI/ユーザー両方の吹き出し内）",
+    "issue": "本文サイズが15pxでトークンスケール外（--font-size-base=16px）。日本語本文としてはやや小さく可読性がわずかに低下",
+    "suggestion": "font-size を var(--font-size-base)=16px、line-height を var(--line-height-ja-body)=1.7、letter-spacing を var(--letter-spacing-ja)=-0.02em に統一",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "フォームラベル（例: s01_signin「メールアドレス」「パスワード」、s12_task_add 各フィールド見出し 等）",
+    "issue": "ラベルが13px指定でトークン外（--font-size-sm=14px）。全体で微小サイズが混在し、タイポの品格と一貫性を損ねる",
+    "suggestion": "フォームラベルは 14px/--line-height-sm=1.4 に統一。英字ラベルは --letter-spacing-label=1.5px、日本語は --letter-spacing-ja=-0.02em を適用",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "ALL",
+    "location": "主要スクリーンの左右パディング（多くが padding: 0 24px）",
+    "issue": "グリッド定義（§4.3）では左右パディングは --space-md=16px。現状24pxでグリッド逸脱",
+    "suggestion": "左右パディングを 16px に統一（モーダル/フル/タブ画面共通）。ヒーローやカード群も親コンテナ基準で16pxリズムに揃える",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Today セクション末��〜Goals 見出し間",
+    "issue": "セクション間マージンが約28pxで §4.2 の「セクション間≧32px」を満たしていないため、呼吸感がやや詰まる",
+    "suggestion": "セクション間スペースを --space-xl（標準40px、最小32px許容）に増やし、見出し前後でリズムを明確化",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "画面タイトル「副業で月10万円」",
+    "issue": "タイトルが24px/weight:200でトークンスケール・見出しウェイトから逸脱（見出しは原則600）。視覚ヒエラルキーが弱い",
+    "suggestion": "画面タイトルは --font-size-xl=28px / font-weight:600 / line-height: var(--line-height-ja-heading)=1.35 に。サブ情報（残り日数/カテゴリ）は14pxで明確に段差を付ける",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "フッターのプライマリーボタン「次へ」",
+    "issue": "ボタン文言の font-weight:500。ボタンは全体で600運���（他画面との一貫性）",
+    "suggestion": "ボタンのタイポを font-weight:600 に統一（--button-primary-fg/bgは現状のトークンで可）。全ボタンで同一スタイルを適用",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "ヘッダーの下ボーダー（border-bottom: 1px solid rgba(110,118,129,0.4)）",
+    "issue": "区切り線にトークン外の直接RGBA指定。カラーシステム（--border / --border-strong）からの参照ではない",
+    "suggestion": "セパレーター色は var(--border-strong)=#6E7681 を基本とし、必要に応じてテーマ別に専用トークン（--divider）を定義して参照に統一",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s01_signin",
+    "location": "最下部のインライン文中リンク「ログイン」",
+    "issue": "インラインテキストリンクに下線がなく、§2.2『カラーのみの伝達禁止』に抵触",
+    "suggestion": "リンクに text-decoration: underline を付与（色は var(--accent) #79C0FF のままで可）。インラインリンクの表現を全画面で統一",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カードのボタン行（登録する／編集して登録／✕）",
+    "issue": "3アクションの視覚強度が近く、Zフロー終端で注意が分散。✕がアウトラインボタンで主操作と競合",
+    "suggestion": "主CTAのみ塗りつぶし（現状維持）、副CTAはアウトラインのまま間隔+4pxで従属化、✕はテキストリンク（右上アイコン/ラベル最小）にして視線を主CTA→副CTAの順に流す",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

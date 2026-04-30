@@ -1,0 +1,38 @@
+[
+  {
+    "id": "DS6-DX-001",
+    "persona": "dx",
+    "severity": "HIGH",
+    "section": "§13.15.4",
+    "title": "Pre-Reviewと外部APIレビューのJSON命名衝突・cmd2混入",
+    "detail": "Pre-Reviewも `review_*.json` 形式で保存する場合、ミッション完了コマンド cmd2 の cumulative CRITICAL カウントに Pre-Review履歴（修正前の状態）が混入する。LAIS-DESIGN-REVIEW-01等で既に発生済みのstale feedback混入と同種の問題が制度化される。",
+    "fix": "命名規則を明記: (1)Pre-Review: `review_{mission}_pre_r{N}_{model}_{persona}.json`, (2)外部API: `review_{mission}_r{N}_{model}_{persona}.json`。完了コマンド cmd2 は外部APIファイルのみ対象とする（glob pattern で `*_pre_*` を除外）。§13.15.4にコマンド例を追加"
+  },
+  {
+    "id": "DS6-DX-002",
+    "persona": "dx",
+    "severity": "MEDIUM",
+    "section": "§13.15.4",
+    "title": "Pre-Reviewラウンド数の上限未定義で無限ループリスク",
+    "detail": "『CRITICAL 0 になるまで繰り返し』とあるが上限無し。Codeの判定精度が仕様書の曖昧性に敗れた場合、無限ループになる。usage limit枠の浪費+ミッション停滞リスク。",
+    "fix": "上限を明記: 『Pre-Reviewは最大5ラウンド。5ラウンドでCRITICAL 0到達しない場合はADVエスカレーション（仕様書の構造問題の可能性があるためADVが介入して設計見直し）』"
+  },
+  {
+    "id": "DS6-DX-003",
+    "persona": "dx",
+    "severity": "HIGH",
+    "section": "§15.6",
+    "title": "負債比率の計測スコープ（プロジェクト単位 vs dev-system共通）が未定義",
+    "detail": "提案ログは session_progress.md 内のセクションでアプリごとに存在。Goal AI/Lais/他アプリ横断で計測するのか、アプリ単位で独立計測するのかが未定義。複数アプリ並行開発時にどのアプリで負債返済スプリントを発動するかが判断不能。",
+    "fix": "『負債比率はアプリ単位で独立計測する。dev-system自体の負債は docs/plans/dev_system_backlog.md（新設）で別管理し、同じ閾値ルールを適用する』を明記"
+  },
+  {
+    "id": "DS6-DX-004",
+    "persona": "dx",
+    "severity": "MEDIUM",
+    "section": "§15.6",
+    "title": "適用開始タイミング『Phase 4』と現状運用の乖離",
+    "detail": "『仕様書フェーズでは提案ログの蓄積のみ』とあるが、現在 Phase 3 で既に提案ログが活発に使われている。ステータスラベル規格（✅完了/⏸保留/❌棄却/🔁実装済みだが未反映）が未統一のまま Phase 4 に突入すると、過去ログの棚卸しコストが発生する。",
+    "fix": "『提案ログのステータスラベル規格は Phase 3 から統一運用する。ラベル種: ✅完了 / ⏸保留 / ❌棄却 / 🔁実装済みだが仕様書未反映 / ⏳対応中。負債計測は Phase 4 から開始するが、ラベル運用は即時開始』に修正"
+  }
+]

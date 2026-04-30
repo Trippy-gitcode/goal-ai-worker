@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§4.2 要素仕様/セクション順序",
+    "issue": "仕様にないサーバーエラー表示ブロック（.s01-server-error）がフォーム内に追加されている。§4.2 の要素一覧・セクション順序および状態記述には、入力エラー（Email不正）のみが定義され、汎用サーバーエラー枠の記載はない。",
+    "suggestion": "Phase A では本ブロックを撤去するか、デザイン側に追認を取り仕様へ追加してください。継続実装する場合は、配置・タイポ・カラーを§4.2に追記し、色はトークンで統一（例: --danger 系の“soft”背景トークンを定義）して整合を取る。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.2 状態・インタラクション（成功時）",
+    "issue": "成功時の画面遷移アニメーション（ease-out / --duration-normal）の指定が実装に見当たらない。route('/') による即時遷移のみ。",
+    "suggestion": "遷移時に S-01→S-00 へフェード/スライド等のトランジションを付与するラッパーを用意し、ease-out と --duration-normal を適用。例: main.s01 に退場アニメーション、遷移先に入場アニメーションを CSS class で付与。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§4.2 S01-9",
+    "issue": "CTA の高さが仕様で“高さ 52px”だが、実装は min-height: 52px。環境差で 52px を超える可能性がある。",
+    "suggestion": "高さを固定値 height: 52px に統一し、行高や内側余白で縦位置を調整する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.2 S01-10",
+    "issue": "セカンダリリンクが <button> 実装。仕様では“リンク”表現であり、意味論上は <a> が適切。実装上の競合回避は理解できるが、仕様文言と要素意味論が乖離している。",
+    "suggestion": "a11y/意味論整合のため、可能なら <a href=\"/auth?mode=...\"> に戻し、onClick で route() を呼ぶ（必要なら e.preventDefault()）。競合が回避できない場合は <button role=\"link\"> + aria-label で“リンク”の意味論を補強し、仕様書に実装上の例外として追記する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.2 全体（カラー指針）/ S01-エラー表示",
+    "issue": "色指定に非トークンのリテラル色 rgba(248,81,73,0.08) を使用（.s01-server-error 背景）。§4.2/§5.0 のトークン方針と不整合。",
+    "suggestion": "背景色もデザイントークン化して参照する。--danger 系のサブトークン（例: --danger-bg-soft）を §5.0 に定義し、それを使用。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.2 S01-9（disabled時）",
+    "issue": "CTA の disabled 状態に border: 1px solid --button-disabled-border を追加しているが、仕様は“背景/文字色を §5.0 A に準拠”のみで枠線の定義はない。",
+    "suggestion": "仕様に追記して許容するか、枠線を外す。残す場合は §5.0 A のボタントークン群に --button-disabled-border を正式追加。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.2 S01-3",
+    "issue": "ラベルの letter-spacing は 1.5px 指定だが、実装は var(--letter-spacing-label) 参照。トークンの実値が 1.5px か仕様からは検証できない。",
+    "suggestion": "デザイントークン表の定義値を 1.5px に固定し、リグレッションを防ぐための可視化/テスト（スナップショットやスタイルlint）を追加。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.2 S01-9",
+    "issue": "CTA 文字色は仕様で #FFFFFF 明記だが、実装は var(--button-primary-text) を参照。現状スクショは白だが、トークン変更で乖離する懸念がある。",
+    "suggestion": "トークン値を #FFFFFF に固定する旨を §5.0 に明記、もしくは当該コンポーネントでの上書き禁止方針を定める。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

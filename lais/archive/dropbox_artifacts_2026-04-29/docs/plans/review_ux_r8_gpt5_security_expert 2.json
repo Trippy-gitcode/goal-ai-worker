@@ -1,0 +1,192 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2, §7.4 / ux_v1.md §15",
+    "issue": "AI対話とソーシャルメッセージのテーブル命名が「messages」と「social_messages」で混在。RLSの適用先を誤るとAI対話が友達に漏洩する重大リスク。",
+    "suggestion": "データモデルを明確に二分: ai_messages（AI対話）と social_messages（友達間）。スキーマ/テーブル名を固定し、RLSを各テーブルに個別定義（ai_messages: auth.uid() = user_id のみSELECT、social_messages: 送信者=auth.uid() または 受信者=auth.uid()）。E2EでRLS回帰テストを追加。参照箇所の記述を全て統一。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §5.4（QR設計）/ ux_v1.md §4.4（QR表示/スキャン）",
+    "issue": "QRコードにユーザーUUID＋24時間有効の一時トークンを含める設計。UUID露出はトラッキング・相関のリスク。24時間TTLは流出時の悪用窓が長い。",
+    "suggestion": "QRは不透明な単用途トークンのみ（UUIDは含めない）。署名付き（例: JWS）でscope=profile_preview、exp=5〜15分。表示中は自動ローテーション。サーバ側でRate Limit（IP/端末/送信者単位）とワンタイム消費（初回閲覧で失効）を実装。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §5.3-5.5 / ux_v1.md §4.4",
+    "issue": "メッセージ/応援/友達リクエストの悪用防止として文字数制限・通報・ブロックはあるが、送信レート制限やスパム検出が未定義。",
+    "suggestion": "サーバ側で送信レート制限（例: 応援: 1人/日5回、メッセージ: 1人/分1通、全体: 時間当たり上限）、重複内容の抑制、同一相手への連投クールダウン、過剰送信で自動一時ミュート。リクエストは1ユーザーあたりの同時pending件数上限も設定。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §3.3（画像添付保存）/ §7.4（データライフサイクル）",
+    "issue": "画像添付のSupabase Storageでの公開範囲・アクセス制御が未定義。デフォルト公開バケットだとURL推測や第三者アクセスで流出の恐れ。",
+    "suggestion": "Storageバケットはprivate。オーナーのみアクセス可能なRLS/ポリシーを定義し、クライアントへは短命署名URL（≤5分）を発行。ファイル名はUUID+拡張子で難読化。アップロード時にEXIF除去済みを検証し、マルウェアスキャン（ClamAV等）も導入。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §7（技術スタック/認証）全般",
+    "issue": "データ暗号化要件が未定義（転送中/保存時）。TLSやDB暗号化、鍵管理の方針が不明。",
+    "suggestion": "TLS1.3強制（Cloudflare Always Use HTTPS + HSTS preload）。DBはSupabase側のAt-Rest暗号化を確認し、必要に応じカラム単位暗号化（age/job/hobby等PIIはKMS管理鍵で）。秘密情報はCloudflare KV/Secretsで安全保管し、鍵のローテーション計画を策定。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §4.4（FRIENDS UI）/ project_v1.md §5.4（公開情報）",
+    "issue": "FRIENDSのカード/詳細で「名前」を表示としているが、公開情報は「表示名（display_name）」のみと規定。実名フィールドの誤表示リスク。",
+    "suggestion": "UIラベルを「表示名」に統一し、公開表示はdisplay_nameのみを使用。RLSで実名/年齢/職業/趣味はfriends/pending/QR閲覧でもSELECT不可を明記。設定画面に公開名の明示を追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §6.4（AIデータプライバシー）/ ux_v1.md §3（TALK初回利用想定）",
+    "issue": "第三者AIベンダーへの送信について、利用規約同意はあるが、初回AI利用時の明示的な同意取得やコントロール（オプトアウト/厳格マスキング）のUXが未定義。",
+    "suggestion": "TALK初回利用時にプロセッサ一覧（OpenAI/Anthropic/Google/Cloudflare等）、送信データ、保存期間、学習不使用を明記した同意モーダルを表示。高精度マスキング（NER）オプションや「高感度モード（URL/数値/固有表現を強制マスク）」トグルを設定に追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §7.4（データライフサイクル）/ ux_v1.md §4.3（DISCOVER）/ §13.1（対話履歴削除）",
+    "issue": "対話履歴削除時にAI理解メモはリセットされるが、DISCOVERの「強み/弱���チップ」「自己分析カード」の扱いが未定義。ユーザー意図と整合しない保持の恐れ。",
+    "suggestion": "「対話履歴を削除」時のオプションで派生データの削除/保持を選択可能に。デフォルトは削除し、再度ヒアリング/対話で再生成。データライフサイクル表にDISCOVER派生データの保持/削除ルールを追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §5.1-5.5 / ux_v1.md §4.4",
+    "issue": "友達リクエストの再送制御や同一相手への再試行クールダウンが未定義。拒否後の執拗な再申請を招く恐れ。",
+    "suggestion": "同一相手への再申請は7〜30日クールダウン。ユーザーが拒否時に「このユーザーからの今後のリクエストを拒否」チェックを提供。pending上限（例: 20件）と送信レート制限も併用。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §7.2（セッション管理）/ ux_v1.md §14（起動・オフライン）",
+    "issue": "Supabase JWT/RTの保存場所やXSS対策が未記載。PWAでlocalStorageに保存される場合、CSP不備で��ークン流出リスク。",
+    "suggestion": "厳格CSP（script-src 'self' 'strict-dynamic' nonce/sha256; object-src 'none'; base-uri 'none'等）、Trusted Types、DOMPurify等でXSS対策。可能ならセッションはメモリ保持＋SW経由リフレッシュ、localStorage使用時はサブリソース完全SRI化・外部スクリプト禁止。ログアウト時はトークン・キャッシュ全消去は既定通り維持。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §7.4（バックアップ）",
+    "issue": "バックアップとGDPRの整合（削除要求後のバックアップ残存ポリシー、復旧時の再削除手順）が未定義。",
+    "suggestion": "バックアップ保持期間（例: 7〜30日）と、災害復旧以外でのアクセス不可方針を明文化。復旧時は削除要求リストを適用して再削除。プライバシーポリシーに記載し、データ主体要求（DSR）時の運用手順を定義。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §6.5（退会フロー）/ ux_v1.md §13.4",
+    "issue": "deleted_pending（72時間）中の書き込み可否が未定義。オフラ��ンでキューされた操作が復帰時に書き込まれる可能性がある。",
+    "suggestion": "deleted_pending状態のユーザーは全書き込みAPIを明示拒否（409）。SW同期時もサーバ側で拒否。クライアントは「削除手続き中です」バナーを出し、ログインでキャンセルしない限り新規操作はブロック。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.4（シェアリンク）/ project_v1.md §5.1",
+    "issue": "友達追加用シェアリンクの一時トークンが24時間有効で単回利用制限が未記載。転送/流出時に第三者が閲覧・申請可能。",
+    "suggestion": "招待トークンは単回利用（初回プロフィール表示で失効）または初回承認成立で失効。TTLは短縮（≤60分）。送信者IDと署名でトークンを束縛し、Rate Limitを併用。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §2.5（通知設計）/ ux_v1.md §15",
+    "issue": "ロック画面通知で送信者名やメッセージ種別がそのまま表示される可能性。第三者の覗き見リスク。",
+    "suggestion": "通知の��ライバシーレベル設定を追加（詳細/簡易/非表示）。デフォルトは簡易（「応援/メッセージがあります」）。iOS/Androidの表示制限ガイドに合わせて文言を調整。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §7.3（PWA同期）/ ux_v1.md §3.2-3.3（TALK）",
+    "issue": "AI送信の冪等性/重複送信防止が未定義。オフライン復帰時に同一メッセージが複数カウント・複数課金される恐れ。",
+    "suggestion": "AIメッセージにclient_message_id（UUID）を付与し、サーバは24時間の重複排除を実装。ベンダー呼び出しもidempotency-keyをヘッダで渡し、応答キャッシュ再利用。対話回数カウンタはclient_message_idベースで集計。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §7.2（RLS: profilesの例外）",
+    "issue": "pending状態の相手にも公開フィールドSELECT可。悪用すると大量にリクエスト送信→公開プロフを収集され得る。",
+    "suggestion": "pending段階の表示はdisplay_name+アバターのみに制限し、レベル/称号は承認後に開示。pending��成レート制限とCAPTCHA（Webのみ）を導入。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-017",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §7.4（データライフサイクル: 通報データ）/ ux_v1.md §4.4（通報の証拠保全）",
+    "issue": "通報で保存される証拠の保持期間・削除基準が未定義。必要最小限・目的限定の原則に抵触する恐れ。",
+    "suggestion": "通報証拠はケースクローズ後N日（例: 180日）で自動削除。法的保全が必要な場合のみ延長し、監査ログに根拠を記録。プライバシーポリシーに保持期間を追記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §7（配信/ホスティング）/ ux_v1.md §14（起動）",
+    "issue": "PWAセキュリティヘッダ/ポリシーが未定義（CSP以外）。クリックジャッキング/広範なAPI許可のリスク。",
+    "suggestion": "HSTS（max-age≥6ヶ月, includeSubDomains, preload）、X-Frame-Options/SameSite代替のframe-ancestors 'none'、Referrer-Policy 'strict-origin-when-cross-origin'、Permissions-Policy（camera/geolocation等を必要画面に限定）、COOP/COEPの採用。CORSは最小許可。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §7.2（認証設計）",
+    "issue": "2FA/パスキー等の強固な認証オプションが未定義。",
+    "suggestion": "v0.2.0でPasskey/WebAuthnを追加（メール+パスワード継続）。高リスク操作（メール/パス変更、プラン変更）では再認証を要求。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  }
+]

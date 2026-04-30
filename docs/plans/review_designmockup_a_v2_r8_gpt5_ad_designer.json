@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s00_splash",
+    "location": "ロゴ下のサブコピー周辺",
+    "issue": "初見でアプリの提供価値が伝わりにくい（「あなたの人生を、あなたらしく」だけでは用途が不明）",
+    "suggestion": "ブランドトーンを保ちつつ、機能を示す1行の価値提案を追記（例: 「AIコーチと計画づくり・タスク管理・目標達成をサポート」）。余白は維持し、句読点区切りの3要素で3秒理解を狙う",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "主要CTA「はじめる」ボタン",
+    "issue": "CTA文言が抽象的で次に何が起きるかが曖昧（サインアップか体験開始か不明）",
+    "suggestion": "文言を「無料で始める」または「サインアップ」に変更し、下の二次CTAは「ログイン」のまま階層差を明確化。補助テキストに「数秒で完了」などの摩擦低減コピーを追加",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "DESIGN_SYSTEM",
+    "screen": "ALL",
+    "location": "画面左右のコンテンツ余白（例: s10_grow, s20_talk, s30_me の container padding 0 24px）",
+    "issue": "グリッドの左右パディングが --space-md(16px) ではなく24pxで実装されているため、design_system §4.3のモバイル1カラム基準から逸脱",
+    "suggestion": "全画面のメインコンテナ左右パディングを16pxに統一（例: padding: 0 16px）。ヒーロー領域やモーダルも同様のトークン準拠に整える",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "見出し「最初のパートナーを選びましょう」（font-size:28px; font-weight:200）",
+    "issue": "見出しで font-weight:200 を使用。design_system §3.3では200は --font-size-2xl(36px)以上限定の想定で、28px見出しは細すぎて視認性が下がる",
+    "suggestion": "見出しのウェイトを 600（推奨）または400に変更し、line-heightは --line-height-ja-heading(1.35)を維持。英字見出し時は --letter-spacing-heading を併用",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "ALL",
+    "location": "小サイズテキスト（例: s02 アバター下ラベル12px、s10 Explorerラベル12px、s14 サブ情報12px など）",
+    "issue": "12pxの本文/ラベルが散見され、タイポスケール（11/14/16/20/28/36/48）から外れている",
+    "suggestion": "12pxは使用せず、キャプション用途は11px（xs）、ラベル/補助は14px（sm）に統一。日本語本文は --line-height-ja-body(1.7) を適用",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾の「+ タスクを追加」リンク",
+    "issue": "インラインテキストリンクに下線がなく、design_system §2.2の非色依存手掛かり（必ず下線）に未準拠",
+    "suggestion": "text-decoration: underline を追加。もしくはアクセントsubtleのピルボタン（--accent-subtle + アイコン）に格上げしてCTA性を強化",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧下の��+ タスクを追加」リンク",
+    "issue": "インラインリンクに下線がなく、リンクの識別が色依存になっている",
+    "suggestion": "リンクに下線を付与（text-decoration: underline）。代替としては小型のアクセントピルボタンで視線誘導を高める",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "TodayセクションとGoals見出しの間（margin-bottom:28px相当）",
+    "issue": "セクション間隔が32px未満で、design_system §4.2（セクション間≧32px）を満たしていない",
+    "suggestion": "Today末尾のセクションマージンを32px（標準は40px）以上に拡張し、呼吸感とセクション階層の認知を改善",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayリスト全体（CTAの視認性）",
+    "issue": "主要次アクションの「+ タスクを追加」が長いリスト末尾にあり、初回ユーザーがスクロールしないと気づきにくい",
+    "suggestion": "ヒーロー領域直下にセカンダリCTAとして「+ タスクを追加」を重ねて配置、または画面右��にFAB（--z-fab, ピル/丸型）を追加して常時可視化",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s02_onboarding",
+    "location": "フッター主要CTA「次へ」（font-weight:500）",
+    "issue": "主要ボタンのウェイトが画面間で不統一（他画面の主要CTAは600が多い）。視覚的階層がぶれる",
+    "suggestion": "主要CTAは font-weight:600 に統一。サイズは16px、最小高さ44pxを維持し、--button-primary系トークンで一貫性確保",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§7.5 forced-colors 対応 / §9",
+    "issue": "`--focus-ring: 0 0 0 3px Highlight` と書いているが、CSS Custom Property に System Color キーワード (Highlight/CanvasText 等) を格納しても、box-shadow のような文脈で使用時に system color が解決されず、実質的に無効になる挙動がブラウザにある。forced-colors モードでのフォーカス可視化が破綻する可能性が高い。",
+    "suggestion": "forced-colors 時は CSS Custom Property 経由ではなく、直接 outline プロパティを使用する方針に統一。`*:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }` をトップレベルで定義。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.5 グラスモーフィズム / §9",
+    "issue": "`.glass-surface` クラスを仕様書側で定義しているが、デザインシステムは「トークンとコンポーネント仕様」を定義する層で、CSS クラス名の命名は実装責務。`.glass-surface` クラスに backdrop-filter を書くアプローチだと、クラス付けを実装者が忘れた場合カード背景が無効化される。",
+    "suggestion": "グラスモーフィズムは `:root[data-glass=\"on\"]` コンテキストで `--card-backdrop` トークンに blur() を格納し、コンポーネント側は一律 `backdrop-filter: var(--card-backdrop)` を使う。`.glass-surface` クラスは削除。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§8.5 ボトムシート / §4.4 z-index / §5 各テーマ --scrim",
+    "issue": "ボトムシートのオーバーレイを `rgba(0,0,0,0.4)` でハードコードしている一方、§5 で `--scrim` トークンを新設している（値は各テーマで 0.5〜0.6）。ハードコードと新トークンが併存しており、実装者がどちらに従うか不明。",
+    "suggestion": "§8.5 のオーバーレイを `background: var(--scrim)` に書き換え。§8 全体でオーバーレイ/scrim のハードコードを禁止。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5.0 FOUC 対策",
+    "issue": "`<html data-theme=\"night-sky\" data-glass=\"off\">` を静的に記述しても、サーバーが初回ロード時にユーザーの保存済みテーマを知らないため、localStorage 読み込み後にテーマが切り替わる一瞬のフラッシュが残る。特にログイン後のナビゲーションで顕著。",
+    "suggestion": "サーバー側でユーザー preference を Cookie に書き出し、HTML 生成時に `<html data-theme=\"...\">` を動的に出力する方針を明記。Cookie キー `lais_theme` / `lais_glass` を定義。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§8.1 Danger ボタン / §9",
+    "issue": "`color-mix(in srgb, var(--danger) 88%, black)` を hover/pressed に使っているが、color-mix() は iOS Safari 16.2+、Chrome 111+ が最小要件。Lais PWA は古い端末も対象の可能性があり、フォールバックなしでは 2025年以前のブラウザで色が抜ける。",
+    "suggestion": "各テーマで --danger-hover / --danger-pressed を静的に定義。color-mix 依存を削除。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§7.1 イージング",
+    "issue": "タブ切替の pill 移動や EXP バー進行で「ease-out + duration-fast」と指定しているが、React/Preact/Vanilla JS のどのアニメーションライブラリを使うかによって transition/animation プロパティ指定方法が異なる。CSS の transition 前提か requestAnimationFrame 前提か不明。",
+    "suggestion": "§7 冒頭にアニメーション実装の原則（「CSS transition 優先、JS アニメは最終手段」等）を追記。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": "`backdrop-filter: blur(16px) saturate(180%)` は iOS Safari 15+ でも重く、スクロール中のフレーム落ちが報告されている。Lais の TODAY タイムラインは多要素スクロール領域なので、グラス ON 時にスクロール fps が 60→30 以下に落ちるリスク。",
+    "suggestion": "グラス ON 時はスクロールコンテナ全体を囲む 1 要素のみに backdrop-filter を適用し、個別タスク行には適用しないルールを §5.5 に明示（すでに30要素上限はあるが、スクロール領域の具体例を追加）。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0 FOUC / §9",
+    "issue": "`<meta name=\"theme-color\">` を JS で動的同期する方針だが、PWA 起動時の Status Bar 色は manifest.json の theme_color も参照する。localStorage テーマと manifest の整合ルールが未定義。",
+    "suggestion": "manifest.json の theme_color は Night Sky 既定値に固定し、JS 側で動的に <meta> を上書きする二段階方式を明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  }
+]

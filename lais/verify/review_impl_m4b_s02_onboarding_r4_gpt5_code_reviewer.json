@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-401",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2. 修正後の該当 CSS",
+    "issue": ":focus-visible 時の outline が forced-colors(Windows High Contrast など)で意図と異なる描画や不可視になる可能性がある。現状、forced-colors 向けの明示的な上書きがない。",
+    "suggestion": "@media (forced-colors: active) で可視リングを OS 配色に合わせて強制表示する。例: @media (forced-colors: active){ .s02-onboarding:focus-visible { outline: 2px solid Highlight; outline-offset: 0; } }。必要に応じて outline-color: CanvasText/HighlightText の採用も検討。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-402",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. 修正後の該当 CSS",
+    "issue": ":focus-visible を未サポートの古いブラウザ(Safari ≤15.3 など)では、programmatic focus 時にもアウトラインが表示されるフォールバック挙動になる。機能的には問題ないが、意図(遷移直後は非表示)と見た目がずれる可能性がある。",
+    "suggestion": "フォールバックを厳密化したい場合、programmatic focus 実行直前後に data-attribute や一時的なクラス(.no-focus-ring)を付与し、.s02-onboarding:focus.no-focus-ring { outline: none; } → requestAnimationFrame/タイマーで除去する等の漸進的拡張を検討。ただし現状のままでもアクセシビリティ上は許容可能。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-403",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. 修正後の該当 CSS",
+    "issue": "outline-offset: -3px によりフォーカスリングが内側に食い込むため、要素や祖先に overflow: hidden があるレイアウトでは一部がクリップされる可能性がある。角丸(border-radius)との組み合わせでも視認性が下がり得る。",
+    "suggestion": "クリップ懸念がある場合は outline-offset: 0〜2px の正値を検討。または box-shadow: 0 0 0 3px var(--accent) で内外に独立リングを描くパターンを検証(ただし forced-colors では outline を優先)。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-404",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. 修正後の該当 CSS",
+    "issue": ".s02-onboarding の padding に 100px と 52px の固定値が直書きされており、意図の追跡性が低い(“魔法の数字”)。将来的なヘッダー/フッター高さ変更時の保守性が下がる。",
+    "suggestion": "CSS カスタムプロパティ(例: --header-height, --footer-height)に置き換えるか、少なくとも算出根拠のコメントを付記してコンテキストを明示する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-405",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2. 修正後の該当 CSS",
+    "issue": ":focus と :focus-visible の意図(プログラムによる focus のみ抑制、キーボード駆動は可視)はコメントで説明されているが、非対応ブラウザでのフォールバック挙動(遷移直後もリングが出る)が読み取りづらい。",
+    "suggestion": "コメントに「:focus-visible 非対応環境では常に outline が表示される(アクセシビリティ優先のフォールバック)」を追記して、想定挙動を明文化する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

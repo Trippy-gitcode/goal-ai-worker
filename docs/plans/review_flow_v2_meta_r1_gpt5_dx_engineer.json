@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改善3 / 共通ルール / 各フロー図",
+    "issue": "ゴールデンレビューの実施回数が「最終1回だけフル」と「1フェーズ最大2回」で記述が矛盾。各フロー図でも「1回限り」と明記されており不一致。",
+    "suggestion": "公式ルールを1つに統一し、2回目を実施する明確なトリガー条件（例: 主審0→ゴールデン1回目でAのCRITICAL>0なら是正→ゴールデン2回目）と承認判定（合否基準）を定義して全セクションを整合更新する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "共通（全体）",
+    "issue": "CRITICAL/HIGH/MEDIUM/LOWの定義・境界が未定義で、モデル/ペルソナ間の基準差が再発する恐れが高い。",
+    "suggestion": "各レビュー種別ごとに影響度・再現性・影響範囲の軸でSeverityルーブリック（例・アンチパターン例含む）を作成。プロンプトにfew-shotで埋め込み、裁定時はルーブリック基準に必ず言及する運用を明記する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "共通ルール / 改善4",
+    "issue": "誰が指摘の採否を最終決定し、重複統合・ラベリングを行うかのRACIが未定義。文中に出るADVの役割が未説明。",
+    "suggestion": "役割定義を追加：PO/レビュリード(ADV)/主審/ドキュメントオーナー/トリアージ担当。採否・ダウングレード・差戻しの決裁者とSLA、重複統合・追跡の責務を明記する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "改善4: 信頼度スコアリング",
+    "issue": "『修正採用率』『false positive率』の分母・分子・集計期間・重み付け（Severity別・重複除外・同一論点の再指摘扱い等）が未定義。",
+    "suggestion": "正式定義を追加：単位=指摘ID、期間=当該Phase、分母=最終ユニーク指摘数、分子=採用・修正コミットでクローズ、FP=事実誤認で却下。Severity重み・モデル一致時の優先度・信頼度更新のしきい値も明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "改善4: 信頼度スコアリング",
+    "issue": "新規ペルソナ/モデル追加時の初期信頼度が未定義でコールドスタートが運用不能になりうる。",
+    "suggestion": "初期値=B+、最小サンプルn件で暫定評価→n到達後に正式反映等のコールドスタート手順を定義。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "改善2: diffレビュー",
+    "issue": "diffレビューの入力形式が語句列挙のみで、必須フィールド・テンプレートが無く新規参加者が着手しづらい。",
+    "suggestion": "標準テンプレを定義（例: JSON/Markdown）。必須項目: context/対象ファイル・セクションID・before/after差分・影響範囲根拠・受入基準・既知リスク・関連Issueリンク・レビューポイント。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "フロー定義（A/B/C共通）",
+    "issue": "主審ラウンドの回数上限や打ち切り条件が無く、CRITICALが継続する場合に無限反復しうる。",
+    "suggestion": "上限Nラウンド/時限T設定、N到達時は強制ゴールデン or PO/ADV裁定にエスカレーションなどの停止条件を明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "共通ルール",
+    "issue": "ゴールデンで信頼度A以外のCRITICALを原則非必須にすると重大な見落としが発生しうる（特にB+）。",
+    "suggestion": "A以外でも『両モデル一致のCRITICAL』『セキュリティ/プライバシ/法令系』は必須対応にする等の安全弁、または却下時の必須根拠記述を義務化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "各フロー: 主審ラウンド",
+    "issue": "同一ペルソナでGPT-5とGeminiの判定が食い違う場合の扱い（どちらを採用/優先）が未定義。",
+    "suggestion": "原則『最大Severity採用（和集合）』を明示しつつ、信頼度に応じた重み付け・タイブレーク手順（例: Aモデル優先→人間裁定）を定義。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "背景と課題 / 改善1",
+    "issue": "コスト/時間削減効果が定量化されておらず、導入効果の検証・継続判断ができない。",
+    "suggestion": "KPIを設定（1ラウンド当たりAPIコール数/コスト・主審回数・平均��達ラウンド・CRITICAL/FP率等）。Phase A実績を基準に目標値と想定削減率を明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "A. デザインモックアップレビュー/ペルソナ",
+    "issue": "artist・illustrator・manga_coverの観点が重複しやすく、指摘の重複・冗長化リスクがある。",
+    "suggestion": "各ペルソナに固有チェックリスト（例: 構図/視線誘導/タイポ/余白）を明確化、もしくは役割統合・名称再定義で重複を低減。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "モデル指定（A/B/C共通）",
+    "issue": "指定モデルが利用不能・高コスト時のフォールバックや単一モデル運用の方針が未記載。",
+    "suggestion": "フォールバック行列（例: Claude/Command等）と信頼度の引継ぎ・再キャリブレーション手順、単一モデル時の追加安全弁（ランダムサンプル再チェック等）を定義。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "背景と課題",
+    "issue": "STAND/WAIVE/DOWNGRADE等の用語がSeverity語彙���混在しており意味が不明瞭。",
+    "suggestion": "用語集を作成し、承認状態（承認/却下/保留/ダウングレード）とSeverity（CRITICAL等）を別軸で定義。文中の表記を統一。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "全体構成",
+    "issue": "状態遷移図やラウンド命名規則がなく、新規参加者が現状位置と次アクションを把握しにくい。",
+    "suggestion": "状態遷移（初回フル→主審反復→ゴールデン→確定/再修正→エスカレーション）を図示し、r1/r2…の命名規則・入出力アーティファクトを明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改善2: diffレビュー",
+    "issue": "『影響範囲』の決め方・検証方法が未定義で、過少申告により重要箇所が未レビューとなるリスクがある。",
+    "suggestion": "影響範囲の決定手順（変更マップ作成・関連トークン/セクションの自動抽出・レビュー側の拡張権限）と、スポットチェック（ランダム/高リスク領域）の導入を明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "改善3 / 共通ルール",
+    "issue": "2回目ゴールデンでCRITICAL>0時のPOエスカレーション後の意思決定オプションやSLAが未定義。",
+    "suggestion": "決定木を定義（延期/仕様変更/スコープ削減/技術的負債チケット化+期限等）と、判断SLA・責務（PO/ADV/オーナー）を明文化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "改善4: 信頼度スコアリング",
+    "issue": "信頼度更新がPhase完了時のみで、フェーズ中に精度が急低下したケースへ即応できない。",
+    "suggestion": "フェーズ中の暫定調整ルール（例: 直近m件でFP>p%なら一時的に1ランク降格→ゴールデン終了時に確定反映）を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "共通（全体）",
+    "issue": "HIGH/MEDIUM/LOWの扱い（受入基準・記録/追跡方針・許容閾値）が未記載で、非クリティカル指摘が負債化しやすい。",
+    "suggestion": "非クリティカル用の運用（バックログ登録必須・HIGHの許容件数閾値・次フェーズ移送基準���期限/担当割当）を明記し、合否判定はCRITICALだけでなく総量指標で補完する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

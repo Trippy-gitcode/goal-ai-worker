@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "背景の星（ドット）の配置",
+    "issue": "星の配置が中途半端で、意図的な構図（設計された沈黙）として機能しておらず、単なる装飾的ノイズに見える。ブランドDNAの「洗練」を損ない、ありきたりな宇宙モチーフに陥っている。",
+    "suggestion": "星を完全に削除し、広大なダーク背景（沈黙）とロゴのタイポグラフィのみで空間の美しさを表現するか、黄金比に基づいた極めて意図的な数点のみに絞る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスクリスト左ボーダー",
+    "issue": "タスクカードの左ボーダー（色線）によるタイムライン表現が、視覚的な分断を生んでいる。線とテキストの間に不自然な空白ができ、視線が散漫になる。また、要素が等間隔に並びすぎておりリズムがない。",
+    "suggestion": "左ボーダーを廃止し、時刻とタスクの間に微細なドットを用いた控えめなタイムラインを配置する。タスク間の余白に強弱をつけ、時間的間隔を感じさせるリズムを生み出す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "AIとユーザーのメッセージバブル",
+    "issue": "AIのメッセージが左ボーダーのみ（背景なし）であるのに対し、ユーザーは背景色ありのバブル。視覚的ウェイトの非対称性が強すぎ、対話としてのバランス（視覚的緊張感）が崩壊している。AIのテキストが背景に浮遊して見える。",
+    "suggestion": "AIのメッセージにも極めて薄い背景色（surface色）を敷くか、ユーザー側のバブルの背景をなくしインデントの���で区別するなど、両者の視覚的ウェイトのバランスを再設計する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "所要時間の選択チップ群",
+    "issue": "選択チップが等間隔で横に羅列されており、枠線（border）の連続が視覚的なノイズ（ワイヤーフレーム感）を生んでいる。情報過密で「息苦しさ」を感じ、Open Airの原則に反している。",
+    "suggestion": "チップの枠線を廃止し、選択状態のみ背景色で示し、非選択状態はテキストのみ（または極めて薄い背景）にして、余白（沈黙）によって要素を区切る設計を徹底する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "画面下部のアクションボタン群",
+    "issue": "4つのボタン（編集、削除、振り返りを聞く、次につなげる）が同じような矩形で密集しており、アクションの優先順位（視覚的階層）が不明瞭。視線が迷子になる。",
+    "suggestion": "破壊的アクション（削除）はテキストリンクのみに降格させ、AIアクション（振り返り等）は形状を丸くするなど、ボタンの形態と周囲の余白で機能の差異を直感的に伝える設計にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "ALL",
+    "location": "画面全体のセクション間マージン",
+    "issue": "全体的に要素間のマージン（padding/gap）が数学的に均等であり、NGリストの「全要素が等間隔」の気配がある。画面全体としての「間（ま）」のダイナミズムに欠ける。",
+    "suggestion": "セクション間の余白（--space-xl: 40px）をより大胆に取り、コンテンツの密集部と完全な空白部のコントラスト（疎密）を意図的に作り出し、深呼吸できる空間を作る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "「60%」の進捗表示とプログレスバー",
+    "issue": "「60%」の巨大なタイポグラフィの下にある進捗バーが、数字の視覚的インパクトに対して物理的に近すぎ、かつ太すぎるため、タイポグラフィの美しさを殺している。",
+    "suggestion": "進捗バーを極細（2px程度）にする���、数字の周囲の余白を現在の2倍以上に広げ、数字自体が持つ造形美を際立たせる「設計された沈黙」を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "ORIGINALITY",
+    "screen": "s30_me",
+    "location": "AI理解メモセクション",
+    "issue": "単なるテキストの羅列になっており、他のUI要素との視覚的な差別化が図れていない。AIの「知性」や「有機的な理解」を感じさせる表現が欠如している。",
+    "suggestion": "メモの背景に微かなグラデーション（NGリストに抵触しない範囲の単色濃淡）や、左端にアクセントカラーの極細ラインを添えるなど、システム的なリストとは異なる「読み物」としての静かな佇まいを与える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "アバター選択肢のハイライト表現",
+    "issue": "アバターが横一列に並んでいるが、選択状態の青いリング（box-shadow）が隣のアバターとの余白を侵食しており、空間が窮屈に見える。",
+    "suggestion": "アバター間の余白を広げるか、選択状態の表現���外側のリングではなく、アバター自体のスケールアップ（1.1倍）と背景の微細な変化で表現し、空間をクリーンに保つ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s01_signin",
+    "location": "サインアップボタン",
+    "issue": "未入力状態でダークグレー（#1C2128）になっているが、背景（#0D1117）とのコントラストが低く、かつ周囲の入力欄の枠線と同化してしまい、アクションの終点としての視覚的フローが弱い。",
+    "suggestion": "未入力状態であっても、ボタンの形状や存在感を明確にするため、微かなアクセントカラーの枠線を持たせるか、透明度を調整して「押せそうだがまだ押せない」状態を美しく表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  }
+]

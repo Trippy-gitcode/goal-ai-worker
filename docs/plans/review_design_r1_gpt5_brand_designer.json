@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§5 テーマ定義 / project_v1.md §3.5, §8.1 / ux_v1.md §5.2, §0.2",
+    "issue": "デザインシステムは3テーマ（Night Sky / Dawn / Adventure）だが、プロジェクト/UXではオンボーディング等で4テーマ（Night Sky / Dawn / Harajuku Light / Harajuku Dark）を前提としている。テーマ数・命名が不一致。",
+    "suggestion": "どちらかに統一する。推奨: Harajuku Light/Darkを正式テーマとして§5に追加（カラー/タイポ/余白/アクセント/semantic overrides/アクセントsubtle/ガラス設定含む完全なトークンセットを定義）。AdventureはHarajukuに改称するか、4テーマ化する場合はAdventureも並走させUX/オンボ導線を更新。全ファイルのテーマ言及を一括置換。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§9 AI実装向けCSSトークンブロック",
+    "issue": "コードフェンス/ブロックが破損しており、:rootブロックが途中で切れた後にトークンがフェンス外に続く。コピペ実装（dev-system §19.9前提）で確実に構文エラーに��る。",
+    "suggestion": "CSSブロックを完全に書き直し、1つの```cssフェンス内で:root { … }を正しくクローズ。Night Skyをデフォルトにしつつ、data-themeごとの差分ブロックも続けて提示。欠落中のトークン（例: --on-accent, subtle系, progress系）も含め、AIがそのまま貼れる完成形に修正。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§1.4 NGリスト（エフェクト）/ §7.1 基本イージング / ux_v1.md §1.3, §8.1",
+    "issue": "デザインシステムはease-in-out禁止かつspring系限定としているが、UXではease-out/ease-in/ease-in-outを多数指定。原則とトークン運用が不整合。",
+    "suggestion": "全アニメーションのeasing/duration指定をトークン化して統一。UX側のease-系指定を --spring-default/--spring-gentle/--spring-bouncy に置換。必要ならspringトークンを3→5種に拡充（例: --spring-fast, --spring-exit）。NGリストは「直指定のease-*禁止（トークン経由のみ可）」に言い換える。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§8.1 ボタン / §5.1-5.3 テーマ",
+    "issue": "Primaryボタン=背景 --accent + テキスト #FFFFFF は、DawnやNight Skyのアクセント値でコントラスト比がAA未達の可能性が高い（白文字×明るいアクセント）。",
+    "suggestion": "テキスト色をトークン化（--on-accent）し、テーマ別にAA基準（4.5:1）を満たす色を定義。必要に応じて--accent自体の明度/彩度を微調整。Danger/Success等のsemanticボタンも--on-danger等を追加し、全テーマでコントラスト監査を通す。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§1.4 NGリスト（色）/ §5.2 Dawn, §5.3 Adventure",
+    "issue": "NGで「純白 #FFFFFF の使用禁止」と明記している一方、Dawn/Adventureの --bg-surface と --bg-elevated に #FFFFFF を使用しており自己矛盾。",
+    "suggestion": "Dawn/Adventureのsurface/elevatedをオフホワイト系（例: #FFFDF9 / #FDF9F4）へ調整し、NGと一貫。NG文言も「UI全面への#FFFFFF直使用禁止（必要時は僅かな色温度/明度オフセット）」のように実運用へ寄せる。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.3 Adventure / §8.4 タイムライン",
+    "issue": "縦ラインをグラデーションで表現（--timeline-line: linear-gradient）としているが、borderプロパティはlinear-gradientを直接受け取れない。",
+    "suggestion": "実装指��を明記: 1) 擬似要素でwidth:2pxの縦背景にlinear-gradientを適用する、または 2) border-imageでグラデーションを適用する。トークン名も --timeline-gradient に変更し、使用先はbackground/border-image限定と注記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.2 セマンティックカラー / §5 テーマ / §9 CSSトークン",
+    "issue": "セマンティックカラーは「テーマごとに調整」とあるが、実体としてはNight Sky値のみ。Dawn/Adventure（およびHarajuku系）用の --success/--danger/--warning/--info オーバーライドが未定義。",
+    "suggestion": "各テーマブロックでsemanticの各色を再定義し、ライト/ダーク別にコントラスト最適化。--success/--danger等に加え、--on-success/--on-dangerもセットで定義。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.3 チップ/バッジ / §8.1 ボタン / §9 CSSトークン",
+    "issue": "「semanticのsubtle版」を前提にしているが、--success-subtle/--danger-subtle 等のトークンが未定義。Dangerボタン指定「--danger / subtle」も曖昧で実装不可。",
+    "suggestion": "subtle系を追加: --success-subtle, --danger-subtle, --warning-subtle, --info-subtle（RGBA推奨）および対応テキスト色 --on-success-subtle などを定義。8.1の表記は具体トークン名に置換。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.4 / lais_design_system.md（未定義）",
+    "issue": "Overdue（期限切れ）用のアクセント/背景/テキストカラーがデザインシステムに存在せず、プロダクト仕様の色要求を満たせない。",
+    "suggestion": "トークン追加: --overdue, --overdue-subtle, --on-overdue。各テーマで視認性/アクセシビリティを満たす値を定義。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.1 スペーシングスケール / §4.2 レイアウト原則",
+    "issue": "タスク間余白「20px以上」とスケール（16/24px）の不一致。実装時にどのトークンを使うか判断が割れる。",
+    "suggestion": "20pxを正式トークン化（--space-md-lg: 20px 等）するか、ガイドを24pxに寄せて統一。具体レイアウト例に推奨値を明記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§3.3 ウェイト・行間",
+    "issue": "system-ui系フォントでfont-weight:200はプラットフォームにより未対応/視認性低下のリスク（Windows/Androidで極細化）。",
+    "suggestion": "ウェイトをトークン化（--weight-display/--weight-body/--weight-heading）し、実デバイス検証に応じて 300/400/600 などにフェイルセーフ。Thin使用時は文字サイズ上限や色コントラスト条件を付記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§1.1 ブランドDNA / §8 コンポーネントトークン（未定義）",
+    "issue": "ブランドの核（EXP/レベル/静かな快楽）がUIで一意に識別できる要素に十分落ちていない。特にEXP/プログレスのビジュアル言語がトークン化されていない。",
+    "suggestion": "プログレス系トークンを追加: --progress-track, --progress-fill, --progress-height, --progress-radius, --exp-float-bg/--exp-float-text。レベルアップ演出の色/グローも --celebration-glow, --celebration-particle-color としてテーマ別定義。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§1.4 NGリスト（レイアウト） / ux_v1.md §11.1",
+    "issue": "NGで「モバイル3列以上のグリッド禁止」としつつ、UXでは大型スマホで友達グリッド3列を想定。ルールが衝突。",
+    "suggestion": "NGルールを「標準幅は2列、429px以上は最大3列まで許可」に緩和し、ブレークポイント条件を明文化。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5 テーマ定義（全体）",
+    "issue": "テーマの性格差が主に色に依存しており、タイポ/角丸/アニメーション気質/ガラス強度など他トークンでの差別化が弱い。",
+    "suggestion": "軽微な差別化を導入（ブランド整合の範囲で）。例: Adventure=--spring-bouncyの振幅/overshootやボタン半径+2px、Dawn=--accent-subtleのalphaを高めに、Night Sky=borderコントラストを強めに。テーマ別の--radius-scale, --shadow-elevation(=0/極小), --glass-opacity を追加し「性格」を視覚化。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§7.4 触覚フィードバック",
+    "issue": "navigator.vibrateはiOSで非対応のため、設計通りの触覚が再現されない環境がある。",
+    "suggestion": "対応判定とフォールバックを明記。例: if ('vibrate' in navigator) でガードし、非対応時は視覚/音の強調（短いscale/opacityアニメーション）で代替。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§6.1 アイコンスタイル",
+    "issue": "stroke-width:1.5pxを固定指定。20/24/32px全サイズで視認性が最適とは限らない（細すぎ/太すぎの環境差）。",
+    "suggestion": "サイズ別ストロークトークンを用意（--icon-stroke-20, --icon-stroke-24, --icon-stroke-32）。DPRとコントラストに応じて1.25/1.5/1.75pxなどチューニング可能にする。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  }
+]

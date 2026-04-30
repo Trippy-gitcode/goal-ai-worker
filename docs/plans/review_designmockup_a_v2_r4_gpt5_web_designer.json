@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部の「すでにアカウントをお持ちですか？ ログイン」行の「ログイン」テキストリンク",
+    "issue": "リンクが色差のみで表現され下線がないため、周囲の本文と視覚的に十分区別できない（WCAG 1.4.1 色の使用に抵触）",
+    "suggestion": "インラインリンクには常時 text-decoration: underline を付与し、ホバー/フォーカス時は下線太さや色を強調。もしくはボタンスタイルにして色以外の手掛かり（枠・アイコン）を追加",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s02_onboarding",
+    "location": "ヘッダー左上の戻る矢印（20pxアイコン）",
+    "issue": "タップターゲットが44×44px未満の可能性が高い（明示的なヒットエリアなし）。design_system §4.5 の --tap-target-min(44px) に不適合",
+    "suggestion": "戻る矢印に透明パディングまたはヒットスロップを付け、実効タップ領域を44×44px以上に拡張。視覚サイズは据え置きでOK",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "ヘッダーの3アイコン（左:メニュー/右:履歴・新規チャット、各22px）",
+    "issue": "各アイコンに明示的な44×44px以上のタップ領域が設定されていない（ヘッダー高さ48pxだが左右パディングが狭く誤タップリスク）。design_system §4.5違反",
+    "suggestion": "各アイコンに44×44pxのクリック領域を確保（ボタン要素化または::beforeで透明パディング）。フォーカスリング/押下状態も付与",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "ヘッダー左上の戻る矢印（20px）",
+    "issue": "戻るボタンの実効タップ領域が44×44px未満に見える。操作頻度の高いナビ要素でタップミスの懸念",
+    "suggestion": "44×44px以上のヒットエリアを確保し、左右のタッチマージンを追加。iOS標準のスワイプバック非対応端末でも確実に操作できるようにする",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾の「+ タスクを追加」テキストCTA（行：padding:10px 0）",
+    "issue": "縦方向のパディングが小さく、タップ高さが44px未満。主要CTAとしては誤タップ/押しづらさがある",
+    "suggestion": "行全体をボタン/リストアイテム化し、min-height:44px以上を保証。左に+アイコン、右にchevronなど形状手掛かりも追加",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayリスト1件目（完了タスクの緑色カード、左ボーダー＋強い塗り）",
+    "issue": "完了済みタスクの緑ティントが強く、これから実行すべき未完了タスクより視覚的に目立ってしまい視線が逆誘導される",
+    "suggestion": "完了タスクのコントラスト/塗りをさらに弱め（テキストストライク＋アイコンのみ程度）、未完了タスクの時刻側インジケータや次タスク行の背景ハイライトで『次にやること』へ視線を誘導",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Todayセクション見出し直下の進捗テキスト「1 / 4 completed」（font-size:11px）",
+    "issue": "重要な日次進捗が--font-size-xs相当で視認性が低い。日本語UIでは説明的情報に11pxは読みにくい",
+    "suggestion": "14pxへ引き上げ、ラベル（例: 今日の進捗）＋小アイコンで意味付け。位置もToday見出し行に統合し一瞥で把握できる配置に",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s14_goal_detail",
+    "location": "進捗表示（大きな「60%」＋直下の進捗バーの二重表現）",
+    "issue": "数値とバーが近接して重複情報になっており、上部がやや冗長。視線が数字とバーで往復しやすい",
+    "suggestion": "どちらかを主役化（例: 数字を22–28pxへ縮小し、バーを太め8px維持）し、数字はバー右端に小さく添えるなどレイアウトを統一",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s20_talk",
+    "location": "タスク提案カードのヘッダー「タスクにしますか？」（font-size:11px）",
+    "issue": "カード見出しのサイズが本文と近く階層差が弱い。カード全体の情報階層がやや平坦",
+    "suggestion": "見出しを13–14px＋セミボールドにし、サブラベルを11–12pxで補助に落とす。左ボーダーまたは小アイコンでカード種別も明示",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "OTHER",
+    "screen": "s30_me",
+    "location": "サブタブの英字ラベル（PROFILE/DISCOVER/FRIENDS/SHOP）",
+    "issue": "日本語UI内で英字のみのタブラベルは一部ユーザーに直感的でない可能性。意味理解に一拍置かれる",
+    "suggestion": "日本語補助ラベル（例: プロフィール/発見/友達/ショップ）を小さく併記、またはアイコンの意味性を強化してラベルの言語依存度を下げる",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "ロゴ直下のタグライン（color:#7A8593）と星の装飾",
+    "issue": "星の装飾のコントラストが非常に弱く、装飾意図が伝わりにくい一方で、視線がロゴ→CTAへ落ちる途中で要素が少なくやや間延び感",
+    "suggestion": "星の密度をロゴ周辺��寄せる/サイズ微増で『Night Sky』らしさを少し強調。タグラインの字間をわずかに締め、ロゴとの距離を数px詰めて視線の落下を滑らかに",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン（無効状態）とフォーム全体",
+    "issue": "無効理由がUI上で明示されず、何を満たせば有効化されるかが直感しづらい（入力未完了 or 規約同意の不足など）。操作迷子の恐れ",
+    "suggestion": "未充足条件に応じてボタン上/直上に短いヒント（例: 「利用規約に同意すると続行できます」）を表示。フィールド完了時は即時フィードバックで段階的に有効化",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

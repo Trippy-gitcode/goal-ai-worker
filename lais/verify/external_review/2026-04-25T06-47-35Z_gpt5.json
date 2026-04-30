@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §2.8 deploy.sh パッチ周辺（約 L798-L860）",
+    "issue": "コードブロック内の deploy.sh サンプルが HTML エンティティ化と 1 行化で破壊されており、`if`/`fi` や改行前提のシェル構文が成立していません。`&gt;` や `\\[` を含むため、そのまま参照実装として転記すると即座に構文エラーになり、デプロイ不能または誤動作を起こします。",
+    "suggestion": "当該コードブロックを事故前のプレーンテキスト shell に戻し、HTML エスケープ済み文字列を全撤去してください。少なくとも `if/then/fi`、リダイレクト、`sed`、`jq`、パイプの各行を原文復元し、`sh -n` と最小実行サンプルで文書内コードの機械検証を追加すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md hflow_trigger_check.sh 節（約 L882 付近）",
+    "issue": "`get_changed_files()` 関数の `case ... esac` 直後に単独の ``` が混入しており、コードブロック���界が壊れています。文書生成や Markdown レンダラによっては以降の関数終端 `}` や後続説明全体がコード扱い/非コード扱いに崩れ、仕様書の参照性とコピペ実行性が失われます。",
+    "suggestion": "この節のコードフェンス開始・終了位置を再確認し、関数本体全体が単一の shell コードブロックに収まるよう修正してください。合わせて Markdown lint と、`awk` 等でコードフェンスの開閉数一致を検証するチェックを pre-commit または `spec_lint_extended.sh` に追加すると再発防止になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "fail-closed を掲げつつ、stdin 空時は `[SKIP] stdin 空` で通過、override 時も無条件通過、さらに dedupe ファイル作成失敗も無視しています。Hook 実行条件や入力形式が少し変わるだけで検査が silently skip されるため、後日「ゲートが効いている前提」で運用した際に違反応答が素通りする潜在バグになります。",
+    "suggestion": "fail-closed と fail-open の境界条件を明文化し、`stdin 空` を許容するのは `--test` 等の明示モードに限定してください。通常 hook 実行時は `hook_event_name`/`session_id`/応答本文の欠落を block 対象に寄せ、skip 分岐はログだけでなく発火コンテキスト別に厳密判定する実装へ寄せるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "scripts/adv_response_gate.sh §2.25.11 判定部",
+    "issue": "直前 3 ターン整合性チェックが `tail -c 16384` した transcript 全文に対する単純 grep で、「不要」「却下」が過去の古い文脈や引用文に含まれるだけでも現応答を矛盾扱いする設計です。誤検知で応答を block しやすく、実運用で正常応答が止まり続ける原因になります。",
+    "suggestion": "transcript は JSON/構造化形式を前提に直近数メッセージだけを厳密抽出し、話者とターン順序を認識した上で比較してください。少なくとも現在は“直前 3 ターン”という仕様に実装が一致していないため、仕様を緩めるか、Python で最後の assistant/user メッセージを構造的に読む実装へ変更すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md 全体（特に §C5〜§15 周辺）",
+    "issue": "Markdown テーブルや箇条書きが多数 1 行化され、`[learned-patterns.md](http://learned-patterns.md)` や `[deploy.sh](http://deploy.sh)` のような不正なリンク化まで混入しています。仕様書としての可読性低下に留まらず、参照先誤認・検索不能・自動抽出失敗を招き、後日チェーン更新や grep ベースの検証が壊れる可能性が高いです。",
+    "suggestion": "事故復元後に混入した Markdown 破損を一括修復してください。特にローカルファイル名は通常テキストか相対リンクで統一し、`http://...` 化された疑似URLを排除するべきです。`markdownlint` や独自のレンダリング差分検証を CI/pre-commit に入れ、表・コードフェンス・リンク形式を機械検査してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "tests/adv_gate_e2e.sh",
+    "issue": "テストケースの `SID` が `date +%s` ベースで生成されており、同一秒内に複数回走ると `adv_response_gate.sh` の dedupe に引っかかって block/pass 判定が不安定になります。今は連番を足しているものの��並列実行や再実行時のログ依存で偽陽性・偽陰性が起こりやすく、回帰テストとして脆いです。",
+    "suggestion": "セッションIDは PID・ナノ秒・乱数を含めて衝突可能性を下げてください。また dedupe ディレクトリをテスト前後で隔離するか、一時 HOME を使って副作用を閉じ込めるべきです。E2E テストは本体ログや既存状態に依存しない hermetic な構成にすると保守しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "tests/persona_review_e2e.sh / logs/persona_review.log / scripts/persona_selector.sh",
+    "issue": "テストが本番ログ `logs/persona_review.log` を直接読み書きし、件数判定も累積行数に依存しています。既存ログがあるとテストが通りやすく、空環境や並列実行では壊れやすいです。さらにログ内の表記揺れ（`SW アーキテクト` と `SWアーキテクト`）も混在し、将来 grep 条件が壊れる温床です。",
+    "suggestion": "ログ出力先を環境変数で差し替え可能にし、テストでは一時ファイルを使ってください。件数検証は増分比較にし、固定の過去ログに依存しないよう���するべきです。ペルソナ名は定数化し、表記揺れを一括正規化してからログ出力・grep 判定するのが安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "evidence/MISSION-G49-PKG/PHASE2.1-RESEARCH/settings_json_patch.md",
+    "issue": "`~/.claude/settings.json` へ SessionStart/Stop hook を user レベルで追加する設計は、プロジェクト外セッションや別リポジトリにも副作用が波及します。コマンド中で `cd /Users/futoshi/Desktop/goal-ai-worker` を前提化しているため、存在しない環境では静かに fail-open し、利用者は hook が有効だと誤認しやすいです。",
+    "suggestion": "可能なら project ローカル設定へ閉じ込め、user 設定に入れる場合は `cwd` や対象 repo の存在確認を明示して通知を出してください。少なくとも“全セッション共通設定”であることを強く記載し、他リポジトリに影響しない切替方法・ロールバック手順・適用確認コマンドをより厳密に定義するべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.1127,
+    "input_tokens": 72734,
+    "output_tokens": 2183,
+    "model_id": "gpt-5.4"
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案① §3.3 ENG起動時Read / 改訂案④ §5.2 ミッション定義テンプレート v4 / 改訂案② §8 Step 10-12",
+    "issue": "ENGは「session_progress.md のキュー先頭ミッション定義に書かれた完了コマンド以外を実行しない」とされている一方、v3.4ではデプロイ後検証（verify_env.sh / verify_external_services.sh / realworld E2E）や提案ログ更新、Step 0 lint等、ミッション定義外でも仕様上必須の実行が多数追加されている。このままだとENGの自律範囲がミッション定義に閉じすぎており、§8や§1.5で必須化した運用をENGが実行できない仕様衝突になる。",
+    "suggestion": "§3.3 を「ENGはキュー先頭ミッション定義および該当フローで必須化されたコマンドのみ実行する」に修正し、ミッション定義外でも dev_system_spec の該当フローで要求される検証・記録・ゲート実行は許可されることを明記する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案① §C1 書き込み規約 / 改訂案① §3.2 ADV起動時Read / 改訂案③ §1.5.3-§1.5.4 / 改訂案③ E",
+    "issue": "§C1で「ADV/POはコードを書かない・読まない」と規定している一方、改訂案③では提案ログの新規追記・ステータス遷移・全項目の滞留セッション数更新を ADV が毎セッション実施する仕様になっている。しかし session_progress.md が ADV の書き込みホワイトリスト内か本パッケージ内で示されておらず、§C1との整合が不明である。ADVが更新責務を負うのに書き込み許可根拠が欠けている。",
+    "suggestion": "§C1 か sub_adv_protocol.md §1 参照箇所で、session_progress.md（提案ログ含む）が ADV 書き込み許可対象であることを明記し、提案ログ更新は例外ではなく既定動作であると接続する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案② D.1 scripts/verify_env.sh",
+    "issue": "Cloudflare Pages の環境変数検証で `wrangler pages secret list` を前提にしているが、Pages の公開用ビルド変数と Worker/Functions の secret は性質が異なり、仕様文中でも Step10 は「PaaS側の実設定値を照合」としているのに、実装例は VITE/PUBLIC 系を dist grep、その他を secret list に分岐しており、Pages 環境変数全体の検証を一貫して満たしていない。結果として未設定の build-time/runtime 変数を取りこぼす高確率がある���",
+    "suggestion": "verify_env.sh の検証対象をプロバイダ別に再定義し、Cloudflare Pages で取得可能な設定ソースと不可視な設定ソースを明確に分ける。取得不能な項目は FAIL ではなく明示的 WARN+手動確認へ落とし、Step10 の仕様文もその限界に合わせて修正する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案⑤ B/C/D/F（§10.4 サブディレクトリ構成、init_app.sh --subdir、pre-commit-sub、G13）",
+    "issue": "サブディレクトリアプリ配下に `.git/hooks/pre-commit-sub` を配置する設計は、通常そのサブディレクトリ自体には `.git` が存在しないため成立しない。親 pre-commit から `cd <SUBDIR> && [ -f .git/hooks/pre-commit-sub ]` を見る実装も、subdir/.git がない構成では常に不成立になる。これによりB2/B3対策として定義したフック連鎖が実際には発火しない。",
+    "suggestion": "pre-commit-sub の配置場所をサブディレクトリ内の通常ファイル（例: `<SUBDIR>/scripts/pre-commit-sub.sh`）へ変更し、親 pre-commit からそのパスを直接実行する設計に改める。G13 も `.git/hooks/pre-commit-sub` ではなく実際の配置先を検証���象に更新する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案⑤ E canopy 発火ログ永続化 / 改訂案⑤ G 連鎖更新 / 改訂案③ §15.3",
+    "issue": "canopy 発火履歴確認のため §15.3 項目11追加と記載しているが、改訂案⑤の連鎖更新表では dev_system_spec.md §15.3 に「項目11（canopy発火履歴）追加」とある一方、実際の本文では項目10までは改訂案③で明示されているものの、項目11の正式な追記本文がこのパッケージ内に存在しない。棚卸しフローとの整合が欠けている。",
+    "suggestion": "§15.3 の最終版に項目11本文を明示的に追加し、改訂案③の項目10と連番が衝突しない最終形を本パッケージ中に確定記述する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改訂案① E/F（全22フローへのStep 0追加、G11 step0_lint.sh）",
+    "issue": "Single Source of Truthとして『本文は§C1-C6のみ、フロー側は参照1行のみ』を掲げているが、G11実装は dev_system_spec.md 内17フローと別ファイル5フローを固定文字列で検出するだけで、実際に『全22フ��ー』の定義一覧そのものを正本化していない。フロー追加・名称変更時に linter 側だけ古くなると、Step0追加漏れを検知できない。",
+    "suggestion": "全22フロー一覧の正本を dev_system_spec 側に持ち、step0_lint.sh はその一覧を入力として検証するか、少なくとも対象一覧の正本セクションを明示してスクリプトと同期ルールを定義する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "改訂案② B/F（§8 Step12 実機E2Eスモーク / deploy.sh拡張）",
+    "issue": "Step12では realworld E2E 失敗時に rollback は『提案のみ・即実行しない』とされるが、deploy.sh 実装は単に exit 1 で終了するだけで、session_progress.md への記録・失敗L1項目の保存・rollback候補の明示という仕様本文のリカバリ手順を実装していない。AI誤判定時の復旧情報が残らず、再現性が落ちる。",
+    "suggestion": "deploy.sh に失敗時の記録処理を追加するか、少なくとも『session_progress.md への記録は別フローで必須』と明示して、Step12のFAIL後に誰が何を書き残すか責務を確定する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "改訂案① G（development_rules.md G1-G9 Step0追加） / 改訂案① E（全22フロー一覧） / §4.1",
+    "issue": "development_rules.md 側は『G1-G9』にStep 0追加と書かれている一方、改訂案②〜⑤では G11/G12/G13 が新設される。起動時参照規範を品質ゲートに統一適用する方針なら、新設G11-G13が対象外のまま残るのは一貫しない。",
+    "suggestion": "development_rules.md 側の対象を G1-G13 に更新するか、G11-G13は dev_system_spec / sub_infrastructure 側のみの内部ゲートで development_rules の対象外とする旨を明記する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改訂案④ A/D/E",
+    "issue": "ミッションテンプレを『v4』に改訂しつつ、物理ファイルは `mission_template_v2.md` のまま、本文では『v3（実装: v4仕様準拠）』とする記述になっており、版管理が三重化している。AIが参照時に v2/v3/v4 のどれを根拠にすべきか曖昧で、責務境界よりも運用誤読を招く。",
+    "suggestion": "ファイル名維持が必要でも、仕様上の呼称は1つに統一する。例: 『ファイル名は歴��的理由で v2、内容仕様名は v4』を明文化し、他セクションでは v4 のみを使用する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "改訂案⑦ C（§16.8 auto-compact引継ぎルール）",
+    "issue": "auto-compact発動後の確認フローは定義されているが、保持必須項目が欠落していた場合の復旧責務と完了判定が未定義である。『Readし直して継続』だけでは、どこまで再読すれば安全に再開できるか、誤った判断をした後にどの地点までロールバックするかが曖昧。",
+    "suggestion": "§16.8 に、欠落検知時は『該当ファイル再読→ミッションID再確認→直前コマンド未実行扱いで再開』などの再開基準を追加し、誤記憶での続行を明示的に禁止する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  }
+]

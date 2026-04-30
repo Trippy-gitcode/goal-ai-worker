@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §1.4, §2.3(S-11/S-13), §6.1",
+    "issue": "編集中（タスク編集インライン/モーダル入力）にボトムタブ切替やタブ再訪、ディープリンク遷移が発生した場合の未保存データ保護が未定義。タブ切替はhistoryに積まれず即時切替のため、確実に入力が消失するリスクがある。",
+    "suggestion": "グローバルの未保存ガードを定義し、ルート変更（タブ切替・ディープリンク・popstate）前にdirty stateを検知→確認ダイアログ（保存/破棄/キャンセル）を表示。タブ切替時はハーフモーダル/インライン編集のdirty判定を統一し、キャンセル選択時は遷移をブロック。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md §2.3(ドラッグ&ドロップ)/lais_project_v1.md §3.2 Today表示ロジック",
+    "issue": "Todayセクションは開始時刻順ソートと定義されている一方、UXではロングプレスで手動並び替えし、その順序を保存とある。時間順と手動順の優先関係が矛盾/未定義。",
+    "suggestion": "優先ルールを明記: 例）開始時刻が未設定のタスクのみ手動並び替え可／“手動順で表示”トグルを提供し、ON時は全タスク手動順>OFF時は時刻順。UI上も並び替え適用中はインジケータを表示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §4.4(QRスキャン 手順3), lais_project_v1.md §7（PWA）",
+    "issue": "QR検出時のVibration APIによるフィードバックはiOS Safari/PWAで未サポートのため、iOSでは無反応になる可能性が高い。",
+    "suggestion": "navigator.vibrate存在チェックで分岐し、非対応環境ではミクロアニメーション（スキャン枠の一瞬のグロー/スケール）や音（ユーザー許諾後）で代替。将来のネイティブラッパーではHapticEngine/振動を追加で実装できる旨を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md §1.4（history.pushStateポリシー）, §2.4(S-14) ",
+    "issue": "タブごとのナビゲーションスタック保持（iOS/Material標準）が未定義。S-14など詳細画面表示中に他タブへ遷移→元タブに戻った���のスタック復元可否が不明で、一貫しない戻り体験の恐れ。",
+    "suggestion": "各タブで独立スタックを保持し、タブ切替時はスタックを維持（ただし明示的にreplaceStateで閉じる設計箇所は例外）を明記。戻った際に直前の詳細/スクロール位置を復元するルールを追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §1.3（ボトムタブ切替アニメーション）",
+    "issue": "タブ切替をコンテンツのクロスフェードにしているが、iOS/Materialではタブは即時切替（状態保持）で大きな画面遷移感を出さないのが一般的。過度なフェードはコンテンツが再描画された印象を与える恐れ。",
+    "suggestion": "クロスフェードを最小限（100–150ms/opacity小変化）に抑えるか、タブアイコン/ラベルの状態変化のみに留め、コンテンツ側はアニメーション無し＋スクロール位置/状態を常に保持することを明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §7（ジェスチャー）, §8（演出）",
+    "issue": "ハプティク��設計（タスク完了/レベルアップ/ゴール達成等）が未定義。要求観点に“ハプティクス”が含まれるが、QRスキャン以外に触覚フィードバックの方針がない。",
+    "suggestion": "PWA前提のためプラットフォーム条件付きで定義: Androidは短いvibrate(10–20ms)をタスク完了、少し長め(30–40ms)をゴール達成/レベルアップに割当。iOS PWAは非対応のため視覚/音で代替。将来のネイティブ化時はUIImpactFeedbackGenerator/performHapticFeedbackのマッピング指針を追記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §2.3（Undoスナックバー）, §6.2（トースト）, §8.2（バナー）",
+    "issue": "iOS安全領域（safe-area-inset-bottom/ホームインジケータ）考慮の明記がなく、Undoスナックバー/トースト/レベルアップバナーがインジケータやキーボードに隠れる恐れがある。",
+    "suggestion": "全ボトム固定UIにpadding-bottom: env(safe-area-inset-bottom)を適用し、キーボード表示時はvisualViewportに追従するルールを明記。重なり順（z-index）とボトムタブの上16px+safe area分の最小マージンを規定する。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §1.4（戻りナビゲーション）, §14.1",
+    "issue": "Androidのシステム戻る（物理バック）で「各タブのルートまで戻った後」の挙動（アプリ終了/確認ダイアログ/トップへスクロール等）が未定義。PWAではブラウザ履歴に依存し想定外遷移が起こりうる。",
+    "suggestion": "インストールPWA時: ルートでのBackは“もう一度で終了”トースト→2秒以内の連続Backで終了。ブラウザ内時: 直前の外部履歴がなければ何もしない/トップへスクロール。履歴番兵（sentinel）で判定し、明確に仕様化。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §3.1（TALKヘッダー）",
+    "issue": "ヘッダーに「☰=履歴ドロワー」「🕐=履歴」と2つの“履歴”導線が併存する記述があり、役割重複で混乱を招く。",
+    "suggestion": "履歴導線は1つに統一。推奨: ☰を廃止し🕐（履歴）アイコンでS-21ドロワーを開く、または☰のみ運用で🕐を削除。アイコンの意味をUIテキスト/ツールチップで補足。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §6.5（Pull-to-refresh）, §1.3（タブ切替）",
+    "issue": "アクティブなタブを再タップした際の“トップへスクロール”挙動が未定義。iOS/Materialの一般的パターンとして期待されるが仕様にない。",
+    "suggestion": "ボトムタブのアクティブタブを再タップ時にそのタブのスクロール位置を先頭へアニメーションスクロールするルールを追加（TALKは除外）。Pull-to-refreshとは独立に共存させる。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §2.3（Undo 30秒）, lais_project_v1.md §3.2.5（日次リセット）",
+    "issue": "日次リセット（JST 4:00）直前/直後に跨るタスク完了→Undoの整合が未定義。3:59:50に完了→4:00:10にUndoした場合のEXP返却/日次上限/習慣リセットとの関係が不明確。",
+    "suggestion": "Undoは“完了イベントのタイムスタンプ日付”に対して巻き戻すと明記。サーバーは完了イベントID基準で冪等に取消し、前日分カウンタから減算（当日分には影響なし）。クライアントは日跨ぎでも30秒間はUndo可能なUIを維持。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §10（アクセシビリティ）",
+    "issue": "ダイナミックタイプ/文字スケールへの対応と長文時の折返し・はみ出し防止（特にTALKバブル/ボタン/タブラベル）が未定義。支援技術使用時にレイアウト破綻や操作不能の恐れ。",
+    "suggestion": "OSの文字サイズに追従（font-sizeをrem基準、上限clamp）。主要コンポーネントで最小行高/自動折返し/アイコンとテキストの折り返し挙動を規定。VoiceOver/TalkBackでの読み上げ順（TALKはタイムライン順→添付→アクション）も明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §7.3（PWA実装注記）",
+    "issue": "overscroll-behavior-x: none によりブラウザ内（非PWA）利用時のネイティブ戻るスワイプを抑止し、一般Webナビゲーション期待を損なう可能性。",
+    "suggestion": "display-mode: standalone 時のみ抑止し、通常ブラウザ表示ではOS標準のスワイプバックを許容。左端カス��ムジェスチャーはスタンドアロン時に限定実装する条件分岐を追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md §3.5（S-21会話削除）, §7.2（ロングプレス）",
+    "issue": "会話削除がロングプレス専用で発見しづらい。誤タップ/誤削除のリスクや操作発見性の問題がある。",
+    "suggestion": "会話行の“…”メニュー（ボタン）を追加し、[削除]を明示（確認ダイアログ必須）。ロングプレスはショートカットとして維持するが、明示導線を標準とする。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §6.4（スケルトン）, §10.5（アニメーション配慮）",
+    "issue": "スケルトンのshimmerはreduce-motionで停止とあるが、代替の静的プレースホルダーコントラストやローディングテキストのARIA通知が未記載。",
+    "suggestion": "prefers-reduced-motion時は静的スケルトン+“読み込み中”をaria-live=\"polite\"で一度通知。コントラスト比（3:1以上）をdesign_system.mdに明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_project_v1.md §4.4/§4.5（EXP/レベル式）, lais_ux_v1.md §15（矛盾の指摘）",
+    "issue": "レベル必要EXPの式（Lv1→2=100）と説明文（Lv1→2=1,000）の矛盾がprojectに残存。UXは100を採用しているが、基礎仕様の不整合は実装/QAで障害化する。",
+    "suggestion": "project_v1.mdを修正し、式・表・文言を100に統一。さらにapp_config.yaml等に数値を単一ソース化し、UX/実装/テストで参照を共通化する。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

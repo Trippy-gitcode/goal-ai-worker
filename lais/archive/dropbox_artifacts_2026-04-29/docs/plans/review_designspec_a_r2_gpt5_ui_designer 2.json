@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.2 S-01 / §4.5 S-12 / §5.6 入力フィールド",
+    "issue": "同じ入力フィールドの背景トークン指定が画面ごとに不一致（S-01: --bg-surface、S-12: --bg-primary、共通定義§5.6: --bg-primary）。",
+    "suggestion": "入力系の背景を単一トークン --field-bg に統一し（例: --field-bg: var(--bg-surface)）、§4.2/§4.5/§5.6の記述を横断更新。併せて focus/hover/error も --field-border, --field-border-focus, --field-border-error へ置換。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.2 タイポグラフィ / §4.4 S-10-3, §4.4 S-10-7",
+    "issue": "英字ラベルは11px固定（uppercase, letter-spacing 1.5px）の規定に対し、TODAY/GOALSラベルが14pxで記載されている。",
+    "suggestion": "英字ラベル体系を二段化し、SmallLabel(11px)とSectionLabel(14px)を公式化。§3.2の規定文とS-10該当箇所を『SectionLabel(14px)』として明示的に整合。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5 共通コンポーネント / §6.5 アクセシビリティ",
+    "issue": "入力以外（ボタン、ピル、タブ、リンク、カード等）のフォーカス可視リング仕様とトークンが未定義。キーボード/スイッチアクセス時の可視性に不足。",
+    "suggestion": "共通トークン --focus-ring-color, --focus-ring-width, --focus-ring-offset, --focus-ring-radius を新設し、全インタラクティブ要素に :focus-visible で適用。推奨: color=--accent, width=2px, offset=2px。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全般（§5.2 プライマリCTA, §5.3 セカンダリCTA, §4.* 各CTA/AIボタン）",
+    "issue": "Disabled状態がopacity 0.5のみ。背景/文字/ボーダーの無効色トークンが未定義で、テーマ切替時の可読性・コントラストが不安定。",
+    "suggestion": "状態トークンを追加: --disabled-bg, --disabled-text, --disabled-border（例: #2A313A / #687381 / #3C4450）。CTA/ピル/アイコンボタンに統一適用し、opacity依存を最小化。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5.9 スナックバー / §5.10 トースト / §6.4 禁止事項",
+    "issue": "『box-shadow（軽）』のみ明記で、エレベーション/シャドウトークンが未定義。『drop-shadow/blur装飾禁止』との境界も曖昧。",
+    "suggestion": "エレベーション階層をトークン化: --shadow-1: 0 1px 2px rgba(0,0,0,.3), --shadow-2: 0 4px 12px rgba(0,0,0,.35), --shadow-3: 0 12px 28px rgba(0,0,0,.4)。機能目的（モーダル/トースト/スナック）に割当し、装飾目的の影は禁止と明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.5 S-12（モーダル） / §4.9 S-20（入力バー/タブバー） / §5.9-5.10",
+    "issue": "モーダル、ドロワー、タブバー、トースト、スナックバー、オートスクロールバナー間のz-index階層が未定義で、重なり順の競合リスクがある。",
+    "suggestion": "z-indexトークンを定義: --z-base:0, --z-header:100, --z-tabbar:900, --z-drawer:1200, --z-overlay:1300, --z-modal:1400, --z-snackbar:1500, --z-toast:1600, --z-fab/banners:1550。各該当コンポーネントに割当を明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§3 冒頭ポリシー / §3.1 NGリスト / §5.2, §4.* ボタン指定",
+    "issue": "『HEXハードコード禁止』『純白#FFFFFFのベタ使用NG』としつつ、ボタンの文字色に#FFFFFFが直接指定されている。実装者がトークン不在で迷う可能性。",
+    "suggestion": "『on色』トークンを追加: --on-primary, --on-danger, --on-accent（推奨: #FFFFFFまたはAA達成色）。全所で#FFFFFFをこれらに置換し、NGリストは『大面積背景の純白禁止（文字色は例外）』と追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "全般（§4.* 各要素のマージン/ギャップ/パディング）",
+    "issue": "2/10/12/14/20pxなど、スペーシングスケール外の生値が多数登場し、トークン運用から逸脱している。",
+    "suggestion": "スペーシング拡張: --space-2:2px, --space-2_5:10px, --space-3:12px, --space-3_5:14px, --space-5:20px 等を追加。既出の生値を該当トークンへ置換。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "全般（§4.* アイコン指定）",
+    "issue": "アイコンサイズ（14/20/22px）やstroke幅（1.5px）が生値指定でトークン不統一。",
+    "suggestion": "アイコントークンを定義: --icon-sm:14px, --icon-md:20px, --icon-lg:22px, --icon-stroke:1.5px。文中の生値をトークン参照へ統一。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.3 Open Air原則 / §4.9 S-20-5/6 / §4.10 S-30-5",
+    "issue": "『カードで囲まない』原則に対し、タスク提案カード/EXPカード/MBTIカードでカード状UIを使用。例外規定が明文化されていない。",
+    "suggestion": "『機能カード（提案/達成/プロフィール等）は例外』を明記し、--card-bg, --card-border, --card-radius（=--radius-lg）などのカード用トークンを追加。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.2 S-01 / §4.9 S-20 / §5.1 ボトムタブバー",
+    "issue": "固定パディング（上60px、下82pxなど）が端末のセーフエリアを考慮していない。ノッチ/ホームインジケータで表示崩れの恐れ。",
+    "suggestion": "セーフエリア対応を明記: padding-top: calc(env(safe-area-inset-top) + 60px)、padding-bottom: calc(env(safe-area-inset-bottom) + 固定値)。--inset-top/--inset-bottom の抽象トークンも追加。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.1 カラー（--accent-hover）/ §5.* コンポーネント",
+    "issue": "hover用トークン --accent-hover は定義されているが、各コンポー��ントのhover状態仕様が未定義（モバイル前提のため利用方針が不明）。",
+    "suggestion": "ポインタデバイス時のhover適用方針を定義（:hover時の色/下線/背景の可否）。未採用ならPhase Aでは未使用と明記し、Phase B以降にPC/タブレット対応章を追加。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.3 S-02-5（アバター選択）/ §5.5 ピル",
+    "issue": "選択リング（box-shadow: 0 0 0 4px --accent-subtle）が生値指定で、フォーカスリングとの整合も未定義。",
+    "suggestion": "選択リング用トークン --selection-ring-color, --selection-ring-width（例: 4px）を新設し、フォーカスリングと役割差（selection vs focus）を整理して全体適用。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§5.9 スナックバー（Undo 30s）",
+    "issue": "30秒の長時間表示は視覚的占有が大きく、入力バーやタブ操作と重なる恐れ（視線誘導・可読性に影響）。",
+    "suggestion": "自動格納（5秒で縮退→タップ/スワイプで再展開）や、画面下の干渉領域回避（マージン/位置オプション）を仕様追加。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.2/§5.3/§5.5（CTA/ピル）/ §4.*",
+    "issue": "押下（pressed/active）時の色レイヤー/オーバーレイ仕様が未定義で、スケールのみ。アクセシビリティ観点で状態の多重表現が不足。",
+    "suggestion": "押下オーバーレイトークン --press-overlay（例: rgba(255,255,255,0.06) on dark）と--press-overlay-strong を定義し、CTA/ピル/タブに適用。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§5.1 ボトムタブバー / §4.9 S-20",
+    "issue": "タブバーは『キーボード表示時のみ非表示』とあるが、全画面での一貫方針やS-20の入力バーとの重なり解消順序が未明確。",
+    "suggestion": "『キーボード表示時は全画面でタブバーを隠す』を明記し、S-20では入力バー＞タブバーのz-index/visibilityルールを追記。visualViewport連動によるスムース押し上げの挙動も定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.5 S-12（モーダル）",
+    "issue": "オーバーレイスクリム色がrgba(0,0,0,0.6)の生値指定で、テーマ整合/将来の調整が困難。",
+    "suggestion": "オーバーレイトークン --overlay-scrim: rgba(0,0,0,0.6) を新設し、モーダル/ドロワー/メニューで共通参照。ライト/他テーマ時の代替値も同時定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§3.1 カラー / テーマ切替全般",
+    "issue": "ボタン/選択背景で --accent-subtle（透過色）を多用。テーマ切替時に下地の--bg-*差でコントラスト/視認性が崩れるリスクがある。",
+    "suggestion": "『on-系』背景に対する最小コントラストを基準に、--accent-subtle をテーマごとに最適化（例: HSLでLightness固定）。併せて『on-*』ペアトークン（--on-accent, --on-success等）でテキスト/アイコン可読性を保証。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  }
+]

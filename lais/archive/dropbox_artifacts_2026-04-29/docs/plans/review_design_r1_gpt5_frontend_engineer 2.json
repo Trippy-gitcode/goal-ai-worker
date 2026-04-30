@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "design_system.md §9（AI実装向けCSSトークンブロック）",
+    "issue": "コードブロック内に余分な```が混入し、:root { ... } の途中でMarkdownが終了→再開している。コピペするとCSSが途中で途切れ、以降のトークンが無効化される（確実に破綻）。",
+    "suggestion": "当該セクションを1つの連続したコードフェンスに修正し、:rootのブレースを正しく閉じる。例（抜粋）: 「:root { … --info: #58A6FF; … --card-border: 1px solid var(--border); }」までを単一の```css … ```で囲う。配布用の原本はCIでCSSパースチェックを通す。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_system.md §8.1, §8.3, §2.2/§9",
+    "issue": "コンポーネント仕様で「Danger= --danger / subtle」「チップ= セマンティックカラーのsubtle版」とあるが、--danger-subtle, --success-subtle, --warning-subtle, --info-subtle 等のトークンが未定義。実装時に未定義変数参照が発生する。",
+    "suggestion": "セマンティックのサブトーンを全テーマで定義する。例: --success-subtle, --danger-subtle, --warning-subtle, --info-subtle（Light/Darkでalphaを変える）。Dawn/Adventure用にはテーマセレクタで上書き値も用意。ボタンDanger/Badges/Alertsの背景・枠・テキスト規則も併記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "design_system.md §5.3（Adventure）/ §8.4（タイムライン）",
+    "issue": "--timeline-line に linear-gradient を格納しているが、仕様では縦ラインを「border: 2px solid …」と記述。CSSのborder-colorにグラデーションは使用できないため、このままでは実装不能。",
+    "suggestion": "タイムライン軸は擬似要素でwidth:2pxの要素背景にグラデーションを敷く方式へ統一し、コンポーネント実装指針を記載。代替として border-image を使う場合は --timeline-border-image トークンを用意し、使用例（border-image-slice等）を追記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "design_system.md §5.4（グラスモーフィズム）",
+    "issue": "backdrop-filter使用の記載はあるが、-webkit-backdrop-filter のベンダープレフィックスと@supports分岐が未記載。iOS Safariでは描画コストが高く、PWAでスクロール/モーダルのjankを招くリスクが大きい。",
+    "suggestion": "使用箇所をカード/モーダル等の限定サーフェスのみに制限し、@supports(backdrop-filter:blur(0)) or (-webkit-backdrop-filter:blur(0))でフォールバック（透明度高めのソリッドBG）を定義。CSS適用例: `.card{background:var(--card-bg);backdrop-filter:var(--card-backdrop);-webkit-backdrop-filter:var(--card-backdrop);border:var(--card-border);}` さらにiOS PWAではblur半径を8pxに抑えるメディア/UAゲーティング指針を明記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system.md §5, §9（テーマ切替全般）",
+    "issue": "テーマ切替時のFOUC対策・JS適用順・永続化キーが不明。初回ペイント前にdata-theme/data-glassを設定しないと白/既定色のフラッシュが発生する（PWA/iOS Safariで顕著）。",
+    "suggestion": "実装ガイドラインを追加: 1) localStorageキー: `lais.theme:v1`, `lais.glass:v1` 2) <head>最上部にインライン即時スクリプトで属性を設定し、CSS読み込み前に反映 3) SSR時はhtmlに既定data-themeを埋め込む 4) meta[name=theme-color]も同時に更新（PWAのステータスバー色整合）。スニペット（要約）: `const t=localStorage.getItem('lais.theme:v1')||'night-sky';document.documentElement.setAttribute('data-theme',t);`",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §5（3テーマ） vs project_v1.md §3.5/ux_v1.md §5.2（4テーマ）",
+    "issue": "Design Systemは3テーマ（Night Sky/Dawn/Adventure）だが、Project/UXはHarajuku Light/Darkを含む4テーマ前提。テーマ数の不一致で実装・オンボーディングの選択肢が齟齬。",
+    "suggestion": "いずれかに統一。4テーマを採用する場合はHarajuku Light/Darkのトークンブロック（bg/text/accent/semantic/subtle/glass時の上書き）を§5に追加し、§0.2のマトリクスも更新。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §7.1（ease-in-out禁止） vs ux_v1.md §1.3/§8.1他（ease-out/ease-in使用）",
+    "issue": "アニメーション方針で「ease-in-out禁止、spring系のみ」と定義しているが、UX仕様では複数箇所でease-out/ease-in/ease-in-outを使用。ガイドと実装指定が矛盾。",
+    "suggestion": "許可イージングをトークン化して明示（例: --ease-out, --ease-in, --spring-*）。禁止は「デフォルトのease/ease-in-outの無秩序使用を避ける」程度に緩和、またはUX側の記述を全てspringトークンに置換。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md §2, §8, ux_v1.md §6.4",
+    "issue": "UX内で言及される「background-secondary（スケルトン用）」「シャドウ」「Overdue用アクセント色」等のトークンがDesign System側に未整備。",
+    "suggestion": "補助背景/境界/影のトークンを追加: 例) --bg-muted, --bg-overlay, --shadow-sm/md/lg, --overdue-bg, --overdue-fg。アクセシビリティ観点で各テーマのコントラスト閾値も併記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §3.2/§4.1/§9（タイポ・スペーシング単位）",
+    "issue": "フォント/スペーシングがpx固定。ユーザーのフォントサイズ設定やズームへの追従性が低く、可読性/アクセシビリティに影響。",
+    "suggestion": "フォントサイズ/スペーシングはremベースのトークン���追加（--font-size-base: 1rem; 等）。必要箇所はclamp()で流動化（例: clamp(14px, 1.6vw, 16px)）。px版はレガシー互換として残し、UI実装はrem優先をガイド。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "design_system.md §7.1（spring系cubic-bezier）",
+    "issue": "y>1のspring系ベジェ（例: 0.34,1.56,0.64,1）はopacity/height等のクランプされるプロパティで期待通りの“弾み”にならない、あるいはSafariで一瞬のチラつきが起きるケースがある。",
+    "suggestion": "spring系はtransform/opacityに限定して使用する指針を追記。高さ/レイアウトはmax-heightやclip-pathで代替。Reduced Motion時は全springを--spring-gentleにフォールバックするCSSも提示。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "design_system.md §5/§9（トークンのオーバーライド順）」",
+    "issue": "デフォルト:root（§9）と各テーマ（§5）の読み込み順・優先順位のガイドがない。ビルド順序によっては意図せぬ上書きや差分漏れのリスク。",
+    "suggestion": "優先順位ガイドを明記: 1) base(:root) → 2) theme(:root[data-theme=…]) → 3) modifiers(:root[data-theme=…][data-glass=on]) → 4) コンポーネント個別変数。セレクタ特異性（:root[data-*] > :root）を利用しつつも、読み込み順をドキュメント化。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "design_system.md §7.4（触覚フィードバック）/ 互換: §16.6（UX）",
+    "issue": "navigator.vibrate()はiOS Safari/PWAで未対応（2026時点でも実質不可）。仕様通りに実装してもiOSで無反応＝体験の不整合が確実に発生。",
+    "suggestion": "プラットフォーム分岐を明記: `if ('vibrate' in navigator) …` でAndroid優先。iOSは代替として短い視覚/音（許可下）やより強いアニメーションに置換。触覚は“ベター”扱いの非必須と記載。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md §5.4/§9（Glass適用方法）",
+    "issue": "トークンとして--card-backdropは定義されているが、コンポーネントへの適用プロパティ指針（backdrop-filter/-webkit-backdrop-filter/overflow/境界の組み合わせ）が未提示で実装ブレが起こりやすい。",
+    "suggestion": "カード/モーダル/ボトムシートのリファレンス実装を提示（background/backdrop-filter/border/radius/overflow:hidden, isolation:isolate）。スクロール領域には適用しないガードラインを追加。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md §2/§5（OS/UIクローム整合）",
+    "issue": "PWAのステータスバー/ブラウザUI色（meta theme-color, apple-mobile-web-app-status-bar-style）のテーマ連動ルールが未定義。テーマ変更時にOS UI色がズレ、FOUC様の違和感が残る。",
+    "suggestion": "トークン --chrome-color（ライト/ダークで別値）を追加し、テーマ変更時にmeta[name=theme-color]を書き換える実装ガイドを記載。iOSはdisplay:standalone時の挙動も注記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §3.3（ウェイト200/字詰め）",
+    "issue": "ウェイト200は一部環境で未実装/疑似レンダリングになりがち（system-uiフォント依存）。見出しの-0.5pxトラッキングも小画面で滲む可能性。",
+    "suggestion": "見出し/大数字のウェイトは300/600等の現実的な存在ウェイトを推奨。トラッキングはデバイス解像度基準で微調整（-0.25px〜-0.5px）し、可変にするかテーマ別に最適化。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  }
+]

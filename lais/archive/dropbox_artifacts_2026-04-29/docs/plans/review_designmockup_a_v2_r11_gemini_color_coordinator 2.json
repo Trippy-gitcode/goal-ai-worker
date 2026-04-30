@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "TEXT_CONTRAST",
+    "screen": "s01_signin",
+    "location": "メールアドレス・パスワード入力フィールド",
+    "issue": "入力フィールド内のプレースホルダーテキストのコントラスト比がWCAG AA基準を満たしていません。前景#7A8593 vs 背景#161B22 のコントラスト比は3.47:1であり、基準の4.5:1を下回っています。",
+    "suggestion": "プレースホルダーテキストの色を、背景#161B22に対して4.5:1以上のコントラスト比を確保できる色に変更してください。例えば、--text-secondary (#9BA7B4) を使用するとコントラスト比が4.30:1となり、わずかに不足するため、#A0ACB9のようなより明るい色を検討するか、デザインシステムの--text-hintトークンの色値を調整してください。",
+    "model": "Gemini 2.5 Pro",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "TEXT_CONTRAST",
+    "screen": "s10_grow",
+    "location": "完了済みタスク「企画書を仕上げる」のサブテキスト",
+    "issue": "完了済みタスクの背景色に対して、サブテキスト「達成 · 45分」のコントラスト比がWCAG AA基準を満たしていません。前景#3FB950 vs 背景rgba(63,185,80,0.12) on #0D1117 (合成後#142818) のコントラスト比は3.01:1であり、基準の4.5:1を大きく下回っています。",
+    "suggestion": "サブテキストの色をより明るい緑色に変更するか、背景の透明度を調整して、コントラスト比4.5:1以上を確保してください。例えば、#56D364のような色を検討してください。",
+    "model": "Gemini 2.5 Pro",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "進行中タスク「ジムで筋トレ」のサブテキスト",
+    "issue": "進行中タスクのステータスを示す色として、デザインシステムに定義されていない#E8A855が使用されています。DS §2.3ではwarning用途の色は--warning (#D29922)と定義されています。",
+    "suggestion": "進行中のステータスを示す色を、デザインシステムの--warningトークン(#D29922)に準拠した色に変更してください。もし「進行中」が「warning」と意味合いが異なる場合は、新しいセマンティックトークンとしてDSに追加定義することを検討してください。",
+    "model": "Gemini 2.5 Pro",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayタスクリスト全体",
+    "issue": "タスク行が2行構成で表示されています。これは累積コンテキストA-7で「タスク行を1行構成 [完了][時刻][タスク名][時間][ゴール色ドット] に」と修正済みのはずの仕様から逸脱しています。",
+    "suggestion": "累積コンテキストA-7の決定に従い、タスク行を1行構成に再修正してください。スクリーンショットとHTMLソースの両方で2行構成が確認されます。",
+    "model": "Gemini 2.5 Pro",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "TEXT_CONTRAST",
+    "screen": "s13_task_detail",
+    "location": "モーダル内の複数テキスト要素",
+    "issue": "モー��ル内の複数のテキスト要素でコントラスト比がWCAG AA基準を満たしていません。1) 「完了済み」ステータス: #3FB950 vs #161B22 = 2.47:1 (<4.5)。 2) メモ本文: #9BA7B4 vs #161B22 = 4.30:1 (<4.5)。",
+    "suggestion": "1) 「完了済み」ステータスのテキスト色を、背景#161B22に対して4.5:1以上を確保できる明るい緑色に変更してください。2) メモ本文のテキスト色を--text-primary (#E6EDF3) に変更するか、現在の#9BA7B4を維持しつつ、DSの--text-secondaryの色値を調整してコントラスト比4.5:1以上を確保してください。",
+    "model": "Gemini 2.5 Pro",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "画面下部のアクションボタンエリア",
+    "issue": "ゴール詳細画面に、UX仕様書 §2.4で要求されている「編集」および「削除」ボタンが存在しません。スクリーンショットとHTMLソースの両方でこれらのアクションボタンが欠落しています。",
+    "suggestion": "UX仕様書 §2.4の定義に基づき、「AI相談」「編集」「削除」の3つのアクションボタンを画面下部に追加してください。",
+    "model": "Gemini 2.5 Pro",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "TEXT_CONTRAST",
+    "screen": "s20_talk",
+    "location": "AIによるタスク提案カード",
+    "issue": "タスク提案カード内の補助テキストのコントラスト比がWCAG AA基準を満たしていません。ヘッダー「タスクにしますか？」とサブテキスト「09:00 · 45分」の両方で、前景#7A8593 vs 背景#161B22 のコントラスト比は3.47:1であり、基準の4.5:1を下回っています。",
+    "suggestion": "これらの補助テキストの色を、背景#161B22に対して4.5:1以上のコントラスト比を確保できる色に変更してください。例えば、--text-secondary (#9BA7B4) を使用しても4.30:1で不足するため、より明るい色を検討するか、DSのトークン値を調整する必要があります。",
+    "model": "Gemini 2.5 Pro",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s30_me",
+    "location": "ヒーロー領域のアバター",
+    "issue": "アバターの服の色にセマンティックカラーである--success (#3FB950) が使用されています。これは「完了」「成功」といった特定の状態を示す色であり、装飾的なアバター要素に使用すると、ユーザーに意図しない意味を伝え��混乱を招く可能性があります。",
+    "suggestion": "アバターの服の色は、DS §6.3aで定義されるアバター専用パレットから選択してください。セマンティックカラー（success, danger, warning, info）を純粋な装飾目的で使用することは避けるべきです。",
+    "model": "Gemini 2.5 Pro",
+    "persona": "color_coordinator"
+  }
+]

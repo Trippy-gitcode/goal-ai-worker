@@ -1,0 +1,252 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §3.2 / §3.2.6 vs ux §2.3",
+    "issue": "タスク完了のUndo許容時間が「30秒以内」（project）と「スナックバー3秒表示」（ux）で矛盾。現状では30秒間の取り消し保証がUI上で満たせない。",
+    "suggestion": "Undo仕様を統一する。推奨: 取り消し可能時間=30秒を正式仕様とし、スナックバーは3秒で消えても、GROW画面下部に30秒間『取り消す』フローティングトースト（残り秒数表示）を維持、またはタスク行に一時的に『取り消す』インラインアクションを表示して30秒間有効にする。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §4.2（7日ルール） vs ux §2.4 / §8.3",
+    "issue": "ゴール達成ボーナスは作成から7日未満の場合『完了待ち』で即時付与不可（project）だが、UXは『ゴール完了条件を満たした場合→達成演出＋EXP』と即時達成の挙動を示している。",
+    "suggestion": "UXに『完了待ち』状態を追加し、達成演出は簡略版（紙吹雪なし）＋バナ���『100%達成。あとN日で完了！』、EXP付与は7日到達時に自動付与演出を発火するよう二段階に分離する。S-14にもカウントダウン表示を追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §8（アニメーション仕様）",
+    "issue": "複数演出が同時発火した際（例: タスク完了＋レベルアップ＋ゴール達成）における優先順位やキューイングの定義がない。",
+    "suggestion": "演出優先度を定義（例: レベルアップ > ゴール達成 > 冒険EXP > タスクEXP）し、1件ずつ直列再生（最大合計4秒など上限）するか、重複エフェクト（紙吹雪）は統合するルールを明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §4.5 vs ux §2.3 / §8 / §9.2",
+    "issue": "日次EXP上限（300EXP）到達時のUXが未定義。タスクは完了可能だがEXP付与しない時の表示/トースト/バー挙動が不明。",
+    "suggestion": "上限到達時はタスク完了チェックは維持しつつ『本日EXP上限に達しました（リセット: 明日04:00）』のトーストと、EXPバーは伸長しない代わりに軽い点滅で通知。GROWヒーローに『上限到達』バッジを当日中表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §4.5（冒険EXP上限） vs ux §3.4 / §9.4",
+    "issue": "冒険EXPが1日2回上限に達した場合のUXが未定義。現状は誤検出抑制時のサイレントのみ記載。",
+    "suggestion": "3回目以降の検出時は冒険カードの代わりに小さなインライン情報『本日の冒険EXPは上限に達しました（リセット: 明日04:00）』を1回だけ表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux §3.1（TALKヘッダー）",
+    "issue": "TALKヘッダーに『☰=履歴ドロワー』『🕐=履歴』の2つの履歴導線が併存し役割が曖昧。",
+    "suggestion": "履歴導線を1つに統一。推奨: ☰を廃止し🕐を『履歴』として左上配置、ドロワーは🕐タップで展開。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §5.4-5.5 vs ux §4.4（FRIENDS）/ §3.5",
+    "issue": "仕様で要求される『ブロック』『通報』のUIがFRIENDS/メッセージに未定義。",
+    "suggestion": "S-35の『…』メニューに『ブロック』『通報』を追加。メッセージバブルの長押しメニューに『通報』を追加し、確認ダイアログと送信完了トーストを定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §8.1（Premier特典） vs ux §4.2 / §4.1 / S-41",
+    "issue": "アバター設定（S-41）の具体仕様が未定義。Premier限定フレーム装備フローがUXに落ちていない。",
+    "suggestion": "S-41に『プレビュー』『フレーム一覧（ロック表示含む）』『装備/外す』『Premier限定バッジ』『未加入時のアップセル』を定義。Premier加入済みは限定フレームを選択可能に。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux S-16（ゴールタスク追加）",
+    "issue": "ゴール配下で作成するタスクの入力フィールド/制約（単発のみ・習慣不可）が未定義。",
+    "suggestion": "S-16のフィールドをS-12準拠で列挙し、タスク種別トグルは非表示（単発固定）。作成後は当面『予定日=未設定』をデフォルトにし、Todayには出さない旨を明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux S-13（タスク編集）",
+    "issue": "タスク編集モーダルの入力項目/バリデーション（文字数上限や予定日変更時の並び替え反映など）が未定義。",
+    "suggestion": "S-13にS-12と同一のフィールド/上限（名前1-100, メモ≤500, 所要時間プリセット）を明記し、保存時のToday並び更新ルールも追記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §3.2.3 vs ux §2.3",
+    "issue": "『週N回』習慣のToday手動追加（「今日やる」ボタン）がUXに存在しない。",
+    "suggestion": "習慣行の詳細パネル（S-11相当）に『今日やる』アクションを追加し、Todayへ即時掲載するフローを定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "project §3.2（Today時刻順表示） vs ux §7.4（ド��ッグ並び替え）",
+    "issue": "Today内の時刻順自動ソートと手動並び替えの優先度・持続期間が不明（当日限りか、次回読み込み後も維持か等）。",
+    "suggestion": "優先ルールを明記。例: 開始時刻ありタスクは常に時刻優先、開始時刻なしタスクのみ手動順を保存/優先。手動順は当日内のみ有効、日次リセットで再計算。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §3.3（画像添付仕様） vs ux §3.2（送信フロー）",
+    "issue": "画像添付の上限（10MB）や非対応形式時のエラー、アップロード進捗/失敗時のUXが未定義。",
+    "suggestion": "📎選択時に拡張子/サイズを事前検証し、超過時はインラインエラー。送信中はサムネに進捗リング、失敗時はリトライ/削除ボタンを表示する。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux §3.2 / §9.3 / §13.2",
+    "issue": "有料化動機が『AI対話回数/質』に依存する一方、残回数の可視性が『上限到達時バナー』のみで、アップグレード動機形成が弱い。",
+    "suggestion": "TALKヘッダーに本日残回数 N/上限 を常時表示し、残り少ない時は色で注意喚起。S-38にプラン別上限比較テーブルを明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §2.1（Premierフェアユース1,000/日） vs ux §9.3",
+    "issue": "Premierのフェアユース上限到達時のTALK画面挙動（バナー文言/CTA）が未定義。",
+    "suggestion": "Free/Basic/Proと同仕様の上限到達バナーを適用し、文言を『フェアユース上限に達しました（1,000/日）』に。リセット時刻の明記を統一。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux S-36（QRスキャン）",
+    "issue": "カメラ権限拒否時/非対応端末時の代替導線が未定義。",
+    "suggestion": "権限拒否時は説明モーダル＋設定アプリ誘導リンク/『シェアリンク貼り付け』入力欄を提示。非対応時は『リンクから追加』のみのフローに自動フォールバック。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux §14.2（新規ユーザー）",
+    "issue": "メール認証待機画面がフローに存在するが画面ID（S-xx）が未割当、戻り/再送信導線の定義なし。",
+    "suggestion": "S-04（仮）『メール認証待機』を追加し、認証メール再送/メールアドレス変更/ログインへ戻るの導線を定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-018",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project §2.1-2.2 / ux §4.5",
+    "issue": "MVP時点でショップ未実装のため、ゲーミフィケーション（アバター/称号）が課金動機に直結しにくい。Premier特典が限定フレーム1種のみで月額¥4,980の訴求が弱い。",
+    "suggestion": "短期施策: S-41で限定フレームの強調表示＋プレビュー常時露出、Premier専用バッジ/プロフィールフレームでソーシャル可視化を強化。中期: v0.1.xで『ガチャ/装飾プレビュー＆ウィッシュリスト』『装飾の期間限定ミッション解放』など購買期待値を醸成するUXを追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §13.2（プラン管理）",
+    "issue": "Stripe Checkoutでユーザーがキャンセル/失敗した場合の復帰UX（状態保持/リトライ案内）が未定義��",
+    "suggestion": "戻り時に非同期でサブスク状態を確認し、未変更ならバナー『手続きは完了しませんでした』＋[再試行]ボタンを表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §5.3（iOS PWA通知制約） vs ux §13.3",
+    "issue": "iOSはPWAインストール時のみPush有効。通知設定画面の許可フローにこの制約のUX案内が反映されていない。",
+    "suggestion": "『プッシュ通知を許可』をiOS判別で分岐し、未インストール時はPWAインストール手順モーダルへ誘導。許可状況がOSで拒否の場合の案内テキストも追記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §7.3（オフラインEXP方針） vs ux §9.1",
+    "issue": "オフライン時にタスク完了でEXP演出を出さず『同期待ち』を表示するルールがUXに落ちていない。",
+    "suggestion": "タスク行右端に『同期待ち』バッジを表示し、オンライン復帰時にEXP演出を遅延再生するか、ヒーロー下に『EXPを同期しました』トーストを出す仕様を追記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux S-21（チャット履歴ドロワー）",
+    "issue": "会話0件時のS-21空状態が未定義。",
+    "suggestion": "『まだ会話がありません』『新しいチャットを始める』CTAをドロワー上部に表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §4.3（ヒアリング）",
+    "issue": "ヒアリングモード中の『スキップ/中断/再開』の操作が未定義。離脱や誤タップ時の復帰UXが不明。",
+    "suggestion": "TALKヘッダーの『ヒアリング中 (N/5)』バッジに『中断』メニューを付与し、再開時は続きの質問から。各質問に『スキップ』を用意。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §3.2（ストリーミング）",
+    "issue": "AI応答ストリーミングの『停止（生成中止）』操作がない。",
+    "suggestion": "AIバブル生成中に『停止』アイコンを表示し、タップでストリーミングを中断。カウントは1回のままにする旨を明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux §2.3 / §11.2",
+    "issue": "時刻表示/入力のフォーマット（24時間/12時間）が明記されていない。日本語UIだが例示に揺れがある。",
+    "suggestion": "日本語環境では24時間表記（例: 09:30/12:00）に統一と明記。将来の多言語対応時はロケールに応じて切替と記載。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  }
+]

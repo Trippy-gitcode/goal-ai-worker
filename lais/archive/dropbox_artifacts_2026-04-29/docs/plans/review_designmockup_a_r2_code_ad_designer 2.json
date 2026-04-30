@@ -1,0 +1,68 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "タイトル + タグライン",
+    "issue": "『Lais』『あなたの人生を、あなたらしく』だけでは初見ユーザーが 3 秒で機能を把握できない。ブランドトーンは改善したが訴求力が弱い。",
+    "suggestion": "タグラインを機能軸に具体化 (例: 『AI と一緒に、ゴールを育てるジャーナル』)。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "ファーストビューの視線起点",
+    "issue": "アバター → 12 EXPLORER → EXP バー → TODAY と 4 回ジャンプしないと主要コンテンツ『今日のタスク』に到達しない。",
+    "suggestion": "アバター + レベル + EXP を 56pt のスリムヘッダーに集約、TODAY を画面 35% 以上に。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "提案カード CTA (登録する / 編集して登録)",
+    "issue": "2 ボタンが同じ高さ・同じ幅で主従不明。",
+    "suggestion": "『登録する』を 60% 幅 Primary、『編集して登録』を 40% ghost に。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "削除ボタン (赤)",
+    "issue": "破壊的アクションがフォアグラウンドで赤強調され、成長系アプリの動機線と矛盾。また誤タップ誘発。",
+    "suggestion": "削除を … メニュー or 長押しに降格、2 段目ボタンは AI 対話 CTA に集中。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s00_splash",
+    "location": "タグライン",
+    "issue": "タグラインの明度が低く、スプラッシュの数秒間で読みにくい。",
+    "suggestion": "#A0B4CC 相当に引き上げ、タイトル遅延 fade-in を追加。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "進行バー",
+    "issue": "5 セグメントのうち現在地の色差が弱く、何ステップ目か一瞥で判別しにくい。",
+    "suggestion": "濃青/淡青/グレーの 3 階調 + 『2 / 5』数値ラベル。",
+    "model": "Code",
+    "persona": "ad_designer"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §5.0.2",
+    "issue": "パスワードリセット完了時に他のデバイスのセッションを失効させる処理が定義されていない。アカウント乗っ取り被害からの回復目的でリセットを行った場合、攻撃者のセッションが維持されたままになり、被害が継続する致命的な脆弱性がある。",
+    "suggestion": "§13.1の「パスワード変更」と同様に、パスワードリセット完了時にもサーバー側で他の全デバイスのリフレッシュトークンを失効させる処理を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §5.4 / ux_v1.md §4.4",
+    "issue": "QRコードおよびシェアリンクに「ユーザーUUID」が含まれる設計になっている。UUIDが平文で露出すると、悪意あるユーザーによるID収集やトラッキングのリスクがある。",
+    "suggestion": "QRコードおよびリンクには「一時トークン」のみを含め、サーバー側でトークンからUUIDを解決する設計に変更する。UUID自体は外部に露出させない。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "シェアリンク（24時間有効）に使用回数制限がない。リンクがSNS等の公開の場に貼られた場合、24時間以内であれば不特定多数から無制限にスパムリクエストが届く温床となる。",
+    "suggestion": "シェアリンク経由のトークンには「1回のみ有効（または設定した回数で無効化）」の制限を設けるか、不特定多数からのリクエスト急増を検知してリンクを自動無効化するレートリミットを導入する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §6.4 / ux_v1.md §3.2",
+    "issue": "テキストのPII（個人情報）は正規表現でマスキングされるが、添付画像内のPII（顔写真、書類の文字など）に対するマスキングや保護メカニズムがなく、そのまま外部のVision APIに送信されてしまう。",
+    "suggestion": "プライバシー注意ダイアログの表示だけでなく、サーバー側で画像送信前に顔認識によるぼかし処理や、OCRを用いたテキスト領域のマスキング処理を導入するか、画像は外部学習オプトアウト済みのAPIのみに限定する旨を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §13.1",
+    "issue": "「対話履歴を削除」を実行した際、AI理解メモはリセットされるとあるが、DISCOVER画面の「自己分析カード」や「強み/弱みチップ」の扱いが未定義。履歴が消えても分析結果が残る場合、ユーザーのプライバシー削除の期待値に反する。",
+    "suggestion": "対話履歴削除時に、対話から派生して生成された自己分析カードや強み/弱みチップも連動して削除（初期化）される仕様を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §4.4",
+    "issue": "友達解除時にメッセージ履歴が「双方から即時削除」される仕様のため、嫌がらせメッセージを送信した直後に送信者側から友達解除を行うことで、受信者が通報する前に証拠隠滅が成立してしまう。",
+    "suggestion": "友達解除時のメッセージ削除は「論理削除（UI上は非表示になるがDBには一定期間保持）」とし、通報機能が正しく機能するための証拠保全期間（例: 14日間）を設ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "SECURITY",
+    "location": "ux_v1.md §14.1",
+    "issue": "オフライン時にリフレッシュトークンでの再認証が失敗した場合でも、ローカルキャッシュでGROW画面の操作（タスク完了等）が許可されている。JWTが期限切れ（または無効化）状態でもデータが蓄積できてしまう。",
+    "suggestion": "オフライン時であっても、ローカルに保存されたJWTの有効期限（exp）をチェックし、期限切れの場合は操作をロック（強制ログアウトまたは完全読み取り専用）する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.1",
+    "issue": "メールアドレス変更時に、旧メールアドレスに紐づく他のデバイスのセッションを失効させる処理が定義されていない。",
+    "suggestion": "メールアドレス変更確定時にも、パスワード変更時と同様に他の全デバイスのリフレッシュトークンを失効させる処理を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §6.5 / ux_v1.md §13.4",
+    "issue": "退会時のデータ削除において、Stripe側の顧客データ（Customerオブジェクト内のメールアドレス等）の削除または匿名化方針が未定義。GDPRの「忘れられる権利」に完全に準拠できていない可能性がある。",
+    "suggestion": "退会確定時（72時間経過後）の物理削除プロセスに、Stripe API経由でのCustomerオブジェクトの削除、または個人情報の匿名化処理を含める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §8.6",
+    "issue": "演出キュー（同時発火時の優���順位）に「TALK画面で検出された冒険EXPの反映」や「ログインボーナス」が含まれていない。GROW画面初回表示時にこれらが同時に発生した場合、アニメーションが競合する。",
+    "suggestion": "演出キューの定義に「ログインボーナス（最優先）」および「非同期の冒険EXP反映」を追加し、直列実行の順序を明確化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3",
+    "issue": "ゴールに紐づいたタスクを削除した場合、ゴールの進捗バー（完了数 / 全タスク数）の分母がどう再計算されるか、または削除が制限されるかが未定義。",
+    "suggestion": "ゴール紐付けタスクを削除した場合、ゴールの全タスク数（分母）が減少し、進捗率が即時再計算される旨を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §13.4",
+    "issue": "アカウント削除の72時間クーリングオフ期間中に、同じメールアドレスで新規サインアップ（S-01）しようとした場合の挙動が未定義。",
+    "suggestion": "クーリングオフ期間中の同一メールアドレスでの新規登録はエラーとし、「このメールアドレスは退会手続き中です。ログインして退会をキャンセルするか、72時間後にお試しください」と案内する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

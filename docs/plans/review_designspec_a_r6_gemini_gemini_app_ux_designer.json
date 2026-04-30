@@ -1,0 +1,132 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.4, §4.7, §4.9, §4.10",
+    "issue": "主要画面における「空状態（Empty State）」のUIが定義されていません。",
+    "suggestion": "S-10のタスク/ゴールリストが0件の場合、S-20の初回利用時、S-30の未入力項目など、データが存在しない場合のUI（イラスト、ガイドテキスト、アクションボタン等）を定義してください。これにより、新規ユーザーの離脱を防ぎ、次のアクションを促すことができます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "データ取得��などの「ローディング状態」に関する表示仕様が定義されていません。",
+    "suggestion": "各画面（特にS-10, S-14, S-20）の初期表示やデータ更新時に表示するローディングUI（スケルトンスクリーン、プログレスインジケータ等）を定義してください。体感速度を向上させ、ユーザーにシステムが動作中であることを明確に伝えるために不可欠です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "ネットワークエラーやAPIエラー発生時の「エラー状態」の表示仕様が定義されていません。",
+    "suggestion": "Phase Cスコープとされていますが、Phase Aの最小ジャーニーでもエラーは発生し得ます。画面内インラインエラー（例：タスク追加失敗時）や、全画面でのエラー表示（例：初期ロード失敗時）の最低限の仕様を定義してください。再試行ボタン等の回復アクションを含めることが望ましいです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "プッシュ通知に関するUI/UX設計が全く定義されていません。",
+    "suggestion": "タスクのリマインダー、AIからの返信通知、ゴールの進捗通知など、アプリのエンゲージメントに不可欠なプッシュ通知の仕様（文言、トリガー、タップ時の遷移先、設定画面での制御）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§4.4, §5.1",
+    "issue": "ボトムタブバーの非アクティブ（Inactive）なタブがアイコンのみでラベルを持たない仕様は、プラットフォーム標準との整合性が低く、認知負荷を高めます。",
+    "suggestion": "特にiOSのHIGでは、全てのタブにラベルを表示することが強く推奨されています。AndroidのMaterial Designでも、3タブ構成ではラベル表示が一般的です。ユーザビリティ向上のため、非アクティブなタブにもラベル（例：`--text-secondary`色）を表示する仕様に変更することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§6.5",
+    "issue": "OSの動的フォントサイズ（Dynamic Type / Font Scaling）への対応が定義されていません。",
+    "suggestion": "ユーザーがOS設定で文字サイズを変更した場合に、アプリ内のテキストが追従してリサイズされる仕様を定義してください。これはWCAGのアクセシビリティ要件（1.4.4 Resize text）を満たす上で重要です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4, §4.7",
+    "issue": "タスクリスト画面（S-10, S-14）で、リスト項目に対するスワイプジェスチャーが定義されていません。",
+    "suggestion": "タスク行を左右にスワイプすることで「完了」「削除」「延期」などのショートカットアクションを実行できる機能を検討してください。これはタスク管理アプリの標準的なUXであり、操作効率を大幅に向上させます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "ハプティックフィードバックに関する規定がありません。",
+    "suggestion": "タスク完了時、ボタンタップ時、レベルアップ時など、重要なインタラクションに対して適切なハプティックフィードバック（触覚フィードバック）を返す仕様を追加してくださ���。物理的な手応えを模倣し、操作の達成感やアプリの質感を高める効果があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.5, §4.6, §4.8",
+    "issue": "ハーフモーダル内でテキスト入力フィールドにフォーカスした際の、キーボード表示に伴うモーダルの挙動が未定義です。",
+    "suggestion": "キーボードが表示された際に、モーダルがキーボードの上にスライドするのか、モーダル内のコンテンツがスクロール可能になるのか、具体的な挙動を定義してください。入力フィールドがキーボードに隠れてしまう問題を防ぐために必須の仕様です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4",
+    "issue": "S-10 GROW画面における「Pull-to-refresh（下に引っ張って更新）」の仕様が定義されていません。",
+    "suggestion": "日次のタスクリストなど、データが更新される可能性がある画面では、ユーザーが手動でデータを最新化する手段としてPull-to-refreshを実装することを推奨します。その際のインジケータのビジュアルも定義が必要です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§5.9",
+    "issue": "Undoスナックバーの表示時間が30秒と非常に長く設定されています。",
+    "suggestion": "一般的なスナックバーの表示時間は4〜10秒です。30秒という時間はユーザーが見逃すか、逆に画面に留まり続けて操作の妨げになる可能性があります。この意図とユーザビリティへの影響を再検討し、より短い時間（例：7秒）に変更することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§4.9",
+    "issue": "S-20 TALK画面の履歴ドロワーを開くためのジェスチャーが定義されていません。",
+    "suggestion": "ヘッダーのハンバーガーアイコンタップに加え、画面左端からの右方向へのスワイプジェスチャーでも履歴ドロワーを開けるようにする仕様を検討してください。これにより、片手での操作性が向上します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.6",
+    "issue": "S-13のAI相談ボタンの状���定義に曖昧さがあります。",
+    "suggestion": "「完了済みタスク」と「未完了タスク」のそれぞれの場合で、「進め方を聞く」ボタンと「振り返り相談」ボタンが具体的にどのような状態（active, inactive, §5.0 Aの真のdisabled, 非表示）になるのかを、組み合わせ表などで明確に定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

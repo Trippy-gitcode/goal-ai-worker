@@ -1,0 +1,74 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "3.2, 7.3",
+    "issue": "GROW画面のヒーロー領域におけるアバター描画方式が矛盾・欠落しています。§7.3では「SVG直接レンダリングはプロフィール詳細画面のみ。リスト表示時はCanvas経由でラスタライズ済みPNG」と定義されていますが、アプリのメイン画面である§3.2 GROW画面のヒーロー領域での描画方式（SVGかPNGか）が不明です。GROW画面でPNGを使用する場合、いつ・どこでCanvasによるラスタライズ処理を行い、どこにキャッシュするのか（IndexedDB等）が未定義のため、実装時にパフォーマンス低下や表示不整合が確実に発生します。",
+    "suggestion": "GROW画面のヒーロー領域でのアバター描画方式を明記してください。PNGキャッシュを使用する場合、アバターのパーツ変更時や初回ロード時にWeb Worker等を用いてバックグラウンドでCanvasラスタライズを行い、IndexedDBにキャッシュするアーキテクチャを§7.3に追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "3.5, 7.3",
+    "issue": "アバターSVGのカラーリング（肌、髪、服など）のカスタマイズ可否、および4種のテーマ（Light/Dark）切り替え時のSVGパーツの視認性確保ルールが未定義です。ダークテーマ時に黒いオーラや暗い服が背景に溶け込む、またはライトテーマで白飛びする問題が発生するリスクがあります。",
+    "suggestion": "SVGパーツの色指定にCSS変数（`var(--avatar-skin)`など）を使用する設計とし、テーマ切り替え時にアバターの配色も連動してコントラストを保つ仕組み、またはアバター自体はテーマに依存しない絶対色空間を持つ仕様を§7.3に明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1.3, 10.2",
+    "issue": "「洗練」と「ゲーミフィケーション」を両立させるための要である「アニメーション」と「マイクロインタラクション」の定義が、デザインシステムの責務（§10.2）に含まれていません。タスク完了時の「気持ちよさ」をどう実装するか（イージング、パーティクル、所要時間など）の指針がなく、実装者によって品質がブレる原因になります。",
+    "suggestion": "§10.2の `design_system.md` の責務に「モーショントークン（デュレーション、イージング）」「マイクロインタラクションのルール（タスク完了、EXP獲得、レベルアップ演出）」を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "3.5",
+    "issue": "テーマが4種（Night Sky / Dawn / Harajuku Light / Harajuku Dark）定義されていますが、OSのシステム設定（ダーク/ライトモード）との連動・優先順位が未定義です。初回起動時にOS設定と相反するテーマが選ばれた場合の挙動が不明確です。",
+    "suggestion": "初回オンボーディング時のデフォルト選���をOSのカラースキーム（`prefers-color-scheme`）に連動させる仕様、およびユーザーが手動でテーマを選択した後はOS設定よりもユーザー選択を優先するルールを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "10.2",
+    "issue": "デザインシステム（`design_system.md`）の責務に、アイコン体系（Iconography）と角丸（Border Radius）、シャドウ（Elevation）の定義が欠落しています。「洗練された」UIを実現するには、これらの一貫性が不可欠です。",
+    "suggestion": "§10.2の `design_system.md` の内容に「アイコンセットの選定基準（線の太さ、角の丸み、塗り/線の使い分け）」「エレベーション（影のトークン）」「角丸（Radius）トークン」を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.4",
+    "issue": "ME画面のサブタブが4つ（PROFILE, DISCOVER, FRIENDS, SHOP）あり、モバイル端末の画面幅（特に320px~375px）では、テキスト付きのタブナビゲーションが窮屈になり、Apple HIG/Material Designが推奨するタップ領域（44x44px以上）を確保しづらくなります。",
+    "suggestion": "サブタブのUIデザイン方針として「アイコンのみ＋選択時のみテキスト表示」とするか、「横スクロール可能なタブ」とする方針を仕様に含めるか、今後の `design_spec_v1.md` でモバイルでのタップ領域確保を必須要件として定義するよう注記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "3.3",
+    "issue": "TALK画面におけるAIのストリーミング応答中のUI（タイピングインジケーターなど）が未定義です。洗練された対話体験のためには、AIが「考えている」状態の視覚的フィードバックと、ユーザー/AIのメッセージバブルの視覚的区別が重要です。",
+    "suggestion": "§3.3に「ストリーミング開始前のタイピングインジケーター表示」および「メッセージバブルのデザイン（ユーザーとAIの視覚的区別、テーマ適用時の配色）」の要件を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

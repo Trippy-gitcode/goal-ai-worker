@@ -1,0 +1,3 @@
+[
+  {"id":"R-001","severity":"LOW","category":"AMBIGUITY","location":"§8.12a Undoスナックバー","issue":"Undoボタンは Secondary 扱いだが、スナックバーの中では Undo こそが主要アクションになる。視覚階層としてはスナックバー内では Primary 扱いにしたい。","suggestion":"§8.12a に『スナックバー内の Undo ボタンは視覚的に強調（下線 or 色 --accent）』を明記。","model":"Claude Opus 4.6","persona":"brand_designer"}
+]

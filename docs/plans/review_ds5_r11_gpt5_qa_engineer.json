@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 (design_system.md)",
+    "issue": "アクセシビリティに関するトークン/基準（コントラスト比、フォーカスリング、ヒットエリア最小値など）の必須セクションがないため、UI受入（G9）での客観基準が不足する。",
+    "suggestion": "§N+? アクセシビリティトークン/基準を追加（WCAG 2.2 AA準拠）：対比比率表、focus-visibleスタイル、最小タップ領域、キーボードナビ仕様、色覚多様性チェックルール。G9で確認する観点を明記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§19.4 (ux_v1.md)",
+    "issue": "国際化/ローカリゼーション（言語/日付/数値/RTL/テキスト拡張）に関するUX要件のセクションが欠落している。",
+    "suggestion": "§N+? 国際化/I18Nセクションを追加し、対応言語、言語切替フロー、テキスト拡張時のレイアウト耐性、RTL対応の有無を定義。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 (reference_v1.md)",
+    "issue": "可観測性/運用に関する設計（ログスキーマ、メトリクス、トレース、アラート、レート制限/スロットリング/バックオフ）が必須セクションに含まれていない。",
+    "suggestion": "§7 可観測性/運用セクションを追加し、ログ/メトリクス/トレース項目、レート制限（HTTP 429ポリシー）とリトライ/バックオフ戦略、ダッシュボードとSLOを定義。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§19.4 (e2e_fullflow_test.md)",
+    "issue": "パフォーマンステストの指標と実行方法が未定義。閾値・計測シナリオ・採点方法がないため、テストが曖昧になりやすい。",
+    "suggestion": "§N+2 パフォーマンステストに指標を定義（TTI、LCP、操作応答時間、API p95/99、エラー率、メモリ上限）。Playwright Tracing/Network、Lighthouse CIの利用、JSON出力の保存先（instructions/results/perf_*.json）を規定。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.4（テストID命名ルール）",
+    "issue": "L2影響範囲テストは[GREP-KEY]を前提にしているが、GREP-KEYの付���/整合性を機械的に検証するゲートがないため、タイトルにキーを入れ忘れてもL2が欠落しうる。",
+    "suggestion": "test_lint.shへ検査を追加：tests/e2e/specs内���全test()タイトルに`\\[[A-Za-z0-9_-]+\\]`が含まれるか検証し、test_map.yamlのキー集合と突き合わせる。未一致・未付与はFAIL。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.5（ヘッダー標準）",
+    "issue": "ヘッダー例の依存表記が`docs/plans/lais_project_v1.md`となっているが、§19.1の必須ファイル配置は`docs/`直下（`docs/project_v1.md`等）。パス規約が不一致。",
+    "suggestion": "ヘッダーの例を`docs/project_v1.md v1.3`等に修正し、複数依存時はセミコロン区切りで列挙するフォーマットを明示（例：`依存: docs/project_v1.md v1.3; docs/design_system.md v1.1`）。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5（ヘッダー標準）",
+    "issue": "「依存: {上流ファイルのパス + バージョン}」が単数形の例示のみで、複数ファイル依存の書式（区切り・順序・空白）が不定。",
+    "suggestion": "複数依存の正式書式（セミコロン区切り、`<path> v<version>`の繰り返し、順序は依存の強さ順）を明文化。正規表現も提示：`^(依存: (\\S+ v\\d+\\.\\d+(; )?)+)$`。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.5-§19.6",
+    "issue": "ヘッダー必須メタ（バージョン/依存）と依存チェーン運用が機械検証に紐づいていないため、バージョンドリフトや未更新の連鎖漏れを自動検知できない。",
+    "suggestion": "spec_header_lint.shを新設しcanopyに組み込み：1) 各docs/*にタイトル行/ステータス/依存があるか、2) 依存の参照先ファイルのヘッダ版と一致するか、3) 参照先が存在するか、4) 依存グラフの循環有無（簡易DAG検証）を実装。FAIL時に一覧を出力。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.6（依存チェーン図）",
+    "issue": "依存チェーン末尾に`└→ design_system.md（デザイン基盤）`が重複記載されており、読み手に冗長/混乱を与える。",
+    "suggestion": "重複ノードを削除し、単一路線に正規化した依存図を提示。必要なら個別の多重参照は注記で明確化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.6（参照表記法）",
+    "issue": "参照はセクション番号（§N.M）基準のみのため、後追いの章追加で番号が変動し参照が不整合化するリスクがある。",
+    "suggestion": "各大項目に安定ID（例：UX-1 画面遷移、DS-2 カラーシステム）を付与し、表記法を「ファイル名 §番号（ID併記）」に拡張。ヘッダー/見出しに`[ID]`を埋め込み、spec_header_lint.shで存在検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.6（連鎖更新）",
+    "issue": "連鎖更新のトリガー判定が手動運用（spec_changelog.md記録のみ）に依存し、抜け漏れ時の検出が困難。",
+    "suggestion": "spec_header_lint.shに変更検出: 直近コミットで変更されたファイルを起点に、依存グラフから下流ファイル群を算出し、該当ファイルの最終更新日/版が元ファイルの更新日より新しいかを確認。古い場合はWARN/FAIL。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.5（dev-system準拠 表記）",
+    "issue": "ヘッダーの「dev-system準拠: docs/plans/dev_system_spec.md §19」はアプリ側に当該パスが存在しない（dev-systemは別リポジトリ）。参照パス規約が運用と不整合。",
+    "suggestion": "「dev-system準拠: dev-system vX.Y.Z (§19)」のようにバージョン/タグ参照へ変更し、必要ならGitHubの固定URL（タグ/commitハッシュ）を明記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.7（ベンチマーク出力）",
+    "issue": "「情報源を明記」のルールがある一方、提示の表フォーマットに情報源URL/出典列がない。証跡欠如でハルシネーション防止ルール（鉄則⑧）を満たせない。",
+    "suggestion": "各表に「出典URL（複数可/脚注ID）」列を追加。機能マトリクスはセル単位で脚注番号を付け、末尾に出典リストを列挙。未確認は「未確認」と明示。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7（ベンチマーク出力）",
+    "issue": "出力がMarkdown表のみで機械可検証に弱く、完了基準（5社/全行Lais方針/差別化≥3）の自動判定が困難。",
+    "suggestion": "表に加えてYAMLブロックを必須化（front-matterか末尾）：competitors配列、matrix配列（feature, vendors[], policy）、diff_points配列（課題, 方針, セクション）。canopyにbench_lint.shを追加して件数/必須列/未確認割合を検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4（system_map.md）",
+    "issue": "テスト影響とのブリッジが弱く、変更時にどのGREP-KEYが影響を受けるかの紐付けがテンプレにない。",
+    "suggestion": "system_map.md §4「ファイル変更チェックリスト」に「関連GREP-KEY/関連spec.ts」の列を追加し、affected-tests.shのtest_map.yaml更新漏れを防止。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19 全体 ↔ §1-18",
+    "issue": "§13系（AIレビュー）はdocs/plans/配下にreview_*.json保存を要求するが、§19.1のアプリ側必須構成はdocs/直下のみで、plansディレクトリの標準化がない。review_gate.shはdocs/plans/のみを走査し、存在しない場合に素通りする恐れがある。",
+    "suggestion": "§19.1にdocs/plans/を必須ディレクトリとして追加。init_app.shで作成し、review_gate.shはdocs/plans/が未存在ならFAILにするか、docs/直下のreview_*.jsonも併せて走査するよう修正。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

@@ -22,7 +22,7 @@
 #   1: ALERT（連続失敗 3 回到達、PO 通知発生）
 #
 # 根拠:
-#   - lais/verify/dev_system_v34_package.md §2.25.20.1〜.4
+#   - core_spec.md §5 機械強制 hook 仕様 (legacy v34 spec §2.25.20.1〜.4, archived 2026-04-30)
 
 set -eu
 

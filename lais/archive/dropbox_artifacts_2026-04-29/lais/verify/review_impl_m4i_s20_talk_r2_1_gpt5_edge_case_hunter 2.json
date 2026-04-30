@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-201",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "S20-9 入力バー（handleKeyDown / onInput / sendMessage）",
+    "issue": "IME composition を Enter で確定直後に送信する場合、keydown タイミングで sendMessage を呼ぶため、onInput がまだ走っておらず state の inputValue が未確定文字を含まない（または古い）可能性がある。結果として最後に確定した文字が欠落した内容を送信するリスクがある。",
+    "suggestion": "送信トリガを keydown ではなく form onSubmit または keyup に寄せ、DOM の更新後に評価されるようにする。もしくは送信時は state ではなく textareaRef.current.value を読み、trim 済み文字列を sendMessage(text) の引数として渡す。compositionend 直後は setTimeout(0) または requestAnimationFrame 後に submit するなど、入力反映を待つ機構を入れる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-202",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "S20-9 入力バー（コメントと実装の乖離）",
+    "issue": "コメントでは「送信経路を form onSubmit に一本化」とあるが、実装は textarea の handleKeyDown で直接 sendMessage を呼んでおり、経路が二重化している。",
+    "suggestion": "handleKeyDown では e.preventDefault() のみ行い、form.requestSubmit()（要 formRef）で onSubmit に委譲して経路を一本化する。これにより送信条件チェックやロック処理を onSubmit に集約できる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-203",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sendMessage（同一フレーム再入ロック）",
+    "issue": "再入ロック解除に queueMicrotask を使用しているが、古い Safari 等で未実装の可能性があるため ReferenceError になるリスクがある。",
+    "suggestion": "queueMicrotask の存在確認とフォールバック（Promise.resolve().then(fn) など）を実装する。例: const qmt = window.queueMicrotask || ((cb)=>Promise.resolve().then(cb)); qmt(()=>{ sendingRef.current=false; });",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-204",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sendMessage（同一フレーム再入ロックと state 反映タイミング）",
+    "issue": "ロック解除を microtask で即時に行うため、メインスレッドがビジーで再描画・state 反映が遅延した場合、第二のユーザー操作（例: Enter → すぐボタン押下）が state 未反映のまま次フレームで通過し、古い inputValue を再送する可能性が残る。",
+    "suggestion": "ロック解除を requestAnimationFrame まで遅らせる、または「送信サイクルID（incrementing token）」を導入して同一テキストの二重送信をガードする。併せて sendMessage は DOM から現在値を読み取り、直後に DOM 側も空文字を代入して同期的に視覚と値を一致させると堅牢。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-205",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "S20-9 入力バー（onSubmit の canSend ガード）",
+    "issue": "canSend は state の inputValue 依存のため、高速タイプ直後に送信（Enter/クリック）すると、onInput の state 反映が間に合わず送信が弾かれる（見かけ上の無反応）可能性がある。",
+    "suggestion": "onSubmit 内のガードは textareaRef.current.value をソースオブトゥルースにし、trim の上で空判定する。sendMessage も text 引数を受け取り、その値で送信するよう変更する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-206",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S20-9 入力バー（送信ボタン）",
+    "issue": "aria-disabled のみで無効化しており、実際にはボタンがフォーカス可能・アクション可能（submit 発火）なまま。支援技術とキーボード操作の一貫性に欠ける。",
+    "suggestion": "実際の disabled 属性を使用し、視覚スタイルは .s20-send:disabled で制御する。submit 抑止は onSubmit 側で引き続き安全策として保持してよい。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-207",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S20-9 入力バー（textarea ラベリング）",
+    "issue": "label 要素で囲みつつ、aria-label と視覚的に隠したラベルテキストも付与しており、スクリーンリーダーで二重読み上げの可能性がある。",
+    "suggestion": "label を維持する場合は textarea の aria-label を削除し、視覚的に隠したテキストは label 内のテキストとしてのみ提供する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-208",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S20-3 AI バブル（aria-live=\"polite\"）",
+    "issue": "各 AI バブルに aria-live を付与しており、再描画や大量メッセージ時に読み上げが過剰になる恐れがある。",
+    "suggestion": "リスト全体（例: ol 親）に role=\"log\" または aria-live=\"polite\" を付与し、個別バブルからは aria-live を外す。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-209",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "sendMessage（疑似 AI 応答タイマー）",
+    "issue": "新規送信ごとに既存の pendingTimer を clear しているため、短時間で複数送信すると最後の1件以外の応答が消える。仕様として意図か不明。",
+    "suggestion": "意図が「各メッセージに1応答」なら、タイマーをメッセージ単位でキュー管理（配列）し、逐次または並列で応答を追加する。意図が「常に最新へのみ応答」なら、その旨をコメントに明記する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-210",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "sendMessage（時刻の扱い）",
+    "issue": "AI 応答の時刻がユーザー送信時刻と同一で固定され、応答が跨分した場合に誤解を招く。",
+    "suggestion": "返信生成時（setTimeout ハンドラ内）に新規の時刻を取得して表示する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-211",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "S20-2 スクロール領域（handleScroll / バナー表示閾値）",
+    "issue": "distance 計算時に iOS のオーバースクロールやブラウザズーム・大きなフォントでの端数処理により、バナーの点滅や誤判定が起こりうる。",
+    "suggestion": "scrollTop を 0 以上に clamp し、distance > 80 の閾値判定にヒステリシスや debounce を導入する（例: 64/96 の二段閾値）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-212",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S20-9 入力バー（handleKeyDown）",
+    "issue": "e.keyCode === 229 は非推奨でブラウザ差がある。将来の互換性が低い。",
+    "suggestion": "isComposing / e.isComposing のみに寄せるか、key === 'Process' 等のモダンプロパティを併用し、keyCode 依存を廃止する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-213",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "S20-9 入力バー（textarea リサイズ）",
+    "issue": "長文ペーストや非 ASCII（絵文字含む）で行高が増える場合、MAX_ROWS=4 を超えたコンテンツがスクロール不能・非表示になるリスク（CSS 次第）。",
+    "suggestion": "CSS で textarea に overflow-y: auto を明示し、キーボードユーザーにも��かるよう aria-describedby で「4 行以上はスクロール」とヘルプテキストを案内することを検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-214",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（prefers-reduced-motion 対応）",
+    "issue": "reduced-motion 時に AI 遅延を 10ms に短縮しており、短時間に複数 DOM 追加が集中して逆に視覚ノイズや読み上げ連打を招く可能性がある。",
+    "suggestion": "reduced-motion ではアニメーション縮退に留め、遅延は通常と同等か、むしろ間引く（例: 応答をバッチして1つに要約）など、情報密度を下げる方向を検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-215",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "S20-2 スクロール末尾追従（useEffect）",
+    "issue": "大量メッセージ追加時に直ちに scrollTop = scrollHeight を行うとレイアウトスラッシングが発生しやすい。",
+    "suggestion": "requestAnimationFrame 内で 1 フレーム後に実施、または IntersectionObserver で末尾 sentinel へのスクロールに切り替えてレイアウトコストを下げる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

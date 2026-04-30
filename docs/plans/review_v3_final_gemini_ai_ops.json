@@ -1,0 +1,132 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "dev_system_spec.md §8 / sub_infrastructure.md §2.9",
+    "issue": "rollback.shがコードのrevertのみを行っており、データベース（Supabase等）のスキーマ変更やデータマイグレーションのロールバック手順が定義されていない。DB変更を含むデプロイ後にロールバックを実行すると、コードとDBスキーマの不整合により確実にシステム障害・データ破損が発生する。",
+    "suggestion": "rollback.shにDBマイグレーションのダウン（revert）処理を組み込むか、DB変更を含むデプロイの場合は自動ロールバックを停止し、POの判断を仰ぐ（手��リカバリ）仕組みを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md §6 / §16.3",
+    "issue": "ENGが自律実行可能な「ホットフィックスパス」の適用条件（低リスク判定）を、ENG自身が行うのかADVが行うのかが不明確。ENG自身が判定する場合、誤判定により高リスクな変更を自律実行してしまう暴走リスクがある。",
+    "suggestion": "ホットフィックスパスの適用判定は必ずADVが行い、ミッション定義に「自律実行許可フラグ」を明記する運用にする。ENG単独でのリスク判定および自律実行開始を禁止する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §13.7 / §13.15.4",
+    "issue": "§13.7で「最低10ラウンド繰り返す」と規定されている一方、§13.15.4ではPre-Review導入により「外部APIラウンド数は7-8ラウンドに減少」とされており矛盾している。CRITICALが0になっても10ラウンドまで強制実行されると、コスト浪費とseverity inflationを誘発する。",
+    "suggestion": "§13.7の「最低10ラウンド繰り返す」��削除し、「CRITICALが0になり、かつ3ラウンド連続で新規HIGHが一定数以下になった時点で収束とする」など、状態ベースの収束条件に改める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "sub_testing.md §1.2",
+    "issue": "test-guards.config.tsでCI環境（process.env.CI === 'true'）の場合に一律でCORSエラーを無視している。これにより、Staging等の本番相当環境に対するCIでのE2EテストでCORS設定ミスを検知できず、本番環境にCORSエラーが流出するリスクがある。",
+    "suggestion": "CORSエラーの無視条件から `process.env.CI === 'true'` を外し、テスト対象のURL（BASE_URL）がlocalhostの場合のみCORSエラーを許容するように修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "sub_infrastructure.md §2.8",
+    "issue": "deploy.shにおいて、ローカルの.envや.dev.varsに設定されたシークレットを本番環境（Cloudflare Workers/Pages等）に反映するステップが欠落している。シークレット追加・変更時に本番で環境変数が見つからずクラッシュする。",
+    "suggestion": "deploy.shに、必要なシークレットをデプロイ先環境に同期するステップを追加するか、シークレット同期はPOの手動操作とする旨を明記し、デプロイ前の必須チェックリストに含める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "sub_infrastructure.md §2.6",
+    "issue": "G8（テストファースト）のRED検証ロジックが「before.jsonのunexpected>0」となっているため、対象ミッションと無関係な既存テストがFAILしているだけでもRED条件を満たしてしまう。対象のテストが正しくREDになっているか検証できていない。",
+    "suggestion": "before.jsonの検証ロジックを「対象ミッションのATに対応するテスト（grepキー等で特定）がFAILしていること」を厳密にチェックするように修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "dev_system_spec.md §19.10 B-3",
+    "issue": "AIレビューの棄却検証でAIが「維持」と判定した場合、ADVの修正対象として強制される。AIがハルシネーション等で誤った指摘を「維持」し続けた場合、PO（人間）が最終判断で強制棄却し��デッドロックを解除するエスケープハッチが定義されていない。",
+    "suggestion": "「POが最終的なビジネス判断として、AIの『維持』判定をオーバーライドして強制棄却できる」旨のエスケープハッチルールを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md §20.2 / sub_infrastructure.md §2.6",
+    "issue": "シークレットスキャン（G10）がpre-commit hookに依存しているが、自律エンジニア（ENG）がエラーを回避するために `git commit --no-verify` を使用してスキャンをバイパスする暴走リスクがシステム的に防がれていない。",
+    "suggestion": "pre-commitだけでなく、canopy.sh（CI/CDパイプライン）内でもシークレットスキャンを再実行し、リポジトリに混入した場合はデプロイを確実にブロックする多層防御を実装する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "sub_infrastructure.md §2.8",
+    "issue": "deploy.shにおいて、L1スモークテストがデプロイ前（ローカル/CI環境）にのみ実行されており、デプロイ完了後の実際の環境（Staging/Prod）に対するE2Eテストが行われていない。環境固有の設定ミスによる本番障害を検知できない。",
+    "suggestion": "デプロイ完了後（curlでの疎通確認後）に、デプロイ先URL（DEPLOY_URL）をターゲットとして再度L1スモークテストを実行するステップを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §2 / sub_adv_protocol.md §1",
+    "issue": "ADVは「コードを読まない」制約がある一方で、ミッション定義作成時に「対象ファイルの列挙（changed-files-allowlist.shで検証される）」を行う責務を持っている。コード構造を知らずに正確な対象ファイルを列挙することは困難である。",
+    "suggestion": "対象ファイルの特定やコードレベルの影響範囲分析はENGの責務とし、ADVは「仕様レベルの影響範囲」の分析に留める。または、ENGが事前調査（Pre-flight）を行い、ADVに報告するステップを設ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "dev_system_spec.md §9.2",
+    "issue": "修正試行3回制限は「同一バグへの��正」に対して定義されているが、新規機能実装時（Step 4）にテストが通らずENGが実装とテスト修正を繰り返す「実装ループ」に対する制限が明確でない。",
+    "suggestion": "修正試行3回制限の適用範囲を「バグ修正」だけでなく「単一ミッション内でのテストFAILに伴う再実装試行」にも拡大し、3回連続でGREENにならない場合はBLOCKEDとしてADV/POにエスカレーションするルールを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md §5",
+    "issue": "新規ソースファイルを追加した際、test_map.yamlにマッピングを追記しないとaffected-tests.shでデプロイがブロックされるが、ENGが実装時にtest_map.yamlを更新する責務が明記されていない。",
+    "suggestion": "dev_system_spec.mdのStep 4（ENG実装）またはミッション定義テンプレートに、「新規ファイル作成時はtest_map.yamlにマッピングを追記する」タスクを必須として追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §13.13 / §13.15.1",
+    "issue": "§13.13���「ENGがClaude系の場合、レビューにClaude APIは不可」と規定しているが、§13.15.1では「Claude Code（自身）が毎ラウンド全ペルソナ実行」と規定しており表現が衝突している。",
+    "suggestion": "§13.13の記述を「外部APIレビューにおいては、ENGと同一プロバイダーのモデルを使用しない（Code自身によるPre-Review/並行レビューは除く）」と明確化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

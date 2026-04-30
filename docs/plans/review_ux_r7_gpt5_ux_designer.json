@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.5（S-21 チャット履歴）/ §3.1 ヘッダー",
+    "issue": "「新しいチャット」作成の挙動が未定義。新規スレッドの開始条件（コンテキストの初期化、タイトルの付与、直前スレッドとの区別、作成直後のフォーカス位置）が記述されていない。ヘッダーの📝アイコンとドロワー内の「新しいチャット」ボタンの役割も重複・未定義。",
+    "suggestion": "新規チャット作成の仕様を明記（例: 押下→現在の会話コンテキストをクリア→空スレッドを作成→入力欄にフォーカス→履歴リスト先頭に追加。初行を自動サマリーとしてリストに表示）。ヘッダーは「📝=新規」「☰=履歴」に統一し、S-21内の「新しいチャット」ボタンは同一動作に揃える。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1/§3.5",
+    "issue": "TALKヘッダーに☰（ドロワー）と🕐（履歴?）が併記され、S-21でも履歴を扱うため、同一機能の入口が複数存在して混乱を招く。",
+    "suggestion": "履歴アクセス手段を1つに統一（推奨: ☰=ドロワー）。🕐は削除するか別機能（例: 最近3件のクイックスイッチ）として明確化。アイコンのラベル（aria-label/ツールチップ）も定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.3 / ux_v1.md §2.3",
+    "issue": "「週N回」習慣のToday手動追加（「今日やる」ボタン）がプロジェクト仕様にあるが、UX仕様でUI配置と操作フローが未定義。",
+    "suggestion": "Weekly習慣の行（Upcoming内の習慣グループ or 習慣管理UI）に「今日やる」ボタンを追加し、タップで当日のTodayに即時ピン留め。取り消し手段（Today行の…メニューから「今日から外す」）も定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5 / ux_v1.md §2.3, §3.4, §9.2",
+    "issue": "日次EXP上限（300）到達時のUXが未定義。GROWでのタスク完了、TALKの冒険EXP検出、ログインボーナスとの競合時の表示/抑止ルールが不足。",
+    "suggestion": "上限到達時の共通ルールを追加: 1) タスク完了は記録するが「+EXPフロート」は非表示、スナックバーで「本日のEXP上限に達しました。チェックは記録されます」を表示。2) TALKの冒険カードは表示しつつ「上限により加算なし」バッジを付与。3) 上限近傍での端数加算（例: 残り5EXPの時+10実行）時の丸め/演出も定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3（Today並び順）",
+    "issue": "Todayは開始時刻順ソートだが、ロングプレスで手動並び替えすると「自動ソート」と「手動順」の優先順位が不明。編集で開始時刻を更新した場合の再ソート挙動も未定義。",
+    "suggestion": "優先順位を明文化（例: 手動順が最優先。編集で開始時刻変更しても手動順は保持。手動順をリセットする[自動に戻す]をTodayヘッダーに設置）。ソート状態インジケータも表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3, §4.4",
+    "issue": "大量データ時のパフォーマンス/操作性に関する規定が不足（タスク最大1万件、友達最大500人）。タスクリストは仮想化/ペー��ングの記述がなく、友達は全件グリッド表示のみ。",
+    "suggestion": "タスクリストはバーチャルスクロール＋日付グルーピング、友達は無限スクロール＋クライアント内検索（自分の友達のみ対象でプライバシー懸念なし）を追加。スクロール位置の保持も明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §13.1（ログアウト）",
+    "issue": "オフライン時に未同期データがある状態で「強制ログアウト（データ消失）」オプションが存在し、誤タップでデータ喪失リスクが高い。",
+    "suggestion": "強制ログアウトをデフォルト非表示にし、二段階確認（長押し→確認ダイアログで具体的な消失対象件数を提示）。代替として「一時ログアウト（ローカル保持）→再ログイン時に同期再試行」案も検討。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.1（画像添付）",
+    "issue": "画像添付の失敗/制限時のUIが未定義（10MB超過、非対応フォーマット、アップロード進行状況、キャンセル）。",
+    "suggestion": "ファイル選択直後のクライアント検証（拡張子/サイズ）＋インラインエラー。アップロード進捗バー（%表示）と[キャンセル]、失敗時の再試行ボタンを定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §11.2（小型端末のサブタブ表記）",
+    "issue": "DISCOVERを「DISC」に短縮すると意味が伝わりにくく、初見で迷う可能性が高い。",
+    "suggestion": "アイコン＋短縮ラベルの併用、もしくは横スクロールタブ＋完全ラベルの維持。初回表示時にツールチップで各タブの説明を提示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §8.6（演出キュー）/ §8.5（ログインボーナス）",
+    "issue": "演出キューにログインボーナスの優先順位が含まれていない。初回起動直後にタスク完了やゴール達成が重なった場合の順序が未定義。",
+    "suggestion": "演出キューにログインボーナス（EXP+5）を追加（推奨順: 1. ログインボーナス → 2. タスク完了 → 3. ゴール達成 → 4. レベルアップ）。合計時間上限の調整ルールも追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（QRスキャン S-36）",
+    "issue": "カメラ権限拒否/恒久拒否時のUXが未定義（代替導線や再許可案内がない）。",
+    "suggestion": "権限拒否時はモーダルで説明＋[設定を開く]ボタン（iOS/Androidガイド）、代替として「リンクで招待」導線を同画面に併設。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.4（TALKでのレベルアップ）/ §4.1（MEヒーロー）",
+    "issue": "TALKでは現在EXP/レベルが常時見えず、上がった実感が薄れる可能性がある。",
+    "suggestion": "TALKヘッダーにミニステータス（Lv/小型EXPバー）をオプション表示（Reduced Motion時は非アニメ）。もしくはレベルアップバナーをタップでGROWにジャンプ。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（Upcoming「7日以降 (N件)」）",
+    "issue": "「7日以降 (N件)」タップ後の表示仕様が曖昧（どこまで読み込むか、戻し方、パフォ��マンス対策）。",
+    "suggestion": "専用一覧モーダル（ハーフ）でページング表示（週単位/無限スクロール）。閉じる操作でTodayに戻る。検索/フィルタ（ゴール/タグ）も検討。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §5.1.2（オンボーディング Step4）",
+    "issue": "AI提案3件のロード/失敗時挙動が未定義（タイムアウト、ネットワーク断、APIエラー時）。",
+    "suggestion": "スケルトン→タイムアウト10秒でリトライ。失敗時はデフォルト例（静的テンプレ）を表示。ユーザーが手入力のみで先に進める回避経路を明示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "ACCESSIBILITY",
+    "location": "ux_v1.md §11.2 / §2.3",
+    "issue": "小型端末で所要時間表示を色付きバーの幅に置き換える仕様は、色弱/視覚的手がかりが不足する可能性がある。",
+    "suggestion": "バーの中に短縮テキスト（15m/30mなど）を残すか、パターン（ストライプ/ドット）で長さを補助。スクリーンリーダー用にaria-labelで所要時間を読み上げ。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（FRIENDS グリッド）",
+    "issue": "友達最大500人に対する探索性が低い。名前検索はスパム懸念で未搭載だが、自分の友達内検索はプライバシー問題が少ない。",
+    "suggestion": "FRIENDS内限定のクライアント検索/フィルタ（称号/Lvレンジ）とアルファベット/50音ジャンプリストを追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.4（S-14→S-20 AI相談遷移）",
+    "issue": "ゴール詳細（S-14）からTALKへ遷移時にS-14を閉じてタブ切替にしているため、TALKから戻ってもS-14に復帰できず「文脈に戻れない」感がある。",
+    "suggestion": "S-14の状態（スクロール位置/選択ゴール）を保持し、TALKのヘッダーに「GROWに戻る（{ゴール名}）」を表示。戻る押下でS-14を再構築して復帰する。もしくはS-14をスタックに残す遷移に変更。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8.1/§7.1",
+    "issue": "タスク完了時の即時性は視覚的に���義されているが、触覚/聴覚のフィードバック定義がない（PWAでもVibration APIは利用可能な環境あり）。",
+    "suggestion": "対応端末では短いバイブ（10–20ms）を付与。設定でON/OFF可能に。音は既定OFFで、設定から有効化できるようにする。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §15（通知タップ遷移）/ §1.4（historyポリシー）",
+    "issue": "通知ディープリンクでS-11（ハーフモーダル）を直接開いた場合の戻る履歴が明確でない（ブラウザバックの初回でモーダルのみ閉じるか、画面も戻るか）。",
+    "suggestion": "ディープリンク時は「ベース画面→モーダル」の2段pushを必ず積むポリシーを明記。戻る1回目でモーダル閉、2回目で前画面に戻る。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §4.2.1（アバター設定）/ project_v1.md §8.1",
+    "issue": "MVPでSHOPがComing Soonにも関わらず、アバター設定で未所持アイテムに「SHOPで購入」導線があり、遷移先がプレースホルダーで落胆を招く可能性。",
+    "suggestion": "MVP中は未所持アイテムタップで「ショップ準備中」のツールチップのみ表示し、S-34遷移は行わない。Premier特典アイテムは例外として装備導線を明確化。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

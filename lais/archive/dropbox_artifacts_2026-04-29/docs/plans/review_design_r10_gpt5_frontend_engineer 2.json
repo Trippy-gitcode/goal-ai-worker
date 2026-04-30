@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§9",
+    "issue": "AI実装向けトークンブロック(:root)に --on-accent-subtle が定義されていない。§8.1/§8.3/§8.7でこのトークンを参照しており、コピー実装時に未定義参照で色が継承に落ちてコントラスト不良・不統一が発生する。",
+    "suggestion": "§9 の :root に Night Sky 相当で --on-accent-subtle を追加する。例: --on-accent-subtle: #79C0FF;（Night Sky）。他テーマは §5.* で上書きされる前提なので、AIブロック内はNight Sky値で十分。併せて §9 の見出しに「--on-accent-subtle を含む」旨を明記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.2, §5.3",
+    "issue": "Dawn/Harajuku Light テーマで --danger を新値に更新した一方、--danger-subtle-hover / --danger-subtle-pressed が旧色 (#CF222E) を参照するRGBAのまま残存。hover/pressedで色相が跳ぶため一貫性と意味付けが破綻する。",
+    "suggestion": "各ライト系テーマで subtle系hover/pressedを --danger の現行色に整合させる。例: Dawn → --danger: #A71B26 に合わせ、--danger-subtle-hover: rgba(167,27,38,0.14〜0.18), --danger-subtle-pressed: rgba(167,27,38,0.20〜0.24) に再計算。Harajuku Light → --danger: #C93000 に合わせ、--danger-subtle-hover: rgba(201,48,0,0.14〜0.18), --danger-subtle-pressed: rgba(201,48,0,0.20〜0.24)。数値はWCAG 1.4.11の3:1(非テキスト)を再確認のうえ決定する。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-103",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§5.5",
+    "issue": "backdrop-filter の @supports ブロックが二重に定義され、先のブロックでfilterのみ、後のブロックでbackground+filterを再指定している。機能上は成立するが、読み手と実装者に混乱を与える構造。",
+    "suggestion": "フォールバック→上書きの二段構えに一本化し、@supports ブロックは後段の一つだけにする。例: 1) .glass-surface { background: var(--bg-surface); border: var(--card-border); } 2) @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) { .glass-surface { background: var(--card-bg); backdrop-filter: var(--card-backdrop); -webkit-backdrop-filter: var(--card-backdrop); } }",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0",
+    "issue": "meta[name=\"theme-color\"] を --bg-primary と同期する方針は記載されているが、実装スニペットとiOS PWAでの挙動差（theme-color非対応/限定対応）への具体対処が未提示。",
+    "suggestion": "実装例を追加: const m=document.querySelector('meta[name=\"theme-color\"]'); const c=getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim(); if(m&&c) m.setAttribute('content',c); 併せてiOS PWA向けに meta[name=\"apple-mobile-web-app-status-bar-style\"] をライト: default/ダーク: black に切替（色そのものは指定不可）し、テーマ切替時に更新する旨を注記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5（テーマ定義 共通）",
+    "issue": "color-scheme が未定義のため、フォームUI/スクロールバーなどUA部品がOS既定配色のままになり、ダークテーマで視覚的不整合が生じうる（特にiOS Safari）。",
+    "suggestion": "テーマごとに color-scheme を明示: html[data-theme=\"night-sky\"], html[data-theme=\"harajuku-dark\"] { color-scheme: dark; } html[data-theme=\"dawn\"], html[data-theme=\"harajuku-light\"] { color-scheme: light; }",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0",
+    "issue": "テーマ切替アニメーションで html/body に color・border-color のトランジションを付与しており、大量テキストや長大リスト表示時に全体再描画コストが増大するリスクがある（特にモバイルSafari）。",
+    "suggestion": "html/bodyのcolorトランジションは外し、背景と境界線のみを .lais-theme-surface の限定適用に留める。例: html.theme-switching { transition: background-color var(--duration-normal) var(--ease-out); } .lais-theme-surface { transition: background-color,border-color var(--duration-normal) var(--ease-out); }",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.5",
+    "issue": "backdrop-filter: blur(16px) saturate(180%) はiOS Safariで特に高負荷。30要素上限は明記されているが、端末性能や電力状態による自動抑制方針が未定義。",
+    "suggestion": "追加ガイドライン: 1) 低性能端末では自動OFF（navigator.hardwareConcurrency<=2 などのヒューリスティック） 2) Battery Saver検知時はOFF（可能ならNavigator API/独自設定） 3) スクロール大量領域内ではコンテナ1枚のみ��限定（position: sticky/fixed との組合せ回避） 4) 強度トークンを用意: --glass-blur: 12px/8px/none で段階的に下げられる設計に。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2.2",
+    "issue": "リンクのvisited状態の色指定がなく、長文コンテンツで辿った/未読の識別性が不足する。アクセシビリティ観点でもvisitedの視覚区別は望ましい。",
+    "suggestion": "トークンとスタイルを追加: --link-visited: var(--accent-pressed); a:visited { color: var(--link-visited); text-decoration: underline; }（テーマ横断でコントラスト4.5:1を確認）",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1",
+    "issue": "spring系 cubic-bezier（y2>1）の誤用を防ぐ技術的ガードがなく、開発時にtranslate/opacityへ誤適用されると画面外オーバーシュート/チラつきのリスクがある。",
+    "suggestion": "運用ガードを明記: 1) アニメユーティリティを用意（.easing-scale-bouncy など）しプロパティ別に適用先を限定 2) stylelint/csstreeで 'spring-* を transform: scale系にのみ許可' のLintルールを導入 3) UIレビ��ー時のチェックリストに『springはscale系のみ』を追加。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§5.0",
+    "issue": "iOS SafariのITP/ストレージポリシーによりlocalStorageが7日で消去されるケースでは、テーマ永続化が失われデフォルトに戻る（FOUC/意図しないテーマ復帰）。デザインシステム内の対処方針が未明記。",
+    "suggestion": "永続化の多重化をガイド: localStorageに加えCookieへも保存（SameSite=Lax, max-age=1y）。起動スニペットで localStorage→Cookie の順に読み出し、両方へ再書込。例: document.cookie='lais.theme='+nextTheme+';path=/;max-age=31536000;SameSite=Lax'。PWAインストール推奨は維持しつつ、非PWA Safariでもテーマ維持を確保する。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  }
+]

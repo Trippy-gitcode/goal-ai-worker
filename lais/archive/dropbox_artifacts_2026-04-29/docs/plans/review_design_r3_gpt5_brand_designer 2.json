@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-301",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§8.1 ボタン + §5.2/§5.3（ライト系テーマ）",
+    "issue": "Secondaryボタンが`--accent-subtle`背景（alpha 0.12〜0.14相当）+ `--accent`テキストの組み合わせで、ライト系テーマ（Dawn/Harajuku Light）において本文サイズのコントラスト4.5:1を満たさない可能性が高い。ブランドDNAの「実世界に溶け込む静けさ」を担保しつつも、可読性低下は体験を損なう。",
+    "suggestion": "ライト系テーマのSecondaryはコントラスト実測でAA>=4.5:1を満たすように再設計する。具体策: 1) subtleのalphaを初期0.20〜0.24に引き上げ（hover/pressedも相対で再計算）、2) またはアウトライン+透明背景に変更（1px `--border-strong`枠 + `--accent`テキスト）で確実に可読性を確保、3) 代替としてSecondary専用の`--button-secondary-bg/fg`トークンをテーマ別に定義し、各テーマでAA達成値を明示。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-302",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.1-5.4（--scrim定義） と §8.5 ボトムシート",
+    "issue": "テーマごとに`--scrim`トークン���定義している一方、§8.5ボトムシートのオーバーレイは`rgba(0,0,0,0.4)`とハードコード。トークン方針（全コンポーネントでトークン参照）と矛盾し、テーマ間でスクラムの表情が揃わない。",
+    "suggestion": "§8.5の「オーバーレイ: rgba(0,0,0,0.4)」を「オーバーレイ: var(--scrim)」に変更。モーダル/ドロワー/ツールチップ等、すべてのオーバーレイ系コンポーネント定義で`--scrim`を参照するルールを追記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-303",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5 テーマ定義（総則） + §7 アニメーショントークン",
+    "issue": "「性格差は色とマイクロコピー、アクセント濃度で表現」とあるが、実装トークンは色中心で、モーション/濃度/密度など“性格”を支える非色トークンのテーマ差分が不足。Harajuku系の「弾む」感、Night/Dawnの「静けさ」が色以外で再現されにくい。",
+    "suggestion": "テーマ別モーション/密度トークンを追加。例: `--motion-scale-check`（Harajukuはspring-bouncy、Dawnはspring-gentle）、`--duration-emphasis`（Harajuku短め、Dawn長め）、`--shadow-ambient-strength`（既存shadowをテーマ別に用途別ガイド化）、`--accent-subtle-alpha`をテーマ別に明記。§7.1に「Harajuku系はscale系演出のみovershoot許可、Night/Dawnは抑制」等の運用ルールを追加。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-304",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5 テーマ定義（総則）",
+    "issue": "「性格差は…マイクロコピー…で表現」と明記されているが、マイクロコピーのトーン/語彙/句読点/絵文字使用などのガイドが未定義。ブランドDNA（洗練＋親しみ）とテーマ性（静けさ/高揚）の言語表現がデザインシステム内に落ちていない。",
+    "suggestion": "テーマ別マイクロコピーガイドを追記（例: 語尾トーン・絵文字使用頻度・励まし表現の強度）。最小でも「Neutral（Night Sky/Dawn）/Pop（Harajuku）」の2トーン見本（DO/NG例）を§5に添付し、UI文言制作時の参照基準を提供。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-305",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.2 レイアウト原則",
+    "issue": "「タスク間余白: 20px以上」とあるが、スペーシングスケールは4/8/16/24/40/64px。20pxはトークンに存在せず、実装でマジックナンバ��化するリスクがある。",
+    "suggestion": "タスク間余白をトークン化（例:`--space-task-gap: 20px`）するか、スケールに寄せて24pxに統合。コンポーネントガイド（§8.4タイムライン）でも同一トークンを参照するよう明記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-306",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.4 z-index階層トークン",
+    "issue": "説明に「トーストは最前面（モーダル内のトーストも含む）」とあるが、定義では`--z-toast: 600`より`--z-tooltip: 700`が上。最前面の定義と数値が食い違う。",
+    "suggestion": "いずれかに統一。選択肢: 1) トーストを最上位にするなら`--z-toast`を700超へ、2) 「最前面（ただしツールチップは除く）」と文言修正、3) コンテキスト別（モーダル内優先順位）ルールを表で追記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-307",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§1.4 NGリスト（色） + §5.5 グラスモーフィズム",
+    "issue": "NGで「純白#FFFFFFを背景として広範に使用禁止」とある一方、ライト系Glass ONは`rgba(255,255,255,0.65)`のカード背景を推奨。背景用途ではないが、運��上「純白系面積の許容範囲」が曖昧で解釈ぶれが生じうる。",
+    "suggestion": "NGリストに但し書きを追加: 「Glass ONのカード等“限定的な面”は許容（ライト系は最大65%不透明まで）。画面のベース背景や広域面での純白は禁止」。併せて、ライト系Glassの色温度をわずかに暖/寒へ振る例も追記すると“実世界の色”原則と整合。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-308",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§7 アニメーション + §8.3/§8.6/§8.3",
+    "issue": "「構造的ゲーミフィケーション」を支える祝祭系の色・パーティクル・サウンド（今回は視覚のみ）の“ブランドらしさ”がトークン未定義。現状は文言で指示されるのみで、チーム横断の一貫表現が担保されにくい。",
+    "suggestion": "演出用のブランドトークンを追加: 例) `--celebration-primary/secondary/tertiary`（テーマ別彩度差）、`--confetti-colors`（配列/設計ガイド）、`--exp-float-fg/bg`。最低限、各テーマで使用する紙吹雪色セットを定義し、Harajuku系は鮮やか、Night/Dawnは落ち着いたトーンに。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-309",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.2 リンク色の役割分離",
+    "issue": "リンクの下線必須は明記されているが、visited状態の扱いが未定義。情報アーキテクチャ上、既読/未読の手掛かりが有益な箇所（ドキュメント/ポリシー等）で一貫しない恐れ。",
+    "suggestion": "アプリ内に外部文書が存在する前提で、`--link-visited`の有無方針を明記。採用する場合は各テーマの`--accent`に対し明度差で識別（色依存回避のため下線スタイルの変更も併用）。採用しない場合も“不採用方針”を追記して判断を固定化。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-310",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.3 アバター",
+    "issue": "アバターは「フラット＋アウトライン無し＋単色ベース＋1段濃淡」と定義されるが、配色パレット/明度レンジ/肌・髪・服の基準値がトークン化されていないため、テーマ間や将来追加パーツでの“Laisらしさ”の再現が属人的になる。",
+    "suggestion": "アバター用の限定パレットをトークン化（例:`--avatar-skin-1..N`, `--avatar-hair-1..N`, `--avatar-cloth-1..N`を各テーマに紐付け）。明度/彩度��ガードレール（L*, Ch範囲）もガイドで明記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-311",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.3 タイポグラフィ（字間）",
+    "issue": "日本語UI前提で`--letter-spacing-heading: -0.5px`の負字間は、CJK見出しで可読性低下やレンダリング崩れを招く可能性。ブランドの「静かな情報設計」に反する結果になり得る。",
+    "suggestion": "負字間はラテン見出しのみに限定する運用ルールを明記（例: 英数のみ適用、CJKは0に固定）。もしくは「見出しサイズ≥28px（--font-size-xl以上）のみ負字間適用」と閾値を設定。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.1, §5, §6.1",
+    "issue": "pre-commit hook による「8 bytes 未満の .md」検知を再発防止の中核としているが、hook は commit 時にしか発火せず、事故シナリオである編集中・保存時の縮退や untracked 状態の破損を即時には防げない。§5 では Git tracking 改善後に 30 秒復元可能とある一方、未 commit 変更分の保護範囲は限定的で、本文全体で予防と事後検知の境界が曖昧になっている。",
+    "suggestion": "hook の役割を「破損状態のコミット防止」に限定して明記し、編集中の上書き事故対策は §3.1 の fswatch / launchd に一本化して主防衛線として位置づけるべきです。あわせて、未 commit 変更は Git 単体では守れないこと、復元可能なのは最後の commit までであることを §5 と §6 に追記し、効果範囲を誤認させない構成へ修正してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§7.1 手順 5-6",
+    "issue": "既存 `.git/hooks/pre-commit` に `bash \"${REPO_ROOT}/scripts/byte_floor_check.sh\" || FAIL=1` を追記する前提だが、`REPO_ROOT` が既存 hook 内で定義済みである保証が本文中にない。未定義のまま追記すると commit 時にパス解決に失敗し、hook 自体が誤作動または常時失敗する恐れがある。既存 hook 依存の変数や制御フロー前提が不明なため、セルフセットアップ手順としては壊れやすい。",
+    "suggestion": "既存 hook の内部変数に依存しない形へ変更し、`REPO_ROOT=$(git rev-parse --show-toplevel)` を呼び出し側または `byte_floor_check.sh` 内で自己解決させてください。さらに、追記位置は「最終 exit の直前」ではなく、既存の `FAIL` 集約パターンを確認する手順を明示し、未定義変数や `set -u` 環境でも安全に動作するサンプルへ置き換えると保守性が上がります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 手順 4",
+    "issue": "`git add lais/ instructions/ docs/ templates/` をそのまま実行する手順は範囲が広すぎ、意図しない生成物・機密・一時ファイル・大容量ファイルまで一括で index に載せる危険がある。今回の目的は SSoT Markdown の tracked 化なのに、ディレクト��丸ごと add を推奨しており、後日 `.gitignore` の想定漏れがあると不要物混入バグを招きやすい。",
+    "suggestion": "対象を `*.md` に限定した add に絞り、`git add -- 'lais/**/*.md' 'instructions/**/*.md' 'docs/**/*.md' 'templates/**/*.md'` のように意図をコード化してください。加えて commit 前に `git diff --cached --name-status` を必須確認ステップとして挿入し、`.gitignore` の見直しと staged 内容確認を分離すると、誤登録や repo 肥大化のリスクを下げられます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.1 手順 1, §7.1 手順 3",
+    "issue": "untracked Markdown の洗い出しコマンドが `find ... | xargs git check-ignore -v` と `git ls-files --others --exclude-standard -- 'lais/**/*.md' ...` で二重化され、しかも前者は ignored 判定、後者は untracked 一覧取得と責務が異なる。どちらを正式手順とするか不明瞭で、glob 展開や Git pathspec の差異により OS / shell 依存の取りこぼしも起き得る。",
+    "suggestion": "洗い出し方法を 1 つに統一し、目的を「untracked」「ignored」「tracked だが未 staged」など状態別に分けて記載してください��Git 管理下の調査なら `git ls-files` 系に寄せた方が一貫性が高く、必要なら `git check-ignore -v --stdin` を組み合わせて ignored 理由を後段で確認する二段構成に整理すると理解しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§1.3, 付録B",
+    "issue": "復元コストについて本文では「総作業時間 約 4〜6 時間」と説明しつつ、付録B では `14:44 起点 → 15:09 完了 ≒ 25 分` と記載しており、commit 時刻基準である注記はあるものの、読者に実際の復旧時間を誤認させやすい。評価資料として投資判断に用いるなら、比較対象の時間軸が揃っていないのは説得力を損なう。",
+    "suggestion": "時間指標を「実作業時間」「commit 記録上の時間」「復元後の検証時間」に分解して表形式で再整理してください。§5 の各戦略比較でも同じ定義を使い、検出から復元完了までの時間と、完全性確認まで含めた時間を分けると、再発防止施策の ROI がより正確に伝わります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§3.1 手順 4, §3.4 手順 5, §6.3",
+    "issue": "`fswatch`、`launchd / cron`、`rsync` を複数箇所で前提にしているが、導入責務・実行ユーザー・失敗時通知・ログ保全・再試行方針が未定義で、運用設計としては未完成である。特にクラウド向け片方向コピーはサイレント失敗すると「守られているつもり」になるため、後日最も危険なバグ源になりやすい。",
+    "suggestion": "ジョブごとに実体スクリプト、配置場所、起動条件、ログ出力先、失敗時通知方法を仕様化してください。最低でも `set -euo pipefail`、終了コード監視、実行ログ、コピー後件数確認、直近成功時刻の可視化を定義し、PO が月次で状態確認できるチェックコマンドを添えると、運用の死文化を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.1 手順 4, §6.1, §7.1 手順 5",
+    "issue": "「8 bytes 未満」「直前比 90% 減」などの閾値が複数出てくるが、根拠・対象・例外条件が定義されていない。Markdown には意図的な短いファイルも存在し得る一方、9 bytes 以上の破損は素通りするため、現在の閾値は説明不足の魔法の数字になっている。閾値変更時の保守方針も見えない。",
+    "suggestion": "閾値の由来を 4/25 事故の実測に基づく暫定値と明記し、対象を SSoT ファイルに限定した設定値として外出ししてください。例えば設定ファイルや環境変数で `MIN_MD_BYTES`、`SHRINK_RATIO_THRESHOLD` を管理し、短文ファイルの allowlist と併せて定義すれば、誤検知と見逃しの双方を調整しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "全体, 特に §3.3, §6.4, §7.1",
+    "issue": "評価表、採否判断、セルフセットアップ、事故教訓が 1 文書に密結合しており、調査結果と実装手順の責務分離が弱い。特に §3.3 は採否判断と技術的制約が混在し、§7.1 は仕様書というより運用 runbook に近い。将来更新時に価格改定・手順変更・判断基準が相互に食い違う保守負債が発生しやすい構成である。",
+    "suggestion": "文書を「調査比較資料」「推奨アーキテクチャ」「実運用 runbook」に分割し、相互参照にしてください。比較資料は判断根拠、runbook は具体手順、方針書は採否結論だけに責務��絞ると DRY になり、価格やコマンド更新時も差分管理しやすくなります。少なくとも手順ブロックは別ファイル化を検討すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0382,
+    "input_tokens": 11382,
+    "output_tokens": 2395,
+    "model_id": "gpt-5.4"
+  }
+]

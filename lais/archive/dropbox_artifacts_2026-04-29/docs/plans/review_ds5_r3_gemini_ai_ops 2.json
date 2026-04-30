@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "AIに「競合アプリの最新画面構成」「App Storeレビュー（★1-2離脱要因）」の調査を要求しているが、AIはアプリ内部のUIやストアレビューを直接閲覧・操作できず、確実にハルシネーション（架空の競合分析）を生成する。これは鉄則⑧（事実確認せずに断言禁止）と根本的に矛盾し、仕様策定プロセスが破綻する。",
+    "suggestion": "ベンチマーク要件に「AIがアクセス不能な情報（内部UI、ストアレビュー）はPOがスクショやテキストで提供する」という前提条件を追加するか、AIの自律調���範囲を「Web上で検索可能な公開情報」に限定する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6 / §18",
+    "issue": "§19.6の依存チェーン図で `e2e_fullflow_test.md` が `project_v1.md` のみに依存しているが、§18の連鎖更新マップでは `ux_redesign`, `design_spec`, `design_system` の変更時にテスト仕様を更新することになっている。テスト仕様は全HOW仕様書に依存する最下流であるべきであり、明確な矛盾がある。",
+    "suggestion": "§19.6の依存チェーン図を修正し、`e2e_fullflow_test.md` を `ux_v1.md`, `design_spec_v1.md`, `reference_v1.md` の下流に配置する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の「依存」フィールドが自然言語のマークダウンテキスト（`> 依存: docs/plans/lais_project_v1.md v1.3`）となっており、複数ファイルの指定方法も未定義。dev-systemの「機械可検証」原則に反し、バージョン不一致のスクリプトによる自動検知が困難。",
+    "suggestion": "ヘッダーをYAMLフロントマター（`---` で囲む形式）��変更し、`depends_on: [{file: \"...\", version: \"...\"}]` のように構造化して、スクリプトで依存関係とバージョンの一致を自動検証できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§18 / §19.6",
+    "issue": "§19.6で `system_map.md` が `ux_v1.md` と `reference_v1.md` に依存すると定義されているが、§18の全プロジェクト共通連鎖更新マップに `system_map.md` が記載されていない。上流変更時に更新漏れが発生する。",
+    "suggestion": "§18のマップに `system_map.md` を追加し、`ux_v1.md` や `reference_v1.md` 変更時の連鎖更新先として明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.1 / §18 / §14",
+    "issue": "§18では `ux_redesign_v*.md` だが§19.1では `ux_v1.md` と命名規則が揺れている。また、§19.1では配置先が `docs/` だが、§14や§19.5の例では `docs/plans/` となっている。DRAFT時と確定時のディレクトリ移動ルールが曖昧。",
+    "suggestion": "ファイルの命名規則（`ux_v1.md` に統一など）を揃え、DRAFT時（`docs/plans/`）と確定時（`docs/`）のデ���レクトリ移動・配置ルールを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4",
+    "issue": "`ux_v1.md` の§1に「画面遷移」があり、`system_map.md` の§3にも「画面遷移図」がある。Single Source of Truthの原則に反し、二重管理による乖離リスクがある。",
+    "suggestion": "画面遷移の正規ソースを `ux_v1.md` に限定し、`system_map.md` 側は「参照のみ」とするか、「コンポーネント間のデータ受け渡し図」に特化させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "`e2e_fullflow_test.md` テンプレートに、dev-systemの3層テスト戦略（L1/L2/L3）に基づく「L1スモークテストの対象指定」や「テストガードの許容エラー定義方針」を記載するセクションがない。",
+    "suggestion": "`e2e_fullflow_test.md` のテンプレートに「§0 テスト戦略（L1対象、許容エラー方針）」を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

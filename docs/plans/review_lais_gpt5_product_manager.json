@@ -1,0 +1,294 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§2.1",
+    "issue": "Premierの「無制限（フェアユース上限1,000回/日）」の運用方法が未定義。検知・強制手段・レート制御がなくAPIコスト暴騰や乱用リスクが高い。",
+    "suggestion": "フェアユースを「ハード上限=1,000回/日/ユーザー」「レート制限=30回/5分」「同時ストリーム最大=3」に明確化。超過時はHTTP 429 + UIバナーで告知。上限値はapp_config.yamlに外だし。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§2.1, §6.1",
+    "issue": "Basic ¥580/月でGPT-5 + Gemini Flashを最大100回/日の提供は原価割れリスク。マルチモデル・ストリーミング・分類レイヤーの追加コストも未計上。",
+    "suggestion": "プラン単価または上限見直し（例: Basic=¥780/50回/日、Pro=¥1,780/200回/日）。もしくはFree/Basicは短文モデル優先、長文/長コンテキストはPro以上に限定。LLMトークン上限（8k/応答）を全プランで設定。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.4",
+    "issue": "レベルカーブが抜粋値のみで全レベル閾値の完全定義がないため実装不能。",
+    "suggestion": "Lv1→50までの累計必要EXPテーブルを全件定義するか、厳密な数式（例: total_exp(lv)=floor(1000*lv^1.35)）と丸め規則を提示。app_config.yamlに配列で格納。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.4",
+    "issue": "称号（Beginner/Seeker/Explorer/…）のレベル対応が抜粋のみで完全マッピングが未定義。",
+    "suggestion": "各レベル範囲に称号を割当（例: 1-4 Beginner, 5-9 Seeker, 10-20 Explorer, 21-45 Adventurer, 46-50 Master）し、将来拡張に備えapp_config.yamlのマップに定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.4, §8.1",
+    "issue": "MVPでアバター進化アセットがPhase1-3のみだが、最大レベルは50（Phase4-5相当）まで到達可能と定義され矛盾。",
+    "suggestion": "MVPの最大レベルを30に制限するか、Lv31-50は一時的にPhase3のまま据置と明記。到達時のUIコピー「次の進化はv0.2で解放」を表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2（習慣）, §4.5（リセット）",
+    "issue": "「週N回」習慣の判定ルール（週の起点、週跨ぎ、未達の繰越可否、同日複数回扱い）が未定義。",
+    "suggestion": "週の起点=月曜00:00 JST、繰越不可、同日複数回は1回としてカウント、進捗は0..Nで管理。UIは進捗チップ（例: ●●○/3）を表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§4.5",
+    "issue": "不正対策「同名タスク5分以内の再完了は無効」が曖昧。タイトル一致だと異なる実タスクや別ゴールのタスクまでブロックしうる。",
+    "suggestion": "判定キーを(task_id, completed_at)に変更。習慣は1日1回のみ完了可（当日2回目は無効）。同一task_idの2回目が5分以内なら無効とする。サーバー時刻基準で判定。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "§7.3（PWAオフライン同期）, §4.5（上限/リセット）",
+    "issue": "オフライン時のタスク完了における「どの日のEXPに計上するか」「クライアント送信のcompleted_at信頼度」が未定義。クライアント日時を採用すると上限回避の不正や日付跨ぎで不整合が確実に発生。",
+    "suggestion": "サーバー権威で計上日を決定。規則: completed_at_clientは受理するが、サーバー受信時刻と差分>24hは切上げ、日次上限判定はサーバーのJST 04:00境界で行う。改ざん対策でクライアントからは完了イベントにリクエストID＋端末時刻＋単調増加カウンタを送信、サーバーは遡及書換を禁止。",
+    "model": "GPT-5",
+    "persona": "product_manager",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.2（ゴール達成ボーナス）",
+    "issue": "1日1回までのボーナス時に同日に複数ゴールが自動/手動で完了した場合の優先順位が未定義。",
+    "suggestion": "当日ボーナス付与は「完了確定時刻の早い順」に1件のみ付与。2件目以降は「翌日に順延」するか「不付与」と運用方針を明示（推奨: 翌日に順延、上限は1件/日）。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.2（ゴール完了）",
+    "issue": "「手動でゴール完了マークも可能（タスクなしゴール用）」の挙動がタスク付きゴールに対してUI/サーバーで禁止か不明。",
+    "suggestion": "タスク付きゴールは手動完了を不可にし、未タスク完了時は��ーバーで409を返却。UIは理由を表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.2（UNDO）, §7.3（オフライン）",
+    "issue": "「完了から30秒UNDO」とオフライン同期の相互作用が未定義。オフライン中は30秒経過後にサーバー到達前に取り消せない可能性。",
+    "suggestion": "ローカルUNDOは30秒、オンライン復帰後にサーバー反映前であれば60秒以内は取り消し許可、超過はサーバーで無効。UIに「同期待ち」の残秒表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§6.1（マルチAI）, §6.2",
+    "issue": "分類レイヤー/ルーティング判定に用いるモデル・トークン上限・カウント課金の扱いが未定義。対話1回あたり追加API呼び出しのコストが計上されない可能性。",
+    "suggestion": "分類は廉価モデル（例: small-embed/mini）でトークン上限1k、対話カウント対象外だが内部メータリング対象と明示。失敗時はフォールバック: GPTで汎用応答。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§6.1",
+    "issue": "対話カウントの境界条件（送信キャンセル、タイムアウト、再送、同一メッセージの重複処理）の定義なし。",
+    "suggestion": "サーバー応答がHTTP 200で最初のトークン送出時に1カウント。送信キャンセル/タイムアウトは0カウント。重複再送はリクエストIDでデダップ。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§3.4（ME>PROFILE 設定）, §8.2",
+    "issue": "設定に「言語」項目がある一方で多言語対応はv0.2.0以降。MVPでの挙動が不明確。",
+    "suggestion": "v0.1.0では言語設定をUIから非表示、または固定で「日本語のみ（変更不可）」と明示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.1（課金モデル）, §6.5（退会）",
+    "issue": "サブスクのアップグレード/ダウングレード/日割り/即時反映/返金ポリシー/支払失敗時の猶予が未定義。Stripe実装に不可欠。",
+    "suggestion": "方針例: アップグレード=即時反映+差額日割り請求、ダウングレード=次回更新から、返金=クーリングオフ7日以内のみ比例、失敗=7日猶予+機能制限、グレース後にFreeへ。規則をTOS/表示に明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§2.1, §2.3",
+    "issue": "MVP時点でショップ未実装のため、ゲーミフィケーション由来の課金動機が弱く、AI回数/質のみでのCVが低下する恐れ。",
+    "suggestion": "当面の付加価値をPro以上に追加（例: 週次ディープ分析レポート/月1回コーチングまとめ、ゴール回顧カード生成、DISCOVERの更新頻度上限の緩和）。FreeのAI上限はやや厳しめ（例: 10-15回/日）に再設計。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§2.1（Premier特典）",
+    "issue": "「優先サポート」のSLAや対応チャネル・時間帯が未定義。価値が伝わりにくい。",
+    "suggestion": "SLA定義: 営業日24時間以内初回応答/バグ優先度S上げ/専用フォーム。アプリ内チャット or メールを指定。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2.2",
+    "issue": "ショップの価格帯/通貨/在庫ステータス/再販売有無/払い戻し方針が未定義（v0.2.0前提だが仕様の骨子は必要）。",
+    "suggestion": "カテゴリ別の価格レンジ（例: フレーム¥200-600, オーラ¥400-900）と通貨=JPY税込、所有はアカウント紐付け・譲渡不可、返金不可を明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§5.3（簡易メッセージ/応援）",
+    "issue": "メッセージ送信のレート制限/日次上限が未定義でスパム懸念。",
+    "suggestion": "上限: 送信50通/日/ユーザー、同一相手は10通/日。連投レート: 1通/10秒。違反時は一時的に送信停止（HTTP 429）。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§6.2（冒険EXP検出）",
+    "issue": "「1日2回まで」の選定ロジック（同日に3件検出時の優先順）と誤検出時のユーザー訂正手段が未定義。",
+    "suggestion": "当日早い時刻順で上位2件に付与。誤検出は通知内「取り消す」ボタンで60分以内に撤回可能（付与取消をサーバーで履歴管理）。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§3（タブ構成）, §9.2",
+    "issue": "タブ構成に「履歴/統計」の恒常的な閲覧導線がないため、継続動機の可視化が弱い可能性。",
+    "suggestion": "ME>PROFILEもしくはGROWに「履歴/統計」セクション（週次EXP・ゴール進捗ヒートマップ）を追加。MVPはシンプルな棒グラフで十分。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§11.1",
+    "issue": "成功指標（Activation/Day1,7,30 Retention、Free→有料CVR、ARPU、AI回数当たり満足度）が未定義で学習サイクルに落ちない。",
+    "suggestion": "KPI定義: D1=35%/D7=15%/D30=8%、Free→有料=3-5%、平均AI回数/日、ゴール達成率/月。Mixpanel等のイベント設計をreference_v1.mdに追記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-023",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§7.2（認証/Free）",
+    "issue": "メール/パスワードのみのFree登録で1ユーザー20回/日AI利用はアカウント量産による無料API濫用の恐れ。",
+    "suggestion": "Freeの新規作成にreCAPTCHA、IPあたり作成レート制限、端末指紋の併用。短期間での異常利用は一時停止。必要なら電話認証はPro/Premier限定で導入。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.5（リセット）, §6.1（上限到達UI）",
+    "issue": "日次リセットJST 04:00を海外タイムゾーン利用者にどう表示/換算するか未定義。表示がJST固定だと混乱を招く。",
+    "suggestion": "内部はJST固定、UIはローカルタイムに換算して「リセット: 明日 04:00（JST）」の併記。設定で「JSTで表示/ローカルで表示」を選択可。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§6.3（AI理解メモ）, §3.4（DISCOVER）",
+    "issue": "MBTI/強み弱みの更新頻度・確信度・変更履歴の扱いが未定義で、表示が頻繁に揺れるリスク。",
+    "suggestion": "更新は「対話5回ごと＋確信度>0.7時のみ」。履歴に直近3回を保存し変更時に変更理由を短文で表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§5.3（通知）, §7.3（PWA）",
+    "issue": "システムイベント（レベルアップ、冒険EXP検出、ゴール完了待ち解除）の通知様式が未定義。",
+    "suggestion": "アプリ内トースト＋通知タブ（ME>FRIENDS内「お知らせ」とは分離）でシステム系を集約。PWA未インストール時はアプリ起動時にまとめてバッチ表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.1",
+    "issue": "Premier「チケット遡及配布」の期限・上限が未定義で期待値管理が難しい。",
+    "suggestion": "遡及配布はショップ公開月に一括3枚、未使用分は最大6枚まで繰越、以降は毎月末に自動付与と明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-028",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§6.4（データ保存）",
+    "issue": "AI対話履歴は90日保存だが、タスク/ゴール/ソーシャルの保存期間とエクスポート可否が未定義。",
+    "suggestion": "タスク/ゴール/フレンド/メッセージは無期限保存、ユーザーによるCSV/JSONエクスポートを将来対応に追加。メッセージは1年で自動アーカイブ等の方針を追記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-029",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§3（タブ構成）",
+    "issue": "GROWにToday/Goals/ヒ��ローが同一スクロールで混在し情報密度が高い。小型端末での操作負荷が懸念。",
+    "suggestion": "TodayとGoalsの間に固定セクションヘッダー＋クイックジャンプ（タブ状）を追加。ヒーローは折りたたみ既定ONを設定（設定で変更可）。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  }
+]

@@ -1,0 +1,5 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"USER_CONCERN","location":"§8.10 ダイアログ / §1.4 トーンオブボイス","issue":"削除確認ダイアログの文言が未定義。敬語ベースだと『本当に削除しますか？』のような堅い表現になる。Finch のような優しい UI では『ゴールを削除すると戻せません。本当にいいですか？』のような配慮ある文言が期待される。","suggestion":"§1.4 または §8.10 にダイアログ文言のサンプルを追加し、『結果の可視化（戻せない等）+ 最終確認』の2段構造を推奨。","model":"Claude Opus 4.6","persona":"target_user"},
+  {"id":"R-002","severity":"LOW","category":"USER_CONCERN","location":"§5.0 テーマ切替","issue":"setTheme 関数例でテーマを変更するとすぐ localStorage に保存されるが、ユーザーが設定画面でプレビューだけして『やっぱり元のに戻す』ような試し体験がない。","suggestion":"設定画面にテーマプレビューモード（適用前に確定ボタン）を検討。ただしこれは UX 側の課題なので提案レベル。","model":"Claude Opus 4.6","persona":"target_user"},
+  {"id":"R-003","severity":"LOW","category":"USER_CONCERN","location":"§6.3a アバターパレット","issue":"服 8 色の候補が未定だが、ユーザーとして気になるのは『自分らしい服』があるか。ビジネス風（スーツ）・カジュアル（Tシャツ）・スポーティなど生活シーンに合わせた分類があると嬉しい。","suggestion":"アバターの服を色だけでなく『タイプ（スーツ/カジュアル/スポーティ/フォーマル/ルーズ）』で分類する方針を §6.3a に追記。","model":"Claude Opus 4.6","persona":"target_user"}
+]

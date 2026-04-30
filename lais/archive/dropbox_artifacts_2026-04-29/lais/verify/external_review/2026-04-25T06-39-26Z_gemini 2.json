@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "scripts/adv_response_gate.sh 182-184行目",
+    "issue": "98行目で設定した `trap 'rm -f \"$TMP_PARSED\" \"$TMP_RESP\"' EXIT` が、184行目の `trap 'rm -f \"$TMP_RESP\"' EXIT` によって上書きされます。これにより、最初に作成された一時ファイルがクリーンアップされず、フックが実行されるたびに /tmp にファイルが蓄積し、最終的にディスク枯渇（inode枯渇）を引き起こします。",
+    "suggestion": "2つ目の一時ファイルには別の変数名（例: `TMP_GREP_TARGET`）を使用し、最初のtrap宣言でまとめて削除するように変更してください。例: `TMP_GREP_TARGET=$(mktemp ...)` とし、冒頭で `trap 'rm -f \"$TMP_PARSED\" \"$TMP_RESP\" \"$TMP_GREP_TARGET\"' EXIT` と宣言します。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "scripts/persona_selector.sh 120-124行目",
+    "issue": "ログローテーション時に `gzip -c \"$LOG_FILE\" > \"$ROT\"` を実行した後、`: > \"$LOG_FILE\"` でファイルを空にしていますが、この間に別のプロセスがログに書き込むとデータが消失します（競合状態）。また、同日に複数回1MBを超えると `$ROT` が上書きされ、過去のログが失われます。",
+    "suggestion": "`mv \"$LOG_FILE\" \"$ROT\" && gzip \"$ROT\"` のようにアトミックなリネームを使用し、ファイル名にエポック秒やPIDを含めて一意にしてください。例: `ROT=\"${LOG_FILE}.$(date -u +%Y%m%d_%H%M%S)_$$\"`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/adv_response_gate.sh 175行目",
+    "issue": "`find \"$DEDUP_DIR\" -type f -mtime +1 -delete` がフック発火のたびに毎回実行されます。StopフックはLLMの応答ごとに頻繁に呼び出されるため、デ���レクトリ内のファイル走査が毎回走るのはI/O負荷の観点から非効率です。",
+    "suggestion": "確率的に実行する（例: `[ $((RANDOM % 100)) -eq 0 ] && find ...`）、または別の非同期なクリーンアッププロセス（cron等）に委譲することを検討してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "scripts/adv_response_gate.sh 211行目, 232行目",
+    "issue": "`tail -c 16384` や `tail -c 256` でバイト単位でテキストを切り出していますが、UTF-8のマルチバイト文字の途中で切断される可能性があります。これにより、後続の `grep` コマンドが不正なバイト列に遭遇し、予期せぬエラーや警告を出力する恐れがあります。",
+    "suggestion": "バイト単位ではなく行単位（`tail -n 500`等）で切り出すか、Pythonスクリプト内で文字単位（`string[-256:]`）で切り出して一時ファイルに保存するアプローチに変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "scripts/adv_response_gate.sh 96行目, 182行目",
+    "issue": "`TMP_RESP` という変数名が、Pythonスクリプトか��の抽出結果を保存するファイル（96行目）と、後段のgrep検査用の一時ファイル（182行目）の両方で使い回されています。これが前述のtrap上書きバグの直接的な原因となっています。",
+    "suggestion": "変数の責務を分離し、後段のファイルには `TMP_GREP_TARGET` などの明確な命名を行ってください。変数のシャドウイングや再利用は可読性を下げ、バグの温床になります。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/adv_hot_summary.sh 96-100行目",
+    "issue": "`python3 - <<'PYEOF' \"$TRIMMED\"` という構文はPOSIX shとして有効ですが、標準入力からスクリプトを読み込ませつつ引数を渡す手法は直感的ではなく、可読性が低いです。",
+    "suggestion": "`python3 -c 'import json, sys; print(json.dumps({\"additionalContext\": sys.argv[1]}, ensure_ascii=False))' \"$TRIMMED\"` のように、`-c` オプションを使用してインラインスクリプトとして記述する方が一般的で読みやすいです。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0515,
+    "input_tokens": 36044,
+    "output_tokens": 1280,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

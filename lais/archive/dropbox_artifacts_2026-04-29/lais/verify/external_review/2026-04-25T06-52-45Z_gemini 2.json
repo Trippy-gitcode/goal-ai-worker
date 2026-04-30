@@ -1,0 +1,60 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§7.1 戦略 1: Git tracking 改善",
+    "issue": "スクリプトファイルを作成する際、`scripts` ディレクトリが存在しない環境では `cat > scripts/byte_floor_check.sh` が `No such file or directory` エラーとなり、手順が確実に失敗して進行不能になります。",
+    "suggestion": "`cat > scripts/byte_floor_check.sh` を実行する直前に、`mkdir -p scripts` を追加してディレクトリの存在を保証してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 byte_floor_check.sh の実装",
+    "issue": "macOS標��のawkはNUL文字(`\\0`)をレコードセパレータとして正しく処理できない場合があり、`tr`と`awk`を組み合わせた複雑なパイプラインはファイル名に改行が含まれると破綻します。",
+    "suggestion": "パイプラインを簡略化し、bashの文字列比較を用いて拡張子を判定してください。`while IFS= read -r -d '' f; do if [[ \"$f\" == *.md ]]; then ...` とし、`git diff --cached --name-only -z --diff-filter=AM` の出力を直接ループに渡すのが安全です。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§7.1 byte_floor_check.sh の実装",
+    "issue": "違反ファイル名を文字列結合して `printf \"%b\" \"$violators\"` で出力していますが、ファイル名に `%` や `\\` が含まれているとフォーマット指定子やエスケープシーケンスとして解釈され、エラーや表示崩れの原因となります。",
+    "suggestion": "bashの配列を使用してファイル名を保持してください。`violators+=(\"$f\")` で追加し、出力時に `printf \"%s\\n\" \"${violators[@]}\"` を使用することで、特殊文字を含むファイル名でも安全に表示できます。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "LOGIC",
+    "location": "§3.4 戦略 4: Google Drive",
+    "issue": "`rsync -av --delete .../*.md .../` のように送信元にワイルドカードを指定した場合、`--delete` オプションはディレクトリ同期として機能せず、送信元で削除されたファイルが送信先から削除されません。",
+    "suggestion": "ディレクトリ同士を同期し、フィルタリングオプションを使用してください。例: `rsync -av --delete --include=\"*/\" --include=\"*.md\" --exclude=\"*\" /src_dir/ /dest_dir/`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§7.1 動作確認",
+    "issue": "フックの動作確認テストで、もしフックが正しく発火せずコミットが成功してしまった場合、`git reset HEAD \"$TESTFILE\"` ではステージングの解除しか行われず、リポジトリの履歴にテスト用のゴミコミットが残ってしまいます。",
+    "suggestion": "コミットが成功してしまった場合のクリーンアップとして、`git reset --soft HEAD~1` を実行してコミットを取り消すロジックを追加するか、テスト用の別ブランチを作成して検証���るよう手順を修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0175,
+    "input_tokens": 10515,
+    "output_tokens": 877,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

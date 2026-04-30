@@ -1,0 +1,132 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.1 / §9",
+    "issue": "Night SkyのPrimaryボタン背景色がセクション間で不一致。§5.1では --button-primary-bg: #1A5FC8（AA余裕）だが、§9のAI向けトークンブロックは #1F6FEBのまま。",
+    "suggestion": "§9の--button-primary-bg/hover/pressedを§5.1に統一（#1A5FC8 / #1158C7 / #0A4AAD）。AIコピーペースト用ブロックは常に最新のテーマ定義と一致させるレビューチェックを追加。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.3 / §9",
+    "issue": "line-heightトークンの命名と運用方針が不一致。§3.3ではサイズ別（--line-height-xs〜-3xl）を推奨する一方、§9は--line-height-heading/body/displayを定義しており実装者がどちらを使うべきか曖昧。",
+    "suggestion": "§9のline-heightをサイズ別トークン（--line-height-xs〜-3xl）に置換し、見出しや本文はサイズペア参照を原則化（使用例も修正）。既存--line-height-heading/body/displayは非推奨化の注記を付ける。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§1.6（NGリスト）/ §3.2",
+    "issue": "NGに「ヒーローメトリクスレイアウト（大数字+小ラベル+グラデーション線）禁止」とあるが、§3.2で大数字（2xl/3xl）トークンを用途指定しており、何が禁止で何が許可かが判別しづらい。",
+    "suggestion": "NGの文言を「グラデーション線を伴う装飾的な“ヒーローメトリクス”表現を禁止。大数字自体の使用は可」に明確化。許可例（EXP/レベル大数字＋フラットバー）と禁止例（グラデ線/グロー/ガラス装飾）を追記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§1.4 / §5（テーマ方針）",
+    "issue": "「Harajuku系は通知・トースト文言を柔らかく」とあるが、文体や絵文字使用量を制御する仕組みがトークン/辞書として未定義。実装時に文面差分をどこで管理するか不明瞭。",
+    "suggestion": "言語トークン/辞書をテーマ別に用意（例: tokens.copy[theme].toastSuffix, tokens.copy[theme].emojiAllowance）。通知/トースト文面はi18nリソース同様にtheme keyで切替える運用に変更。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5 / §7.1-7.3",
+    "issue": "テーマの性格差が色中心で、モーション特性（静けさ/弾み）の差が表現トークンに落ちていない。全テーマ同一のease/spring/durationだとHarajukuの“ポップ”、Night Skyの“静けさ”が弱くなる恐れ。",
+    "suggestion": "テーマ別モーションマッピングを追加。例: Night Sky/Dawnは --spring-gentle 優先＋--duration-normal基準、Harajuku Light/Darkは小要素のscale演出に --spring-bouncy を許容＋--duration-fast比率を高める。許可範囲（translateはspring禁止など）は現ルールを維持。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§1.6（NGリスト）/ §5.5",
+    "issue": "「純白背景の広範使用禁止」の原則に対し、ライト系Glass ONが --card-bg: rgba(255,255,255,0.65) を採用。機能例外とはいえ、視覚的に“白”に見えやすくブランド原則のトーンから外れる可能性。",
+    "suggestion": "ライト系Glass ONの--card-bgを各テーマのオフホワイト寄りに微調整（例: Dawn: rgba(254,252,249,0.70)／Harajuku Light: rgba(255,250,251,0.70)）。NGリスト��「機能目的のGlassは例外。ただしテーマの色温度に寄せること」を明記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2.2 / §8（共通テキスト要素）",
+    "issue": "インラインテキストリンクの状態トークン（hover/active/visited）が未定義。--accentの再利用方針はあるが、状態遷移の一貫性が担保しづらい。",
+    "suggestion": "リンク用トークンを追加: --link: var(--accent) / --link-hover: var(--accent-hover) / --link-active: var(--accent-pressed) / --link-visited: color-mix不使用で別定義（または未使用を明記）。下線スタイル（--link-underline-thickness）も定義。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§6.1",
+    "issue": "アイコンのstroke-width=1.5pxが仕様文にのみ存在し、トークン化されていない。将来の環境差や密度変更に弱い。",
+    "suggestion": "--icon-stroke-width（例: 1.5px）/--icon-size-sm/md/lg（20/24/32px）トークンを追加し、アイコン実装はCSS変数参照に統一。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§1.5 / §4.2 / §8.4",
+    "issue": "「ロゴを隠してもわかるか？」の固有性が色依存に偏り、形状・パターンの“指紋”が弱い。競合の多色テーマ群と差別化が視覚的に薄まる懸念。",
+    "suggestion": "ブランドモチーフをトークン化して恒常的に使用。例: タイムラインNOWドットの外周比（--timeline-now-ring-scale=1.5）、セクション区切りの細実線パターン（--divider-style=dotted/soft）、フォーカスリング太さ（--focus-ring-width by theme）。スタイルガイドに“この指紋は常用”を追記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§8.1（ボタン表）",
+    "issue": "Danger(subtle)のhover/pressed説明に「rgba(*danger*,0.18)→トークン」と併記が残っており、実装で直接rgba計算を試みる可能性がある。",
+    "suggestion": "表記をトークン参照に統一（--danger-subtle-hover/--danger-subtle-pressedのみを記載）。カラー合成はビルド時設計で完了済みである旨を注記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.4 / §8.4",
+    "issue": "Overdueの左バー太さ（3px）は本文に記載があるが、トークン化されていないため将来の密度調整が困難。",
+    "suggestion": "--overdue-indicator-width（例: 3px）を追加し、コンポーネント実装は変数参照に統一。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5（各テーマのaccent-subtle系）/ §8（チップ/バッジ）",
+    "issue": "ライト系テーマの--accent-subtle等は「合成で非テキスト3:1確保」と記載だが、Glass ONやelevated面との組合せで実測3:1を割るリスクがある。検証プロセスが明文化されていない。",
+    "suggestion": "各テーマ×面（bg-surface/elevated/card-bg）で主要コンポーネント（チップ/ボタンSecondary/タブpill）の非テキストコントラストを事前検証し、付録に実測表を追加。閾値未達時の代替トークン（+0.04 opacityなど）を併記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§1.6（NGリスト）/ UX §4.4（QR）",
+    "issue": "NGで純白背景の広範使用を禁止する一方、UX側でQRコードは常に白背景を強制。デザインシステム側に機能例外が明記されていない。",
+    "suggestion": "NGリストに「機能要件としての純白例外: QRコード背景は白固定（スキャン互換性のため）」を追記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "4",
+    "issue": "チェックボタンのARIAラベルが実挙動と不一致。scheduled状態で「タップで完了にする」と案内するが、実際は scheduled → active に遷移する。",
+    "suggestion": "状態ごとに正しい次アクションを案内する文言へ修正（例: scheduled:「予定。タップで進行中にする」/ active:「進行中。タップで完了にする」/ done:「完了済み。タップで予定に戻す」）。同時にテストで文言と遷移の整合を担保。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "4",
+    "issue": "3状態（scheduled/active/done）をrole=checkbox（2値）で表現しておりARIAセマンティクスが破綻。スクリーンリーダーが誤解する恐れ。",
+    "suggestion": "選択肢: (a) 3状態を提供するボタン（roleは無し）として実装し、aria-labelで現在状態と次アクションを明示、または (b) tri-state checkboxとしてaria-checked=\"mixed\"をactiveに適用しガイダンスを合わせる。どちらにせよ現在/次状態の発話を一貫させる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "4",
+    "issue": "Overdue行のチェックは「延期」動作をトリガーしており、見た目とアフォーダンス（チェック=完了/状態変更）が不一致でUX的に危険。",
+    "suggestion": "Overdue行のチェックは非インタラクティブにするか、明確に「延期」専用アイコン/ボタンに分離。チェックは状態変更、延期は別ボタン（既存の「明日に延期」）に限定して役割を一貫させる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2",
+    "issue": "BottomTabBarでrole=tablist/role=tabを使用しているが、対応するtabpanelが無くタブパターンのARIA要件を満たしていない。",
+    "suggestion": "ナビゲーション用途のため、nav内はデフォルトのナビゲーションセマンティクスに戻し、各ボタンにaria-current=\"page\"（またはa要素でaria-current）を用いる。role=tablist/role=tabは削除。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "4",
+    "issue": "タブ選択時にルーティングが行われずconsole.logのみに留まっている。メインナビとして期待される遷移が未実装。",
+    "suggestion": "onSelectでroute('/talk')等へ遷移するマッピングを実装（grow/talk/me → 対応パス）。遷移不可のタブは一時的にdisabledや説明ツールチップで明示。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "4",
+    "issue": "ヒーローEXPバーの幅計算とARIA値にクランプ処理がなく、expCurrent>expNextやexpNext=0時に100%超過やInfinity%等の不正値になり得る（視覚的にはoverflow hiddenで隠れるが、ARIAは不整合）。",
+    "suggestion": "max>0を前提に現在値を0..maxへクランプし、幅は0..100%に丸める。max<=0の場合はvaluenow=0/width=0%とし、aria-valuetextも適切にフォールバック（例:「経験値情報なし」）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "4",
+    "issue": "ゴール進捗バーも同様にクランプが無く、0〜100%外の値でUI/ARIA表現が破綻する可能性。",
+    "suggestion": "g.progressは0..100にクランプしてからaria-valuenowおよび幅に適用。データ受信時にバリデーションを入れる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "4",
+    "issue": "折りたたみ（Upcoming）のaria-controlsが閉じている間は実体DOMが存在せず、ATによっては参照切れ扱いになる可能性。閉じる操作時にパネル内フォーカスが消失する懸念もある。",
+    "suggestion": "パネルDOMは常時残し、hidden/aria-hidden/visibilityで表示制御する。閉じる操作時にフォーカスがパネル内ならトグルボタンに戻すフォーカスマネジメントを追加。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "Suspenseフォールバックおよび他箇所のconsole.logが本番バンドルに残る設計。ユーザー環境でノイズ化、パフォーマンス/セキュリティ観点で望ましくない。",
+    "suggestion": "ビルド時にconsole.*を除去（babel-plugin-transform-remove-console等）またはNODE_ENVチェックでガード。ロギングは開発用ロガーに集約。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4",
+    "issue": "handleToggle内でcycleStatus(t.status)を3回呼び出しておりDRYでない。将来のロジック変更時に不整合リスク。",
+    "suggestion": "next = cycleStatus(t.status)を一度だけ計算し、statusとmeta両方に使い回す。metaはstatus→文言のマップオブジェクトで表現し分岐を排除。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "4",
+    "issue": "未使用コードが散在（import { route } from 'preact-router'未使用、prefersReducedMotion()未使用）。静的解析の警告対象。",
+    "suggestion": "未使用import/関数を削除し、ESLintのno-unused-vars/no-unused-expressionsを有効化。将来使用予定ならTODOコメントとissue番号を付す。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5",
+    "issue": "チェックのspringアニメーション仕様（scale(0.9→1.1→1)）が未実装。CSSでtransformにtransitionは定義されているが、変化するtransformが付与されないため発火しない。",
+    "suggestion": "クリック時に一時的なクラス（例: .is-bouncing）を付与してkeyframesでscale往復を再生、またはJSで短時間のstyle.transform適用→解除。reduced-motion時はスキッ��。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "4",
+    "issue": "meta文言をトグル時に固定『15分』へ上書きしており、元の30/60分などの情報が失われる。将来的に所要時間を保持したい場合に不整合の原因となる。",
+    "suggestion": "タスクにduration(min)を保持し、statusに応じて『達成/進行中/予定』の接頭辞だけを差し替えるフォーマッタ関数を用意。文言生成はUI層に集約。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4",
+    "issue": "スクロールしきい値判定で毎frame setStateを呼びうる（同値でも呼ぶ）。無駄な再レンダリングの可能性。",
+    "suggestion": "refに直近の圧縮状態を保持し、変化がある場合のみsetHeroCompressedを呼ぶ。あるいはmatchMedia('(max-height: 400px)')等と併用してイベント発火を最小化。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "4",
+    "issue": "main要素のaria-labelledbyが『TODAY』見出しを参照しており、画面全体（Overdue/Upcoming/Goals含む）のラベルとして��不適切な可能性。",
+    "suggestion": "mainには『GROW』等の画面タイトルを参照させるかaria-labelで明示。Today節見出しは節内のラベルに限定。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

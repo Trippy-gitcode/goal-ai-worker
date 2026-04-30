@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.2.5 / §4.4.3 / §3.1.3",
+    "issue": "3層テスト戦略と完了コマンド3区分の対応が依然として破綻している。§4.2.5ではL1-realworldは『デプロイ直後』、L2は『実装完了時』だが、§4.4.3では高リスク系ミッションの完了判定はcmd-realworld PASS時点とされる一方、cmd-e2eの完了タイミングが『実装完了時』のまま残っている。結果として高リスクミッションは『実装完了時点ではL2必須だがミッション完了はデプロイ後』という二段階状態になるが、その状態名・DONE条件・中間状態の扱いが未定義で、運用によってはL2だけ通してDONE誤判定、または常時BLOCKED化のどちらも起こり得る。R1で指摘されたデッドロック/二重定義が完全には解消していない。",
+    "suggestion": "『実装完了』『デプロイ準備完了』『ミッション完了』の3状態を明示し、各状態で必須のcmd-unit/cmd-e2e/cmd-realworldとL1/L2/L3を表で固定すること。特に高リスク系は DONE条件 = cmd-unit PASS + cmd-e2e PASS + deploy後cmd-realworld PASS と明文化し、session_progressのSTATUS遷移に READY_FOR_DEPLOY などの中間��態を追加する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§2.8 / §4.2.5 / §4.6.3",
+    "issue": "G8 TDD証跡との整合が未完成。§2.8では『G8 TDD証跡をAT単位に固定。cmd-realworldはATとは別で実機検証証跡』とする一方、§4.6.3では before-unit.json / before-e2e.json / before-realworld.json に分離しており、realworldにもRED段階ログを要求する構造になっている。実機スモーク/realworldは本質的にデプロイ後確認であり、AT単位RED/GREENのTDD証跡と別物とした方針と矛盾する。このままだと realworld までRED必須と解釈され、高リスク系ミッションが実運用上ほぼ全FAILになるか、逆にG8を形骸化させる。",
+    "suggestion": "G8の対象を明確に『ローカルで再現可能な unit/e2e AT のみ』と固定し、realworldはG8対象外・G9または別ゲートの『実機検証証跡』として完全分離すること。ファイル名も before-realworld.json を削除し、realworld-proof.json / realworld-screenshots/ など別命名に変更する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.8 / §4.2.3",
+    "issue": "L1スモークの網羅性定義が不十分。R1の注目点だった『認証追加は正しいか』��対して、R2では認証ミッションを高リスク化しcmd-realworld必須にしたが、全デプロイ共通のL1-realworld 4基本操作には認証チェックが含まれていない。認証関連変更時にログイン/セッション維持/ログアウト/期限切れのいずれをL1で必須化するかが未定義で、認証回帰がL1から漏れる。",
+    "suggestion": "L1-realworldを『共通4項目 + リスク別追加項目』に分け、auth変更時は最低でも login成功・保護画面遷移・refresh後セッション維持・logout の4点を追加必須と明記すること。payment/external_apiも同様に追加スモークを定義する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§4.2.5",
+    "issue": "L1-local = cmd-unitの一部、L3 = cmd-unit全体という対応はテストピラミッド上かなり特殊で、unitとsmokeの関係が曖昧なまま残っている。現在の表では『cmd-unit』がローカルスモークにも週次フルにも使われるため、どの subset がL1-localなのか機械判定不能。品質ゲート実装時に恣意的運用を招く。",
+    "suggestion": "cmd-unit を cmd-smoke-local と cmd-unit-full に分離するか、mission templateで cmd-unit-smoke / cmd-unit-full を別フィールド化すること。少なくとも『L1-localに含まれるunitテストの選定規則』を機械可読で定義する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.1.2 / §3.1.3 / §4.4.2",
+    "issue": "PD-105の『高リスク系はN/A理由必須』『認証・決済・外部APIは3区分すべて必須』の2ルールが衝突気味。3区分すべて必須なら高リスク系でのN/A理由欄は原則存在しないはずだが、§4.4.2では高リスク系で『省略時はN/A理由必須』としており、実質的に高リスクでも省略可能な余地を残している。これはR1の“エスケープ不可”方針を弱める。",
+    "suggestion": "高リスク系の中でも auth/payment/external_api は『N/A不可』、DB schema変更などその他高リスクは『N/A理由必須』と二段階に分けて明記すること。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.1.4 / §4.3.4",
+    "issue": "mission_risk_classifier.sh の入力前提が曖昧。『ミッション定義ファイルパス』を受け取る仕様だが、実際のミッションはsession_progress.md内のブロックで管理されており、独立ファイルではない。現仕様のままでは classifier をどこにどう適用するか不明で、mission_linterとの接続も未定義。",
+    "suggestion": "classifier の入力を『session_progress.md + MISSION-ID』に変更するか、mission_linterが一時抽出して渡すフローを明記すること。どのコマンドチェーンで実行されるかも追記する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.2.1 / §3.3 / §4.3.6",
+    "issue": "高リスク判定パターンが本文内で不一致。PD-106の対象には `src/services/supabase.ts` が含まれるが、PD-105の高リスク系定義では『既存DBスキーマ変更』も含まれる一方、risk_patterns.sh にはDB schema系パスが入っていない。結果として『高リスクなので3区分必須』だが『Hフロー発火しない』、またはその逆が起こりうる。共通化を宣言しているのに対象集合が一致していない。",
+    "suggestion": "risk_patterns を用途別に base_risk_paths / hflow_paths / mission_high_risk_paths に分けるか、DB schema変更用の追加パターンを明記して差異を仕様化すること。『同一パターンを使う』という文言は現状削るべき。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§4.2.3",
+    "issue": "統合E2E（§9新設に相当する内容）の定義がまだ不明確。R2本文では Hフロー���L1-realworld、cmd-e2e、tests/e2e/integration、end_user_integration.md が併存しているが、『統合E2E』がどのレイヤーに属し、通常L2のE2Eと何が違うのか、どのタイミングでどの設定ファイルで走るのかが一本化されていない。R1で問題になった testDir分離は改善されているが、概念定義の曖昧さは残る。",
+    "suggestion": "新セクションを設けて『統合E2E = 複数画面/複数サービスを跨ぐデプロイ前後の結合検証』などと定義し、通常E2E・Hフロー・realworldとの境界、保存先、config、必須条件を表で整理すること。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.4.7 / dev_system_spec.md §4.5（現行ベース）",
+    "issue": "SKIPルールの一貫性がまだ不足。R2では SKIP/N/A/WARN の用語を定義しているが、現行ベースでは『許容されるSKIPはplatformのみ』『その他SKIPはFAIL』『SKIP-RETRYを次キュー追記』という強いルールがある。R2の表だけでは cmd-* セル値としてのSKIP を許すようにも読め、Playwright test.skip と完了報告上のSKIP が混線する。R1で指摘された一貫性不足が完全に潰れていない。",
+    "suggestion": "『テスト実装上のSKIP』と『ミッシ��ン定義セル値としてのSKIP』を別用語に分離すること。例えば TEST-SKIP / CMD-SKIP などへ改名し、後者も platform以外は禁止なのか、単なる未実施報告なのかを明記する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.9.2",
+    "issue": "mission templateの3区分必須化は書かれているが、AT-IDとcmd-unit/cmd-e2e/cmd-realworldの対応規則が未記載。R1で問題になった『G7 仕様↔完了コマンド対応』に対し、3区分が増えた後の1:1/1:n対応ルールがないため、G7が形式通過しても重要ATがrealworld側にしか紐づかない、または逆に未紐づけのままになる。",
+    "suggestion": "templateに『AT-ID -> 検証層 -> 対応cmd』マッピング表を必須化し、G7/mission_linterで ATごとに最低1つのcmd割当を検証する仕様を追加する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.2.3",
+    "issue": "L1-realworldの『4基本操作』が現行dev-systemのL1定義（起動/機能A/機能B/AI送受信/データ永続化）より1項目少なく、AI送受信に相当する観点が消えているように見える。すべてのアプリでAI送受信があるとは限らないが、現行定義との差分理由が説明され��いない。",
+    "suggestion": "共通L1項目を『起動/主要機能1/主要機能2/状態保存/アプリ固有クリティカル経路1』のように抽象化し、AI送受信はAI系アプリのみの拡張項目と明記する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.8",
+    "issue": "G11/G12/G13を追加した完全版ゲート一覧は改善だが、G10『仕様書ファースト』はR2本文中で新規に現れており、元の現行dev_system_specではG10はシークレットスキャン。既存番号との衝突リスクが高い。R1で採番破綻を修正する意図なのに、新たな番号衝突を生んでいる。",
+    "suggestion": "既存G10を維持したまま新規ゲートはG11以降へ繰り下げるか、現行番号との対応表（旧G10=Secret Scan, 新G10=... は不可）を明示すること。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.6.4",
+    "issue": "『非視覚条件の自動アサーションは可』は前進だが、URL/data-*属性/JSON応答のどこまでがrealworldテンプレで許されるか境界がまだ広い。結果としてDOM中心の“見えていないが通る”テストが再び増える余地がある。",
+    "suggestion": "許容例と禁止例を各3件ずつ列挙し、『視���状態の代替判定に使ってはならない』を明文化する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§4.3.4 / §4.3.5",
+    "issue": "risk_patterns.sh を source する例が bash配列前提になっており、クラスターAで強調した『POSIX互換 + bash3.2互換』には合うが、shellcheck/他sh実行との相性が未定義。scripts群をPOSIX寄りに寄せる方針なら、ここだけbash配列依存なのは実装者を迷わせる。",
+    "suggestion": "scripts/lib/risk_patterns.sh は『bash専用ライブラリ』と明記するか、改行区切り文字列にして while read で回す方式へ寄せること。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.2.4",
+    "issue": "deploy失敗時に DEPLOY-RECOVER ミッションを先頭追加するとあるが、誰が追加するのか（ENG/ADV）、追加権限、重複追加防止、既存先頭BLOCKEDとの競合ルールが未定義。障害時運用でぶれやすい。",
+    "suggestion": "session_progressへの追加主体と重複防止キーを定義し、『既存先頭がBLOCKEDなら提案ログへ記録のみ』など優先順位ルールを追記する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  }
+]

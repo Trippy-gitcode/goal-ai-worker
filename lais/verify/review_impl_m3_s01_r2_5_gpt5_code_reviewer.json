@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "3.5",
+    "issue": "Supabase クライアント設定で auth.detectSessionInUrl=false のため、メール確認/マジックリンクで戻った際に URL 片（#access_token や code）を処理せず、セッションが確立されない。S01 の文言「メール内のリンクをクリックするとサインインできます」と矛盾し、本番でサインイン不能を確実に生む。",
+    "suggestion": "auth.detectSessionInUrl を true に戻すか、起動時に URL のフラグメント/クエリを明示的に処理する。例: 起動直後に (a) location.hash に access_token 等が含まれる場合は supabase-js の URL 解析（detectSessionInUrl=true に委譲）を有効化し、history.replaceState で URL をクリーンアップ、または (b) code パラメータがある場合は supabase.auth.exchangeCodeForSession() を呼び出す。どちらの方法でも URL トークン処理後に余計なフラグメントを除去する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "3.4",
+    "issue": "入力要素に onInput と onChange を二重にバインドしており��1入力あたり2回 setState が走る可能性がある。Preact では onInput が実質的な変更イベントのため重複更新・不要な再レンダリングを招く。",
+    "suggestion": "onChange を削除し onInput のみに統一する（email/password 双方）。例: <input ... onInput={handleEmailInput} /> のみにする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3.4",
+    "issue": "バリデーション失敗時のフォーカス誘導が email と agree のみで、パスワードが短いケースで適切なフォーカス移動が行われない。支援技術/キーボード操作でエラー修正がしづらく、実用上のバグになりやすい。",
+    "suggestion": "最初の不正要素へ確実にフォーカスする汎用ロジックに変更する。例: if (!emailFormatOk) emailInputRef.focus(); else if (passwordTooShort) passwordInputRef.focus(); else if (isSignup && !agree) agreeRef.focus(); の順で判定。password 用の ref を追加する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.4",
+    "issue": "route('/', true) によりコンポーネントがアンマウントされた後でも finally で setSubmitting(false) が走りうる。Preact でもアンマウント後の setState は警告や無駄な処理の原因となる。",
+    "suggestion": "マウント状態を追跡してクリーンアップす���。例: const mountedRef=useRef(true); useEffect(()=>()=>{mountedRef.current=false;},[]); finally 内で if(mountedRef.current){ setSubmitting(false); inFlightRef.current=false; } とする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.2",
+    "issue": "NotFound の allowlist リダイレクトで query/hash を落として window.location.assign(path) しているため、/terms?lang=ja 等のパラメータが失われる。",
+    "suggestion": "受け取った url 全体を維持して遷移する。例: window.location.assign(url) を用いるか、const { pathname, search, hash } = new URL(url, location.origin); window.location.assign(pathname + search + hash); として検索条件/ハッシュを保持する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.4",
+    "issue": "Supabase の生エラーメッセージ（err.message）をそのままユーザーに表示しており、英語表示や内部実装の露出で UX が低下しやすい。",
+    "suggestion": "エラーマッピングを行い、代表的なコード/メッセージを日本語のフレンドリーテキストに変換する。例: 'Invalid login credentials' → 'メールアド��スまたはパスワードが正しくありません'。元の詳細は console や監視に送る。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4",
+    "issue": "button に disabled と aria-disabled を同時指定しており冗長。支援技術的にも button の disabled だけで十分に状態が伝わる。",
+    "suggestion": "button の aria-disabled を削除し disabled のみにする。リンクに対しては aria-disabled とキーハンドリング（preventDefault）を残す方が望ましい。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.4",
+    "issue": "UI 文言中の最小文字数（“8文字以上”/“6文字以上”）がハードコードされており、定数変更時に不整合が生じるリスクがある（DRY 違反）。",
+    "suggestion": "表示文言も定数から生成する。例: const minPw = isSignup ? SIGNUP_MIN_PASSWORD : LOGIN_MIN_PASSWORD; プレースホルダやエラーメッセージで `${minPw}文字以上` を使用する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.2",
+    "issue": "Link を 'preact-router/match' から import しており、バージョン依存で壊れやすい（将来の API 変更で読み込み失敗の恐れ）。",
+    "suggestion": "使用中の preact-router バージョンを固定しつつ、可能であれば 'preact-router' からの import に統一する。少なくとも package.json のバージョンピン留めと import 元の根拠コメントを追加する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "3.2",
+    "issue": "STATIC_PATHS の照合が厳密一致のみのため、/terms/ のような末尾スラッシュでマッチしない。将来の静的配信設定変更で 404→リダイレクトループの温床になり得る。",
+    "suggestion": "パス正規化（末尾スラッシュ除去）または startsWith/正規表現での許容マッチに変更する。例: const normalized=path.replace(/\\/$/, ''); STATIC_PATHS.includes(normalized)。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.4",
+    "issue": "サインアップで確認メール送信後（data.session が null の分岐）にフォームが再度送信可能なまま残り、短時間に再送・既登録エラーを誘発しうる。",
+    "suggestion": "確認待ち状態フラグ（awaitingConfirmation）を導入し、CTA を無効化/非表示にするか「確認メールを再送」アクションに切り替える。少なくとも confirmNotice 表示中は submit をブロックする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4",
+    "issue": "aria-busy をボタンに付与しているが、本来はリージョン（form/main）に付与すると読み上げの整合性が高い。",
+    "suggestion": "form 要素または main コンテナに aria-busy={submitting} を付与し、ボタンからは除去する。CTA ラベル変更（送信中…）はそのままで良い。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

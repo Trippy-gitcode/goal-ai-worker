@@ -1,0 +1,172 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.6（対 §1.2, §6, §16.3, §18）",
+    "issue": "UX仕様書のファイル名が§19では「ux_v1.md」だが、他セクションでは一貫して「ux_redesign_v*.md」を参照しており命名規約が不一致。",
+    "suggestion": "UX仕様書の正式名称をどちらかに統一し、もう一方は完全廃止または互換エイリアスを明記。§17の仕様書一覧、§18の依存マップも同時更新し、canopyにdocs命名規約リンター（例: docs_naming_lint.sh）を追加して混在を検出。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー「依存」が自由記述（Markdown引用記法）で機械判定が困難。複数依存・バージョンレンジ・コミット固定・循環の自動検出ができない。",
+    "suggestion": "各仕様書冒頭にYAML front matterを導入し、depends_on配列（file, version_range, commit(optional)）を必須化。例: ---\\ndoc_id: project_v1\\nversion: 1.0.0\\ndepends_on: [{file: docs/dev_system_spec.md, version_range: \">=3.0 <3.1\"}]\\nowner: ADV\\napprover: PO\\n---。canopyにdocs_dep_lint.shを追加し、未記入・解釈不能・循環・未存在ファイルをFAILにする。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.6",
+    "issue": "「循環参照禁止」「バージョンなし依存禁止」を規定するが、これを自動検証する仕組みが未定義のため実効性が不足。",
+    "suggestion": "R-002のYAML化と合わせ、canopyでトポロジカルソートにより依存グラフ検証を自動化（循環→FAIL、上流未存在→FAIL、version_range不一致→FAIL）。review_gate.sh同様のdocs_dep_lint.shを追加しC2内で実行。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7（対 §13.4）",
+    "issue": "Phase 0完了基準で「8ペルソナ×2モデルのAIレビューでCRITICAL 0」とあるが、標準ペルソナは§13.4で5種のみ。追加3種の定義・役割・評価観点が未定義。",
+    "suggestion": "いずれかに統一。案1: §13.4に3ペルソナ（法務/データ保護、プロダクトマーケ、アクセシビリティ）を正式追加。案2: §19.7を「標準5ペルソナ＋アプリ固有最大3ペルソナ（任意）」へ修正���、完了基準もそれに合わせて明確化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力がMarkdown表のみで、件数条件（直接5＋間接3）、全行「Lais方針」記入、差別化≥3点などの自動検証が困難。",
+    "suggestion": "各ベンチマークに併設のbenchmark.json（構造: apps, features, lais_policy, evidence_urls, analyzed_at）を必須化し、benchmark_lint.shで件数・空欄・差別化件数を検証。Markdownは人間可読、JSONは機械検証の二層構成にする。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 project_v1.md テンプレート",
+    "issue": "法令/準拠（個人情報・データ保持期間・越境移転・同意/撤回）等のリーガル/プライバシー要件が独立セクションとして明示されていない。",
+    "suggestion": "§11「コンプライアンス・プライバシー」を追加（法的根拠、データ保持/削除ポリシー、DPA/サブプロセッサ、地域別の規制差分）。§7の非機能・セキュリティとは分離して記載。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 ux_v1.md テンプレート",
+    "issue": "オフライン/再接続/競合解消（同一データの同時編集や差分マージ）のUX規定がない。",
+    "suggestion": "「§N+11 オフライン/再接続UX」を追加（オフライン時の表示、操作制限、同期待機/バックオフ、競合発生時の解決フロー、ユーザー通知）。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 design_system.md テンプレート",
+    "issue": "アクセシビリティ基準（コントラスト比、フォーカス可視性、音声読み上げ対応トークン）やインタラクションステートの共通規則が不足。",
+    "suggestion": "「§9 アクセシビリティトークン/基準」を追加（WCAGレベル、min contrast、focus ring、タップ領域）。§8に「hover/active/disabled/error/success」ステートのトークン命名規則を追記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 design_spec_v1.md テンプレート",
+    "issue": "各画面の状態定義（hover/active/disabled/error/focus）やバリデーションメッセー��等のマイクロコピー仕様が欠落しやすい。",
+    "suggestion": "「§N+3 状態・マイクロコピー仕様」を追加し、コンポーネントごとに状態別の見た目・文言・アイコンを画面単位で固定。G9スクショ判定の観点も付記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md テンプレート",
+    "issue": "API運用要件（レート制限、冪等性キー、リトライ/タイムアウト方針、バージョニング、ページネーション、監視/メトリクス、SLA/SLO、障害時のフォールバック）がテンプレに含まれていない。",
+    "suggestion": "「§7 API運用要件（SRE準拠）」を追加し、各項目の既定値テンプレを提示。AIルーティング/サーキットブレーカ/フェイルセーフ（簡易返信/キャッシュ使用）も§3 AI活用設計に明示。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§19.4 system_map.md テンプレート",
+    "issue": "処理フローに失敗モード/補償・リカバリ（ロールバック、再試行、整合性回復）の記述欄がなく、AI/ENGが誤判断時に即時リカバリ手���へトレースしづらい。",
+    "suggestion": "「§5 失敗モード&リカバリ（操作別）」を追加。各主要操作のFAIL時に実行する補償トランザクション、再試行回数/バックオフ、データ修復手順、ユーザー通知、incident_runbook.mdの参照を定型で記載。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4 e2e_fullflow_test.md テンプレート",
+    "issue": "各テストケースがSPEC-ID（§12）やG9スクショ証跡のファイル名規約と明示的に紐付かないため、G7/G9の自動対応検証が弱い。",
+    "suggestion": "テストケース見出しにSPEC-ID必須、各ケースに「スクショID（before/afterのファイル接頭辞）」を追加。mission_linter.shでSPEC-IDとスクショIDの存在を検証するルールを拡張。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.5",
+    "issue": "ヘッダーにOwner/Approver/Out-of-Scope/最終レビュー日がなく、責務境界や承認ゲートの実効性が弱い。",
+    "suggestion": "YAMLヘッダーにowner（ADV/PO/ENG）、approver（PO固定可）、out_of_scope（配下で扱わない事項）、last_reviewed（上流バージョンと日付）を追加。canopyで空欄→FAIL。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.6 参照表記法",
+    "issue": "「§X.Y参照」の数値参照は見出し変更時に崩壊しやすい。",
+    "suggestion": "各見出しに安定ID（例: [S-UX-TRANSITIONS]）を併記し、参照は「project_v1.md §3.2（S-PROJ-FLOWS）」のように数値＋ID併記へ。docs_dep_lint.shでID存在を検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§19.6 依存チェーン",
+    "issue": "ダイヤ型依存（design_spec_v1.mdがux_v1.mdとdesign_system.mdの両方に依存）の更新順序や衝突時の優先順位が未定義。",
+    "suggestion": "更新順序の規約を明記（dev-system→project→ux,design_system→design_spec→system_map→e2e）。競合時はproject>ux>design_system>referenceの優先度などを定義。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.7 競合ベンチマーク",
+    "issue": "調査根拠（URL/スクショ/取得日時）や保存場所の規定がないため、再現性・追跡性が不足���",
+    "suggestion": "各行にevidence列を追加（URLまたはevidence/benchmarks/{app}/{date}.png）。ベンチマーク用evidenceディレクトリ規約と、リンク切れ/欠落検出のlintを導入。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.5 ヘッダー「dev-system準拠」",
+    "issue": "「dev-system準拠: docs/plans/dev_system_spec.md §19」の参照パスがアプリ側リポジトリに存在しない可能性があり、正本の特定が曖昧。",
+    "suggestion": "dev-system準拠は「dev-system version pin（.dev-system.version）＋URL（またはサブモジュールパス）＋セクションID」で記載し、docs_dep_lint.shが存在検証できる形にする。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

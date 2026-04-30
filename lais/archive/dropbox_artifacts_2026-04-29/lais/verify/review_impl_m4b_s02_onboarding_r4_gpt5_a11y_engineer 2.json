@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-401",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "R3 指摘の CRITICAL 1 件と対応（修正の狙いの説明）",
+    "issue": "「Shift+Tab で main に戻した場合に outline が出る」と記載があるが、一般的に main 要素はフォーカス不可であり、programmatic focus のみを許可する tabindex=\"-1\" を付与している場合は Tab/Shift+Tab で到達できない。tabindex の設計意図と説明が矛盾している可能性。",
+    "suggestion": "main を Tab 移動対象にするなら tabindex=\"0\" を採用し、意図的に 1 タブストップ増やす設計を明記。programmatic のみなら tabindex=\"-1\" を維持し、「Shift+Tab で戻れる」の文言を削除。いずれの場合も :focus-visible の表示条件を再確認。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-402",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "修正後の該当 CSS（.s02-onboarding:focus / :focus-visible）",
+    "issue": ":focus-visible の UA ヒューリスティクス依存により、キーボード操作で遷移→JS で main に focus() された直後でも、ブラウザによってはフォーカスリングが出ない可能性がある（特に programmatic focus を :focus-visible と判定しない実装）。",
+    "suggestion": "入力モダリティ（keyboard/pointer）をアプリ側でトラッキングし、keyboard 由来の遷移時は抑制しない明示ロジックを追加（例: <html data-modality=\"keyboard\"> を付与し、.s02-onboarding[data-modality=\"keyboard\"]:focus { outline: 3px solid var(--accent); outline-offset: -3px; }）。あるいは focus-visible ポリフィル/what-input を導入。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-403",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "修正後の該当 CSS（.s02-onboarding:focus-visible の outline 色）",
+    "issue": "フォーカスインジケータのコントラスト要件（WCAG 2.2 AA 2.4.11 Focus Appearance (Minimum) および 1.4.11 Non-text Contrast）について、var(--accent), var(--bg-primary) の実値が不明で実測検証が未提示。3:1 を満たさない配色だと不適合となる可能性がある。",
+    "suggestion": "実際のトークン値でコントラストを計測し記録。要件: ①インジケータが少なくとも 2 CSS px 相当の厚み（現状 3px で満たす）、②インジケータと隣接色（要素内側の var(--bg-primary) と外側背景の双方）でコントラスト比 ≥ 3:1。例: var(--accent)=#0066CC, var(--bg-primary)=#FFFFFF なら 6.5:1 で適合。値が未達の場合はアクセント色の見直しまたは outline 太さ/スタイル変更（double/offset 調整）で改善。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-404",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "修正後の該当 CSS（フォーカスリングの強制配色対応）",
+    "issue": "Windows の強制ハイコントラスト（forced-colors: active）で outline 色指定が無視/上書きされる場合の表示保証が未定義。",
+    "suggestion": "強制配色用の明示ルールを追加して可視性を担保。例: @media (forced-colors: active) { .s02-onboarding:focus-visible { outline: 2px solid Highlight; outline-offset: 0; } }。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-405",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "修正後の該当 CSS（outline-offset: -3px）",
+    "issue": "負の outline-offset によりフォーカスリングが要素内側に描画されるため、overflow: hidden な親やコンテンツ端に近い箇所で視認性低下/クリップの可能性がある。",
+    "suggestion": "対象要素と親に overflow クリップがないこと、および内側パディング（既定の padding: var(--space-lg) ...）でリ��グがコンテンツと衝突しないことを確認。必要なら outline-offset: -2px 〜 0px に調整。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-406",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "R4 レビュー観点（ターゲットブラウザ）",
+    "issue": ":focus-visible サポートの下限（Safari 15.4+, Chrome 86+, Firefox 85+）が製品の正式サポートブラウザ範囲と明示一致しているか不明。",
+    "suggestion": "サポートマトリクスに :focus-visible 対応状況を明記。非対応ブラウザでは .s02-onboarding:focus:not(:focus-visible) セレクタが無効化され UA デフォルトのアウトラインが残るため、挙動差を既知の仕様として QA に通達。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-407",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "全体（R4 差分外の確認）",
+    "issue": "タップターゲット 44×44 CSS px 以上の保証（WCAG 2.5.8 Target Size (Minimum) AA）が本パッケージでは確認不可。",
+    "suggestion": "本画面の主要操作（例: .s02-next 固定ボタン、アバター選択セル等）について、ヒット領域が 44×44 を満たすことを E2E/手動で再確認し、寸法と余白の根拠を記録。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

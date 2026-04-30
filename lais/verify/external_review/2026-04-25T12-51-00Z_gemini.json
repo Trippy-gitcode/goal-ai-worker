@@ -1,0 +1,20 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "scripts/persona_selector.sh, scripts/vote_dispatcher.sh",
+    "issue": "ログローテーション時に `gzip -c \"$LOG_FILE\" > \"$ROT\"` を実行した後、`: > \"$LOG_FILE\"` でファイルを切り詰めています。この2つのコマンドの間に別のプロセスがログに書き込んだ場合、そのデータは圧縮ファイルにも含まれず、切り詰めによって完全に消失します（Race condition）。",
+    "suggestion": "リネームしてから圧縮する方式に変更してください。例: `mv \"$LOG_FILE\" \"${LOG_FILE}.tmp\" && gzip \"${LOG_FILE}.tmp\" && mv \"${LOG_FILE}.tmp.gz\" \"$ROT\"`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0438,
+    "input_tokens": 32418,
+    "output_tokens": 652,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

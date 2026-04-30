@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1 §4.1 / S00Splash.css .s00-center",
+    "issue": "ロゴの「中央から上に60px」指定が、実装ではロゴ単体ではなくロゴ+タグラインのスタック全体に対して適用されているため、タグラインの行数やフォントスケールに依存してロゴY位置がズレる（例: スクショでY≈326は想定Y≈340から乖離）。多言語や縮小画面でタグラインが2行になると乖離が拡大する。",
+    "suggestion": "ロゴ位置をスタック高に依存させず、ロゴ要素自体を基準に固定する。例: .s00 を min-height:100vh; position:relative にし、.s00-logo を position:absolute; top:calc(50% - 60px); left:50%; transform:translate(-50%, -50%); としてロゴのみを厳密配置。タグラインはロゴ直下にposition:relativeで配置（例: .s00-tagline { position:absolute; top:calc(50% + 16px); left:50%; transform:translateX(-50%); }）またはロゴを内包するラッパを用意してロゴの下に通常フローで積む。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "S00Splash.css レイアウト（.s00-center と .s00-cta がともに absolute）",
+    "issue": "小さい縦寸（例: 320×568）や横向き時に、中央スタック（absolute）とCTAスタック（absolute）が互いに衝突・重なり得る。375×812では成立していても、可視領域が縮むと「動いているように見えるが特定条件で壊れる」リスク。",
+    "suggestion": "中央スタックは通常フローでセンタリングし、CTAのみabsoluteにするか、全体をflex/gridで構成して重なりを避ける。例: .s00 { min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding-bottom:calc(76px + 52px*2 + 12px + env(safe-area-inset-bottom)); } .s00-center { position:static; } .s00-cta は現状のabsolute維持。さらに max-height ブレークポイントで bottom を clamp する等のガードも検討。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S00Splash.css .s00-cta (bottom: 76px)",
+    "issue": "76px は「primaryの140px・高さ52px・gap12px」に依存するマジックナンバー。将来トークン（高さ・gap・primaryのbottom）が変更されると二次項の76pxを追従更新し忘れるデグレリスクが高い。",
+    "suggestion": "依存関係を式で表現し、単一���ースオブトゥルースにする。例: :root に --cta-height:52px; --cta-gap:12px; --cta-primary-bottom:140px; を定義し、.s00-cta { bottom: calc(var(--cta-primary-bottom) - var(--cta-height) - var(--cta-gap)); } とする。もしくは primary を bottom:140px に固定し、.s00-cta を column-reverse で組む等、数字の重複を排除。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "App.jsx / S00Splash.jsx（JSXでclass属性を使用）",
+    "issue": "JSXで class を使用。現環境では動作しているが、React純正へ移行・Strict化・リンタ適用時に className 以外は警告/不具合になる可能性がある「動いているように見える」系の移行リスク。",
+    "suggestion": "JSX属性を className に統一し、ESLintの react/no-unknown-property を有効化して検知する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "S00Splash.css .s00",
+    "issue": ".s00 は flex:1; だが、親の高さ定義に依存。ルートが高さ未定義の環境では 100vh を満たせず、absolute基準が縮みCTAのbottom基準が崩れる可能性。",
+    "suggestion": ".s00 に min-height:100vh; を付与しビューポート基準を自前で確保。併せて .app-root（親）にも min-height:100vh; を指定して積み重ねのリスクを低減。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "App.jsx（div.app-root に aria-label）、S00Splash.jsx（main に aria-label）",
+    "issue": "ランドマーク近傍に重複する aria-label があり、SRユーザーに冗長な名称読み上げが発生する可能性。",
+    "suggestion": "ランドマークの名前付けは main のみに限定し、app-root 側の aria-label を撤去。ページ名は h1=ロゴ、または <title> で伝達。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "テスト（Playwright/E2E）",
+    "issue": "375×812以外やタグライン改行時のレイアウト検証が不足。デグレ検出の自動化が弱く、将来のトークン変更・翻訳追加で破綻を見逃す恐れ。",
+    "suggestion": "以下を自動化: 1) 320×568/横向きで中央スタックとCTAの非重なりを検証（要素のbounding box交差なし）。2) タグラインが2行になる幅でロゴY位置が「中央-60px±許容」に入ることを確認。3) CTAの primary=140px/secondary=76px の bottom距離を検証。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "R2.1.1 §2.θ'",
+    "issue": "低リスクミッション（文言修正など）でも、`cmd-e2e` と `cmd-realworld` に毎回 `N/A（理由: ...）` を記述することが必須化された。ソロ開発において、自明なN/A理由を毎ミッション手動（またはAI経由）で記述・確認するコストは、得られる便益を完全に上回る。形骸化し、無意味なコピペが横行する原因となる。",
+    "suggestion": "低リスクミッションにおいては、`cmd-e2e` および `cmd-realworld` の行自体の省略を許容するか、未記載の場合は自動的に `N/A（低リスクのため）` とみなす仕様に変更す���。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "R2.1.1 §2.ε' & PD-106",
+    "issue": "`RISK_PATHS` に該当する変更（例：DBマイグレーションの微修正）があるだけで、デプロイ時にHフロー（統合レビュー）が発火しブロックされる。ソロ開発で毎回15-25分と数ドルのAPIコストを強制されるのは非現実的。`HFLOW_APPROVED=1` でバイパス可能だが、レビュー未実施でのフラグ立てが常態化し、形骸化する。",
+    "suggestion": "ソロ開発者向けに `app_config.yaml` 等で `hflow_auto_trigger: false` のようなオプトアウト設定を設けるか、Hフロー発火時は警告のみとし、デプロイブロックはしない（または対話的な `[y/N]` プロンプトにする）よう変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "R2.1.1 §2.β' & §2.ζ'",
+    "issue": "高リスクミッションではG17が必須となり、5枚のスクショが要求される。しかし、外部APIの内部ロジック修正やDBスキーマ変更など、UIに全く変更がないバックエンド主体の高リスクミッションでもスクショが強制されるのは自己矛盾であり、物理的に無意味な作業を強いる。",
+    "suggestion": "G17のスクショ検証要件に、ミッション定義の「UI変更の有無」フラグ（または `AT不要` フラグ）を連動させ、UI変更がない場合はスクショ検証をスキップ（または `proof.json` のみの検証）するよう `realworld_proof_check.sh` を修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "R2.1.1 §2.η'",
+    "issue": "`check_test_pass` が成功すると、低/中リスクミッションは自動的に `DONE` に遷移する。テストは通ったがリファクタリングを続けたい場合や、一時的なデバッグコードが残っている場合でも、テスト通過と同時にミッションが完了扱いとなり、次のキューに進んでしまう。ソロ開発の柔軟な試行錯誤を破壊する。",
+    "suggestion": "STATUSの自動遷移は `READY_FOR_DEPLOY` までとし、`DONE` への遷移はデプロイ成功時（`deploy.sh`）のみとする。または、ミッション定義に `AUTO_DONE: false` のような制御フラグを設ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "R2.1.1 ��2.ι' & §6.9.2",
+    "issue": "`templates/dev-system.yaml.template` を新規追加し、`pre-commit` で参照するよう変更されたが、`init_app.sh` や `update_app.sh` でこのテンプレートを各アプリのルートにコピーする連鎖更新指示が §6 に欠落している。結果としてファイルが存在せず、常にフォールバックの `find` 探索が走る。",
+    "suggestion": "§6.5 (新規連鎖更新) に `scripts/init_app.sh` および `scripts/update_app.sh` の修正指示を追加し、`dev-system.yaml` が正しく配置・同期されるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "R2.1.1 §3",
+    "issue": "§C0-C6が新設され、`dev_system_spec.md` が約1,832行に肥大化する。ソロ開発者がこの規模の仕様書を維持・把握し、AIの更新差分をレビューして承認するのは運用負荷の限界を超える。PD-107で「起動時Read」は減ったが、仕様書自体のメンテナンスコストがソロ開発の価値を上回る。",
+    "suggestion": "仕様書の肥大化を止めるため、§C0-C6を `dev_system_spec.md` の末尾に追加するのではなく、完全に別ファイル（例：`dev_system_summary.md`）として分離する��または、既存の§1-§20をアーカイブし、§C1-C6を正本として再構築する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "EDGE_CASE",
+    "location": "R2.1.1 §2.δ'-3",
+    "issue": "G14 (`spec_first_lint.sh`) の正規表現が `docs/.*\\.md|lais/verify/.*\\.md` に緩和されたが、これでは `docs/debugging-guide.md` や `docs/anti_patterns.md` などの非仕様書ドキュメントを参照した場合でもPASSしてしまう。「仕様書ファースト」の本来の目的（Whatの定義を参照する）が骨抜きになる。",
+    "suggestion": "正規表現を `docs/.*_v[0-9]+\\.md|docs/design_system\\.md|lais/verify/.*\\.md` のように、バージョン番号付きの仕様書や特定のコア仕様書に限定するよう修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "location": "R2.1.1 §2.δ'-4",
+    "issue": "`proposal_log_lint.sh` の `awk` によるインプレース更新で、一時ファイル `TMP.new` を `TMP` に上書きしているが、ループ内で毎回 `TMP` を読み書きするため、複数件の滞留提案がある場合、2件目以降の更新時に1件目の更新が失われるか、ファイルが破損するリスクがある��`awk` の入力と出力が同じベースファイルに依存しているため）。",
+    "suggestion": "ループ内でファイルを都度上書きするのではなく、ループ内で滞留日数のマッピング（行番号と日数のペア）を収集し、ループ終了後に1回の `awk` 処理で全ての該当行を更新するアーキテクチャに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  }
+]

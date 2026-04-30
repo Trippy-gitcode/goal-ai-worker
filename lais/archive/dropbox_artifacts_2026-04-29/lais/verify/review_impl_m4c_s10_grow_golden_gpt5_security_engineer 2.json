@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体（ビルド/index.html またはサーバヘッダ）",
+    "issue": "CSP（Content-Security-Policy）が未定義。将来 API や外部リソース接続が入ると、XSS/クリックジャッキング/混在コンテンツの防御が不十分になり得る。",
+    "suggestion": "アプリ全体に厳格なCSPを導入する。例: default-src 'self'; script-src 'self' 'nonce-<generated>'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; img-src 'self' data:; connect-src 'self' https://api.example.com; style-src 'self'（必要なら 'unsafe-inline' か後述のinline回避パターンを採用）; upgrade-insecure-requests。合わせて Referrer-Policy/Permissions-Policy も設定。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "4. S10Grow.jsx（.s10-hero-bar-fill / .s10-goal-bar-fill の style={{ width: ... }})",
+    "issue": "進捗バーの幅に inline style（style属性）を使用。厳格なCSP（style-srcで'unsafe-inline'を許可しない構成）と相性が悪く、将来的にCSP強化を阻害する。",
+    "suggestion": "CSP要件に合わせて方針を選択: 1) style-src に 'unsafe-inline' を許可する（他を厳格化）/ 2) inline style をやめ、事前生成したCSSクラス（例: .w-0, .w-1 ... .w-100）やscaleXクラス切替で表現 / 3) もしくはnonce付き<style>を動的生成してルール追加（ビルド管理下）。アプリ全体で統一方針を決定。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "4. S10Grow.jsx（カテゴリ/ステータス由来の class 組み立て）",
+    "issue": "class 名をテンプレートで組み立てている（例: s10-task-dot-${task.category}）。現状はモック固定だが、将来サーバ由来データが入ると予期しない値（空白や区切り文字）で意図しないクラス付与・UI破綻のリスク。",
+    "suggestion": "受信データを列挙型でホワイトリスト化してからクラスにマップする（const DOT_CLASS = { work:'s10-task-dot-work', health:'...', learn:'...' } など）。不正値はデフォルトクラスにフォールバック。ステータスも同様に enum 検証。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "将来の状態変更API（S10-2「明日に延期」、チェックトグル等）",
+    "issue": "現状は console.log のみでCSRF影響なしだが、Cookieベース認証で状態変更エンドポイントを実装するとCSRFの脅威が発生する。",
+    "suggestion": "サーバ側でCSRF対策を実施: SameSite=Lax/StrictなCookie運用、状態変更はGETで実装しない、POST/PUT/DELETEでOrigin/Referer検証、トークン方式（ダブルサブミット等）を併用。フロントはcredentials送信の最小化とXSRFトークンの送出を実装。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "将来のバックエンド/DB（Tasks/Goals 取得・更新想定）",
+    "issue": "Row-Level Security（RLS）やサーバサイド認可の記載がない。フロントのタブ/画面制御だけでは認可を満たせず、将来データ漏洩・越権更新のリスク。",
+    "suggestion": "DBレイヤ（例: Postgres/Supabase）でRLSを有効化し、user_idで所有行のみ参照・更新可能なポリシーを定義。APIは認証コンテキストからサーバ側で user_id を強制付与し、クライアント由来のIDは信用しない。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. BottomTabBar.jsx（onSelect→将来の遷移）",
+    "issue": "タブ選択で将来ルーティングを実装する際、外部/任意URLへ誘導できる形にするとOpen Redirectの温床になる可能性。",
+    "suggestion": "遷��先は固定列挙（grow/talk/me）のみに限定し、未知のtabIdは無視。外部URLへ遷移させない。必要時はプロトコル・ホストを検証して同一オリジンのみに制限。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（XSS 対策方針）",
+    "issue": "現状 dangerouslySetInnerHTML/innerHTML は未使用でXSS面は良好だが、将来リッチテキストを入れる際の方針が未定。",
+    "suggestion": "原則としてテキストノード出力に限定。やむを得ずHTMLを扱う場合はDOMPurify等でサニタイズし、CSPのTrusted Types（require-trusted-types-for 'script'）を導入してスクリプトシンクを保護。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "4. S10Grow.jsx（多数の console.log）",
+    "issue": "本番バンドルでのconsole出力は、将来ユーザのタスク/ゴール名などの機微情報がブラウザや収集ツールに漏れる恐れ。",
+    "suggestion": "ビルド時にconsole除去（Vite terser drop_console/rollup-plugin-strip等）を有効化し、開発時のみデバッグログを出す仕組み（ENVフラグ）にする。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "将来のバックエンド（CORS 設定）",
+    "issue": "本実装にはCORSは関与しないが、後続でAPI接続時にワイルドカード許可（*）や資格情報付き*の誤設定が起きやすい。",
+    "suggestion": "Access-Control-Allow-Origin は明示オリジン限定、資格情報を用いる場合は*を使わない。許可メソッド/ヘッダを最小化し、プリフライトを監査ログに残す。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（リポジトリ/CI）",
+    "issue": "現状コードからはシークレット露出は検出されないが、秘密情報スキャン（grep以上の自動化）を導入した形跡がない。",
+    "suggestion": "gitleaks/truffleHog等をCIに組み込み、pre-commitでのシークレット検出を有効化。Viteの環境変数は公開可否を明確化し、クライアントに露出させない鍵はサーバ側にのみ配置。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

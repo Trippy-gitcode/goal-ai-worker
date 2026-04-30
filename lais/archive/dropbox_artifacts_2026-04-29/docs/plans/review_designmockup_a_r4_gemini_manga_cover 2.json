@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "下部のアクションボタン「進め方を聞く」「詰まりを相談」",
+    "issue": "背景色（#1C2128）に対して文字色（#484F58）のコントラスト比が著しく低く（約2.2:1）、WCAG AAの4.5:1要件を満たしていない。非アクティブ状態だとしても視認性が低すぎる。",
+    "suggestion": "非アクティブ状態の文字色を--text-disabled（#484F58）とする場合、背景色はより暗い色にするか、ボタンの枠線のみで表現するなど、最低限の可読性を確保する明暗設計に見直す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスクリスト",
+    "issue": "左側のタイムラインが視線を縦に誘導する一方で、右端に配置されたゴール紐付けのカラードットが視線を横に強く引っ張り、Z字/F字の自然な視線移動を阻害している（視線迷子）。",
+    "suggestion": "ゴール紐付けのドットはタスク名の下（時間表記の横など）に移動させ、情報の塊（チャンク）を左側に集約することで、縦の視線誘導をスムーズにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "所要時間の横スクロールチップ群",
+    "issue": "チップ間の余白（gap: 8px）が狭く、要素が密集している。余白が「間」として機能しておらず、タップターゲットとしての独立性も弱いため、情報過密な印象を与える。",
+    "suggestion": "チップ間の余白を広げ（gap: 12px等）、左右のパディングも調整して、呼吸するような「間」を持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内のアクションボタン",
+    "issue": "「登録する」「編集して登録」「✕」の3つのボタンが狭い領域に横並びになっており、視覚的なウェイトが拮抗しているため、ユーザーの視線が迷う。",
+    "suggestion": "主動作（登録する）を強調し、副動作（編集）はテキストリンクにするなど、ボタンの形状と明暗コントラストに明確な階層（ヒエラルキー）を設ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "画面上部の見出し「最初のパートナーを選びましょう」",
+    "issue": "日本語見出しの行間（line-height: 1.35）が詰まりすぎており、漢字とひらがなの間の余白が窮屈。タイポグラフィの品格を損ねている。",
+    "suggestion": "日本語の特性（画数が多い、正方形に近い）に合わせて、見出しの行間を少し広げる（line-height: 1.4〜1.5程度）か、文字サイズに対して適切なマージンを設定する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "基本情報セクションのリスト（名前、年齢など）",
+    "issue": "ラベル（#9BA7B4）と値のコントラストが色（明度）のみに依存しており、フォントウェイトが同じであるため、情報の階層が平坦でリズムに欠ける。",
+    "suggestion": "値のフォントウェイトを少し上げる（Medium/500等）ことで、文字の太さによる黒の面積を増やし、ラベルとのコントラスト（明暗のリズム）を際立たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s01_signin",
+    "location": "チェックボックス横のテキスト「利用規約とプライバシーポリシーに同意します」",
+    "issue": "文字サイズ（13px）に対して行間（line-height: 1.5）と文字間（letter-spacing: -0.02em）のバランスがやや窮屈。特にリンクの下線が文字に近接しすぎている。",
+    "suggestion": "文字間を少し緩めるか、text-underline-offsetを使用して下線と文字の間に適度な「間」を設け、可読性と美しさを向上させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s00_splash",
+    "location": "画面全���のレイアウト",
+    "issue": "ロゴ、サブタイトル、ボタンが画面中央から下部に配置されており、上部の広大な余白が意図された「間」ではなく、単なる「空きスペース」に見える。洗練された静けさの演出が弱い。",
+    "suggestion": "ロゴとサブタイトルを黄金比や三分割法に基づく位置（少し上部）に配置し、上部の余白に緊張感を持たせることで、ブランドDNAである「洗練」を体現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s14_goal_detail",
+    "location": "タスクリストの完了済みタスク",
+    "issue": "取り消し線と文字色（#7A8593）の組み合わせが、背景（#0D1117）に対して沈みすぎており、完了したという達成感（ポジティブなコントラスト）が薄い。",
+    "suggestion": "完了状態のテキストの明度を少し上げるか、チェックマークの緑色（#3FB950）との明暗バランスを調整し、完了したタスクが美しく見えるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域のレベル表記���12 EXPLORER」",
+    "issue": "数字（36px, weight:200）とテキスト（14px, uppercase）のベースラインの揃え方やサイズ比率がややアンバランスで、視覚的な安定感に欠ける。",
+    "suggestion": "数字とテキストのベースラインを厳密に揃え、テキストのウェイトやトラッキング（字送り）を微調整して、一つのロゴタイプのような一体感を持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  }
+]

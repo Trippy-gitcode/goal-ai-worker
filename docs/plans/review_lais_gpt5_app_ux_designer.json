@@ -1,0 +1,302 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.1",
+    "issue": "ボトムタブのプラットフォーム準拠（ラベル常時表示、アイコン/文言、セーフエリア対応、状態保持）が未定義",
+    "suggestion": "iOS/Material準拠で各タブにアイコン＋短いラベルを常時表示し、env(safe-area-inset-bottom)対応でホームインジケータを避ける。各タブのスクロール位置とフォーム入力状態を保持。アクティブタブ再タップでリスト先頭へスクロールを実装。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.1/3.3",
+    "issue": "キーボード表示時のボトムタブ/入力バーの干渉回避仕様がTALK以外で未定義（Android IMEやiOS PWAでの被りリスク）",
+    "suggestion": "VisualViewportとCSSのsafe-area-insetを用い、IME表示時はボトムタブを押し上げるか一時非表示にする共通レイアウトルールを定義。TALK以外の画面（GROW/ME）でも適用する。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.2/3.3/5.3",
+    "issue": "Pull-to-refreshの有無と動作が未定義。PWAではブラウザのページリロードと競合しうる",
+    "suggestion": "各リスト（Today、TALK履歴、FRIENDS）でインアプリのPull-to-refreshを実装する場合は、ページスクロールではなく内部スクロールコンテナに限定し、ブラウザのプルツーリロードを無効化。代替として明示的な更新ボタンも用意。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3.2",
+    "issue": "タスク行のスワイプアクション（完了、編集、削除、予定変更など）の定義がない",
+    "suggestion": "iOSは左右スワイプで編集/削除/完了、Androidは長押しまたはスワイプでクイックアクションを提供。誤操作防止のため削除は確認付き、完了は即時＋Undo。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3/4",
+    "issue": "ハプティクス設計が未定義（完了、エラー、レベルアップ等）",
+    "suggestion": "タスク完了＝軽い成功ハプティクス、エラー＝警告ハプティクス、レベルアップ/ゴール達成＝やや強い成功ハプティクス。システム設定（バイブ/触覚の無効化、視差/動作の削減）を尊重。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3.2/3.3/5.2",
+    "issue": "ローディングの骨組み（スケルトン/シマー）やプレースホルダーが未定義",
+    "suggestion": "Today/Goals/FRIENDSにスケルトン行、TALKはメッセージバブルのスケルトンを実装。アバター画像はプレースホルダーを先出しし、遅延読み込み。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.2/3.3/5.2/5.3",
+    "issue": "空状態（タスク/ゴール/友達/チャット履歴）が未定義で、初回体験が弱くなる恐れ",
+    "suggestion": "各空状態で説明テキスト＋主要CTA（タスクを作成、ゴールを作る、QRで友達追加、AIに話しかける）とチュートリアルイラストを表示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3/5/7",
+    "issue": "エラー状態の統一ガイドラインがない（ネットワーク、権限拒否、サーバーエラー、レート制限等）",
+    "suggestion": "ページ内リトライ可能なインライン���ラー、軽微はトースト/スナックバー、重大はフルページ/モーダル。エラーコードに応じた文言と再試行・サポート導線を定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "5.3",
+    "issue": "プッシュ通知の許諾タイミング・カテゴリ別ON/OFF・配信時間帯（クワイエットアワー）が未定義",
+    "suggestion": "許諾前に事前説明カードを表示し、承諾後にOSプロンプト。カテゴリ（応援、メッセージ、フレンドリクエスト、システム）ごとの切替とおやすみ時間/要約通知を設定に追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.3",
+    "issue": "TALKで上スクロール中に新規メッセージが来た場合の挙動（“最下部へ”ボタン等）が未定義",
+    "suggestion": "履歴閲覧中は自動スクロールを抑止し、右下に“新着X件・最下部へ”FABを表示。最下部到達時のみ自動スクロールを再開。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.1/3.2",
+    "issue": "アクティブタブの��タップでスクロール先頭へ戻る共通ジェスチャーが未定義",
+    "suggestion": "iOS/Androidとも、同一タブを再タップでリスト先頭にスムーズスクロールするパターンを導入。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "3.4",
+    "issue": "ME内サブタブの戻る遷移・ディープリンク・状態保持が未定義",
+    "suggestion": "サブタブはURLクエリ等でディープリンク可能にし、Androidの戻るはタブ履歴→ME退出の順で遷移。iOSは上部セグメント制御を推奨。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.5/5.1/6.5",
+    "issue": "モーダル/ダイアログのアクセシビリティ（フォーカストラップ、role、ラベル）が未定義",
+    "suggestion": "モーダルにaria-modal=true/role=dialog、適切なaria-labelledbyを設定し、オープン時に最初の操作要素へフォーカス。Esc/戻るで閉じ、閉じたらトリガーへフォーカス返却。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "タップターゲットの最小サ��ズ・間隔が未定義（誤タップの懸念）",
+    "suggestion": "タップ領域はiOS44pt/Android48dp以上、隣接要素との間隔は8dp以上を指針として設計。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.5",
+    "issue": "テーマ別のコントラスト比・色覚多様性対応が未定義",
+    "suggestion": "本文と背景のコントラスト比4.5:1以上、UI要素は3:1以上を満たす。色だけに依存しない状態表現（アイコン/テクスチャ/ラベル）を併用。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3",
+    "issue": "動的文字サイズ（OSのフォントスケール）対応が未定義",
+    "suggestion": "テキストは相対単位で実装し、2段以上の切り返し時もUI崩れないようオートレイアウトを前提に。極端な拡大時は重要情報を優先表示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3.2/3.4",
+    "issue": "アバター/レベル/EXPのスクリーンリーダー読み上げ仕様が未定義",
+    "suggestion": "アバターに代替ラベル（例: “Lv12・Explorerのア���ター”）、EXPバーにaria-valuenow/maxと文言（例: “1240/2000、62%”）を付与。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.2/4.2",
+    "issue": "アニメーション（完了演出・レベルアップ）に対する“動作を減らす”設定の尊重が未定義",
+    "suggestion": "prefers-reduced-motionに応じてアニメーションを短縮/無効化し、代替のフェードや静的イラストへフォールバック。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "3.2/4.2",
+    "issue": "完了後30秒のUndoの提示場所・遷移跨ぎ・音声読み上げが未定義",
+    "suggestion": "画面下部スナックバーでUndoを提示し、他画面に遷移しても表示を維持。スクリーンリーダー向けに“取り消し可能”を即時アナウンス。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.3/7.3",
+    "issue": "TALKの送信失敗時のUI（再送、下書き保持、エラー理由）が未定義",
+    "suggestion": "失敗メッセージにエラーアイコンと“再送”ボタン、長押しで削除/コピー。オフ��インからの自動再送時は状態遷移を明示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5.1",
+    "issue": "QRスキャンの権限拒否時の代替導線（手入力/リンク貼付）が未定義",
+    "suggestion": "カメラ拒否時はシェアリンク貼付欄を表示し、設定での権限変更手順を案内。読み取り中は視認性の高い枠と連続オートフォーカスを実装。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.2",
+    "issue": "時間/所要時間入力のコンポーネントがプラットフォーム非最適（未定義）",
+    "suggestion": "iOSはピッカー（ホイール）/カレンダー、AndroidはMaterial Time/Date Pickerを採用。所要時間はプリセットチップ＋数値入力を併用。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.2",
+    "issue": "“タスク追加ボタン”の配置・様式が未定義（FABかツールバーか）",
+    "suggestion": "AndroidはFABを右下に、iOSはナビゲーションバーの“＋”を推奨。PWA共通UIならFAB＋アクセシブルラベルで統��。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.1",
+    "issue": "タブ切替時のスクロール位置/入力内容の保持について明記なし",
+    "suggestion": "各タブは独立したナビゲーションスタックとスクロール位置を保持し、戻った際に直前の位置へ復元する。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "5.3",
+    "issue": "タブアイコンのバッジ表現（数値/ドット、既読処理）が未定義",
+    "suggestion": "未読件数が多い場合は“9+”などに丸め、閲覧で自動既読化。iOSは赤丸数値、Androidはドット＋数値のいずれかで統一。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-026",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "3.2",
+    "issue": "ヒーロー領域の縮小とPull-to-refreshの競合・パフォーマンス劣化の懸念",
+    "suggestion": "スクロール0→Xpxの範囲で段階的に縮小し、PTRはコンテンツ領域のみで発火。スレッド外のアニメーション（transform/opacity）でGPUレンダリングを優先。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4",
+    "issue": "サブタブの横スワイプ切替を入れる場合、iOSのエッジスワイプ戻るとの競合リスク",
+    "suggestion": "エッジ領域は戻る優先、コンテンツ中央のみ横スワイプ許可、あるいは横スワイプを無効化しタップ操作に限定。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-028",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.5",
+    "issue": "オンボーディング5ステップにスキップ/後で設定の導線が未記載で離脱リスク",
+    "suggestion": "各ステップに“後で”を設け、最小入力で完了可能に。初回GROWにてコンテキストチュートリアルを補完。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-029",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.3",
+    "issue": "ストリーミング応答中のアクセシビリティ（ライブリージョン、進行状況）が未定義",
+    "suggestion": "AI応答領域にaria-live=politeを設定し、送信中/生成中の状態をテキストで併記。キャンセル操作も提供。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-030",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.2",
+    "issue": "Todayの並び替え（ドラッグ＆ドロップ）や長押しアクションの有無が未定義",
+    "suggestion": "ユーザーが優先度調整できるよう長押しで並び替えを許可（時刻未設定タスクのみ等の制約を明記）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

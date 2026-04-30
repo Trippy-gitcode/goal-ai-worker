@@ -1,0 +1,21 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"CONTRADICTION\",\n    \"location\": \"scripts/ai_review.js / parseArgs\",\n    \"issue\": \"CLI 解析で `--mode=precommit` と `--mode=vote` の条件式が `arg === '--mode=...' || arg === '--mode' && ...` になっており、JavaScript の優先順位上は `||` と `&&` の結合に依存します。今回は動くケースもありますが可読性が低く、将来の条件追加時に誤判定しやすい上、未知の `--mode` 値が `Unknown option` で即終了するため hook 経路が簡単に壊れます。\",\n    \"suggestion\": \"`if (arg === '--mode' && ['precommit','vote'].includes(args[i+1])) { ... } else if",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0629,
+    "input_tokens": 32484,
+    "output_tokens": 2232,
+    "model_id": "gpt-5.4"
+  }
+]

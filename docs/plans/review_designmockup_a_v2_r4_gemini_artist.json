@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s02_onboarding",
+    "location": "アバターのイラスト（タイプA, B, C）",
+    "issue": "幾何学的で無個性なフラットベクターであり、「一緒に成長するパートナー」としての感情的喚起力に欠ける。SaaSの汎用アイコンのようであり、ブランドDNAの「感情的価値」を提供できていない。",
+    "suggestion": "線のニュアンスやわずかな非対称性を取り入れ、有機的な温かみを感じさせる造形に調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクションの完了済みタスク（09:00）",
+    "issue": "完了済みタスクに緑の背景色（rgba）が敷かれているため、未完了タスクよりも視覚的に目立ってしまっている。完了したものが主張し、次にやるべき未完了タスクへの視線誘導を阻害している。",
+    "suggestion": "完了タスクの背景色を外し、テキストの不透明度を下げることで、未完了タスクへ視線を誘導する「設計された沈黙」を作る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "背景の星（ドット）の配置",
+    "issue": "星の配置がランダムで意図が薄く、AI生成的な安易なパーティクル表現に見える。「洗練された静けさ」というブランドの緊張感を阻害している。",
+    "suggestion": "星の数を極限まで減らし、黄金比や星座のような意図的な配置にするか、完全に排除して深いグラデーションのみで「夜空」を表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE, DISCOVER, FRIENDS, SHOP）",
+    "issue": "画���幅に対して4つのタブが均等割で詰め込まれており、文字間隔（letter-spacing）の余裕がなく窮屈。「Open Air」の原則に反している。",
+    "suggestion": "タブの文字サイズを1段下げるか、横スクロールを許容して各タブの左右パディングを十分に確保し、呼吸できる余白を作る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "下部の「振り返りを聞く」「次につなげる」ボタン",
+    "issue": "2つのアクションが全く同じ視覚的重み（青の微透過背景）で並んでおり、ユーザーにどちらを押すべきかの迷い（視線迷子）を生じさせる。",
+    "suggestion": "主アクションをソリッドな背景色にし、副アクションをアウトラインまたはテキストのみにして視覚的な階層をつける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "「60%」のタイポグラフィ",
+    "issue": "数字と「%」のサイズ差はあるが、ベースラインの揃え方や字間（カーニング）に緊張感がなく、単なるシステムテキストの羅列に見える。",
+    "suggestion": "「%」のウェイトをさらに落とし、数字との間隔を微調整して、一枚のポスターのタイポグラフィのような美しさを持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内のボタン群（登録する、編集して登録、✕）",
+    "issue": "形状の異なるボタン（Pill型と円形）が狭い余白で並んでおり、視覚的なリズムが詰まっている。",
+    "suggestion": "✕ボタンをカードの右上にアイコンとして独立させるか、ボタン間の余白（gap）を広げて空間を作る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "「買い物リストを作る」入力欄のフォーカスリング",
+    "issue": "青い太いアウトライン（outline: 3px solid rgba...）が野暮ったく、洗練されたUIの緊張感を削いでいる。",
+    "suggestion": "フォーカス時は枠線の色を--accentに変更するのみに留めるか、より繊細なシャドウを用いて上質な手触りを出す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "ハーフモーダルやカードの境界表現",
+    "issue": "「カードで囲まない（Open Air）」原則に対し、角丸の面で区切る表現が多く、結果的に「よくあるアプリ」の箱庭感が出ている。",
+    "suggestion": "モーダルの背景色と画面背景色のコントラストをさらに下げ、境界線を光の反射（極細のインナーボーダー）のみで表現するなど、空間の連続性を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」のチェックボックスとテキスト",
+    "issue": "チェックボックスの四角形とテキストのベースラインが視覚的に揃っておらず、細部の洗練さを欠いている。",
+    "suggestion": "チェックボックスとテキストの垂直方向の中央揃え（align-items: center）を厳密に調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  }
+]

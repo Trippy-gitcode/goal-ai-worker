@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「利用規約に同意します」左のチェックボックス",
+    "issue": "チェックボックスが20×20px（style: width:20px;height:20px）で、最小タップターゲット44×44pxの要件に満たない（WCAG 2.5.5 / デザインシステム§4.5）。周囲のテキストもクリック領域になっていないように見える。",
+    "suggestion": "チェックボックス自体の可視サイズは現状のままでも良いが、実際のタップ領域を44×44px以上に拡張し、ラベル全体もヒット領域に含める。CSSでpadding/::beforeを用いるか<label>で囲って可用性を確保。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "所要時間チップ（5分/10分/…/120分）",
+    "issue": "チップの高さが約28〜32px（style: padding:6px 14px, font-size:13px）で、タップターゲット最小44pxを満たしていない。横スクロールで誤タップのリスクも上が���。",
+    "suggestion": "視覚高さを維持する場合でも、透明paddingで実ヒット領域を44px以上に拡張する。行間を+6〜8px、上下paddingを+6px程度付与し、アイテム間隔も8→12pxへ。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s15_goal_create",
+    "location": "カテゴリ選択チップ（仕事/健康/学習/…）",
+    "issue": "各チップの高さが約30〜34px（style: padding:8px 14px, font-size:13px）で44px未満。PWA前提で指操作が中心なため誤タップ余地が大きい。",
+    "suggestion": "上下paddingを増やして44px以上に。複数行折返し時も行間を12〜16px確保し、スクロール領域に余白を追加して誤スワイプを防ぐ。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクション各タスク行",
+    "issue": "タスク行の先頭に完了トグル（⭕）がない。完了済みのみ右端にチェックが出ており、仕様の「[完了⭕] [時刻] [タスク名]…」（UX§2.3）と乖離。",
+    "suggestion": "全タスク行の左端に完了トグル（⭕）を配置し、完了アクションを一貫化。完了済みは同位置を✓で表示し、右端のアイコンは撤去して視線移動を最短化。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "下部アクション行「進め方を聞く」「詰まりを相談」",
+    "issue": "両ボタンが無効（グレーアウト/ pointer-events:none）。UX§2.3ではタスク詳細からTALKに遷移できる導線として定義されており、完了済みでも無効化の記載はない。",
+    "suggestion": "常時アクティブ化し、タップでS-20 TALKへコンテキスト付き遷移（文面プリセット）を実装。無効化は入力未保存など限定ケースのみに留める。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "配色・クローム全体",
+    "issue": "Night Skyの色設計（#0D1117/#161B22/#79C0FF系）と角丸カード、ヘアラインの使い方がGitHubダークに強く類似し、独自の視覚的個性が弱い。ブランドDNA「実世界由来の色＋自分のアプリ感」（§1.1, §1.2, §1.5）の主張が薄い。",
+    "suggestion": "アクセントの相対明度/彩度��色相を微調整（例: 月光ブルーにわずかに緑味を加え夜露のニュアンスへ）。アイコン線幅や端の処理を統一し、アバター/小イラストにテーマ固有の質感（光のにじみ/紙感）を付与して“Laisらしさ”を前面化。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カード（チャット内インライン）",
+    "issue": "濃色の塗りつぶしカード（background:#161B22, radius:12px）で要素を囲っており、Open Airの「カードで囲まない。余白と薄いborderで区切る」（デザインシステム§4.2）から逸脱気味。",
+    "suggestion": "塗り面を廃し、左ボーダー＋薄いアウトライン（--border-strong）と余白で分節化。見出しのみアクセント-subtleを用い、面の最小化で“設計された沈黙”を保つ。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内のアクション（「登録する」「編集して登録」）",
+    "issue": "ブランドのアクセント(#79C0FF)とプライマリボタン色(#1A5FC8)が同一コンポーネント内で併置され、青系が二系統に分裂して見える。意図の違いはあるが、視覚ノイズとなりがち。",
+    "suggestion": "カード内はアクセントを主役に統一し、プライマリボタンはアクセント基調（濃淡）へ寄せるか、ボタンはアウトライン/トーナルにし情報優先度で差を出す。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "プロフィール情報リスト（年齢/職業/趣味）と下部リンク群",
+    "issue": "区切り線が多く（各行にborder）、面積の大きい余白に対して線情報が優勢になり“静けさ”が薄れる。ブランド原則§4.2のOpen Airと逆方向の緊張が生じている。",
+    "suggestion": "不要なボーダーを削減し、セクション見出し＋余白で区切る。行間を+4〜8px拡張し、行末の矢印は必要箇所のみ。ヒエラルキーは太さ/彩度差で表現。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "入力バー右端の送信アイコン",
+    "issue": "送信アイコンが抽象的で（回転させた矢印風）、紙飛行機や明確な“➤”に比べ直感性が弱い。暗部での見分けもやや低い。",
+    "suggestion": "“➤”または紙飛行機のピクトへ置換し、アクティブ時は--accentで塗り/アウトラインを強調。タップ領域を直径44px以上に。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "ロゴ上部の星ドット群",
+    "issue": "星が微小・散在で視覚アンカーにならず、ロゴ→CTAへの視線誘導に寄与しにくい。装飾が背景化しており、静けさはあるものの“初見の記憶点”が弱い。",
+    "suggestion": "星座/一等星のワンポイントなど、重心を持つモチーフに整理。ロゴ直上に微かなグロウ/月光のハイライトを配し、下のCTAへ流れる垂直の視線導線を作る。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択（タイプA/B/Cのラベルと表情差）",
+    "issue": "ラベルが汎用的（タイプA/B/C）で情緒が立たず、表情差/色差も最小限のため“相棒を選ぶ瞬間”の高揚が生まれにくい。",
+    "suggestion": "「��かに燃える」「快活」「思索的」など性格名＋微表情/色調差で物語性を付与。選択中は背景色や光輪のニュアンス（夜空の月光）を強め、感情トリガーを演出。",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

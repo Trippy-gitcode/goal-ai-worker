@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "2.3 S01Auth.css — :focus-visible トークン全般",
+    "issue": "フォーカスインジケーターの具体的なコントラスト値・最小面積要件（WCAG 2.2 AA 2.4.11/1.4.11）の実測・証跡がない。テーマ差により見失う可能性がある。",
+    "suggestion": "全フォーカス可能要素（input/checkbox/button/a）で、少なくとも2 CSS px相当のアウトラインまたは面積と、背景/隣接色に対してコントラスト比≥3:1を満たすことを実測・記録する。CSS例: outline: 2px solid var(--focus-ring-color); outline-offset: 2px;。強制色モード用のフォールバックも追加。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "2.1 App.jsx NotFound 経由の route('/', true) 遷移および 2.2 S01Auth.jsx 認証成功後の遷移",
+    "issue": "SPA ルーティング後の明示的なフォーカス移動が不在。画面更新後もフォーカスが消失・不可視要素に残存し、スクリーンリーダーが新規コンテンツを自動で読まない恐れがある。",
+    "suggestion": "各画面に <main id=\"main\" tabIndex=\"-1\"> と <h1> を設置し、ルート変更完了時に main へ focus()。document.title をモード（サインアップ/ログイン）に応じて更新し、必要に応じて aria-live=\"polite\" で画面変更を告知。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 S01Auth.jsx — エラーメッセージの role=\"alert\" 運用",
+    "issue": "各フィールドエラー <p role=\"alert\"> を複数同時に出力すると、スクリーンリーダーが連続読み上げして過剰通知になる可能性がある。",
+    "suggestion": "フィールドには aria-invalid と aria-describedby で個別関連付けし、フォーム送信時は上部に1つのサマリー（role=\"alert\"）を出すか、フィールド個別は role=\"status\"（polite）へ格下げ。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "2.2 S01Auth.jsx — email/password 入力要素（マークアップ未掲示）",
+    "issue": "autocomplete 属性の付与有無が不明。未設定の場合、SC 1.3.5（入力目的の特定, AA）に抵触する可能性がある。",
+    "suggestion": "email に autocomplete=\"email\"、ログイン時 password に \"current-password\"、サインアップ時に \"new-password\" を付与。将来的にOTP等があれば \"one-time-code\" も検討。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "2.2 S01Auth.jsx — handleSubmit / canSubmit ガード",
+    "issue": "送信不可時の制御が JS ガードや aria-disabled のみだと、ボタンが依然としてフォーカス可能・押下可能で反応しない UI となり混乱を招く（キーボード/支援技術）。",
+    "suggestion": "送信不可時はネイティブの disabled 属性を button に付与（必要なら aria-disabled も併用は可）。視覚的無効化は非テキストコントラスト（1.4.11）の3:1を満たすよう設計。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "2.2 S01Auth.jsx — handleSubmit 内（// focus 誘導... コメント）",
+    "issue": "初回バリデーション失敗時のフォーカス誘導実装が断片に示されておらず、最初の不正入力へ移動する保証が不明。",
+    "suggestion": "送信時 canSubmit=false の場合、最初のエラー対象に focus() + scrollIntoView({block:'center'}) を実行。各入力に aria-describedby で該当エラーIDを関連付け、aria-invalid=true を設定。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "2.3 S01Auth.css — 全体（トランジション/ローディング/フォーカス効果）",
+    "issue": "prefers-reduced-motion への対応が明記されていない。フォーカスアニメやスピナーがある場合に動作を抑制できない可能性。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) で transition/animation を無効化し、スピナーは停止＋テキストの進行状況（role=\"status\"）を表示。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "2.3 S01Auth.css — .s01-checkbox",
+    "issue": "チェックボックスのボーダー/チェックマーク/フォーカスリングの非テキストコントラスト（1.4.11 ≥3:1）が全テーマ・全状態（デフォルト/ホバー/フォーカス/無効）で満たされているか未検証。",
+    "suggestion": "lais_contrast_check.mjs にチェックボックスの UI 状態を追加し、枠線/チェック/背景/隣接色のコントラストを実測。必要に応じて色/線幅（>=2px）を調整。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "2.3 S01Auth.css — .s01-agree-links（本文色） / .s01-link（リンク色）",
+    "issue": "��文色（--text-secondary）およびリンク色（--accent）の背景に対するコントラスト実測が未提示。下位コントラストのテーマで 1.4.3（本文≥4.5:1）を下回るリスク。",
+    "suggestion": "各テーマで本文/リンク/背景のコントラストを収集・保存。リンクは下線があるため識別は色依存ではないが、コントラスト不足時は色調整またはフォントウェイト/サイズ強化で補う。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3 S01Auth.css — .s01-link（negative margin でのヒット領域拡張）",
+    "issue": "negative margin により、隣接のフォーカス可能要素とヒット領域が重なるとポインタ/タブ移動の不確実性が生じうる。",
+    "suggestion": "リンク周辺での E2E テスト（タブ順・クリック境界・スクリーンリーダーフォーカス）を追加。可能ならコンテナ側の行間/内側余白で領域確保し、負のマージン依存を低減。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "2.2 S01Auth.jsx — submitting/timeout の UI 通知",
+    "issue": "setSubmitting/タイムアウトは実装されているが、支援技術への進行状況露出（aria-busy や live region）が明確でない。",
+    "suggestion": "フォーム/セクションに aria-busy=\"true\" を付与し、送信中テキスト（例: 「送信中…」）を aria-live=\"polite\" で掲出。スピナーには視覚非依存のテキスト代替を併設。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.3 S01Auth.css — 強制色（Windows High Contrast）対応",
+    "issue": "カスタムフォーカス/リンク色/チェックボックスが強制色モードで抑制される恐れがある。",
+    "suggestion": "@media (forced-colors: active) で outline: 2px solid ButtonText; outline-offset: 2px; border-color: ButtonText; text-decoration: underline; を指定。必要に応じて -ms-high-contrast クエリも併用。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "S-01 画面コンテナ（マークアップ未掲示）",
+    "issue": "main ランドマークやページ見出しの存在が確認できない。見出し/ランドマークがないとスクリーンリーダーのナビゲーション効率が落ちる。",
+    "suggestion": "<main> を設置し、画面状態（サインアップ/ログイン）を表す h1 を配置。関連リンク群（利用規約/プライバシー）は nav or 適切なセクション化で意味付け。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "S-01 ロゴ/イラスト（存在する場合）",
+    "issue": "画像の代替テキスト方針が記載なし。",
+    "suggestion": "装飾画像は alt=\"\"、意味のある画像は適切な alt を付与。ロゴは製品名を alt に（リンク先がホームである場合はテキスト重複に留意）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S-01 画面遷移（ログイン↔サインアップ、NotFound→/terms,/privacy→/）",
+    "issue": "document.title 更新や変更告知が明示されていない。タイトルはスクリーンリーダーが最初に確認する情報。",
+    "suggestion": "各ルート/モード切替で document.title を更新し、必要に応じて aria-live=\"polite\" のステータスで画面変更を告知。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": ".s01-footer-link（フッターの相互���照リンク）",
+    "issue": "リンク目的が文脈依存だと読み上げ時に不明瞭となる恐れがある。",
+    "suggestion": "リンクテキスト自体で目的がわかる文言にし、必要なら視覚的に隠した補助テキスト（.sr-only）を追加して明確化。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

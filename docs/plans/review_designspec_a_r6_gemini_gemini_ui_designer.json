@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "全体（特に §5 モーダル、スナックバー、トースト、タブバー関連）",
+    "issue": "モーダル、スナックバー、トースト、タブバーなど、画面上で重なり合う要素のz-index階層が定義されていません。これが未定義の場合、実装者ごとに異なる値を設定し、コンポーネント間の表示順序が崩れる（例：モーダルがスナックバーの下に隠れる）といった重大な表示バグが確実に発生します。",
+    "suggestion": "z-index用のデザイントークンを体系的に定義してください。例：`--z-index-bottom-nav: 100; --z-index-modal-backdrop: 200; --z-index-modal: 201; --z-index-snackbar: 300;` のように階層を定め、各コンポーネント仕様で参照するようにしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§5.9, §5.10, §4.3",
+    "issue": "UI要素の階層や浮遊感を示すためのシャドウが体系的に定義されていません。§5.9 スナックバーで「box-shadow（軽）」という曖昧な記述があるのみで、具体的な値や他の要素（トースト、モーダル等）での利用が規定されていません。これも実装のばらつきとUIの一貫性欠如に直結します。",
+    "suggestion": "複数のレベル（例: `--shadow-sm`, `--shadow-md`, `--shadow-lg`）を持つシャドウ用のデザイントークンを定義し、スナックバー、トースト、エレベーテッドなカード等にどのレベルのシャドウを適用するかを明確に指定してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5.2, §5.3, §5.4, 全体のインタラクティブ要素",
+    "issue": "プライマリCTA、セカンダリCTA、破壊的ボタンなど、主要なインタラクティブコンポーネントのホバー（:hover���およびアクティブ（:active）状態のスタイルが定義されていません。`--accent-hover`トークンは存在しますが、どの要素に適用されるかが不明確であり、タップ時のフィードバックなど重要なインタラクションの仕様が欠落しています。",
+    "suggestion": "各ボタンやリンク、リスト項目に対して、ホバー時とアクティブ時の背景色、文字色、枠線のトークン（例: `--button-primary-bg-hover`, `--button-primary-bg-active`）を定義し、インタラクションを明確にしてください。これにより、ユーザー体験と実装の一貫性が向上します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.1, §4.2, §4.6, §5.2, §5.4 など",
+    "issue": "プライマリボタンや破壊的ボタンのテキスト色が `#FFFFFF` とハードコードされています。本書は複数のテーマ（ライト/ダーク）を前提としていますが、このハードコードはテーマ切替時に破綻します。例えばライトテーマでボタン背景が明るい色になった場合、白い文字は読めなくなります。",
+    "suggestion": "色が固定された背景に乗るテキストのためのトークン��例: `--text-on-primary`, `--text-on-danger`）を定義し、ハードコードされた値を置き換えてください。これにより、テーマ切替時の保守性と堅牢性が確保されます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.4 S-10",
+    "issue": "S-10のタスク行のレイアウトで `gap: 12px` が使用されていますが、この値は§3.3で定義されたスペーシングトークン（4, 8, 16, 24, 32...）に含まれていません。デザインシステムの一貫性が損なわれています。",
+    "suggestion": "スペーシングの一貫性を保つため、`12px` を既存のトークン（`--space-sm: 8px` や `--space-md: 16px`）に寄せるか、新たに `--space-s-m: 12px` のような中間トークンをデザインシステムに追加し、仕様書内で参照するようにしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§3.2",
+    "issue": "タイポグラフィの `letter-spacing` の指定で、`-0.02em`（相対単位）と `-0.5px`（絶対単位）が混在しており、一貫性がありません。これにより、フォントサイズ変更時の挙動が予測しづらくなります。",
+    "suggestion": "`letter-spacing` の単位を `em` または `px` のどちらかに統一してください。フォントサイズに応じてスケールさせたい場合は `em`、固定値にしたい場合は `px` が適しています。デザイン意図に合わせて統一を図るべきです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.10 S-30",
+    "issue": "S-30の基本情報セクションの各行はタップでインライン編集が可能とされていますが、タップ可能であることを示す視覚的なアフォーダンス（例: アイコン、ホバーエフェクト）が定義されていません。ユーザーがこの便利な機能に気づかない可能性があります。",
+    "suggestion": "タップ可能な行の右端に編集アイコン（鉛筆など）やchevron-rightアイコンを追加するか、ホバー時に背景色を変更するなど、インタラクティブであることを示すスタイルを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§4.9 S-20",
+    "issue": "S-20のAIメッセージバブルで、`rgba` 値を持つ `--accent-subtle` トークンが `border-left-color` として使用されています。`border-color` に `rgba` を使用すると、要素の背景ではなく、その親要素の背景と色が合成されるため、意図しない表示になる可能性があります。",
+    "suggestion": "`border` 専用の不透明色トークン（例: `--border-accent-subtle`）を定義するか、`--accent` トークンを `opacity` を下げて使用する（例: `border-color: color-mix(in srgb, var(--accent) 30%, transparent)`）ことを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.2",
+    "issue": "タイポグラフィのスケールが `11px`, `14px` のようにピクセル値で直接参照されています。セマンティックなトークン（例: `--font-size-body`, `--font-size-heading-lg`）が定義されていないため、将来的にタイポスケールを全体的に見直す際の変更コストが高くなります。",
+    "suggestion": "`font-size` にセマンティックなトークン（例: `--font-size-xs: 11px`, `--font-size-sm: 14px`, `--font-size-h1: 48px` など）を定義し、各画面仕様ではこれらのトークンを参照するように変更することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.6 S-13",
+    "issue": "S-13のAI相談ボタンのdisabled状態について、§5.0 Aの共通定義があるにも関わらず、「上記 Inactive スタイルに加え opacity: 0.5 + pointer-events: none」とスタイルが再定義されています。これは冗長であり、将来的に§5.0の定義が変更された際にS-13の記述が追従されず、矛盾を生むリスクがあります。",
+    "suggestion": "S-13の記述を「§5.0 A（真のdisabled）のスタイルを適用する」のように、共通定義への参照に修正してください。これにより、仕様書全体の保守性が向上します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  }
+]

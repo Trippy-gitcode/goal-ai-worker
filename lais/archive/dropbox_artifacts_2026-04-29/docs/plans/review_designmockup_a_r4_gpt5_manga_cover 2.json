@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」リンク",
+    "issue": "インラインテキストリンクが下線なしで色のみの差別化（#79C0FF）。WCAG 1.4.1およびデザインシステム§2.2の「インラインテキストリンクは必ずunderline」要件に不適合。",
+    "suggestion": "「ログイン」に text-decoration: underline を付与。ホバー/押下の視覚状態も下線維持で色のみ依存を避ける。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "ボトムタブバー（中央TALK・右MEにもラベル表示）",
+    "issue": "非アクティブタブにもラベルが表示されており、デザインシステム§6.2「非Active=アイコンのみ、ラベルなし」に反する。",
+    "suggestion": "非アクティブタブはアイコンのみ表示に統一。アクティブのみpill背景+アイコン/ラ��ル（accent）を適用し、情報量と視線の焦点を絞る。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayセクション最下部「+ タスクを追加」",
+    "issue": "インタラクティブなテキストが下線なしで色のみの識別。WCAG 1.4.1（色依存の回避）および§2.2に不適合。",
+    "suggestion": "「+ タスクを追加」を下線付きインラインリンクにするか、ボタン/チップ化（枠線やアイコン）で色以外の手がかりを追加。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧下部「+ タスクを追加」",
+    "issue": "インタラクティブテキストが下線なしで色のみの識別。WCAG 1.4.1および§2.2不適合。",
+    "suggestion": "下線を常時表示。もしくはゴーストボタン化（アイコン+枠線）し、色以外でも可視的にインタラクティブ性を示す。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "見出し「最初のパートナーを選びましょう」（左上）",
+    "issue": "font-size:24px で font-weight:200 を使用。デザインシステム§3.3ではThin(200)は2XL(36px)以上限定。日本語の可読性・品格がやや損なわれる。",
+    "suggestion": "見出しは 24px/line-height 1.35 に対し weight 400〜600へ。字間は --letter-spacing-heading(-0.5px) を適用。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "画面タイトル「副業で月10万円」（上部）",
+    "issue": "24px相当で weight 200 を使用し細すぎる。日本語見出しの骨格が弱く、タイトルと本文のコントラストが不足気味。",
+    "suggestion": "タイトルを weight 600（または400）に変更し、本文との差を明確化。日本語見出しの行間は --line-height-ja-heading(1.35) を遵守。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カード右上「✕」ゴーストチップ",
+    "issue": "タップターゲットが視覚上30px弱程度に見え、--tap-target-min:44px 要件（§4.5）に満たない可能性。押し間違いのリスク。",
+    "suggestion": "���明パディングで44×44px以上を確保。アイコンサイズは据え置きでヒット領域のみ拡張。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "下部ボタン行「進め方を聞く」「詰まりを相談」",
+    "issue": "両ボタンが無効（グレーアウト）になっている。UX仕様§2.3では詳細パネルからTALK遷移が基本導線で、完了済みでも無効化要件は記載なし。",
+    "suggestion": "完了済みでも相談導線は有効化を維持。押下でS-20に遷移し、タスク名をコンテキスト送信。無効化の条件を仕様に沿って再確認。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "「タスク名」入力フィールド（フォーカス時の装飾）",
+    "issue": "濃いめのaccentボーダー＋半透明アウトラインの二重強調で視覚ノイズ。視線が散り、周囲要素とのコントラストリズムが崩れる。",
+    "suggestion": "強調は1系統に統一（例: アクセント1px枠＋内側グローなし）。またはアウトラインのみ2pxで、ボーダーは通��色に。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "プロフィールの各行（「基本情報」「AI理解メモ」配下の連続ボーダー）",
+    "issue": "項目ごとにボーダーが連続し、余白の「間」が詰まって見える。Open Air原則（§4.2）の呼吸感が弱い。",
+    "suggestion": "グループ化してセクション間は40px、行間は20px以上を確保。ボーダーは最小限（セクショントップのみ等）に減らし、余白で区切る。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カード（本文とボタン群）",
+    "issue": "見出し「タスクにしますか？」が小さく、CTA3種が同ウェイト・近接配置で主従が曖昧。視線がZ字に流れにくい。",
+    "suggestion": "情報優先度を再設計。見出し/タスク名をやや強く（14–15px/semibold）、CTAは「登録する」=塗りボタン→「編集」=ゴースト→「✕」=アイコンのみで軽量化し、左→右へ自然に誘導。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域のEXP最小/最大値（「1,240」「2,000」 11px）",
+    "issue": "数値が--font-size-xs相当で小さく、進捗の基準値としての視認性が弱い。タイトルとのコントラストも弱め。",
+    "suggestion": "数値を14px（--font-size-sm）+ color: --text-hint→--text-secondaryに引き上げ、バーとの距離を8px確保して読み取りやすくする。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

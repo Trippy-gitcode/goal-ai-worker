@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "1. App.jsx",
+    "issue": "NotFound コンポーネントの render 中に route('/') を同期実行しており、副作用を render フェーズで起こしている。ルーティング実装によっては二重レンダや予期せぬ再入を誘発する可能性がある。",
+    "suggestion": "NotFound はマウント後に副作用でリダイレクトする。例: function NotFound(){ useEffect(()=>{ route('/', true); },[]); return null; } のように useEffect 内へ移動する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "1. App.jsx",
+    "issue": "AuthRoute が window.location.search を直接参照しており、SSR・テスト容易性・将来のルーター差し替えに弱い。preact-router の props を使っていないため依存が分散している。",
+    "suggestion": "preact-router の Route 子に渡される url や matches を受け取り、そこから query を解釈する。例: function AuthRoute({ url }) { const mode = new URL(url, location.origin).searchParams.get('mode')==='login'?'login':'signup'; return <S01Auth mode={mode}/> }。もしくはルーター層で query��mode の正規化を行い、S01Auth には明示的 props を渡す。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2. S01Auth.jsx",
+    "issue": "ログイン時にもパスワード最小 8 文字のクライアントサイド制約がかかっており（canSubmit 条件）、Supabase 側のポリシー（既定は最小6）とズレる可能性がある。6〜7 文字の既存ユーザーが正しくログインできない UX バグを誘発する。",
+    "suggestion": "ログイン時の最小長チェックは外す（signup のみ 8+ を適用）か、Supabase のパスワードポリシーと同値にする。例: const MIN_PW = isSignup ? 8 : 1; などの定数化で意図を明確化。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2. S01Auth.jsx",
+    "issue": "signup/login モード切替時に email/password/agree 等のフォーム状態が保持される。モードが異なる操作コンテキストに跨って入力が残留し、ユーザーを混乱させる可能性がある。",
+    "suggestion": "mode 変更検知でフォーム状態を初期化する。例: useEffect(()=>{ setEmail(''); setPassword(''); setAgree(false); setServerError(''); setEmailTouched(false); },[mode]); など。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "5. auth.js",
+    "issue": "supabase.auth.onAuthStateChange の購読をモジュール初期化時に登録しており、HMR（Vite 開発時）などでモジュールが再評価されると購読が多重化する恐れがある（dev 時のリーク/二重更新）。",
+    "suggestion": "HMR 環境でのクリーンアップを入れるか、初期化ガードを設ける。例: const sub = supabase.auth.onAuthStateChange(...); if (import.meta.hot) import.meta.hot.dispose(()=>sub.data.subscription.unsubscribe());",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "4. supabase.js",
+    "issue": "detectSessionInUrl: false により、将来のメールリンク確認や OAuth/Magic Link フローで URL からセッション検出が行われず、想定どおりにログイン完了できない可能性が高い。",
+    "suggestion": "Phase B 以降を見据え detectSessionInUrl を true にするか、フロー別に一時的に有効化する実装に備える（ルーターで code パラメータ検出時のみ明示処理、等）。設定理由のコメントも追記する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2. S01Auth.jsx",
+    "issue": "フッターのモード切替が button 要素で実装されており、見た目はリンクだがスクリーンリーダーには「ボタン」として読み上げられる。実装上の回避策としては理解できるが、意味論との乖離でアクセシビリティ低下の恐れ。",
+    "suggestion": "button を使う場合は role=\"link\" の付与や aria-label で意図を補う。あるいは <a href=\"/auth?mode=login\"> を使用し onClick は外し、preact-router のデフォルトリンクハンドリングに任せる（以前の競合は onClick と二重ハンドラが原因の可能性が高いため、href のみで解消できる）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2. S01Auth.jsx",
+    "issue": "サーバーエラー表示（serverError）が次回送信まで保持され、入力修正中も残り続ける。ユーザーが修正したつもりでもエラーが消えず不安を与えうる。",
+    "suggestion": "email/password/agree のいずれかが変更されたら serverError をクリアするハンドラを追加する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. S01Auth.jsx",
+    "issue": "利用規約/プライバシーポリシーのリンクが href=\"#\" + preventDefault になっており、キーボードユーザーや JS 無効環境での挙動が不自然になる。",
+    "suggestion": "実リンク先が未定でも button type=\"button\" に変更し、後日リンク先が決まり次第 a に戻す。もしくはダミーではなく /terms /privacy 等のプレースホルダールートへ遷移させる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "4. supabase.js",
+    "issue": "環境変数未設定時にモジュール評価段階で throw してアプリ全体を即時クラッシュさせる。開発時はよいが、本番での設定ミス時に原因特定が難しくなる可能性がある。",
+    "suggestion": "初期化関数化して明確なエラーメッセージ/フェールセーフ画面を表示するか、環境チェックをブートストラップ層で行いユーザー向けの案内画面にフォールバックする。最低限 console.error で詳細を出しつつ UI にはガードを出すなど。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "全体（import パス）",
+    "issue": "相対パス ../../lib/auth.js の多用はリファクタ時に壊れやすく、参照の見通しも悪い。",
+    "suggestion": "Vite の resolve.alias（例: '@': '/src'）を設定し、'@/lib/auth' のような絶対エイリアスに統一する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. S01Auth.css / 2. S01Auth.jsx",
+    "issue": "CTA ボタンに disabled と aria-disabled の両方を付与し、CSS でも両方にスタイルが当たっている。冗長で意図の重複がある。",
+    "suggestion": "ネイティブ button の disabled 属性に一本化し、スタイルは :disabled セレクタに寄せる。非 button 要素の場合のみ aria-disabled を使う。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

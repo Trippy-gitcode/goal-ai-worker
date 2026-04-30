@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "提案カード（AI応答直後のカード）内 ボタン/左ボーダー",
+    "issue": "アクセント系ブルー #79C0FF（左ボーダー）とプライマリボタン #1A5FC8 が至近で併用され、青系が二重に主張して落ち着きが損なわれる。Night Skyの静けさよりも“仕事用ブルー”の緊張感が強くなる",
+    "suggestion": "カード内では色の主役を1つに絞る。案1: 左ボーダーを --border (#484F58) に下げ、プライマリを主役に。案2: ボタンを subtle（--accent-subtle 背景 + アクセント文字）にして、左ボーダー #79C0FF を主役にする",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow",
+    "location": "Todayリスト 1行目（完了タスク）カード背景",
+    "issue": "完了タスクのカード全体が success-subtle (rgba(63,185,80,0.12)) で塗られており、リストの中で緑面積が大きく“静かな夜空”よりも色面のノイズ感が���ている",
+    "suggestion": "完了表現は色面積を縮小。カード背景は中立（透明）に戻し、チェックアイコンと小さなテキスト（例: 完了）だけを success 色にする、または左端3pxバーのみ success にするなど面積を最小化する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "ヘッダー下の区切り線（border-bottom）",
+    "issue": "区切り線が --border-strong 相当 #6E7681 でやや強く、夜空テーマの穏やかさをわずかに損なう",
+    "suggestion": "装飾線は --border (#484F58) を使用し、強調が必要な領域のみ --border-strong を使い分ける",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "ヘッダー行のパンくずテキスト「GROW」",
+    "issue": "英字ラベルの字間トークン（--letter-spacing-label: 1.5px）が適用されていないため、他画面（タブ等）の英字ラベルと質感が揃っていない",
+    "suggestion": "「GROW」に letter-spacing: var(--letter-spacing-label) を適用（大文字は維持）。視覚的一貫性を確保する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "AI理解メモの直下〜リンク群（アバター設定/設定）",
+    "issue": "セクション間スペースが実質0px＋1pxの罫線のみで、DS §4.2 の「セクション間≧32px」を満たしていない。情報の段落感が弱い",
+    "suggestion": "リンク群コンテナの上に margin-top: 32px を追加（またはAI理解メモのmargin-bottomを32px以上に）。線に頼らず“空気”で区切る",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "メッセージスクロール領域（height: calc(100% - 34px - 48px - 60px - 82px)）",
+    "issue": "ヘッダー実高56pxに対し、計算式は48pxを減算しており8pxのズレがある。余白の不整合により下端での見切れやスクロール量に影響する恐れ",
+    "suggestion": "height計算を実寸に合わせて 56px を減算する（calc(100% - 34px - 56px - 60px - 82px)）など、定数の整合を取る",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s02_onboarding",
+    "location": "未選択アバターの円形フレ���ム（#6E7681）",
+    "issue": "未選択状態の枠線が --border-strong (#6E7681) でやや強め。選択リング（アクセント）とのコントラストが過剰で、視線が分散する",
+    "suggestion": "未選択フレームは --border (#484F58) に下げ、選択時だけアクセント枠＋外側グローで主従を明確化する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s00_splash",
+    "location": "ロゴ直下のタグライン「あなたの人生を、あなたらしく」",
+    "issue": "テキスト色 #7A8593 がやや沈み、歓迎感より“距離”を感じるトーンになっている（Night Skyの安心感をもう一段引き出したい箇所）",
+    "suggestion": "タグラインを --text-secondary (#9BA7B4) に上げ、読みやすさと柔らかさを両立させる（見出しとの主従はweightで維持）",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

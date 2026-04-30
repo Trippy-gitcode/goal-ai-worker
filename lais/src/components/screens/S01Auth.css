@@ -1,0 +1,412 @@
+/*
+ * S-01 Auth — design_spec_v1.md §4.2 準拠
+ * - padding-top: 60px (ノッチ下から)
+ * - 左右 --space-lg
+ * - signup/login 兼用。login 時は .s01-agree / .s01-hint 非表示
+ */
+
+.s01 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 60px var(--space-lg) var(--space-xl);
+  padding-top: calc(60px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(var(--space-xl) + env(safe-area-inset-bottom, 0px));
+  min-height: 100svh;
+  background: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+}
+
+.s01-logo {
+  margin: 0;
+  text-align: center;
+  font-size: var(--font-size-xl); /* 28px */
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 3px;
+  line-height: var(--theme-font-line-height-heading);
+  color: var(--theme-color-accent);
+  font-family: var(--theme-font-display);
+}
+
+.s01-title {
+  margin: var(--space-xl) 0 0;
+  text-align: center;
+  font-size: var(--font-size-lg); /* 20px */
+  font-weight: var(--font-weight-regular);
+  line-height: var(--theme-font-line-height-heading);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-display);
+  letter-spacing: var(--theme-font-letter-spacing-tight);
+}
+
+.s01-form {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-xl);
+}
+
+.s01-field {
+  margin-top: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+}
+
+.s01-field:first-child { margin-top: 0; }
+
+.s01-label {
+  font-size: var(--font-size-xs); /* 11px */
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  line-height: var(--line-height-label);
+}
+
+.s01-input {
+  margin-top: var(--space-sm);
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  background: var(--theme-color-bg-elevated);
+  border: 1px solid var(--theme-color-border-strong);
+  border-radius: var(--theme-radius-md);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+  font-size: var(--font-size-sm); /* 14px */
+  letter-spacing: var(--theme-font-letter-spacing-normal);
+  transition: border-color var(--theme-motion-fast) var(--theme-motion-easing);
+  box-shadow: var(--theme-shadow-sm);
+}
+
+.s01-input::placeholder { color: var(--theme-color-text-muted); }
+
+.s01-input:focus {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-color: var(--theme-color-accent);
+}
+
+.s01-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.s01-input-error,
+.s01-input-error:focus { border-color: var(--danger); }
+
+.s01-error {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--danger);
+  line-height: var(--line-height-label);
+}
+
+.s01-hint {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: var(--line-height-label);
+}
+
+/*
+ * S01-7/8 同意ブロック:
+ * - .s01-agree-label: チェックボックスとテキストを包み、WCAG 2.5.5 / 2.5.8 準拠の
+ *   44×44px 以上のタップ領域を padding で確保（視覚サイズ 20×20 は spec §4.2 通り）
+ * - 規約 / プライバシーポリシーのリンクは label 外に分離（label 内リンククリックで
+ *   checkbox がトグルされる副作用を回避）
+ */
+.s01-agree {
+  margin-top: var(--space-lg);
+}
+
+.s01-agree-label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.s01-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: var(--checkbox-size);
+  height: var(--checkbox-size);
+  flex: 0 0 var(--checkbox-size);
+  margin: 0;
+  margin-top: 2px;
+  border: 1.5px solid var(--theme-color-border-strong);
+  border-radius: var(--theme-radius-sm);
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--theme-motion-fast) var(--theme-motion-easing), border-color var(--theme-motion-fast) var(--theme-motion-easing);
+}
+
+.s01-checkbox:checked {
+  background: var(--theme-color-accent);
+  border-color: var(--theme-color-accent);
+}
+
+.s01-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 6px;
+  height: 11px;
+  border: solid var(--theme-color-bg);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.s01-checkbox:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s01-agree-text {
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+/*
+ * R4-G タップターゲット: .s01-link はインラインテキストリンクのため
+ * WCAG 2.2 AA (2.5.8) の inline exception 対象だが、実用上の操作性のため
+ * display: inline-block + vertical padding で高さ方向を 44px 以上に拡張する。
+ * 負マージンで視覚レイアウトは従来どおり維持（隣接要素にクリック領域が食い込むが、
+ * 上下に同一 line 要素しか存在しないため実害なし）。
+ * すべての寸法はスペーシングトークン参照（生 px 値使用禁止）。
+ */
+.s01-agree-links {
+  margin: var(--space-sm) 0 0 calc(var(--checkbox-size) + var(--space-sm));
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-ja-body);
+  color: var(--text-secondary);
+}
+
+.s01-link {
+  display: inline-block;
+  padding: var(--space-md) var(--space-xs);
+  margin: calc(var(--space-md) * -1) calc(var(--space-xs) * -1);
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.s01-link:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+.s01-link-sep {
+  color: var(--text-muted);
+}
+
+/*
+ * S01-9b サーバメッセージ（error / notice 両用）
+ * spec §4.2: role=alert (error) or role=status (notice)
+ *
+ * WCAG 1.4.3 コントラスト実測（lais_contrast_check.mjs）:
+ *   --danger on blended --danger-subtle (over --bg-primary):
+ *     night-sky 5.26:1 / dawn 5.35:1 / harajuku-light 4.77:1 / harajuku-dark 5.30:1
+ *   全テーマで AA (4.5:1) をクリア。
+ */
+.s01-server-message {
+  margin: var(--space-md) 0 0;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+.s01-server-message-error {
+  background: var(--danger-subtle);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+
+.s01-server-message-notice {
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent);
+  color: var(--text-primary);
+}
+
+.s01-cta {
+  margin-top: var(--space-xl);
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--space-md);
+  background: var(--theme-color-accent);
+  color: var(--theme-color-text-inverse);
+  font-family: var(--theme-font-base);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--theme-font-letter-spacing-normal);
+  line-height: 1.25;
+  border: none;
+  border-radius: var(--theme-radius-lg);
+  cursor: pointer;
+  transition: transform var(--theme-motion-fast) var(--theme-motion-easing);
+  box-shadow: var(--theme-shadow-md);
+}
+
+.s01-cta-inactive,
+.s01-cta[aria-disabled="true"] {
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
+  border: 1px solid var(--button-disabled-border);
+  cursor: not-allowed;
+}
+
+.s01-cta:active:not(.s01-cta-inactive):not([aria-disabled="true"]) {
+  transform: scale(0.98);
+}
+
+.s01-cta:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s01-footer-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-md);
+  align-self: center;
+  padding: var(--space-sm) var(--space-md);
+  min-height: 44px;
+  min-width: 44px;
+  background: transparent;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.s01-footer-link[aria-disabled="true"] {
+  color: var(--text-muted);
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.s01-footer-link:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+/*
+ * BUG-RT-SIGNUP-DUPLICATE-UX: 既登録メアド通知 + ログインに切替ボタン
+ * 既存 .s01-server-message-notice の枠組み（accent-subtle background + accent border）を継承し、
+ * その下にインラインボタンを配置する。
+ * タップターゲットは 44x44 確保（WCAG 2.5.5 / R4-G ）。
+ */
+.s01-duplicate-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin: var(--space-md) 0 0;
+}
+
+.s01-duplicate-message {
+  margin-top: 0;
+}
+
+.s01-duplicate-switch {
+  margin-top: var(--space-sm);
+  align-self: flex-start;
+  min-height: 44px;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--accent);
+  color: var(--button-primary-text);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-ja);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--spring-default);
+}
+
+.s01-duplicate-switch:active {
+  transform: scale(0.98);
+}
+
+.s01-duplicate-switch:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/*
+ * prefers-reduced-motion: 前庭障害ユーザー等への配慮 (WCAG 2.3.3 relaxed)
+ * 全 transition / transform を即時化
+ */
+@media (prefers-reduced-motion: reduce) {
+  .s01-input,
+  .s01-checkbox,
+  .s01-cta,
+  .s01-duplicate-switch {
+    transition: none !important;
+  }
+  .s01-cta:active:not(:disabled),
+  .s01-duplicate-switch:active {
+    transform: none !important;
+  }
+}
+
+/*
+ * BUG-RT-SIGNIN-LATENCY-REDUCTION（2026-04-26）:
+ *   signin 押下直後に「即時フィードバック」のオーバーレイを表示。
+ *   旧実装は CTA ラベルが「送信中…」になるだけで視覚変化が乏しく、
+ *   ふとし報告「画面遷移が遅い」の体感悪化要因になっていた。
+ *
+ *   200ms 以内表示要件: opacity 0 → 1 を transition なしで一気に切替。
+ *   prefers-reduced-motion でも動作するよう、transition を省く。
+ */
+.s01-signin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--bg-primary) 80%, transparent);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  pointer-events: auto;
+}
+.s01-signin-overlay-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md, 12px);
+  color: var(--text-primary);
+}
+.s01-signin-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: s01-spin 800ms linear infinite;
+}
+.s01-signin-overlay-text {
+  font-size: var(--font-size-sm, 14px);
+  margin: 0;
+}
+@keyframes s01-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .s01-signin-spinner {
+    animation: none;
+  }
+}

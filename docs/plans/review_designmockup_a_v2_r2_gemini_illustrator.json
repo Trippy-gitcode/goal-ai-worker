@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン",
+    "issue": "非アクティブ状態と思われるボタンの背景色（#1C2128）とテキスト色（#484F58）のコントラスト比が著しく低く、視認性が確保されていない（WCAG AA不適合）。",
+    "suggestion": "非アクティブ状態であっても、テキスト色を#7A8593などにして最低限のコントラスト比（3:1以上）を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s01_signin",
+    "location": "画面下部の「ログイン」リンクテキスト",
+    "issue": "リンクテキストがアクセント色（#79C0FF）のみで表現されており、下線がない。仕様書§2.2の「インラインテキストリンクは必ず text-decoration: underline を併用」に違反している。",
+    "suggestion": "「ログイン」テキストに下線を追加し、色に依存しない情報伝達（WCAG 1.4.1）を遵守する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "12:00「ジムで筋トレ」タスクの左ボーダー",
+    "issue": "左ボーダーにwarning色（#D29922）が使用されている。仕様書§2.1でwarningは「注意/期限接近」と定義されており、通常のタスクへの使用は仕様矛盾であり、ユーザーに不要な焦り（緊張感）を与える。",
+    "suggestion": "期限接近などの明確なステータスがない限り、ニュートラルな色（#484F58）を使用し、静かな情報設計を維持する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "「編集」「削除」ボタン群",
+    "issue": "破壊的操作である「削除」ボタン（赤）が、日常的な操��である「編集」ボタンと全く同じ形状・ウェイトで並列配置されている。視覚的な重みが同じため、誤タップの緊張感をユーザーに与える。",
+    "suggestion": "「削除」ボタンはテキストのみのGhostスタイルにするか、配置位置を離すことで視覚的な重みを下げ、安心感のあるレイアウトにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s14_goal_detail",
+    "location": "タスクリストのチェックマーク",
+    "issue": "完了（緑）、今日（青）、予定（グレー）と多色使いになっており、画面内の色の情報量が過剰。「静かな情報設計」のDNAから逸脱し、完了時の「緑」がもたらす達成感（喜び）が相対的に薄れている。",
+    "suggestion": "未完了タスクのチェックマークはアクセント色で塗りつぶさずグレーの枠線のみに統一し、完了した時だけ色（緑）が点灯するようにして感情訴求を際立たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "入力フィールドと所要時間チップ",
+    "issue": "フォ���カス中の入力フィールドのアウトラインと、選択済みの「単発タスク」「30分」チップがすべて同じ強さの青（#79C0FF）でハイライトされており、現在の操作の焦点（視線）が分散している。",
+    "suggestion": "選択済みのチップは背景の不透明度を下げるか、テキスト色のみのハイライトにするなどして、入力中のフィールドに最も視線が誘導されるよう視覚的階層を整理する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s00_splash",
+    "location": "「はじめる」ボタン",
+    "issue": "ボタンの青（#1A5FC8）の彩度が高く、デジタル感が強い。「夜空のジャーナル」という自然界に根ざした静かなブランドトーンに対して浮いており、洗練さよりもシステム的な緊張感を与えている。",
+    "suggestion": "仕様のトークン定義自体の見直しになるが、背景色をもう少し夜空に馴染む深い青に調整するか、面積を減らすアプローチを検討する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "チャットのメッセージバブ��",
+    "issue": "AIのバブル左ボーダーとユーザーのバブル背景がどちらも同じアクセント色（青系）で作られている。対話の「相手」と「自分」の視覚的な分離が弱く、感情的なメリハリに欠ける。",
+    "suggestion": "ユーザー側のバブル背景を、夜空のトーンに合わせたわずかな紫みやニュートラルなグレーなど、異なる色相・トーンに振ることで対話のリズムを作る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s30_me",
+    "location": "ヒーロー領域のアバター",
+    "issue": "アバターのボーダーにアクセント色（#79C0FF）が使われているが、アバター自体の色（肌色や服の緑）と青が視覚的に衝突しており、洗練された印象を損ねている。",
+    "suggestion": "アバターのボーダーをニュートラルな色（#484F58）にするか、ボーダーをなくしてシャドウで浮き立たせることで、アバターのパーソナリティ（色）を邪魔しないようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  }
+]

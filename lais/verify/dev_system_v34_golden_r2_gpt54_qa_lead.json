@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§2.ζ', §3.4, §4.7.2",
+    "issue": "3層テスト戦略と完了コマンド3区分の対応がまだ破綻しています。§2.ζ'でL1をrealworld 5項目に固定しつつ、§3.4ではL2=cmd-e2e、L3=cmd-unit全体と記述され、従来のL1=スモーク/L2=影響範囲/L3=フルという意味づけとも逆転しています。さらに高リスクのDONE条件はcmd-realworld依存で、L1/L2/L3とcmd-unit/cmd-e2e/cmd-realworldの関係が一対一でなく、レビュー時・実装時にどの層をどのコマンドで満たすのか判定不能です。",
+    "suggestion": "L1/L2/L3はテストスコープ、cmd-unit/cmd-e2e/cmd-realworldは実行媒体として明確に分離してください。例えば『L1スモークはcmd-e2eまたはcmd-realworldのいずれかで実施可、ただし高リスクデプロイ後はcmd-realworld必須』『L2影響範囲はcmd-unit+cmd-e2e』『L3フルはunit/e2e full suite』のように関係表を1箇所でSSOT化し、§4.4.3・§4.2.3・sub_testing・development_rulesを全てその表参照へ統一すべきです。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§2.γ', §2.β', §6.4, §6.10",
+    "issue": "G15 tdd_trace_consistency.sh の設計が実装上成立していません。仕様側抽出は dev_system_spec.md と sub_testing.md から before/after/realworld-proof を拾いますが、実装側として grep 対象にしている canopy_common.sh には realworld-proof.json 参照が存在せず、G17 は別スクリプトです。このままでは仕様に realworld-proof が書かれている限り G15 が恒常的に FAIL するか、逆に G15 の責務が G8/G17 境界を誤って侵食します。",
+    "suggestion": "G15 の対象を『G8の unit/e2e 証跡名の同期』に限定し、realworld-proof.json を抽出対象から除外してください。もし G17 も含めたいなら、実装側入力を canopy_common.sh 単体ではなく realworld_proof_check.sh も含む複数ファイルに変更し、G15 の名称と説明も『証跡ファイル参照整合』へ改める必要があります。現状のままでは全FAILまたは誤検知を招きます。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§2.β', §2.ε', §2.η'",
+    "issue": "高リスク判定に mission_risk_classifier.sh を instructions/session_progress.md 全体へ適用する設計が不正確���す。classifier は本来1ミッションブロックの『対象ファイル』を読む前提なのに、deploy.sh や canopy_common.sh では session_progress.md 全体を渡しています。この場���、キュー内の別高リスクミッションや複数ミッションの対象ファイルが混在し、現在のMISSION_IDと無関係に high/low が誤判定され、READY_FOR_DEPLOY要求やrealworld強制が誤発火します。",
+    "suggestion": "mission_risk_classifier.sh は必ず単一ミッションブロックを入力にするよう仕様を改めてください。deploy.sh/canopy_common.sh では MISSION_ID を引数に取り、session_progress.md から該当ブロックだけ抽出して classifier に渡す専用ヘルパーを新設すべきです。『ファイル全体を渡す』実装例は削除し、MISSION_ID単位の判定をSSOT化してください。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§2.η', §2.ε', §4.7.1",
+    "issue": "STATUS自動化の定義が一貫していません。§2.η'では『ミッション定義記述時に(init)→IN_PROGRESS』『手動書換え禁止』としつつ、実際の deploy.sh は先頭の最初の ### ブロックから MISSION_ID を拾い、canopy_common.sh の check_test_pass も session_progress.md を直接書換えるだけで、キュー上の QUEUED/複数IN_PROGRESS/完了済みの区別がありません。さらに低・中リスクは IN_PROGRESS→DONE 自動、���期状態も IN_PROGRESS とされ、未着手ミッションまで実行中扱いになる構造です。",
+    "suggestion": "STATUS モデルを再整理し、少なくとも QUEUED / IN_PROGRESS / READY_FOR_DEPLOY / DONE / BLOCKED の5状態に戻すか、現行3状態を維持するなら『着手時にのみ QUEUED相当からIN_PROGRESSへ遷移する仕組み』を別途定義してください。deploy.sh の MISSION_ID 解決も『キュー先頭かつ STATUS!=DONE の対象のみ』に限定し、canopy が複数ミッションへ誤書換えしないようブロック抽出仕様を追加すべきです。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "AMBIGUITY",
+    "location": "§2.ζ', §2.β' G17, §7.4",
+    "issue": "L1スモーク5項目に認証を追加した方向性は正しいものの、適用条件が曖昧です。§2.ζ'では『全高リスク系ミッションで5項目必須』『認証ミッション時L1-2必須、決済時L1-4必須』とありますが、外部APIのみ変更した高リスクでは auth も必須なのか、G17 は常に auth.png を要求するのかが食い違っています。これでは認証変更漏れ防止と不要な常時認証操作強制が混在します。",
+    "suggestion": "L1-2 認証/セッション復元を���全高リスクで必須』にするのか、『認証に関与する高リスクで必須、その他は既存セッション確認で代替可』にするのかを明文化してください。G17 の screenshot 要件も auth.png 固定ではなく、auth-or-session.png 等にして判定基準を定義するか、リスク種別別の必須スクリーンショット表を新設してSSOT化すべきです。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§9.6, §6.5, §3.8",
+    "issue": "統合E2E（§9新設相当）に相当するものが deploy.sh の high-risk post-deploy 実行や Hフロー、L1-realworld、G17 に分散しており、用語として定義されていません。Golden R1 で問題化した『統合E2Eの定義不明確』は、deploy後に何をもって統合E2Eと呼ぶのか、L1-realworld と何が違うのかが依然として曖昧です。",
+    "suggestion": "『統合E2E』を独立定義してください。例として『デプロイ済み実環境に対して認証・主要業務フロー・外部API連携を通しで検証する post-deploy テスト群。L1-realworld はその最小必須サブセット、G17 はその証跡ゲート』という関係を §4.2.3 または新節で明文化し、Hフロー・cmd-realworld・G17 との境界を図表で示すと混乱が解消します。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.δ' proposal_log_lint.sh, §4.8.1, §4.8.2",
+    "issue": "proposal_log_lint.sh の滞留日数更新設計が POSIX 前提と衝突しています。R2.1.1 版では awk 内で strftime() を使っていますが、これは POSIX awk で保証されず、macOS の awk 互換条件と矛盾します。Golden R1 でPOSIX徹底を宣言した後に、新しい非互換を再導入しています。",
+    "suggestion": "strftime() を awk で使わず、現在日付はシェル側で TODAY=$(date +%Y-%m-%d) を計算し awk に -v today=\"$TODAY\" で渡してください。R2.1.1 の新規スクリプト群は shellcheck だけでなく macOS /bin/sh + awk 実行前提で書き切る必要があり、非POSIX関数は全面排除すべきです。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§2.β' check_tdd, §2.ξ', §4.14",
+    "issue": "TDD証跡(G8)とSKIP/N/A/WARNルールの整合がまだ弱いです。check_tdd は before/after の failed 値しか見ず、cmd-unit/cmd-e2e が N/A や SKIP の場合に G8 をどう扱うかが未定義です。高��スクではN/A不可とされる一方、低/中リスクで unit/e2e のどちらかが不要な場合に『traceなしでFAIL』になる可能性があります。",
+    "suggestion": "G8 は『該当する完了コマンド区分に対してのみ要求』と明記し、cmd-e2e=N/A のミッションでは before-e2e/after-e2e 不要、cmd-unit 実施時のみ before-unit/after-unit 必須とする条件を追加してください。G8 の入力は完了コマンド状態表と連動させ、canopy_common.sh も mission 定義の cmd 状態を読んで必要証跡だけ検証する形にすると矛盾が減ります。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  }
+]

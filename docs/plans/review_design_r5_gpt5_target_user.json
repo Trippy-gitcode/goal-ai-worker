@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2.4 / design_system.md §2.4 §8.4",
+    "issue": "Overdueタスクの色指定が文書間で不一致。project側は「通常タスクと異なるアクセントカラー（テーマ定義に依存）」と曖昧に書かれている一方、design_system側はdanger系（赤）を再利用し左3pxバーを付けると明確化している。",
+    "suggestion": "project_v1.md §3.2.4をdesign_system.mdに合わせて「Overdueはセマンティックdanger（赤）を使用。行左に3pxバー表示（色以外の手掛かり）」と明記し、文言の不一致を解消する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §7.3 / §4.5・ux_v1.md §9.1",
+    "issue": "オフライン完了のサーバー同期時に不正対策（同名タスク5分以内の再完了無効）へ抵触した場合のクライアント側の整合動作が未定義。UIでは完了チェックを付けられるが、同期で拒否された際に完了状態/表示をどう戻すかのルールがない。",
+    "suggestion": "同期APIを「完了イベントごとにaccepted/rejected理���付き」で返す仕様にし、rejectedの場合は（1）チェックマークを自動解除（2）理由をトースト表示（「最近完了済みのため無効」）（3）同期待ちバッジを消す、を定義。UX側にも巻き戻しのビジュアル（フェード/スライド）を追記する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.1 / §7.1・ux_v1.md §11",
+    "issue": "クイックキャプチャ手段の不足。Habitify/Todoist慣れだとウィジェットや共有メニューから即タスク登録できないと継続率が落ちる。PWA前提でOSウィジェットは難しいが代替の即時入力導線が未定義。",
+    "suggestion": "PWAのWeb Share Targetで他アプリ共有→新規タスク起動を実装し、manifest shortcuts（長押し）に「今日のタスクを追加」「メモからタスク化」を追加。URLスキーム風の`/new-task?text=...&due=today`も用意してブックマークから即起動できるようにする。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2",
+    "issue": "タスクEXPが一律+10で所要時間や難易度に関係しないため、重いタスクより細切れタスクが得に見える。長期的な動機づけで物足りなさ/ゲーミフィケーション飽きを招く懸念。",
+    "suggestion": "所要時間（見積り）や「難易度タグ」で±補正（例: 15分=+8/30分=+10/60分=+12上限±20%）または週替わりの「フォーカスクエスト」（特定カテゴリ達成時ボーナス）で一律感を緩和。日次上限300は維持してインフレを防ぐ。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "project_v1.md §3.2.5 / §4.5・ux_v1.md §9.3",
+    "issue": "各種カウンター/リセットがJST 04:00固定。UIでは「明日 04:00」表記だが、遠征/出張時に体感時刻とズレて混乱しやすい。",
+    "suggestion": "当面はUIに明確に「JST 04:00（日本時間）」と併記し、将来計画（v0.2.0以降）として「ユーザーごとのタイムゾーン設定」へ移行予定であることを設定画面に記載する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.5・§5.3・ux_v1.md §13.3・§16.4",
+    "issue": "iOSではPWAインストールしないとWeb Pushが使えず、通知ONまでの段取��が複雑。Habitify等から乗り換えると「リマインダーが来ない」体験で離脱しやすい。",
+    "suggestion": "通知の代替として（1）メール/カレンダーICSサブスクによるリマインダー配信（任意）を用意（2）オンボーディング完了直後にPWA追加のミニタスクを提示（完了で+EXP）してインストール率を上げる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3.1・ux_v1.md §3.3",
+    "issue": "会話→タスク化で既存タスクとの重複排除ルールが未定義。類似名/同期限の重複登録が発生しやすい。",
+    "suggestion": "タスク登録時にサーバー/ローカルで近傍重複チェック（正規化した名前+期日/開始時刻でファジーマッチ）。疑わしい場合は「既に似たタスクが存在：A（明日）」としてマージ/新規の選択UIを提示する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1-§2.2",
+    "issue": "Premier（月¥4,980）はMVP時点でショップ未実装かつチケットがComing Soon。限定フレーム/優先サポートのみでは価格対価が直感的に弱く、課金判断が揺らぐ。",
+    "suggestion": "MVPではPremierの露出を抑え、Proを主訴求に。Premierは早期アクセス価格（例: 初月半額）または7日無料体験を用意し、価値が可視化されるまでのハードルを下げる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §4.4（z-index）",
+    "issue": "コメントで「トーストが最前面」とあるが、定義値はtooltip=700 > toast=600で整合しない。実装時にツールチップがトーストより上に出てしまう可能性。",
+    "suggestion": "z-indexの優先順位を再定義：toastを最上位（例: 700）、tooltipをその下（例: 650）に修正。コメントと値を一致させる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §5.5",
+    "issue": "グラスモーフィズムは「同時30要素以内」とあるが、実装的に超過を検知する仕組みが未記載。複雑画面でパフォーマンス劣化のリスク。",
+    "suggestion": "glass-surfaceを発行するレイヤに集中管理（1コンテナのみ）し、開発時はDevビルドで要素数をカウントして警告を出す。設定の“モーション/視覚効果を減らす”ON時は強制OFFを既定に。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §6.1",
+    "issue": "マルチAIルーティングはユーザーに透過的とあるが、プラン差で品質が変わる以上「どのモデルで回答されたか」を知りたいユーザーもいる。体感品質のばらつきが“よくわからない”に繋がる懸念。",
+    "suggestion": "設定に「モデルラベルを表示」トグルを追加し、バブル右上に小さく“Claude/GPT/Gemini”を表示可能にする（デフォルトOFF）。品質の納得感を担保。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §5.1・§5.4・ux_v1.md §4.4",
+    "issue": "友達リクエストの有効期限切れ時、送信者への明示的フィードバックがない設計は“放置された感”を生み、ユーザー体験としてストレスになり得る。",
+    "suggestion": "送信者側にも期限切れステータスを表示し、再送ボタンを提示。期限切れ時に軽い通知/バッジを出して「再送しますか？」と促す���",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §5.1・ux_v1.md §4.4",
+    "issue": "シェアリンク/QRによる友達追加は便利だが、公開場でリンクが拡散された場合の濫用対策（レート制限/同時発行上限/IPあたり制限等）が未記載。",
+    "suggestion": "一時トークンの発行・検証にレートリミット、同時有効数の上限、使い捨て（1回使用で失効）を導入。異常検知時はクールダウンを適用する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.4（PROFILE: AI理解メモ）",
+    "issue": "AI理解メモが5セッションごとに上書きで履歴非保持。成長の足跡を振り返れず、自己発見の継続モチベが弱まる恐れ。",
+    "suggestion": "直近3バージョンの履歴を閲覧可能にするか、変更点のみの“差分ハイライト”を提供。ストレージ増は最小限に抑えつつ価値向上。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

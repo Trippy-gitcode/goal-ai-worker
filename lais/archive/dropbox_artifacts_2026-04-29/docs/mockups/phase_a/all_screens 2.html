@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lais Phase A Mockups v1.1 — Night Sky</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a1a2e; display: flex; flex-wrap: wrap; gap: 48px; padding: 48px; justify-content: center; }
+.phone { width: 375px; height: 812px; background: #0D1117; border-radius: 40px; overflow: hidden; position: relative; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; color: #E6EDF3; border: 1px solid #484F58; flex-shrink: 0; }
+.notch { height: 54px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; }
+.notch-inner { width: 126px; height: 34px; background: #0D1117; border-radius: 0 0 20px 20px; }
+.home-bar { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px; background: #E6EDF3; border-radius: 999px; z-index: 999; }
+.label { color: #E6EDF3; font-family: system-ui; font-size: 14px; text-align: center; margin-top: 8px; letter-spacing: 1px; opacity: 0.6; }
+</style>
+</head>
+<body>
+<!-- ===== S-00 SPLASH ===== -->
+<div><div class="phone" id="s00">
+<div class="notch"><div class="notch-inner"></div></div>
+<div style="position:absolute;top:120px;left:50%;transform:translateX(-50%);width:3px;height:3px;background:#79C0FF;border-radius:50%;opacity:.4"></div>
+<div style="position:absolute;top:180px;right:60px;width:2px;height:2px;background:#9BA7B4;border-radius:50%;opacity:.3"></div>
+<div style="position:absolute;top:160px;left:80px;width:2px;height:2px;background:#58A6FF;border-radius:50%;opacity:.25"></div>
+<div style="position:absolute;top:240px;right:90px;width:1.5px;height:1.5px;background:#E6EDF3;border-radius:50%;opacity:.2"></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:calc(100% - 54px);padding:0 24px;">
+<div style="text-align:center;margin-bottom:120px;">
+<div style="font-size:48px;font-weight:200;letter-spacing:-1.5px;margin-bottom:12px">Lais</div>
+<div style="font-size:14px;color:#7A8593">あなたの人生を、あなたらしく</div>
+<!-- EN: Live your life, your way -->
+</div>
+<div style="position:absolute;bottom:140px;left:24px;right:24px;display:flex;flex-direction:column;gap:12px;">
+<div style="background:#79C0FF;color:#0D1117;border-radius:12px;height:52px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600">はじめる<!-- EN: Get started --></div>
+<div style="border:1px solid #484F58;border-radius:12px;height:52px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#9BA7B4">ログイン<!-- EN: Log in --></div>
+</div>
+</div>
+<div class="home-bar"></div>
+</div><div class="label">S-00 Splash</div></div>
+
+<!-- ===== S-01 SIGN-IN ===== -->
+<div><div class="phone" id="s01">
+<div class="notch"><div class="notch-inner"></div></div>
+<div style="padding:0 24px;display:flex;flex-direction:column;height:calc(100% - 54px - 30px)">
+<div style="padding-top:60px;margin-bottom:48px">
+<div style="font-size:36px;font-weight:200;letter-spacing:-1px;margin-bottom:8px">Lais</div>
+<div style="font-size:14px;color:#7A8593">アカウントを作成<!-- EN: Create account --></div>
+</div>
+<div style="flex:1">
+<div style="margin-bottom:24px">
+<label style="font-size:13px;color:#9BA7B4;display:block;margin-bottom:8px">メールアドレス<!-- EN: Email address --></label>
+<div style="background:#161B22;border:1px solid #484F58;border-radius:8px;height:48px;padding:0 16px;display:flex;align-items:center;color:#7A8593;font-size:15px">you@example.com</div>
+</div>
+<div style="margin-bottom:24px">
+<label style="font-size:13px;color:#9BA7B4;display:block;margin-bottom:8px">パスワード<!-- EN: Password --></label>
+<div style="background:#161B22;border:1px solid #484F58;border-radius:8px;height:48px;padding:0 16px;display:flex;align-items:center;justify-content:space-between">
+<span style="color:#7A8593;font-size:15px">8文字以上<!-- EN: 8+ characters --></span>
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10c0 0 3.5-5 7-5s7 5 7 5-3.5 5-7 5-7-5-7-5z" stroke="#7A8593" stroke-width="1.5" fill="none"/><circle cx="10" cy="10" r="2.5" stroke="#7A8593" stroke-width="1.5" fill="none"/></svg>
+</div>
+</div>
+<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:32px">
+<div style="width:20px;height:20px;border:1.5px solid #484F58;border-radius:4px;flex-shrink:0;margin-top:1px"></div>
+<span style="font-size:13px;color:#9BA7B4;line-height:1.5"><span style="color:#79C0FF;text-decoration:underline">利用規約</span>と<span style="color:#79C0FF;text-decoration:underline">プライバシーポリシー</span>に同意します</span>
+</div>
+<div style="background:#1C2128;border-radius:12px;height:52px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#484F58">サインアップ<!-- EN: Sign up --></div>
+<div style="text-align:center;margin-top:24px;font-size:14px;color:#7A8593">すでにアカウントをお持ちですか？ <span style="color:#79C0FF">ログイン<!-- EN: Log in --></span></div>
+</div>
+</div>
+<div class="home-bar"></div>
+</div><div class="label">S-01 Sign-in</div></div>
+
+<!-- ===== S-02 ONBOARDING STEP 2 ===== -->
+<div><div class="phone" id="s02">
+<div class="notch"><div class="notch-inner"></div></div>
+<div style="padding:0 24px">
+<div style="display:flex;gap:4px;margin-top:16px;margin-bottom:48px">
+<div style="flex:1;height:3px;background:#79C0FF;border-radius:999px"></div>
+<div style="flex:1;height:3px;background:#79C0FF;border-radius:999px"></div>
+<div style="flex:1;height:3px;background:#1C2128;border-radius:999px"></div>
+<div style="flex:1;height:3px;background:#1C2128;border-radius:999px"></div>
+<div style="flex:1;height:3px;background:#1C2128;border-radius:999px"></div>
+</div>
+<div style="font-size:24px;font-weight:200;letter-spacing:-.5px;margin-bottom:8px">最初のパートナーを<br>選びましょう<!-- EN: Choose your<br>first partner --></div>
+<div style="font-size:14px;color:#7A8593;margin-bottom:48px">一緒に成長するアバターです<!-- EN: Your avatar grows with you --></div>
+<div style="display:flex;justify-content:center;gap:20px;margin-bottom:64px">
+<div style="text-align:center"><div style="width:100px;height:100px;border-radius:50%;background:#161B22;border:1px solid #484F58;display:flex;align-items:center;justify-content:center;margin-bottom:8px"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="16" r="9" fill="#C99775"/><path d="M8 42c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="#58A6FF"/><circle cx="20" cy="15" r="1.5" fill="#1C2128"/><circle cx="28" cy="15" r="1.5" fill="#1C2128"/><path d="M21 20c0 0 1.5 2 3 2s3-2 3-2" stroke="#1C2128" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg></div><span style="font-size:12px;color:#7A8593">A</span></div>
+<div style="text-align:center"><div style="width:100px;height:100px;border-radius:50%;background:#161B22;border:2px solid #79C0FF;box-shadow:0 0 0 4px rgba(121,192,255,.14);display:flex;align-items:center;justify-content:center;margin-bottom:8px"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="16" r="9" fill="#E5C3A6"/><path d="M8 42c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="#3FB950"/><circle cx="20" cy="15" r="1.5" fill="#1C2128"/><circle cx="28" cy="15" r="1.5" fill="#1C2128"/><path d="M21 20c0 0 1.5 2 3 2s3-2 3-2" stroke="#1C2128" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg></div><span style="font-size:12px;color:#79C0FF">B</span></div>
+<div style="text-align:center"><div style="width:100px;height:100px;border-radius:50%;background:#161B22;border:1px solid #484F58;display:flex;align-items:center;justify-content:center;margin-bottom:8px"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="16" r="9" fill="#F4DFCD"/><path d="M8 42c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="#D29922"/><circle cx="20" cy="15" r="1.5" fill="#1C2128"/><circle cx="28" cy="15" r="1.5" fill="#1C2128"/><path d="M21 20c0 0 1.5 2 3 2s3-2 3-2" stroke="#1C2128" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg></div><span style="font-size:12px;color:#7A8593">C</span></div>
+</div>
+<div style="position:absolute;bottom:100px;left:24px;right:24px">
+<div style="background:#79C0FF;color:#0D1117;border-radius:12px;height:52px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600">次へ<!-- EN: Next --></div>
+<div style="text-align:center;margin-top:16px;font-size:14px;color:#7A8593">← 戻る<!-- EN: ← Back --></div>
+</div>
+</div>
+<div class="home-bar"></div>
+</div><div class="label">S-02 Onboarding Step 2</div></div>
+
+<!-- ===== S-10 GROW (v1.1: ⭕button+completed task compressed+overdue) ===== -->
+<div><div class="phone" id="s10">
+<div class="notch"><div class="notch-inner"></div></div>
+<div style="padding:0 24px;overflow-y:auto;height:calc(100% - 54px - 82px)">
+<!-- Hero -->
+<div style="text-align:center;padding:24px 0 20px">
+<div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#1C2128,#161B22);border:2px solid #79C0FF;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="12" r="7" fill="#E5C3A6"/><path d="M6 32c0-6.627 5.373-12 12-12s12 5.373 12 12" fill="#3FB950"/></svg></div>
+<div style="display:flex;align-items:baseline;justify-content:center;gap:8px;margin-bottom:4px">
+<span style="font-size:36px;font-weight:200;letter-spacing:-1px">12</span>
+<span style="font-size:14px;color:#9BA7B4;letter-spacing:1.5px;text-transform:uppercase">Explorer</span>
+</div>
+<div style="position:relative;height:6px;background:#1C2128;border-radius:999px;margin:0 48px"><div style="position:absolute;top:0;left:0;height:100%;width:62%;background:#79C0FF;border-radius:999px"></div></div>
+<div style="display:flex;justify-content:space-between;margin:6px 48px 0;font-size:11px;color:#7A8593"><span>1,240</span><span>2,000</span></div>
+</div>
+<!-- Today section -->
+<div style="margin-top:8px">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+<span style="font-size:14px;color:#7A8593;letter-spacing:1.5px;text-transform:uppercase">Today<!-- same in EN --></span>
+<span style="font-size:13px;color:#9BA7B4">4月12日<!-- EN: Apr 12 --></span>
+</div>
+<div style="position:relative;padding-left:28px">
+<div style="position:absolute;left:8px;top:0;bottom:0;width:2px;background:#484F58"></div>
+<!-- OVERDUE task -->
+<div style="position:relative;margin-bottom:16px;border-left:3px solid #F85149;margin-left:-31px;padding-left:31px">
+<div style="position:absolute;left:5px;top:4px;width:12px;height:12px;border-radius:50%;background:#F85149;display:flex;align-items:center;justify-content:center"><span style="font-size:8px;color:#0D1117;font-weight:700">!</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><div style="font-size:15px;color:#F85149">メール返信</div><div style="font-size:12px;color:#7A8593">昨日 · 15分<!-- EN: Yesterday · 15m --></div></div>
+<span style="font-size:12px;color:#F85149;white-space:nowrap">明日に延期<!-- EN: Defer --></span>
+</div>
+</div>
+<!-- COMPLETED task (compressed height) -->
+<div style="position:relative;margin-bottom:10px;padding:4px 0">
+<div style="position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;background:#3FB950;display:flex;align-items:center;justify-content:center"><svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="#0D1117" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div style="font-size:13px;color:#484F58;text-decoration:line-through">朝のストレッチ · 10分<!-- EN: Morning stretch · 10m --></div>
+</div>
+<!-- NOW task -->
+<div style="position:relative;margin-bottom:24px">
+<div style="position:absolute;left:-24px;top:6px;width:12px;height:12px;border-radius:50%;background:#79C0FF;box-shadow:0 0 0 4px rgba(121,192,255,.14)"></div>
+<div style="display:flex;justify-content:space-between;align-items:flex-start">
+<div><div style="font-size:16px;margin-bottom:4px">企画書を仕上げる<!-- EN: Finish proposal --></div><div style="font-size:13px;color:#7A8593">09:00 · 45分<!-- EN: 09:00 · 45m --></div></div>
+<div style="width:28px;height:28px;border-radius:50%;border:2px solid #79C0FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px"><span style="font-size:10px;color:#79C0FF">⭕</span></div>
+</div>
+</div>
+<!-- NEXT tasks with ⭕ -->
+<div style="position:relative;margin-bottom:24px">
+<div style="position:absolute;left:-24px;top:6px;width:12px;height:12px;border-radius:50%;border:2px solid #484F58;background:#0D1117"></div>
+<div style="display:flex;justify-content:space-between;align-items:flex-start">
+<div><div style="font-size:16px;color:#9BA7B4;margin-bottom:4px">ジムで筋トレ<!-- EN: Gym workout --></div><div style="font-size:13px;color:#7A8593">12:00 · 60分</div></div>
+<div style="width:28px;height:28px;border-radius:50%;border:2px solid #484F58;flex-shrink:0;margin-top:2px"></div>
+</div>
+</div>
+<div style="position:relative;margin-bottom:24px">
+<div style="position:absolute;left:-24px;top:6px;width:12px;height:12px;border-radius:50%;border:2px solid #484F58;background:#0D1117"></div>
+<div style="display:flex;justify-content:space-between;align-items:flex-start">
+<div><div style="font-size:16px;color:#9BA7B4;margin-bottom:4px">英語のリスニング<!-- EN: English listening --></div><div style="font-size:13px;color:#7A8593">18:00 · 30分</div></div>
+<div style="width:28px;height:28px;border-radius:50%;border:2px solid #484F58;flex-shrink:0;margin-top:2px"></div>
+</div>
+</div>
+<!-- Add task -->
+<div style="position:relative;margin-bottom:8px">
+<div style="position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;border:1.5px dashed #484F58;background:#0D1117"></div>
+<div style="font-size:14px;color:#79C0FF">+ タスクを追加<!-- EN: + Add task --></div>
+</div>
+</div></div>
+<!-- Goals section -->
+<div style="margin-top:32px;padding-bottom:16px">
+<div style="font-size:14px;color:#7A8593;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px">Goals<!-- same in EN --></div>
+<div style="margin-bottom:16px;padding:16px 0;border-top:1px solid rgba(72,79,88,.4)">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:15px">副業で月10万円<!-- EN: Side hustle ¥100K/mo --></span><span style="font-size:13px;color:#9BA7B4">60%</span></div>
+<div style="height:4px;background:#1C2128;border-radius:999px"><div style="height:100%;width:60%;background:#79C0FF;border-radius:999px"></div></div>
+</div>
+<div style="margin-bottom:16px;padding:16px 0;border-top:1px solid rgba(72,79,88,.4)">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:15px">TOEIC 800点<!-- EN: TOEIC 800 --></span><span style="font-size:13px;color:#9BA7B4">40%</span></div>
+<div style="height:4px;background:#1C2128;border-radius:999px"><div style="height:100%;width:40%;background:#79C0FF;border-radius:999px"></div></div>
+</div>
+<div style="font-size:14px;color:#79C0FF;padding-left:28px">+ ゴールを作成<!-- EN: + Create goal --></div>
+</div></div>
+<!-- Bottom tab bar -->
+<div style="position:absolute;bottom:0;left:0;right:0;height:82px;background:#161B22;border-top:1px solid #484F58;display:flex;align-items:flex-start;justify-content:space-around;padding-top:10px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="background:rgba(121,192,255,.14);border-radius:999px;padding:6px 16px;display:flex;align-items:center;gap:6px"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3c0 0-3 2-3 5s1.5 4 3 7c1.5-3 3-4 3-7s-3-5-3-5z" fill="#79C0FF"/><path d="M8 16c0 0 .5 1 2 1s2-1 2-1" stroke="#79C0FF" stroke-width="1.5" stroke-linecap="round"/></svg><span style="font-size:12px;color:#79C0FF;font-weight:600">GROW</span></div></div>
+<div style="padding-top:6px"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 14l-1 4 3.5-1.5L4 14z" fill="#9BA7B4"/><rect x="3" y="4" width="14" height="10" rx="4" stroke="#9BA7B4" stroke-width="1.5" fill="none"/><circle cx="7.5" cy="9" r="1" fill="#9BA7B4"/><circle cx="10" cy="9" r="1" fill="#9BA7B4"/><circle cx="12.5" cy="9" r="1" fill="#9BA7B4"/></svg></div>
+<div style="padding-top:6px"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="#9BA7B4" stroke-width="1.5" fill="none"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#9BA7B4" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></div>
+</div>
+<div class="home-bar"></div>
+</div><div class="label">S-10 GROW</div></div>
+
+<!-- ===== S-20 TALK (v1.1: 📎icon fix, 📝header fix) ===== -->
+<div><div class="phone" id="s20">
+<div class="notch"><div class="notch-inner"></div></div>
+<div style="height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid rgba(72,79,88,.4)">
+<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><line x1="4" y1="6" x2="18" y2="6" stroke="#9BA7B4" stroke-width="1.5" stroke-linecap="round"/><line x1="4" y1="11" x2="18" y2="11" stroke="#9BA7B4" stroke-width="1.5" stroke-linecap="round"/><line x1="4" y1="16" x2="14" y2="16" stroke="#9BA7B4" stroke-width="1.5" stroke-linecap="round"/></svg>
+<span style="font-size:14px;letter-spacing:1.5px;color:#7A8593;text-transform:uppercase">Talk</span>
+<!-- v1.1: 📝 new chat icon (was +) -->
+<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M14 4l4 4-10 10H4v-4L14 4z" stroke="#9BA7B4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+</div>
+<div style="padding:16px 24px;overflow-y:auto;height:calc(100% - 54px - 48px - 60px - 82px)">
+<div style="display:flex;gap:10px;margin-bottom:20px"><div style="width:28px;height:28px;border-radius:50%;background:#161B22;border:1px solid #484F58;flex-shrink:0;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="3" fill="#79C0FF"/><path d="M2 13c0-2.761 2.239-5 5-5s5 2.239 5 5" fill="#79C0FF"/></svg></div><div style="background:#161B22;border-radius:4px 12px 12px 12px;padding:12px 16px;max-width:260px"><div style="font-size:15px;line-height:1.5">こんにちは！今日はどんな一日にしたいですか？<!-- EN: Hi! What kind of day do you want? --></div><div style="font-size:11px;color:#7A8593;margin-top:6px">14:02</div></div></div>
+<div style="display:flex;justify-content:flex-end;margin-bottom:20px"><div style="background:rgba(121,192,255,.14);border-radius:12px 4px 12px 12px;padding:12px 16px;max-width:260px"><div style="font-size:15px;line-height:1.5">企画書を今日中に仕上げたい。でも午後からジムも行きたい</div><div style="font-size:11px;color:#7A8593;margin-top:6px;text-align:right">14:03</div></div></div>
+<div style="display:flex;gap:10px;margin-bottom:20px"><div style="width:28px;height:28px;border-radius:50%;background:#161B22;border:1px solid #484F58;flex-shrink:0;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="3" fill="#79C0FF"/><path d="M2 13c0-2.761 2.239-5 5-5s5 2.239 5 5" fill="#79C0FF"/></svg></div><div style="background:#161B22;border-radius:4px 12px 12px 12px;padding:12px 16px;max-width:260px"><div style="font-size:15px;line-height:1.5">午前に企画書に集中して、午後にジムはどうですか？</div><div style="font-size:11px;color:#7A8593;margin-top:6px">14:03</div></div></div>
+<!-- Task suggestion card -->
+<div style="margin-left:38px;margin-bottom:20px;background:#161B22;border-left:3px solid #79C0FF;border-radius:0 8px 8px 0;padding:14px 16px;max-width:260px">
+<div style="font-size:12px;color:#79C0FF;margin-bottom:8px;letter-spacing:.5px">タスクにしますか？<!-- EN: Add as task? --></div>
+<div style="font-size:14px;margin-bottom:4px">企画書を仕上げる</div>
+<div style="font-size:12px;color:#7A8593;margin-bottom:12px">09:00 · 45分</div>
+<div style="display:flex;gap:8px"><div style="background:rgba(121,192,255,.14);color:#79C0FF;font-size:13px;padding:6px 14px;border-radius:999px">登録する<!-- EN: Add --></div><div style="color:#7A8593;font-size:13px;padding:6px 14px;border-radius:999px;border:1px solid #484F58">編集して登録<!-- EN: Edit & add --></div></div>
+</div>
+</div>
+<!-- v1.1: 📎 clip icon (was +) -->
+<div style="position:absolute;bottom:82px;left:0;right:0;height:60px;background:#0D1117;border-top:1px solid rgba(72,79,88,.4);display:flex;align-items:center;padding:0 16px;gap:12px">
+<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M19 10.5l-7.5 7.5a4.243 4.243 0 0 1-6-6l7.5-7.5a2.828 2.828 0 0 1 4 4l-7.5 7.5a1.414 1.414 0 0 1-2-2l7-7" stroke="#7A8593" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+<div style="flex:1;background:#161B22;border:1px solid #484F58;border-radius:999px;height:40px;padding:0 16px;display:flex;align-items:center;color:#7A8593;font-size:14px">メッセージを入力...<!-- EN: Type a message... --></div>
+<div style="width:36px;height:36px;background:#1C2128;border-radius:50%;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8l6-5v10l-6-5z" fill="#484F58" transform="rotate(180 8 8)"/></svg></div>
+</div>
+<div style="position:absolute;bottom:0;left:0;right:0;height:82px;background:#161B22;border-top:1px solid #484F58;display:flex;align-items:flex-start;justify-content:space-around;padding-top:10px">
+<div style="padding-top:6px"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3c0 0-3 2-3 5s1.5 4 3 7c1.5-3 3-4 3-7s-3-5-3-5z" stroke="#9BA7B4" stroke-width="1.5" fill="none"/><path d="M8 16c0 0 .5 1 2 1s2-1 2-1" stroke="#9BA7B4" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+<div><div style="background:rgba(121,192,255,.14);border-radius:999px;padding:6px 16px;display:flex;align-items:center;gap:6px"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 14l-1 4 3.5-1.5L4 14z" fill="#79C0FF"/><rect x="3" y="4" width="14" height="10" rx="4" stroke="#79C0FF" stroke-width="1.5" fill="none"/><circle cx="7.5" cy="9" r="1" fill="#79C0FF"/><circle cx="10" cy="9" r="1" fill="#79C0FF"/><circle cx="12.5" cy="9" r="1" fill="#79C0FF"/></svg><span style="font-size:12px;color:#79C0FF;font-weight:600">TALK</span></div></div>
+<div style="padding-top:6px"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="#9BA7B4" stroke-width="1.5" fill="none"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#9BA7B4" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></div>
+</div>
+<div class="home-bar"></div>
+</div><div class="label">S-20 TALK</div></div>
+
+<!-- ===== S-30 ME PROFILE (v1.1: gear icon fix) ===== -->
+<div><div class="phone" id="s30">
+<div class="notch"><div class="notch-inner"></div></div>
+<div style="padding:0 24px;overflow-y:auto;height:calc(100% - 54px - 82px)">
+<div style="text-align:center;padding:24px 0 20px">
+<div style="width:72px;height:72px;border-radius:50%;background:#161B22;border:2px solid #79C0FF;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="12" r="7" fill="#E5C3A6"/><path d="M6 32c0-6.627 5.373-12 12-12s12 5.373 12 12" fill="#3FB950"/></svg></div>
+<div style="display:flex;align-items:baseline;justify-content:center;gap:8px;margin-bottom:4px"><span style="font-size:36px;font-weight:200;letter-spacing:-1px">12</span><span style="font-size:14px;color:#9BA7B4;letter-spacing:1.5px;text-transform:uppercase">Explorer</span></div>
+<div style="position:relative;height:6px;background:#1C2128;border-radius:999px;margin:0 48px"><div style="position:absolute;top:0;left:0;height:100%;width:62%;background:#79C0FF;border-radius:999px"></div></div>
+<div style="display:flex;justify-content:space-between;margin:6px 48px 0;font-size:11px;color:#7A8593"><span>1,240</span><span>2,000</span></div>
+</div>
+<div style="display:flex;border-bottom:1px solid rgba(72,79,88,.4);margin-bottom:24px">
+<div style="flex:1;text-align:center;padding:12px 0;font-size:13px;color:#79C0FF;font-weight:600;position:relative">PROFILE<div style="position:absolute;bottom:-1px;left:20%;right:20%;height:2px;background:#79C0FF;border-radius:999px"></div></div>
+<div style="flex:1;text-align:center;padding:12px 0;font-size:13px;color:#7A8593">DISCOVER</div>
+<div style="flex:1;text-align:center;padding:12px 0;font-size:13px;color:#7A8593">FRIENDS</div>
+<div style="flex:1;text-align:center;padding:12px 0;font-size:13px;color:#7A8593">SHOP</div>
+</div>
+<div style="margin-bottom:24px">
+<div style="font-size:12px;color:#7A8593;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px">基本情報<!-- EN: Basic info --></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid rgba(72,79,88,.3)"><span style="font-size:14px;color:#9BA7B4">名前<!-- EN: Name --></span><span style="font-size:15px">ふとし</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid rgba(72,79,88,.3)"><span style="font-size:14px;color:#9BA7B4">年齢<!-- EN: Age --></span><span style="font-size:15px">28</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid rgba(72,79,88,.3)"><span style="font-size:14px;color:#9BA7B4">職業<!-- EN: Occupation --></span><span style="font-size:15px">エンジニア<!-- EN: Engineer --></span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid rgba(72,79,88,.3)"><span style="font-size:14px;color:#9BA7B4">趣味<!-- EN: Hobbies --></span><span style="font-size:15px;color:#7A8593">タップして入力<!-- EN: Tap to enter --></span></div>
+</div>
+<div style="margin-bottom:24px"><div style="font-size:12px;color:#7A8593;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px">AI理解メモ<!-- EN: AI understanding --></div>
+<div style="background:#161B22;border-radius:12px;padding:16px;border:1px solid rgba(72,79,88,.4)"><div style="font-size:14px;line-height:1.6;color:#9BA7B4">目標達成に対して計画的に取り組む傾向があります。午前中に集中力が高く、午後はアクティブな活動を好みます。</div><div style="font-size:11px;color:#7A8593;margin-top:10px">最終更新: 2026-04-12</div></div></div>
+<div style="margin-bottom:24px"><div style="font-size:12px;color:#7A8593;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px">性格タイプ<!-- EN: Personality --></div>
+<div style="background:#161B22;border-radius:12px;padding:16px;border:1px solid rgba(72,79,88,.4);display:flex;align-items:center;gap:16px"><span style="font-size:28px;font-weight:200;letter-spacing:2px;color:#79C0FF">ENFP</span><span style="font-size:13px;color:#9BA7B4;line-height:1.4">広報運動家タイプ<!-- EN: Campaigner --><br>創造的で社交的<!-- EN: Creative & social --></span></div></div>
+<!-- v1.1: gear icon for settings -->
+<div style="padding-bottom:24px">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-top:1px solid rgba(72,79,88,.3)"><div style="display:flex;align-items:center;gap:12px"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" stroke="#9BA7B4" stroke-width="1.2" fill="none"/><path d="M9 1v2M9 15v2M1 9h2M15 9h2M3.3 3.3l1.4 1.4M13.3 13.3l1.4 1.4M3.3 14.7l1.4-1.4M13.3 4.7l1.4-1.4" stroke="#9BA7B4" stroke-width="1.2" stroke-linecap="round"/></svg><span style="font-size:15px;color:#9BA7B4">設定<!-- EN: Settings --></span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="#7A8593" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-top:1px solid rgba(72,79,88,.3)"><div style="display:flex;align-items:center;gap:12px"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="7" r="3" stroke="#9BA7B4" stroke-width="1.2" fill="none"/><path d="M4 15c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="#9BA7B4" stroke-width="1.2" fill="none"/></svg><span style="font-size:15px;color:#9BA7B4">アバター設定<!-- EN: Avatar settings --></span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="#7A8593" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+</div></div>
+<div style="position:absolute;bottom:0;left:0;right:0;height:82px;background:#161B22;border-top:1px solid #484F58;display:flex;align-items:flex-start;justify-content:space-around;padding-top:10px">
+<div style="padding-top:6px"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3c0 0-3 2-3 5s1.5 4 3 7c1.5-3 3-4 3-7s-3-5-3-5z" stroke="#9BA7B4" stroke-width="1.5" fill="none"/><path d="M8 16c0 0 .5 1 2 1s2-1 2-1" stroke="#9BA7B4" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+<div style="padding-top:6px"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 14l-1 4 3.5-1.5L4 14z" fill="#9BA7B4"/><rect x="3" y="4" width="14" height="10" rx="4" stroke="#9BA7B4" stroke-width="1.5" fill="none"/><circle cx="7.5" cy="9" r="1" fill="#9BA7B4"/><circle cx="10" cy="9" r="1" fill="#9BA7B4"/><circle cx="12.5" cy="9" r="1" fill="#9BA7B4"/></svg></div>
+<div><div style="background:rgba(121,192,255,.14);border-radius:999px;padding:6px 16px;display:flex;align-items:center;gap:6px"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" fill="#79C0FF"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6" fill="#79C0FF"/></svg><span style="font-size:12px;color:#79C0FF;font-weight:600">ME</span></div></div>
+</div>
+<div class="home-bar"></div>
+</div><div class="label">S-30 ME Profile</div></div>
+
+<!-- ===== S-12 TASK ADD (v1.1: all duration chips) ===== -->
+<div><div class="phone" id="s12">
+<div class="notch"><div class="notch-inner"></div></div>
+<div style="height:200px;padding:0 24px;opacity:.3"></div>
+<div style="position:absolute;bottom:0;left:0;right:0;top:200px;background:rgba(0,0,0,.6)"></div>
+<div style="position:absolute;bottom:0;left:0;right:0;background:#161B22;border-radius:12px 12px 0 0;padding:0 24px 30px">
+<div style="display:flex;justify-content:center;padding:12px 0"><div style="width:40px;height:4px;background:#484F58;border-radius:999px"></div></div>
+<div style="font-size:18px;margin-bottom:24px">タスクを追加<!-- EN: Add task --></div>
+<div style="display:flex;gap:8px;margin-bottom:20px">
+<div style="background:rgba(121,192,255,.14);color:#79C0FF;font-size:13px;padding:8px 16px;border-radius:999px;font-weight:600">単発タスク<!-- EN: One-time --></div>
+<div style="color:#7A8593;font-size:13px;padding:8px 16px;border-radius:999px;border:1px solid #484F58">習慣<!-- EN: Habit --></div>
+</div>
+<div style="margin-bottom:16px"><div style="background:#0D1117;border:1px solid #79C0FF;border-radius:8px;height:48px;padding:0 16px;display:flex;align-items:center;font-size:15px;outline:3px solid rgba(121,192,255,.2);outline-offset:2px">買い物リストを作る<span style="color:#79C0FF;margin-left:1px">|</span></div></div>
+<div style="display:flex;gap:12px;margin-bottom:16px">
+<div style="flex:1"><div style="font-size:12px;color:#7A8593;margin-bottom:6px">開始時刻<!-- EN: Start --></div><div style="background:#0D1117;border:1px solid #484F58;border-radius:8px;height:44px;padding:0 12px;display:flex;align-items:center;font-size:14px;color:#9BA7B4">10:00</div></div>
+<div style="flex:1"><div style="font-size:12px;color:#7A8593;margin-bottom:6px">予定日<!-- EN: Date --></div><div style="background:#0D1117;border:1px solid #484F58;border-radius:8px;height:44px;padding:0 12px;display:flex;align-items:center;font-size:14px">今日<!-- EN: Today --></div></div>
+</div>
+<!-- v1.1: all 8 duration chips per spec -->
+<div style="margin-bottom:16px"><div style="font-size:12px;color:#7A8593;margin-bottom:8px">所要時間<!-- EN: Duration --></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<div style="color:#7A8593;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #484F58">5分</div>
+<div style="color:#7A8593;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #484F58">10分</div>
+<div style="color:#7A8593;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #484F58">15分</div>
+<div style="background:rgba(121,192,255,.14);color:#79C0FF;font-size:12px;padding:6px 10px;border-radius:999px;font-weight:600">30分</div>
+<div style="color:#7A8593;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #484F58">45分</div>
+<div style="color:#7A8593;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #484F58">60分</div>
+<div style="color:#7A8593;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #484F58">90分</div>
+<div style="color:#7A8593;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #484F58">120分</div>
+</div></div>
+<div style="margin-bottom:16px"><div style="font-size:12px;color:#7A8593;margin-bottom:6px">ゴール紐付け<!-- EN: Link to goal --></div><div style="background:#0D1117;border:1px solid #484F58;border-radius:8px;height:44px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;font-size:14px;color:#7A8593"><span>なし<!-- EN: None --></span><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 5.5l3 3 3-3" stroke="#7A8593" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+<div style="margin-bottom:20px"><div style="background:#0D1117;border:1px solid #484F58;border-radius:8px;height:44px;padding:0 16px;display:flex;align-items:center;font-size:14px;color:#7A8593">メモを追加<!-- EN: Add note --></div></div>
+<div style="background:#79C0FF;color:#0D1117;border-radius:12px;height:52px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600">作成<!-- EN: Create --></div>
+</div>
+<div class="home-bar"></div>
+</div><div class="label">S-12 Task add</div></div>
+
+<!-- ===== S-13 TASK DETAIL ===== -->
+<div><div class="phone" id="s13">
+<div class="notch"><div class="notch-inner"></div></div>
+<div style="height:280px;opacity:.3"></div>
+<div style="position:absolute;bottom:0;left:0;right:0;top:280px;background:rgba(0,0,0,.6)"></div>
+<div style="position:absolute;bottom:0;left:0;right:0;background:#161B22;border-radius:12px 12px 0 0;padding:0 24px 30px">
+<div style="display:flex;justify-content:center;padding:12px 0"><div style="width:40px;height:4px;background:#484F58;border-radius:999px"></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+<div style="font-size:20px;letter-spacing:-.3px">企画書を仕上げる</div>
+<div style="width:28px;height:28px;border-radius:50%;border:2px solid #3FB950;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#3FB950" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+</div>
+<div style="font-size:13px;color:#3FB950;margin-bottom:20px">完了済み<!-- EN: Completed --></div>
+<div style="display:flex;gap:24px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(72,79,88,.3)">
+<div><div style="font-size:11px;color:#7A8593;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase">時刻<!-- EN: Time --></div><div style="font-size:15px">09:00</div></div>
+<div><div style="font-size:11px;color:#7A8593;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase">所要時間<!-- EN: Duration --></div><div style="font-size:15px">45分<!-- EN: 45m --></div></div>
+<div><div style="font-size:11px;color:#7A8593;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase">ゴール<!-- EN: Goal --></div><div style="display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:#58A6FF"></div><span style="font-size:15px">副業<!-- EN: Side hustle --></span></div></div>
+</div>
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(72,79,88,.3)"><div style="font-size:11px;color:#7A8593;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase">メモ<!-- EN: Note --></div><div style="font-size:14px;color:#9BA7B4;line-height:1.6">クライアントへの提案内容をまとめる</div></div>
+<div style="display:flex;gap:8px">
+<div style="flex:1;border:1px solid #484F58;border-radius:8px;height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#9BA7B4">編集<!-- EN: Edit --></div>
+<div style="flex:1;border:1px solid rgba(248,81,73,.3);border-radius:8px;height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#F85149">削除<!-- EN: Delete --></div>
+</div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<div style="flex:1;background:rgba(121,192,255,.14);border-radius:8px;height:44px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#79C0FF">進め方を聞く<!-- EN: How to proceed --></div>
+<div style="flex:1;background:rgba(121,192,255,.14);border-radius:8px;height:44px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#79C0FF">詰まりを相談<!-- EN: Get unstuck --></div>
+</div>
+</div>
+<div class="home-bar"></div>
+</div><div class="label">S-13 Task detail</div></div>
+
+<!-- ===== S-14 GOAL DETAIL (v1.1: complete button added) ===== -->
+<div><div class="phone" id="s14">
+<div class="notch"><div class="notch-inner"></div></div>
+<div style="padding:0 24px;overflow-y:auto;height:calc(100% - 54px - 30px)">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0 24px"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12 4l-6 6 6 6" stroke="#9BA7B4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:14px;color:#7A8593">GROW</span></div>
+<div style="margin-bottom:32px">
+<div style="font-size:24px;font-weight:200;letter-spacing:-.5px;margin-bottom:16px">副業で月10万円<!-- EN: Side hustle ¥100K/mo --></div>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px"><span style="font-size:48px;font-weight:200;letter-spacing:-2px;color:#79C0FF">60<span style="font-size:20px;font-weight:400">%</span></span></div>
+<div style="height:8px;background:#1C2128;border-radius:999px;margin-bottom:12px"><div style="height:100%;width:60%;background:#79C0FF;border-radius:999px"></div></div>
+<div style="display:flex;gap:12px"><div style="display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="10" rx="2" stroke="#7A8593" stroke-width="1.2" fill="none"/><path d="M1 5h12" stroke="#7A8593" stroke-width="1.2"/></svg><span style="font-size:13px;color:#7A8593">残り42日<!-- EN: 42 days left --></span></div><div style="background:rgba(121,192,255,.14);color:#79C0FF;font-size:12px;padding:4px 12px;border-radius:999px">仕事<!-- EN: Work --></div></div>
+</div>
+<div style="margin-bottom:24px"><div style="font-size:12px;color:#7A8593;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px">タスク<!-- EN: Tasks --></div>
+<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid rgba(72,79,88,.3)"><div style="width:22px;height:22px;border-radius:50%;background:#3FB950;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4-4" stroke="#0D1117" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><div style="font-size:15px;text-decoration:line-through;color:#7A8593">ポートフォリオサイト作成</div><div style="font-size:12px;color:#7A8593;margin-top:4px">完了 · 4/8</div></div></div>
+<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid rgba(72,79,88,.3)"><div style="width:22px;height:22px;border-radius:50%;border:2px solid #79C0FF;background:#0D1117;flex-shrink:0;margin-top:1px"></div><div><div style="font-size:15px">企画書を仕上げる</div><div style="font-size:12px;color:#7A8593;margin-top:4px">今日 · 09:00</div></div></div>
+<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid rgba(72,79,88,.3)"><div style="width:22px;height:22px;border-radius:50%;border:2px solid #484F58;background:#0D1117;flex-shrink:0;margin-top:1px"></div><div><div style="font-size:15px;color:#9BA7B4">初案件に応募する</div><div style="font-size:12px;color:#7A8593;margin-top:4px">4/15 · 予定</div></div></div>
+<div style="font-size:14px;color:#79C0FF;padding:12px 0">+ タスクを追加<!-- EN: + Add task --></div>
+</div>
+<!-- v1.1: Goal complete button added -->
+<div style="border:1px solid rgba(63,185,80,.3);border-radius:8px;height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#3FB950;margin-bottom:12px">ゴール完了にする<!-- EN: Mark goal complete --></div>
+<div style="display:flex;gap:8px;margin-bottom:24px">
+<div style="flex:1;background:rgba(121,192,255,.14);border-radius:8px;height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#79C0FF">AI相談<!-- EN: Ask AI --></div>
+<div style="flex:1;border:1px solid #484F58;border-radius:8px;height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#9BA7B4">編集<!-- EN: Edit --></div>
+<div style="flex:1;border:1px solid rgba(248,81,73,.3);border-radius:8px;height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#F85149">削除<!-- EN: Delete --></div>
+</div></div>
+<div class="home-bar"></div>
+</div><div class="label">S-14 Goal detail</div></div>
+
+<!-- ===== S-15 GOAL CREATE ===== -->
+<div><div class="phone" id="s15">
+<div class="notch"><div class="notch-inner"></div></div>
+<div style="height:250px;opacity:.3"></div>
+<div style="position:absolute;bottom:0;left:0;right:0;top:250px;background:rgba(0,0,0,.6)"></div>
+<div style="position:absolute;bottom:0;left:0;right:0;background:#161B22;border-radius:12px 12px 0 0;padding:0 24px 30px">
+<div style="display:flex;justify-content:center;padding:12px 0"><div style="width:40px;height:4px;background:#484F58;border-radius:999px"></div></div>
+<div style="font-size:18px;margin-bottom:24px">ゴールを作成<!-- EN: Create goal --></div>
+<div style="margin-bottom:20px"><label style="font-size:12px;color:#7A8593;display:block;margin-bottom:6px">ゴール名<!-- EN: Goal name --></label><div style="background:#0D1117;border:1px solid #484F58;border-radius:8px;height:48px;padding:0 16px;display:flex;align-items:center;font-size:15px;color:#7A8593">達成したい目標<!-- EN: Your goal --></div></div>
+<div style="margin-bottom:20px"><label style="font-size:12px;color:#7A8593;display:block;margin-bottom:6px">期限<!-- EN: Deadline --></label><div style="background:#0D1117;border:1px solid #484F58;border-radius:8px;height:48px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;font-size:14px;color:#7A8593"><span>期限なし<!-- EN: No deadline --></span><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="10" rx="2" stroke="#7A8593" stroke-width="1.2" fill="none"/><path d="M1 5h12" stroke="#7A8593" stroke-width="1.2"/></svg></div></div>
+<div style="margin-bottom:20px"><label style="font-size:12px;color:#7A8593;display:block;margin-bottom:8px">カテゴリ<!-- EN: Category --></label>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<div style="background:rgba(121,192,255,.14);color:#79C0FF;font-size:13px;padding:8px 14px;border-radius:999px">仕事<!-- EN: Work --></div>
+<div style="border:1px solid #484F58;color:#7A8593;font-size:13px;padding:8px 14px;border-radius:999px">健康<!-- EN: Health --></div>
+<div style="border:1px solid #484F58;color:#7A8593;font-size:13px;padding:8px 14px;border-radius:999px">学習<!-- EN: Study --></div>
+<div style="border:1px solid #484F58;color:#7A8593;font-size:13px;padding:8px 14px;border-radius:999px">趣味<!-- EN: Hobby --></div>
+<div style="border:1px solid #484F58;color:#7A8593;font-size:13px;padding:8px 14px;border-radius:999px">人間関係<!-- EN: Relationships --></div>
+<div style="border:1px solid #484F58;color:#7A8593;font-size:13px;padding:8px 14px;border-radius:999px">その他<!-- EN: Other --></div>
+</div></div>
+<div style="margin-bottom:24px"><div style="font-size:14px;color:#79C0FF;display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 3v8M3 7h8" stroke="#79C0FF" stroke-width="1.5" stroke-linecap="round"/></svg>最初のタスクを追加<!-- EN: Add first task --></div></div>
+<div style="background:#79C0FF;color:#0D1117;border-radius:12px;height:52px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600">作成<!-- EN: Create --></div>
+</div>
+<div class="home-bar"></div>
+</div><div class="label">S-15 Goal create</div></div>
+
+</body></html>

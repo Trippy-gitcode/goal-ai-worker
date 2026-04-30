@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "画面中央のサブコピー",
+    "issue": "「あなたの人生を、あなたらしく」というコピーが抽象的すぎ、3秒以内に「AIとタスク管理ができるアプリ」というコアバリューが伝わらない。",
+    "suggestion": "アプリの具体的な便益（例：「AIと育てる、新しい習慣」など）を端的に伝えるタグラインに変更し、第一印象での理解度を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s02_onboarding",
+    "location": "アバター選択肢のラベル",
+    "issue": "���タイプA/B/C」という事務的な名称と無機質なイラストにより、一緒に成長するパートナーとしての感情的な愛着やワクワク感が喚起されない。",
+    "suggestion": "アバターの個性を表す魅力的なネーミング（例：「フレンドリー」「クール」など）に変更し、イラストの表情や色使いに温かみを持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "TODAYセクション末尾の「+ タスクを追加」",
+    "issue": "主要なCTAであるタスク追加がリスト末尾の単なるテキストリンクになっており、視覚的な際立ちが弱く視線が誘導されない。",
+    "suggestion": "テキストリンクの左側にアイコンを追加し、アクセントカラーの背景を持つボタン状のUIにするか、FAB（フローティングアクションボタン）を導入して常にアクセス可能にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "タスクリスト左側のステータスアイコン",
+    "issue": "タスクの完了状態を示すドットが小さく、タップして完了させるインタラクティブな要素（チェックボックス）として直感的に認識しづらい。",
+    "suggestion": "タップ領域（44x44px）を視覚的に暗示する大きめの円形アウトラインを設け、未完了・完了のステータス変化が直感的にわかるデザインにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "AIチャット内の「タスクにしますか？」カード",
+    "issue": "重要なアクションを促すタスク提案カードが、通常のチャットバブルと似た背景色で同化しており、ユーザーの視線が止まらない。",
+    "suggestion": "提案カードの背景色をアクセントカラーの極薄い色にするか、左側に太いアクセントボーダーを配置して、通常の会話とは異なる「アクション可能な要素」であることを際立たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "画面下部のアクションボタン",
+    "issue": "タスクが「完了済み」ステータスであるにも関わらず、「進め方を聞く」「詰まりを相談」という未完了前提のAI相談CTAがアクティブなまま表示されている。",
+    "suggestion": "完了済みのタスクではこれらのボタンを非表示にするか、「振り返りをする」などの完了後アクションに置き換える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s30_me",
+    "location": "AI理解メモのセクション",
+    "issue": "AIからの分析結果がプレーンテキストの塊になっており、インサイトとしての特別感や要点がパッと見で伝わらない。",
+    "suggestion": "重要なキーワードを太字やアクセントカラーでハイライトし、テキストの行間を広げて読みやすさと「分析された感」を演出する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s12_task_add",
+    "location": "所要時間の選択チップ",
+    "issue": "非アクティブなチップの枠線とテキストが背景色に沈んでおり、選択肢としての視認性が低い。",
+    "suggestion": "非アクティブなチップの枠線とテキストのコントラスト比を上げ、タップ可能な要素として明確に認識できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "画面上部の進捗表示エリア",
+    "issue": "「60%」の数字は大きいが、プログレスバーが細く、達成に向けたモチベーションを煽る視覚的な力強さに欠ける。",
+    "suggestion": "プログレスバーの太さを増し、完了部分にグラデーションや光沢感を加えることで、進捗の「溜まっていく心地よさ」を視覚的に強調する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  }
+]

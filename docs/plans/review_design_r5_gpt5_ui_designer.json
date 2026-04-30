@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.2 / §9",
+    "issue": "タイポグラフィのサイズ基準が矛盾。§3.2はrem基底（ユーザーのOS/ブラウザ文字サイズ変更に追従）だが、§9のAI向けCSSブロックではfont-sizeトークンがpx固定になっている。",
+    "suggestion": "§9のfont-sizeトークンを§3.2のrem値に統一する（例: --font-size-sm: 0.875rem 等）。もしくはエイリアスを用意: --font-size-sm: 0.875rem; --font-size-sm-px: 14px（ドキュメント用途）。AIコピーペースト前提のブロックはremに統一し、html { font-size } 前提を明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.1 / §8.2 / §8.7",
+    "issue": "コンポーネントのサイズ系トークン（高さ・横パディング等）が未定義。現状は数値直書き（高さ48pxなど）が多く、S/M/Lバリアントや将来の調整に弱い。",
+    "suggestion": "共通サイズトークンを追加し、ボタン/入力/タブで再利用: --control-height-sm: 40px; --control-height-md: 48px; --control-height-lg: 56px; --control-pad-x-sm: 12px; --control-pad-x-md: 16px; --control-pad-x-lg: 20px; --tabbar-height: 56px（既述値のトークン化）。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.1 / §4.2",
+    "issue": "スペーシングスケールに20pxが存在しない一方、§4.2で「タスク間余白: 20px以上」と指定しているため、実装時に整数トークンのみで表現できない。",
+    "suggestion": "20px相当のトークンを追加（--space-ml: 20px など）または指定をトークン基準に改める（例: タスク間余白= --space-lg - 4px → 回避のため --space-md + --space-xs のような合成を避け、単一トークンを新設）。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§3.3",
+    "issue": "system-ui環境でfont-weight: 200（Thin）の実装互換性が不安。Windows/一部Android端末では200が利用不可/視覚差異となるリスクがある。",
+    "suggestion": "大数字用途のウェイトを可変にし、非対応環境で300へフォールバックする指針を明記。例: --font-weight-thin: 200;（非対応環境では300を使用）+ 実装ガイドにfont-synthesis/フォールバック運用を追記。もしくは最初から300を��準化して体裁を揃える。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8（コンポーネント）",
+    "issue": "ポップオーバーファミリの定義不足。z-indexにdropdown/tooltipを定義しているが、Tooltip/Dropdown/Menuの具体仕様（サイズ、パディング、背景/ボーダー、影、矢印、キーボード操作/ARIA）が未定義。",
+    "suggestion": "§8にTooltip/Dropdown/Menuを追加。例: Tooltip: 背景=--bg-elevated, テキスト=--text-primary, padding 6–8px, radius --radius-sm, shadow --shadow-sm, z-index --z-tooltip, アロー有無、フォーカス/hoverトリガとARIA（role=tooltip, aria-describedby）。Dropdown/Menu: 項目高さ= --control-height-sm, hover/pressed色=アクセントsubtle系, キーボード移動/aria-activedescendant定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§6.1 / §8（コンポーネント）",
+    "issue": "アイコンボタン（IconButton）のコンポーネント仕様が未定義。アイコンサイズは定義されているが、押下/hover/タップ領域/フォーカス/無効時の一貫したガイドがない。",
+    "suggestion": "IconButtonを追加: サイズS/M/L（24/32/40px視覚、タップ領域は--tap-target-min）、背景=transparent、hover=--accent-subtle、pressed=--accent-subtle-hover、フォーカス=--focus-ring、無効=opacity 0.6+pointer-events:none。トークン: --icon-size-sm:20px; --icon-size-md:24px; --icon-size-lg:32px。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§8.9",
+    "issue": "プログレスバーの高さが数値で直書き（8px/12px）。テーマ間/画面別に可変とするためのトークン化が未実施。",
+    "suggestion": "進捗バー用トークンを追加: --progressbar-height: 8px; --progressbar-height-lg: 12px。実装ではこれらを参照。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§8.1（ボタン表）",
+    "issue": "Danger（subtle）のhover/pressed説明に『rgba(*danger*, 0.18)→ --danger-subtle-hover』のような記述が混在し、実装がトークン参照か動的rgba計算か曖昧。",
+    "suggestion": "表記をトークン参照のみに統一し、動的rgba例示を削除（--danger-subtle-hover / --danger-subtle-pressedを必ず使用）。実装ルールとして『状態色は常に専用トークンを参照し、色計算はしない』を追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.3 / §8.3",
+    "issue": "高彩度背景上のテキスト色を���別コンポーネントで指定（例: --button-danger-fg, --button-primary-fg）。体系的に『on-*』トークンがないため、他コンポーネント（チップ/バッジ/タグ等）拡張時に重複指定が生じやすい。",
+    "suggestion": "前景色の汎用トークンを追加: --on-accent, --on-danger, --on-success, --on-warning, --on-info（テーマ別に最適化）。ボタン/チップ/バッジ等で再利用し、色コントラストAAを満たす値を各テーマで検証・定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§8.6 / §8.6a",
+    "issue": "セクション番号に『8.6』『8.6a』が併存し、参照性がやや低い。",
+    "suggestion": "『8.6a』を『8.6.1（補足）』等に変更し、章番号の一意性を担保。目次/自動リンク生成時の混乱を回避。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§4.3",
+    "issue": "『コンテナ最大幅: 480px』が数値記述のみで、トークン化されていない。",
+    "suggestion": "レイアウト用の幅トークンを追加: --container-max-width: 480px。将来のタブレット/デスクトップ最適化時に一元管理可能に��",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2 / §9",
+    "issue": "テキスト選択時のハイライト色（::selection）が未定義。テーマの可読性/ブランド一貫性に影響しうる。",
+    "suggestion": "テーマ別に ::selection 用トークンを定義: --selection-bg / --selection-fg（例: ダーク= --accent-subtle系背景+--text-primary、ライト= --accent-subtle系背景+--text-primary）。グローバルCSSに適用。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  }
+]

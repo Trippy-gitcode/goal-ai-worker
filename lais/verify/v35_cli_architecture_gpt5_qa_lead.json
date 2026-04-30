@@ -1,0 +1,12 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§3層テスト戦略とcmd-*対応",
+    "issue": "L1/L2/L3各層とcmd-unit/cmd-e2e/cmd-realworldの対応関係が明文化されておらず、どのテストがどの層・どのコマンドで実行され品質ゲートで評価されるか不明。これにより同一観点の二重計測や抜け漏れ、ゲートすり抜けのリスクが高い。",
+    "suggestion": "各テストに層(layer)・目的(type)・実行コマンド(cmd)・ゲート(stage)の必須メタデータを付与し、対応表（層⇔cmd⇔ゲート）を策定・公開。1:1/1:多の正当化基準も明記し、Orchestratorがメタデータ検証して不整合時はビルド失敗にする。",
+    "model": "GPT-5",
+    "persona": "qa_lead"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx / 2. lais/src/components/screens/S00Splash.jsx",
+    "issue": "JSXでclass属性を使用しており、React純正では警告/型エラーや将来の互換性リスク（Preact互換でなければ非推奨）。",
+    "suggestion": "React/Preactいずれでも破綻しないようclassNameへ統一。Preact互換を維持する方針なら、Babel/TS設定とESLintルールでプロジェクト全体のスタイルを明示・統一する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S00Splash.css",
+    "issue": "prefers-reduced-motion適用時でも:activeのtransform: scale(0.98)が発生しうる（瞬間的でも一部ユーザーに不快）。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) で.s00-cta-primary:active, .s00-cta-secondary:active { transform: none; } を追加し、モーション低減設定を尊重する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx / 2. lais/src/components/screens/S00Splash.jsx",
+    "issue": "親div(aria-label=\"Lais\")とmain(aria-label=\"Lais スプラッシュ\")で重複的なラベル付け。ランドマーク(main)は見出しと併用で十分で、冗長読み上げの恐れ。",
+    "suggestion": "親divのaria-labelを削除し、必要ならmainにaria-labelledbyでh1(.s00-logo)を参照させる。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（実装パッケージ）",
+    "issue": "ハードコードされたAPIキー/シークレットの露出は検出されず良好（grep確認）。ただし管理方針の明示は未見。",
+    "suggestion": "後続フェーズで.envとビルド時置換を徹底し、クライアントバンドルに秘密を含めない運用を明文化。公開が必要なキーのみ埋め込み、秘密はサーバ/ワーカー側に配置する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（セキュリティ）",
+    "issue": "当画面ではXSS/CSRF/認証バイパス/オープンリダイレクト/RLSの脅威となる要素は見当たらず（dangerouslySetInnerHTML/innerHTML未使用、入力・外部遷移なし）。一方でCSP等のアプリ全体ポリシー���本コンポーネントからは不明。",
+    "suggestion": "デプロイ時に厳格なCSP（例: default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'）を設定。将来の状態変更エンドポイントではCSRF対策（SameSite=Lax/Strict + CSRFトークン/Double Submit）とオープンリダイレクト防止（リダイレクト先ホワイトリスト）を適用する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

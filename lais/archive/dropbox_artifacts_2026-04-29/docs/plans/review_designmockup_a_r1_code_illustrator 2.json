@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "COLOR",
+    "screen": "ALL",
+    "location": "アクセントブルーの彩度",
+    "issue": "Primary アクセントとして使われている水色 (#7FBFF0 相当) の彩度が高く、夜空背景の落ち着き (#0B1220 相当) とぶつかっている。『月明かりの下のジャーナル』という設定に対して『昼間のチャート SaaS』のカラー言語で描かれている。",
+    "suggestion": "アクセントを『月明かり銀 #C0D4E8』(低彩度) を基調とし、青は『信頼・クリック可能』を示すエンゲージメント要素にだけ限定使用する (CTA のみ)。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "COLOR",
+    "screen": "s02_onboarding",
+    "location": "アバターの原色 (青 / 緑 / 黄)",
+    "issue": "3 つのアバターがそれぞれ青シャツ/緑シャツ/黄シャツの純色で塗られており、Night Sky の静けさに対して色相が強すぎる。選択中アバターの発光リングも蛍光的。",
+    "suggestion": "アバターの衣装をモノクロ + アクセント 1 点 (銀/金/青銅) に抑え、選択リングを光の粒 (星屑の円) で表現。原色の衣装バリエーションは SHOP 画面でのみ出現させる。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow,s30_me",
+    "location": "アバターバストアップ円",
+    "issue": "既成のアイコン (人型シルエット) をそのまま円で囲んだだけで、Lais のイラスト言語が定義できていない。ユーザー個別性・感情表現が皆無。",
+    "suggestion": "アバターはオリジナルラインアート (手描き風 1px) で描画、表情バリエーション (穏やか/集中/眠い) を時間帯で自動切替。月相アイコンを並置する。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "赤文字の『削除』",
+    "issue": "夜空のモノクロ基調に赤が差し込み、色相環で最も離れた色を使っているため瞳が自動的にそこへ固定される。心理的緊張を誘発する。",
+    "suggestion": "削除色を赤ではなく『煤色 #7A5A5A』相当のマット赤に置換、または削除をメニュー内に隠して画面上の赤を消す。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "AI バブル vs ユーザーバブル",
+    "issue": "2 種類のグレーの明度差が小さく (15-20%)、発話者の区別が瞬時にはつきにくい。色による感情表現も平坦。",
+    "suggestion": "AI バブルを『月光の青銀』、ユーザーバブルを『深い紺』に差別化。アクセントはバブルの左縁 2px ラインで表現。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "背景の空間表現",
+    "issue": "背景がほぼフラットな黒で、奥行き (宇宙の深さ / 星雲の濃淡) が全く表現されていない。静けさは伝わるが『広大さ』『詩情』が欠落。",
+    "suggestion": "背景に微細なラジアルグラデ (#0A0E1B → #1A2338) + 画面下端に薄い星雲の霞。透過率 20% で重ねるだけで立体感が出る。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s14_goal_detail",
+    "location": "完了タスクの打ち消し線",
+    "issue": "完了タスクの取り消し線 + グレーアウトが強く、『積み重ね』ではなく『消去』のメタファーになっている。",
+    "suggestion": "完了タスクは明度を落とすだけに留め、取り消し線を削除。代わりに左端のチェック丸に金/銀の着色を施し『小さな勲章』として感情的報酬を与える。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s15_goal_create",
+    "location": "カテゴリチップのアクティブ色",
+    "issue": "『仕事』チップのアクティブ色が他の非アクティブチップより微妙に濃いだけで、選択状態が弱い。",
+    "suggestion": "アクティブチップに薄い内光 (inset 0 0 8px rgba(127,191,240,0.3)) を付け、夜空の星の点灯を模した発光表現に。",
+    "model": "Code",
+    "persona": "illustrator"
+  }
+]

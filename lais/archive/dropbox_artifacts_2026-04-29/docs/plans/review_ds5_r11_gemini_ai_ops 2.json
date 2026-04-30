@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§19.1, §14",
+    "issue": "「Phase」という用語が、§14では「仕様書開発の6フェーズ（DRAFT〜確定）」、§19.1では「プロジェクト全体の工程（コンセプト〜実装設計）」という全く異なる2つの意味で使われており、AIが指示を解釈する際に深刻な混乱を招く。",
+    "suggestion": "§19.1のプロジェクト工程を「Stage 0〜3」などにリネームし、仕様書開発の「Phase」と明確に区別する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.4, §12",
+    "issue": "§12では仕様書ID（SPEC-SCREEN-NNN）をテストのコメントにリンクすると定義しているが、§19.4ではテストID（GREP-KEY）をテストタイトルに埋め込むと定義している。二重管理となり、affected-tests.shの抽出ロジックと競合・混乱する。",
+    "suggestion": "§12のSPEC-IDをGREP-KEYとして統合し、「test('[SPEC-TODAY-001] タスク追加', ...)」のようにタイトルに埋め込むルールに一本化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存」メタデータに上流ファイルのバージョン（例: v1.3）を記載する仕様だが、上流更新時に下流のヘッダーを同期・検証する仕組み（canopy等）がないため、確実にバージョンが乖離し形骸化する。",
+    "suggestion": "canopy_common.shにヘッダーの依存バージョンと実際のファイルバージョンを照合するゲートを追加するか、ヘッダーにはファイルパスのみを記載しバージョン番号のハードコードを廃止する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6, §18",
+    "issue": "§18の依存関係マップで��design_system.mdとdesign_spec_v*.mdが双方向の依存関係にあり、design_system.md変更時にもe2eテストを更新するとあるが、§19.6の依存チェーンでは単方向になっており、e2eテストの更新トリガーからもdesign_systemが漏れている。",
+    "suggestion": "§19.6の依存チェーンの記述を§18の連鎖更新マップと完全に一致するよう修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.7",
+    "issue": "「ADVはベンチマーク表の各項目に調査日と情報源を明記」とルール化されているが、指定されたMarkdownの出力フォーマット（調査対象表・マトリクス表）に「情報源」の列が存在しない。",
+    "suggestion": "調査対象の表、または差別化マッピングの表に「情報源（URL等）」の列を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.4, sub_system_map.md",
+    "issue": "§19.4のsystem_map.mdテンプレート定義には「§4 ファイル変更チェックリスト」が必須とされているが、実際のテンプレートファイル（sub_system_map.md）には§1〜§3しか存在しない��",
+    "suggestion": "sub_system_map.mdに「§4 ファイル変更チェックリスト」のセクションを追加するか、§19.4の要件から削除する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4",
+    "issue": "project_v1.mdに「§10 AIレビュー計画」があり、ux_v1.mdにも「§N+10 AIレビュー計画」がある。アプリ全体のレビュー計画の正規ソース（Single Source of Truth）が分散している。",
+    "suggestion": "AIレビュー計画はproject_v1.mdの§10で一元管理し、他の仕様書からはそれを参照する形に統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.6",
+    "issue": "依存チェーンのツリー図において、「design_system.md」がproject_v1.mdの子要素として2回重複して記載されている。",
+    "suggestion": "末尾の「└→ design_system.md（デザイン基盤）」の重複行を削除する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

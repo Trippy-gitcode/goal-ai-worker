@@ -1,0 +1,242 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md → §4.1 G1 / sub_infrastructure.md → canopy_common.sh comment",
+    "issue": "G1の対象ファイルがメインでは「version.ts」、canopy_common.shコメントでは「frontend/src/version.ts」と不一致。G1はcanopyで検証するとあるが、実装コードが存在しない。",
+    "suggestion": "G1の対象を単一の正規パスに統一（例: frontend/src/version.ts）。canopy_common.shに4箇所一致チェックを実装し、パスをapp_config.yamlに定義（version.file_path）してcanopyが参照するようにする。"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §8 C2デプロイフロー",
+    "issue": "C2フローは固定コマンド（vite build, wrangler deploy）を記載しているが、app_config.yamlにはbuild.cmdやdeploy.frontend_cmd/backed_cmdが定義されており未使用。SoTと乖離。",
+    "suggestion": "C2フローのスクリプト化（deploy.sh）を追加し、app_config.yamlのbuild.cmd・build.out_dir・deploy.*を読み取り実行するように変更。メインスペックとsub_infrastructureにスクリプトを掲載。"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §1.1 基本思想 / §8 C2デプロイフロー",
+    "issue": "Single Source of Truthを掲げながら、バージョン情報を4箇所に重複保持。同期漏れリスクが高く、SoT原則に反する。",
+    "suggestion": "app_config.yamlをバージョンのSoTに指定し、version_sync.shを追加してpackage.json/version.ts/CLAUDE.mdへ自動反映。C2開始時にversion_sync.sh実行とG1での整合チェックを必須化。"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → canopy_common.sh",
+    "issue": "G1・G6がコメントのみで、実際の検証ロジックが未実装。品質ゲート体系（§4）と乖離。",
+    "suggestion": "canopy_common.shに以下を実装: (1) G1: 4箇所のバージョン文字列一致チェック、(2) G6: app_config.build.out_dirとdeploy.frontend_cmd/ backend_cmd内参照のパス一致検証（grep/awkで抽出）。"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §4.1 G7 / sub_infrastructure.md → mission_linter.sh",
+    "issue": "G7「仕様↔完了コマンド対応」をmission_linter.shでは“bashコマンドの存在”のみで判定しており、1:1対応やAT網羅性を検証できていない。",
+    "suggestion": "mission_linter.shを拡張し、(a) 各ATに一意ID（AT-N）必須、(b) 完了コマンドにAT-IDを--grepやタグで参照必須、(c) AT各フィールド（前提/操作/期待/検証/否定検証/データ検証/スクショ）の存在チェックを追加。"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "sub_adv_protocol.md → §2（ファイル書き込みルール）",
+    "issue": "「書き込み前に対象ファイル名+理由を提示→POのOKを待つ」とあるが、別箇所で「仕様決定時はSTEP1-4を即座に実行」「ADVはリポジトリ書き込み可」としており、ADVの即時反映と矛盾。",
+    "suggestion": "PO承認不要のADV書き込みホワイトリストを明記（例: instructions/session_progress.md, docs/*, CLAUDE.md, development_rules_app.md）。コード系/スクリプトやcanopyは承認必須とする。"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §6 承認ルール",
+    "issue": "🟡中リスクで「3件まで連続実行→まとめて報告」が許容され、連続適用で実質的に大きな変更が未承認で進む恐れ（暴走リスク）。",
+    "suggestion": "🟡中リスクにセッション内の変更総量上限を追加（例: 変更ファイル≤6/合計LoC差分≤500/所要時間≤2h）。上限超は個別承認にエスカレーション。"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §9 デバッグ / §16.1 修正試行3回制限",
+    "issue": "誤実装からの回復（リカバリ）手順が不足。ロールバック/タグからの再デプロイ/データ移行失敗時の復旧/runbookがない。",
+    "suggestion": "rollback.sh（直近タグへ再デプロイ）とincident_runbook.md（判断基準, ロールバック手順, 影響範囲確認, コミュニケーション手順）を追加。C2失敗/本番障害発生時の自動停止・ロールバック条件を明記。"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §2.5 G8 テストファースト",
+    "issue": "「AT全FAIL確認→実装→全PASS」を要求しているが、証跡要件や自動検証が無い。ENGが手順を省略しても検出不可。",
+    "suggestion": "G8の証跡要件を追加（実装前のテスト実行ログ/JSONレポート保存を義務化、canopyで実装前後のテスト結果差分を検証）。session_progress.mdにRED/GREENスクショとテスト統計の貼付を必須化。"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md → §1.2 test-guards.config.ts",
+    "issue": "モジュールスコープでtypeof pageを参照するTypeScriptはコンパイルエラー（Cannot find name 'page'）の可能性が高い。Playwrightのpageはフィクスチャでグローバルではない。",
+    "suggestion": "isLocal判定を環境変数/BASE_URLで行う（例: const isLocal = process.env.CI==='true' || /localhost/.test(process.env.BASE_URL||'');）。page依存ロジックは関数化してテスト内で呼ぶ。型エラーを避けるため型宣言を削除。"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → update_app.sh / build_rules.sh",
+    "issue": "DEV_SYSTEMのデフォルトパスが$HOME/Desktop/dev-systemにハードコードされ、CI環境や他OSで動作しない。",
+    "suggestion": "DEV_SYSTEM_DIR環境変数を優先し、未設定時はスクリプト位置の相対パスを用いるように統一。init_app.sh, update_app.sh, build_rules.shすべてで同一検出ロジックを使用。"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → canopy_common.sh",
+    "issue": "IGNORED_ERRORS件数チェックが単一引用符前提のgrepで脆弱。二重引用符や末尾カンマ/コメントで誤カウント。",
+    "suggestion": "ts-node/deno等でconfigを実行評価しJSON出力するか、jq互換フォーマットに変更。少なくともgrepを([\"'])で両対応、コメント除去（sed 's,//.*$,,'）後に行数算出へ修正。"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md → §5 affected-tests.sh",
+    "issue": "HEAD~1基準のdiff取得は初回コミット/リベース後のCIで失敗。shallow cloneでは比較不能。",
+    "suggestion": "git merge-baseを用いた差分（BASE=$(git merge-base origin/main HEAD); git diff --name-only $BASE...HEAD）に変更。CIではfetch-depth: 0を推奨。BASE未取得時はL1にフォールバック。"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §11 データSoT / sub_testing.md → §7",
+    "issue": "テストでKVを直接更新する手順があるが、Wranglerの認証/バインド/ローカル実行戦略が未定義で、CIやローカルで失敗しやすい。",
+    "suggestion": "tests/e2e/helpersにkv_put.tsを追加し、(1) Miniflare/local KVを優先、(2) 本番KVはWRANGLER_AUTHがある時のみ許可、(3) CI用にダミーバインドを提供。手順書と環境変数を明記。"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §13 AIレビュー基盤",
+    "issue": "CRITICAL>0で確定不可のルールがあるが、canopy等に連携されていないため手動運用に依存。",
+    "suggestion": "review_gate.shを追加し、docs/plans/review_*.jsonをスキャンしてCRITICAL件数>0ならFAIL。C2フローにreview_gate.sh実行を組み込み。未対応指摘の理由記録ファイルも検証対象にする。"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §4.4 SKIPルール / sub_testing.md → test_lint.sh",
+    "issue": "条件付きskip検出が単純grepで、プラットフォーム非対応の唯一の例外を正しく識別できない。正当なskipもFAILになる恐れ。",
+    "suggestion": "許可されたskipに特別コメントタグ（// @allowed-skip: platform）を必須化し、grepにこのタグ存在時は除外。もしくはESLintルール追加で静的検証。"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §4.1 G3 テスト項目数",
+    "issue": "「grep -c でテスト数の期待値検証」とあるが、期待値の定義場所がないため自動検証不能。",
+    "suggestion": "tests/test_meta.jsonを導入し、期待テスト件数（L1/L2/L3/タグ別）を定義。canopyで実数と照合し乖離率>±10%でWARN、>±20%でFAILにする。"
+  },
+  {
+    "id": "R-018",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §5 ミッション定義テンプレート",
+    "issue": "「対象ファイル」指定があるが、ENGが他ファイルを変更することを防ぐ仕組みが無い。",
+    "suggestion": "changed-files-allowlist.shを追加し、ミッションの対象ファイル（グロブ可）以外の変更がある場合はFAIL。canopyに統合。"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "sub_adv_protocol.md → §8 禁止事項 / dev_system_spec.md → §16.5 絶対禁止",
+    "issue": "禁止事項が重複記述されメンテナンスコスト増。変更時の不整合リスク。",
+    "suggestion": "禁止事項の正本をdev_system_spec.md §16.5に統一し、sub_adv_protocol.mdからは参照のみ（要点リンク）にする。"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §9.3 デバイス依存バグ診断フロー",
+    "issue": "ADVはコードを読まない前提だが、「原因分析」を求めており手段が限定的。ログ/スタックトレース/再現動画などの必須入力が未定義。",
+    "suggestion": "ENGに対し再現手順・スクショ・動画・コンソールログ・ネットワークログのテンプレートを義務化。ADVはそれを基に静的分析し、コード断片の直接参照は不可（疑似コード/アーキ図で代替）。"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §4.1 G9",
+    "issue": "G9が人間目視判定のみで、証跡要件（ビフォー/アフターの必須枚数やファイル命名規則）が未定義。虚偽報告の抑止が弱い。",
+    "suggestion": "スクショ保管規約を定義（evidence/<MISSION-ID>/{before_*.png, after_*.png} 形式、最低各1枚、タイムスタンプ付き）。screenshot_lint.shで存在と枚数を検証し、完了報告にファイル一覧を必須化。"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_system_map.md → §3 データフロー / app_config_template.yaml → routing",
+    "issue": "routing.models.ratioの合計100チェックをcanopyで行うとコメント記述があるが、実装がない。",
+    "suggestion": "canopy_common.shにapp_config.yamlのrouting.enabled時、models.*.ratio合計==100をjq/yqで検証する処理を追加。"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md → §17 仕様書構成",
+    "issue": "メイン/サブの分割は概ね妥当だが、AIレビュー基盤（§13）の運用詳細やゲート連携はメインのみで、実装スクリプトがサブに無い。",
+    "suggestion": "AIレビュー用スクリプト（review_gate.sh, review_runner.ts）をsub_infrastructure.mdに追加し、§13から参照させる。"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → session_archiver.sh / templates",
+    "issue": "session_archiver.shは「## 完了済み」見出し前提。init_app.shで配布するテンプレートにこの見出しが存在する保証が明記されていない。",
+    "suggestion": "session_progress_template.mdに必ず「## 完了済み」セクションを含めることを明記し、init_app.sh完了時に存在チェック（wc -l + grep）を行い、欠落時はテンプレの該当ブロックを追記。"
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §16.3 ホットフィックスパス",
+    "issue": "低リスクの自律実行に回数上限や時間窓制限がなく、連続適用で大きな変更に波及する恐れ。",
+    "suggestion": "ホットフィックスパスの1セッションあたりの上限（例: 最大2ミッション/合計変更ファイル≤4）と、連続適用は2セッションまで等の制限を追加。"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §3 鉄則 / §5 ミッション完了報告",
+    "issue": "曖昧用語禁止の検証を人間確認（G5）に依存。自動検出がない。",
+    "suggestion": "report_lint.shを追加し、instructions/results内の最新報告から禁止語12語をgrepし、ヒット時FAIL。canopyに統合。"
+  },
+  {
+    "id": "R-027",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §2.4 Step4 実装の300行制限",
+    "issue": "「1コンポーネント300行以内」の自動検証がない。",
+    "suggestion": "max_lines_lint.shを追加し、frontend/src/components配下の*.tsx/*.tsに対し、300行超をFAIL。対象ディレクトリはapp_config.yamlで設定可能にする。"
+  },
+  {
+    "id": "R-028",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §15.4 metrics.jsonl",
+    "issue": "メトリクス追記が任意実装で未検証。運用で抜けやすい。",
+    "suggestion": "canopy終了時に当日分のmetrics.jsonl追記を検証（jqでdate==todayの行が存在）。なければFAILまたはWARN（設定可能）。"
+  },
+  {
+    "id": "R-029",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §13.2 実行方式 / コスト管理",
+    "issue": "ENGが「複数モデルに全内容を省略なしで送信」するAIレビューはAPIコスト暴走のリスクがあるが、コスト上限や件数制限がない。",
+    "suggestion": "AIレビューのセッションあたり予算（AI_CALL_BUDGET）と最大トークン/呼び出し回数を定義。review_runnerに--max-calls/--max-tokensを実装し、超過時は停止＋PO承認待ち。"
+  },
+  {
+    "id": "R-030",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "sub_system_map.md → §1 依存関係 / dev_system_spec.md → §16.7 変更時の一括更新義務",
+    "issue": "依存関係の逆引きや更新対象は記載されているが、機械検証（更新漏れ検知）の仕組みがない。",
+    "suggestion": "spec_links.yaml（仕様ファイル間リンクのSoT）を追加し、canopyで更新されたファイルの隣接リンク先の更新有無をチェック。未更新時はWARN/FAIL（重要度で分岐）。"
+  }
+]

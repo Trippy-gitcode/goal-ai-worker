@@ -1,0 +1,222 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §1.1, §1.2, §2.3",
+    "issue": "S-13（タスク編集）の画面種別が不整合。画面一覧ではハーフモーダルだが、詳細ではS-11内のインライン編集として記載。戻り/履歴（pushState）の扱いが曖昧になる",
+    "suggestion": "どちらかに統一する。推奨: S-13を廃止し、S-11の内部状態（view/edit）として扱う。画面一覧（§1.1）と遷移マトリクス（§1.2）からS-13を削除し、戻りナビと未保存ダイアログはS-11の状態遷移として明記する",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5, ux_v1.md §2.3, §3.4, §8",
+    "issue": "日次EXP上限（300EXP）到達後のUXが未定義。上限到達後にタスク完了した際の演出・通知・EXPの扱いが不明",
+    "suggestion": "上限到達時はタスク完了チェックは通常どおり成立させるが、EXPは付与しない。UI: トースト「本日のEXP上限に達しています。明日04:00にリセット」＋EXPバーは変化なし。TALKの冒険EXPカードも非表示。GROWヒーロー付近に当日限りの薄いバナーを表示して再発防止",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5, ux_v1.md §3.4",
+    "issue": "冒険EXPの1日上限（2回/100EXP）到達時の挙動が未定義。3回目以降の検出時にユーザーへ何もフィードバックがない可能性",
+    "suggestion": "3回目以降の冒険判定時はサイレントにせず、薄い情報バナー「今日はもう冒険EXPの上限に達しています」をTALK画面上部に1回だけ表示。カードは出さない。翌日リセット案内も併記",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.2, ux_v1.md §2.4, §8.3",
+    "issue": "ゴール達成ボーナス（1日1回）の上限超過時の挙動が未定義。同日に2個目以降のゴール達成時の演出/通知が不明",
+    "suggestion": "2個目以降はゴール達成の紙吹雪のみ（ボーナスEXPなし）にし、バナー文言を「🎉 ゴール達成！（本日のボーナス上限に達しています）」に変更。翌日リセットの案内を追記",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §7.4（上限値）, ux_v1.md（該当なし）",
+    "issue": "タスク10,000件/ゴール100件/友達500人などデータ量上限に達したときのUXが未定義",
+    "suggestion": "作成ボタン押下時にサーバーから上限エラーを受けた場合のインラインエラーを定義。例: タスク追加モーダルに「作成上限に達しました。不要なタスクをアーカイブしてください」。FRIENDSは「これ以上追加できません（上限500）」のトースト＋[整理する]で一覧へ",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3（Today並び順）",
+    "issue": "Todayの手動並び替えと開始時刻ソートの優先関係・持続期間が不明（当日限り/永続/リセット条件）",
+    "suggestion": "仕様化: 「手動順はToday当日限定で優先。翌日4:00のリセットで時刻順に戻す」。UIに「並び順をリセット」アクションを追加。開始時刻を編集した際の優先順位も定義（例: 時刻編集→そのタスクのみ時刻順位置に再配置）",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘ��ダー）",
+    "issue": "TALKヘッダーに☰（履歴ドロワー）と🕐（履歴）が併存し、履歴への入口が二重化している。操作の学習コスト増と誤タップリスク",
+    "suggestion": "履歴入口を1つに統一。推奨: ☰を廃止し🕐を「履歴」として明示ラベル化。☰は一般的にハンバーガーメニューの期待を生むため、誤解の元",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2（所要時間の用途）, ux_v1.md（タイムラインUI未定義）",
+    "issue": "「所要時間はタイムライン表示の幅計算に使用」とあるが、UX仕様にタイムラインUIが存在しない。用途が不明瞭",
+    "suggestion": "MVPでは所要時間は表示（テキスト or 小バー）に限定と明記し、「タイムライン幅」言及を削除。将来のカレンダー/タイムライン導入時に再定義",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §5.1, §13.3",
+    "issue": "初回体験で通知許可の案内がない。PWAの通知はユーザー主導の許可が必要だが、いつ/どこで求めるかが曖昧で有効化され��くい",
+    "suggestion": "Day1のGROW初回タスクリマインダー作成直後に、JIT（Just-In-Time）で通知許可を案内。iOS Safari（非PWA）の場合はガイドモーダル→ホーム追加→再訪で通知許可の二段階フローを用意",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md（共通）",
+    "issue": "初見でGROW/TALK/MEの意味や「EXP/冒険/称号/Phase/ヒアリング」が分かりにくい。自己成長に特に興味がないユーザーには専門用語が多い",
+    "suggestion": "初回起動時に3枚のコーチマークを追加（GROW=今日やること/TALK=AIに相談/ME=自分の記録）。各用語は初出時に1行マイクロコピーと「？」ツールチップで説明（例: 冒険EXP=新しい挑戦をした時のポイント）",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.1",
+    "issue": "レビュー要件はS-00〜S-41の整合性だが、仕様はS-44まで増えている。追加画面（S-42〜S-44）の遷移は本文にあるが、一覧の責務範囲が要件表現とズレる",
+    "suggestion": "要件を満たす旨を明記しつつ、S-42〜S-44は「拡張ID��として区分見出しを追加（例: “拡張（S-42〜S-44）”）。遷移マトリクスにも補足注記を入れると混乱が減る",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（週N回習慣の表示/Today介入）",
+    "issue": "project_v1.mdの「週N回習慣のToday表示ロジック（今日やらなくても達成可能なら非表示/今日から毎日必要なら表示）」がUX側で操作として明示されていない",
+    "suggestion": "Today行に「今日やる/今日はスキップ」トグルを設け、AIロジックの自動表示に対してユーザーが明示介入できるUIを追加。Upcomingにも週N回の残回数バッジを表示",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.5（スレッド命名）",
+    "issue": "チャットスレッドの自動命名のみで手動リネーム不可。会話が増えると一覧認知が難しい",
+    "suggestion": "会話一覧の行メニューに「名前を変更」を追加（MVP+αでも可）。長押しでリネームでも良い",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.2.1, project_v1.md §2.1",
+    "issue": "Premier特典の限定フレーム授与タイミング/装備までの導線がUXに明文化さ��ていない（自動付与か、どこで受け取るか）",
+    "suggestion": "Premierアップグレード完了時に自動付与→S-41に「新しいフレームを受け取りました」バナーを表示。S-38戻り時にも1回だけトーストで案内",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §15（通知遷移）, §13.3（通知設定）",
+    "issue": "通知タップでのディープリンクは定義済みだが、通知カテゴリごとの既読管理/お知らせ一覧（FRIENDS）の既読反映が未定義",
+    "suggestion": "通知タップ時に対象メッセージを既読化し、ME>FRIENDSの未読バッジを同期更新。アプリ内で「すべて既読」操作も提供",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §1.1（タブ名）",
+    "issue": "GROW/TALK/MEという英語タブ名が直感的でない（“今日/AI/わたし”等の日本語名の方が分かりやすい）",
+    "suggestion": "ローカライズ方針に合わせて日本語タブラベルを検討（例: 「GROW（今日）」「TALK（AI）」「ME（わたし）」の二段表示 or 純日本語化）。A/Bテストでラベル理解度を検証",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3, §2.4",
+    "issue": "Undoが直近1件のみ保証で、連続完了時に前のUndoが即確定する仕様は誤タップ時の救済が弱い",
+    "suggestion": "オプションとして履歴画面（GROW右上メニュー等）に「直近5分の操作履歴」→個別取り消しを用意（EXPはサーバー権威で検証）。MVP後の改善案として追記",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §11.4（PWAインストールバナー）",
+    "issue": "iOSのホーム追加ガイドは3回目起動で一度だけの想定だが、見逃しリスクがある",
+    "suggestion": "設定>通知設定（S-39）にも常設リンク「iOSでホーム画面に追加する方法」を配置。未インストール検知時はS-39上部に常時バナーを表示",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §0（UXベンチマーク）→全体",
+    "issue": "ベンチマークの示唆は方針に反映されているが、いくつかの重要示唆（HabitifyのFree上限制御への反感、Finchの長すぎるオンボーディング）は定量KPIへの落とし込みが無い",
+    "suggestion": "UX要件にKPIを追記（例: オンボ離脱率<10%、初日レベルアップ達成率>70%、通知許可率>40%）。E2Eテスト（lais_e2e_test.md）にトラッキングイベント要件を追加",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（Overdue）",
+    "issue": "「明日に延期」実行後のUndoはトーストに「取り消す」とあるが、取り消し後の予定日復元ルール（元日付に戻す/今日に戻す）が明記されていない",
+    "suggestion": "取り消し時は元の予定日に復元と明記。連続操作（複数タスクを延期）時のUndo対象は直近1件と統一",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.3（タスク提案カード）",
+    "issue": "「不要」を学習するとあるが、学習の可視化/解除がない（誤って不要にした場合に復帰できない）",
+    "suggestion": "TALK設定（S-37配下）に「提案学習をリセット」スイッチを用意 or 次回同種提案カードに「この種類の提案を再開する」リンクを表示",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4, §4.5, ux_v1.md §15注記",
+    "issue": "レベル必要EXPに関する式と注記の内部矛盾が残存（Lv1→2が100か1,000か）。UX側に依存する演出タイミングに影響する",
+    "suggestion": "project_v1.mdの数式と表を公式ソースとして統一（Lv1→2=100）。UX側はこの前提で演出（初日レベルアップ設計）を確定。計算式をreference_v1.mdにも重複記載し単一情報源化",
+    "model": "GPT-5",
+    "persona": "general_user"
+  }
+]

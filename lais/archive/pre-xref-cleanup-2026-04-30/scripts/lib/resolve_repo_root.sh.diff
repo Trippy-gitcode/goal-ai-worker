@@ -1,0 +1,20 @@
+--- /Users/futoshi/Desktop/goal-ai-worker/lais/archive/pre-xref-cleanup-2026-04-30/scripts/lib/resolve_repo_root.sh	2026-04-30 21:22:52
++++ /Users/futoshi/Desktop/goal-ai-worker/scripts/lib/resolve_repo_root.sh	2026-04-30 21:25:40
+@@ -20,7 +20,7 @@
+ #   既定: dev-system-generated.json （生成 App メタデータ、scaffold ジェネレータ
+ #         パターンの SSoT、改変禁止）
+ #   上書き: ${APP_REPO_MARKER} 環境変数で App 固有のマーカー指定可
+-#         （例: lais → lais/verify/dev_system_v34_package.md）
++#         （例: lais → legacy v34 spec marker (archived 2026-04-30)、現在は lais/archive/spec_v34_pre_reform/INDEX.md 参照）
+ #
+ # 使い方:
+ #   . "$(dirname "$0")/lib/resolve_repo_root.sh"
+@@ -31,7 +31,7 @@
+ #
+ # App 固有の設定例（App 側 scripts/config_repo_root.sh 等で export）:
+ #   export APP_REPO_ROOT_ENV="LAIS_REPO_ROOT"
+-#   export APP_REPO_MARKER="lais/verify/dev_system_v34_package.md"
++#   export APP_REPO_MARKER="dev-system-generated.json"  # 新マーカー (旧 v34 spec marker は 2026-04-30 archived)
+ #   export APP_REPO_CANDIDATES="/Users/futoshi/Desktop/goal-ai-worker ${HOME}/Desktop/goal-ai-worker"
+ 
+ resolve_repo_root() {

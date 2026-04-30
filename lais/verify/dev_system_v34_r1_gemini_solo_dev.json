@@ -1,0 +1,67 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "screen": "dev_system_spec.md / scripts/proposal_log_lint.sh",
+    "location": "§1.5.4 / §1.5.5 / scripts/proposal_log_lint.sh",
+    "issue": "提案ログの「滞留セッション数」を毎セッション開始時にAI（ADV）が手動で+1してファイルを書き換える運用は破綻する。毎セッションで無意味なGit差分が発生し、コンフリクトの温床になる上、AIの計算・書き換えミスを誘発する。ソロ開発者がこのノイズを毎セッションレビュー・マージする運用コストは価値を完全に上回る。",
+    "spec_reference": "§1.5.4 滞留セッション数の更新: 各セッション開始時、ADV は提案ログを Read し、全項目の「滞留セッション数」を +1 する",
+    "actual": "テキストファイル上の数値をAIに毎セッションインクリメントさせている",
+    "suggestion": "滞留セッション数の手動インクリメントを廃止する。提案ログには「提案時のセッションID」または「提案日時」のみを静的に記録し、`proposal_log_lint.sh` 側で現在のセッション数/日時との差分を動的に計算して滞留警告を出す設計に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "screen": "dev_system_spec.md / scripts/mission_linter.sh",
+    "location": "§5.1 / §5.2 / scripts/mission_linter.sh",
+    "issue": "ドキュメント更新やデザイン調整など、明らかにunit/e2e/realworldが不要なミッションタイプでも、毎回3区分全てについて「N/A — 理由」を記述し、Linterで強制するのは冗長。ソロ開発者の認知負荷とAIの出力トークンを無駄に消費する。",
+    "spec_reference": "§5.1 ミッションタイプ別 完了コマンド必須マトリクス / mission_linter.sh: N/A 宣言時の理由必須",
+    "actual": "N/Aの場合でも3区分すべての記述と理由の明記が強制さ���ている",
+    "suggestion": "§5.1のマトリクスで「N/A」となっている区分については、ミッション定義での記述自体を省略可能とする。`mission_linter.sh` もミッションタイプに応じて必須チェックを動的にスキップするよう緩和する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "screen": "sub_infrastructure.md",
+    "location": "§2.8 deploy.sh 拡張",
+    "issue": "PaaS（Cloudflare Pages等）へのデプロイ直後に `npx playwright test` を実行しているが、デプロイ完了からエッジノードへの伝播やキャッシュクリアまでにラグがある場合、古いバージョンに対してテストが走り高確度で偽陽性（FAIL）となる。",
+    "spec_reference": "§8 v3.4 Step 12: 実機E2Eスモーク",
+    "actual": "デプロイコマンド完了直後に待機なしでPlaywrightを実行している",
+    "suggestion": "Step 12のPlaywright実行前に、デプロイ先URLのバージョン文字列（Step 8のcurl疎通確認と同等）が最新コミットハッシュと一致するまでリトライ待機するポーリング処理（デプロイ伝播待ち）を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "screen": "sub_review_flow.md / dev_system_spec.md",
+    "location": "sub_review_flow.md §4.H / dev_system_spec.md §19.10",
+    "issue": "Hフロー（統合レビュー）の発動タイミングに「デプロイ後の本番環境に対して」が含まれている。デプロイのたびに3ペルソナ×2モデル=6本の重いAIレビュー（APIコストと時間）を回すのは、ソロ開発者のアジリティを著しく低下させ、運用負荷が非現実的。",
+    "spec_reference": "Hフローの発動タイミング: デプロイ後の本番環境に対して",
+    "actual": "デプロイのたびにHフローが発動する定義になっている",
+    "suggestion": "デプロイ時の品質保証は機械的な実機E2E（§8 Step 12）に任せ、Hフローの発動タイミングは「Phase A完了後」および「大型機能完了後」のみに限定する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "screen": "dev_system_spec.md",
+    "location": "§3.1 改訂案① / 全22フローへのStep 0追加",
+    "issue": "全22フローの冒頭に「Step 0 (参照Read): §C○ を Read して遵守する」を追加することで、人間（ソロ開発者）が仕様書を読む際の���イズが増大し、1,900行の仕様書の可読性とメンテナンス性が低下する。",
+    "spec_reference": "全22フローへの Step 0（参照Read）追加",
+    "actual": "各フローの冒頭にハードコードでStep 0が追加されている",
+    "suggestion": "Step 0の記述を各フローにハードコードするのではなく、AIのシステムプロンプト（CLAUDE.mdの起動時Read指示）側で「該当フローを実行する前に必ず対応する§C規範をReadすること」と包括的に指示する形にし、仕様書本文のノイズを減らす。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  }
+]

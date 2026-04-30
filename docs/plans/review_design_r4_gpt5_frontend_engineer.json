@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§5.2–§5.4, §8.1, §9",
+    "issue": "セマンティックのsubtle系ホバー/プレス用トークンが全テーマで未定義（Night Skyの:root既定だけに存在）。Dawn/Harajuku系では--danger-subtle-hover/pressed等がNight Sky色のまま適用され、テーマ整合が崩れる。",
+    "suggestion": "各テーマブロック(:root[data-theme=...])で以下を必ず定義: --success-subtle-hover/pressed, --danger-subtle-hover/pressed, --warning-subtle-hover/pressed, --info-subtle-hover/pressed。値は各テーマの--{semantic}に対する不透明度違いで静的定義（color-mixは使わない方針に準拠）。コンポーネントは必ずこれらのトークン参照に統一。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.1（ボタン状態表）, §9",
+    "issue": "danger以外（success/warning/info）のsubtle系ホバー/プレス・トークン自体がトークン一覧に存在しないため、コンポーネント実装時に色の一貫性が保てない。",
+    "suggestion": "トークン一覧（§9）に--success-subtle-hover/pressed, --warning-subtle-hover/pressed, --info-subtle-hover/pressedを追加し、全テーマ側でも上書き定義。状態表・コンポーネント仕様もそれらに差し替え。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§8.1（ボタン: Danger subtle行）",
+    "issue": "説明にrgba(*danger*, 0.18)の擬似記法が残っており、コピペ実装でCSS構文エラーを誘発しうる。",
+    "suggestion": "擬似記法を削除し、具体トークン名（--danger-subtle-hover/--danger-subtle-pressed）に置換。実装例もトークン参照のみを掲載。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.5（グラスモーフィズム）",
+    "issue": "backdrop-filterはiOS Safari/Android Chromeでも高コストで、スクロール領域や祖先にtransform/filtersがあると再描画範囲が拡大しフレーム落ちが発生しやすい。角丸ボーダーと併用時に縁のブリードも起きうる。",
+    "suggestion": "- glass適用要素にoverflow:hiddenとborder-radiusを併用し、background-clip: padding-boxで縁ブリードを抑制\n- glassはスクロール子要素ではなく固定/非スクロールのコンテナに限定（既方針の明��化）\n- 祖先にtransform/filter/backdrop-filterを重ねない運用ルールを追記\n- data-glass-strength（soft|strong）等で強度を段階化し、モバイル低速端末はblur(8px) + saturate(140%)に自動ダウングレード\n- will-changeの多用は避け、パフォーマンス計測（Chrome Performance/iOS Remote Inspector）で30/60fps基準の検証手順を明記",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5（各テーマ定義）, §9",
+    "issue": "color-schemeが未定義のため、iOS SafariでフォームコントロールやスクロールバーがOS既定配色になり、ダーク/ライトテーマと不一致になる可能性。",
+    "suggestion": "html[data-theme='night-sky'],[data-theme='harajuku-dark']にはcolor-scheme: dark、[data-theme='dawn'],[data-theme='harajuku-light']にはcolor-scheme: lightを付与。ベース:rootにはcolor-scheme: dark（Night Sky既定）を指定。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§5.0（FOUC対策/永続化）",
+    "issue": "テーマ本体のFOUCは抑止されているが、ブラウザ/ステータスバーのtheme-colorが初期描画時に一瞬デフォルト色で表示される可能性（特にAndroid Chrome、iOS Safariのツールバー）。",
+    "suggestion": "初期HTMLに<meta name='theme-color' content='{デフォルトテーマ色}'>を静的出力し、インライ��の永続化スクリプト直後に即時同期（document.querySelector(\"meta[name='theme-color']\").content = getComputedStyle(document.documentElement).getPropertyValue('--bg-primary')）。iOS PWA用に<meta name='apple-mobile-web-app-status-bar-style'>もテーマ別（default/black/black-translucent）で同期手順を追記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§9, §5.1（Night Sky）",
+    "issue": ":rootにNight Sky既定と、:root[data-theme='night-sky']にも同等定義があり「二重の単一情報源」。一方の更新漏れリスクと、他テーマ未上書きトークンがNight Skyにフォールバックする設計バグの温床になる。",
+    "suggestion": "単一の情報源に統一。推奨: :rootは“テーマ非依存の骨格トークン（spacing/typography/z-index他）”のみ、色系は必ず:root[data-theme='...']で定義。Night Skyもdata-theme側に寄せ、:rootの色定義は撤廃。必要なら@layer tokensで読み込み順を固定。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1（イージングトークン）, lais_ux_v1.md §1.3",
+    "issue": "spring系cubic-bezier（y>1のオーバーシュート）はscale専用と明記されているが、UX側で独自ベジェ(cubic-bezier(0.32, 0.72, 0, 1))を使用しており、デザインシステムのトークン逸脱と保守負荷増の懸念。",
+    "suggestion": "UX側の個別ベジェを--ease-out等の既存トークンに寄せるか、デザインシステムへ新トークン(--ease-modal等)として昇格して全体で統一。さらにspring系はtransition-property: transformのみに限定するLintルールを記載（opacity/translateでの誤用防止）。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0（FOUC対策）",
+    "issue": "テーマ切替時に全画面のcolor/background/borderが同時トランジションすると“チラつき”が発生しやすいが、切替瞬間のトランジション抑止ルールが未定義。",
+    "suggestion": "テーマ変更処理で<html class=\"theme-changing\">を一時付与し、.theme-changing * { transition: none !important } を200ms程度適用→class除去。これにより切替時のJank/チラつきを根絶。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§7.6（prefers-reduced-motion）, §9",
+    "issue": "§7.6では全要��のtransition/animationを!importantで1ms化し包括停止、§9ではトークン上書きのみ。どちらを“正”とするかが明確でないため、実装者に混乱を招く。",
+    "suggestion": "優先指針を明文化: グローバル停止（§7.6）を正とし、§9のトークン短縮は“トークンだけを参照する最小実装向けサンプル”である旨を明記。実装チェックリストに§7.6の導入必須を追記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.4（z-index）/ §5.5（glass）",
+    "issue": "filter/backdrop-filter/transformは新たなスタッキングコンテキストを作るため、z-indexトークンだけでは前後関係が意図通りにならないケースがあるが、運用ルールが未記載。",
+    "suggestion": "ガイドライン追記: glass-surfaceやアニメ付き要素で不要なtransform/filterを避ける、必要時は親・子のどちらがスタッキングコンテキストを持つか設計時に固定し、z-indexトークンの適用層を明確化する。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0（FOUC対策）, 互換性: lais_ux_v1.md §16.5 D2",
+    "issue": "iOSのITPによりlocalStorageが消去された際、初回描画はデフォルトテーマで出てしまい、その後サーバー同期でテーマが切り替わる“二段階描画”が発生する可能性。",
+    "suggestion": "テーマ選好をCookieにも二重保存し、インラインスクリプトでCookie→localStorageへ復元。もしくはSSR/edge functionでdata-themeを事前埋め込み。これによりITP影響下でも初回からユーザー選好テーマで描画可能。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  }
+]

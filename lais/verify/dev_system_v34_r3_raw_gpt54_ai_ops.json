@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§2.18, §3.5, §5.2",
+    "issue": "Hフロー承認ゲートをAI暴走防止の中核と定義しながら、app_config.yaml の `hflow.enabled: false` で高リスク変更でも承認を全面スキップできる設計になっています。これは『ADV/POのみ承認可』『ENG自己付与禁止』という責務境界を実質的に無効化し、AIの自律範囲を設定ファイル1つで危険側へ拡大させるため、承認ゲートの実効性が崩れています。",
+    "suggestion": "Hフローのオプトアウトは全面無効化ではなく、対象を限定してください。少なくとも auth/payment/external/supabase/migration などPD-105/106の最重要領域は常に承認必須とし、`hflow.enabled: false` は中リスク以下のみ警告モードに留めるべきです。さらにオプトアウト変更自体をPO承認対象にし、設定変更履歴・理由・有効期限を別証跡として残す設計に改めてください。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "AMBIGUITY",
+    "location": "§2.2, §3.1, §3.2, §2.6",
+    "issue": "MISSION_ID の解決規則が一貫して��ません。deploy.sh では session_progress.md の『最初の ### ブロック』を拾う実装例が残る一方、STATUS 5状態モデルでは READY_FOR_DEPLOY や IN_PROGRESS を前提にしています。複数QUEUED/IN_PROGRESS/READY_FOR_DEPLOYが共存した場合、どのミッションを対象にするかが不定で、AIが誤ったミッションを抽出して別案件のデプロイ・状態更新を行う危険があります。",
+    "suggestion": "MISSION_ID 解決を単一SSOTに固定してください。例えば『deploy.sh は READY_FOR_DEPLOY の最上位1件のみ対象、存在しなければ失敗』『canopy は IN_PROGRESS 優先、なければ QUEUED の先頭をIN_PROGRESSへ昇格』のように状態別の優先順位を厳密定義し、§3.1・§3.2・§2.2・§2.6の全コード例を同一ロジックに統一してください。複数候補検出時は自律継続せず human review に停止するのが妥当です。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§3.2, §2.6, §2.17",
+    "issue": "STATUS 自動遷移の条件が内部矛盾しています。§3.2 では READY_FOR_DEPLOY は『cmd-unit + cmd-e2e PASS』と定義される一方、§2.6 の `check_test_pass()` は『最低1種類の証跡がPASS��ら遷移』としており、しかも cmd-e2e 省略可の扱いが低リスクだけでなく一般化されています。この差異により、AIが unit だけPASSで READY_FOR_DEPLOY/DONE に進めてしまう余地があり、責務境界と品質ゲートが崩れます。",
+    "suggestion": "自動遷移条件をリスク別に明文化して一本化してください。例として、low=no_deploy時は cmd-unit 必須 + cmd-e2e 任意、通常low/midは cmd-unit and cmd-e2e 必須、highは cmd-unit and cmd-e2e and deploy.sh完了 and G17必須、のように状態遷移表を定義し、`check_test_pass()` の実装例も完全一致させてください。『最低1種類で遷移』という緩い規則は削除すべきです。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§2.2 Step 11, §2.4, §2.6",
+    "issue": "AIが誤判定して誤った STATUS 更新や誤デプロイを行った場合のリカバリ手順が、デプロイ失敗時の recover ミッション生成に偏っており、『誤成功』『誤DONE』『誤ったMISSION_IDへの書換え』に対する巻き戻し責務が未定義です。暴走防止だけでなく、誤判断後に誰が何を戻すかが不足しています。",
+    "suggestion": "失敗系だ��でなく誤判定系の運用手順を追加してください。具体的には、(1) ENGが誤更新を検知したら自動実行を停止、(2) ADVが `STATUS_CORRECTION` 承認を発行、(3) 専用スクリプトで before/after 差分を残しつつ状態を巻き戻す、(4) 誤デプロイ時は rollback.sh を必須起動、(5) session_progress.md と deploy.log にインシデント記録、までを明文化すると責務分離と復旧性が上がります。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§3.5, §2.3, §6.4, §6.7",
+    "issue": "Hフロー承認ファイルの作成主体をADV/POに限定している点は妥当ですが、承認内容の真正性検証が commit_sha 一致にほぼ依存しており、approver本人性や改ざん耐性が弱いです。権限分離の思想はある一方、承認ファイルが単なるリポジトリ内JSONだと、運用事故時に『誰が本当に承認したか』が曖昧になりやすい構造です。",
+    "suggestion": "少なくとも承認プロセスに二重証跡を持たせてください。例として、承認ファイルに `approved_via_session` や `review_log_ref` を追加し、対応する session_history / review artifact の参照を必須化します。可能��ら git author/commit metadata と承認ファイル生成コマンドを紐づけ、ADV/PO専用スクリプト経由でのみ作成可能にすると、AIの自律範囲と人間承認の境界がより実効的になります。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§2.4, §3.6",
+    "issue": "deploy失敗時の STRIKE 管理は整理されていますが、1回目で自動 recover ミッションを生成する設計は、AIが原因を誤認したまま復旧作業を自己増殖させる危険をまだ残しています。特に同一根因で連続失敗するケースでは、人間が原因確認する前に新しいミッションが積まれ、キューが汚染される可能性があります。",
+    "suggestion": "1回目失敗でも recover ミッション自動生成は『ログ収集専用』に限定し、実装着手は human acknowledgment 後にしてください。具体的には STATUS を QUEUED ではなく BLOCKED_REVIEW 相当の待機状態にする、または `AUTO_CREATED=true` マークを付与し、ADVレビュー完了までENGが実行不可と明記すると、暴走防止と復旧のバランスが改善します。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§0.4, §6, §2.3, §6.4",
+    "issue": "ADVは『コードを書かない』原則を維持しつつ、Code G_47 に対して多数のスクリプト実装サンプルを逐語転記させる構造になっており、実質的な実装責任の所在が見えにくくなっています。設計責任はADV、実装責任はENGという境界自体はあるものの、不具合時にどこまでがADVの設計ミスでどこからがENG実装ミスか判別しにくいです。",
+    "suggestion": "責務境界を実運用で明確化するため、各スクリプトに『design authority / implementation authority / approval authority』の3者をメタ情報として付けてください。例えば R2.2の各Target節に『ADVは仕様正文と受入条件まで、ENGは実ファイルへの反映とshellcheck/jq実行まで』と明記すると、AI⇔人間の責任分界が監査しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.2, §5.1, §6.4",
+    "issue": "BLOCKED はENG手動遷移可と整理されていますが、BLOCKED 長期滞留時に誰が解除判断・優先度見直し・PO報告を行うかの運用SLAが弱いです。デッドロックは避けられても、AIが『BLOCKEDにして��わり』になり、回収責任が曖昧なまま積み残される懸念があります。",
+    "suggestion": "BLOCKED に対して人間介入SLAを追加してください。例として『24時間超のBLOCKEDはADVレビュー必須』『72時間超はPO通知必須』『解除時は原因分類を learned-pattern 候補に登録』などのルールを加えると、AIの誤判断や先送りを人間が吸収しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  }
+]

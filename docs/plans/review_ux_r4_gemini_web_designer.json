@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3",
+    "issue": "「リスト表示時はCanvas経由でラスタライズ済みPNGをキャッシュ表示」とあるが、FRIENDS画面で最大500人の他人のSVGアバターをクライアント側で一斉にCanvas描画・PNG化すると、メインスレッドが長時間ブロックされ、アプリがフリーズ・クラッシュする確実な原因となる。",
+    "suggestion": "他人のアバター（および自アバターのリスト用サムネイル）は、サーバー側（Cloudflare Workers等）でSVG合成とPNGラスタライズを行い、CDN経由で配信・キャッシュするアーキテクチャに変更するこ���。クライアントでのSVG直接レンダリングは、自アバターのプロフィール詳細画面のみに限定する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.4, §6.1",
+    "issue": "ハーフモーダルやドロワー表示時に `history.pushState` を発行するかどうかが未定義。発行しない場合、Androidユーザーが物理/ジェスチャーの「戻る」操作をした際、モーダルが閉じるのではなく、アプリ自体から離脱（または前画面へ遷移）してしまう致命的なUX障害が発生する。",
+    "suggestion": "ハーフモーダル、ドロワー、フルスクリーンQR表示などのオーバーレイUIを開く際は必ず `history.pushState` を行い、`popstate` イベントをフックしてオーバーレイを閉じる処理を明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALK画面での画像添付（最大10MB）について、アップロード中のプログレス表示、送信ボタンの制御、およびオフライン時に添付を試みた際のエラーハンドリングが未定義。",
+    "suggestion": "画像選択後、プレビュー上にローディングインジケータを表示し、アップロード完了まで送信ボタンを無効化する。オフライン時はファイルピッカーを開く前に「オフライン時は画像を添付できません」のトーストを表示しブロックする仕様を追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §1.3, ux_v1.md §8.2, §8.3",
+    "issue": "コンセプトで「見た目は洗練。ゲーム画面は一切出さない」としているが、レベルアップやゴール達成の演出で「紙吹雪パーティクル」が指定されている。紙吹雪はカジュアル・ポップな印象が強く、「洗練（特にNight SkyやHarajuku Darkテーマ）」の世界観と衝突する。",
+    "suggestion": "パーティクルのスタイルをテーマに連動させる（例：洗練テーマでは光の波紋、オーラエフェクト、控えめなグリッターにする）か、デザインシステムで「洗練された達成エフェクト」を再定義すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §6.2, §10.2",
+    "issue": "トーストやモーダ���に「shadow」を使用するとあるが、ダークテーマ（Night Sky, Harajuku Dark）ではドロップシャドウが視認しづらく、UIの階層（Elevation）がユーザーに伝わらない。",
+    "suggestion": "デザインシステムにおいて、ライトテーマはシャドウで階層を表現し、ダークテーマは背景色の明度差（surface-1, surface-2）や微細なボーダー（border-subtle）で階層を表現する方針を明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.2",
+    "issue": "iOS PWA対策として「flexboxでメッセージ領域が縮小」とあるが、領域が縮小した瞬間に、最新のメッセージ（最下部）がキーボードの下に隠れて見えなくなる（スクロール位置が自動調整されない）問題が発生する。",
+    "suggestion": "`visualViewport` の `resize` イベント発火時（キーボード表示による領域縮小時）に、メッセージリストの最下部へプログラム的にスクロール（`scrollTop = scrollHeight`）する処理を明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3",
+    "issue": "「Undoスナックバーは全タブに跨って表示を維持する」とあるが、TALK画面に遷移した場合、画面下部にあるチャット入力バーの上にスナックバーが被り、30秒間チャット入力が阻害される恐れがある。",
+    "suggestion": "TALK画面ではスナックバーを入力バーの上部にオフセットして動的に配置するか、タブ切替時はスナックバーを非表示にし（バックグラウンドでカウントダウンは継続）、GROW画面に戻った時のみ再表示する仕様に変更すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §7.3",
+    "issue": "SVGアバターの背景や線画の色が固定されていると、ダークテーマに変更した際にアバターだけが白浮きするなど、ビジュアルの統合性が損なわれる。",
+    "suggestion": "SVGアバターの背景を透過（transparent）にし、線画やベースカラーにCSS変数（`currentColor` やテーマのトークン）を適用して、選択中のテーマに自然に馴染む設計にすること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "project_v1.md §3.2.5, ux_v1.md §2.3",
+    "issue": "午前3:59にタスクを完了し、4:00（日次リセット）を跨いでUndo（30秒以内）を実行した場合、すでに未完了にリセットされた状態に対してUndoが発火し、データ不整合やEXP計算のバグを引き起こす可能性がある。",
+    "suggestion": "サーバー側でタスク完了イベントに「論理日付」を持たせ、4:00を跨いだUndoでも前日分の完了を取り消す（前日分のEXPを減算する）処理とするか、4:00を跨ぐUndoはUI上で無効化する仕様を追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §10.2",
+    "issue": "「洗練」を実現するための色、フォント、余白が未定義。design_system.mdで定義予定だが、UX仕様の段階で「アクセント色」「surface色」などのセマンティックトークン（意味的命名）の体系が定まっていないと、実装時にハードコードが頻発する。",
+    "suggestion": "design_system.mdの作成要件として、カラースキーム（surface, primary, accent, text-primary等）、タイポグラフィスケール、余白（spacing-1〜8）、アイコン体系（線の太さ、角丸の有無）のセ���ンティックトークン定義を必須とすることを明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

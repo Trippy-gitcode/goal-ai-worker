@@ -1,0 +1,57 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRAST",
+    "screen": "s10_grow",
+    "location": "完了タスク『企画書を仕上げる』テキスト",
+    "issue": "完了グレーアウト色 #4a5568 相当で、背景 #0d1117 とのコントラストが WCAG 1.4.3 AA (4.5:1) に不足の可能性（視認困難）。LOCK §18 で WCAG は実装時対応だが、視認性そのものが機能を損ねている。",
+    "suggestion": "#7890A8 程度に引き上げ（打ち消し線で完了表現）。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "COLOR_HARMONY",
+    "screen": "s10_grow",
+    "location": "ゴール色ドット 青/オレンジ",
+    "issue": "v1→v2 で緑 (完了色) 排除済み ✅。青=#79C0FF、オレンジ=#D29922 で衝突なし。",
+    "suggestion": "(問題なし)",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY_SIZE",
+    "screen": "s10_grow",
+    "location": "EXP 数値 1,240 / 2,000",
+    "issue": "B群v2 #2 11px 化 ✅。§3.2 最小 --font-size-xs=11px に適合。",
+    "suggestion": "(問題なし)",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY_SIZE",
+    "screen": "s20_talk",
+    "location": "タイムスタンプ 14:02 / 14:03",
+    "issue": "B群v2 #5 11px 化 ✅。§3.2 最小値に適合。",
+    "suggestion": "(問題なし)",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "FOCUS",
+    "screen": "ALL",
+    "location": "フォーカスリング",
+    "issue": "静的モックアップのため未表示。LOCK §18 実装時対応。",
+    "suggestion": "(対応不要)",
+    "model": "Code",
+    "persona": "color_coordinator"
+  }
+]

@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "上部背景のドット配置",
+    "issue": "ドットの散布が意図的な「設計された沈黙」として機能しておらず、ありきたりなAI生成のパーティクル表現に見え、視覚的緊張感に欠ける。",
+    "suggestion": "ドットを完全に排除して深い余白（暗闇）の美しさを際立たせるか、ブランドDNAに根ざした意味のある抽象形態（単色の微かな光の境界など）に置き換える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s02_onboarding",
+    "location": "中央のアバター���ラストと選択リング",
+    "issue": "アバターの造形がチープなクリップアートのようで、「洗練＋自然体」のブランドDNAに反している。また、選択状態の青いリングが太く野暮ったい。",
+    "suggestion": "アバターをより抽象的で洗練されたシルエットに再設計する。選択リングは1〜1.5px程度に細くし、余白を持たせてエレガントに囲む。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタイムライン",
+    "issue": "垂直線とドットが単なるリストの装飾に留まり、視覚的なリズムを生み出せていない。ドットの彩度が高く、Night Skyの静けさの中で浮いている。",
+    "suggestion": "タイムラインの線の不透明度を下げ、ドットはセマンティックカラーのsubtle版を活用して背景に溶け込ませる。タスク間の余白を広げ呼吸するリズムを作る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内のボタン群",
+    "issue": "「登録する」「編集して登録」��タンがチャットバブル内に窮屈に押し込まれており、情報過密で視覚的フローを阻害している。",
+    "suggestion": "カード内の余白を広げ、ボタンを横並びの塗りつぶしではなく、スリムなテキストリンクやGhostボタンに変更して圧迫感を軽減する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "AI理解メモの本文テキスト",
+    "issue": "テキストの行間が詰まっており、仕様書（--line-height-ja-body: 1.7）の日本語タイポグラフィ調整が反映されていない。静かな情報設計が損なわれている。",
+    "suggestion": "line-heightを仕様通り1.7に設定し、文字間に適切な呼吸の空間を与え、読ませるテキストとしての美しさを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "所要時間の選択チップ群",
+    "issue": "チップが横に窮屈に並んでおり、視覚的な高さが小さく、WCAG 2.5.5のタップターゲット最小サイズ（44x44px）を満たしていないように見える。",
+    "suggestion": "チップの上下パディングを増やすか、::before疑似要素で透明なタップ領域を拡張し、確実に44x44pxを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "下部のアクションボタン4つ",
+    "issue": "「編集」「削除」「進め方を聞く」「詰まりを相談」が同じ視覚的重み（サイズ・形状）で2x2に並んでおり、ユーザーの視線が迷う。",
+    "suggestion": "主要アクション（AI相談系）と副次アクション（編集・削除）でボタンスタイル（Primary, Secondary, Ghost）を明確に分け、視覚的な階層を構築する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s14_goal_detail",
+    "location": "進捗バーと「60%」の数字",
+    "issue": "数字が巨大すぎるため、下の細いプログレスバーとのプロポーションが崩れており、視覚的な緊張感ではなく単なるアンバランスを生んでいる。",
+    "suggestion": "数字のウェイトを細くする（Thin等）かサイズを少し抑え、プログレスバーとの一体感のあるモニュメント的な美しさを探る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s00_splash",
+    "location": "「はじめる」ボタンの背景色",
+    "issue": "ボタンの青（#1A5FC8）が背景に対してコントラストが強すぎ、「実世界との地続き感」を損ねる典型的なアプリ的ネオン感が出ている。",
+    "suggestion": "ボタンの色をテーマのアクセント色（--accent: #79C0FF）の落ち着いたトーンに合わせるか、周囲の暗闇に馴染む表現に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域のアバタープレースホルダー",
+    "issue": "円形の枠に対して人型アイコンが小さく、周囲の余白が「設計された沈黙」ではなく「意図のない空虚な隙間」になっている。",
+    "suggestion": "アイコンのサイズを枠に対して適切に拡大するか、枠自体の存在感を極限まで薄め、空間全体でアバターを包み込む構成にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  }
+]

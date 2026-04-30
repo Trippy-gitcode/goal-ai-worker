@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "1. App.jsx + 2. S10Grow.jsx（LP-012 ルート分割）",
+    "issue": "S30 を lazy-load のみで事前ウォームアップしていないため、初回 /me 遷移がコールドスタートになりやすく、低速回線で明確な体感遅延が出る。",
+    "suggestion": "BottomTabBar が初回表示されたアイドル時間に /me チャンクを prefetch/温める。例: useEffect(() => { const id = window.requestIdleCallback?.(() => import('./screens/S30MeProfile.jsx')); return () => window.cancelIdleCallback?.(id); }, []); または <link rel=\"prefetch\" as=\"script\"> を注入。ホバー/フォーカス時の onPointerEnter で import するのも有効。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "4. S30MeProfile.css（.s30-hero-bar-fill / .s30-mbti-bar-fill）",
+    "issue": "progress のアニメーションに width のトランジションを使っており、レイアウト計算と再ペイントを誘発するため低速端末で滑らかさが低下しやすい。",
+    "suggestion": "transform: scaleX を用いた GPU フレンドリーな実装に変更。例: .bar-fill { transform-origin: left; transition: transform var(--duration-slow) var(--ease-out); } とし、JS 側は style={{ '--p': expPercent/100 }}、CSS で transform: scaleX(var(--p)); を適用。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. S30MeProfile.jsx（S30-2 サブタブ map）",
+    "issue": "onClick={() => handleSubtabClick(tab.id)} でレンダー毎にクロージャが生成され、微小ながら再レンダーコストと diff の変化を増やす。",
+    "suggestion": "単一ハンドラ + data-属性で回避。例: <button data-id={tab.id} onClick={onSubtab}> とし、const onSubtab = useCallback((e)=>setActiveSubtab(e.currentTarget.dataset.id),[]);",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3. S30MeProfile.jsx（S30-6 リンク行の chevron 等 SVG）",
+    "issue": "インライン SVG が重複し、DOM/HTML バイトが増加。全画面で同様のアイコンを多用するとバンドル肥大とペイントノードの増加につながる。",
+    "suggestion": "共通 Icon コンポーネントや SVG sprite（<symbol> + <use>）を導入し再利用。例: <use href=\"#icon-chevron\" aria-hidden=\"true\"/>。アイコンは aria-hidden を付与してヒットテスト/アクセシビリティも最適化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "4. S30MeProfile.css（.s30-me の min-height: 100dvh）",
+    "issue": "100dvh はモバイルでアドレスバーの表示/非表示に追随してレイアウトが頻繁に変わり、スクロール時にジャンクが発生しやすい。",
+    "suggestion": "安定したビューポート単位を優先。例: .s30-me { min-height: 100vh; min-height: 100svh; } を併記（対応ブラウザでは 100svh が採用され、不要な再レイアウトを抑制）。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "1. App.jsx（Suspense fallback）",
+    "issue": "fallback が実質空のため、初回遷移で真っ白なフレームが表示され知覚的パフォーマンスが低下（特にコールドフェッチ時）。",
+    "suggestion": "軽量スケルトンを表示し、最終レイアウトに近い高さを確保して CLS と空白時間を回避。例: <main class=\"route-fallback\" aria-busy=\"true\"><div class=\"hero-skel\"/><div class=\"tab-skel\"/></main> など。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. S10Grow.jsx / 3. S30MeProfile.jsx（各 onClick の console.log）",
+    "issue": "本番でも console.log が実行されると I/O がメインスレッドを占有し、連打時の応答性を悪化させる可能性がある。",
+    "suggestion": "ログはビルド時除去（terser drop_console）または if (process.env.NODE_ENV !== 'production') ガードで無効化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. S30MeProfile.jsx（progress の style プロップ）",
+    "issue": "style={{ width: `${percent}%` }} が毎レンダー新規オブジェクトとなり、DOM プロップ比較のチューニング余地がある。",
+    "suggestion": "CSS カスタムプロパティで値を受け渡し（例: style={{ '--p': `${percent}%` }} + CSS 側で width: var(--p) または R-002 の transform 案）。もしくは useMemo で style を安定化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3. S30MeProfile.jsx（BottomTabBar の再レンダー）",
+    "issue": "active=\"me\" は固定だが、親の state 変更（サブタブ切替）に伴い BottomTabBar も再レンダーされる可能性がある。アイコン数/装飾が多い場合オーバーヘッド化。",
+    "suggestion": "BottomTabBar を memo 化（export default memo(BottomTabBar)）し、props が浅い比較で等しい場合は再レンダーを回避。必要なら S30 側で <MemoizedBottomTabBar .../> を使用。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4. S30MeProfile.css（S30-4/5/6 下部セクション）",
+    "issue": "ファーストビュー外の要素も初回ペイント対象になり、わずかだが初期レンダリングコストが増加。",
+    "suggestion": "progressive enhancement として下部セクションに content-visibility: auto; contain-intrinsic-size: 1px 400px; を付与し、スクロールインまでレイアウト/ペイントを遅延。対応外ブラウザでも悪影響なし。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

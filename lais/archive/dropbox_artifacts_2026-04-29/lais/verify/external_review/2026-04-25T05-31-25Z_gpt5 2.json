@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "docs/plans/dev_system_spec.md §17 / docs/plans/sub_external_review_protocol.md / docs/plans/sub_review_flow.md",
+    "issue": "仕様書構成や依存参照の列挙に不整合があります。dev_system_spec のヘッダではサブ仕様書3本+テンプレート1本としつつ本文では sub_hflow_protocol.md や sub_review_flow.md、さらに新設の sub_external_review_protocol.md を参照していますが、ヘッダや構成説明に揃って反映されていません。運用時に『どれが正本か』判断を誤り、レビュー対象漏れや chain update 漏れを生みます。",
+    "suggestion": "仕様書トップのメタ情報、§17 構成表、依存先一覧、レビュー送信ルールを単一の一覧に統一し、sub_review_flow.md / sub_external_review_protocol.md / sub_hflow_protocol.md を正式な構成要素として明示してください。存在する全サブ仕様書を1か所で列挙し、ヘッダ・本文・ロードマップの記述差分をなくすと、後続の自動化やレビュー手順が安定します。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "instructions/session_progress.md 先頭ヘッダ / docs/plans/dev_system_spec.md 全体",
+    "issue": "session_progress の dev-system 参照が v3.3 のまま固定されている一方、今回追加された仕様群は v3.4 確定・v3.5 確定を前提にしています。運用の唯一の情報源と明記されたファイルが旧版を案内しているため、新セッション開始時に Code/ADV が古いルールセットを読む構造的誤誘導が発生します。これは後日、古いゲート定義や旧フローでの誤実装を必ず生みます。",
+    "suggestion": "session_progress の先頭メタ情報にある dev-system 参照を現行の正本へ更新し、必要なら『運用正本: v3.4 / 拡張参考: v3.5』のように明示的に分離してください。合わせて “唯一の情報源” とされるファイル内の版情報、Next/Last done/Open issues が各仕様書の現状と同期していることを pre-commit または review 時の自動検証対象に追加すると再発防止になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "docs/plans/dev_system_spec.md §13.13 / §13.15 / docs/learned-patterns.md LP-032 / docs/plans/sub_external_review_protocol.md §7",
+    "issue": "レビ���ーモデル方針が文書間で競合しています。§13.13 では Claude 系レビュー API 不可・外部プロバイダー分離を強く要求する一方、§13.15 では Claude Code 自身のフル実行をレビュー体系に含め、LP-032 や external review protocol では Max プラン前提の Opus 統一運用を推奨しています。どの場面で『同一プロバイダー禁止』が適用され、どこで免除されるのか不明確です。",
+    "suggestion": "『外部APIレビュー』と『内部 subagent / Code self-review』を明確に別レイヤとして定義し、§13.13 の禁止対象を外部APIのみに限定するか、逆に Opus 統一運用を例外規定として明文化してください。レビュー実行者が読む判断表を1つ作り、“Code自己レビュー可／Claude API不可／subagent可” など境界を機械的に判定できる形にすると、運用矛盾を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "docs/plans/sub_external_review_protocol.md §3.3 / PATCH-24,25,26 記述一式",
+    "issue": "外部レビューのコスト計上まわりが仕様と実装計画で二重化し、実際の課金制御が再び壊れやすい状態です。post-commit 側では 0.15 USD の fallback を維持しつつ、ai_review.js 側で cost_usd を別計算しており、どちらが正本か曖昧です。このままだと価格改定やモデル追加時に片方だけ更新され、ガードレールが静かにズレます。",
+    "suggestion": "コストの SSOT を ai_review.js か app_config.yaml のどちらか一方に固定し、post-commit 側はその値を読むだけにしてください。『暫定 fallback を維持』する場合も、有効期限・削除条件・優先順位を明文化し、二重管理を一時措置として宣言するべきです。さらに cost_usd 不一致を検知する sanity check を追加すれば、将来の課金事故を未然に防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "docs/plans/sub_external_review_protocol.md §5.1 / §5.2 / scripts 参照設計全般",
+    "issue": "review_feed や external_review ディレクトリの保存・ローテーション方針は記載されていますが、障害時や並列実行時の排他制御が未定義です。pre-commit 非同期実行と post-commit 集約が同時に走る構造で、同じ日次 markdown に追記競合が起きるとログ破損や記録欠落が起こり得ます。発生頻度は低くても、後か���原因追跡不能になるタイプの不具合です。",
+    "suggestion": "review_feed 追記処理に flock 相当の排他、もしくは一時ファイル→mv の原子的更新手順を仕様へ追加してください。また、同一 commit に対する複数回 post-commit 実行時の重複防止キー（commit sha）を定義し、既記録なら追記せず更新に切り替える方針を明文化すると、監査ログの信頼性が上がります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "docs/learned-patterns.md 全体",
+    "issue": "learned-patterns.md が運用規約・過去事例・フェーズ別追記・同一テーマの再記述を1ファイルに混在させており、LP-030〜033 付近では同趣旨の内容が複数節に重複しています。現時点では読めますが、今後さらに蓄積されると検索性が落ち、どの節を更新すべきか曖昧になります。結果として重複追記や古い記述の放置が発生しやすい構造です。",
+    "suggestion": "LP 本文、適用実例、運用定着記録、抽出メタ情報を見出しレベルで分離し、各 LP は『定義本体1箇所 + 実例へのアンカー参照』に整理してください。特に LP-030〜033 は再���述を避け、実例節へのリンクに置き換えると DRY になり、将来の更新コストと読み間違いを大きく減らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "docs/plans/dev_system_spec.md §21.5 §C5.1 / docs/plans/sub_review_flow.md §1.2",
+    "issue": "レビュー結果 JSON のスキーマ定義が文書ごとに微妙に異なります。dev_system_spec 側は id/severity/category/location/issue/spec_reference/suggestion を前提にしている一方、sub_review_flow は screen や actual を含む別形式を正本のように示しています。生成・集約・lint の各処理が別々の前提で書かれると、将来どこかでパース失敗や項目欠落による silent degradation が起きます。",
+    "suggestion": "レビューJSONの正式スキーマを1箇所に固定し、他文書はその参照のみにしてください。必須キー・任意キー・禁止キーを表形式で定義し、実装側でも JSON Schema か軽量バリデータで検証すると、モデルやプロンプト変更時の破壊的ズレを即検出できます。特に spec_reference の必須性は全仕様で揃えるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "docs/plans/sub_external_review_protocol.md §7 / instructions/session_progress.md / docs/plans/dev_system_v35_roadmap.md",
+    "issue": "review.model_tier や app_config.yaml review 節について『仕様化済み』『切替準備完了』『v3.5.xで実装』『まだ未反映』という表現が併存し、現時点で実装済みなのか未実装なのか判別しづらくなっています。運用者が設定値を書いても読まれない、あるいは未対応だと気づかず本番投入する危険があります。",
+    "suggestion": "各設定項目に対して “仕様のみ / テンプレあり / 実装済み / 本番有効” の4状態を明示してください。roadmap、session_progress、protocol の表現を統一し、未実装設定には『現時点では無視される』と明記すると誤設定を防げます。設定フラグが読まれているかを起動時ログや verify スクリプトで可視化するのも有効です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.3043,
+    "input_tokens": 223776,
+    "output_tokens": 2461,
+    "model_id": "gpt-5.4"
+  }
+]

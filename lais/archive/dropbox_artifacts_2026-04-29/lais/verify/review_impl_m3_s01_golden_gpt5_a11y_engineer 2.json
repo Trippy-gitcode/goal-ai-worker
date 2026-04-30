@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.2 S01-7 同意チェックボックス（S01Auth.jsx/.css: .s01-agree, .s01-checkbox）",
+    "issue": "チェックボックスのタップターゲットが20×20pxで、44×44px未満。音声/片手操作/運動障害ユーザーにとって誤タップリスクが高い。",
+    "suggestion": "クリック可能領域を44×44px以上に拡張する。例1) マークアップを<label class=\"s01-agree\"><input ... class=\"s01-checkbox\"/><span class=\"s01-agree-text\">…</span></label>に変更し、.s01-agree {min-height:44px; padding-block:10px; gap:12px;} を付与。例2) 現行構造のままなら、.s01-agree-text に display:inline-flex; align-items:center; min-height:44px; padding-block:10px; を付与してlabel全体をヒット領域にし、labelクリックでトグルできるよう維持する。いずれもキーボード/スクリーンリーダー挙動は既存の<input type=\"checkbox\">セマンティクスを保持。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§4.2 S01-10 セカンダリリンク（S01Auth.jsx: .s01-footer-link）",
+    "issue": "画面遷移（/auth?mode=…）を実行する要素が<button>で実装されており、支援技術には「ボタン」として案内される。ナビゲーションは本来リンクのセマンティクスが期待され、ユーザーのメンタルモデルと乖離。",
+    "suggestion": "preact-routerの<Link>コンポーネントまたは<a href={footerTarget} onClick={(e)=>{e.preventDefault(); route(footerTarget);}}>を使用し、リンクのセマンティクスを維持。キーボードでEnterで起動し、スクリーンリーダーには「リンク」として報告される。視覚は現行の下線スタイルを踏襲。min-height:44pxは現行維持。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§4.2 S01-6 パスワード入力（S01Auth.jsx: #s01-password）",
+    "issue": "パスワードの条件（8文字以上）が未達でもエラーメッセージが出ず、CTAがdisabledになるのみ。色や状態だけでは理由が伝わりづらく、キーボード/スクリーンリーダーユーザーにも原因が把握しにくい。",
+    "suggestion": "パスワード入力に説明文と関連付けを追加。例: <p id=\"s01-password-hint\" class=\"s01-hint\">8文字以上</p> を可視表示し、inputに aria-describedby=\"s01-password-hint\" を付与。blur後に条件未達なら aria-invalid=true とエラー文（idを付与）を表示し、aria-describedbyにエラーidも連結。required 属性の付与も推奨。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.2 モード切替/画面遷移（S01Auth.jsx + App.jsx）",
+    "issue": "signup↔loginへのモード切替や認証成功後の遷移時のフォーカスマネジメントが未実装。視覚的には変化しても、スクリーンリーダー利用者はコンテキストの変化に気づきにくい。",
+    "suggestion": "モード変更時・マウント時にh2（.s01-title）へプログラム的にフォーカスを移動（tabindex=\"-1\" + focus()）。またdocument.titleもモードに応じて更新。遷移完了後、新画面のmainやh1/h2へ同様にフォーカス。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S01Auth.css（.s01-cta, .s01-input ほかのtransition/transform）",
+    "issue": "prefers-reduced-motionに未対応。押下時のtransformや各種transitionが常に有効で、動きに敏感なユーザーに負担となる可能性。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } .s01-cta:active { transform: none; } } を追加し、インタラクション起因のアニメーション/トランジションを抑制。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "S01Auth.css フォーカス可視化（.s01-input:focus, .s01-cta:focus-visible, .s01-footer-link:focus-visible, .s01-checkbox:focus-visible）",
+    "issue": "focus ringの色/太さがトークン変数依存で、非テキストコントラスト(3:1)の満たしが実測できない。変数未設定/低コントラストの場合は可視フォーカス不十分となるリスク。",
+    "suggestion": "focus ringを確実に3:1以上に。例: outline: 2px solid #79C0FF; outline-offset: 2px; 背景（#0D1117前提）に対し実測コントラスト≥3:1を確認。特にダークテーマでの視認性を実測（スクショ/ツール）で担保。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S01Auth.jsx <main class=\"s01\" aria-label=…> / App.jsx <div class=\"app-root\" aria-label=\"Lais\">",
+    "issue": "mainランドマークおよびルートラッパーdivにaria-labelが付与され、支援技術に冗長な名称を読み上げる可能性。",
+    "suggestion": "単一mainであればaria-labelは不要。app-rootのaria-labelも削除。ページ名は見出し(h1/h2)とdocument.titleで提供。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.2 S01-8 利用規約/プライバシーポリシー（S01Auth.jsx: .s01-link）",
+    "issue": "href=\"#\" で onClick preventDefault の空リンクがフォーカス可能になっており、操作しても何も起こらないため混乱を招く恐れ。",
+    "suggestion": "実装準備前はフォーカス不可能にする（<span>に変更、または<a aria-disabled=\"true\" tabindex=\"-1\">）。リリース時は実URLへ遷移する<a href=…>にし、モーダル表示ならボタンセマンティクスを使用。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.2 フォーム必須表示（S01Auth.jsx 全フィールド）",
+    "issue": "必須入力である旨（email/password/同意）の可視表示がない。支援技術にはプログラム的に伝わらず、ユーザーにも事前に把握しづらい。",
+    "suggestion": "required属性を各必須フィールドに付与し、ラベルに「（必須）」を追記（視覚）またはsr-onlyで明示。例: <label>メールアドレス <span class=\"sr-only\">必須</span></label>。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S01Auth.css プレースホルダー色（.s01-input::placeholder）",
+    "issue": "プレースホルダーのコントラストはPhase 4以降と記載だが、現時点では実測未確認。低コントラストだと弱視ユーザーが読みにくい可能性。",
+    "suggestion": "後続フェーズでの対応時、背景(#161B22)に対し少なくとも4.5:1を目標（情報提示として使わない場合でも可読性を担保）。必要ならフォントサイズや重みの調整も検討。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

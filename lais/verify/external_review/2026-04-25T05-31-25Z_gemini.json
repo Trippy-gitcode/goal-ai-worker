@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md §2.δ'-3 (scripts/spec_first_lint.sh)",
+    "issue": "awkスクリプト内のコメント「# δ'-3 対応:」に含まれるシングルクォートにより、シェルスクリプトのシングルクォートが意図せず閉じられ、構文エラー（Syntax Error）が発生してスクリプトがクラッシュします。",
+    "suggestion": "コメント内のシングルクォートを削除するか、別の文字（例: `δ-3` や `delta-3`）に変更して、awkスクリプトが正しくパースされるように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §2.ε'-1 (scripts/deploy.sh)",
+    "issue": "PD-110およびPATCH-14で「HFLOW_APPROVED環境変数バイパス廃止」「verify_approval_authenticity.shに置換」と明記されているにもかかわらず、deploy.shの実装サンプルには古いHFLOW_APPROVEDのロジックがそのまま残存しています。",
+    "suggestion": "deploy.shのHフロー発火判定部分を、仕様通りに `verify_approval_authenticity.sh` を呼び出して二重証跡を検証するロジックに更新してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §2.γ'-7 (scripts/append_deploy_fail.sh)",
+    "issue": "PATCH-13で「自動 DEPLOY-RECOVER 生成廃止」と仕様変更されたにもかかわらず、スクリプトの後半に `templates/deploy_recover_template.md` を用いて `session_progress.md` にミッションを自動追記するロジックが残存しています。",
+    "suggestion": "スクリプト後半の `if [ -f templates/deploy_recover_template.md ]; then ... fi` ブロックを完全に削除し、仕様と実装を一致させてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md §2.δ'-4 (scripts/proposal_log_lint.sh)",
+    "issue": "awkスクリプト内で `strftime(\"%Y-%m-%d\")` を使用していますが、これはGNU awkなどの拡張機能であり、POSIX awkには存在しないため、macOSなどの環境でエラーになる可能性があります。",
+    "suggestion": "awkの外部で `date +%Y-%m-%d` を実行し、`awk -v today=\"$(date +%Y-%m-%d)\"` のように変数を渡して `strftime` の使用を避けるように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md §2.η' (canopy_common.sh::check_test_pass)",
+    "issue": "POSIX sh互換を謳っているにもかかわらず、非標準の `local` キーワードと、GNU/BSDで挙動が異なる `sed -i.bak` を使用しています。特にsed -iは移植性の問題を引き起こします。",
+    "suggestion": "`local` を削除して変数名をユニークにするか、サブシェルを利用してください。また、`sed -i.bak` は `sed ... > tmp && mv tmp ...` のように一時ファイルを経由する方式に変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "ROBUSTNESS",
+    "location": "lais/verify/dev_system_v34_package.md §2.γ'-1 (scripts/lib/risk_match.sh)",
+    "issue": "`is_risk_path` 関数内で `target` や `matched` 変数を宣言なしで使用しているため、グローバル変数が汚染されます。複数回呼び出された場合や他のスクリプトからsourceされた場合に予期せぬバグを生むリスクがあります。",
+    "suggestion": "変数名を `_risk_match_target` のようにユニークなプレフィックスを付けるか、関数全体をサブシェル `(...)` 内で実行して変数のスコープを制限してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.2771,
+    "input_tokens": 217136,
+    "output_tokens": 1130,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体（§7 ジェスチャー、§2.3 タスク完了、§3 TALK、§4.4 QRスキャン）",
+    "issue": "ハプティクス（触覚フィードバック）の設計が未定義。QR検出時のみVibration API記述があるが、iOS Safari/PWAではVibration APIが非対応で、完了・レベルアップ・ゴール達成・エラー時などのフィードバック方針が未定。",
+    "suggestion": "フィードバック方針を追加: 1) Android: Vibration APIで完了(10-15ms)、長押し開始(20ms)、重大エラー(40ms)などのパターン定義。2) iOS PWA: 触覚は使えない前提で、代替の視覚・微小サウンド(初回ユーザー操作後に再生許可)を定義。3) 設定>表示に「触覚/サウンドを減らす」トグルを追加。4) QR検出時はiOSではアイコン点滅+サウンド、Androidでは振動+サウンド。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§7.3 PWA実装注記（edge swipe）",
+    "issue": "iOS Safariのネイティブスワイプバックを `overscroll-behavior-x: none` とカスタムジェスチャで抑制する方針はHIGと乖離し、ブラウザ戻る期待と衝突する恐れが高い。",
+    "suggestion": "iOS in-browserではOS標準の戻る操作を尊重し、SPA内の戻りは左上戻るに限定。edge-swipeカスタムはPWAスタンドアロン時のみ有効化（`display-mode: standalone` 判定）。in-browserではページ全体ではなくコンテンツの内部スクロール要素に限定して水平オーバースクロールを抑止して衝突を最小化。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§6.5 Pull-to-refresh, §1 全体スクロール",
+    "issue": "Pull-to-refreshの適用範囲が画面全体と読み取れるが、iOS Safariのネイティブページリフレッシュと競合しやすく、誤動作やページリロードを引き起こす可能性が高い。",
+    "suggestion": "PTRはwindowではなく、スクロールコンテナ（Today/FRIENDSリスト領域）に限定実装。iOSではbodyは固定・内部スクロール（`height: 100vh; overflow: hidden` + 内部`overflow:auto`）にし、OSのネイティブPTRを回避。PTR発火閾値(60px)とキャンセル条件（下方向スクロール以外は無効）を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§6.2 トースト / §2.3 Undoスナックバー / §1.4 戻りナビ",
+    "issue": "ボトムスナックバー（Undo/トースト）やボトムタブがiOSのホームインジケータ領域と重なる可能性があるが、safe area考慮（env(safe-area-inset-*)）の記述がない。",
+    "suggestion": "ボトム固定UI（タブ、トースト、Undo）は常に`padding-bottom: env(safe-area-inset-bottom, 16px)`を適用。ハーフモーダルや入力バーにも同様のインセット調整を追加し、ランドスケープやノッチ端末でも重なりを防止。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§1.1 画面一覧 / §1.2 遷移 / §3.1 TALKヘッダー / ボトムタブ（全体）",
+    "issue": "ボトムタブの表記がテキストのみのように読め、iOS HIG/Material Designの「アイコン+ラベル常時表示」推奨に合致していない。視認性・学習性の面で不利。",
+    "suggestion": "3タブに適切なアイコン（例: GROW=target/checklist、TALK=chat bubble、ME=person）＋ラベル常時表示を明記。未読/バッジはアイコン右上に表示。タブの可触域≥48px、選択時の色/太字切替を定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.2 メッセージ送信フロー / §3.1 TALK画面構成",
+    "issue": "AI応答ストリーミングの「停止/キャンセル」操作が未定義。長文生成時の制御不能はUX低下を招く。",
+    "suggestion": "ストリーミング中に入力バー右側を[停止]に切替（×アイコン）。タップでサーバーに中断シグナル送出→受信停止。中断結果はバブルに「中断しました」を小さく表示。次入力の送信を即可能にする。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.1 画像添付 / §3.2 メッセージ送信",
+    "issue": "画像アップロードの進捗表示・失敗時のリトライ/キャンセルが未定義。",
+    "suggestion": "添付後、送信前にサムネイル上へプログレスリング表示。アップロード失敗時はサムネイルにエラーアイコン＋[再試行][削除]を表示。10MB超過/フォーマット不正は事前バリデーションとインラインエラーを定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§7.4 ドラッグ&ドロップ / §2.3 Today表示",
+    "issue": "Todayの手動並び替えと開始時刻による自動ソートの優先関係は「手動が上書き」とあるが、元に戻す方法（自動ソートへリセット）の操作が未定義。",
+    "suggestion": "Todayヘッダーに[並び替え]メニューを追加（自動/手動トグル＋『手動順をリセット』）。手動中に新規タスクが追加・編集で時刻変更された場合の挿入ルールも明記（例: 手動優先、追加は末尾に入れユーザーが後で整列）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§2.4 ゴール詳細（7日完了待ち）",
+    "issue": "『完了待ち（7日未満）』状態での挙動が未定義（例: 追加でタスクを増やした場合は100%を維持か、進捗を100%未満に戻すか）。",
+    "suggestion": "ルールを明記: 1) 完了待ち中に新規タスク追加→進捗は100%未満に戻す（実質未完了）／または2) 完了待ちをロック（タスク追加は7日経過まで禁止）。どちらかを採用し、UI（ボタンの活性/非活性）と文言を揃える。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.1/§7.3 サブタブ横スワイプ / §4.3 DISCOVER（横スクロールチップ）",
+    "issue": "MEサブタブの横スワイプ切替が、DISCOVERの横スクロールUI（強み/弱みチップ）と競合し誤スワイプが起きやすい。",
+    "suggestion": "横スワイプ切替は『空白領域（リスト外）』でのみ有効化し、横スクロールコンポーネント内では無効化。閾値（水平移動>垂直移動×1.5 かつ 24px以上）を定義し誤判定を抑制。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§1.4 戻りナビゲーション（Android）",
+    "issue": "Androidのシステム戻るボタンで、トップレベルタブ（S-10/20/30）直下にいる時の最終挙動（アプリ終了 or ブラウザバック）が未定義。PWAでは終了APIがないため、意図が曖昧。",
+    "suggestion": "ポリシー明記: 1) in-browser: タブ直下でBack→ブラウザ前ページへ。2) standalone: タブ直下でBack→確認トースト『もう一度戻るで終了』（2秒以内に再Backで`window.close()`試行 or 何もしない）。Backでタブ間を移動しない指針は維持。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§3.1 TALKヘッダー",
+    "issue": "ヘッダーに『☰（履歴ドロワー）』と『🕐（履歴）』が併記されており、両者の役割が重複して見える。",
+    "suggestion": "トリガーを一つに統一（☰=履歴ドロワー）。🕐は削除 or 別機能（最近の下書きなど）に再割当。アクセシビリティラベル（例: aria-label='会話履歴を開く'）を付与。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§6 共通UI / §2.3 Undoスナックバー",
+    "issue": "Undo/トーストのスクリーンリーダー通知が記述されているが、フォーカス移動の仕様がなく、誤ってフォーカスを奪う可能性がある。",
+    "suggestion": "Undo/トーストは`aria-live='polite'`で読み上げるのみとし、フォーカスは奪わない方針を明記。スナックバーのアクション（取り消す）はTab順の最後に注入し、Escapeで閉じる動作を追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§15 通知タップ遷移 / §2.5 通知設計（project）",
+    "issue": "タスクリマインダーの通知からのアク���ョン（例: 通知上で『完了』『明日に延期』）が未定義。PWAでもNotification actionsは利用可能（ブラウザ依存）。",
+    "suggestion": "Service Workerのnotification actionsを定義（完了/延期）。権限がある環境ではアクションボタンを表示し、実行時にサーバーへ反映→アプリ起動時に差分同期。非対応環境はタップでディープリンクの現仕様を継続。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.2 ヒーロー領域 / §2.1 画面構成",
+    "issue": "iOSの一般的なパターン（アクティブなタブを再タップでリスト先頭にスクロール）が未定義。",
+    "suggestion": "アクティブなGROWタブを再タップ時にTodayの先頭へスムーススクロール（200ms）。TALK/MEは直近のスクロールコンテナにも適用。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 と §4.5（内部矛盾メモにも記載）",
+    "issue": "レベル必要EXP（Lv1→2が100 vs 1,000）の矛盾が残存。ux_v1.mdでは100を前提に進むが、WHAT側のブレは実装時の仕様確定を阻害する。",
+    "suggestion": "project_v1.md側を修正し、式とテーブルを100で統一。§4.5の文言（1,000EXP）を削除/更新。これに合わせて非機能要件や初回体験（初日Lv2）説明も整合させる。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §7.2/§7.4（messages vs social_messages）",
+    "issue": "AI対話テーブルとソーシャルメッセージテーブルの命名が混在し、RLSミス適用リスクがある（UX仕様でも参照が分散）。",
+    "suggestion": "テーブル命名規則を統一し、UX/Reference両方に反映。例: ai_messages（AI用）/ social_messages（ソーシャル用）。RLSのセクションに具体的カラムと許可主体を明示して誤適用を防止。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§9.1 ネットワーク断 / §6.4 スケルトン",
+    "issue": "ローディング/エラーの視覚パターンはあるが、グローバルなロードインジケータ（初回同期、Stripe戻りポーリングなど）の一貫仕様が分散。",
+    "suggestion": "アプリ共通のトップレベルローダ（アプリバー下の細線progress or 全画面ローダ）と使用基準（>400msで表示、>10sで『処理中』文言）を定義。Reduced Motion時は非アニメ化。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.4 FRIENDS お知らせ",
+    "issue": "『未読N件』の既読化ルールが未定義（一覧を開いた時点で既読か、要個別閲覧か）。既読にならないとバッジが消えず不満が生じやすい。",
+    "suggestion": "既読化ルールを明記: 1) お知らせ一覧を開いた時点で一括既読、2) または各行タップで個別既読＋一括[すべて既読]。いずれかを選び、バッジ更新タイミングを定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§10 アクセシビリティ / §8.2 レベルアップ演出 / §8.7 パーティクル",
+    "issue": "Reduced Motion対応はあるが、サウンド（効果音）や触覚の配慮設定が未定義。感覚過敏ユーザー向けに追加の制御が望ましい。",
+    "suggestion": "設定>表示に『効果音をオフ』『演出を簡素化』トグルを追加。Reduced Motion有効時は紙吹雪・フロートテキストを抑制し、バナーのみ・色変化のみの最小演出に。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

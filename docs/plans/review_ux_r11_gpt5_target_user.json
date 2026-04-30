@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3（Today操作/ドラッグ&ドロップ） × project_v1.md §3.2（Today=開始時刻順表示）",
+    "issue": "Todayのタスク並び順が「開始時刻順（未設定は末尾）」と定義されている一方、UXではロングプレスでの手動並び替えを保存するとある。自動ソートと手動ソートの優先順位・切替条件が矛盾し、実装/ユーザー体験が不安定になる。",
+    "suggestion": "どちらを正とするかを明記する。例: ①基本=開始時刻順、手動並び替えは「開始時刻未設定タスクのみ」許可、②Todayヘッダーに[並び順]トグル（時刻順/手動）を設け、ユーザーが明示選択、③手動順は当日限定で有効（翌日リセット）。設計方針を1つに固定してルールを仕様化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5（日次EXP上限） / ux_v1.md §8（演出）・§9.1（オフライン以外）",
+    "issue": "日次EXP上限（300）に到達した後のUI/UXが未定義。以降のタスク完了や冒険検出時に、EXP演出・バ��伸長・フロートテキスト・レベルアップ処理をどう扱うかが記載されていない。",
+    "suggestion": "上限到達時の明示UIを追加: 1) GROWヒーロー下に「本日のEXP上限に達しました」バナー、2) 以降のタスク完了はチェックのみ（+EXP表記とバー伸長は抑制）、3) TALKの冒険カードは「今日は+0（上限）」の注記付きで表示 or サイレント非表示方針を統一、4) 翌日のリセット時刻カウントダウン表記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.2（ゴール達成ボーナス1日1回） / ux_v1.md §2.4・§8.3",
+    "issue": "ゴール達成ボーナスが1日1回までという上限に到達した場合のUXが未定義。2件目以降のゴール達成時の演出やメッセージ、EXP付与抑制の扱いが不明。",
+    "suggestion": "2件目以降の達成時は「今日はボーナス上限に達しています（+0、明日04:00にリセット）」などのバナー/トーストを表示し、EXPバー伸長は抑制。ゴール自体の完了状態は維持し、翌日以降の履歴/達成一覧で可視化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5（冒険EXP 1日2回） / ux_v1.md §3.4（冒険EXP演出）",
+    "issue": "冒険EXPが1日2回の上限に達した場合のTALK画面での挙動が未定義。カード表示を抑制するのか、カードは表示して+0と明示するのかの方針がない。",
+    "suggestion": "上限到達時のカード方針を定める。例: カードは表示するが「本日は上限（+0）」と明記し、期待外れ感を軽減。もしくは非表示にしつつAIバブル末尾に「今日は冒険EXP上限に達しています」を1回だけ表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.3（複数タスク提案: 個別編集） / 変更履歴 v1.6",
+    "issue": "変更履歴では「TALKタスク提案編集をモーダル化（S-12）」とある一方、本文では複数タスク提案の[個別に編集]が『アコーディオン展開』になっており不一致。",
+    "suggestion": "本文を変更履歴に合わせて統一。複数タスクの個別編集もS-12ハーフモーダルで1件ずつ順番に編集→登録するフローに明示修正。インライン編集は不採用と明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘッダー: ☰/🕐/📝）・§3.5",
+    "issue": "TALKヘッダーに☰（履歴ドロワー）と🕐（履歴）が併存し、どちらが履歴を開くのかが曖昧。本文では☰でドロワー展開と定義されているが、🕐の役割が不明。",
+    "suggestion": "履歴入口を1つに統一（☰または🕐のどちらかを削除/別機能に割当）。ヘッダーのアイコンとS-21ドロワーの対応関係を明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.3（週N回のToday手動追加） / ux_v1.md §2.3・§2.3（Upcoming）",
+    "issue": "週N回習慣の「今日やる」手動追加ボタンがUXに存在しない。Projectで定義されたユーザー主導のToday追加パスが欠落。",
+    "suggestion": "習慣の詳細パネル（S-11相当）かUpcoming内の習慣行に「今日やる」ボタンを追加し、当日のTodayに即時反映する動作を規定。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3（画像添付の制約） / ux_v1.md §3.2（送信フロー）",
+    "issue": "画��添付の上限10MB/非対応フォーマット時のエラー表示・アップロード進捗・キャンセル操作のUXが未定義。",
+    "suggestion": "添付時にプログレスインジケータ/キャンセル（✕）と、失敗時のインラインエラー（「10MBを超えています」「未対応形式」）を定義。リサイズ・再送の導線も明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（Overdue: 明日に延期の取り消し）",
+    "issue": "「明日に延期しました [取り消す]」の[取り消す]が具体的にどの値へ巻き戻すか（元の予定日/時刻、Today表示状態）が未定義。",
+    "suggestion": "取り消しは『直前の値』に厳密に戻すと明記（例: 予定日=元の日付、開始時刻は不変、Today/Upcomingの表示位置も復元）。アニメーション/トースト文言も統一する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.4（S-14→S-20遷移: replaceState）",
+    "issue": "ゴール詳細からTALKに遷移すると履歴を置換し、戻るとGROWに戻るため、直前に開いていたゴール詳細（S-14）へ戻れな���。タスクや分解の続きに戻りたいユーザーには不便。",
+    "suggestion": "S-14→S-20遷移時はpushStateして、TALK→戻るでS-14に戻れる挙動に変更。もしくはTALKヘッダーに「← {ゴール名}に戻る」を一時的に表示して明示の戻り先を提供。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §5.3（送信済みリクエストのステータス表示） / ux_v1.md §4.4",
+    "issue": "FRIENDS画面に送信済みフレンドリクエストのステータス表示UIが見当たらない。Projectでは送信済みの状態も可視化する方針。",
+    "suggestion": "「送信済み（保留中）」セクションをFRIENDS上部に追加し、相手表示名/送信日時/取消ボタン/期限までの残日数を表示。期限切れ時の自動削除もUI反映。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2（プラン管理）",
+    "issue": "Premierプランの「チケットComing Soon」注記がS-38のUIに明示されていない。購入前に差分価値/制約の説明不足で誤解・不満の恐れ。",
+    "suggestion": "Premierカード/確認ダイアログに��チケットはショップ開設後に配布（遡及保証）、現時点の追加価値=限定フレーム/優先サポート』を明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5（日次リセット=JST 04:00） / ux_v1.md 全体",
+    "issue": "日次リセットがJST固定のため、海外利用/出張時に「なぜ4:00でリセット？」と混乱しやすい。Freeでもグローバル想定のアプリで説明が不足。",
+    "suggestion": "ヒーロー領域または通知バナーに『リセット: 明日 04:00（JST）』のタイムゾーン注記とローカル時刻換算（例: GMT+9）ツールチップを追加。v0.2でローカルタイム対応予定の案内も追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §9.1（復帰時の演出）・§8.6（演出キュー）",
+    "issue": "オフライン復帰時に多数の完了/EXPが一括反映されるケースの演出圧縮ルールが未定義。『同時発火の上限8秒』は定義あるが、逐次適用が多数ある場合の時間制御がない。",
+    "suggestion": "同期反映時は『+Nタスク完了、+M EXPをまとめて反映』���集約バナーで短縮し、レベルアップのみ個別演出。ユーザー操作中は演出を抑制し、静的更新や短縮表示を選べる設定も検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.4（history.pushStateポリシー）",
+    "issue": "タブ切替は履歴に積まない設計のため、Androidの物理戻るで直前の外部ページに遷移してしまう（PWA/ブラウザ起動時）。誤離脱のリスクがある。",
+    "suggestion": "アプリのルート（タブ直下）で戻る押下時は『アプリを終了しますか？』のスナック/ダイアログを出し、誤離脱を防止。PWAスタンドアロン判定で挙動を分岐。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2（タスクEXP一律10） / ux_v1.md（説明UIなし）",
+    "issue": "タスクEXPが一律10だと、重いタスクの手応えが薄く感じられる可能性がある。ユーザーが『分割した方が得？』と混乱する恐れ（5分以内同名無効の説明だけでは意図が伝わりにくい）。",
+    "suggestion": "Why画面/ヘルプツールチップで『EXPは挑戦の量より継続を重視』『冒険/ゴールで大きく評価』を説明。重いタスクはゴール紐付けや冒険検出で報われることをUIでガイド。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §13.3（iOS Safari非PWAの通知制約）",
+    "issue": "iOSでPWAインストールが必要という前提は一般ユーザーに難しく、通知ONに至る前の離脱が起きやすい（Finchでの『待機メカニクスが煩わしい』類のUX摩擦が再燃の恐れ）。",
+    "suggestion": "通知を使う操作文脈（リマインダー作成/初回ゴール作成時）で自然にインストール案内を出す。『ホーム画面に追加で通知ONに』のメリット訴求とステップ画像を簡潔に。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §6.2（トースト）・§2.3（タスク完了）",
+    "issue": "Undoスナックバーと通常トーストの同時発生時のZ-index/表示優先度の衝突ルールが未定義（完了→Undoスナックバー表示中に別操作のトーストが出た場合の重なり）。",
+    "suggestion": "優先度: Undoスナックバー > トースト。トーストはUndoの上に重ならないよう位置/余白を調整し、同時時はトーストを上部寄せにスライド表示するなどのルールを追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "全体（ユーザー視点所感）",
+    "issue": "使いたい/続けられる/課金/友達に勧めるの観点: 競合不満（Habiticaの罰、Finchの待機、HabitifyのFree制限）は概ね解消され魅力的。ただしPremierの『Coming Soon』要素とS-14→S-20の戻り先、JST固定は課金/継続/紹介時の不安材料。",
+    "suggestion": "MVP期はPremierの価値訴求を明確化（限定フレームの視覚差/優先サポートの実例提示）、戻り先の改善（R-010）、JST注記（R-013）。友達誘導はQRだけでなく『招待リマインド』や初回達成時の共有導線を検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.6（TALK空状態）・§0.3（差別化）",
+    "issue": "AI活用の価値（会話→タスク化/冒険検出/自己分析）が初見で伝わりにくい。空状態チップはあるが、3層EXPや会話→タスク化の『一連の気持ちよさ』を体験する導線が弱い。",
+    "suggestion": "初回起動後1セッション目限定のガイド（3枚チュートリアル or ミニミッション: 「予定を話す→提案→1件登録→+EXP」���を追加し、学習コストを下げる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

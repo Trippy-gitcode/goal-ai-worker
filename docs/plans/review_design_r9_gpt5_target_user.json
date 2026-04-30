@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3（Today操作）/ project_v1.md §3.2.3（週N回習慣）",
+    "issue": "週N回習慣をTodayに手動追加できる「今日やる」ボタンの具体的な配置場所と操作フローがUI上で明確でない。どの画面（Today行内・詳細パネル・Upcoming内）から実行できるのかが分からず、実装者とユーザー双方で迷う恐れがある。",
+    "suggestion": "UIモックと共に操作点を明記（例: 習慣行右端に「今日やる」テキストボタンを常設＋S-11詳細パネルにも同ボタン追加）。押下時のフィードバック（バッジ/トースト）と取り消し手段も合わせて定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5（日次リセット）/ §4.5（上限リセット）",
+    "issue": "日次リセットと各種カウンターがJST固定（04:00）で、出張や海外在住時に直感とズレる可能性がある。自己成長アプリとして日々の区切りが自分の生活リズムと合わないのはストレスになり得る。",
+    "suggestion": "MVPはJST固定のままでも、設定に「リセット時刻のタイムゾーン（端末ローカル/JST）」選択を追加する検討を明記。少なくともUI上でJST固定である旨を常時表示（例: TALK上限バナー/設定画面）し、渡航時の注意もガイドに追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2（Goals）",
+    "issue": "習慣タスクをゴールに紐付け不可の設計は、健康系など“継続で前進する”目標と直感的に結びつかず、「ゴール進捗が増えない」体験になりやすい。",
+    "suggestion": "MVPの制約は維持しつつ、代替として「ゴールに習慣の達成率を表示（指標のみ、進捗％とは別枠）」や「週次マイルストーン（単発タスク自動生成）」など、継続行動がゴール画面にも見える補助表現を追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2（EXP 3層）",
+    "issue": "タスクEXPが一律+10で所要時間や難易度に関わらず同報酬。Habitifyから移ってくると、短時間タスクの連打と重いタスクの達成が同価値に感じられ、動機づけが弱くなる懸念がある。",
+    "suggestion": "難易度タグ（S/M/L）や「初回達成ボーナス」等の軽量な補正を将来オプションとして記載。MVPでは固定のままにしつつ、重いタスク完了時は視覚演出を強めるなど感情面の補完をUX側に追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.5（EXP上限・不正対策）/ ux_v1.md §8.6（演出キュー）",
+    "issue": "1日のEXP上限300に達した後は達成感が途切れやすい。夜に頑張った分が数字に反映されないと、翌日以降の継続意欲が下がる恐れがある。",
+    "suggestion": "上限到達後は“評価は翌日に繰り越し”の明確な表示や「記録だけは反映（灰色バー＋翌日自動加算）」を仕様に追記。到達時は別バナー（上限到達おめでとう＋継続称賛）でポジティブに締める。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1-§2.2（プラン/ショップ）",
+    "issue": "PremierがMVP時点でショップ未実装のため実利が限定的。月額¥4,980で“Coming Soon”は心理的ハードルが高���、友人にも勧めにくい。",
+    "suggestion": "MVP期間限定の割引・無料トライアル・返金保証、または即時価値（限定コーチングセッション/限定テーマ/月次イベント招待など）を追加。購入画面と比較表に“現時点で受け取れる特典”を明示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §6.4（AIデータプライバシー）",
+    "issue": "PIIの正規表現マスキングは日本語名前/住所の検出漏れが生じやすい。画像の外部送信もユーザーの不安要因になり得る（Finchから移行勢は“安心感”を重視）。",
+    "suggestion": "送信前にユーザー側で確認できる「センシティブモード（毎回確認）」や、画像送信時の明示合意UIを追加。将来のNER検討だけでなく、MVPでも辞書＋機械学習のハイブリッド簡易マスキング、会話ごとの“外部送信を最小化”オプションを仕様に追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §13.3（通知設定）/ project_v1.md §5.3（通知設計）",
+    "issue": "iOSでPWAインストールが前提���Push有効化は、一般ユーザーには手順が難しい。通知ONにしたのに届かないと離脱要因になりやすい。",
+    "suggestion": "通知有効化ウィザードを多段化（1. PWAインストール案内 → 2. OSパーミッション → 3. テスト通知送信）。設定画面だけでなくオンボーディング後に1回ガイド表示する導線を仕様に追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "project_v1.md §3.2（所要時間の扱い）/ ux_v1.md §2.2-2.3",
+    "issue": "「所要時間はタイムライン表示の幅計算に使用」とあるが、標準画面での具体的な可視化（幅や配置ルール）が不明確。小型端末の省略仕様以外での表現が想像しづらい。",
+    "suggestion": "デザイン仕様（design_spec）側に、標準画面での所要時間バーの長さ・表示条件・並び替えとの優先順位を図解で追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.4（並び替え）/ §2.3（時刻順ソート）",
+    "issue": "Todayの“開始時刻による自動ソート”と“手動並び替え保存”の競合時ルールが曖昧。いつ��動ソートが再適用されるか、手動順を解除する操作があるかが分からない。",
+    "suggestion": "優先順位ルールを明示（例: 手動並び替え有効時は自動ソートを無効化、[時刻順に戻す]アクションをメニューに追加、翌日リセット時に自動ソートへ復帰等）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.5（チャット履歴）",
+    "issue": "会話削除がロングプレスのみは発見性が低い。長押しジェスチャーはiOS/Android慣れた層でも見落としがち。",
+    "suggestion": "履歴ドロワー各行の「…」メニューに[削除]を追加（ロングプレスも併用）。初回はガイドトーストで削除方法を案内。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.3 / ux_v1.md §3.4（冒険EXP）",
+    "issue": "“冒険”の判定基準がユーザーから見えにくく、何が+50になるのかが手応えとして学びづらい。結果がたまたまに感じる可能性がある。",
+    "suggestion": "TALKに「冒険って何？」ヘルプを追加し、例文/ヒントを表示。初回付与時���短い解説バナーも出し、行動学習につなげる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §16.5（D2 Storage永続性）/ §9.1（オフライン）",
+    "issue": "iOSの7日ITP問題はPWAでも端末/OSにより挙動が不安定な報告があり、長期オフラインや稀起動ユーザーで未同期データ消失のリスクが残る。",
+    "suggestion": "未同期データが一定量/一定期間を超えた場合に“早めの起動/同期”を促すバナーを仕様化。重要データはSW Cacheだけでなく、送信キューを複数ストレージに冗長保存（Queue ID付き）する実装指針もreferenceに追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2（7日ルール）/ ux_v1.md §2.4（完了待ちUI）",
+    "issue": "ゴール“完了待ち（7日）”は不正防止に有効だが、達成時に即ボーナスが出ない体験は人によって混乱しやすい。",
+    "suggestion": "完了待ち突入時に“なぜ7日待つのか”の短い説明リンクを表示。日毎に進むカウントダウン演出や小さな日次ボーナス演出を付け、待ち時間���前向きに感じられるUIを検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §2.5（通知設計）/ §3.2（開始時刻・所要時間）",
+    "issue": "週N回習慣で開始時刻未設定の場合、リマインダーが出ない運用になりがち。ToDoがTodayに出ない日も増え、抜け漏れリスクがある。",
+    "suggestion": "週N回選択時に“推奨時刻を設定しますか？”のガイドを追加。開始時刻未設定の習慣は日中に軽い提案トースト（例: 15時に軽運動どう？）を出すスマートナッジの導入を検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §6.1（AI対話カウントUI）/ ux_v1.md §3.2",
+    "issue": "Freeで20回/日の上限は妥当だが、残回数の常時視認性が仕様に明記されていない。残が読めないと対話の使いどころを計画しづらい。",
+    "suggestion": "TALKタブに残回数バッジ（例: 12/20）を常時表示。残1桁で色変化、0でバナー案内（翌日4:00リセット/アップグレードCTA）を仕様に追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

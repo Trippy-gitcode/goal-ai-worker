@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §7.4 / project_v1.md §3.2",
+    "issue": "Todayリストの並び順がUXでは「ロングプレス→ドラッグで手動並び替え（開始時刻による自動ソートを手動で上書き）」と記載。一方、プロジェクト仕様ではTodayは時刻順（未設定は末尾）と明記。ルールが相反している。",
+    "suggestion": "優先ルールを一本化する。例: デフォルト=時刻順、手動並び替えを有効化する場合は「今日だけの並び替え」or「恒久的に手動順を優先」を選択できる設定を用意。手動順のリセット手段（当日終了/明示的な[自動順に戻す]）も定義。表示ラベルに「手動順」バッジを付与し現在の並び規則を明示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1, §3.5",
+    "issue": "TALKヘッダーに「☰（ドロワー）・🕐（履歴）・📝（新規チャット）」が並記。§3.5では☰のみが履歴ドロワーを開くと定義されており、🕐の役割が重複/不明。",
+    "suggestion": "ヘッダーアイコンの責���を統一。例: ☰=履歴ドロワー、📝=新規チャット、🕐は削除またはショートカット（☰と同一機能）として非表示。アクセシビリティのため各アイコンのaria-labelも明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.1, §3.5",
+    "issue": "「📝 新規チャット」ボタンの挙動（新規スレッドの作成条件、既存スレッドのアーカイブ/保持、初期タイトル/空状態、初回メッセージ送信前の扱い）が未定義。",
+    "suggestion": "新規チャットのUXを定義: 押下で空のスレッド作成→入力欄にフォーカス。タイトルは最初のユーザー発話の先頭文を要約して自動命名。未送信で離脱した空スレッドの扱い（自動削除 or 下書き保持）を明確化。履歴ドロワーにも即時反映するかのルール含めて記載。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4（QRスキャン 手順3）",
+    "issue": "QR検出時のVibration API振動フィードバックはiOS Safari/PWAで未サポートのため機能しない可能性が高い。",
+    "suggestion": "振動はサポー��検出の上でAndroid限定とし、iOSでは視覚（枠色のグリーン化＋チェックアニメ）と短い効果音で代替。Vibration APIの存在チェックとpermission拒否時のフォールバックを明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3 / ux_v1.md §3.2",
+    "issue": "TALK画像添付のアップロード進行状況・失敗時のリカバリ（再試行/キャンセル）UIが未定義。",
+    "suggestion": "アップロード中は各サムネイル上に円形プログレスと[✕]キャンセルを表示。失敗時はサムネイルにエラーバッジ＋[再試行]。サイズ超過・ネットワークエラーのメッセージも具体化（例: 10MB超過時はクライアント側で事前検出）。複数枚同時アップロードの逐次/並列ポリシーを定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §7.4, §10",
+    "issue": "ドラッグ&ドロップによる並び替えにスクリーンリーダー代替操作がない（視覚/運動障害ユーザーが操作不能）。",
+    "suggestion": "リスト項目に「並び替えハンドル」ボタン（上下移動）を提供し、キーボード/スイッチアクセスで移動可能に。aria属性（aria-grabbed、aria-dropeffect、aria-describedby）で現在位置と移動結果を読み上げ。タスク行のアクションメニューに[上に移動][下に移動][先頭へ][末尾へ]も用意。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §1.4（戻りナビ）",
+    "issue": "Androidのシステム戻るボタンでアプリのルート（タブ直下）にいる時の挙動が未定義（終了/無視/確認ダイアログ）。PWAではブラウザ履歴に依存し意図しない前ページ遷移が起こる恐れ。",
+    "suggestion": "PWAポリシーを明記: ルートではhistory.back()で前ページが無ければ「もう一度で終了」トースト→ダブルバックでウィンドウを閉じる（TWAの場合）/no-op（ブラウザタブの場合）。display: standalone時は「ダブルバックで終了」パターン採用を推奨。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.2, §6.5",
+    "issue": "GROWのヒーロー領域が縮小するスクロールとPull-to-refreshの発火条件が競合する可能性（トップ閾値やどの��クロールコンテナにバインドするかが未定義）。",
+    "suggestion": "PTRは「Todayセクションのスクロール位置=0 かつヒーローが最大展開時」にのみ有効と定義。閾値60px到達前はヒーロー縮小を優先、縮小完了後は通常スクロールに。実装上はコンテンツ領域にのみPTRをバインドし、ヒーローは非スクロール固定に。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.1, §7.3",
+    "issue": "MEサブタブの横スワイプとコンテンツ縦スクロールの軸競合対策（スワイプ開始しきい値、エッジスワイプ優先）が未定義。",
+    "suggestion": "横スワイプは水平方向移動>垂直方向移動かつ開始位置が左右24pxエッジ内、速度閾値を満たす場合のみ発火。縦スクロール中はロック（touch-action: pan-y）。横スクロールコンポーネント内はスワイプ切替を無効化。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3, §2.4",
+    "issue": "Undoスナックバーは「全タブを跨いで表示維持」とあるが、GROW以外（S-14ゴール詳細等）で発火��た場合の表示レイヤー/優先順位が未定義。",
+    "suggestion": "アプリ共通のグローバルSnackbarレイヤーを1つ定義（z-index最上位、safe-area対応）。あらゆる画面で同一コンポーネントを使用し、同時要求はキューイング/置換ポリシー（既存を確定→新規に差替）を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（Undo）, §6.2（トースト）",
+    "issue": "ボトム配置UI（スナックバー/トースト/タブ）がiPhoneのホームインジケータ/Androidナビバーと干渉するリスク。safe-area考慮が明記されていない。",
+    "suggestion": "env(safe-area-inset-bottom)を考慮した下余白（min 16px + inset）を全ボトムUIに適用。iOSのヒューマンインターフェイスガイドライン準拠でタブ・FAB・トーストの最低間隔を確保。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §2.5 / ux_v1.md §13.3",
+    "issue": "通知許可リクエストのタイミングが「設定トグル依存」のみで、文脈的な最適タイミング（リマインダー作成後等）のガイドがない���",
+    "suggestion": "初回はOS許可ダイアログの直前にアプリ内プリプロンプトを表示し、文脈（例: 最初のタスクリマインダー設定完了時）で求める。未許可時は設定画面やコンテキストバナーから設定アプリ誘導を再提示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §10.4, §2.3（Undo）",
+    "issue": "スクリーンリーダー向けのリアルタイム通知文言が抽象的で、Undoのカウントダウン等が十分に伝わらない可能性。",
+    "suggestion": "aria-liveで「タスクを完了。取り消し可能、残り30秒」→5秒刻みで更新。EXP獲得時は「プラス10EXP。累計{X}」と読み上げ。スナックバーの[取り消す]には明確なaria-labelを設定。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.4（ゴール詳細）",
+    "issue": "ゴール削除時に紐づくタスク（未完了/完了済み）をどう扱うか未定義。データ消失/整合性崩れの恐れ。",
+    "suggestion": "削除オプションを明示: ①ゴールのみ削除（紐づく単発タスクは存続し紐付け解除）②ゴール＋���完了タスクを同時削除（危険操作は明示的チェックが必要）。デフォルトは①を推奨。確認ダイアログで影響件数を表示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（QRスキャン）",
+    "issue": "カメラ権限拒否/恒久拒否時の代替フローが未定義（設定誘導やシェアリンク入力）。",
+    "suggestion": "拒否時は説明モーダル＋[設定で許可]（iOS: 手順案内、Android: 設定インテント/TWA）を表示。代替手段として「受け取った招待リンクを貼り付け」入力欄を提供。再試行ボタンも設置。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.3（タブ切替アニメ）, §2.3（スクロール）",
+    "issue": "タブ切替時のスクロール位置/入力状態の保持ルールが未定義（戻った際にリスト先頭へジャンプする等のUX劣化リスク）。",
+    "suggestion": "各タブごとに直近のスクロール位置・展開状態・一時入力を保存し、再表示時に復元。TALKはストリーミング優先で最下部追従ルールを維持。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7（ジェスチャー全般）",
+    "issue": "ハプティクス設計がQR検出時のみで、主要成功/失敗操作（完了、レベルアップ、エラー）に対する一貫した触覚フィードバックが未定義。",
+    "suggestion": "プラットフォーム別に定義: iOS=UIImpactFeedbackGenerator/UIFeedbackGenerator（成功=light、レベルアップ=medium+success通知、エラー=notificationError）。Android=VibrationEffect（短150ms成功/長300msエラー/複合レベルアップ）。Web/PWAは機能検出で振動対応のみ。Reduced Motion時はハプティクスも抑制。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §9.1（オフライン同期）, §8.6（演出キュー）",
+    "issue": "オフライン中に多数の完了を同期した際の演出再生ポリシー（大量のEXPフロート/レベルアップが長時間続く）が未定義。",
+    "suggestion": "同期時は演出を集約: 「X件のタスクを同期。+Y EXP」サマリー1回＋レベルアップは最新1回のみ演出。詳細はアクティビティログ（簡易）に記録して参照可能に。最大演出時間上限（例: 5秒）を設定。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

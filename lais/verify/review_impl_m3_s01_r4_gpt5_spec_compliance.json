@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.1（S-01 レイアウト/余白トークン）",
+    "issue": ".s01-link に生の px 値で padding: 15px 4px、margin: -15px -4px を使用しており、仕様の「余白はスペーシングトークンで定義する」に反します。",
+    "suggestion": "padding/margin を var(--space-*) などのスペーシングトークンへ置換してください（例: padding: var(--space-md) var(--space-2xs)）。44px タップターゲットは --target-min または相当トークンを定義/参照して保証し、負のマージンに頼らない構造（ヒットエリア用のラッパー要素や utility クラス）に変更してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.1（タイポグラフィスケール）",
+    "issue": ".s01-agree-links の line-height: 2.2 が離散スケール/トークンを使用せず、生の数値指定になっています。",
+    "suggestion": "行間は指定スケールのトークン（例: var(--leading-sm) / var(--line-height-loose) 等、仕様で定義のもの）を使用してくださ��。必要な可読性・タップ領域はフォントサイズ・行間トークンの組み合わせで満たすよう調整してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.1（コントロール整列/余白トークン）",
+    "issue": ".s01-agree-links の margin-left: calc(20px + var(--space-sm)) にハードコード 20px が混在し、トークン一貫性と密度スケール適合性を損ねます（チェックボックスサイズ依存のマジックナンバー）。",
+    "suggestion": "チェックボックス寸法にもトークン（例: var(--control-size) や var(--checkbox-size)）を導入し、calc(var(--checkbox-size) + var(--space-sm)) のようにトークンのみで算出してください。サイズバリエーション（密度/アクセシビリティ設定）に対しても追随できる構造に置換してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.1（タップターゲット/インタラクティブ要素指針）",
+    "issue": "タップターゲット拡張を負のマージンで実現するパターンは、仕様に定義のない手法であり、��接要素とのヒットエリア重畳やスクロール領域の意図しない拡張リスクがあります。",
+    "suggestion": "仕様側に『リンク用ヒットエリア拡張の標準パターン』を定義し、実装はその utility（例: .hit-area-inline）を使用してください。ヒットエリアの拡張は padding（トークン）と line-height トークンで達成し、負のマージンは避けてください。��接リンク間に最小ギャップ（トークン）を確保し、重畳をテストで検証してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1.md §4.1（状態別スタイル: link/focus/hover/visited/disabled）",
+    "issue": ".s01-link の状態別スタイル（:hover, :active, :visited, :focus-visible）の色・装飾がトークン基準で定義済か、提示コードからは確認できません。",
+    "suggestion": "リンクの各状態に対して、色/下線/フォーカスリングをトークン（例: --accent-hover, --accent-visited, --focus-ring-*）で明示定義してください。コントラスト（AA）とハイコントラストテーマでの代替も合わせて visual regression/コントラストテストに追加してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1.md §4.1（画面遷移/ナビゲーション指針）",
+    "issue": "NotFound から /terms /privacy への遷移を window.location.replace でフルリロードにしており、仕様が SPA 内ルーティング（アニメーション/履歴制御を含む）を要求する場合に不整合となる可能性があります。",
+    "suggestion": "仕様で /terms /privacy の配信/遷移方式（SPA 内表示か外部ナビゲーションか）を明記し、実装はそれに合わせて route(..., { replace: true }) 等の SPA 置換遷移、または外部遷移であることを UI/アクセシビリティ上も示す（target/aria-label 等）よう統一してください。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

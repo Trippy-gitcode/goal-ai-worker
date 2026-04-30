@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "全体（各ファイルのヘッダー）",
+    "issue": "ヘッダーメタデータのバージョン/依存が不整合。dev_system_spec.mdは本文で§13.10-14/§19.8を含むがヘッダーはv3.0。lais_project_v1.mdは依存をdev_system v3.1と記載。lais_ux_v1.mdはヘッダーがv1.0 DRAFT・依存v1.3のままにもかかわらず本文の変更履歴はv1.14まで進んでいる。",
+    "suggestion": "各ファイルのヘッダーを実体に合わせて即時更新: 1) dev_system_spec.md > version: v3.2（§13.10-14, §19.6拡充, §19.8追加を反映） 2) lais_project_v1.md > 依存: dev_system_spec.md v3.2 3) lais_ux_v1.md > version: v1.14 / ステータス: REVIEW or CONFIRMED（現状に応じて）/ 依存: lais_project_v1.md v1.4。併せてcanopyにspec_header_check.sh（yq/grepでヘッダーの依存バージョン突合→不一致時FAIL）を追加して自動検出する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §19.6（上流変更時の下流遡及チェック）",
+    "issue": "遡及チェックが「ADVの責任で実施・記録」となっており、���械可検証（§1.1 原則）としての自動化が未整備。人手運用だと漏れ/遅延が発生しやすい。",
+    "suggestion": "自動ゲートを追加: 1) spec_header_check.shで各docs/*_v*.mdの「依存」ヘッダーをパース→実在ファイルのversion見出しと一致検証 2) 依存チェーン順（dev-system→project→ux→design_spec→system_map→e2e）のレビュー完了ステータス（CONFIRMED）を上流から順に確認し、未確定の下流レビュー着手をFAILにする 3) 上流更新検出時に下流の“依存バージョン”未更新をFAILにする。review_gate.shに同スクリプト呼び出しを組み込み。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md §16.1（対象環境）/ dev_system_spec.md §19.8",
+    "issue": "dev-system §19.8ではE5（デスクトップChrome/Edge）を検証必須（✅）としている一方、lais_ux_v1.md §16.1ではE5を「任意」としているため整合しない。",
+    "suggestion": "lais_ux_v1.md §16.1のE5を「必須」に修正し、E5に関するテスト設計（通知のディープリンク挙動除外など“モバイル前提”差分の明記）を追加。e2e_fullflow_test.mdにもE5向け最小スモーク（��動/ログイン/タスク追加/AI一往復不可の説明 or 代替動作）を追記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md §16.2 A2 / dev_system_spec.md §19.8 A2",
+    "issue": "スプラッシュ画像の扱いが不一致。dev-systemはiOSのapple-launch-image（apple-touch-startup-image相当）を明示しているが、UXは「非推奨のためmanifest準拠」として未対応方針。",
+    "suggestion": "iOSの現行挙動（2026時点）に合わせ、起動時の白画面/レターボックス回避目的で最小限のapple-touch-startup-imageセットを採用（主要解像度3-4種）。“将来の非推奨動向により撤廃可”と注記し、design_spec_v1.mdに画像生成規定を追記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md（ヘッダー/変更履歴）",
+    "issue": "ヘッダーがv1.0 DRAFT（AIレビュー前）だが、本文変更履歴はR1〜R14のAIレビュー修正を含んでおり内部整合が取れていない。dev-system §19.5のヘッダー標準/§19.6の参照ルールにも抵触。",
+    "suggestion": "ヘッダーを最新状態に更新（version v1.14、ステータスは現状に応じてREVIEW or CONFIRMED、依存: lais_project_v1.md v1.4）。同時にspec_changelog.mdへ本更新を追記。canopyのspec_header_check.shでヘッダーと「変更履歴の最新バージョン番号」が乖離していればFAILにする。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais_project_v1.md（ヘッダー）",
+    "issue": "依存が dev_system_spec.md v3.1となっており、当該版では§19.8（PWA互換性チェックリスト）の新要件に合致しない可能性。今回の統合検証対象はv3.2想定。",
+    "suggestion": "依存を dev_system_spec.md v3.2 に更新し、§19.8対応の宣言を明確化。app側e2e_fullflow_test.mdにE1-E4の環境別テストIDを割り当て、tests/test_map.yamlにも反映。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_project_v1.md §3.2.6 / §7.3",
+    "issue": "アバター進化演出は「ラスタライズ済みPNGクロスフェード」とある一方、基礎実装はSVGレイヤー合成。どのタイミング/経路でPNGを作成・取得するか（事前ビルドか、実行時Canvasラスタライズか）が未定義で、キャッシュ戦略/メモリ影響��不明。",
+    "suggestion": "PNGアセット供給方式を定義: 1) 進化段階ごとにビルド時プリレンダーPNG（CDN配信/Cache-Control設定） 2) 実行時合成→Canvas→Blob URLはリスト/一時表示のみ使用し、進化演出はプリレンダーPNGを参照。UX §8.2に“プリレンダーPNGを用いる”旨を追記し、assets命名規則/パスもreference_v1.mdに記載。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "lais_project_v1.md §4.3/§4.5（冒険EXP検出＆上限）/ lais_ux_v1.md §3.4",
+    "issue": "AIの誤検出で不正な冒険EXPが付与された場合、30秒Undoの枠外では訂正手段が明記されていない。EXPは「加算のみ」で巻き戻し不可設計のため、誤付与が残存しユーザー不信の可能性。",
+    "suggestion": "サーバー側にEXP台帳（immutable ledger: event_id/種類/起点メッセージID/モデル/スコア/付与時刻）を実装し、管理者/サポート用に訂正イベント（reversal）を発行できる仕組みを追加。UXに“誤検出報告”導線（ME>サポート）を1行で設置。reversal時のユーザー通知と、当日レベルダウンが発生する場合のUI挙動（静的反映/演出なし）を§8.2に追���。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md §13.10-13.12（棄却検証/効率化）",
+    "issue": "棄却ルールと効率化（ペルソナ/モデル絞り込み）は明確だが、終了条件が「最低10ラウンド＋CRITICAL 0」の二軸で、軽微改訂でも冗長化する可能性。",
+    "suggestion": "軽微改訂向けのスキップ条件を追加（例: 変更行数≤50、リスク🟢、前回CRITICAL 0維持→10ラウンド要件を免除）。review_gate.shに“軽微改訂モード”フラグを導入し、適用可否はADV/PO承認ログ必須。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md §13.9/§13.10/ review_gate.sh",
+    "issue": "AIレビューの棄却で`dismissed:true`はADV/POのみ許可としているが、review_gate.shは“誰が”棄却したかのトレーサビリティ検証を行っていないため、手続上の逸脱検知ができない。",
+    "suggestion": "レビューJSONに `dismissed_by`, `dismissed_role (ADV|PO)`, `dismissed_at` を必須化。review_gate.shでロール/署名（コミット署名やCODEOWNERSレビュー承認）を検証し、未充足ならFAIL。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §19.8 / lais_ux_v1.md §16（テスト連携）",
+    "issue": "dev-system §19.8ではux_v1.mdの互換性方針をe2e_fullflow_test.mdの環境別テストに落とし込むことを要求しているが、Lais側のテストへのマッピング（test_map.yaml/テストID）が本文では未提示。",
+    "suggestion": "e2e_fullflow_test.mdにE1〜E4の最低スモーク/異常系（通知不可時・Storage IT P7日/Background Sync非対応）を明記し、tests/test_map.yamlに `[PLAT-E{n}-*]` のgrepキーを登録。affected-tests.shで環境関連のソース変更時に当該テストを確実に実行できるようにする。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "lais_project_v1.md §7.2（RLS例外の箇条書き）",
+    "issue": "RLS例外の番号が①②③⑤④と前後しており、参照時に混乱を招く恐れがある（実装影響は軽微）。",
+    "suggestion": "番号を①②③④⑤の順に校正し、`ai_messages`/`social_messages`のCRUD/RLS原則をreference_v1.md §2/§5にも重複記載（Single Source of Truthを担保）。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

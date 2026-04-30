@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§7.1",
+    "issue": "`cat > .git/hooks/pre-commit` により既存のフックが上書きされ消失します。対象リポジトリは `node_modules` を含むNode.jsプロジェクトであり、Husky等の既存フック（Lint/フォーマッタ等）が存在する可能性が高く、既存の開発・CI環境を破壊することに繋がります。",
+    "suggestion": "`cat >` ではなく `>>` で追記するか、既存のフックファイルが存在する場合はバックアップを取る、あるいはHusky等のプロジェクトで採用されている仕組みに則ってフックを追加する手順に変更してください。既存���境を上書きしない配慮が必須です。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§7.1",
+    "issue": "動作確認の `git add /tmp/test.md 2>&1 || echo \"OK\"` は二重に誤っています。第一に `/tmp` はリポジトリ外のため `git add` 自体がエラーになります。第二に pre-commit フックは `git commit` 時に発火するため、`git add` ではテストできません。常に偽陽性となります。",
+    "suggestion": "テスト用ファイルはリポジトリ内に作成し、`git commit` を実行してフックの動作を確認する手順に修正してください。例: `touch test.md; git add test.md; git commit -m \"test\" || echo \"OK: hook が機能\"; rm test.md`。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§3.3",
+    "issue": "`node_modules` を `.nosync` リネームで同期除外すると記載されていますが、ディレクトリ名を変更するとNode.jsアプリケーションが依存関係を解決できなくなり、ローカル開発環境が動作しなくなります。これは重大な副作用を引き起こします。",
+    "suggestion": "単純なリネームではな��、「`node_modules.nosync` フォルダを作成し、そこへ `node_modules` からシンボリックリンクを張る」などの開発環境を破壊しない代替手順を記載するか、iCloud同期の非推奨理由として強調するに留めてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§7.1",
+    "issue": "手順2で untracked ファイルを洗い出していますが、手順3の `git add lais/ instructions/ ...` ではディレクトリ全体を指定しているため、意図せず作業中（unstaged）の変更まで全てステージングされてしまいます。手順の連続性に矛盾があります。",
+    "suggestion": "洗い出した untracked ファイルのみを安全に追加するため、`cat /tmp/untracked_ssot.txt | xargs git add` のように、リストアップした結果を直接 `git add` に渡すコマンドに修正してください。これにより意図しないファイルのコミットを防げます。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§7.2",
+    "issue": "Time Machine用ディスクのフォーマットとして「APFS (大文字小文字を区別しない)」を指定していますが、macOS Big Sur以降のTime Machineはバックアップ先として自動的に「APFS（大文字/小文字を区別）」を使用または再フォーマットします。誤解を招く手順です。",
+    "suggestion": "フォーマット指定の記載を「APFS」のみにするか、「Time Machine設定時に自動的に適切なAPFSフォーマット（大文字/小文字を区別）に変換されます」という注記を追加してください。不要な混乱を避けるため、OSの仕様に合わせた記述が望ましいです。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.2",
+    "issue": "復元テストの手順で「1時間以上待機」と記載されていますが、テストのために長時間を要するのは非効率であり、運用セットアップのハードルを上げます。手動でスナップショットを作成する手段がOS標準で提供されています。",
+    "suggestion": "`tmutil localsnapshot` コマンドを実行することで即座にローカルスナップショットを作成できる旨を追記し、待機時間なしで復元テストを実施できる手順を案内してください。これにより、セットアップ完了までの時間を大幅に短縮できます。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0167,
+    "input_tokens": 8921,
+    "output_tokens": 1117,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

@@ -1,0 +1,232 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §1.1（S-13定義）/ §2.3（タスク編集UI）",
+    "issue": "S-13は「タスク編集＝ハーフモーダル」と定義されている一方、§2.3ではS-11内のインライン編集に変更されており、画面種別と遷移・戻りナビの前提が矛盾している。",
+    "suggestion": "どちらを正式採用するかを確定し、S-13の種別と遷移表を統一する。推奨: インライン編集を正式化しS-13を「状態（S-11内編集モード）」として再定義。history.popstateの扱い（未保存時の確認）をS-11に集約。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §8.6（演出キュー）",
+    "issue": "「直列実行（並列実行しない）」と明記しつつ、ゴール達成バナー表示中にレベルアップ演出を重ねてよいと記載し、並列可否の方針が揺れている。",
+    "suggestion": "厳密な優先順位と排他ルールを再定義。例: 完全直列（重ねない）に統一、または「バナーは並行可・パーティクルは直列」のように要素単位で並行許可���タイムライン図でミリ秒単位の発火順を記す。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1/§3.5（TALKヘッダー）",
+    "issue": "ヘッダーに☰と🕐の両方が履歴導線として示唆されるが、§3.5では☰のみでドロワー展開と定義。重複導線で学習コストが上がる。",
+    "suggestion": "履歴導線を1つに統一。推奨: ☰（ハンバーガー）=ドロワー、🕐は削除。アイコンのaria-labelは「会話履歴」を付与。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system.md（未定義）",
+    "issue": "デザインシステムの中核トークンが未定義（色役割、タイポグラフィスケール、余白グリッド、角丸/影、アイコン仕様、モーション）。実装段階で一貫性とアクセシビリティを担保できない。",
+    "suggestion": "デザイントークンを定義: 1) Color roles: primary/secondary/surface/surface-variant/background, success/warning/error/info, outline, on-*（各4テーマ） 2) Type scale: 12–32pxの段階+行間（和文: 1.5–1.7）/字間 3) Spacing: 4/8ベースグリッド（xs=4, s=8, m=12, l=16, xl=24...） 4) Radius: 4/8/12/16 5) Elevation/shadow: 3–4段階 6) Icons: 24pxグリッド、線幅2px、角R統一、命名規則 7) Motion tokens: fast(100ms)/base(200ms)/slow(300ms)、標準easing/物理ベジェを定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.4 / ux_v1.md §10.2",
+    "issue": "4テーマの色役割とコントラスト基準が未確定。Overdueラベル、強み/弱みチップ、バナー等の状態色が各テーマでAAを満たす保証がない。",
+    "suggestion": "各テーマごとにsemantic paletteを設計し、全状態UI（Overdue=critical、Success/Warning/Info/Neutral）の配色とコントラスト(AA)を色見本表で確定。Harajuku系は彩度を抑えたon-colorを別途用意。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md（未定義）",
+    "issue": "タイポグラフィが未定義（書体/階層/フォールバック）。和文+欧文混在で見た目がばらつく恐れ。",
+    "suggestion": "推奨スタック: 'Inter var', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', Roboto, 'Hiragino Sans', 'Yu Gothic UI', Arial, sans-serif。見出し/本文/キャプシ��ンのサイズ・行間・字間をスケール化し、数字はtabular liningに。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md（未定義）",
+    "issue": "余白・レイアウト基準が未定義。カードやリスト間隔、コンテナ左右余白が画面ごとに揺れるリスク。",
+    "suggestion": "8ptグリッドを採用し、コンテナ左右16px、セクション見出し上24/下16、リスト行間12、カード内パディング16を基準化。スマホ幅別のmax-width/カラム数も表で定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md（未定義）",
+    "issue": "モーション仕様が散在（各所に個別duration/easing記載）。Reduced Motion以外の一貫したモーション体系がない。",
+    "suggestion": "Motion tokensを定義し全UIで使用。例: motion.fast=100ms ease-out（押下/タップ）、motion.base=200ms ease-out（遷移/トースト）、motion.emphasis=300ms cubic-bezier(0.32,0.72,0,1)（モーダル/演出）。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md 全体（🎉等の絵文字使用箇所）",
+    "issue": "絵文字とアイコンが混在し、OS依存の見た目差（Android/iOS/Windows）でブランドの「洗練」が揺らぐ恐れ。",
+    "suggestion": "主要アイコンは統一SVGアイコンセットに置換。絵文字は補助的アクセントのみ。アクセシビリティ上はaria-hiddenし、視覚情報はテキストで冗長化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3（アバターシステム）/ ux_v1.md §8.2",
+    "issue": "SVGレイヤー合成の実装方針が画面ごとに揺れ（GROWヒーローはSVGベース記載、UXはPNGクロスフェード推奨）。またフィルタ/ブラーを含むSVGを多用するとモバイルで描画コストが高い。",
+    "suggestion": "統一方針を定める: 1) 一覧=64px PNGキャッシュ、ヒーロー=128px PNGキャッシュ、詳細=SVG直描画 2) OffscreenCanvasで合成→createImageBitmapで描画 3) 合成キー（phase+parts+colors+decor+theme）でLRUキャッシュ 4) SVG filter禁止or最小化（オーラ/グローはラスタスプライト）に。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §7.3（アバター座標/レイヤー）",
+    "issue": "レイヤー間のブレンドモード/不透明度/当たり順（z-index）の詳細、フレーム/オーラのクリッピング仕様が未定義。",
+    "suggestion": "レイヤー仕様書を追加: z順固定（background→body→hair→face→accessory→frame→aura）、各レイヤーのglobalAlpha既定、frameは外縁にmask、auraは描画境界200x200内に収める。混色はnormal限定（multiply等は非推奨）。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md（未定義）",
+    "issue": "アバターの色設計（肌/髪/服/フレーム/オーラ）とテーマ連動の許容コントラストや色域が未定義。ダーク/ライト双方で視認性が変動する可能性。",
+    "suggestion": "アバターパレットを中立設計（相対輝度中域中心）とし、テーマとは独立。フレーム/オーラのみテーマアクセントに追従。ダーク/ライトでの最小コントラスト（対背景3:1）を図例で検証。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3（アバターシステム）",
+    "issue": "オーラ/グローをSVG filterで実装する場合、低端末やSafariでfps低下が起こりやすい。",
+    "suggestion": "オーラは事前レンダ済みPNG（2–3密度）で差し替え。軽量なCSS box-shadow/blurは静止時のみ許可。アニメ再生は60fps capの代わりに最大30fpsで時間短縮、Reduced Motion時は無効。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.5 / ux_v1.md §9.1",
+    "issue": "日次リセット（JST 4:00）時のオフライン継続利用中のToday/習慣表示の整合処理が未定義（日跨ぎオフライン→復帰時のローカル表示補正）。",
+    "suggestion": "ローカルでJST 4:00の境界検出→UIを「同期待ち」状態に切替（今日の表示は仮）、復帰後にサーバー日付で再同期。完了操作は許可するが送信時に日付補正（サーバが権威）する旨をUIメッセージで周知。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.4（S-14→S-20遷移）",
+    "issue": "ゴール詳細からTALKへ遷移時にreplaceStateでS-14履歴を消しており、ユーザーがTALKから戻るとGROWに戻る。直前のゴール詳��に戻れないのは驚きの可能性。",
+    "suggestion": "戻り先をS-14に保つか、TALK上部に「←ゴール詳細へ戻る」チップを一時表示するUX補助を追加。A/Bで回遊性を検証。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.4（ドラッグ&ドロップ）",
+    "issue": "ロングプレス開始がOSのテキスト選択/コンテキストメニューと競合する可能性（Web/PWA特有）。",
+    "suggestion": "タスク行に`touch-action: manipulation`と`user-select: none`を適用。ロングプレス開始時にhaptic（Vibration API: 10–20ms）を発火（対応端末のみ）して状態遷移を明確化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.1（タップ）/ §12.2（即時フィードバック）",
+    "issue": "100ms以内の即時ビジュアルフィードバック方針はあるが、全ボタン/アイテムへの押下フィードバック仕様（opacity/ripple/scaleなど）の統一が未定義。",
+    "suggestion": "全インタラクティブ要素に共通のpressed状態（opacity 0.92 + scale 0.98, 80–100ms）を適用。キーボード/フォーカス時��focus ringも同一スタイルで定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8.1–8.7（演出）/ §10.4（スクリーンリーダー）",
+    "issue": "紙吹雪Canvasやレベルアップバナーが重畳する際のフォーカス/読み上げ順、aria-liveの通知粒度が未定義。",
+    "suggestion": "演出用コンテナは`aria-hidden=true`、バナーは`role=status`でpolite通知。トースト/スナックバー/演出のz-index層を数値で規定（例: snackbar 900, toast 800, confetti 600）。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md（未定義）/ ux_v1.md §2.3・§3.3・§4.3",
+    "issue": "状態色（Overdue=赤系、強み=緑、弱み=オレンジ、提案カードのアクセント等）の正確な色値・役割が未定義でテーマ間の見え方が保証されない。",
+    "suggestion": "状態色トークン（success/attention/warning/danger/info）を定義し、チップ/バナー/ラベル/左ボーダーのUIパターンに役割マップを適用。Harajuku系はon-colorをややグレー寄りに。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 / §4.5",
+    "issue": "レベル必要EXPの計算式（Lv1→2=100）と説明（Lv1→2=1,000）が矛盾。UX演出タイミングや初回体験のレベルアップ可否に影響し、実装判断が分岐する。",
+    "suggestion": "§4.4の式を正として§4.5の説明を修正。また、計算式から導くサンプル（1日目にLv2に達する算定根拠）を1行で追記して齟齬を防止。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.4（history.pushStateポリシー）",
+    "issue": "複数のモーダル/ドロワーを連続表示した際の履歴積み上げ上限や同時オープン禁止の規則が未定義。戻る連打で意図しない深い履歴に陥る恐れ。",
+    "suggestion": "同時オープン=1個まで/入れ子禁止を明文化。pushStateは最上位UIのみ。連続オープン時は古いモーダルをreplaceStateで置換。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.3（PWA edge swipe対策）",
+    "issue": "overscroll-behavior-x: none の全体適用はSafariのネイティブ戻る挙動を過度に抑制し、��待とズレる可能性。",
+    "suggestion": "edge-swipe抑制は詳細画面のみのスコープに限定。スタンドアロン判定で条件分岐し、ブラウザ内起動時はブラウザ標準に寄せる。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "テーマ全般（Harajuku Light/Dark）",
+    "issue": "Harajuku系は高彩度で情報密度の高い画面（Today/Goals）で可読性が落ち「洗練」印象を損なう懸念。",
+    "suggestion": "Harajukuはアクセントと表層のみ派手に、背景/テキストはニュートラルを維持。見出し・罫線は低彩度で締めるテーマ内ガイドラインを策定。テーマごとのサンプル画面でレビュー。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BEST_PRACTICE",
+    "location": "S12-5 / S12-8（.s12-type-pill-active / .s12-duration-chip-active）",
+    "issue": "選択状態（Active）のピル/チップが border を透明にし、背景色 --accent-subtle の塗りのみで状態を示しているため、コンポーネント境界（または状態表示）の非テキストコントラストが背景（--bg-surface）に対して約 1.33:1 と推定され、WCAG 2.1/2.2 1.4.11（Non-text Contrast 3:1）に不適合となる可能性が高い。",
+    "suggestion": "選択状態にも 3:1 以上のコントラストが確保されるようにする。例: 1) Active 時にも 1px の境界線（--border-strong など 3:1 以上）を残す、2) --accent-subtle の不透明度を上げる（背景 #161B22 に対して 3:1 以上になるよう調整）、3) 境界ではなく内部輪郭（box-shadow や outline）で 3:1 を確保。いずれの場合も実測で 3:1 以上を確認すること。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "S12-5 / S12-8（role=\"radiogroup\" + role=\"radio\"）",
+    "issue": "カスタムラジオ（ピル/チップ）は Tab と Space/Enter で操作できるが、ARIA Authoring Practices にある矢印キー（←→）での選択移動、Home/End などのキーボードナビゲーションが未実装。",
+    "suggestion": "radiogroup 内で左右矢印（または上下矢印）で前後の選択肢へ移動・選択できるようキーハンドラを追加し、roving tabindex もしくは aria-activedescendant を採用。これによりスクリーンリーダー/キーボードユーザーの操作負荷を下げる。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "S12-12（CTA 作成ボタン）/ S12TaskAdd.jsx onSubmit",
+    "issue": "無効状態のボタンが aria-disabled のみで、ネイティブの disabled 属性を付与していないため、支援技術/ブラウザ間での一貫した無効化挙動・フォーカス可否が保証されない（フォーカス対象になり得る）。",
+    "suggestion": "isValid=false のときは button に disabled 属性も付与し、併せて aria-disabled=\"true\" を維持。CSS は :disabled と [aria-disabled=\"true\"] の両方に対応。フォーム submit 側でも isValid を二重でガードしておくと安全。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "focus trap（S12TaskAdd.jsx useEffect keydown）/ S12-12（CTA）",
+    "issue": "focus trap のフォーカス対象抽出で [aria-disabled=\"true\"] を除外していないため、無効ボタンにフォーカスが移動しうる。ユーザーは\"無効\"とアナウンスされる要素に遷移してしまい混乱の恐れ。",
+    "suggestion": "focusables 抽出時に [aria-disabled=\"true\"] を除外するか、CTA に disabled も付与して自動的にタブ順から外す。例: querySelector を `button:not([disabled]):not([aria-disabled=\"true\"]) ...` に。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "S12-9 / S12-10（読み取り専用表示）",
+    "issue": "読み取り専用表示の div に aria-readonly を付与しているが、aria-readonly は特定の入力ロール向けであり、役割を持たない汎用要素への適用は非推奨（無効属性）。",
+    "suggestion": "静的テキストとして扱う場合は aria-readonly を削除。将来的に操作可能な擬似入力として振る舞わせる場合は role=\"textbox\" + aria-readonly=\"true\" + tabindex=\"0/-1\" など、ロールとプロパティの整合を取る。現状は単なるテキストのままが適切。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "S12TaskAdd.css（--tap-target-min 使用箇所: .s12-close / .s12-type-pill / .s12-duration-chip）",
+    "issue": "タップターゲットサイズを var(--tap-target-min) に依存しているが、提示されたトークン抜粋に当該変数の定義がなく、未定義環境では 44×44 を満たさないリスクがある。",
+    "suggestion": "フォールバックを付与し最小 44px を保証する。例: `min-height: var(--tap-target-min, 44px); width/height: var(--tap-target-min, 44px);`。合わせて E2E/ビジュアルテストで 44×44 以上を実測確認。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "LP-001（prefers-reduced-motion）",
+    "issue": "prefers-reduced-motion: reduce 時に animation/transition の duration を 1ms に縮退しているため、依然として微小なアニメーションが残りうる。",
+    "suggestion": "reduce 時は `animation: none !important; transition: none !important;` にしてアニメーションを完全停止する。特にモーダルの transform/フェードは無効化推奨。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "focus trap（S12TaskAdd.jsx useEffect keydown）",
+    "issue": "Tab サイクリングの keydown リスナーを document に付与しており、将来ネストしたモーダルなどで干渉リスクがある。また、モーダル外にプログラム的にフォーカスが動いた場合のケアが限定的。",
+    "suggestion": "keydown リスナーはダイアログ要素（dialogRef.current）にスコープするか、focusin で常にモーダル内へ戻すフォールバックを追加。さらに背景を inert で無効化（対応ブラウザ）するか、aria-modal に加えてアプリ側でバックグラウンドを aria-hidden 切替する実装パターンを検討。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S10-5（+ タスクを追加 ボタン）/ S12TaskAdd.jsx（dialog）",
+    "issue": "起動ボタンは aria-haspopup/aria-expanded を付与しているが、aria-controls で関連ダイアログ要素を関連付けていない。",
+    "suggestion": "ダイアログに安定 ID を付与し、起動ボタンに `aria-controls=\"<dialog-id>\"` を追加することで関係性を明示（SR での理解向上）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "S12-6（タスク名 input）",
+    "issue": "必須入力である旨がマークアップ上で示されていない（required/aria-required 未指定）。現在は CTA 側の無効化でガードしているのみ。",
+    "suggestion": "タスク名 input に `required`（必要に応じて `aria-required=\"true\"`）を付与し、ネイティブ検証および支援技術への明示を行う。エラー文言/状態の視覚表示は後続で実装。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S12-5 / S12-8（radiogroup ラベル）",
+    "issue": "legend によるグループ名がある一方で、子のコンテナにも aria-label を付与しており、スクリーンリーダーによっては二重読み上げの可能性がある。",
+    "suggestion": "radiogroup の accessible name は legend に統一し、`aria-labelledby` で legend を参照するか、aria-label を削除してシンプルにする。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S12-12（CTA 作成ボタン）",
+    "issue": "無効時のボタンがフォーカス可能なままの場合、キーボードユーザーが無効操作対象に頻繁に到達してしまい操作負荷が増��る。",
+    "suggestion": "R-003 と合わせ、無効時は disabled を用いてタブ順から外す（あるいは `tabindex=\"-1\"` を併用）。無効の理由を説明するヘルプテキスト（例: 「タスク名を入力してください」）を追加するとさらに親切。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

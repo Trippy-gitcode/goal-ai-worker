@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.2（remスケール） + §9（AI向けCSSトークン）",
+    "issue": "フォントサイズトークンの単位が矛盾。§3.2ではrem前提だが、§9では--font-size-*にpx値（11px/14px/...）が直書きされており、ユーザーのブラウザ文字サイズ変更やOSアクセシビリティ設定に追従しない。",
+    "suggestion": "§9のAI向けブロックも§3.2と同じrem値に統一する（例: --font-size-sm: 0.875rem）。互換のため必要ならpxエイリアスを別名で追加（--font-size-sm-px: 14px）し、実UIはrem版を参照する。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5.0 テーマ切替（FOUC対策/初回トランジション抑止）",
+    "issue": "本文中に「初回ロード時はtransitionを無効化（JSでdata-theme-loaded=\"true\"セット後に有効化）」とあるが、提示スニペットはdata-theme-loadedの制御を実装していないため、初回描画で背景色や文字色がアニメーションしてしまうリスクが残る。",
+    "suggestion": "head最上部に初期抑止CSSと、描画後に有効化するJSを追加する。例: CSS: html:not([data-theme-loaded=\"true\"]) *, html:not([data-theme-loaded=\"true\"]) { transition: none !important }。JS: requestAnimationFrameで最初のフレーム後にdocument.documentElement.dataset.themeLoaded = 'true'をセット。テーマ変更時のみ:rootにtransitionを付与。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0（<meta name=\"theme-color\">同期） + §16.2 A4",
+    "issue": "meta theme-colorを--bg-primaryと同期とあるが、具体的な実装例・iOS PWAの制約が未記載。iOS PWAではapple-mobile-web-app-status-bar-styleの動的切替が限定的で、theme-colorの動的変更も反映にラグ/不一致が生じ得る。",
+    "suggestion": "テーマ変更時に以下を実装: 1) <meta name=\"theme-color\">のcontentを--bg-primary計算値に更新（getComputedStyleで取得）。2) iOS PWAは display-mode: standalone 時、apple-mobile-web-app-status-bar-styleはstaticになるため、ライト系=default/ダーク系=black-translucentをmanifest/静的metaでテーマ別に用意し、切替時はページ再ロード時に反映される旨を仕様化。再描画不要な範囲での許容差も明記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.5 グラスモーフィズム（backdrop-filter）",
+    "issue": "backdrop-filterはGPU負荷が高く、スクロール中のjankや電池消費増の原因になる。30要素以内という方針はあるが、実運用では条件表示やスクロール境界でのon/off制御がないと破りやすい。",
+    "suggestion": "IntersectionObserverでviewport内の限定要素だけに.glass-surfaceを付与/解除し、要素数制限を強制。モーダル/ドロップダウン等の一過性UIのみ適用し、スクロールリスト内は親コンテナの1枚に限定。低性能端末検知（UA/ベンチ）やbattery-saver/matchMediaで自動OFFの追加も検討。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.5 グラスモーフィズム（Safari視覚破綻）",
+    "issue": "iOS Safariではbackdrop-filterとborder-radiusの組合せで角が欠ける/にじむ既知不具合があり、カード角丸で視覚破綻を起こしやすい。",
+    "suggestion": ".glass-surfaceにborder-radius適用時は同時にbackground-clip: padding-box; とoverflow: hidden; を付与。影を強める代わりにボーダー薄く等、テーマ別の微調整もガイドに追記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§9 AI実装向けCSSトークン",
+    "issue": "§7.5 forced-colors対応や§7.6の包括的reduced-motion無効化（*, *::before/afterへの!important短縮、glass自動OFF）が§9ブロックに反映されていない。AI/実装者が§9のみをコピペするとA11y仕様が欠落する恐れ。",
+    "suggestion": "§9にも最低限のA11yメディアクエリを同梱（forced-colorsのoutlineルール、prefers-reduced-motionのglobal短縮＋glass OFF）。もしくは§9冒頭に「必ず§7.5/§7.6のブロックも併記すること」を明示。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 イージングトークン",
+    "issue": "spring-bouncy（cubic-bezier(0.34, 1.56, 0.64, 1)）はscale専用と明記されているが、誤用されるとリスト/モーダルが画面外へオーバーシュートしてちらつくリスクが高い（特にiOS Safari）。",
+    "suggestion": "用途をCSS変数名で拘束（--spring-bouncy-scaleなど）し、lint（stylelint custom-property-pattern）で誤用検出。実装ガイドに『translate/opacityは禁止』と具体的サンプルとNG例を追記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0 テーマ切替（パフォーマンス）",
+    "issue": ":rootにbackground-color,colorのtransitionを付けると、子孫の継承による再描画が大きく、端末によっては1フレーム落ちが発生しやすい。",
+    "suggestion": "初期はtransition無し、切替時のみbody直下の大面積要素（appシェル）に限定してtransitionさせるか、durationを200ms以下に短縮。色数の多い要素（アイコン等）はtransition: noneで除外するユーティリティクラスを用意。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.5 @supports 構文",
+    "issue": "@supports ((backdrop-filter) or (-webkit-backdrop-filter)) 自体は仕様上正しいが、古いSafariでは論理演算子周りの挙動差が報告されている。",
+    "suggestion": "堅牢性を高めるため、2本に分けるか（@supports(backdrop-filter:blur(1px)){} と @supports(-webkit-backdrop-filter:blur(1px)){}）、あるいは@supportsを使わず常時プロパティを指定し、非対応ブラウザは無視（フォールバック背景/ボーダーが既定で効く）とする。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0（テーマ切替のJSガイド）",
+    "issue": "localStorageキー名は提示されているが、「テーマ変更UIでの保存・反映・アニメーション制御」の実装フロー（クリック→data-attr更新→localStorage保存→meta theme-color同期→初期transition抑止解除タイミング）がコードレベルで未提示。",
+    "suggestion": "ガイド用擬似コードを追加。例: onThemeChange(t){ documentElement.dataset.theme=t; localStorage.setItem('lais.theme', t); syncThemeColor(); if(documentElement.dataset.themeLoaded!=='true'){ requestAnimationFrame(()=>documentElement.dataset.themeLoaded='true'); } }。さらに、unload前に現在テーマを必ず永続化する旨も明記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  }
+]

@@ -1,0 +1,5 @@
+[
+  {"id":"R-001","severity":"HIGH","category":"CHARACTER","screen":"s02_onboarding","location":"アバター3種","issue":"汎用 SVG で個性欠如。Phase B 独自キャラ化候補。","suggestion":"(Phase B 対応)","model":"Code","persona":"illustrator"},
+  {"id":"R-002","severity":"MEDIUM","category":"ICON_CONSISTENCY","screen":"s20_talk","location":"絵文字アイコン","issue":"OS依存グリフ。実装時 SVG 化必須。","suggestion":"(実装時 SVG 化)","model":"Code","persona":"illustrator"},
+  {"id":"R-003","severity":"LOW","category":"WHITESPACE","screen":"s12_task_add","location":"所要時間チップ横スクロール","issue":"8種のうち 5/10/15/30/45 可視 ✅。","suggestion":"(問題なし)","model":"Code","persona":"illustrator"}
+]

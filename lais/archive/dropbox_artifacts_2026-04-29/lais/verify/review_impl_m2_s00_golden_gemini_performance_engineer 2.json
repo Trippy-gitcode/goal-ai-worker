@@ -1,0 +1,32 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "Webフォントの読み込み戦略が実装パッケージから確認できません。フォントファイルの読み込みが最適化されていない場合、レンダリングブロックやテキストのちらつき（FOUT/FOIT）が発生し、LCP（Largest Contentful Paint）の悪化やユーザー体感の低下を招く可能性があります。特に、画面の主要コンテンツであるロゴやCTAのテ��スト表示遅延は影響が大きいです。",
+    "suggestion": "Webフォントを使用している場合、HTMLの`<head>`内で`<link rel=\"preload\">`を用いてフォントファイルを早期に読み込むことを推奨します。また、CSSの`@font-face`ルールに`font-display: swap;`を追加することで、フォールバックフォントでテキストを即座に表示し、レンダリングブロックを回避できます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "CTAボタンの`:active`時に適用される`transform`アニメーションは、特に低スペックなデバイスにおいて、描画の開始時にわずかなカクつきを引き起こす可能性があります。",
+    "suggestion": "`.s00-cta-primary, .s00-cta-secondary`セレクタに`will-change: transform;`を追加することを検討してください。これにより、ブラウザは`transform`プロパティが変更されることを事前に予測し、アニメーションをよりスムーズに実行するための最適化（例: 要素を専用のコンポジットレイヤーに昇格させる）を行うことができます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/App.jsx",
+    "issue": "現状、`App`コンポーネントは状態を持たないため問題ありませんが、将来的に状態が追加され再レンダリングが発生した場合、`handleStart`と`handleLogin`関数が毎回再生成され、子コンポーネントである`S00Splash`に不要な再レンダリングを引き起こす可能性があります（`React.memo`等で最適化されている場合）。",
+    "suggestion": "将来的なパフォーマンス問題を未然に防ぐため、`useCallback`フックを用いてイベントハンドラをメモ化することを推奨します。例: `const handleStart = useCallback(() => { ... }, []);`。これにより、依存関係が変わらない限り、コンポーネントが再レンダリングされても同じ関数インスタンスが再利用されます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "performance_engineer"
+  }
+]

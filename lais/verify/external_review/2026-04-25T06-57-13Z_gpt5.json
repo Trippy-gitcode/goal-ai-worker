@@ -1,0 +1,100 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BEST_PRACTICE",
+    "location": "frontend/js/chat.js / openHomeTaskPanel",
+    "issue": "Preactパネル有効時の委譲処理で `window.openHomeTaskPanel(item); return;` と自分自身のグローバル関数を再帰呼び出ししています。`window._preactTaskPanelMounted` が真なら毎回同じ分岐に入り続け、スタックオーバーフローでクラッシュする明確なバグです。",
+    "suggestion": "委譲先は `window._openTaskPanel(item)` のような別名ブリッジ関数に統一してください。`openHomeTaskById` と同じ命名規則で揃え、`if (window._preactTaskPanelMounted && typeof window._openTaskPanel === 'function') { window._openTaskPanel(item); return; }` に修正し、回帰テストを追加すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md / deploy.shコードブロック",
+    "issue": "deploy.shのサンプルが壊れており、複数行シェルが1行化され `if` や `fi` の区切り、HTMLエスケープ、正規表現誤記が混在しています。この内容を実装正として参照するとシェル構文エラーになり、デプロイ処理そのものが動作不能になります。",
+    "suggestion": "仕様書中のコードブロックはMarkdown整形崩れを修正し、実際に `sh -n` と `shellcheck` を通した内容だけを掲載してください。HTMLエスケープ済み文字列や改行欠落を全除去し、実ファイルに切り出して include 参照する方式へ変えると、仕様と実装の乖離を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "frontend/components/GoalHub.jsx / saveSettings, deleteGoal, saveMemo",
+    "issue": "Goalデータを state ではなく `window.ALL_GOALS` 内オブジェクトへ直接代入・spliceしており、失敗時も `.catch(() => {})` で握り潰しています。UIだけ先に更新されて永続化が失敗すると、再読込後に内容が戻る・削除したはずのゴールが復活する不整合が高確率で発生します。",
+    "suggestion": "直接ミューテーションをやめ、Goal一覧を state またはストアで更新し、API成功後に確定反映するフローへ変更してください。最低でも optimistic update のロールバックと toast エラー表示を入れ、`apiUpdateGoal` / `apiDeleteGoal` / memo保存失敗���に整合性を回復できるようにするべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "frontend/components/Talk.jsx / window bridge useEffect",
+    "issue": "`useEffect` の依存に `messages` と `loading` が入っているため、メッセージ増減のたびに `window.sendHomeMsg` や `homeMsgs` の defineProperty を張り直しています。副作用の再登録が多く、他のVanillaコードが参照を保持していると一時的な不整合や追跡困難なバグを招きます。",
+    "suggestion": "windowブリッジは mount 時に一度だけ登録し、最新値は ref 経由で参照させてください。`messagesRef.current = messages` のように保持すれば、グローバルAPIを再生成せずに最新状態を読めます。特に defineProperty の再定義は避け、責務を bridge 層へ切り出すのが安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "frontend/components/GoalHub.jsx / progress bar, analytics",
+    "issue": "進捗バー幅に `goal.actual%`、目標マーカーに `goal.target%` をそのまま使っており、値域のクランプがありません。100超や負数、null混入時にUIがはみ出し、進捗表現が崩壊します。外部データ依存の画面で未検証値を直接styleへ入れるのは危険です。",
+    "suggestion": "表示用の数値は `const actualPct = clamp(Number(goal.actual) || 0, 0, 100)` のように正規化してから利用してください。target・diff・daysLeft も同様に変換し、計算ロジックをユーティリティ化すると魔法の数字 100/0 の意味も明確になり保守しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "frontend/components/GoalHub.jsx / renderMemoTab, getUserAvatarHtml",
+    "issue": "`dangerouslySetInnerHTML` にメモ本文やプロフィール由来の画像HTMLを組み立てており、入力値のサニタイズ方針が不統一です。memo本文は改行置換のみ、avatar_base64 も検証なしで埋め込まれており、将来URL文字列が混入した際のXSS面で脆弱になります。",
+    "suggestion": "メモ本文はHTML化せずテキストノードで描画し、改行はCSS `white-space: pre-wrap` で表現してください。画像も `h('img', { src })` で属性として渡し、許可する形式を `data:image/` に限定するバリデーションを入れると安全性と可読性が���がります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "frontend/components/preact-bridge.js / mountTaskAddFlow, mountTaskCard, mountTaskDetailPanel",
+    "issue": "永続マウント処理がIIFEで即実行され、TaskAddFlow と TaskCard は既存ホスト確認なしで毎回 `document.body.appendChild` しています。モジュール再評価やHMR、二重初期化時にホストが増殖し、同一UIが複数マウントされる保守性の低い構造です。",
+    "suggestion": "各永続ホストは `getElementById` で存在確認してから再利用してください。mount/unmount責務を共通関数にまとめ、`ensurePersistentHost(id)` のようなヘルパーでDRY化すると重複ロジックを減らし、将来的な多重マウント事故を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "frontend/components/GoalHub.jsx 全体",
+    "issue": "1ファイルにタブ状態、チャット送信、Supabase同期、ゴール設定変更、削除、メモ機能、analytics描画、windowブリッジまで詰め込まれており責務分離が崩れています。420行超の肥大化で、再レンダリング理由や副作用���界を追いづらく、今後のバグ修正コストが高くなります。",
+    "suggestion": "Chat/Memo/Settings/Analytics を独立コンポーネント化し、データ取得・永続化は custom hook へ分離してください。windowブリッジも別モジュールに切り出すと、UI描画と副作用の責務が明確になります。特に `forceUpdate` 依存をなくす設計へ寄せるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "frontend/components/GoalHub.jsx, Talk.jsx, tests/e2e/specs/arch-02.spec.ts",
+    "issue": "110、86400000、50、400、100 など意味づけされていない数値が散在し、さらにテスト側で `home-task-panel` や `task-step1-name` など実装詳細DOMに強く依存しています。仕様変更でなくても微修正で壊れやすく、意図の読み取りが困難です。",
+    "suggestion": "日数換算、最大トークン、履歴件数、textarea最大高などは定数化して名前を付けてください。テストも data-testid かユーザー操作に近いセレクタへ寄せ、内部DOM構造への結合を減らすことで保守性と失敗原因の特定しやすさが向上します。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.1609,
+    "input_tokens": 111330,
+    "output_tokens": 2177,
+    "model_id": "gpt-5.4"
+  }
+]

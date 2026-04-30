@@ -1,0 +1,192 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2.1",
+    "issue": "Supabase auth.storageKey を 'lais.auth' に変更したことで、既存ユーザーのセッション（既定キー 'sb-<project-ref>-auth-token'）が読み込まれず、デプロイ後に全員強制ログアウトが発生するリスクがある（移行手順の記載なし）。",
+    "suggestion": "起動時に旧キーを検出して新キーへコピーするマイグレーションを実装（二重読込→旧キー削除）。もしくは既定キーへ戻す。やむを得ず破壊的変更にする場合はリリースノートで周知。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "2.3",
+    "issue": "signup 時の password に minLength 属性を付与しており、ネイティブ検証が submit イベント自体をブロックする可能性がある。H3 の「aria-disabled でのみ制御し、handleSubmit 内で attempted 状態へ誘導する」方針と矛盾。",
+    "suggestion": "form に noValidate を付与してネイティブ検証を無効化し、長さ検証は JS 内で一元管理。あるいは CTA を type=\"button\" にして onClick で明��� submit する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "email/password を onInput のみに依存。ブラウザ/パスワードマネージャのオートフィルは onInput を発火させないケースがあり、値は見た目で入っていても state 未反映→CTA が有効化されない。",
+    "suggestion": "onChange を併用（少なくとも password は併用）し、マウント後に ref.current.value を初期同期。autocomplete 適切化、WebKit オートフィル検知（onAnimationStart など）や visibilitychange での再同期も検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.4",
+    "issue": ".s01-cta の active 時 transform に reduced motion 配慮がない。",
+    "suggestion": "@media (prefers-reduced-motion: no-preference) 内で transform を適用し、代替のフォーカス/アクティブ表現（アウトライン/色）を用意。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2.2",
+    "issue": "STATIC_PATHS が '/terms' '/privacy' のみ厳密一致。末尾スラッシュ、ハッシュ、クエリ、��ースパス配下デプロイ（例: /app/terms）で想定外のフォールバックやループの可能性。",
+    "suggestion": "パス正規化（末尾スラッシュ除去・クエリ/ハッシュ無視）とベースパス対応を実装。必要なら正規表現許容。window.location.assign 時に元の search/hash を保持。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "sessionStorage アクセスが前提（取得/設定時の例外未処理）。Safari 制限やサンドボックス iframe、クォータ超過で例外し、NotFound エフェクトが失敗し得る。",
+    "suggestion": "sessionStorage の getItem/setItem を try/catch でラップし、失敗時はインメモリ代替やガード無効化で安全にフォールバック。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "2.3",
+    "issue": "オフライン/ネットワーク遅延/タイムアウト時の UI が未定義。aria-busy が無期限継続しユーザーが復帰できない可能性。",
+    "suggestion": "AbortController によるリクエストタイムアウト、navigator.onLine 検出とオフライン専用メッセージ、再試行ボタン��指数バックオフ）を追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "二重送信防止が onMouseDown の preventDefault のみ。クリックや Enter/Space による submit、プログラム的 submit を抑止しきれない。",
+    "suggestion": "handleSubmit 冒頭で inFlightRef/submitting を厳格ガード。送信中は aria-disabled=true と pointer-events:none を付与し、ボタン/フォーム両方で複数経路を遮断。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "送信中に login/signup モード切替やアンマウントが起きた場合、遅延レスポンスが別モードへ誤って反映される競合の恐れ。",
+    "suggestion": "送信時にモードとトークンをスナップショットし、解決時に一致確認して不一致は破棄。可能なら AbortController で未完了リクエストをキャンセル。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "2.3",
+    "issue": "メール検証・パスワード長が非 ASCII を考慮しているか不明。IDN/Unicode ローカル���のメールや絵文字・結合文字を含むパスワードでクライアント/サーバの判定不一致の恐れ。",
+    "suggestion": "メールは IDN（punycode）許容かサーバ委譲に明示。パスワード長はコードポイント/書記素クラスタ基準を明記するか、クライアント側チェックを最小化してサーバ結果に同期。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2.1",
+    "issue": "flowType:'pkce' はセキュアコンテキスト必須。HTTP ステージング等で失敗するが、その検出/フォールバック方針が未定義。",
+    "suggestion": "window.isSecureContext を確認し、非セキュアでは警告・開発ドキュメント整備・（許容範囲内で）開発限定の代替フローを案内。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "送信中 aria-busy は付与されるが、aria-disabled が false のままだと支援技術に対して操作可能に見える可能性がある。",
+    "suggestion": "送信中は aria-disabled=true も同時付与し、完了後に解除。ラベルに進行状況を示す role=\"status\"/aria-live の補助���検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "window.location.assign(path) が既存のクエリ/ハッシュ（utm、アンカー）を破棄し、存在する静的資産でも常にハードリロードで SPA 状態を失う。",
+    "suggestion": "必要に応じて現在の search/hash を保持・付与。静的ページが存在するか HEAD で事前確認し、存在時はそのまま遷移、非存在時は SPA フォールバック。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.5",
+    "issue": "--danger-subtle の背景とテキストのコントラストが一部テーマ/高倍率で不十分になる可能性。",
+    "suggestion": "エラーバナーのテキスト/背景コントラストを WCAG AA 以上（4.5:1）で再調整。forced-colors/high-contrast 環境も検証。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2.1/2.2/5",
+    "issue": "メール確認/マジックリンク復帰は detectSessionInUrl 依存で明示的コールバック未実装。初期化順・NotFound リダイレクトとの競合で稀に検出前にルー���ィングが走ると不整合の恐れ。",
+    "suggestion": "Supabase クライアント初期化を最優先に実行し、NotFound リダイレクトは検出完了（または短い遅延）まで保留。'/auth/callback' e2e を追加し、hash/query 両方を検証。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.1",
+    "issue": "localStorage が利用不可（プライベートモード/クォータ超過等）の場合のフォールバックが未定義。persistSession 失敗がサイレントに起こり得る。",
+    "suggestion": "カスタム StorageAdapter を実装して try/catch し、失敗時は sessionStorage かインメモリへフォールバック。永続化不能時は軽微なバナーで通知。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2.3/2.4",
+    "issue": "サーバーエラーメッセージ領域の ARIA アナウンス（role=\"alert\"/aria-live）が明記されておらず、スクリーンリーダーで気づきにくい可能性。",
+    "suggestion": ".s01-server-message-error コンテナに role=\"alert\"（もしくは aria-live=\"assertive\"）を付与し、CTA の aria-describedby がこれを参��することを保証。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "不正項目へのフォーカス誘導時、スクロールインビュー配慮がないため、モバイルやズーム時にオフスクリーンのままになる可能性。",
+    "suggestion": "focus 前後に element.scrollIntoView({ block: 'center' }) を行う、もしくは focus({ preventScroll: true }) と明示スクロールを併用。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.4",
+    "issue": "極端に長い入力値/サーバーメッセージでレイアウト崩れの恐れ。折返し/最大高の指定が見当たらない。",
+    "suggestion": ".s01-server-message-error に overflow-wrap:anywhere; word-break:break-word; max-height と内スクロールを指定。input には合理的な maxLength を設定。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

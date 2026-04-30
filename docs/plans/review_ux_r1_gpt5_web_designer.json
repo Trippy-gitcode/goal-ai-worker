@@ -1,0 +1,262 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1 / §14.2",
+    "issue": "新規登録フローに「メールを確認してください」画面が登場するが、画面一覧に該当ID（例: S-04）が存在せず、遷移定義もないため行き止まりが発生する。",
+    "suggestion": "S-04（メール確認待ち）を画面一覧に追加し、S-01→S-04→（メールリンク経由）→S-03の遷移と、S-04の戻りナビ（←でS-01）を定義。S-04のタイムアウト/再送信（メール再送）/メール変更導線も合わせて定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.1 設定",
+    "issue": "設定リストに「メール変更」「パスワード変更」があるが、対応する画面ID・遷移・UI仕様が未定義でダミーリンクになる。",
+    "suggestion": "S-42: メール変更、S-43: パスワード変更（各フルスクリーン）を追加。入力項目、バリデーション、確認メールの要否、成功/失敗トースト、戻り遷移を定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2.6 / ux_v1.md §2.3",
+    "issue": "タスク完了のUndoは「30秒以内に取消可」とある一方、UXではスナックバー表示が3秒で消えるため、27秒間の取消手段が存在しない。",
+    "suggestion": "取消可用時間を統一。推奨: 30秒間はタスク行右端に「取消」チップを表示（カウントダウン付き）。スナックバーは3〜5秒表示で良いが、30秒間は行内アクションで取り消せるようにする。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1",
+    "issue": "TALKヘッダーで☰=履歴ドロワー、🕐=履歴と説明され、同機能が重複。ユーザーの学習コストとジェスチャー一貫性を損なう。",
+    "suggestion": "履歴アクセスは1箇所に統一。推奨: ☰を廃止し、🕐=履歴ドロワー（またはアイコンを「≡」から「🕐」に変更）に集約。左端スワイプも同機能に合わせる。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3 アバターシステム / §3.2.6 / ux_v1.md §8.2",
+    "issue": "アバター進化アニメーション��「モーフィング（1.5秒）」を要求しているが、パーツ間でパス数/制御点一致などのアセット制約が未定義のままでは実装困難。",
+    "suggestion": "デザイン側に「モーフ互換アセット規約」を定義（同一パス数/対応アンカー/塗り分け一貫）。実装側は失敗時フォールバック（クロスフェード+軽いスケール/グロー）を規定。design_system.mdにアセット仕様とエクスポート要件（SVGO最適化ルール含む）を追加。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §8（アニメーション）",
+    "issue": "「タスク完了」「レベルアップ」「ゴール達成」「冒険EXP検出」など同時発火時の優先順位と併用ルールが未定義で、演出競合や過剰な同時発火の懸念がある。",
+    "suggestion": "演出キューと優先度を定義。例: 1) クリティカル: レベルアップ > ゴール達成 2) メジャー: 冒険EXP 3) マイナー: タスク完了。バナー/紙吹雪は1つずつ順送り。タイムライン例と同時発火の結合ルールを追記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §7.4 上限 / ux_v1.md 全体",
+    "issue": "タスク1万件・ゴール100件・友達500人などデータ上限時のUI/エラー表示が未定義。",
+    "suggestion": "各上限到達時の文言・抑止UIを定義。例: タスク作成モーダルにエラー「作成上限に達しました（10,000件）」、FRIENDSに「上限のため新規追加できません」。上限付近で事前警告（例: 90%到達時バナー）も検討。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2 画像添付 / §9 エラー",
+    "issue": "画像添付の10MB超過/非対応形式/アップロード進行中のキャンセル・再試行UIが未定義。",
+    "suggestion": "添付時に前検証（サイズ/形式）、進捗バーとキャンセル、失敗時の「再試行/削除」ボタン、複数添付の上限（例: 3枚）を定義。エラーメッセージ定型も追加。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4 / §3.6",
+    "issue": "QRスキャンでカメラ許可拒否/デバイス非対応時の代替手段とエラー状態が未定義。",
+    "suggestion": "許可拒否時は説明+再試行+代���導線（画像から読み取り/招待リンク貼付）。非対応端末は「カメラが利用できません。招待リンクから追加してください」。設定アプリ遷移案内も追加。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §1.4 ブラウザバック",
+    "issue": "「ボトムタブ間: 前タブ」などWeb履歴に乗せる挙動の具体実装が未定義で、戻るスタックの一貫性に不安がある。",
+    "suggestion": "履歴管理ポリシーを明文化。例: タブ切替はpushStateせず（URLは固定）、モーダル/詳細のみpush。通知ディープリンクはクエリで状態復元し、戻るで直前の画面へ。端末戻るボタンの反応マトリクスも追記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3 Overdue / §2.3 タスク完了",
+    "issue": "Overdueの「明日に延期」にはUndoがあるが、通常完了のUndo（30秒）が他の操作により見失われやすい。誤操作時の安心感を損なう可能性。",
+    "suggestion": "Undoの視認性を高める（タスク行内アクション+タイマー表示）。複数同時操作時はUndoキューを1件ずつ表示。Reduced Motion時も等価な視覚サインを用意。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3 アバターシステム",
+    "issue": "SVGレイヤー合成は定義されているが、一覧表示のPNGキャッシュが64x64固定だと高DPR端末で粗く見え「洗練」意図を損なう。キャッシュ膨張や再生成戦略も未定義。",
+    "suggestion": "デバイスピクセル比に応じて64/128/192のマルチ解像度をService Workerキャッシュ。初回はSVG→OffscreenCanvasでラスタライズ、差分（パーツ変更）時のみ再生成。画像のWebP/PNG選択とLRU上限（例: 200枚）も定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §7.3 / ux_v1.md §8.2",
+    "issue": "オーラ/グローなど重いSVGフィルタの使用指針がなく、低端末でパフォーマンス劣化の懸念。",
+    "suggestion": "重いフィルタ禁止方針（feGaussianBlurは半径上限/静的ビットマップ置換）、アニメはtransform/opacity中心。アバターの進化演出はSVG2DよりCanvas/Lottie検討。SVGO最適化とシンボル再利用（<use>）を規定。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_system（未作成）",
+    "issue": "ブランド/テーマのコアが未定義（色体系/タイポグラフィ/余白/アイコン/エレベーション/状態色）。洗練×ゲーミフィケーションの両立を担保できない。",
+    "suggestion": "design_system.mdでトークン定義: 1) カラー（role-based: primary/accent/surface/surface-elevated/bg/text/text-muted/border/positive/warning/danger/overdue）× tone scale(50–900) 2) タイポ（日本語対応のsystem-ui系本文+見出し用Display可変。見出し: 28/24/20、本文: 16/14、行間1.4–1.6）3) スペーシング4ptグリッド（4/8/12/16/20/24/32/40）4) コーナー半径（4/8/12/16）5) アイコンセット（線幅2px、角丸、統一ストローク）6) エレベーション/影（e1–e4）7) フィードバック/状態色とアクセシビリティ基準（AA保証）8) モーショントークン（duration 100/200/300/400ms, easings）9) ダーク/ライトの表面レイヤー（overlay alpha段階）。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "design_system（未作成）",
+    "issue": "4テーマ（Night Sky/Dawn/Harajuku Light/Harajuku Dark）の具体色・コントラスト・表面/陰影のルールが未定義。",
+    "suggestion": "各テーマのベース/サーフェス/エレベーテッド/境界/アクセント/成功/警告/危険/Overdueの具体色を定義し、WCAGコントラストを検証。PWAのmeta theme-color、iOSステータスバー外観、モーダルbackdropのアルファもテーマ別に指定。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "design_system（未作成）",
+    "issue": "タイポグラフィが未定義（フォントファミリ/サイズ階層/字間/和文の可読性）。長文（AI理解メモ/ディープ分析）における可読性とブランド感の担保が難しい。",
+    "suggestion": "本文: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Hiragino Sans, Noto Sans JP, Yu Gothic, Meiryo。見出しのみ可変フォント採用（遅延読み込み）。見出しスケール、行間、字間、段落間余白を規定。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "design_system（未作成）",
+    "issue": "アニメーションの設計原則/トークンが分散（各所でduration/easingがバラバラ）で、一貫性が担保されない。",
+    "suggestion": "モーショントークンを制定（t-quick=100ms, t-base=200ms, t-slow=300ms, t-epic=1500ms / ease-out=e(0.2,0.8,0.2,1), standard=ease-in-out）。適用マップ（トランジション種別→トークン）とReduced Motion時の代替も記述。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.2 / §11.2",
+    "issue": "小型端末最適化において、ヒーローの縮小や省略は定義されているが、セーフエリア（iPhoneホームインジケータ/ノッチ）対応の明記がない。",
+    "suggestion": "safe-area-insetを考慮したpadding適用ルール（ボトムタブ上/スナックバー/入力バー）を追加し、端末別の最小タップ余白を確保。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §10 アクセシビリティ",
+    "issue": "強み/弱みチップの色（緑/オレンジ）に依存し、色覚多様性対応の補助（アイコン/パターン）が未定義。",
+    "suggestion": "強み=✓アイコン、課題=!アイコンを併記。チップにaria-labelでカテゴリを付与。色以外の手���かりを追加。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.3 / §3.5",
+    "issue": "TALKの左端スワイプでドロワー展開は、iOSのシステム「戻る」ジェスチャーと衝突しやすい（特にPWA未インストール時）。",
+    "suggestion": "左端ジェスチャーの有効幅を16px→8pxに縮小、もしくは無効化し、ヘッダーアイコンに限定。PWAインストール状態で挙動を切り替えるか、二重ジェスチャー衝突時の優先度を定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system（未作成）/ project_v1.md §3.2.4",
+    "issue": "Overdueのアクセント色や警告/危険のトーンが未定義で、ダーク/ライト双方での可読性と一貫性が保証されない。",
+    "suggestion": "semantic color tokens（warning, danger, overdue）を各テーマで定義し、配色の使用ルール（背景/枠/テキスト/アイコン）とコントラスト閾値を明文化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.1 / 全体",
+    "issue": "S-34 SHOPは「Coming Soon」だが、タブ上のバッジや遷移の可用性がMVPで不明確（ユーザーが期待して遷移→プレースホルダー多発は不満要因）。",
+    "suggestion": "SHOPタブに「Coming Soon」バッジ/ツールチップを表示し、タップ時にミニ説明+プレミア特典の現状（アバターフレームはS-41から装備）を案内。必要なら当面はタブ非表示でS-41に導線集中も検討。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §0.3 / 設計全体",
+    "issue": "ベンチマークの知見は反映されているが、「Habitifyのフリーズ」対策のUX側（重い演出を抑制/非同期化/スケルトン優先）の指針が明文化されていない。",
+    "suggestion": "UX原則に「パフォーマンス優先」の条項を追加。重い演出（紙吹雪/モーフ）はfps低下検知で自動簡略化、1フレーム100ms内のフィードバック保障（押下ハイライト即時）を明記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_system（未作成）",
+    "issue": "アイコン体系（セット選定/スタイル/サイズ/線幅/命名/テーマ適合）が未定義で、統一感と「洗練」イメージに影響。",
+    "suggestion": "アイコンは線幅2px/角丸の一貫スタイル（例: Phosphor Icons/Remix Icons Rounded）を採用。サイズ（16/20/24）、カラー（currentColor）、命名規則、テーマ適合（コントラスト）を規定。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "design_system（未作成）",
+    "issue": "余白/レイアウトグリッドのスケールが未定義で、画面間の密度とリズムが不統一になる恐れ。",
+    "suggestion": "4ptグリッドベースでセクション間24/32、カード内16、行間8を基準に密度バリエーション（dense/regular/roomy）を定義。コンポーネントごとの内外余白トークンを設ける。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-026",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §8.1–8.4",
+    "issue": "紙吹雪（30–50）や複数演出の同時実行はモバイルPWAでjankのリスク。Canvas管理/解放の詳細が不足。",
+    "suggestion": "パーティクルはrAFでバッチ描画、上限30に制限、OffscreenCanvas対応端末では分離。duration後のdispose徹底、visibilitychangeで一時停止。低端末判定で数/解像度を削減。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

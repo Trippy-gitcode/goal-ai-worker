@@ -1,0 +1,61 @@
+.auth-callback {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  background: var(--bg-primary);
+}
+
+.auth-callback-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.auth-callback-text-error {
+  color: var(--danger);
+}
+
+/*
+ * ウェルカム演出 — Lais 主人公体験ブランド導入の最初の瞬間。
+ * design_system.md §7.5 に準拠:
+ *   duration: --duration-celebration (800ms)
+ *   easing:   --spring-default (scale系はspring許可)
+ *   opacity:  --ease-out
+ * prefers-reduced-motion 時は §7.6 によりトークンが 1ms に縮退し、
+ * JS 側でも表示をスキップ（main component 側で判定）。
+ */
+.auth-callback-welcome {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.96);
+  animation:
+    auth-callback-welcome-fade var(--duration-celebration, 800ms) var(--ease-out, ease-out) forwards,
+    auth-callback-welcome-scale var(--duration-celebration, 800ms)
+      var(--spring-default, cubic-bezier(0.175, 0.885, 0.32, 1.1)) forwards;
+}
+
+.auth-callback-welcome-text {
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: var(--letter-spacing-ja, 0.02em);
+  color: var(--accent);
+  text-align: center;
+  margin: 0;
+  line-height: 1.6;
+}
+
+@keyframes auth-callback-welcome-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes auth-callback-welcome-scale {
+  from { transform: scale(0.96); }
+  to   { transform: scale(1); }
+}

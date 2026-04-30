@@ -1,0 +1,21 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"CONTRADICTION\",\n    \"location\": \"lais/verify/dev_system_v34_package.md §2.ε'\",\n    \"issue\": \"PD-110でHFLOW_APPROVED環境変数バイパスが廃止され、verify_approval_authenticity.shによる二重証跡検証に置き換えられたはずですが、deploy.shの実装には古いHFLOW_APPROVED=1のチェックが残存しており、verify_approval_authenticity.shの呼び出しがありません。Hフロー承認ゲートが機能せずバイパス可能です。\",\n    \"suggestion\": \"deploy.shのHフロー発火判定部分を修正し、HFLOW_APPROVEDのチェックを削除して、`bash scripts/verify_approval_authenticity.sh \\\"$MISSION_ID\\\" \\\"$",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.2748,
+    "input_tokens": 217193,
+    "output_tokens": 652,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

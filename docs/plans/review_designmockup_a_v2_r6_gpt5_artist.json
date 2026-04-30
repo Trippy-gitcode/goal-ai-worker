@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow, s14_goal_detail, s01_signin",
+    "location": "s10_grow: Today末尾「+ タスクを追加」/ s14_goal_detail: 画面下「+ タスクを追加」/ s01_signin: 画面下「ログイン」リンク",
+    "issue": "インラインテキストリンクが下線なし。design_system §2.2で「インラインテキストリンクは必ずunderline」と定義されているのに未適用（色と記号のみで可視化）。",
+    "suggestion": "対象テキストに text-decoration: underline を付与するか、小ボタン/チップに昇格させて“リンクではない”UIに置換する（アクセント色のみの差別化を回避）。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "全画面の主要CTA/バー/カード",
+    "issue": "ダーク×青アクセントと汎用パーツ（角丸ボタン/チップ）の組み合わせに強く依存し、他サービスと視覚的に類似。ブランドチェックリスト「ロゴを隠し��も分かるか？」に未到達。",
+    "suggestion": "Night Skyの物語性をUIの細部に埋め込む。例: EXPバー端に“月相”インジケータ、ヒーロー周辺の微細な星粒配列、アバター枠に称号別の控えめなテクスチャ。CTAは場面によりaccent-subtle版を標準化して強弱を作る。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayリスト1行目（達成タスク）",
+    "issue": "完了行が濃い緑のカード＋枠線で最も目立ち、未了タスクより強い視覚ウェイトを持っている。視線が“済んだもの”に吸われる。",
+    "suggestion": "完了行は背景なし/文字色をsecondary＋打消し、チェックのみ成功色にしてウェイトを下げる。完了グループを折りたたみ可能にし、未了に視線集中を促す。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "AI返答直後の「タスクにしますか？」カード",
+    "issue": "左ボーダー＋濃い面＋大きいPrimaryボタン×2で会話本文より視覚的に強く、“読む→考える”流れが中断される。",
+    "suggestion": "カードはaccent-subtle背景＋細ボーダーに弱め、プライマリは1つに絞る（登録）。編集はテキストボタン扱いに格下げ。カード上下の余白を+8pxし、会話との分節を明確化。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Todayヘッダー下「1 / 4 completed」",
+    "issue": "11px相当の極小テキストを使用。§3.2では --font-size-xs(11px) は“キャプション・時刻のみ”と定義。進捗文言は本文扱いで小さすぎる。",
+    "suggestion": "14px(--font-size-sm)に引き上げ、line-heightを日文規定(--line-height-ja-body)へ。文言も日本語化（例:「1/4件 完了」）で可読性を上げる。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Today各行のカテゴリドット（副業=青, 健康=アンバー, 学習=紫）",
+    "issue": "カテゴリ色がセマンティック色（info青/ warningアンバー）と衝突し、意味の混同リスク。design_system §2.1/2.2の役割分離意図に反する使い方。",
+    "suggestion": "カテゴリ専用のニュートラル寄りパレ��トを定義（低彩度トーン）し、セマンティック色との同居時も識別可能に。形状（アイコン/パターン）も併用して“色だけ”に依存しない。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択行（タイプA/B/C）",
+    "issue": "ラベルが汎称（タイプA/B/C）で物語性がなく、自己投影が起きにくい。ブランド原則「ユーザーの自己表現」に弱い。",
+    "suggestion": "性格/雰囲気が伝わる名称と微差分（配色/服/輪郭）に変更（例: “静かに燃える/ひらめき派/コツコツ派”）。選択時に“らしさ”の短文コピーを表示。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s14_goal_detail",
+    "location": "タスクリスト各行の区切り線",
+    "issue": "各行に境界線が連続し、面が分断されて見える。Open Air原則の“余白で区切る”より線依存が強い。",
+    "suggestion": "行間+4〜6px拡張＋交互にごく薄いrow-hover面または内側余白を増やし、ボーダーはグループ見出し下のみ残す。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "入力群 > 「メモを追加」フィールド",
+    "issue": "プレースホルダのみで恒常的なラベルがない。入力後に役割が消え、WCAG 3.3.2(Labels)で望まれる自己記述性が弱い。",
+    "suggestion": "フィールド上に「メモ」ラベルを常設（12–14px）。インプット内のプレースホルダは補助に留める。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "OTHER",
+    "screen": "s10_grow",
+    "location": "Todayヘッダー下「1 / 4 completed」",
+    "issue": "日本語UI内でこの一文のみ英語併用。小サイズ＋英語で読解が一瞬遅れる。",
+    "suggestion": "文言を日本語に統一（例:「1/4件 完了」または「進捗 25%」）。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "ヘッダー（左:メニュー/右:履歴・新規）",
+    "issue": "アイコン3つの視覚ウェイトが同等で優先度が見えない。初見で“どれが主要アクションか”判断しにくい。",
+    "suggestion": "主要アクション（新規）はアクセント色/実線アイコンで強調し、補助（履歴/メニュー）はsecondary色/アウトラインで弱める。タップ領域は維持しつつ視覚優先度を段階化。",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

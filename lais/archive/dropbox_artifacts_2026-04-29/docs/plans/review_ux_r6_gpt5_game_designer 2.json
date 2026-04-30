@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 vs §4.5（および ux_v1.md §15 内部矛盾#1）",
+    "issue": "レベル計算式と説明文が矛盾。次Lv必要EXPは式/表ではLv1→2=100なのに、§4.5に「Lv.1→2=1,000EXP」と記載。",
+    "suggestion": "正値（Lv1→2=100）に統一し、§4.5の誤記を削除。あわせて表・到達目安・通知文面（例: 日次サマリー）に依存する全箇所を一括置換。reference_v1.mdに計算式の単体テストを追加してCIで検知可能に。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "project_v1.md §4.4（レベル表「到達目安」）× §4.5（1日上限）",
+    "issue": "到達目安（例: Lv50=1.7年）が、1日上限350EXP（ゴール別枠50含む）や一般的な日次行動ペースと整合しているか不明。高速プレイ前提では約半年で到達も可能。",
+    "suggestion": "実プレイ想定（平均タスク数・冒険検出頻度・週休等）でモンテカルロ試算し、到達目安を数値根拠付きで更新。アプリ内の「到達目安」表現は幅を持たせる（例: “約0.6〜1.7年”）。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2, §4.5",
+    "issue": "タスクEXPが所要時間・難易度に関わらず一律+10のため、短時間・細分化タスクの量産（マイクロタスキング）を誘発しがち。日次上限300でブレーキはあるが、ゲーム性として“挑戦”の重みが希薄になり得る。",
+    "suggestion": "難易度/所要時間/ゴール紐付けで重み付け（例: ゴール紐付け+5、所要60分以上+5、同カテゴリ連打の逓減-2/回）。“罰なし”方針を守りつつ“同一カテゴリ短時間の連続”に日内限りの逓減を導入。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2（ゴール達成ボーナス）",
+    "issue": "タスクなしゴールの手動完了でも+50EXP（1日1回、作成から7日経過でOK）のため、“7日前に仕込んでおく”だけで容易に恒常+50を得られる可能性がある。",
+    "suggestion": "ゴール達成ボーナス付与条件に“直近7日間で当該ゴール関連タスク（またはメモ/チェックイン）を1回以上実施”を追加。タスクなしゴールは日記型の“進捗メモ入力”を最低1回要求など、形骸化を抑止。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §2.3, §3.4, project_v1.md §4.5",
+    "issue": "日次EXP上限到達時のUIが未定義（GROWのタスク完了、TALKの冒険検出、ゴール達成時の別枠50を含む）。ユーザーは完了自体は成功したのか/EXPだけ無効なのか判断できない。",
+    "suggestion": "共通トーストを定義（例: “今日はEXP上限に達しました。完了は記録済みです”）。TALKの冒険カードは“検出”表示は保ちつつ“+0 EXP（上限）”と明示。GROWヒーローに“本日: 295/300(+50)”のような上限進捗表示も追加。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md（全体）",
+    "issue": "“本日のEXP上限の進捗”の常時可視化がない。上限管理が隠れていると“無駄打ち感”が発生し、やる気を毀損。",
+    "suggestion": "ヒーロー領域にデイリーゲージを追加（例: 今日のEXP 180/300、別枠ボーナス残: 1件/日）。日次サマリー通知にも上限到達有無を記載。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §2.3（Today 並び替え）× project_v1.md §3.2（開始時刻ソート）",
+    "issue": "Todayは“開始時刻順ソート”と“手動ドラッグ順の保存”が併記。どちらが優先か、日を跨いだ適用スコープ（当日だけ/予定日全般）が不明。",
+    "suggestion": "優先順位を定義（例: 当日は手動順を最優先、翌日は再び開始時刻順に戻す）。または“手動固定ピン留め（上位N件）”と“残りは開始時刻順”などのハイブリッドを明記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.3（週N回の“今日やる”ボタン言及）× lais_ux_v1.md",
+    "issue": "週N回習慣のToday手動追加“今日やる”導線がUX仕様に未反映（ボタン位置・状態遷移不明）。",
+    "suggestion": "S-10 Todayの各“週N回習慣”に“今日やる”トグル/ボタンを追加し、押下時のToday表示・取り消しルール（今日中のみ有効/Undo可）を定義。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.1（TALKヘッダー：📝新規チャット）",
+    "issue": "“📝 新規チャット”の挙動が未定義（既存スレッドとの関係、初期プロンプト、タイトル命名、対話回数カウント）。",
+    "suggestion": "新規チャット押下時の仕様を追加（空スレ生成→入力フォーカス、タイトルは最初のユーザーメッセージ先頭20字、自動保存、対話回数は通常通りカウント、既存コンテキストは引き継がない等）。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §3.1, §3.5",
+    "issue": "TALKヘッダーに☰（ドロワー）と🕐（履歴）が併存し、どちらから履歴に到達するのか役割が被っている。",
+    "suggestion": "履歴エントリポイントを1つに集約（例: ☰=履歴ドロワーのみ。🕐は削除）。ヘッダーアイコンの意味をラベル/ツールチップで補足。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §4.4（アバター進化5段階）× §7.3（MVPはPhase1-3アセットのみ）",
+    "issue": "レベルキャップ50（Phase4/5領域）まで到達可能だ���、MVPでPhase4-5のアセット未実装。長期利用者で進化ビジュアルが欠落し没入感を損なう恐れ。",
+    "suggestion": "MVPは一時的にLv30（Phase3終端）でキャップする、またはPhase4/5に暫定プレースホルダ（色違い/輪郭強調）を用意。アプリ内で“次期アップデートでフル進化”を明示。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §8.2（レベルアップ演出）× project_v1.md §4.4（Lv50到達後表示方針）",
+    "issue": "レベルキャップ到達時（Master）のEXPバー/到達演出/以後の表示状態（“MAX”表示、次Lvゲージ非表示など）がUIとして未定義。",
+    "suggestion": "Lv50到達時は“MAX”ピルと累計EXPのみ表示、バーはフル固定。再生フラグは1回限り。将来キャップ解放時に自動再計算される旨のツールチップを追加。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §4.5, §7.3",
+    "issue": "不正対策は“同名5分以内無効”“冒険の同一文脈抑止”のみ。名称を変えた大量タスク/自動化POST/短時間での大量作成・完了な��に脆弱。",
+    "suggestion": "サーバーレート制限（完了/作成/削除の分単位上限）、ユーザー別・IP別のアノマリ検出、日次ユニーク完了数上限のソフトガード、目標未紐付タスクのEXP逓減、リクエストIDの重複排除を全完了系APIに適用。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.3 × lais_ux_v1.md §3.4",
+    "issue": "冒険EXPが誤検出/上限到達で+0になった際のユーザー操作（“冒険ではない”申告、再評価要求）が未定義。",
+    "suggestion": "冒険カードに“これは冒険ではない”スナックアクションを追加（サーバーへフィードバック→将来の分類改善に活用）。上限到達時は“+0（本日上限）”と明示。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §1.3, §4（ループ設計全体）",
+    "issue": "1週間/1ヶ月/3ヶ月の飽きポイントに対する強いリズム設計が不足（ショップ未実装、タスク+10のフラット化、週次/季節イベント不在）。",
+    "suggestion": "週次アドベンチャー（例: “新しいこと3回”で���定バッジ）、月次称号チャレンジ（称号スキン開放）、フレンドDuoゴール（双方達成で“絆バッジ”獲得・EXPは付与しない）を追加。ペナルティなしで“やってみたい”を喚起する周期ミッションを導入。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §2.2, §4.4 × lais_ux_v1.md §4.2.1",
+    "issue": "“アバター経済”のゲームデザインが未整備（現状は有料装飾とレベル自動進化のみ）。無課金でも継続により解放される“遊べるコスメ/トロフィー”が不足。",
+    "suggestion": "レベル/称号/週次チャレンジでコスメを段階解放（無料でも少しずつ増える）。ソーシャル由来の限定フレーム（Duo達成/イベント参加）を用意。ショップ開始後は“入手経路：購入/達成/限定”の3柱で希少性を設計。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §4（インフレ/減衰方針）",
+    "issue": "“減算なし”方針は明記されているが、日内の“同型行動の逓減”やカテゴリ別上限など、インフレ制御の細則が未定義。",
+    "suggestion": "“罰なし”を維持しつつ日内逓減ルール（同カテゴリ5件目以降は+8→+6→+4）や“ゴール紐付けで逓減を打ち消す”等の正の設計を追加。app_config.yamlに調整可能なトークンとして定義。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5（JST 4:00固定リセット）",
+    "issue": "全ユーザー一律JST 4:00は海外/出張ユーザーで直感に反し、日次境界を跨ぐ“取りこぼし感”が出やすい。",
+    "suggestion": "v0.2.0でローカルTZベースへの移行計画を明記。移行までの暫定として、GROWヒーローに“日次リセット: 04:00 JST（現地: xx:xx）”を併記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  }
+]

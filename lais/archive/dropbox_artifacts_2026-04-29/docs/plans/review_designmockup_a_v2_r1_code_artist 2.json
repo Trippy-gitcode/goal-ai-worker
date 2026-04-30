@@ -1,0 +1,57 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s20_talk",
+    "location": "AI 吹き出し（背景削除・縦ラインのみ）",
+    "issue": "v2 で AI バブルの背景が削除され、左 2px のアクセントラインのみで表現されたのは Night Sky のトーンに合致する大きな進化。ただしユーザー吹き出しとの視覚的バランスが崩れており、ユーザー側だけ bg ありで『閉じた箱』に見える。",
+    "suggestion": "ユーザー吹き出しも bg を透過度 40% まで薄め、吹き出し全体を『月光下の対話』の雰囲気で統一。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "星屑の密度",
+    "issue": "v2 でもスプラッシュの星屑は 6 点のまま。詩情の演出が未進化。",
+    "suggestion": "100〜200 点のポアソンディスク + 月/薄雲のグラデーション。Phase B での対応でも可。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "時刻左列 + タスクカード",
+    "issue": "v2 の時刻左配置は情報階層が明確になった。ただし時刻とタスクカードの間の divider が薄くて視線が流れにくく、4 タスクが連続した block に見える。",
+    "suggestion": "タスク間の余白を +8px、時刻とカード間に 1px の divider を追加。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "全体構造",
+    "issue": "SaaS テンプレ感は v2 で大幅緩和（s10/s20 の構成が独自化）。ただし残った固有シグネチャが『月のジャーナル』と言えるほど立っていない。",
+    "suggestion": "Phase B/C で装飾的な月相アイコン or 星のアクセントを画面隅に配置する統一モチーフを追加。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択 3 円",
+    "issue": "v2 で変更なし。既視感のある均等配置が残存。",
+    "suggestion": "Phase B で見直し。横カード or オーバーラップ配置。",
+    "model": "Code",
+    "persona": "artist"
+  }
+]

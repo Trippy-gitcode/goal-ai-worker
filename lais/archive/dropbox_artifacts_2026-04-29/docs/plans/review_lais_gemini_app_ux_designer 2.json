@@ -1,0 +1,104 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "5.1",
+    "issue": "QRスキャン時のカメラ権限要求と拒否時のエラーハンドリングが未定義",
+    "suggestion": "カメラ権限（getUserMedia）の要求タイミングと、ユーザーが拒否した場合のフォールバックUI（「ブラウザの設定からカメラへのアクセスを許可してください」という案内や、リンク共有への誘導）を明記してください。未定義のまま実装すると、権限拒否時に例外が発生し画面が真っ暗なまま進行不能（デッドロック）になります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.2",
+    "issue": "各セクションのEmpty State（空状態）が未定義",
+    "suggestion": "Todayタスクが0件の時、Goalsが0件の時、FRIENDSが0件の時のUIを定義してください。単なる空白ではなく、「今日はゆっくり休もう」などのポジティブなメッセージや、新規作成へのCTA（Call to Action）を配置し、ユーザーが次に何をすべきか迷わないようにする必要があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1.3",
+    "issue": "ハプティクス（触覚フィードバック）の設計が欠落している",
+    "suggestion": "「ゲームの気持ちよさを持った洗練されたアプリ」というコンセプトを実現するため、タスク完了時（Success）、EXP獲得時（Light）、レベルアップ時（Heavy）などのハプティクス（Vibration API等を利用した触覚フィードバック）のトリガーポイントを定義してください。視覚（アニメーション）と触覚の組み合わせがモバイルUXの質を決定づけます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "3.2",
+    "issue": "タスク完了���Undo（30秒以内）のUI表現と画面遷移時の挙動が未定義",
+    "suggestion": "Undoボタンをどこに表示するか（グローバルなスナックバー/トーストか、リストアイテムのインラインか）を定義してください。また、30秒以内に別タブ（TALK等）に遷移した場合、Undo UIが追従するのか消えるのかの状態管理ルールを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "5.3",
+    "issue": "プッシュ通知のパーミッション要求タイミングが未定義",
+    "suggestion": "初回起動時にいきなり通知許可を求めると拒否率が高くなります。「初めて友達リクエストを送った時」や「初めて応援メッセージを受け取る設定をした時」など、ユーザーが通知のメリットを理解できるコンテキストに沿ったタイミング（Contextual Onboarding）で要求するよう定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.3",
+    "issue": "ローディング状態（スケルトン/スピナー）の定義が欠落",
+    "suggestion": "TALK画面の履歴読み込み時や、��プリ起動時のデータフェッチ中に表示するローディングUI（スケルトンスクリーンやインジケーター）を定義してください。PWA特有のネットワーク遅延時に、アプリがフリーズしたと誤認されるのを防ぐために必須です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.2",
+    "issue": "アクセシビリティ（VoiceOver/TalkBack、タップ領域）の要件が未定義",
+    "suggestion": "SVGアバターやEXPプログレスバーの代替テキスト（aria-label等での「現在1240、最大2000」などの読み上げ）、最低タップターゲットサイズ（44x44pt / 48x48dp）、およびOSのダイナミックタイプ（文字サイズ拡大）への追従方針を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3.2",
+    "issue": "Pull-to-refresh（引っ張って更新）ジェスチャーが未定義",
+    "suggestion": "PWAでオフラインからオンラインに復帰した際や、他デバイスでの変更を同期するために、GROW画面やME画面でのPull-to-refreshによる手動同期ジェスチャーを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.2",
+    "issue": "リストアイテムに対するスワイプアクションが未定義",
+    "suggestion": "モバイルUXの標準的な期待値として、タスクリストのアイテムを左右にスワイプすることで「完了」「削除」「編集」などのアクションを素早くトリガーできるジェスチャーを追加することを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.3",
+    "issue": "TALK画面でのキーボード非表示ジェスチャーが未定義",
+    "suggestion": "メッセージリストをスクロールダウンした際に、インタラクティブにキーボードを閉じる（iOSの `keyboardDismissMode=\"interactive\"` 相当の挙動）ジェスチャーを定義してください。画面領域を素早く確保するために重要です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

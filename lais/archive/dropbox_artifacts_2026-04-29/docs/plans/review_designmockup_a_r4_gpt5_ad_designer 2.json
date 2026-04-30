@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "OTHER",
+    "screen": "s00_splash",
+    "location": "ロゴ直下のタグライン（「あなたの人生を、あなたらしく」）周辺",
+    "issue": "初見で「何ができるアプリか」が分かる具体説明がない。タグラインが抽象的で、AI/タスク/ゴールなどの機能が示されていない",
+    "suggestion": "ロゴ直下に機能が一目で分かる1行USPを追加（例:「AIと一緒にタスクとゴールを計画・達成」）。その下に小さな3アイコン（タスク/AI相談/成長バー）か短い箇条書き3点を配置して具体を補足",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "OTHER",
+    "screen": "s00_splash",
+    "location": "主要CTAボタン「はじめる」",
+    "issue": "CTA文言が汎用的でベネフィットやコスト（無料）が伝わらないため、初動の訴求が弱い",
+    "suggestion": "ボタン文言を「無料ではじめる」に変更し、下に微文言「登録は1分・いつでも解約可」を追加して心理的ハードルを下げる",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」のチェックボックス",
+    "issue": "チェックボックスが20×20pxで、デザインシステム§4.5の最小タップ領域44×44px要件に不一致",
+    "suggestion": "見た目サイズは維持しても良いが、paddingまたは透明ヒット領域で--tap-target-min:44pxを満たす。ラベル全体をタップ可能にしてアクセシビリティを向上",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」リンク",
+    "issue": "インラインテキストリンクに下線がなく、色のみでリンク性を伝達（WCAG 1.4.1違反）。デザインシステム§2.2でも下線併用を必須としている",
+    "suggestion": "「ログイン」にtext-decoration: underlineを適用。ホバー/フォーカス時は下線太さまたは色変化を追加して可視性を強化",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン周辺",
+    "issue": "主要CTAが無効状態のまま視線が留まるが、有効化条件（チェックや必須入力）が即座に理解しづらい",
+    "suggestion": "ボタン直上に小さなガイダンス（例:「メール・パスワード入力と同意で有効になります」）を追加。未充足項目には軽いエラーヒント/強調枠を表示して次のアクションを明確化",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクションの「＋ タスクを追加」行",
+    "issue": "主要CTA（タスク追加）がテキストリンク風で埋もれ、視線誘導が弱い。次のアクションが直感的に取りにくい",
+    "suggestion": "右下にFAB（＋）を追加（--z-fab:300、--button-primary-bg系トークン使用）、または「＋ タスクを追加」をアクセントサブトル背景のピルボタンに昇格して目立たせる",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "AI提案カード内の操作（「登録する」「編集して登録」「✕」）",
+    "issue": "ボタン/チップの高さが約28〜32pxで--tap-target-min:44pxに未達。誤タップリスクが高い",
+    "suggestion": "各アク���ョンのタップ領域を44px以上に拡大（padding追加 or 透明ヒット領域）。主要アクション「登録する」は塗りボタン、第二アクションはアウトラインで階層化",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "入力バー右端の送信（紙飛行機）ボタン",
+    "issue": "ビジュアル36×36pxで--tap-target-min:44pxに未達",
+    "suggestion": "実サイズを44px以上に拡大、または見た目36pxのまま周囲に透明paddingを持たせて44px以上のヒット領域を確保",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "画面下部「← 戻る」",
+    "issue": "戻るが小さなテキストとして表示されており、ナビ要素としての発見性・タップ領域が弱い",
+    "suggestion": "上部左に標準の戻るアイコン+ラベルのボタンを配置（高さ≥44px）。下部テキストは補助として残すか削除し、主戻り導線を一箇所に集約",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "タスクリスト下部の「＋ タスクを追加」",
+    "issue": "追加CTAが小さく、長い詳細画面の中で視認性が低い。次の一手が弱い",
+    "suggestion": "リスト直下に幅広のセカンダリボタン（accent-subtle背景のピル or アウトライン）で配置し、44px以上の高さを確保。スクロール最下部でも常に見えるようミニ固定CTAも検討",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "OTHER",
+    "screen": "s13_task_detail",
+    "location": "下部ボタン群（進め方を聞く／詰まりを相談 が無効）",
+    "issue": "完了タスク表示時、次のアクション（学びの振り返りや要約作成）導線が途切れている",
+    "suggestion": "完了時は「AIで振り返りを作成」「要点をまとめる」などTALK誘導の代替CTAを常時有効で提示し、行動の連続性を担保",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

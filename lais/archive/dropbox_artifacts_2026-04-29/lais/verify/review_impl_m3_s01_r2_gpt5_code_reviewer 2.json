@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3.1",
+    "issue": "NotFound が全未定義パスを自動で '/' にリダイレクトしており、/terms /privacy など未実装ページも即座にトップへ戻される。R2 でC2対策としてリンクを有効化したが、現状では実体を閲覧できない挙動になっている。",
+    "suggestion": "NotFound は即時リダイレクトではなく 404/準備中ページを表示するか、/terms と /privacy だけは暫定プレースホルダを用意して直接表示する（あるいは NotFound 内で allowlist してリダイレクトを抑止）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.2",
+    "issue": "supabase.auth.onAuthStateChange の購読を解除していないため、HMR/再インポートで重複購読・リークのリスクがある（既知事項だが未対応）。",
+    "suggestion": "onAuthStateChange の戻り値の subscription.unsubscribe を保持し、HMR 時は import.meta.hot.dispose で解除。あるいはシングルトン初期化ガードを設けて複数回の購読を防ぐ。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "3.2",
+    "issue": "auth.js で getSession 実行と onAuthStateChange 購読をモジュールトップで実行しており、実行コンテキストによっては重複初期化やテスト・SSR 実行時の副作用原因になる。",
+    "suggestion": "初期化関数 initAuth() を用意しアプリ起動時に一度だけ呼ぶ。HMR 環境ではガードまたは dispose でクリーンアップする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.3",
+    "issue": "パスワードのガイダンス文言とプレースホルダがハードコード（「8文字以上」）で、SIGNUP_MIN_PASSWORD と重複。将来的に最小長が変更された際に UI とロジックが乖離する恐れが高い。",
+    "suggestion": "UI 文言を SIGNUP_MIN_PASSWORD から動的生成する（例: `${SIGNUP_MIN_PASSWORD}文字以上`）。i18n 対応も考慮してテンプレート化する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.3",
+    "issue": "email/password 入力に onInput と onChange を併用しており、ブラウザによっては blur 時などに二重で state 更新���走る（不要な再レンダリングの原因）。",
+    "suggestion": "オートフィル検知目的なら、基本は onInput のみを使い、オートフィル専用の検知（setTimeout での値差分確認、animationstart ハック、または onChange は一時的に onInput 不発時のみ）に限定する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.3",
+    "issue": "Supabase の生メッセージ（err.message）をそのままエンドユーザに提示しており、英語や内部的な理由が露出する可能性がある。",
+    "suggestion": "エラーコードに基づきユーザ向けの定型文へマッピングし、詳細は console/log など開発者向けにのみ記録する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.1",
+    "issue": "AuthRoute でクエリ文字列を url の '?' 以降を slice する手法で手動解析しており、将来的なパス表現やハッシュ、セミコロンパラメータなどの拡張に脆弱。",
+    "suggestion": "URL オブジェクトを利用（new URL(url, location.origin) など）し、searchParams を安定的に取得する。もしくは Router から渡る url を安全に正規化してから URLSearchParams に渡す。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "3.3",
+    "issue": "サインイン成功時に即 route('/') しており、遷移先がセッション Signal に依存する場合にごく短時間の不整合やチラつきが起こる可能性がある。",
+    "suggestion": "signIn の戻り data.session 有無で遷移を判断しているが、必要に応じて onAuthStateChange の発火（session 反映）を待ってから遷移、または遷移先で authLoading を参照してガードする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3.3",
+    "issue": "モード切替 <Link> の無効化は onClick での prevent のみで、ミドルクリックやコンテキストメニューによる新規タブオープンは抑止できないため、送信中レース条件が完全には排除できない。",
+    "suggestion": "CSS で [aria-disabled=\"true\"] に pointer-events:none を付与し、UI 上の相互作用を明確に無効化する。新規タブオープンはユーザ明示操作のため許容するか、必要ならガードを追加する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3.3",
+    "issue": "確認メール送信の案内（confirmNotice）が任意の入力操作で即消去されるため、成功メッセージの視認性が低下する可能性がある。",
+    "suggestion": "入力でクリアするのは serverError のみに限定し、confirmNotice はモード変更または次回送信時にのみクリアする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.3",
+    "issue": "LOGIN_MIN_PASSWORD=6 をクライアント側で固定しており、サーバ設定変更時にクライアント制約と乖離する可能性がある（短すぎる値を許可してサーバ側で弾かれる等）。",
+    "suggestion": "ログインは最小長による事前制約を設けず、空文字など明白な不正のみ弾く。もしくは設定値を環境変数等で注入してサーバと同期させる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.2",
+    "issue": "console.error のみで監視されており、運用時の可観測性（エラー集計・通知）が不足する可能性がある。",
+    "suggestion": "本番ビルドではエラーログを集中管理（Sentry など）へ送るフックを用意し、開発時は console、運用時はトラッキングに切り替��られる構成にする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

@@ -1,0 +1,272 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project §3.2.6(7), §7.3 / ux §8.2",
+    "issue": "アバター演出で「SVGモーフィング(1.5s)」と「PNGクロスフェード」が併記され、どの画面がSVG直描画/ラスタ画像を使うかの最終方針が分散・矛盾している。",
+    "suggestion": "最終方針を一本化: ①一覧/ヒーロー/演出=ラスタ(PNG/WebP)のみ ②詳細(S-41)のみSVG直描画。画面別に明記し、キャッシュ戦略(解像度・DPR)と再生成トリガー(レベル変化/装飾変更/テーマ変更)をdesign_system.mdに追記。project §3.2.6(7)を§7.3/ux §8.2に整合させる。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project §7.3（SVGアバターシステム）",
+    "issue": "SVGレイヤーにfilter/blur等の重いエフェクト(オーラ/グロー)を多用すると、iOS Safariでのレンダリングがフレーム落ち・電池消費増のリスク。",
+    "suggestion": "装飾の描画制約を定義: SVG filterの使用禁止/最小化、オーラは事前合成済みビットマップ(アルファ付PNG)を重ねる、shadowはCSSではなく画像内表��。低性能端末検出で演出を段階的に簡略化(粒子数/サイズ/blur半径のダウングレード)。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §7.3（ラスタライズ/キャッシュ方針）",
+    "issue": "SVG→PNGラスタライズのキャッシュキー/失効条件/保存先が未定義で、装飾変更やレベルアップ時に古い画像が残る・無駄な再描画が発生する恐れ。",
+    "suggestion": "キャッシュ仕様を定義: key=`{basePhase}-{variant}-{frame}-{accessory}-{aura}-{bg}-{theme}-{DPR}-{ver}`、LRU 50件、失効=装飾/レベル/テーマ変更時。生成=OffscreenCanvas+createImageBitmap(対応外はCanvas2D)。Workerで非同期生成、生成中はプレースホルダーを表示。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system（未作成）/ project §3.2.4・ux 全般",
+    "issue": "4テーマの色体系(ベース/サーフェス/アクセント/成功/警告/危険/情報/境界/背景コントラスト)が未定義。Overdueやバナー/カード/プログレスの意味色も未確定でコントラスト保証ができない。",
+    "suggestion": "色トークンを策定: semanticカラー(—bg, —surface, —text, —muted, —accent, —success, —warning, —danger, —info, —outline)×4テーマ。WCAG AA基準(通常4.5:1/大3:1)で検証し、状態(hover/pressed/disabled/focus)の階調も用意。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system（未作成）",
+    "issue": "タイポグラフィ(日本語/ラテン)の書体・字間・行間・段階スケール・数値(タブラー)が未定義でブランドの「洗練」再現と可読性担保が困難。",
+    "suggestion": "推奨: 見出し/本文=Inter + Noto Sans JP(可変幅/Weight 300-700)。タイプスケール(例: 28/24/20/16/14/12)、本文行間1.5、数値/進捗はtabular nums。見出しは字間-1〜-2%、和文はJIS調整/禁則最適化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system（未作成）",
+    "issue": "スペーシング/ラディウス/エレベーション/境界線トークンが未定義で、カード・モーダル・ドロワーの一貫した密度と階層が表現できない。",
+    "suggestion": "8ptベースのスケール(4,8,12,16,24,32,48,64)。半径=4/8/12、影=level0-4(色/blur/offset定義)、境界線=hairline(1px)/strong(2px)。セクション/カード/行間の既定余白をUIキットに明記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux 全般（アイコン表記）",
+    "issue": "UI中に絵文字(🎯,⚙️等)とアイコンが混在し、ブランドの一貫性と可読性が揺らぐ。",
+    "suggestion": "アイコン体系を統一: 例) Phosphor/Feather/Material Symbolsのアウトライン1セットに統一。サイズ(16/20/24)、ストローク太さ、角Rを規定し、絵文字はヘルプテキスト内に限定。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux §1.3, §8（アニメーション）",
+    "issue": "各アニメーションのduration/easingが画面ごとに個別定義で、モーション言語の統一(洗練感)が弱い。",
+    "suggestion": "モーショントークンを定義: duration(xs=100, s=200, m=300, l=500, xl=800ms)、easing(standard, decel, accel, emphasized)を全体で共通化。Reduced Motion時の代替もトークン化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux §7.4（Today並び替え）/ §2.3（時間順ソート）",
+    "issue": "Todayの「開始時刻による自動ソート」と「手動並び替え保存」の優先順位・持続期間が未定義。時刻付き/なしが混在する場合の期待動作が不明確。",
+    "suggestion": "優先ルールを明記: 1) 時刻あり=常に時刻昇順(手動並び替え不可) 2) 時刻なし=手動順 3) セクション分割(Overdue/時刻あり/時刻なし)内でのみドラッグ可 4) 翌日リセット時は手動順をクリア。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux §8.6（演出キュー）",
+    "issue": "短時間に連続完了が起きると演出キューが8秒上限に達しやすく、体感が間延びする可能性。",
+    "suggestion": "EXPアニメの合算/間引き実装: 連続2秒内のタスク完了はEXPバーを合算1回で伸長、フロートテキストは数値を合計し1回表示。紙吹雪はゴール/レベル時のみ。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux §8.7（Canvasパーティクル）",
+    "issue": "Canvasパーティクルが低端末/バッテリーセーブ時にCPU負荷となる懸念。",
+    "suggestion": "動的ダウングレード: requestAnimationFrame中に実測FPS<45で粒子数半減・duration短縮。battery saverや低電力モード検知時は自動簡略化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §3.4 / §8.2（TALKでのレベルアップ）",
+    "issue": "TALKでレベルアップ発生時にGROWで「フル演出を次回再生」とあるが、再生条件(一度見たか/セッション跨ぎ)の永続フラグ仕様が未定義。",
+    "suggestion": "一度限り再生フラグをuser_metaに保存(例: next_levelup_replay=true/false + level value)。GROW初回描画時に消化→falseに更新。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §1.4（戻りナビ）/ §2.3, §2.4（AI相談遷移）",
+    "issue": "S-11/S-14からTALKへ遷移時のブラウザバック挙動がS-14→TALKのみ明記。他の「AI相談」経路の戻り先が統一されていない。",
+    "suggestion": "AI相談遷移の共通ポリシー: すべてreplaceStateで元画面を閉じ、ブラウザバックは直前のタブ状態へ(=GROW/ME)。例外があれば個別記載。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux §8（演出）/ §9.1（オフライン）",
+    "issue": "「洗練」と「ゲーミフィケーション」の両立で、紙吹雪/バナー/フロートの頻度が多いと冗長に感じるユーザー層が一定数いる。",
+    "suggestion": "「演出の控えめモード」を設定に用意(紙吹雪OFF/フロート最小化/バナー短縮)。デフォルトは標準、ユーザー選好で調整可能に。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system（未作成）/ ux §10.3",
+    "issue": "フォーカス可視化の具体スタイル(フォーカスリング色/太さ/角R/コントラスト)が未定義でキーボード/支援技術の操作性が担保されない。",
+    "suggestion": "focus-visibleトークンを定義: outline 2px, color=—accent(AA 3:1以上), offset=2px, radius継承。タブ/ボタン/入力/モーダル閉じ等の適用対象を明記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §6.1/§3.1（iOS PWAキーボード/セーフエリア）",
+    "issue": "iOSのsafe-area-inset対応(ノッチ/ホームインジケータ)の余白適用箇所が明文化されていない。",
+    "suggestion": "全画面でenv(safe-area-inset-*)を適用。ボトムタブ/入力バー/Undoスナックバー/ドロワー/ハーフモーダル下端にpadding-bottom追加。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project §4.4/§4.5 / ux §15(内部矛盾1)",
+    "issue": "レベル必要EXPが100(式)と1,000(説明)で矛盾。成長体験/演出頻度/バナー文言に重大影響。",
+    "suggestion": "正値を単一ソースに確定し、式/表/コピーを更新。E2Eテストでレベル2到達シナリオを固定。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "project §7.3（OffscreenCanvas想定）",
+    "issue": "OffscreenCanvasはiOS Safari未対応。ワーカー合成の前提が環境によって崩れる。",
+    "suggestion": "機能検出でフォールバック: OffscreenCanvas→通常Canvas+requestIdleCallbackでメインスレッド合成。createImageBitmapもfeature detect。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §11（レスポンシブ）/ §4.1（MEヒーロー）",
+    "issue": "小型端末での文字省略・二行化・ツー��チップ/フル名表示ポリシーが不足。ラベル短縮(“DISC”)以外の基準がない。",
+    "suggestion": "テキスト省略規則を定義: 1行省略(…)+title属性、重要フィールドは2行まで許容、長押しで全表示。ヒーロー内数値は必ずフル表示。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system（未作成）/ project §4.4",
+    "issue": "アバターのアートディレクション(線の太さ/影の有無/配色レンジ/Phase間の一貫性/Harajuku×洗練の文法)が未定義でブランドが揺らぐ。",
+    "suggestion": "アートガイドを作成: 1px相当線/角R/面の塗り比率、配色(Phase別ベース/アクセント上限)、表情/シルエット変化のルール、背景/フレーム/オーラの重ね順の作画規範を図示。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux §0 / 全テーマ",
+    "issue": "Harajuku Light/Darkは高彩度になりがちで、文字/UIのコントラスト不足や視認性低下の恐れ。AA準拠が保証されていない。",
+    "suggestion": "Harajuku系は彩度をアクセントのみに絞り、背景/サーフェスは低彩度でコントラスト確保。主要UI(テキスト/アイコン/プログレス)で全テーマAA達成をカラーセットに含める。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §15（通知ディープリンク）/ §14（起動）",
+    "issue": "Androidの物理戻るボタンでアプリルート(S-10)からの挙動(アプリ終了/確認/何もしない)が未定義。",
+    "suggestion": "ルートでの戻るは「もう一度で終了」トースト(2秒以内ダブルバックで終了)を推奨。PWAではhistory長の管理と組み合わせて意図せぬ終了を防止。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §3.2（タイムスタンプ）/ project §3.2.5（日次リセットJST）",
+    "issue": "表示上の時刻・日付(チャット/タスク)がJST基準かローカルかが未定義。JSTリセット方針とUI表示の不一致が混乱を招く可能性。",
+    "suggestion": "UI表示は常にユーザー端末ローカル時刻、日次リセットのみJSTである旨を設定/ヘルプに明記。JST基準の影響(リマインダー/サマリー)も注記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §4.4（QR表示モーダル）",
+    "issue": "ダークテーマで白背景QRが浮いて見え、周囲コントラスト���強すぎる可能性。読み取り性は担保されているが視覚的統一に欠ける。",
+    "suggestion": "QRを白カード(角R/影)に載せ、周囲のモーダルsurfaceはテーマ色を維持。補足説明テキストはミュート色でバランス調整。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §8.1（タスク完了）/ §9.1（オフラインUndo）",
+    "issue": "オフラインでのUndo後にオンライン復帰時、複数の完了/取消が競合した場合の優先値(最終操作勝ち/タイムスタンプ優先)が未定義。",
+    "suggestion": "クライアント操作にUUIDとタイムスタンプを付与し、同期時は「最終操作勝ち」をサーバーで決定。重複POSTはリクエストIDで冪等に破棄。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §13.1（テーマ変更）",
+    "issue": "テーマ切替が即時反映のみでトランジションなし。急な反転で負荷感が出る。",
+    "suggestion": "テーマ変更時に全体クロスフェード(150ms, opacity)を適用。画像/動画レイヤーは除外し、低スペック時は無効化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-027",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "project §7.2（RLS命名）/ ux §15(内部矛盾3)",
+    "issue": "AI対話メッセージとソーシャルメッセージのテーブル命名が混乱(messages/social_messages)。RLS誤設定によるデータ漏洩リスク。",
+    "suggestion": "テーブルを明確分離: ai_messages / social_messages 等に改名し、RLSポリシーをファイル別に定義。design_system範囲外だが、UX上のデータ可視性に直結するため早期修正。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスクリスト",
+    "issue": "タスク間の余白が数ピクセルしかなく、デザインシステム仕様の「タスク間余白: 20px以上（呼吸するリズム）」というOpen Air原則に完全に違反している。",
+    "suggestion": "タスク間のマージンを仕様通り20px以上に拡大し、要素間に「設計された沈黙」を持たせることで洗練された印象を取り戻す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s10_grow",
+    "location": "タスク行の左端",
+    "issue": "タスク行の左端にある太い色付きボーダーが視覚的ノイズとなり、ありきたりなタスク管理アプリのパターンに陥っている。「静かな情報設計」を阻害している。",
+    "suggestion": "左ボーダーを廃止し、ステータスやカテゴリは右端の小さなドットやテキストの微細な色変化など、より控えめなインジケーターで表現し余白を主役にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "背景上部",
+    "issue": "背景に散りばめられたドット（星）が安価なAI生成画像のような既視感を与え、「実世界との地続き感」「洗練」というブランドDNAを著しく損なっている。",
+    "suggestion": "意味のない装飾的なドットを完全に削除し、深い背景色とタイポグラフィ、そして美しい余白のみで構成する極限までミニマルな画面にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「利用規約と...」の左側",
+    "issue": "チェックボックスの枠線が暗く、背景色に溶け込んでおり、非テキスト要素のコントラスト比（3:1）を満たしていない。",
+    "suggestion": "チェックボックスの枠線を `--border-strong` などのより明るい色に変更し、視認性とアクセシビリティを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内",
+    "issue": "カード内のボタン（登録する、編集、✕）が狭い領域に詰め込まれており、余白が呼吸しておらず視覚的な緊張感が高すぎる。",
+    "suggestion": "カード内のパディングを広げ、ボタン間の余白を増やす。または「✕」を右上の絶対配置にするなどして、アクション領域の窮屈さを解消する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "中央のアバター選択領域",
+    "issue": "アバターのイラストが非常にフラットで無機質。ユーザーが感情的なつながりを持つための「洗練＋親しみ」が欠如し、汎用アイコンに見える。",
+    "suggestion": "アバターの造形にわずかな非対称性や、テーマカラーを��映した温かみのあるトーンを加え、単なる記号ではない「パートナー」としての存在感を与える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "進捗パーセンテージ表示",
+    "issue": "「60%」の巨大な数字表示において、「60」と「%」のベースラインやウェイトのバランスが取れておらず、画面内で浮いて間延びして見える。",
+    "suggestion": "「%」のサイズをさらに小さくし、数字部分のフォントウェイトとのコントラストを強調するか、レタースペースを調整してタイポグラフィとしての塊感を出す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "画面全体",
+    "issue": "ヒーロー領域（アバター・名前）が中央揃えであるのに対し、直下の基本情報が左揃えとなっており、視線が中央から左へ強制的に振られ静けさが削がれる。",
+    "suggestion": "ヒーロー領域から下のコンテンツへの視線誘導を滑らかにするため、基本情報も中央揃えのレイアウトを検討するか、ヒー��ー領域を左揃えに統一して垂直軸を揃える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "所要時間選択エリア",
+    "issue": "所要時間の横スクロールチップが画面端まで詰まっており、ハーフモーダル内で情報が飽和している。「静かな情報設計」に反する。",
+    "suggestion": "チップの数を減らすか、ドロップダウン形式に変更して、デフォルトで表示される要素数を絞り、余白を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "画面下部「削除」ボタン",
+    "issue": "「削除」ボタンのテキスト色（赤）が暗い背景に対して沈んでおり、破壊的アクションとしての警告の役割が視覚的に弱い。",
+    "suggestion": "削除ボタンのテキスト色を少し明るくするか、ボタンの背景に薄い赤（danger-subtle）を敷いて、アクションの性質を明確にしつつ視認性を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  }
+]

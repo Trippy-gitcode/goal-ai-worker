@@ -1,17 +1,17 @@
-# GOAL AI — CLAUDE.md（Claude Code専用）
-> 最終更新：2026-03-24（実装その18: canopy #20/#21追加、C2/C10/C15ルール追加。次回canopyでFAILする項目あり）
-> **このファイルを読んだらsession_progress.mdのキューを上から自律実行**
-> **アドホック指示の場合も、まずこのファイルの参照ドキュメントリストを確認すること**
-> 判断に迷ったら development_rules.md を参照
+# GOAL AI — [CLAUDE.md](http://CLAUDE.md)（Claude Code専用）
+
+> 最終更新：2026-03-24（実装その18: canopy #20/#21追加、C2/C10/C15ルール追加。次回canopyでFAILする項目あり） **このファイルを読んだらsession_progress.mdのキューを上から自律実行アドホック指示の場合も、まずこのファイルの参照ドキュメントリストを確認すること**判断に迷ったら development_rules.md を参照
 
 ---
 
 ## 🔒 契約セクション（Code変更禁止。変更権限はClaude.ai経由のみ）
 
 ### プラン構成（v6.3 + ルーティングv2）
-Free(¥0,20回/日,Sonnet+mini+3Flash) / Light(¥500~980,¥8/t,cap¥980) / Pro(¥1,500~2,980,¥20/t,cap¥2,980,Sonnet4.6+GPT-5+3Flash) / Max(¥1,500~9,800,¥10/t,cap¥9,800,Opus4.6+GPT-5+3.1ProPreview) / Ultra(¥20,000使い放題,Maxと同モデル,ET140回/週,コンテキスト2倍)
+
+Free(¥0,20回/日,Sonnet+mini+3Flash) / Light(¥500\~980,¥8/t,cap¥980) / Pro(¥1,500\~2,980,¥20/t,cap¥2,980,Sonnet4.6+GPT-5+3Flash) / Max(¥1,500\~9,800,¥10/t,cap¥9,800,Opus4.6+GPT-5+3.1ProPreview) / Ultra(¥20,000使い放題,Maxと同モデル,ET140回/週,コンテキスト2倍)
 
 ### 変更不可の設計
+
 - AIルーティング: quickRoute→callRoutingAPI→モデル振り分け（廃止禁止）。catch-allはGPT（Claude 15%/GPT 40%/simple 15%/Gemini 30%目標）
 - フェアユース: 5h窓+週間窓の2層（checkFairUseV2。削除禁止）
 - 従量課金: Stripe Metered Billing（recordTurnUsage→maybeSendUsageRecord）
@@ -19,39 +19,44 @@ Free(¥0,20回/日,Sonnet+mini+3Flash) / Light(¥500~980,¥8/t,cap¥980) / Pro(�
 - PLAN_CONFIGがSingle Source of Truth
 
 ### ふとしの方針メモ
+
 - 品質最優先。スピードのために品質を犠牲にしない
 - GPT-5をProに投入（粗利88%維持、ChatGPT Plus対抗）
 - GPT比率を積極的に拡大（アイディア出し・一般会話・クリエイティブ）。Claudeは感情・コーチング核心部に特化
 - Geminiは3.x系に更新（Free〜Pro: 3 Flash, Max/Ultra: 3.1 Pro Preview）。Previewステータスに注意
 - 旧KVフェアユースはv6.3で完全削除済み（I/O半減）
-- このチャット(Claude.ai)は経営者+アドバイザーの場。実務は全てCode
+- このチャット([Claude.ai](http://Claude.ai))は経営者+アドバイザーの場。実務は全てCode
 - **デザイン照合は双方向必須。** 正方向（mockup→実装）だけでは、後から追加した要素・JS動的生成要素を検出できない。逆方向（実装→mockup）+視覚検証を必ず行う（C14-B, C16）
-- **チェックリスト検証の一括PASS禁止（C20）。** 各項目に個別のタイムスタンプ＋スクショパスがなければ✅無効。「実装したので全PASS」は禁止。verify.sh/canopyで未検証項目をブロック
+- **チェックリスト検証の一括PASS禁止（C20）。** 各項目に個別のタイムスタンプ＋スクショパスがなければ✅無効。「実装したので全PASS」は禁止。[verify.sh/canopyで未検証項目をブロック](http://verify.sh/canopy%E3%81%A7%E6%9C%AA%E6%A4%9C%E8%A8%BC%E9%A0%85%E7%9B%AE%E3%82%92%E3%83%96%E3%83%AD%E3%83%83%E3%82%AF)
 - **mockup HTMLは原本。手書き再構成禁止。** localhostで元ファイルを配信してブラウザレンダリングする。コードを読んで推測して描くのは不正確（要素順序入替・SVG省略・CSS省略が発生する）。Claude.ai側はA8、Code側はC16で規定
 - **UI変更フロー（A9）:** 新規=Claude.aiがビジュアライザーでデザイン案→ふとし承認→Codeがmockup HTML化+実装。変更=Codeが差分調査レポート→Claude.aiが推奨判断付きで提示→ふとし判断→Codeがmockup更新→**C16 Stage 0: mockup更新前後の比較画像をふとしに提示→ふとし承認→実装修正→Stage A（localhost比較）→デプロイ→Stage B（本番比較）。** mockup承認なしに実装に着手しない。Claude.aiはHTML編集しない（鉄則2・7）。ファイル書き込みはふとし承諾後（鉄則追加）
 - **「忘れた」「間違えた」「見落とした」等の人間的ミス表現は禁止。** AIにうっかりは存在しない。エラー発生時は構造的原因（ルール不在/検証不在/参照フロー欠如/コンテキスト制約/指示の曖昧さ）を特定し、機械的ゲートの改善を提案する。Code側はC19、Claude.ai側は鉄則8の拡張で適用
 - **コンテキスト残量が推定20%未満になったら、ふとしに通知する。** 「コンテキスト残量が少なくなっています。新しいチャットへの移行を推奨します」と伝え、未完了の作業があればリストアップする
 
 ### 契約変更ルール
-- 契約セクションの編集権限はClaude.ai（Desktop Commander経由）のみ
+
+- [契約セクションの編集権限はClaude.ai](http://xn--Claude-9d4eia88cqcxbx3b6ex141dg24bpb7c6fdkv6m92b.ai)（Desktop Commander経由）のみ
 - Codeによる契約セクションの変更は絶対禁止
 - 変更時はClaude.aiがsession_progress.mdにも記録する
 
 ### 役割分担と設計権限
-- Claude.ai: 仕様（何を作るか）+ 方針（なぜそう作るか）+ コスト/プラン影響のある設計判断
+
+- [Claude.ai](http://Claude.ai): 仕様（何を作るか）+ 方針（なぜそう作るか）+ コスト/プラン影響のある設計判断
 - Code: アーキテクチャ設計 + 実装設計 + 手順ルール管理（development_rules.md C2,C5,C7,C10）
 - 仕様変更（禁止）= ユーザーから見える挙動が変わること
 - 設計変更（自由）= 内部構造・実装方法の選択。判断根拠を記録
 - **制約:** コスト構造またはプラン間の差別化に影響するアーキテクチャ変更は、提案ログに記載して承認を待つ
 - バグ対応フロー: development_rules.md C11参照
 
-### verify.sh 最低基準
+### [verify.sh](http://verify.sh) 最低基準
+
 - 新規関数: 全てgrep存在確認
 - 既存保全: canopy.shの全項目（累積。削除禁止）
 - PLAN_CONFIG数値: 契約セクションの値と一致すること
 - 旧コード残存: 削除対象が残っていないこと
 
 ### 承認ルール
+
 - 🟢低リスク: バッチ承認可（複数ステップまとめて実行→まとめて報告）
 - 🟡中リスク: 3件まで連続実行可（まとめて報告→承認）
 - 🔴高リスク: ふとしの個別承認必須（実行前に停止して報告）
@@ -62,7 +67,7 @@ Free(¥0,20回/日,Sonnet+mini+3Flash) / Light(¥500~980,¥8/t,cap¥980) / Pro(�
 ## 鉄則（常に意識する8つだけ。詳細はdevelopment_rules.md）
 
 1. **仕様変更禁止。** 契約セクション参照。設計判断は自由、根拠を記録
-2. **C2基準フロー厳守:** 実装→**E2E(該当セクション)**→bump-version→build→canopy→デプロイ→ヘルスチェック→git tag→push。省略・順序変更禁止。**frontend/ or src/ の変更が1行でもあればE2E必須。** テスト省略はdocs/, instructions/, *.md のみの変更に限定
+2. **C2基準フロー厳守:** 実装→**E2E(該当セクション)**→bump-version→build→canopy→デプロイ→ヘルスチェック→git tag→push。省略・順序変更禁止。**frontend/ or src/ の変更が1行でもあればE2E必須。** テスト省略はdocs/, instructions/, \*.md のみの変更に限定
 3. **verify.shを自分で作り自分で実行。** canopyに新項目を累積追加（削除禁止）
 4. **判断根拠・結果・提案をsession_progress.mdに記録。** レポート規約に従う
 5. **ミッション遂行に必要なバグ修正はOK（記録必須）。無関係なバグは報告のみ**
@@ -73,6 +78,7 @@ Free(¥0,20回/日,Sonnet+mini+3Flash) / Light(¥500~980,¥8/t,cap¥980) / Pro(�
 ---
 
 ## ミッションキュー運用
+
 - Claude.aiがDC経由でsession_progress.mdのキューに直接追記する
 - **書き込み分担:** キューセクション=Claude.ai専用、完了済み/変更履歴セクション=Code専用（同時編集コンフリクト防止）
 - Codeはステップ完了後、session_progress.mdのキューを再読してから次に進む

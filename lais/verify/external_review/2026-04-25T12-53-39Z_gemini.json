@@ -1,0 +1,40 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "scripts/ai_review.js: extractJson",
+    "issue": "正規表現 `/```(?:json)?\\s*(\\[[\\s\\S]*\\])\\s*```/` で `[\\s\\S]*` が欲張りマッチになっているため、レスポンス内に複数のJSONブロックが存在する場合、最初から最後までを1つのブロックとしてマッチさせようとし、JSONパースエラーが発生します。",
+    "suggestion": "`[\\s\\S]*?` に変更して非欲張りマッチ（最短一致）に修正してください。`arrayMatch` の正規表現も同様に `/\\[[\\s\\S]*?\\]/` に修正する必要があります。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "scripts/persona_selector.sh, scripts/vote_dispatcher.sh",
+    "issue": "ログローテーションで `gzip -c \"$LOG_FILE\" > \"$ROT\"` の実行後、`: > \"$LOG_FILE\"` でファイルを切り詰めていますが、この2つのコマンドの間に他のプロセスがログに書き込んだ場合、そのログデータが完全に消失する競合状態（Race Condition）が存在します。",
+    "suggestion": "`mv \"$LOG_FILE\" \"${LOG_FILE}.tmp\"` でアトミックにファイルを退避させてから、`gzip \"${LOG_FILE}.tmp\"` を実行する安全なローテーション方式に変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/vote_dispatcher.sh, scripts/persona_vote.sh",
+    "issue": "提案テキスト（`$PROPOSAL`）を `--proposal \"$PROPOSAL\"` としてコマンドライン引数で渡しています。提案テキストが数万文字に及ぶ場合、OSの引数長制限（ARG_MAX）に抵触し、`Argument list too long` (E2BIG) エラーでスクリプトがクラッシュします。",
+    "suggestion": "長文テキストはコマンドライン引数ではなく、環境変数（例: `PROPOSAL=\"$PROPOSAL\" node ...`）経由で渡すか、一時ファイルまたは標準入力（stdin）を経由して読み込ませる設計に変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0458,
+    "input_tokens": 33743,
+    "output_tokens": 716,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

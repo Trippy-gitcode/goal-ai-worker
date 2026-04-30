@@ -1,0 +1,192 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S10Grow.jsx（ヒーロー EXP バー width 計算）",
+    "issue": "EXP 進捗幅を Math.round((expCurrent/expNext)*100) で算出しており、expNext=0 や負値・極端に大きい値で NaN/Infinity や 100%超えが発生して UI が壊れる可能性がある。",
+    "suggestion": "expNext <= 0 の場合は 0% にフォールバックし、0〜100 に clamp してから width に適用する。例: const pct = expNext > 0 ? Math.min(100, Math.max(0, Math.round(expCurrent/expNext*100))) : 0;",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S10Grow.jsx（Goals プログレスバー width 計算）",
+    "issue": "g.progress をそのまま % に使用しており、0〜100 を超える値でプログレスバーがはみ出す。",
+    "suggestion": "0〜100 に clamp してから width に適用する。例: const pct = Math.min(100, Math.max(0, g.progress));",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S10Grow.jsx（スクロール rAF スロットル）",
+    "issue": "requestAnimationFrame をキャ���セルしておらず、アンマウント直後に setState が走る race で警告・無駄な再描画の可能性がある（環境により稀に再現）。",
+    "suggestion": "rAF の ID を保持し、cleanup で cancelAnimationFrame する。加えてアンマウント後は state 更新をスキップするガードを入れると堅牢。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§2 BottomTabBar.jsx（ARIA ロール）",
+    "issue": "role=tablist/role=tab を付与しているが、タブパターンに必要な roving tabindex（選択タブのみ tabIndex=0、他は -1）や左右矢印でのフォーカス移動、tabpanel 連携が未実装。スクリーンリーダー/キーボード操作で“タブ”として期待通りに動かない。",
+    "suggestion": "以下のいずれかに統一する: 1) タブパターンを実装（roving tabindex、左右矢印、aria-controls 対応）または 2) 単なるナビゲーションとして role を外し、aria-current=\"page\" を active に付与。後者がボトムナビには現実的。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§4 S10Grow.jsx（Check コンポーネント aria-label）",
+    "issue": "status='scheduled' の aria-label が「予定。タップで完了にする」だが、実際の動作は scheduled→active への遷移であり説明と不一致。支援技術ユーザーに誤案内となる。",
+    "suggestion": "scheduled の文言を「予定。タップで進行中にする」に修正。状態ごとに“次に何が起きるか”を正しく伝える。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S10Grow.jsx（Check コンポーネントのロール/状態表現）",
+    "issue": "3 状態（scheduled/active/done）に対して role=checkbox, aria-checked=true/false だけでは状態が十分に伝わらない。特に active は“混在”表現に近い。",
+    "suggestion": "選択肢: 1) active で aria-checked=\"mixed\" を用いる 2) button + aria-pressed でトグルとして表現 3) 独自 role は避けて適切な aria-live/label を補足。1 が最小変更での改善。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4 S10Grow.jsx（OverdueRow のチェック挙動）",
+    "issue": "Overdue 行のチェックを押すと onDefer（明日に延期）が発火し、チェックボックスの���味（完了/状態変更）と乖離している。見た目はチェックでも実処理は延期であり、認知負荷・誤操作の温床。",
+    "suggestion": "Overdue のチェックは押せない見た目にするか、role=button で「明日に延期」に統一（aria-label も一致）する。タスク詳細遷移と競合しない UI 設計に。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4 S10Grow.jsx（handleToggle の meta 更新）",
+    "issue": "トグル時に meta が常に『… · 15分』へ上書きされ、元の 60分/30分/20分等の所要時間が失われる。見た目は動くが、状態変更で情報が破綻する。",
+    "suggestion": "task に duration 分（例: 15/20/30/60）を保持し、状態語だけ切り替えて `${状態} · ${duration}分` を再構築する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4 S10Grow.jsx / §5 S10Grow.css（チェックの spring アニメーション）",
+    "issue": "要件『チェックタップ: spring アニメーション（scale 0.9→1.1→1）』が未実装。CSS に transform の transition はあるが、transform 値自体を変更しておらず発火しない。",
+    "suggestion": "チェック押下時に一時的なクラス（例: .is-bouncing）を付与し、@keyframes で scale を 0.9→1.1→1 に。終了時にクラスを除去。prefers-reduced-motion ではスキップ。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§全体（デグレ検出とテスト）",
+    "issue": "閾値 60px 圧縮、aria-expanded/controls 同期、チェック状態ローテ等、挙動が UI 依存だが自動テストやロギングがなくデグレ検出が困難。",
+    "suggestion": "E2E: ヒーロー圧縮閾値、UPCOMING 折りたたみ、チェック三態ローテのスナップショットを追加。単体: cycleStatus、completedCount。Telemetry/開発限定ログで操作イベントを計測（本番は除去）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S10Grow.jsx（console.log の常在）",
+    "issue": "本番バンドルに console.log が残るとパフォーマンス・情報漏えい・ノイズのリスク。",
+    "suggestion": "Vite で production 時に console をストリップ（esbuild drop: ['console','debugger'] 等）または env ガードした logger を導入。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§4 S10Grow.jsx（未使用コード）",
+    "issue": "prefersReducedMotion 関数と route インポートが未使用。将来の読み手にノイズとなる。",
+    "suggestion": "未使用の関数・インポートを削除。必要なら TODO コメントで用途を明記してから実装時に追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S10Grow.jsx（rAF フォールバック）",
+    "issue": "requestAnimationFrame 非対応環境ではスクロール圧縮が機能しない可能性（非常に稀）。",
+    "suggestion": "rAF が無い場合は setTimeout(handle, 16) を使用するフォールバックを用意。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5 S10Grow.css（--spring-default）",
+    "issue": "transition の timing-function に var(--spring-default) を使用しているが、未定義時にプロパティ全体が無効化される恐れ。",
+    "suggestion": "var(--spring-default, var(--ease-out)) のようにフォールバック値を指定。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5 S10Grow.css（100dvh の互換性）",
+    "issue": "min-height: 100dvh のみだと未対応ブラウザで無視される可能性。",
+    "suggestion": "min-height: 100vh を先に記述し、その後に 100dvh で上書きして互換性を確保。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§1 App.jsx（Suspense fallback）",
+    "issue": "fallback が aria-label のみで可視テキストが無く、支援技術によっては読み上げが不安定になることがある。",
+    "suggestion": "『読み込み中…』等のテキストノードを含めるか aria-live 領域に明示テキストを配置。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4 S10Grow.jsx（main の aria-labelledby）",
+    "issue": "main を TODAY 見出しでラベリングしており、画面全体のラベルとしては意味が限定的。Overdue/Goals 主体の状況で文脈がずれる可能性。",
+    "suggestion": "画面名（GROW）を示す視覚的/非表示の h1 を追加し、main はその h1 を参照または aria-label=\"GROW\" を付与。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4 S10Grow.jsx（タブ選択時の挙動）",
+    "issue": "BottomTabBar で grow 以外を押下しても遷移せず console.log のみ。仕様上スコープ外の可能性はあるが、ユーザーには反応が無いように見える。",
+    "suggestion": "スコープ外であっても軽微なトースト/disabled スタイル/将来予告の aria-disabled など、意図した未実装であることを明確化。将来的には route('/talk') 等に接続。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§4 S10Grow.jsx（Overdue 行の構造）",
+    "issue": "spec の『Today タスク行と同構造』の記述に対し、Overdue 行はカードが button ではなく div のため、タスク詳細へのタップ遷移が不可。",
+    "suggestion": "要件に含める場合は Overdue のカードも button 化し onOpen を付与。含めない場合は仕様メモに明記してレビューノイズを抑止。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

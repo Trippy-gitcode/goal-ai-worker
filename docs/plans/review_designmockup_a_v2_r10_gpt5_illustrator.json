@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾と「GOALS」見出しの間",
+    "issue": "セクション間マージンが28pxで、DS §4.2の基準（セクション間≧32px）を下回っている",
+    "suggestion": "Today全体のコンテナのmargin-bottomを32〜40pxへ拡大してOpen Airのリズムを確保する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE/DISCOVER/FRIENDS/SHOP）の直下〜基本情報ブロックの間",
+    "issue": "セクション間余白が28pxで、DS §4.2（セクション間≧32px）に満たない",
+    "suggestion": "サブタブと最初のコンテンツブロック間のスペースを32〜40pxへ増やし、セクションの切り替わりを明確化する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "タスクリスト右端のカテゴリ/ゴールドット",
+    "issue": "#58A6FFと#A5D6FFが混在し、同一意味に対して青の系統が不統一。さらに#58A6FFはinfo系であり、カテゴリ色としての意味が曖昧になりやすい",
+    "suggestion": "カテゴリ/ゴールのドット色を1系統に統一（例: --accent-hover #A5D6FF）するか、カテゴリ専用パレットを定義してinfo色の流用を避ける",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "完了タスク行（緑のサブtle塗りカード）",
+    "issue": "完了行の塗り面積が大きく、ヒーローよりも視線を強く引きやすい。Night Skyの静けさよりも達成色の面積が前面化している",
+    "suggestion": "完了行は塗り面積を抑え、左ボーダー+テキストカラー/小さなピル程度で示すなど、成功色の露出を控えめにして階層（ヒーロー＞進行中＞完了）の視線誘導を整える",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s12_task_add",
+    "location": "最終フィールド（メモを追加）下〜プライマリCTA「作成」",
+    "issue": "フォーム本体とCTAの区切りが20pxと近く、DS §4.2の��クション間≧32pxのリズムに対して詰まり気味に見える",
+    "suggestion": "CTA直上の余白を32px以上に拡大して、入力完了→送信の段階切替を明確化する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "ALL",
+    "location": "プライマリボタン（#1A5FC8）とアクセント（#79C0FF）の併存箇所全般",
+    "issue": "同系統の青が2種並立しがちで、文脈によっては“主役色”が二重に見える。Night Skyの静けさよりもインタラクティブの主張がやや強めに感じられる場面がある",
+    "suggestion": "画面ごとに“いまの主役”を明確化し、片方の露出を抑える（例: ヒーロー周辺は--accent中心、フォーム画面は--button-primary中心）。必要に応じてボタン青の露出面積（幅/角丸/影）を微調整",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "「はじめる」ボタン",
+    "issue": "初回体験のトーンとしてはボタン青(#1A5FC8)の主張がやや強く、夜空の“静かな期待感”よりも“元気さ”寄りに感じられる",
+    "suggestion": "スプラッシュ���定でボタンの角丸/高さをわずかに抑える、もしくは周囲の余白を増やして“間”を作り、夜空の余韻を優先（色値は現行維持でも可）",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s02_onboarding",
+    "location": "アバター選択の選択リング（#79C0FFの2pxボーダー+外側4px相当のサブtleグロー）",
+    "issue": "選択リングの発光表現がやや強く、見出しの注視を奪う。Night Skyの落ち着きよりもゲーミーな印象が先行",
+    "suggestion": "選択状態はボーダーを2px→1.5pxへ微調整、外側のサブtleグローを薄くする（alphaを0.14→0.10程度）か、グローを外して内側ピル/チェックで示す",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

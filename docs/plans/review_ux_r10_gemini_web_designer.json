@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.2.1, §8.2",
+    "issue": "SVGアバターパーツの非同期ロードによるFOUC（Flash of Unstyled Content）対策が未定義。複数レイヤー（顔、髪、装飾等）をネットワーク経由で合成する場合、ロード遅延により「顔だけの状態」や「ハゲたアバター」が一瞬表示され、ブランドの「洗練」を著しく損なう。",
+    "suggestion": "アバター表示領域に「全SVGパーツのロードが完了するまでスケルトン（またはデフォルトの単色シルエット）を表示する」ローディング状態の仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§2.2",
+    "issue": "iOS Safari/PWAにおいて、キーボード表示時にヒーロー領域を `display: none` で非表示にすると、DOMの高さが急変しスクロール位置が意図せずジャンプする（入力中のフィールドからフォーカスが外れる）不具合が頻発する。",
+    "suggestion": "`display: none` ではなく、高さを0にする（`height: 0; overflow: hidden; opacity: 0; transition: all 0.2s`）か、`position: absolute; top: -999px;` 等を用いてDOMツリー上の高さを滑らかに消すトランジションを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§14.2, §5.1",
+    "issue": "新規ユーザーがS-03（オンボーディング）の途中でブラウザを閉じた場合やリロードした場合、次回起動時にどこから再開するのか（S-03の途中か、S-10に強制遷移か）が未定義。",
+    "suggestion": "§14.2の起動フローに「オンボーディング未完了（DBのフラグ等で判定）の場合はS-03の未回答ステップから再開する」ロジックを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.2, §9.1",
+    "issue": "画像添付時のエッジケース（10MB超過、非対応フォーマット）のエラー表示UX、およびオフライン時に画像添付を試みた場合の挙動が未定義。",
+    "suggestion": "§3.2に「10MB超過/非対応形式時はトーストでエラー表示し添付キャンセル」、§9.1に「オフライン時は画像添付ボタン(📎)を無効化（グレーアウト）」を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.4, §8.6",
+    "issue": "TALK画面で冒険EXP検出（カード表示）とレベルアップ（バナー表示）が同時に発生した場合の表示位置の競合やキューイングが不明確。重なって表示される懸念がある。",
+    "suggestion": "§3.4に「冒険EXPカードとレベルアップバナーが同時発生した場合は、冒険EXPカードの下にマージンを空けてバナーをスタック表示する（または演出キューに従い直列でアニメーションさせる）」と明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§10.3, §13.1",
+    "issue": "デザインシステムとして定義すべき視覚的フィードバック（キーボード操作時のフォーカスリング `:focus-visible` のスタイル、テーマ切替時の色変化の滑らかなトランジション）が未定義。「洗練」を担保するために必要。",
+    "suggestion": "§10.3に「キーボードフォーカス時はアクセントカラーの2pxアウトライン（offset 2px）を表示」、§13.1のテーマ切替に「背景・テキスト色の変更は `transition: background-color 0.3s ease, color 0.3s ease` で滑らかに遷移」を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§13.1, §5.2",
+    "issue": "テーマ選択が4種固定であり、OSのダークモード設定（`prefers-color-scheme`）に自動追従するオプションがない。モダンなモバイルWebアプリのベストプラクティスから外れる。",
+    "suggestion": "§13.1のテーマ設定および§5.2のオンボーディングに「システム設定に従う（自動でDawn/Night Skyを切替）」の選択肢を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§5.0.2",
+    "issue": "S-05 Step 2（新パスワード設定画面）で、パスワード変更をやめてログイン画面に戻るための「キャンセル」または「戻る」導線がない。",
+    "suggestion": "Step 2の画面下部に「[キャンセルしてログイン画面に戻る]」のテキストリンクを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§7.3",
+    "issue": "左→右のスワイプ（戻る）はiOS標準だが、Androidのジェスチャーナビゲーション（画面両端からのスワイプ）と競合し、二重に「戻る」が発火する可能性がある。",
+    "suggestion": "§7.3のPWA実装注記に「Android環境ではOSのジェスチャーナビゲーションを優先し、アプリ内でのカスタムエッジスワイプは無効化する」と追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

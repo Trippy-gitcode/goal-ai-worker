@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5 全テーマ / §9 / §8.1 Danger(subtle)",
+    "issue": "v0.4 で Night Sky の §9 に `--danger-subtle-hover` `--danger-subtle-pressed` を追加したが、§5.1 Night Sky の :root ブロック本体には追加されていない。§9 はドキュメント末尾の参照用で、正規の定義元は §5 のはず。§5.1 に反映しないと §9 と §5 の乖離が発生する。",
+    "suggestion": "§5.1 のトークン定義に --danger-subtle-hover/-pressed を追加し、§5.2〜5.4 も同様に追加する。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§7.6 prefers-reduced-motion 例外",
+    "issue": "`[role=\"progressbar\"] > * { transition-duration: 100ms !important; }` は子要素の transition のみを対象にするが、プログレスバーのフィル要素が疑似要素（::before）や孫要素の場合に適用されない可能性がある。セレクタが実装依存すぎる。",
+    "suggestion": "クラスベース（.reduced-motion-safe, .progress-fill）での指定に統一し、実装ガイドとして DOM 構造を規定する。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5.0 FOUC / Cookie",
+    "issue": "R3 で指摘した Cookie ベースの SSR ハイドレーション方針がまだ未記載。Lais はどのレンダリングモード（SSR/SPA/SSG）を採用するかで FOUC リスクが変わるが、その前提が §5.0 に書かれていない。",
+    "suggestion": "§5.0 冒頭に『Lais のレンダリング方式（SPA/PWA）』前提を明記し、それに応じた FOUC 対策を記述する。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": "iOS Safari の backdrop-filter は transform を持つ親要素の内部で破綻する（stacking context 問題）。実装者が意図せずに親要素に transform: translateZ(0) を付けるケースで glass が効かない。デザインシステム仕様書としてこの制約を明記すべき。",
+    "suggestion": "§5.5 末尾に『glass-surface の祖先に transform / filter / perspective を持つ要素があるとglass効果が破綻する』という実装制約を注記。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§8.10 状態マトリクス / §7.5 forced-colors",
+    "issue": "状態マトリクスで focus-visible は `box-shadow: var(--focus-ring)` だが、§7.5 forced-colors では outline 直指定。両者の切替ロジック（通常時は box-shadow、forced-colors時は outline）が実装者から見て冗長で混乱する。",
+    "suggestion": "§8.10 に『通常時 box-shadow、forced-colors 時は §7.5 により outline が上書きされる』旨の注記を追加。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§9 CSS トークンブロック",
+    "issue": "§9 のトークンブロックに、v0.4 で追加した semantic -hover/-pressed 群のうち success/warning/info の -hover/-pressed が既に書かれていない。Night Sky の §5.1 にはある。§9 と §5.1 の同期が不完全。",
+    "suggestion": "§9 を §5.1 と完全に同期させる（またはビルドスクリプトで自動生成する旨を注記）。",
+    "model": "Claude Opus 4.6",
+    "persona": "frontend_engineer"
+  }
+]

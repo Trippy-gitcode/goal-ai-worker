@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "Primaryボタン（「はじめる」「次へ」「作成」など）",
+    "issue": "ボタンが水色背景に黒文字になっている。デザイン仕様書（5.1 Night Sky）では「--button-primary-bg: #1A5FC8（濃い青）」「--button-primary-fg: #FFFFFF（白文字）」と定義されており、ブランドのカラースキームと矛盾している。",
+    "suggestion": "仕様書通り、Primaryボタンの背景色を濃い青（#1A5FC8）にし、テキストを白（#FFFFFF）に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「利用規約」「プライバシーポリシー」「ログイン」のテキストリンク",
+    "issue": "リンクが色（青）のみで表現されており、下線がない。デザイン仕様書（2.2）の「インラインテキストリンクは必ず text-decoration: underline を併用（WCAG 1.4.1 カラーのみ伝達禁止）」に違反している。",
+    "suggestion": "すべてのインラインテキストリンクに `text-decoration: underline` を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "ヘッダー右側のアイコン",
+    "issue": "ヘッダー右側のアイコンが「＋」1つのみになっている。UX仕様書（3.1）では「🕐（履歴）」「📝（新規チャット）」の2つのアイコンを配置するよう定義されている。",
+    "suggestion": "ヘッダー右側のアイコンを仕様通り「履歴」と「新規チャット」の2つのアイコンに変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタスク行",
+    "issue": "タスクの左側がタイムラインのノード（線で繋がった小さなドット）になっており、タップして完了（⭕）できる領域として視覚的に不明確。UX仕様書（2.3）の「[完了⭕] [時刻] [タスク名]...」の構造と合致していない。",
+    "suggestion": "左端のノードを、タップ可能なチェックボックス（⭕）として明確に認識できるサイズ（44x44pxのタップ領域）とデザインに変更し、タイムラインの線とは分離して配置してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "下部のアクションボタン群",
+    "issue": "「削除」ボタンが「編集」などの安全なアクションと隣接して同等の視覚的重み（2x2グリッド）で配置されており、誤タップによる破壊的操作のリスクが高い。",
+    "suggestion": "「削除」ボタンは他のボタンから物理的に離すか、テキストリンクにするなどして視覚的階層を下げ、誤操作を防ぐレイアウトに変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "入力フィールドのプレースホルダー（「you@example.com」「8文字以上」）",
+    "issue": "プレースホルダーのテキスト色が暗く、背景色とのコントラスト比がWCAG AA基準（4.5:1）を満たしていない可能性が高い。",
+    "suggestion": "プレースホルダーのテキスト色（--text-hint）を明るくし、背景色に対して十分なコントラスト比を確保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "入力バーのアイコン",
+    "issue": "入力バーの左アイコンが「⊕」、右アイコンが「→」になっている。UX仕様書（3.1）では「📎（画像添付）」「➤（送信）」と定義されている。",
+    "suggestion": "アイコンを仕様書で指定された「📎（クリップ）」と「➤（紙飛行機など）」に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow, s30_me",
+    "location": "ヒーロー領域のアバター",
+    "issue": "アバターが汎用的な人型アイコンになっている。デザイン仕様書（6.3）およびs02_onboardingで示されている「フラットベクター風のイラスト」が反映されていない。",
+    "suggestion": "プレースホルダーのアイコンではなく、ユーザーが選択・育成するイラストベースのアバターを表示してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧の完了済みタスク",
+    "issue": "完了済みのタスク名に取り消し線が引かれている。仕様書に記載がなく、文字の可読性を不必要に低下させている。",
+    "suggestion": "取り消し線を外し、チェックマークアイコンとテキスト色（--text-secondaryなど）の変化のみで完了状態を表現してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "ボトムタブのGROWアイコン",
+    "issue": "GROWタブのアイコンが「芽（seedling）」ではなく、別の形状（ピンやマイクのように見える）になっている。",
+    "suggestion": "デザイン仕様書（6.2）に従い、成長・育成のメタファーである「芽（seedling）」のアイコンに変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

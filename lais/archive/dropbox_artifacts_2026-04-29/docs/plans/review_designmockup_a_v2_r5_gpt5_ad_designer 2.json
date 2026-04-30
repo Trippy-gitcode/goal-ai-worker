@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "ロゴ下のサブコピー周辺",
+    "issue": "初見3秒で「何ができるアプリか」が伝わらない。サブコピーが汎用的で、機能（AI×タスク/ゴール/習慣）が明示されていない。",
+    "suggestion": "サブコピーを機能直結の価値提案に変更（例：「AIコーチと計画・タスク管理で毎日を前進」）。下に3アイコン（タスク/ゴール/AIトーク）＋短いラベルを横並びで追設し、視線誘導→「はじめる」へ繋げる。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "本文末「すでにアカウントをお持ちですか？ ログイン」",
+    "issue": "インラインテキストリンク「ログイン」に下線がなく、色のみでリンクであることを伝達している（WCAG 1.4.1違反。デザインシステム§2.2にも反する）。",
+    "suggestion": "「ログイン」に text-decoration: underline を付与���ホバー/フォーカス時は下線太さまたは色濃度で強調。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "左上の戻る矢印（20×20pxアイコン）",
+    "issue": "タップターゲットが44×44px未満に見える（実装上もwrapper未設定）。WCAG 2.5.5 / HIGの最小タップ領域を満たしていない可能性が高い。",
+    "suggestion": "44×44px以上の透明ヒットエリアを付与（padding/::before）。視覚は現状のまま、ヒット領域のみ拡張。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Today下部「+ タスクを追加」およびGoals下部「+ ゴールを作成」テキストリンク",
+    "issue": "テキスト単体の細いリンクで、タップターゲットが44×44px未満に見える。主要CTAの最小タップ領域要件（デザインシステム§4.5）に不適合。",
+    "suggestion": "リンク全体を高さ44px以上の行として実装（アイコン＋ラベルの横並び、背景hover/pressed状態あり）。または右下に＋FABを追加し、主要CTAの到達性を担保。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Today/Goals セクションのCTA配置",
+    "issue": "主要行動（タスク追加/ゴール作成）が細いテキストリンクで視覚的優先度が低く、初回ユーザーが次の一手に迷う。",
+    "suggestion": "Todayセクション末尾の「+ タスクを追加」を強調ボタン化（アクセントサブトーン背景＋ピル）し、スクロール時は右下に固定表示の＋FABを併用。Goals側も同様の視覚強調を適用。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Todayヘッダー直下の「1 / 4 completed」（約11px）",
+    "issue": "達成状況の重要指標がキャプション級の小ささで可読性が落ちる（DS§3.2で本文系は14px推奨）。",
+    "suggestion": "フォントサイズを12〜14pxへ引き上げ、字間を詰めすぎない。色はtext-secondaryを維持しつつ、行間1.4以上で視認性を確保。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "「ジムで筋トレ」行 左ボーダー（オレンジ���）",
+    "issue": "左ボーダー色の意味（ゴール紐付け/カテゴリ等）が画面内で説明されず、警告色（warning）と混同の恐れ。",
+    "suggestion": "Goalsセクション見出し付近に凡例を簡潔に表示、またはタスク行に小さなカテゴリチップとセットで示すなど、色以外の手掛かりを追加。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "ヘッダー右側アイコン（履歴/新規）",
+    "issue": "アイコンのみでラベルがなく、初見では機能が推測しづらい。",
+    "suggestion": "初回起動時のみツールチップ/コーチマークを表示（「履歴」「新しいチャット」）。長押しでラベル吐き出し、アクセシビリティlabelも付与。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "下部アクション群（編集/削除 と AI導線「振り返りを聞く」「次につなげる」）",
+    "issue": "主要導線が分散し、どれが推奨アクションか分かりにくい。破壊的操作「削除」の視覚強度が相対的に強い。",
+    "suggestion": "AI導線のうち1つをPrimary（アクセント塗りボタン）として上段に、編集は第2群、削除は最下段に配置。視線を上→中→下に誘導。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "INFO_DENSITY",
+    "screen": "s30_me",
+    "location": "ヒーロー領域の進捗バー/数値",
+    "issue": "バーが何の進捗か（EXP/レベル進行）の明示がなく、初回は意味を取り違える可能性。",
+    "suggestion": "数値右に小さく「EXP」表記、またはバー左に「レベル進行」のミニラベルを追加。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "AI関連ボタンの文言",
+    "issue": "UX仕様書の想定文言（「進め方を聞く」「詰まりを相談」）とモックの文言（「振り返りを聞く」「次につなげる」）が異なり、ユーザー期待と仕様の整合が取りにくい。",
+    "suggestion": "仕様側の用語に合わせるか、意味差がある場合はツールチップ/補助テキストで目的を明確化。アナリティクスで選択率を比較し最適化。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

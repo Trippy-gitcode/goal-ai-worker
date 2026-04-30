@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-101",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "S02-6 / ルート（.s02-onboarding padding-bottom / .s02-next bottom）",
+    "issue": "env() にフォールバック引数を渡している（env(safe-area-inset-bottom, 0px)）。env() は var() と異なりフォールバックを取れないため、値全体が無効になり該当宣言がドロップされる。結果として .s02-next の bottom が適用されず固定位置が壊れる可能性が高く、.s02-onboarding の padding も無効化され CTA と本文の重なりが再発する。",
+    "suggestion": "env() の誤用をやめ、段階的フォールバックにする。例: 1) まずフォールバック宣言を置く（bottom: 100px; / padding-bottom: calc(100px + 52px + var(--space-md));）。2) 直後に対応ブラウザ向けに上書き（bottom: calc(env(safe-area-inset-bottom) + 100px); / padding-bottom: calc(env(safe-area-inset-bottom) + 100px + 52px + var(--space-md));）。加えて padding は shorthand ではなく padding-bottom で個別指定し、単一値の無効で全体が無効にならないようにする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ルート��.s02-onboarding padding）",
+    "issue": "padding の shorthand で複雑な calc() を混在させており、1 つでも値が無効になると宣言全体が破棄されるリスクが高い。可読性も低下している。",
+    "suggestion": "padding は上左右をシンプルに指定（padding: var(--space-lg) var(--space-lg);）し、下側だけを padding-bottom で個別に計算指定する（フォールバック → env() 上書きの順）。こうすることで堅牢性と可読性が向上する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "S02-6（.s02-next）",
+    "issue": "position: fixed の CTA に z-index が無く、他要素（例えばトースト、モーダル、ドロップシャドウ付きヘッダ等）との重なり順が環境に依存してしまう可能性がある。",
+    "suggestion": "デザインシステムのレイヤートークン（例: --z-overlay, --z-floating など）があればそれを用い、なければ z-index を適切に設定（例: z-index: 10）して、モーダル等の最上位 UI には劣後しつつ本文よりは前面に出るようにする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "S02-2（.s02-progress-bar / .s02-progress-bar-done）",
+    "issue": "未完了が border 1px + height 3px（実質 5pxの外形）、完了が塗りつぶし + border 同色で視覚的厚みが一致しない可能性がある。環境によっては段差やにじみが生じ、視覚的ノイズになる。",
+    "suggestion": "形状差は維持しつつ厚みを揃える。例: height を 4px に統一し、未完了は background: transparent + outline（または box-shadow 内側）で表現してレイアウト寸法を一定化する、もしくは未完了のみ opacity を下げた塗りつぶし＋点線境界などで非色依存の差分を付ける。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "S02-5（.s02-avatar / .s02-avatar-selected）",
+    "issue": "選択時に border が 1px → 2px に変化し、グリッド内で軽微なレイアウトシフトが発生する。タップ後の要素位置ずれは操作感を損なう。",
+    "suggestion": "通常時から border 幅を一定にし、選択状態は box-shadow（外側）や outline（非レイアウト影響）で強調する。もしくは border-color のみ変更して太さは固定する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "S02-5（.s02-avatar）",
+    "issue": "aspect-ratio に依存して正方形を維持しているが、非対応ブラウザでは崩れる可能性がある。",
+    "suggestion": "@supports (aspect-ratio: 1 / 1) で分岐し、非対応環境向けには高さをパディング比率（padding-top: 100%）で確保するラッパー法や、明示 height: auto; に画像/SVG 側の viewBox 比率で担保する等のフォールバックを用意する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02-2, S02-3, S02-5（複数箇所）",
+    "issue": "gap: 8px / font-size: 12px, 14px, 28px / progress 高さ 3px など、トークン化されていない固定値が散在している。LP-011「魔法の数字禁止」の趣旨から外れる。",
+    "suggestion": "デザインシステムのスケールへ寄せる（例: var(--space-sm), var(--text-sm) など）。必要であれば新規トークンを追加して意味づけし、同値の横展開で DRY を担保する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "S02-2（S02Onboarding.jsx 進捗ラベル <p>）",
+    "issue": "JSX で class を使用している（className ではない）。React 環境では警告発生やリンタ逸脱の原因となる。既存部分と同傾向だが、今回の差分でも新規に 1 箇所追加されている。",
+    "suggestion": "プロジェクト全体で className に統一する（codemod 推奨）。Preact 等の互換層を前提とする場合も、型付けとリンタ設定（eslint-plugin-react 等）で誤用検知を行う。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

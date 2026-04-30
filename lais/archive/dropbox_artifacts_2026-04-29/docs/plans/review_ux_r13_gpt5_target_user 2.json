@@ -1,0 +1,242 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §6.5 退会・データ削除 vs ux_v1.md §13.4 アカウント削除",
+    "issue": "退会時のStripeサブスク処理が「即時キャンセル」（project）と「72時間後にキャンセル予約」（UX）で矛盾。請求や利用可否の境界が実装不能レベルで割れる可能性が高い",
+    "suggestion": "どちらの方針に統一するかを決定し、両仕様に反映。推奨: UXの「72時間クーリングオフ中はキャンセル予約」に統一。併せて(1)クーリングオフ期間中のプラン権限/AI回数の扱い、(2)復帰時のサブスク復元可否、(3)Webhook遅延時のUI表記（処理中バナー）を明文化する",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2.6(3) vs ux_v1.md §2.3",
+    "issue": "Undoスナックバー表示時間がprojectで3秒、UXで30秒に分岐。操作安全性・EXP巻き戻し設計に直結する数値の不一致",
+    "suggestion": "表示時間を30秒に統一（UX準拠）し、project_v1.md §3.2.6(3)を修正。UNDO対象が直近1件限定である旨もproject側に追記する",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 レベル計算式 vs §4.5 設計意図",
+    "issue": "「次レベルに必要EXP=100+(現在Lv-1)×50」だとLv1→2は100EXPだが、§4.5に「Lv.1→2=1,000EXP」と記載。レベルカーブの基礎数値が矛盾",
+    "suggestion": "式とテーブル、到達目安の記述を一貫化。初日Lv2到達を設計意図とするならLv1→2=100EXPで統一し、§4.5の1,000を削除",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2 RLS/テーブル名 vs §7.4 データライフサイクル vs §5.3 ソーシャル",
+    "issue": "AI対話とソーシャルでmessagesテーブル命名が混在（messages/social_messages）。RLS誤適用によりAI対話が第三者に閲覧されるリスク",
+    "suggestion": "テーブル命名を明確化（例: ai_messages と social_messages）。RLS例外ルールを該当テーブルごとに再記述し、参照境界を図示（system_mapでも整合）",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §4.4 FRIENDS > QRコード表示",
+    "issue": "「QRコード表示」モーダルが画面一覧（§1.1）にID定義されていない。遷移網羅・E2Eテストで行き先が特定できない",
+    "suggestion": "S-45（フルスクリーンモーダル）として追加し、開閉/オフライン無効化/背景タップ挙動/履歴（pushState有無）を定義",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3 Today操作（自動ソートと手動順の上書き）",
+    "issue": "開始時刻ソートと手動並び替えの優先関係が不明。編集で時刻変更した場合やOverdue挿入時に手動順がどう維持されるかが未定義",
+    "suggestion": "「並び順モード」を明示（デフォルト=時刻順）。手動並び替え実行時は「手動順モード」に切替→バッジ表示→ワンタップで「時刻順に戻す」。Overdueは常に先頭固定（セクション分離）とし、各セクション内の並び規則を確定する",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.3 週N回表示ロジック / ux_v1.md §2.3",
+    "issue": "週N回習慣の「今日やる」ボタンのUI位置や操作手順が未定義。���つけにくく、意図的に前倒し実行したい時に困る",
+    "suggestion": "習慣行の右端に「今日やる」テキストボタン（または…メニュー内）を定義。押下でTodayに即反映し、元のロジックで『達成不能』判定に影響しないことを明記",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5 日次リセット / §4.5 リセットタイミング",
+    "issue": "全ユーザー一律JST 4:00リセット。海外在住/出張/夜勤だと日付感覚とズレ、「実際に使うと困りそう」",
+    "suggestion": "MVPでもUIはローカル時間で『リセットまで◯時間』『明日 04:00 JST』の併記に変更。設定にタイムゾーン警告を明示。v0.2.0でユーザータイムゾーン対応を優先度高で前倒し検討",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §9.3 AI対話上限到達UI",
+    "issue": "「リセット: 明日 04:00」の表示がJST基準のまま。ユーザーの現地時刻から見て分かりにくい",
+    "suggestion": "『リセット: 明日 04:00（JST）/ あとX時間』の相対表記を追加。ツールチップ��タイムゾーン注記",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1-2.2 プラン/ショップ",
+    "issue": "PremierプランがMVP時点で「チケットComing Soon」。実質Proと大差がなく、課金動機が弱い。Finchの『割高』不満が再燃しうる",
+    "suggestion": "Premierの即時価値を明確化（例: 返信優先キュー、限定フレーム+限定背景2種、TALKでの長文上限↑、β機能の早期解放）。S-38に『今すぐ使える特典』セクションを追加し、Coming Soon要素は別枠に隔離して誤解を防ぐ",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §6.1 マルチAIルーティング / ux_v1.md §3",
+    "issue": "Basic/Pro以降で応答の文体がモデルにより揺れる可能性があるが、UIに可視化がないため『AIの質が安定しない』と感じる恐れ",
+    "suggestion": "TALKバブル末尾に小さな『i』で『この返信はClaude/GPT/Gemini』を任意表示（設定でOFF可）。S-38にプラン別AIの簡易比較表も追加",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §6.4/§7.4（対話90日保存） / ux_v1.md §3.5",
+    "issue": "会話が90日で自動削除される旨がTALK UIに露出していない。消失時にユーザーが混乱しうる",
+    "suggestion": "S-21ドロワー上部に情報行『会話は90日間保存されます』を追加。削除直前7日前に会話先頭へ『まもなく自動削除』ラベル表示",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §7.4 タスク完了後90日アーカイブ",
+    "issue": "完了タスクが90日後に表示対象外になる仕様がGROW/MEのどこにも可視化されていない。達成の記録が突然消えたように感じる",
+    "suggestion": "MEに『アーカイブ』一覧を追加（v0.2.0でも）。MVPでは少なくともGROW Today末尾に『過去の完了記録（90日まで表示）』の説明リンクを設置",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2 EXP（タスク一律+10）/ ux_v1.md §2.3",
+    "issue": "所要時間・難易度に関係なくタスクEXPが一律+10。『重いタスクが報われない』と感じて習慣化モチベが落ちる恐れ",
+    "suggestion": "MVPは一律維持でも、任意の『チャレンジ』タグ（例: 難/初）に+5〜+10の上乗せを検討。もしくは週1回まで『特別な1件』に+20を付与。悪用対策（連打無効・日次上限）と併記",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3 Undo連続完了の設計決定",
+    "issue": "Undoが直近1件のみ。連続で完了した直後に2件目を誤タップしても戻せないのは実務で痛い",
+    "suggestion": "オプションで『直近3件まで』のUndo履歴を採用、または『直前の操作に戻す』ショートカットを追加（長押しでUndo履歴ドロワー表示など）",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §3.1 TALKヘッダー",
+    "issue": "ヘッダーに☰（履歴）と🕐（履歴）が併存して見える表記。S-21の起動手段が二重で混乱の恐れ",
+    "suggestion": "履歴起動アイコンを一つに統一（☰ or 🕐）。もう一方は別機能にするか削除。ツールチップ/aria-labelも『履歴を開く』に統一",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §15 通知タップ時の遷移先",
+    "issue": "週次レポート通知タップでGROWに遷移するだけだと、ユーザーは『どこにレポートがあるのか』迷う可能性",
+    "suggestion": "GROW上部に一時的な『先週のサマリー』バナーを展開、または将来のアナリティクス画面（ME内）に遷移する仕様を予告表示",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.4 FRIENDS > 送信済みリクエストの扱い",
+    "issue": "QR承認リクエストが7日で期限切れ時、『送信者にもフィードバックなし』とあるが、S-33上の送信済み一覧に期限切れ状態がどう反映されるか不明",
+    "suggestion": "送信済みリクエストのステータスに『期限切れ』ラベルと再送ボタンを表示。自動削除する場合は削除前に『期限切れ（明日自動削除）』の予告を出す",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "全体（ベンチマーク §0 / ナビ §1 / GROW §2 / TALK §3）",
+    "issue": "自分が使いたいか: Yes。Habiticaの罰/煩雑さとFinchの待機・軽さ、Habitify��無料制限に感じた不満はほぼ解消。ただしPremierの即時特典の弱さとJST固定は気になる",
+    "suggestion": "Premierの即時特典強化とJST UI改善���R-008/R-010参照）を優先。初回体験でLv2到達演出・会話→タスク化を確実に体験できるよう、オンボ終了直後の『次にやること』チップを強調",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "全体（継続動機: project_v1.md §4/§5、ux_v1.md §2/§4）",
+    "issue": "続けられるか: Yes寄り。罰なし・EXP3層・発見カードが良い。ただ、重いタスクが一律+10だと長期で物足りなさを感じる可能性",
+    "suggestion": "週次レポートで『挑戦ハイライト』を称える、ゴールのマイルストーン（25%/50%/75%）達成時に小さな演出を追加するなど、長期の喜びポイントを増やす",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1-2.4 / ux_v1.md §13.2",
+    "issue": "課金したいか: Basicは妥当、Proも納得感あり。Premierは現状だと『Coming Soon』要素比率が高く即決しづらい",
+    "suggestion": "Premierに30日間返金保証、もしくは7日無料トライアルを検討。S-38で『今すぐ得られる特典』と『将来の特典』を明確に区別し、時期も明記",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.4 FRIENDS / §5.3 通知設計",
+    "issue": "友達に勧めるか: Yes。ただしiOSはPWAインストール前提で通知が使えない点は非テックの友人に伝えづらい",
+    "suggestion": "初回起動3回目のPWA導線だけでなく、FRIENDSタブに『通知を有効にして応援を受け取ろう』の常設カードを置き、iOSは『ホーム画面に追加』のヘルプを常時参照可能にする",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.5 チャットスレッドモデル",
+    "issue": "スレッド自動命名のみ（手動リネーム不可）。重要会話の管理性がやや低い",
+    "suggestion": "長押しでリネーム（MVP+1でも可）を計画に記載。代替としてピン留め機能（上位表示）を先に実装しても良い",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8.6 演出キュー",
+    "issue": "同時演出直列化は良いが、最大8秒は長く感じることがある（小型端末や低スペック端末でラグに見えがち）",
+    "suggestion": "Reduced Motionだけでなく『演出短縮モード』トグル（設定）を用意。上限を5秒に短縮し、紙吹雪数を自動で減らす",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

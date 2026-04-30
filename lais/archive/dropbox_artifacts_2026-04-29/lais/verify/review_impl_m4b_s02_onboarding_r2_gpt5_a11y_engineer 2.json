@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-101",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.3 S02-6（.s02-next bottom）",
+    "issue": "env() に第2引数（フォールバック）を渡しており、CSS 構文として無効。`bottom: calc(env(safe-area-inset-bottom, 0px) + 100px)` は全ブラウザで解釈に失敗し、`bottom` が無効になるため固定CTAの位置決めが崩れるリスクが高い。",
+    "suggestion": "env() は1引数のみ有効。フォールバックは宣言順で与える。例: \n- `.s02-next { bottom: 100px; }`\n- `.s02-next { bottom: calc(env(safe-area-inset-bottom) + 100px); }`\n- レガシー iOS 対応が必要なら前行に `bottom: calc(constant(safe-area-inset-bottom) + 100px);` を追加。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-102",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.3 コンテナ（.s02-onboarding padding-bottom）",
+    "issue": "同様に `padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px + 52px + var(--space-md))` が無効。env() の第2引数指定によりプロパティ全体がパース失敗し、末尾スペース確保が効かず、固定CTAがコンテンツを覆い隠す可能性がある。",
+    "suggestion": "宣言順でフォールバックを与える。例:\n- `.s02-onboarding { padding-bottom: calc(100px + 52px + var(--space-md)); }`\n- 直後に `.s02-onboarding { padding-bottom: calc(env(safe-area-inset-bottom) + 100px + 52px + var(--space-md)); }`\n- 必要に応じて `constant(safe-area-inset-bottom)` 版も併記。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.3 S02-2（進捗バーのロール）",
+    "issue": "離散ステップのインジケータに `role=\"progressbar\"` を用いると、一部スクリーンリーダーが連続量の進捗として読み上げるため、メンタルモデルがズレる可能性がある。",
+    "suggestion": "ステッパーであれば、視覚は現状のまま、AT には `aria-roledescription=\"ステップ\"` を補う、または `nav` + `ol li` で現在位置に `aria-current=\"step\"` を付与する方法がより適切。連続量として伝えたい場合は `aria-valuetext` を%表示にするなど一貫した表現に。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-104",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.3 S02-2（aria-valuetext）",
+    "issue": "aria-valuetext=\"2 / 5 完了\" は「現在のステップ」なのか「完了済み数」なのか解釈が分かれる。`aria-valuenow=2, min=1, max=5` と併用時に読み上げが冗長・混乱する可能性。",
+    "suggestion": "「現在 2/5」等、状態の意味を明確化（例: `aria-valuetext=\"現在 2 / 5 ステップ\"`）。または `aria-label=\"オンボーディング進捗\"` は維持し、`aria-valuetext` は省略して SR 既定の「2/5」を活用する。主要 SR で読み上げ確認を。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "全体（フォーカスインジケータの視認性）",
+    "issue": "フォーカスリングは `outline: 3px solid var(--accent)` 指定だが、実際の色コントラスト（インジケータ vs 隣接色）が未測定。WCAG 2.2 の Focus Appearance (Minimum) 要件に適合しているか不明。",
+    "suggestion": "実測で確認し、フォーカスインジケータのコントラストが少なくとも 3:1（インジケータと隣接色）を満たすように設定。必要なら `outline-offset` の拡大や内側/外側の二重リング、背景色の調整で面積・コントラストを確保。主要テーマ（ライト/ダーク/ハイコントラスト）で検証。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.3 S02-6（固定CTAとフォーカス非被覆）",
+    "issue": "固定CTAが画面下部を占有するため、特定のフォーカス移動で下端要素がCTAの背後に入り「完全に隠れる」と 2.2 の Focus Not Obscured (Minimum) に抵触するリスクが残る。",
+    "suggestion": "`.s02-avatar` などフォーカス可能要素に `scroll-margin-bottom: calc(100px + 52px + var(--space-md))` を付与し、UA の自動スクロール時にCTAの背後に入らないよう保険をかける。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.3 S02-5（アバター選択子のセマンティクス）",
+    "issue": "`.s02-avatar` はインタラクティブな見た目（cursor:pointer, focus-visible スタイル）だが、JSX 側の要素型（button/div+tabindex/role=radio 等）が明記されておらず、セマンティックHTML・AT通知が不明。",
+    "suggestion": "単一選択なら native `<button>` + `aria-pressed`、またはグループで `role=\"radiogroup\"` と各子に `role=\"radio\" aria-checked` を付与。マウス/タッチ/キーボード/スクリーンリーダーで一貫した操作を担保。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.3 S02-2（進捗ラベルの可読性）",
+    "issue": "`.s02-progress-label` は 12px・`--text-muted`。小サイズ文字のため 1.4.3 (コントラスト最小 4.5:1) 充足が未確認。",
+    "suggestion": "実測で 4.5:1 以上を確認。満たさない場合は文字色を `--text-secondary` に引き上げる、または font-size/weight を上げる。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.3 S02-5（Reflow 余白計算）",
+    "issue": "minmax(72px, 100px) と `gap: clamp(12px, 4vw, var(--space-lg))` の組み合わせは概ね Reflow を満たすが、`--space-lg` と左右パディングの実値次第で 320px 幅境界での水平スクロール再発の可能性がわずかに残る。",
+    "suggestion": "320px/200% ズームで実測し、必要に応じて `gap` の下限を 8px まで許容、または左右パディングを極小幅で縮退させるレスポンシブルールを追加。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.3 S02-6（CTAの無効状態の実装）",
+    "issue": "`.s02-next` は `:disabled` と `[aria-disabled='true']` の両方をスタイル対象にしているが、動作・読み上げが分岐する可能性（native disabled はフォーカス不能、`aria-disabled` はフォーカス可）。仕様としてどちらを採用するかが未定義。",
+    "suggestion": "原則は `disabled` 属性（ネイティブセマンティクス）を優先。フォーカス可能な見かけ上の無効を求める場合のみ `aria-disabled` を使い、`aria-live` で理由提示などを追加。いずれかに統一方針を明文化。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "DATA_CORRUPTION",
+    "location": "lais/verify/dev_system_v34_package.md",
+    "issue": "Markdown内のシェルスクリプトコードブロックで、改行が失われ、`>` が `&gt;` に、`[` が `\\[` に変換されるなど、コードが完全に破壊されています。このドキュメントからスクリプトをコピペして実行するとSyntax Errorとなり、実装不能に陥ります。",
+    "suggestion": "ドキュメント生成・置換処理のバグによりHTMLエンティティ化やエスケープが過剰に行われています。元の改行と記号（`>`, `[`）を維持した正しいシェルスクリプトのフォーマットに修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "LOGIC_ERROR",
+    "location": "scripts/night_mode_dispatcher.sh L66-L72",
+    "issue": "`NOW_INT=$(printf '%d' \"$NOW_HHMM\")` は、`0800` のような先頭が0の文字列を8進数として解釈しようとし、エラーで0を返します。また `0700` は10進数の448になります。結果として、朝7時や8時でも `NOW_INT < 600` が真となり、昼間でも夜間モードが誤起動します。",
+    "suggestion": "ゼロ埋めを削除して10進数として強制解釈させるため、`NOW_INT=$(echo \"$NOW_HHMM\" | sed 's/^0*//')` とし、空文字になった場合は `0` を代入する処理に変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "SECURITY",
+    "location": "scripts/main_session_writeguard.sh L85-L91",
+    "issue": "`FILE_PATH` に `../` が含まれる場合、絶対パス化しても `REL_PATH` に `../` が残ります。例えば `foo/../scripts/hoge.sh` は `scripts/*` のパターンにマッチせず、書込禁止ディレクトリへのアクセス制限をすり抜けて書き込みが可能になります。",
+    "suggestion": "パスを評価する前に `readlink -m` や `realpath` を使用するか、`cd` と `pwd` を組み合わせてパスを正規化し、`../` を完全に排除してからプレフィックス判定を行ってください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "LOGIC_ERROR",
+    "location": "scripts/night_mode_dispatcher.sh L125-L132",
+    "issue": "`pending` の数と `auto_eligible: true` の数をファイル全体で独立してカウントしています。そのため、「pendingだが対象外のタスク」と「完了済みの対象タスク」が存在するだけで両方のカウントが1以上になり、誤って起動条件を満たしてしまいます。",
+    "suggestion": "awkスクリプト内で、同一の `## TASK-` ブロック内に `status: pending` と `auto_eligible: true` の両方が存在する場合のみカウントを増やすようにロジックを修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/completion_verifier.sh L83-L88",
+    "issue": "`for f in $REQUIRED_FILES; do` において、変数がダブルクォートで囲まれていないため、カンマ区切りの値に `*` や `?` が含まれているとカレントディレクトリのファイル名に glob 展開されてしまいます。",
+    "suggestion": "ループの前に `set -f` を実行して glob 展開を無効化し、ループ終了後に `set +f` で元に戻すか、`echo \"$REQUIRED_FILES\" | tr ',' '\\n' | while read -r f; do` の形式に変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "DATA_INTEGRITY",
+    "location": "scripts/subagent_health_check.sh L70-L72",
+    "issue": "`NOTE` 変数のエスケープが `sed 's/\"/\\\"/g'` のみで行われています。`NOTE` に改行文字やタブなどの制御文字が含まれていた場合、出力される JSON がフォーマットエラーとなり、後続のログ解析ツールがクラッシュする原因になります。",
+    "suggestion": "`jq` を使用して安全に JSON を生成してください。例: `jq -n --arg ts \"$TS\" --arg id \"$SUBAGENT_ID\" --arg st \"$DERIVED_STATUS\" --arg note \"$NOTE\" '{ts:$ts, subagent_id:$id, status:$st, note:$note}' >> \"$LOG_FILE\"`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "ROBUSTNESS",
+    "location": "scripts/main_session_writeguard.sh L65, L77",
+    "issue": "`sed` を用いた正規表現で JSON から `tool_name` と `file_path` を抽出していますが、JSON のフォーマット���改行位置やスペース）が変わったり、`tool_input` 内に同名のキーが含まれていた場合に誤抽出するリスクがあります。",
+    "suggestion": "外部コマンドへの依存を減らす意図であっても、正確で堅牢なパースのために `jq -r '.tool_name'` および `jq -r '.tool_input.file_path'` を使用するように変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0758,
+    "input_tokens": 55090,
+    "output_tokens": 1388,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

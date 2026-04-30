@@ -1,0 +1,26 @@
+spawn_subagent_review: persona=adv target=lais/review_feed/dummy.md
+ADV レビュー対象ファイルが存在しません。
+
+**事実確認:**
+- 指定パス: `lais/review_feed/dummy.md` → 存在せず
+- `lais/review_feed/` 実在ファイル: `README.md` / `2026-04-25.md` / `.gitignore` のみ
+- 仕様（README.md L7）: review_feed は post-commit 監査ログ専用領域。日別ファイル `YYYY-MM-DD.md` 形式で、`dummy.md` は仕様書未定義の名前
+
+**§2.25.1 仕様書照合結果:**
+- `sub_external_review_protocol.md §5` は post-commit 自動書込のみ規定。手動 `dummy.md` 配置の運用は未定義
+- ADV レビュー対象として `dummy.md` を扱う根拠が仕様書に存在しない
+
+**§2.25.7 既成事実化の禁止:**
+- 存在しないファイルに対する架空レビューは生成不可
+- ファイルを ADV 側で新規作成する権限も仕様書に未定義
+
+**想定される意図（PO 確認事項）:**
+1. `2026-04-25.md` の誤記か
+2. ADV レビューフローの動作確認用ダミー投入が別ミッションで予定されているか
+3. `lais/review_feed/_critical.md`（README L13、git 管理対象）の誤記か
+
+PO 側で正しい対象ファイルパスを指定してください。仕様書に未定義のため §2.25.1 に従い独断進行不可。
+/ `lais/verify/<対象>.md`）
+2. **意図確認**: `dummy.md` が「ADV レビュー機構の動作確認用テストフィクスチャ」を指すなら、`docs/plans/sub_external_review_protocol.md` にテストフィクスチャ配置規約を追記する改定提案を ENG/PO に起票（ADV が起案可）
+
+§2.25.5 違反自己申告: 本応答に違反なし（`adv_violation_log.md` 追記不要）。

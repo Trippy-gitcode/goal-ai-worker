@@ -1,0 +1,79 @@
+[
+  {
+    "id": "R3I-QA-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§3.2 STATUS 5状態 / §2.6 check_test_pass / §2.17 PD疑義1 / §2.20 PD疑義4",
+    "issue": "STATUS 遷移条件が SSOT §3.2 と実装サンプル §2.6 check_test_pass で矛盾。§3.2 は READY_FOR_DEPLOY を『cmd-unit + cmd-e2e PASS』と定義するが §2.6 check_test_pass は PASS>=1 で遷移（OR 意味論）。さらに no_deploy:true で READY_FOR_DEPLOY を経由せず直接 DONE、cmd-e2e 省略可の扱いが低リスクだけでなく一般化されている。canopy が仕様違反の状態遷移を行い、TDD 証跡（G8 RED→GREEN）確認も組込まれていない。",
+    "spec_reference": "R2.2 §3.2 L186-187 / §2.6 L841-843 / §2.17 L1500-1511 / §2.20 L1577-1596 / §3.4 L240-242（cmd-unit/cmd-e2e 必須）",
+    "suggestion": "SSOT を §3.2 一本化: 通常ミッション = cmd-unit PASS AND cmd-e2e PASS で READY_FOR_DEPLOY、deploy 成功後 DONE / no_deploy:true = cmd-unit PASS のみで DONE 可、cmd-e2e は N/A 明示時のみ免除 / high リスク = cmd-unit AND cmd-e2e AND cmd-realworld PASS + G17。check_test_pass 実装サンプルも mission block の cmd-unit/cmd-e2e/cmd-realworld 定義 + classifier 結果を読んで『必要証跡全て GREEN』のときのみ遷移に書き換え。G8 RED→GREEN 整合を遷移条件に明示組込（before-*.json 失敗>0 + after-*.json 失敗=0 の組）。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R3I-QA-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§3.4 L1/L2/L3 SSOT / §2.2 Step 10 / §2.7 χcrit / §9 Golden R3",
+    "issue": "『統合E2E』の定義が本パッケージ内で明示されていない。cmd-e2e が L1 スモーク（§3.4 L231-232）と L2 影響範囲（§3.4 L233）の両方に使われ、両層の境界線（粒度・カバレッジ・SKIP可否・失敗時の扱い）が定義されていない。テスト作成者が粒度を誤り、L1 の穴・L2 の過剰重複を招く。qa_lead 視点で品質ゲートの実効性を著しく損なう。",
+    "spec_reference": "R2.2 §3.4 L230-234 L1/L2/L3 定義 / §2.2 L474-477 Step 6/7（L1 スモーク、L2 影響範囲）/ §C3.4 L1856-1867",
+    "suggestion": "§3.4 に独立節『統合E2E の定義』を追加: 統合E2E = 複数コンポーネント/画面/外部境界を横断して主要業務フローを検証する非本番 E2E、cmd-e2e のうち @smoke タグ外が該当。L1 スモーク E2E = @smoke タグ付き、launch/auth/primary1/primary2_or_external/reload の5項目。L2 影響範囲 E2E = affected-tests.sh で抽出された変更起点の周辺テスト。L3 フル回帰 E2E = 週次・リリース前の全件実行。§2.2 deploy.sh Step 6/7 のコマンドに tag filter（--grep '@smoke' vs --grep-invert '@smoke'）を明示。テストファイル配置規約（tests/e2e/smoke/ vs tests/e2e/integration/）も SSOT 化。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R3I-QA-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.4 cmd-3区分 / §2.17 低リスク省略 / §2.15 mission_linter / §C3.3 テンプレ",
+    "issue": "N/A と SKIP の厳密分離が不足。cmd 欄では N/A と SKIP を許容する（§3.4 L240-242）としつつ、SKIP 時の再試行条件・承認要否・STATUS 遷移可否が定義されていない。mission_linter（§2.15 ζcrit'）は N/A / SKIP を同列で PASS 扱い → 実行不能なテストを恒久 SKIP のまま READY_FOR_DEPLOY に進める余地。テストアンチパターンの『赤信号の常態化』を助長する。",
+    "spec_reference": "R2.2 §3.4 L240-242 / §2.15 L1429-1446 / §2.17 L1500-1511 / §C3.3 L1847-1850",
+    "suggestion": "N/A と SKIP を厳密分離: N/A = 構造的に不要（例: 低リスクで cmd-realworld）、SKIP = 一時的未実施。SKIP には必須フィールド（理由 / 再試行予定日 / 代替証跡 / 承認者）を要求し、mission_linter で検証。SSOT に『SKIP が 1 つでもある場合は READY_FOR_DEPLOY 不可、ただし ADV/PO 承認付きの例外のみ可』ルール追加。check_test_pass でも SKIP カウンタを記録し、skip_count>0 のときは READY_FOR_DEPLOY 遷移を警告ログ付きでブロック。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R3I-QA-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§3.4 / §2.7 realworld_proof_check / §C3.4 / §C4.1",
+    "issue": "L1 スモーク 5 項目の定義は改善されたが、実装レベルの命名と証跡要件が一致していない。§3.4 は『主機能2or外部API』（L1-4 相当）と記述、§2.7 realworld_proof_check は REQUIRED=\"launch primary1 reload\" + 条件付き auth/payment/api_call。R2.2 §3.3 証跡パス SSOT にも統一キー名が無い。テストID と証跡キー名の SSOT 不整合で、認証追加が正しい一方、4番目の必須項目が決済・外部API・第2主機能のどれを指すか実装ブレ。",
+    "spec_reference": "R2.2 §3.4 L232 / §2.7 L1055-1058 / §3.3 L210-211 / §C3.4 L1858-1862",
+    "suggestion": "L1 5項目を論理名＋証跡キー名で完全一本化: L1-1 launch / L1-2 auth / L1-3 primary1 / L1-4 primary2_or_external / L1-5 reload。決済・外部API は L1-4 の具体例として統合（『primary2_or_external = 決済・外部API・第2主機能のいずれか、ミッション種別で1つ選択』）。§2.7 realworld_proof_check の REQUIRED 変数と §3.3 証跡パス SSOT と §C3.4 を同一キー名に揃え、mission_template に『l1_mapping』フィールド追加で本質的な機能対応を明示。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R3I-QA-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.2 Step 6-7 deploy.sh / §3.4 / §C4.1",
+    "issue": "deploy.sh Step 6『L1 スモーク』が `npx playwright test --grep \"smoke\" --project=mobile` の固定コマンドで、mission block の cmd-e2e 記述と連携しない。Step 7『L2 影響範囲』は affected-tests.sh 呼出し。mission_template に書かれた完了コマンド cmd-unit/cmd-e2e/cmd-realworld が deploy.sh で実行されない → 仕様上の cmd 区分と実運用のゲートが乖離。レビュアーが『どのコマンドが実際のゲート判定に使われるか』を追跡不能。",
+    "spec_reference": "R2.2 §2.2 L474-477 Step 6/7 / §3.4 L238-242 cmd-3区分 / §C4.1 L1896-1897 Step 6/7",
+    "suggestion": "2択を SSOT で一意化: (a) deploy.sh が mission block の cmd-e2e/cmd-realworld を eval 実行、mission 未記載時のみ固定コマンドをフォールバック / (b) mission の cmd は『証跡生成用』、deploy.sh の固定コマンドは『ゲート判定用』と役割分離（その場合、両者のテスト対象が一致することの自動検証を G4 拡張で追加）。現状の記述は両解釈が可能で危険。どちらを採用するか §3.4 SSOT と §2.2/§C4.1 で統一記述。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R3I-QA-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.6 check_test_pass / §2.12 G15 / §3.3 証跡パス SSOT / §C3.5 G8 TDD",
+    "issue": "READY_FOR_DEPLOY 条件に G8 の RED→GREEN 整合が組込まれていない。check_test_pass は after-*.json の PASS のみを確認（§2.6 L831-839）。before-*.json による RED 確認が遷移条件に無い → 『最初から通っていたテストを再実行しただけ』でも READY_FOR_DEPLOY 化可能。TDD 証跡（G8）の実効性が弱い。G15 tdd_trace_consistency は責務限定（§2.12）で unit/e2e の名前同期のみ、実際の RED→GREEN 遷移検証は誰の責務か不明。",
+    "spec_reference": "R2.2 §2.6 L831-839 check_test_pass / §2.12 L1264-1301 G15 / §3.3 L207-211 / §C3.5 L1869-1873",
+    "suggestion": "check_test_pass に G8 RED→GREEN 検証を組込: before-unit.json の stats.unexpected > 0 AND after-unit.json の stats.unexpected == 0 の組 を最低 1 テストで確認、必要コマンド分（cmd-unit/cmd-e2e）全てで確認。before-*.json が無い場合は N/A 明示必須、N/A なしで before ファイル欠落時は FAIL。G15 は命名同期のみ、G8 は check_test_pass で RED→GREEN 検証、G17 は realworld 証跡の 3 者責務分界を §C3.5 で明文化。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R3I-QA-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§7.3 severity 定義 / §0.6 / §7.4 既棄却",
+    "issue": "レビュアーに『この論点で CRITICAL を出すべきでない』と強く指定しているが、テスト戦略・品質ゲートの実装不備まで過度に抑制する危険。特に L1/L2/L3 や SKIP 運用のような再発しやすい設計穴が『既採用テーマの蒸し返し』として見逃される可能性。severity inflation 対策は有効だが、品質ゲートの実効性検証が機能低下する。",
+    "spec_reference": "R2.2 §7.3 L2329-2344 / §0.6 L56-65 / §7.4 L2347-2354",
+    "suggestion": "§7.4 既棄却テーマの記述を『方針そのものへの異議は不可、方針を満たす実装・整合性欠陥は通常通り指摘可』に統一。例示追加: 『OK: \"STATUS 5状態モデルの実装で check_test_pass が PASS>=1 なのは §3.2 と矛盾\" → CRITICAL 可 / NG: \"STATUS 5状態モデル自体を 3状態に戻すべき\" → 方針異議として棄却』。レビュー抑制ではなく再議論抑制であることを明示。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "qa_lead"
+  }
+]

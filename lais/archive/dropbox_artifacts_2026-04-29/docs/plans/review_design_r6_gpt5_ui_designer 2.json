@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.4 z-index階層",
+    "issue": "コメントで「--z-toast は最前面（モーダル内のトーストも含む）」と記載がある一方、実値では --z-tooltip:700 > --z-toast:600 になっており、ツールチップがトーストより前面に来る可能性がある。",
+    "suggestion": "最前面にしたい要素を統一。どちらを最前面にするかを明記し、必要に応じて値を入れ替える（例: --z-toast: 700, --z-tooltip: 650）。あるいはコメントを「ツールチップを除く最前面」に修正。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8 コンポーネント（全体）/ §2.2, §4.4",
+    "issue": "ツールチップがカラー役割（info）とz-indexで登場するが、ツールチップ自体のコンポーネント仕様（背景/文字色/パディング/角丸/矢印形状/出現アニメーション/アクセシビリティ）が未定義。",
+    "suggestion": "Tooltipコンポーネントを追加し、--tooltip-bg（=var(--info-subtle)想定）、--tooltip-fg（=var(--text-primary)orダーク/ライト別上書き）、--tooltip-padding、--tooltip-radius、--tooltip-shadow、--tooltip-max-width、矢印サイズ/オフセット、出現/退避のeasing/duration、role=tooltip + aria-describedbyの要件を定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8 コンポーネント",
+    "issue": "ドロップダウン/メニュー（コンテキストメニュー/選択肢リスト）のコンポーネント定義がない。z-index(--z-dropdown)のみ定義されており、見た目・選択状態・キーボード操作・フォーカス管理が未規定。",
+    "suggestion": "Dropdown/Menuコンポーネントを追加し、--menu-bg/--menu-fg/--menu-radius/--menu-shadow/--menu-divider/--menu-item-padding/hover・pressed色/disabled色/チェック付き項目のアイコン扱い/キーボードナビゲーション(↑↓EnterEsc)/aria-role(menu/menuitem)などを定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.1, §6.2, §6.4（UX）, §8 コンポーネント",
+    "issue": "スピナー/ローディングインジケータのデザイン・トークンが未定義。UX側でPull-to-refreshやローディングが前提だが、色・サイズ・ストローク幅・モーショ���の標準がない。",
+    "suggestion": "Spinner/Progress indicatorを追加。--spinner-size-sm/md/lg、--spinner-stroke、--spinner-color（=--accent or --text-secondary）、アニメーションkeyframes（回転）、reduced-motion時の代替（フェード）を規定。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§8.8 トグルスイッチ",
+    "issue": "トグルのON色・サム色がボタントークン（--button-primary-*）に依存しており、ボタンとスイッチの配色連動が必須になっている。テーマや将来の配色調整で相互影響が生じやすい。",
+    "suggestion": "スイッチ専用トークンを導入（--switch-on-bg, --switch-off-bg, --switch-thumb-bg, --switch-focus-ring 等）。各テーマでボタンと独立に上書き可能にし、実装の結合度を下げる。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§6.1 アイコンスタイル",
+    "issue": "アイコンの押下色が --accent-hover と記載されており、他の体系（--accent-pressed）と命名規則が不一致。押下でhover色を使うと状態の意味付けが曖昧になる。",
+    "suggestion": "押下（pressed）は --accent-pressed を使用するorアイコン専用の --icon-pressed を用意。hover/pressedの意味と色を体系的に揃える。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§8.1 ボタン（表組内の説明文）",
+    "issue": "Danger(subtle)のhover/pressed説明に『rgba(*danger*, 0.18)→ --danger-subtle-hover』のような擬似コードが併記され、実装者が動的合成とトークン固定値のどちらを採用すべきか迷う恐れがある。",
+    "suggestion": "実装ルールを「必ず定義済みトークン参照（--danger-subtle, --danger-subtle-hover, --danger-subtle-pressed）」に統一し、計算式の記述は参考情報として脚注化または削除。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.1 スペーシングスケール",
+    "issue": "タイポはrem基底だが、スペーシングがpx固定。ユーザーの文字サイズ拡大時にレイアウトの相対比率が崩れる可能性がある。",
+    "suggestion": "主要スペーシングをrem化（例: 4px→0.25rem, 8px→0.5rem, 16px→1rem 等）し、可読性向上時のレイアウト追従性を高める。px値はdesign spec側（ピクセル仕様）で補助として保持可。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5 各テーマ/§9 CSSトークン",
+    "issue": "フォーカスリングが1つのプロパティ文字列（--focus-ring: 0 0 0 3px rgba(...)）で管理されており、太さ/色/offsetの粒度が粗い。要素ごとの最適化や将来の微調整が難しい。",
+    "suggestion": "フォーカスリングを分割トークン化（--focus-ring-color, --focus-ring-width, --focus-ring-offset）し、box-shadow/outlineのどちらを使うかは実装側で合成。特にoverflow:hidden要素ではoutline使用を推奨。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2.2 リンク色の役割分離",
+    "issue": "テキストリンクのvisited状態（既読リンク）についての方針が未定義。モバイルでもWeb/PWAでは訪問済みリンクが混在しうる。",
+    "suggestion": "visited色の扱いを明記（推奨: visitedも--accentのまま＝色差を付けない。付ける場合はコントラスト/可用性を検証）。text-decorationの扱いはvisitedでも維持することを明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-111",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§6.1 アイコンスタイル",
+    "issue": "アイコンサイズ（20/24/32px）が文言でのみ定義され、トークン化され���いない。テーマ/密度設定や一括調整時に冗長。",
+    "suggestion": "アイコンサイズ/ストロークのトークン追加: --icon-size-sm:20px, --icon-size-md:24px, --icon-size-lg:32px, --icon-stroke:1.5px。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-112",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.4 タイムライン",
+    "issue": "Overdue左バーの太さが仕様で3px固定。テーマ/密度/スケール対応や将来の調整がしにくい。",
+    "suggestion": "バー太さをトークン化（--timeline-overdue-bar-width: 3px）。NOW/DONE/NEXTのドット半径/ストローク幅も合わせてトークン化すると一貫性が高まる。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-113",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8 コンポーネント（タブ）",
+    "issue": "UX仕様で上部サブタブ（MEのPROFILE/DISCOVER/FRIENDS/SHOP）が存在するが、デザインシステム側にタブ（上部）コンポーネントの定義（インジケータ高さ/色/アニメ/タップ余白/hover/pressed/disabled/スクロール挙動）がない。",
+    "suggestion": "上部タブ（segmented/tab bar）を追加。--tab-height, --tab-padding-x, --tab-indicator-height, --tab-indicator-color(=--accent), --tab-fg/--tab-fg-active, hover/pressed色, フォーカスリング, スクロール可能時の左右フェード等を定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-114",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.5 / §8（フォーカス全般）",
+    "issue": "通常テーマ時のフォーカス可視化にbox-shadowを用いるため、overflow:hiddenの小要素やpill内でリングが欠ける可能性がある（forced-colors時はoutlineだが通常時は未指定）。",
+    "suggestion": "小要素/丸要素（pill/チップ/トグル）ではoutline + outline-offsetを優先する実装ガイドを追記。あるいは「--focus-style: outline|shadow」を持たせ、要素種別で切替。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-115",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§8.2 入力フィールド",
+    "issue": "read-only状態の視覚仕様が未定義（編集不可だがフォーカス可能なケースの区別）。",
+    "suggestion": "read-onlyの背景/ボーダー/テキスト色（例: 背景=--bg-surface, ボーダー=--border, テキスト=--text-secondary, カーソル=default）とアイコン有無のルールを追加。aria-readonly属性の方針も併記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-116",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.3/§5（セマンティック/テーマ）",
+    "issue": "大数字・統計の桁揃え（tabular-nums）に関するタイポ設定が未定義。exp/レベル/ゴール%など数値UIが多く、桁揃えがないとジャンプ感が出やすい。",
+    "suggestion": "数値用クラス/トークンを定義（--font-feature-numeric: 'tnum' 1 または font-variant-numeric: tabular-nums）。大数字/プログレスラベルに適用する実装ガイドを追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  }
+]

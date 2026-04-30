@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "依頼事項で指定された「L1スモーク5項目の網羅性」「3層テスト戦略（L1/L2/L3）と完了コマンド3区分の対応」「SKIPルール」の定義がドキュメント内に一切存在しない。テスト基準と品質ゲートの定義がないままアーキテクチャを決定すると、実装時に品質保証が機能せず破綻する。",
+    "suggestion": "アーキテクチャの各プロセス（ENG, ADV, Orchestrator等）が、L1/L2/L3のどのテスト層をトリガーし、どの完了コマンド（cmd-unit/cmd-e2e/cmd-realworld）で品質ゲートを通過とするかの対応表を早急に追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "案 C: 全役兼任",
+    "issue": "案Cは1つのAppで全役割を兼任するため、テスト結果の評価や品質ゲートの判定を実装と同一セッションで行う。Bug O（self-critiqueの限界）により、テストの失敗理由をLLMが自己正当化し、実態はFAILなのにPASSと判定して本番にバグが漏れる致命的なアンチパターン。",
+    "suggestion": "品質ゲートの判定（特にL2/L3や統合E2E）は、実装を行ったセッションとは物理的・論理的に独立したプロセス（別セッションまたは外部API）で行うことを必須条件として明記し、案Cを非推奨とするか厳格な制約を設けること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "案 D: 1 App + 外部 API ワンショットクロスチェック",
+    "issue": "外部APIによるクロスチェックが「post-commit」で実行される設計となっている。品質ゲートは本来コミット前（pre-commit）にテスト（L1スモーク等）を通過させるべきであり、事後検知はメインブ��ンチの汚染と手戻りを引き起こすアンチパターン。",
+    "suggestion": "外部APIによるクロスチェックのタイミングを「pre-commit（品質ゲート通過前）」に変更し、完了コマンド（cmd-unit等）の実行結果とセットで外部モデルに判定させるフローに修正すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "TDD証跡（G8）の検証プロセスが各アーキテクチャ案のどこに組み込まれるか不明確。ENGが実装前にテストを書き、それがPASSした証跡を誰（Orchestratorか外部APIか）がどう検証するのか定義がないと、TDDが形骸化する。",
+    "suggestion": "ENGプロセスが完了コマンドを発行する際の必須要件として「TDD証跡（G8）の提示」を追加し、Orchestrator（案A/B）または外部API（案D）がその証跡の妥当性を検証するステップをアーキテクチャ図に明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "案 A, B: Orchestrator daemon",
+    "issue": "Orchestrator daemonが自動レビューを行う際、自動テスト（特にE2E���のFlaky（不安定）な結果や、SKIPルールの適用判断を自律的に行うと、LLMの幻覚により無限再実行ループに陥るか、誤って全PASS判定を出すリスクがある。",
+    "suggestion": "Orchestrator daemonの品質ゲート判定において、「最大再試行回数の上限」と「SKIPルール適用の厳格な条件（人間へのフォールバック等）」をハードコードされたロジックとして組み込むことを仕様に追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "全体",
+    "issue": "統合E2E（§9新設予定）の実行環境とトリガーの責務分界点が不明確。ローカルの常駐プロセス（案A/B）が重いE2Eを回すのか、CI/cronバッチ（案D）に委譲するのかが定義されていないと、POのローカル環境のリソース枯渇やテストのタイムアウトを招く。",
+    "suggestion": "統合E2Eの実行主体を明確化すること。ローカル環境の負荷を考慮し、L1/L2はローカルのENG/Orchestratorで実行し、L3（統合E2E）はCI環境または独立したバッチプロセスで実行する3層テスト戦略とのマッピングを定義すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "S10Grow.css §s10-check-* / S10Grow.jsx Check コンポーネント",
+    "issue": "タスク状態「scheduled」と「active」が、チェック円の枠線色（border-color）の違いのみで区別されている可能性が高い。視覚的手がかりが色だけだと 1.4.1 Use of Color (AA) に抵触し得る。",
+    "suggestion": "色以外の手がかりを追加する（例: active は内部に小さなドット/斜線パターン/部分塗りを付与、あるいはテキストバッジ「進行中」をカード内に常時表示）。併せて SR 向けだけでなく視覚ユーザーにも状態が判別できるようにする。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "BottomTabBar.jsx",
+    "issue": "ページ遷移ナビゲーションに <button> を使用しており、リンクのキーボード/支援技術の期待（コンテキストメニュー、長押しでのリンク共有等）と一致しない可能性がある。",
+    "suggestion": "可能なら <a href> + aria-current=\"page\" を採用し、SPA でも href を有効にする（pushState 併用）。もし <button> 維持なら role=\"link\" + onKeyDown(Enter で発火) の追加や、コンテキストメニュー動作の代替案を検討。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "BottomTabBar.jsx / S10Grow.css",
+    "issue": "s10-check には明示的な :focus-visible があるが、BottomTabBar のボタンや「明日に延期」ボタンのフォーカスインジケーターが明示されていない。UA 既定に依存すると 2.4.11 Focus Appearance (Minimum) / 1.4.11 Non-text Contrast を満たさない恐れがある。",
+    "suggestion": "すべての操作可能要素（.bottom-tab-bar-btn, .s10-task-defer など）に :focus-visible を定義し、最低 2px 相当のインジケーターと 3:1 のコントラストを保証する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S10Grow.jsx Check コンポーネント aria-label",
+    "issue": "aria-label にデバイス依存語（「タップ」）が含まれており、キーボード/スイッチ利用者に不適切。",
+    "suggestion": "デバイス非依存の表現に変更（例: 「予定。選択すると進行中にする」「進行中。選択すると完了にする」「完了済み。選択すると予定に戻す」）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-105",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "S10Grow.jsx Check コンポーネント",
+    "issue": "aria-pressed は done のみ true で、scheduled/active はいずれも false。ユーザーが scheduled→active にした際、SR では状態変化が十分に伝わらない恐れがある（ラベル変更は必ずしも自動アナウンスされない）。",
+    "suggestion": "active を aria-pressed=\"mixed\" として三値トグル化する、または現在状態を別要素（視覚表示テキスト）に出し、aria-describedby で結び、当該要素に aria-live=\"polite\" を付与して状態更新を確実に通知する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "S10Grow.css .s10-check::before",
+    "issue": "44×44 のヒット領域拡張を ::before の絶対配置で実現しているが、隣接ターゲットと重なった場合に誤タップを誘発する可能性がある（可視境界と実ヒット境界が乖離）。",
+    "suggestion": "隣接インタラクティブ要素との間隔を 8px 以上確保するか、ターゲット拡張を要素自身の padding/margin で実装する（推奨）。UI 監査で重なりの有無を実機確認（iOS/Android/デスクトップ）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "全体（カラートークン: --accent, --success, --border-strong, --danger, 背景色など）",
+    "issue": "色コントラストの実測値が未提示のため 1.4.3 (テキスト), 1.4.11 (UI コンポーネント/グラフィカル) の適合可否が判断できない。",
+    "suggestion": "実装で使用しているカラー変数の実値（HEX/RGB）と背景色の組み合わせごとにコントラスト比を測定・提示する。要件: テキスト 4.5:1、UI 枠線/アイコン/フォーカスインジケーター 3:1。測定結果に応じて色の明度差を調整。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "S10Grow.css :focus-visible（全ボタン想定）",
+    "issue": "2.4.11 Focus Appearance (Minimum) の面積要件/コントラスト要件の満足可否が未確認（例: 22×22 のボタンに 2px アウトラインで、1px 周囲面積と同等以上か、3:1 のコントラストを確保できているか）。",
+    "suggestion": "代表要素で計算し、必要に応じて���ウトライン太さ/offset/色を調整。計算根拠とスクリーンショット（ズーム100%）を提示。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "全体（.bottom-tab-bar-btn, .s10-task-defer など）",
+    "issue": "2.5.8 Target Size (Minimum) 24×24（AA）の満足可否がチェック以外の操作要素で未確認。特にテキストボタンやタブの非アクティブ状態で高さ/余白が不足している可能性。",
+    "suggestion": "全操作要素で最小タップ領域 24×24（可能なら 44×44）を実測確認し、CSS で padding/line-height を調整。測定値を表で提示する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S10Grow.css @media (prefers-reduced-motion: reduce)",
+    "issue": "主要なトランジション/アニメーションは縮退されているが、今後追加される可能性のある装飾アニメーションの網羅性は未保証。",
+    "suggestion": "新規アニメーション追加時は reduce クエリに必ずフックする運用ルールを README/コードコメントに明記。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-111",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ミッション定義「スコープ外 4 件」",
+    "issue": "R1 で CRITICAL 指摘された 4 件（S-13/S-14 未実装、EXP アニメ、Undo スナックバー）はミッション定義によりスコープ外であることを確認。",
+    "suggestion": "R2 では非指摘（LOW 記録のみ）。後続ミッションにて実装時に a11y 観点を再レビュー。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-112",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "S10Grow.jsx useEffect(mainRef.focus)",
+    "issue": "mount 時の mainRef.focus 実行対象の要素が示されておらず、tabindex が無いとフォーカス移動に失敗する恐れ。また role=\"main\" のランドマーク付与状況も不明。",
+    "suggestion": "フォーカスさせるコンテナに role=\"main\" と tabindex=\"-1\" を付与し、見出し直後へフォーカスを移す。初回ロード時のみの移動とし、スクリーン読み上げの冗長化を避ける。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

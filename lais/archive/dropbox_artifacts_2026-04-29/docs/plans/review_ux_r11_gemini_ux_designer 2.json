@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.4",
+    "issue": "S-36 QRスキャン画面（フルスクリーンカメラ）において、スキャンをキャンセルして前画面（S-33）に戻るための明示的なUI（✕ボタンやキャンセルボタン）が定義されていません。カメラ起動中のエッジスワイプは誤動作しやすく、QRを読み込むまで画面から抜け出せない「行き止まり」が発生します。",
+    "suggestion": "S-36の画面上部（または下部）に、常にタップ可能な「✕」または「キャンセル」ボタンを配置し、タップ時にカメラを停止してS-33へ戻る（history.back()）仕様を追記してくだ���い。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2",
+    "issue": "画像添付（最大10MB）時のアップロード処理中のUI状態が未定義です。アップロード完了前に送信ボタンを押した場合の挙動や、アップロード中のプログレス表示がないため、送信エラーやデータ不整合が発生するリスクがあります。",
+    "suggestion": "画像選択後、入力バーのサムネイル上にローディングスピナーを表示し、アップロード完了まで送信ボタンを無効化（グレーアウト）する仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§8.6",
+    "issue": "GROW画面表示時に発火する非同期演出（ログインボーナス、TALK画面で獲得した冒険EXPの反映、それに伴うレベルアップ）のキュー順序が定義されていません。これらが同時にトリガーされた場合、アニメーションが競合しEXPバーの表示が破綻します。",
+    "suggestion": "§8.6の演出キューに「画面表示時の初期化キュー」を追加し、1. ログインボーナス → 2. 非同期冒険EXP反映 → 3. レベルアップ の順で直列実行するよう定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§5.3",
+    "issue": "オンボーディング完了後（Step 5）にGROW画面へ遷移する際、history.pushStateを使用すると、Androidの物理戻るボタン等でオンボーディング画面に戻れてしまい、状態の不整合や再送信エラーが発生します。",
+    "suggestion": "Step 5からGROW画面への遷移は `history.replaceState` を使用し、ブラウザの履歴スタックからオンボーディングの履歴を消去するよう明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.3, §6.1",
+    "issue": "S-13（タスク編集モード）で未保存データがある状態のとき、ハーフモーダルを下スワイプして閉じようとした場合の挙動が定義されていません。誤スワイプでデータがサイレントに破棄されるリスクがあります。",
+    "suggestion": "§6.1のハーフモーダル共通仕様に「未保存データがある場合は下スワイプによる閉じ操作を無効化する、またはスワイプ時に確認ダイ��ログを表示する」旨を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§2.3",
+    "issue": "習慣タスクの繰り返し周期で「カスタム曜日」を選択した際のUI（月〜日の選択肢をどう表示し、どう操作するか）が定義されておらず、実装者がUIを構築できません。",
+    "suggestion": "「カスタム曜日」選択時、直下に月〜日の7つの丸型トグルボタンが横並びでインライン展開され、複数選択可能（最低1つ必須）となるUI仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.4",
+    "issue": "S-35 友達詳細画面で簡易メッセージ（100文字）を送信した後、送信履歴画面が存在しないため、ユーザーはメッセージが正しく送信されたか確認する手段がありません。",
+    "suggestion": "メッセージ送信成功時に、入力欄をクリアした上でトースト「メッセージを送信しました」を表示するフィードバック仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.4",
+    "issue": "S-15 ゴール作成時の「最初のタスク追加」でインライン入力欄を増やした後、誤って追加した入力欄を削除するUI（✕ボタン等）が定義されていません。",
+    "suggestion": "追加された各タスク入力欄の右端に「✕（削除）」アイコンを配置し、タップで該当の入力欄を消去できる仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.2",
+    "issue": "添付画像のサイズが上限（10MB）を超過していた場合のエラーハンドリングがUX仕様として定義されていません。",
+    "suggestion": "10MB超過の画像が選択された場合、OSのファイルピッカーが閉じた直後にトースト「画像サイズは10MB以下にしてください」を表示し、添付をキャンセルする仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§13.2",
+    "issue": "プラン管理画面で「ダウングレード予約中の場合: [キャンセル]」ボタンが定義されていますが、タップ後の確認フローや結果のフィードバックが未定義です。",
+    "suggestion": "[キャンセル]タップ時に確認ダイアログ「ダウングレード予約をキャンセルし、現在のプランを継続しますか？」を表示し、実行後にトースト「予約をキャンセルしました」を表示するフローを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§9.1",
+    "issue": "オフライン時のTALK画面において、入力フィールドは無効化されるとありますが、画像添付（📎）アイコンの無効化について明記されていません。オフラインで画像を選択できてしまうとアップロードエラーになります。",
+    "suggestion": "オフライン時は入力フィールドだけでなく、画像添付（📎）アイコンおよび送信ボタンも無効化（グレーアウト）されることを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  }
+]

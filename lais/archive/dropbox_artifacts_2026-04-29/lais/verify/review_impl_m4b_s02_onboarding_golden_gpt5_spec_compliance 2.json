@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.3 S02-3",
+    "issue": "タイトルの上余白が spec では「進捗バー下 --space-2xl (40px)」だが、実装は design_system の --space-2xl=64px を採用しており 40px と不一致。",
+    "suggestion": "S-02 専用トークンを導入して整合を取る（例: .s02-title { margin-top: var(--space-s02-title, 40px); }）。もしくは spec 側を 64px に更新する正式合意を取り、コードコメントだけでなく値自体を統一。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.3 S02-6 / レイアウト原則",
+    "issue": "「次へ」CTA は「下端固定」かつ「画面下100px」の指定だが、実装はフロー内配置（margin で押し下げ）で固定されていない。スクロールや端末高さにより位置が変動し、仕様と矛盾。",
+    "suggestion": "CTA を固定配置に変更。例: .s02-onboarding { padding-bottom: calc(env(safe-area-inset-bottom) + 100px + 52px + var(--space-md)); } .s02-next { position: fixed; left: var(--space-lg); right: var(--space-lg); bottom: calc(env(safe-area-inset-bottom) + 100px); height: 52px; margin: 0; }",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.3 S02-6",
+    "issue": "CTA の幅指定「100% - --space-lg*2」に対し、コンテナに左右 padding: --space-lg があり、かつ CTA 自身にも左右 margin: --space-lg があるため、実効幅が「100% - --space-lg*4」となり仕様より狭い。",
+    "suggestion": "幅の基準を画面幅に合わせる設計に統一。固定配置化（R-002）と併せ、.s02-next の左右マージンを 0 にし、left/right: var(--space-lg) で幅を決定。フロー配置を維持する場合は、CTA の左右 margin を撤去してコンテナ padding のみで左右余白を担保する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.3 状態・インタラクション（戻る）",
+    "issue": "「戻る」は ease-out / 350ms で1ステップ戻ると規定だが、実装は history.back()/route による即時遷移で画面トランジションが無い。",
+    "suggestion": "遷移トランジションを実装（例: 戻る押下時に <main> に leaving クラスを付与し 350ms ease-out でフェード/ス��イド後に history.back() 実行、もしくはルータのトランジションフックで 350ms のアニメーションを付加）。スコープ理由で未対応とする場合は spec 例外を明文化。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.3 S02-6",
+    "issue": "CTA に letter-spacing: var(--letter-spacing-ja) を付与してい���が、spec に文字間の指定は無く仕様外追加となっている。文字詰めはボタンの可読性・横幅に影響。",
+    "suggestion": "spec に CTA の letter-spacing 指針を追記するか、当該プロパティを削除/0 にして spec 値（未指定＝既定）に合わせる。導入継続ならトークン値と意図（日本語最適化等）を仕様化。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "design_spec_v1.md §4.3 S02-5",
+    "issue": "アバター3列（各100×100）＋ gap 8px ＋左右 --space-lg により、360px 幅端末で横幅が不足（約396px必要）する可能性。横スクロールやはみ出しのリスク。",
+    "suggestion": "小幅端末でのレイアウト調整を追加。例: grid-template-columns: repeat(3, min(100px, calc((100vw - 2*var(--space-lg) - 16px)/3))); もしくは余白縮小のブレークポイントを設定。仕様側にも最小対応幅/リフロー方針（縮小 or スクロール）を明記。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1.md §4.3（--space-2xl 値）/ design_system.md §2",
+    "issue": "--space-2xl の値が spec では 40px、design_system ���は 64px と不一致。実装は design_system を優先。複数箇所（タイトル、アバター群の上余白等）でレイアウト差異を生む根因。",
+    "suggestion": "どちらを正とするか合意のうえ、S-02 では暫定で S-02 専用トークン（例: --space-s02-block-gap）を導入して即時解消。後続で共通トークンの値/命名を統一する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン",
+    "issue": "ボタンの背景色（#1C2128）とテキスト色（#484F58）のコントラスト比が極めて低く、視認できない。非アクティブ状態だとしてもWCAG AA基準を満たしていない。",
+    "suggestion": "テキスト色を#7A8593以上に明るくし、最低限の可読性を確保するか、ボタン全体の不透明度（opacity）で非アクティブ状態を表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "画面下部の「進め方を��く」「詰まりを相談」ボタン",
+    "issue": "背景色（#1C2128）に対してテキスト色（#484F58）が暗すぎ、文字が背景に沈んで読めない。アクセシビリティ上の重大な問題。",
+    "suggestion": "テキスト色を#7A8593以上に引き上げ、視認性を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "「所要時間」の横スクロールチップ群",
+    "issue": "狭い画面幅に8つのチップが詰め込まれており、視線が横に逃げてしまう。下部の「作成」ボタンへのスムーズな縦の視線誘導（Z/N字）を阻害している。",
+    "suggestion": "よく使う3〜4つの時間（例: 15分, 30分, 60分）のみを表示し、その他は「カスタム」としてまとめるか、ドロップダウンに変更して画面内の「間」を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内のアクションボタン群",
+    "issue": "「登録する」「編集して登録」「✕」の3つのボタンが横に並んでおり、視線が迷う。特に「編集し��登録」の文字数が多く、窮屈で洗練さに欠ける。",
+    "suggestion": "「登録する」を主ボタンとして幅広にし、「編集」と「✕」はアイコンのみの副ボタンとして右上に配置するなど、視線誘導の優先順位を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "ALL",
+    "location": "画面全体のテキストカラー設計",
+    "issue": "全体的に中間色のグレー（#7A8593, #9BA7B4）が多用されており、最も明るい白（#E6EDF3）との明暗のコントラスト演出が弱い。画面全体がフラットでメリハリに欠ける。",
+    "suggestion": "見出しや主要なデータ（未完了のタスク名など）にははっきりと#E6EDF3を使用し、補助情報との明暗のコントラスト（黒と白のリズム）を強化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "TODAYセクションの未完了タスク（18:00, 20:30）",
+    "issue": "タスク名（#9BA7B4）と時刻（#7A8593）の明度差が曖昧で、情報の主従関係が直感的に伝わりにくい。日本語の品格がやや損なわれている。",
+    "suggestion": "タスク名をより明るい色（#E6EDF3）にしてコントラストを高め、時刻との明暗のメリハリをつける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s14_goal_detail",
+    "location": "ヒーロー領域の「60%」表示とプログレスバー",
+    "issue": "数字のジャンプ率は美しいが、その直下にあるプログレスバーとの間隔が詰まりすぎており、余白のリズムが窮屈で「間」として機能していない。",
+    "suggestion": "「60%」のテキストとプログレスバーの間に8px〜12px程度の余白を設け、深呼吸できる「間」を作る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "AI理解メモの本文テキスト",
+    "issue": "日本語の長文に対して文字間（letter-spacing: -0.02em）が適用されているが、行長が長いため、視線が次の行へ移る際に迷いが生じやすい。",
+    "suggestion": "本文の左右に少し広めのパディングを取って行長を短くするか、長文の場合は文字間を0に戻して可読性を向上させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s02_onboarding",
+    "location": "画面上部のプログレスバー",
+    "issue": "アクティブな青（#79C0FF）と非アクティブな暗いグレー（#1C2128）のコントラストが強すぎ、視線がタイトルよりも先に上部に引っ張られてしまう。",
+    "suggestion": "非アクティブなバーの色を少し明るくするか、バー全体の太さを細くして、メインタイトルへの視線誘導を優先する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s15_goal_create",
+    "location": "カテゴリ選択のチップ群",
+    "issue": "2行に渡ってチップが配置されているが、行間の余白（gap）が狭く、タップターゲットとしての独立性が弱く見える。窮屈な印象。",
+    "suggestion": "チップの上下のgapを広げ（8px→12px程度）、タップしやすい「間」を確保して洗練されたリズムを作る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  }
+]

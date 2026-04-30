@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_project_v1.md §6.5 / lais_ux_v1.md §13.4",
+    "issue": "Stripe退会フローの技術方針が矛盾しています。project_v1.mdでは「cancel_at_period_end: trueを設定し、72時間後に即時解約」としていますが、この方法では72時間以内に請求期間の終了日（更新日）が到来した場合、クーリングオフ期間中にも関わらずサブスクが解約されてしまいます。一方、ux_v1.mdでは「Stripe schedule cancellation（キャンセル予約）」を使用すると記載されており、方針が割れています。",
+    "suggestion": "project_v1.md §6.5の記述をux_v1.mdに合わせて修正し��「Stripe Subscription Schedule APIを利用して72時間後のキャンセルを予約する。クーリングオフで復帰した場合はScheduleを解除する」という方針に統一してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md ヘッダー / dev_system_spec.md §19.6",
+    "issue": "dev-system §19.6の「上流変更時の下流遡及チェック」ルールが機能していません。project_v1.mdがv1.4に更新され内部矛盾が解消されたにも関わらず、ux_v1.mdのヘッダーは「依存: v1.3」「ステータス: DRAFT」のままであり、末尾の「project_v1.md 内部矛盾」セクションも残存したままになっています。",
+    "suggestion": "ux_v1.mdの依存バージョンをv1.4に更新し、ステータスを最新状態（CONFIRMED等）に変更してください。また、解決済みの「project_v1.md 内部矛盾」セクションを削除し、仕様書間の整合性を保ってください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §2.3",
+    "issue": "Undoスナックバーを「全タブ共通で維持」しつつ、TALK画面の時だけ「入力バーの上に���的配置する」仕様は、iOS PWAのvisualViewport（キーボード表示時の高さ変動）と組み合わせた際にレイアウト計算が極めて複雑になり、表示崩れや入力バーが隠れるバグの温床になります。",
+    "suggestion": "UndoスナックバーはGROW画面（タスク操作が発生する画面）のローカル状態とするか、TALK画面等の他タブ遷移時はスナックバーを非表示にする（裏で30秒のカウントダウンと仮確定状態は継続する）など、DOM構造と状態管理をシンプルに保つ仕様に変更することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md §13.7 / §13.12",
+    "issue": "AIレビューの収束ルールに曖昧さがあります。§13.7で「最低10ラウンド繰り返す」と規定していますが、§13.12で「3ラウンド連続で横ばいならペルソナを絞り込む」とあります。早期（例: R4）にペルソナを絞り込んだ場合、除外されたペルソナの観点でのレビューが10ラウンド行われず、網羅性が低下するリスクがあります。",
+    "suggestion": "§13.12の絞り込み適用条件に「最低Nラウンド（例: 7ラウンド）経過後」という条件を追加し、序盤〜中盤は必ず全ペルソナでレビューを回して網羅性を担保するよう明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md §9.1",
+    "issue": "オフライン時にQRコード表示ボタンが無効化される仕様となっていますが、対面でのQR交換はオフライン環境（地下の飲食店やイベント会場など）で発生しやすいため、表示自体ができないのはUXを損ないます。",
+    "suggestion": "オンライン時に24時間有効な一時トークンを事前取得してService WorkerまたはlocalStorageにキャッシュしておき、オフライン時でもキャッシュが有効であればQRコードを表示できるようにするフォールバックの追加を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

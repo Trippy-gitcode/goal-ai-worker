@@ -1,0 +1,279 @@
+/*
+ * S-15 Goal Create — design_spec_v1.md §4.8 準拠
+ * S-12 のモーダル骨格をコピー（Rule of three 観測点、共通抽出は別ミッション）
+ * LP-001/011/013/014 + LP-015（正式昇格後初回適用）事前適用
+ */
+
+/* Overlay --------------------------------------------------------------- */
+.s15-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--theme-color-overlay-strong, var(--theme-color-modal-overlay));
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: s15-overlay-fade var(--duration-fast) var(--ease-out);
+}
+@keyframes s15-overlay-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Modal ----------------------------------------------------------------- */
+.s15-modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-modal);
+  padding: 0 var(--space-lg) 30px;
+  overflow-y: auto;
+  animation: s15-modal-up var(--duration-normal) var(--ease-out);
+}
+@keyframes s15-modal-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* LP-013 */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .s15-modal { padding-bottom: calc(env(safe-area-inset-bottom) + 30px); }
+}
+
+/* LP-014 */
+.s15-modal:focus:not(:focus-visible) { outline: none; }
+.s15-modal:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* S15-1 ドラッグハンドル */
+.s15-drag-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+  margin: var(--space-sm) auto 0;
+}
+
+/* S15-2 / S15-3 ヘッダ ------------------------------------------------- */
+.s15-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.s15-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-ja);
+  color: var(--text-primary);
+  line-height: var(--line-height-ja-heading);
+  margin: 0;
+}
+
+.s15-close {
+  width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin: calc(var(--space-sm) * -1) calc(var(--space-sm) * -1) calc(var(--space-sm) * -1) 0;
+  border-radius: var(--radius-sm);
+}
+
+.s15-close:focus:not(:focus-visible) { outline: none; }
+.s15-close:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Form ------------------------------------------------------------------ */
+.s15-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.s15-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.s15-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  line-height: var(--line-height-label);
+  padding: 0;
+}
+
+/* 共通 input (S15-4 / S15-5) ------------------------------------------- */
+.s15-input {
+  width: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  letter-spacing: var(--letter-spacing-ja);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.s15-input::placeholder { color: var(--text-placeholder); }
+
+.s15-name, .s15-date { height: 48px; }
+
+.s15-input:focus { border-color: var(--accent); }
+.s15-input:focus:not(:focus-visible) { outline: none; }
+.s15-input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-color: var(--accent);
+}
+
+/* S15-5 期限ピッカー (readonly + icon) */
+.s15-readonly-with-icon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-secondary);
+}
+
+.s15-readonly-with-icon svg {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/*
+ * S15-6 カテゴリチップ ---------------------------------------------------
+ * LP-015 (正式昇格後初回適用):
+ * Selected 状態は border-color を --accent で残して WCAG 1.4.11 Non-text
+ * Contrast 3:1 を確保する。Stage 7-3: 色値は theme token 経由
+ * (var(--theme-color-accent) / var(--theme-color-bg)) で 4 テーマ全部 AA 担保。
+ * Unselected は border-strong で 3:1 以上を別途確保。
+ */
+.s15-category-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.s15-category {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: var(--tap-target-min);
+  padding: 12px 16px;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  font-family: var(--font-family-base);
+  transition: background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.s15-category-active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-weight: var(--font-weight-semibold);
+  border-color: var(--accent);
+}
+
+.s15-category-check {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.s15-category:focus:not(:focus-visible) { outline: none; }
+.s15-category:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* S15-7 + 最初のタスクを追加 ------------------------------------------- */
+.s15-add-task {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: var(--space-md) 0;
+  min-height: var(--tap-target-min);
+  letter-spacing: var(--letter-spacing-ja);
+}
+
+.s15-add-task svg { color: var(--accent); flex-shrink: 0; }
+
+.s15-add-task:focus:not(:focus-visible) { outline: none; }
+.s15-add-task:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* S15-8 CTA 作成 ------------------------------------------------------- */
+.s15-submit {
+  height: 52px;
+  width: 100%;
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  margin-top: var(--space-sm);
+  transition: opacity var(--duration-fast) var(--ease-out),
+              background var(--duration-fast) var(--ease-out);
+}
+
+.s15-submit[aria-disabled='true'] {
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
+  border: 1px solid var(--button-disabled-border);
+  cursor: not-allowed;
+}
+
+.s15-submit:focus:not(:focus-visible) { outline: none; }
+.s15-submit:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* LP-001 縮退 ---------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .s15-overlay, .s15-modal {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .s15-category, .s15-input, .s15-submit {
+    transition-duration: 1ms !important;
+  }
+}

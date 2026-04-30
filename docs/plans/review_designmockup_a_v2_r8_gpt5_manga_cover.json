@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "メイン見出し「最初のパートナーを選びましょう」",
+    "issue": "font-size:28px に対して font-weight:200 を使用。DSでは thin(200)は --font-size-2xl(36px)以上限定。",
+    "suggestion": "見出しは font-weight:600（--font-weight-semibold）+ line-height:1.35 を適用し、品格と可読性を担保。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "ゴール名見出し「副業で月10万円」",
+    "issue": "font-size:28px に対して font-weight:200 を使用。日本語見出しとして視線の停留が弱く、DSの見出し基準から逸脱。",
+    "suggestion": "font-weight:600 に変更（letter-spacing:-0.5px / line-height:1.35は維持）してタイトルの軸を強化。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "DESIGN_SYSTEM",
+    "screen": "ALL",
+    "location": "小ラベル/タブ/肩見出し（例: s10_grow「Explorer」12px、s30_me サブタブ12px など）",
+    "issue": "12pxテキストが各所で使用され、タイポスケール（11/14/16/20/28/36/48）から外れている。",
+    "suggestion": "役割別に統一: メタ/時刻=11px(--font-size-xs)、ラベル/タブ=14px(--font-size-sm)。全画面で12pxを排除しスケールに寄せる。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "サブタブ見出し「PROFILE/DISCOVER/FRIENDS/SHOP」",
+    "issue": "英字ラベルの letter-spacing が 0.5px。DSの英字ラベル推奨は 1.5px。",
+    "suggestion": "text-transform:uppercase 維持のまま letter-spacing を 1.5px（--letter-spacing-label）に統一。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Today セクション末尾 → Goals セクション見出し間",
+    "issue": "セクション間余白が margin-bottom:28px。DS §4.2の基準（セクション間≧32px）を満たしていない。",
+    "suggestion": "Todayブロックの余白を 32–40px に拡張し、呼吸感とZ字の視線遷移を確保。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "リンク「+ タスクを追加」",
+    "issue": "インラインリンク風スタイルだが下線がなく、DS §2.2の『インラインテキストリンクは必ず下線』要件に非準拠。",
+    "suggestion": "text-decoration:underline を付与するか、pillボタン（--accent-subtle 背景）に昇格してリンクとボタンの役割を明確化。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "OTHER",
+    "screen": "s10_grow",
+    "location": "Today 見出し直下の進捗テキスト",
+    "issue": "「1 / 4 completed」が英語混在で日本語UIの品位をわずかに損ねる。",
+    "suggestion": "「1 / 4 完了」にローカライズ（全角/半角の統一も合わせて検討）。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダル見出し「タスクを追加」",
+    "issue": "見出しが font-size:20px・weight:400で、本文とコントラスト（強弱）が弱い。",
+    "suggestion": "見出しは font-weight:600 に上げ、見出し-本文の階層差（太さのコントラスト）を明確化。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "タスク提案カードのボタン群（登録する/編集して登録/✕）",
+    "issue": "ボタン間のギャップが8pxでやや窮屈。小画面で視線が滞りやすい。",
+    "suggestion": "gap を12–16pxに拡張し、必要に応じて2行折返し許可（min-width と flex-wrap を調整）でリズムを改善。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

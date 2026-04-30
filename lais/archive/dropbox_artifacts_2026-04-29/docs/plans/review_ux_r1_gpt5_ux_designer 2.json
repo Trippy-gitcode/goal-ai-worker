@@ -1,0 +1,282 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §3.2.6 / ux §2.3（Undoスナックバー）",
+    "issue": "タスク完了のUndo許可時間が「30秒以内」（project）と「スナックバー表示3秒」（ux）で矛盾。3秒で消えるUIでは30秒の取り消しが実行不能。",
+    "suggestion": "Undo仕様を統一する。例: スナックバー表示5秒＋GROW画面上部に「最近の操作」アイコンから30秒内は履歴パネルで取り消し可能、またはUndo許可時間自体を5〜10秒に短縮しスナックバーのみで完結。仕様表と文言を全箇所で同期。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux §13.1 設定（メール変更/パスワード変更）",
+    "issue": "設定リストに「メール変更」「パスワード変更」項目があるが、対応する画面IDやUXフローが未定義（S-IDなし）。",
+    "suggestion": "S-42: メール変更、S-43: パスワード変更を追加し、入力・確認・エラー（弱いパスワード/既存メール/再認証要求）・成功トースト・戻り先を定義。Magic Link再認証フローも記載。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "project §5.4（ブロック機能） / ux §4.4（FRIENDS）",
+    "issue": "プロジェクト仕様にあるブロック/解除機能のUXフローが未定義。どこからブロックし、どのUIで解除するか不明。",
+    "suggestion": "S-35の「…」メニューに[ブロック]を追加（確認ダイアログ付き）。S-33に「ブロックしたユーザー」管理リンク（一覧/解除）モーダルを定義。ブロック時のUI（メッセージ不可・相互非表示）も注記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "project §5.5（通報機能） / ux §4.4（FRIENDS メッセージ）",
+    "issue": "各メッセージに通報ボタンを設ける要件がUXに未反映。ユーザーが通報経路を辿れない。",
+    "suggestion": "受信/送信メッセージバブルの長押しメニューに[通報]を追加。通報モーダル（理由選択＋任意テキスト）→送信→トースト。お知らせ一覧にも各項目の[通報]を設置。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux §1.1 S-16 / §2.4（ゴールタスク追加）",
+    "issue": "S-16（ゴールタスク追加）の入力項目・バリデーションが未定義。S-12相当と推測できるが差分（ゴール紐付け固定等）が明記されていない。",
+    "suggestion": "S-16のフォームをS-12と同一フィールド構成で定義しつつ、ゴール紐付けは固定表示（変更不可）、習慣は選べない、予定日デフォルトはゴール期限考慮等を明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux §1.1 S-13 / §2.3（タスク編集）",
+    "issue": "S-13（タスク編集）の具体UI・項目が明記されていない（S-12と同一か、編集不可項目があるのか不明）。",
+    "suggestion": "S-13はS-12と同一のフィールド構成で初期値を既存値で埋める、と明記。編集不可がある場合は項目ごとに理由と代替操作を定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux §8（アニメーション）/ project §3.2.6",
+    "issue": "タスク完了・レベルアップ・ゴール達成・冒険EXPが同時に発火した場合の優先順位やシーケンスが未定義。演出競���や同時再生での可読性低下が懸念。",
+    "suggestion": "グローバル演出キューを定義（優先度: レベルアップ > ゴール達成 > 冒険EXP > タスクEXP）。各演出はシーケンシャル再生し、バナーは重ねず順番に表示。最大演出時間上限も設定。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux §7.3 / §1.4（戻りナビゲーション）",
+    "issue": "「iOS風」と記載しつつ、戻りジェスチャーが右端→左スワイプになっておりiOS標準（左端→右スワイプ）と逆。TALKでは左端スワイプがドロワー展開に割当てられており一貫性が崩れる。",
+    "suggestion": "iOS準拠に合わせて戻りは左端→右スワイプに統一。TALKのドロワーはヘッダー☰のみで開くか、左端スワイプ優先度を「戻る＞ドロワー」に変更（ドロワーは中間スワイプ開始位置に制限）。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §4.5（EXP上限）/ ux §2.3（タスク完了）/ §9（エラー系）",
+    "issue": "日次EXP上限到達時にタスク完了は成功するがEXPは増えないケースのUI��ィードバックが未定義。",
+    "suggestion": "サーバー応答で上限到達を検知した場合は「タスクは完了。今日のEXP上限に達しました」トーストを表示し、EXPフロート/バー伸長は抑止。初回到達時のみ説明モーダルで詳細を表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §4.4 S-36（QRスキャン）",
+    "issue": "カメラ権限拒否時の代替UI・導線が未定義（許可再要求/手動許可誘導/画像から読み取りの可否）。",
+    "suggestion": "権限拒否時はフルスクリーン案内（許可手順リンク/再試行ボタン/シェアリンク貼付フィールド）。代替として「画像から読み取る」オプション（ギャラリー選択→QR解析）も定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §2.4（ダウングレード予約表示） / ux §13.1（設定）",
+    "issue": "プロジェクト仕様で「設定に変更予定バナー表示」とあるが、UXの設定画面にその要素がない。",
+    "suggestion": "S-37設定の上部にバナー「○月○日から{プラン}に変更予定 [キャンセル]」を追加���S-38の予約バナーと文言・挙動を統一。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux §2（GROWリスト）/ project §7.4（データ上限）",
+    "issue": "タスク/ゴールの大量データ（上限: タスク1万件、ゴール100件）に対するリスト仮想化・ページングの記載がなく、描画/スクロール性能低下の懸念。",
+    "suggestion": "Today/Goalsにリスト仮想化（windowing）を導入。Goalsは折りたたみ/検索。過去日タスクは非同期ロードにし、初期レンダリング件数上限を設ける。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §7.4（ドラッグ並び替え）/ §2.3（時刻ソート）",
+    "issue": "手動並び替えと開始時刻による自動ソートの優先関係や維持期間が未定義（翌日への引継ぎ/時刻編集時のリセットなど）。",
+    "suggestion": "Todayは「並び替え優先」フラグをタスク単位で保持。開始時刻編集時は並び替え優先フラグを解除する等のルールを明記。翌日はデフォルトで時刻ソートに戻す。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §3.3/§3.4（タスク提案カード/冒険EXPカード）",
+    "issue": "同一メッセージで「タスク提案」と「冒険EXP検出」が同時発生した際の表示順/同時出現の扱いが未定義。",
+    "suggestion": "表示順を「AI応答 → 冒険EXPカード → タスク提案カード」に統一。複数カードはアコーディオン化し、上限2枚まで同時表示、以降は『他1件』で折りたたみ。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project §7.3（オフラインEXP方針）/ ux §8.1（タスク完了演出）",
+    "issue": "オフライン時はEXP演出を出さない方針だが、UXの演出仕様にオフライン分岐が明記されていない。",
+    "suggestion": "オフライン完了時は「同期待ち」バッジをタスク行右端に表示し、オンライン同期後にまとめてEXP演出の簡易版（テキストのみ）を実行する、と明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §4.4（FRIENDS お知らせ/メッセージ受信）",
+    "issue": "受信一覧の各項目操作（既読化/削除/通報/ブロックへの導線）が未定義。大量受信時の管理性が不足。",
+    "suggestion": "受信一覧にスワイプ操作（左: 削除/右: 既読）と溢れメニュー（…）を追加し[通報][ブロック]を配置。既読/未読フィルタと一括既読も用意。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project §3.2.5（JST 4:00リセット）/ ux 全体",
+    "issue": "全ユーザー一律JST 4:00リセットは海外ユーザーで混乱の恐れ。UX上の説明と誤認防止が必要。",
+    "suggestion": "S-37設定に『日次リセット: 04:00 JST』表記とヘルプリンクを追加。GROWのログインボーナス/日次サマリーにも同文言をツールチップで提示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §3.1（TALKヘッダー）/ §3.5（履歴）",
+    "issue": "TALKヘッダーに☰と🕐の二重導線があり、両者が同じS-21を開くのか役割差があるのか不明瞭。",
+    "suggestion": "アイコンを1つに統合（☰のみ）し、アクセシビリティラベルを『履歴と新規チャット』など機能名に変更。📝（新規）は右側に維持で��割分離。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux §3.5（履歴スワイプ削除）/ §10（アクセシビリティ）",
+    "issue": "会話削除がスワイプ依存で、キーボード/スクリーンリーダー利用者には操作困難。",
+    "suggestion": "履歴ドロワー上部に[編集]を設置し、チェックボックスで複数選択→削除を可能に。各行にも『削除』ボタンをフォーカス可能要素として提供。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §1.1 S-41 / §4.2（アバター設定リンク）",
+    "issue": "S-41（アバター設定）の具体的UI/機能が未定義（MVPでフレーム装備が可能とあるがUXに記述なし）。",
+    "suggestion": "S-41を定義（プレビュー/装飾一覧/装備・外す/保存）。MVPは『限定フレーム1種』の装備トグルのみで可。未所持時のプレースホルダーも記載。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux §11.2（小型端末ラベル短縮）",
+    "issue": "MEサブタブラベルを「DISC」に短縮すると意味が��わりにくい可能性。",
+    "suggestion": "テキスト短縮の代わりにアイコン＋短縮ラベル（例: プロフ/発見/友達/ショップ）へ。もしくはタブ自体を横スクロール可能に。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §1.1 S-01/02（サインアップ/ログイン）",
+    "issue": "入力エラー（弱いパスワード/既存メール/無効メール）や『パスワードを忘れた』/Magic LinkログインのUXが未定義。",
+    "suggestion": "S-01/02にインラインエラー文言/状態、[パスワードを忘れた]→メール送信→成功/失敗トースト、Magic Link案内（利用可能なら）を追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux §4.4 S-35（友達詳細＞友達をやめる）",
+    "issue": "友達解除で『双方のメッセージ履歴削除』が仕様にあるが、確認ダイアログ文言にその重要情報が含まれていない。",
+    "suggestion": "確認文言を『友達関係と双方のメッセージ履歴が削除されます。この操作は取り消せません』に変更。実行後の戻り先（S-33）も明示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §6.1（ハーフモーダル）/ §2.3/§2.4（フォーム）",
+    "issue": "キーボード表示時にハーフモーダルの[作成]/[保存]ボタンが隠れる可能性への対応が未定義。",
+    "suggestion": "モーダル下部に安全領域を確保し、キーボード開時はCTAを固定（sticky footer）に。visualViewportで余白調整・フォーカス時自動スクロールも定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §3.2（画像添付）",
+    "issue": "複数画像の同時添付可否、サイズ超過/非対応形式時のユーザーフィードバックが未定義。",
+    "suggestion": "複数添付は最大3枚などの上限を定め、各エラー（>10MB/非対応拡張子）はインラインエラー＋トースト。リサイズ中のローディング表示も追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-026",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §4.2（ゴール完了7日ルール）/ ux §2.4（ゴール詳細）",
+    "issue": "『作成から7日未満に全タスク完了→完了待ち』状態のUIがゴール詳細/Goals���覧に未定義。",
+    "suggestion": "ゴール詳細/一覧に『完了待ち（あとN日）』バッジを追加し、完了ボタンは無効化（理由ツールチップ付与）。完了時の自動反映も記述。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-027",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux §4.3（DISCOVER 強み/弱みチップ）/ §4.1（サブタブ横スワイプ）",
+    "issue": "DISCOVERの横スクロールチップ操作とMEサブタブの横スワイプが競合し、意図せずタブ切替が起こる恐れ。",
+    "suggestion": "サブタブ横スワイプの開始領域を左右端20pxに限定、または水平方向スクロール可能要素上ではタブスワイプを無効化。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §2.2（ヒーロー縮小時のEXP/レベル表示）",
+    "issue": "極小端末でEXPバーが薄く読みにくくなるリスク。視認性要件が未明記。",
+    "suggestion": "最小バー高さを6px以上・数値は常時表示（例: 1,240/2,000）。コントラストAA準拠をdesign_systemで保証。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

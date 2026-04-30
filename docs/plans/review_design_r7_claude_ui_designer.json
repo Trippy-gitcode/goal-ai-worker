@@ -1,0 +1,5 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"MISSING","location":"§9 CSSトークンブロック","issue":"v0.7時点で §9 はまだ Night Sky のみの完全版で、他 3 テーマは §5.2〜5.4 に分散。実装者向けのクイックリファレンスが未提供。","suggestion":"§9 末尾に4テーマ主要トークン一覧表を追加。","model":"Claude Opus 4.6","persona":"ui_designer"},
+  {"id":"R-002","severity":"MEDIUM","category":"MISSING","location":"§8.11 スケルトン","issue":"スケルトンのバリエーション（text/avatar/card）がまだ未定義。","suggestion":"§8.11 に形状バリエーションを追加。","model":"Claude Opus 4.6","persona":"ui_designer"},
+  {"id":"R-003","severity":"LOW","category":"BEST_PRACTICE","location":"§3.3 line-height トークン","issue":"新設の line-height トークンを既存の §8.1 ボタン等が参照していない。line-height 適用箇所が散在して実装者が迷う。","suggestion":"§8 各コンポーネントに適用すべき line-height トークンを明記。","model":"Claude Opus 4.6","persona":"ui_designer"}
+]

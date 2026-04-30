@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.5",
+    "issue": "ヘッダー例の依存パスが本文のファイル命名と不一致（例: docs/plans/lais_project_v1.md）。§19.1では docs/project_v1.md を採用しており整合しない。",
+    "suggestion": "依存の記載例を docs/project_v1.md v1.3 に統一し、全セクションの例示・参照をこの命名規則に合わせて修正する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.6 vs §18",
+    "issue": "UX仕様書の名称が§19では ux_v1.md、§18では ux_redesign_v*.md と不一致。依存チェーンや連鎖更新マップで混乱を招く。",
+    "suggestion": "UX仕様書の正式名称を一方に統一（推奨: docs/ux_v1.md）。§18の依存関係マップと他セクションの表記も一括更新し、旧名はエイリアス注記を追記する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（design_spec_v1.md テンプレート）",
+    "issue": "画面デザイン仕様に状態定義（hover/focus/active/disabled/検証エラー時など）が欠落。G9スクショ判定の期待が曖昧になる。",
+    "suggestion": "「§N+3 インタラクション・状態定義（hover/focus/active/disabled/validation）」を追加し、各コンポーネントの状態別スタイル・トランジションを必須化する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（reference_v1.md テンプレート）",
+    "issue": "API横断の共通規約（エラーフォーマット、ページネーション、バージョニング、冪等性キー、タイムアウト/再試行/レート制限）が未定義で、実装・テスト整合が崩れる恐れ。",
+    "suggestion": "「§0 API共通規約」を新設し、(1) エラーレスポンスの標準形、(2) ページネーション/フィルタ/ソート規則、(3) APIバージョニング方針、(4) 冪等性キーと再試行、(5) タイムアウト/レート制限/バックオフ、(6) 認可/権限の標準ヘッダを明記する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（system_map.md テンプレート）",
+    "issue": "失敗時の分岐（リトライ/バックオフ/フォールバック）、タイムアウト、デグレード���用のフローが未記載。",
+    "suggestion": "「§5 失敗時フロー/リトライ戦略/フォールバック」を追加し、API失敗・タイムアウト時の分岐、最大試行回数、ユーザー通知、監視イベント送出を明記する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（project_v1.md テンプレート）",
+    "issue": "データプライバシー/コンプライアンス（GDPR/PII保持期間/削除SLA/監査ログ）の明確なセクションがない。",
+    "suggestion": "「§11 データプライバシー/コンプライアンス」を追加し、法令準拠、データ保持・削除、監査ログ方針を定義する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（ux_v1.md テンプレート）",
+    "issue": "各画面での空状態/ローディング/権限制限表示の記述がテンプレート上必須化されていないため、実装・テストで抜けがち。",
+    "suggestion": "各「§3-N 画面ごとのUXフロー」に必須の小見出し（空状態/ローディング/権限制限）を追加し、スクショ要件と否定検証を明記する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4（e2e_fullflow_test.md テンプレート）",
+    "issue": "SPEC-IDおよび差別化ポイントへのトレーサビリティがテンプレートに含まれず、§12のID体系と結びつかない。",
+    "suggestion": "「§0 トレーサビリティ」を追加し、各テストケースに対応するSPEC-IDと（該当する場合）差別化ポイントIDを必須列として持つカバレッジ表を導入する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存」フィールドが単一/自由記述に見え、複数依存の機械可読性が不足。§1.1の機械可検証原則に対して脆弱。",
+    "suggestion": "YAMLフロントマター形式を採用し、dependencies: [{path: docs/ux_v1.md, version: \">=1.2 <2.0\"}, ...] の配列で宣言。canopyに依存整合チェック（存在/バージョン範囲/循環）を追加する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.6 参照表記法",
+    "issue": "他ファイル参照の相対基準（リポジトリルート or 当該ファ���ルからの相対）が未定義で、リンク切れや探索コストが発生。",
+    "suggestion": "参照はリポジトリルート相対パスで統一（例: docs/project_v1.md §3.2）。ヘッダーの依存と一致させることを必須化する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.6 禁止/連鎖更新",
+    "issue": "循環参照や未バージョン依存の禁止は規範のみで、自動検出手段が定義されていない。",
+    "suggestion": "dependency_check.sh（docs配下を走査しヘッダ依存をグラフ化→循環/未定義/バージョン不整合を検出）を追加し、canopyに組み込む。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.7 ベンチマーク要件",
+    "issue": "要求は直接5社+間接3社（計8）だが、マトリクス例は競合A〜E（5列）で間接競合の扱いが不明確。",
+    "suggestion": "マトリクスを可変列にするか、直接/間接で表を分離。列ヘッダに実アプリ名を入れる前提とし、テンプレ側は列数固定をやめる。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7（Phase 0 完了基準） vs §13.4",
+    "issue": "「8ペルソナ×2モデル」の要件が§13.4（標準5ペルソナ）と不一致。実務上の完了基準が曖昧。",
+    "suggestion": "「標準5ペルソナ×2モデル（必要に応じて追加ペルソナを定義可）」などに統一し、追加ペルソナ要件がある場合は定義と根拠を明記する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7 調査項目",
+    "issue": "「DL数」はiOS等で公的に取得困難な場合があり、実務上の収集が詰まるリスク。",
+    "suggestion": "DL数が取得不可の場合はランキング/MAU推定/レビュー件数など代替指標の許容を明記し、列名も「DL数/代替指標」に変更する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7 出力フォーマット",
+    "issue": "Markdown表のみで機械可検証が難しい。ベンチマーク完了基準（5+3社/Lais方針/差別化3点）の自動チェックができない。",
+    "suggestion": "docs/benchmarks/*.json または .csv を必須添付し、調査対象/項目/分類（同等/未対応/差別化）/対応セクションを構造化保存。canopyで件数・必須列・差別化≥3を検証する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダーに更新日/改訂履歴リンク/レビューIDがなく、変更トレーサビリティが弱い。",
+    "suggestion": "「更新: {日付}」「変更履歴: docs/spec_changelog.md#anchor」「レビューID: review_yyyymmdd.json」等のメタを追加する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（design_system.md テンプレート）",
+    "issue": "アクセシビリティに関する設計トークン（コントラスト、最小文字サイズ、フォーカスリング/アウトライン、reduce motion対応）が不足。",
+    "suggestion": "「§9 アクセシビリティトークン/ガイドライン」を追加し、AA/AAA目標、フォーカス可視化、メディアクエリ(prefers-reduced-motion)方針を定義する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.6 参照表記法",
+    "issue": "「dev-system §4.7準拠」の参照にバージョン/コミットが含まれず、dev-system更新で意味が変動する恐れ。",
+    "suggestion": "「dev-system v{VERSION} §4.7準拠（.dev-system.versionに一致）」の形式に統一し、コミットハッシュまたはタグを明記する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.6 参照更新",
+    "issue": "セクション番号参照（§3.2など）は改訂でズレやすい。安定ID（アンカー/SPEC-ID）併記がない。",
+    "suggestion": "参照は「ファイル名 + セクション番号 + 安定アンカー（もしくはSPEC-ID）」の併記を必須化し、アンカー命名規則を定義する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "「dev-system準拠」の参照先パスがアプリリポジトリ内に存在しない可能性が高く、リンク切れを招く。",
+    "suggestion": "dev-systemへの参照はリポジトリURL（特定タグ）または相対参照方針（DEV_SYSTEM_DIR起点の仮想パス+バージョン）に変更し、クリック可能なリンク形式を推奨する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

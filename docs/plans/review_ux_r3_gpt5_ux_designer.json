@@ -1,0 +1,302 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "project §4.4, §4.5; ux §\"project_v1.md 内部矛盾\"",
+    "issue": "レベル計算について「次Lv必要EXP=100+(Lv-1)×50」と「Lv.1→2=1,000EXP」が矛盾。UX側は100EXPを前提に書かれているが、project側の数値が残存し実装判断が割れる。",
+    "suggestion": "project §4.5の「Lv.1→2=1,000EXP」を削除/修正し、式とテーブル（Lv1→2=100）に統一。UX §8.2の演出トリガー条件も最終値に合わせて相互参照リンクを付与。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §2.3 タスク完了/Undo, §9.1 オフライン; project §7.3 オフラインEXP方針",
+    "issue": "オフライン時のタスク完了UIとUndoの詳細が未定義。projectでは「EXPは表示しない/同期待ち」とあるが、UXはオンライン前提の楽観更新＋失敗時巻き戻しのみ定義で不一致。",
+    "suggestion": "オフライン分岐を明記: ①⭕タップでチェック入る＋行に「同期待ち」バッジ、Undoは30秒間ローカルで有効。②EXP演出は抑止し、ヒーロー領域に「EXP 同期待ち」トースト。③同期後: 上限超過で不付与の場合は静かなインフォトースト「今日の上限によりEXPは付与されませんでした」。巻き戻しはタスク状態に対しては行わないことを明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux §2.4 ゴール達成後のUndo",
+    "issue": "「ゴール達成ボーナスは1日1回制限。同日中に再度完了した場合はボーナス再付与可」の記述が相互に矛盾し、サーバー側の日次制限と整合しない可能性。",
+    "suggestion": "ルールを厳密化: 「30秒の仮確定中にUndoした場合は未付与扱い。1日あたり“確定付与”が未発生のときのみ当日中の再完了で付与可」。UI文言も「取り消し中は付与されません」に統一。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project §3.3.1 会話→タスク化; ux §3.3 タスク提案カード",
+    "issue": "projectでは「不要」選択で“同文脈での再提案抑制”を学習するとあるが、UXのカードは[✕]のみで一時非表示に見える。学習/抑制の意味がUIから伝わらない。",
+    "suggestion": "カードの[✕]を[不要]に変更しツールチップ/補足文「この話題では今後提案しません」を表示。さらに[頻度を下げる]のサブアクションも検討。設定で提案リセットができる場所（S-39等）も追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux §4.1/§4.3 サブタブスワイプと横スクロールUI",
+    "issue": "MEのサブタブ横スワイプと、DISCOVERの横スクロール（強み/弱みチップ）がジェスチャー競合する恐れ。内側スクロール時にタブ切替が誤発火しうる。",
+    "suggestion": "子要素（横スクロール領域）で一定距離（例: 8px以上）の横移動検出中は親のタブスワイプを一時無効化。スワイプ開始閾値（横>縦×1.5）を導入し誤検出を低減。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §4.4 FRIENDS > S-36 QRスキャン",
+    "issue": "カメラ許可拒否/再許可案内、端末非対応、暗所や未検出時のハンドリングが未定義。",
+    "suggestion": "許可拒否時は案内モーダル「設定アプリでカメラを許可」＋[ヘルプ]。非対応端末は「画像から読み���む」代替導線。未検出時はタイムアウト/リトライ、照明ONのヒントを表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §3.2 画像添付; project §3.3 画像仕様",
+    "issue": "添付画像のエラーハンドリング（>10MB、非対応形式、リサイズ/アップロード失敗）が未定義。ユーザーに原因が伝わらない可能性。",
+    "suggestion": "インラインエラーを定義: ①10MB超→「10MB以下にしてください」②形式不正→「対応形式: JPG/PNG/GIF/WebP」③アップロード失敗→[再試行]ボタン付き。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §2.4 S-14 ゴール詳細",
+    "issue": "ゴール削除時の挙動（紐づく未完了/完了タスクの扱い）が未定義。データ消失や意図しない残骸のリスク。",
+    "suggestion": "削除確認にオプションを明示: ①関連タスクも削除 ②タスクを保持しゴール紐付け解除（デフォルト推奨）。選択内容を最終確認に表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux §3.1 TALKヘッダー, §3.5 履歴",
+    "issue": "TALKヘッダーに☰（ドロワー）と🕐（履歴）の2つが存在し役割が重複。どちらが何を開くか直感で判別しにくい。",
+    "suggestion": "どちらかに統一。例: ☰=履歴ドロワー、📝=新規のみ。🕐は削除。あるいは🕑=最近開いた会話（モーダル）など役割差別化をUI文言とツールチップで明示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux §1.1 画面ID, §3.3 タスク提案インライン編集",
+    "issue": "S-12（タスク追加）をハーフモーダルとして定義しつつ、TALK内で“インラインパネル”としてもS-12相当と表現。テスト/解析で識別困難。",
+    "suggestion": "インライン編集用に新ID（例: S-22 タスク編集（インライン））を付与し、コンポーネント共有/差異（アニメ/レイヤー）を明文化。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux §1.4 戻りナビゲーション",
+    "issue": "ブラウザバック時の「ボトムタブ間: 前タブへ」はWeb慣習と異なり予期せぬ戻り挙動の可能性。",
+    "suggestion": "historyには“タブ切替”を積まないのが一般的。戻る=モーダルクローズ/前画面遷移のみとし、タブ切替は状態復元に留めるポリシーを明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §3.5 履歴ドロワー",
+    "issue": "「新しいチャット」の作成フロー/命名規則（自動タイトル/編集可否）が未定義。履歴リストの可読性に影響。",
+    "suggestion": "初回AI/ユーザー発言の先頭数語で自動タイトル生成＋長押しでリネーム。新規作成時は入力バーに『新規チャットを開始しました』トーストで状態認知を補助。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §4.4 FRIENDS（お知らせ）",
+    "issue": "「お知らせ」受信一覧のUI（並び順、グルーピング、既読化、最大件数/大量時のページネーション）が未定義。",
+    "suggestion": "お知らせ一覧を時系列で表示し、最大200件まで無限スクロール。既読はタップ/一覧表示時に自動化。種別フィルタ（応援/メッセージ）を追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux §4.4 FRIENDS",
+    "issue": "最大500人の友達リストに検索/ソートがなく目的の相手が見つけづらい恐れ。",
+    "suggestion": "名前検索バーとソート（最近のやり取り/レベル順/名前順）を最上部に追加。スクロール仮想化（virtualized list）でパフォーマンスを確保。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux §7.4 タスク並び替え, §6.5 Pull-to-refresh",
+    "issue": "Today内のドラッグ並び替えとPull-to-refreshのジェスチャー競合リスク。",
+    "suggestion": "ドラッグ開始はロングプレス（既定500ms）＋縦移動閾値を導入し、ドラッグ中はPTRを無効化。ヘルプトーストで「長押しで並び替え」を初回提示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §8.6 演出キュー",
+    "issue": "タスク完了/ゴール/レベル以外（ログインボーナス、冒険EXP）の同時発火優先順位が未定義。重畳表示の順序で混乱の恐れ。",
+    "suggestion": "優先度を明記: 1) タスク完了 2) ゴール達成 3) レベルアップ 4) 冒険EXP 5) ログインボーナス。上記がTalk/Grow間で発火した場合の遅延再生ルールも補足。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux §2.2 ヒーロー領域（小型端末）",
+    "issue": "Lv/EXP/称号を1行圧縮表示にすると可読性が低下する可能性がある。",
+    "suggestion": "ヒーロー領域をタップで一時拡張（詳細オーバーレイ表示）するマイクロインタラクションを追加。数値の桁区切りとアイコンラベルで視認性を補強。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux §6.2 トースト, §2.3 Undoスナックバー",
+    "issue": "Undoは「スナックバー（30秒）」、トーストは「3〜5秒」と別定義だが、用語/コンポーネント差異が明確でない。",
+    "suggestion": "用語統一: Undoは“Snackbar”コンポーネント（固定30秒/アクション付き）、トーストは“Toast”（短時間/通知）として明示し、同時表示時のスタック優先順位も定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §2.3 Upcoming��スク",
+    "issue": "「7日以降 (N件)」タップ後の全一覧表示のスコープ/表示方式が曖昧（全件展開？別画面？）。大量将来タスク時の可視性に影響。",
+    "suggestion": "別画面（S-17: タスク一覧/カレンダー）を定義し、無限スクロール/日付フィルタで管理。なければハーフモーダルで“今後30日”に制限を明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §7.3 エッジスワイプ",
+    "issue": "TALKの左端→右スワイプでドロワー展開は、iOSの戻るジェスチャーと混同の恐れ（PWAで抑制方針は記載済みだが発火閾値が未定義）。",
+    "suggestion": "左端20px以内開始＋水平移動15px以上でのみドロワー発火など、閾値を数値で明記。戻ると競合しないガードを仕様化。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §4.4 FRIENDS > メッセージ送信",
+    "issue": "オフライン時のメッセージ送信挙動が未定義（入力可否、再送キュー、失敗時のUI）。",
+    "suggestion": "オフラインは入力可/送信不可（送信ボタン無効化＋バナー表示）。送信押下時はローカルキュー保存と再送アイコン（時計）を表示、復帰時に自動送信/失敗時は[再送]。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §3.5 履歴ドロワー",
+    "issue": "履歴0件の空状態が未定義。",
+    "suggestion": "空状態カード「まだ会話がありません」＋[新しいチャット]ボタン＋チップ（今日の予定/目標/気分）を履歴ドロワー上部に表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §10 アクセシビリティ（チップ/タブ）",
+    "issue": "横スクロールするチップ群のフォーカス移動（Tab/矢印キー）やロービジョン支援の詳細が未定義。",
+    "suggestion": "ロービングtabindexを採用し、左右矢印でチップ移動、Home/Endで先頭/末尾、スクリーンリーダー向けにグループラベル（role=\"listbox\"）を付与。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project §3.2.5 日次リセット(JST 4:00); ux §9.3 上限到達バナー",
+    "issue": "全ユーザー一律JST 4:00リセットは海外/出張ユーザーで混乱の恐れ（週N回習慣の判定もJST基準）。UI内での明示が限定的。",
+    "suggestion": "関連UI（上限到達、週N回の進捗、日次サマリー）で常に『JST 04:00』を併記。習慣設定画面に“週の区切り: 月曜 04:00 JST”の注記を追加。v0.2でローカルTZ対応ロードマップを明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §7.4 タスク並び替え",
+    "issue": "開始時刻ソートを手動並び替えで上書き可能だが、もとに戻す操作がない。",
+    "suggestion": "Todayヘッダーに「並び順をリセット（開始時刻順）」アクションを追加。現在の並び基準を小さく表示し、ユーザーのメンタルモデルを補助。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-026",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §2.1/§2.2 EXPバー演出, §8.1",
+    "issue": "連続タスク完了（短時間に複数）時のEXPバー伸長/フロートテキストのキュー処理が未定義。演出衝突や取りこぼしの恐れ。",
+    "suggestion": "タスク単位でFIFOキューに積み、EXPバー伸長は直列、フロートテキストは最大同時3件までスタッガー表示（100ms間隔）とするルールを追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux §2.3 タスク行: ゴールドット",
+    "issue": "タスク行の「ゴール色ドット」の凡例がなく、色の意味（どのゴールか）が初見では伝わりにくい。",
+    "suggestion": "初回ツールチップ「色=紐づくゴール」を表示。長押しで当該ゴール名ツールチップ/ジャンプ（S-14）を提供。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §3.4 冒険EXP（TALK）",
+    "issue": "冒険EXPカードの「誤検出時」のユーザー側復旧（フィードバック/異議申し立て）が未定義。",
+    "suggestion": "カードの[誤検出を報告]リンク（小）を用意し、将来の精度改善に活用。報告はローカルで学習抑制にも反映。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-029",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §10.4 スクリーンリーダー, §2.3 Undo",
+    "issue": "30秒Undoの残り時間が視覚のみ。スクリーンリーダー利用者への時間警告が不足。",
+    "suggestion": "aria-liveで「取り消しは残りN秒です」を10秒/5秒/終了時に通知。Snackbarに明示テキストを含める。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-030",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux §0 UXベンチマークの活用",
+    "issue": "ベンチマークの「パフォーマンス不満（Habitify）」対策は非機能要件で触れているが、UIスケール（500友達/大量カード）時の具体UI最適化（バーチャルリスト等）がUX側に十分反映されていない。",
+    "suggestion": "大量表示箇所（FRIENDS、DISCOVERカード）でリスト仮想化/遅延レンダリングを明記し、パフォーマンス改善のUIパターンを§6 共通UIに追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

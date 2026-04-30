@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§5 テーマ切替",
+    "issue": "R3 で指摘したテーマ切替アニメーションの定義が未反映。設定画面でテーマを選んだ瞬間、瞬時に色が変わるのか、フェードするのか不明。Habitica で色がパッと変わると酔った経験がある。",
+    "suggestion": "§5.0 に『テーマ切替時はルート要素の背景色を --duration-normal で ease-out フェード。CSS transition: background-color --duration-normal --ease-out を :root に付ける』と明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§3 タイポグラフィ",
+    "issue": "R3 で指摘した 11px 小フォントの視認性問題が未反映。屋外や弱視ユーザー向けの配慮がまだない。",
+    "suggestion": "§3.2 の 11px の用途を『キャプション・時刻のみ、本文や重要情報には使用禁止』と制約を明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§8.4 OVERDUE",
+    "issue": "R3 で指摘した『怒られ感』がまだ強い。赤＋感嘆符＋左バー 3 段構えは罰則的。Finch 的な優しい UI を期待するユーザーは離脱しやすい。",
+    "suggestion": "OVERDUE のトーンを『期限を過ぎたお知らせ』程度に柔らかくし、アイコンも ! ではなく時計アイコンに変更する選択肢を §8.4 に追記。",
+    "model": "Claude Opus 4.6",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§8.8 トグルスイッチ",
+    "issue": "トグルの ON/OFF は色だけでなくサムの位置でも区別されるが、ON 状態の色が各テーマ primary bg（Night Sky の青、Dawn のテラコッタ、Harajuku の濃いピンク）で、『これが ON/OFF どっちだっけ？』と迷うユーザーがいる。",
+    "suggestion": "§8.8 に『ON 時はサムが右、OFF 時はサムが左』という普遍的な位置ルールを明記し、色変化に依存しない状態表現を補強。",
+    "model": "Claude Opus 4.6",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": "R3 で指摘したトグルの説明・プレビュー要件は未反映。『なんか半透明になる』くらいしかユーザーに伝わらない。",
+    "suggestion": "設定画面内にミニプレビュー（カード 1 枚）を置き、トグル切替時にリアルタイムで見え方が変わる仕様を §5.5 に追記。",
+    "model": "Claude Opus 4.6",
+    "persona": "target_user"
+  }
+]

@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1/§19.4/§19.6 vs §12/§18/§10(sub_adv_protocol §10)",
+    "issue": "UX仕様書のファイル名が「ux_v*.md」（§19系）と「ux_redesign_v*.md」（§12・§18・sub_adv_protocolの一覧）で不一致。参照統一が崩れている。",
+    "suggestion": "UX仕様書の正式名称を「docs/ux_v*.md」に統一（推奨）し、§12のサンプルgrep、§18の依存マップ、sub_adv_protocol §10の一覧を一括置換。別名を許容する場合はエイリアス規約と機械可検証ルール（どちらか片方のみ存在）を追記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存」メタデータがプレーンテキスト1行想定で、複数依存・機械可読性・バージョン拘束の表現に乏しい。依存チェーン運用（§19.6）と齟齬。",
+    "suggestion": "全仕様書ヘッダーをYAML Front Matterに変更し、dependenciesを配列で定義: dependencies: [{file: docs/project_v1.md, version: \">=1.3 <2.0\"}, ...]。あわせてcanopy用のlint（spec_header_lint.sh）を追加して、未バー���ョン・未解決参照・循環を検出。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの「dev-system準拠: docs/plans/dev_system_spec.md §19」はアプリ側リポジトリ構成と乖離（アプリにはdev-system本体が存在しない）。パスが曖昧。",
+    "suggestion": "ヘッダー項目を dev_system: { version: 3.0, section: \"§19\" } に変更し、参照はバージョンpin（.dev-system.version）と論理参照に統一。物理パスは不要。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4（全テンプレート）/ §19.6",
+    "issue": "テンプレートの節番号運用が不統一（project/design_system/uxは§0開始、design_spec等は§1開始）。また§19.6は「§3.2参照」等の小数表記例を示すがテンプレートに下位節の規約がない。",
+    "suggestion": "共通ルール: すべての仕様書は§0=概要/ベンチマーク、§1以降を本編。下位節は§N.M形式を許容する旨を明記し、テンプレートに見出しレベル例（H2=大項、H3=小項）を追記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4 e2e_fullflow_test.md",
+    "issue": "パフォーマンステストの定義はあるが、閾値や判定方式（成功基準/計測メトリクス/端末条件）が未定義で実行可能性が低い。",
+    "suggestion": "§N+2 パフォーマンステスト配下に必須項目を追加: 指標(KPIs: FCP/TTI/API p95等)・閾値・計測方法（コマンド/ツール）・対象環境（端末/ネットワーク）・許容誤差・失敗時の対応。例: cmd: lighthouse-ci --preset=mobile → JSONしきい値判定。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md",
+    "issue": "API仕様/データモデル/セキュリティはあるが、運用・可観測性（監視項目/SLO/レート制限/監査ログ/バージョニング方針）が散逸または未定義。",
+    "suggestion": "以下の小節を追加: §7 可観測性（メトリクス/ログ/トレース/SLO）、§8 レート制限/スロットリング、§9 APIバージョニング/互換性ポリシー。必要に応じて§5（セキュリティ）から監査ログの詳細を分離。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "「直接競合5社+間接3社」要件に対し、マトリクスが固定5列（A〜E）でスケールしない。出典URL/地域/期間の指定もなく再現性が低い。",
+    "suggestion": "出力フォーマットを拡張: 1) 調査対象テーブルにID/URL/地域/OS/集計期間/データ出典列を追加。2) マトリクスは列を競合IDで可変化（5社超を許容）。3) 差別化表の「対応セクション」は『{ファイル} §{節}』形式を必須。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7 vs §13.4",
+    "issue": "AIレビューのペルソナ数が§13.4で標準5ペルソナ、§19.7で「8ペルソナ×2モデル」と矛盾。",
+    "suggestion": "統一方針を明示: 例）標準5ペルソナ必須 + 追加3はプロジェクト任意（合計最大8）。「×2モデル」要件は任意に格下げ、適用条件を記載。該当箇所を同一表現に更新。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "ベンチマーク完了基準（競合数/Lais方針記入/差別化≥3）に対する機械検証がないため、実務で抜けやすい。",
+    "suggestion": "bench_lint.shを追加し、Markdown（またはYAML）から1) 直接≥5/間接≥3社、2) 全行Lais方針非空、3) 差別化≥3件、4) 出典URL/調査日必須 を検証。canopyでFAILに組み込み。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.7",
+    "issue": "App Storeレビュー分析のスコープ（国/期間/言語/抽出件数/分析手法）が未定義で、結果のばらつきが大きくなる。",
+    "suggestion": "調査プロトコルを追加: 国=JP/US、期間=直近90日、ストア=App Store/Google Play、抽出件数=各50レビュー以上、サンプリング/重複排除手順、分類タグ定義（離脱要因/継続要因）を明文化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.1 tests/test_meta.json vs sub_testing §8",
+    "issue": "§19.1はtest_meta.jsonに「最終実行日時・PASS/FAIL/SKIP数・カバレッジ」等を含むと記述する一方、テンプレート（sub_testing §8）はexpected_total等のみ。期待スキーマが不一致。",
+    "suggestion": "どちらかに統一。推奨: sub_testing §8のテンプレートを拡張し、last_run/last_pass/last_fail/last_skip/coverage等の任意項目を追加、G3はexpected_totalのみを強制チェックと明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 design_spec_v1.md",
+    "issue": "画面デザイン仕様テンプレートにアクセシビリティ状態（フォーカス/ホバー/コントラスト）や国際化（文字数膨張時）の画面差分ガイドがない。",
+    "suggestion": "「§N+3 状態別/UIステート（focus/hover/disable/エラー）」「§N+4 多言語/長文時の崩れ対策」を追加し、検証対象を明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.6",
+    "issue": "「バージョンなしの依存禁止」はあるが、ドキュメント版の表記規約（SemVer/日付版/メジャーアップ時の下流更新方針）が未定義。",
+    "suggestion": "ドキュメント版はSemVer準拠（MAJOR互換破壊/MINOR後方互換/パッチ軽微）を採用し、依存宣言はSemVerレンジ（例: \">=1.3 <2.0\"）必須とする規約を§19.5に追記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.7（差別化マッピ���グ）",
+    "issue": "「対応セクション」の表記フォーマットが未規定で、追跡性が低い。",
+    "suggestion": "表記規約を明記: 『{ファイル名} §{節番号}[.小節]』（例: ux_v1.md §2.3）。canopyのbench_lint.shでフォーマット検証を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

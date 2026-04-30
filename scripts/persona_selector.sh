@@ -19,7 +19,7 @@
 #     ts | response_id | rounds | personas_csv | severity_summary | trigger_tags
 #
 # 根拠:
-#   - lais/verify/dev_system_v34_package.md §2.25.14.2 必須 3 / §2.25.14.3 追加候補
+#   - core_spec.md §11.2 必須 3 / §11.3 追加候補 (legacy v34 spec §2.25.14.2 / §2.25.14.3, archived 2026-04-30)
 #   - docs/po-decisions.md PD-111
 
 set -eu

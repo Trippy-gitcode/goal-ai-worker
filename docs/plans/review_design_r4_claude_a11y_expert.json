@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§5.2 Dawn --focus-ring / §5.3 Harajuku Light --focus-ring",
+    "issue": "ライト系テーマの --focus-ring が rgba 0.4 の半透明で、WCAG 2.4.11 Focus Appearance (AAA) および Focus Not Obscured は満たすが、AA のFocus Visible (2.4.7) の最小3:1を微妙に下回るケースがある。Dawn の #A85E28 at 0.4 を #FEFCF9 に合成すると 約 2.6:1 相当。",
+    "suggestion": "ライト系テーマの focus-ring を opacity 0.6 以上に引き上げ（または不透明の暗色系アクセント）、合成後 3:1 を確実に超える値にする。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.7 ボトムタブバー / §4.5",
+    "issue": "ボトムタブバー高さ 56px + safe-area-inset は妥当だが、タブ項目の個別タップ領域が最小 44×44 を満たすか未検証。3 タブ均等分割なら最小デバイス幅 320px で各タブ約 106px 幅、高さ 56px なので満たすが、6 タブになった場合などの拡張時に破綻する。",
+    "suggestion": "§8.7 にタブ数ごとのタップ領域検証表、または「1タブあたり最小幅 80px」を義務付ける注記を追加。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.8 トグルスイッチ",
+    "issue": "トグルスイッチで OFF→ON 状態変化をスクリーンリーダーに伝える方法（aria-checked の変更イベント）について、テキストラベル（「通知を有効化」）との結合が未定義。状態を音声で読み上げる際に『オン/オフ』のアナウンスが欠落する。",
+    "suggestion": "§8.8 に「role=switch の場合、aria-labelledby でラベル要素を明示し、aria-checked 変更時に onchange ハンドラーで status領域に反映」を追記。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.3 アバター",
+    "issue": "アバターの alt テキスト規定がない。装飾用途なら alt=\"\"、機能用途（プロフィール表示）なら aria-label=\"{ユーザー名}のアバター\" が必要。スクリーンリーダーで空読みになるリスク。",
+    "suggestion": "§6.3 にアバターの alt/aria-label ルールを追記。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.4 タイムライン",
+    "issue": "タイムラインの各行が「ボタン」なのか「リスト項目」なのか ARIA role 定義が未記載。スクリーンリーダーで適切に読み上げるには role=\"list\" + role=\"listitem\"、クリック可能行には role=\"button\" が必要。",
+    "suggestion": "§8.4 にタイムラインの semantic HTML / ARIA 構造（ul>li + button）を明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3 タイポグラフィ",
+    "issue": "R3 で指摘した rem 単位への移行が未反映。--font-size-* がすべて px 固定のままで、ブラウザのデフォルトフォントサイズ変更（Dynamic Type 相当）に追従しない。",
+    "suggestion": "--font-size-* を rem 基底にし、1rem = 16px を前提に換算（例: --font-size-sm: 0.875rem）。",
+    "model": "Claude Opus 4.6",
+    "persona": "a11y_expert"
+  }
+]

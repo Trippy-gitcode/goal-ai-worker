@@ -1,0 +1,147 @@
+/*
+ * S-50 Stats — design tokens via theme variables (Stage 7-3)
+ */
+
+.s50-stats {
+  flex: 1;
+  background: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+}
+
+.s50-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-md);
+  background: var(--theme-color-bg-elevated);
+  border-bottom: 1px solid var(--theme-color-border);
+}
+
+.s50-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-display);
+}
+
+.s50-month-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.s50-month-btn {
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: 1px solid var(--theme-color-border);
+  border-radius: var(--theme-radius-md);
+  color: var(--theme-color-text);
+  cursor: pointer;
+}
+
+.s50-month-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.s50-month-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s50-month-label {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-text);
+  flex: 1;
+  text-align: center;
+}
+
+.s50-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+  padding: var(--space-md);
+}
+
+.s50-card {
+  padding: var(--space-md);
+  background: var(--theme-color-bg-card);
+  border: 1px solid var(--theme-color-border);
+  border-radius: var(--theme-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  text-align: center;
+  box-shadow: var(--theme-shadow-sm);
+}
+
+.s50-card-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  color: var(--theme-color-text-secondary);
+  letter-spacing: var(--theme-font-letter-spacing-loose);
+  font-weight: var(--font-weight-semibold);
+}
+
+.s50-card-value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-accent);
+  font-family: var(--theme-font-display);
+}
+
+.s50-chart {
+  padding: var(--space-md);
+}
+
+.s50-section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--theme-font-letter-spacing-loose);
+  margin-bottom: var(--space-md);
+}
+
+.s50-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-sm);
+  height: 200px;
+  background: var(--theme-color-bg-card);
+  border: 1px solid var(--theme-color-border);
+  border-radius: var(--theme-radius-md);
+  padding: var(--space-md);
+}
+
+.s50-bar {
+  flex: 1;
+  background: var(--theme-color-accent);
+  border-radius: var(--theme-radius-sm) var(--theme-radius-sm) 0 0;
+  min-height: 4px;
+  transition: height var(--theme-motion-normal) var(--theme-motion-easing);
+  box-shadow: var(--theme-shadow-sm);
+}
+
+@media (max-width: 320px) {
+  .s50-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .s50-header,
+  .s50-cards,
+  .s50-chart {
+    max-width: 960px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}

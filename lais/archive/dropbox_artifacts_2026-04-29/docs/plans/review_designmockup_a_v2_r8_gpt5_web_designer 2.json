@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "各画面の補助テキスト/ラベル/メタ情報（例: s10_grow ヒーロー内「Explorer」, タスク行のサブ行; s30_me サブタブ/レベル表示; s12_task_add 各フィールドラベル; s02_onboarding アバターラベル等）",
+    "issue": "font-size:12px が広範に使用されており、デザインシステムの離散スケール（11/14/16/20/28/36/48）外。可読性とスケール一貫性を損なう",
+    "suggestion": "用途別にスケールへスナップ: タイムスタンプ/キャプション=11px(--font-size-xs)、ラベル/補助テキスト=14px(--font-size-sm)、本文=16px(--font-size-base)。全画面で12pxを廃止し該当トークンに置換",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s02_onboarding",
+    "location": "画面下部プライマリボタン「次へ」",
+    "issue": "font-weight:500 が使用されており、フォントウェイトトークン（200/400/600）外",
+    "suggestion": "プラ��マリボタンは 600(--font-weight-semibold) を採用し、一貫した押し感と視覚階層を確保",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s30_me",
+    "location": "ヒーロー領域 > EXPバーの背景",
+    "issue": "背景色が rgba(121,192,255,0.18) で、--accent-subtle(=rgba(121,192,255,0.14)) と不一致。s10_grow では 0.14 が使われており画面間で不整合",
+    "suggestion": "背景を var(--accent-subtle) に統一（rgba(121,192,255,0.14)）。s10_grow と同一トークンで揃え、テーマ変更時の整合も担保",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "ヘッダー下ボーダー",
+    "issue": "border-bottom: 1px solid rgba(110,118,129,0.4) とトークン外指定。--border または --border-strong を使わず不透明度で調整している",
+    "suggestion": "ボーダー色を var(--border) もしくは var(--border-strong) に置換。必要なら1px/opacityでなくトークン設計内でコントラストを調整",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Today セクショ���末尾（タスクリスト）→ Goals 見出しまでの間隔",
+    "issue": "セクション間マージンが28px相当で、design_system §4.2 の「セクション間≧32px」を下回る",
+    "suggestion": "Todayブロックの下マージンを32〜40pxに拡張し、セクション区切りの可視性と呼吸感を確保",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カード > アクション行の［✕］",
+    "issue": "閉じるが文字記号「✕」で表現され、アイコン体系（SF Symbols風・stroke 1.5px）と不整合",
+    "suggestion": "20pxのアウトラインアイコン（×）へ置換し、線幅1.5pxで他アイコンと統一。非プライマリアクションとしてはテキストよりアイコンが適切",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Today > 完了タスク行（「企画書を仕上げる」カード）",
+    "issue": "背景に rgba(63,185,80,0.06) が使用され、--success-subtle(=rgba(63,185,80,0.12)) と不一致。成功状態の視覚基準が画面内でぶれる",
+    "suggestion": "背景を var(--success-subtle) に統一。必要なら hover/pressed 変種（§5.1）で濃淡を付け、状態一貫性を維持",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "OTHER",
+    "screen": "s20_talk",
+    "location": "入力バー右端 送信アイコン",
+    "issue": "上向き矢印（アップロード連想）に見え、送信（paper plane）メンタルモデルとやや乖離。直感性に軽微な影響",
+    "suggestion": "紙飛行機（送信）アイコンへ変更し意味連想を一致。線幅/サイズはアイコンガイド（20px/1.5px）に準拠",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "タスク提案カード全体の配置",
+    "issue": "カード左インデント（margin-left:6px）が会話本文の左右リズム（24px）とずれ、縦流れでわずかに段差印象を生む",
+    "suggestion": "カードの左右マージンをメッセージ本文と同一グリッド（左右24px基準）に合わせて整列。会話内コンポーネントの一体感を強化",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

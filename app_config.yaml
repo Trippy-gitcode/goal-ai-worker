@@ -1,0 +1,17 @@
+# app_config.yaml — goal-ai-worker (Lais 側アプリ設定)
+#
+# 根拠: lais/verify/dev_system_v34_package.md §6.11 / §2.18 PD疑義2
+#   Hフロー承認ゲート（PD-110）のオプトアウト設定を各アプリで保持
+# 親テンプレート: templates/app_config_template.yaml（dev-system v3.4 + v3.5 案 D' 完全版）
+# 本ファイルは §6.11 の最小項目（hflow セクション）のみ反映、他項目は本プロジェクト移行時にテンプレから拡充
+
+# --- アプリ識別 ---
+app:
+  name: "goal-ai-worker"
+  version: "4.0.42"
+  env: "prod"
+
+# --- Hフロー承認ゲート（PD-110、sub_hflow_protocol.md §5 オプトアウト）---
+hflow:
+  enabled: true
+  disabled_notice: "Hフロー承認ゲート無効。"

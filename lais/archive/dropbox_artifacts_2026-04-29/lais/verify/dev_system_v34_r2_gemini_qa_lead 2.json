@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.6.3, §4.8",
+    "issue": "TDD証跡ファイル名を `before.json` から `before-unit.json` 等に分離（4.6.3）しているが、`canopy_common.sh` の G8 チェックロジックを修正する指示がない。結果として `before.json` が見つからず G8 ゲートが常に全FAILする。",
+    "suggestion": "`canopy_common.sh` の G8 チェックロジックを `before-*.json` および `after-*.json` のワイルドカードまたは配列検索に対応させる修正指示を §4.6 または §4.8 に追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§3.2.2, §4.3.5",
+    "issue": "Hフロー発火判定（`hflow_trigger_check.sh`）で `git diff --cached --name-only` を使用するとあるが、デプロイ時（`deploy.sh` 実行時）にはミッションの変更はすでにコミット済みであるため、`--cached` ではバージョンバンプの差分しか取得できず、Hフローが絶対に発火しない。",
+    "suggestion": "`affected-tests.sh` と同様に `BASE=$(git merge-base origin/main HEAD)` を用いて `git diff --name-only \"$BASE\"...HEAD` で判定するよう `hflow_trigger_check.sh` のロジックを修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.4.5",
+    "issue": "`playwright.realworld.config.ts` の `testDir` を `./tests` に広げ `--grep \"MISSION-ID\"` で抽出すると、`tests/e2e/` 配下のモックを使用したテストと `tests/realworld/` 配下の実機テストが混在して実行される。cmd-realworld の目的（モックなし実機検証）が破綻する。",
+    "suggestion": "`--grep` だけでなく、ファイルパス（例: `tests/realworld/`）や専用タグ（`@realworld`）でフィルタリングする設定を config に追加し、モックテストの混入を防ぐ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.2.2, §4.3.2",
+    "issue": "§4.2.2 では認証・決済の未設定は「FAIL（エスケープ不可）」としているが、§4.3.2 では `wrangler whoami` が未認証の場合は全体を「WARN + 手動確認」としてスキップする。これにより、wrangler からログアウトするだけで認証・決済の必須ゲートをバイパスできてしまう。",
+    "suggestion": "`wrangler whoami` 未認証時でも、ミッションが「高リスク（認証・決済）」の場合は WARN ではなく FAIL とし、ローカルエミュ等の代替証跡を要求するよう `verify_external_services.sh` のロジックを分岐させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.2.3",
+    "issue": "L1-realworld スモークが「4基本操作（起動 / 主機能1操作 / 主機能2操作 / リロード残存確認）」と定義されているが、現行の L1 スモーク（5操作）から減少しており、特に今回必須化された「認証」および「AI送受信」が含まれていない。",
+    "suggestion": "L1-realworld スモークの対象に「認証（ログイン/ログアウト）」および「AI送受信��を明記し、最低5〜6操作の網羅性を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.3.4",
+    "issue": "`mission_risk_classifier.sh` の `awk '/^対象ファイル:/,/^$/'` では、ミッション定義テンプレートの `> 対象ファイル: src/...` （引用符付き）や、1行でカンマ区切りで書かれたフォーマットから正しくファイルパスを抽出できない。",
+    "suggestion": "`grep -oP '(?<=対象ファイル:).*'` や `sed` を用いて、行内のカンマ区切りリストを正しくパース・展開するロジックに修正する（macOS互換に注意）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.2.5",
+    "issue": "3層テスト戦略表で L1-local の完了コマンドが「cmd-unit の一部」と定義されているが、現行の G4 では `npx playwright test --grep \"smoke\"`（E2E）が実行されており、Playwright スモークの位置づけが不明確になる。",
+    "suggestion": "L1-local の完了コマンドを「cmd-unit の一部 + cmd-e2e のスモークタグ」に修正し、Playwright によるローカルスモークとの整合性を保つ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§4.4.7",
+    "issue": "`cmd-*` のセル値として「SKIP（理由必須）」を許容しているが、現行の `development_rules.md` G5 では「SKIP=DONE不可」とされている。完了コマンド表で SKIP と書いたミッションが DONE にできるのか曖昧。",
+    "suggestion": "完了コマンド表の SKIP と、テストコード内の SKIP（`test.skip`）の扱いを明確に分け、完了コマンドを SKIP した場合のミッションステータス（DONE可能か、別ミッション化が必要か）を定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  }
+]

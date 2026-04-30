@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §3, §4.1, §4.2; sub_adv_protocol.md → §3",
+    "issue": "The core UI validation mechanism, 'screenshot image judgment' (スクショ画像判定), is critically ambiguous for an AI agent. The spec repeatedly forbids DOM API checks for acceptance (G9) and requires validation by 'looking at the screenshot as an image', but never defines *how* an AI (ENG or ADV) performs this visual comparison. This is the most critical ambiguity as it underpins the entire quality gate system.",
+    "suggestion": "Define the precise mechanism for screenshot validation. Options: 1) Specify a visual regression testing tool (e.g., Playwright's built-in pixel matching, Percy, Applitools) and define the workflow for updating baseline images. 2) If using an LLM with vision, provide a specific prompt template for the vision model that asks it to compare 'before' and 'after' screenshots against a specific requirement from the spec. 3) Clarify that this is a manual check by the PO, which would be a deviation from the 'automation first' principle but would at least be unambiguous."
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §9.3",
+    "issue": "The 'Device-dependent bug diagnosis flow' requires ENG to 'reproduce and confirm the symptoms in a simulator'. This assumes the AI agent has the capability to launch, operate, and debug within a graphical device simulator (like iOS Simulator or Android Emulator), which is a very strong and likely incorrect assumption about the capabilities of current code-generating AI agents operating in a typical CI/CD environment.",
+    "suggestion": "Redefine the flow to not depend on the AI operating a GUI. Instead, have ENG write a detailed, step-by-step reproduction script for the PO. The flow should be: 1) ENG analyzes logs and code to form a hypothesis. 2) ENG creates a specific test branch and provides a clear script for the PO to run on their physical device (e.g., '1. Open this URL. 2. Tap X. 3. Observe Y.'). 3) PO reports back the result, which ENG uses to continue debugging."
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "sub_infrastructure.md → §2.6 canopy_common.sh",
+    "issue": "The script `canopy_common.sh` contains comments for critical checks G1 (Version Sync) and G6 (Build Sync), but the actual implementation code is missing. The main spec in `dev_system_spec.md §4.1` and `§8` treats these gates as active. An AI will read the script as the source of truth and will not perform these checks, leading to a silent failure of the quality gate process.",
+    "suggestion": "Implement the missing checks in `canopy_common.sh`. For G1, add bash commands to parse `app_config.yaml`, `package.json`, `version.ts`, and `CLAUDE.md` and assert that the version strings are identical. For G6, parse `app_config.yaml` to get `build.out_dir` and check if it's used in the `deploy.frontend_cmd` string."
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §1.2",
+    "issue": "ENG is constrained from making architectural changes that affect 'cost structure or differentiation between plans' without PO approval. This is too abstract for an AI. ENG has no reliable way to determine what constitutes a 'cost structure' impact (e.g., changing a DB query, adding a function call). This ambiguity could lead to the AI either halting unnecessarily or making a change it shouldn't.",
+    "suggestion": "Provide a concrete, machine-readable definition of what impacts cost. For example, create a file `cost_sensitive_files.txt` listing files or directories (e.g., `src/worker/billing/`, `app_config.yaml`) that require approval if changed. The approval gate can then be automated by checking `git diff` against this list."
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "sub_system_map.md → §1 逆引き",
+    "issue": "The 'Reverse Lookup' dependency map, which is critical for AI-driven changes, contains an outdated reference. It states that changing `CLAUDE.md` requires checking `claude_ai_protocol`. However, `sub_adv_protocol.md` explicitly states it has integrated and replaced the old `claude_ai_protocol.md`. This will cause the AI to look for a non-existent file, causing errors or confusion.",
+    "suggestion": "Update the dependency map in `sub_system_map.md`. Change the line `CLAUDE.md を変更 → CHECK: claude_ai_protocol, ...` to `CLAUDE.md を変更 → CHECK: sub_adv_protocol.md, ...`."
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §2",
+    "issue": "The 6-step change flow ends with 'PO final confirmation'. However, it does not define the process if the PO rejects the change or finds an issue. The AI (ENG) has no instructions on what to do next: should it revert the deployment, create a new bug-fix mission, or simply wait? This is a critical missing recovery path.",
+    "suggestion": "Add a 'Step 6: Handling Rejection' to the change flow. Define the process clearly: 'If PO rejects the change, ADV will create a new high-priority mission in `session_progress.md` with the PO's feedback. The previous mission is marked as `DONE-REJECTED`. ENG must not attempt to fix it without a new mission. The deployment is NOT automatically rolled back unless it's a critical bug.'"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §1.3",
+    "issue": "The bug response flow states that for simple bugs, 'PO tells ENG directly' (POがENGに直接伝える). The mechanism for this 'direct' communication is undefined. The rest of the spec implies all work is initiated via `session_progress.md`. This undefined channel breaks the single source of truth principle and leaves the AI without a clear input channel.",
+    "suggestion": "Eliminate the ambiguous 'direct' channel. Specify that ALL work requests, including simple bug fixes from the PO, must be formalized as a mission in `session_progress.md`. The text should be changed to: 'For other bugs, the PO asks ADV to create a low-risk mission, which ENG then picks up.'"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §3",
+    "issue": "Iron Rule ⑤ 'Self-check for policy consistency' (方針整合性自己チェック) is too abstract for an AI to perform reliably. The term 'policy' is not defined, and there is no specified process for how to conduct such a check across potentially hundreds of lines of rules and past decisions.",
+    "suggestion": "Make this rule more concrete and actionable. Change it to: 'When proposing a change, ADV must explicitly check against `dev_system_spec.md` and the app's `CLAUDE.md`. The proposal must include a section: \"Consistency Check: This proposal does not conflict with Rule X in `dev_system_spec.md` and Guideline Y in `CLAUDE.md`.\"' This turns an abstract idea into a verifiable checklist item."
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "sub_system_map.md → §2 vs sub_infrastructure.md → §3",
+    "issue": "There are two conflicting definitions for AI model routing ratios. `sub_system_map.md` defines a specific set of models and ratios for the chat function. `sub_infrastructure.md` provides a different set of models and ratios in `app_config_template.yaml`. This violates the Single Source of Truth principle and will confuse the ENG agent about which implementation is correct.",
+    "suggestion": "Designate `app_config.yaml` as the single source of truth for routing ratios. Remove the hardcoded ratios from `sub_system_map.md` and replace them with a reference: 'The intent is classified and routed to an AI model according to the ratios defined in `app_config.yaml` under the `routing` section.'"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "sub_system_map.md → §1",
+    "issue": "The dependency map in `sub_system_map.md` references files `docs/mockups/` and `design_review_changelog.md`. However, these files/directories are not mentioned in the canonical directory structures defined in `sub_infrastructure.md`. The AI will be unable to find or update these files.",
+    "suggestion": "Add `docs/mockups/` (directory) and `design_review_changelog.md` (file, can be empty) to the application directory structure in `sub_infrastructure.md §1.2` and the `init_app.sh` script."
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "sub_adv_protocol.md → §2",
+    "issue": "The ADV trigger table contains undefined terms. The trigger `IF PO == \"G_実装N\"` is cryptic and not defined anywhere. The action `DO: DC read session_progress.md` uses an undefined acronym 'DC'. An AI cannot parse or act on these instructions.",
+    "suggestion": "Clarify the terms. If 'G_実装N' is a typo for 'Go, implement Mission N', rewrite it as `IF PO says 'Implement Mission X' or 'Go'`. Define 'DC' or correct it. If 'DC' is a typo for 'ADV' or 'ENG', replace it with the correct persona name."
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → §2.2, §2.6",
+    "issue": "The scripts `update_app.sh` and `canopy_common.sh` contain a hardcoded path to the dev-system repository: `$HOME/Desktop/dev-system`. This makes the entire system brittle and dependent on a specific user's local setup, which is bad practice for automation.",
+    "suggestion": "Remove the hardcoded path. Use an environment variable like `$DEV_SYSTEM_PATH`. The scripts should check for this variable and exit with an error if it's not set. The documentation should instruct the user (Futoshi) on how to set this variable once."
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §10.2",
+    "issue": "The dev-system version pin rule states that a mismatch is a WARN, which becomes a FAIL after being ignored for 3 sessions. The mechanism for tracking the '3 sessions' state is not defined. The `canopy_common.sh` script only outputs a stateless WARN, so this rule is currently unenforceable.",
+    "suggestion": "Implement a stateful check. When a mismatch is detected, the script should write a timestamp to a state file (e.g., `.canopy_warn_state`). On subsequent runs, the script checks this file. If the warning has persisted for 3 sessions (or a certain time duration), it should exit with a FAIL status."
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §7",
+    "issue": "ENG can request to simplify tests if it determines the 'test volume is too large'. The criteria for 'too large' are subjective and not defined, making it difficult for an AI to make this judgment call. It could lead to either never asking or asking too often.",
+    "suggestion": "Provide concrete, quantitative criteria for the simplification request. For example: 'ENG can request simplification if L2 or L3 test suites consistently exceed a 20-minute execution time, or if the number of tests for a single component exceeds 50.'"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §8",
+    "issue": "The C2 deploy flow includes a 'version bump' step, but there is no guidance on how to determine the new version number (e.g., following Semantic Versioning). It's unclear who decides whether a change is a patch, minor, or major release, and based on what criteria.",
+    "suggestion": "Add a section defining the versioning policy. Specify that ADV is responsible for determining the version bump based on the nature of the mission. E.g., 'Bug fixes not affecting the API are a PATCH bump. New non-breaking features are a MINOR bump. Breaking changes are a MAJOR bump. ADV must state the proposed version bump in the mission definition.'"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §5",
+    "issue": "The mission definition template includes `RED: ☐ / GREEN: ☐` checkboxes for each AT, but their purpose and usage are never explained in any of the specification files. ENG and ADV will not know how or when to update these.",
+    "suggestion": "Add a short explanation to the template's description in `dev_system_spec.md §5`. For example: 'The RED/GREEN checkboxes are for tracking the Test-First workflow. ADV leaves them unchecked. ENG must first run the test to see it fail (verifying the test itself works) and check the RED box. After implementation, ENG runs it again to see it pass and checks the GREEN box.'"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "sub_infrastructure.md → §2.1 vs §2.6",
+    "issue": "There's a minor contradiction regarding the minimum line count for `canopy_app.sh`. The template created by `init_app.sh` is noted as having a minimum of 10 lines, but the check in `canopy_common.sh` only requires a minimum of 5 active lines. This is inconsistent.",
+    "suggestion": "Make the values consistent. Either change the check in `canopy_common.sh` to require 10 lines or update the comment in `init_app.sh` to state the minimum is 5 lines. Aligning on 5 seems more reasonable for a minimal check."
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "sub_system_map.md",
+    "issue": "The file `sub_system_map.md` is part of the generic `dev-system` spec suite but is explicitly noted as containing app-specific content that needs to be rewritten. This is an awkward structural pattern. Common templates should be separate from instance-specific documentation.",
+    "suggestion": "Restructure this. Rename `sub_system_map.md` to `sub_system_map_template.md` and move it to the `dev-system/templates/` directory. The `init_app.sh` script should then copy this template into the app's `docs/system_map.md` file. This clarifies that it's a starting point for app-specific documentation, not a core, shared spec file."
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → §2.5",
+    "issue": "The `session_archiver.sh` script relies on finding a `## 完了済み` header. If this header is missing or misspelled, the script exits with an error, which could halt a larger automation chain. The logic is also brittle as it won't archive completed items placed above this header.",
+    "suggestion": "Make the script more robust. If the header is not found, the script should append it to the end of the file and issue a warning instead of exiting with an error. Add a comment explaining that all completed missions should be moved under this header for archiving."
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "COMPLETENESS",
+    "location": "sub_testing.md → §6",
+    "issue": "The 'Test Splitting Rule' for long tests requires ENG to write intermediate results to `session_progress.md` after each batch. However, the format for these 'intermediate results' is not defined. This will lead to inconsistent or unparseable progress updates from the AI.",
+    "suggestion": "Define a clear template for intermediate progress reports. For example: `- [IN_PROGRESS] Test Batch 1/3 (tests/specs/auth.spec.ts): 12/12 PASS. - [IN_PROGRESS] Test Batch 2/3 (tests/specs/chat.spec.ts): 10/15 PASS, 5 FAIL.` This gives the AI a clear structure to follow."
+  }
+]

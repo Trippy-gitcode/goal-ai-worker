@@ -1,0 +1,404 @@
+/*
+ * S-13 Task Detail — design_spec_v1.md §4.6 準拠
+ * S-12 のモーダル骨格パターンをコピー（Rule of three まで共通抽出保留）
+ * LP-001/011/013/014 + LP-015 候補（Active border-color 残し）事前適用
+ */
+
+/* Overlay --------------------------------------------------------------- */
+.s13-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--theme-color-overlay-strong, var(--theme-color-modal-overlay));
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: s13-overlay-fade var(--duration-fast) var(--ease-out);
+}
+
+@keyframes s13-overlay-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Modal ----------------------------------------------------------------- */
+.s13-modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-modal);
+  padding: 0 var(--space-lg) 30px;
+  overflow-y: auto;
+  animation: s13-modal-up var(--duration-normal) var(--ease-out);
+}
+
+@keyframes s13-modal-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .s13-modal {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 30px);
+  }
+}
+
+.s13-modal:focus:not(:focus-visible) { outline: none; }
+.s13-modal:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* S13-1 ドラッグハンドル */
+.s13-drag-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+  margin: var(--space-sm) auto 0;
+}
+
+/* S13-2/3/4 ヘッダ ------------------------------------------------------ */
+.s13-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-sm);
+  gap: var(--space-sm);
+}
+
+.s13-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex: 1;
+  min-width: 0;
+}
+
+/* S13-2 28×28 status 別チェック */
+.s13-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: transparent;
+}
+
+.s13-check-done {
+  border-color: var(--success);
+  color: var(--success);
+  background: var(--success-subtle);
+}
+
+.s13-check-active {
+  border-color: var(--accent);
+}
+
+.s13-check-scheduled {
+  border-color: var(--border-strong);
+}
+
+/* S13-3 タスク名 */
+.s13-task-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  line-height: var(--line-height-ja-heading);
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.s13-edit-name {
+  height: 44px;
+  flex: 1;
+}
+
+/* S13-4 close ボタン */
+.s13-close {
+  width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin: calc(var(--space-sm) * -1) calc(var(--space-sm) * -1) calc(var(--space-sm) * -1) 0;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.s13-close:focus:not(:focus-visible) { outline: none; }
+.s13-close:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* S13-5 ステータスラベル ------------------------------------------------ */
+.s13-status {
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--space-md);
+}
+
+.s13-status-done      { color: var(--success); }
+.s13-status-active    { color: var(--accent); }
+.s13-status-scheduled { color: var(--text-muted); }
+
+/* S13-6 メタデータ行 ---------------------------------------------------- */
+.s13-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--border);
+  margin: 0;
+}
+
+.s13-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.s13-meta-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-label);
+  margin: 0;
+}
+
+.s13-meta-value {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: var(--letter-spacing-ja);
+}
+
+.s13-meta-goal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* S13-7 カテゴリドット */
+.s13-cat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--cat-other);
+}
+.s13-cat-dot-work    { background: var(--cat-work); }
+.s13-cat-dot-health  { background: var(--cat-health); }
+.s13-cat-dot-learn   { background: var(--cat-learn); }
+.s13-cat-dot-hobby   { background: var(--cat-hobby); }
+.s13-cat-dot-social  { background: var(--cat-social); }
+.s13-cat-dot-other   { background: var(--cat-other); }
+
+/* S13-8 / S13-9 メモ ---------------------------------------------------- */
+.s13-memo-section {
+  padding-top: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border);
+}
+
+.s13-memo-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-label);
+  margin: 0 0 var(--space-sm);
+}
+
+.s13-memo {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-ja-body);
+  letter-spacing: var(--letter-spacing-ja);
+  margin: 0;
+}
+
+/* 共通 input -------------------------------------------------------------*/
+.s13-input {
+  width: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  letter-spacing: var(--letter-spacing-ja);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.s13-input::placeholder { color: var(--text-placeholder); }
+.s13-input:focus { border-color: var(--accent); }
+.s13-input:focus:not(:focus-visible) { outline: none; }
+.s13-input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-color: var(--accent);
+}
+
+.s13-edit-time, .s13-edit-duration { height: 44px; }
+
+.s13-edit-memo {
+  min-height: 80px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  line-height: var(--line-height-ja-body);
+  resize: vertical;
+}
+
+/* S13-10/11 アクションボタン行 ----------------------------------------- */
+.s13-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.s13-edit {
+  height: 44px;
+  flex: 1;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.s13-edit:focus:not(:focus-visible) { outline: none; }
+.s13-edit:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s13-delete {
+  height: 44px;
+  flex: 1;
+  background: var(--danger-solid);
+  color: var(--theme-color-button-text-inverse);
+  border: 1px solid var(--danger-solid);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-base);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.s13-delete:focus:not(:focus-visible) { outline: none; }
+.s13-delete:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s13-save {
+  height: 44px;
+  flex: 1;
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  border: 1px solid var(--button-primary-bg);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-base);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.s13-save[aria-disabled='true'] {
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
+  border: 1px solid var(--button-disabled-border);
+  cursor: not-allowed;
+}
+
+.s13-save:focus:not(:focus-visible) { outline: none; }
+.s13-save:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* S13-12 AI 相談ボタン -------------------------------------------------- */
+.s13-ai-row {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.s13-ai-btn {
+  height: 44px;
+  flex: 1;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+/*
+ * §5.0 A 真の disabled は aria-disabled="true" + opacity 0.5 + pointer-events:none
+ * §5.0 B Inactive スタイルは bg-elevated + text-muted（disabled とは別概念）
+ * S13-12 「条件未達で押せない時」は §5.0 A を採用
+ *
+ * LP-015 候補: Active state は border を残して WCAG 1.4.11 Non-text Contrast 3:1 を確保する
+ */
+.s13-ai-btn-active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-weight: var(--font-weight-semibold);
+  border: 1px solid var(--accent);
+}
+
+.s13-ai-btn-inactive {
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-regular);
+  border: 1px solid var(--bg-elevated);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.s13-ai-btn:focus:not(:focus-visible) { outline: none; }
+.s13-ai-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* LP-001: prefers-reduced-motion 縮退 ---------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .s13-overlay, .s13-modal {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .s13-input, .s13-edit, .s13-delete, .s13-save, .s13-ai-btn {
+    transition-duration: 1ms !important;
+  }
+}

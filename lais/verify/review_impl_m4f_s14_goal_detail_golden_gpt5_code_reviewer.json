@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.7 S14-2 / 4.S14GoalDetail.css",
+    "issue": ".s14-title に padting-top と誤記があり、指定の上余白（padding-top: --space-md）が適用されない。spec の S14-2（タイトル上に --space-md）が崩れる。",
+    "suggestion": "プロパティ名を padding-top に修正する。合わせて他のスタイルのタイポ有無も一括検索で確認。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "3.S14GoalDetail.jsx",
+    "issue": "goal を useState(() => GOALS_MOCK[id] || DEFAULT_GOAL) で初期化して以後固定しているため、/goal/:id の id が更新されても表示が変わらない（同一コンポーネントのままパラメータだけ変化した場合に陳腐化）。",
+    "suggestion": "state ではなく props から毎レンダー導出する: const goal = GOALS_MOCK[id] || DEFAULT_GOAL; もしくは id 依存の useEffect + setGoal で同期。可能なら DEFAULT_GOAL へのフォールバック時は別 UI に分岐（NotFound）にする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.S14GoalDetail.jsx（id フォールバック）",
+    "issue": "不明な id の場合に DEFAULT_GOAL（g-1）を黙って表示するため、ユーザーが別ゴールを誤って閲覧・操作したと誤認する恐れがある。",
+    "suggestion": "該当ゴール未存在時は 1) GROW にリダイレクト + トースト通知、または 2) 404/NotFound 表示 + 戻る導線、に変更する。ログだけでなく UI で明示する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.7 S14-8 / 3.S14GoalDetail.jsx + 4.S14GoalDetail.css",
+    "issue": "S10-4 と完全一致を要件にしつつ、S14 側に同等スタイル・DOMを重複実装（コピー戦略）。将来的な乖離・修正漏れのリスクが高い。",
+    "suggestion": "TaskRow を共有コンポーネント（例: components/common/TaskRow.jsx + .css）として抽出し、S10/S14 双方で再利用する。トークン化済みの変数を使い、差異はクラスで切替。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "3.S14GoalDetail.jsx / 4.S14GoalDetail.css / デザイントークン",
+    "issue": "カテゴリ用クラス s14-cat-tag-${goal.category} とト���クン --cat-learn, --cat-health が未使用。タスク行の s14-task-row-${status} も現状スタイル未定義でデッドクラス化。",
+    "suggestion": "未使用なら削除するか、カテゴリ別配色などのルールを実装して活用する（例: .s14-cat-tag-learn { color: var(--cat-learn) }）。管理対象を最小化して保守性を上げる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "1.App.jsx（Suspense fallback）",
+    "issue": "fallback が空の <main role=\"status\" aria-label=\"読み込み中\"> のみで可視テキストやスケルトンがない。支援技術でも発話されない可能性があり、UX/A11y の観点で不十分。",
+    "suggestion": "可視テキスト（例: 読み込み中…）を子要素として配置し、必要に応じて簡易スケルトンを表示。role=\"status\" はそのまま活かし、aria-busy を親 main に付与してもよい。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.S14GoalDetail.jsx（タスク行 onClick）",
+    "issue": "map 内で onClick={() => handleOpenTask(task.id)} を都度生成しており、リストが大きい場合に不要な再生成を招く。",
+    "suggestion": "data-id を用いて単一ハンドラで拾う、または TaskRow をメモ化して props 経由で id を受け渡す。現状規模では実害は小さいが、拡張時に備えて整理。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.S14GoalDetail.jsx（progress 計算）",
+    "issue": "progress の値域チェックがなく、将来 API 連携時に 0–100 を外れると UI 崩れ（幅負値/100%超過）や A11y 属性の不整合が起こり得る。",
+    "suggestion": "Math.min(Math.max(Number(progress)||0, 0), 100) でクランプし、aria-valuenow にも同値を設定する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.S14GoalDetail.jsx（デバッグ出力）",
+    "issue": "本番ビルドで console.log（addTask / openTask / AI / edit / delete）が残る。",
+    "suggestion": "ビルド時に除去（babel-plugin/terser 設定）または env ガードで開発時のみ出力。将来の実装に備えトースト/ダイアログのプレースホルダ UI を用意してもよい。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.S14GoalDetail.jsx（型安全性）",
+    "issue": "JS のみで props（id）・データ構造（goal/tasks/status）の型保証がなく、将来 API 置換時の破壊的変更を検知しづらい。",
+    "suggestion": "TypeScript 化または JSDoc による型定義を追加。status は 'done' | 'active' | 'scheduled' のユニオン型にし、進捗・日数は number を明示。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

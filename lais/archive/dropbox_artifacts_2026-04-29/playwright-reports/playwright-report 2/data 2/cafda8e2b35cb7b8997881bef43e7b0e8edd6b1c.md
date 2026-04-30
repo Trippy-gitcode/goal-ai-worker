@@ -1,0 +1,213 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: test03-layout.spec.ts >> TEST-03: Layout / Collision / Display >> 3-5. Sidebar >> Sidebar: z-index above all content
+- Location: tests/e2e/specs/test03-layout.spec.ts:409:7
+
+# Error details
+
+```
+Error: Unexpected errors during test: [pageerror] Cannot read properties of null (reading 'parentNode')
+
+expect(received).toHaveLength(expected)
+
+Expected length: 0
+Received length: 1
+Received array:  ["[pageerror] Cannot read properties of null (reading 'parentNode')"]
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e5] [cursor=pointer]:
+        - img [ref=e6]
+        - generic [ref=e8]: GOAL AI
+        - generic [ref=e9]: Free
+      - generic [ref=e10]: コーチングモード
+      - generic [ref=e11]:
+        - generic [ref=e12] [cursor=pointer]: 通常
+        - generic [ref=e13] [cursor=pointer]: メンケア
+        - generic [ref=e14] [cursor=pointer]: ソクラテス
+        - generic [ref=e15] [cursor=pointer]: スパルタ
+      - generic [ref=e16]:
+        - text: チャット履歴
+        - generic [ref=e17] [cursor=pointer]: すべて見る →
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - button "会話履歴" [ref=e24] [cursor=pointer]:
+          - img [ref=e25]
+        - button "検索" [ref=e28] [cursor=pointer]:
+          - img [ref=e29]
+        - button "G" [ref=e32] [cursor=pointer]
+        - button "T" [ref=e33] [cursor=pointer]
+        - button "新しい会話" [ref=e34] [cursor=pointer]:
+          - img [ref=e35]
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - img [ref=e40]
+          - img [ref=e44]
+          - img [ref=e48]
+        - generic [ref=e50]: 三人の賢者があなたを支えています
+      - generic [ref=e54]:
+        - generic [ref=e56]:
+          - img [ref=e57]
+          - text: 今日のタスクはありません
+        - generic [ref=e60]: タスク画面 →
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - generic [ref=e64] [cursor=pointer]: ←
+          - generic [ref=e66]: タスク名
+        - generic [ref=e69]:
+          - combobox [ref=e70] [cursor=pointer]:
+            - option "⬜ 未着手" [selected]
+            - option "🔵 進行中"
+            - option "✅ 完了"
+            - option "🔴 ブロック中"
+          - generic [ref=e71] [cursor=pointer]:
+            - img [ref=e72]
+            - text: 進め方を聞く
+          - generic [ref=e74] [cursor=pointer]: → 詰まりを相談
+          - generic [ref=e75] [cursor=pointer]:
+            - img [ref=e76]
+            - text: 30分で終わらせる
+        - generic [ref=e80]:
+          - textbox "このタスクについて質問する…" [ref=e81]
+          - button [ref=e82] [cursor=pointer]:
+            - img [ref=e83]
+  - navigation [ref=e85]:
+    - button "TODAY" [ref=e86] [cursor=pointer]:
+      - img [ref=e87]
+      - generic [ref=e90]: TODAY
+    - button "TALK" [ref=e91] [cursor=pointer]:
+      - img [ref=e92]
+      - generic [ref=e94]: TALK
+    - button "GOALS" [ref=e95] [cursor=pointer]:
+      - img [ref=e96]
+      - generic [ref=e100]: GOALS
+    - button "ME" [ref=e101] [cursor=pointer]:
+      - img [ref=e102]
+      - generic [ref=e105]: ME
+  - generic [ref=e107]:
+    - generic "画像を添付" [ref=e108] [cursor=pointer]:
+      - img [ref=e109]
+    - textbox "質問、相談、なんでも..." [ref=e113]
+    - button "音声入力" [ref=e114] [cursor=pointer]:
+      - img [ref=e115]
+    - button [ref=e118] [cursor=pointer]:
+      - img [ref=e119]
+```
+
+# Test source
+
+```ts
+  1   | /**
+  2   |  * GOAL AI — Global Test Guards
+  3   |  * AC-GLOBAL-1: console.error → FAIL
+  4   |  * AC-GLOBAL-2: unhandled rejection → FAIL
+  5   |  * AC-GLOBAL-3: error toast detection → FAIL (unless error test)
+  6   |  * AC-GLOBAL-4: .msg.ai error text detection → FAIL (unless error test)
+  7   |  */
+  8   | 
+  9   | import { Page, expect } from '@playwright/test';
+  10  | 
+  11  | // Known benign console errors to ignore
+  12  | // ⚠ この許容リストの変更はClaude.ai承認必須（canopyで件数チェック）
+  13  | // localhost固有のエラーとブラウザ内部エラーのみ許容。本番で起きるエラーは絶対に追加しない
+  14  | const IGNORED_ERRORS = [
+  15  |   // ブラウザ内部（本番でも発生するが無害）
+  16  |   'favicon',
+  17  |   'manifest',
+  18  |   'sw.js',
+  19  |   'service-worker',
+  20  |   'ResizeObserver loop',
+  21  |   'Non-Error promise rejection',
+  22  |   'DevTools',
+  23  |   'Autofill',
+  24  |   'chrome-extension',
+  25  |   // localhost固有（本番では発生しない）
+  26  |   'CORS policy',
+  27  |   'Access-Control-Allow-Origin',
+  28  |   'blocked by CORS',
+  29  | ];
+  30  | 
+  31  | function isBenign(msg: string): boolean {
+  32  |   return IGNORED_ERRORS.some(pattern => msg.includes(pattern));
+  33  | }
+  34  | 
+  35  | export interface GuardOptions {
+  36  |   /** Set true for error-handling tests where errors are expected */
+  37  |   expectErrors?: boolean;
+  38  | }
+  39  | 
+  40  | /** Call in beforeEach to start monitoring */
+  41  | export function setupGuards(page: Page, opts: GuardOptions = {}) {
+  42  |   const errors: string[] = [];
+  43  | 
+  44  |   page.on('console', msg => {
+  45  |     if (msg.type() === 'error' && !isBenign(msg.text())) {
+  46  |       // Include URL if available for debugging
+  47  |       const loc = msg.location();
+  48  |       const url = loc?.url ? ` (${loc.url.split('/').pop()})` : '';
+  49  |       errors.push(`[console.error] ${msg.text()}${url}`);
+  50  |     }
+  51  |   });
+  52  | 
+  53  |   // Track failed network requests for better error reporting
+  54  |   page.on('response', response => {
+  55  |     if (response.status() >= 500) {
+  56  |       errors.push(`[http-500] ${response.url()} → ${response.status()}`);
+  57  |     }
+  58  |   });
+  59  | 
+  60  |   page.on('pageerror', err => {
+  61  |     if (!isBenign(err.message)) {
+  62  |       errors.push(`[pageerror] ${err.message}`);
+  63  |     }
+  64  |   });
+  65  | 
+  66  |   (page as any).__guardErrors = errors;
+  67  |   (page as any).__guardOpts = opts;
+  68  | }
+  69  | 
+  70  | /** Call in afterEach to assert no unexpected errors */
+  71  | export async function checkGuards(page: Page) {
+  72  |   const errors: string[] = (page as any).__guardErrors || [];
+  73  |   const opts: GuardOptions = (page as any).__guardOpts || {};
+  74  | 
+  75  |   if (opts.expectErrors) return; // Skip for error-handling tests
+  76  | 
+  77  |   // AC-GLOBAL-3: Check for error toast
+  78  |   const toast = page.locator('.toast-error, [class*="toast"][class*="error"], [class*="err-toast"]');
+  79  |   const toastCount = await toast.count();
+  80  |   if (toastCount > 0) {
+  81  |     const toastText = await toast.first().textContent();
+  82  |     errors.push(`[error-toast] ${toastText}`);
+  83  |   }
+  84  | 
+  85  |   // AC-GLOBAL-4: Check .msg.ai for error text
+  86  |   const aiMsgs = page.locator('.msg.ai .bubble, .msg.ai');
+  87  |   const count = await aiMsgs.count();
+  88  |   for (let i = 0; i < count; i++) {
+  89  |     const text = await aiMsgs.nth(i).textContent() || '';
+  90  |     if (text.includes('エラーが発生しました') || text.includes('エラーが起きました')) {
+  91  |       errors.push(`[ai-error] AI応答にエラーメッセージ: "${text.slice(0, 50)}"`);
+  92  |     }
+  93  |   }
+  94  | 
+  95  |   // Allow up to 0 critical errors
+  96  |   if (errors.length > 0) {
+  97  |     console.log('Guard errors detected:', errors);
+  98  |   }
+> 99  |   expect(errors, `Unexpected errors during test: ${errors.join('; ')}`).toHaveLength(0);
+      |                                                                         ^ Error: Unexpected errors during test: [pageerror] Cannot read properties of null (reading 'parentNode')
+  100 | }
+  101 | 
+```

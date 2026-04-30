@@ -1,0 +1,80 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "scripts/subagent_health_check.sh L70",
+    "issue": "`NOTE` 変数のJSONエスケープが `sed 's/\"/\\\"/g'` のみで行われており、改行やバックスラッシュ、タブなどの制御文字が含まれると不正なJSONが生成されます。これにより、後続のログ解析や機械的な検証処理が破綻するリスクがあります。",
+    "suggestion": "`jq` を使用して `jq -n --arg note \"$NOTE\" '{\"ts\":..., \"note\":$note}'` のように安全にJSON文字列を生成するか、Pythonワンライナーの `json.dumps()` を用いてエスケープ処理を行うように変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "scripts/context_monitor.sh L49",
+    "issue": "`CONTEXT_MAX_TOKENS` が環境変数で `0` に設定された場合、awkの計算 `(t * 100) / m` でゼロ除算エラーが発生し、スクリプトが異常終了します。これによりコンテキスト監視が機能しなくなります。",
+    "suggestion": "`CONTEXT_MAX_TOKENS` が0以下の場合はデフォルト値（200000）にフォールバックする、またはエラーメッセージを出力して安全に終了するバリデーション処理をawkの実行前に追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/completion_verifier.sh L84",
+    "issue": "`IFS=','` で `REQUIRED_FILES` を分割して `for` ループで回す際、`set -f` (noglob) が指定されていないため、ファイル名に `*` や `?` が含まれると意図しないパス展開が発生し、正確なファイル存在チェックができません。",
+    "suggestion": "ループの前に `set -f` を実行して glob 展開を無効化し、ループ後に `set +f` で元に戻すか、`echo \"$REQUIRED_FILES\" | tr ',' '\\n' | while read -r f; do` のように安全に処理してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "scripts/main_session_writeguard.sh L97",
+    "issue": "`realpath -m` の代替として `os.path.normpath` を使用していますが、これは文字列上のパス正規化のみを行いシンボリックリンクを解決しないため、シンボリックリンクを用いた path traversal 攻撃を完全に防ぐことができません。",
+    "suggestion": "Pythonのフォールバック処理において、`os.path.normpath` ではなく `os.path.realpath` を使用して、シンボリックリンクを完全に解決した絶対パスを取得するように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "scripts/handoff_validator.sh L30",
+    "issue": "引数パースが `$1` のみを直接チェックするハードコードになっており、引数の順序変更や追加に対応できません。また、他のスクリプトで採用されている `while [ $# -gt 0 ]` ループと一貫性がなく、保守性が低下しています。",
+    "suggestion": "拡張性と保守性を向上させるため、`while [ $# -gt 0 ]; do case \"$1\" in --transcript) ...` の標準的な引数パースパターンにリファクタリングし、他のスクリプトと実装方針を統一してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "scripts/main_session_writeguard.sh L77",
+    "issue": "`sed` を用いた JSON の値抽出 (`[^\"]*`) は、`file_path` にエスケープされたダブルクォート (`\\\"`) が含まれる場合に正しくパースできず、誤ったパスで評価されるリスクがあります。これにより意図しない書込許可・拒否が発生し得ます。",
+    "suggestion": "可能な限り `jq` を使用して正確にパースするか、Pythonの `json` モジュールを用いたワンライナーで安全に値を抽出するように変更し、エスケープ文字が含まれるパスでも堅牢に動作するようにしてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "scripts/night_mode_dispatcher.sh L146",
+    "issue": "`in_flight_topics.md` を解析する awk の正規表現 `/^- \\*\\*status\\*\\*:[[:space:]]*pending[[:space:]]*$/` は、行末に `\\r` (CR) が含まれる環境（Windowsで編集された場合など）でマッチせず、対象タスクがスキップされます。",
+    "suggestion": "正規表現の末尾の `$` の前に `\\r?` を許容するパターンを追加するか、`[[:space:]]*$` を使用して改行コードの違いを吸収するように修正し、異なるプラットフォーム間でも安定して動作するようにしてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0418,
+    "input_tokens": 28260,
+    "output_tokens": 1291,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

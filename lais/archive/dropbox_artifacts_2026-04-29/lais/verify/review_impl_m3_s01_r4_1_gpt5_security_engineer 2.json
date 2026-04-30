@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "5 (Phase B / H9: 明示的 CSP 設定)",
+    "issue": "明示的な Content-Security-Policy が未設定。XSS/クリックジャッキング/外部リソース取り込みの制御ができず、トークン窃取などの被害リスクが残存。",
+    "suggestion": "本番で強制するCSPを導入。例: default-src 'self'; script-src 'self' 'strict-dynamic' 'nonce-<generated>'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://<your-supabase-project>.supabase.co; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests。開発中は Report-Only から開始し、許可先を最小化。クリックジャッキング対策として frame-ancestors 'none' または X-Frame-Options DENY も併用。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "5 (Phase B / H7: Supabase RLS 全テーブル検証)",
+    "issue": "RLS の全テーブル検証が未完了。RLS 未設定や許可過多ポリシーがあると anon キーからの不正読取・更新が発生し得る。",
+    "suggestion": "RLS を全テーブルで有効化し、���フォルト拒否ポリシーを設定。PII/機微テーブルは auth.uid() = user_id のみ許可、ストレージもバケットポリシーで同等に制限。PostgREST 経由の read/update/insert/delete をロール別に最小化。自動テストで anon ロールからの不正アクセスが 403 となることを検証し、CI に組み込む。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "5 (Phase B / H8: service_role キー混入検知)",
+    "issue": "service_role キー混入の自動検知/遮断が未実装。クライアントバンドルやレポジトリに混入すると即時に全権限が漏洩する重大リスク。",
+    "suggestion": "gitleaks/secretlint を CI と pre-commit に導入し、“service_role”パターンや SUPABASE_SERVICE_ROLE 等の環境変数名を厳格に検出。クライアントは anon キーのみを使用し、service_role はサーバ専用 (VPC/サーバサイド関数) に限定。ビルド時に service_role を参照していたらエラーにするガード (例: if (import.meta.env.VITE_SUPABASE_SERVICE_ROLE) throw)。万一露出時は即ローテーション。なお、現レビューのテキスト/スニペットには秘密情報の埋め込みは検出されず。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "パッケージ全体 (Supabase クライアント初期化・環境変数の取り扱い未掲示)",
+    "issue": "クライアントで使用している Supabase キー種別 (anon のみか) と読み込み経路が本文からは不明。誤って service_role をバンドルすると致命的。",
+    "suggestion": "クライアントは VITE_SUPABASE_ANON_KEY のみを読み込み、service_role はクライアントビルドから完全に除外。ビルド成果物を自動スキャンし、“eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9” のような JWT パターンが含まれないことを検証。ドキュメントに “client=anon/server=service_role” の責務分離を明記。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "パッケージ全体 (CORS 設定の記載なし)",
+    "issue": "バックエンド/API/ストレージの CORS 設定が不明。ワイルドカード許可や過剰な credentials 許可はセッション悪用のリスクを増大。",
+    "suggestion": "CORS を厳格化。Access-Control-Allow-Origin は本番/ステージングの正規オリジンのみに限定、ワイルドカード禁止。credentials を必要���小限のエンドポイントでのみ許可。Supabase 側は Auth の許可リダイレクト URL/Storage の CORS を限定し、オブジェクト操作は RLS/ポリシーと併用。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 lais/src/components/screens/S01Auth.jsx",
+    "issue": "サーバからのエラーメッセージ (err.message) をそのままユーザ表示。React により HTML はエスケープされるため XSS には直結しないが、内部実装や脆弱な文言が露出する可能性。",
+    "suggestion": "外部/サーバ由来のエラーテキストはコード→ユーザ向けメッセージへマッピングし、詳細はログ/テレメトリにのみ送る。dangerouslySetInnerHTML/innerHTML を今後も使わない方針をコメント/ESLint ルール (react/no-danger) で固定化。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.1 lais/src/components/App.jsx — NotFound",
+    "issue": "window.location.replace の遷移先が静的許可リスト (/terms,/privacy) に固定されており現状は Open Redirect ではないが、将来パスが動的化した場合にリスクが再発する懸念。",
+    "suggestion": "遷移先は常にサーバサイド/クライアントサイド双方で allowlist 管理し、絶対 URL・プロトコル指定は拒否。現在の実装に対し E2E で “?next=//evil.com” 等の悪性クエリが無害化されることを回帰テストに追加。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "パッケージ全体 (CSRF 方針の明文化なし)",
+    "issue": "本フローは Supabase のトークン方式想定で CSRF 影響は限定的だが、Cookie ベースのステート変更 API が将来追加される場合の対策方針が未記載。",
+    "suggestion": "Cookie ベースの保護対象エンドポイントでは SameSite=Strict/Secure/HttpOnly の採用、CSRF トークン (同期トークン or ダブルサブミット) と Origin/Referer 検証を必ず実装する旨を開発規約に明記。現行の Supabase 呼び出しは Authorization ヘッダ (Bearer) に限定。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "5 (将来対応予定: /auth/callback deep-link)",
+    "issue": "認証コールバックで redirect_to/next 等のクエリをそのまま利用すると Open Redirect/フィッシングになる恐れ。",
+    "suggestion": "コールバックで扱う遷移先は “アプリ内相対パス” のみ許可し、絶対 URL・スキーマ付きは拒否。さらに ‘/’ など限定的 allowlist を用意し、違反時は安全なデフォルト (トップ) にフォールバック。URL 正規化と二重エンコード対策も実装。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "パッケージ全体 (レート制御/アカウント保護)",
+    "issue": "クライアント側の検証はあるが、ブルートフォース/クレデンシャルスタッフィング対策のサーバ側要件が未言及。",
+    "suggestion": "Auth まわりに IP/ユーザ単位のレートリミット、reCAPTCHA 等のボット対策、サインイン失敗回数による段階的遅延/ロックを導入。監査ログとアラートを整備し、異常検知 (同一IPからの多量試行等) を可視化。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

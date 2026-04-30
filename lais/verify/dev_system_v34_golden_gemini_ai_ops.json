@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§4.5.2",
+    "issue": "deploy.sh 冒頭で hflow_trigger_check.sh が発火（HFLOW_TRIGGER=1）しても、echo で警告を出すだけで exit 1 していない。高リスク変更時に統合レビュー（Hフロー）を強制する承認ゲートがバイパスされ、そのまま本番デプロイされてしまう。",
+    "suggestion": "if grep -q 'HFLOW_TRIGGER=1' /tmp/hflow.txt; then echo \"[hflow] triggered...\"; exit 1; fi とし、Hフロー完了までデプロイを確実にブロックする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.11.1",
+    "issue": "mission_risk_classifier.sh の grep 正規表現 `^>?[[:space:]]*対象ファイル:` では、形式2（複数行の `- src/xxx.js`）のファイルパス行が抽出されない。target_files が空になり、高リスクファイルが含まれていても常に low リスクと誤判定され、承認ゲートが破綻する。",
+    "suggestion": "awk を用いて `対象ファイル:` から次の空行または別セクションまでを抽出するロジックに戻すか、sed で複数行ブロックを取得してからファイルパスを抽出するよう修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.12.1",
+    "issue": "playwright.realworld.config.ts では outputFile が `logs/realworld/latest/realworld-proof.json` に固定されているが、G17 (realworld_proof_check.sh) は `logs/realworld/$MISSION_ID/realworld-proof.json` を検証している。パスの不一致により G17 が常に FAIL し、デッドロックする。",
+    "suggestion": "config 側で process.env.MISSION_ID を受け取り動的に出力パスを生成するか、deploy.sh 等で latest から $MISSION_ID ディレクトリへファイルをコピーする処理を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.9.1",
+    "issue": "verify_external_services.sh で高リスクかつ未認証の場合、代替証跡の提示を求めて exit 1 しているが、スクリプト内に「代替証跡が存在する場合は exit 0 とする」ロジックが実装されていない。代替証跡を用意しても永遠にコミットやデプロイがブロックされる。",
+    "suggestion": "exit 1 する前に、`logs/realworld/$MISSION_ID/local-emu-proof.json` の存在確認や、session_progress.md 内の `【代替証跡】` grep チェックを行い、存在すれば exit 0 とするロジックを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.16.1",
+    "issue": "scripts/lib/*.sh を ADV 書き込み可としているが、これは「ADVはコードを書かない（鉄則②）」と明確に矛盾する。実行環境を持たない ADV がシェルスクリプトを書くと、構文エラーや POSIX 非互換バグを混入させるリスクが高い。",
+    "suggestion": "scripts/lib/*.sh の書き込みは ENG に限定し、ADV は仕様（要件やアルゴリズムの自然言語記述）のみを提示する運用を維持する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.1.1",
+    "issue": "deploy_poll_hash.sh の TIMEOUT=30 は、Cloudflare Pages や Workers のデプロイ反映時間（通常1〜3分）に対して短すぎる。正常なデプロイでも高確率でタイムアウトし、デプロイ失敗と誤判定される。",
+    "suggestion": "TIMEOUT=180（3分）程度に延長する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "ROBUSTNESS",
+    "location": "§4.17.4",
+    "issue": "verify_hooks.sh の awk 内で `gsub(\"-\", \" \", d[1])` を行い `YYYY MM DD` 形式にしてから `date -d` に渡しているが、GNU date はこの形式を解釈できずエラーになる。",
+    "suggestion": "§4.8.2 で実装した date_to_epoch のような BSD/GNU 両対応のロジックを共通化して呼び出すか、awk 内で OS 判定を行ってフォーマットを切り替える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

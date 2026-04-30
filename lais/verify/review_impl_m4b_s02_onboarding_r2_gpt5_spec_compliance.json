@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "design_spec_v1.md §4.3（S02-6 次へ CTA）/ .s02-next bottom / .s02-onboarding padding-bottom",
+    "issue": "bottom と padding-bottom が env(safe-area-inset-bottom, 0px) 前提の単一宣言のみ。env() 非対応ブラウザでは宣言全体が無効になり、CTA の垂直位置固定とコンテンツ末尾の余白確保が機能しない恐れがある。",
+    "suggestion": "フォールバックを明示。例: 1) .s02-next に bottom: 100px; を先に記述し、その後に bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); を上書き。2) .s02-onboarding に padding-bottom: calc(100px + 52px + var(--space-md)); を先に記述し、その後に padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px + 52px + var(--space-md)); を上書き。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.3（S02-2 進捗バー）/ .s02-progress-label",
+    "issue": "仕様に存在しない新規要素（常時表示の進捗テキスト \"2 / 5\"）が追加されている（WCAG 1.4.1 対応目的）。",
+    "suggestion": "仕様に a11y 目的のテキスト進捗ラベル常時表示を追記し、文言・タイポグラフィ・位置（右寄せ）・読み上げ抑止（aria-hidden）を明文化する。代替案として視覚ラベルは非表示（sr-only）で、UI 上は数値ラベルを省略する運用を採用する場合も仕様で選択肢として規定すること。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.3（S02-2 進捗バー）/ .s02-progress-bar",
+    "issue": "仕様の「未完 = --border（塗り）」から逸脱し、未完を outline のみ（background: transparent + border）で表現している。視覚的差異は強化されているが、仕様とスタイル定義が不一致。",
+    "suggestion": "仕様側を『未完＝outline（border-strong）、完了＝塗りつぶし（accent）』に改訂し、形状差を公式化する。あるいは実装を仕様通り『未完＝--border で塗り（高さ3px バー）』に戻しつつ、色非依存の差分（テクスチャ/パターン/ハッチング）を付加する案も記載して選択。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.3（S02-2 進捗バー）/ .s02-progress-label",
+    "issue": "font-size: 12px を直指定。デザインシステムの離散タイポグラフィスケール（トークン）外指定の可能性が高く、LP-011（魔法の数字禁止）に反する。",
+    "suggestion": "タイポグラフィトークン（例: var(--font-size-xs) など）に置換し、仕様の離散スケールに整合させる。併せて line-height と letter-spacing も該当トークンに合わせて更新。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-105",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_spec_v1.md §4.3（S02-2 進捗バー）/ .s02-progress-label",
+    "issue": "letter-spacing: 0.5px が直指定。デザインシステムの字間トークン未使用。",
+    "suggestion": "var(--letter-spacing-*) 等の字間トークンに置換し、全体の文字組み整合を担保。数字表記の可読性要件（和欧混植）に適合する字間値を仕様側に定義して参照する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1.md §4.3（S02-6 次へ CTA）/ .s02-next",
+    "issue": "仕様は『高さ 52px』と明記だが、実装は min-height: 52px。厳密高さ指定か可変高（最低 52px）かの解釈が不明瞭。",
+    "suggestion": "仕様で『固定高 52px』か『最小高 52px（多言語・長文で2行許容）』かを明示。固定高要求なら height: 52px に変更し、テキストは1行省略（text-overflow）を適用。可変高許容なら min-height のまま、リザーブ余白の計算式（padding-bottom）を可変高対応に更新する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "design_spec_v1.md §4.3（S02-6 次へ CTA）/ .s02-onboarding padding-bottom",
+    "issue": "リザーブ余白が CTA 高さを 52px 前提で固定計上。文言増やローカライズで CTA が2行になった場合、末尾コンテンツと CTA が重なる可能性。",
+    "suggestion": "可変高対応にする。例: 1) マウント時/ResizeObserver で CTA の実高を CSS 変数 --s02-next-h に反映し、padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px + var(--s02-next-h) + var(--space-md)); にする。2) あるいは CTA をコンテナ外に配置し、下部に常時レイアウトスペーサー（height: current CTA 高）を置く。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_spec_v1.md §4.3（S02-6 次へ CTA）/ .s02-next",
+    "issue": "color: var(--button-primary-text, #ffffff) に生の #ffffff フォールバックが混在。テーマ切替時の一貫性確保の観点でトークン優先が望ましい。",
+    "suggestion": "フォールバックもトークン（例: var(--text-on-primary, #ffffff)）に寄せるか、デザインシステム側で --button-primary-text のデフォルト値を提供して、コンポーネント側の生色フォールバックを排除。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1.md §4.3（S02-6 次へ CTA）",
+    "issue": "『画面下 100px』の基準が曖昧。実装は safe-area を加算して『安全域の上端から 100px』に配置されるため、デバイスによっては物理解像度下端から 134px（例: iOS 34px safe-area + 100px）となる。",
+    "suggestion": "『safe-area 下端から 100px』なのか『ビューポート下端から 100px（safe-area 無視）』なのかを仕様で明示。前者を採用するなら現実装で正と定義し、後者なら bottom: 100px のみ（env() 非加算）に変更する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_spec_v1.md §4.3（S02-5 アバター選択肢）/ .s02-avatars",
+    "issue": "clamp(12px, 4vw, var(--space-lg)) の 12px が生値。LP-011（魔法の数字禁止）の観点で最小値にもトークン使用が望ましい。",
+    "suggestion": "最小値を余白トークン（例: var(--space-xs) または var(--space-sm)）へ置換し、必要に応じてデザインシステムに最小ギャップ用トークンを追加する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

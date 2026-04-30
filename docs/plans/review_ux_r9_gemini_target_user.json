@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3, §9.1",
+    "issue": "03:59にタスクを完了し、Undoスナックバーが表示された状態で04:00（日次リセット）を迎えた場合の挙動が未定義です。04:00に習慣タスクは未完了にリセットされますが、その状態でUndoを押すとデータ不整合が発生する可能性があります。また、アプリを開いたまま04:00を跨いだ際、Todayセクションが自動更新されるのかPull-to-refreshが必要なのか不明です。",
+    "suggestion": "04:00を跨いだ時点で表示中のUndoスナックバーは強制的に確定（消去）し、Todayセクションを自動リフレッシュ（または「日付が変わりました」ダイアログを表示してリロードを促す）する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.3",
+    "issue": "DISCOVER画面からTALK画面に遷移してヒアリング（5問）を行いますが、5問目が終わった後、ユーザーがどのようにDISCOVER画面に戻るのか、またはAIがどのように完了を通知して遷移を促すのかが定義されていません。ユーザーが「終わったけどどうすればいいの？」と迷う原因になります。",
+    "suggestion": "5問目の回答に対するAIの応答に「ヒアリングが完了しました！DISCOVER画面で分析結果を見てみましょう」というメッセージと、DISCOVER画面へ戻るためのインラインボタン（カード）を表示する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3",
+    "issue": "project_v1.md §3.2.3で「ユーザーが手動でTodayに追加することも可能（「今日やる」ボタン）」と定義されていますが、ux_v1.mdの画面定義（Upcomingセクション等）に「今日やる」ボタンの配置や操作フローが一切記載されていません。",
+    "suggestion": "Upcomingセクションの習慣タスク行、またはタスク詳細パネル（S-11）に「今日やる（Todayに追加）」ボタンを配置し、タップ時にTodayセクションへ移動するフローを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2, ux_v1.md §2.3",
+    "issue": "「TOEIC 800点」というゴールに対して「毎日単語帳をやる」という習慣タスクを紐付けられないのは、ユーザー視点で非常に不便です。ゴール達成に向けた日々の積み重ねが可視化されず、競合アプリ（Habitica等）と比べて目標管理の体験が劣ると感じます。",
+    "suggestion": "習慣タスクもゴールに紐付け可能にするか、ゴール詳細画面に「このゴールに関連する習慣」を参考表示（進捗%の計算には含めない）できる仕組みを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3",
+    "issue": "タスク詳細パネルから「進め方を聞く」「詰まりを相談」��タップすると、自動的にTALK画面に遷移してメッセージが送信されます。これがFreeプランの貴重な対話回数（20回/日）を即座に消費してしまう場合、誤タップ時のユーザーの強い不満に繋がります。",
+    "suggestion": "自動送信ではなく、TALK画面の入力欄に「『〇〇』の進め方を教えてください」とテキストがセットされた状態で遷移し、ユーザーが確認・編集してから送信ボタンを押すフローに変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.3",
+    "issue": "TALK画面でAIが提案したタスクカードの「✕」を誤ってタップしてしまった場合、カードが消滅し、仕様上「以降同じ文脈では再提案しない」ため、そのタスクを簡単に登録する手段が失われてしまいます。",
+    "suggestion": "「✕」タップ時はカードを完全に消すのではなく、「提案をスキップしました [元に戻す]」という一時的なトーストを表示するか、チャット履歴内に折りたたまれた状態で残す仕様にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §9.1",
+    "issue": "オフライン時に送信したメッセージが「送信中...」のまま維持されるとありますが、その状態でアプリをタスクキル（終了）した場合、そのメッセージがIndexedDB等に保存されて次回起動時に再送信されるのか、それとも消滅するのかが未定義です。",
+    "suggestion": "オフライン時の未送信メッセージはIndexedDBの送信キューに保存し、次回アプリ起動時（オンライン時）にバックグラウンドで再送信してチャット履歴に反映する仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2.1, ux_v1.md §2.3",
+    "issue": "project_v1.mdでは所要時間が「5分刻み（5/10/15/.../120分）のプリセット選択」とありますが、ux_v1.mdでは「横スクロールチップ: 5/10/15/30/45/60/90/120分」となっており、5分刻み（20, 25等）になっておらず矛盾しています。",
+    "suggestion": "UIのスペース制約を考慮し、ux_v1.mdの「よく使われる間隔のチップ（5/10/15/30/45/60/90/120分）」を正とし、project_v1.mdの内部矛盾リストに追記して次���改訂時に修正するよう注記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3",
+    "issue": "TALK画面で入力バーの上にUndoスナックバーが30秒間表示され、キーボード表示中も上昇する仕様です。チャットに集中している最中に、画面下部の貴重なスペースを30秒間も占有するのはUXを損ないます。",
+    "suggestion": "TALK画面表示中（またはキーボード展開中）は、Undoスナックバーを最小化（アイコンのみ等）するか、タブを切り替えた時点でUndoを自動確定させてスナックバーを消す仕様に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3, §6.2",
+    "issue": "Overdueタスクの「明日に延期」タップ時に「明日に延期しました [取り消す]」というトーストが表示されます。これがタスク完了のUndoスナックバー（30秒）と同時に発生した場合、画面下部にどのように重なって表示されるのか（スタックするのか、上書きするのか）不明です。",
+    "suggestion": "「明日に延期」の取��消しもUndoスナックバーの仕組み（キューまたは上書き）に統合し、トーストではなくスナックバーとして一元管理する仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  }
+]

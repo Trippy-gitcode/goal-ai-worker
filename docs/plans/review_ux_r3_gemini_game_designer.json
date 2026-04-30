@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §9.1 / project_v1.md §7.3",
+    "issue": "オフライン同期時のレベルアップ演出の消失と状態不整合",
+    "suggestion": "オフライン時にタスクを完了して内部的にレベルアップ条件を満たした場合、オンライン復帰時のバックグラウンド同期でEXPが付与されますが、その際の演出トリガーが未定義です。ユーザーが別画面（ME等）を見ている時に同期が完了すると、レベルアップ演出が空振りし、気づかないうちにアバターが進化する状態不整合が起きます。同期によるEXP加算・レベルアップ・冒険EXPは「未再生��演出キュー」としてローカルに保持し、次回GROW画面がアクティブになった瞬間に再生する仕組みを§8.6に追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3, §2.4",
+    "issue": "ゴール「完了待ち（7日待機）」状態のUI定義漏れ",
+    "suggestion": "project_v1.md §4.2で「7日未満で全タスク完了した場合は完了待ち状態になり、あとN日で完了と表示する」と定義されていますが、ux_v1.mdのS-14（ゴール詳細）およびGoalsリストにその状態のUI定義がありません。ユーザーが「全タスク完了したのに達成にならないバグ」と誤認するのを防ぐため、進捗バー付近に「⏳ あとN日で達成（ボーナス確定待ち）」のバッジ表示と、手動完了ボタンの非活性化（グレーアウト＋理由のツールチップ）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.4, §2.2",
+    "issue": "アバター経済の設計不足とLv16〜30の長期的な飽きポイント",
+    "suggestion": "無課金ユーザーがプレイを通じて装飾を一切得られない設計になっており、ソーシャル画面（図鑑）での多様性が生まれず過疎化を招きます。また、Lv16（2ヶ月）からLv30（7ヶ月）までアバターの進化がなく、モチベーションの谷間（飽きポイント）になります。特定のレベル到達時（例: Lv20, 25）や長期ゴール達成時に「無償チケット」または「限定装飾（帽子やバッジ等）」を付与する仕組みをEXP設計に追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §4.5",
+    "issue": "ダミータスクによるEXP不正獲得が容易すぎる",
+    "suggestion": "「同名タスク5分以内再完了無効」の対策だけでは、「あ」「い」「う」など異なる名前の単発タスクを20個作成し即完了させるだけで、簡単に1日のEXP上限（300）に到達できてしまいます。コンセプトである「本当の人生経験の可視化」が崩壊するため、「タスク作成から完了までに最低5分間の経過を必須とする」または「1日のタスク完了によるEXP獲得回数にソフトリミット（例: 15回以降はEXP付与なし）」を設けてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §8.6",
+    "issue": "アプリ起動時（GROW画面初回表示時）の演出キューの競合",
+    "suggestion": "アプリ起動時に「ログインボーナス（§8.5）」と、TALK画面で保留されていた「冒険EXP反映・レベルアップ演出（§3.4）」が同時にトリガーされる可能性があります。§8.6の演出キューに「1. ログインボーナス」「2. 保留中の冒険EXP」「3. 保留中のレベルアップ」を追加し、起動時の直列実行順序を明確に定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3",
+    "issue": "習慣タスクのクリティカル状態（達成ピンチ）の視認性不足",
+    "suggestion": "習慣タスクは「Overdue」にならない仕様ですが、「週3回」の目標で木曜夜時点で0回の場合など、「今日やらないと週目標が達成不能になる」状態は実質的な期限切れ寸前です。通常のタスクと同じ表示では見落とされるため、達成不能リスクが生じた日にはオレンジ色の「Must Do」ラベル等で強調表示するUIを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UX",
+    "location": "ux_v1.md §2.3, §6.2",
+    "issue": "30秒間表示されるUndoスナックバーによるコンテンツの隠蔽",
+    "suggestion": "タスク完了時のUndoスナックバーが30秒間表示され続けるため、画面最下部のコンテンツ（Upcomingタスクの展開ボタンなど）が隠れて操作できなくなる時間が長すぎます。スナックバー表示中は、GROW画面のスクロール領域（bodyまたはmain要素）の下部にスナックバーの高さ分（約60px）のpadding-bottomを動的に追加し、最下部までスクロールできるようにしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.4",
+    "issue": "ゴール紐付けタスクの所要時間合計の未活用",
+    "suggestion": "タスク作成時に所要時間（5〜120分）を入力させていますが、ゴール詳細画面（S-14）でその合計値が活用されていません。進捗バーの付近に「未完了タスクの推定残り時間: 計○時間○分」を表示することで、目標達成までの労力を可視化し、計画のリアリティを高めることができます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.4",
+    "issue": "QRコード表示画面を開いたまま有効期限が切れた場合の挙動",
+    "suggestion": "QRコードの一時トークンは24時間有効ですが、S-33でQRコードを表示したまま端末を放置し、有効期限が切れた場合のクライアント側の挙動が未定義です。有効期限が切れたタイミング（または期限の5分前）に、自動的にバックグラウンドで新しいトークンを取得し、QRコードを再描画する処理を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  }
+]

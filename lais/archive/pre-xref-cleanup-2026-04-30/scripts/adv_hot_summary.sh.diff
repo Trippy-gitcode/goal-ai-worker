@@ -1,0 +1,11 @@
+--- /Users/futoshi/Desktop/goal-ai-worker/lais/archive/pre-xref-cleanup-2026-04-30/scripts/adv_hot_summary.sh	2026-04-30 21:22:52
++++ /Users/futoshi/Desktop/goal-ai-worker/scripts/adv_hot_summary.sh	2026-04-30 21:25:21
+@@ -21,7 +21,7 @@
+ # 終了: 常に exit 0（fail-open、ホットサマリ生成失敗で起動を妨げない）
+ #
+ # 根拠:
+-#   - lais/verify/dev_system_v34_package.md §2.25 (L1183-L1465) / §C0 (L1532-L1582)
++#   - core_spec.md §3 / §11 (legacy v34 spec §2.25 (L1183-L1465) / §C0 (L1532-L1582), archived 2026-04-30)
+ #   - docs/po-decisions.md PD-111
+ #   - evidence/MISSION-G49-PKG/PHASE2.1-RESEARCH/hook_capability_matrix.md §3.3
+ 

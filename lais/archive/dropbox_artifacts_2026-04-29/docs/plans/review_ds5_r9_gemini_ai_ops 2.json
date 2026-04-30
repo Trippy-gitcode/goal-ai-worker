@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "依存チェーン図において `e2e_fullflow_test.md` が `project_v1.md` のみに依存する構造になっているが、§18の「仕様書の依存関係マップ」では `ux_redesign_v*.md` や `design_spec_v*.md`、`reference_v*.md` の変更時にもテストを更新するルールとなっている。この矛盾により、下流のテスト仕様書の連鎖更新が漏れるリスクがある。",
+    "suggestion": "§19.6の依存チェーン図を修正し、`e2e_fullflow_test.md` を `ux_v1.md`, `design_spec_v1.md`, `reference_v1.md` の下流（または全仕様書を統合検証する最下流）に位置付けるようツリー構造を改めること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ベンチマーク要件において「競合5社の画面構成/ジェスチャー/アニメーション」の調査が必須とされているが、AI（ADV/ENG）は実機アプリのダウンロードや動的UIの直接操作ができず、自律実行が不可能。AIと人間の責務分離が定義されていない。",
+    "suggestion": "ベンチマークプロセスにおける責務分離を明記すること。「データ収集（実機操作、スクショ撮影、動画記録、ストアレビュー抽出）」はPOの責務とし、「提供されたデータの分析・構造化・差別化マッピングの作成」をAI（ADV）の責務と定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md",
+    "issue": "アプリ内のAI機能設計（§3 AI活用設計）において、AIの暴走防止メカニズム（プロンプトインジェクション対策、ハルシネーション時の出力ガードレール）およびAPI障害時のフォールバック（サーキットブレーカー）の設計セクションが欠落している。",
+    "suggestion": "`reference_v1.md` の §3 に「ガードレール設計（入力検証/出力フィルタリング）」および「フォールバック・リカバリ手順」を必須項目として追加し、AIの自律範囲の安全性を担保すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 project_v1.md",
+    "issue": "dev-system §6で「コスト影響/プラン変更」は🔴高リスクとして承認ゲートが設けられているが、アプリ固有の具体的な閾値や自律実行の境界（例: どのAPIやDBテーブルの変更が高リスクに該当するか）を定義する場所がない。",
+    "suggestion": "`project_v1.md` の §7 または新規セクションに「アプリ固有のリスク境界とAI自律実行の制約（🔴高リスク承認ゲートの具体化）」を追加し、AIが承認を求めるべき境界を明確にすること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の `> 依存: {上流ファイルのパス + バージョン}` において、複数の上流ファイルに依存する場合の記述フォーマットが不明確。また、上流のバージョンが更新された際に、下流ファイルのステータスをどう扱うか（自動的にREVIEWに戻す等）のメカニズムがない。",
+    "suggestion": "複数依存の場合はカンマ区切りまたは複数行での記述を許可する旨を追記し、§19.6に「上流ファイルのバージョンが更新された場合、依存する下流ファイルのステータスを『REVIEW（要確認）』に変更し、影響範囲のAIレビューをトリガーする」ルールを追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 ux_v1.md",
+    "issue": "AIが誤った判断や不適切な出力をした場合に、ユーザーがそれを訂正・報告するためのフィードバックUX（Good/Bad評価、再生成、手動オーバーライドなど）が必須セクションとして定義されていない。",
+    "suggestion": "`ux_v1.md` の §N+5（エラー・異常系UX）またはAI専用セクションに「AI不適切応答時のリカバリ・フィードバックUX」を追加し、ユーザー側のリカバリ手段を確保すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

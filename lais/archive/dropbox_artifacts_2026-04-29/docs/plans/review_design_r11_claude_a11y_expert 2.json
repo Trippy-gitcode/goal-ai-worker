@@ -1,0 +1,56 @@
+[
+  {
+    "id": "R11-A11Y-01",
+    "persona": "a11y_expert",
+    "severity": "MEDIUM",
+    "section": "§8.7 / ux_v1 §10.4",
+    "title": "タブ ARIA 未決により SC 4.1.2 Name/Role/Value のリスクが残る",
+    "detail": "§8.7 は nav+aria-current、ux_v1 §10.4 は tablist+tab+aria-selected。両方の実装を混在させると SR は矛盾した読み上げを返す(例: 『リンク, 現在のページ』 vs 『タブ, 選択』)。WCAG 4.1.2 は役割/状態の一意性を要求するため、2通りの仕様が併存する状態自体がリスク。",
+    "fix": "R11 終了前に一本化(nav+aria-current 推奨)。決定後、ux_v1 §10.4 を Claude.ai 経由で該当箇所を修正して同期する。"
+  },
+  {
+    "id": "R11-A11Y-02",
+    "persona": "a11y_expert",
+    "severity": "MEDIUM",
+    "section": "§3.2",
+    "title": "--font-size-xs=11px が本文から除外されているが『本文』の定義が曖昧",
+    "detail": "§3.2 は『キャプション・時刻のみ。本文・重要情報には使用禁止』と書くが、『時刻』以外の具体例がない。タイムラインの日付、バッジ数字、フォームのヘルプテキスト等が11pxに流用されるリスクがあり、WCAG 1.4.4 Resize Text に関わるユーザー体験が劣化する。特に 25歳社会人(ペルソナ)でも視覚疲労のあるシーンでは厳しい。",
+    "fix": "§3.2 に『本文/重要情報= --font-size-base (16px) 以上』『補助テキスト= --font-size-sm (14px) 以上』『--font-size-xs(11px)= 時刻・バッジ数字・キャプションのみ。フォームのヘルプ/エラーメッセージには不可』と具体リストを明記。"
+  },
+  {
+    "id": "R11-A11Y-03",
+    "persona": "a11y_expert",
+    "severity": "MEDIUM",
+    "section": "§6.3 / §8.12",
+    "title": "空状態アイコンと装飾アイコンの aria 属性ルールが不完全",
+    "detail": "§6.3 はアバターの ARIA を定義しているが、§8.12 空状態アイコン・§8.4 タイムラインドット等、装飾/機能分離が明記されていないアイコンが残る。SR が空状態アイコンを読み上げて『画像』とだけ言うと情報ノイズになる。",
+    "fix": "§6 または §8 の冒頭に『全アイコンは装飾=aria-hidden=\"true\"、機能=aria-label を必須』と包括ルールを追記。§8.12 には『アイコンは aria-hidden=\"true\"、セマンティクスは見出しテキストで担う』を明記。"
+  },
+  {
+    "id": "R11-A11Y-04",
+    "persona": "a11y_expert",
+    "severity": "LOW",
+    "section": "§7.6",
+    "title": "prefers-reduced-motion で --duration-celebration=1ms になり、祝福演出が無音化される",
+    "detail": "レベルアップ/ゴール達成時の演出(§7.3 spring-bouncy + duration-celebration)が reduced-motion で 1ms に潰れるため、動機付けとなる祝福体験が失われる。ゲーミフィケーションは感情的フィードバックが核なので、100ms の短縮フェード等で『何か起きた』感は残したい(プログレスバーと同じ例外枠)。",
+    "fix": "§7.6 の例外リストに .level-up-effect, .goal-achieved-banner を追加し transition-duration: 100ms を維持。motion を減らしつつ告知は消さない。"
+  },
+  {
+    "id": "R11-A11Y-05",
+    "persona": "a11y_expert",
+    "severity": "LOW",
+    "section": "§8.11a",
+    "title": "Skip Link が z-toast(700) 使用 — トースト表示中にSkip Linkがトースト下に回る可能性",
+    "detail": "§8.11a の .lais-skip-link は z-index: var(--z-toast) (700) を使っている。同じ値のトーストが先に挿入されると DOM 順で z バトルに負けることがある。Skip Link は最初のタブフォーカスで必ず前面でなければならない。",
+    "fix": "Skip Link は最前面保証のため独立トークン --z-skiplink (例: 800) を作るか、!important で確実に最前面を担保。"
+  },
+  {
+    "id": "R11-A11Y-06",
+    "persona": "a11y_expert",
+    "severity": "LOW",
+    "section": "§7.5",
+    "title": "forced-colors モードで NEXT ドット(空円)の視認性ガイダンスが無い",
+    "detail": "§7.5 で timeline-dot-done と timeline-row-overdue には border 補完が定義されているが、NEXT (空円) の視覚は --border-strong のみに依存。forced-colors では CanvasText で自動解決されるため破綻はしないが、仕様として『NEXT=border: 1px solid CanvasText』を明記しておいた方が一貫する。",
+    "fix": "§7.5 の .timeline-dot-done/.timeline-row-overdue の並びに .timeline-dot-next { border: 1px solid CanvasText; } を追加。"
+  }
+]

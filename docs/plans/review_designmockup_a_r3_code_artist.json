@@ -1,0 +1,68 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "全体構造",
+    "issue": "中央寄せタイトル + 縦積みフォーム + ボトムタブ + Primary CTA の SaaS テンプレ構造が残存。r3 で色・アバタートーンは整ったが構図の独自性は未解決。",
+    "suggestion": "3 パターン作成時に非対称構図案 A / 縦ガイドライン強調案 B / ミニマル余白案 C を差別化軸として用意。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "星屑の密度",
+    "issue": "r3 でロゴは太字化されたが星屑は依然 6 点の均等散布。宇宙の深さ・静かな詩情が立っていない。",
+    "suggestion": "100〜200 点のポアソンディスク配置 + 3 段階明度 + 右上に月/薄雲のグラデーション。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "TODAY タイムライン等間隔",
+    "issue": "縦線 + ドット + タスクが機械的等間隔で、手書きジャーナルの呼吸がない。",
+    "suggestion": "時間帯ギャップを実寸比例化、午前/午後境界に薄い divider + 時刻ラベル。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "チャット + 提案カードの言語混在",
+    "issue": "チャット部分は iMessage 言語、提案カードは SaaS カード言語で、異なるデザイン語彙が同居。",
+    "suggestion": "提案カードを吹き出しの延長（ネスト）として設計し独立カード感を減らす。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択 3 円",
+    "issue": "r3 で衣装色は落ち着いたが、円 3 個均等配置のレイアウト自体は Notion/Slack 等で既視感。",
+    "suggestion": "横カード（タロット風）配置 or z-index オーバーラップで選択中を前面に浮き出し。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "s30_me",
+    "location": "PROFILE/DISCOVER/FRIENDS/SHOP 下線タブ",
+    "issue": "典型 Web UI パターンで、ジャーナルの手触りが失われる。",
+    "suggestion": "横スワイプ + ドットインジケータ、もしくは PROFILE 単体縦スクロール化。",
+    "model": "Code",
+    "persona": "artist"
+  }
+]

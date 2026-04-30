@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "callGPT5 / JSON_INSTRUCTION / extractJson",
+    "issue": "GPT-5系呼び出しで response_format: json_object を指定している一方、モデルへの指示は『JSON配列のみ』です。Chat Completions は json_object 指定時に配列トップレベルを返せないため、モデルはオブジェクトで包むか出力を崩す可能性が高く、extractJson 側も配列前提処理が混在しています。レビュー結果の構造が不安定になり、precommit の CRITICAL 判定が欠落・誤判定する明確なバグです。",
+    "suggestion": "配列を必須にするなら response_format を外すか、schema 対応APIへ移行して『items: []』のような明示スキーマに統一してください。少なくとも GPT-5 でも json_object 強制をやめ、トップレベル配列をそのまま返せる設定に揃えるべきです。extractJson のフォールバックも、想定構造を1つに絞った上で不正構造は失敗として扱い、レビュー失敗を検知可能にしてください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "冒頭 import 群",
+    "issue": "const { glob } = require('path'); は path モジュールに存在しない export を分割代入しており、常に undefined になります。現時点では未使用のため即時クラッシュしませんが、実装意図を誤認させる dead code であり、後続変更で glob を使った瞬間に実行時エラーを誘発します。import パスと命名の不整合として保守性が低く、レビュー対象で特に注意すべき箇所です。",
+    "suggestion": "未使用なら行ごと削除してください。glob が必要なら path ではなく glob / fast-glob 等の専用パッケージを明示的に導入し、resolveFiles を置き換える形にすると責務も明確になります。少なくとも linter で no-unused-vars と import/namespace 系ルールを有効にし、この種の紛れ込みを pre-commit で防ぐ構成にするのが安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "parseArgs",
+    "issue": "CLI引数解析で値を伴うオプションに対し存在確認がなく、--input や --timeout の直後に値が欠けると次のオプション文字列を値として誤解釈します。さらに parseInt(args[++i]) の結果が NaN でも通るため、timeout �� maxTokens が無効値になって後段の API 呼び出し失敗や無制限挙動を招きます。障害時の原因も分かりにくく、運用バグを生みやすい実装です。",
+    "suggestion": "各オプションで args[i+1] の存在と '--' 始まりでないことを検証し、欠落時は usage を出して終了してください。数値引数は Number.isFinite で検証し、負値や 0 も明示的に弾くべきです。手書きパーサを維持するなら requireValue ヘルパーを作って重複をなくし、できれば commander/yargs に寄せて型変換とヘルプ生成を委譲すると保守性が大きく上がります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "main / runJob / runPrecommitMode",
+    "issue": "ファイル書き込み前に opts.output ディレクトリの存在確認・作成がなく、通常モードでは存在しない出力先を指定すると fs.writeFileSync が ENOENT で失敗します。precommit モードだけ mkdirSync しており挙動が不統一です。レビュー処理自体は成功しても最後の保存で落ちるため、再現性の低い運用障害になりやすいです。",
+    "suggestion": "main の早い段階で fs.mkdirSync(opts.output, { recursive: true }) を実行し、precommit と通常モードで出力パス準備の責務を共通化してください。runJob 内では書き込み失敗も個別に catch して API 失敗と分けて記録すると原因追跡が容易です。パスは path.resolve で正規化し、ログには絶対パスを出すと CI 上の調査もしやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "resolveFiles",
+    "issue": "独自 glob 実装が『ファイル名内の * を .* に置換』するだけで、正規表現メタ文字のエスケープや **, ?, [] など一般的なパターンに対応していません。コメントでも制限は書かれていますが CLI オプション名は glob を期待させるため、ユーザーが通常の glob を指定すると静かに取りこぼす可能性があります。仕様と実装のズレが将来の見逃しバグを招きます。",
+    "suggestion": "オプション説明を『簡易ワイルドカード』に改めるか、実装を fast-glob 等へ置き換えて一般的な glob を正しく扱ってください。少なくとも base に対する regex 変換前に特殊文字をエスケープし、意図しないマッチ拡大を防ぐべきです。見つからなかったパターンは warning を出し、レビュー対象ゼロ件の理由が分かるようにすると運用での混乱を減らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "extractJson",
+    "issue": "JSON 抽出ロジックが正規表現ベースで貪欲に最初の [ から最後の ] までを拾うため、本文中に別用途の配列風テキストが混じると誤った範囲を parse しやすいです。さらにパース失敗時に raw_response を含む疑似 finding を返しており、本来のレビュー失敗とレビュー結果が同列に扱われます。責務が曖昧で後段集計の意味がぶれます。",
+    "suggestion": "抽出とバリデーションを分離し、モデル出力は『JSONのみ』でなければ失敗として扱うほうが安全です。どうしても回復処理を入れるなら、_metadata.errors のような別チャンネルに保持し、finding 配列へ混入させない設計にしてください。返却後は配列・必須キー・severity 値を検証し、不正要素は集計対象から除外するガードを追加すると堅牢になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "runJob / runPrecommitMode / 集計処理",
+    "issue": "results/items 配列に _metadata オブジェクトを push した上で同じ配列を severity 集計や件数表示に使っており、レビュー結果件数と実データ件数が一致しません。現在は severity 欠落で CRITICAL 数に入らない前提ですが、呼び出し側が純粋な findings 配列を期待すると誤動作します。データとメタ情報を同じ配列に入れる構造は保守性が低いです。",
+    "suggestion": "出力形式を { findings: [...], metadata: {...} } のオブジェクトに変更し、集計処理は findings のみを見るようにしてください。互換性を維持したい場合でも件数表示・CRITICAL 算出前に severity を持つ要素へ明示的に filter し、_metadata を除外する処理を共通関数化するとバグ混入を防げます。データ契約を README や仕様へ明記することも重要です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "withRetry / runPrecommitMode / MODEL_PRICES",
+    "issue": "5000ms バックオフ、retries=2/3、Gemini maxOutputTokens=16384、git diff maxBuffer=32MB、価格テーブルの固定値など、意味のある閾値が複数箇所に散在し��います。現時点で直ちに障害ではないものの、要件変更時に見落としや設定不整合を起こしやすく、運用チューニングも困難です。魔法の数字が責務をまたいで埋め込まれている点が気になります。",
+    "suggestion": "定数を CONFIG オブジェクトへ集約し、用途ごとに名前を付けてください。例として RETRY_BASE_DELAY_MS、PRECOMMIT_DIFF_MAX_BUFFER、DEFAULT_GEMINI_MAX_OUTPUT_TOKENS、DEFAULT_MODEL_PRICES などです。さらに CLI や環境変数で上書き可能にすると運用改善がしやすくなります。コメントだけで意味を補うのではなく、命名で意図が分かる形に寄せると保守負荷を下げられます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0396,
+    "input_tokens": 12853,
+    "output_tokens": 2356,
+    "model_id": "gpt-5.4"
+  }
+]

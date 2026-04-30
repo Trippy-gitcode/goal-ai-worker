@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §1.4, §3.5",
+    "issue": "チャット履歴ドロワー（S-21）を閉じる操作「左スワイプ」と、会話行の削除ボタンを露出させる操作「左スワイプ」が完全に競合しています。ユーザーがスワイプした際にどちらが発火するかシステムが判別できず、誤操作（意図せずドロワーが閉じる、または意図せず削除ボタンが出る）を確実に誘発します。",
+    "suggestion": "会話行の削除操作を「ロングプレスからのコンテキストメニュー表示」または「右スワイプ（ただしエッジスワイプに注意）」に変更し、ジェスチャーの競合を解消してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.4, §8.3",
+    "issue": "§8.3では「全タスクが完了」した時点で自動的にゴール達成演出がトリガーされる仕様ですが、§2.4では全タスク完了済みの場合は「[ゴール完了にする] ボタンが自動表示」され手動で押させる仕様となっており、ロジックが矛盾しています。",
+    "suggestion": "タスクありゴールの場合は、最後のタスク完了時に自動でゴール達成とする（ボタン表示は不要）仕様に統一してください。「ゴール完了にする」ボタンはタスクなしゴール専用のUIとして明確に分離してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.3, §2.3",
+    "issue": "TALK画面のタスク提案カードから「編集して登録」を選び、S-12（タスク追加モーダル）で「作成」を押した後の画面遷移が定義されていません。GROW画面に強制遷移するのか、TALK画面に留まるのか不明であり、ユーザーが迷うポイントになります。",
+    "suggestion": "作成完了後はTALK画面に留まり、元のタスク提案カードを「✅ 登録しました」状態に更新する旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §2.1",
+    "issue": "GROW画面が縦スクロールでTodayの下にGoalsが配置されているため、タスクが多数（例: 15件以上）ある場合、Goalsセクションがファーストビューから完全に押し出されます。スクロールしないと目標にアクセスできなくなり、アプリのコアバリューである「目標管理」のUXが著しく損なわれます。",
+    "suggestion": "TodayとGoalsをGROW画面内でサブタブ（Segmented Control）で切り替えるUIにするか、GoalsセクションをTodayの上に横スクロールのカード形式で配置して、常にアクセス可能にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "友達リストは最大500人まで登録可能ですが、検索機能やソート機能が定義されていません。2列グリッドで250行のスクロールが必要になり、特定の友達を探して応援やメッセージ���送るのが極めて困難になります。",
+    "suggestion": "FRIENDS画面の上部（ヘッダー下）にローカルフィルタリング用の検索バーを追加するか、ソート機能（レベル順、追加日順など）を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3",
+    "issue": "Undoスナックバーが「全タブに跨って表示を維持する」とありますが、表示中の30秒間にユーザーがS-14（ゴール詳細）やS-37（設定）などのフルスクリーン画面に遷移した場合、スナックバーがフルスクリーン画面の上に被さって表示され続けるのか、背面に隠れるのか定義されていません。",
+    "suggestion": "Undoスナックバーはボトムタブのルート画面（S-10, S-20, S-30）でのみ表示し、フルスクリーン画面やハーフモーダル表示中は背面に隠れる（ただし30秒のカウントダウンは裏で進行する）仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3",
+    "issue": "S-13タスク編集で「インラインモード遷移」とありますが、モ���ド切替時に元の「編集」「削除」などのボタン行がどう変化するのかが明記されていないため、保存操作のUIが不明確です。",
+    "suggestion": "インライン編集モード遷移時、パネル下部のボタン行を「キャンセル」「保存」ボタンに置き換える旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.2",
+    "issue": "S-06（新パスワード設定）、S-42（メール変更）、S-43（パスワード変更）、S-44（ブロックリスト）の画面IDが定義されていますが、§1.2の遷移マトリクスから漏れています。",
+    "suggestion": "§1.2のマトリクスに該当画面への遷移パス（S-02→S-05→S-06、S-37→S-42/43/44）を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.2",
+    "issue": "iOS PWAでキーボードが表示されると画面の約半分が占有されます。TALK画面にはヘッダーと入力バーがあるため、メッセージ領域が極端に狭くなり、直近の1〜2吹き出ししか見えなくなる恐れがあります。",
+    "suggestion": "キー��ード表示時はTALK画面のヘッダー（☰ TALK 🕐 📝）を非表示にするか、スクロールに応じて隠れるようにして、メッセージ領域の可視範囲を最大化してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.3",
+    "issue": "ヒアリング（5問）が通常のAI対話回数を消費する仕様です。Freeプランのユーザーが残り回数が少ない状態で開始し、途中で上限に達して翌日再開となる場合、前日の文脈を忘れてしまうなどUXが断絶します。",
+    "suggestion": "ヒアリングの5問はAI対話回数のカウントから除外する（システムメッセージ扱いとする）ことで、途中で上限に達するUXの断絶を防いでください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.4",
+    "issue": "7日ルールで「完了待ち」状態のゴールにタスクを追加すると完了待ちが解除されますが、そのタスクを即座に削除（またはUndo）した場合、元の「完了待ち（あとN日）」状態に正しく復帰できるか定義されていません。",
+    "suggestion": "完了待ち���除後にタスクが削除され、再び全タスク完了状態になった場合、元の7日カウントを維持したまま完了待ち状態に復帰する旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "5",
+    "issue": "明示的な CSP 設定が未定義（Phase B 管理下）。localStorage に認証トークンを保持する SPA では XSS 発生時の被害半径が大きく、防御層として CSP が重要。",
+    "suggestion": "サーバで強固な CSP を発行する。例: default-src 'self'; script-src 'self' 'nonce-<runtime-nonce>' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests; require-trusted-types-for 'script'（対応可能なら）。ビルドでハッシュ/ノンス自動付与、レポートエンドポイント設定も推奨。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "5",
+    "issue": "Supabase の RLS 有効化・ポリシー整備の実施状況が本パッケージからは不明（Phase B 記載あり）。RLS 未設定はデータ漏えいに直結。",
+    "suggestion": "全テーブルで RLS を有効化し、row-level で auth.uid() に基づく SELECT/INSERT/UPDATE/DELETE ポリシーを最小権限で定義。Anon 役割での���箱テストと pgTAP/自動回帰テストを追加。管理系は service_role ではなく RPC 経由 + 権限絞り込みで運用。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "5",
+    "issue": "service_role 等の機密キー流出対策は Phase B（gitleaks/CI）で計画済だが、現状のスニペットからは運用詳細が不明。",
+    "suggestion": "フロントエンドバンドルに service_role/秘密鍵を絶対に含めない。環境変数の公開/秘匿をビルド時に検証し、gitleaks を必須化。Supabase 公開 anon キーのみクライアントに配布し、レート制限・ドメイン制限も併用。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "5",
+    "issue": "CORS 設定の厳格化有無が不明。ワイルドカード + 認証付リクエストは CSRF 類似の悪用を招く可能性。",
+    "suggestion": "自前 API がある場合は Access-Control-Allow-Origin を厳密な許可オリジンに限定し、Allow-Credentials 使用時はワイルドカード禁止。プリフライト応答・メソッド/ヘッダも最小化。Supabase 側はプロジェクト設定の許可オリジンを限定。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "認証エラーを err.message のまま表示しており、ユーザー列挙や内部情報の露出を助長する可能性。",
+    "suggestion": "UI には常に汎用メッセージ（例:「メールまたはパスワードが違います」）のみを表示し、詳細はサーバログ/テレメトリへ。サインアップ時の「既存ユーザー」等の差異も UI では伏せる。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "5",
+    "issue": "本実装はトークンベースで CSRF の直接対象ではないが、将来的に Cookie ベースの state-changing エンドポイントを追加する場合の CSRF 防御要件が未記載。",
+    "suggestion": "Cookie ベース導入時は SameSite=Lax/Strict + Secure + HttpOnly を必須化し、CSRF トークン（同期トークン or 二重送信）と Origin/Referer 検証を実装。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "Supabase 認証トークンが localStorage に保持される設計は XSS 発生時の奪取リスクが高い（CSP なしの場合は特に）。",
+    "suggestion": "CSP を強化した上で、可能ならカスタム storage アダプタでメモリ保存（タブ閉鎖で消える）や「この端末を信頼する」時のみ永続化などを検討。トークン露出監視（Content-Security-Policy-Report-Only + ネットワーク監査）も併用。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.1",
+    "issue": "NotFound の遷移は '/terms' '/privacy' のホワイトリストに限定されオープンリダイレクトは現状なしだが、将来パスを可変にするとリスク化する可能性。",
+    "suggestion": "外部/動的リダイレクトが必要になった場合は、厳密な許可リストと同一オリジン検証（URL API でプロトコル/ホスト検査）を必須化。クエリ由来のパスは決してそのまま location.replace に渡さない。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体/grep",
+    "issue": "提供スニペット上は API キーやシークレット等のハードコードは検出されず（grep レベル）。ただし継続的な検知が必要。",
+    "suggestion": "CI での gitleaks/secretlint を強制。環境固有値は .env.* と Secret Manager に隔離し、PR 上での差分曝露を禁止。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体",
+    "issue": "XSS シンク（dangerouslySetInnerHTML/innerHTML）の使用は本差分では未検出。将来的な導入がリスク。",
+    "suggestion": "ESLint で react/no-danger を有効化し、テンプレート/Markdown レンダは DOMPurify 等でサニタイズ。ユーザー入力/外部入力は常にエスケープされる経路のみで描画。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

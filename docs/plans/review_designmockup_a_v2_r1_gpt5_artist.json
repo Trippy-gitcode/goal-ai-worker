@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」行のチェックボックス",
+    "issue": "チェックボックスの見かけのサイズが20×20pxで、デザインシステムのタップターゲット最小サイズ 44×44pxに満たない。",
+    "suggestion": "label全体にclick領域を拡張し、見かけは20pxのままでも ::before などで44×44pxの透明ヒットエリアを付与する（--tap-target-min適用）。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクションの各タスク行（09:00/12:00/18:00/20:30）",
+    "issue": "タスク間マージンが4px（style: margin-bottom:4px）で、デザインシステム §4.2「タスク間余白: 20px以上」に反している。リストが詰まって見え、可読性と誤タップリスクを高める。",
+    "suggestion": "タスク行の下マージンを --space-lg(24px) か最低でも20pxへ引き上げ、Open Airリズムを確保する。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "アバター/タブアイコン/ヒーロー周辺のビジュアル要素",
+    "issue": "全体として「ダーク×青アクセント×丸角」という汎用AI/開発者ツール的な既視感が強く、ブランドDNAの「実世界に根ざす個性（Night Skyの物語性）」が画面から立ち上がってこない。",
+    "suggestion": "Night Skyの星座/月光のモチーフを最小限の形（点配列・薄いアーク）で各画面に一貫して挿入。アバターもLais固有の造形/配色（肌/服の単色＋1段濃淡）を前面にし、タブアイコンはSF Symbols風から一段踏み込み、線端や角のRにLaisらしい癖を付ける。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s02_onboarding",
+    "location": "上部見出し（左寄せ）とアバター選択（中央寄せ）のブロック関係",
+    "issue": "見出しが左寄せ、選択肢が中央寄せでブロックの重心がズレ、画面中央に生まれている大きな余白が「設計された沈黙」というより単なる空洞に見える。",
+    "suggestion": "見出しとアバター選択の重心を揃える（どちらかに寄せる）。またはアバター群を一段大きくし、見出し直下の説明文との間を--space-xlで接続して視線の落下を連続化する。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "12:00『ジムで筋トレ』の左ボーダー（#D29922）と他タスクのボーダー色の違い",
+    "issue": "左ボーダー色がタスクごとに異なるが、意味（期限接近/ゴール色/状態）が画面上で説明されず、セマンティックかブランドアクセントかの区別が不明瞭。",
+    "suggestion": "§2.2/§2.4の役割分離に従い、期限切れはdanger（赤）＋3pxバー、ゴール色は小ドット、選択/完了はアクセント系など、色の意味を一貫化。必要ならToday見出し付近に小さな凡例を置く。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "入力バー内のプレースホルダ「メッセージを入力...」（背景#161B22 上の #7A8593）",
+    "issue": "小サイズのプレースホルダテキストのコントラストが背景に対して十分でない可能性が高い（#7A8593 on #161B22でAAの4.5:1を下回る推定）。薄さと小ささが重なり可読性が低い。",
+    "suggestion": "placeholderの色を--text-secondary（#9BA7B4相当）へ引き上げるか、背景を#0D1117に寄せてコントラストをAA≥4.5:1に確保。併せてフォントサイズ16px以上/行高の確保で視認性を底上げする。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "ロゴと星粒の周辺、ボタン群直上の広い余白帯",
+    "issue": "ロゴ周囲の星粒が極小かつ散発的で、中心性を生まず画面の主題が弱い。下部CTAsとの間に「間延び」印象が出ている。",
+    "suggestion": "Night Skyの物語性を一筆書きの星座アーク/薄い円弧グローでロゴ背後に敷き、余白を「設計された沈黙」として機能させる。ボタン群は--space-xl上方に引き、視線の落下をロゴ→キャッチ→CTAへ連続化。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "基本情報リストと下部リンク群の区切り線（多用される1pxボーダー）",
+    "issue": "ボーダーの反復が多く、Open Airの余白リズムよりも「線」で区切る印象が勝ち、静けさをやや損なっている。",
+    "suggestion": "区切り線を間引き、ブロック間は--space-xlで分節。必要な箇所のみ--border-strongを使い、他は余白とタイポ階層で区切る。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "OTHER",
+    "screen": "s12_task_add",
+    "location": "タイトル入力フィールド（フォーカス時の二重強調：border + 3px outline）",
+    "issue": "フォーカス時の視覚強度が高く、周囲要素より浮き過ぎる。暗所でハロー感が出て視線を奪う。",
+    "suggestion": "outlineを2px/より低アルファへ弱めるか、border色のみで強調。あるいは--accent-subtleの内側グローを薄く併用して静かな強調に調整。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "アクション行「編集」「削除」ボタン（横並び・同サイズ）",
+    "issue": "破壊的操作の「削除」が「編集」と同ウェイト/面積で並び、主副の優先度が視覚に反映されていない。",
+    "suggestion": "編集=主要（ボタン/アクセント縁取り）、削除=テキストリンクか細身アウトラインに落とす。十分な��隔（--space-sm以上）と危険色は最小限で注意喚起に留める。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域のEXPバー（高さ4px）と初期レイアウト",
+    "issue": "画面最上部で既にコンパクト様式（4pxバー/小アバター）になっており、UX仕様 §2.2の「通常状態（EXPバー高さ8px、アバター80px）」の初期体験が再現されていないように見える。",
+    "suggestion": "初期表示は通常サイズ（EXP 8px/アバター80px/2行構成）→スクロールで縮小に遷移。トークンで2段階の高さ/タイポを切り替える。",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

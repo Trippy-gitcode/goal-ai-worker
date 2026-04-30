@@ -1,0 +1,30 @@
+12:- Hooks: `PostToolUse` and `PostToolUseFailure` hook inputs now include `duration_ms` (tool execution time, excluding permission prompts and PreToolUse hooks)
+83:- Fixed agent-type hooks failing with "Messages are required for agent hooks" when configured for events other than `Stop` or `SubagentStop`
+237:- Windows: `CLAUDE_ENV_FILE` and SessionStart hook environment files now apply (previously a no-op)
+268:- Fixed `PreToolUse` hook `additionalContext` being dropped when the tool call fails
+314:- Added PreCompact hook support: hooks can now block compaction by exiting with code 2 or returning `{"decision":"block"}`
+374:- Fixed `permissions.deny` rules not overriding a PreToolUse hook's `permissionDecision: "ask"` — previously the hook could downgrade a deny into a prompt
+441:- Fixed prompt-type Stop/SubagentStop hooks failing on long sessions, and hook evaluator API errors showing "JSON validation failed" instead of the real message
+481:- Fixed prompt-type `Stop`/`SubagentStop` hooks failing on long sessions, and hook evaluator API errors displaying "JSON validation failed" instead of the actual message
+519:- Added `hookSpecificOutput.sessionTitle` to `UserPromptSubmit` hooks for setting the session title
+550:- Fixed prompt-type Stop hooks incorrectly failing when the small fast model returns `ok:false`, and restored `preventContinuation:true` semantics for non-Stop prompt-type hooks
+589:- Fixed `PreToolUse` hooks that emit JSON to stdout and exit with code 2 not correctly blocking the tool call
+605:- Added `"defer"` permission decision to `PreToolUse` hooks — headless sessions can pause at a tool call and resume with `-p --resume` to have the hook re-evaluate
+624:- Fixed PreToolUse/PostToolUse hooks to receive `file_path` as an absolute path for Write/Edit/Read tools, matching the documented behavior
+700:- PreToolUse hooks can now satisfy `AskUserQuestion` by returning `updatedInput` alongside `permissionDecision: "allow"`, enabling headless integrations that collect answers via their own UI
+919:- Added `StopFailure` hook event that fires when the turn ends due to an API error (rate limit, auth failure, etc.)
+926:- Fixed infinite loop when API errors triggered stop hooks that re-fed blocking errors to the model
+954:- Fixed PreToolUse hooks returning `"allow"` bypassing `deny` permission rules, including enterprise managed settings
+1085:- Fixed SessionStart hooks firing twice when resuming a session via `--resume` or `--continue`
+1257:- Fixed plugin Stop/SessionEnd/etc hooks not firing after any `/plugin` operation
+1286:- Fixed `TeammateIdle` and `TaskCompleted` hooks to support `{"continue": false, "stopReason": "..."}` to stop the teammate, matching `Stop` hook behavior
+1490:- Improved startup performance by deferring SessionStart hook execution, reducing time-to-interactive by ~500ms.
+1504:- Added `last_assistant_message` field to Stop and SubagentStop hook inputs, providing the final assistant response text so hooks can access it without parsing transcript files.
+1540:- Fixed hooks (PreToolUse, PostToolUse) silently failing to execute on Windows by using Git Bash instead of cmd.exe (anthropics/claude-code#25981)
+1888:- Added support for `PreToolUse` hooks to return `additionalContext` to the model
+1972:- Added `agent_type` to SessionStart hook input, populated if `--agent` is specified
+2005:- Fixed PreToolUse hooks to allow `updatedInput` when returning `ask` permission decision, enabling hooks to act as middleware while still requesting user consent
+2017:- Added hooks support to agent frontmatter, allowing agents to define PreToolUse, PostToolUse, and Stop hooks scoped to the agent's lifecycle
+2338:- Added `tool_use_id` field to `PreToolUseHookInput` and `PostToolUseHookInput` types
+2348:- Added `agent_id` and `agent_transcript_path` fields to `SubagentStop` hooks.
+2352:- Added `model` parameter to prompt-based stop hooks, allowing users to specify a custom model for hook evaluation

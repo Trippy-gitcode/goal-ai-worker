@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "4. lais/src/lib/supabase.js",
+    "issue": "アクセストークン/リフレッシュトークンが localStorage（storageKey=lais.auth）に保存されるため、万一XSSが発生した場合にトークン窃取の影響が大きい。",
+    "suggestion": "ホスティング側で強力なCSP（script-src 'self' <nonce>；object-src 'none'；base-uri 'none'；frame-ancestors 'none' 等）を導入し、インラインスクリプト禁止＋Nonce運用を徹底。可能ならアプリ層でTrusted Typesを有効化。将来的にサーバ仲介（HttpOnly/SameSite Cookieベースのセッション管理）へ移行できる構成を検討。少なくともサブリソース整合性（SRI）と依存のロックを行う。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "4. lais/src/lib/supabase.js",
+    "issue": "クライアントが publishable/anon どちらのキーでも動作する実装のため、誤って service_role キーをフロントに設定しても検知できず、致命的な権限漏えいに繋がるリスクがある。",
+    "suggestion": "起動時にキー検証を追加し、JWTのroleクレームが'service_role'の場合は即座に例外を投げる（sb_publishable_* 形式のみ許可などのガード）。CIでgitleaks等を用いた秘密情報スキャンを強制し、VITE_SUPABASE_SERVICE_ROLEのような変数はフロントビルドで拒否。運用手順書に「service_roleをクライアントに渡さない」を明記。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S01Auth.jsx",
+    "issue": "サーバエラー文言（err.message）をそのままユーザーに表示しており、メール登録済み等の情報を推測されるユーザー列挙の足掛かりになり得る。",
+    "suggestion": "signUp/signIn失敗時の表示は常に汎用メッセージ（例:「メールアドレスまたはパスワードが正しくありません」）に統一し、詳細はSentry等にのみ送る。サインアップ時の「既存ユーザー」エラーも同様にマスクする。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "全体（Supabase Auth 設定）",
+    "issue": "ブルートフォース/クレデンシャルスタッフィング対策（レート制限やCAPTCHA等）の記載��実装が見当たらない。",
+    "suggestion": "Supabase Auth（GoTrue）側でIP/メールアドレス単位のレート制限を有効化・調整し、連続失敗時のクールダウンを設定。必要ならreCAPTCHA等のボット対策をサインアップに導入。クライアント側でも短時間の指数的バックオフを実装。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "全体（インフラ/ホスティング）",
+    "issue": "CSP/主要セキュリティヘッダの要件定義がパッケージ内になく、デフォルトのままデプロイされるとXSSやクリックジャッキングの影響が大きくなる。",
+    "suggestion": "ホスティングで以下を設定: 1) Content-Security-Policy（厳格なscript-src、object-src 'none'、base-uri 'none'、frame-ancestors 'none'、upgrade-insecure-requests等）、2) Referrer-Policy: no-referrer（またはsame-origin）、3) X-Content-Type-Options: nosniff、4) Permissions-Policyで不要権限を無効化、5) Strict-Transport-Securityを有効化。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "全体（Supabase プロジェクト設定）",
+    "issue": "CORS/リダイレク��URLの制約が不明。ワイルドカード許可のままだと将来的なOAuth/リダイレクト処理での悪用リスクが上がる。",
+    "suggestion": "SupabaseのAuth設定でSite URL/Redirect URLsを正確なオリジン・パスに限定。StorageのCORSも許可オリジンを明示し、'*'を避ける。不要なHTTPメソッド/ヘッダの許可を外す。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx",
+    "issue": "将来的にリダイレクト先をクエリ等で外部から与える仕様にするとオープンリダイレクトの温床になり得る。",
+    "suggestion": "認証後の遷移先はサーバ/クライアント双方で許可リストを使用し、外部ドメインやスキームを拒否するバリデーションを実装。現在の固定'/'遷移は安全なため維持する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S01Auth.jsx",
+    "issue": "email/passwordのトリミング・正規化がなく、ユーザー体験の悪化やログイン失敗の原因になり得る（セキュリティ上の重大性は低）。",
+    "suggestion": "送信前���emailをtrim()し、小文字化（toLowerCase）を検討。パスワードはtrimしないが前後の不可視文字を警告。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S01Auth.jsx",
+    "issue": "利用規約同意はクライアント側UIでのみ強制されており、改変されたクライアントやAPI直叩きでは担保できない。",
+    "suggestion": "サインアップ完了時に同意フラグ（タイムスタンプ/IP/バージョン）をバックエンドに保存し、以後の利用に必須とする。RPC/Edge Function を介して作成時にサーバ側で検証する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S01Auth.jsx",
+    "issue": "将来的に外部リンク（利用規約/プライバシーポリシー）が外部ドメインになる場合、ターゲットの扱いによりタブ乗っ取り（reverse tabnabbing）の可能性がある。",
+    "suggestion": "外部リンクをtarget=\"_blank\"にする際は必ずrel=\"noopener noreferrer\"を付与。現状'#'でpreventDefaultしているが、実URL設定時に適用する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（CSRF 評価）",
+    "issue": "現状はBearerトークン（Authorizationヘッダ）でのAPI呼び出しのためCSRFは非適用だが、将来的にCookieベースのエンドポイントを導入するとCSRF対策が必要になる。",
+    "suggestion": "Cookieベースの状態変更エンドポイントを追加する場合、SameSite=Lax/Strict, Secure, HttpOnly, CSRFトークン（二重送信/同期トークン/Origin検証）を必須化する設計指針をドキュメント化。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "リポジトリ全体（grep チェック）",
+    "issue": "ハードコードされたAPIキー/シークレットは現状検出されず、秘匿情報の直接露出は見当たらない（grepレベル確認）。",
+    "suggestion": "この状態を維持するため、pre-commitでgitleaks/trufflehog等のシークレットスキャンを強制し、.env.*はリポジトリに含めない。誤コミット時に自動失効・ローテーションできる運用を整備。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

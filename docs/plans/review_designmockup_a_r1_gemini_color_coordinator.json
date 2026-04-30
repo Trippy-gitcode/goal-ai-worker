@@ -1,0 +1,79 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "Primaryボタン（s00「はじめる」、s02「次へ」、s12/s15「作成」）",
+    "issue": "ボタンが明るい水色背景に黒文字で実装されている。デザインシステム仕様（--button-primary-bg: #1A5FC8, 白文字）と異なり、ブランドの洗練されたトーンを損なっている。",
+    "suggestion": "仕様通り、濃いブルー（#1A5FC8）の背景に白文字（#FFFFFF）を使用し、ブランドDNAとコントラストを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「利用規約���「プライバシーポリシー」「ログイン」のテキストリンク",
+    "issue": "リンクが色（青）のみで表現されており、下線がない。仕様（2.2）およびWCAG 1.4.1（色のみでの情報伝達禁止）に違反している。",
+    "suggestion": "インラインリンクには必ず `text-decoration: underline` を適用し、色以外の手掛かりを提供する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow, s13_task_detail",
+    "location": "s10のタスク行右端の小ドット、s13のゴール名「副業」左側の小ドット",
+    "issue": "ゴールの紐付けを色ドットのみで表現しており、色覚多様性のあるユーザーに情報が伝わらない（WCAG 1.4.1違反）。",
+    "suggestion": "色だけでなく、形状を変える（例：特定のアイコンを使用する）か、短いテキストラベルを併記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "「買い物リストを作る」入力フィールド",
+    "issue": "フォーカス状態がボーダーの色の変化のみで示されており、仕様で指定された `outline-offset: 2px` を伴うアウトラインが適用されていない。視認性が不十分（WCAG 2.4.11）。",
+    "suggestion": "仕様通り、要素の外側にオフセットを持たせたアウトライン（outline: 3px solid var(--accent); outline-offset: 2px;）を描画する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add, s14_goal_detail, s15_goal_create",
+    "location": "「単発タスク」「30分」「仕事」などのアクティブ状態のチップ",
+    "issue": "ダークブルーの背景に水色のテキストが使用されており、テキストのコントラスト比がWCAG AAの基準（通常テキスト4.5:1）を満たしていない可能性が高い。",
+    "suggestion": "チップのアクティブ状態の背景色またはテキスト色を調整し、十分なコントラスト比（4.5:1以上）を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "ヘッダー右側のアイコン",
+    "issue": "UX仕様書（3.1）では履歴（🕐）と新規チャット（📝）のアイコンを配置するよう指定されているが、モックアップでは「＋」アイコン1つのみになっている。",
+    "suggestion": "UX仕様に従い、履歴アイコンと新規チャットアイコンの2つを配置するレイアウトに修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "「削除」ボタン",
+    "issue": "ダークグレーの背景に暗めの赤文字が使用されており、コントラスト比が4.5:1を満たしていない（WCAG 1.4.3違反）。",
+    "suggestion": "赤文字の明度を上げるか、ボタンの背景色を調整して、テキストのコントラスト比4.5:1以上を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  }
+]

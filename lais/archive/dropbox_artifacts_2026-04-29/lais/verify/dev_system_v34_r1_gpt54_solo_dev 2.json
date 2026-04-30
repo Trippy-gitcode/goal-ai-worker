@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§3.1.A / §3.1.B / 改訂案① A-B",
+    "issue": "§0 Step 0-2 で「§共通行動規範集 §C1-C6 は全層で必須Read」としつつ、§3.1 PO起動時Readには session_progress.md しか含まれていない。§0と§3.1が相互矛盾しており、POが仕様通りに動くとどちらかに必ず違反する。",
+    "suggestion": "POを§C1-C6必須Read対象から明示的に除外するか、§3.1に§C1-C6を追加して整合させる。§0の「全層で必須Read」と§3.1-§3.3の実リストを完全一致させること。",
+    "model": "GPT-5.4",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "改訂案① E / 改訂案③ C / 改訂案⑤ D-E / 総合サマリー",
+    "issue": "品質ゲート番号が破綻している。改訂案①でG11新設、改訂案③でG12新設、改訂案⑤でG13新設としている一方、development_rules.md の対象は「G1-G9」や「G1-G10」と揺れており、Step 0適用一覧でもdevelopment_rules.mdはG1-G9のみ。どのゲート集合が正本か不明で、参照整合が崩れる。",
+    "suggestion": "G1-G13までの正規一覧を1箇所で再定義し、dev_system_spec / development_rules.md / Step 0適用一覧 / 各改訂案サマリーの表記を統一する。",
+    "model": "GPT-5.4",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "改訂案① F / 改訂案⑦ D",
+    "issue": "CLAUDE.md の起動時Read指示では dev_system_spec.md §0 → §3.3 → §C1-C6 までしか強制していないが、改訂案⑦サマリーでは「改訂案①で §3.3 ENG起動時Read に §4.7.1 / §8.1 / §16.8 を含める」と記載している。しかし実際の§3.3案にはその3節が含まれていない。仕様本文とサマリーが矛盾している。",
+    "suggestion": "§3.3のRead対象に§4.7.1 / §8.1 / §16.8を正式追加するか、改訂案⑦側の記述を削除してStep 0参照のみで読む設計に統一する。",
+    "model": "GPT-5.4",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§3.1 改訂案① 全体",
+    "issue": "セッション起動時の必須Read量がソロ開発運用として重い。ADVは session_progress全文 + bootstrap + CLAUDE契約 + dev_system目次 + §C1-C6全文 + sub_adv_protocol全文 + po-decisions直近10件 + learned-patterns目次、ENGも CLAUDE全文 + rules全文 + session_progress全文 + §C1-C6���文 + learned-patterns + po-decisions を毎回必須化している。短時間の修正や再開でも同量Readを要求するため、起動コストが高すぎて実務上の遵守率低下が高確度で起きる。",
+    "suggestion": "起動時Readを「毎回必須」と「条件付き再読」に分離する。例: 毎回は5行サマリー・キュー先頭・現在ミッション関連節のみ、§C1-C6や全文系は新セッション初回/仕様更新後/compact後のみ必須にする。",
+    "model": "GPT-5.4",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案① E-F",
+    "issue": "全22フローへのStep 0追加とG11による存在検証は、規範本文を1箇所に集約する利点よりも保守コストが大きい。22箇所の見出し名・表記揺れ・節番号変更に追従し続ける必要があり、仕様改編のたびにlintが壊れやすい。ソロ開発での認知負荷・編集負荷が高い。",
+    "suggestion": "Step 0は上位章単位やファイル単位に集約し、22フロー個別追記をやめる。G11も『全フロー』ではなく『対象ファイルの冒頭に起動参照節が存在する』程度の粗い検証に下げる。",
+    "model": "GPT-5.4",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案④ A-D",
+    "issue": "cmd-unit/cmd-e2e/cmd-realworldの3区分必須 + N/A理由必須は、ドキュメント/小修正/局所修正のたびに3欄を埋める追加事務コストが発生する。特にソロ開発では『実行すべきテスト』より『N/A理由の記述』に時間を取られやすく、運用コストが価値を上回る可能性が高い。",
+    "suggestion": "3区分必須は高リスク系ミッションのみに限定し、低リスク系は mission_type から省略可能な欄を自動決定する。少なくとも N/A理由必須は認証・デプロイ・複数画面のみへ限定する。",
+    "model": "GPT-5.4",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案③ A-E",
+    "issue": "提案ログの手動ステータス管理と『各セッション開始時に全項目の滞留セッション数を+1』は、ソロ開発者に継続的な事務更新を強いる。項目数が増えるほど毎セッションの手動更新が定常負荷になり、未更新そのものが新たな違反源になる。",
+    "suggestion": "滞留セッション数は手書き管理ではなく、最終更新セッションIDや日付からlint側で算出する方式に変更する。手���管理するならWAITING_POのみ対象に絞る。",
+    "model": "GPT-5.4",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案③ A / 改訂案① §3.3",
+    "issue": "§3.3 ENGは『キュー先頭のミッション定義に書かれた完了コマンド以外を実行しない』とされる一方、改訂案③ではENG/ADVが提案ログに[SUGGESTED]を起票できる。ミッション外で提案ログ更新を行うと§3.3違反になり得て、実務フローが衝突している。",
+    "suggestion": "提案ログ更新を『完了コマンド以外』の例外操作として§3.3に明記するか、提案起票はADV専任に限定してENGから外す。",
+    "model": "GPT-5.4",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "総合サマリー / 全体",
+    "issue": "dev_system_spec.mdが約1,900行、sub_infrastructure.mdが約1,200行へ増える想定で、運用仕様全体がさらに肥大化している。ソロ開発者が単独で継続保守するには変更影響範囲の把握が難しく、将来的に『ルールはあるが読まれない』状態になりやすい。",
+    "suggestion": "正本は維持しつつ、日常運用用に『最小運用版』の索引/チェックリストを別途用意し、長文仕様は参照専用に分離する。少なくとも起動・実装・終了の3枚に要約する。",
+    "model": "GPT-5.4",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改訂案② B-D",
+    "issue": "verify_external_services.sh はAPIキー未設定時をWARN扱いとしているが、§8 Step 11では外部連携確認を完了条件に近い位置づけで記述している。WARNでも先に進める設計だと、重要な連携未検証が常態化する恐れがある。",
+    "suggestion": "認証・決済など高リスク連携はWARN不可、その他のみWARN可など、サービス種別ごとのFAIL/WARN基準を明文化する。",
+    "model": "GPT-5.4",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "改訂案⑤ D",
+    "issue": "G13のサブディレクトリ判定が『.dev-system.version と親 .git の存在』になっているが、通常のスタンドアロンリポジトリでも親ディレクトリに別の.gitが存在し得るため誤判定の余地がある。判定基準が曖昧でフック検証結果が不安定になる。",
+    "suggestion": "subdirモードは init_app.sh 実行時に明示フラグファイルを置くなど、構成を一意に��すマーカーで判定する。",
+    "model": "GPT-5.4",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "改訂案⑥ 全体",
+    "issue": "Hフロー追加は有用だが、既存のDレビュー・§8 Step12実機スモーク・外部APIレビューにさらに別カテゴリを重ねるため、ソロ開発のレビュー総量が増える。大型機能・Phase A完了・デプロイ後の3タイミング指定でも、1人運用では回し切れない可能性がある。",
+    "suggestion": "Hフローは認証/決済/外部連携ありのケースに限定するか、DまたはStep12の成果物を流用して追加作業を最小化するルールを明記する。",
+    "model": "GPT-5.4",
+    "persona": "solo_dev"
+  }
+]

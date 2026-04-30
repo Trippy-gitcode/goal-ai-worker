@@ -1,0 +1,58 @@
+[
+  {
+    "id": "R-001",
+    "verdict": "STAND",
+    "reason": "現行モックはfocus-visibleの定義が見当たらず、主要操作でフォーカス可視化が保証されていない。:focus-visible/outline-offset/forced-colorsは静的HTMLでも実装可能。Phase4送りは言い訳。今ここで全要素に統一適用すべき。",
+    "harsh_comment": "フォーカスリング後回し癖は最悪の反パターン。実装末期に泥縄対応して全体破綻、を何度繰り返すつもりですか。今、設計原則として打ち込め。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "verdict": "STAND",
+    "reason": "インタラクティブ要素をdivで実装しており、標準のロール/フォーカス/キーボード作動が欠落。button/aへの置換はモック段階で可能でJS不要。ARIAで上塗りするより本質的解決を。2.1.1/4.1.2の根本違反、先送り不可。",
+    "harsh_comment": "divボタンは初級ミス。設計の負債を積むだけ。アクセシビリティを「装飾」扱いする姿勢を改めろ。まずHTMLを正せ。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "verdict": "STAND",
+    "reason": "s10の完了トグルは視覚もヒット領域も22pxで2.5.5不適合リスク大。ほかで実施した44×44ラッパーを当該要素にも適用すれば即解決。コア操作の可用性は聖域、Phase4言い訳は通用しない。",
+    "harsh_comment": "親指は22px精密操作ロボットではない。タップ外しで離脱を誘発するな。44px基準は宗教ではなくデータだ。即対応。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "verdict": "STAND",
+    "reason": "オンボ進捗は色だけの差で現ステップが判別不能。1.4.1に抵触。各画面に「n/5」テキストと太さ/アウトライン等の形状差、aria-valuenow/min/maxの静的付与は今すぐ可能。改善を先送りする理由なし。",
+    "harsh_comment": "色だけUIはもう時代遅れ。計測不能な「なんとなく分かる」は禁止。数字と形で保証せよ。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "verdict": "STAND",
+    "reason": "問題は本文内「ログイン」リンク。提示の下線実装は「利用規約/プライバシー」で別要素。ここは依然として色のみ区別で1.4.1/DS不整合。本文内リンクは常時下線が原則。混同での自己合格は不可、即修正。",
+    "harsh_comment": "すり替え弁明は逆効果。対象要素を取り違えている。粒度を合わせて是正しろ。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "verdict": "STAND",
+    "reason": "「削除」アウトラインの境界は背景に沈み3:1未満の恐れ。非テキストコントラスト1.4.11違反。--border-strong相当に上げるか、塗り潰しdanger化で確実に見えるように。CSS一行で解決、先送り不要。",
+    "harsh_comment": "危険操作が見えにくいのは最悪。ユーザーの指を止めるべき場面で見えないボタンは罪。境界を上げるか塗れ。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "verdict": "STAND",
+    "reason": "ボトムシートにrole=\"dialog\" aria-modal/labelledbyが無く意味構造が欠落。これらは静的HTMLで今付けられる。フォーカストラップや戻るキー抑止はPhase4で良いが、土台のARIA欠落は容認不可。Phase3で必ず適用。",
+    "harsh_comment": "モーダルのARIA無しは「ただのdiv」。意味のない箱を量産するな。土台が無ければ実装段で全て破綻する。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

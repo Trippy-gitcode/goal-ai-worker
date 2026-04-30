@@ -1,0 +1,273 @@
+/*
+ * S-02 Onboarding — design_spec_v1.md §4.3 準拠
+ * トークンは全て design_system.md §2〜§7 を参照（LP-011: 魔法の数字禁止）
+ */
+
+/*
+ * R2-CRIT R-101 fix: env() の第 2 引数（フォールバック）は CSS 仕様では
+ * 有効だが、主要ブラウザ実装での誤解リスク + レビュアー指摘に合わせて
+ * 段階的フォールバック（@supports 上書き）に変更する。
+ * 1) まず env() 不使用の値を設定
+ * 2) @supports で対応ブラウザのみ safe-area 加算に上書き
+ */
+.s02-onboarding {
+  min-height: 100dvh;
+  background: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+  padding: var(--space-lg) var(--space-lg)
+    calc(100px + 52px + var(--space-md));
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * R3-CRIT R-201 fix (WCAG 2.4.7 Focus Visible):
+ * LP-002 で SPA 遷移直後に main へ programmatic focus() を行うため、
+ * 無条件の `outline: none` はキーボードユーザーからもインジケータを奪う。
+ * :focus-visible を使って「キーボード駆動以外の focus（programmatic focus）」
+ * のみ outline を抑制し、キーボードユーザーには従来通り可視リングを出す。
+ */
+.s02-onboarding:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.s02-onboarding:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .s02-onboarding {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 100px + 52px + var(--space-md));
+  }
+}
+
+/* S02-1 戻るボタン ------------------------------------------------------- */
+.s02-nav {
+  display: flex;
+  align-items: center;
+  min-height: 44px; /* タップ領域 44×44 確保 */
+}
+
+.s02-back {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--theme-color-text);
+  cursor: pointer;
+  border-radius: var(--theme-radius-md);
+  transition: background-color var(--theme-motion-fast) var(--theme-motion-easing);
+}
+
+.s02-back:hover {
+  background: var(--accent-subtle);
+}
+
+.s02-back:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* S02-2 進捗バー --------------------------------------------------------- */
+.s02-progress {
+  display: flex;
+  gap: 8px; /* 仕様値固定: §4.3「gap 8px」。トークン化されていない S-02 固有値 */
+  margin-top: var(--space-lg);
+  padding: 0;
+}
+
+/*
+ * R-002 a11y fix (WCAG 1.4.1 Use of Color):
+ * 進捗状態を色だけで伝えると色覚多様性ユーザーが判別不能。
+ * 未完了バーは outline のみ、完了バーは塗りつぶしで形状差をつける。
+ * 併せて .s02-progress-label に「2/5」テキストを常時表示する。
+ */
+.s02-progress-bar {
+  flex: 1;
+  height: 3px; /* §4.3 固定値 */
+  border-radius: var(--theme-radius-pill);
+  background: transparent;
+  border: 1px solid var(--theme-color-border-strong);
+  transition:
+    background-color var(--theme-motion-normal) var(--theme-motion-easing),
+    border-color var(--theme-motion-normal) var(--theme-motion-easing);
+}
+
+.s02-progress-bar-done {
+  background: var(--theme-color-accent);
+  border-color: var(--theme-color-accent);
+}
+
+.s02-progress-label {
+  margin: var(--space-sm) 0 0;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+/* S02-3 タイトル --------------------------------------------------------- */
+.s02-title {
+  margin: var(--space-2xl) 0 0;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: var(--theme-font-letter-spacing-tight);
+  line-height: var(--theme-font-line-height-heading);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-display);
+}
+
+/* S02-4 補助テキスト ----------------------------------------------------- */
+.s02-subtitle {
+  margin: var(--space-sm) 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--theme-color-text-muted);
+  line-height: var(--theme-font-line-height-body);
+}
+
+/* S02-5 アバター選択肢 --------------------------------------------------- */
+/*
+ * R-001 a11y fix (WCAG 1.4.10 Reflow):
+ * 固定 100px × 3 列では 320px 幅端末や 200% ズーム時に
+ * 水平スクロールが発生する。最小 72px まで比例縮小し、
+ * iPhone SE (375px) 以上では 100px のまま表示される。
+ */
+.s02-avatars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(72px, 100px));
+  justify-content: center;
+  gap: clamp(12px, 4vw, var(--space-lg));
+  margin-top: var(--space-2xl);
+}
+
+.s02-avatar {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 100px;
+  border-radius: 50%;
+  border: 1px solid var(--theme-color-border-strong);
+  background: var(--theme-color-bg-elevated);
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: var(--theme-shadow-sm);
+  transition:
+    border-color var(--theme-motion-fast) var(--theme-motion-easing),
+    box-shadow var(--theme-motion-normal) var(--theme-motion-easing),
+    transform var(--theme-motion-normal) var(--theme-motion-easing-spring);
+}
+
+.s02-avatar:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.s02-avatar-inner {
+  width: 72px;
+  height: 72px;
+  display: block;
+}
+
+.s02-avatar-inner svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.s02-avatar-selected {
+  border: 2px solid var(--theme-color-accent);
+  box-shadow: 0 0 0 4px var(--theme-color-accent-subtle), var(--theme-shadow-md);
+}
+
+/*
+ * LP-001: spring アニメーション
+ * scale(0.98 → 1.02 → 1) 350ms — §4.3 状態・インタラクション
+ * JS 側で class 付与 → setTimeout で除去する方式
+ */
+.s02-avatar-tapping {
+  animation: s02-avatar-tap var(--duration-normal) var(--spring-default) both;
+}
+
+@keyframes s02-avatar-tap {
+  0%   { transform: scale(0.98); }
+  50%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* S02-6 次へ CTA --------------------------------------------------------- */
+/*
+ * R-002/R-003 spec fix:
+ * §4.3「画面下 100px / 幅 100% - --space-lg*2 / 高さ 52px / 下端固定」
+ * → position: fixed で画面下端 100px に固定、
+ *   left/right を --space-lg に設定して実効幅を「100% - --space-lg*2」に一致。
+ * iOS safe-area 対応のため bottom に safe-area-inset-bottom を加算。
+ */
+.s02-next {
+  position: fixed;
+  left: var(--space-lg);
+  right: var(--space-lg);
+  bottom: 100px;
+  min-height: 52px;
+  background: var(--theme-color-accent);
+  color: var(--theme-color-text-inverse);
+  border: none;
+  border-radius: var(--theme-radius-lg);
+  font-family: var(--theme-font-base);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: var(--theme-font-letter-spacing-normal);
+  line-height: 1.25;
+  cursor: pointer;
+  box-shadow: var(--theme-shadow-md);
+  transition:
+    background-color var(--theme-motion-fast) var(--theme-motion-easing),
+    opacity var(--theme-motion-fast) var(--theme-motion-easing);
+}
+
+.s02-next:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.s02-next:disabled,
+.s02-next[aria-disabled='true'] {
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
+  cursor: not-allowed;
+}
+
+/* R2-CRIT R-101 fix: env() 対応ブラウザのみ safe-area を加算 */
+@supports (bottom: env(safe-area-inset-bottom)) {
+  .s02-next {
+    bottom: calc(env(safe-area-inset-bottom) + 100px);
+  }
+}
+
+/*
+ * LP-001: prefers-reduced-motion 対応
+ * design_system.md §7.6 でグローバル token 縮退されるが、
+ * 念のため本コンポーネントでも明示的にアニメーションを無効化する。
+ */
+@media (prefers-reduced-motion: reduce) {
+  .s02-avatar,
+  .s02-next,
+  .s02-back,
+  .s02-progress-bar {
+    transition: none;
+  }
+  .s02-avatar-tapping {
+    animation: none;
+  }
+}

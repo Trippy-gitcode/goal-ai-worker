@@ -1,0 +1,145 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "「所要時間」チップ群（5分〜120分）",
+    "issue": "各チップのタップ領域がpadding: 6px 14pxで高さが約30px前後。design_system §4.5の最小44×44pxに未達",
+    "suggestion": "各チップを高さ44px以上にする（min-height: 44px + line-height調整）または::beforeで透明ヒットエリアを拡張。横スクロール時も44pxを維持",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾の「+ タスクを追加」",
+    "issue": "コンテナがpadding: 10px 0で視覚高さが約20px強。タップターゲット最小44pxに未達",
+    "suggestion": "行全体を押下可能にし、高さ44pxを確保（padding増量または透明クリック領域）。アイコン＋下線やピル背景などでボタン化して認知も補強",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧下部の「+ タスクを追加」リンク行",
+    "issue": "padding: 8px 0で高さが最小44pxに満たない。細いテキストのみで可用性が低い",
+    "suggestion": "高さ44px以上のタップ領域を確保し、左に＋アイコン＋下線でインタラクティブ性を多重化。色以外の手掛かりも付与",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s01_signin",
+    "location": "「利用規約に同意します」チェックボックス",
+    "issue": "チェックボックスが20×20pxで§4.5の最小44×44pxに未達。誤タップの恐れ",
+    "suggestion": "ボックス自体を44×44pxに拡大し、ラベル全体にもクリック領域を拡張（label要素で関連付け）。フォーカス可視化も強化",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "画面中央〜下部（ロゴ＋ブルーのプライマリCTA）",
+    "issue": "ダーク地＋青ボタン＋最小の星粒という構成が汎用的で、独自の“Laisらしさ”が弱い",
+    "suggestion": "Night Skyの物語性を強���る余白演出（星図の微ドロー/潮汐ライン）や、ロゴの字間・ベースラインを活かしたタイポ比率の遊びで第一印象に勘所を作る",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域（アバター／Lv.12 Explorer／右端のEXP数値）",
+    "issue": "左アバター・中央見出し・右端数値の3極配置で視線がジグザグし、主役の定義が曖昧",
+    "suggestion": "数値をバー直下に集約して2段構成にし、左から右へ一筆書きで読める整流を設計。Explorerは数値の直上に寄せ、重心を中央1カラムへ",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Today 12:00「ジムで筋トレ」の左ボーダー（#D29922）",
+    "issue": "warning系アンバーが理由説明なく単独で使われ、意味（注意/期限接近）と視覚表現が乖離",
+    "suggestion": "アンバーは注意喚起に限定。ゴール色のドットで紐付けを示すか、アクセント系subtleを統一使���し、色の役割分離（§2.2）を厳守",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "アバター選択〜画面下半分の広い余白",
+    "issue": "下半分の“沈黙”が設計意図よりも空白に見え、重心が下がって間延びする",
+    "suggestion": "アバター列をやや下げ、説明文を1行追加。もしくは進捗ステッパーを下部にも反射させ、上下で“静寂の対話”をつくる",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "時刻・補助情報（11px系キャプションが散在）",
+    "issue": "11pxの小粒テキストが画面全体に点在し、読みの呼吸が細かく切れる",
+    "suggestion": "主要補助情報は12pxに引き上げ、日本語は--line-height-ja-bodyで間を確保。重要度の低いラベルのみ11pxを許容して粒度を揃える",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s20_talk",
+    "location": "ヘッダー中央タイトル「TALK」",
+    "issue": "日本語文脈の中でのフル大文字が硬質に響き、���ランドの“洗練＋親しみ”からわずかに距離が出る",
+    "suggestion": "「Talk」もしくは「AIと話す」など、字面の硬さを和らげる選択肢を検討（Harajuku系テーマでは特に効果的）",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "ハーフモーダル上部のスクリーン（黒い帯〜ハンドル周辺）",
+    "issue": "モーダル上の広い暗部が“空き”に見え、下部コンテンツへの集中を阻害",
+    "suggestion": "モーダルの初期高さを数十px引き上げ、上部scrimに軽いグラス/backdropの気配を差して“設計された沈黙”としての存在感に昇華",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s30_me",
+    "location": "基本情報セクションの連続ボーダーと均一リズム",
+    "issue": "細い区切り線が連続し、紙面の“罫線感”が勝つ。Open Air思想（§4.2）の呼吸が弱まる",
+    "suggestion": "項目を2グループに束ね、セクション間はボーダーを外し--space-xlで間を確保。見出しを1段強めて“余白で区切る”へ転換",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "ユーザーバブル（青tint）とAIメッセージ（左ボーダー）の差異",
+    "issue": "背景色が#0D1117/#161B22で近く、薄暗い環境では役割差がやや弱い",
+    "suggestion": "AI側の左ボーダー濃度を+1段（accent-subtle→accent-subtle-hover）に上げるか、ユーザーバブルのtint不透明度を+0.04上げて一瞥識別を強化",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

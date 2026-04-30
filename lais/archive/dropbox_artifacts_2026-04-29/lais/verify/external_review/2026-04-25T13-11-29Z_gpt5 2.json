@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:28",
+    "issue": "path モジュールから `glob` を分割代入していますが、Node.js の `path` にその export は存在しません。現状この変数は未使用のため直ちにクラッシュはしないものの、実際に glob を使う前提で追加された痕跡に見え、将来ここを使い始めた時点で `undefined` を前提にした不具合を生みます。import パスの誤認を放置すると保守者が標準 API を誤解したまま実装を積み増す危険があります。",
+    "suggestion": "未使用なら `const { glob } = require('path');` 自体を削除してください。glob 機能が必要なら `node:fs/promises` や `glob` パッケージなど、実際の提供元から明示的に import する構成へ修正すべきです。ESLint の no-unused-vars と import/no-unresolved 相当の静的検査を CI に入れ、誤 import を pre-commit で止めると再発防止になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "scripts/ai_review.js:567-572",
+    "issue": "起動直後に `GEMINI_API_KEY` と `OPENAI_API_KEY` の両方を必須チェックしていますが、vote mode は provider が単一、通常実行も models 指定次第で片方しか使いません。そのため未使用側の API キーが無いだけで本来実行可能な処理まで失敗します。運用時に provider を限定したジョブや CI 環境で不必要な設定依存が増え、後日『使わないキー不足でジョブ停止』の障害を確実に招きます。",
+    "suggestion": "モードと利用モデルに応じて必要なキーだけ検証する条件分岐に変更してください。たとえば precommit は両方必須、vote mode は `opts.provider` に応じて片方のみ、通常モードは `opts.models` に含まれる provider のみ必須とするのが自然です。エラーメッセージも不足しているキー名を個別表示し、設定ミスを即特定できるようにすると保守性が上がります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "scripts/ai_review.js:19, 437-520",
+    "issue": "CLI に `--async` を定義し pre-commit 仕様コメントでも fire-and-forget と説明していますが、実装では `opts.async` を一切参照していません。現状は `--async` を付けても通常の同期実行になり、フッ���側は API 応答待ちでブロックされます。仕様と実装が食い違っているため、運用者は非同期だと信じて導入し、コミット遅延やタイムアウトを後からバグとして踏む可能性が高いです。",
+    "suggestion": "`runPrecommitMode` で `opts.async` の分岐を実装し、child process のデタッチ起動またはジョブキュー化で本当に fire-and-forget にしてください。未実装のままならオプションとコメントを削除し、明示的に非対応とするべきです。CLI のヘルプと実装の差分は利用者を誤誘導するため、最低限 `--async is not implemented` で即失敗させる対応でも有効です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:56-57",
+    "issue": "`parseInt(args[++i])` をそのまま代入しており、値欠落や不正文字列時に `NaN` が入り込みます。以降 `timeout` は https.request、`maxTokens` は API payload に渡されるため、入力異常が遅延して別箇所の分かりにくい失敗として表面化します。CLI スクリプトとしてはエラーハンドリングが弱く、利用者が原因を即時特定できません。",
+    "suggestion": "数値オプションは `Number()` で変換後に `Number.isFinite` と範囲チェックを行い、不正なら `console.error` で対象オプション名と受け取った値を表示して即終了してください。共通の `readNumberArg(name, value, {min,max})` のような関数に切り出せば DRY になり、今後オプション追加時も同じバリデーションを再利用できます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:95-114",
+    "issue": "glob 解決を独自実装していますが、`*` を正規表現へ直接変換するだけで他のメタ文字をエスケープしていません。ファイル名パターンに `.` や `[]` など正規表現上の意味を持つ文字が含まれると想定外マッチが発生し、レビュー対象ファイルの取り違えや取りこぼしにつながります。入力ファイル誤選択はレビュー品質を静かに壊すため、後で気付きにくいタイプのバグです。",
+    "suggestion": "独自実装をやめて実績ある glob ライブラリを使うのが最も安全です。どうしても自前で行うなら、まず basename を正規表現エスケープし、その後 `*` のみをワイルドカードへ変換してください。またコメントにある『trailing * only』と実際の実装条件 `includes('*')` が一致していないため、サポート範囲をコードと説明の両方で明確に揃えるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "scripts/ai_review.js:397-404, 671-679",
+    "issue": "JSON 配列の末尾に `_metadata` オブジェクトを同居させる設計は、結果配列を『全要素が finding』とみなす他ツールや今後の集計処理と衝突しやすいです。現に本ファイル内でも `results.length` をそのまま件数表示しており、finding 数が 1 件多く見えます。今は severity 欠落を前提に除外していますが、その暗黙仕様に依存すると後日の拡張で集計バグを生みます。",
+    "suggestion": "出力形式を `{ findings: [...], metadata: {...} }` のオブジェクトに分離するか、少なくとも `_metadata` を別ファイルへ書き出してください。既存互換性を保つなら、finding 集計・表示・CRITICAL 判定で `id !== '_metadata'` を明示条件にして件数ズレをなくすべきです。データ構造の責務分離をしておくと downstream の実装がかなり安全になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:423-425, 694-696",
+    "issue": "再試行待機時間 5000ms、Gemini maxOutputTokens 16384、git diff maxBuffer 32MB などの数値が散在しており、意味がコードから読み取りにくいです。現状でも仕様コメントと実値の対応を追う負担が高く、将来運用条件が変わった際に一部だけ更新漏れが起きやすい構造です。魔法の数字の増加は保守時の設定ミスを誘発します。",
+    "suggestion": "リトライ回数・バックオフ基準・バッファ上限・モデルごとの token 上限などはファイル先頭の定数に集約し、用途が分かる名前を付けてください。たとえば `RETRY_BASE_DELAY_MS`、`PRECOMMIT_GIT_DIFF_MAX_BUFFER_BYTES` のようにすると意図が明確になります。可能なら CLI オプション化し、デフォルト値のみ定数化する形にすると運用変更にも強くなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:78-80, 553-564",
+    "issue": "`--provider` は `--provider=` と `--provider` の両形式に対応している一方、`--proposal` はスペース���切りのみです。提案文は空白や改行を含みやすく、シェル経由での取り回しミスが起きやすいにもかかわらず `--proposal-file` のような安全な入力経路がありません。長文提案を扱う vote mode で入力の壊れ方が不安定になり、実運用で誤判定や ABSTAIN 増加を生みやすいです。",
+    "suggestion": "vote mode には `--proposal-file` を追加し、長文はファイル入力を第一選択にしてください。あわせて `--proposal=` 形式にも対応すると CLI 一貫性が出ます。入力長の上限や空文字チェックも設け、ログには全文ではなく文字数やハッシュのみを出すと安全です。オプション仕様を揃えることで利用ミス由来のバグを減らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0414,
+    "input_tokens": 13861,
+    "output_tokens": 2405,
+    "model_id": "gpt-5.4"
+  }
+]

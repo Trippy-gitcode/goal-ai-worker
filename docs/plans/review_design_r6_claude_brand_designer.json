@@ -1,0 +1,5 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"AMBIGUITY","location":"§5.1 Night Sky --accent 変更","issue":"v0.6 で Night Sky の --accent を #58A6FF から #79C0FF に変更した。これは info との差別化目的だが、Night Sky テーマのブランドイメージ（冷静・集中）に対して #79C0FF はやや『明るく鮮やか』側に寄りすぎて、夜の静けさを損なう可能性がある。","suggestion":"Night Sky accent の新色 #79C0FF を別候補（#6CB6FF や #8CC2FF）と比較検証し、性格に最もフィットするものを選定。または info 側を変更して accent を元に戻す選択肢を検討。","model":"Claude Opus 4.6","persona":"brand_designer"},
+  {"id":"R-002","severity":"MEDIUM","category":"MISSING","location":"§1.3 ロゴ placeholder","issue":"暫定ロゴタイプ Lais は system-ui のため環境依存。placeholder 段階でも SVG ロゴを作成しておかないと、Phase 4 実装に入った時点でロゴがない状態でテスト配布されるリスク。","suggestion":"§1.3 に『placeholder SVG を docs/plans/assets/logo_placeholder.svg に配置する』タスクを明記。","model":"Claude Opus 4.6","persona":"brand_designer"},
+  {"id":"R-003","severity":"LOW","category":"BEST_PRACTICE","location":"§6.3a アバターパレット","issue":"肌色 5 色は placeholder として妥当だが、Fitzpatrick scale（1-6 の肌色分類）の国際標準に準拠すべき。多様性への配慮が placeholder 段階から必要。","suggestion":"LAIS-BRAND-02 ミッションの要件として Fitzpatrick scale 準拠を明記。","model":"Claude Opus 4.6","persona":"brand_designer"}
+]

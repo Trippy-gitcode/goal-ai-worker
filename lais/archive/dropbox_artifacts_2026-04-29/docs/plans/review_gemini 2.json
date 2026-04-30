@@ -1,0 +1,130 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "init_app.sh",
+    "issue": "The entire system for reusing common components relies on copying files (`cp`). This prevents any updates or bug fixes in `dev-system` from propagating to existing projects, leading to massive maintenance overhead and project divergence.",
+    "suggestion": "Replace the `cp` commands in `init_app.sh` with `ln -s` to create symbolic links. Alternatively, manage `dev-system` as a git submodule or a versioned package (e.g., via npm) to allow for controlled, trackable updates across all projects."
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec_v1.md (横展開手順)",
+    "issue": "The specification lacks a defined process or script for updating an *existing* application with changes from the `dev-system` template. The 'Learning Feedback Loop' section mentions 'getting the latest' but does not specify how.",
+    "suggestion": "Create an `update_app.sh` script that can be run in an existing project. This script should intelligently update the common files (or symlinks) from the `dev-system` source, handling potential conflicts in user-modified templates."
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "claude_ai_protocol.md",
+    "issue": "The protocol has conflicting rules for file write approvals. Section 3 ('Triggers') states that for any file write, the AI must wait for Futoshi's explicit 'OK'. However, Section 7 ('承認') defines a risk-based system (🟢🟡🔴) that allows for batch approvals and implies autonomy for low-risk changes.",
+    "suggestion": "Clarify the approval process. The risk-based system in Section 7 should be the primary rule. Update Section 3 to state: 'For file writes, follow the risk-based approval process defined in Section 7. Only high-risk (🔴) changes require waiting for an explicit OK before proceeding.'"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "mission_linter.sh",
+    "issue": "A key lesson in `lessons_learned.md` is to 'describe all completion conditions with bash commands' to prevent false reports. However, the `mission_linter.sh` only issues a `WARN` for missions lacking a `bash` block, failing to enforce this critical rule.",
+    "suggestion": "Change the severity of the missing `bash` block check in `mission_linter.sh` from a `WARN` to a `FAIL`. This will enforce the best practice learned from past failures and improve mission quality."
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE_DEVIATION",
+    "location": "dev_system_spec_v1.md (学習の逆流メカニズム)",
+    "issue": "The feedback loop for propagating lessons learned back into the common templates is described as a manual process. This is unreliable and scales poorly, risking that valuable lessons are not applied consistently across all projects.",
+    "suggestion": "Formalize the feedback loop. When a lesson is added to `lessons_learned.md`, create a formal 'TODO' or issue that is tracked until the corresponding change is made in `dev-system` and a new version is tagged. Use a git submodule or package manager approach to make applying these updates to child projects a simple, single command."
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "g5_reporting.md & test-guards.config.ts",
+    "issue": "`g5_reporting.md` explicitly forbids ignoring errors like `Failed to fetch` and `500`. However, the `test-guards.config.ts` template includes `CORS policy` and `Access-Control-Allow-Origin` in `IGNORED_ERRORS`, which often manifest as `Failed to fetch` errors during local development. This gives the AI conflicting instructions.",
+    "suggestion": "Refine the rule in `g5_reporting.md`. Specify that `Failed to fetch` errors are permissible *only if* they are confirmed to be localhost-specific CORS issues. Add a comment in `test-guards.config.ts` clarifying this distinction and warning against adding application-level fetch errors to the list."
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "g2_ui_verification.md",
+    "issue": "The G2 UI verification flow mandates running a script `node scripts/c16_stage_a.js` to generate visual comparison images. This script is not included in the `dev-system` directory structure or described anywhere else.",
+    "suggestion": "Add the `c16_stage_a.js` script to the `dev-system/scripts/` directory and include a brief description of its function and dependencies in the main specification."
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "init_app.sh & dev_system_spec_v1.md",
+    "issue": "The `init_app.sh` script copies `development_rules_common.md` and `development_rules_app.md` separately. The app structure example shows a single, combined `development_rules.md`. The process for combining these two files is not defined, leaving it to the AI's interpretation.",
+    "suggestion": "Update `init_app.sh` to explicitly combine the files. For example: `cat development_rules_common.md development_rules_app.md > development_rules.md && rm development_rules_common.md development_rules_app.md`."
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "session_archiver.sh",
+    "issue": "The `session_archiver.sh` script uses `grep`, `sed`, and `head` to parse and manipulate the markdown file. This is brittle and will break if the header format changes (e.g., '##完了済み' instead of '## 完了済み').",
+    "suggestion": "Make the script more robust. Use a more flexible pattern for grep, like `grep -n \"^##[[:space:]]*完了済み\"`, and add comments explaining the logic so the AI can debug it if it fails."
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "canopy/canopy_app_template.sh",
+    "issue": "The system relies on `canopy.sh` for quality gates, but there is no mechanism to ensure that the app-specific part, `canopy_app.sh`, is populated with meaningful checks. A project could be initialized with a blank template, rendering the smoke test partially ineffective.",
+    "suggestion": "Add a check to `canopy_common.sh` that verifies `canopy_app.sh` contains a minimum number of checks (e.g., more than 5 lines of active code). Also, update `init_app.sh` to add placeholder comments in the template guiding the developer on what to add."
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE_DEVIATION",
+    "location": "init_app.sh",
+    "issue": "The `init_app.sh` script contains a hardcoded, absolute path to the dev-system: `DEV_SYSTEM=\"$HOME/Desktop/dev-system\"`. This is not portable and will fail on any machine with a different setup.",
+    "suggestion": "Make the path configurable. Either pass it as a second argument to the script or determine it dynamically assuming the script is run from within the `dev-system` repo (e.g., `DEV_SYSTEM=$(dirname \"$0\")/..`)."
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "debugging-guide.md",
+    "issue": "The debugging guide's escalation procedure (Phase 4.5) is triggered by a '3-attempt limit for fixes' which is cited as being from `development_rules.md`. This rule is not defined in the provided `development_rules_common.md` or any other document.",
+    "suggestion": "Add the '修正試行3回制限' (3-attempt limit for fixes) rule explicitly to `development_rules_common.md` to ensure it is a formal part of the quality gate and not just a dangling reference."
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "init_app.sh",
+    "issue": "The `init_app.sh` script copies `mission_template_v2.md` into the new application's `docs/` directory. The purpose of a template file inside a documentation directory is unclear. Is it for reference, or to be copied for each new mission?",
+    "suggestion": "Clarify the intent. Either place the template in a more appropriate location like `templates/` within the app, or rename the file in `docs/` to `mission_template_reference.md` to indicate its purpose is for documentation."
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "g4_testing.md",
+    "issue": "A critical architectural principle, 'planのSource of TruthはTOKEN_KV（not Supabase DB）', is buried within a sub-section of a testing guide. An AI agent might miss this when working on features related to billing or user plans.",
+    "suggestion": "Elevate this architectural principle to a more prominent document, such as `bootstrap.md` or a dedicated architecture overview document, and have the testing guide reference it."
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "COMPLETENESS",
+    "location": "claude_ai_protocol.md",
+    "issue": "The AT template specification states that a missing '前提' (precondition) section is a reason for the Code agent to SKIP a test. However, there is no automated check, such as in `mission_linter.sh`, to enforce the presence of this mandatory section in missions requiring an AT.",
+    "suggestion": "Add a check to `mission_linter.sh` that scans missions containing 'AT-N:' and fails them if the '前提:' line is missing, to prevent tests from being skipped silently."
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "canopy_common.sh",
+    "issue": "The canopy check enforces arbitrary line limits for `session_progress.md` (<= 300) and `development_rules.md` (<= 120) without providing any rationale. These 'magic numbers' can be confusing for an AI trying to understand the intent.",
+    "suggestion": "Add a comment next to each check in `canopy_common.sh` explaining the reason for the limit. For example: `# Limit to 300 lines to maintain readability and encourage regular archiving`."
+  }
+]

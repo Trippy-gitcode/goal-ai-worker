@@ -1,0 +1,282 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §3.2（Undo:30秒以内） / project §3.2.6（スナックバー3秒） / ux §2.3（スナックバー3秒）",
+    "issue": "タスク完了の取り消し許容時間が「30秒以内」とある一方、UI上のUndoスナックバーは3秒表示のみ。30秒間の取り消し操作手段が定義されておらず、仕様間で矛盾。",
+    "suggestion": "取り消しポリシーを一本化する。例: ①スナックバー表示を10秒に延長＋消えた後もタスク行右端に「取り消す（残りN秒）」を表示して合計30秒維持、または②許容時間を10秒へ短縮し全体仕様を更新。EXPロールバックのサーバーAPIも同じウィンドウで冪等化を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §1.1, §4.2, §13（S-41 アバター設定）",
+    "issue": "S-41 アバター設定画面のUXフロー・編集項目・エラー/空/ローディング状態が未定義。MVPでPremier特典フレーム装備が必要だが操作HOWが不足。",
+    "suggestion": "S-41の詳細を追加。項目: プレビュー（前後比較）、装���一覧（所持/未所持の区別）、装備/外す、保存/自動保存、オフライン時のローカル保持、スケルトン、未所持時のComing Soon、アクセシビリティ（aria-label/フォーカス順）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §1.1（S-13 タスク編集） / §2.3",
+    "issue": "S-13 タスク編集パネルの具体的フィールドとバリデーション/エラー処理が未定義（S-12相当と推測されるが明記なし）。",
+    "suggestion": "S-13にS-12と同一の編集項目（種別変更可否、開始時刻、所要時間、予定日/繰り返し、ゴール紐付け、メモ）と、保存/キャンセル/エラー時のインライン表示、変更時のTodayソート反映ルールを明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux §1.4（戻りナビゲーション: ブラウザバック → 前タブ）",
+    "issue": "ブラウザ/ハードウェアBackで「前タブ」に戻る挙動はiOS/Android双方の標準と乖離し、予測不可能な戻り履歴を生む可能性が高い。",
+    "suggestion": "プラットフォーム準拠: タブはトップレベル宛先として独立スタックを保持。Backは「モーダル→閉じる」「詳細→親に戻る」「タブ内履歴→一つ戻る」。タブを跨いでBackで遷移しない。PWAではhistoryスタックをタ���別に管理し、ルートでBack→アプリ終了/ランディング。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux §3.5 / §7.3（TALK左端スワイプでドロワー）",
+    "issue": "Androidの予測バック（左右エッジ）と左端スワイプでのドロワー展開が競合し、Backが優先される可能性。iOS PWAでもエッジスワイプがブラウザ履歴に割り当てられる場合がある。",
+    "suggestion": "左端完全エッジではなく、ヘッダーのハンバーガー優先＋エッジ開始20pxはBackに譲る（ドロワーはヘッダー/コンテンツ内スワイプ開始のみ許可）。Androidはpredictive backのコールバックに準拠、PWAではエッジジェスチャーを前提にしない。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux §3.5（左スワイプで削除） / §7.3（左→右で削除露出）",
+    "issue": "チャット履歴行のスワイプ方向がセクション間で矛盾（左スワイプ vs 左→右）。",
+    "suggestion": "方向を統一。推奨: iOS/Materialの慣習に合わせ「左スワイプで削除/その他」を採用。Androidは左右どちらでも可���する場合は両対応を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux §7.4（Todayタスク並び替え） / project §3.2（時刻順ソート）",
+    "issue": "Todayは時刻順表示だが、ロングプレスで手動並び替え可能と記載。開始時刻変更時や未設定タスクの扱い、翌日への持ち越し時に手動順と自動ソートの優先関係が不明。",
+    "suggestion": "優先ルールを定義: 例）セクション分割（Overdue→時刻あり→時刻なし）。手動並び替えは各セクション内のみに限定。開始時刻を付与/変更した場合は自動ソートが手動順を上書き。手動順は当日限定で日替わり時にリセット等。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux 全体（ジェスチャー/ハプティクス設計）",
+    "issue": "ハプティクスの仕様がQRスキャン時のVibrationのみ。タスク完了/レベルアップ/ゴール達成など主要イベントの触覚フィードバック設計が未定義（WebではiOS非対応もある）。",
+    "suggestion": "イベントごとのハプティクス/代替を定義: 完了=軽いインパクト、LvUp/ゴール=成功パターン。WebではVibration APIの存在確認→未対応端末は短い効果音/強調アニメで代替。将来のネイティブラッパーでHIG/Materialのhapticsにマッピング。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux §6.2（トースト） / §2.3（Undo） / 全画面フッターUI",
+    "issue": "スナックバー/トーストの下端固定位置にSafe Area配慮が明記されていないため、iPhoneのホームインジケータやソフトキーボードと重なる恐れ。",
+    "suggestion": "CSS env(safe-area-inset-bottom)を使用し下マージンを動的確保。キーボード表示時は入力上にスタック。ボトムタブ/スナックバー/キーボードのZ順と回避ロジックを定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §3.2（TALK: 画像添付UI）",
+    "issue": "画像アップロードの進捗表示/失敗時リトライ/キャンセルのUXが未定義。",
+    "suggestion": "サムネイル上に円形進捗リングとキャンセル✕を表示。失敗時は赤バッジ＋[再試行]。送信中は送信ボタンをローディング状態に。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §3.3（タスク提案カード）",
+    "issue": "「登録する/まとめて登録」押下後のローディング/失敗時のインラインエラーが未定義。通信遅延時に多重タップのリスク。",
+    "suggestion": "ボタンをローディング化し二重送信防止。成功→『✅ 登録しました』に置換。失敗→カード内にエラーと[再試行]/[詳細を編集]。複数登録は部分成功時の結果表示も定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §8（アニメーション）",
+    "issue": "タスク完了と同時にゴール達成/レベルアップ/冒険EXPが重なるケースの演出優先順位・同時発火制御が未定義。",
+    "suggestion": "優先度キューを定義: 1) タスク完了→2) ゴール達成→3) レベルアップ→4) 冒険EXP（TALK内）。各演出の間に200msのインターバル、紙吹雪は同時発火を抑制（上書き/延長ルール）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux §13.3（通知設定） / project §2.5（通知設計）",
+    "issue": "OS許可ダイアログを即時出さず理由説明のプリプロンプトが無い。Androidの通知チャンネル相当の説明/カテゴリー表現がPWAでは不足しがち。",
+    "suggestion": "プリプロンプトで価値訴求→同意後にPermission API。PWAではチャンネルAPIがないため画面内にカテゴリ説明と個別ON/OFFを明記。拒否時の再許可手順も案内。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "ACCESSIBILITY",
+    "location": "ux §7.4（ドラッグ&ドロップ） / §10（アクセシビリティ）",
+    "issue": "リスト並び替えにキーボード/スクリーンリーダーの代替操作が未定義。ドラッグのみではアクセシビリティを満たさない。",
+    "suggestion": "各行にドラッグハンドル＋コンテキストメニュー『上へ/下へ/先頭/末尾』。ARIA: aria-grabbed/aria-dropeffect、キーボード操作（Spaceでgrab、矢印で移動、Enterでドロップ）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "ACCESSIBILITY",
+    "location": "ux §10.4（スクリーンリーダー） / ボトムタブ",
+    "issue": "ボトムタブにrole=\"tablist\"指定はウェブナビゲーションで��過剰で、スクリーンリーダーの期待とズレる場合がある。",
+    "suggestion": "ボトムタブは<nav>＋role=\"navigation\"でリスト化し、現在地にaria-current=\"page\"。ME内サブタブのみrole=\"tablist/tab\"を適用。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux §4.1（MEサブタブ：横スワイプ） / §7.3",
+    "issue": "横スワイプでのサブタブ切替にしきい値/斜めスワイプ時の優先度が未定義で、縦スクロール中の誤作動リスク。",
+    "suggestion": "水平移動30–40px以上かつ水平/垂直の角度閾値（±30°以内）でのみタブ切替。初動の縦スクロール優先。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux §6.5（Pull-to-refresh）",
+    "issue": "iOS PWAでのブラウザ既定Pull-to-refresh（ページ再読込）とアプリ内PTRの競合に関する防止策が未定義。",
+    "suggestion": "対象スクロール領域にoverscroll-behavior-y: containを適用し、ページ全体のリフレッシュを抑制。PTRしきい値/キャンセル条件も明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux §3.1（TALKヘッダー: ☰/🕐）",
+    "issue": "ヘッダーに履歴への入口がハンバーガー（ドロワー）と時計アイコンで重複。認知負荷増。",
+    "suggestion": "入口を一本化。推奨: ハンバーガー=ドロワー（履歴/新規チャット含む）。🕐は削除または別機能（最近使用のプロンプト等）に再割当。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §6.4（スケルトン）",
+    "issue": "スケルトン適用箇所にS-35（友達詳細）、S-41（アバター設定）が含まれていない。",
+    "suggestion": "適用対象にS-35/S-41を追加。友達詳細はアバター円/テキスト行/ボタンプレースホルダ、アバター設定はグリッド/プレビューのスケルトンを用意。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux §6.1（ハーフモーダル） / §2.3 / §5",
+    "issue": "キーボード表示時のハーフモーダル内フォーカス項目の被り/スクロール自動追従の定義が不足。",
+    "suggestion": "入力フォーカス時に対象をscrollIntoView（��ロック=nearest）し、100vhの代わりに動的vh（small/large viewport単位）を使用。iOSではvisualViewportに合わせてモーダル高さを再計算。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §1.4（戻りナビゲーション）",
+    "issue": "AndroidハードウェアBackの詳細なハンドリングが未定義（タブ別スタック、モーダル優先など）。",
+    "suggestion": "ハードウェアBack優先順位を定義: ①モーダル/ドロワーを閉じる→②タブ内スタックを1つ戻る→③タブルートならアプリ終了（PWAは前ページへ）。予測バックのアニメーション手掛かりに準拠。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project §7.3（オフラインEXPは表示しない） / ux §8.1（タスク完了時に毎回EXP演出） / §9.1",
+    "issue": "オフライン時はEXP表示しない方針と、完了演出（EXPフロート/バー伸長）の常時実行が矛盾。オフライン完了で演出すると後で付与否認時に体験が破綻。",
+    "suggestion": "オフライン時はチェックの視覚反応のみ＋『同期待ち』バッジ。EXP演出はサーバー確定後に遅延実行。オンライン復帰でまとめて反映するUI（バッチ演出/静的カウントアップ）を定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §3.1/§3.2（チャット履歴の無限スクロール）",
+    "issue": "過去メッセージ追加読み込み時のローディングインジケータ位置と挙動が未定義。",
+    "suggestion": "上端到達でトップに小型スピナー表示（スクロール位置保持）。読み込み完了後もとのメッセージにフォーカスを戻す。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §10（アクセシビリティ）",
+    "issue": "ダイナミックタイプ/フォントスケール対応の明記がない（最小サイズ固定のままでは可読性低下）。",
+    "suggestion": "OSのフォントスケールに追従（remベース/メディアクエリ）。長文は行間を自動調整。テキストがあふれる箇所に折返し・最大行数とツールチップを定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §1.3（タブ切替アニメーショ��）",
+    "issue": "ボトムタブのクロスフェードはiOS HIGのデフォルト即時切替よりやや重く感じる可能性。",
+    "suggestion": "200msクロスフェードは維持しつつ、各タブのスクロール位置/フォーム入力状態を必ず保持（復帰即時描画<100ms）。iOS向けはフェード量/時間を軽量化（150ms）を検討。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "ACCESSIBILITY",
+    "location": "ux §10.4（aria-live） / §3（TALK）",
+    "issue": "チャットのストリーミングテキストをaria-liveで逐次読み上げると冗長になり得る。",
+    "suggestion": "ストリーミング中はliveをoff、完了時に「新しいメッセージ」+送信者の先頭数語のみpoliteで通知。全文はフォーカス移動時に読み上げ。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-027",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux §2.3（タスク完了⭕）",
+    "issue": "スクロール中の誤タップで完了になるリスク（チェックターゲットがリスト先頭/末尾付近）。",
+    "suggestion": "チェック領域を十分に離す/行中央タップは詳細のみ、完了は⭕専用。設定で『スワイプで完了/延��』オプションを将来追加検討。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §10（アクセシビリティ: コントラスト/色）",
+    "issue": "色弱対応（意味色の多用: 強み=緑/弱み=オレンジ等）に形状/アイコンの冗長符号化が未定義。",
+    "suggestion": "色+アイコン/パターンで冗長化（強み=✓、課題=! など）。チップのborder/ハッチングで差異を補強。全テーマでコントラストをデザインシステムに明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

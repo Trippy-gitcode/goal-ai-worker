@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "画面中央のキャッチコピー",
+    "issue": "「あなたの人生を、あなたらしく」というコピーが抽象的すぎて、初めて画面を見た人が3秒以内に「AIタスク管理アプリ」というコアバリューを理解できない。",
+    "suggestion": "サブコピーに「AIと歩む、新しいタスク管理」など、機能的価値と感情的価値を両立した具体的な文言を追加し、アプリの用途を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s01_signin",
+    "location": "画面下部の「���インアップ」ボタン",
+    "issue": "ボタンが非活性状態（暗いグレー）で表示されているが、背景色とのコントラストが低すぎ、最終的なCTAの存在自体が視覚的に認知しづらい。",
+    "suggestion": "非活性状態でもボタンの輪郭やテキストが最低限の視認性を保つよう、テキスト色を少し明るくするか、薄い枠線を追加して存在を暗示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "画面中央のアバター選択エリア",
+    "issue": "アバターの選択肢が小さく周囲の余白が広すぎるため、キャラクターへの感情移入や「自分のパートナーを選ぶ」というワクワク感が喚起されにくい。",
+    "suggestion": "選択中のアバターをスケールアップして大きく表示するなど、選択状態を強調し、キャラクターの魅力を引き立てるレイアウトに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "TODAYセクションの未完了タスク行",
+    "issue": "UX仕様書ではタスク行に「完了⭕」があるとされているが、画面上では未完了タスクにチェックボックス等のアクションヒントがなく、どこをタップすれば完了できるのか視覚的に不明確。",
+    "suggestion": "未完了タスクの右端（または左端）に、タップ可能な空のチェックボックスを明示的に配置し、ユーザーの完了アクションを誘導する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の「編集」「✕」ボタン",
+    "issue": "ボタンの視覚的サイズが小さく、WCAG 2.5.5のタップターゲット最小サイズ（44x44px）を満たしていない可能性が高く、誤タップを誘発しやすい。",
+    "suggestion": "ボタンのパディングを広げるか、アイコンの周囲に透明なタップ領域（44x44px以上）を確保して操作性を向上させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "「所要時間」のチップ選択エリア",
+    "issue": "チップが横スクロール可能であることが視覚的に示唆されていない（右端のグラデーションフェードや、半分見切れた要素の配置が不十分）。",
+    "suggestion": "スクロール可能領域の右端にフェード効果を追加するか、最後の要素が意図的に半分見切れるようにパディングを調整し、横スクロールを誘導する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s13_task_detail",
+    "location": "画面下部の「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "完了済みタスクにおいてAI相談ボタンが非活性になっているが、暗すぎてボタンの存在自体が認知しづらく、なぜ押せないのかの理由も不明瞭。",
+    "suggestion": "完了済みタスクの場合はこれらのボタンを非表示にしてUIを整理するか、非活性状態でも輪郭を残しつつ理由（ツールチップ等）を添える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "タスクリストの未完了タスク左側の丸い枠線",
+    "issue": "未完了タスクの左側にある丸い枠線が、単なる装飾（ステータス表示）なのか、タップ可能なチェックボックスなのか視覚的���判別しづらい。",
+    "suggestion": "タップ可能であることを示すため、丸枠の中に薄いチェックマークのプレースホルダーを置くなど、アフォーダンスを強化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s15_goal_create",
+    "location": "「カテゴリ」の未選択チップ",
+    "issue": "未選択チップの枠線（暗いグレー）と背景色のコントラストが低く、選択肢としての存在感が弱いため、インタラクティブな要素として認識しづらい。",
+    "suggestion": "未選択チップの枠線色を少し明るくして背景とのコントラストを高め、タップ可能な選択肢であることを明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  }
+]

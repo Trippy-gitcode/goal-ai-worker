@@ -1,0 +1,146 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → §2.2 update_app.sh, §2.6 canopy_common.sh",
+    "issue": "Scripts contain hardcoded absolute paths to the dev-system repository (e.g., `$HOME/Desktop/dev-system`). This makes the entire system non-portable and will fail in any other directory structure, including CI/CD environments.",
+    "suggestion": "Modify all scripts (`init_app.sh`, `update_app.sh`, `canopy_common.sh`, etc.) to use relative paths or accept the `dev-system` path as a mandatory, validated parameter. Remove default hardcoded paths."
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → §2.6 canopy_common.sh",
+    "issue": "Key quality gates defined in the main spec are not implemented in `canopy_common.sh`. Specifically, G1 (Version Sync) and G6 (Build Sync) are present only as comments with no functional code.",
+    "suggestion": "Implement the script logic for G1 and G6. For G1, the script must parse `app_config.yaml`, `package.json`, `version.ts`, and `CLAUDE.md` to assert version equality. For G6, it must parse `app_config.yaml` to get `build.out_dir` and verify its use in `deploy.frontend_cmd`."
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "sub_testing.md → §5 affected-tests.sh",
+    "issue": "The `affected-tests.sh` script, which is critical for the L2 testing strategy, is merely a skeleton. The core logic for mapping changed files to test specs is commented out, making the strategy inoperable.",
+    "suggestion": "Define a structured, scalable mechanism for this mapping. For example, add a `test_mapping` section to `app_config.yaml` or a separate `test_map.json` file. The script should then parse this configuration to determine which tests to run."
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §8 C2デプロイフロー",
+    "issue": "The process of bumping versions in four separate files manually is error-prone and violates the 'Single Source of Truth' principle. An AI agent is likely to miss one of the locations.",
+    "suggestion": "Create a dedicated script, e.g., `set-version.sh <new_version>`, that takes the version as an argument and automatically updates all four specified locations (`app_config.yaml`, `package.json`, `version.ts`, `CLAUDE.md`)."
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "SCALABILITY",
+    "location": "sub_infrastructure.md → §2.2 update_app.sh",
+    "issue": "The `update_app.sh` script only refreshes existing symlinks. It does not account for new common files being added to `dev-system` over time. Existing apps will not receive new scripts or helpers, leading to divergence.",
+    "suggestion": "Modify `update_app.sh` to be declarative. The script should read a manifest of all required symlinks from `dev-system` and ensure that every link in the manifest exists and is correct in the target app directory, creating missing ones."
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "SCALABILITY",
+    "location": "dev_system_spec.md → §10.1 共通資産の管理方式",
+    "issue": "The system for updating templates that are copied (e.g., `test-guards.config.ts`, `bootstrap.md`) is not defined. Unlike symlinks, these files will become outdated in app repositories as the `dev-system` evolves, leading to inconsistent rules and configurations.",
+    "suggestion": "Define a clear process for managing updates to copied files. Options include: 1) During `update_app.sh`, generate diffs between the app's file and the new template and log them for ADV to review and apply. 2) Adopt a 'scaffolding' approach where the files are always regenerated from a base template and an app-specific configuration file."
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → §2.1 init_app.sh",
+    "issue": "The `ln -s` commands use a relative path to the source (`$DEV_SYSTEM/...`) but are executed from within the new app directory. This creates symlinks like `../path/to/dev-system/file`, which are fragile and depend on the relative location of the two repositories.",
+    "suggestion": "Calculate the correct relative path from the symlink's location to the source file for maximum portability. For example: `ln -s \"$(realpath --relative-to=\"$DST_DIR\" \"$SRC_FILE\")\" \"$DST_FILE\"`."
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §10.2 バージョンpin方式",
+    "issue": "The version pin check in `canopy_common.sh` is specified as a `WARN` that becomes a `FAIL` after '3 sessions'. This grace period is not defined technically and is difficult for a script to enforce, making it likely to be ignored.",
+    "suggestion": "Remove the ambiguous grace period. The check should either be a `WARN` consistently or, preferably, a hard `FAIL` to enforce immediate synchronization. If a grace period is essential, implement an explicit tracking mechanism, such as a timestamped log file."
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "sub_testing.md → §2 テストアンチパターン検出（test_lint.sh）",
+    "issue": "The full source code for `test_lint.sh` is located in `sub_testing.md`, while all other primary scripts are in `sub_infrastructure.md`. This structural inconsistency makes the specification harder to navigate.",
+    "suggestion": "Move the full source code of `test_lint.sh` to `sub_infrastructure.md` alongside the other scripts. The section in `sub_testing.md` should describe the purpose of the script and the anti-patterns it detects, then reference the implementation in `sub_infrastructure.md`."
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §2 Step 2: モックアップ作成・承認",
+    "issue": "The spec states 'ADV creates mockups' but does not define the format or tooling. For an AI agent, this is too ambiguous. It could produce anything from a text description to a complex image, most of which are not machine-verifiable or easily translated to code.",
+    "suggestion": "Specify a precise, simple format for mockups. For example, mandate that mockups must be 'a single, self-contained HTML file using a specified CSS framework/CDN like TailwindCSS'. This makes the output consistent and directly usable by the ENG agent."
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §15.4 metrics.jsonl",
+    "issue": "The spec defines the `metrics.jsonl` format and states that the ENG agent should append to it, but the process for gathering the metrics (e.g., test counts, duration) is not defined. This leaves the implementation of a key reporting mechanism ambiguous.",
+    "suggestion": "Specify that the `canopy.sh` script (or a new session-closing script) is responsible for gathering and appending metrics to `metrics.jsonl`. Define how each metric is calculated (e.g., `duration_min` is from a timer in the script, test counts are from parsing the test runner's JSON output)."
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "sub_infrastructure.md → §3 app_config_template.yaml",
+    "issue": "The `deploy.frontend_cmd` uses shell-like variable syntax (`${build.out_dir}`). YAML does not support this interpolation, which could confuse an AI agent trying to execute the command directly. The responsibility for substitution is implicit.",
+    "suggestion": "Add a comment in the YAML template explicitly stating that the executing script is responsible for reading values from the YAML and performing the substitution. For example: `# NOTE: The deploy script must substitute ${build.out_dir} with the value from the 'build.out_dir' key.`"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "sub_adv_protocol.md → §10 仕様書一覧",
+    "issue": "A list of app-specific specification documents is located in the ADV protocol file. This information pertains to the overall project structure and dependencies, not specifically to the ADV agent's behavior.",
+    "suggestion": "Move this list to a more appropriate location, such as `sub_system_map.md` which already contains the document dependency map, or into the `docs/` directory of the template generated by `init_app.sh`."
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "sub_infrastructure.md → §1.1, §2.6",
+    "issue": "There is a contradiction regarding the minimum line count for `canopy_app.sh`. The directory structure description (§1.1) states the template is a minimum of 10 lines, but the check in `canopy_common.sh` (§2.6) fails if there are fewer than 5 *active* lines.",
+    "suggestion": "Reconcile the two statements. Standardize on a single, clear requirement. A check for `> 0` active lines is likely more practical than an arbitrary number like 5 or 10."
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md → §4 テストライブラリ",
+    "issue": "The common test library is a single markdown file (`test_library.md`). As the number of reusable test cases grows, this file will become difficult to manage, search, and parse.",
+    "suggestion": "Change the test library format to a directory-based structure, e.g., `dev-system/tests/library/{feature_tag}/{test_id}.md`. This is more scalable and allows scripts to easily discover and filter tests by directory and file names."
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "sub_infrastructure.md → §2.5 session_archiver.sh",
+    "issue": "The specification provides the `session_archiver.sh` script but does not define when or how it should be triggered. Without a defined trigger, this maintenance task is likely to be forgotten.",
+    "suggestion": "Integrate the script into the standard workflow. For example, add a call to `session_archiver.sh` at the beginning of the main `canopy.sh` script to ensure it runs with every test cycle."
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → §2.3 build_rules.sh",
+    "issue": "The `build_rules.sh` script simply concatenates common and app-specific rules. This prevents app-specific rules from overriding or modifying common rules in a structured way, limiting its flexibility.",
+    "suggestion": "Consider a more sophisticated rule-building mechanism. For example, use a marker-based system where the app-specific file can specify sections to replace or extend in the common file (e.g., `<!-- OVERRIDE:G9_RULES -->`)."
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "SCALABILITY",
+    "location": "sub_system_map.md → §1 仕様書の依存関係",
+    "issue": "The specification dependency map is maintained manually. This is error-prone and likely to become outdated as the system evolves, defeating its purpose of preventing missed updates.",
+    "suggestion": "While full automation is complex, create a helper script that scans all `docs/*.md` and `tests/**/*.ts` files for `SPEC-XXX-NNN` references and generates a report of linkages. The ADV agent can use this report to more reliably update the manual dependency map."
+  }
+]

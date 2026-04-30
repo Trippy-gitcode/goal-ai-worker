@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1, §1.2",
+    "issue": "ログイン画面（S-02）からパスワードを忘れた場合のリカバリーフロー（パスワードリセット画面および遷移）が定義されておらず、パスワードを忘れたユーザーがアカウントに復帰できなくなる。",
+    "suggestion": "S-02に「パスワードを忘れた場合」のリンクを追加し、パスワードリセット画面（S-04等）への遷移と、メール送信・再設定の操作フローを定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3, §8.1",
+    "issue": "タスク完了時のUndo（3秒間）とEXP演出・サーバーPOSTのタイミングが矛盾している。即時POST＋演出を行うと、Undo時にEXPバーが「減算（巻き戻り）」することになり「EXPは減らない」というコンセプトに反する。一方、3秒待ってから演出を行うと「100ms以内のフィードバック」要件に反する。",
+    "suggestion": "楽観的UIとしてチェックマークは即時（100ms以内）につけるが、サーバーPOSTとEXPバー伸長・フロートテキスト演出は「Undo受付期間（3秒）が経過した後」に実行する仕様として明確に定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §8.2, §8.3",
+    "issue": "タスク完了、レベルアップ、ゴール達成が同時に発生した場合（例：最後のタスクを完了してゴール達成し、同時にレベルアップ閾値を超えた場合）のアニメーションの優先順位とキューイング（直列実行）が定義されていない。同時に発火するとバナーが重なり、紙吹雪が二重に描画されUIが破綻する。",
+    "suggestion": "アニメーションのキュー管理システムを定義し、「タスク完了演�� → ゴール達成演出 → レベルアップ演出」のように順番に1つずつ再生される仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.1, §4.3",
+    "issue": "ME画面のサブタブ切替（横スワイプ）と、DISCOVERサブタブ内の「強み/弱みチップ」の横スクロールジェスチャーが競合する。チップをスクロールしようとしてタブが切り替わる誤操作が頻発する。",
+    "suggestion": "サブタブコンテンツ領域全体での横スワイプ切替を廃止しタブバーのタップのみにするか、横スクロール要素（チップ領域）上でのスワイプイベントの伝播を止める（stopPropagation）仕様を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1, §2.3, §4.2",
+    "issue": "S-13（タスク編集）、S-16（ゴールタスク追加）、S-41（アバター設定）の画面IDは存在するが、具体的な画面構成や操作フローが定義されていない。特にS-41はMVPのPremier特典装備に必須である。",
+    "suggestion": "S-13/S-16はS-12（タスク追加）のUIを流用する旨を明記��、S-41（アバター設定）のハーフモーダルまたはフルスクリーンでのフレーム選択・保存フローを追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §2.1",
+    "issue": "GROW画面でTodayセクションの下にGoalsセクションがあるため、タスク（単発＋習慣）が多数ある場合、Goalsがファーストビューから完全に押し出され、目標を意識する機会が失われる。",
+    "suggestion": "GoalsセクションをTodayの上に配置するか、Todayセクションのタスクリストを折りたたみ可能にする、あるいは横スワイプのカルーセルでGoalsをコンパクトに最上部に表示するレイアウトを検討する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3, §6.1",
+    "issue": "S-12（タスク追加）やS-15（ゴール作成）のハーフモーダルで、入力途中に誤ってbackdropをタップしたり下スワイプした場合、入力内容が警告なしに破棄されるリスクがある。",
+    "suggestion": "入力フィールドに変更がある状態でモーダルを閉じようとした場合、「編集内容���破棄しますか？」の確認ダイアログ（S-6.3）を表示する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §2.2, §11.2",
+    "issue": "小型端末でスクロール時に「Lv.12 █████ 1,240/2,000」と1行に圧縮される仕様だが、テキストとプログレスバーを1行に詰め込むと視認性が著しく低下し、レイアウト崩れの原因になる。",
+    "suggestion": "小型端末の圧縮時はプログレスバーを非表示にしテキスト（Lv.12 1,240/2,000）のみにするか、プログレスバーを要素の最下部に細いライン（高さ2px等）として配置するデザインに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3, §6.2",
+    "issue": "Undoスナックバー表示中（3秒以内）に別のタスクを完了した場合、スナックバーがスタック（最大2件）すると、どちらの「取り消す」ボタンがどのタスクに対応するのかユーザーが混乱する。",
+    "suggestion": "Undoスナックバーはスタックさせず、新しいタスクを完了した場合は前のUndoを即時確定（スナッ��バーを上書き）する仕様にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.5, §7.3",
+    "issue": "TALK画面の左端から右スワイプで履歴ドロワーを展開する仕様は、iOSのシステムジェスチャー（エッジスワイプで戻る）と競合し、誤動作を招きやすい。",
+    "suggestion": "エッジスワイプでのドロワー展開を無効化し、ヘッダーの「☰」ボタンタップのみで展開するようにするか、スワイプ開始領域を画面端から離すなど厳密に調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "改善2: diffレビュー（r2以降は差分のみ）",
+    "issue": "diffレビューの前提となる「影響範囲」を誰がどのように特定するかが定義されていません。影響範囲の特定が不正確・不完全な場合、修正によるデグレード（副作用）が修正ラウンドのレビューで見逃され、ゴールデンレビューまで発見が遅れる重大なリスクがあります。",
+    "suggestion": "影響範囲を特定するための具体的なプロセスと責任者を定義してください。例：1. Code（AI開発者）が静的解析ツールや依存関係グラフを用いて機械的に影響範囲候補をリストアップする。2. そのリストの妥当性を、修正ラウンドのレビュー前に主審AIが検証・承認する。3. 影響範囲が主審の専門外に及ぶ場合は、関連ペルソナを臨時でレビューに追加する、などのルールを設けることを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "共通ルール",
+    "issue": "「ゴールデンで出たCRITICALは信頼度Aのペルソナのもののみ修正必須」というルールは、信頼度がAでないペルソナ（例: たまたまfalse positiveが続いて信頼度がB+に落ちたsecurity_engineer）が発見した本物���CRITICALな問題を見逃すリスクを内包しています。",
+    "suggestion": "このルールを「ゴールデンレビューで発見されたCRITICALは、ペルソナの信頼度に関わらず、全てADV/POによるトリアージ対象とする」と変更することを強く推奨します。特にセキュリティやデータ破壊に繋がる指摘は、信頼度や合意度に関係なく最優先で評価すべきです。Filter 5のsecurity_engineer例外ルールと思想を統一することが望ましいです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "A, B, C, E, F, Gの各フロー",
+    "issue": "D.実装レビューではCRITICALの具体的な定義が示されていますが、他のレビューフロー（A.デザイン, B.アプリ仕様など）には客観的なCRITICAL定義がありません。これにより、severity判定がモデルやペルソナの主観に依存し、判定ブレや不要なseverity inflationが発生する可能性があります。",
+    "suggestion": "各レビューフロー、または全フロー共通で、何がCRITICALに該当するかの定義を明記してください。例：B.アプリ仕様レビューでは「仕様間の致命的な矛盾」「法規制要件からの逸脱」��実現不可能な要求」などをCRITICALと定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "全体",
+    "issue": "複数モデル・複数ペルソナから多数の指摘が提出された際、それらをどのように集計し、重複を排除し、意味的にグルーピングするかのプロセスが定義されていません。このプロセスがないと、類似の指摘が別々に扱われ、Filter 5（合意度）が正しく機能しない可能性があります。",
+    "suggestion": "指摘の集計・クラスタリングプロセスを定義してください。例：「1. 全ての指摘をベクトル化し、意味的な類似度に基づいてクラスタリングする。2. 各クラスタから代表的な指摘を抽出し、関連する指摘を紐付ける。3. Filter 5の合意度を各クラスタ単位で評価する」といった手順を明確にすることを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "D. 実装レビュー",
+    "issue": "レビュー対象に「Playwrightテスト」が含まれていますが、テストコード特有のアンチパターン（flaky test、不適切なセレクタ、ハー��コーディングされた待機、不十分なアサーションなど）を専門的にレビューするペルソナが不在です。これにより、テストコードの品質が低下し、CIの安定性を損なう可能性があります。",
+    "suggestion": "D.実装レビューのペルソナに `qa_engineer` を追加するか、`code_reviewer` または `sw_debugger` の役割に「テストコードの品質とアンチパターンのチェック」を明示的に追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "Filter 3: 既決定チェック",
+    "issue": "Filter 3で参照される「CUMULATIVE_CONTEXT」や「PO決定済みリスト」が、複数のレビューフロー（A〜G）を横断してどのように一元管理・更新されるかのメカニズムが定義されていません。これにより、あるフローでの決定が別のフローに反映されず、同じ指摘が繰り返される可能性があります。",
+    "suggestion": "全てのレビューフローで共有される「プロジェクトワイドな決定事項リポジトリ」のような概念を定義し、その更新・参照プロセスを明確にしてください。このリポジトリには、PO/ADVによる決定、WAIVEされた指摘とその理由、スコープ外リストなどを記録します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "改善4: 信頼度スコアリング",
+    "issue": "信頼度スコアが「修正採用率」に大きく依存するロジックは、修正コストが高い、あるいは先進的だがすぐには採用されない重要な指摘（例：大規模なリファクタリング提案）を行うペルソナの評価が不当に低くなるバイアスを生む可能性があります。",
+    "suggestion": "スコアリングロジックに、指摘の重要度（severity）や根本原因を突いているかといった定性的な要素を加えることを検討してください。例えば、採用されなくてもHIGH以上の指摘を多く出したペルソナにはボーナスポイントを与える、あるいはADVが「良質な指摘」と評価した場合にポイントを加算するなどの仕組みが考えられます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "レビュー対象 × フロー マッピング",
+    "issue": "レビュー対象の成果物リストに、IaC (Infrastructure as Code) コード、DBマイグレーションスクリプト、セキュリティポリシー文書などが明記されていません。これらの重要な成果物がどのフローでレビューされるかが不明確です。",
+    "suggestion": "これらの成果物がどのレビューフローの対象となるかをマッピング表に追記してください。例えば、IaCとマイグレーションスクリプトは「D. 実装レビュー」に、ポリシー文書は「C. dev-system」や「B. アプリ仕様」に含めるなど、担当フローを明確化することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "Filter 5: 再現性（合意度）",
+    "issue": "「1 モデル/ペルソナのみ」の指摘を画一的にseverityダウンさせるルールは、専門性の高いニッチな指摘（例: a11y_expertによる特定の支援技術でのみ発生する問題）の重要度を不当に下げてしまう可能性があります。",
+    "suggestion": "`security_engineer`と同様に、特定の専門家ペルソナ（例: `a11y_expert`, `a11y_engineer`, `backend_architect`）の単独指摘については、ダウングレードの対象外とする例外ルールを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "Code Pre-Reviewの改善",
+    "issue": "Code Pre-ReviewでCRITICALが発見された場合、「Code自身が修正 → Pre-Review再実行」というループが定義されていますが、修正が困難でループが収束しない場合のタイムアウトやエスカレーションパスが定義されていません。",
+    "suggestion": "Pre-Reviewの再実行回数に上限（例: 3回）を設け、上限に達してもCRITICALが解消されない場合は、人間（ADV/PO）にエスカレーションするルールを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

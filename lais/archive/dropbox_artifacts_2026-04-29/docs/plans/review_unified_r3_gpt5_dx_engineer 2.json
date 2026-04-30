@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.5 ヘッダー（dev-system / project / ux）",
+    "issue": "依存バージョンが相互に不一致。lais_project_v1.mdは「dev_system_spec.md v3.1」に依存と明記、dev_system_spec.md自体はヘッダーがv3.0のまま（提供文脈ではv3.2想定）。さらに lais_ux_v1.md は「lais_project_v1.md v1.3」に依存と記載しているが、実体は v1.4。",
+    "suggestion": "正本（Single Source of Truth）に合わせて全ファイル冒頭ヘッダーを同期する。具体: 1) dev_system_spec.md の version を実体（v3.2）へ更新。2) lais_project_v1.md の依存を dev_system_spec.md v3.2 に更新。3) lais_ux_v1.md の依存を lais_project_v1.md v1.4 に更新。4) これを機械検証する spec_dep_lint をcanopyに組み込む（R-003参照）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md ヘッダー / 「変更履歴」",
+    "issue": "ヘッダーは v1.0 のままなのに、変更履歴は v1.14 まで進んでいる。読者とツールの基準点がズレる。",
+    "suggestion": "lais_ux_v1.md のヘッダー版数を最新（v1.14）���更新し、ステータスや依存も同時同期。以後、版上げ時は必ずヘッダー→本文→依存の三点同時更新を運用ルール化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §19.6（上流変更時の下流遡及チェック）",
+    "issue": "遡及チェックは「ADVが実施」と記述されているが、機械可検証の原則（§1.1）に対して自動ゲート/スクリプトが未提示。人手運用だと漏れや遅延が生じやすい。",
+    "suggestion": "docs配下の全仕様書ヘッダーから「依存: {path} vX.Y」行を抽出→参照先ファイルのヘッダー版数（もしくは先頭の vX.Y）と突合する spec_dep_lint.sh を追加。canopy_common.sh から呼び出し、未同期や循環/欠落をFAILにする。結果をspec_changelog.mdへ自動追記するオプションも検討。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md §19.1/§19.4/§18 と lais_project_v1.md §10.1",
+    "issue": "必須ファイル名の整合が取れていない。dev-systemは docs/e2e_fullflow_test.md を前提に依存図や連鎖更新を示す一方、Lais側ロードマップは docs/plans/lais_e2e_test.md を記述。この差異は参照や自動化（将来のlint）を不安定化させる。",
+    "suggestion": "どちらかに統一。推奨はdev-system準拠（docs/e2e_fullflow_test.md）。アプリ固有の接頭辞を付ける場合は dev-system §18 の依存関係マップ例も同名規約に差し替え、参照表記（§19.6 参照表記法）にサンプルを追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "lais_project_v1.md §3.2（ヒーロー領域の例示値）/ §4.4（レベル計算式）",
+    "issue": "ヒーロー領域の例示「1,240 / 2,000 EXP」は固定表記に見え、§4.4の式（次Lv必要EXP=100+(Lv-1)*50）と直感的に噛み合わない。例示なのか規定値なのかが判別しづらい。",
+    "suggestion": "当該数値は『例』である旨を明記し、式に基づいた具体例（例: Lv12→13は必要650EXP、よってバー表示は{current}/{650}など）に差し替えるか、表記を『例: 1,240 / 2,000（ダミー）』と明示。テスト実装者の誤読を予防。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "lais_project_v1.md 変更履歴",
+    "issue": "同日付で v1.1 が2回登場。版管理の読み取りミスや自動集計の不具合につながる恐れ。",
+    "suggestion": "v1.1の2エントリを統合するか、v1.1 / v1.1.1 のように正規の番号に修正。以降、1バージョン1行の原則を徹底。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §16.2–16.8",
+    "issue": "dev-system §19.8の『環境ごと（E1〜E7）にどの項目が対象かを明示』の趣旨は満たしているが、A以外の節はテーブル形式ではなく本文中で環境を説明しているため、チェックリストとしての機械判定性がやや弱い。",
+    "suggestion": "A〜G全項目について、E1〜E4（最低必須）に✔/✖/対象外を付ける簡易マトリクス（1行/項目の短表）を追補。E5〜E7は『対象外』を明記。e2e_fullflow_test.md（作成後）からもこのIDで参照できるよう、各項目にID（A1等）を見出しとして併記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md §10.2 / canopy_common.sh",
+    "issue": "dev-systemバージョンpin不一致はWARN（『3セッション放置でFAIL』の運用）だが、スクリプトにカウント保持の仕組みがなく、実運用で『放置3回』判定を自動化できない。",
+    "suggestion": "instructions/results/.dev-system-drift.json のような小さな状態ファイルに最終WARN検出日/回数を記録し、canopy_common.sh で3セッション連続WARNをFAIL化するロジックを追加。セッション番号はmetrics.jsonlの最新行を参照して照合可能にする。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

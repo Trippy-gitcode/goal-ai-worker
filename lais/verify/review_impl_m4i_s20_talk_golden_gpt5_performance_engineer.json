@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§4.9 S20-2（S20Talk.css + S20Talk.jsx useEffect）",
+    "issue": "チャット末尾への自動スクロール時に .s20-scroll の scroll-behavior: smooth が常時有効のため、メッセージ追加ごとにスムーススクロールが発生し、低速端末でフレーム落ち・レイアウトスラッシングを誘発しやすい。",
+    "suggestion": "プログラム的スクロール時はスムースを無効化する。例: スクロール直前に el.style.scrollBehavior = 'auto' で即時スクロールし、requestAnimationFrame 後に空文字へ戻す。または el.scrollTo({ top: el.scrollHeight, behavior: 'auto' }) を使用。CSS 側はデフォルトを auto にし、ユーザー操作専用にスムースを適用する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.9 S20-2（S20Talk.jsx: messages レンダリング）",
+    "issue": "メッセージを全件 map で描画しており、履歴が増えると DOM が際限なく肥大化し、レンダリングとメモリ使用量が線形に悪化する。",
+    "suggestion": "メッセージの仮想リスト化（例: preact-virtual-list / react-window 相当）または直近 N 件にローカル制限し、古い履歴は『さらに読み込む』で段階取得。あわせてキー保持とアイテムの memo 化で再レンダリングを最小化する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.9 S20-2（S20Talk.jsx: handleScroll）",
+    "issue": "onScroll で毎フレーム scrollHeight/scrollTop/clientHeight を読み取り setShowScrollBanner を即時呼び出しているため、連続スクロール中にメインスレッド負荷が上がる可能性がある。",
+    "suggestion": "requestAnimationFrame でスロットルし、距離判定→setState を 1 フレーム 1 回に制限。さらに setShowScrollBanner(v => (v === next ? v : next)) として同値更新を回避。もしくはフッター近傍に IntersectionObserver のセンチネルを置いてバナー表示/非表示を切り替えると同期レイアウト計測を減らせる。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.9 S20-9（S20Talk.jsx: resizeTextarea / handleInput）",
+    "issue": "入力のたびに textarea の style.height を同期更新しており、連続タイプ時にレイアウト計算が頻発し得る。",
+    "suggestion": "高さ更新を rAF にバッチし、同一値なら書き込みをスキップ。例: resizeScheduled フラグ + requestAnimationFrame 内で height='auto'→scrollHeight 測定→min(max, scrollHeight) を算出→前回値と差分がある場合のみ反映。可能なら field-sizing: content（対応ブラウザ）も検討し、JS 介入を最小化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.9 S20-2（S20Talk.css）",
+    "issue": "大量メッセージ時の初回/再描画でオフスクリーン要素もレイアウト・ペイント対象になりやすい。",
+    "suggestion": "オフスクリーン最適化に content-visibility: auto; と contain-intrinsic-size を .s20-message-list > li（または適切なラッパー）に付与して、ビューポート外の計算をスキップ。SR 影響を確認しつつ段階導入する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.9 S20-3（S20Talk.jsx: aria-live の付与）",
+    "issue": "AI バブルごとに aria-live=\"polite\" を持つ複数ライブリージョンが常駐し、支援技術向け処理と DOM ���新のオーバーヘッドが増える可能性。",
+    "suggestion": "チャット全体に role=\"log\"（または単一の aria-live リージョン）を付与し、最後に追加されたメッセージのみをアナウンス。個々のバブルから aria-live は外す。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.9 S20-5（S20Talk.jsx: TaskProposalCard 内の onClick）",
+    "issue": "カード内で無名関数を毎レンダリング生成しており、カード数が増えると不要な関数割り当てが累積する。",
+    "suggestion": "onAction を受け取る側で useCallback 化し、引数は data-attr 参照や部分適用で対処。あるいは TaskProposalCard/QuestCard を memo 化して親の再レンダリング時の無駄な差分を抑制。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "実装 4. S20Talk.jsx（import 行）",
+    "issue": "useMemo を import しているが未使用。バンドル最適化の妨げになる可能性（ツールにより除去されるが、開発ビルドでは維持され得る）。",
+    "suggestion": "未使用 import を削除してツリーシェイクを確実化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.9 S20-2（S20Talk.css: .s20-scroll）",
+    "issue": "スクロールチェーンにより、親ドキュメント側のスクロールやリフローが伝播し、体感カクつきにつながる場合がある。",
+    "suggestion": ".s20-scroll に overscroll-behavior: contain; を付与し、スクロールチェーンを遮断。必要に応じて touch-action の調整も検討。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "実装 1. App.jsx（lazy ルート）/ §4.9 全体",
+    "issue": "S20 は lazy 読み込みだが、ユーザーが BottomTabBar を操作する直前の高意図タイミングでプリフェッチしておらず、初回遷移で TTI が伸びる可能性。",
+    "suggestion": "タブ hover/press（onPointerEnter/onTouchStart）で import('./screens/S20Talk.jsx') を先行実行、または webpackPrefetch/rel=prefetch を利用してアイドル時に先読み。ネットワーク負荷と相談し条件付きで有効化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.9 S20-8（S20Talk.css: .s20-autoscroll）",
+    "issue": "transform に対する transition が常時有効。実際には頻繁にアニメーションしないため、GPU レイヤー昇格コストが割に合わないケースがある。",
+    "suggestion": "必要時のみクラス付けで transition を有効化、もしくは transition を削減して CSS を軽量化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.9 S20-2（S20Talk.jsx: 全体再レンダー）",
+    "issue": "messages 更新でリスト全体が再レンダリングされるため、カードや過去バブルも都度再描画対象になる。",
+    "suggestion": "各メッセージアイテムを独立コンポーネント化し memo 化（props が同一なら再レンダー回避）。あわせて key 安定化とイベントハンドラの参照安定化で差分コストを最小化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

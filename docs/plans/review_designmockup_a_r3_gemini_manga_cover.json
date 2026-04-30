@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s00_splash",
+    "location": "画面下部のプライマリボタン",
+    "issue": "UX仕様書（1.2 遷移マトリクス）では新規登録の導線は「サインアップ」と定義されているが、画面上は「はじめる」となっており、用語が矛盾している。",
+    "suggestion": "ボタンのラベルを仕様書に合わせて「サインアップ」に変更し、ユーザーの認知とシステムのアクションを一致させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s02_onboarding",
+    "location": "アバター選択の3つの円",
+    "issue": "円の枠（100x100px）に対して中のアバターイラストが小さく、外側の余白が間延びしている。キャラクターの顔に視線が集中せず、パートナーとしての感情的な繋がりが生まれにくい。",
+    "suggestion": "アバターのスケールを拡大し、円の枠に対して顔が大きく配置されるようにトリミングを調整して、キャラクターの表情へ強く視線を誘導する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "TODAYセクションの各タスク行",
+    "issue": "左端のタイムラインのドットと、右端のゴール紐付けのカラードットが両端に離れて配置されているため、視線が左右に分断され、中央のタスク名への集中を削いでいる。",
+    "suggestion": "ゴール紐付けのカラードットをタスク名の直後、または時刻表示の横など、テキスト情報の近くに配置し、視線の流れを中央の「Z字」のラインにまとめる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カード（「タスクにしますか？��）",
+    "issue": "カードの背景色（#161B22）が通常のチャットバブルと同じであり、左側の青いボーダーだけでは「アクションを促す特別なUI」としての塊感（明暗のコントラスト）が弱く、会話の中に埋もれている。",
+    "suggestion": "提案カードの背景色をわずかに明るくする（--bg-elevated等）、またはカード全体を薄いアクセント色のボーダーで囲み、周囲のテキストとの明暗のコントラストを強化して浮き立たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s14_goal_detail",
+    "location": "進捗の「60%」表示とプログレスバーの間",
+    "issue": "「60」の数字（48px）の大きなジャンプ率に対して、下のプログレスバーとの間隔（margin-bottom: 12px）が狭く、大きなタイポグラフィの持つ視覚的エネルギーを受け止める「余白（間）」が不足している。",
+    "suggestion": "数字とプログレスバーの間の余白を `margin-bottom: 24px` 程度に広げ、大きな文字の周囲に十分な「呼吸する空間」を持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "タスクリストの完了済みタスク（「ポートフォリオサイト作成」など）",
+    "issue": "完了済みタスクにテキストの取り消し線（line-through）が適用されているが、日本語の複雑な漢字に取り消し線が重なると可読性が著しく低下し、画面の品格を損なう。",
+    "suggestion": "取り消し線を廃止し、テキストの明度を下げる（#7A8593等）ことと、左側の緑のチェックマークのみで完了状態を静かに表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "画面下部の「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "非活性状態（#484F58 on #1C2128）のコントラストが低すぎ（約2.1:1）、画面下部の視覚的なウェイトが軽くなりすぎてレイアウトの土台としての安定感を欠いている。",
+    "suggestion": "非活性状態であっても、ボタンの輪郭（border）を薄く残すか、テキストのコントラスト比を最低3:1まで引き上げ、画面の重心を保つ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE, DISCOVER, FRIENDS, SHOP）",
+    "issue": "英字の大文字（uppercase）が連続しているが、文字サイズが13pxと小さく、かつ字間（letter-spacing）が設定されていないため、文字同士がくっついて見え、窮屈な印象を与える。",
+    "suggestion": "サブタブの英字ラベルに仕様書の `--letter-spacing-label: 1.5px` を適用し、文字間に「間」を持たせることで、洗練された印象と可読性を向上させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」のチェックボックス行",
+    "issue": "チェックボックスの四角と右側のテキストの垂直方向の中央揃えが視覚的にズレており（テキストが少し下がって見える）、タイポグラフィの整然としたリズムを崩している。",
+    "suggestion": "テキストのline-heightによる上下の余白を考慮し、チェックボックスの `margin-top` を微調整してベースラインを視覚的に正確に揃える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s12_task_add",
+    "location": "「所要時間」の選択チップ群",
+    "issue": "8つのチップが `gap: 8px` で折り返して配置されているが、上下の行間も8pxとなっており、タップ領域としての「間」が少し窮屈に見える。",
+    "suggestion": "`gap: 12px 8px` のように、上下の余白を左右の余白より少し広く取ることで、行ごとの独立性を高め、視覚的なリズムを改善する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  }
+]

@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "ユーザーメッセージバブル（右寄せ）の背景",
+    "issue": "背景色が rgba(121,192,255,0.08) とトークン外の値になっており、--accent-subtle(=rgba(121,192,255,0.14))から逸脱",
+    "suggestion": "背景は var(--accent-subtle) を使用し、必要に応じて on-accent-subtle の前景色指定を組み合わせる（不透明度の独自値は避ける）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "AIメッセージの左ボーダー",
+    "issue": "border-left が rgba(121,192,255,0.25) とトークン外の直指定。カラーシステムのトークン未使用",
+    "suggestion": "ボーダー色は var(--accent) を使用（例: border-left: 2px solid var(--accent)）。サブトーン表現が必要なら専用トークン（--accent-border 等）をデザインシステムに追加して運用",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s13_task_detail",
+    "location": "下段ボタン行「削除」ボタン（枠線/テキスト）",
+    "issue": "色が #FF7B72 / rgba(255,123,114,0.5) とトークン外。--danger(#F85149)体系から逸脱",
+    "suggestion": "テキストは var(--danger)、スタイルは var(--danger-subtle)系（背景 or 枠線）に統一。例: color: var(--danger); border-color: rgba(var(--danger),0.3) ではなく、デザインシステム側に danger-border トークンを定義して参照",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s01_signin",
+    "location": "画面下「すでにアカウントを…」内の「ログイン」リンク",
+    "issue": "インラインリンクに下線がなく、色の違いのみで可視化。カラーシステム§2.2の下線併用ルールに不一致",
+    "suggestion": "テキストリンクは text-decoration: underline を付与（色 + 下線の二重手掛かりにする）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "ラベル/補助テキスト各所（例: s01ラベル13px, s02アバター種別12px, s10 Today=13px, s14「タスク」=12px 等���",
+    "issue": "12px/13pxなどトークンスケール外のフォントサイズが散見。--font-size-xs(11)と--font-size-sm(14)の間の独自値使用はスケール逸脱",
+    "suggestion": "サイズをトークンに揃える。補助/ラベル系は14px(--font-size-sm)、時刻・キャプションのみ11px(--font-size-xs)。日本語本文は line-height を --line-height-ja-body に統一",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "タスク行 右端のドット（例: 学習=紫 #A371F7）",
+    "issue": "セマンティクス外の色(#A371F7)が混在し、1画面内のアクセント同時使用制限（プライマリ+セマンティック4）を超える恐れ",
+    "suggestion": "ドット色はブランドアクセント/セマンティック内で運用（例: var(--accent) または warning/success 等）。カテゴリ識別が必要ならカテゴリ用パレットをデザインシステム側に定義して限定運用",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "サブタブ下��ーダーから「年齢」行までの上下間隔（margin-bottom:28px）",
+    "issue": "セクション間隔が32px未満（§4.2: セクション間≧32px）で詰まって見える",
+    "suggestion": "サブタブ直下のセクション開始マージンを --space-xl(=40px) もしくは最低32pxに拡張",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayヘッダー直下の進捗テキスト「1 / 4 completed」(11px, ヒント色)",
+    "issue": "重要度の割にサイズ/配置が弱く視線誘導が働きにくい。日付と分離されて情報が埋もれる",
+    "suggestion": "Today見出し行の右側に配置し直し（同一視線上で把握）、色は text-secondary に格上げ。必要なら見出しとグルーピングし余白も最小化",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "タスク提案カードのアクション行（3ボタン横並び）",
+    "issue": "日本語ラベルが長く、横並びで詰まって見える端末幅がある（視覚的に密度高）",
+    "suggestion": "ボタン群は折返し許可で2段レイアウトに（上段=Primary、���段=Secondary/✕）。もしくはSecondaryをテキストボタン＋アイコンにし横幅を圧縮",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>Lais — S-20 Talk (案 B_v2 Hogwarts)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="screen s20-talk">
+  <div class="ornate-border"></div>
+  <div class="corner-flourish tl">G</div>
+  <div class="corner-flourish tr">S</div>
+  <div class="corner-flourish bl">R</div>
+  <div class="corner-flourish br">H</div>
+
+  <div class="content">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <span>⚜ 🪄 ▮▮▮</span>
+    </div>
+
+    <!-- Header (校長室の Sage 対話) -->
+    <div class="talk-header">
+      <a class="talk-back">‹</a>
+      <!-- 動く絵画フレーム (Sage) -->
+      <div class="talk-portrait">
+        <span class="talk-portrait-icon">🎩</span>
+      </div>
+      <div class="talk-title-block">
+        <div class="talk-title">SAGE — Headmaster</div>
+        <div class="talk-status">校長室にて ✦ Opus IV.VII</div>
+      </div>
+      <div class="talk-deepcheck" title="Mirror of Erised Mode">
+        <span>MIRROR</span>
+        <span class="deepcheck-toggle"></span>
+      </div>
+    </div>
+
+    <!-- Mirror of Erised 帯 (DeepCheck active) -->
+    <div class="mirror-frame">MIRROR OF ERISED — 望みの鏡 ✦ DEEPCHECK ON</div>
+
+    <!-- Messages -->
+    <div class="talk-messages">
+
+      <!-- Day separator -->
+      <div style="text-align:center; margin: 4px 0;">
+        <span style="font-family:'Cinzel',serif; font-size:9px; letter-spacing:3px; color: var(--parchment-dark); border-top: 1px solid var(--house-secondary-dim); border-bottom: 1px solid var(--house-secondary-dim); padding: 4px 14px; display: inline-block;">⚜ TODAY ⚜ IV / XXVII ⚜</span>
+      </div>
+
+      <!-- AI msg -->
+      <div class="talk-msg-row">
+        <div class="talk-msg-icon ai">🦉</div>
+        <div>
+          <div class="talk-msg-bubble ai">
+            おはようございます、賢者よ。<br>
+            昨夜の頁、フクロウ便にて見届けました。<br>
+            「沈黙の中に何を聴くか」— 今日はこの問いと共に、Diagon Alley を歩みましょうか。
+          </div>
+          <div class="talk-msg-meta">SAGE ✦ 9:38</div>
+        </div>
+      </div>
+
+      <!-- User msg -->
+      <div class="talk-msg-row user">
+        <div class="talk-msg-icon user">F</div>
+        <div>
+          <div class="talk-msg-bubble user">
+            最近、自分の声がよく分からなくなって。
+            周りの正解ばかり追いかけている気がする。
+          </div>
+          <div class="talk-msg-meta" style="text-align:right">9:39 ✦ FUTOSHI</div>
+        </div>
+      </div>
+
+      <!-- AI msg (Mirror of Erised — 賢者 2 名対話示唆) -->
+      <div class="talk-msg-row">
+        <div class="talk-msg-icon ai">🪄</div>
+        <div>
+          <div class="talk-msg-bubble ai">
+            <em>「自分の声」</em>— Hogwarts の古い書にも、よくこの言葉が出て参ります。<br>
+            周りの正解は、頁の余白に書かれた他人の注釈。<br>
+            あなたが書くべきは、本文 — まだ言葉になっていない、胸の奥の<em>沈黙</em>です。<br><br>
+            Mirror of Erised が映すのは「最も深く望むもの」。<br>
+            <strong>最後に「これが好きだ」と言葉に出したのは、いつでしたか。</strong>
+          </div>
+          <div class="talk-msg-meta">SAGE ✦ 9:40 ✦ Mirror ✓ ✦ DeepCheck ✓</div>
+        </div>
+      </div>
+
+      <!-- Pending -->
+      <div class="talk-msg-row">
+        <div class="talk-msg-icon ai">🪶</div>
+        <div class="talk-pending" data-testid="ai-pending">
+          <span class="talk-pending-dot"></span>
+          <span class="talk-pending-dot"></span>
+          <span class="talk-pending-dot"></span>
+          <span class="talk-pending-text">校長は羽ペンを取っています…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 入力欄 (羊皮紙風) -->
+    <div class="talk-input-area">
+      <span class="talk-input-icon">🪶</span>
+      <input class="talk-input" type="text" placeholder="羊皮紙に記したき想いを…">
+      <button class="talk-send" aria-label="フクロウ便で送る">➤</button>
+    </div>
+
+    <div class="home-indicator"></div>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,226 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §4.1 G1 ↔ sub_infrastructure.md §2.6 canopy_common.sh (comments)",
+    "issue": "Version sync targets are inconsistent: main spec says 4 files (app_config.yaml, package.json, version.ts, CLAUDE.md) while canopy_common.sh comments reference frontend/src/version.ts. Many apps may not have package.json/version.ts unless the frontend template is applied.",
+    "suggestion": "Unify G1 targets and make them conditional: define G1_REQUIRED_PATHS in canopy_common.sh by detecting files that exist (app_config.yaml always; if package.json exists include; if frontend/src/version.ts exists include). Update dev_system_spec.md to list conditional paths and exact expected key (e.g., app.app.version)."
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md §2.2 update_app.sh / §2.6 canopy_common.sh",
+    "issue": "Scripts hardcode $HOME/Desktop/dev-system as the dev-system root, while init_app.sh uses a relative default. This will fail outside that directory layout.",
+    "suggestion": "Introduce DEV_SYSTEM_ROOT env var with fallbacks: 1) provided CLI arg, 2) env DEV_SYSTEM_ROOT, 3) script-relative path. Refactor update_app.sh and canopy_common.sh to resolve DEV_SYSTEM_ROOT robustly and error if unresolved."
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §4.1 G6 / sub_infrastructure.md §2.6 canopy_common.sh",
+    "issue": "G6 (build.out_dir and deploy command consistency) is only a comment; no implemented check. app_config.yaml isn’t parsed anywhere to enforce this gate.",
+    "suggestion": "Add a YAML parse in canopy_common.sh (e.g., yq or grep/awk fallback) to read build.out_dir and deploy.frontend_cmd, then verify the out_dir variable is interpolated correctly and directory exists post-build. Fail if mismatch."
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §4.1 G7 / sub_infrastructure.md §2.6 canopy_common.sh",
+    "issue": "G7 (mission_linter.sh) is declared as a FAIL gate, but canopy_common.sh never invokes mission_linter.sh, so it can’t enforce G7.",
+    "suggestion": "Call scripts/mission_linter.sh from canopy_common.sh and propagate nonzero exit to FAIL. Add a guard if the file is missing to inform setup issues."
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "sub_infrastructure.md §1.1 canopy_app_template.sh note ↔ §2.6 canopy_common.sh",
+    "issue": "Minimum lines for canopy_app.sh conflict: template says minimum 10 lines; canopy_common.sh enforces ≥5 active lines.",
+    "suggestion": "Standardize the minimum (e.g., 10 active lines). Update canopy_common.sh check and the template note to match."
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §8 C2デプロイフロー ↔ sub_infrastructure.md §3 app_config_template.yaml",
+    "issue": "C2 deploy unconditionally uses Cloudflare (wrangler pages deploy / wrangler deploy), but app_config allows non-Cloudflare providers (vercel/netlify/aws).",
+    "suggestion": "Parameterize deploy commands based on app_config.deploy.provider and infrastructure.backend. Provide a provider switch in a new deploy.sh script and update §8 to reference it."
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §11 Source of Truth / sub_system_map.md §プラン変更",
+    "issue": "Plan Source of Truth requires Cloudflare KV (TOKEN_KV), but app_config allows non-Cloudflare backends; flows and testing assume KV and wrangler.",
+    "suggestion": "Either restrict backend to Cloudflare Workers in v3.0-RC or define equivalent providers (e.g., Redis/SSM) and abstract test hooks. Update SKUs and testing guidance accordingly."
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md §4.1 G9 / §4.2 / §5 ATテンプレート",
+    "issue": "UI acceptance via screenshot lacks concrete tooling: no baseline management, threshold, or command to compare screenshots. 'スクショ前後一致=FAIL' is underspecified.",
+    "suggestion": "Specify Playwright toMatchSnapshot or pixelmatch with a fixed threshold (e.g., 0.1%). Define baseline storage path, naming (AT-N-before/after), and update policy. Provide a sample spec snippet and add a canopy check that fails if screenshot diffs exceed threshold."
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §4.1 G3",
+    "issue": "Test item count (grep -c) has no defined search path or expected value source, making it non-actionable.",
+    "suggestion": "Define TEST_COUNT_EXPECTED in a config (e.g., tests/test_config.json) and the search scope (tests/e2e/specs). Add a canopy check that reads expected count and compares to actual grep count."
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md §2 Step 2 / sub_system_map.md §1 (design_spec_v*.md, docs/mockups/)",
+    "issue": "Mockups are 'Single Source of Truth' but the storage format/path isn’t fixed; '手動再構築禁止' without generation pipeline details can confuse ENG.",
+    "suggestion": "Define the mockup format (e.g., HTML in docs/mockups/ or Figma PNGs exported to a fixed folder) and a script to sync/generate assets. Link these in Step 2 and sub_system_map."
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §5 テンプレート v3 ↔ sub_adv_protocol.md §5 ATテンプレート",
+    "issue": "AT template fields differ: main spec includes RED/GREEN checkboxes, but sub_adv_protocol doesn’t mention them.",
+    "suggestion": "Align AT templates: add RED/GREEN fields to sub_adv_protocol §5 and ensure mission_linter.sh checks for both markers."
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md §4.2/G9・鉄則⑨",
+    "issue": "DOM API is banned for acceptance, but Playwright still needs DOM queries for interaction. The boundary between allowed 'setup/interaction' and disallowed 'assertion' is not explicitly stated.",
+    "suggestion": "Clarify: DOM queries are allowed for interaction/setup; assertions must be screenshot/image-based. Provide examples of acceptable screenshot assertions for states like disabled, toasts, and interstitials."
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md §5 affected-tests.sh",
+    "issue": "Uses git diff HEAD~1 which breaks on first commit, squashed merges, or shallow clones. It also ignores multi-commit PRs.",
+    "suggestion": "Resolve diff base robustly: use CI-provided merge-base (e.g., git merge-base origin/main HEAD) or accept a baseline sha via env VAR. Add a fallback to run L1 if diff resolution fails."
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md §1.2 test-guards.config.ts",
+    "issue": "isLocal relies on typeof page and page.url() at module load; in Playwright, page isn’t available at import time, making isLocal always false and disabling intended localhost allowances.",
+    "suggestion": "Compute environment via process.env.BASE_URL/CI only, or export a function to evaluate at runtime within tests. Example: const isLocal = process.env.CI === 'true' || /localhost/.test(process.env.BASE_URL || '');"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §10.2 バージョンpin方式 ↔ sub_infrastructure.md §2.6 canopy_common.sh",
+    "issue": "Policy says '3セッション放置でFAIL', but only a WARN is implemented with no escalation.",
+    "suggestion": "Track WARN count across sessions in instructions/results/metrics.jsonl or a .canopy_state file. Fail once the mismatch persists for 3 recorded sessions. Document the mechanism in §10.2."
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §8 C2デプロイフロー",
+    "issue": "The deploy verification 'curl -s $URL | grep version' lacks definition for $URL and the expected version token.",
+    "suggestion": "Add app_config.deploy.url and a standard version endpoint or HTML marker (e.g., <meta name=\"app-version\" content=\"X.Y.Z\">). Provide a canopy snippet to fetch and compare against app.app.version."
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md §2.4 mission_linter.sh",
+    "issue": "Bash command detection is too narrow; valid commands like 'pnpm test', 'node scripts/foo.mjs', or 'bash -lc' may not match.",
+    "suggestion": "Broaden detection to lines starting with cmdN: or common CLI verbs (npm|pnpm|yarn|node|bash|sh|wrangler|curl). Alternatively, enforce 'cmdN:' prefixes and check presence of at least one cmdN with '|| exit 1'."
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "sub_adv_protocol.md §9 ミッションステータス管理",
+    "issue": "Phrase 'DONE は唯一スキップしてよいステータス' is ambiguous (skip what?).",
+    "suggestion": "Clarify: ADV may skip re-reviewing DONE missions in session summaries; all other statuses must be considered for next actions. Add one example."
+  },
+  {
+    "id": "R-019",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "sub_adv_protocol.md §2 トリガー→アクション",
+    "issue": "Key triggers missing: ENG 3 failed fixes (escalation), device-dependent bug flow, /simplify requests, SKIP-RETRY handling, G9 FAIL remediation.",
+    "suggestion": "Add explicit rows for: ENG修正3回失敗→ADV承認/アーキ検討; デバイス依存BUG→§9.3準拠; ENGが/simplify申請→評価とテスト縮約; SKIP-RETRY検知→次キュー投入; G9 FAIL→モック/AT見直しの判断基準。"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "sub_system_map.md (entire file)",
+    "issue": "Contains app-specific flows (e.g., secretary memo, EXP logic). For new apps, this can mislead ENG before it’s rewritten.",
+    "suggestion": "Wrap app-specific examples in clearly marked 'EXAMPLE (Must customize)' blocks. Provide a checklist at top to update or remove these sections in new apps and add a canopy reminder if placeholders remain."
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "sub_testing.md §6 テスト分割実行ルール",
+    "issue": "Rule depends on per_test_timeout > 30s, but there is no method to detect it programmatically.",
+    "suggestion": "Add a script (scripts/test_stats.sh) to read playwright.config.(ts/js) or env to determine per-test timeout and total test count, then enforce batching accordingly."
+  },
+  {
+    "id": "R-022",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "sub_testing.md §5 affected-tests.sh / sub_infrastructure.md §2 symlinks",
+    "issue": "affected-tests.sh is defined in docs but not provided as a script nor symlinked in init/update; L2 automation may be missing.",
+    "suggestion": "Include affected-tests.sh in dev-system/scripts and add it to init_app.sh/update_app.sh symlink lists. Reference it in §7 test strategy and C2 flow."
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §2（仕様協議時の操作フロー確認） / sub_infrastructure.md §2.4 mission_linter.sh",
+    "issue": "The required '操作フロー確認' checklist is not machine-checked, risking omission.",
+    "suggestion": "Extend mission_linter.sh to check for the three bullets (開始/中断・キャンセル/戻り先) within each mission’s AT block and fail if missing."
+  },
+  {
+    "id": "R-024",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "app_config_template.yaml (routing.models ratios) ↔ dev_system_spec.md §11 / sub_infrastructure.md §2.6 canopy_common.sh",
+    "issue": "Spec says canopy verifies routing ratio sums to 100, but no implementation exists.",
+    "suggestion": "Implement a YAML check in canopy_common.sh to sum routing.models.*.ratio when routing.enabled=true and fail if total != 100 or any missing. Provide example in app_config_template.yaml."
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md §4.2 G2/G9 roles",
+    "issue": "For non-UI changes (refactors, backend-only), G9’s screenshot requirement may be inapplicable, yet rule says DOM API acceptance is banned and 'スクショ前後一致=FAIL'.",
+    "suggestion": "Add a branch: if mission has no UI delta (tagged in mission), acceptance can rely on logs/metrics or API contract tests (G4) instead of G9 screenshots. Update mission template to flag 'UI_CHANGE: true/false'."
+  },
+  {
+    "id": "R-026",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "sub_adv_protocol.md §2（ファイルを書き込む） ↔ dev_system_spec.md §6 承認ルール",
+    "issue": "ADV must 'ask PO before writing files', but §6 allows batched/low-risk auto-approval. The precedence between them is unclear.",
+    "suggestion": "Clarify: 'ファイル書き込みの事前承認は🔴高リスクのみ必須。🟢/🟡は§6に従い即時実行可（報告必須）' and list which file types are considered high risk."
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md §13 AIレビュー基盤",
+    "issue": "No standardized script to bundle and send all 5 files '省略なし'.",
+    "suggestion": "Add scripts/review_runner.sh that concatenates the 5 files, calls the API, and writes JSON to docs/plans/. Document its usage in §13.2."
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md §8 C2 / §4.3 test commands",
+    "issue": "G8 'test-first (all FAIL then PASS)' is a process rule but lacks evidence capture, risking non-compliance.",
+    "suggestion": "Require ENG to attach two Playwright JSON reports (pre-implementation all-FAIL and post-implementation PASS) in instructions/results/, and add a canopy check to verify both exist per mission."
+  }
+]

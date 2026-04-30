@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§3.1.A / §3.1.B / 改訂案① D / 改訂案① F",
+    "issue": "§C セクションの見出し形式が文中で不一致です。本文案では「## §共通行動規範集（§C1〜§C6）」「### §C1 書き込み規約」としている一方、step0_lint.sh は `^### §C1\\.` のように『§C1.』というピリオド付き見出しを前提に検出しています。このままでは新設G11が正常文書をFAIL判定する可能性が高く、相互参照と機械検証が破綻します。",
+    "suggestion": "§C1〜§C6 の正式見出し表記を1つに統一し、step0_lint.sh・本文サンプル・参照表記を同一形式に合わせてください。例: 見出しをすべて「### §C1. 書き込み規約」に統一する。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§3.1.B §3.5 / 改訂案① B §3.5 / 改訂案① E",
+    "issue": "『フローに書かれたこと以外やらない原則』と、全22フローへの Step 0 追加方針が矛盾しています。§3.5では実行対象フロー一覧に sub_review_flow §3/§6 や development_rules G1-G9 を含���版と含まない版が混在し、さらに『sub_*.md の各フロー』と広く書く一方で Step 0 追加対象は22フローに限定されています。読者はどこまでが強制対象か解釈不能です。",
+    "suggestion": "§3.5 の対象フロー一覧を唯一の正本として固定し、改訂案① E の22フロー一覧と完全一致させてください。『sub_*.md の各フロー』のような包括表現は削除し、対象フローを列挙で確定してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.1 / 改訂案③ C / 改訂案⑤ D / 総合サマリー",
+    "issue": "品質ゲート番号の採番が破綻しています。改訂案①でG11新設、改訂案③でG12新設、改訂案⑤でG13新設としている一方、連鎖更新表や各節では『development_rules.md G1-G9』『§4 G11新設』『現行G1-G10』が混在しています。G10までしか存在しない前提とG13まで存在する前提が同居しており、参照番号が一意に解釈できません。",
+    "suggestion": "v3.4での正式なゲート一覧を §4.1 に一度だけ完全掲載し、G1-G13 の名称・スクリプト・参照先を確定してください。以後の全節・development_rules.md・サマリーはその一覧を参照する形に統一してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.1 / 改訂案① F / 改訂案③ C / 改訂案⑤ D",
+    "issue": "新設ゲート G11/G12/G13 のうち、G12とG13は §4.1 に明示されますが、G11は本文中で『§4 G11新設』とあるだけで、最終的なゲート一覧の表形式定義が示されていません。quality gateの正本が不完全です。",
+    "suggestion": "§4.1 のゲート一覧に G11 を明示追加し、名称・実装スクリプト・目的をG12/G13と同粒度で定義してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案① C §3.6 / §3.1.B §3.6 / 総合サマリー",
+    "issue": "『旧鉄則→新規範移行マップ』の完全性説明が不一致です。3.1.Bでは旧鉄則15個+曖昧用語12語の16行相当、改訂案① Cでは『全17項目（旧鉄則15個 + 曖昧用語12語カテゴリ + L1-L2テスト関連）』と記載していますが、表にはL1-L2テスト関連行が存在しません。読者に完全移行済みか誤認を与えます。",
+    "suggestion": "移行マップの対象数を表の実数に合わせて修正するか、欠落している追加項目を実際に表へ追加してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案① §C1 / 改訂案① §3.6 / 改訂案⑤ G / 改訂案⑦ D",
+    "issue": "『ADV/POはコードを書かない・読まない』の定義が他節の運用と衝突しています。§C1では全面禁止に見える一方、改訂案⑦ではADVがCLAUDE.md契約セクションをDesktop Commander経由で削除実行、改訂案③ではENGも提案ログ追記、改訂案① §3.2ではADVが複数仕様書をReadする前提です。『コード』と『ファイル』と『仕様』の境界が不明確です。",
+    "suggestion": "『コードを書かない・読まない』を『アプリ実装コード(src/, frontend/, scripts実装)』などに限定し、仕様書・テンプレート・契約ファイルの編集可否は別表で定義してください。用語を「コード」「ドキュメント」「契約セクション」で分離してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "改訂案① 全体 / 全文横断",
+    "issue": "用語が一貫していません。『鉄則』『規範』『規約』『ルール』『フロー』『ゲート』が近接文脈で混用され、特に『鉄則廃止→共通行動規範集』『§C1 書き込み規約』『§C5 改善ループ規範』『development_rules.md』が混在しています。同一レベルの概念か下位概念かが曖昧です。",
+    "suggestion": "用語体系を冒頭で定義してください。例: 規範=横断ルール、フロー=手順、ゲート=機械検証、ルール=総称。『鉄則』は旧称として §3.6 のみで使用し、それ以外では使用しないよう統一してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案④ A §5.1 / 改訂案④ G 注意事項",
+    "issue": "ミッションタイプ別マトリクスで『画面実装（単一画面）』の cmd-realworld は任意と定義している一方、注意事項で『単一画面でも認証を含む場合は必須にすべきか検討する』と未確定事項を書いています。仕様本文と検討メモが同居しており、確定仕様として読めません。",
+    "suggestion": "注意事項の未確定文言を削除し、正式ルールを本文で確定してください。認証を含む単一画面は『認証・セッション関連』に分類する等、分類規則を追加すると明確です。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改訂案④ A §5.1",
+    "issue": "『任意』『N/A』『必須』の使い分けが曖昧です。表では任意と書きつつ、下で『N/A の場合は理由を明記』としており、任意だが未記載でよいのか、任意でも欄自体は必須でN/A記載が必要なのか判断できません。",
+    "suggestion": "3区分の欄自体は全ミッション必須記載と明記し、その値が『コマンド記述 / N/A — 理由』のどちらかであると定義してください。表の『任意』は『N/A許容』など機械検証可能な表現へ変更してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案② B Step 10 / 改訂案② D.1 verify_env.sh / 改訂案⑦ B §8.1.1",
+    "issue": "環境変数確認の方式が相互に整合していません。Step10では『PaaS側の実設定値を照合』『VITE_*はdist/内の実値をgrep』とありますが、verify_env.shではCloudflare Pagesで `wrangler pages secret list` を前提としており、Pagesの通常環境変数とsecretの区別や取得方法が本文で整理されていません。さらに§8.1.1ではCloudflare Pagesのランタイム/ビルド時変数の反映手順を分けていますが、verify_env.sh の分岐はそれ��対応していません。",
+    "suggestion": "Cloudflare Pages/Workersごとの env 種別と確認方法を仕様本文で明示し、verify_env.sh の対象範囲と非対応範囲を一致させてください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§3 / §8 以降全体",
+    "issue": "§番号の参照整合性が不安定です。『§C1-C6』『§C1〜§C6』『§C. 共通行動規範集』『§C2 / §C6』『§4 G11』『§4.1 G5』など表記揺れが多く、検索性と参照一貫性を損ねています。",
+    "suggestion": "参照表記ルールを固定してください。例: セクションは『§4.1』、規範は『§C2』、ゲートは『§4.1 G11』、複数参照は『§C2, §C6』に統一。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.3 / 改訂案③ F",
+    "issue": "連鎖更新対象一覧に `templates/session_progress_template.md` が含まれていませんが、改訂案③ F では更新対象として新規に登場します。連鎖更新マップの完全性が不足しています。",
+    "suggestion": "§4.3 の表に `templates/session_progress_template.md` を追加し、更新内容を明記してくださ���。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§1.1 / 改訂案④ E / 改訂案③ F / 改訂案⑥ G",
+    "issue": "改訂対象ファイル一覧と改訂案本文の対象ファイルが一致していません。`templates/session_progress_template.md`、`templates/CLAUDE_TEMPLATE.md`、`templates/review_personas/*.md` などが本文で更新・新設対象として挙がる一方、§1.1 の改訂対象9ファイルには含まれていません。",
+    "suggestion": "§1.1 を『改訂対象 + 新設対象』として再整理し、本文で言及するすべての対象ファイルを列挙してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§1.1 / §0.2 1.",
+    "issue": "『dev-system関連6ファイル計3,646行を完読』の見出しで実際には8ファイルを列挙しており、本文の数と列挙内容が一致していません。レビュー前提の信頼性を損ねます。",
+    "suggestion": "ファイル数表記を実数に修正してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改訂案③ A §1.5.1",
+    "issue": "『���テータスなしの項目はSUGGESTED扱い（デフォルト）』としつつ、同節の冒頭で『全項目は以下のいずれかのステータスを持つ』と規定しています。厳密運用か後方互換救済かが混在しています。",
+    "suggestion": "初回移行期間のみステータスなしをSUGGESTED扱いとするなど、恒久ルールと移行ルールを分離してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改訂案③ A §1.5.4",
+    "issue": "『各セッション開始時、ADVは提案ログをReadし、全項目の滞留セッション数を+1する』は、PO開始セッション・ENGのみのセッション・レビュー専用セッションでも加算するのか不明です。セッション定義が曖昧なため数値基準の再現性がありません。",
+    "suggestion": "『ADVが開始した作業セッションのみ加算』『すべてのG_xセッションで加算』など、加算単位を明確化してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "改訂案⑤ E / 改訂案⑤ G",
+    "issue": "棚卸し項目11『canopy発火履歴確認』は改訂案⑤ Eで追加���案されていますが、改訂案⑤ Gの連鎖更新表では dev_system_spec.md §15.3 項目11 追加と記載される一方、実際の本文例が §15.3 に反映された完成形として示されていません。項目10/11の最終形が読めません。",
+    "suggestion": "§15.3 の最終完成版を1か所に再掲し、項目10・11を含む最終番号を確定してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改訂案⑦ A §4.7.1.6",
+    "issue": "『scripts/bidir_design_lint.sh（将来対応。まずは手動運用で開始）』は、本文で規範化している一方で実装時期が未確定です。レビュー対象外の将来対応が確定仕様の中に混ざっています。",
+    "suggestion": "未実装であることを明記し、現時点では手動運用のみが正式ルールであると分けて記載してください。将来対応は別注記に分離してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "全文横断",
+    "issue": "同じ改訂案①が §3.1 と後半『## §3. 改訂案全文（①〜⑦）』で二重に展開されており、微妙な差分があります。レビュー読者がどちらを正として読めばよいか迷います。",
+    "suggestion": "前半は要約、後半は正本など役割を明記するか、重複を削除して1本化してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "改訂案⑤ G リスクと緩和策",
+    "issue": "『将来対応』『手動設定』『検討』など未確定表現が仕様本文に残っています。実装範囲と非範囲の境界がやや曖昧です。",
+    "suggestion": "確定仕様と参考メモを分離し、未実装項目は『スコープ外』または『将来検討』として明示してください。",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  }
+]

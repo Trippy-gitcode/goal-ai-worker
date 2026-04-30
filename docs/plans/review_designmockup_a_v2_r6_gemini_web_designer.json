@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "TODAYセクションの各タスク左側にあるチェックマーク",
+    "issue": "タスク完了のチェックマーク（⭕）のサイズが22x22pxであり、周囲に透明なタップ領域が確保されていないため、WCAG 2.5.5の最小タップターゲットサイズ（44x44px）を満たしていない。",
+    "suggestion": "チェックマーク要素に対してpaddingまたは::before疑似要素を用いて、視覚的なサイズを変えずに透明なタップ領域を44x44px以上に拡張する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s30_me",
+    "location": "画面中央部のサブタブ（PROFILE, DISCOVER, FRIENDS, SHOP）",
+    "issue": "サブタブのタップ領域が上下padding 12pxとフォントサイズ12pxで構成されており、全体の高さが約36pxとなるため、44x44pxの最小タップターゲット要件を満たしていない。",
+    "suggestion": "サブタブの上下のpaddingを増やすか、コンテナにmin-height: 44pxを設定してタップ領域を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s13_task_detail",
+    "location": "ハーフモーダル下部の「削除」ボタン",
+    "issue": "削除ボタンのテキスト色とボーダー色が `#FF7B72` とハードコードされており、デザインシステム仕様書で定義された `--danger` トークン（`#F85149`）と一致していない。",
+    "suggestion": "インラインスタイルの色指定を削除し、デザインシステムのセマンティックカラートークン var(--danger) を使用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "タスクリスト下部の「+ タスクを追加」テキストリンク",
+    "issue": "テキストリンクのタップ領域が上下padding 8pxとフォントサイズ14pxで構成されており、高さが約30pxしかなく、タップターゲットとして小さすぎる。",
+    "suggestion": "上下のpaddingを増やすか、min-height: 44pxを指定し、display: flex; align-items: center; で中央揃えにしてタップ領域を拡大する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "画面上部の「60%」表記の下にある進捗バー",
+    "issue": "進捗バーの背景（未完了部分のトラック）の色が rgba(121,192,255,0.18) であり、ダーク背景（#0D1117）に対するコントラスト比が低く、非テキスト要素のコントラスト要件（3:1）を満たしていないため全体の長さが視認しづらい。",
+    "suggestion": "進捗バーのトラック部分の色を --border-strong など、背景色に対して3:1以上のコントラスト比を持つ色に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "タスク提案カード下部のアクションボタン群",
+    "issue": "「編集して登録」ボ��ンと「✕（閉じる）」ボタンが近接しており、特に「✕」ボタンが右端に配置されているため、右手での片手操作時に誤タップを誘発しやすい。",
+    "suggestion": "「✕」ボタンをカードの右上（絶対配置）に移動させるか、ボタン間のgapを広げて誤操作を防ぐ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "所要時間選択の横スクロールエリア",
+    "issue": "「30分」がデフォルトハイライトされているが、スクロール領域の中央付近にあり、画面サイズによっては初期表示時に見切れる、またはスクロール可能であることが分かりにくい。",
+    "suggestion": "選択中のチップが常に可視領域に表示されるように初期スクロール位置を調整するか、右端のチップが意図的に半分見切れるようにコンテナ幅とパディングを調整してスクロール可能であることを示唆する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s15_goal_create",
+    "location": "カテゴリ選択セクションのチップ群",
+    "issue": "��択済みのカテゴリチップの背景色とテキスト色が同系色（青系）であり、未選択状態（ボーダーのみ）との視覚的な差異がやや弱く、情報密度が高い中で埋もれがち。",
+    "suggestion": "選択状態のチップは背景の不透明度を上げるか、チェックアイコンのウェイトを上げてコントラストを強め、選択状態をより明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

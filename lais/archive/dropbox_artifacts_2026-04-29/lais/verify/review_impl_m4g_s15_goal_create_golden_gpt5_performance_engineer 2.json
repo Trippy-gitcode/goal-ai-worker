@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "S15GoalCreate を S10Grow で即時 import しており、初期バンドルにモーダル一式（JS/CSS/SVG）が常駐。発火頻度が低い UI のため初期描画コストを無駄に増やす。",
+    "suggestion": "モーダルは動的 import + lazy/Suspense でコード分割。例: const GoalCreate = lazy(() => import('./S15GoalCreate.jsx')); goalCreateOpen 時のみ <Suspense> で読み込み。近傍で pointerenter/mousedown などをフックして先読みプリロードも検討（重要導線なら preload/prefetch 併用）。CSS はモーダル側で import し、 bundler の CSS code-split を有効化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "1",
+    "issue": "body scroll lock を overflow=hidden へ直接上書きするだけの実装で、デスクトップ（常時スクロールバー表示環境）では開閉時にスクロールバー幅分のレイアウトシフトが発生し得る（ユーザーが確実に体感）。",
+    "suggestion": "ロック時に scrollbar 補正を入れる: const gap = window.innerWidth - document.documentElement.clientWidth; if (gap>0) body.style.paddingRight = `${gap}px`; body.style.overflow='hidden'; クリーンアップで元に戻す。あるいは body にクラス付与で一括管理し、複数モーダルにも耐えるカウンタ実装にする。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "Escape 用と Tab 用に document へ keydown リスナーを2本登録しており、イベント経路が重複。",
+    "suggestion": "1本の keydown リスナーに統合し、分岐で Escape/Tab を処理。関数生成/登録・削除の回数を減らし、ヒット率の高いキーイベントのハンドリングコストを最小化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "フォーカストラップで Tab 押下ごとに querySelectorAll → Array.from し直しており、毎回 DOM クエリが走る。",
+    "suggestion": "open 時にフォーカス可能要素リストを一度構築・ref にキャッシュし、動的変化がある箇所（ボタンの disabled 切替など）で必要時のみ再算出。あるいは focusin/out をトリガに更新。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "カテゴリボタン map 内で onClick={() => toggleCategory(id)} のインライン関数がレンダー毎に6件生成される。input onInput も同様にインライン生成。",
+    "suggestion": "イベントデリゲーション（.s15-category-row に onClick、closest で .s15-category を特定し data-id を読む）に変更して関数生成を1本に集約。入力は useCallback で handleNameInput を定義。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "isValid を useMemo にしているが、依存が name のみの軽量式でメモ化メリットが薄く、フック分のオーバーヘッドが逆転しやすい。",
+    "suggestion": "レンダー内で直接 const isValid = name.trim().length > 0 と算出し、useMemo と useMemo の import を削除してバンドルと実行コストを微減。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "console.log が本番でも実行され得る（作成・タスク追加）。頻度は低いが、量が増えると I/O によるメインスレッドブロックの一因になる。",
+    "suggestion": "NODE_ENV ガードや軽量な logger を導入し、prod では no-op。例: if (process.env.NODE_ENV !== 'production') console.log(...);",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "モーダルのスライドインは transform を用いているが、レイヤ化の明示がなく低スペック端末で組成最適化が外れる可能性。",
+    "suggestion": "アニメ中のみ will-change: transform を付与（永続付与は避ける）。開閉時に data-state クラスを付け、.s15-modal[data-state='opening'] { will-change: transform; } のように限定適用。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2",
+    "issue": "スクロール領域（.s15-modal）がモバイルでスクロールチェーンしやすく、背景側へのバブルで小さなジャンクや誤スクロールが起こりうる。",
+    "suggestion": "CSS に overscroll-behavior: contain; と -webkit-overflow-scrolling: touch; を追加し、必要に応じて .s15-overlay に touch-action: none; を付与して背景のスクロール干渉を抑制。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2",
+    "issue": "S-12 と骨格 CSS がほぼ重複。積み重なると CSS サイズ増大・パース時間増に寄与。",
+    "suggestion": "Rule of three 達成後にハーフモーダルの共通トークン/基底クラスを抽出（overlay, container, header, field, submit）。コンポーネント単位の CSS チャンク化と併用して CSS コストを抑制。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "カテゴリ選択の内部表現が配列で、includes/filter に O(n) が乗る。現状6件では無視できるが拡張時にスケールしにくい。",
+    "suggestion": "内部は Set で保持し（useState(() => new Set())）、トグルで add/delete を行う。外部 I/F だけ配列に変換して渡す。レンダーはキーの安定性を維持。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "CTA 非活性を aria-disabled のみで表現しており、要素はタブ停止対象のまま。フォーカストラップの巡回対象が増え、Tab ナビの無駄がわずかに増える。",
+    "suggestion": "実際に disabled 属性を付与してタブ順から除外し、フォーカストラップの対象を自然に減らす（視覚は現行 CSS の [disabled] に合わせる）。aria-disabled は補助的に残してもよい。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§2.η', §2.ε'-1",
+    "issue": "R2.1.1はPOSIX互換を徹底する方針（γ'クラスター）だが、`canopy_common.sh`と`deploy.sh`のSTATUS自動遷移で非標準の`sed -i.bak`が使用されている。macOS(BSD)とLinux(GNU)で挙動が異なり、実行環境によってはエラーとなりSTATUS遷移が失敗する。`append_deploy_fail.sh`ではPOSIX互換の`awk`+`mv`が使われており、実装に矛盾がある。",
+    "suggestion": "`sed -i.bak`の使用を完全に廃止し、`append_deploy_fail.sh`で実装されているのと同様に、`awk`または`sed`を用いて一時ファイルに結果を出力してから、`mv`コマンドで元のファイルを上書きするPOSIX互換の方式に統一する。これにより環境依存のエラーを排除する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§2.α', §3.2",
+    "issue": "§2.α'で「§3 15個の鉄則を§C1にどう集約するか、本R2.1.1 §3で具体化」と宣言しているが、実際の§3.2には「§3 鉄則1-6 → §C1.2 の 1-6（ほぼ同内容）」と番号の対応しか書かれていない。15個の鉄則の具体的な1行要約テキストが存在しないため、Code G_47が書き込む際に推測による要約が発生し、正本（§3）との意味的乖離を生む。",
+    "suggestion": "§3.2に、15個の鉄則それぞれの具体的な1行要約テキスト（例：「1. ADVはコードを書かない」「2. テストファースト(G8)」等）を全て明記し、Code G_47が推測なしでそのまま転記できるようにする。これにより、要約版と正本の間での意味のズレや情報の欠落を未然に防ぐ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "EDGE_CASE",
+    "location": "§2.η'",
+    "issue": "STATUS遷移を全自動化し、ENGの手動書換えを禁止している（§4.7.1）。しかし、ミッションが「BLOCKED」になる場合や、自動遷移スクリプトがエラーで停止した場合のフォールバック手段が定義されていない。手動書換えを完全に禁止すると、例外発生時にミッションが永遠にIN_PROGRESSにスタックするデッドロックが発生する。",
+    "suggestion": "「原則として自動遷移とするが、スクリプト障害時やBLOCKEDなどの例外状態への遷移に限り、ENGによる手動書換えを許可する」というエスケープハッチ（例外規定）を明記する。これにより、自動化の恩恵を受けつつ、予期せぬシステムトラブル時の運用停止を防ぐことができる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§3.1 〜 §3.7",
+    "issue": "新設される章が「§21.1」と「§C1」という二重の番号を持っている（例：「### §C1（§21.1） 設計原則 & 鉄則」）。他のドキュメントから参照する際、「§21.1」と「§C1」のどちらを正式なアンカーとして使うべきかが未定義であり、表記ゆれやリンク切れの原因となる。",
+    "suggestion": "正式な章番号の参照方法を一つに統一する。例えば「ドキュメント間参照のSSOTは『§21.1』に固定し、§C1は通称としてのみ扱う」旨を§6.1.2に明記する。これにより、将来的なドキュメント更新時のリンク切れや、AIによる参照エラーを防止する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "ROBUSTNESS",
+    "location": "§2.δ'-3",
+    "issue": "G14の正規表現を `docs/.*\\.md|lais/verify/.*\\.md` に緩和したが、これでは `docs/lessons_learned.md` や `docs/debugging-guide.md` などの非仕様書ファイルを参照しただけでも「仕様書ファースト」を満たしたと誤判定される。本来の目的である「仕様書に基づく実装」の検証ゲートとして機能しなくなる。",
+    "suggestion": "正規表現を `docs/(plans/|.*_v[0-9]+\\.md|design_system\\.md|system_map\\.md)|lais/verify/.*\\.md` のように、仕様書として妥当なファイル名パターンのみに限定する。これにより、単なるガイドライン参照を仕様書参照と誤認するリスクを排除する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.1",
+    "issue": "タイトルに「共通規範集」という新用語が使われているが、dev-system内の既存用語（鉄則、設��原則、ルール）との関係が定義されていない。読者にとって「規範」が「鉄則（§3）」と同じ強制力を持つのか、単なるガイドラインなのかが不明確であり、ルールの形骸化を招く恐れがある。",
+    "suggestion": "「規範」という新用語の使用をやめ、「共通ルール要約集」または「起動時コンテキスト（要約版）」など、既存の用語体系と整合するタイトルに変更する。これにより、読者がドキュメントの位置づけや強制力を正しく理解し、既存ルールとの一貫性を保つことができる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§7.4",
+    "issue": "Filter 4のカテゴリ正規化リストに `JOURNEY_GAP`, `EXPERT` というdev-systemで未定義の新しいカテゴリが含まれている。これらはAIレビュアーのプロンプト指示（MISSING, AMBIGUITY, CONTRADICTION等）と一致せず、AIが分類時に混乱する原因となる。",
+    "suggestion": "`JOURNEY_GAP`, `EXPERT` を削除し、プロンプトで指示されている標準カテゴリリストと完全に一致させる。これにより、AIレビュー結果のカテゴリ分類が安定し、後続のトリアージ���集計処理でのエラーを防ぐことができる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  }
+]

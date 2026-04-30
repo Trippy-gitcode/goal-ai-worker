@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s12_task_add",
+    "location": "各入力フィールドのラベル（開始時刻／所要時間／予定日／ゴール紐付け／メモを追加）",
+    "issue": "ラベルのfont-sizeが11pxになっており、DS §3.2ではラベルは--font-size-sm(14px)を推奨。--font-size-xs(11px)はキャプション・時刻限定",
+    "suggestion": "ラベルのfont-sizeを14px（--font-size-sm）+ line-height: var(--line-height-sm)に引き上げ、視認性とDS整合を確保",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s15_goal_create",
+    "location": "ラベル群（ゴール名／期限／カテゴリ）",
+    "issue": "ラベルのfont-sizeが11px。DS §3.2の用途制限に反し、フォームラベルとしては小さすぎる",
+    "suggestion": "ラベルサイズを14px（--font-size-sm）に統一し、日本語は letter-spacing: var(--letter-spacing-ja) を適用",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "サブタブ見出し（PROFILE／DISCOVER／FRIENDS／SHOP）",
+    "issue": "英字ラベルのletter-spacingが0.5px。DS §3.4「英字ラベルは1.5px」を満たしていない",
+    "suggestion": "サブタブラベルを letter-spacing: var(--letter-spacing-label)（1.5px）に修正し、タブ間の視認性と一貫性を向上",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "ヘッダーのパンくずラベル「GROW」",
+    "issue": "英字ラベルだがletter-spacing指定がなく、DSの1.5pxルール未適用でブランドのタイポリズムが崩れている",
+    "suggestion": "「GROW」を letter-spacing: var(--letter-spacing-label) にし、ラベル体系を統一",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "ALL",
+    "location": "区切り線・ヘッダー境界：s20_talk（ヘッダー下境界）、s13_task_detail（セクション区切り）、s14_goal_detail（タスクリストの区切り）",
+    "issue": "rgba(72,79,88,0.3/0.4) などトークン外の半透明ボーダー値を直指定。DS §5.1の--border / --border-strongへの準拠が不十���",
+    "suggestion": "境界色は var(--border) または var(--border-strong) を使用し、必要に応じて不透明1pxで濃淡を調整（余白で階層を補助）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾〜Goals見出し間",
+    "issue": "セクション間マージンが約28px相当で、DS §4.2の基準（セクション間≧32px）を満たしていない",
+    "suggestion": "Today→Goalsのセクション間スペースを>=32px（推奨40px）に拡張し、情報群の切り替わりを明確化",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "テキストCTA「+ タスクを追加」「+ ゴールを作成」",
+    "issue": "主要導線がインラインテキストのみで、周囲のテキストと視覚的差が小さく、クリックアフォーダンスが弱い",
+    "suggestion": "subtleボタン（pill背景=--accent-subtle + テキスト=--on-accent-subtle）または下線を付与し、主要導線としての優先度を視覚的に���き上げる",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s02_onboarding",
+    "location": "フッター固定の主ボタン「次へ」",
+    "issue": "主ボタンのfont-weightが500で、他画面（例: s00_splash/s12_task_add）の主ボタン600と不一致",
+    "suggestion": "主ボタンはfont-weight: 600に統一（DS §3.3）。視覚階層の一貫性を確保",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "ヒーロー領域の英字ラベル「EXPLORER」",
+    "issue": "英字ラベルのletter-spacingが1pxで、ラベル規格（1.5px）に満たない",
+    "suggestion": "「EXPLORER」のletter-spacingを1.5pxへ修正（var(--letter-spacing-label)）、数値表示とラベルの読み分けを改善",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

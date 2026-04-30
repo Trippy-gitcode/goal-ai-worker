@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ADV（Claude.ai）は静的解析のみ可能（§9.3参照）であり、インターネット上のApp Storeレビュー（★1-2離脱要因など）を自律的に収集・分析する機能を持たないため、AI単独でのベンチマーク実行は不可能。",
+    "suggestion": "ベンチマークのデータ収集（App Storeレビュー等）はPOが手動で提供する前提とするか、外部ツール（スクレイピングAPI等）との連携フローを定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "§18の��存関係マップと§19.6の依存チェーンでファイル名（`ux_redesign_v*.md` vs `ux_v1.md`）および依存の方向（§18は双方向確認、§19.6は単方向）に矛盾がある。また、`test_map.yaml`がチェーンに含まれていない。",
+    "suggestion": "ファイル名を統一（例: `ux_v*.md`）し、§18の連鎖更新マップと§19.6の依存チェーンを統合・整合させる。`test_map.yaml`などのテスト基盤ファイルも依存チェーンに組み込む。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7",
+    "issue": "Phase 0の完了基準に「8ペルソナ×2モデルのAIレビュー」とあるが、§13.4で定義されているのは「標準5ペルソナ」であり、ペルソナ数に矛盾がある。",
+    "suggestion": "Phase 0の完了基準のペルソナ数を§13.4の「標準5ペルソナ」に合わせるか、§13.4にPhase 0用の追加3ペルソナを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.4",
+    "issue": "system_map.mdの「§4 ファイル変更チェックリスト」を手動管理する仕様は、`test_map.yaml`や`affected-tests.sh`の自動影響範囲特定と役割が重複し、§1.1の「Single Source of Truth」原則に違反する。",
+    "suggestion": "system_map.mdの§4を削除し、影響範囲の管理は機械可検証な`test_map.yaml`に一元化する旨を記載する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "e2e_fullflow_test.mdのテンプレートに、テスト戦略（§7）のL1/L2/L3層分類や、テストライブラリ（sub_testing.md §4.1）のタグ（#all, #chat等）を付与する要件が含まれていない。",
+    "suggestion": "e2e_fullflow_test.mdのテンプレートに「テスト層（L1/L2/L3）の分類」および「タグ付与ルール」を必須セクションとして追加し、自動化基盤との連携を担保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "dev_system_spec.md §5のATテンプレートで必須とされている「ストレスパス（主要操作を3回連続）」を定義するセクションが、e2e_fullflow_test.mdのテンプレートに存在しない。",
+    "suggestion": "e2e_fullflow_test.mdのテンプレートに「§N+3 ストレスパステストケース」を追加し、ATテンプレートと��整合性を担保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存: {上流ファイルのパス + バージョン}」でバージョンを手動記載するルールは、上流更新時の追従漏れ（バージョン不一致）を誘発しやすい。",
+    "suggestion": "ヘッダーの依存バージョンはファイルパスのみとするか、`version_sync.sh`にドキュメント間の依存バージョン同期機能を追加して自動化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

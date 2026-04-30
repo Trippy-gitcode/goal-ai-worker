@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "lais/src/components/screens/S01Auth.jsx (S01-8 同意テキスト内のリンク)",
+    "issue": "利用規約およびプライバシーポリシーへのリンクがキーボードで操作できません。`<a>` タグに `href=\"#\"` と `onClick` のみ設定されているため、キーボードフォーカスを受け付けません。これはキーボード操作に依存するユーザーが規約を確認できないことを意味し、WCAG 2.1.1 Keyboard (A) に違反します。",
+    "suggestion": "リンクを `<button type=\"button\" class=\"s01-link\">` に変更するか、`<a>` タグに実際の規約ページ���URL（未実装の場合はプレースホルダーでも可）を `href` 属性として設定してください。SPA内でモーダル表示などを行う場合は、`button` 要素を使用するのが最も堅牢です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais/src/components/screens/S01Auth.css (S01-4, S01-6 のプレースホルダー)",
+    "issue": "入力欄のプレースホルダーテキストの色 (`--text-muted`: `#6E7681`) と背景色 (`--bg-surface`: `#161B22`) のコントラスト比が 2.93:1 であり、WCAG 2 AA が要求する最低 4.5:1 を満たしていません。これは WCAG 1.4.3 Contrast (Minimum) (AA) 違反です。ロービジョンのユーザーがプレースホルダーのテキストを読めない可能性があります。",
+    "suggestion": "プレースホルダーのテキスト色（`--text-muted`）を、背景色とのコントラスト比が 4.5:1 以上になるように変更してください。例えば `#A0AEC0` であればコントラスト比が 5.67:1 となり、基準を満たします。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "lais/src/components/screens/S01Auth.css (S01-7 同意チェックボックス)",
+    "issue": "同意チェックボックスのサイズが 20x20px であり、WCAG 2.2 の達成基準 2.5.8 Target Size (Minimum) (AA) が要求する最低 24x24px を満たしていません。隣接するラベルで操作可能ですが、コントロール自体が小さすぎるため、手の震えがあるユーザーや、タッチデバイスでの操作精度が低いユーザーにとって操作が困難になります。",
+    "suggestion": "チェックボックスのサイズを最低でも 24x24px に変更してください。視覚的なデザインを維持したい場合は、`padding` を追加してタップ可能な領域を広げるか、`::before` 疑似要素を使ってヒットエリアを拡大するなどの手法が考えられます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S01Auth.css",
+    "issue": "複数の要素 (`.s01-input`, `.s01-checkbox`, `.s01-cta`) に `transition` や `transform` によるアニメーションが設定されていますが、ユーザーの `prefers-reduced-motion` 設定を尊重する実装がありません。これにより、前庭障害などを持つユーザーに不快感や健康上の問題を引き起こす可能性があります。",
+    "suggestion": "`@media (prefers-reduced-motion: reduce)` メディアクエリを追加し、その中で `transition: none;` や `transform: none;` を設定して、動きを抑制するオプションを提供してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/App.jsx, lais/src/components/screens/S01Auth.jsx",
+    "issue": "`route()` によるクライアントサイドの画面遷移後、フォーカス管理が行われていません。これにより、スクリーンリーダーのユーザーはページのコンテンツが変更されたことに気づきにくく、どこから読み始めればよいか分からなくなる可能性があります。",
+    "suggestion": "画面コンポーネント（例: `S01Auth`）のマウント時に `useEffect` フックを使用し、ページのメインコンテナ（`<main>`）やメインの見出し（`<h2>`）にプログラムでフォーカスを移動させてください。見出しにフォーカスを当てる場合は、`tabindex=\"-1\"` を追加してフォーカス可能にする必要があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S01Auth.jsx",
+    "issue": "サイトロゴ「Lais」に `<h1>` が使用されていますが、ページの主題は「アカウントを作成」または「ログイン」です。セマンティックな観点からは、ページの主題を表す見出しを `<h1>` にする方が、スクリーンリーダーユーザーが文書構造を把握しやすくなります。",
+    "suggestion": "「アカウントを作成」/「ログイン」のタイトルを `<h1>` に変更し、ロゴは `<div>` や `<span>` など、見出しレベルを持たない要素でマークアップすることを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S01Auth.jsx",
+    "issue": "`<main>` 要素に `aria-label` が設定されていますが、コンテンツ内にはページの主題を示す可視の `<h2>` 見出しが既に存在します。スクリーンリーダーは `aria-label` と `<h2>` の両方を読み上げる可能性があり、情報が冗長になります。",
+    "suggestion": "`<main>` の `aria-label` を削除してください。または、より丁寧に実装するなら、`<h2>` に `id` を付与し、`<main aria-labelledby=\"your-id\">` のように関連付けることで、ランドマークのアクセシブルな名前として見出しのテキストが使用されます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S01Auth.jsx (S01-9 CTA)",
+    "issue": "プライマリCTAボタンに `disabled` 属性と `aria-disabled` 属性の両方が設定されています。ネイティブの `disabled` 属性は、要素が無効であることを支援技術に伝えるため、`aria-disabled` 属性は不要であり冗長です。",
+    "suggestion": "`aria-disabled={!canSubmit}` の記述を削除してください。`disabled={!canSubmit}` だけで十分です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_engineer"
+  }
+]

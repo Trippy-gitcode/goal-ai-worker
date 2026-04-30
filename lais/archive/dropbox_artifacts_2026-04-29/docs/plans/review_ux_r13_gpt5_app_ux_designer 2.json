@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §3.1（TALKヘッダー）, §3.5（ドロワー）",
+    "issue": "TALKヘッダーに☰（ドロワー）と🕐（履歴）の両方が「履歴」起点として示されており、履歴の入り口が二重定義になっている。どちらを押すと何が開くのかが曖昧。",
+    "suggestion": "履歴への導線は1つに統一する。推奨: ☰で左ドロワーを開く（履歴一覧/新規チャット含む）。🕐は削除するか、別機能（例: 直近スレッドへジャンプ）に明確化。アクセシビリティ上もアイコンの役割をaria-labelで一意に定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §7.3（PWA実装注記：edge swipe）",
+    "issue": "iOS PWAで左端スワイプをカスタム実装し、overscroll-behaviorでブラウザの戻るを抑制する設計は、iOS Safari/PWAでの未実装・不安定動作が多く、戻るジェスチャーの競合・誤作動のリスクが高い。",
+    "suggestion": "iOSではネイティブの戻るジェスチャー（スタンドアロン時はシステム戻る無��）に合わせ、アプリ内は明示的な「←」戻るボタンを常設。左端カスタムスワイプは廃止。ブラウザ環境ではhistory.popstateで戻りつつ、戻りアニメはトランジションだけに限定。Androidは物理戻るに準拠。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §2.3（Undoスナックバー）, §6.1（ハーフモーダル）, §6.2（トースト）",
+    "issue": "セーフエリア（ノッチ/ホームインジケータ）考慮が明記されておらず、スナックバー/トースト/ボトムモーダルがホームインジケータと重なる恐れがある。",
+    "suggestion": "CSS env(safe-area-inset-bottom/top)を用い、下端要素（ボトムタブ・トースト・スナックバー・モーダル）にpaddingを加算。iOS/Android双方でinsetを尊重するルールをdesign_system.mdに追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §7（ジェスチャー）, §8（アニメーション）",
+    "issue": "主要操作（タスク完了、ゴール達成、Pull-to-refresh成功など）のハプティクス設計が未定義。QRスキャン時のVibrationのみ記���。",
+    "suggestion": "可能な環境で軽微なハプティクスを付与（Android Vibration API、iOSネイティブは将来TWA/ラッパー時に対応）。未対応環境では視覚/音で代替。各操作に対する強度とパターン（短/中/長）を定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §7.4（ドラッグ&ドロップ）",
+    "issue": "タスク並び替えの起点が「行ロングプレス」だけだと、タップで詳細を開きたい/スクロールしたい意図と衝突しやすい（誤作動）。HIG/Materialではドラッグハンドルの明示が望ましい。",
+    "suggestion": "行左端にドラッグハンドル（≡）を追加し、並び替えはハンドル限定で開始。ロングプレス開始も残す場合は発火遅延を650ms程度にして誤作動を抑制。開始/確定時に微ハプティクスと影で状態を伝える。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §6.5（Pull-to-refresh）",
+    "issue": "iOS SafariのバウンススクロールとPull-to-refreshの競合対策（scroll chaining/overscroll制御）が未記載。",
+    "suggestion": "スクロール先頭でのみ発火し、`overscroll-behavior-y: contain` と `touch-action: pan-y` を適用。発火しきい値/進行表示/キャンセル条件を明記し、誤発火を防ぐ。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.5（チャット履歴）",
+    "issue": "上スクロールでの履歴追加時のローディング表示・スクロールアンカー保持（ジャンプ防止）の仕様が未定義。",
+    "suggestion": "履歴先頭到達でトップに小型スピナーを表示し、追加読込後は「読み込み前の最初の可視メッセージ」をアンカーにしてスクロール位置を保存・復元。エンプティ（最古到達）表示も定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.2（メッセージ送信）, §9.2（API失敗）",
+    "issue": "ユーザー送信自体がサーバーで4xx/5xxにより失敗した場合（オフライン以外）のエラーUIが未定義。現在は「AI応答の取得失敗」中心。",
+    "suggestion": "送信失敗時はユーザーバブルにエラーステータス（赤アイコン/『送信失敗 [再送信]』）を表��。タップで再送。レート制限やNGワード等の失敗理由がある場合はツールチップで簡潔に提示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "lais_project_v1.md §3.2.5（日次リセット）, lais_ux_v1.md §9.3（対話上限到達UI）",
+    "issue": "日次リセット時刻がJST固定だが、UIでは単に『明日 04:00』と表示。海外/時差環境で混乱の恐れ。",
+    "suggestion": "表示を『明日 04:00 JST』のように明示、またはユーザーのローカル時刻に換算して括弧でJSTも併記。将来のTZ対応ロードマップ注記もUIヘルプに記載。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §7.1（タップフィードバック）, §1.3（タブ切替）",
+    "issue": "ボトムタブ等のタップフィードバックが不透明度変化のみ。Materialではripple、iOSでは軽微な色/スケールが一般的。",
+    "suggestion": "プラットフォームに応じた触覚/視覚フィードバックを適用。Web共通実装でAndroidはripple風インク波紋、iOSは色/ウェイト変化＋微スケールで即時（≤100ms）反応。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §13.3（通知設定）",
+    "issue": "最上部トグルONで即OSの通知許可ダイアログが出る設計は拒否率/誤タップ率が上がる。",
+    "suggestion": "ソフトアスク（事前説明モーダル）を挟み、メリット/後から変更可を説明の上で『許可する』→OSプロンプトの順に。拒否時の再案内方針（一定期間リトライ抑制）も定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §10（アクセシビリティ）",
+    "issue": "動的テキストサイズ（OSの文字サイズ拡大）への対応が未定義。固定高さ要素が多いと切れやオーバーフローの恐れ。",
+    "suggestion": "フォントサイズはrem/emで定義し、行間/カード内レイアウトをauto-fitに。大文字サイズ時の折返し・省略ルール、モーダルの最小可視入力領域を追記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §2.3（Undoスナックバー）",
+    "issue": "Undoスナックバーの30秒カウントダウンが視覚中心で、スクリーンリーダー配慮が不足。",
+    "suggestion": "表示時にaria-liveで『タスク完了。30秒以内は取���消し可能』をアナウンス。フォーカス移動可能な[取り消す]ボタンを提供し、残り時間はpoliteで10秒毎に更新。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §1.4（戻りナビゲーション）",
+    "issue": "タブルート（S-10/S-20/S-30）でAndroid戻るボタン/ブラウザバックを押した際の最終挙動（アプリ終了/前ページへ/無視）が未定義。",
+    "suggestion": "インストールPWA: ルートで戻る=アプリ終了。ブラウザ: 直前のWeb履歴に戻る。誤離脱防止が必要なら二度押し/トーストで明示。history管理方針に追記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §2.2（キーボード表示時のヒーロー挙動）",
+    "issue": "キーボード表示時にヒーロー領域をdisplay:noneで消すと、急激なレイアウトシフトやスクリーンリーダーの読み上げ対象消失が起きやすい。",
+    "suggestion": "高さをアニメーションで縮退（max-height/transform）し、ARIA上はvisibility:hidden; aria-hidden=trueで読み上げ除外に留める。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md §4.4（FRIENDSヘッダー/バッジ）",
+    "issue": "MEタブのバッジが『未読メッセージ/承認待ち』の合算表示と読み取れる。種類が区別できず、タップ後の期待行動が曖昧になる恐れ。",
+    "suggestion": "タブバッジは総数のままでも、FRIENDS画面内で『未読』『承認待ち』を明確にセクション分けし、バナー/タブセグメントで種別を即識別可能に。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §4.4（QRスキャン手順 3. 振動）",
+    "issue": "Vibration APIはiOS Safari/PWAで非対応のため、スキャン検出ハプティクスが動作しない。",
+    "suggestion": "機能検出でVibration非対応時は音/視覚（アニメ/色反転）で代替。実装指針を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.2（メッセージ送信）, §3.6（TALK空状態）",
+    "issue": "無限スクロール依存はスクリーンリーダー/キーボード操作で到達しづらい。『さらに読み込む』の明示的ト���ガーがない。",
+    "suggestion": "メッセージリスト先頭に『過去のメッセージを読み込む』ボタンを常設（visibility: auto-hide可）。aria-controls/aria-busyで読み込みを通知。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §3.1（TALKヘッダーのアイコンボタン）",
+    "issue": "アイコンのみボタン（☰/🕐/📝）は視覚依存度が高く、意味が伝わりにくい可能性。",
+    "suggestion": "ツールチップ/ラベル（小さなテキスト）を併設するか、少なくともaria-labelを具体化（例: aria-label=\"履歴ドロワーを開く\"）。長押しでヒント表示も有効。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md §9.4（不正操作：ブロック済みユーザーへのアクション）",
+    "issue": "『サイレント失敗』は、ユーザー自身がブロックしている相手への送信時にも無反応に見え混乱を招く。",
+    "suggestion": "『あなたがブロックしているため送信しませんでした』等のローカル限定フィードバックを表示（相手に通知はしない）。相���にブロックされているケースはプライバシー観点で従来通りサイレント維持。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

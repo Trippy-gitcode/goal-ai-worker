@@ -1,0 +1,172 @@
+[
+  {
+    "id": "CR-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "file": "dev_system_spec.md",
+    "section": "8. C2デプロイフロー",
+    "line": "approx. 222",
+    "issue": "The deployment flow specifies `curl -s $URL | grep version` for verification, which directly contradicts Accepted Design Decision #7 stating that URL verification must use HTTP status codes, not body content.",
+    "suggestion": "Align the specification and the `deploy.sh` script implementation to use HTTP status code verification (e.g., `curl -s -o /dev/null -w '%{http_code}'`) as per the accepted design decision to ensure SPA compatibility and robustness."
+  },
+  {
+    "id": "CR-002",
+    "severity": "CRITICAL",
+    "category": "PROCESS_GAP",
+    "file": "dev_system_spec.md",
+    "section": "4.5 SKIPルール",
+    "line": "approx. 132",
+    "issue": "The rule 'SKIPされたATは次キューにSKIP-RETRYとして追記' implies a manual process. There is no automated mechanism defined to enforce this, creating a high risk that skipped tests will be forgotten, leading to a permanent and invisible gap in test coverage.",
+    "suggestion": "Define an automated process where the test runner outputs a list of skipped tests to a file, and a subsequent script automatically creates a 'SKIP-RETRY' mission in `session_progress.md` if the file is not empty."
+  },
+  {
+    "id": "CR-003",
+    "severity": "CRITICAL",
+    "category": "PROCESS_GAP",
+    "file": "dev_system_spec.md",
+    "section": "9.2 修正試行3回制限",
+    "line": "approx. 248",
+    "issue": "The 3-strike limit for bug fixes requires tracking strikes 'バグIDごとに'. The specification does not define where or how this state is stored and tracked. Without a defined persistence mechanism, this rule is unenforceable by automation and will be ignored.",
+    "suggestion": "Specify a file (e.g., `instructions/results/bug_strikes.json`) for tracking strike counts against bug/mission IDs. Update canopy to include a check that fails a mission if it exceeds 3 strikes."
+  },
+  {
+    "id": "CR-004",
+    "severity": "CRITICAL",
+    "category": "DATA_INTEGRITY",
+    "file": "sub_system_map.md",
+    "section": "1. SW処理フロー (プラン変更)",
+    "line": "approx. 104",
+    "issue": "The plan change webhook performs two separate writes: `Supabase UPDATE` and `KV PUT TOKEN_KV`. This is not an atomic operation. If the KV write fails after the Supabase write succeeds, the system enters an inconsistent state where the user has been charged but their runtime plan (from SoT `TOKEN_KV`) is not updated, effectively causing service denial for a paid feature.",
+    "suggestion": "Redesign the webhook to be idempotent and fault-tolerant. For example, the webhook should only update Supabase, and a separate, reliable process should sync the Supabase state to the KV store, or the worker should read from Supabase with caching instead of directly from KV."
+  },
+  {
+    "id": "CR-005",
+    "severity": "CRITICAL",
+    "category": "INCORRECT_IMPLEMENTATION",
+    "file": "dev_system_spec.md",
+    "section": "12. 仕様書ID付番",
+    "line": "approx. 305",
+    "issue": "The canopy verification script for spec-to-test linkage counts total references (`grep -rc`), not coverage. This gate cannot detect a spec (`SPEC-ID`) that has zero test references, which is its primary purpose. This provides a false sense of security regarding test coverage.",
+    "suggestion": "Replace the script with a more robust one that extracts all `SPEC-ID`s from docs, extracts all `SPEC-ID` references from tests, and then fails if any spec ID from the docs is not found in the tests."
+  },
+  {
+    "id": "CR-006",
+    "severity": "CRITICAL",
+    "category": "AMBIGUITY",
+    "file": "dev_system_spec.md",
+    "section": "13.7 収束ルール",
+    "line": "approx. 359",
+    "issue": "The AI review convergence rule presents two contradictory termination conditions: '最低10ラウンド繰り返す' (run at least 10 times) and '品質改善につながる妥当な指摘がなくなるまで終了しない' (stop when reviews are no longer useful). An autonomous agent cannot resolve this ambiguity, which will lead to either wasted API costs or premature termination of the quality review.",
+    "suggestion": "Remove the arbitrary '最低10ラウンド' rule. Define a clear, machine-verifiable convergence criterion, such as 'The process terminates if two consecutive review rounds produce zero CRITICAL or HIGH severity findings'."
+  },
+  {
+    "id": "CR-007",
+    "severity": "CRITICAL",
+    "category": "PROCESS_GAP",
+    "file": "dev_system_spec.md",
+    "section": "18. 仕様書の依存関係",
+    "line": "approx. 450",
+    "issue": "The dependency map is presented as a manual checklist. There is no automated enforcement mechanism to ensure a change in one file triggers the required updates in dependent files. This violates the '機械可検証' principle and guarantees that documentation, tests, and code will drift out of sync.",
+    "suggestion": "Create a script (`dependency_check.sh`) that reads the map, checks `git diff` for changed files, and fails the CI/canopy gate if dependent files are not also part of the changeset."
+  },
+  {
+    "id": "CR-008",
+    "severity": "CRITICAL",
+    "category": "PROCESS_GAP",
+    "file": "dev_system_spec.md",
+    "section": "16.3 ホットフィックスパス",
+    "line": "approx. 401",
+    "issue": "The rule limiting hotfixes to '連続2セッションまで' lacks an automated tracking mechanism. Like the 3-strike rule, it relies on memory and cannot be enforced by the system, allowing for potential abuse of the fast-track path which bypasses standard approvals.",
+    "suggestion": "Define a state file (e.g., `instructions/results/session_meta.jsonl`) where each session's type (normal/hotfix) is logged. Add a canopy check that reads the last two entries and fails if a third consecutive hotfix is attempted."
+  },
+  {
+    "id": "CR-009",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "file": "sub_infrastructure.md",
+    "section": "2.5 session_archiver.sh",
+    "line": "approx. 200",
+    "issue": "The `session_archiver.sh` script will exit with an error if the '## 完了済み' header is missing from `session_progress.md`. This makes the archival process fragile. If the header is accidentally deleted, the file will grow beyond the 300-line limit, causing canopy to fail and blocking all further missions.",
+    "suggestion": "Make the script more resilient. If the '## 完了済み' header is not found, the script should automatically append it to the end of the file instead of failing."
+  },
+  {
+    "id": "CR-010",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "file": "sub_infrastructure.md",
+    "section": "2.8 deploy.sh",
+    "line": "approx. 385",
+    "issue": "The deployment script's `git tag` command uses `2>/dev/null || true`, which silences any and all errors. If tagging fails (e.g., tag already exists, not in a git repo), the error is ignored. This breaks the crucial link between a deployed artifact and its version in source control, making release tracking and rollbacks unreliable.",
+    "suggestion": "Remove `2>/dev/null || true`. The script must fail loudly if the git tag cannot be created, preventing a release from proceeding without a corresponding version tag."
+  },
+  {
+    "id": "CR-011",
+    "severity": "CRITICAL",
+    "category": "RISK",
+    "file": "sub_infrastructure.md",
+    "section": "2.9 rollback.sh",
+    "line": "approx. 421",
+    "issue": "The rollback process is not atomic. It commits the revert and then attempts to re-deploy. If the subsequent deployment fails (e.g., tests fail on the reverted code), the repository will contain the rollback commit, but the production environment will still be running the old, broken code. The system is left in a dangerous, inconsistent state.",
+    "suggestion": "The rollback script should build and test the reverted code *before* committing the revert. Only after all gates pass on the reverted code should the script proceed to commit and deploy."
+  },
+  {
+    "id": "CR-012",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "file": "sub_infrastructure.md",
+    "section": "2.13 changed-files-allowlist.sh",
+    "line": "approx. 535",
+    "issue": "The script determines the changeset using `git describe --tags --abbrev=0`. In a new repository with no tags, this command will fail. The script's fallback is insufficient, causing the gate to be non-functional for the initial missions of a project, allowing out-of-scope changes to go undetected.",
+    "suggestion": "Improve the script to robustly handle the no-tag scenario, for example by diffing against the initial commit or a known empty tree hash (`4b825dc642cb6eb9a060e54bf8d69288fbee4904`)."
+  },
+  {
+    "id": "CR-013",
+    "severity": "CRITICAL",
+    "category": "RISK",
+    "file": "sub_testing.md",
+    "section": "7. プラン別挙動テスト",
+    "line": "approx. 202",
+    "issue": "The specification instructs tests to manipulate plan status by executing `wrangler kv:key put` directly. This modifies a live, shared resource. Parallel test runs will conflict, and a test failure can leave the KV store in a dirty state, affecting subsequent tests or even other environments. This is an unacceptably high risk for an automated test suite.",
+    "suggestion": "Tests must not modify live infrastructure. Use a mocking library (e.g., `miniflare` for local testing) to simulate the KV store or ensure tests run against a completely isolated, ephemeral environment for each test run."
+  },
+  {
+    "id": "CR-014",
+    "severity": "CRITICAL",
+    "category": "PROCESS_GAP",
+    "file": "sub_adv_protocol.md",
+    "section": "1. 書き込みホワイトリスト",
+    "line": "approx. 16",
+    "issue": "ADV is permitted to modify `docs/*.md` without PO approval. However, the main spec's dependency map (§18) shows that changes to spec docs mandate code changes (e.g., in tests). This creates a loophole where ADV can effectively force code changes and alter system behavior without the required PO approval for code modifications.",
+    "suggestion": "Update the whitelist. Any change to a spec document listed in the dependency map (§18) that implies a code change must require PO approval, just like a direct code change."
+  },
+  {
+    "id": "CR-015",
+    "severity": "CRITICAL",
+    "category": "DATA_INTEGRITY",
+    "file": "sub_system_map.md",
+    "section": "2. データフロー",
+    "line": "approx. 125",
+    "issue": "The data flow specifies a 'merge' between `localStorage` and API data but fails to define a conflict resolution strategy. In a scenario where data is modified both locally (offline) and on the server, this ambiguity will lead to data loss (e.g., one of the changes being silently overwritten).",
+    "suggestion": "Define a specific conflict resolution strategy. Options include Last-Write-Wins (based on timestamps), First-Write-Wins, or a CRDT-based approach. This logic must be explicitly specified to prevent data loss."
+  },
+  {
+    "id": "CR-016",
+    "severity": "CRITICAL",
+    "category": "RISK",
+    "file": "sub_system_map.md",
+    "section": "1. SW処理フロー (タスク追加)",
+    "line": "approx. 26",
+    "issue": "The task creation flow triggers `triggerSecretaryMemoRegenerate()`, a potentially expensive AI operation, on every single task addition. This lacks any debouncing or aggregation logic, creating a high risk of excessive API costs and race conditions, especially if a user adds multiple tasks in quick succession.",
+    "suggestion": "Implement a debouncing mechanism. The memo regeneration should only be triggered after a period of inactivity (e.g., 5 seconds after the last task-related action) or on a less frequent trigger, like a manual refresh or app load."
+  },
+  {
+    "id": "CR-017",
+    "severity": "CRITICAL",
+    "category": "INCORRECT_IMPLEMENTATION",
+    "file": "sub_infrastructure.md",
+    "section": "2.6 canopy_common.sh",
+    "line": "approx. 282",
+    "issue": "The G8/G9 check logic for finding the `LATEST_MISSION` uses `grep -B1 ... | head -1`. If the most recently completed mission is marked `DONE` and is listed above an `IN_PROGRESS` mission, the script will incorrectly select the `DONE` mission for TDD/screenshot evidence checks, causing the gate to fail or check the wrong evidence.",
+    "suggestion": "Refine the mission selection logic to unambiguously find the single, most recent mission with `STATUS: IN_PROGRESS`. For example, `grep 'STATUS: IN_PROGRESS' -B 2 | grep '### MISSION' | tail -1`."
+  }
+]

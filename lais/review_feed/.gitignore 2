@@ -1,0 +1,7 @@
+# dev-system v3.5 Phase 2 — lais/review_feed/
+# 日別ログ（YYYY-MM-DD.md）はローカル監査ログ、git 管理外。
+# _critical.md と .gitignore / README.md のみ git 管理。
+*.md
+!_critical.md
+!README.md
+!.gitignore

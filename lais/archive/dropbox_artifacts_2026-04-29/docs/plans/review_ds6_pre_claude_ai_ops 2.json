@@ -1,0 +1,38 @@
+[
+  {
+    "id": "DS6-AO-001",
+    "persona": "ai_ops",
+    "severity": "MEDIUM",
+    "section": "§13.15.1",
+    "title": "Claude Code『¥0（月額内）』表記がusage limit枠消費を隠蔽",
+    "detail": "Opus/Sonnet使用時はサブスクのusage limit枠を消費する。大量並列Pre-Reviewは他業務の枠を圧迫し、実質的なコストになる。経理的¥0と運用的¥0は異なる。",
+    "fix": "『¥0（月額サブスク内。ただしusage limit枠を消費するため大量並列Pre-Reviewは非推奨。1ミッションあたりPre-Reviewラウンド上限は§13.15.4で規定）』に修正"
+  },
+  {
+    "id": "DS6-AO-002",
+    "persona": "ai_ops",
+    "severity": "MEDIUM",
+    "section": "§13.15.2",
+    "title": "Geminiキャッシュ TTL 1時間超過時の挙動が未定義",
+    "detail": "ラウンドが1時間を超えた場合、cachedContentが失効する。fresh callへフォールバックするのか、cache再作成するのかが未定義。",
+    "fix": "『TTL失効時は自動的にcache再作成。残ペルソナ実行時にexpiredエラーを検知したら一度だけrecreate』等の明示ルールを追記"
+  },
+  {
+    "id": "DS6-AO-003",
+    "persona": "ai_ops",
+    "severity": "HIGH",
+    "section": "§13.15.3",
+    "title": "差分レビューのgit diff依存に実装曖昧性",
+    "detail": "『前ラウンドからのgit diff』とあるが、レビュー中の仕様書修正はcommitされない中間状態で進むため `git diff` が空になる可能性。ai_review.jsの実装時に解釈分岐を生み、再現性が失われる。",
+    "fix": "具体的手順を明記: (1)各ラウンド開始時にgit tag `review_{mission}_r{N}_start` を打つ, (2)次ラウンド差分は `git diff review_{mission}_r{N-1}_start HEAD` で取得, (3)未コミット変更は含める。または (1')ラウンド開始時に仕様書のsnapshotコピーを `docs/plans/.review_snapshots/` に保存し、そこからdiff生成"
+  },
+  {
+    "id": "DS6-AO-004",
+    "persona": "ai_ops",
+    "severity": "MEDIUM",
+    "section": "§13.15.5",
+    "title": "コスト試算の単価根拠・調査日付が未記載",
+    "detail": "『~$71』『~$5』の根拠（GPT-5.4 $X/1M tokens, Gemini 3.1 Pro Preview $Y/1M tokens）が書かれていない。価格改定で表がstaleになる。",
+    "fix": "脚注に『単価は2026-04-12時点。GPT-5.4: input $X/1M, cached $X/2, Gemini: input $Y/1M, cached $Y/4』と算出式を明記。年1回更新する運用ルールも追加"
+  }
+]

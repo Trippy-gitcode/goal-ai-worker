@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4 ↔ §17, §18, §6, §12",
+    "issue": "UX仕様書のファイル名が「ux_v1.md」と「ux_redesign_v*.md」で混在しており、参照先が一貫していない。",
+    "suggestion": "ファイル命名を「docs/ux_v*.md」に統一（推奨）し、§6/§12/§17/§18の全出現箇所と例示、依存チェーン図、テンプレート見出しを一括置換。init_app.shテンプレートと依存マップのサンプルも同期更新。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7 ↔ §13.4",
+    "issue": "ベンチマーク完了基準で「8ペルソナ×2モデルのAIレビュー」とあるが、標準ペルソナは§13.4で5つと定義されている。",
+    "suggestion": "いずれかに統一。例: §13.4に3ペルソナ追加（合計8）または§19.7を「標準5ペルソナ×2モデル」に修正。加えてヘッダーに「review_refs: [docs/plans/review_*.json]」を追加し、review_gate.shで参照数の整合性を検証できるよう拡張。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー項目「dev-system準拠: docs/plans/dev_system_spec.md §19」がアプリ側リポジトリの実在パスと不整合。dev-systemは別リポジトリ管理であり、アプリ側には当該ファイルが存在しない。",
+    "suggestion": "ヘッダーを「dev-system: v{.dev-system.version}（repo@tag/commit）」形式に変更し、.dev-system.versionと親リポジトリURL/タグを明記。canopyで「.dev-system.version＝DEV_SYSTEM/VERSION」をチェック済のため、参照はバージョン+URLに寄せる。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダー「依存」フィールドの表記が単一例のみで、複数上流の列挙方法やセマンティックバージョン（範囲/固定）の扱いが未定義。",
+    "suggestion": "YAML風リスト推奨: 「依存: - {file: docs/project_v1.md, version: \"^1.3\"} - {file: docs/design_system.md, version: \"=1.0\"}」。許容するバージョン指定子（=, ^, ~）を定義し、将来の軽微更新で全下流の機械的な一括更新を避ける。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.6",
+    "issue": "循環参照・未定義参照・バージョンなし依存を禁止しているが、自動検証手段が定義されていないため実運用で逸脱が混入しうる。",
+    "suggestion": "refs_lint.sh（新規）を追加し、各mdヘッダーの「依存」からDAG検証/未定義検出/バージョン有無チェックを実施。canopyから呼び出してFAIL化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（全テンプレート横断）",
+    "issue": "新規開発者の迷いを減らすための横断必須セクションが不足。用語定義/非スコープ/KPI・成功指標/ローカリゼーション/法務・データ保護等が明示されていない。",
+    "suggestion": "- project_v1.md: 前提・制約/非スコープ/成功指標(KPI)/法務・コンプライアンス(データ保持・削除方針、GDPR/CCPA)/ローカリゼーション方針を追加。- ux_v1.md: マイクロコピー/コンテンツ設計ガイドを追加。- design_system.md: 状態バリアント（hover/focus/pressed/disabled）/elevation(影)/corner radiusスケールを明記。- reference_v1.md: API・データのバージョニング/互換性ポリシー、レート制限、標準エラー構造、移行戦略を追加。- system_map.md: 状態管理戦略（グローバル/ローカル、イベントソース）を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md） ↔ §12",
+    "issue": "§12のSPEC-ID付番とのトレーサビリティがe2e_fullflow_test.mdテンプレートに明記されていない。",
+    "suggestion": "e2e_fullflow_test.mdに「SPECトレーサビリティ表（SPEC-ID → テストケースID/ファイル）」セクション追加。canopyのG3/G7に軽量チェックを加え、docs内のSPEC件数とテスト側のSPEC参照件数の乖離も検知。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "テンプレート内の文言が特定アプリ名（Lais）に依存しており、dev-systemのアプリ横断テンプレートとして汎用性が不足。",
+    "suggestion": "「Lais方針」を「{AppName}方針」に置換し、init_app.shでアプリ名を自動埋め込み。表カラム名や差別化マッピングもアプリ名プレースホルダを使用。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力がMarkdownのみで機械検証が困難。完了基準（5+3社/「方針」列の全埋め/差別化≥3）を自動で満たしているか判定できない。",
+    "suggestion": "併せてJSON出力（docs/benchmarks/{scope}_v1.json）を必須化し、bench_lint.sh（新規）で対象社数・「方針」列の埋め・差別化件数を検証。session_progress.mdにファイルパスを記録してG5/G7と同様にゲート化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.6",
+    "issue": "「上流変更時の連鎖更新」の“影響する下流ファイルの特定”基準が抽象的で、新規メンバーが迷う余地がある。",
+    "suggestion": "各上流ファイルのヘッダーにimpact_tags（例: plans, auth, pricing, navigation, theme, data_model等）を追加し、下流側はconsumes_tagsを列挙。refs_lint.shでタグの交差に基づく連鎖更新候補を自動提示。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "セクション参照が「§N.M」番号のみで、見出し変更時のリンクロスが起こり得る。",
+    "suggestion": "各見出しに安定ID（HTMLアンカー/slug）を併記（例: §3.2 {#pricing-change-flow}）。参照は「file §N.M（#slug）」の併記形式を推奨。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "直接5社+間接3社などボリューム要件がドメインによっては非現実的な場合があり、初期フェーズのスピードと相反する可能性がある。",
+    "suggestion": "例外運用をヘッダーに定義（例: benchmark_exception: true, reason: 'ニッチ市場で直接競合が2社のみ'）。PO承認必須とし、bench_lint.shで例外フラグと理由記載の有無を検証。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Lais — S-00 Splash | 案 E_v2 Cyberpunk 2077</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="screen">
+
+  <!-- Status bar (CP2077 yellow) -->
+  <div class="statusbar">
+    <span class="time">22:47</span>
+    <span class="indicators">
+      <span class="ind-dot"></span>
+      <span class="net">5G</span>
+      <span class="bat">98%</span>
+    </span>
+  </div>
+
+  <!-- HUD コーナー -->
+  <div class="hud-corner tl"></div>
+  <div class="hud-corner tr"></div>
+  <div class="hud-corner bl"></div>
+  <div class="hud-corner br"></div>
+
+  <!-- 看板要素: タテ書き漢字 (Night City 過密) -->
+  <div class="s00-vertical-jp">
+    念<br>確<br>育
+    <div class="small">サイバー</div>
+  </div>
+
+  <!-- 巨大カタカナ (右外) -->
+  <div class="s00-katakana">ナ<br>イ<br>ト<br>シ<br>テ<br>ィ</div>
+
+  <!-- 横書き看板 (装飾) -->
+  <div class="sign-horizontal" style="top: 60px; left: 16px; font-size: 11px; color: var(--c-magenta); text-shadow: var(--g-magenta); letter-spacing: 0.4em; z-index: 6;">SECTOR.07 // NIGHT_CITY</div>
+  <div class="sign-horizontal" style="bottom: 28px; right: 14px; font-family: var(--f-mono); font-size: 13px; color: var(--c-cyan); text-shadow: var(--g-cyan); letter-spacing: 0.2em; z-index: 6;">// NETRUNNER_OK</div>
+
+  <!-- メインコンテンツ -->
+  <div class="s00-content">
+    <!-- wireframe ロゴ (六角形 + 内部漢字) -->
+    <div class="s00-logo-block">
+      <svg class="s00-logo-svg" viewBox="0 0 360 144" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <filter id="g0">
+            <feGaussianBlur stdDeviation="1.6" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <!-- 横長 六角形 (CP2077 logo っぽいシェブロン) -->
+        <polygon points="180,8 312,40 312,104 180,136 48,104 48,40"
+                 fill="none" stroke="#fcee0a" stroke-width="2" filter="url(#g0)"/>
+        <!-- 内側 -->
+        <polygon points="180,28 280,52 280,92 180,116 80,92 80,52"
+                 fill="none" stroke="#cf3aff" stroke-width="1" opacity="0.85"/>
+        <!-- 中心 巨大漢字「念」 -->
+        <text x="180" y="92" text-anchor="middle"
+              font-family="Noto Sans JP, sans-serif"
+              font-size="60" font-weight="900"
+              fill="#fcee0a" filter="url(#g0)">念</text>
+        <!-- 角度 line -->
+        <line x1="180" y1="8" x2="180" y2="136" stroke="#00ffe0" stroke-width="0.6" opacity="0.4"/>
+        <line x1="48" y1="40" x2="312" y2="104" stroke="#cf3aff" stroke-width="0.5" opacity="0.35"/>
+        <line x1="312" y1="40" x2="48" y2="104" stroke="#cf3aff" stroke-width="0.5" opacity="0.35"/>
+        <!-- 角点 -->
+        <circle cx="180" cy="8" r="3" fill="#cf3aff"/>
+        <circle cx="312" cy="40" r="3" fill="#fcee0a"/>
+        <circle cx="312" cy="104" r="3" fill="#00ffe0"/>
+        <circle cx="180" cy="136" r="3" fill="#cf3aff"/>
+        <circle cx="48" cy="104" r="3" fill="#fcee0a"/>
+        <circle cx="48" cy="40" r="3" fill="#00ffe0"/>
+        <!-- HUD ティック -->
+        <g stroke="#fcee0a" stroke-width="0.6" opacity="0.7">
+          <line x1="20" y1="72" x2="40" y2="72"/>
+          <line x1="320" y1="72" x2="340" y2="72"/>
+        </g>
+        <!-- 装飾文字 -->
+        <text x="48" y="22" font-family="VT323, monospace" font-size="10" fill="#fcee0a" letter-spacing="2">SYS_LAIS_v3.4</text>
+        <text x="312" y="22" text-anchor="end" font-family="VT323, monospace" font-size="10" fill="#cf3aff" letter-spacing="2">NODE_0xFTS</text>
+      </svg>
+    </div>
+
+    <!-- 巨大ブランド名 LAIS (グリッチ / Bebas-style) -->
+    <div class="s00-brand-row">
+      <div class="s00-brand">
+        LAIS
+        <span class="glitch-r">LAIS</span>
+        <span class="glitch-c">LAIS</span>
+      </div>
+    </div>
+
+    <!-- 副題 -->
+    <div class="s00-tagline-block">
+      <div class="s00-tagline-en">DREAM × DATA × DAILY</div>
+      <div class="s00-tagline-jp">自分の<span class="accent">念</span>を、確かに育てる</div>
+    </div>
+
+    <!-- CTA エリア -->
+    <div class="s00-cta-wrap">
+      <button class="s00-cta">
+        <span>JACK_IN</span>
+        <span class="s00-cta-arrow">»</span>
+      </button>
+      <div class="s00-cta-mono">// PRESS_TO_SIGN_IN</div>
+      <div class="s00-version">v3.4 // BUILD_2147 // OPUS_4.7</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

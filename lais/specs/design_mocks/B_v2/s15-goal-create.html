@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>Lais — S-15 GoalCreate (案 B_v2 Hogwarts)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="screen s15">
+  <!-- Background dimmed dashboard -->
+  <div class="ornate-border s15-page-bg"></div>
+  <div class="content s15-page-bg">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <span>⚜ 🪄 ▮▮▮</span>
+    </div>
+    <div class="grow-header">
+      <div>
+        <div class="grow-greeting">良き朝です、賢者よ ⚜</div>
+        <div class="grow-date">IV ✦ XXVII</div>
+      </div>
+      <div class="grow-portrait">
+        <div class="grow-portrait-letter">F</div>
+      </div>
+    </div>
+    <h3 class="grow-section-title">⚜ Quest in Progress</h3>
+  </div>
+
+  <!-- Modal Overlay (羊皮紙の手紙 + 蝋封) -->
+  <div class="s15-overlay" data-testid="s15-overlay">
+    <div class="s15-modal" data-testid="s15-modal">
+      <span class="s15-page-corner tl"></span>
+      <span class="s15-page-corner tr"></span>
+      <button class="s15-close" data-testid="s15-close">✕</button>
+
+      <div class="s15-emblem">📜 ⚜ 🪶</div>
+      <h2 class="s15-title">NEW QUEST</h2>
+      <div class="s15-title-jp">— 新たなる目標を、羊皮紙に刻む —</div>
+      <div class="s15-divider"></div>
+
+      <div class="s15-form-group">
+        <label class="s15-form-label">⚜ Quest Title — 目標の題</label>
+        <input class="s15-input" type="text" placeholder="あなたの叶えたき望みを記せ" value="読書 50 冊の書架を築く">
+      </div>
+
+      <div class="s15-form-group">
+        <label class="s15-form-label">📜 Inscription — 詳細の刻み</label>
+        <textarea class="s15-input s15-textarea" placeholder="この quest の意味、誓い、心の声を…">古典 30、技術 15、詩 5。月に 4 冊、夜の儀式として読み進める。Honeydukes の蜂蜜飴を傍らに。</textarea>
+      </div>
+
+      <div class="s15-form-group">
+        <label class="s15-form-label">🕯 Due Date — 期限の刻</label>
+        <div class="s15-date-picker">
+          <div class="s15-date-segment active">
+            <div class="s15-date-segment-value">XII</div>
+            <div class="s15-date-segment-label">Month</div>
+          </div>
+          <div class="s15-date-segment">
+            <div class="s15-date-segment-value">XXXI</div>
+            <div class="s15-date-segment-label">Day</div>
+          </div>
+          <div class="s15-date-segment">
+            <div class="s15-date-segment-value">MMXXVI</div>
+            <div class="s15-date-segment-label">Year</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="s15-actions">
+        <button class="s15-btn s15-btn-cancel">CANCEL</button>
+        <button class="s15-btn s15-btn-create">⚜ INSCRIBE ⚜</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-indicator"></div>
+</main>
+</body>
+</html>

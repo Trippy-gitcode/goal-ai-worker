@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§2.2, §8.2, project_v1.md §7.3",
+    "issue": "GROW画面ヒーロー領域のアバターレンダリング方式（SVGかPNGか）が矛盾しており、パフォーマンス破綻の危険がある。project_v1.md §7.3では「SVG直接レンダリングはプロフィール詳細画面のみ」とあるが、GROW画面（S-10）はプロフィール詳細画面ではない。もしGROW画面でSVGを使用し、§2.2の「スクロールに応じて縮小（transform: scale）」を適用すると、再描画コストが高くスクロールが著しくカクつく。一方、PNGを使用する場合、装飾変更時にPNGを再生成・キャッシュするフ��ーが未定義。",
+    "suggestion": "GROW画面のヒーロー領域は「ラスタライズ済みPNG」を使用することを明記し、S-41（アバター設定）で保存した際にCanvas経由でPNGを再生成しキャッシュを更新するフローを定義すること。スクロール時の縮小アニメーションはPNGに対して行う。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.4, §13.1",
+    "issue": "ダークテーマ（Night Sky, Harajuku Dark）選択時のQRコード表示（S-33）における背景色の制御が未定義。QRコードの背景をダーク色、描画色をライト色に反転させると、一般的なQRコードスキャナー（およびjsQR）での読み取り失敗率が極めて高くなり、コア機能である友達追加が機能しなくなる。",
+    "suggestion": "テーマ設定に関わらず、QRコードのコンテナ背景は常に「白（#FFFFFF）」、QRコードの描画色は「黒（#000000）」またはそれに準ずる高コントラストの固定色を維持する仕様を明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.2",
+    "issue": "TALK画面での画像添付において、project_v1.md §3.3で定義されている「10MB上限」を超過した場合のエラーハンドリング（UX）が未定義。また、画像アップロード中のローディング状態（送信ボタンのスピナー化や入力欄のロック等）が定義されていないため、重い画像を送信した際にユーザーが複数回タップしてしまう恐れがある。",
+    "suggestion": "10MB超過時はOSファイルピッカーから戻った直後にエラートースト「画像サイズは10MB以下にしてください」を表示しプレビューを破棄する仕様を追加。また、送信中の入力バーの非活性化とローディングインジケータの表示を定義すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.4, §8.3",
+    "issue": "S-14（ゴール詳細）の「[ゴール完了にする] ボタン」の表示条件と、ゴール達成演出のトリガーが矛盾している。§8.3では「紐づく全タスクが完了」で自動的に演出が走るように読めるが、§2.4では「全タスク完了済みの場合は自動表示」とあり、ユーザーが手動でボタンを押す必要があるのか、自動で達成になるのか曖昧。",
+    "suggestion": "「紐づく最後のタスクを完了した瞬間、自動的にゴール達成状態となり演出が発火する」ことを明記し、[ゴール完了にする] ボタンは「タスクが1件も紐づいていないゴール」の場合のみ表示される仕様に統一すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§2.3, §6.1",
+    "issue": "S-13（タスク編集）のインラインモード遷移時、キーボードがせり上がるが、保存/キャンセルボタンの配置が未定義。S-11（ハーフモーダル）の下部にボタンがある場合、キーボードで隠れてしまい操作不能になる可能性が高い。",
+    "suggestion": "インライン編集モード時は、[保存] [キャンセル] ボタンをハーフモーダルのヘッダー部分（ドラッグハンドルの横など）に固定表示するか、キーボードの直上（visualViewportのbottom）に追従するアクションバーとして表示する仕様を追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.2, §10",
+    "issue": "デザインシステム（Phase 2）への要件引き継ぎとして、タイポグラフィの「等幅フ��ント（tabular-nums）」指定が欠落している。EXPやレベルがカウントアップするアニメーション（§8.2）において、数字の文字幅が変動するフォントを使用すると、UI全体が横にガタガタと揺れてしまい「洗練」が損なわれる。",
+    "suggestion": "UX仕様書内に「デザインシステムへの要件」セクションを設け、EXP・レベル・時間表示などの動的数値には必ず `font-variant-numeric: tabular-nums` を適用する等幅フォントを指定することを明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§5.0",
+    "issue": "S-01（サインアップ）、S-02（ログイン）などのフルスクリーンフォームにおける、iOS PWAでのキーボード表示時のスクロール制御が未定義。入力欄や[サインアップ]ボタンがキーボードの下に隠れてしまう問題が発生する。",
+    "suggestion": "フルスクリーンフォームにおいても、visualViewport APIを使用してコンテナの高さを動的に調整し、現在フォーカスされている入力欄および主要なアクションボタンが常に可視領域にスクロールされる挙動を定義すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.2, §8.3",
+    "issue": "レベルアップやゴール達成時の「紙吹雪パーティクル」が、project_v1.md §1.3で定義された「洗練（ゲーム画面は出さない）」というブランドメッセージとやや不一致。紙吹雪はポップ・カジュアルな印象を与えやすい。",
+    "suggestion": "「紙吹雪」という具体的な表現を避け、「洗練された光の波紋（Ripple）や、テーマカラーに基づいた幾何学的なパーティクルエフェクト」など、デザインシステム側でブランドに合わせた抽象的で上品な演出を定義できるよう表現を調整すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§2.3",
+    "issue": "Undoスナックバーが30秒間表示される仕様だが、30秒経過する前にユーザーがアプリをキル（終了）またはブラウザをリロードした場合の挙動が未定義。ローカル状態とサーバー状態の不整合が起きる可能性がある。",
+    "suggestion": "「アプリ終了時（pagehide/visibilitychangeイベント）にUndoスナックバーが表示中の場合、その���点で即座に完了を確定（サーバーに同期）し、次回起動時はUndo不可とする」仕様を明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§13.1",
+    "issue": "S-42（メール変更）およびS-43（パスワード変更）で、変更完了後にトーストを表示することは定義されているが、その後の画面遷移（S-37設定トップに自動で戻るのか、その画面に留まるのか）が曖昧。",
+    "suggestion": "「変更完了のトースト表示と同時に、自動的にS-37（設定トップ）へ戻る（左へスライドアウト）」という遷移を明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

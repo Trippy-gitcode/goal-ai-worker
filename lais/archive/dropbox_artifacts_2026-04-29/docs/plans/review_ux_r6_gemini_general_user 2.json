@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4, §5.3",
+    "issue": "新規ユーザーがシェアリンク（友達追加）を踏んだ際の遷移パスが破綻しており、友達追加にたどり着けない。",
+    "suggestion": "ux_v1.md §4.4では「未ログイン → S-02 ログイン画面（認証後にプロフィール表示に遷移）」とあるが、新規ユーザーはS-01(サインアップ)→S-04(メール認証)→S-03(オンボーディング)を経由する。S-03完了後はS-10(GROW)に強制遷移する仕様(§5.3)のため、リダイレクトURLが失われる。S-03完了時の遷移ロジックに「sessionStorageにリダイレクトURLがある場合は、S-10ではなく該当URL（友達プロフィール表示）に遷移する」例外処理を追加せよ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §5.1.1",
+    "issue": "自己成長に興味がない一般ユーザーにとって、オンボーディングのステップ3〜5が強制に見え、離脱の原因になる。",
+    "suggestion": "「[スキップ] リンクは非表示（空でも次へ可能）」としているが、LINE等しか使わないユーザーは「スキップ」がないと入力必須だと思い込み、目標がない場合に面倒になって離脱する。ステップ3〜5には明確に「スキップ」または「あとで設定する」ボタンを配置し、心理的ハードルを下げよ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §5.3",
+    "issue": "オンボーディング完了後の初回体験（チュートリアル）が定義されておらず、初見でアプリの使い方がわからない。",
+    "suggestion": "GROW画面に遷移後、AIが提案したタスクが置かれているだけでは、「⭕をタップするとEXPがもらえる」「TALKタブでAIと話せる」という基本サイクル���伝わらない。初回GROW画面表示時に、提案されたタスクの⭕を指し示すツールチップ（「タップして完了してみましょう」）を表示し、完了後にTALKタブへ誘導する最小限のインタラクティブチュートリアルを追加せよ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §5.0, project_v1.md §7.2",
+    "issue": "project_v1.mdで定義されているMagic Link（パスワードレス）認証のUXフローが存在しない。",
+    "suggestion": "project_v1.md §7.2で「メール/パスワード認証 + Magic Link」と定義されているが、ux_v1.md §5.0のサインアップ/ログイン画面にはパスワード入力しかなく、Magic Linkを要求するUIがない。S-01およびS-02に「パスワードなしでログイン（Magic Link）」ボタンを追加し、メールアドレスのみ入力してリンクを送信するフローを定義せよ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.4, §3.6",
+    "issue": "「ゴール」「タスク」「冒険EXP」などの用語や概念が、自己成長系アプリに慣れていないユーザーに伝わりにくい。",
+    "suggestion": "空状態（Empty State）のイラストやテキストで、「日常のちょっとしたこと（買い物など）もタスクにしてOK」「EXP＝あなたの経験値」といった、ハードルを下げる親しみやすい説明（マイクロコピー）を追加せよ。また、TALKの初回チップに「このアプリの使い方を聞く」を含めよ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.3",
+    "issue": "DISCOVERのヒアリングセッション（5問）をユーザーが自発的に中断した場合の挙動が未定義。",
+    "suggestion": "ヒアリング中にユーザーがGROW画面に移動したり、別の話題をAIに振ったりした場合の仕様を追記せよ。例: 「ヒアリング中に別タブへ移動しても状態は保持し、TALKに戻れば再開可能。TALK画面のヘッダーバッジ『ヒアリング中 (3/5)』をタップすると『ヒアリングを中断する』メニューが出る」など。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3",
+    "issue": "30秒間消えないUndoスナックバーが、画面下部の操作を阻害し「面倒くさい」��感じさせる。",
+    "suggestion": "「30秒間自動消去されない」「タブ切替でも消えない」仕様は、TALK画面でのメッセージ閲覧やキーボード入力時に視覚的ノイズとなる。スナックバーに「✕（即時確定して閉じる）」ボタンを追加し、ユーザーが任意で消して画面を広く使えるようにせよ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §5.0",
+    "issue": "サインアップ（S-01）で登録済みのメールアドレスを入力した場合の挙動が未定義。",
+    "suggestion": "クーリングオフ期間中のユーザーや、単に忘れて再登録しようとしたユーザーがS-01で既存メアドを入れた際のエラーハンドリングを追記せよ。例: 「このメールアドレスは既に登録されています。[ログイン] または [パスワードリセット] をお試しください」というインラインエラーを表示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3",
+    "issue": "タスク追加時の「所要時間」デフォルト30分が、些細なタスク（薬を飲む等）を入れる際に修正��手間を生む。",
+    "suggestion": "普段タスク管理をしないユーザーにとって入力項目が多いのは面倒。所要時間のプリセットに「設定しない（または 5分未満）」を追加し、デフォルトをそれに変更するか、AIがタスク名から自動推測してセットする仕組みを検討せよ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.2",
+    "issue": "画像添付時のプライバシー警告ダイアログの「今後表示しない」の保存先が不明。",
+    "suggestion": "ログアウトして別端末でログインした際に再表示されるのか（localStorageかDB保存か）が定義されていない。ユーザー設定（DBのprofiles等）にフラグを持たせ、デバイスを跨いでも「今後表示しない」状態が引き継がれるように明記せよ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  }
+]

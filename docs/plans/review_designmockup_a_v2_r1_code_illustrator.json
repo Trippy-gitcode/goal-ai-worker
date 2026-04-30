@@ -1,0 +1,57 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s20_talk",
+    "location": "AI 吹き出しの左縦ライン表現",
+    "issue": "v2 での最大の進化。吹き出し bg 削除 + 左 2px 縦ラインは『月明かり下の対話』の詩情と合致する優れた方向性。ただしユーザー側吹き出しの bg 濃度が高く、左右で『開放 vs 閉鎖』の対比が未設計。",
+    "suggestion": "ユーザー吹き出し bg を rgba(35,44,58,0.5) 程度まで下げて『半透明の日記帳』感に。左縁にも 2px の accent ラインを追加。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow,s30_me",
+    "location": "アバター円",
+    "issue": "v2 でアバターは横並び配置に変わったが、造形は既成の人型シルエットのまま。",
+    "suggestion": "Phase B でオリジナルラインアート（1px 手描き風）+ 時間帯表情切替。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "削除の赤文字",
+    "issue": "v2 据え置き。モノクロ基調に純赤が差し込む。",
+    "suggestion": "煤赤 #7A5A5A に置換、または … メニュー内に隠す。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "進行中タスクの黄色縦線",
+    "issue": "黄色 (#F5C842 相当) は Night Sky の静けさとやや衝突する彩度。",
+    "suggestion": "蝋燭色 #E8B960 / 月光黄 #EAD5A8 相当に落ち着かせる。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s14_goal_detail",
+    "location": "完了タスクの取り消し線",
+    "issue": "v2 据え置き。『積み重ね』の表現として弱い。",
+    "suggestion": "明度ダウン + チェック丸を金/銀着色で勲章化。",
+    "model": "Code",
+    "persona": "illustrator"
+  }
+]

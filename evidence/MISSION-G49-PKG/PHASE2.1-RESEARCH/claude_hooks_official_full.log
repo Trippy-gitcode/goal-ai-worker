@@ -1,0 +1,120 @@
+12:- Hooks: `PostToolUse` and `PostToolUseFailure` hook inputs now include `duration_ms` (tool execution time, excluding permission prompts and PreToolUse hooks)
+20:- OpenTelemetry: `tool_result` and `tool_decision` events now include `tool_use_id`; `tool_result` also includes `tool_input_size_bytes`
+27:- Fixed Rewind overlay showing "(no prompt)" for messages with image attachments
+29:- Fixed async `PostToolUse` hooks that emit no response payload writing empty entries to the session transcript
+32:- Fixed `@`-file Tab completion replacing the entire prompt when used inside a slash command with an absolute path
+33:- Fixed a stray `p` character appearing at the prompt on startup in macOS Terminal.app via Docker or SSH
+36:- Fixed `/skills` Enter key closing the dialog instead of pre-filling `/<skill-name>` in the prompt
+45:- Fixed skills invoked before auto-compaction being re-executed against the next user message
+47:- Fixed Agent tool with `isolation: "worktree"` reusing stale worktrees from prior sessions
+52:- Fixed PR not linked to session when working in a git worktree
+55:- [VSCode] Fixed voice dictation's first recording producing nothing on macOS while the microphone permission prompt is showing
+62:- Hooks can now invoke MCP tools directly via `type: "mcp_tool"`
+66:- Added a "Don't ask again" option to the auto mode opt-in prompt
+68:- `--continue`/`--resume` now find sessions that added the current directory via `/add-dir`
+69:- `/color` now syncs the session accent color to claude.ai/code when Remote Control is connected
+74:- Fixed MCP step-up authorization silently refreshing instead of prompting for re-consent when the server's `insufficient_scope` 403 names a scope the current token already has
+77:- Fixed macOS keychain race where a concurrent MCP token refresh could overwrite a freshly-refreshed OAuth token, causing unexpected "Please run /login" prompts
+80:- Fixed `/login` having no effect in a session launched with `CLAUDE_CODE_OAUTH_TOKEN` — the env token is now cleared so disk credentials take effect
+83:- Fixed agent-type hooks failing with "Messages are required for agent hooks" when configured for events other than `Stop` or `SubagentStop`
+84:- Fixed `prompt` hooks re-firing on tool calls made by an agent-hook verifier subagent
+87:- Fixed connecting to a remote session overwriting your local `model` setting in `~/.claude/settings.json`
+91:- Fixed Remote Control sessions getting archived on transient CCR initialization blips during JWT refresh
+97:- Agent frontmatter `mcpServers` are now loaded for main-thread agent sessions via `--agent`
+99:- The `/resume` command now offers to summarize stale, large sessions before re-reading them, matching the existing `--resume` behavior
+101:- `plugin install` on an already-installed plugin now installs any missing dependencies instead of stopping at "already installed"
+104:- Advisor Tool (experimental): dialog now carries an "experimental" label, learn-more link, and startup notification when enabled; sessions no longer get stuck with "Advisor tool result content could not be processed" errors on every prompt and `/compact`
+106:- OpenTelemetry: `user_prompt` events now include `command_name` and `command_source` for slash commands; `cost.usage`, `token.usage`, `api_request`, and `api_error` now include an `effort` attribute when the model supports effort levels. Custom/MCP command names are redacted unless `OTEL_LOG_TOOL_DETAILS=1` is set
+110:- Fixed Plain-CLI OAuth sessions dying with "Please run /login" when the access token expires mid-session — the token is now refreshed reactively on 401
+114:- Fixed prompt-input undo (`Ctrl+_`) doing nothing immediately after typing, and skipping a state on each undo step
+123:- Fixed Opus 4.7 sessions showing inflated `/context` percentages and autocompacting too early — Claude Code was computing against a 200K context window instead of Opus 4.7's native 1M
+127:- `/resume` on large sessions is significantly faster (up to 67% on 40MB+ sessions) and handles sessions with many dead-fork entries more efficiently
+136:- Agent frontmatter `hooks:` now fire when running as a main-thread agent via `--agent`
+149:- Fixed `/resume` silently showing an empty conversation on large session files instead of reporting the load error
+151:- Fixed `/update` and `/tui` not working after entering a worktree mid-session
+171:- Running `cd <current-directory> && git …` no longer triggers a permission prompt when the `cd` is a no-op
+178:- Fixed session recap auto-firing while composing unsent text in the prompt
+181:- Fixed Bash `dangerouslyDisableSandbox` running commands outside the sandbox without a permission prompt
+186:- Fixed slash/@ completion menu not sitting flush against the prompt border in fullscreen mode
+188:- Fixed prompt cursor disappearing when `NO_COLOR` is set
+190:- Fixed compacting a resumed long-context session failing with "Extra usage is required for long context requests"
+192:- Fixed "Refine with Ultraplan" not showing the remote session URL in the transcript
+193:- Fixed SDK image content blocks that fail to process crashing the session — now degrade to a text placeholder
+194:- Fixed Remote Control sessions not streaming subagent transcripts
+195:- Fixed Remote Control sessions not being archived when Claude Code exits
+209:- Added `/less-permission-prompts` skill — scans transcripts for common read-only Bash and MCP tool calls and proposes a prioritized allowlist for `.claude/settings.json`
+213:- Read-only bash commands with glob patterns (e.g. `ls *.ts`) and commands starting with `cd <project-dir> &&` no longer trigger a permission prompt
+215:- Plan files are now named after your prompt (e.g. `fix-auth-race-snug-otter.md`) instead of purely random words
+219:- `Ctrl+L` now forces a full screen redraw in addition to clearing the prompt input
+229:- Fixed tab-completing `/resume` immediately resuming an arbitrary titled session instead of showing the session picker
+231:- Fixed `/clear` dropping the session name set by `/rename`, causing statusline output to lose `session_name`
+237:- Windows: `CLAUDE_ENV_FILE` and SessionStart hook environment files now apply (previously a no-op)
+253:- SDK/headless sessions now read `TRACEPARENT`/`TRACESTATE` from the environment for distributed trace linking
+254:- Session recap is now enabled for users with telemetry disabled (Bedrock, Vertex, Foundry, `DISABLE_TELEMETRY`). Opt out via `/config` or `CLAUDE_CODE_ENABLE_AWAY_SUMMARY=0`.
+257:- Fixed session recap, local slash-command output, and other system status lines not appearing in focus mode
+261:- Fixed `--resume` sometimes showing the first prompt instead of the `/rename` name for sessions still running or exited uncleanly
+263:- Fixed session cleanup not removing the full session directory including subagent transcripts
+267:- Fixed `PermissionRequest` hooks returning `updatedInput` not being re-checked against `permissions.deny` rules; `setMode:'bypassPermissions'` updates now respect `disableBypassPermissionsMode`
+268:- Fixed `PreToolUse` hook `additionalContext` being dropped when the tool call fails
+270:- Fixed headless/SDK session auto-title firing an extra Haiku request when `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` or `CLAUDE_CODE_DISABLE_TERMINAL_TITLE` is set
+273:- Fixed Remote Control sessions showing a generic error instead of prompting for re-login when the session is too old
+274:- Fixed Remote Control session renames from claude.ai not persisting the title to the local CLI session
+282:- Added `ENABLE_PROMPT_CACHING_1H` env var to opt into 1-hour prompt cache TTL on API key, Bedrock, Vertex, and Foundry (`ENABLE_PROMPT_CACHING_1H_BEDROCK` is deprecated but still honored), and `FORCE_PROMPT_CACHING_5M` to force 5-minute TTL
+283:- Added recap feature to provide context when returning to a session, configurable in `/config` and manually invocable with `/recap`; force with `CLAUDE_CODE_ENABLE_AWAY_SUMMARY` if telemetry disabled.
+287:- Improved `/resume` picker to default to sessions from the current directory; press `Ctrl+A` to show all projects
+291:- Added a warning at startup when prompt caching is disabled via `DISABLE_PROMPT_CACHING*` environment variables
+292:- Fixed paste not working in the `/login` code prompt (regression in 2.1.105)
+293:- Fixed subscribers who set `DISABLE_TELEMETRY` falling back to 5-minute prompt cache TTL instead of 1 hour
+294:- Fixed Agent tool prompting for permission in auto mode when the safety classifier's transcript exceeded its context window
+296:- Fixed `claude --resume <session-id>` losing the session's custom name and color set via `/rename`
+297:- Fixed session titles showing placeholder example text when the first message is a short greeting
+298:- Fixed terminal escape codes appearing as garbage text in the prompt input after `--teleport`
+300:- Fixed `--teleport` and `--resume <id>` precondition errors (e.g. dirty git tree, session not found) exiting silently instead of showing the error message
+301:- Fixed Remote Control session titles set in the web UI being overwritten by auto-generated titles after the third message
+302:- Fixed `--resume` truncating sessions when the transcript contained a self-referencing message
+314:- Added PreCompact hook support: hooks can now block compaction by exiting with code 2 or returning `{"decision":"block"}`
+315:- Added background monitor support for plugins via a top-level `monitors` manifest key that auto-arms at session start or on skill invoke
+325:- Improved MCP large-output truncation prompt to give format-specific recipes (e.g. `jq` for JSON, computed Read chunk sizes for text)
+327:- Fixed screen going blank when the prompt input wraps to a second line in long conversations
+333:- Fixed queued user prompts disappearing from focus mode
+338:- Fixed "Resume this session with..." hint not printing on exit after `/resume`, `--worktree`, or `/branch`
+339:- Fixed feedback survey shortcut keys firing when typed at the end of a longer prompt
+340:- Fixed stdio MCP server emitting malformed (non-JSON) output hanging the session instead of failing fast with "Connection closed"
+341:- Fixed MCP tools missing on the first turn of headless/remote-trigger sessions when MCP servers connect asynchronously
+344:- Fixed crash on resume when session contains malformed text blocks
+355:- `/ultraplan` and other remote-session features now auto-create a default cloud environment instead of requiring web setup first
+361:- Improved `claude -p --resume <name>` to accept session titles set via `/rename` or `--name`
+362:- Improved settings resilience: an unrecognized hook event name in `settings.json` no longer causes the entire file to be ignored
+363:- Improved plugin hooks from plugins force-enabled by managed settings to run when `allowManagedHooksOnly` is set
+366:- Improved beta tracing to honor `OTEL_LOG_USER_PROMPTS`, `OTEL_LOG_TOOL_DETAILS`, and `OTEL_LOG_TOOL_CONTENT`; sensitive span attributes are no longer emitted unless opted in
+369:- Fixed a memory leak where long sessions retained dozens of historical copies of the message list in the virtual scroller
+370:- Fixed `--resume`/`--continue` losing conversation context on large sessions when the loader anchored on a dead-end branch instead of the live conversation
+374:- Fixed `permissions.deny` rules not overriding a PreToolUse hook's `permissionDecision: "ask"` — previously the hook could downgrade a deny into a prompt
+377:- Fixed `claude -w <name>` failing with "already exists" after a previous session's worktree cleanup left a stale directory
+383:- Fixed several `/resume` picker issues: narrow default view hiding sessions from other projects, unreachable preview on Windows Terminal, incorrect cwd in worktrees, session-not-found errors not surfacing in stderr, terminal title not being set, and resume hint overlapping the prompt input
+384:- Fixed Grep tool ENOENT when the embedded ripgrep binary path becomes stale (VS Code extension auto-update, macOS App Translocation); now falls back to system `rg` and self-heals mid-session
+391:- Fixed rendering issues: flicker in non-fullscreen mode when content above the visible area changed, terminal scrollback being wiped during long sessions in non-fullscreen mode, and mouse-scroll escape sequences occasionally leaking into the prompt as text
+393:- Fixed in-app settings writes (e.g. `/add-dir --remember`, `/config`) not refreshing the in-memory snapshot, preventing removed directories from being revoked mid-session
+395:- Fixed `claude --continue -p` not correctly continuing sessions created by `-p` or the SDK
+396:- Fixed several Remote Control issues: worktrees removed on session crash, connection failures not persisting in the transcript, spurious "Disconnected" indicator in brief mode for local sessions, and `/remote-control` failing over SSH when only `CLAUDE_CODE_ORGANIZATION_UUID` is set
+405:- Added subprocess sandboxing with PID namespace isolation on Linux when `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` is set, and `CLAUDE_CODE_SCRIPT_CAPS` env var to limit per-session script invocations
+406:- Added `--exclude-dynamic-system-prompt-sections` flag to print mode for improved cross-user prompt caching
+411:- Fixed compound Bash commands bypassing forced permission prompts for safety checks and explicit ask rules in auto and bypass-permissions modes
+412:- Fixed read-only commands with env-var prefixes not prompting unless the var is known-safe (`LANG`, `TZ`, `NO_COLOR`, etc.)
+413:- Fixed redirects to `/dev/tcp/...` or `/dev/udp/...` not prompting instead of auto-allowing
+421:- Fixed `permissions.additionalDirectories` changes not applying mid-session — removed directories lose access immediately and added ones work without restart
+424:- Fixed `Bash(...)` deny rules being downgraded to a prompt for piped commands that mix `cd` with other segments
+425:- Fixed false Bash permission prompts for `cut -d /`, `paste -d /`, `column -s /`, `awk '{print $1}' file`, and filenames containing `%`
+439:- Fixed a memory leak where Remote Control permission handler entries were retained for the lifetime of the session
+441:- Fixed prompt-type Stop/SubagentStop hooks failing on long sessions, and hook evaluator API errors showing "JSON validation failed" instead of the real message
+443:- Fixed Bash `grep -f FILE` / `rg -f FILE` not prompting when reading a pattern file outside the working directory
+452:- Improved hook errors in the transcript to include the first line of stderr for self-diagnosis without `--debug`
+457:- Fixed `CLAUDE_CODE_MAX_CONTEXT_TOKENS` to honor `DISABLE_COMPACT` when it is set.
+458:- Dropped `/compact` hints when `DISABLE_COMPACT` is set.
+462:- Added focus view toggle (`Ctrl+O`) in `NO_FLICKER` mode showing prompt, one-line tool summary with edit diffstats, and final response
+468:- Fixed and hardened Bash tool permissions, tightening checks around env-var prefixes and network redirects, and reducing false prompts on common commands
+471:- Fixed `permissions.additionalDirectories` changes in settings not applying mid-session
+476:- Fixed rate-limit upgrade options disappearing after context compaction
+481:- Fixed prompt-type `Stop`/`SubagentStop` hooks failing on long sessions, and hook evaluator API errors displaying "JSON validation failed" instead of the actual message
+482:- Fixed subagents with worktree isolation or `cwd:` override leaking their working directory back to the parent session's Bash tool
+483:- Fixed compaction writing duplicate multi-MB subagent transcript files on prompt-too-long retries

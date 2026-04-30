@@ -22,7 +22,7 @@
 #   2: ガード違反疑義（fail-closed、起動禁止）
 #
 # 根拠:
-#   - lais/verify/dev_system_v34_package.md §2.25.22.1〜.6
+#   - core_spec.md §9 夜間自動着手モード (legacy v34 spec §2.25.22.1〜.6, archived 2026-04-30)
 
 set -eu
 

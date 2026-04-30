@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §6.1, §7.3",
+    "issue": "ハーフモーダル内の縦スクロールと、モーダルを閉じる「下スワイプ」のジェスチャーが競合しており、操作不能または意図しないモーダル閉じが確実に発生する。",
+    "suggestion": "モーダルを閉じる下スワイプのトリガー領域を「上部のドラッグハンドル周辺（例: 上部40px）」に限定するか、モーダル内コンテンツの `scrollTop === 0` の状態でのみ下スワイプ閉じを許可する仕様を明記してください。また、CSS `touch-action: pan-y` などの制御方針を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §10.1, ux_v1.md 全般",
+    "issue": "「洗練」を表現するためのデザインシステム（Phase 2で作成予定）に引き継ぐべき、具体的なビジュアルトークンの要件が未定義。特にアイコン体系（Filled/Outlined、線幅）、タイポグラフィ（フォントファミリー、ウェイト階層）、角丸（Border Radiusのスケール）の指定がないと、実装時にUIがバラバラになります。",
+    "suggestion": "design_system.md で定義すべき項目として、「アイコンセットの統一ルール（例: Phosphor IconsのRegularウェイトで統一）」「タイポグラフィのスケール」「コンポーネントの角丸（Radius）ルール」を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.2, §6.1",
+    "issue": "キーボード表示時にGROW画面のヒーロー領域を `display: none` にすると、ハーフモーダル（S-12 タスク追加など）を開いてテキスト入力した瞬間、背面のGROW画面がガクッと上にズレるレイアウトシフトが発生し、「洗練されたUI」を損ない��す。",
+    "suggestion": "ハーフモーダル表示中のキーボード展開時は、背面のGROW画面のスクロール位置やヒーロー領域の表示状態をロック（固定）し、`display: none` によるレイアウトシフトを防ぐ仕様に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §8.6",
+    "issue": "演出キューが「直列実行」と定義されていますが、ユーザーがタスクを高速で連続完了（例: 3件連続タップ）した場合、EXPバー伸長やフロートテキストのアニメーションがキューに溜まり続け、操作とフィードバックの間に大きな遅延（即時性の喪失）が生じます。",
+    "suggestion": "「同一種類の演出（タスク完了）が連続発火した場合は、前のアニメーションをキャンセルして最新の数値を即時反映（または並列でフロートテキストを複数飛ばす）し、レベルアップやゴール達成などの異種演出のみ直列キューに入れる」というルールを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §2.4",
+    "issue": "S-14��ゴール詳細）からTALK画面へ遷移する際、S-14の履歴をreplaceStateでGROWに書き換える仕様は、ユーザーのメンタルモデル（「ゴール詳細から相談に来たから、戻るボタンでゴール詳細に戻りたい」）に反し、コンテキストを見失わせます。",
+    "suggestion": "TALK画面への遷移時はS-14の履歴を維持し、TALK画面の左上（または戻るボタン）でS-14に戻れるようにするか、TALK画面をS-14上のフルスクリーンモーダルとして被せる（タブ切替ではなくコンテキスト内対話とする）設計を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3, ux_v1.md §4.4",
+    "issue": "アバターをCanvas経由でPNGキャッシュする仕様ですが、友達（FRIENDS）がアバター装飾を変更した場合、クライアント側でそのPNGキャッシュをいつ・どのように無効化して再生成するかのトリガーが未定義です。古いアバターが表示され続けるリスクがあります。",
+    "suggestion": "プロフィール取得APIのレスポンスに `avatar_updated_at` などのタイムスタンプを含め、ローカルキャッシュのタイムスタ���プと不一致の場合にのみSVGからPNGを再レンダリングするキャッシュパージ戦略を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3",
+    "issue": "GROW画面のTodayセクションに「単発」「習慣」「Overdue」「Upcoming（展開時）」が混在し、さらにGoalsセクションが続くため、縦スクロールが極端に長くなり、ベンチマークで避けるべきとした「認知負荷の増大」を招く懸念があります。",
+    "suggestion": "Upcomingセクションはデフォルトで折りたたむ仕様になっていますが、さらに「完了済みタスクは自動的に最下部に移動する、または折りたたむ」仕様を追加し、未完了のタスクにフォーカスしやすい構造にすることを提案します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §10.2, project_v1.md §3.5",
+    "issue": "ダークテーマ（Night Sky, Harajuku Dark）において、カードやハーフモーダルの階層（Elevation）を表現する方法が未定義です。ダークテーマではドロップシャドウが見えにくいため、背景色���明度（Lightness）やボーダーで階層を示す必要があります。",
+    "suggestion": "design_system.md で定義すべき項目として、「ダークテーマにおけるElevation（階層）は、シャドウではなくSurfaceカラーの明度上昇、または1pxの半透明ボーダーで表現する」という方針を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

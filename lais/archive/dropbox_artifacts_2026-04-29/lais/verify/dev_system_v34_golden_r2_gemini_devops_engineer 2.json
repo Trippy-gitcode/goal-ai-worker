@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "R2.1.1 §2.ε'-1",
+    "issue": "deploy.shの第1引数をMISSION_IDに変更したことで、既存のENVとAPP_DIRを引数に取る仕様（sub_infrastructure.md §2.8）と完全に矛盾しています。rollback.sh等から`bash scripts/deploy.sh prod .`として呼ばれるため、'prod'がMISSION_IDとして解釈され、デプロイやロールバックが確実に失敗します。",
+    "suggestion": "deploy.shの引数仕様を元の`ENV=${1:-prod}` `APP_DIR=${2:-.}`に戻し、MISSION_IDは環境変数から取得するか、session_progress.mdから動的に抽出するロジックを維持してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "location": "R2.1.1 §2.δ'-1, §2.δ'-2",
+    "issue": "mission_risk_classifier.shとverify_external_services.shがsession_progress.md全体を検索しているため、過去の完了済みミッションに高リスクファイルや【代替証跡】が含まれていると、現在のミッションでも誤って「高リスク」や「代替証跡あり」と判定されます。これによりセキュリティゲートが恒久的にバイパスされます。",
+    "suggestion": "session_progress.md全体ではなく、現在IN_PROGRESSのミッションブロック、または引数で指定されたMISSION_IDのブロックのみを抽出（sedやawkを使用）してから、対象ファイルや代替証跡の検索を行うようスクリプトを修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "location": "R2.1.1 §2.γ'-8, §2.ι'",
+    "issue": "shellcheck_lint.shやpre-commitの動的探索フォールバックにおいて、`find ... | while read ...; do ... || exit 1; done`の構造が使われています。POSIX shではパイプの右側はサブシェルで実行されるため、`exit 1`は親シェルを終了させず、エラーが握りつぶされてフッ���が通過してしまいます。",
+    "suggestion": "パイプを使わず、プロセス置換も避けるため、findの結果を一時ファイルに出力してからリダイレクトでwhileループに渡すか、`for f in $(find ...); do`の形式を使用してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "R2.1.1 §2.β'",
+    "issue": "G17（realworld_proof_check.sh）でauthスクリーンショットを無条件で必須としていますが、§2.ζ'-1のL1 SSOT定義ではauthは「認証ミッション時の必須度: 必須」であり、決済のみ等のミッションでは存在しません。これにより、認証非関連の高リスクミッションでG17が100% FAILし、デプロイが完了できなくなります。",
+    "suggestion": "G17のスクリプト内で、authスクリーンショットの存在チェックを条件付きにするか、ミッションのリスク分類（認証関連かどうか）を判定して必須リストを動的に切り替えるロジックを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "ROBUSTNESS",
+    "location": "R2.1.1 §2.γ'-7",
+    "issue": "append_deploy_fail.shのawkスクリプトにお��て、`in_block && /^### [A-Z0-9-]+:/ && NR>1 { in_block=0 }`としていますが、対象ミッションのヘッダ行自体がこの正規表現にマッチするため、マッチした直後にin_block=0となり、その後のSTATUS行が書き換えられない可能性が高いです。",
+    "suggestion": "awkのロジックを修正し、対象ミッションのヘッダ行にマッチした際はin_block=1としつつnextでスキップするか、別のミッションヘッダに到達した時のみin_block=0とするよう条件を厳密にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "R2.1.1 §2.η'",
+    "issue": "check_test_pass内でテストがPASSするたびにSTATUSをDONEやREADY_FOR_DEPLOYに自動書換えしていますが、TDDの過程（実装中のテスト実行）でもPASSすれば書き換わってしまいます。完了コマンドとして明示的に実行された時のみ遷移する制御がないため、ステータス管理が混乱します。",
+    "suggestion": "STATUSの自動遷移は、check_test_pass内ではなく、完了コマンドをラップする専用のスクリプト（例: scripts/complete_mission.sh）内で行うか、環境変数等で「完了判定としての実行」であることを明示した場合のみ遷移するよう設計を見直してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  }
+]

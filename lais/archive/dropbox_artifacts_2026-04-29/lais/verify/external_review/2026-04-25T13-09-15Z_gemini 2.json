@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "callGPT5",
+    "issue": "gpt-5モデル使用時に response_format: { type: 'json_object' } を指定しているが、プロンプトでは「必ずJSON配列のみを出力し、最初と最後は[]とすること」と指示している。OpenAIのjson_objectモードはルートがオブジェクトであることを強制するため、APIエラーになるか指示違反を引き起こす完全な矛盾状態にある。",
+    "suggestion": "プロンプトの指示を「JSONオブジェクト（キーに配列を持つ形式）を出力すること」に変更してextractJson側で吸収するか、response_formatの指定を削除して通常のテキストモード���配列を直接出力させるように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "extractJson",
+    "issue": "正規表現 /```(?:json)?\\s*(\\[[\\s\\S]*\\])\\s*```/ および /\\[[\\s\\S]*\\]/ が貪欲マッチになっている。AIが解説テキストを挟んで複数のコードブロックを出力した場合、最初から最後までを1つの文字列としてキャプチャし、JSONパースエラーが確実に発生する。",
+    "suggestion": "貪欲マッチを防ぐため、[\\s\\S]* を非貪欲マッチの [\\s\\S]*? に修正してください。これにより、最初の有効なJSON配列ブロックのみを正しく抽出できるようになります。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "main",
+    "issue": "results配列に _metadata オブジェクトをpushした後、同じ配列をループして severity の集計を行っている。_metadata には severity がないため sevs['?'] がカウントされ、totalItems も実際のレビュー指摘数より1多く水増しされるバグがある。",
+    "suggestion": "集計ループ内で if (item.id === '_metadata') continue; を追加してメタデータを除外するか、_metadata を results 配列に push する前に集計処理を完了させるように処理順序を変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "httpRequest",
+    "issue": "https.request のレスポンスオブジェクト (res) に対して error イベントハンドラが設定されていない。レスポンスデータの受信中にネットワーク切断などが発生した場合、Promiseが解決も拒否もされず、タイムアウトまでプロセスがハングする。",
+    "suggestion": "res.on('end', ...) の定義の直後に res.on('error', reject); を追加し、レスポンスストリームの受信エラーを捕捉してPromiseを即座にrejectするようにしてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "resolveFiles",
+    "issue": "globパターンの正規表現変換 base.replace(/\\*/g, '.*') において、ドット（.）のエスケープが漏れている。例えば sub_*.md が ^sub_.*.md$ となり、ドットが任意の一文字として扱われるため sub_aXmd のような意図しないファイルにも誤ってマッチする。",
+    "suggestion": "アスタリスクを置換する前にドットをエスケープするように、base.replace(/\\./g, '\\\\.').replace(/\\*/g, '.*') に修正し、拡張子のドットがリテラルとして扱われるようにしてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "withRetry",
+    "issue": "HTTP 400 (Bad Request) や 413 (Payload Too Large) などのクライアント起因エラー（トークン数超過や不正なリクエスト形式など）に対しても一律でリトライを行っている。これらは何度リトライしても成功しないため、無駄な待機時間とAPIコールが発生する。",
+    "suggestion": "catch ブロック内で e.message を確認し、HTTP 400 番台のエラー（429 Too Many Requests を除く）の場合はリトライを中止し、即座に throw するように条件分岐を追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0221,
+    "input_tokens": 13475,
+    "output_tokens": 1049,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

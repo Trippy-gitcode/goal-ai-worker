@@ -1,0 +1,141 @@
+/*
+ * S-11 DiaryLog — design tokens via theme variables (Stage 7-3)
+ */
+
+.s11-diary {
+  flex: 1;
+  background: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+}
+
+.s11-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-lg) var(--space-md);
+  background: var(--theme-color-bg-elevated);
+  border-bottom: 1px solid var(--theme-color-border);
+}
+
+.s11-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-display);
+}
+
+.s11-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--theme-color-text-secondary);
+}
+
+.s11-input-section {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.s11-input {
+  width: 100%;
+  padding: var(--space-md);
+  background: var(--theme-color-bg-card);
+  color: var(--theme-color-text);
+  border: 1px solid var(--theme-color-border-strong);
+  border-radius: var(--theme-radius-md);
+  font-size: var(--font-size-base);
+  font-family: var(--theme-font-base);
+  line-height: var(--theme-font-line-height-body);
+  resize: vertical;
+  min-height: 100px;
+  box-sizing: border-box;
+}
+
+.s11-input::placeholder {
+  color: var(--theme-color-text-secondary);
+}
+
+.s11-input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-color: var(--theme-color-accent);
+}
+
+.s11-save {
+  align-self: flex-end;
+  min-height: 44px;
+  padding: 0 var(--space-lg);
+  background: var(--theme-color-accent);
+  color: var(--theme-color-button-text-inverse);
+  border: none;
+  border-radius: var(--theme-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--theme-font-base);
+  cursor: pointer;
+}
+
+.s11-save:disabled {
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
+  cursor: not-allowed;
+}
+
+.s11-save:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s11-entries {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: 0 var(--space-md) var(--space-md);
+}
+
+.s11-empty {
+  text-align: center;
+  color: var(--theme-color-text-secondary);
+  font-size: var(--font-size-sm);
+  padding: var(--space-2xl) 0;
+}
+
+.s11-entry-card {
+  background: var(--theme-color-bg-card);
+  border: 1px solid var(--theme-color-border);
+  border-radius: var(--theme-radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  box-shadow: var(--theme-shadow-sm);
+}
+
+.s11-entry-date {
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--theme-font-letter-spacing-loose);
+}
+
+.s11-entry-text {
+  font-size: var(--font-size-base);
+  color: var(--theme-color-text);
+  line-height: var(--theme-font-line-height-body);
+  white-space: pre-wrap;
+}
+
+@media (min-width: 768px) {
+  .s11-input-section,
+  .s11-entries {
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}

@@ -1,0 +1,282 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.2（遷移マトリクス）",
+    "issue": "画面一覧にS-42（メール変更）/S-43（パスワード変更）が追加されたが、主要遷移マトリクスに遷移パスが未定義。S-37（設定）からの遷移のみ文章で触れられているが、戻りパスやブラウザバック時の挙動も未記載。",
+    "suggestion": "遷移マトリクスにS-37→S-42/S-43→戻り（S-37）の明示と、ブラウザバック時のpopstateハンドリング（フォーム編集中の確認ダイアログを含む）を追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.3（PWAオフラインEXP方針） vs ux_v1.md §9.1（オフライン時のEXP演出）",
+    "issue": "projectでは「オフライン時はEXP付与を表示しない（同期待ちバッジ表示）」だが、UXでは「通常どおり楽観的にEXP演出を表示」と定義���根本方針が矛盾し、巻き戻し有無の挙動も一致していない。",
+    "suggestion": "方針を統一。サーバー権威を優先するならUXも「同期待ち」表示に変更し演出を抑止。楽観表示を採用するならproject側の「巻き戻しは発生しない」を削除し、「同期後に差分を静かに補正、必要に応じて情報トースト」を明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.2.6（タスク完了→EXP→演出フロー）/ §9.2（API失敗）",
+    "issue": "日次EXP上限到達時の挙動が未定義。完了イベント自体は成功だがEXPのみ不付与のケースで、UIは「成功（チェック維持）+ EXPなし」を期待する一方、現在の定義は失敗＝チェック解除のロールバックしかない。",
+    "suggestion": "サーバー応答を3値化: success_with_exp / success_without_exp（上限到達）/ failure。上限時はチェック維持・「本日はEXP上限に達しました（タスクは完了）」の情報トーストを表示し、演出はスキップ。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.4（ドラッグ&ドロ��プ）/ §2.3（Todayセクション）",
+    "issue": "Todayの手動並び替えが「開始時刻による自動ソートを手動で上書き」とあるが、後で開始時刻を編集した場合の優先順位（手動順を維持か、再度自動ソートか）やリセット方法が不明。",
+    "suggestion": "並び順モードを明示（自動/手動）。手動モードでは開始時刻変更でも順序は不変、ヘッダに［自動に戻す］を配置して日次でリセット可能に。未設定タスクのみ手動可等の簡略ルールも検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.3（会話→タスク化）",
+    "issue": "会話内容からのタスク抽出は単発前提。ユーザー発言に「毎日/週n回/毎朝」等の習慣表現が含まれるケースが多いが、習慣タスク検出/登録の仕様が未定義。",
+    "suggestion": "抽出JSONにrecurrenceフィールド（daily/weekday/weekly_n/custom）を追加。カードに［習慣として登録］トグルを設け、編集時はS-12の習慣UI（周期選択）をインライン展開する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.1（TALKヘッダー）/ §3.5（チャット履歴）",
+    "issue": "TALKヘッダーに「☰（履歴ドロワー）」「🕐（履歴）」の2重導線が存在し、同一機能に複数アイコンが割り当てられている。学習コスト増・誤操作の恐れ。",
+    "suggestion": "履歴導線は1つに統一（☰または🕐）。もう一方は「新規チャット」等の別機能に割り当て、アイコン意味を明確化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §13.3（通知設定）/ project_v1.md §5.3（iOS Web Push制約）",
+    "issue": "iOSはPWA（ホーム追加）でのみWeb Push許可が可能。通知設定の最上位トグルON時にOS許可を出す前提だが、PWA未インストールのSafariでは許可ダイアログ自体が出せない。",
+    "suggestion": "iOS Safari検出時は最上位トグルを無効化し「ホーム画面に追加」の誘導モーダルを自動表示。PWAインストール検出後に有効化。トグルラベル下に「iOSではホーム画面追加が必要です」の説明テキストを常設。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.3（週N回習慣のToday表示）/ ux_v1.md §2.3",
+    "issue": "週N回の習慣が「今日やらなくても達成可能」だとTodayに出ないロジックは、ユーザー視点では「突然表示された/今日は出ない理由が分からない」混乱を招きやすい。",
+    "suggestion": "習慣行に今週の残り回数バッジ（例: 1/3）と「表示ロジックの簡易説明」ツールチップを追加。Today非表示時もUpcomingに「今週あとN回」の行を常時表示し［今日やる］を明示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5（JST 4:00日次リセット）",
+    "issue": "リセットがJST固定でローカルタイム非対応。深夜帯のユーザーや海外利用者は日替わりタイミングが体感とズレ、ストレス・混乱の可能性。",
+    "suggestion": "MVPでもヘルプ/設定に「日次リセットはJST 4:00」と明記し、Todayヘッダーに「次のリセットまで残りHH:MM」のカウントダウンを表示。v0.2.0でローカルTZ対応のロードマップもUI内リンクで示す。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.1/§3.5（新しいチャット）/ project_v1.md §6.3",
+    "issue": "「新しいチャット」のスコープが未定義。スレッド境界がAIの文脈（会話履歴）やAI理解メモ更新サイクル（5セッションごと）にどう影響するか分からない。",
+    "suggestion": "新規チャット＝コンテキストリセットを明文化。スレッド単位で要約を持つか、AI理解メモは全体で集計かを定義し、S-21の会話リストにも「スレッド境界=文脈切替」を説明。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（Undoスナックバー）/ §6.1（ハーフモーダル）",
+    "issue": "キーボード表示時にヒーロー領域は非表示になるが、Undoスナックバーの位置調整が未記載。iOS PWAではキーボードがスナックバーを覆う可能性。",
+    "suggestion": "visualViewportでキーボード高さを考慮し、Undoスナックバーのbottomオフセットを動的に再配置。入力中でも確実に可視領域内に収まることを仕様化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（QRスキャ��� S-36）",
+    "issue": "カメラ権限を拒否/恒久拒否した場合の代替フローが未定義。",
+    "suggestion": "拒否時は代替導線として「シェアリンクを貼り付け」「相手のQRを画像としてアップロード（画像からQR読取）」等の手段を提示。設定アプリの権限変更案内も表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §15（通知タップ時遷移）",
+    "issue": "ディープリンクで参照するタスク/メッセージがアーカイブ済み・削除済み・権限なしの場合のフォールバックが未定義。",
+    "suggestion": "対象が見つからない場合は該当リストの先頭に遷移し、非破壊のインフォトースト（「対象が見つかりませんでした」）を表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §6.4（AI対話履歴90日保持）/ ux_v1.md §13.1（対話履歴を削除）",
+    "issue": "AI対話履歴が90日で自動削除される点は、長期で自己理解を蓄積したい動機と相反。ユーザーが気づかず消えると不満に繋がる。",
+    "suggestion": "設定/プロフィールに保持期間の明示と、エクスポート（v0.2.0予定）への誘導を表示。削除前に週次メール/アプリ内で「30日前の会話がまもなく削除」の通知も検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.2.1（アバター設定）/ §4.5（SHOP Coming Soon）",
+    "issue": "未所持アイテムをタップするとSHOP（Coming Soon）に遷移。実質的に行き止まりで徒労感がある。",
+    "suggestion": "SHOP実装まで未所持アイテムは一覧に表示するがタップ不可（説明ツールチップのみ）に変更、または「リリース通知を受け取る」ボタンに置換。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.2（PROFILE: AI理解メモ）",
+    "issue": "AI理解メモが5セッションごとに上書きで履歴非保持。変化の軌跡が見えず自己理解の「図鑑」体験と相性が悪い。",
+    "suggestion": "版管理（スナップショット履歴）や「前回との差分ハイライト」を将来仕様として明記。MVPでも過去1版を参照できる簡易履歴を検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.4（戻りナビゲーション）/ §7.3（PWA edge swipe注記）",
+    "issue": "TALK画面の左端スワイプはドロワー展開、フルスクリーン詳細の左端スワイプは戻る。エッジ領域の競合時（遷移直後など）に誤発火の可能性があるが優先順位やガードが未定義。",
+    "suggestion": "左端ジェスチャーの優先順位を画面種別で明示（詳細>ドロワー）。閾値（開始x座標/移動距離/角度）を仕様に追記し、誤発火防止のガードを定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.6（TALK空状態）/ §0.3（差別化マッピング）",
+    "issue": "空状態のチップは入力欄に定型文をセットのみ。行動までの1タップが増えるため、初回体験としてはやや弱い。",
+    "suggestion": "チップタップで即送信（1テンポ早い）と、長押しで編集→送信の2系統を提供。設定で挙動を選べると良い。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3（Overdueタスク）",
+    "issue": "Overdueに対して「明日に延期」一択だと、複数日後/週末への延期や日時指定の柔軟性が足りずストレスになる可能性。",
+    "suggestion": "「明日に延期」横に［日時を変更］を追加し、日付ピッカーを開けるようにする（長押しで詳細編集でも可）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §8.6（演出キュー）",
+    "issue": "複数演出の直列制御は定義されているが、演出中にユーザーが別タブへ移動した場合の中断/再生方針が未定義。",
+    "suggestion": "タブ離脱時は演出を一時停止し、GROW復帰時に残りの演出をスキップして最終状態のみ反映、または簡略版演出で再生するポリシーを明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §10.4（スクリーンリーダー対応）",
+    "issue": "EXP獲得やレベルアップの一時的な視覚演出に対する音声の簡潔な説明（live regionの文言例）が未提示。",
+    "suggestion": "例: タスク完了時にaria-liveで「タスク完了。10EXP獲得。現在Lv12、次のレベルまで760EXP」等の文言ガイドを追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §13.2（プラン管理）/ project_v1.md §2.1-2.4",
+    "issue": "PremierはMVPでチケットがComing Soon。画面上の価値説明はあるが、アップグレード直後に得られる差分が直感的に分かりにくい（「限定フレーム1種」以外が将来価値に寄る）。",
+    "suggestion": "プランカードに「今すぐ得られる価値」を強調（限定フレームのプレビュー/装備導線を同画面に設置）。将来価値は小さく注記に留める。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.3（複数タスク提案カード）",
+    "issue": "複数タスク提案のチェック選択が5件上限とprojectに定義があるが、UX側カードUIに上限や超過時のメッセージが未記載。",
+    "suggestion": "カード見出しに「最大5件まで」を明示。6件以上検出時は信頼度順に5件のみ表示し、下部に「他の候補を表示」無効（将来対応）と説明。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.4（FRIENDS: 友達解除/ブロック）",
+    "issue": "友達解除時にメッセージ履歴も双方から削除。思い出/記録として残したいニーズと相反し、事前説明が薄いと後悔が残る可能性。",
+    "suggestion": "解除確認ダイアログに「双方のメッセージ履歴も削除されます（復元不可）」と強調表示。将来的に「解除しても自分側履歴は保持」オプションの検討も記載。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.1（画面一覧）/ §1.2（遷移マトリクス）",
+    "issue": "S-34 SHOPがMVPではComing Soonだが、MEサブタブの横スワイプで常時到達可能。意図せず行き止まり感（学習コスト）を生む。",
+    "suggestion": "SHOPタブはMVP中は非表示、またはタブ見出しに「Coming Soon」バッジを表示し、初回のみ説明ツアーを出して以後は目立たない表示にする。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（Upcomingセクション）",
+    "issue": "Upcomingの「7日以降(N件)」は件数のみでアクションが弱い。先の計画を立てたいユーザーには操作導線が薄い。",
+    "suggestion": "「7日以降」タップで月カレンダーまたは全一覧へ遷移し、日付指定編集を可能に。最小でも簡易一覧（スクロールロード）を定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §0（UXベンチマーク反映）/ §2（GROW）",
+    "issue": "Habiticaで感じた「罰のストレス」は解消されている一方、達成感の源泉となる「バトル風の爽快さ」を期待するユーザー（私含む）には、演出の手触りが文章だけでは伝わりづらい。",
+    "suggestion": "演出のモーション仕様にGIF/動画リファレンス（デザイン仕様側リンク）を追加。Reduced Motion時の代替表現も同ページで可視化して期待値調整。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md 全体（課金体験）/ project_v1.md §2.1",
+    "issue": "Freeでも核心機能開放は魅力的で続けられそうだが、上位プランの「AIモデル差」がUI上でどの程度体感差になるかが不透明で、課金判断材料として弱い。",
+    "suggestion": "TALKヘッダーや応答バブルに「高品質ルーティング中」等のさりげないバッジ/ツールチップを表示。比較デモ（Free vs Proの応答例）へのリンクをプラン管理に設置。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

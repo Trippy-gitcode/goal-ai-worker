@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "design_spec §4.1 S00-3, S00-4 / S00Splash.css",
+    "issue": "CTAボタンスタックの垂直位置がデザイン仕様と明確に矛盾しています。仕様書では『S00-3 CTA「はじめる」 | 画面下端から上 140px』と規定されていますが、実装および実測スクショでは『S00-4 CTA「ログイン」』の下端が画面下から140pxの位置に配置されています。これにより、主要CTAである「はじめる」ボタンの位置が���様よりも64px（ボタン1つ分の高さ52px + gap 12px）高くなっています。",
+    "suggestion": "プロダクトオーナーまたはデザイナーに仕様と実装のどちらが正しい意図であるかを確認してください。仕様が正しければ、CSSの `.s00-cta` の配置ロジックを修正する必要があります。実装（現状の見た目）が正しい場合は、混乱を避けるためにデザイン仕様書のS00-3およびS00-4の記述を『CTAスタックの下端が、画面下端から140pxの位置に配置される』といった内容に修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "現在のレイアウトは `position: absolute` に強く依存しており、画面の高さが約480px未満のビューポート（例: スマートフォンの横向き表示、PCブラウザでウィンドウ高を極端に狭めた場合）では、中央のロゴ領域と下部のCTAボタンが重なり、操作不能になる可能性があります。これは『動いているように見えるが特定条件で壊れる』典型的なエッジケースです。",
+    "suggestion": "レイアウトの堅牢性を高めるため、メディアクエリ（例: `@media (max-height: 480px)`）を使用して、低身長ビューポート用の代替スタイルを定義してください。具体的には、コンテナに `min-height` を設定し、それを下回る場合は `overflow-y: auto` を適用してスクロール可能にするか、`position: static` と `justify-content: space-around` などを利用したFlexboxレイアウトに切り替えることを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S00Splash.jsx",
+    "issue": "S00Splashコンポーネントが受け取る `onStart` および `onLogin` propsに、型定義やデフォルト値が設定されていません。これらのpropsが親コンポーネントから渡されなかった場合（`undefined`）、ボタンをクリックしても何も起こらず、エラーも発生しないため、バグの原因特定が困難になる可能性があります。コンポーネントの契約が不明確であり、再利用性や堅牢性を損ないます。",
+    "suggestion": "コンポーネントの堅牢性を高めるため、propsにデフォルトの空関数を設定してください（例: `export function S00Splash({ onStart = () => {}, onLogin = () => {} })`）。これにより、propsが指定されなかった場合でもコンポーネントが安全に動作します。プロジェクトでTypeScriptやPropTypesを使用している場合は、これらのpropsが関数型であり必須であることを明記するのがより望ましいです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais/src/components/App.jsx",
+    "issue": "CTAボタンクリック時のログが `console.log('[Lais] CTA はじめる ...')` のように単純な文字列で出力されており、デバッグや将来のイベント分析に必要な構造化データが不足しています。デグレを検出したり、特定のアクションを追跡したりする際に、現状のログ形式では効率的なフィルタリングや解析が困難です。",
+    "suggestion": "ログ出力を構造化されたオブジェクト形式に変更することを推奨します。例えば、`console.log({ event: 'cta_click', screen: 'S00Splash', target: 'start', timestamp: new Date().toISOString() });` のように、イベント名、画面、対象、タイムスタンプなどの情報を含めることで、開発者ツールのフィルタ機能や将来のロギング基盤での活用が容易になります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/App.jsx",
+    "issue": "アプリケーションのルート要素である `<div class=\"app-root\">` に `aria-label=\"Lais\"` が設定されています。意味的な役割（`role`）を持たない汎用的な `div` 要素に `aria-label` を使用することは非推奨であり、多くのスクリーンリーダーで無視されるため、アクセシビリティ上の効果が期待できません。",
+    "suggestion": "この `aria-label` は削除してください。画面の目的は、`S00Splash.jsx` 内の `<main aria-label=\"Lais スプラッシュ\">` によってスクリーンリーダー利用者へ適切に伝えられています。アプリケーション全体の名前は `document.title` で設定するのが標準的な方法です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "sw_debugger"
+  }
+]

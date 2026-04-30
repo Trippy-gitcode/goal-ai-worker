@@ -1,0 +1,242 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "location": "§5.1 Night Sky（--text-hint, --bg-primary/--bg-surface）",
+    "issue": "ダーク系の補助テキスト色 --text-hint: #484F58 は背景とのコントラストが不足。bg-primary(#0D1117)で 2.29:1、bg-surface(#161B22)で 2.09:1。WCAG 2.2 AAの通常テキスト 4.5:1に不適合。",
+    "suggestion": "Night Sky用の--text-hintを明るくする（例: #9AA3AD 相当、目標L≥0.223）。目標: (Ltext+0.05)/(Lbg+0.05)≥4.5。もしくはhint用途の文字はフォントサイズ/太字で“大きなテキスト”扱いにして3:1基準を満たす。プレースホルダー等、情報を伝えるテキストに--text-hintを使わない。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "location": "§8.1 ボタン（Night Sky, --accent 背景 + #FFFFFF テキスト）",
+    "issue": "Primaryボタンの配色（背景 --accent: #58A6FF, テキスト #FFFFFF）のコントラストが 2.53:1 で不適合（4.5:1未満）。",
+    "suggestion": "いずれかを採用: (A) on-accentテキストをダークに（#0D1117など、比=7.48:1）、(B) ボタン用に濃い --accent-emphasis（例: #1F6FEB、白文字で≈5.2:1）を追加、(C) テキストサイズ/ウェイトを“大きなテキスト”基準にして3:1を満たす。トークン追加例: --accent-emphasis, --on-accent。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "location": "§5.2 Dawn（--text-hint, --bg-*）",
+    "issue": "Dawnの--text-hint: #A89E94 は bg-primary(#FBF8F4)で約2.51:1、bg-surface(#FFFFFF)で約2.63:1。通常テキスト4.5:1に不適合。",
+    "suggestion": "--text-hintを十分に濃く（例: #7D746A 付近）し、(Ltext+0.05)/(Lbg+0.05)≥4.5 を満たす。また、placeholder等に依存せずラベルを併記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "location": "§5.2 Dawn（--accent, テキスト/背景の組み合わせ）",
+    "issue": "Dawnの--accent: #D47B3E は、白文字を乗せると3.05:1で不適合。逆に白背景にaccentテキストも3.05:1で不適合。リンク色(info: #0969DA)は適合するが、accentをボタン/テキスト色として使うとAAを満たさない。",
+    "suggestion": "ボタンは --accent-emphasis（より濃い橙, 例 #9B4A13〜#A14E14）+ --on-accent（#FFFFFF）で4.5:1以上を確保。テキスト色にaccentを使う場合は文字サイズを“大きなテ��スト”にするか、accent自体を濃くする。トークン: --accent-emphasis, --on-accent を追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "location": "§5.3 Adventure（--text-hint）",
+    "issue": "Adventureの--text-hint: #A09080 は白/薄背景で約2.6:1前後。通常テキスト4.5:1に不適合。",
+    "suggestion": "--text-hintを濃く（例: #7E6E5E 付近）しコントラストを確保。hintに依存しない情報設計（明示ラベル）も併用。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "location": "§5.3 Adventure（--accent 関連, ボタン/テキスト）",
+    "issue": "Adventureの--accent: #E85D3A に白文字は3.74:1で不適合。accentテキストを白背景に置く場合も約2.69:1で不適合。",
+    "suggestion": "ボタンは --accent-emphasis（例: #C0431A 前後）+ --on-accent（#FFFFFF）で4.5:1以上に。テキスト色として使用する場合は“大きなテキスト”基準にするかaccentを濃色化。トークン: --accent-emphasis, --on-accent を追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "location": "§5.2 Dawn / §5.3 Adventure（--border, 入力/カードボーダー）",
+    "issue": "ライト系テーマの--border（Dawn:#E8E0D8 / Adventure:#F0E8D8）は白背景に対してコントラストが極めて低く（≒1.1〜1.3:1）、非テキストコントラスト（UIコンポーネントの境界, 1.4.11の3:1）に不適合。",
+    "suggestion": "--borderを十分に濃く（例: Dawn≈#C9BBAA、Adventure≈#CFC4B3 など、白背景と3:1以上）するか、コンポーネント内部の塗り（--bg-surfaceをわずかに色付け）と2px相当の視覚的境界（box-shadow 0 0 0 1px）で3:1を満たす。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "location": "§5.4 グラスモーフィズム（Glass ON）",
+    "issue": "ダーク時の--card-bg: rgba(255,255,255,0.06) と --card-border: rgba(255,255,255,0.08) は周囲(#0D1117)と3:1を満たさない可能性が高い。UI境界やフォーカス時の可視指標が不十分になりうる（1.4.11, 2.4.7）。",
+    "suggestion": "Glass ON時は境界/フォーカス用に高コントラストのアウトラインを追加。例: .card:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }。border色も濃く（例: rgba(255,255,255,0.24)）し、背景・周囲との3:1を計測して保証。@supports(backdrop-filter) フォールバックも用意。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2 カラーシステム/§8 コンポーネントトークン",
+    "issue": "フォーカスリングのトークン/仕様が未定義。キーボード操作時に可視かつ十分なコントラスト（3:1）を担保する定義がない。",
+    "suggestion": "トークン追加: --focus-ring-color, --focus-ring-width(2px), --focus-ring-offset(2px)。テーマ別推奨: Night Sky=#79C0FF, Dawn=#2C2520, Adventure=#2A1F14。実装: :focus-visibleに限定して表示、非テキスト3:1を満たす。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§8.3 チップ/バッジ と lais_ux_v1.md §10.1",
+    "issue": "タップターゲット最小44x44px（UXで明記）に対し、チップ仕様（padding: 4px 12px, font-size:14px）は実高が約28–32pxで最小サイズを満たさない可能性が高い。",
+    "suggestion": "インタラクティブなチップ/バッジのmin-heightを44pxに、または見た目は小さくてもhit-areaを擬似要素で拡張（.chip::beforeで透明パディングを確保）。アイコンボタンも同様にタップ領域44x44pxを保証。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§7 アニメーショントークン",
+    "issue": "prefers-reduced-motion対応の代替トークン/挙動が未定義。減速・省略の具体がない（2.3.3）。",
+    "suggestion": "メディアクエリ追加: @media (prefers-reduced-motion: reduce) { --duration-*: 0ms; パーティクル/スプリングの振幅0; shimmer停止 }。トークン: --motion-scale（1.0→0.0）。UX §10.5の方針をDSに反映。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§7.4 触覚フィードバック",
+    "issue": "navigator.vibrate()がユーザーのアクセシビリティ設定（動きの軽減等）を考慮しない。iOSでは非対応でありフォールバックも未定義。",
+    "suggestion": "prefers-reduced-motion: reduce 時は振動を無効化。また設定に「触覚フィードバック」トグルを追加しDS側でdata属性で分岐。未対応環境では自動的にno-op。例: if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && settings.haptics) navigator.vibrate(...);",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§6.2 タブアイコン/ラベル仕様",
+    "issue": "非アクティブタブがアイコンのみ（ラベル無し）。視覚的には色変化のみの識別に寄りがちで、色覚多様性や低視力ユーザーに不利。",
+    "suggestion": "常時ラベル表示、または非アクティブにも形状/下線等の非色覚手掛かりを追加。ARIAはrole=tab/aria-selected/aria-labelでプログラム上の名前を必ず付与。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "location": "§8.4 タイムライン（NOW/DONE/NEXTの色分け）",
+    "issue": "状態の区別が色のみ（NOW=accent, DONE=success, NEXT=border）に依存。1.4.1「色の使用」に抵触する恐れ。",
+    "suggestion": "形状/パターン/アイコンの併用（例: NOW=二重円、DONE=チェック付き、NEXT=点線アウトライン）。スクリーンリーダー向けにaria-labelで状態を明示。凡例もテキストで提示。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "location": "§5.3 Adventure（--timeline-line グラデーション）",
+    "issue": "タイムライン主軸にレインボーグラデーションを使用。黄色(#F5B731)等の高輝度区間は白/淡背景に対して非テキスト3:1を満たさない（例: 白との比 ≈1.4:1）。情報を伝える線は常時3:1が必要。",
+    "suggestion": "単色で3:1を満たすカラーに変更、または太さ・アウトラインの付与で3:1を満たす。装飾としてグラデを重ねる場合も基底ラインは高コントラスト色で描画。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "location": "§8.1 ボタン（Danger）",
+    "issue": "ダーク系テーマの--danger: #F85149 に白文字は約2.7–2.8:1で不適合の可能性（Night Sky基調）。",
+    "suggestion": "Dangerボタンにも --danger-emphasis と --on-danger を用意。例: --danger-emphasis をより暗く（例 #CF2E2E）して白文字で4.5:1以上、またはon-dangerをダークテキストに。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5 テーマ定義 / §9 CSSトークン",
+    "issue": "高コントラストモード（Windows forced-colors）やprefers-contrastへの対応トークン/ガイドが未定義。",
+    "suggestion": "@media (forced-colors: active) と @media (prefers-contrast: more) に対応する代替トークン（--bg-*, --text-*, --border, --focus-ring-color など）を定義。必要に応じてsystem colorを使用（CanvasText, Canvas 等）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "location": "§6.2 タブ（Active=--accent-subtle 背景）",
+    "issue": "Activeタブのpills背景がaccent-subtle（Night: rgba(88,166,255,0.1)）のみだと、周囲との非テキストコントラスト3:1を満たさない恐れ。状態の可視化が不十分に。",
+    "suggestion": "alphaを上げる（例: 0.2–0.24）か、アウトライン（2px, 高コントラスト色）を追加。アイコン色/ラベル表示も併用。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§3.2 サイズスケール（--font-size-xs: 11px）",
+    "issue": "11pxは可読性・可触性の観点で極小。高齢層や視力の低いユーザーに負担。",
+    "suggestion": "最小文字サイズは12–13px以上を推奨。小サイズ使用時も行間1.4以上、ズーム時のレイアウト破綻がないことをテスト。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§1.4 NGリスト と §5.2/§5.3/§8.1",
+    "issue": "「純白/純黒の使用禁止」としつつ、Dawn/Adventureの--bg-surface= #FFFFFF、Primary/Dangerボタンのテキストに#FFFFFFを使用。方針と実定義が不一致。",
+    "suggestion": "NGリス���を「本文や大面積での使用禁止」に緩和するか、ボタン/サーフェスから#FFFFFFを排除（ごく僅かに色味を付与）して整合。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §7.1 と lais_ux_v1.md §1.3/§8.1",
+    "issue": "DSはease-in-out禁止・spring系のみ許可だが、UXではease-in/ease-out/ease-in-outを指定している箇所がある。実装時の解釈不一致リスク。",
+    "suggestion": "UXのイージング指定をDSのspringトークンに置換、またはDS側でease系を許容に変更。reduced-motionポリシーも両文書で統一。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-022",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "location": "§8.3 チップ/バッジ（--accent-subtle 背景 + --accent テキスト、ライト系）",
+    "issue": "ライト系でチップ背景がほぼ白（subtle）に対しテキストがaccent（Dawn:#D47B3E, Adventure:#E85D3A）。白背景とのテキストコントラストが約3.05:1/2.69:1で通常テキスト4.5:1に不適合。",
+    "suggestion": "チップのテキスト色は--text-primaryに、もしくは背景を十分濃いaccent-emphasisに変更してon-accent（#FFF）で4.5:1以上に。サイズ���“大きなテキスト”にする手もあるが一貫性に注意。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§9 CSSトークンブロック（実装用）",
+    "issue": "アクセシビリティ関連トークン（--focus-ring-*, --on-accent, --accent-emphasis, --disabled-*, --hit-target-min, reduced-motion切替）が未掲載。AI実装が配色/リングを誤る恐れ。",
+    "suggestion": "実装用ブロックに上記トークン群を追加し、テーマ別具体値を記載。例: --on-accent, --accent-emphasis, --focus-ring-color, --focus-ring-width, --hit-target-min: 44px, @media(prefers-reduced-motion:reduce) 用の代替値。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.1 アイコンスタイル / §6.2 タブ",
+    "issue": "アイコンの非テキストコントラスト確保（3:1）と状態変化の要件が未定義。細いstroke(1.5px)はライトテーマで視認性低下の恐れ。",
+    "suggestion": "アイコン色と背景の3:1を保証し、必要に応じてstroke-widthを2pxに。選択状態は色以外の手掛かり（塗り、下線、太さ）を併用。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  }
+]

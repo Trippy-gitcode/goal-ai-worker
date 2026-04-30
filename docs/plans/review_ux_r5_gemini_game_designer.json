@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3, §8.1",
+    "issue": "Undo時のEXPバー巻き戻しアニメーションが未定義",
+    "suggestion": "タスク完了時に即時サーバーPOSTとEXP演出（バー伸長・レベルアップ）を行う仕様ですが、30秒以内にUndoされた場合の「EXPバーが縮む」「レベルやアバターが降格する」視覚的フィードバックが定義されていません。Undo時の巻き戻しアニメーションを明記するか、EXP演出自体をUndo期間終了後（30秒後）に遅延発火させる設計に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §2.3, §1.2",
+    "issue": "Undoスナックバーのタブ跨ぎ維持によるコンテキスト破壊",
+    "suggestion": "「全タブに跨って表示を維持する」仕様により、タスク完了直後に設定画面（S-37）やアカウント削除画面（S-40）などのフルスクリーン画面に遷移した場合でもUndoが可能になり、UIのコンテキストが破綻します。フルスクリーン遷移時やハーフモーダル展開時は、Undoスナックバーを即時確定（消去）させるルールを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.4, §4.5",
+    "issue": "ヘビーユーザーのレベルキャップ到達速度と目標喪失",
+    "suggestion": "Lv.50到達目安が1.7年とされていますが、毎日上限（350 EXP）まで獲得するヘビーユーザーは計算上約182日（半年）でLv.50に到達します。到達後もEXPは蓄積されるとありますが、視覚的変化がないためモチベーションが低下します。Lv.50以降のループ要素（プレステージバッジ、オーバーレベルごとの小さな報酬など）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.4, §8.2",
+    "issue": "Lv.15〜30（約2ヶ月間）の視覚的報酬の枯渇（飽きポイント）",
+    "suggestion": "MVPではSHOPが未実装のため、アバターの装飾変更ができません。Lv.15からLv.30（Phase 3）の間、約2ヶ月間にわたりアバターの変化が一切なくなり、継続の動機が薄れます。中間レベル（Lv.20, 25など）で無料のカラーバリエーションや基本フレームがアンロックされる仕組みをMVPに組み込むことを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3",
+    "issue": "Overdueタスクの蓄積による心理的ペナルティ（罰なしコンセプトとの矛盾）",
+    "suggestion": "「罰なし」を謳いながら、未完了の単発タスクが赤系背景でTodayの最上部に溜まり続ける仕様は、ユーザーに強い自己嫌悪（実質的な罰）を与え、アプリを開かなくなる原因になります。Overdueタスクは3日経過で自動的にUpcomingに隠す、または「AIがリスケジュールを優しく提案する」などの救済フローを追加して��ださい。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §8.6, §3.4",
+    "issue": "GROW画面表示時の保留演出キューの優先順位が未定義",
+    "suggestion": "TALK画面で発生したレベルアップ演出は「次回GROW画面表示時に自動再生」されますが、これが初回起動時の「ログインボーナス演出（§8.5）」と同時に発生した場合のキュー順序が定義されていません。保留された演出（レベルアップ、オフライン復帰時の同期EXPなど）とログインボーナスの直列実行順序を§8.6に追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §4.2",
+    "issue": "タスクなしゴールによるボーナスEXPの不正獲得",
+    "suggestion": "ゴール達成ボーナス（50 EXP）は作成から7日経過で獲得可能ですが、「タスクなしゴール」を毎日1つ作成し、7日後から毎日手動完了させることで、無労力で毎日50 EXPを獲得し続けることが可能です。タスクなしゴールのボーナスEXPを減額するか、紐づくタスクがN件以上完了していることをボーナス���与の条件にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §10.4",
+    "issue": "スクリーンリーダーによるUndoカウントダウンの過剰読み上げ",
+    "suggestion": "Undoスナックバーの「残り秒数カウントダウン」が毎秒DOM更新されると、スクリーンリーダーが毎秒読み上げを行い、ユーザーの操作を著しく妨害します。カウントダウンの数値部分は `aria-hidden=\"true\"` とし、スナックバー出現時のみ「タスクを完了しました。30秒間取り消し可能です」と一度だけ読み上げるようアクセシビリティ仕様を修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §5.2, ux_v1.md §4.4",
+    "issue": "友達の成長に対するパッシブな通知・共有機能の不足",
+    "suggestion": "友達のEXPが非公開であり、競争要素がない中で、友達のレベルアップやゴール達成に気づく手段がありません。これでは図鑑（FRIENDSタブ）を定期的に開く動機が弱いです。友達がレベルアップ・ゴール達成した際に、FRIENDSタ��に小さなバッジが付き、ワンタップでお祝いの応援を送れる「パッシブな成長共有」の仕組みを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.4",
+    "issue": "ドラッグ＆ドロップの操作スコープが不明確",
+    "suggestion": "Today内のタスク行をロングプレスで並び替え可能とありますが、Overdueタスク領域や、Upcomingセクション（明日以降のタスク）との間でタスクをドラッグ＆ドロップして日付を変更できるのかが不明確です。D&Dは「Todayの当日タスク内の順序変更のみ」に限定するか、日付変更も許容するかを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  }
+]

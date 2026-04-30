@@ -1,0 +1,302 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.3 vs ux_v1.md §9.1",
+    "issue": "オフライン時のEXP表示方針が矛盾。projectは「EXP演出を表示しない（同期待ちバッジのみ）」、UXは「楽観的に+10EXPやバー伸長を表示し、同期後に静かに補正」。",
+    "suggestion": "どちらかに統一する。推奨: サーバー権威モデル維持のままUIは『完了』の達成感は即時表示（チェック・トースト）は出すが、EXPは“同期待ち”バッジで明示しバーは伸長させない。もしくはEXPも楽観表示するなら、補正時の違和感を避けるため『本日分のEXPは暫定表示』ラベルと補正アニメーション（差分だけ滑らかに調整）を定義。いずれにせよ両ファイルの記述を同一に更新すること。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2.6(7) / §7.3 アバター演出 と ux_v1.md §8.2",
+    "issue": "アバター進化演出がprojectではSVGモーフィング（1.5s）、UXではPNGクロスフェードに変更され矛盾。さらに『SVG直接レンダリングはプロフィール詳細のみ』という技術方針とモーフィングが整合しない。",
+    "suggestion": "MVPはパフォーマンス優先で『PNGクロスフェード+軽いグロー』に統一。SVGモーフは将来検討（プロフィール詳細限定など範囲を明記）。両仕様の文言を揃え、演出トークン（duration/easing/opacity/scale）をdesign_system.mdに登録。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 vs §4.5（ux_v1.md §project内部矛盾に記載済み）",
+    "issue": "レベル計算の矛盾（Lv1→2が100EXP vs 1,000EXP）。UX側で100EXP採用と注記されているが、project本文は未修正のまま。",
+    "suggestion": "project_v1.md本体を正値（100EXP）に修正し、式・表・説明を全て整合化。サーバー実装の唯一の真実源（Single Source of Truth）としてreference_v1.mdにも明文化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3 アバターシステム / ux_v1.md §2.2, §4.2.1",
+    "issue": "SVGレイヤー合成の実行場所・キャッシュ戦略が不明瞭。ヒーロー領域（80→32px）、一覧（64px）、設定プレビュー（256px）などサイズ別での生成・キャッシュキー・失効が未定義で、再描画スパイクやぼやけ（高DPR端末）リスクがある。",
+    "suggestion": "実装方針を設計: 1) 初回のみOffscreenCanvasで合成→createImageBitmap→IndexedDB/LRUでキャッシュ（key=phase+partsHash+size+DPR）。2) srcsetで@1x/@2x/@3xを供給。3) 合成は非同期・優先度低（Idleまで）で行い、プレースホルダーを先描画。4) invalidate条件（装飾変更/レベル変化）と最大キャッシュ件数/TTLを定義。design_system.mdにサイズトークン（avatar.xs=32, sm=64, md=80, lg=128, xl=256）を登録。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system.md（未作成）",
+    "issue": "テーマ/ブランドの基礎トークン未定義（色/フォント/余白/アイコン/モーション/elevation/角丸/境界/ステート）。ダーク/ライト4テーマ対応の要件に対し定義不足。",
+    "suggestion": "最低限のデザイントークンを定義: 1) Color roles（primary/secondary/tertiary, surface/surface-variant, background, on-* , success/warn/error, info, outline, overlay）各4テーマの値+コントラスト保証。2) Type scale（��/英混植向け: display/title/headline/label/body、字間・行間、数字は等幅tabular）。3) Spacing scale（8pt系: 4/8/12/16/24/32/48/64）。4) Radius（xs=4, sm=8, md=12, lg=16, pill=999）。5) Elevation/shadow（1..5段階+ダーク時のoverlay）。6) Iconography（24dp基準、線幅1.5〜2px、角R、塗り/線スタイル、選定ライブラリ）。7) Motion tokens（duration: fast 100ms/normal 200–300ms/slow 400–600ms、easing: standard/enter/exit）。8) States（hover/pressed/disabled/focus-ring色・太さ・オフセット）。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3 / §3.3 / §13.1",
+    "issue": "100ms以内の即時フィードバック原則が全操作に対してトークン化されていない。ボタン/タブ/チップ/リスト項目での押下フィードバック・ローディングインジケータの統一定義が不足。",
+    "suggestion": "design_system.mdに『press feedback』を定義（pressed opacity=0.7 or state-layer、rippleはPWAなら無効化可）。ローディングは小型スピナー/プログレスバー/スケルトンの使い分け規則を追加（例: API>300msでスケルトン、>100msでボタンにspinner-inline）。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3 Overdue / §0.2 テーマ",
+    "issue": "Overdueや警告系UIの色指定が「赤系」など抽象で、4テーマにおけるコントラスト担保と色ロール対応が未定義。",
+    "suggestion": "semantic colorを導入（error, error-container, on-error, on-error-container）。Overdueはerror-container背景+on-error-container文字など、ダーク/ライトでの視認性基準を定義（WCAG AA 4.5:1以上）。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3（SVG座標/レイヤー）",
+    "issue": "Aura/背景エフェクトの表現が未定義。filter/mix-blend-mode/SVGフィルタはPWAでコスト高・端末差が大きく、一覧大量描画でフレーム落ち懸念。",
+    "suggestion": "Aura/背景は“プリレンダーPNGレイヤー”に限定し、CSS filterやSVG filterの常時適用を避ける。必要な動きは微小なopacity/scale（GPU transform）に留め、filter系は設定プレビュー限定に。低端末向けにreduced-motion時はAuraを自動無効化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.2 遷移マトリクス / §4.2.1 アバター設定",
+    "issue": "未所持アイテム→SHOP遷移はMVPでComing Soon画面に着地するため、ユーザー期待が途切れる可能性。行き止まりではないが、意図説明と戻り導線の明示が必要。",
+    "suggestion": "S-34に『現在は購入できません（予定時期）』『Premier特典の装備方法（PROFILEから）』を明記し、[戻る]と[Premierを検討する]の代替CTAを配置。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §10 アクセシビリティ",
+    "issue": "フォーカスリングの具体デザイン（色、太さ、オフセット、コントラスト）が未定義。ダークテーマ時の視認性が担保されない恐れ。",
+    "suggestion": "focus-ringトークンを定義（例: color=primary, width=2px, offset=2px, 内側shadow回避）。キーボードナビ有効化時のみ強調するポリシーを明記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1 TALKヘッダー",
+    "issue": "ヘッダーに☰（履歴ドロワー）と🕐（履歴）2つの履歴導線が併存し役割が重複。学習コストと誤タップ増の懸念。",
+    "suggestion": "導線を1つに統一（☰でドロワー展開）。🕐は削除、もしくは別機能（新規チャット/検索）に再割当。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md（未作成）",
+    "issue": "タイポグラフィ未定義（日本語Webフォント/可読サイズ/字間/数字体裁）。数値の多いUI（EXP/レベル/時間）で桁ズレ・読みにくさ懸念。",
+    "suggestion": "推奨: Noto Sans JP（可変フォント）+英数はInter/Noto Sans（tabular-nums）。Type scale例: body 14–16/1.5, label 12/1.4, title 18/1.3, headline 22/1.25。数字はfont-feature-settings:'tnum'を有効化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md（未作成）",
+    "issue": "余白/レイアウトグリッドが未定義。カードやリスト行の密度が端末差で不均一になりやすい。",
+    "suggestion": "8ptベースのspacingスケールとレイアウトグリッド（content max-width=480、セクション間: 24–32、行間: 12–16）を定義。小型端末の縮退ルールもトークン化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8 アニメーション",
+    "issue": "個別アニメーションのduration/easingは記載があるが、テーマ横断のモーショントークン化がなく、将来調整が困難。",
+    "suggestion": "motion tokensを定義（duration: xfast=100, fast=150, base=200, slow=300, xslow=500ms / easing: standard, emphasized, decelerate, accelerate）。全アニメーションはトークン参照に統一。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §1.3 / ux_v1.md 全体",
+    "issue": "UI内の絵文字多用（🎉⚔️等）が『洗練』より『カジュアル/遊び』に寄り、ブランドメッセージの上質感とズレる恐れ。",
+    "suggestion": "主要ラベルは絵文字を外し、同等のベクターアイコンで統一。演出内（バナー/紙吹雪）など“祝祭”に限定使用。アイコン体系と線幅/角Rを定義し、統一感を確保。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.4 / §8.4",
+    "issue": "ダーク/ライトでのメッセージバブル/カードのsurface��層や陰影規則が未定義。Harajukuテーマの高彩度配色で可読性が崩れる可能性。",
+    "suggestion": "bubbles: surface-variant上にon-surface-variant、自己/相手別の彩度とコントラスト基準を定義（最小4.5:1）。ダーク時のelevation overlay（%）や影トークンを設定。Harajuku系は彩度上限/明度レンジを定義し、本文可読性を優先。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §2.3 ドラッグ&ドロップ",
+    "issue": "Today並び替え（手動順保持）が開始時刻ソートと競合する可能性。手動ソート適用/解除の優先順位とリセット条件が未定義。",
+    "suggestion": "『手動ソートが一度でも行われたらTodayは手動優先』を明記。手動順のリセット操作（並び替えをリセット→時刻順に戻す）をS-11内に用意。サーバー保存のカラム（manual_index）と昇順規則をreferenceに追記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §7.4 / ux_v1.md §4.4",
+    "issue": "上限系UX未定義（上限到達時の文言/ガード）。例: 友達500人上限、ゴール100件上限、タスク1万件に近い時のパフォーマンス配慮。",
+    "suggestion": "各上限到達/接近時のUIを定義（作成ボタン無効+ツールチップ、件数表示横に『上限に近づいています』）。リストは仮想化+ページング規則を設計。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.3 PWA実装注記",
+    "issue": "iOS PWAのedge-swipe抑止はUX観点で賛否があり、誤判定でスクロール体験を損なう可能性。",
+    "suggestion": "edge-swipeを使う画面を限定（フルスクリーン詳細のみ）。TALKのドロワーは明示ボタン優先、edge領域は20→12pxに縮小し誤作動を低減。A/B用フラグを用意。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §8.6 演出キュー",
+    "issue": "同時発火定義はGROW前提。TALKで冒険EXP+レベルアップ+ゴール達成（タスク完了由来）など“タブ跨ぎ”の同時発火時優先順位/再生遅延フラグが未定義。",
+    "suggestion": "演出ディスパッチャをグローバル化し、発火元/種別/優先度/遅延再生可否をキュー管理。TALK中は『レベルアップのフル演出は次回GROW表示時に再生』を明文化し、既述の“1回限り再生”フラグの仕様（保存場所/クリア条件）をreferenceに追記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md（未作成）",
+    "issue": "アイコン体系未定義（セット/線幅/サイズ/命名/状態色）。PWAでの混在（Emoji/各種セット）により一貫性が崩れる恐れ。",
+    "suggestion": "アイコンライブラリを選定（例: Phosphor/Material Symbols Rounded）。サイズトークン（16/20/24/32）、線幅（1.75px）、角R、使用ルール（filled=強調/outlined=通常）を定義。状態色はcolor rolesと連動。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3 / ux_v1.md §2.2",
+    "issue": "ヒーロー領域のアバター縮小（80→32px）をCSS scaleで行うと、高DPR端末で滲みやジャギーが発生する可能性。",
+    "suggestion": "縮小時は別解像度のビットマップを差し替える（srcset/sizesで最適化）。SVG直描画であってもラスタライズ結果をキャッシュして差し替える方針に統一。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §6.1 ハーフモーダル",
+    "issue": "iOS PWAのキーボード出現時にモーダル内の『保存/作成』ボタンが隠れるケースへのフォールバック（固定CTAバー/スクロールガード）が未定義。",
+    "suggestion": "モーダル下部に“安全領域CTAバー”を用意し、キーボード可視時はCTAをモーダル内固定（sticky）に切替。visualViewportでpadding-bottomを調整。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3 タスク完了 / §3.2 メッセージ送信",
+    "issue": "ハプティクス指針が限定（QRスキャン時のみ）。完了/達成時の微弱ハプティクスはモチベーションに寄与。",
+    "suggestion": "対応端末では『タスク完了=light impact』『レベルアップ/ゴール達成=medium impact』を推奨（Vibration APIのフォールバック含む）。design_systemにhapticsポリシーを定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §0 ベンチマーク→全体設計",
+    "issue": "ベンチマークの知見は反映されているが、『Freeでも使い物になる』を担保する視点で“機能内ペイウォール表現の禁止規則（UI上の鍵/非活性の扱い）”が未定義。",
+    "suggestion": "非対応機能は鍵アイコンでなく『説明+将来予告』とし、代替導線を提示（例: SHOP未実装→Premier特典の装備はPROFILEで可能等）。Freeに“詐欺的UI”と評価されない文言規範をdesign_systemに追加。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-026",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §15 通知遷移",
+    "issue": "ディープリンク時の失敗ケース（対象タスク削除/期限切れQR/未ログイン）ごとのUIが一部未定義。",
+    "suggestion": "各ケースのフォールバックを明記（例: タスク不存在→GROW Today先頭+トースト『対象は見つかりませんでした』、未ログイン→ログイン後に再遷移/期限切れは説明画面）。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-027",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §2.3 Undo / §9.1 オフライン同期",
+    "issue": "オフライン中の『完了→Undo』を複数回繰り返した場合の同期待ちキューの圧縮（最終状態のみ送信）ロジッ��が未定義で、上限300EXP/日と競合時に整合しない可能性。",
+    "suggestion": "同期キューはタスクID単位でcoalesceし『最終ステート』のみ送信。APIはupsert的エンドポイント（complete_at=nullで取消）を用意。サーバー側はrequestId+taskIdで冪等化。reference_v1.mdに時系列/競合解決ルールを追記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §13.2 プラン管理",
+    "issue": "Stripeから復帰時の状態検証/ローディングが未定義で、ユーザーが変更反映に不安を持つ可能性。",
+    "suggestion": "復帰時にプラン検証APIを叩き、画面上部に『プランを確認中…』スナックを一時表示。成功/失敗で明示的な結果トーストを出す。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-029",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §2.5 通知 / ux_v1.md §13.3",
+    "issue": "通知のアイコン/色/チャンネル（importance）のデザイン規範が未定義。Web Pushのプラットフォーム差で可読性が揺らぐ可能性。",
+    "suggestion": "通知デザインガイドを追加（small icon=モノクロ、badge色、title語尾統一、importance既定、クリック時のアニメーション/ハイライト規則）。無音/バイブ有無もハプティクス方針と整合。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-030",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "project_v1.md §7.5 非機能 / ux_v1.md 全体",
+    "issue": "画像添付やアバター合成のレイジーロード/優先度（LCP対策）が未定義。初期表示2秒目標に対し、合成や画像デコードが競合する恐れ。",
+    "suggestion": "imgのloading=lazy / fetchpriority=high（LCP要素のみ）を定義。アバター合成はIdleまで延期、初期はプレースホルダー+既存キャッシュ利用。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

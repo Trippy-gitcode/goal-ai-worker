@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3 / ux_v1.md §3.2",
+    "issue": "画像アップロード時のファイル検証および違法コンテンツ（NSFW/CSAM）フィルタリングが未定義。ユーザーがアップロードした画像がそのままSupabase Storageに保存され、外部AI APIに送信されるため、マルウェアのホスティングや、AIプロバイダー（OpenAI等）の利用規約違反によるAPIアカウント即時BAN、最悪の場合は法的措置によるサービス停止の致命的リスクがある。",
+    "suggestion": "クライアントおよびサーバーサイドでの厳格なMIMEタイプ・マジックバイト検証を実装すること。また、Supabase Storage保存前またはAI送信前に、軽量なNSFW判定API（またはCloudflareの画像スキャン機能）を挟み、不適切な画像をブロックするフローをUX仕様（エラートースト「不適切な画像が含まれているため送信できません」等）に追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §5.4 / ux_v1.md §4.4",
+    "issue": "QRコードのペイロードに「ユーザーUUID」が含まれている（project_v1.md §5.4）。一時トークン（24時間有効）があるにも関わらず固定のUUIDを含めることは、QRコードのスクリーンショットが漏洩した場合に、トークン期限切れ後もユーザーの一意な識別子が永続的に漏洩し続けるプライバシーリスクとなる。シェアリンク（ux_v1.md §4.4）ではトークンのみとなっており仕様に矛盾がある。",
+    "suggestion": "QRコードのペイロードからユーザーUUIDを削除し、シェアリンクと同様に「一時トークン」のみを含める仕様に統一すること。サーバー側でトークンからユーザーUUIDを引く設計に修正すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.1",
+    "issue": "メールアドレス変更時、旧メールアドレスにセキュリティ通知を送信する仕様は良いが、アカウント乗っ取り（セッションハイジャック）が発生した場合、正当なユーザーがその通知を見て「変更をキャンセルし、アカウントをロックする」ためのアクションリンク（ロールバックパス）が定義されていない。",
+    "suggestion": "旧メールアドレスへの通知に「この変更に心当たりがない場合は、こちらをクリックしてアカウントを保護（パスワードリセット＆全セッション強制切断）してください」というワンタイムリンクを含める仕様を追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "友達詳細画面の「応援ボタン（ワンタップ送信）」に、レートリミット（連続送信の制限）やクールダウンが定義されていない。悪意のあるユーザーが連打することで、相手に大量のプッシュ通知を送りつけるスパム（嫌がらせ）が構造的に可能になっている。",
+    "suggestion": "応援ボタンのタップ後に一定のクールダウン（例: 1時間に1回のみ、または1日3回まで等）を設けるか、連続タップ時はUI上はアニメーションするがサーバーへの送信・通知は1回にまとめる（デバウンス処理）仕様を追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.4",
+    "issue": "ブロック実行時、「相手の図鑑からあなたが非表示になる」仕様は、突然消滅することで「ブロックされた事実」が相手に確定的に伝わり、逆上や別SNS等でのストーカー行為を誘発するプライバシー/安全上のリスクがある。",
+    "suggestion": "ブロック時の相手側の見え方を「図鑑には残るが、レベルやアバターの更新が停止し、メッセージを送っても既読にならない（シャドウバン状態）」にするか、「退会したユーザー」として表示するなど、ブロックの事実をぼかす安全設計に変更することを検討すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §6.5 / ux_v1.md §13.4",
+    "issue": "退会時のデー��削除において、Supabase上のデータ削除は定義されているが、Stripe上の顧客データ（Customerオブジェクト、決済履歴）の削除または匿名化ポリシーが未定義。GDPRの「忘れられる権利」において、決済データの保持期間と削除基準を明確にする必要がある。",
+    "suggestion": "退会フローに「Stripeの顧客データは法的要件（税務等）に基づく保持期間経過後に匿名化/削除する」旨のポリシーを明記し、プライバシーポリシーにもその旨を記載する要件を追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §13.1",
+    "issue": "ログアウト処理において「セッション破棄 + ローカルデータ消去」と記載されているが、Supabase AuthのAPI（signOut）を呼び出してサーバー側でリフレッシュトークンを無効化（Revoke）することが明示されていない。ローカルの消去だけでは、トークンが漏洩していた場合に不正アクセスが継続する。",
+    "suggestion": "ログアウト処理の定義を「Supabase AuthのsignOut APIを呼び出し、サーバー側でセッションを無効化した上で、ローカルデータを��去する」と明確に記述すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "シェアリンク（リモート友達追加）のURLがSNSや掲示板等で意図せず拡散された場合、見知らぬユーザーから大量のスパムリクエストが届くリスクがある。リンクの無効化やリクエスト受信の制御手段がない。",
+    "suggestion": "FRIENDS画面の設定（またはQR表示モーダル内）に「現在の招待リンクを無効化する（トークン再生成）」機能、および「友達リクエストの受信を一時停止する」トグルを追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §6.4",
+    "issue": "AIへの送信データについて「PIIを正規表現で自動マスキング」とあるが、ユーザーが「パスワード」や「APIキー」などの機密情報をAIに送信した場合の保護が定義されていない。また、過度なマスキングは文脈を破壊しAIの応答品質を下げる。",
+    "suggestion": "正規表現によるマスキング対象に「クレジットカード番号」「一般的なAPIキー���フォーマット」を含めること。また、マスキング処理がAIの文脈理解を阻害しないよう、置換文字列（例: [REDACTED_EMAIL]）の仕様をreference_v1.mdで詳細化するよう注記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.3",
+    "issue": "TALK画面の履歴ドロワー展開において、iOSのedge swipeとの競合回避のために「左端スワイプ無効（☰タップのみ）」としているが、片手操作時のUX（アクセシビリティ）を低下させる。",
+    "suggestion": "画面中央部からの右スワイプ（edge swipe以外の領域）でドロワーを展開できるようにするか、画面下部（入力バー付近）に履歴へのクイックアクセスボタンを配置するなど、指の届きやすい代替操作を検討すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

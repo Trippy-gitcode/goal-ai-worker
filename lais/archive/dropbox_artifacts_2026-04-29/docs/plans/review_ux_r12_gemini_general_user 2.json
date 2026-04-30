@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md 5.0 / project_v1.md 7.2",
+    "issue": "Magic Link（パスワードレス）認証のサインアップフローが存在せず、メール変更時に現パスワードが必須となっているため、Magic Linkユーザーが操作不能になる。",
+    "suggestion": "ux_v1.md 5.0にMagic Link用のサインアップ/ログインフローを追加し、S-42（メール変更）でパスワード未設定ユーザー向けの代替認証（再度のMagic Link送信など）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md 5.1",
+    "issue": "オンボーディング（S-03）でアバターや目標を選ぶだけで、「AIパートナーと対話してタスク管理する」というアプリのコア価値や、GROW/TALK画面の具体的な使い方（⭕タップで完了など）を説明するチュートリアル体験が欠落している。一般ユーザーには何をするアプリか初見で伝わらない。",
+    "suggestion": "オンボーディング完了直後のGROW画面で、初回タスクの完了方法を示すツールチップや、TALK画面への誘導とAIからの初回挨拶メッセージなど、実際の操作を通じたチュートリアルを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md 2.3 / project_v1.md 3.2.5",
+    "issue": "アプリを起動したまま午前4:00（日次リセット）を跨いだ場合の挙動が未定義。Todayセクションのタスク一覧やAI対話回数が自動で切り替わるのか、ユーザーの操作中に突然画面が更新されて操作が中断されるリスクがある。",
+    "suggestion": "午前4:00を跨いだ際のクライアント側の挙動（例: 「日付が変わりました」トースト表示と共にデータを静かに再取得する、またはPull-to-refreshを促すバナーを表示する等）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md 11.4 / project_v1.md 5.3",
+    "issue": "iOSのPWAインストール誘導UIの表示タイミングについて、project_v1.md 5.3では「初回起動時」、ux_v1.md 11.4では「3回目のアプリ起動時」と矛盾している。",
+    "suggestion": "どちらかの仕様に統一してください。ユーザー体験の観点からは、アプリの価値を理解した後の「3回目」が望ましいです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md 3.3",
+    "issue": "TALK画面でAIがタスク提案カードを表示した後、ユーザーがアクション（登録/✕）を行わずにチャットを続けた場合、過去に流れた提案カードのボタンがいつまで有効なのか（後から押してスクロールを戻して登録できるのか）が定義されていない。",
+    "suggestion": "「過去の提案カードのボタンも常に有効」とするか、「新しい話題に移った（Nターン経過した）場合は自動的に無効化（グレーアウト）する」などのエッジケー���の挙動を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md 8.6 / 14.1",
+    "issue": "アプリ起動時に「ログインボーナス（8.5）」と「7日経過による自動ゴール達成（2.4）」が同時に発生した場合の演出キュー（優先順位と直列/並列実行）が定義されていない。",
+    "suggestion": "起動時の演出キューを追加し、「ログインボーナス表示 → ゴール達成演出」などの順序と待機条件を明確にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md 3.6",
+    "issue": "TALK画面の空状態で「チップを選んで話しかける」仕様だが、LINE等の受動的なコミュニケーションに慣れた一般ユーザーにとっては自分から話題を振るハードルが高い。",
+    "suggestion": "初回TALK画面表示時や、1日1回の初回アクセス時に、AI側から「今日もお疲れ様！何か予定はある？」のように自発的なメッセージ（システムからの自動送信）が届く体験を追加することを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md 4.2",
+    "issue": "「MBTI」という用語が、自己成長や性格診断に詳しくない一般ユーザー（30歳会社員など）には意味が通じない可能性がある。",
+    "suggestion": "UI上の表記を「性格タイプ（MBTI等）」や「16タイプ性格診断」など、より一般的な表現を併記する形に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md 1.4",
+    "issue": "Androidの物理戻るボタンを使用した際、履歴のルート（GROW画面など）に到達した状態でさらに戻るボタンを押した場合のアプリ終了挙動（確認ダイアログの有無など）が定義されていない。",
+    "suggestion": "ルート画面でのpopstateイベント/戻るボタン押下時に、アプリをバックグラウンドに回すか、「終了しますか？」のトースト/ダイアログを出すかの挙動を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  }
+]

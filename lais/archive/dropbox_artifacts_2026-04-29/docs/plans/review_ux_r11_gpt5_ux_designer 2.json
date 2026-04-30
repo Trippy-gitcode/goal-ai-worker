@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 / ux_v1.md §8.2",
+    "issue": "レベル計算式の矛盾（Lv.1→2が100EXP vs 1,000EXP）。UXは100EXP前提で演出・文言を定義しているが、プロジェクト仕様の記述が一致していないため、実装時にEXPバーの進捗・レベルアップ条件が不一致になるリスクが高い。",
+    "suggestion": "プロジェクト仕様を単一真実源として修正し、次Lv必要EXP=100+(現在Lv-1)*50を採用する旨を§4.4に明記。表と文言を総点検。ux_v1.md側は『projectに従う』注記を追加して整合を固定化。E2EテストにLv1→2境界テストを追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2, §7.4 / ux_v1.md（参照整合性）",
+    "issue": "AI対話とソーシャルメッセージのテーブル命名が混在（messagesとsocial_messages）。RLS例外の説明も分散。誤適用でAI対話が他者に参照されるプライバシー事故を招く恐れがある。",
+    "suggestion": "データモデル命名を一本化：AI対話=ai_messages、ソーシャル= social_messages 等に確定し、RLS章 (§7.2) とデータライフサイクル (§7.4) を更新。RLSのALLOW/SELECT条件を両テーブルで明文化し、テーブル名をUX仕様の関連箇所（通知遷移/削除フロー）にも反映。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2(Undo)/§3.2.6(3) と ux_v1.md §2.3",
+    "issue": "Undoスナックバーの表示時間がprojectで3秒／30秒の両方で記載。UXは30秒で統一しているが、上位仕様が未確定のまま。",
+    "suggestion": "project_v1.md §3.2.6(3)の『3秒』を『30秒』に修正し、Undoのスコープ（直近1件のみ）も明記。API側で30秒の“仮確定”→“本確定”を保証する注記を§7.3に追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（タスク完了）/ §8.1（演出）/ project_v1.md §4.5（上限）",
+    "issue": "日次EXP上限（300EXP）到達時のGROW画面でのフィードバックが未定義。完了チェックは通るがEXPが付与されない場合、ユーザーが混乱する可能性が高い。",
+    "suggestion": "上限到達検知時のUIを定義：チェックは確定、EXP��ロート『+10』は非表示、トースト『本日のEXP上限に達しました。リセット: 04:00 JST』を表示。初回到達時はGROWヒーロー直下に一時バナー（1回/日）。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（週N回習慣/Upcoming）/ project_v1.md §3.2.3",
+    "issue": "projectで規定されている週N回習慣の『今日やる』手動追加ボタンの具体UIがUXに未定義。",
+    "suggestion": "Upcoming内の各週N回習慣アイテムに『今日やる』アクション（右端テキストボタン）を追加し、Todayへ即挿入。取り消し操作（『今日やる』→『今日やらない』）も定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘッダー）/ §3.5",
+    "issue": "TALKヘッダーに☰（ドロワー）と🕐（履歴）の2つの履歴入口が併存し、役割の重複で認知負荷・学習コストが増大。",
+    "suggestion": "履歴アクセスを1系統に統一。推奨：🕐を削除し☰のみを履歴ドロワー起動に固定。あるいは☰=メニュー、🕐=履歴モーダルと明確に差別化し、どちらかをMVPでは非表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §9.3（AI対話上限）/ §5.1.1（文言）/ project_v1.md §4.5, §3.2.5",
+    "issue": "日次リセット時刻をUIで『明日 04:00』とだけ表示しており、JST固定である旨が不明。海外ユーザーやJST外利用で誤解を招く。",
+    "suggestion": "上限・リセット関連の全UIに『04:00 JST』とタイムゾーンを明記。または『約X時間後にリセット』の相対表現を併記。将来のTZ対応を前提に文言基盤を整備。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §9.4（不正操作）/ §2.3（タスク完了）",
+    "issue": "『同名タスク5分以内再完了はEXP付与なし』時のUIが未定義。チェックは完了のままなのか、取り消すのかが不明で、ユーザーに原因が伝わらない。",
+    "suggestion": "同名短時間再完了を検出した場合：タスク完了自体は維持、EXP演出は抑止、トースト『直近で同名タスクを完了済みのためEXPは付与されません』を表示。運用ルールをS-11詳細パネルのヘルプにも記載。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §9.1（オフライン復帰時の演出再生）/ §8.6（演出キュー）",
+    "issue": "オフライン期間中に多数の完了が蓄積すると、復帰時のEXP演出が長時間化し8秒上限を容易に超過する恐れ。",
+    "suggestion": "同期結果の演出を集約：『+N EXP（xMタスク）』の単一フロート＋バー一回伸長、レベルアップは最終値に対して1回のみ。ゴール達成は最大2件まで表示し、残りは簡易履歴に集約。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §4.5（S-34 SHOP）/ project_v1.md §8.1",
+    "issue": "MEサブタブに『SHOP（Coming Soon）』を常設すると、4分の1のタブが無効となり誤タップ・不満を誘発。",
+    "suggestion": "MVPではSHOPタブを非表示にし、PROFILE内に『ショップは準備中』カードを配置。Premier特典のフレーム装備導線はS-41から維持。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §7.4（Today並び替え）/ §2.3（Today表示）",
+    "issue": "Todayの手動並び替えと開始時刻による自動ソートの競合時の挿入・復元ルールが未定義（新規追加や時刻編集時にどちらを優先するか不明）。",
+    "suggestion": "優��順位を明記：『手動順＞開始時刻』。新規タスクは開始時刻グループ末尾に挿入。『並び替えをリセット（開始時刻順に戻す）』アクションをTodayヘッダーに追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §9.4（QR期限切れ）/ §4.4（S-36）",
+    "issue": "QRトークン期限切れ時のエラーメッセージ後の行動導線（戻る/リンクで招待を依頼など）が未定義。",
+    "suggestion": "期限切れ画面に『QRを再表示してもらう』『リンクで招待を依頼』の2CTAと『戻る』を追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2（画像添付）",
+    "issue": "画像添付のサイズ超過・非対応フォーマット・アップロード失敗時のインラインエラーUIが未定義。",
+    "suggestion": "ファイル選択時バリデーション：10MB超は即座に『10MBを超えています』エラー、非対応形式は『対応形式: JPG/PNG/GIF/WebP』を表示。送信中断時はサムネ上に『再試行』ボタンをオーバーレイ。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §11.2（小型端末のサブタブ）",
+    "issue": "MEのサブタブラベル短縮（DISCなど）は意味解像度が下がり迷いやすい。",
+    "suggestion": "各サブタブにピクトグラムを併記し、短縮ラベル時はアイコン＋短縮名で一貫表示。初回はツールチップで説明（1回限り）。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2（GROWリスト）/ §4.4（FRIENDSグリッド）/ project_v1.md §7.4（最大件数）",
+    "issue": "タスク最大1万件、友達最大500人の大規模リストに対するパフォーマンス対策（仮想スクロール・逐次ロード）が未定義。",
+    "suggestion": "リストに仮想スクロール（windowing）を適用。GROWは日付/セクション単位の差分ロード、FRIENDSはページング+検索/並び替え（最近やり取り順/レベル順）を追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.2（プロフィール自動保存）",
+    "issue": "インライン編集の都度トースト『保存しました』は連続操作でノイズになり��すい。",
+    "suggestion": "自動保存はトーストではなく、フィールド右上に一時的な『✓ 保存済み』ラベル（1.5秒表示）に置換。エラー時のみトーストで通知。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.5（チャット履歴100スレッド上限）",
+    "issue": "スレッド数が増えると目的の会話が見つけづらいが、検索・フィルタが未提供。",
+    "suggestion": "履歴ドロワーに簡易検索（タイトル/直近発話テキストの前方一致）と『ヒアリングのみ』フィルタを追加（MVP+1候補）。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.4（FRIENDS）",
+    "issue": "友達最大500人に対し、検索・並び替えの導線が未定義でスケーラビリティに不安。",
+    "suggestion": "FRIENDSに検索バーとソート（最近相互アクション/レベル/名前）を追加。カード上の長押しで『トップに固定』も検討。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

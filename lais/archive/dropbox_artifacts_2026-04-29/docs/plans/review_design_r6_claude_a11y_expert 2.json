@@ -1,0 +1,5 @@
+[
+  {"id":"R-001","severity":"HIGH","category":"MISSING","location":"§8.10 ダイアログ","issue":"ダイアログ開閉時のフォーカス管理は記載されたが、実装すべきフォーカストラップ（Tab キーでダイアログ内に閉じ込める）のアルゴリズムが未定義。スクリーンリーダー利用者は現実的にダイアログ外に逃げてしまう。","suggestion":"§8.10 に『Tab/Shift+Tab でダイアログ内の最初/最後の focusable 要素を循環させる。フォーカストラップは手動実装または focus-trap ライブラリを使用』と追記。","model":"Claude Opus 4.6","persona":"a11y_expert"},
+  {"id":"R-002","severity":"MEDIUM","category":"MISSING","location":"§8.12 空状態","issue":"空状態のアイコンに `aria-hidden=\"true\"` のガイダンスがない。装飾アイコンはスクリーンリーダーから隠すべきだが、機能アイコン（CTA の一部）は隠すべきでない。","suggestion":"§8.12 に『装飾アイコンは aria-hidden=\"true\"、機能アイコンは aria-label で説明』を追記。","model":"Claude Opus 4.6","persona":"a11y_expert"},
+  {"id":"R-003","severity":"MEDIUM","category":"MISSING","location":"§3.2 rem 基底","issue":"rem 基底に変換したが、ユーザーがブラウザ設定で 200% まで拡大しても UI が崩れないか（1.4.4 Resize text 要件）の検証が未定義。","suggestion":"§3.2 末尾に『ブラウザ設定 200% ズーム時にすべての画面で横スクロール発生なし、文字重なりなしを e2e で検証する』テスト要件を追記。","model":"Claude Opus 4.6","persona":"a11y_expert"}
+]

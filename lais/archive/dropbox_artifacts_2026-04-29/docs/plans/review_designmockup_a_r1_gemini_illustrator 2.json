@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "ALL",
+    "location": "画面下部のプライマリボタン（s00のはじめる、s02の次へ、s12/s15の作成）",
+    "issue": "ボタン背景が明るい水色（--accent相当）でテキストが黒色になっている。仕様書（§5.1）の `--button-primary-bg: #1A5FC8`（濃い青）と `--button-primary-fg: #FFFFFF`（白文字）の指定に反しており、夜空のテーマの洗練されたトーンから浮いている。",
+    "suggestion": "ボタン背景色を `--button-primary-bg` に、テキスト色を `--button-primary-fg` に修正し、ブランドDNAに沿った落ち着いたコントラストを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "入力フィールドのプレースホルダーテキスト（s01, s12, s15）",
+    "issue": "プレースホルダーテキスト（you@example.com、10:00など）が暗く、背景色（--bg-surface）とのコントラスト比がWCAG AA（4.5:1）を満たしていないように見える。",
+    "suggestion": "テキスト色に `--text-hint` を正しく適用し、ダーク背景上でも十分な可読性とコントラストを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Todayセクションの完了済みタスク「企画書を仕上げる」の左側ドット",
+    "issue": "完了状態を示すドットが水色（--accent）になっている。仕様書（§2.1）では「success（完了/EXP獲得）: 緑系」と定義されており、s13やs14の緑色チェックマークと一貫性がない。",
+    "suggestion": "完了済みタスクのドット色を `--success`（緑系）に変更し、アプリ全体で「完了＝緑（喜び・達成感）」の感情的マッピングを統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の「登録する」ボタン",
+    "issue": "ボタン背景が暗い青でテキストが水色になっており、背景とテキストのコントラストが低く視認性が悪い。",
+    "suggestion": "ボタンのスタイルを仕様書の Secondary（--accent-subtle 背景 + --on-accent-subtle テキスト）などに準拠させ、十分なコントラストを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s14_goal_detail",
+    "location": "タスクリスト「企画書を仕上げる」の左側リング",
+    "issue": "未完了タスクのリングが水色（--accent）になっている。他の未完了タスクはグレーであり、色のみで「今日のタスク」などの状態を伝達しているとすればWCAG 1.4.1に抵触する恐れがある。",
+    "suggestion": "未完了タスクのリングはすべて `--text-secondary` などのグレー系に統一し、状態の伝達を色に依存しない設計にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s12_task_add",
+    "location": "「単発タスク」「習慣」のトグ��ボタン",
+    "issue": "アクティブな「単発タスク」の背景色が暗い青で、非アクティブな「習慣」との視覚的な差が弱く、ダークテーマ下で選択状態が直感的に分かりにくい。",
+    "suggestion": "アクティブ状態の背景を `--accent-subtle` にし、テキストを `--on-accent-subtle` にするなど、選択状態のコントラストを強める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "画面下部のアクションボタン群",
+    "issue": "「進め方を聞く」「詰まりを相談」が塗りつぶし背景になっている一方、主目的であるはずの「編集」がアウトラインになっており、AI機能の視覚的ウェイトが強すぎる。",
+    "suggestion": "ユーザーの主目的（タスク管理）とAI機能のバランスを取るため、ボタンのスタイル（Primary/Secondary/Ghost）の割り当てを見直す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "選択中のアバター（タイプB）を囲む水色のリング",
+    "issue": "選択リングとアバターの円形背景��間に隙間がなく、窮屈な印象を与えており「Open Air」のレイアウト原則にやや反している。",
+    "suggestion": "選択リングとアバター背景の間に数pxのクリアランス（透明な隙間）を設けるか、リングサイズを広げてゆったりとした空間表現にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "進捗パーセンテージ「60%」の表記",
+    "issue": "「60」の大数字に対して「%」の記号が小さすぎ、かつベースラインのバランスが不自然に見えるため、洗練されたタイポグラフィの印象を損なっている。",
+    "suggestion": "「%」のフォントサイズやベースラインを調整し、大数字（--font-size-3xl等）と美しく調和するように整える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  }
+]

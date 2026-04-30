@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s30_me",
+    "location": "「趣味」項目の「タップして入力」テキスト",
+    "issue": "テキスト色（#484F58）と背景色（#0D1117）のコントラスト比が極めて低く、WCAG AAの通常テキスト要件（4.5:1）を満たしていない。",
+    "suggestion": "テキスト色を仕様書の --text-hint（#7A8593）などに変更し、十分なコントラストを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "無効状態のテキスト���（#484F58）と背景色（#1C2128）のコントラストが低すぎる。無効状態はWCAG例外だが、何の機能が利用不可なのかユーザーが認識できずUXを損ねている。",
+    "suggestion": "無効状態でも文字が読める最低限のコントラストを確保するか、無効理由（タスク完了済のため等）をツールチップ等で補足する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "画面上部のステッププログレスバー（未完了部分）",
+    "issue": "未完了部分の背景色（#1C2128）と画面背景色（#0D1117）のコントラスト比が低く、非テキスト要素のコントラスト要件（3:1）を満たしていないため、全体のステップ数が把握しづらい。",
+    "suggestion": "未完了部分の色を明るくするか、プログレスバー全体を囲む枠線を追加して視認性を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "09:00タスク「企画書を仕上げる」の完了チェックマーク",
+    "issue": "チェックマークのアイコン色（#79C0FF）と背景色（rgba(121,192,255,0.2)）が同系色でコントラスト比が3:1を満たしておらず、完了状態の視認性が低い。",
+    "suggestion": "チェックマークのアイコン色を白（#FFFFFF）や背景と十分なコントラストを持つ色に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」のチェックボックス",
+    "issue": "チェックボックスの枠線色（#484F58）と背景色（#0D1117）のコントラスト比が低く、インタラクティブ要素の境界線としての要件（3:1）を満たしていない。",
+    "suggestion": "枠線色を仕様書の --border-strong（#6E7681）などに変更し、非テキストコントラストを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "「タスク名」入力フィールドのフォーカスリング",
+    "issue": "フォーカスリングの色（rgba(121,192,255,0.2)）が薄く、背景色に対して3:1のコントラスト比を満たしていないため、キーボード操作時の現在位置が不明瞭。",
+    "suggestion": "フォーカスリングの不透明度を上げるか、仕様書通りに forced-colors 対応も兼ねた明確な outline（例: 2px solid #79C0FF）を適用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "未完了（予定）タスクのチェックボックス枠線",
+    "issue": "枠線色（#484F58）と背景色（#0D1117）のコントラスト比が低く、タップ可能な操作要素として認識しづらい（非テキストコントラスト3:1未満）。",
+    "suggestion": "枠線色を --border-strong（#6E7681）などに変更し、操作可能な要素であることを明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "18:00および20:30タスクの左ボーダー",
+    "issue": "ゴール未紐付けを示す左ボーダー色（#484F58）が背景色に沈んでおり、視覚的な区切りや情報伝達の手掛かりとして機能していない。",
+    "suggestion": "ボーダー色を少し明るくするか、ゴール未紐付けの場合はボーダー自体を非表示にして余白で区別するレイアウトを検討する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カードの「✕」ボタン",
+    "issue": "テキスト色（#7A8593）とボーダー色（#484F58）が背景（#161B22）に対して弱く、キャンセルという重要なアクションが見落とされやすい。",
+    "suggestion": "「✕」ボタンの視認性を高めるため、テキスト色を --text-secondary（#9BA7B4）等に変更し、十分なコントラストを持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域のEXPバーおよびゴールの進捗バー",
+    "issue": "バーの未獲得/未完了部分の背景色（#1C2128）が画面背景色（#0D1117）と同化しており、全体の長さ（分母）が視認できないため、進捗の度合いが直感的に伝わらない。",
+    "suggestion": "未完了部分の背景色を明るくするか、バー全体に薄い枠線を設けて全体の長さを明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  }
+]

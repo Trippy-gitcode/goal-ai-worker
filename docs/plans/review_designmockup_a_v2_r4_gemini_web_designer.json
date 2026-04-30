@@ -1,0 +1,79 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "「+ タスクを追加」「+ ゴールを作成」などのインラインテキストリンク",
+    "issue": "テキストリンクがアクセントカラー（青）のみで表現されており、下線がない。仕様書「2.2 リンク色の役割分離」およびWCAG 1.4.1（カラーのみ伝達禁止）に違反している。",
+    "suggestion": "インラインテキストリンクには必ず text-decoration: underline を適用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "画面上部のヒーロー領域（EXPバー周辺）",
+    "issue": "UX仕様書「4.1 画面構成」でME画面のヒーロー領域は「GROW同一」と指定されているが、EXPの表記が「1,240 / 2,000」ではなく「62%」となっており、レイアウトが矛盾している。",
+    "suggestion": "GROW画面（s10_grow）と完全に同一のヒーローコンポーネントを使用し、一貫性を保つ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "ロゴ下のサブタイトル「あなたの人生を、あなたらしく」",
+    "issue": "仕様書で定義されたブランドDNA「洗練して生きよう。憧れの姿になるように。」と異なる一般的なコピーが使われており、アプリのコアな世界観を伝える機会を損なっている。",
+    "suggestion": "サブタイトルをブランドDNAの文言に変更するか、ブランドガイドラインに厳密に沿ったメッセージに統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "画面下部の「編集」「削除」ボタン",
+    "issue": "「削除」ボタンが赤色ボーダーとテキストで強調���れており、隣の「編集」ボタンよりも視覚的ウェイトが重い。破壊的操作が主要アクションのように見え、誤操作を誘発しやすい。",
+    "suggestion": "「削除」ボタンの視覚的強調を弱め（例：テキストのみ、またはより薄い背景色）、プライマリアクションと誤認されないようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "AIのメッセージバブル",
+    "issue": "AIのメッセージが左ボーダーのみで背景色がないため、長文や連続したメッセージの場合にブロックとしての境界が曖昧になり、情報が背景に溶け込んで読みづらい。",
+    "suggestion": "AIメッセージの背景に非常に薄いsurface色を敷くか、メッセージ間の余白を広げて視覚的な区切りを明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "「所要時間」の選択チップ",
+    "issue": "選択肢が横スクロールになっており、一覧性が低い。頻繁に行うタスク追加操作において、隠れた選択肢を探すス��ロール操作は摩擦となる。",
+    "suggestion": "チップを折り返し（flex-wrap）にして複数行で全選択肢を一度に表示するか、主要な選択肢のみに絞る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "左上の戻る（＜）アイコン",
+    "issue": "アイコン単体で配置されており、視覚的なタップターゲットが不明瞭。44x44pxの最小タップ領域が確保されているかユーザーから見て分かりにくい。",
+    "suggestion": "アイコンの周囲に透明な44x44pxのタップ領域を確保し、必要であれば薄い背景色をホバー/タップ時に表示して領域を明示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

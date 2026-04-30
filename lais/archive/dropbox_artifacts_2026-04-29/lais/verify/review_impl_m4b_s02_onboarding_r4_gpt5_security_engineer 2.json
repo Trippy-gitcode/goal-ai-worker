@@ -1,0 +1,32 @@
+[
+  {
+    "id": "R-401",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "全体",
+    "issue": "本R4はCSS差分（focus可視リング調整）のみで、XSS/CSRF/認証バイパス/RLS/CORS/入力バリデーション/オープンリダイレクト/APIキー露出などの評価対象となる実装が含まれていないため、これらの脆弱性有無を判断できない。",
+    "suggestion": "当該画面に関係するHTML/JS（innerHTML/dangerouslySetInnerHTMLの有無、イベントハンドラ、フォーム送信）、バックエンドの状態変更エンドポイント、認可/認証フロー、CORS/CSP設定、RLS/DB権限設定の差分を併せて提示し、変更なしであればその旨を明記する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-402",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "修正後の該当 CSS",
+    "issue": "CSSカスタムプロパティ（例: var(--accent) 等）を使用しているが、これらがユーザー入力や外部データから直接設定される場合、スタイルインジェクションや意図しない外部リソース参照（url()等）に繋がる余地がある。",
+    "suggestion": "テーマトークン/カスタムプロパティはビルド時���固定またはサーバ側でホワイトリスト検証を行う。CSPでstyle-src 'self' を基本とし、外部スタイルやインラインスタイル（'unsafe-inline'）を避け、必要時はnonce/hashを用いる。ユーザー提供値をstyle属性やCSS変数に直接反映しない。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-403",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体",
+    "issue": "提供ファイル内にAPIキー/シークレット等の露出はgrepレベルでは検出されなかったが、検出体制の記載がなく、継続的な漏洩検知の保証がない。",
+    "suggestion": "CIでの自動シークレットスキャン（gitleaks/trufflehog等）の常時有効化、誤検知・抑止ルールの管理、漏洩時の鍵ローテーション手順をレポ内に明記する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

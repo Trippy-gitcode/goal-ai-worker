@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§7.1 戦略 1: Git tracking 改善 (byte_floor_check.sh)",
+    "issue": "pre-commitフック内で `wc -c < \"$f\"` を使用し、ワークツリーのファイルサイズを検査しています。ユーザーが0 bytesの破損状態を `git add` した後にワークツリーを修正した場合、正常なサイズと判定されて破損データがそのままコミットされる致命的なすり抜けが発生します。",
+    "suggestion": "ステージングエリア（インデックス）に登録されたオブジェクトのサイズを直接取得するため、`size=$(git cat-file -s \":$f\")` を使用するようにスクリプトを修正し��ください。これにより `[ -f \"$f\" ]` のチェックも不要になります。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§3.4 戦略 4: Google Drive / §6.3 並行運用案",
+    "issue": "Google Drive for desktopのStreamモードのマウントポイントは通常 `~/Library/CloudStorage/GoogleDrive-...` または `/Volumes/GoogleDrive` です。手順にある `~/GoogleDrive/` を指定すると、単なるローカルディレクトリが作成されるだけでクラウドに同期されず、バックアップとして機能しません。",
+    "suggestion": "実際のGoogle Driveのマウントポイント（例: `~/Library/CloudStorage/GoogleDrive-<アカウント名>/`）を確認して指定するよう、パスの記述とセットアップ手順を修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§7.1 戦略 1: Git tracking 改善",
+    "issue": "手順5で新規作成した `scripts/byte_floor_check.sh` をGit管理下に追加（`git add` および `git commit`）する手順が欠落しています。untrackedのままでは別環境への共有や復元ができず、本資料の「untracked撲滅」という目的に反���ます。",
+    "suggestion": "手順5の後に `git add scripts/byte_floor_check.sh` と `git commit -m \"Add byte_floor_check hook\"` を実行する手順を追記し、スクリプト自体をリポジトリの管理下に置いてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§7.1 戦略 1: Git tracking 改善 (手順6)",
+    "issue": "既存のpre-commitフックへの追記として `bash \"$BYTE_FLOOR_HOOK\" || FAIL=1` を指示していますが、既存フックが `FAIL` 変数を評価して `exit $FAIL` する構造になっていない場合、エラーが握りつぶされてコミットが成功してしまいます。",
+    "suggestion": "既存フックの内部構造に依存しないよう、確実にコミットをブロックできる `bash \"$BYTE_FLOOR_HOOK\" || exit 1` と記述するか、追記位置の前提条件をより明確に記載してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§3.4 戦略 4: Google Drive (セットアップ手順5)",
+    "issue": "rsyncコマンドで `--include='*/'` を使用していますが、`-m` (`--prune-empty-dirs`) オプションが指定されていないため、`.md` ���ァイルを含まない空のディレクトリツリーが宛先に大量に作成されてしまいます。",
+    "suggestion": "rsyncコマンドに `-m` オプションを追加し、`rsync -avm --delete ...` とすることで、不要な空ディレクトリの作成を防ぐように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§7.1 戦略 1: Git tracking 改善 (byte_floor_check.sh)",
+    "issue": "`git diff --cached` のフィルタが `--diff-filter=AM` に限定されているため、リネーム（R）やコピー（C）されたMarkdownファイルが8 bytes未満に縮退していた場合に検知から漏れてしまいます。",
+    "suggestion": "`--diff-filter=d` （削除以外すべて）を使用するか、`--diff-filter=AMRC` に変更して、リネームやコピーされたファイルも確実に検査対象に含めてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.019,
+    "input_tokens": 10769,
+    "output_tokens": 1104,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

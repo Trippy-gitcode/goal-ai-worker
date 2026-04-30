@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "1, 2",
+    "issue": "JSX 内で class 属性を使用しており、React では className が正です。開発時警告や将来の SSR/Hydration での不整合リスクになります。",
+    "suggestion": "App.jsx と S00Splash.jsx の全ての class を className に置換し、eslint-plugin-react の react/no-unknown-property を有効化して検知を自動化してください。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "2, 3",
+    "issue": ".s00 は min-height: 100vh 指定がなく、絶対配置の基準が親要素サイズに依存しています。親が viewport 高を保証しない文脈に埋め込むと、CTA の bottom 値が仕様からずれる可能性があります。",
+    "suggestion": ".s00 に min-height: 100vh を付与するか、html, body, #root, .app-root に height: 100%（もしくは min-height: 100vh）を明示し、絶対配置の基準が常にビューポート相当になるようにしてください。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "実測スクショ事実",
+    "issue": "本文の箇条書きで「secondary の下辺が 140px、primary が 204px」と記載がありますが、直上の JSON 実測値は primary=140px / secondary=76px で矛盾しています。",
+    "suggestion": "箇条書きの説明文を実測値に合わせて「secondary（ログイン）: 76px、primary（はじめる）: 140px」に修正してください（r2 の修正意図とも一致）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "div.app-root に aria-label=\"Lais\" が付与されていますが、汎用コンテナに名前付けしてもランドマークにはならず、スクリーンリーダーで冗長になる可能性があります。",
+    "suggestion": "app-root の aria-label は削除し、名前付けが必要な場合は main ランドマーク（すでに S00 内に存在）に限定してください。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "3",
+    "issue": ".s00-cta-primary:disabled と [aria-disabled=\"true\"] のスタイルが現状未使用で、最小実装の範囲ではデッドコードです。",
+    "suggestion": "M2 では削除するか「M3+ で使用予定」とコメントを付与して意図を明確化してください（将来の拡張を見越す場合は残して可）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "コンポーネント props に型安全性がありません（onStart/onLogin の型不明）。",
+    "suggestion": "PropTypes で関数必須を明示するか、TypeScript へ移行して型定義（onStart: () => void, onLogin: () => void）を付与してください。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

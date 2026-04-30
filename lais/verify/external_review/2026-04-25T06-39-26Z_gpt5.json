@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "同一応答の重複実行防止に使う dedupe ファイルを、検査前に必ず touch しているため、初回実行が途中失敗・異常終了しても以後は [DEDUP] 扱いで再検査されません。結果として本来 BLOCK すべき応答が以後永続的に素通りし、機械ゲートの中核仕様が破綻します。",
+    "suggestion": "DEDUP は検査完了後にのみ確定させ、途中失敗時は作成しないか一時ファイルを使ってアトミックに rename してください。少なくとも PASS/BLOCK 判定後に touch し、trap で異常終了時の中間ファイル削除を行うことで、失敗が fail-open 化する経路を塞ぐべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "transcript_path を参照する条件分岐で `TRANSCRIPT_PATH` という未定義変数を `set -u` 環境下で展開しており、通常は `${TRANSCRIPT_PATH:-}` によって回避しているものの、後続では別名 `TP` を都度再生成していて状態管理が分散しています。将来の軽微な変更で即時クラッシュしやすい不安定な実装です。",
+    "suggestion": "stdin JSON から取得するメタ情報は最初に一度だけ `SID/EV/SHA/TP/RESP_TEXT` として確定し、その後の検査では再パースせず同じ変数を参照してください。変数名を統一し、未定義許容は `${var:-}` に統一することで、`set -u` 起因の壊れやすさを減らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "tests/adv_gate_e2e.sh",
+    "issue": "テストが `instructions/gate_override.flag` を実ファイルとして作成・削除しており、途中失敗や SIGINT で cleanup されないと後続の実運用セッション全体が fail-open になります。ローカル環境依存の副作用が強く、後日『なぜ gate が効かないのか分からない』障害を高確率で招きます。",
+    "suggestion": "テスト用 override は一時ディレクトリ配下に切り出し、スクリプト側で `OVERRIDE_FLAG_PATH` を上書き可能にしてください。少なくとも `trap 'rm -f ...' EXIT INT TERM` を導入して必ず掃除し、リポジトリ実ファイルを直接触る設計は避けるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "fail-closed と説明している一方で、stdin が空の場合は `[SKIP]` で即 exit 0、応答テキスト未取得時も `[SKIP]` で通過しています。仕様文書では parse 失敗や取得失敗時の block を示唆している箇所があり、実装と説明が食い違っています。将来 input 形式変更時に静かに無検査通過する危険があります。",
+    "suggestion": "hook 実行時に必須な `hook_event_name/session_id/last_assistant_message or transcript_path` の最低要件を定義し、満たさない場合は明示的に block するか、少なくとも fail-open として統計付き WARN に分けてください。README・証跡文書側も実装に合わせて整合させる必要があります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "一時ファイル `TMP_RESP` を前半の parse 用と後半の grep 用で再利用し、`trap` も二度設定しています。現状たまたま動いても、将来の編集で古い tmpfile が掃除されない・期待しないファイルを消す・��バッグしづらいといった保守性低下を招きます。",
+    "suggestion": "tmpfile は `TMP_PARSED_RESP` と `TMP_CHECK_RESP` のように用途別に分離し、trap は一箇所で全ファイルを削除する形に整理してください。変数の再代入を避けるだけで責務分離と可読性が大きく改善します。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "scripts/spec_lint_extended.sh",
+    "issue": "重複検出ロジックが `grep | sort | uniq -d` で見出し全文一致を前提としているため、同じ節番号でも見出し文言が異なれば重複を見逃します。仕様上もっとも防ぎたい『同一番号の二重定義』に対して検出精度が不足しており、BLOCK 用 lint としては危ういです。",
+    "suggestion": "見出し全文ではなく節番号そのものを抽出して重複判定してください。例として `grep -oE '^####? §2\\.25\\.[0-9]+' | awk '{print $2}' | sort | uniq -d` のように番号単位で見ると、文言差分に引きずられず安定して検出できます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/persona_selector.sh",
+    "issue": "追加ペルソナのトリガが grep の出現順依存で、上限 3 件の切り捨てに優先度設計がありません。クエリ内容次第で本来重要なセキュリティや QA が、たまたま前に書かれた arch/sre で押し出されます。仕様に対して結果の一貫性が弱く、後日『なぜそのペルソナが外れたか』説明困難になります。",
+    "suggestion": "タグごとに明示的な優先度を設けて上位 3 件を採用するか、危険度の高い sec/qa を優先するルールを固定化してください。少なくとも出現順依存ではなく、仕様に記載された deterministic な選択順をコードと文書の両方に持たせるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/adv_hot_summary.sh / scripts/persona_selector.sh / scripts/spec_lint_extended.sh / scripts/adv_response_gate.sh",
+    "issue": "複数スクリプトで `git rev-parse --show-toplevel 2>/dev/null || pwd`、ログディレクトリ作成、日時生成などの定型処理が重複しています。現時点では小規模ですが、repo root 判定やエラーハンドリングを修正したい時に全ファイルへ横展開が必要となり DRY を崩しています。",
+    "suggestion": "共通処理を `scripts/lib/` 配下へ抽出し、repo root 解決・log 関数・safe mktemp・cleanup などを共有化してください。POSIX sh のままでも `. scripts/lib/xxx.sh` で十分整理でき、今後の hook 拡張時のバグ混入を抑えられます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0622,
+    "input_tokens": 34212,
+    "output_tokens": 1942,
+    "model_id": "gpt-5.4"
+  }
+]

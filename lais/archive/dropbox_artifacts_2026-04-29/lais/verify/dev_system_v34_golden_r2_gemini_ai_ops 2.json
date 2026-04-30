@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "R2.1.1 §2.ε'-1",
+    "issue": "Hフローの承認確認が `[ \"$HFLOW_APPROVED\" != \"1\" ]` という環境変数チェックのみで行われている。ENG（Claude Code）は自律的に環境変数を付与してコマンドを再実行できるため、POの承認なしにHフローゲートをバイパス可能であり、AIの暴走防止メカニズムとして完全に破綻している。",
+    "suggestion": "環境変数によるバイパスを廃止し、外部からの承認証跡（例: `session_progress.md` に ADV/PO が書き込んだ `HFLOW_APPROVED: YYYY-MM-DD` の記述、または特定の承認済みファイルの存在）を `grep` 等で検��する設計に変更し、ENG単独での突破を不可能にすること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "location": "R2.1.1 §2.γ'-7",
+    "issue": "デプロイ失敗時に `DEPLOY-RECOVER-$MISSION_ID` を自動挿入するが、リカバリミッション自体が失敗した場合、MISSION_ID が `DEPLOY-RECOVER-DEPLOY-RECOVER-...` と無限にネストして増殖する。これにより、本来の「3回試行でPOエスカレーション」の制限が機能せず、AIが無限ループに陥るリスクがある。",
+    "suggestion": "`append_deploy_fail.sh` にて、MISSION_ID にすでに `DEPLOY-RECOVER-` プレフィックスが含まれている場合はプレフィックスを重複させず、サフィックスで試行回数（例: `-TRY2`）を付与するか、ストライクカウントを別ファイルで管理して3回目で確実にエスカレーション（自動挿入停止）するロジックを追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "ROBUSTNESS",
+    "location": "R2.1.1 §5.2",
+    "issue": "GPT-5.4 の `response_format: json_object` を削除してプロンプトで JSON 配列を強制する方針だが、LLM は高確率で Markdown のコード��ロック（```json ... ```）や前置きテキストを含めて出力する。単純な `JSON.parse` ではパースエラーが多発し、自律レビューサイクルが停止する運用上の重大リスクがある。",
+    "suggestion": "`ai_review.js` の改修指示に、出力テキストから正規表現（例: `/\\[[\\s\\S]*\\]/`）を用いて JSON 配列部分のみを抽出・サニタイズしてから `JSON.parse` を実行するロジックの追加を明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "R2.1.1 §2.δ'-1",
+    "issue": "ミッションのリスク判定が `session_progress.md` に記載された「対象ファイル」の自己申告リストのみに依存している。ENG が高リスクファイルをリストに書き漏らした場合、または意図的に除外した場合、実際には高リスクファイルを変更していても `low` と判定され、G17 や Hフローなどの承認ゲートをすり抜けてしまう。",
+    "suggestion": "リスク判定ロジックにおいて、自己申告の対象ファイルリストだけでなく、`git diff --name-only origin/main...HEAD`（または現在の変更ファイル）も取得し、実際の変更ファイルと申告ファイル��両方を `is_risk_path` で検査するハイブリッド判定に変更すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "R2.1.1 §2.θ'",
+    "issue": "完了コマンドが `cmd-unit`, `cmd-e2e`, `cmd-realworld` の3区分化されたが、`cmd-realworld`（G17等）は `deploy.sh` 内で自動実行される設計（§2.ε'-1）となっている。ENG がミッション完了時にこれを手動で実行すべきか、デプロイに任せるべきかが曖昧であり、二重実行や順序エラーを誘発する。",
+    "suggestion": "`mission_template_v3.md` の `cmd-realworld` の説明に「※デプロイパイプライン内で自動実行されるため手動実行は不要。デプロイ成功をもってPASSとする」等の注記を追記し、ENG の責務境界（手動実行範囲）を明確にすること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

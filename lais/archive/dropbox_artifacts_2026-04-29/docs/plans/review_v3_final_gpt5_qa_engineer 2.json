@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "sub_testing.md §1, §3 / dev_system_spec.md §7",
+    "issue": "テスト分離（データ/セッション/ストレージの隔離）方針が未定義。各テスト間でSupabase・KV・localStorage状態の汚染や順序依存が発生しうるが、標準の初期化/リセット手順やstorageState戦略が仕様化・ゲート化されていない。",
+    "suggestion": "PlaywrightのstorageState/fixturesでユーザー・セッションをテスト単位に分離し、beforeEachでDB/KVの初期データ投入と後始末を標準化。reset scripts（wrangler+SQL）を用意し、L1/L2/L3実行前後に実行。canopyにG4.5: reset実行/検証ゲートを追加。serial依存を検知するtest_lint（テスト内で前テスト生成IDを参照するパターン検出）も追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md §5 affected-tests.sh",
+    "issue": "L2影響範囲テストの特定ロジックが脆弱。test_map.yamlの単純マッピングとgit差分のみで、間接依存（importグラフ）やリネーム、共有モジュール変更が漏れる恐れがある。--grepでのタイトル一致も命名徹底が崩れると取りこぼす。",
+    "suggestion": "影響特定を強化: (1) ts-node/tscでimportグラフを抽出し、変更ファイルに依存するspecを自動解決（madge等）。(2) testタイトルへのGREP-KEY強制をlinterで検証（canopyで“[A-Z]+-[0-9]+”必須）。(3) マッピング未解決時は“関連タグ/ディレクトリ（例: #all, 該当機能タグ）”の安全側フォールバックを実行。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §4.1 G7 / sub_infrastructure.md §2.4 mission_linter.sh",
+    "issue": "G7「仕様↔完了コマンドの1:1対応」要件に対し、実装（mission_linter.sh）はbashブロック存在等の静的チェックのみで、AT-IDと実行コマンドの対応検証を行っていない。ゲートの説明と実装が不整合。",
+    "suggestion": "mission_linterにAT-ID抽出（AT-1, AT-2等）と完了コマンドの対象spec/--grepが該当AT-IDを網羅するかの突合を実装。最低1:1対応が成立しない場合FAIL。AT不要フラグ時は例外扱いだが、その存在もADV記述由来であることをコミット署名/差分で検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "dev_system_spec.md §4.3 / sub_infrastructure.md §2.11 screenshot_lint.sh",
+    "issue": "G9スクショ証跡はbefore/afterの枚数と同一画像チェックのみ。ATごとのペア（before_AT-N.png/after_AT-N.png）存在やAT総数との一致を検証していないため、一部ATの証跡欠落を検出できない。",
+    "suggestion": "screenshot_lintを拡張し、ミッション定義からAT数を抽出→evidence配下でAT番号ごとにbefore/afterペアの存在を検証。余剰・欠落の双方をFAILに。ファイル名規約の逸脱（例: AT番号不一致）も検出。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "dev_system_spec.md §4.6 G8 / sub_infrastructure.md §2.6 canopy_common.sh",
+    "issue": "G8 TDD証跡はunexpected（失敗数）のみ判定で、skip件数や実行テストセットの同一性を検証していないため、許容skipや対象外テスト混入で“GREEN誤判定”の余地がある。",
+    "suggestion": "G8でbefore/after双方のJSONから（1）skipped==0（許容skipのみ@allowed-skip注記時に限り<=N）（2）executed test list一致（testId/titleの差分なし）を検証。完了コマンド側で対��spec限定実行を必須化し、evidenceに実行テスト一覧を保存して突合。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "sub_testing.md §2 test_lint.sh / dev_system_spec.md §9.4",
+    "issue": "アンチパターン検出が5項目に限定され、明示されている“waitForTimeout固定待ち”や“アサーション無し”の自動検出が未実装。フレークや無効テストの混入リスクが残る。",
+    "suggestion": "test_lintに以下を追加: (AP-6) page.waitForTimeout/ setTimeoutの直接使用検出→FAIL（許容コメント付きのみWARN）、(AP-7) 各testブロック内のexpect/toHaveScreenshot等アサーション呼び出し数>=1の静的検査（最低限のヒューリスティクス）。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "sub_infrastructure.md §2.14 review_gate.sh / dev_system_spec.md §13.15.5",
+    "issue": "review_gate.shはreview_*.jsonを無差別集計し、Pre-Reviewや過去ラウンドのCRITICALも合算してFAILにする。仕様では“最終ラウンドのみ対象/Pre-Reviewは別枠”と定義されており不整合で誤FAILを招く。",
+    "suggestion": "ファイル命名規則��従い、最終ラウンドのみを対象にフィルタ（同一mission+model+personaの最大rN、pre_rは除外）。あるいは“active_rounds.json”で対象ファイルリストを明示し、そのみ集計。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md §2.13 changed-files-allowlist.sh",
+    "issue": "対象ファイル許可のマッチが単純grep部分一致で、\"src\"のような広すぎる指定で実質バイパスされうる。merge-baseもorigin/main固定で、無い環境やデフォルトブランチ差異で誤検出の恐れ。",
+    "suggestion": "許可パターンをglob/regexで厳格化（^や$を用いたパス先頭/末尾固定）。git diffのBASEは“git merge-base --fork-point”や“初回コミット/空ツリー”フォールバックを実装。許可対象に‘scripts/’等を含める場合は個別明記を必須化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "dev_system_spec.md §7 / sub_testing.md §5 affected-tests.sh",
+    "issue": "L2がtestタイトルのGREP-KEY前提だが、GREP-KEY付与の自動検証がないため、命名漏れのテストはL2から永久に外れてしまう（��かなカバレッジ低下）。",
+    "suggestion": "canopyに“G3.5: GREP-KEY検証”を追加し、tests/e2e/specs配下の全test()タイトルに“\\[[A-Z]+-[0-9]+\\]”を強制。未付与でFAIL。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "dev_system_spec.md §4.5 SKIPルール / sub_testing.md §2",
+    "issue": "“SKIP-RETRY最大2回”の運用ルールに対する機械的検証が未実装。test.skip検出はあるが、同一ATのSKIP回数追跡/ブロックが行われない。",
+    "suggestion": "SKIP記録ファイル（instructions/results/skip_history.jsonl）にAT-ID/日時を追記し、canopyで直近履歴から閾値超過をFAILに。testコードの@allowed-skipにもAT-ID必須を追加して追跡可能化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "sub_infrastructure.md §2.6 canopy_common.sh（G8/G9 AT不要判定）",
+    "issue": "“AT不要/grep検証のみ/テスト影響:なし”のフラグはADVのみが付与可能とあるが、実装はmissionブロック内の文字列検索のみで、記述者の検証が無い。ENGが誤って（あるいは意図的に）付与しバイパス可能。",
+    "suggestion": "AT不要フラグ行に“Signed-Off-By: ADV”行とコミット署名（GPG/SS2）を必須化し、canopyで直近コミットの署名者/差分を検証。未署名/ADV以外はFAIL。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "dev_system_spec.md §19.8 / §7",
+    "issue": "PWA環境別（E1〜E4必須）テストの定義はあるが、CI上で複数Playwright projectを実行する品質ゲートが未定義。結果としてE1のみ通過でもデプロイ可能になる恐れ。",
+    "suggestion": "C2に“L1_multi-env”を追加し、projects: [ios_safari, ios_pwa, android_chrome, android_pwa]のsmokeを必須実行。test_meta.by_layerに環境別件数を追加し、G3で照合。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md §4.1 G3 / sub_infrastructure.md §2.6 canopy_common.sh",
+    "issue": "G3のテスト件数照合は“test(”のみカウントで“it(”やparameterized testに未対応。±20%の粗い閾値のみで層別(by_layer)不整合も未検出。",
+    "suggestion": "カウント対象にit(を追加し、PlaywrightのJSONレポートから実行件数を直接集計。test_meta.by_layer（L1/L2/L3、環境別）���も突合し、逸脱を詳細に報告。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md §2.6 canopy_common.sh（G4） / §2.8 C2",
+    "issue": "canopyのG4はnode_modules/.bin/playwright存在時のみ実行するため、未セットアップ環境で“PASS”と誤判定される可能性がある。",
+    "suggestion": "Playwright未インストール時は明示FAILに変更（“FAIL: Playwright not installed”）。もしくはC2開始前に“npx playwright install-deps”を必須化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md §2.10 report_lint.sh / dev_system_spec.md §4.1 G5",
+    "issue": "G5で“分母なしのALL PASS禁止”が仕様にあるが、スクリプトは曖昧語12語のみ検出で“ALL PASS”表現の分母検証をしていない。",
+    "suggestion": "完了報告内の“ALL PASS”表記を検出し、直近の結果サマリ（tests_pass/total形式）の有無を必須化。分母不在でFAILに。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "dev_system_spec.md §19.9（VRT） / §4.3",
+    "issue": "VRT（toHaveScreenshot）の導入が方針レベルに留まり、品質ゲートとしての実行/閾値/除外管理が自動化されていない。G9は証跡の存在検証のみで、視覚的回帰の自動阻止ができない。",
+    "suggestion": "L2/L3にVRTを統合（変更差分の画面に限定）。閾値0.5%をplaywright.configに定義し、VRT FAILでcanopyをFAILに。意図的変更は“vrt-allowlist.json”にAT-ID紐付けで管理。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "sub_infrastructure.md §2.5 session_archiver.sh / dev_system_spec.md §16.2",
+    "issue": "session_progress.md 300行超過時のアーカイブは“## 完了済み”以降を丸ごと移送するが、未了ミッションが混在していた場合の保全/検出がない。",
+    "suggestion": "アーカイブ前に各ミッションのSTATUSを走査し、IN_PROGRESS/BLOCKEDを残す、DONEのみをアーカイブする安全策を強制。未了混入検出時はFAIL。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md §5 affected-tests.sh",
+    "issue": "“ソース未マップ時FAIL”の対象が^(src|frontend)/に限定され、バックエン���/ワーカー構成が“server/”“backend/”“functions/”等のディレクトリ名の場合に取りこぼす可能性がある。",
+    "suggestion": "未マップ検出の対象ディレクトリプリフィクスに^(src|frontend|server|backend|functions|worker)/を追加。app_config.yamlに“source_roots”を持たせ、各アプリ固有のルートを参照するよう汎用化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "dev_system_spec.md §4.6 / sub_infrastructure.md §2.6 canopy_common.sh",
+    "issue": "G8 before/afterが“同一テスト集合”である保証が無い。完了コマンドのスコープ変更や並列実行により、RED→GREENの比較対象が変わってもPASSになりうる。",
+    "suggestion": "before/after双方のresults.jsonからtestId/title+fileパスのハッシュを保存し、evidence内で照合。同一でなければFAIL。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "dev_system_spec.md §4.6 / §4.4",
+    "issue": "Playwright JSONレポーターの“unexpected”依存はバージョン差異でフィールド名/構造が変動するリスクがある（旧互換性低下時に誤判定の恐れ）。",
+    "suggestion": "レポーター出力のスキーマバージョンを記録し、jq抽出をスキーマ別に分岐。もしくはJUnitレポーターに統一し、PASS/FAIL/SKIP/TEST SUITE/CASEを安定スキーマで解析。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

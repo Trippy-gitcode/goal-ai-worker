@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.2",
+    "issue": "画像添付機能において、画像内のPII（顔写真や個人情報が写った書類等）はテキストのように自動マスキングされずサードパーティのVision APIに送信されるが、ユーザーへのプライバシー警告UXが存在しない。GDPR等のプライバシー規制において重大なコンプライアンス違反リスクとなる。",
+    "suggestion": "画像添付時（初回のみ、または毎回）に「個人情報を含む画像は送信しないでください」という警告ダイアログまたはツールチップを表示し、ユーザーの同意・注意喚起を行う��ローを追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §15 / §4.4",
+    "issue": "project_v1.md §5.1で定義された「シェアリンク（URL）によるリモート友達追加」について、受信者がリンクをタップした後のUXフロー（ディープリンクからのアプリ起動、プロフィール確認、リクエスト送信画面への遷移）がux_v1.mdに完全に欠落している。遷移パスが未定義のため実装不能。",
+    "suggestion": "§15（ディープリンク）または§4.4に、シェアリンクURL（例: `https://lais.app/invite?token=...`）を開いた際の遷移フロー（S-36相当のプロフィール確認モーダル表示 → 承認/キャンセル）を追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.4 / project_v1.md §6.5",
+    "issue": "退会時の72時間クーリングオフ期間（deleted_pending状態）中、他のユーザー（友達）のFRIENDS画面（図鑑）にそのユーザーがどのように表示されるか、またメッセージ送信が可能かが未定義。送信可能だと退会予定者にデータが蓄積され、プライバシー上の懸念が生じる。",
+    "suggestion": "deleted_pending状態のユーザーは、友達の図鑑から即時非表示（論理削除扱い）にするか、アバターをグレーアウトして「退会予定」とし、メッセージや応援の送信を無効化する仕様を明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "簡易メッセージ機能において、100文字制限や通報機能はあるものの、連続送信（スパム行為）を防ぐためのクライアント側のレートリミットUX（クールダウンUIやエラートースト）が定義されていない。",
+    "suggestion": "メッセージ送信ボタンにクールダウン（例: 送信後3秒間は無効化）を設けるか、サーバー側でレートリミット超過（429エラー）を返却した際のエラートースト「送信が早すぎます。少し待ってから再送信してください」の挙動を追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.4",
+    "issue": "QRコードやシェアリンクを誤って公開SNS等に投稿してしまった場合、24時間有効���トークンによりスパムリクエストが届き続けるリスクがあるが、ユーザーが手動でトークンを無効化（再生成）する手段が提供されていない。",
+    "suggestion": "QRコード表示モーダル内に「リンクを無効化して再生成する」ボタンを追加し、意図せぬ漏洩時にユーザー自身で被害を止めることができるようにすること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §13.1",
+    "issue": "メールアドレス変更（S-42）フローにおいて、新アドレスへの認証リンク送信は定義されているが、セキュリティのベストプラクティスである「旧メールアドレスへの変更通知」が定義されていない。アカウント乗っ取りの検知が遅れる原因となる。",
+    "suggestion": "メールアドレス変更リクエスト実行時に、システムから旧メールアドレス宛に「メールアドレスの変更リクエストがありました。心当たりがない場合はサポートへご連絡ください」というセキュリティ通知を送信する仕様を追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.4",
+    "issue": "メッセージを通報した後、「通報を受け付けました」のトーストは表示されるが、通報対象の不快なメッセージが画面上にそのまま残り続けるため、被害者のUXを損なう。",
+    "suggestion": "通報完了後、クライアント側で該当メッセージを即時非表示にするか、「このメッセージは通報されました」というプレースホルダーに置換する仕様を追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

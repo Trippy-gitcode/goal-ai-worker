@@ -1,0 +1,161 @@
+/*
+ * S-00 Splash — design_spec_v1.md §4.1 準拠
+ * - フルスクリーン中央集約
+ * - ロゴ中央から上 60px / ステートメント直下 16px
+ * - CTA 2段: 画面下から 140px
+ * - 禁止: 星屑 / グラデーション / 紫装飾
+ * - 低画面高フォールバック: 140px未満の余白しか取れない場合は縦flex流し込みに切替
+ */
+
+.s00 {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-lg);
+  padding-bottom: max(var(--space-lg), env(safe-area-inset-bottom));
+  min-height: 100svh;
+  background: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+  overflow-y: auto;
+}
+
+.s00-center {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(calc(-50% - 60px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.s00-logo {
+  font-size: var(--font-size-3xl); /* 48px */
+  font-weight: var(--font-weight-semibold); /* 600 */
+  letter-spacing: 3px;
+  color: var(--theme-color-accent);
+  font-family: var(--theme-font-display);
+  line-height: var(--theme-font-line-height-heading);
+  margin: 0;
+}
+
+.s00-tagline {
+  margin-top: var(--space-md); /* 16px */
+  font-size: var(--font-size-sm); /* 14px */
+  font-weight: var(--font-weight-regular);
+  color: var(--theme-color-text-muted);
+  letter-spacing: var(--theme-font-letter-spacing-normal);
+  line-height: var(--theme-font-line-height-body);
+}
+
+/*
+ * design_spec §4.1 要素表:
+ *   S00-3「はじめる」: 画面下端から上 140px（= primary CTA の下辺が viewport bottom から 140px）
+ *   S00-4「ログイン」: S00-3 の下 12px（= ログインの上辺 = はじめるの下辺 + 12px）
+ * よってログインの下辺 = 140 - 52 - 12 = 76px from viewport bottom
+ * コンテナの bottom はスタックの最下要素（ログイン）の下辺に一致させる。
+ */
+.s00-cta {
+  position: absolute;
+  left: var(--space-lg);
+  right: var(--space-lg);
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.s00-cta-primary,
+.s00-cta-secondary {
+  min-height: 52px;
+  padding: 0 var(--space-md);
+  border-radius: var(--theme-radius-lg);
+  font-size: var(--font-size-base);
+  font-family: var(--theme-font-base);
+  letter-spacing: var(--theme-font-letter-spacing-normal);
+  line-height: 1.25;
+  min-width: 44px;
+  white-space: normal;
+  transition: transform var(--theme-motion-fast) var(--theme-motion-easing);
+  box-shadow: var(--theme-shadow-sm);
+}
+
+.s00-cta-primary {
+  background: var(--theme-color-accent);
+  color: var(--theme-color-text-inverse);
+  font-weight: var(--font-weight-semibold);
+  border: none;
+}
+
+.s00-cta-primary:disabled,
+.s00-cta-primary[aria-disabled="true"] {
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.s00-cta-secondary {
+  background: transparent;
+  color: var(--theme-color-text);
+  font-weight: var(--font-weight-regular);
+  border: 1px solid var(--theme-color-border-strong);
+}
+
+/*
+ * Stage 7-4 prep (TASK-STAGE7-4-PREP-DEBT-CLEANUP-V1, 2026-04-29):
+ * a11y CRITICAL C1 — DQ テーマで secondary CTA テキスト #1a1a2e on #2c2c54 = 2.0:1 fail.
+ * dark bg-primary (#2c2c54) 上では `--theme-color-text-inverse` (#fffce8) を使い 13.4:1 確保.
+ * border も明色 (#fffce8) に揃えて 8bit DQ window 様式を維持.
+ */
+[data-theme="dq"] .s00-cta-secondary {
+  color: var(--theme-color-text-inverse);
+  border-color: var(--theme-color-text-inverse);
+}
+
+/*
+ * Stage 7-4 prep (a11y CRITICAL C3):
+ * Cyberpunk テーマ secondary CTA は --theme-color-text (#e8e8ed) が
+ * transparent (= #0a0a0a) 上で 16.5:1 で本来 OK だが border が薄いと
+ * UI コンポーネント識別性が下がる. accent border に切替えて 1.4.11 強化.
+ */
+[data-theme="cyberpunk"] .s00-cta-secondary {
+  color: var(--theme-color-text);
+  border-color: var(--theme-color-accent);
+}
+
+.s00-cta-primary:active,
+.s00-cta-secondary:active {
+  transform: scale(0.98);
+}
+
+/*
+ * 低画面高フォールバック:
+ * CTAの確保高さ（primary 52 + gap 12 + secondary 52 + bottom 76 = 192px）+
+ * 中央塊の概算（logo 48 + gap 16 + tagline 20 = 84px）+ 余白 48 = 324px 未満では
+ * absolute配置で確実に衝突するため、flex流し込みに切替える。
+ * ※ base宣言のカスケードに勝つため、このブロックはファイル末尾に配置する。
+ */
+@media (max-height: 560px) {
+  .s00 {
+    justify-content: space-between;
+    padding-top: calc(var(--space-xl) + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(var(--space-xl) + env(safe-area-inset-bottom, 0px));
+  }
+  .s00-center {
+    position: static;
+    transform: none;
+  }
+  .s00-cta {
+    position: static;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+  }
+}

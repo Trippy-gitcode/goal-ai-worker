@@ -1,0 +1,232 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §1.1, §1.3 / project_v1.md §3.1",
+    "issue": "ボトムタブの仕様にタブアイコン、ラベル有無、選択状態、プラットフォーム別の高さ/安全領域対応が明記されていない。HIG/Materialではタブは常にラベル付き・十分なタップ領域・Safe Area考慮が推奨。",
+    "suggestion": "タブ仕様を追記: 1) 各タブにアイコン+テキストラベル（iOSは必須） 2) 高さ iOS: 49pt, Android(Material3): 56dp 3) 安全領域 env(safe-area-inset-bottom) を余白に加算（タブ/スナックバー/トーストとも） 4) 選択/非選択のカラー/コントラスト/アニメーション（200ms） 5) バッジ位置と最大桁数 6) Talk=会話アイコン、Grow=ホーム/ターゲット、Me=人型の標準メタファーを明示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §1.3, §3.5, §7.3",
+    "issue": "S-21ドロワー内の「会話行の左スワイプで削除」と「ドロワー自体を左スワイプで閉じる」のジェスチャーが競合する可能性がある。",
+    "suggestion": "ジェスチ���ー優先度を定義: 1) ドロワー閉じはドロワー外(backdrop)のスワイプ/タップのみに限定 2) ドロワー内は行スワイプを優先し、閉じジェスチャーは無効 3) 代替として、行の長押しメニューに[削除]を移すか、スワイプ方向を逆（右スワイプでアクション）に統一。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.1, §3.5",
+    "issue": "TALK画面ヘッダーのアイコン意味が重複（☰=履歴ドロワー、🕐=履歴）。同一機能へのアイコンが2つ存在し認知負荷を高める。",
+    "suggestion": "履歴起動はどちらか一方に集約（推奨: ☰=ドロワー開閉、🕐は削除 or 他機能に再割当て）。ラベル付きツールチップ/アクセシビリティラベルも明示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §7, §8",
+    "issue": "ハプティクス設計がQRスキャン時のVibrationのみ。タスク完了/ゴール達成/レベルアップなど主要行為の触覚フィードバックが未定義。",
+    "suggestion": "ハプティクス方針を追加: PWA制約下でAndroidはVibration APIで短いパターン(例: 完了=20ms, 重要達成=20/20/20ms)、iOS PWAは非対応時に視覚/音で代替。設定でON/OFF切替を提供。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §2.2, §6.5",
+    "issue": "ヒーロー領域が固定/縮小だがPull-to-refreshの発火条件（最上部オーバースクロール閾値）がスクロールコンテナどこか不明確。誤作動や発火不能の恐れ。",
+    "suggestion": "スクロールコンテナをToday/Goalsリストに限定し、y=0時のみPTRを有効化する旨を明記。ヒーロー領域上ではPTR無効。閾値60px/インジケータ位置も定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §2.5, §5.3 / ux_v1.md §15",
+    "issue": "タスクリマインダーのプッシュ通知にアクションが定義されていない。Android/ChromeのWeb Pushではアクションボタンが有効で、完了/スヌーズの即時操作が一般的。",
+    "suggestion": "通知アクションを追加: [完了][スヌーズ(15分)]。notificationclickのactionでAPI呼び出し→完了/延期。iOS PWA未対応時は単一タップのみ。通知本文とDeep Linkの整合も明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §10.2, §11",
+    "issue": "動的文字サイズ（OSの文字サイズ/アクセシビリティ設定）への追従ルールが未定義。固定pxだと可読性低下の恐れ。",
+    "suggestion": "タイポスケールをrem/emベースで定義し、iOS/Androidの大きな文字設定で主要テキストが1.2〜1.4倍まで拡大しても折返し/省略で破綻しないことを規定。最小本文サイズ16px相当を保証。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（ゴールドット）, §10.2",
+    "issue": "ゴール紐付けの色ドットは色のみで区別しており、色覚多様性に配慮不足。",
+    "suggestion": "色に加えて形/パターン/テキストヒントを追加（例: ドット内記号, アクセシブルツールチップ, スクリーンリーダー向けaria-labelでゴール名を併記）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.2, §6.2, §10.4",
+    "issue": "新着メッセージ/ストリーミング完了/Undo残り時間などのライブ更新のスクリーンリーダー通知仕様が不足。",
+    "suggestion": "aria-live領域を用途別に定義: 1) 新着メッセージ（polite） 2) エラー/失敗��assertive） 3) Undoカウントダウンは毎秒読み上げず、[取り消し可能です(30秒)]など単発告知。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.3（PWA実装注記）",
+    "issue": "iOS Safariでネイティブスワイプバックを抑制する方針は、ブラウジング慣行と衝突し誤作動のリスクがある。",
+    "suggestion": "スワイプバック抑制はstandalone時のみ。ブラウザ内実行時はOS標準を尊重し、SPA内戻りは上部『←』で誘導。抑制条件/UA判定とフォールバックを明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（Undo）, §9.1（オフライン）",
+    "issue": "Undo 30秒の『タブ跨ぎ維持』は定義されているが、アプリがバックグラウンド/終了した場合の扱いが未定義。",
+    "suggestion": "Undo保留状態をIndexedDBに一時保存し、復帰時にバナー再提示（残時間に応じ短縮）するか、明示的に『アプリ終了でUndo不可』と仕様化。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.3��タスク提案カード『編集して登録』）",
+    "issue": "インライン編集の確定/キャンセルUIが未定義（保存/キャンセルボタン、バリデーション/エラー表示、キーボード確定の扱い）。",
+    "suggestion": "カード内に[登録]/[キャンセル]を明示し、必須項目未入力時のエラー、時間/日付ピッカーの挙動、確定後のカード縮退アニメーションを定義。Enter=送信、Esc=キャンセルのキーボード動作も追記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "ACCESSIBILITY",
+    "location": "ux_v1.md §7.4（ドラッグ&ドロップ並び替え）",
+    "issue": "ロングプレスでの並び替えにアクセシブルな代替操作がない。スクリーンリーダー/スイッチ操作で順序変更不可。",
+    "suggestion": "各タスク行の『…』メニューに『上へ/下へ/先頭/末尾』を追加、または編集モードでドラッグハンドルを表示。SRにはaria-grabbed/aria-dropeffectやMove Up/Downボタンを提供。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（Undo）, §6.2（トースト）, §1.1（タブ）",
+    "issue": "ボトムタブ/スナックバー/トーストのSafe Area対応が未定義で、ホームインジケータや折りたたみ端末での重なりリスク。",
+    "suggestion": "CSS env(safe-area-inset-bottom)とcalc()で下余白を加算。SnackBar/Toast位置=16px+safe-area、タブ=56px+safe-area、モーダル角丸とインセットも調整。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（S-36 QRスキャン）",
+    "issue": "カメラ権限拒否/恒久拒否時の代替導線が未定義。",
+    "suggestion": "拒否時: ガイドモーダル『設定からカメラを許可』+ [設定アプリを開く]リンク（可能環境のみ）/ 代替として『シェアリンクで招待』を提示。再試行ボタンも設置。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3（画像添付）/ ux_v1.md §3.2",
+    "issue": "画像添付のアップロード進捗/失敗（サイズ超過/非対応フォーマット/変換失敗）のUIが未定義。",
+    "suggestion": "添付サムネに送信中インジケータ/進捗、失敗時のエラーラベルと[再試行]/[削除]を実装。10MB超や変換失敗の明確な文言と制��値を表示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.5, §5.3 / ux_v1.md §13.3",
+    "issue": "Web Push未許可/非PWA環境ではリマインダーが届かない。設定画面にインストール/許可の強い誘導はあるが、未許可時の代替が弱い。",
+    "suggestion": "未許可時はGROW上部に常時リマインダー有効化バナー（非侵襲）と、当日分の時刻付きリストに『次のリマインダーまで◯分』インライン表示。オンボーディングでもPWA追加を再周知。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §4.1, §4.3, §7.3",
+    "issue": "MEサブタブの横スワイプ（タブ切替）とDISCOVER内の横スクロール（チップ/カード）が競合する恐れ。",
+    "suggestion": "水平スワイプの優先度を定義: コンテンツ内の水平スクロール開始時はサブタブ切替を無効化（一定閾値でパンをロック）。サブタブ切替はタブバーまたはコンテンツ余白でのスワイプに限定。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（時刻/日付ピッカー）, §11",
+    "issue": "時刻/日付ピッカーの12/24時間表記やロケール準拠が未定義（JST日次リセットは別途定義済み）。",
+    "suggestion": "入力type=time/dateのロケール準拠を前提に、表示はユーザーのOSロケールに従う旨を明記。JSTリセットは各所の説明文に『04:00 JST』のタイムゾーン注記を併記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §1.1（タブ命名）",
+    "issue": "「GROW」ラベルはブランド性が高い一方で、新規ユーザーには今日のタスク画面であることが直感的に伝わりにくい可能性。",
+    "suggestion": "初回起動時のみタブラベルに説明チップ『GROW=今日のやること』を重ねる、もしくはアクセシビリティラベルを『GROW（今日のタスク）』にする。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.4（history.pushStateポリシー）",
+    "issue": "モーダル/ドロワー表示で毎回pushStateすると、短時間に多数開閉した際にAndroidの戻るで何度も『閉じる』が必要になる可能性。",
+    "suggestion": "モーダル/ドロワーは『開く時のみpush、閉じるはreplace』のポリシーを追加。既に開いている状態で再度開く操作は無視して履歴を増やさない。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §6.4（スケルトン）",
+    "issue": "スケルトンのアニメーションは定義されているが、低電力/低性能端末での負荷軽減方針が未定義。",
+    "suggestion": "省データ/低電力モード検知（Network Information API/節電モード検知は限定的だがUA/ヒューリスティクス可）時はshimmer停止（静的プレースホルダー）に切替。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "ACCESSIBILITY",
+    "location": "ux_v1.md §1.4（戻りナビゲーション）, §3.5（ドロワー）",
+    "issue": "ドロワー/モーダルのフォーカストラップは定義済みだが、ドロワー自体のrole/aria属性が未定義。",
+    "suggestion": "ドロワーにrole=\"dialog\" aria-modal=\"true\" aria-label/labelledbyを付与し、開閉でフォーカスをトリガー要素に戻す。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "2.2.1 / 2.4 / 2.6",
+    "issue": "`core_spec.md` が 2.2.1 では `[required]` として完了扱いされている一方、2.4 では `[breaking]` の対象 file #1 として列挙され、2.6 でも files differ 集計から外れた形で説明されています。単一ファイルに対する分類が節ごとに揺れており、将来の運用で required と breaking のどちらの手順・証跡を適用すべきか判断不能になります。",
+    "suggestion": "`core_spec.md` の分類を 1 か所に正規化し、他節はその定義を参照する形へ統一してください。たとえば『分類は breaking だが実作業は新規追加相当』という補足を専用列で表現し、集計表・必須件数・files differ 件数にも同一ロジックを適用すると、後続メンテナが誤った運用をしにくくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "2.3 / 2.6",
+    "issue": "2.3 では `[optional]` を 7 件と定義しているのに対し、2.6 では files differ 21 件の内訳として scripts 8 件、docs/plans 3 件、CLAUDE.md / development_rules.md、settings.json、instructions 3 件など、7 件を大幅に超える optional 対象を列挙しています。末尾で『bookkeeping』と補足していますが、数え方の基準が不明で台帳としての信頼性が下がっています。",
+    "suggestion": "『migration エントリ数』と『差分ファイル数』を別指標として明示的に分離してください。たとえば 2.3 は“エントリ単位 7 件”、2.6 は“実ファイル単位 18 件”と表記し、フォルダ単位のテンプレ群を何件換算するかを脚注で固定すると、将来追加時にも集計ロジックのぶれを防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "3 Step 2-3",
+    "issue": "一般手順が `diff -ru` と `cp` による単純上書きを前提にしており、breaking / optional / required の分類差や archive 必須条件との接続が弱いです。特に 2.4 では archive snapshot と個別 tag が必須なのに、一般手順ではその分岐が見えず、運用者が誤ってそのまま上書きコミットするリスクがあります。",
+    "suggestion": "手順を分類別に分岐させてください。`[required] は追加のみ`, `[optional] は手動 merge 推奨`, `[breaking] は archive → diff 記録 → 個別 commit/tag 必須` という条件を Step 2-5 に組み込み、コマンド例も分類別に分けると、後日の手順逸脱による事故を防止できます��",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "3 Step 3",
+    "issue": "`cp` で直接本番管理下のファイルを置換する例は、既存パーミッション・改行コード・差分確認不足を招きやすく、特に scripts 配下の breaking 対象では将来のバグを生みやすいです。手順書がこの書き方だと、レビュー前に内容確認せず丸ごと上書きする運用が定着し、App 固有修正の消失や hook 破損の温床になります。",
+    "suggestion": "`install` や `git diff --no-index`、もしくは patch 適用を前提にした安全な手順へ変更してください。最低でも『cp 前後で diff を確認』『breaking は archive 作成後のみ許可』『optional は手動 merge』を追記し、単純コピーを推奨手順から外すことで、将来の意図しない上書き事故を減らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "4",
+    "issue": "例外手順で要求している `// MODIFIED: BROKE GENERATED CONTRACT` コメントは、Markdown や JSON など言語非依存ファイルにも同一表記を求めています。`core_spec.md` や `dev-system-generated.json` ���ような対象では文法的に不正、あるいは仕様上のノイズとなりうるため、実運用で形式破壊や lint エラーの原因になります。",
+    "suggestion": "コメント方式をファイル種別ごとに定義してください。たとえば Markdown は HTML コメント、JSON は隣接する `.override.md` 記録、Shell は `#` コメント、コメント不能ファイルは decision_log のみで代替といったルールに分けると、例外運用でもファイル形式を壊さずに済みます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "2.2.4 / 3 / 5",
+    "issue": "scripts 群の追加や nightly 系ジョブの導入が列挙されていますが、依存関係・実行条件・OS 前提がこの文書だけでは追えません。特に `launchd` 前提の install/uninstall を required としつつ、適用対象環境の記述がないため、非 macOS 環境や CI で誤用されると導入不能・未検証状態のまま必須扱いになる恐れがあります。",
+    "suggestion": "required scripts について、各ファイルの目的・依存コマンド・対象 OS・CI 実行可否を表形式で追加してください。最低限 `launchd` 系は macOS 限定であること、��環境では skip 可能か代替策があるかを明記すると、保守時の誤適用を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.4",
+    "issue": "breaking 対象 tag 名が `v0.1.0-phase3-breaking-1` から `-3` まで個別指定されている一方で、表の #1 は `core_spec.md` に対応しており、scripts 側は #2-#4 です。番号体系が対象種別と一致しておらず、将来参照時に『どの tag がどの file に対応するか』を毎回読み解く必要があり、追跡性が低下しています。",
+    "suggestion": "tag 名をファイル名ベース、または表の通し番号と完全一致する命名に変更してください。例として `v0.1.0-breaking-core-spec` や `v0.1.0-breaking-04-main-session-writeguard` のようにすれば、監査や復旧時の検索性が上がり、運用ミスも減ります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体",
+    "issue": "文書全体で `retro merge`, `bookkeeping`, `SSoT`, `App 化マーカー`, `実質 [required] 扱い` など独自語彙が多く、定義が散在しています。現時点では関係者が理解できても、後日別担��者が読むと分類・集計・手順の意味を誤解しやすく、保守文書としての可読性が下がります。",
+    "suggestion": "冒頭に用語集を追加し、分類・件数・ファイル数・エントリ数の定義を統一してください。略語や独自表現は初出で正式定義し、節内で別意味に使わないよう整理すると、文書が SSoT としてより再利用しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0252,
+    "input_tokens": 3732,
+    "output_tokens": 2057,
+    "model_id": "gpt-5.4"
+  }
+]

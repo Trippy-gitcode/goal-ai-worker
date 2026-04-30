@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"FEASIBILITY\",\n    \"location\": \"§4.4\",\n    \"issue\": \"フルスクリーンカメラ（S-36）からブラウザバックやスワイプバックで離脱した際、カメラストリーム（MediaStreamTrack）を明示的に停止するライフサイクル処理が定義されていない。SPAでは自動解放されないため、カメラが起動し続けプライバシー警告やバッテリー消費の障害となる。\",\n    \"suggestion\": \"S-36コンポーネントのアンマウント時（useEffectのcleanup関数内）およびpopstateイベント検知時に、必ず `track.stop()` を実行してカメラリソースを解放する仕様を追記する。\"\n  },\n  {\n    \"id\": \"R-002\",\n    \"severity\": \"HIGH\",\n    \"category\": \"FEASIBILITY\",\n    \"location\": \"",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

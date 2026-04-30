@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「利用規約」と「プライバシーポリシー」テキストリンク（同意文）",
+    "issue": "インラインリンクが色のみで識別され、下線がない。WCAG 1.4.1およびデザインシステム§2.2（インラインは必ず下線）に不適合。",
+    "suggestion": "リンクに常時 text-decoration: underline を付与し、:focus-visible で3pxのaccentアウトラインを表示。hover/pressedは下線太さやaccent-subtle背景で状態差を補助。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面最下部の「ログイン」テキストリンク",
+    "issue": "インラインリンクが色のみで強調され下線がない。WCAG 1.4.1 + デザインシステム§2.2の要件未満。",
+    "suggestion": "常時下線を付けるか、Ghost/Secondaryボタン化してボタンとして認識できる視覚言語に変更。キーボードフォーカス時のアウトラインも明��。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s14_goal_detail",
+    "location": "ヘッダー直下の「60%」巨大数値＋進捗バー",
+    "issue": "デザインシステムNG「ヒーローメトリクス（大数字+小ラベル）」に該当。ブランドの「静かな情報設計」に反し、大数字が主役化して視覚の重心が乱れる。",
+    "suggestion": "ゴール名を主見出しに据え、進捗%はバー右端の小さな補助テキスト（14–16px）へ縮小。必要ならバー内に細身の数値ラベルを重ね、全体の余白（上+8〜12px）で呼吸感を確保。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「…に同意します」チェックボックス一帯",
+    "issue": "チェックボックスの見かけサイズ/タップ領域が44px未満に見える。デザインシステム§4.5（最小44×44）およびWCAG 2.5.5要件に不適合の恐れ。",
+    "suggestion": "見た目24pxでもlabel全体に透明パディング/::beforeで44×44のヒットボックスを確保。行間も+4〜8px拡張して誤タップを防止。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択（タイプA/B/C）",
+    "issue": "絵文字風の汎用シルエットで既視感が強く、AI生成プロトタイプ的に見える。独自の視覚的個性が立っていない。",
+    "suggestion": "§6.3の方針に沿い、フラットベクター＋1段濃淡の塗り・枠なし・テーマ別パレットで「Laisらしさ」を明確化。選択状態はaccent-subtleのピルと微細なspring-scaleで品よく演出。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "CTAボタン/チャットバブル/標準角丸の組み合わせ全般",
+    "issue": "濃いブルーのプライマリ、汎用バブル、平均的な角丸でマテリアル既定/生成UIに近く、ブランドDNAの「実世界に溶け込む独自性」が希薄。",
+    "suggestion": "アクセントの出番を厳選（Primaryは重要局面のみ）、Secondary/Ghost/アクセントsubtleの比率を上げる。見出しの字間(-0.5px)と和文行間(1.7)を徹底し、seedling/アバター微要素やテーマ色の繊細な使い分けで“Laisの手触り”を付与。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s30_me",
+    "location": "基本情報リスト（名前/年齢/職業/趣味）周辺の区切り線",
+    "issue": "各行に実線ボーダーが連続し、行間も詰まり気味で圧迫感がある。Open Air原則に反し、視線が断続的に分断される。",
+    "suggestion": "ボーダーはセクション単位に限定し、行ごとの常時ボーダーは撤廃。行間+8px、セクション間+16px拡張。ホバー/編集中のみsubtle背景で区切り、通常時は余白で整える。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内のCTA（登録する/編集して登録）",
+    "issue": "濃色の塗りボタンが会話本文より強く主張し、視線がCTAに吸い寄せられて“設計された沈黙”が壊れている。",
+    "suggestion": "主要CTAを1つに絞りSecondary（accent-subtle）へ、もう一方は下線付きテキストリンクに。カード上下の余白+8〜12px、左ボーダーのみでアクセントを最小限にし、本文＞カード＞CTAの視覚階層を回復。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s12_task_add",
+    "location": "所要時間チップ（5/15/30/60/90分）",
+    "issue": "視覚高さが小さく、タップ領域44pxを満たしていない可能性。チップ密集により誤タップリスクもある。",
+    "suggestion": "上下に透明パディングを追加して44pxミニマムを保証。左右間隔も+4px拡張し、選択時はアクセントsubtle背景と太字で明確化。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾「+ タスクを追加」",
+    "issue": "色と記号のみでリンク性を示しており、下線がないため非色依存の手掛かりが弱い。",
+    "suggestion": "インライン運用なら常時下線を付与。もしくはGhostボタン（+アイコン＋ラベル）へ昇格し、コンポーネントとしての一貫した操作手掛かりを提供。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s00_splash",
+    "location": "セカンダリ「ログイン」アウトラインボタンの境界線",
+    "issue": "背景とのボーダーコントラストが弱く見え、非テキストコントラスト（1.4.11の3:1）を下回る懸念がある。",
+    "suggestion": "ボーダーを--border-strong相当に濃色化し��hover/pressed/focusではaccent-subtleの背景を併用。角丸/影で浮き上がりも最小限補強。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "タイムライン行の右端カラー・ドット（ゴール紐付け表示）",
+    "issue": "属性の識別が色のみで行われているように見え、色覚多様性に配慮した代替手掛かりが不足。",
+    "suggestion": "ドット形状（枠/中塗り/二重円）や小アイコン、ラベル（短いカテゴリ名）を併用。Overdueの左バー同様に“色以外”の差を追加して可読性を向上。",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

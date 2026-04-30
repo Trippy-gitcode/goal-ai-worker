@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダル上部のトグル（「単発タスク／習慣」）",
+    "issue": "UX仕様 §2.3 の入力順「a. 種別: [単発タスク]/[習慣]」で明示されている『種別』ラベルが表示されていない（要素不在）。",
+    "suggestion": "トグルの直上にラベル『種別』を追加（font-size:14px, color:var(--text-hint)）。例: <label>種別</label> の下に [単発タスク][習慣] のピルを配置。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "ヘッダー下部ボーダー",
+    "issue": "border-bottom: 1px solid rgba(110,118,129,0.4) の直指定。Night Sky の --border / --border-strong トークン未使用（色値逸脱）。",
+    "suggestion": "border-bottom をトークン化: border-bottom:1px solid var(--border)（または var(--border-strong)）。不透明値で統一し、必要なら専用サブトークンを追加して管理。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域のEXPバー",
+    "issue": "EXPバーの高さが 4px（styleでheight:4px）。UX仕様 §2.2『通常状態: 高さ8px』と不一致。",
+    "suggestion": "EXPバーの高さを 8px（height:8px; border-radius:999px）に修正し、スクロール時の縮小（通常8px→縮小時4px）をアニメーションで実装。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "ヒーロー領域のEXPバー",
+    "issue": "EXPバーの高さが 3px。UX仕様 §2.2『通常状態: 高さ8px』に満たない。",
+    "suggestion": "GROWと同一仕様に合わせ、通常時は高さ8pxに。コンパクト表現が必要な場合も『縮小時4px』の範囲で統一。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾〜Goalsセクション先頭の間隔",
+    "issue": "セクション間隔が 28px（margin-bottom:28px）。DS §4.2『セクション間≧32px』に未達。",
+    "suggestion": "Todayブロックのボトムマージン、またはGoalsヘッダーのトップマージンを調整し、合計≥32px（推奨40px）を確保。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "ALL",
+    "location": "区切り線・境界線（例: s30_me 基本情報行の区切り、s14_goal_detail タスク行のボーダー、s20_talk 入力バー上のボーダー等）",
+    "issue": "rgba(72,79,88,0.2〜0.4) などアルファ付きの直指定が散見。DS §5.1の --border / --border-strong を経由しておらず色管理が分散。",
+    "suggestion": "全ボーダーを var(--border) / var(--border-strong) に統一（不透明値）。濃淡が必要ならサブトークン（--border-muted など）をDSに追加して一元管理。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード（AIバブル直下）",
+    "issue": "margin-left:6px により、チャット列の垂直グリッドからわずかに外れ、左端が揃わない。読み線が分断される。",
+    "suggestion": "カードの左右位置をメッセージ本文のグリッドに合わせて再整列（例: 左端=コンテナ24pxパディングに���える、不要な6pxインデントを削除）。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Todayヘッダー配下の進捗テキスト『1 / 4 completed』",
+    "issue": "font-size:11px（--font-size-xs）で要約情報としては視認性が弱い。DS §3.2では11pxはキャプション/時刻専用の想定。",
+    "suggestion": "進捗サマリーは --font-size-sm 14px + color:var(--text-secondary) へ引き上げ、情報階層の重要度に見合うサイズに。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "タスク行右端のゴール色ドット（オレンジ #E8A855）と『進行中』インジケータの色相",
+    "issue": "カテゴリ色（オレンジ系）と状態色（警告/注意=アンバー系）との色相近接により、色覚多様性の文脈で誤認のリスクがある。",
+    "suggestion": "カテゴリ色はブランドアクセント系（例: #A5D6FF）や彩度控えめの中立色に寄せ、状態色（warning/danger/success）と役割分離。形状（アイコン/パターン）も併用して冗長化。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

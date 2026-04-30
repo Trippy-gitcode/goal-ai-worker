@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "検討中の 3 案",
+    "issue": "アーキテクチャ案に3層テスト戦略（L1/L2/L3）および完了コマンド3区分（cmd-unit/cmd-e2e/cmd-realworld）の実行・評価責務の割り当てが完全に欠落している。Orchestratorがどのテスト層を管轄するのか不明なため、品質ゲートが機能しない。",
+    "suggestion": "各案（特に案A/B）に対し、ENGがL1/L2（cmd-unit）を実行・証明し、独立したOrchestratorがL3/統合E2E（cmd-e2e/cmd-realworld）を検証する責務分界を明記すること。テスト層と実行主体のマッピングがないと自動化が破綻する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "案C: 全役兼任",
+    "issue": "案Cは全役兼任によりStage 2独立性が消滅するとあるが、これはBug O（同一セッションself-critique限界）の根本原因そのものであり、テストアンチパターン（自己正当化バイアスによる欠陥見逃し）を助長する致命的な設計である。",
+    "suggestion": "案Cは品質最優先の原則に完全に反するため、採用候補から即時除外すること。万が一残す場合は、外部の独立したテスト実行環境（CI等）による強制的な品質ゲート（G8等）の通過を必須とし、AIの自己評価に依存しない仕組みを構築すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "案A / 案B Orchestrator",
+    "issue": "Orchestrator（daemon）による自動レビューの具体的な品質ゲート基準（L1スモーク5項目の網羅性、SKIPルールの一貫性など）が定義されていない。基準が曖昧なまま自動化すると、誤検知による全FAILや見逃しによる全PASSを引き起こす。",
+    "suggestion": "Orchestratorの自動レビュー要件として、L1スモーク5項目の全パス、TDD証跡（G8）の確認、および厳格なSKIPルールの適用を必須とする品質ゲート仕様（§9統合E2E等）を明記すること。機械的な合否判定基準の定義が不可欠である。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "前提条件 5. 既存 PD-110",
+    "issue": "「Hフロー承認主体は ADV/PO 限定、AI 自律承認禁止」とあるが、Orchestrator（AI）が自動レビューを行う際の「レビュー完了」と「承認」の境界が不明確。テスト結果（cmd-realworld等）の機械的検証と、POによる最終承認のプロセスが混同されるリスクがある。",
+    "suggestion": "Orchestratorは「機械可検証なテスト（L1-L3）の合否判定とTDD証跡の収集」のみを自律的に行い、その客観的証拠をPO/ADVに提示して最終承認（Hフロー）を仰ぐという、品質ゲートの2段階構造（自動検証＋人間承認）を明確化すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "背景 / Bug O 事例",
+    "issue": "Bug Oの事例において、別セッションENGが14件���バグを検出したとあるが、これが静的解析（レビュー）によるものか、動的テスト（L1/L2/L3）の実行によるものか不明。レビューのみに依存すると、実行時エラー（認証追加の漏れ等）を見逃す。",
+    "suggestion": "Bug Oの再発防止策として、セッション分離によるLLMの静的レビューだけでなく、統合E2Eテスト（§9新設相当）の自動実行と完了コマンドによる機械的な動作証明をアーキテクチャの必須要件に組み込むこと。動的テストの裏付けなしでは品質は担保できない。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  }
+]

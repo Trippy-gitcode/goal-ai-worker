@@ -1,0 +1,292 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "2.1 フロー（全レビュー種別共通）",
+    "issue": "CRITICALが0になるまで修正ラウンド（diffレビュー）を繰り返す停止条件が定義されておらず、無限ラリー/コスト暴騰のリスクがある",
+    "suggestion": "修正ラウンドの最大回数/総APIコール上限/経過時間上限を設定し、閾値超過時は自動エスカレーション（人間PO/QA承認ゲート）→集中トリアージ→ゴールデン1回で打切り、の強制収束パスを定義する",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "2.1 フロー（全レビュー種別共通）",
+    "issue": "ゴールデンレビューを最大2回としているが、それでもCRITICAL=0にならない場合の代替パス/最終判断者が未定義",
+    "suggestion": "ゴールデン2回でCRITICAL>0なら、人間POの承認ゲートで「例外承認（ワイバー） or ブロック」判定。ワイバーは期限付き・リスク記録・次Phaseの必須項目化を義務付ける",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "全体（2.1/2.2/2.3）",
+    "issue": "AI間で完結する設計で人間の最終承認ポイントが明確でなく、AIの裁量が過大",
+    "suggestion": "RACIを定義：最終承認者は人間PO。CRITICALのクローズ/格下げ/棄却は必ず人間承認を要する。AIは提案・集約・エビデンス提示に限定",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2.3 信頼度スコアリング",
+    "issue": "信頼度Bのペルソナが出したCRITICALを自動でHIGH扱いにする設計は、重大欠陥の見逃しを誘発しうる",
+    "suggestion": "CRITICALは出所に関わらずブロッカー扱いを維持。格下げには「2者以上の独立同意＋人間承認」を必須化。Bは“要トリアージ”フラグ付与のみに留める",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "2.3 信頼度スコアリング",
+    "issue": "false positiveの定義・判定者・計測単位（重複指摘の扱い等）が未定義で、スコアが恣意的になりうる",
+    "suggestion": "FP定義を明文化（人間審判による最終却下、理由コード付与）。重複クラスタ単位で1カウントに正規化。最小母数（例: 30件）未満は評価保留",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.3 信頼度スコアリング",
+    "issue": "修正採用率はPOの工数やスコープ都合で歪み、レビュア品質を正しく反映しない",
+    "suggestion": "採用率ではなく“正当性判定率（人間審判が妥当と判断）”を主指標に。重み付けはSeverity加重・新規性（重複除外）・再現性を考慮",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2.1 フロー（全レビュー種別共通）",
+    "issue": "モデル間・ペルソナ間で相反する指摘が出た際のコンフリクト解消ルールがない",
+    "suggestion": "アグリゲータを定義：重複統合→相反項目は根拠比較・影響分析・サンプル/仕様該当箇所引用を必須化し、最終は人間承認で裁定",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.1 フロー（全レビュー種別共通）",
+    "issue": "diffのみのレビューは局所最適化を招き、広域影響（設計原則違反、横断整合性崩れ）���見落とす恐れ",
+    "suggestion": "影響範囲推定により“関連セクション自動追従スキャン”を導入。設計不変条件（例: DSルール、アクセシビリティ基準）に違反時は部分的フルスキャンを自動発火",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 動的主審選定ルール",
+    "issue": "上位主審の固定は探索が止まり、長期的に見落としが増える“探索-活用”の偏りを生む",
+    "suggestion": "ε-greedy等で主審枠の一部を探索に割当（例: 20%はランダム/ローテ）。スコアは時系列減衰・最近データを高加重化",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "3.1 A. デザインモックアップレビュー",
+    "issue": "artist/illustrator/manga_cover/ad_designerなど役割が重複し、ソロ体制には過多",
+    "suggestion": "Aは3枠に集約：UI/UX（web_designer）、Brand/Visual（ad_designer or artist統合）、A11y/Color（a11y_expert+color_coordinator統合）。特殊視点（manga_cover）はスポット起用へ",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3.2 B. アプリ仕様レビュー",
+    "issue": "プロダクト分析/テレメトリ設計の視点が欠落",
+    "suggestion": "product_analytics（計測設計、KPI/イベント定義、実装可観測性）ペルソナを追加し、実装前にトラッキング仕様をレビュー",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "3.2 B. アプリ仕様レビュー",
+    "issue": "法務/プライバシー・規制準拠（特にログ・分析・課金周り）の観点が弱い",
+    "suggestion": "privacy_complianceペルソナを追加（データ保持/同意/ToS/地域規制）。軽量なチェックリストで初期はオンデマンド実行",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-013",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "3.3 C. 開発システム仕様レビュー",
+    "issue": "レビュー基盤のコスト・クォータ管理（APIコール上限、モデル切替、失敗時フォールバック）が未定義で、過去のコスト増問題が再発する",
+    "suggestion": "budget_controller（ai_ops or devops）を定義。フェーズ別/日次コール上限、しきい値超過時の自動降格（2モデル→1モデル、全員→主審のみ）とレポー��/承認フローを実装",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "2.1 フロー（全レビュー種別共通）",
+    "issue": "ランナウェイ防止の運用ガード（早期打切り、失敗時リトライ/バックオフ、ヘルスチェック）がない",
+    "suggestion": "失敗時の指数バックオフ＋最大試行回数、フェーズ別SLO（最大ラウンド/最大日数）、しきい値到達で「中間リリース不可・要人間トリアージ」に強制遷移",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "AIの誤判定・誤提案を採用した後のリカバリ手順（ロールバック/ロールフォワード/再トリアージ）が未定義",
+    "suggestion": "変更管理を標準化：提案→採用理由→影響範囲→リリース前/後チェックリスト→失敗時のロールバック手順。ワイバーは期限・再検証条件・責任者を明記",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "全体（用語）",
+    "issue": "Severity定義（CRITICAL/HIGH等）の基準と例示がなく、判定がブレる",
+    "suggestion": "明確なSeverityポリシーを策定（影響範囲/可逆性/潜在損失/法的影響）。CRITICALは出荷ブロック、HIGHは人間承認必須等の運用規則を紐付け",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.1 フロー（全レビュー種別共通）",
+    "issue": "DoDを“CRITICAL=0”に置くと、ラベリングの恣意性（格下げ/分割）により目標が形骸化し得る",
+    "suggestion": "DoDは多軸化：CRITICAL=0＋HIGH≤N＋重複率≤X%＋リグレッションテスト/静的チェック全通過。ランダムサンプリングの独立監査を導入",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2.2/2.3",
+    "issue": "重複/派生指摘の取り扱いがなく、指摘数やFP率が膨張する",
+    "suggestion": "指摘をクラスタリング（ハッシュ化/類似度）して正規化。スコアリングはクラスタ単位で集計。代表指摘に統合表示",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.1 フロー（全レビュー種別共通）",
+    "issue": "常に2モデル×全ペルソナのゴールデンはコスト過多になりがち",
+    "suggestion": "リスクベースでゴールデンを条件付き実行（直近の差分スコア、残存HIGH数、影響範囲）。低リスクは主審＋哨戒（shadow）1名で終了",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.1 フロー（全レビュー種別共通）",
+    "issue": "常時2モデル運用は冗長で、低リスク領域では費用対効果が低い",
+    "suggestion": "デフォルトは単一モデル、ハイリスク/不一致時のみクロスモデル検証に昇格する段階的モデル戦略を採用",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-021",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2.3 信頼度スコアリング",
+    "issue": "false positive判定やCRITICAL棄却にAI（ADV）が関与する設計は、自己審判バイアスを生む",
+    "suggestion": "最終判定は人間（PO/QA）が実施。AIはエビデンス提示と根拠比較に限定。AI間の相互評価は参考情報として別集計",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（運用）",
+    "issue": "プロンプト/成果物に含まれる機密・個人情報の取り扱いが未記載",
+    "suggestion": "データガバナンスポリシーを定義（マスキング/最小権限/保存期間/PII禁止）。外部モデル送信前の自動レダクションを導入",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "2.1 & 3.1",
+    "issue": "A種別（スクショ/ビジュアル）のdiffレビューはテキストdiffでは不十分で実装困難",
+    "suggestion": "HTMLはDOM/アクセシビリティツリー差分、画像は視覚差分（SSIM/ヒートマップ）＋コンポーネント粒度での差分注釈を採用",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "2.3 信頼度スコアリング",
+    "issue": "信頼度を“ペルソナ”単位で集計するとモデル依存の性能差が混在する",
+    "suggestion": "スコアはペルソナ×モデルのペア単位で管理し、モデル変更時はスコアをリセット/低重み初期化",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "2.3 信頼度スコアリング",
+    "issue": "スコアの時系列劣化/再学習（古い実績が残り続ける）に関する��ールがない",
+    "suggestion": "時間減衰（例: 30日ハーフライフ）と最近ラウンド高加重、バージョン/ドメイン切替時のスコア再初期化ルールを導入",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-026",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2.2 動的主審選定ルール",
+    "issue": "主審選定をAI（Code）が自動で行うが、選定根拠の可監査性/恣意性対策がない",
+    "suggestion": "選定理由・指標・母数をログ化し、人間POが承認/差替できるUIを用意。しきい値/重みは設定可能にする",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（可観測性）",
+    "issue": "レビュー基盤の健全性を監視するメトリクス/ダッシュボードが記載なし",
+    "suggestion": "主要KPIを可視化（1ラウンド当たりコール数、重複率、FP率、残存CRITICAL、TTF収束）。異常時のアラート/自動セーフモードを実装",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（品質検証）",
+    "issue": "レビューフローの精度検証（基準集合に対する再現率・適合率）���枠組みがない",
+    "suggestion": "既知不具合を埋め込んだゴールデンセットでA/B評価し、閾値（Precision/Recall）を満たさない場合は主審/モデル/フローを自動調整",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-029",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（ソロ開発者体験）",
+    "issue": "多人数ペルソナの指摘をソロで捌く負荷が高い",
+    "suggestion": "集約サマライザを常設し、上位リスク順にキュレーション（重複折畳み/推奨対応順/所要時間目安）で提示。1クリックでワイバー/対応/保留を記録",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

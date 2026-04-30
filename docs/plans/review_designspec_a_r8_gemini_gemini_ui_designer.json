@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§5.0",
+    "issue": "「真のdisabled」状態のスタイル規定（`opacity: 0.5`のみ）は、特にLightテーマにおいて、ボタンの背景色と文字色のコントラスト比を著しく低下させ、WCAGのアクセシビリティ基準を満たさなくなる可能性が極めて高いです。このまま実装すると、視認性が低い操作不能なUIとなり、アクセシビリティ上の重大な欠陥に直結します。",
+    "suggestion": "disabled状態専用のカラートークン（例: `--button-primary-bg-disabled`, `--button-primary-text-disabled`）をテーマごとに定義し、いかなるテーマでも最低限のコントラスト比（例: 4.5:1）が担保されるように規定を修正してください。`opacity`のみに依存する実装は避けるべきです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.1, §5.x",
+    "issue": "デザインシステム内で`--accent-hover`トークンは定義されていますが、プライマリCTA、セカンダリCTA、タスク行、ゴール行、リンクなど、主要なインタラクティブコンポーネントのホバー（マウスオーバー）状態のスタイルが一切定義されていません。",
+    "suggestion": "各インタラクティブコンポーネントに対して、ホバー時の具体的なスタイル（背景色、文字色、ボーダー色など）を定義してください。これにより、実装のばらつきを防ぎ、一貫したユーザー体験を提供できます。例えば、`--button-primary-bg-hover`のような専用トークンを定義することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.10",
+    "issue": "S-30 ME画面のサブタブについて、Phase Aスコープでは`PROFILE`タブのみが定義されています。`DISCOVER` / `FRIENDS` / `SHOP`タブをタップした際の挙動が未定義のため、実装者が判断できません。",
+    "suggestion": "Phase Aにおける`DISCOVER` / `FRIENDS` / `SHOP`タブの挙動を明確に定義してください。例えば、「タップ不可（`pointer-events: none`）とする」「タップ可能だが、空の画面または『準備中』と表示する」などの仕様を追記する必要があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.7",
+    "issue": "S-14 Goal Detail画面のアクションボタン行にある「編集」ボタン（S14-10b）について、タップした際の挙動が定義されていません。S-13のようにインライン編集に切り替わるのか、S-15のようなモーダルが開くのかが不明で、このままでは実装を進められません。",
+    "suggestion": "「編集」ボタンをタップした後の画面遷移やインタラクション（例: 「S-15 Goal Createモーダルを編集モードで開く」など）を具体的に定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§5.1",
+    "issue": "ボトムタブバーのInactive（非選択）状態のタブが、アイコンのみでラベル（GROW, TALK, ME）を表示しない仕様になっています。§6.5で`aria-label`によるスクリーンリーダー対応は規定されていますが、視覚的にはアイコンの意味が直感的に分からないユーザーにとって、ナビゲーションのユーザビリティを損なうリスクがあります。",
+    "suggestion": "ユーザビリティ向上のため、Inactive状態のタブにもラベルを常時表示することを検討してください。もしデザイン原則としてミニマルさを優先する場合は、その設計判断の根拠を明記しておくべきです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.4",
+    "issue": "S-10 GROW画面のタスク行において、「予定」「進行中」「完了」の3つの状態が定義されていますが、タスクが「予定」から「進行中」に切り替わるトリガー（条件やユーザー操作）が不明確です。",
+    "suggestion": "タスクの状態遷移ロジックを明確にしてください。例えば、「タスクの開始時刻になったら自動で『進行中』に切り替わる」「ユーザーが手動でタイマーを開始したら切り替わる」など、具体的なUXフローを定義する必要があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.9",
+    "issue": "S-20 TALK画面のヘッダ（S20-1）に配置されている時計アイコン（🕐）と新規チャットアイコン（📝）の機能が定義されていません。`aria-label`は存在しますが、タップした際の具体的な挙動が不明です。",
+    "suggestion": "各アイコンをタップした際の機能を定義してください。例えば、「🕐: 時刻関連のショートカットを表示」「📝: 現在の会話をクリアして新しいセッションを開始」といった仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§6.5",
+    "issue": "破壊的ボタン（`--danger-solid`背景）のフォーカスリングを、ブランドカラーである`--accent`で統一するルールには、視認性低下のリスクがあります。テーマや色の組み合わせによっては、赤系の背景色の上で青系のフォーカスリングが十分なコントラストを保て��、フォーカス状態が認識しにくくなる可能性があります。",
+    "suggestion": "フォーカスリングの色は、背景色を問わず常に高い視認性を確保できる色（例: `CanvasText`や白黒反転色）を使用するか、`--danger-solid`背景用のフォーカスリングカラートークン（例: `--focus-ring-on-danger`）を別途定義することを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.9",
+    "issue": "S-20 TALK画面のユーザーメッセージバブル（S20-4）の角丸に、`radius: 12px 4px 12px 12px`というトークン外の値が指定されています。これはデザインシステムの一貫性を損なう可能性があります。",
+    "suggestion": "このような例外的な角丸を許容するか、あるいはデザインシステムで管理するかの指針を明確にすべきです。もし多用されるパターンであれば、`--radius-bubble`のような意味的なトークンとしてデザインシステムに追加することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.9",
+    "issue": "Undo操作用のスナックバーの表示持続時間が30秒と設定されています。これは一般的なUIパターン（5〜10秒）と比較して非常に長く、ユーザーが操作を完了したと誤認した後に意図せずUndoしてしまう可能性があります。",
+    "suggestion": "持続時間を一般的な5〜10秒程度に短縮することを検討してください。もし30秒という長い時間に意図がある場合は、そのUX的な根拠を仕様書に明記することが望ましいです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.10",
+    "issue": "S-30 ME画面の基本情報セクション（S30-3）におけるインライン編集の自動保存について、API通信が失敗した場合の挙動（エラーハンドリング）が定義されていません。",
+    "suggestion": "通信失敗時にユーザーにフィードバックする方法を定義してください。例えば、「エラーメッセージのトーストを表示し、入力値を編集前の状態に戻す」や「再試行ボタンを表示する」などの仕様が必要です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§6.5",
+    "issue": "アクセシビリティの`aria-label`必須リストは良い取り組みですが、網羅性に懸念があります。例えば、タスク行のチェックボックスなど、ラベルとの関連付け（`aria-labelledby`など）が必要な要素が他にも存在する可能性があります。",
+    "suggestion": "実装フェーズで、スクリーンリーダーを用いたアクセシビリティテストを必須項目とし、インタラクティブな全要素の読み上げが適切に行われることを確認するプロセスを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §7.5 / components/screens/AuthCallback.jsx",
+    "issue": "ウェルカム演出の表示保持時間がトークン --duration-celebration(800ms) と不一致。コード側で WELCOME_HOLD_MS=900ms をハードコードしており、「トークンに合わせる」とのコメントと矛盾する。",
+    "suggestion": "保持時間をトークンに厳密同期させる。例: const dur = getComputedStyle(document.documentElement).getPropertyValue('--duration-celebration'); トークン値(ms/s)を数値にパースして setTimeout に使用、または animationend をリッスンして遷移。prefers-reduced-motion の場合は 0ms/スキップのままで可。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "components/screens/AuthCallback.css",
+    "issue": "フォントサイズが 14px / 20px と生値指定で、タイポグラフィの離散スケール/トークン未使用。デザインシステム準拠性の観点で将来の一括調整やテーマ対応が困難になる。",
+    "suggestion": "タイポグラフィトークン(例: --font-size-sm, --font-size-lg 等)に置換。スケールが未定義なら design_system のタイポグラフィ節に追記し、auth-callback-text と auth-callback-welcome-text ともに var(--font-size-*) を使用する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "components/screens/AuthCallback.jsx（ファイル先頭コメント）/ ミッション定義「スコープ外」",
+    "issue": "本ミッションは「Supabase メール確認 PKCE のみ」を対象としているが、コンポーネントコメントに OAuth を含む汎用受け口である旨が記載されており、仕様外の機能スコープ拡張が読み取れる（仕様外追加）。",
+    "suggestion": "本ミッション範囲に明確化: コメントを PKCE メール確認に限定する記述へ修正。将来の OAuth 受け口対応は別ミッションで追記するか、実装としては現状の挙動を維持してもよいが、仕様外対応である旨を明記し、検証・テスト計画に反映する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1.md §4.2（成功時遷移のモーション）/ AuthCallback",
+    "issue": "§4.2 では成功時に「ease-out / --duration-normal で次画面��」とあるが、AuthCallback からの画面遷移には明示的な遷移モーションはなく即時 route。§4.2 が S-01 専用で AuthCallback は適用外とも読めるため解釈が分かれる。",
+    "suggestion": "AuthCallback は §4.2 の対象外である旨を設計書に明記するか、もし適用したい場合はコンテナにフェードアウト(transition: opacity var(--duration-normal) var(--ease-out))等の遷移モーションを追加してから route する設計に統一する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "TEXT_CONTRAST",
+    "screen": "s14_goal_detail",
+    "location": "画面下部のアクション行「削除」ボタン（枠線ボタン）",
+    "issue": "文字色 #F85149（danger）× 背景 #161B22（surface）のコントラストが約4.19:1でAA 4.5:1を下回る。",
+    "suggestion": "デザインシステム準拠のsolid版を使用（background: var(--button-danger-bg) #DA3633 + color: var(--button-danger-fg) #FFFFFF）。もしくは枠線ボタンのままにする場合は文字色を #DA3633 など濃度を上げて4.5:1以上を確保。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Todayタスクリストの直下（Goalsセクションの直前）",
+    "issue": "セクション間マージンが28px（margin-bottom:28px）で、DS §4.2の基準（セクション間≧32px）を満たしていない。",
+    "suggestion": "Todayセクション末尾の余白を32–40pxに拡張し、情報ブロック間の「間」を明確化。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」同意文",
+    "issue": "日本語本文のline-heightが1.5指定で、DS §3.4の推奨（--line-height-ja-body:1.7）より詰まり気味。可読性と品位を損なう恐れ。",
+    "suggestion": "同意文のline-heightを var(--line-height-ja-body)（1.7）に設定し、句読点周りの余白感を確保。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "ハーフモーダルのヘッダー「企画書を仕上げる」右側の緑チェックアイコン",
+    "issue": "タイトルと大きな完了アイコンが対峙し、視線が左右に分断。Zフローが乱れて読み始めが安定しない。",
+    "suggestion": "完了状態はタイトル直下の小さなラベル（例「完了済み」）に集約し、右肩の大型アイコンは削除 or 20px程度に縮小して左側へ寄せる。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "ヘッダー下ボーダー/入力バー上ボーダー（border-bottom/top: 1px solid rgba(72,79,88,0.4)・rgba(110,118,129,0.4))",
+    "issue": "ボーダー色をRGBA直指定しており、DSの色トークン（--border / --border-strong）から乖離。",
+    "suggestion": "border-colorを var(--border) または var(--border-strong) に置換。必要ならテーマ別のsubtle/alphaトークンを定義して運用（例: --border-subtle: color-mix）。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内ボタン群（「登録する」「編集して登録」「✕」）",
+    "issue": "同一行に主要CTA2つ＋✕が密集し、余白リズムが詰まり気味。主要行動の優先度が曖昧になる。",
+    "suggestion": "✕はカード右上の独立アイコンとして分離し、主要CTA2つは横並びで間隔を12–16pxに拡張。もしくは主要CTA+テキストリンク（編集）に簡素化。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s15_goal_create",
+    "location": "「カテゴリ」チップ群と「+ 最初のタスクを追加」リンクの間（margin-bottom:24px）",
+    "issue": "セクション間の余白が24pxでDS基準（≧32px）未満。視線が次要素へ流れ急ぎ、呼吸感が不足。",
+    "suggestion": "カテゴリブロック末尾の余白を32–40pxに拡大し、フォーム内のまとまり（セクション）を明確化。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s00_splash",
+    "location": "ロゴ「Lais」とタグラインの間隔（margin-bottom:12px）",
+    "issue": "ヒーロー領域でロゴ直下の日本語タグラインとの間隔が狭く、余白の「間」と品格がやや弱い。",
+    "suggestion": "ロゴ下の間隔を16–20pxへ拡張し、タグラインは var(--text-hint)のままでも行間1.7を確保して柔らかく受け止める。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

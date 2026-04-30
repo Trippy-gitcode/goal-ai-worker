@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.1, §2.1（ボトムタブ）",
+    "issue": "ボトムタブがテキスト中心で、プラットフォーム標準（HIG/Material）のアイコン＋ラベル併記のガイドラインが未定義。再選択時の挙動も未記載。",
+    "suggestion": "各タブに意味のあるアイコンを追加し、ラベル常時表示（Androidは選択時のみ太字）を明記。アクティブタブを再タップで「スクロールトップに戻る」を定義。タブ間の状態保持（スクロール位置・入力値）も明文化。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §1.4（history.pushStateポリシー）",
+    "issue": "タブ状態保持やタブ再選択時の標準挙動（トップへスクロール）が未定義。戻る操作時のルート動作も明確でない。",
+    "suggestion": "各タブは独立したナビゲーションスタックとスクロール位置を保持する旨を明記。アクティブタブ再タップ=スクロールトップ。Androidの物理戻る: タブ内に戻り履歴がなければアプリ（PWA）を閉じずに���ースト提示→2回目で離脱、もしくはランディングに戻らないよう初期エントリをreplaceState。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.1（TALKヘッダー）, §3.5（ドロワー）",
+    "issue": "TALKヘッダーに「☰」「🕐」が併記され、どちらも履歴/ドロワー起動に見えるため役割が重複・矛盾している。",
+    "suggestion": "履歴起動トリガーを1つに統一。例: 左上は「履歴」アイコン（🕐）でS-21を開く、☰は廃止。iOSはハンバーガーを避け、機能名の明示的アイコンを採用。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.1（画面一覧 S-05）, §5.0.2（パスワード再設定 Step2）",
+    "issue": "パスワード再設定の新パスワード入力画面が別IDとして定義されておらず、ルーティング/ディープリンクの実装が不明瞭。",
+    "suggestion": "S-06（新パスワード設定）を新設するか、S-05がトークン有無で2状態を持つことを明記（URLパラメータ例含む）。遷移図にも追記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.4（Today並び替え）, §2.3（Todayセクション）",
+    "issue": "「開始時刻による自動ソートを手動で上���き」とあるが、Overdueや時間付き/時間なし混在時、編集後の自動ソート復帰やリセット方法が未定義で混乱の恐れ。",
+    "suggestion": "Todayの並びルールを厳密化。推奨: グルーピング（Overdue固定→時間あり→時間なし）＋各グループ内は「時間順 or 手動順」のトグルを用意。「並び順を時間順に戻す」アクションをS-11やセクションヘッダーに追加。時間・予定日変更時の優先ロジックも明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.1, §4.3（横スワイプ切替/横スクロールチップ）, §7.3",
+    "issue": "MEサブタブの横スワイプとDISCOVER内の横スクロール（チップやカルーセル）が競合する際のジェスチャー優先度が未定義。",
+    "suggestion": "Materialのnested-scrollingに準拠: コンテンツ内の横スクロール開始時はタブ切替を抑止。タブ切替は画面左右端（例: 16px以内）からのスワイプに限定するなどのヒットスロット/閾値を定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.2（ヒーロー縮小）, §6.5���Pull-to-refresh）",
+    "issue": "GROWでヒーロー領域が縮小するスクロールとPull-to-refreshの発火条件の優先順位が未定義。誤って更新が発火する恐れ。",
+    "suggestion": "PTRは「コンテンツスクロールが先頭かつヒーローが最小化済み」の状態で、さらにオーバースクロール量が一定閾値（例60px）を超えた場合のみ発火と明記。スピナーはヒーロー直下に表示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.5（チャット履歴 S-21）",
+    "issue": "履歴の無限スクロールにおけるロード中インジケータ/ページング到達/再試行UIが未定義。",
+    "suggestion": "リスト上端に小型スピナー＋「読み込み中...」。到達時は「これ以前の履歴はありません」。失敗時はインライン「読み込みに失敗しました [再試行]」。読み込み時のスクロール位置保持も明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（Undoスナックバー）",
+    "issue": "Undo 30秒のカウントをアプリがバックグラウンドに入った場合の扱いが未定義（復帰時に残り時間が不正になる可能性）。",
+    "suggestion": "タスク完了時にタイムスタンプを保存し、復帰時に残時間を再計算。期限超過なら即確定しスナックバー非表示とする旨を記載。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.4（戻りナビゲーション/ブラウザバック）",
+    "issue": "Androidの物理戻るがタブ間履歴を積まない方針は適切だが、タブ根本での戻る時の挙動（アプリ終了/ランディングへ戻る）が未明記。",
+    "suggestion": "PWAではルートで戻る=ブラウザ履歴へ遷移するため、初回エントリはreplaceStateし、ルート戻りで不要なランディング表示を避ける。必要なら「もう一度戻るで終了」トーストを実装（Webでは履歴ナビゲーション抑止のみ）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §7（ジェスチャー）, §8（アニメーション）",
+    "issue": "ハプティクス設計が未定義。QRスキャンはVibration APIだが、タスク完了/レベルアップ/ゴール達成などの重要フィードバックの触覚仕様がない（iOS Safariは振動非対応という制約も未整理）。",
+    "suggestion": "Android ChromeではVibration APIで短パターン（例: タスク完了=10ms, レベルアップ=20-40-20ms）。iOSでは触覚なしのビジュアル強化（ハイライト/音）にフォールバックする方針を明記。設定で「触覚フィードバックON/OFF」を提供。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §13.3（通知設定）",
+    "issue": "トグルONで直ちにOS権限プロンプトを出す設計は、iOS/Android双方での許諾率低下につながる可能性（HIG/Materialの推奨は事前説明=ソフトアスク）。",
+    "suggestion": "最上部トグルON時にまずソフトアスク（通知の価値・頻度と後で変更できる旨を説明）→同意後にOSプロンプトを発火。拒否時の再案内クールダウン（例: 14日）も定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §7.3（PWA実装注記：edge swipe）",
+    "issue": "iOS PWAでoverscroll-behaviorやカスタムedge swipeの信頼性がOS/バージョン依存で、ネイティブの履歴スワイプ抑��が効かない場合がある。",
+    "suggestion": "iOS PWAではedge-swipe戻りを原則無効化し、明示的な戻るボタンに統一するフォールバックを明記。実装検証結果に応じてデバイス/OS別フラグで分岐。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §7.4（ドラッグ&ドロップ）, §10（アクセシビリティ）",
+    "issue": "並び替えがロングプレス＋ドラッグのみで、スクリーンリーダーや運動障害ユーザー向けの代替操作が未定義（アクセシビリティ不足）。",
+    "suggestion": "各タスクのコンテキストメニューに「上へ/下へ/先頭/末尾」などのキーボード/スイッチ操作対応項目を追加。ARIAドラッグ＆ドロップ属性とライブリージョンで順序変更を通知。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3（画像添付）, ux_v1.md §3.1（入力バー）",
+    "issue": "画像添付のサイズ超過/非対応形式/アップロード失敗時の具体的ユーザー通知や再試行UIが未定義。",
+    "suggestion": "ファイル選択時のバリデーション（>10MB/非対���拡張子）で即時インラインエラー。「圧縮して再試行」フロー（クライアント圧縮）とアップロード失敗時の[再送信]ボタンをカード内に表示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.1（MEサブタブ）",
+    "issue": "ME内のサブタブ切替時の状態保持（各タブのスクロール位置/入力状態）や再タップでのスクロールトップ動作が未定義。",
+    "suggestion": "サブタブ単位で状態保持を明記し、タブ再タップ=トップへスクロールを統一。戻る時は直前のスクロール位置に復帰。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.4（S-14→S-20遷移）",
+    "issue": "ゴール詳細からAI相談でTALKへ遷移時、replaceStateによりユーザーが戻るとGROWへ戻り、直前のゴール詳細に復帰できない設計は期待と異なる可能性がある。",
+    "suggestion": "ユーザー期待に合わせ、通常はS-14をスタックに保持（戻るでS-14へ）。もしくはTALKに「{ゴール名}に戻る」コンテキストバナーを表示。A/Bで検証可。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5（JST 4:00日次リセット）, ux_v1.md §9.3（上限表示の時刻文言）",
+    "issue": "全ユーザー一律JST 4:00リセットは海外ユーザーに混乱の恐れ。UI文言がローカル時刻かJSTかが場面により明示されていない。",
+    "suggestion": "当面は文言に明確に「JST 04:00」を併記し、将来対応のロードマップを設定/ヘルプに記載。ローカルタイムゾーン正式対応時は自動切替。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "画面上部〜中央の星空表現",
+    "issue": "星の配置が散漫で、意図的な「設計された沈黙」ではなく単なる「空きスペース」に見える。ドットによる星空表現がAI生成の典型的な宇宙パターンの域を出ておらず、ブランドDNAの「洗練」に達していない。",
+    "suggestion": "星の数を減らし、不透明度のコントラストを上げることで、静寂の中にある微かな光という視覚的緊張感を持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン（非アクティブ状態）",
+    "issue": "非アクティブ状態のボタンテキスト（#484F58）と背景（#1C2128）のコントラスト比が低すぎ、WCAG AA基準を満たしていない。視覚的な沈黙を通り越して読めない状態。",
+    "suggestion": "非アクティブ状態でも最低限のコントラスト比（3:1以上）を確保する色設定に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s02_onboarding",
+    "location": "アバターの顔イラスト",
+    "issue": "目と口のパーツが幾何学的すぎて感情の喚起力が極めて低い。「一緒に成長するパートナー」としての温かみや個性がなく、ありきたりな無機質ベクター素材に見える。",
+    "suggestion": "線の太さや配置にわずかな有機的ゆらぎを持たせ、ユーザーが感情移入できる「自然体」の表情にリファインする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスク完了インジケータ",
+    "issue": "UX仕様書（§2.3）では「完了⭕」と定義されているが、画面上では塗りつぶしの青丸・黄丸になっている。また、タイムラインの縦線が視覚的に強すぎ、タスク間の「呼吸するリズム（余白）」を阻害している。",
+    "suggestion": "インジケータを仕様通りのアウトライン（⭕）に変更し、タイムラインの縦線の不透明度を下げて、余白を主役にした構成にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の「登録する」ボタン",
+    "issue": "ボタンの幅が不足しており、テキストが「登録す」「る」と不自然に改行されている。視覚的なノイズとなり、洗練された印象を著しく損なっている。",
+    "suggestion": "ボタンのpaddingを調整するか、flex-wrapの挙動を見直し、テキストが必ず1行で収まるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "AI理解メモのテキストブロック",
+    "issue": "日本語本文の行間が詰まって見え、仕様書（§3.4 日本語タイポグラフィ調整 line-height: 1.7）の意図で��る「間延び防止と読みやすさ」が体現されていない。情報の塊として重く感じる。",
+    "suggestion": "テキストブロックのline-heightを厳密に1.7に適用し、文字間に「設計された沈黙」を取り戻す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "所要時間の横スクロールチップ",
+    "issue": "チップが密集しており、情報過密な印象を与える。Open Airの原則に反し、ユーザーに選択の圧迫感を与えている。",
+    "suggestion": "チップ間の余白（gap）を広げ、両端にフェードアウト効果を入れることで、空間の広がりとスクロールの示唆を両立させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s14_goal_detail",
+    "location": "完了済みタスクの取り消し線とテキスト",
+    "issue": "取り消し線とテキストの色（#7A8593）が背景に沈みすぎており、達成感（感情の喚起）よりも「死んだ情報」というネガティブな印象が強い。",
+    "suggestion": "完了タスクのテキスト明度を少し上げ、取り消し線には微かにアク��ントカラー（success色）のニュアンスを含ませることで、達成の余韻を表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "画面全体の角丸（Radius）の使用",
+    "issue": "モーダル、ボタン、チップなどあらゆる要素に角丸が多用されており、Finchのような「かわいい」アプリのパターンに寄っている。ブランドDNAの「洗練」との間に視覚的な矛盾がある。",
+    "suggestion": "角丸のサイズ（--radius-md, --radius-lg）を少しシャープに調整し、モダンで大人びた緊張感を持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  }
+]

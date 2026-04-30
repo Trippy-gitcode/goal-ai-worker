@@ -1,0 +1,22 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/App.jsx",
+    "issue": "ルートの `div` 要素に `aria-label` が使用されています。`role` が指定されていない汎用的な `div` 要素に `aria-label` を使用することは、スクリーンリーダーの挙動が保証されず、一般的に非推奨とされています。スクリーンリーダーによってはこのラベルが読み上げられない、あるいは予期せぬ形で読み上げられる可能性があります。結果��して、冗長な情報提供や混乱を招く恐れがあります。",
+    "suggestion": "`aria-label=\"Lais\"` を削除することを推奨します。アプリケーション名は `document.title` で設定し、各画面の主要なコンテンツは `<h1>` タグで示すのが最も堅牢な方法です。本実装では `S00Splash.jsx` 内に `<h1>Lais</h1>` が適切に配置されているため、この `aria-label` は不要です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1.md §4.1 S00-1",
+    "issue": "デザイン仕様ではロゴのY座標を「Y ≈ 340」と記載していますが、Playwrightによる実測値は「y: 326」となっており、約14pxの乖離があります。これは、CSSの実装 (`transform: translateY(calc(-50% - 60px))`) が、ロゴ単体ではなく、ロゴとタグラインを含むコンテナ全体 (`s00-center`) を画面中央からオフセットしているために生じる設計通りのズレです。実装ロジックは仕様の意図を汲んでいますが、��様書に記載された具体的な座標値と実装結果が一致していません。",
+    "suggestion": "将来の回帰テストや他の開発者による改修時の混乱を避けるため、デザイン仕様の記述を実装の挙動と一致させることを推奨します。例えば、「Y ≈ 340」という記述を削除し、「ロゴとタグラインを含む中央ブロック全体を、画面の垂直中央から60px上方に配置する」のように、実装ロジックを反映した記述に修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_engineer"
+  }
+]

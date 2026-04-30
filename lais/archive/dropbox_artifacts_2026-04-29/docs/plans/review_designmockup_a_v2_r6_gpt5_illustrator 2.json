@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "中央ロゴ「Lais」",
+    "issue": "ロゴ色が#E6EDF3（白系）で表示されており、デザインシステム1.3の暫定ルール（ロゴは--accentを使用）に不一致",
+    "suggestion": "ロゴのテキスト色を--accent（Night Sky: #79C0FF）に変更し、背景とのコントラストを確認（AA達成）。副文は現状の#7A8593のままでOK",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s01_signin",
+    "location": "上部ロゴ「Lais」",
+    "issue": "ロゴ色が#E6EDF3のまま固定で、ブランド暫定ルール（ロゴは--accentを使用）に不整合",
+    "suggestion": "ロゴ色を--accent（#79C0FF）へ。小見出しやフォーム文言の色は現状のトークン準拠で問題なし",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部のインライン文「すでにアカウントをお��ちですか？ ログイン」中の「ログイン」",
+    "issue": "インラインテキストリンクが色のみで区別（下線なし）。デザインシステム2.2の要件（リンクは必ず下線）およびWCAG 1.4.1に抵触",
+    "suggestion": "「ログイン」にtext-decoration: underlineを付与（色は--accent #79C0FFを維持）",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾「+ タスクを追加」およびGoalsセクション「+ ゴールを作成」",
+    "issue": "テキストリンクが色のみで可視（下線なし）。デザインシステム2.2のリンク表現ルールに反する",
+    "suggestion": "両リンクにtext-decoration: underlineを付与。もしくはリンクアイコン＋下線の二重手掛かりで可読性を補強",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "タスクリスト末尾の「+ タスクを追加」",
+    "issue": "リンクが下線なしで色のみの区別。デザインシステム2.2違反",
+    "suggestion": "text-decoration: underlineを適用（色は--accent）。���全体のタップ領域拡張はそのままでOK",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "タスク行の右端カテゴリドット（学習=紫 #A371F7／健康=橙 #E8A855 など）",
+    "issue": "Night Skyの定義外色相（紫等）が混在し、画面内の色相数が増えて夜空トーンの静けさを損ねる。NGリス���（アクセント色過多）に近い状態",
+    "suggestion": "カテゴリ色はセマンティックの範囲内にマップ（success/danger/warning/info）し、残りは中立色（--text-secondary）や--accentサブトーンで表現。紫系は撤退",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "「ジムで筋トレ」行の進行状態ラベル前のダッシュとドット（橙 #E8A855）",
+    "issue": "警告色として定義された--warning（#D29922）ではなく別値を使用しており、テーマ間一貫性が崩れる",
+    "suggestion": "進行/注意を示すアクセントは--warning系トークン（#D29922や--warning-subtle系）に統一",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "ステータス「完了済み」テキスト（#56D364）",
+    "issue": "successカラーがトークン（--success #3FB950）と不一致で、成功表現の色が画面間で揺れている",
+    "suggestion": "成功状態は--success/#3FB950に一本化。背景やアイコンのsubtle色も--success-subtleを併用",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カード内（左ボーダー#79C0FF＋主ボタン#1A5FC8）",
+    "issue": "同一カード内で異なる青（accentとbutton-primary）が競合し、視線が分散。カード内の階層がやや騒がしい印象",
+    "suggestion": "左ボーダーを--accent-subtle（透明度高め）に弱めるか、ボタンを強調点として残す。もしくはボタンをアウトライン（--accent色）に変更して青の主役を1つに絞る",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "主要CTA（例: Splash/Onboarding/提案カードの青ボタン #1A5FC8）",
+    "issue": "Night Skyの『静けさ』に対してCTAの彩度がやや強く、画面によっては緊張感が先行する",
+    "suggestion": "Night Sky限定でprimaryボタンの色相/明度を一段抑える運用（例: hover/pressed系の濃色を常用、周辺のaccent要素を弱める）で全体の落ち着きを保持",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

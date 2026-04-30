@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Lais — S-10 Grow | 案 E_v2 Cyberpunk 2077</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="screen">
+
+  <div class="statusbar">
+    <span class="time">07:14</span>
+    <span class="indicators">
+      <span class="ind-dot"></span>
+      <span class="net">5G</span>
+      <span class="bat">82%</span>
+    </span>
+  </div>
+
+  <div class="s10-content">
+    <!-- ヘッダ — 巨大ユーザー名 -->
+    <div class="s10-header">
+      <div class="s10-header-left">
+        <div class="greeting">// MORNING.OK</div>
+        <div class="user">FTS_07</div>
+        <div class="user-jp">フ ト シ // 念</div>
+      </div>
+      <div class="s10-header-right">
+        <div class="date">04.27</div>
+        <div class="id">USR.0xFTS · LV.07</div>
+      </div>
+    </div>
+
+    <!-- AI 一言 -->
+    <div class="s10-ai-msg">
+      <div class="ai-tag">
+        <span class="pulse"></span>
+        AI_LAIS // <span class="jp">念</span> NODE
+      </div>
+      <div class="ai-text">
+        昨日の<span class="highlight">対話ログ</span>を確認した。今日の最優先タスクは<span class="highlight">「企画書 v2 ドラフト」</span>。朝の集中時間 (07:00-09:30) に割り当て済み。
+      </div>
+    </div>
+
+    <!-- セクション: 今日のタスク -->
+    <div class="s10-section-title">
+      <span class="label-en">TASKS <span class="label-jp">今日</span></span>
+      <span class="count">[ 02 / 04 ]</span>
+    </div>
+
+    <div class="s10-tasks">
+      <div class="s10-task done">
+        <span class="check"></span>
+        <span class="s10-task-name">朝のストレッチ 5分</span>
+        <span class="s10-task-time">06:45</span>
+      </div>
+      <div class="s10-task done">
+        <span class="check"></span>
+        <span class="s10-task-name">ジャーナル記入</span>
+        <span class="s10-task-time">07:00</span>
+      </div>
+      <div class="s10-task">
+        <span class="check"></span>
+        <span class="s10-task-name">企画書 v2 ドラフト</span>
+        <span class="s10-task-tag">P0</span>
+        <span class="s10-task-time">09:30</span>
+      </div>
+      <div class="s10-task">
+        <span class="check"></span>
+        <span class="s10-task-name">夜の振り返り対話</span>
+        <span class="s10-task-time">22:30</span>
+      </div>
+      <div class="s10-task-add">
+        <span style="font-size:14px; line-height:0;">+</span>
+        <span>ADD_TASK</span>
+      </div>
+    </div>
+
+    <!-- セクション: 直近目標 -->
+    <div class="s10-section-title">
+      <span class="label-en">GOALS <span class="label-jp">目標</span></span>
+      <span class="count">[ 03_ACTIVE ]</span>
+    </div>
+
+    <div class="s10-goals">
+      <div class="s10-goal">
+        <div class="s10-goal-row1">
+          <span class="s10-goal-name">新事業の検証フェーズ完了</span>
+          <span class="s10-goal-pct">68%</span>
+        </div>
+        <div class="s10-goal-meter">
+          <div class="s10-goal-meter-fill" style="width:68%;"></div>
+        </div>
+        <div class="s10-goal-meta">
+          <span>// PRIORITY: HIGH</span>
+          <span class="deadline">D-34 // 05.31</span>
+        </div>
+      </div>
+
+      <div class="s10-goal">
+        <div class="s10-goal-row1">
+          <span class="s10-goal-name">毎週3冊の読書</span>
+          <span class="s10-goal-pct" style="color: var(--c-magenta); text-shadow: var(--g-magenta);">42%</span>
+        </div>
+        <div class="s10-goal-meter">
+          <div class="s10-goal-meter-fill" style="width:42%; background: linear-gradient(90deg, var(--c-magenta), var(--c-cyan));"></div>
+        </div>
+        <div class="s10-goal-meta">
+          <span>// CYCLE: WEEKLY</span>
+          <span class="deadline" style="color: var(--c-cyan); text-shadow: var(--g-cyan);">STREAK_12W</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BottomTabBar -->
+  <div class="tabbar">
+    <div class="tab active">
+      <div class="tab-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="6" width="3" height="8" stroke="#fcee0a" stroke-width="1.4"/>
+          <rect x="6.5" y="3" width="3" height="11" stroke="#fcee0a" stroke-width="1.4"/>
+          <rect x="11" y="8" width="3" height="6" stroke="#fcee0a" stroke-width="1.4"/>
+        </svg>
+        <span class="tab-kanji">育</span>
+      </div>
+      <div class="tab-label">GROW</div>
+    </div>
+    <div class="tab">
+      <div class="tab-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="#8a8a99" stroke-width="1.4"/>
+          <path d="M8 4 V8 L11 10" stroke="#8a8a99" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span class="tab-kanji" style="color: var(--c-text-dim); text-shadow:none;">日</span>
+      </div>
+      <div class="tab-label">LOG</div>
+    </div>
+    <div class="tab">
+      <div class="tab-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <path d="M2 4 H14 M2 4 V12 H10 L13 14 V12 H14 V4" stroke="#8a8a99" stroke-width="1.4" fill="none"/>
+        </svg>
+        <span class="tab-kanji" style="color: var(--c-text-dim); text-shadow:none;">話</span>
+      </div>
+      <div class="tab-label">TALK</div>
+    </div>
+    <div class="tab">
+      <div class="tab-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="6" r="3" stroke="#8a8a99" stroke-width="1.4"/>
+          <path d="M3 14 c0-3 2-5 5-5 s5 2 5 5" stroke="#8a8a99" stroke-width="1.4" fill="none"/>
+        </svg>
+        <span class="tab-kanji" style="color: var(--c-text-dim); text-shadow:none;">己</span>
+      </div>
+      <div class="tab-label">ME</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

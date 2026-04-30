@@ -1,0 +1,1667 @@
+/* ============================================================
+ * 案 B_v2: Hogwarts School of Witchcraft and Wizardry
+ * 配色: Gryffindor (紅 #740001 + 金 #d3a625) デフォルト
+ *       + 4 寮カラー切替
+ * フォント: Cinzel (紋章/見出し) + Cormorant Garamond (本文古書)
+ *           + Noto Serif JP (和文)
+ * 雰囲気: Hogwarts Library / 校長室 / Diagon Alley / 寮の談話室
+ * 装飾: 古城石造り + ステンドグラス + 動く絵画フレーム
+ *       + 羊皮紙手紙 + 蝋封 + 9¾ 番線 + Honeydukes
+ * ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Noto+Serif+JP:wght@400;500;600;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* === Gryffindor (デフォルト) === */
+  --house-primary: #740001;        /* 深紅 */
+  --house-primary-dark: #4a0001;
+  --house-primary-bright: #ae0001;
+  --house-secondary: #d3a625;      /* 金 */
+  --house-secondary-bright: #eeba30;
+  --house-secondary-dim: #9a7a1a;
+  --house-name: 'GRYFFINDOR';
+  --house-animal: '🦁';
+
+  /* === Slytherin === */
+  --slyth-primary: #1a472a;
+  --slyth-primary-dark: #0d2516;
+  --slyth-secondary: #aaaaaa;
+  --slyth-secondary-bright: #d4d4d4;
+
+  /* === Ravenclaw === */
+  --rav-primary: #0e1a40;
+  --rav-primary-dark: #050a20;
+  --rav-secondary: #946b2d;
+  --rav-secondary-bright: #c08841;
+
+  /* === Hufflepuff === */
+  --huff-primary: #ecb939;
+  --huff-primary-dark: #b8941d;
+  --huff-secondary: #372e29;
+  --huff-secondary-bright: #5a4a40;
+
+  /* === 共通 === */
+  --parchment: #ede2c1;            /* 羊皮紙 */
+  --parchment-dark: #c9b78d;
+  --parchment-bright: #f5ecd0;
+  --wax-seal: #6b1f1f;             /* 蝋封 */
+  --candle-glow: rgba(232, 197, 96, 0.3);
+  --moonlight: rgba(180, 200, 230, 0.15);
+  --stone-cold: #2d2520;           /* 古城石 */
+  --stone-shadow: rgba(0, 0, 0, 0.65);
+  --honeydukes-pink: #f5a3c7;
+  --honeydukes-mint: #a3e5c5;
+}
+
+html, body {
+  width: 390px;
+  height: 844px;
+  font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  background: var(--house-primary-dark);
+  color: var(--parchment);
+  overflow: hidden;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.screen {
+  width: 390px;
+  height: 844px;
+  position: relative;
+  overflow: hidden;
+  background:
+    /* 校長室の月光 */
+    radial-gradient(ellipse at 50% 18%, rgba(211, 166, 37, 0.12) 0%, transparent 55%),
+    /* ステンドグラス左 */
+    radial-gradient(circle at 12% 48%, rgba(174, 0, 1, 0.18) 0%, transparent 30%),
+    /* ステンドグラス右 */
+    radial-gradient(circle at 88% 60%, rgba(116, 0, 1, 0.18) 0%, transparent 30%),
+    /* 蝋燭の暖光 */
+    radial-gradient(circle at 50% 92%, rgba(211, 166, 37, 0.08) 0%, transparent 40%),
+    linear-gradient(180deg, var(--house-primary-dark) 0%, #1f0608 50%, var(--house-primary-dark) 100%);
+}
+
+/* 古城の石造りテクスチャ */
+.screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    /* 石壁の継ぎ目 */
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 28px,
+      rgba(0, 0, 0, 0.08) 28px,
+      rgba(0, 0, 0, 0.08) 29px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 56px,
+      rgba(0, 0, 0, 0.06) 56px,
+      rgba(0, 0, 0, 0.06) 57px
+    ),
+    /* 古紙の粒状感 */
+    repeating-linear-gradient(
+      45deg,
+      transparent 0,
+      transparent 2px,
+      rgba(211, 166, 37, 0.012) 2px,
+      rgba(211, 166, 37, 0.012) 3px
+    );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 装飾枠 (Hogwarts 校章風 二重枠) */
+.ornate-border {
+  position: absolute;
+  inset: 14px;
+  border: 1.5px solid var(--house-secondary-dim);
+  pointer-events: none;
+  z-index: 2;
+  box-shadow:
+    0 0 0 1px var(--house-primary-bright) inset,
+    0 0 0 4px transparent,
+    0 0 0 5px var(--house-secondary-dim) inset;
+}
+
+/* 校章マーク (上下に紋章のような ✦) */
+.ornate-border::before,
+.ornate-border::after {
+  content: '✦ ⚜ ✦';
+  position: absolute;
+  color: var(--house-secondary);
+  font-size: 11px;
+  letter-spacing: 6px;
+  background: var(--house-primary-dark);
+  padding: 0 10px;
+  font-family: 'Cinzel', serif;
+}
+
+.ornate-border::before { top: -8px; left: 50%; transform: translateX(-50%); }
+.ornate-border::after { bottom: -8px; left: 50%; transform: translateX(-50%); }
+
+/* 角の四つ葉飾り (Hogwarts 校章の四領域風) */
+.corner-flourish {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  z-index: 3;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  color: var(--house-secondary);
+  font-weight: 700;
+}
+
+.corner-flourish.tl { top: 6px; left: 6px; border-top: 2px solid var(--house-secondary); border-left: 2px solid var(--house-secondary); }
+.corner-flourish.tr { top: 6px; right: 6px; border-top: 2px solid var(--house-secondary); border-right: 2px solid var(--house-secondary); }
+.corner-flourish.bl { bottom: 6px; left: 6px; border-bottom: 2px solid var(--house-secondary); border-left: 2px solid var(--house-secondary); }
+.corner-flourish.br { bottom: 6px; right: 6px; border-bottom: 2px solid var(--house-secondary); border-right: 2px solid var(--house-secondary); }
+
+/* ステンドグラス窓 (画面端の装飾) */
+.stained-glass {
+  position: absolute;
+  width: 60px;
+  height: 110px;
+  z-index: 2;
+  pointer-events: none;
+  border: 1px solid var(--house-secondary-dim);
+  border-radius: 30px 30px 4px 4px;
+  background:
+    /* 中央の薔薇窓 */
+    radial-gradient(circle at 50% 30%, rgba(211, 166, 37, 0.35) 0%, transparent 35%),
+    radial-gradient(circle at 50% 70%, rgba(174, 0, 1, 0.30) 0%, transparent 35%),
+    /* 縦の格子 */
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.4) 0,
+      rgba(0, 0, 0, 0.4) 1px,
+      transparent 1px,
+      transparent 14px
+    ),
+    /* 横の格子 */
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.4) 0,
+      rgba(0, 0, 0, 0.4) 1px,
+      transparent 1px,
+      transparent 16px
+    ),
+    linear-gradient(180deg, rgba(116, 0, 1, 0.25), rgba(14, 26, 64, 0.25));
+  box-shadow:
+    inset 0 0 12px rgba(211, 166, 37, 0.2),
+    0 0 20px rgba(211, 166, 37, 0.08);
+  opacity: 0.85;
+}
+
+.stained-glass.left { top: 100px; left: 6px; }
+.stained-glass.right { top: 100px; right: 6px; }
+
+.content {
+  position: relative;
+  z-index: 5;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ステータスバー (iOS 風 + 9¾ プラットフォーム時刻) */
+.status-bar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 26px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--parchment);
+  font-family: 'Cinzel', serif;
+}
+
+.status-bar .time { letter-spacing: 1.5px; }
+
+/* ============================================================
+ * S-00 Splash (Hogwarts Welcome Letter 風)
+ * ============================================================ */
+
+.splash-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px 32px;
+  gap: 18px;
+}
+
+/* Hogwarts 校章 (盾形) */
+.hogwarts-crest {
+  width: 180px;
+  height: 200px;
+  position: relative;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 0 24px var(--candle-glow));
+}
+
+.hogwarts-crest-shield {
+  width: 100%;
+  height: 100%;
+  background:
+    /* 盾の背景 */
+    linear-gradient(180deg, var(--house-primary-bright), var(--house-primary)),
+    var(--house-primary);
+  /* 盾の形 */
+  clip-path: polygon(0 0, 100% 0, 100% 65%, 50% 100%, 0 65%);
+  border: 3px solid var(--house-secondary);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0 0 30px rgba(211, 166, 37, 0.25),
+    0 6px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* 盾の四領域 (4 寮を象徴) */
+.hogwarts-crest-shield::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, transparent 49.5%, var(--house-secondary) 49.5%, var(--house-secondary) 50.5%, transparent 50.5%),
+    linear-gradient(45deg, transparent 49.5%, var(--house-secondary) 49.5%, var(--house-secondary) 50.5%, transparent 50.5%);
+  opacity: 0.5;
+  clip-path: polygon(0 0, 100% 0, 100% 65%, 50% 100%, 0 65%);
+}
+
+.hogwarts-crest-letter {
+  font-family: 'Cinzel', serif;
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--house-secondary-bright);
+  letter-spacing: 2px;
+  text-shadow:
+    2px 2px 0 var(--house-primary-dark),
+    0 0 14px var(--house-secondary);
+  z-index: 2;
+  margin-top: -8px;
+}
+
+.hogwarts-crest-banner {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--house-secondary);
+  color: var(--house-primary-dark);
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  padding: 2px 14px;
+  white-space: nowrap;
+  z-index: 3;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.splash-title {
+  font-family: 'Cinzel', serif;
+  font-size: 52px;
+  font-weight: 700;
+  color: var(--house-secondary);
+  letter-spacing: 12px;
+  text-shadow:
+    0 2px 0 var(--house-primary-dark),
+    0 0 16px rgba(211, 166, 37, 0.5);
+  margin: 0;
+  margin-left: 12px; /* visual offset for letter-spacing */
+}
+
+.splash-subtitle {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--parchment-dark);
+  text-transform: uppercase;
+  margin-top: -4px;
+}
+
+.splash-tagline {
+  font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  font-size: 16px;
+  font-style: italic;
+  color: var(--parchment);
+  line-height: 1.6;
+  max-width: 290px;
+  margin: 8px 0;
+}
+
+.splash-tagline em {
+  color: var(--house-secondary-bright);
+  font-style: italic;
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  display: block;
+  margin-top: 4px;
+}
+
+.splash-tagline-jp {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 12px;
+  color: var(--parchment-dark);
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+.splash-cta {
+  width: 240px;
+  padding: 14px 24px;
+  background: linear-gradient(180deg, var(--house-secondary-bright) 0%, var(--house-secondary-dim) 100%);
+  color: var(--house-primary-dark);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 4px;
+  border: 1.5px solid var(--house-secondary);
+  border-radius: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  margin-top: 14px;
+  position: relative;
+}
+
+.splash-cta::before {
+  content: '🪄';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+}
+
+.splash-cta-secondary {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--house-secondary-bright);
+  text-decoration: underline;
+  text-decoration-color: var(--house-secondary-dim);
+  text-underline-offset: 4px;
+  margin-top: 8px;
+  cursor: pointer;
+}
+
+.splash-candles {
+  position: absolute;
+  bottom: 70px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  font-size: 26px;
+  filter: drop-shadow(0 0 14px var(--candle-glow));
+  z-index: 4;
+}
+
+/* 4 寮カラー切替プレビュー */
+.house-switcher {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 5;
+}
+
+.house-chip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--parchment-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.house-chip.gryffindor { background: linear-gradient(135deg, #740001 50%, #d3a625 50%); border-color: var(--house-secondary); transform: scale(1.15); box-shadow: 0 0 10px var(--candle-glow); }
+.house-chip.slytherin { background: linear-gradient(135deg, #1a472a 50%, #aaaaaa 50%); }
+.house-chip.ravenclaw { background: linear-gradient(135deg, #0e1a40 50%, #946b2d 50%); }
+.house-chip.hufflepuff { background: linear-gradient(135deg, #ecb939 50%, #372e29 50%); }
+
+/* ============================================================
+ * S-01 Auth (Sign-In = 9¾ 番線への入口)
+ * ============================================================ */
+
+.auth-header {
+  text-align: center;
+  padding: 22px 32px 14px;
+  position: relative;
+}
+
+.auth-back {
+  position: absolute;
+  left: 28px;
+  top: 28px;
+  color: var(--house-secondary);
+  font-size: 18px;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+}
+
+.auth-icon {
+  font-size: 38px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 12px var(--candle-glow));
+}
+
+.auth-title {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  letter-spacing: 5px;
+  color: var(--house-secondary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.auth-subtitle {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 12px;
+  color: var(--parchment-dark);
+  letter-spacing: 1.5px;
+}
+
+/* 9¾ プラットフォーム表示 */
+.platform-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 10px;
+  background: var(--house-primary-bright);
+  color: var(--house-secondary-bright);
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  border: 1px solid var(--house-secondary);
+  border-radius: 2px;
+  font-weight: 700;
+}
+
+.auth-divider-h {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--house-secondary-dim), transparent);
+  margin: 8px 32px 14px;
+  position: relative;
+}
+
+.auth-divider-h::before {
+  content: '⚜';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--house-primary-dark);
+  color: var(--house-secondary);
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.auth-form {
+  padding: 6px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--house-secondary-bright);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.auth-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(237, 226, 193, 0.06);
+  border: 1px solid var(--house-secondary-dim);
+  border-radius: 2px;
+  padding: 0 12px;
+}
+
+.auth-input-icon {
+  font-size: 16px;
+  color: var(--house-secondary-bright);
+  margin-right: 10px;
+}
+
+.auth-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 11px 0;
+  color: var(--parchment);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+
+.auth-input::placeholder {
+  color: rgba(237, 226, 193, 0.4);
+  font-style: italic;
+}
+
+.auth-help {
+  font-size: 11px;
+  color: var(--parchment-dark);
+  text-align: right;
+  font-style: italic;
+}
+
+.auth-submit {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(180deg, var(--house-secondary-bright), var(--house-secondary-dim));
+  color: var(--house-primary-dark);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 5px;
+  border: 1.5px solid var(--house-secondary);
+  border-radius: 2px;
+  text-transform: uppercase;
+  margin-top: 4px;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.auth-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 6px;
+  color: var(--parchment-dark);
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+
+.auth-or::before, .auth-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--house-secondary-dim), transparent);
+}
+
+.auth-alt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-alt-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 11px;
+  background: rgba(237, 226, 193, 0.06);
+  border: 1px solid var(--house-secondary-dim);
+  border-radius: 2px;
+  color: var(--parchment);
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.auth-alt-btn-apple {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.auth-footer {
+  text-align: center;
+  padding: 14px 20px;
+  font-size: 12px;
+  color: var(--parchment-dark);
+  font-style: italic;
+}
+
+.auth-footer a {
+  color: var(--house-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 600;
+}
+
+/* ============================================================
+ * S-10 Grow (Common Room Dashboard)
+ * ============================================================ */
+
+.grow-header {
+  padding: 12px 24px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.grow-greeting {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 12px;
+  color: var(--parchment-dark);
+  letter-spacing: 1px;
+}
+
+.grow-date {
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  color: var(--house-secondary);
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+/* 動く絵画フレーム (アバター) */
+.grow-portrait {
+  width: 46px;
+  height: 56px;
+  position: relative;
+  border: 2px solid var(--house-secondary);
+  background:
+    /* 絵画の被写体ハッチ (人物の暗示) */
+    repeating-linear-gradient(
+      45deg,
+      var(--house-primary-bright) 0,
+      var(--house-primary-bright) 2px,
+      var(--house-primary) 2px,
+      var(--house-primary) 4px
+    ),
+    radial-gradient(circle at 50% 35%, var(--house-secondary-bright) 0%, transparent 30%),
+    var(--house-primary);
+  border-radius: 4px 4px 18px 18px / 4px 4px 8px 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+  box-shadow:
+    inset 0 0 8px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--house-primary-dark);
+}
+
+.grow-portrait::before {
+  /* 額縁の彫刻装飾 */
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 1px dashed var(--house-secondary-dim);
+  border-radius: 6px 6px 22px 22px / 6px 6px 10px 10px;
+  pointer-events: none;
+}
+
+.grow-portrait-letter {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--parchment-bright);
+  text-shadow: 1px 1px 0 var(--house-primary-dark);
+  z-index: 2;
+}
+
+/* AI 一言メッセージ (羊皮紙手紙の欄外注釈) */
+.grow-ai-msg {
+  margin: 10px 24px 14px;
+  padding: 14px 16px 14px 38px;
+  background:
+    /* 羊皮紙のテクスチャ */
+    repeating-linear-gradient(
+      0deg,
+      rgba(237, 226, 193, 0.04) 0,
+      rgba(237, 226, 193, 0.04) 18px,
+      rgba(237, 226, 193, 0.07) 18px,
+      rgba(237, 226, 193, 0.07) 19px
+    ),
+    linear-gradient(180deg, rgba(237, 226, 193, 0.10), rgba(237, 226, 193, 0.03));
+  border-left: 3px solid var(--house-secondary);
+  border-right: 1px solid var(--house-secondary-dim);
+  border-top: 1px solid var(--house-secondary-dim);
+  border-bottom: 1px solid var(--house-secondary-dim);
+  border-radius: 0 4px 4px 0;
+  position: relative;
+  font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  font-style: italic;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--parchment-bright);
+}
+
+.grow-ai-msg::before {
+  content: '🦉';
+  position: absolute;
+  left: 8px;
+  top: 12px;
+  font-size: 18px;
+  filter: drop-shadow(0 0 6px var(--candle-glow));
+}
+
+.grow-ai-msg .quote-mark {
+  color: var(--house-secondary);
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  vertical-align: -4px;
+}
+
+/* セクション見出し */
+.grow-section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--house-secondary);
+  text-transform: uppercase;
+  padding: 0 24px;
+  margin: 4px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.grow-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--house-secondary-dim), transparent);
+}
+
+/* タスクカード (羊皮紙のチェックリスト) */
+.grow-task-list {
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+
+.grow-task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  background: rgba(237, 226, 193, 0.06);
+  border: 1px solid var(--house-secondary-dim);
+  border-radius: 3px;
+  position: relative;
+}
+
+.grow-task-check {
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--house-secondary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--house-secondary);
+  background: rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+.grow-task.done .grow-task-check {
+  background: var(--house-secondary);
+  color: var(--house-primary-dark);
+}
+
+.grow-task.done .grow-task-name {
+  text-decoration: line-through;
+  text-decoration-color: var(--house-secondary-dim);
+  color: var(--parchment-dark);
+  font-style: italic;
+}
+
+.grow-task-name {
+  flex: 1;
+  font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  font-size: 14.5px;
+  color: var(--parchment);
+}
+
+.grow-task-icon {
+  font-size: 16px;
+}
+
+/* 目標進捗 (魔法書の章メーター) */
+.grow-goal {
+  margin: 0 24px 12px;
+  padding: 14px;
+  background: rgba(237, 226, 193, 0.05);
+  border: 1px solid var(--house-secondary-dim);
+  border-radius: 3px;
+  position: relative;
+}
+
+/* 蝋封 */
+.grow-goal::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 14px;
+  width: 22px;
+  height: 22px;
+  background: radial-gradient(circle at 35% 35%, var(--house-primary-bright), var(--wax-seal) 60%, var(--house-primary-dark));
+  border-radius: 50%;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.grow-goal::after {
+  content: 'L';
+  position: absolute;
+  top: -7px;
+  right: 19px;
+  color: var(--house-secondary-bright);
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 700;
+  z-index: 2;
+}
+
+.grow-goal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-right: 28px;
+}
+
+.grow-goal-title {
+  font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--parchment-bright);
+}
+
+.grow-goal-due {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  color: var(--house-secondary-bright);
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+
+/* 知識メーター (魔法書ページ風) */
+.knowledge-meter {
+  position: relative;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--house-secondary-dim);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.knowledge-meter-fill {
+  height: 100%;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--house-secondary) 0,
+      var(--house-secondary-bright) 6px,
+      var(--house-secondary) 12px
+    );
+  box-shadow: 0 0 8px var(--candle-glow);
+  position: relative;
+}
+
+.knowledge-meter-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+}
+
+.knowledge-meter-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--parchment-dark);
+}
+
+.knowledge-meter-label .pct {
+  color: var(--house-secondary);
+  font-weight: 700;
+}
+
+/* FAB (杖) */
+.grow-fab {
+  position: absolute;
+  right: 24px;
+  bottom: 96px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, var(--house-secondary-bright), var(--house-secondary-dim));
+  border: 2px solid var(--house-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.6),
+    0 0 24px var(--candle-glow);
+  z-index: 10;
+}
+
+/* ============================================================
+ * BottomTabBar (4 寮 + 中央杖)
+ * ============================================================ */
+
+.tab-bar {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  height: 70px;
+  background: linear-gradient(180deg, #2a0e10 0%, #14060a 100%);
+  border: 1.5px solid var(--house-secondary-dim);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 8px;
+  box-shadow:
+    0 -4px 20px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(211, 166, 37, 0.25);
+  z-index: 6;
+}
+
+.tab-bar::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 4px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--house-secondary), transparent);
+  opacity: 0.6;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 0;
+  cursor: pointer;
+  position: relative;
+}
+
+/* 寮シールド (タブアイコン背景) */
+.tab-shield {
+  width: 28px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  clip-path: polygon(0 0, 100% 0, 100% 60%, 50% 100%, 0 60%);
+  border: 1px solid var(--house-secondary-dim);
+  filter: grayscale(0.4) brightness(0.7);
+  transition: all 0.2s;
+}
+
+.tab-shield-icon {
+  font-size: 16px;
+}
+
+.tab-label {
+  font-family: 'Cinzel', serif;
+  font-size: 8.5px;
+  letter-spacing: 1.5px;
+  color: var(--parchment-dark);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* 各寮カラー (タブ別) */
+.tab.gryff .tab-shield { background: linear-gradient(180deg, #ae0001, #740001); border-color: var(--house-secondary); }
+.tab.slyth .tab-shield { background: linear-gradient(180deg, #2a6b40, #1a472a); border-color: #aaaaaa; }
+.tab.rav .tab-shield { background: linear-gradient(180deg, #1a2a60, #0e1a40); border-color: #946b2d; }
+.tab.huff .tab-shield { background: linear-gradient(180deg, #ecb939, #b8941d); border-color: #372e29; }
+
+/* 中央 (杖) */
+.tab.wand .tab-shield {
+  background: radial-gradient(circle at 30% 30%, var(--house-secondary-bright), var(--house-secondary-dim));
+  border: 1.5px solid var(--house-secondary);
+  clip-path: circle(50%);
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 0 12px var(--candle-glow));
+}
+
+.tab.wand .tab-shield-icon { font-size: 18px; }
+
+.tab.active .tab-shield {
+  filter: drop-shadow(0 0 8px var(--candle-glow));
+  transform: scale(1.08);
+  border-width: 1.5px;
+}
+
+.tab.active .tab-label {
+  color: var(--house-secondary);
+  font-weight: 700;
+}
+
+.tab.active::before {
+  content: '✦';
+  position: absolute;
+  top: -2px;
+  color: var(--house-secondary);
+  font-size: 8px;
+}
+
+/* ============================================================
+ * S-15 GoalCreate (羊皮紙の手紙 + 蝋封)
+ * ============================================================ */
+
+.s15-page-bg {
+  filter: brightness(0.5);
+}
+
+.s15-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 2, 4, 0.78);
+  backdrop-filter: blur(2px);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px 100px;
+}
+
+.s15-modal {
+  width: 100%;
+  max-width: 340px;
+  background:
+    /* 羊皮紙テクスチャ */
+    repeating-linear-gradient(
+      0deg,
+      rgba(237, 226, 193, 0.03) 0,
+      rgba(237, 226, 193, 0.03) 18px,
+      rgba(237, 226, 193, 0.06) 18px,
+      rgba(237, 226, 193, 0.06) 19px
+    ),
+    radial-gradient(circle at 50% 0%, rgba(211, 166, 37, 0.12), transparent 60%),
+    linear-gradient(180deg, #5a1a1c 0%, #3a0e10 100%);
+  border: 2px solid var(--house-secondary);
+  border-radius: 4px;
+  padding: 22px 20px 18px;
+  position: relative;
+  box-shadow:
+    0 0 0 1px var(--house-secondary-dim) inset,
+    0 12px 40px rgba(0, 0, 0, 0.7),
+    0 0 50px var(--candle-glow);
+}
+
+/* リボン (Hogwarts 紋章帯) */
+.s15-modal::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 24px;
+  right: 24px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--house-primary-bright), var(--house-secondary), var(--house-primary-bright));
+}
+
+/* 蝋封 (右上) */
+.s15-modal::after {
+  content: '⚜';
+  position: absolute;
+  top: -16px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  background: radial-gradient(circle at 35% 35%, var(--house-primary-bright), var(--wax-seal) 60%, var(--house-primary-dark));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--house-secondary-bright);
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.6),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25);
+  z-index: 3;
+}
+
+.s15-page-corner {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.s15-page-corner.tl { top: 0; left: 0; border-width: 0 0 16px 16px; border-color: transparent transparent var(--house-secondary-dim) transparent; opacity: 0.4; }
+.s15-page-corner.tr { top: 0; right: 0; border-width: 0 0 16px 16px; border-color: transparent transparent var(--house-secondary-dim) transparent; transform: scaleX(-1); opacity: 0.4; }
+
+.s15-close {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--house-secondary-dim);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--house-secondary);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.s15-emblem {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 0 12px var(--candle-glow));
+}
+
+.s15-title {
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  letter-spacing: 5px;
+  color: var(--house-secondary);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+.s15-title-jp {
+  text-align: center;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 11px;
+  color: var(--parchment-dark);
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+}
+
+.s15-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--house-secondary-dim), transparent);
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.s15-divider::before {
+  content: '⚜';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #4a1416;
+  color: var(--house-secondary);
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+.s15-form-group {
+  margin-bottom: 12px;
+}
+
+.s15-form-label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--house-secondary-bright);
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  display: block;
+  font-weight: 600;
+}
+
+.s15-input {
+  width: 100%;
+  padding: 9px 12px;
+  background: rgba(237, 226, 193, 0.08);
+  border: 1px solid var(--house-secondary-dim);
+  border-radius: 2px;
+  color: var(--parchment-bright);
+  font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  font-size: 14px;
+  outline: none;
+}
+
+.s15-input::placeholder {
+  color: rgba(237, 226, 193, 0.35);
+  font-style: italic;
+}
+
+.s15-textarea {
+  min-height: 50px;
+  resize: none;
+  font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+}
+
+.s15-date-picker {
+  display: flex;
+  gap: 8px;
+}
+
+.s15-date-segment {
+  flex: 1;
+  text-align: center;
+  padding: 10px 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--house-secondary-dim);
+  border-radius: 2px;
+}
+
+.s15-date-segment.active {
+  background: rgba(211, 166, 37, 0.15);
+  border-color: var(--house-secondary);
+}
+
+.s15-date-segment-value {
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  color: var(--house-secondary);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.s15-date-segment-label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  color: var(--parchment-dark);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.s15-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.s15-btn {
+  flex: 1;
+  padding: 11px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border-radius: 2px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.s15-btn-cancel {
+  background: transparent;
+  border: 1px solid var(--house-secondary-dim);
+  color: var(--parchment-dark);
+}
+
+.s15-btn-create {
+  background: linear-gradient(180deg, var(--house-secondary-bright), var(--house-secondary-dim));
+  border: 1.5px solid var(--house-secondary);
+  color: var(--house-primary-dark);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================================
+ * S-20 Talk (校長室 / Mirror of Erised との対話)
+ * ============================================================ */
+
+.talk-header {
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--house-secondary-dim);
+  background: linear-gradient(180deg, rgba(211, 166, 37, 0.06), transparent);
+}
+
+.talk-back {
+  color: var(--house-secondary);
+  font-size: 18px;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+}
+
+/* 動く絵画フレーム (Sage アバター) */
+.talk-portrait {
+  width: 38px;
+  height: 44px;
+  position: relative;
+  border: 1.5px solid var(--house-secondary);
+  background:
+    repeating-linear-gradient(
+      45deg,
+      var(--house-primary-bright) 0,
+      var(--house-primary-bright) 2px,
+      var(--house-primary) 2px,
+      var(--house-primary) 4px
+    ),
+    radial-gradient(circle at 50% 35%, var(--house-secondary-bright) 0%, transparent 30%),
+    var(--house-primary);
+  border-radius: 3px 3px 14px 14px / 3px 3px 6px 6px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 3px;
+  flex-shrink: 0;
+  box-shadow:
+    inset 0 0 6px rgba(0, 0, 0, 0.4),
+    0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.talk-portrait-icon {
+  font-size: 14px;
+  z-index: 2;
+}
+
+.talk-title-block {
+  flex: 1;
+}
+
+.talk-title {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  letter-spacing: 2.5px;
+  color: var(--house-secondary);
+  font-weight: 700;
+}
+
+.talk-status {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 10px;
+  color: var(--parchment-dark);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.talk-status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--house-secondary-bright);
+  box-shadow: 0 0 6px var(--house-secondary-bright);
+}
+
+.talk-deepcheck {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(211, 166, 37, 0.1);
+  border: 1px solid var(--house-secondary);
+  border-radius: 12px;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  color: var(--house-secondary);
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+/* Mirror of Erised トグル */
+.deepcheck-toggle {
+  width: 26px;
+  height: 14px;
+  background: var(--house-secondary);
+  border-radius: 7px;
+  position: relative;
+}
+
+.deepcheck-toggle::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--house-primary-dark);
+  border-radius: 50%;
+  top: 2px;
+  right: 2px;
+  box-shadow: 0 0 4px var(--candle-glow);
+}
+
+/* Mirror of Erised 表示 (DeepCheck 中の AI バブル装飾) */
+.mirror-frame {
+  margin: 4px 16px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, rgba(211, 166, 37, 0.08), rgba(116, 0, 1, 0.10));
+  border-top: 1px solid var(--house-secondary-dim);
+  border-bottom: 1px solid var(--house-secondary-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--parchment-dark);
+  text-align: center;
+  position: relative;
+}
+
+.mirror-frame::before, .mirror-frame::after {
+  content: '⚜';
+  color: var(--house-secondary);
+  margin: 0 6px;
+}
+
+.talk-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.talk-msg-row {
+  display: flex;
+  gap: 8px;
+}
+
+.talk-msg-row.user {
+  flex-direction: row-reverse;
+}
+
+.talk-msg-bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  font-size: 14px;
+  line-height: 1.55;
+  position: relative;
+}
+
+.talk-msg-bubble.ai {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(237, 226, 193, 0.04) 0,
+      rgba(237, 226, 193, 0.04) 18px,
+      rgba(237, 226, 193, 0.07) 18px,
+      rgba(237, 226, 193, 0.07) 19px
+    ),
+    linear-gradient(180deg, rgba(237, 226, 193, 0.08), rgba(237, 226, 193, 0.02));
+  border: 1px solid var(--house-secondary-dim);
+  border-left: 3px solid var(--house-secondary);
+  color: var(--parchment-bright);
+  font-style: italic;
+}
+
+.talk-msg-bubble.user {
+  background: linear-gradient(135deg, var(--house-primary-bright), var(--house-primary));
+  border: 1px solid var(--house-secondary-dim);
+  color: var(--parchment-bright);
+}
+
+.talk-msg-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.talk-msg-icon.ai {
+  background: radial-gradient(circle, var(--house-secondary-bright), var(--house-secondary-dim));
+  border: 1px solid var(--house-secondary);
+  color: var(--house-primary-dark);
+}
+
+.talk-msg-icon.user {
+  background: var(--house-primary-bright);
+  border: 1px solid var(--house-secondary-dim);
+  color: var(--house-secondary);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+}
+
+.talk-msg-meta {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: var(--parchment-dark);
+  margin-top: 4px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.talk-pending {
+  display: flex;
+  gap: 4px;
+  padding: 11px 14px;
+  background: linear-gradient(180deg, rgba(237, 226, 193, 0.08), transparent);
+  border: 1px dashed var(--house-secondary-dim);
+  border-radius: 4px;
+  align-items: center;
+}
+
+.talk-pending-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--house-secondary);
+  box-shadow: 0 0 6px var(--candle-glow);
+}
+
+.talk-pending-text {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 11px;
+  color: var(--parchment-dark);
+  font-style: italic;
+  letter-spacing: 1px;
+  margin-left: 6px;
+}
+
+/* 入力欄 */
+.talk-input-area {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  background: linear-gradient(180deg, #2a0e10 0%, #14060a 100%);
+  border: 1.5px solid var(--house-secondary-dim);
+  border-radius: 4px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  z-index: 6;
+}
+
+.talk-input-icon {
+  font-size: 18px;
+  padding: 0 6px;
+}
+
+.talk-input {
+  flex: 1;
+  background: rgba(237, 226, 193, 0.07);
+  border: 1px solid var(--house-secondary-dim);
+  border-radius: 2px;
+  padding: 9px 12px;
+  color: var(--parchment);
+  font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  font-size: 14px;
+  outline: none;
+}
+
+.talk-input::placeholder {
+  color: rgba(237, 226, 193, 0.4);
+  font-style: italic;
+}
+
+.talk-send {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, var(--house-secondary-bright), var(--house-secondary-dim));
+  border: 1.5px solid var(--house-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--house-primary-dark);
+  box-shadow: 0 0 12px var(--candle-glow);
+  flex-shrink: 0;
+}
+
+/* ホームインジケータ */
+.home-indicator {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 134px;
+  height: 4px;
+  background: var(--house-secondary-dim);
+  border-radius: 2px;
+  opacity: 0.5;
+  z-index: 30;
+}

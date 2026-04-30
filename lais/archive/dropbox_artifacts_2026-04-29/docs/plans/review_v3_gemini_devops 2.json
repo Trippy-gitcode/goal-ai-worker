@@ -1,0 +1,146 @@
+[
+  {
+    "id": "CR-DEVOPS-001",
+    "file": "dev_system_spec.md",
+    "location": "Section 4.4 テスト判定方式",
+    "severity": "CRITICAL",
+    "description": "The recommended jq command for test result analysis is fragile. `jq '.stats.unexpected' | awk ...` will treat a `null` output from jq (if the key is missing) as 0, causing a false pass. This could allow failed test runs to be reported as successful, breaking a core quality gate.",
+    "recommendation": "Modify the command to be more robust by providing a default value. Use `jq '.stats.unexpected // -1' results.json` and check if the value is not equal to 0. A value of -1 indicates a parsing/file error, while any non-zero value is a test failure."
+  },
+  {
+    "id": "CR-DEVOPS-002",
+    "file": "dev_system_spec.md",
+    "location": "Section 8. C2デプロイフロー",
+    "severity": "CRITICAL",
+    "description": "The deployment verification step is specified as `curl -s $URL | grep version`. This contradicts Accepted Design Decision #7, which states 'URL verification uses HTTP status (not body grep)'. The main specification must not contain instructions that directly violate agreed-upon principles, as this will cause confusion for the AI agents.",
+    "recommendation": "Update the main specification in Section 8 to align with the implemented script (`deploy.sh`) and Design Decision #7. The verification step should be described as checking for a `2xx` HTTP status code."
+  },
+  {
+    "id": "CR-DEVOPS-003",
+    "file": "sub_infrastructure.md",
+    "location": "2.9 rollback.sh",
+    "severity": "CRITICAL",
+    "description": "The rollback script will fail on the very first deployment of an application because there is no previous tag to roll back to. The command `git rev-list --tags --skip=1 -n 1` will exit with an error, causing the safety mechanism to fail when it might be needed most.",
+    "recommendation": "Add a check at the beginning of `rollback.sh` to verify that at least one previous tag exists. If not, exit with a clear error message stating that automatic rollback is not possible."
+  },
+  {
+    "id": "CR-DEVOPS-004",
+    "file": "dev_system_spec.md",
+    "location": "Section 13.7 収束ルール",
+    "severity": "CRITICAL",
+    "description": "The AI review process mandates a fixed 'minimum of 10 rounds'. This is inefficient and can block deployment. If quality converges in 3 rounds, 7 are wasted. If quality hasn't converged in 10, it allows a low-quality spec to pass. This fixed number is a process flaw that prevents efficient, quality-based outcomes.",
+    "recommendation": "Change the rule from a fixed number of rounds to a condition-based one, such as: 'The review process continues until no new CRITICAL or HIGH severity findings are generated for two consecutive rounds.'"
+  },
+  {
+    "id": "CR-DEVOPS-005",
+    "file": "dev_system_spec.md",
+    "location": "Section 15.4 metrics.jsonl",
+    "severity": "CRITICAL",
+    "description": "The canopy check for the daily metrics entry (`grep -q \"\\\"$TODAY\\\"\"`) is timezone-dependent. A CI/CD pipeline running in UTC will fail this check for several hours if the developer works in a different timezone (e.g., JST). This will cause spurious, blocking deployment failures.",
+    "recommendation": "Make the check more robust. For example, check for an entry with today's date OR yesterday's date to accommodate timezone differences between the developer's machine and the CI runner."
+  },
+  {
+    "id": "CR-DEVOPS-006",
+    "file": "dev_system_spec.md",
+    "location": "Section 18. 仕様書の依存関係",
+    "severity": "CRITICAL",
+    "description": "The dependency map incorrectly lists the generated file `development_rules.md` as a trigger. The actual source files are `development_rules_common.md` and `development_rules_app.md`. This incorrect mapping will cause the system to miss necessary updates to `canopy.sh` when the underlying rules change, leading to a divergence between specification and enforcement.",
+    "recommendation": "Correct the dependency map to list the source files (`development_rules_common.md`, `development_rules_app.md`) as the triggers for checking `canopy.sh`."
+  },
+  {
+    "id": "CR-DEVOPS-007",
+    "file": "sub_infrastructure.md",
+    "location": "2.1 init_app.sh",
+    "severity": "CRITICAL",
+    "description": "The script hardcodes the creation of the `canopy.sh` entrypoint file via a `cat` heredoc. This file cannot be updated by `update_app.sh`. If the core invocation logic for canopy changes, all existing applications will have an outdated, potentially broken quality gate, and there is no automated way to fix it.",
+    "recommendation": "The `canopy.sh` entrypoint should also be a symlink managed by `init_app.sh` and `update_app.sh`. Create a template file like `canopy_entrypoint.sh` in `dev-system/templates` and link to it."
+  },
+  {
+    "id": "CR-DEVOPS-008",
+    "file": "sub_infrastructure.md",
+    "location": "2.2 update_app.sh",
+    "severity": "CRITICAL",
+    "description": "The list of symlinks to update is hardcoded within `update_app.sh`. If a new common script is added to `dev-system` and `init_app.sh`, this update script will not know about it, and existing apps will never receive the new script. This prevents the common infrastructure from being reliably propagated.",
+    "recommendation": "Create a manifest file (e.g., `symlink_manifest.txt`) in the `dev-system` repository that lists all files to be symlinked. Both `init_app.sh` and `update_app.sh` should read from this single source of truth."
+  },
+  {
+    "id": "CR-DEVOPS-009",
+    "file": "sub_infrastructure.md",
+    "location": "2.8 deploy.sh",
+    "severity": "CRITICAL",
+    "description": "The script uses `eval` on commands read from `app_config.yaml` (`eval \"$BUILD_CMD\"`). This is a severe security risk, as it allows for arbitrary code execution if the YAML file is compromised or misconfigured. While the context is a solo developer, this pattern is fundamentally unsafe and can cause catastrophic deployment failures.",
+    "recommendation": "Remove the use of `eval`. Instead, invoke the commands directly. If variables are needed, use a safer substitution method or structure the YAML to separate the command from its arguments."
+  },
+  {
+    "id": "CR-DEVOPS-010",
+    "file": "sub_infrastructure.md",
+    "location": "2.9 rollback.sh",
+    "severity": "CRITICAL",
+    "description": "The rollback mechanism re-runs the entire build and deployment pipeline (`bash scripts/deploy.sh prod .`). A rollback is a critical safety procedure that should be fast and low-risk. Introducing a new build and deploy cycle into the rollback process adds a significant chance of new failures, defeating the purpose of a quick restore to a known-good state.",
+    "recommendation": "Change the rollback strategy to use the deployment provider's native rollback feature (e.g., promoting a previous Cloudflare Pages deployment). This is near-instantaneous and does not involve a new build, making it a much safer and more reliable rollback mechanism."
+  },
+  {
+    "id": "CR-DEVOPS-011",
+    "file": "sub_infrastructure.md",
+    "location": "2.9 rollback.sh",
+    "severity": "CRITICAL",
+    "description": "The logic to find the previous tag (`--skip=1`) is incorrect. It finds the second-to-last tag. If a deployment of `v1.2.0` fails (after `v1.1.0` was successful), this script would attempt to roll back to `v1.0.0`, skipping an entire version and potentially causing data inconsistencies or loss.",
+    "recommendation": "Correct the git command to find the most recent tag prior to HEAD. A safer command would be `git describe --tags --abbrev=0 HEAD~1` or a similar construct that correctly identifies the immediate predecessor tag."
+  },
+  {
+    "id": "CR-DEVOPS-012",
+    "file": "sub_infrastructure.md",
+    "location": "2.13 changed-files-allowlist.sh",
+    "severity": "CRITICAL",
+    "description": "The fallback logic for finding changed files (`git diff --name-only HEAD~1`) is incorrect for missions involving multiple commits. It only checks the single most recent commit, allowing unauthorized file changes from earlier commits in the mission to pass the gate undetected.",
+    "recommendation": "Change the fallback to diff against a more stable base, such as the merge-base with the main branch (e.g., `git merge-base origin/main HEAD`), to ensure all changes in the current feature branch are checked."
+  },
+  {
+    "id": "CR-DEVOPS-013",
+    "file": "sub_infrastructure.md",
+    "location": "2.6 canopy_common.sh",
+    "severity": "CRITICAL",
+    "description": "The G6 build sync check iterates over deploy commands using an unquoted variable (`for CMD in $ALL_DEPLOY_CMDS`). If a command in `app_config.yaml` contains spaces, it will be split into multiple words by the shell, causing the check to fail incorrectly and blocking valid deployments.",
+    "recommendation": "Quote the variable in the for loop to handle commands with spaces correctly: `for CMD in \"$ALL_DEPLOY_CMDS\"; do`."
+  },
+  {
+    "id": "CR-DEVOPS-014",
+    "file": "sub_infrastructure.md",
+    "location": "2.14 review_gate.sh",
+    "severity": "CRITICAL",
+    "description": "The script introduces a new, undocumented dependency on Python 3. All other scripts rely on shell tools, node, and yq. If Python 3 is not present in the CI environment, this quality gate will fail, blocking all deployments. This inconsistent tooling choice makes the environment fragile.",
+    "recommendation": "Rewrite the check using `jq`, which is already an established dependency. The equivalent command would be `jq '[.[] | select(.severity==\"CRITICAL\")] | length' \"$FILE\"`."
+  },
+  {
+    "id": "CR-DEVOPS-015",
+    "file": "sub_testing.md",
+    "location": "5. affected-tests.sh",
+    "severity": "CRITICAL",
+    "description": "The script hardcodes `origin/main` as the base branch for comparison. This will fail silently in any repository that uses a different primary branch name (e.g., `master`), causing the script to fall back to `HEAD~1`. This fallback is incorrect for multi-commit missions and will result in an incomplete test suite being run, potentially allowing bugs into production.",
+    "recommendation": "Make the primary branch name a configurable variable in `app_config.yaml` or attempt to determine it dynamically. Do not rely on a hardcoded value."
+  },
+  {
+    "id": "CR-DEVOPS-016",
+    "file": "sub_adv_protocol.md",
+    "location": "1. 書き込みホワイトリスト",
+    "severity": "CRITICAL",
+    "description": "There is a direct contradiction regarding `CLAUDE.md`. This protocol states ADV can write to it without PO approval. The main spec states `CLAUDE.md` is the contract and its contract section is PO-only. This ambiguity could lead to the ADV agent modifying the contract without authorization, violating a core project constraint.",
+    "recommendation": "Resolve the contradiction. Clarify in this protocol that ADV can modify `CLAUDE.md` EXCEPT for the contract section, which requires explicit PO approval. The whitelist should be more granular."
+  },
+  {
+    "id": "CR-DEVOPS-017",
+    "file": "sub_system_map.md",
+    "location": "1. SW処理フロー (プロフィール保存)",
+    "severity": "CRITICAL",
+    "description": "The profile save flow specifies an optimistic UI update to localStorage that is not reverted on API failure. This will cause a persistent data inconsistency between the client and the server. The user will see their new data, but it is lost on the backend, leading to confusion and potential data loss.",
+    "recommendation": "Modify the flow to handle API failures by reverting the change in localStorage and clearly informing the user that the save operation failed. The UI must always reflect the true state of the backend after an operation concludes."
+  },
+  {
+    "id": "CR-DEVOPS-018",
+    "file": "sub_infrastructure.md",
+    "location": "2.4 mission_linter.sh",
+    "severity": "CRITICAL",
+    "description": "The linter's check for bash commands (`grep -c \"cmd[0-9]...\"`) is too specific and brittle. A valid mission might use a different command structure or a script. This will cause the linter to incorrectly fail valid mission definitions, blocking development.",
+    "recommendation": "Generalize the check. Instead of looking for specific command patterns, verify the presence of a markdown code block designated for shell commands (e.g., ```bash) within the '完了コマンド' section."
+  }
+]

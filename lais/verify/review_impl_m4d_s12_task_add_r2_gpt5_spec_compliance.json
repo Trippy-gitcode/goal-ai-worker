@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.5 S12-9",
+    "issue": "「S12-6 と同スタイル」との記述に対し、S12-9専用の .s12-readonly-with-icon で justify-content: space-between を追加しており、S12-6側の実装とレイアウトロジックが分岐する可能性がある。結果としてパディング/ギャップ等が将来的に乖離するリスク。",
+    "suggestion": "S12-6で用いているユーティリティ/ミックスインを再利用し、S12-9も同一のスタイルソースを参照する。具体的には S12-6 のコンテナクラス（例: .s12-readonly.s12-input 内でのアイコン配置ルール）に依存させ、S12-9専用の justify-content: space-between 追加を避け、必要なら共通クラスに trailing-icon 用の修飾子を追加する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "WCAG/ARIA §aria-readonly 適用範囲",
+    "issue": "aria-readonly=\"true\" を div（ロール未指定）に付与しており、ARIAの適用範囲外。支援技術に正しく伝わらず、読み上げが期待通りにならない可能性。",
+    "suggestion": "セマンティクス��正す。選択肢: 1) 視覚的にreadonlyなだけなら aria-readonly を削除し、単なるテキスト表示にする。2) 入力コントロールとしての意味を持たせる場合、role=\"textbox\" か適切なロールに変更の上で aria-readonly を付与。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "S12TaskAdd.jsx S12-9 ブロック",
+    "issue": "JSX属性に class を使用（React標準は className）。環境によっては警告や属性無視が発生し、スタイル未適用となるリスク。",
+    "suggestion": "S12-9ブロック内の class を className に置換（例: <div className=\"s12-field\"> 等）。プロジェクト全体の記法統一も併せて確認。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "design_system.md §5.0 A",
+    "issue": "非テキストコントラスト対策として active 時に border-color: var(--accent) を設定しているが、active状態で border-style/border-width が継承されていない場合、境界が表示されない可能性が残る。",
+    "suggestion": "activeスタイル側で border 明示（例: border: 1px solid var(--accent);）を定義、あるいはベース���ラスでの border 定義が確実に継承されることをコメントで明示し、将来のリファクタによる崩れを防ぐ。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md §5.0 A / WCAG 1.4.11",
+    "issue": "ピル/チップの active 状態に対するコントラストは確保されたが、キーボードフォーカス時の可視イ��ジケータ（focus-visible）に関する定義が見当たらない。",
+    "suggestion": ":focus-visible のアウトラインやフォーカスリングをデザイントークン（例: --focus-ring / --accent）で定義し、非テキストコントラスト 3:1 を満たすことをスタイルシートに明記する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.5 S12-9",
+    "issue": "S12-9 は種別で「予定日 ⇄ 繰り返し周期」をスワップしているが、実装では両方の状態で同じカレンダーアイコンを出すように見える。仕様抜粋は予定日に対する記述のみで、繰り返し周期側のアイコン要件が不明。",
+    "suggestion": "繰り返し周期表示時にカレンダーアイコンを使うのか、別アイコン（リピート）またはアイコン無しなのかを仕様で明示。実装では type !== 'single' の場合のアイコン要件に応じて SVG を条件分岐する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

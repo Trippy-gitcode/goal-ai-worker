@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"HIGH\",\n    \"category\": \"MISSING\",\n    \"location\": \"S00Splash.css\",\n    \"issue\": \"画面の高さが極端に低い場合（例: スマートフォンの横向き表示、PCブラウザでのウィンドウリサイズ）、中央のロゴ・タグラインと下部に固定されたCTAボタン群が重なり、レイアウトが崩壊します。現在のCSS実装は縦長のviewportのみを想定しており、レスポンシブ対応が考慮されていません。\",\n    \"suggestion\": \"`@media (orientation: landscape)` やコンテナ���エリ (`@container`) を用いて、高さが低い場合の代替レイアウトを定義してください。例えば、ロゴとCTA間のマージンを縮小する、フォントサイズを小さくする、あるいは要素を横並びに再配置するなどの対応が考えられます。\"\n  },\n  {\n    \"id\": \"R-002\",\n    \"severity\": \"HI",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  }
+]

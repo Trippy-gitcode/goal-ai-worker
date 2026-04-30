@@ -1,0 +1,145 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "フッター文言「すでにアカウントをお持ちですか？ ログイン」の「ログイン」リンク",
+    "issue": "リンクが色のみで示され、下線などの非色情報がない（WCAG 1.4.1 違反の恐れ／デザインシステム§2.2の下線必須に不一致）",
+    "suggestion": "インラインテキストリンクには常に text-decoration: underline を適用し、:hover/:active/:focus-visibleで明度差も付ける（--accent を維持しつつ下線で非色依存化）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "利用規約・プライバシーポリシー同意のチェックボックス行",
+    "issue": "チェックボックス見た目が約20×20pxで最小タップ領域44×44px未満（WCAG 2.5.5／Apple HIGに不適合の恐れ）",
+    "suggestion": "行全体をタップ可能にしつつ、実タップ領域をmin 44×44pxに拡張（paddingまたは::beforeで透明ヒット領��を付与）。チェック状態は行クリックでも切替",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダル上部（見出し「タスクを追加」右側）",
+    "issue": "閉じる✕ボタンが見当たらず、仕様の「ハーフモーダルは✕ボタン/下スワイプ/バックドロップで閉じる」に未準拠（UX仕様§1.4）",
+    "suggestion": "見出し右上に44×44pxの✕ボタンを追加（hit領域は--tap-target-min準拠）。focus-visibleも確保",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s15_goal_create",
+    "location": "ハーフモーダル上部（見出し「ゴールを作成」右側）",
+    "issue": "閉じる✕ボタンがなく、同一コンポーネント（ハーフモーダル）内でs13には✕がある一方で本画面は無し。挙動不一致は学習コストを上げる",
+    "suggestion": "s12と同様に右上へ✕ボタンを追加し、ハーフモーダルの閉じ方を全画面で統一（✕/下スワイプ/バックドロップ）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カード（「登録する」「編集」「✕」のボタン行）",
+    "issue": "セカンダリCTAが「編集」になっており、仕様の「編集して登録」と文言不一致（UX仕様§3.3）。意味が弱く意図が伝わりにくい",
+    "suggestion": "ボタン文言を「編集して登録」に変更し、押下時はS-12のハーフモーダルをAI事前入力付きで開く仕様に合わせる",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "各タスク行右端の完了チェック（小さな円形チェックマーク）",
+    "issue": "完了トグルの視覚サイズが約14pxでタップターゲットが極小に見える。主要操作として誤タップ/取り逃しリスクが高い",
+    "suggestion": "チェック領域を44×44px以上に拡張（右端に見えないタップパッドを設置）。視覚円はそのままでもOKだが、押下フィードバックを明確化",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "左上の戻る矢印アイコン",
+    "issue": "アイコンのみでボタンコンテナが見えず、タップ領域が44×44px未満に見える。片手操作時に押しづらい",
+    "suggestion": "ヘッダー左上に44×44pxのタップボックスを設ける（透明でも可）。押下時の拡大/色反転などのフィードバックを追加",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s12_task_add",
+    "location": "「所要時間」横スクロールのチップ（5分/10分/…/120分）",
+    "issue": "視覚高さが約28〜32pxで最小タップサイズに満たない印象。スクロール中の誤タップや選択ミスが起きやすい",
+    "suggestion": "各チップに透明hit拡張を付与し44×44px以上を確保（行高を上げる or ::beforeで拡張）。選択時は--accent-subtle背景で面積を増やす",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カード内の「登録する」「編集」「✕」ボタン",
+    "issue": "各ボタンの見た目が高さ約32pxで主要CTAとしては小さい。チャット内で指が被りやすく押しづらい",
+    "suggestion": "主要CTA（登録する）は高さ44px以上のpillに。副次もヒット領域を44pxへ拡張（padding/::before）。押下時は--spring-defaultで軽いscale演出",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "ヒーローのEXPバーとGoalsセクションの進捗バー（同色・同形状）",
+    "issue": "EXPバーとゴール進捗バーが同じ色・太さで並び、意味が異なる2種の進捗が混同されやすい（視線の目的地がぼやける）",
+    "suggestion": "EXPは現状維持、Goalsはバー太さを細く（3px→2px）し--accent-subtle系に変更 or 端に🎯アイコン併記。ラベルも「目標進捗」と明示",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Todayセクションのサブテキスト「1 / 4 completed」",
+    "issue": "日本語UI内で当該表現のみ英語。機能は理解できるがトーンが混在し微妙な違和感を生む",
+    "suggestion": "「1/4 完了」にローカライズ、もしくはアイコン+数値（✅ 1/4）で言語依存度を下げる",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "OTHER",
+    "screen": "s20_talk",
+    "location": "ヘッダー右側の🕐（履歴）・✎（新規チャット）アイコン群",
+    "issue": "意味が直感的に取りづらく、3アイコン並列で認知負荷がやや高い（鉛筆は編集と誤認の恐れ）",
+    "suggestion": "鉛筆は「＋」や紙飛行機などの標準メタファーへ置換。ツールチップ/ラベル表示（縮小時は省略）で初回認知コストを下げる",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Today/Goals の「+ タスクを追加」「+ ゴールを作成」リンク",
+    "issue": "テキストのみでボタン性が弱く、一覧内で見落としやすい（インタラクティブ要素としての手掛かり不足）",
+    "suggestion": "ゴーストボタン化（pill＋--accent-subtle背景＋アイコン）でボタン性と視認性を強化。hover/pressedの状態差も付与",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

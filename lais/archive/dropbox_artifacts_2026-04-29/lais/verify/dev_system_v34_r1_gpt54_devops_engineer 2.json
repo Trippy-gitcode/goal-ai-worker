@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "改訂案② §8 Step 11 / 改訂案⑤ G13 / 改訂案⑤ pre-commit-sub",
+    "issue": "canopy検証の発火保証が仕様上成立していません。G13はフックの『存在』しか検証せず、実際のpre-commit発火やcanopy実行成功を保証しません。さらに pre-commit-sub は tests/smoke/canopy.sh を直接実行しますが、親pre-commit連鎖は git commit 時にしか動作せず、deploy.sh や CI 実行との接続も未定義です。B3の解消として『発火保証』を掲げていますが、実際にはフック未経由のデプロイ/CI/手動実行でゲートが素通り可能です。",
+    "suggestion": "G13の目的を『存在検証』に限定するか、deploy.sh/CI の必須ステップとして canopy 実行を明示し、ログ永続化もその実行経路に必ず組み込んでください。少なくとも『pre-commit設置=発火保証』という記述は修正が必要です。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案② D.1 scripts/verify_env.sh",
+    "issue": "Cloudflare Pages の環境変数確認方法が実装可能性に乏しいです。仕様では `wrangler pages secret list --project-name=...` で取得するとしていますが、Pages の全 required_env をこの方法で一貫取得できる前提が不明で、しかも VITE_/PUBLIC_ 変数は `dist/` 内 grep で確認するとしています。しかし deploy.sh の Step 10 はデプロイ後検証であり、ローカル dist の内容は『実際にPaaSへ反映された値』の証明になりません。ローカル build と実デプロイ結果が乖離しても通過し得ます。",
+    "suggestion": "verify_env.sh は『ローカルビルド入力確認』と『PaaS設定確認』を分離してください。PaaS実反映を確認できない変数は PASS にせず WARN/手動確認へ落とすか、配信URLから取得した成果物に対して検証する方式へ変更してください。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案② §8 Step 11 / 改訂案② D.2 scripts/verify_external_services.sh",
+    "issue": "外部サービス連携確認のFAIL条件が仕様本文とスクリプト実装案で矛盾しています。本文では『APIキーがない項目は WARN 扱い』とありますが、Supabase/Stripe 以外のサービスは未実装、かつ app_config.yaml に external_services が定義されても provider 未対応時は事実上未検証のまま通過します。さらに Step 11 は『検証必須』としてデプロイ判定に組み込まれている一方、実��案は認証情報不足でWARNに落とすため、セキュリティ/外部設定の抜けがあってもデプロイ通過が可能です。",
+    "suggestion": "Step 11 を provider対応済み項目のみ PASS/FAIL 判定し、未対応または認証情報不足の項目は『デプロイブロッカーにする条件』を明文化してください。少なくとも認証・決済に関わる必須 external_services は WARN ではなく FAIL 条件に分ける必要があります。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案① F. scripts/step0_lint.sh",
+    "issue": "G11 の実装案が brittle で、仕様変更に極めて弱いです。`grep '^## $FLOW|^### $FLOW'` と開始20行以内の固定探索に依存しており、見出し文言の微修正・階層変更・改行差分で容易に誤検知/見逃しします。また development_rules.md 側は `grep -c` でファイル全体一致を見るだけでセクション単位の検証になっていません。『全22フローへのStep 0参照の機械保証』という目的に対して実装精度が不足しています。",
+    "suggestion": "セクション単位の抽出ロジックに変更し、対象見出しごとにブロック範囲を切って Step 0 の存在を確認してください。development_rules.md も G1〜G9 の各ブロック単位で検証する実装に改めてください。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案④ §5.1 / 改訂案② §8 Step 12 / 改訂案④ D mission_linter.sh",
+    "issue": "cmd-realworld の必須化と deployフロー依存が整合していません。§5.1 では認証・複数画面・デプロイ系で cmd-realworld 必須ですが、実行例は `DEPLOY_URL=$DEPLOY_URL npx playwright test ...` で、デプロイ済みURLが前提です。一方、ミッションはデプロイ前に実行・完了判定され得るため、DEPLOY_URL 未確定時に自動実行不能です。N/A を許さないタイプがあるため、ミッション定義として成立しないケースが出ます。",
+    "suggestion": "cmd-realworld 必須ミッションは『デプロイ後完了判定』であることを明示するか、完了判定を「実装完了」と「デプロイ完了」に分離してください。少なくとも deploy前の通常ミッションで cmd-realworld を必須にする条件整理が必要です。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案⑤ C. dev-system/templates/hooks/pre-commit-sub",
+    "issue": "pre-commit-sub の changed file 判定がサブディレクトリ内実行と整合していません。親pre-commitから `cd <SUBDIR>` した後に `git diff --cached --name-only | grep '^${SUBDIR}/'` を実行していますが、git の出力は通常リポジトリルート相対のため、この挙動は環境依存です。さらに `sed \"s|^${SUBDIR}/||\"` 前提のため、相対パス化されない場合にのみ成立します。cwd仕様が未固定なまま B2 を解消したことになっており危険です。",
+    "suggestion": "pre-commit-sub では `git rev-parse --show-toplevel` を基準にパスを正規化し、常にルート相対→サブディレクトリ相対へ変換する処理にしてください。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "改訂案② D.1 scripts/verify_env.sh / 改訂案② Step 10",
+    "issue": "VITE_/PUBLIC_ 変数の検証に `dist/` grep を使う設計は、シークレット保護の観点で危ういです。値そのものを検査対象にすると、ログや失敗出力に環境変数名・検出位置が露出しやすくなります。また『G10パターンでマスク』とありますが、具体的なマス��実装が示されていません。",
+    "suggestion": "値そのものの grep ではなく、ビルド時に生成される設定メタデータや公開用設定オブジェクトの存在確認へ寄せてください。少なくともログ出力時のマスク仕様を verify_env.sh に明記してください。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改訂案⑤ E. canopy 発火ログ永続化 / 改訂案⑤ G13",
+    "issue": "canopy 発火ログの `fail_count` に `$FAIL` をそのまま出力していますが、前段スクリプト群では FAIL を 0/1 フラグとして使っている記述が多く、件数ではありません。ログ項目名と実値の意味が一致していません。",
+    "suggestion": "`fail_count` を `failed` などの真偽値相当名に変更するか、実際の失敗件数を集計する実装へ修正してください。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "改訂案① F. scripts/step0_lint.sh / 改訂案③ D. proposal_log_lint.sh / 改訂案② D.2 verify_external_services.sh",
+    "issue": "新設スクリプト群が GNU grep の `-P` に依存しており、macOS標準環境では動作しない��能性があります。レビュー観点で要求されている macOS/Linux 互換性に反します。",
+    "suggestion": "`grep -P` を避け、POSIX互換の sed/awk/perl/python3 で置き換えてください。少なくとも各スクリプトの依存コマンド要件を明記し、macOS対応版を用意する必要があります。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "改訂案③ §1.5.4 / 改訂案③ D. proposal_log_lint.sh",
+    "issue": "G12 は提案ログの形式検証と閾値警告のみで、仕様本文が要求する『各セッション開始時に滞留セッション数を +1 する』処理自体は自動化されていません。『必ず本更新処理が発火する』とありますが、実装案は発火検知のみで値更新は手作業です。",
+    "suggestion": "自動更新スクリプトを追加するか、『更新は手動、G12 は未更新検知のみ』に記述を下げてください。現状のままでは自動前提の記述が過剰です。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "改訂案⑤ A. §10.4.4 / 改訂案⑤ B. init_app.sh --subdir",
+    "issue": "§10.4.4 ではサブディレクトリ���に `tests/smoke/canopy.sh` が必須としていますが、init_app.sh --subdir の追加処理ではその配置保証が示されていません。B3対策として『標準canopy。親の.gitから独立』と記述する一方、実装案は pre-commit-sub 配置しか新規追加していません。",
+    "suggestion": "init_app.sh の --subdir 処理に canopy.sh 配置/リンク確認を追加するか、必須設定の記述を『既存標準処理で配置される』と明示してください。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "改訂案⑦ A. §4.7.1.6",
+    "issue": "双方向デザイン照合について『新設スクリプト: scripts/bidir_design_lint.sh（将来対応。まずは手動運用）』とあり、自動化対象として挙げつつ未実装です。改訂方針自体は問題ありませんが、実装済み/未実装の境界が読者に誤解されやすい構成です。",
+    "suggestion": "§4.7.1.6 に『v3.4 では手動運用、ゲート未接続』を明示し、将来対応であることを表で区別してください。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  }
+]

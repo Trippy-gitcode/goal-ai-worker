@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §5.1, §5.3",
+    "issue": "オンボーディング完了後、GROW画面に遷移するが、その後の「タスクの⭕️をタップして完了する」「TALKタブでAIと話す」といった基本的な使い方の説明（チュートリアル）が一切ない。普段LINEやPayPayしか使わない層は、画面を見ても何をすればいいか分からず離脱する可能性が高い。",
+    "suggestion": "初回GROW画面表示時に、AI提案済みの初回タスクをハイライトし「まずはこのタスクを完了（⭕️をタップ）してみましょう」と促すツールチップや、TALKタブへの誘導など、最小限��インタラクティブなチュートリアル（初回体験フロー）を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §5.3 / ux_v1.md §11.4",
+    "issue": "PWAインストール誘導モーダルの表示タイミングについて、project_v1.mdでは「初回起動時」、ux_v1.mdでは「3回目のアプリ起動時」と矛盾している。また、一般ユーザーはApp Store以外からアプリを入れる操作に不慣れなため、理由がないと不審に思う。",
+    "suggestion": "表示タイミングの矛盾を解消する（例: 3回目に統一）。また、インストール誘導モーダルには「通知を受け取るためにホーム画面に追加してください」など、ユーザーにとっての明確なメリット（Why）を記載する仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3",
+    "issue": "S-12（タスク追加）などのハーフモーダルでテキスト入力を行う際、ソフトウェアキーボードが表示された場合のモーダル自体の挙動（上に押し上げられるのか、内部でスクロールするのか）が定義されていない。入力欄がキーボードに隠れると操作不能になる。",
+    "suggestion": "キーボード表示時はハーフモーダルの高さを画面上部まで拡張（フルスクリーン化）するか、入力中のフィールドがキーボードのすぐ上に位置するように自動スクロールする仕様を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §1.4, §3.5, §7.3",
+    "issue": "フルスクリーン詳細画面では「左端から右スワイプ」で前画面に戻る（iOS標準）が、TALK画面では同じジェスチャーで「履歴ドロワー展開」となっている。iOSのPWA環境では、画面左端からのスワイプがOSの「戻る（ブラウザバック）」として誤爆しやすく、ドロワー展開と競合する。",
+    "suggestion": "ドロワー展開のジェスチャーを「画面左端」からではなく「画面内の任意の場所から右スワイプ」にするか、ジェスチャー展開を廃止して☰ボタンタップのみに限定する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §5.2 Step 3, 4",
+    "issue": "自己成長に興味がないユーザーにとって、「目標ジャンル」や「最初のゴール」を急に聞かれても困る。「0個でも次へ可能」とあるが、何も選ばずに進むのは心理的に抵抗があり、面倒くささを感じる。",
+    "suggestion": "Step 3や4に「今は決めない」「まずは日常の記録から」といった明示的な選択肢（チップ）を用意し、自己啓発に興味がない層でも安心して進めるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §4.2, §8.1",
+    "issue": "ME画面に「MBTI」という用語が突然出てくるが、一般層には意味が通じない。また「EXP」もゲーム習慣がないユーザーにはPayPayのようなポイント（買い物に使えるもの）と誤認される可能性がある。",
+    "suggestion": "「MBTI」という専門用語を避け「性格タイプ（16タイプ診断）」などの一般的な表現にする。また、初回EXP獲得時やオンボーディングで「EXPはあなたの成長の証です（買い物には使えません）」のような軽い説明を入れる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3",
+    "issue": "タスク追加（S-12）の入力項目が7つ（種別、タスク名、開始時刻、所要時間、予定日、ゴール紐付け、メモ）もあり、LINEやPayPayのようなシンプルなUIに慣れたユーザーには「面倒くさい」と感じられ、タスク登録のハードルになる。",
+    "suggestion": "初期表示は「タスク名」と「作成ボタン」のみの超シンプルUIにし、「詳細設定（時刻、所要時間など）」はアコーディオンや別タブで隠すプログレッシブ・ディクロージャーを採用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §4.4",
+    "issue": "友達をやめる・ブロックするための導線が「友達詳細(S-35) > ...メニュー」と深く、LINE等に慣れたユーザーがリスト画面から直感的に操作できない。",
+    "suggestion": "FRIENDS画面の友達リスト（カードグリッド）でのロングプレスで、簡易コンテキストメニュー（応援/メッセージ/友達解除/ブロック）を表示する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  }
+]

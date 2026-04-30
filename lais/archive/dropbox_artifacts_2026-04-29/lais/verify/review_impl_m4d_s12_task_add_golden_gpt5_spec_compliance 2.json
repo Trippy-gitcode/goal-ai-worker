@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.5 S12-9",
+    "issue": "予定日フィールド右側の14pxカレンダーアイコンが実装されていない。specは「S12-9 | 予定日 | ... 右に14pxカレンダーSVG stroke --text-muted」を要求。",
+    "suggestion": "S12-9の読み取り専用表示に14×14のカレンダーSVG（stroke=currentColor）を右側に追加し、SVGのカラーを--text-mutedで継承する。例: <div class=\"s12-readonly s12-input s12-readonly-with-calendar\"> <span>今日</span> <svg width=\"14\" height=\"14\">...</svg> </div>。CSSで.s12-readonly-with-calendar { justify-content: space-between; } とし、svg { color: var(--text-muted); } を付与。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.5 S12-9 / S12-10",
+    "issue": "予定日／ゴール紐付けは「S12-6と同スタイル」と明記だが、.s12-readonly/.s12-readonly-with-chevronで文字色が--text-secondary/--text-mutedに変更されており、S12-6相当（入力値=--text-primary）と乖離。",
+    "suggestion": "読み取り専用ブロックのテキストカラーを--text-primaryへ戻し、アイコンの��を--text-mutedで着色する。具体的には.s12-readonly, .s12-readonly-with-chevronのcolor指定を削除またはvar(--text-primary)へ変更し、.s12-readonly-with-chevron svg { color: var(--text-muted) } を維持。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.5 画面タイプ / 検証可能なスクショ",
+    "issue": "ハーフモーダルの高さが「画面高60%」であるべきところ、実装はmax-height: 85vhで固定高さを満たしていない。スクショ要件（約487px≒60%）とも不整合。",
+    "suggestion": ".s12-modalにheight: 60vhを付与し、内部スクロールで内容を収める（overflow-y: autoは維持）。必要ならmin-heightやsafe-area考慮は@supports内で補完。max-height:85vhは削除または60vhに置換。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.5 状態・インタラクション",
+    "issue": "閉じる際の「逆アニメ（モーダル下降・オーバーレイfade-out）」が未実装。現在はDOMを即時unmountしており、specの遷移要件に反する。",
+    "suggestion": "クローズ時に退場アニメを実行するため、isClosing状態を導入し、.s12-modal/.s12-overlayにclosingクラスを付与してreverseアニメ（translateY(0→100%) / opacity(1→0)）を適用。アニメーション終了イベント後にunmountする。durationは--duration-normal/--duration-fastを流用。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.5 S12-3",
+    "issue": "✕ボタンのSVGサイズが16×16だが、specは20×20を要求。",
+    "suggestion": "s12-close内のSVGをwidth/height=20に変更（viewBox 0 0 20 20に合わせる）。strokeはcurrentColor（=--text-secondary継承）を維持し、タップ領域44×44はそのまま確保。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.5 S12-6",
+    "issue": "タスク名入力のplaceholder色が--text-placeholderになっており、spec指定の--text-mutedと不一致。",
+    "suggestion": ".s12-input::placeholderの色をvar(--text-muted)に変更。もし全体設計で--text-placeholderを使用したい場合は、当該specセクションに準拠するよう--text-placeholderを--text-mutedと同値にマッピングするか、S12に限り上書き。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.5 S12-2",
+    "issue": "タイトルのタイポグラフィ（font-size 20px / letter-spacing -0.02em）がトークンに依存しており、現在の--font-size-lg / --letter-spacing-jaがこれらの数値に一致する保証がない。",
+    "suggestion": "tokensの値をspecに整合させる（--font-size-lg=20px, --letter-spacing-ja=-0.02em）か、S12限定で.s12-titleに明示指定（font-size: 20px; letter-spacing: -0.02em;）。トークン定義に根拠コメントを追記。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.5 S12-3 / S12-5 / S12-8",
+    "issue": "タップ領域/最小高に44px指定があるが、実装は--tap-target-minトークンに依存。トークンが44pxである根拠がパッケージ内に示されていない。",
+    "suggestion": "design_systemの--tap-target-minを44pxへ明示し、S12内の依存箇所（.s12-close, .s12-type-pill, .s12-duration-chip）に対する準拠を記載。もしくは各要素にmin-height: 44pxを明示指定。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.5 S12-11",
+    "issue": "メモのline-heightがspecの1.7に対し、トークン--line-height-ja-body依存。1.7と一致するか不明。",
+    "suggestion": "トークン値を1.7に合わせるか、.s12-memo { line-height: 1.7; } を明示。tokensに数値根拠をコメント追記。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

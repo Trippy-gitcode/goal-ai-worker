@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§4.8 全般（閉じる: Escape）",
+    "issue": "IME（日本語かな漢字変換等）入力中に Escape を押すとモーダルが閉じる可能性。keydown で Escape を常時監視しており、e.isComposing を考慮していないため、候補キャンセルのつもりがモーダル閉鎖→作業中断の UX 悪化を招く。",
+    "suggestion": "Escape ハンドラで IME 合成中を無視する。例: if (e.key === 'Escape' && !e.isComposing) { ... } に変更。補助的に compositionstart/end を監視して isComposing フラグを持つとブラウザ差も吸収できる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "実装 S15GoalCreate.jsx（Tab フォーカストラップ）",
+    "issue": "フォーカストラップの『有効要素』判定が [disabled] と aria-hidden='true' のみを除外。aria-disabled='true' の CTA（無効状態）や CSS で非表示の要素（display:none 等）、祖先に aria-hidden が付与された要素が含まれる可能性があるため、見えない/操作不能な要素に意図せずフォーカスが飛ぶ恐れがある。",
+    "suggestion": "enabled フィルタを強化: 1) :not([disabled]):not([aria-disabled='true']) を除外、2) getClientRects().length > 0 で可視性確認、3) el.closest('[aria-hidden=\"true\"]') が null のみ許可。あるいは focus-trap ライブラリ相当の実装へ置換を検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.8 S15-4 ゴール名入力",
+    "issue": "入力要素 id が固定文字列（id=\"s15-name-input\"）。将来的に同一ページで複数モーダルを並行マウントした場合（実装ミスや E2E 並走など）に id 競合が発生するリスク。",
+    "suggestion": "label/for と input/id をともに useId() で生成したユニーク値に置換。例: const inputId = useId(); <label htmlFor={inputId}/> <input id={inputId}/>。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.8 S15-5 期限ピッカー",
+    "issue": "読み取り専用表示に div + aria-readonly='true' を付与しているが、div には意味がなく AT へ誤情報となる恐れがある。",
+    "suggestion": "純表示であれば aria-readonly を削除。将来インタラクティブ化する場合は button/readonly input など妥当なロールに置換し、必要に応じて aria-haspopup / aria-controls を付与。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "LP-001 適用（CSS 全般）",
+    "issue": "prefers-reduced-motion: reduce で animation/transition の duration を 1ms に縮退しているが、理想は完全無効（none）。1ms でもモーションが発火し、感受性の高いユーザーで不快となる可能性。",
+    "suggestion": "reduce 時は animation: none; transition: none; を適用。必要なら状態遷移に即時スタイル切替（transform/opacity の最終値を直接指定）を使う。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.8 S15-4/S15-8（入力/CTA 高さ固定）",
+    "issue": "入力(48px)・CTA(52px)の高さ固定により、ブラウザズーム 200% や OS のラージテキスト時に文字がクリップ・折返し不能となる恐れ（WCAG 1.4.4/1.4.10 観点）。",
+    "suggestion": "height 固定を min-height + padding に変更し、行高に追従できるようにする。例: .s15-name{min-height:48px;height:auto;} .s15-submit{min-height:52px;height:auto;} を検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.8 モーダル全体（モバイル縦横回転/ソフトキーボード）",
+    "issue": "max-height: 85vh は iOS Safari のキーボード展開や画面回転時のレイアウト変動に追従しにくく、下端がキーボードに隠れる・スクロール不能になる可能性。",
+    "suggestion": "高さに動的ビューポート単位を併用（max-height: min(85vh, 85dvh)）。あわせて overscroll-behavior: contain（モーダル）を設定し、スクロール連鎖を抑止。必要に応じて iOS 向けのキーボード出現検知で padding-bottom を加算。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "実装 全般（keydown ハンドラ 2 箇所）",
+    "issue": "Escape/Tab の keydown を document に直接張っており、万一モーダルが二重に開いた場合や別ダイアログと同時存在時にハンドラが競合する可能性（重複 close / フォーカスジャンプ）。",
+    "suggestion": "アクティブモーダルのみに反応するガードを追加（if (!dialogRef.current.contains(document.activeElement)) return;）。またはイベントをモーダル root へ捕捉（onKeyDownCapture）し、他モーダルと独立させる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "UI コンポーネント追加チェック（body scroll lock）",
+    "issue": "body.style.overflow='hidden' により、スクロールバー有無の切り替えでレイアウトシフト（横幅ズレ）が発生する可能性。さらに iOS では body ロックが不十分で背面スクロールやバウンスが起こり得る。",
+    "suggestion": "スクロールロックは html/body へクラス付与し、scrollbar-gutter: stable もしくは padding-right にスクロールバー幅を加算してシフトを抑制。iOS では touch-action/overscroll-behavior 併用やポータル固定（position: fixed; top: -scrollY）方式を検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.8 S15-8 CTA（作成）",
+    "issue": "連打・二重 Enter に対する送信多重防止がない。バックエンド接続時に重複作成が発生しうる（onCreate が非同期でもガード無し）。",
+    "suggestion": "送信開始直後にローカルで submitting フラグを立て、CTA を aria-disabled/disabled で封鎖。onCreate の完了/失��で解除。二重発火を関数レベルでも防ぐ（once 的ガード）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.8 S15-6 カテゴリ群",
+    "issue": "fieldset/legend でグルーピング済みにも関わらず、内側に role=\"group\" を重ねており、スクリーンリーダーで冗長に読まれる可能性。",
+    "suggestion": "role=\"group\" と aria-label を削除し、fieldset/legend のみで名称付与。必要なら legend 文言を調整して十分な説明を付す。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S10-9 トリガーボタン",
+    "issue": "aria-haspopup=\"dialog\" は適切だが、aria-expanded は通常ダイアログでは必須ではない（展開/折畳みウィジェット向け）。一部 AT で意味の混乱を招く恐れ。",
+    "suggestion": "aria-expanded を削除し、必要であれば aria-controls でモーダルの id を関連付け（モーダルがマウント済みの場合）。未マウントの場合は haspopup のみで十分。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "フォーカス復帰（UI コンポーネント追加チェック）",
+    "issue": "閉鎖時のフォーカス復帰で scroll ジャンプが起こる可能性（focus による自動スクロール）。",
+    "suggestion": "returnFocusRef.current.focus({ preventScroll: true }); を使用してスクロール位置を保つ。対象要素が不可視/disabled の場合に備えフォールバック（body 直下へフォーカスリング移動等）も用意。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.8 S15-4 ゴール名入力（maxLength）",
+    "issue": "maxLength=120 はサロゲートペア（絵文字等）で意図せず早く上限に到達・途中分割の UX を招く恐れ（ブラウザによりコードユニット基準）。",
+    "suggestion": "文字数カウントをコードポイント基準にし、視覚的カウンタを併設。もしくは maxLength を緩めつつ保存時にサーバ側でバイト/正規化長を検証。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "モーダル開閉（アクセシビリティ全般）",
+    "issue": "aria-modal=\"true\" には対応しているが、背景 DOM を物理的にフォーカス不能化（inert）していないため、ブラウザ/AT 組み合わせによっては背面へフォーカス遷移できる可能性が残る。",
+    "suggestion": "モーダル表示中は application root に inert と aria-hidden を付与、閉鎖時に解除。フォーカストラップと併用して堅牢化する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

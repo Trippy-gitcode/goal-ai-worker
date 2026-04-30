@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §4.4 / §4.5",
+    "issue": "レベル必要EXPの定義が式(§4.4)と説明(§4.5:「Lv.1→2=1,000EXP」)で矛盾。実装時にどちらにも整合できず、UI/演出/サーバー計算が破綻する。",
+    "suggestion": "正とする数式/テーブルを1つに確定し、§4.5の説明を修正。UX側(ux §8.2)の演出トリガー条件(レベルアップ到達点)と一致させる。変更後は両ファイルに同一式・同一表を記載。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux §3.1, §3.5",
+    "issue": "TALKヘッダーに☰(履歴ドロワー)と🕐(履歴)の2つの履歴導線が併存。どちらを使えばよいか不明で、ジェスチャー一貫性にも反する。",
+    "suggestion": "履歴導線を1つに統一。推奨: ☰を廃止し🕐を「履歴」ボタンとして右上に固定、もしくは☰のみを残して🕐削除。仕様内の全記述(§3.1見出しアイコン、§3.5ドロワー起動条件)を揃える。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §4.5, ux §2.3, §8.1",
+    "issue": "日次EXP上限(300)到達後の「タスク完了」時のUIが未定義。現在は冒険EXP(§3.4)の上限時UIのみ規定。タスク完了後にEXPが加算されない理由が分からず混乱する。",
+    "suggestion": "日次上限到達時の共通フィードバックを定義: ①チェックは成立(タスクは完了) ②トースト「本日のEXP上限に達しました」 ③EXPバーは変化なし ④以降の当日中の完了時も同様のトースト(スパム防止で1回/数分に抑制)。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §2.4, §8.3, §8.6",
+    "issue": "7日ルール到達による「起動時の自動ゴール達成」が複数件同時に発生した場合の演出キュー/上限処理が未定義。1日1回ボーナスと演出の整合も曖昧。",
+    "suggestion": "起動時は「ゴール自動達成イベント」をキューに積み、最大N件(例:3件)まで直列再生。1件目のみ+50EXP表示、2件目以降はEXP非表示の演出。N超は「他X件」サマリバナーに集約。演出優先度表(§8.6)に自動達成を追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux §2.1, §4.4, project §7.4",
+    "issue": "大量データ時のパフォーマンス仕様不足。Todayに多数タスク、FRIENDS最大500人時のスクロールジャン��対策(リスト仮想化/遅延ロード)が未記載。",
+    "suggestion": "Today/Goals/FRIENDSにリスト仮想化(可視域＋バッファ)と画像遅延読み込みを採用。FRIENDSはページング(例: 50件/ページ)＋スケルトン。タスクは日付/セクションごとのチャンク読み込みを定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux §2.2, §11.2, §10.2",
+    "issue": "小型端末でヒーロー領域を1行圧縮時にLv/称号/EXP数値の可読性が低下する恐れ。色分けのみではコントラスト要件を満たさない可能性も。",
+    "suggestion": "圧縮時の最小フォントサイズ/行間/数値桁区切りを明記し、%や区切り文字(「1,240/2,000」)を保持。WCAGコントラスト(4.5:1)を4テーマで検証。必要に応じて縮小時は称号を省略しツールチップ/長押しで全表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux §4.1, §11.2",
+    "issue": "MEの4サブタブが小型端末で「DISC」に省略されるが、意味が直感的でない可能性。誤タップや学習コストが生じる。",
+    "suggestion": "サブタブにアイコ��＋短縮ラベルを併記、もしくは横スクロール可能なタブにしてフルラベルを保持。初回はツールチップでタブの意味を説明。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux §2.4（S-14 紐づくタスク一覧）",
+    "issue": "ゴール詳細(S-14)内で期限が未来の単発タスクを完了できるか、完了時にToday/Upcomingへどう反映するかが未定義。",
+    "suggestion": "ルールを明記: ①未来日タスクの完了可否 ②完了可なら予定日は自動で「今日」に繰上げる/そのままにするのどちらか ③Today/Upcomingからの除外/表示ロジック ④完了Undoの可用性(30秒)をGROWと同一に。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §2.3（Undoスナックバー）",
+    "issue": "Undoの30秒カウントダウンはタブ跨ぎ維持は定義済みだが、アプリをバックグラウンド/終了した場合の扱いが未定義。復帰時にUndo可能か不明。",
+    "suggestion": "Undoトークンをタイムスタンプ付きで保持し、バックグラウンド中も時刻基準で30秒をカウント。復帰時に残り時間を再描画。��了→再起動で30秒超過なら自動確定。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §1.4, §6.1",
+    "issue": "Android物理戻るボタン/ブラウザバック押下時にキーボードが開いている場合の優先挙動が未定義。モーダル/履歴操作と競合の恐れ。",
+    "suggestion": "戻る操作の優先度を規定: ①キーボード表示中はまずキーボードを閉じる ②次にモーダル/ドロワーを閉じる ③最後に画面遷移(popstate)。各段で100ms以内の視覚フィードバックを保証。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §15（通知タップ時の遷移先）",
+    "issue": "ディープリンク先のタスク/メッセージが削除/アーカイブ済みで見つからない場合のフォールバックが未定義。",
+    "suggestion": "フォールバックを定義: 対象不在なら ①GROW/FRIENDSの該当セクション先頭に遷移 ②バナー「対象が見つかりませんでした（期限切れ/削除）」を3秒表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §8.5, §8.6, §3.4",
+    "issue": "演出キューが「タスク完了/ゴール達成/レベルアップ」に限定。ログインボーナス(§8.5)やTALK側の冒険EXP(§3.4)が同時期に発火した場合の優先順位/直列化が未定義。",
+    "suggestion": "全演出を単一イベントキューで制御。推奨優先度: ①タスク完了 ②ゴール達成 ③レベルアップ ④ログインボーナス ⑤冒険EXP(TALK内)。クロススクリーンの場合は現在画面で簡易バナー、GROW表示時にフル演出を再生。上限8秒の総量制限を適用。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux §11.2, §2.1",
+    "issue": "所要時間の表現が画面によりテキスト(§2.1:「45min」)と色付きバー(§11.2:小型端末)で不一致。意味や単位の明確性が損なわれる恐れ。",
+    "suggestion": "統一ルールを定義: 小型端末でも数値+短バーの併用、またはバーに分単位のツールチップ/長押し説明を付与。単位(分)の省略可否も明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §5.3, ux §4.4",
+    "issue": "projectでは「送信済みリクエストのステー���ス表示」を明記(§5.3)だが、UXのFRIENDS(§4.4)は受信の「承認待ち」しかUI定義がない。送信側が迷う。",
+    "suggestion": "FRIENDS上部にタブ/折りたたみ「送信済みリクエスト」リストを追加(相手名/送信日/期限/キャンセル)。期限切れ時の自動消滅と視覚的区別(グレー)も定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux §7.2",
+    "issue": "ロングプレスの意味が画面ごとに異なる(タスク=並び替え開始、チャット履歴=削除)。同一ジェスチャーの異なる動作は学習コストを上げる。",
+    "suggestion": "ロングプレスは共通で「コンテキストメニュー表示」に統一し、並び替えはドラッグハンドル(≡)を明示。チャット削除もロングプレス→メニュー→削除に変更。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux §2.3, project §3.2.5",
+    "issue": "日次リセット(04:00 JST)とUndo 30秒の競合が未定義。03:59:50に完了→04:00跨ぎでUndoするとサーバー側日次が変わり、EXP/タスク状態の整合が崩れる恐れ。",
+    "suggestion": "サーバー側で���完了イベント時刻基準」でUndoを許可(30秒以内は同一日扱いで巻き戻し可)とし、クライアントはリセット跨ぎUndo時に専用トーストを表示。不可とする場合は「日次リセット後は取り消し不可」と明示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux §3.1, §3.5",
+    "issue": "TALKヘッダーの📝(新規チャット)の動作詳細が不足。入力中/ストリーミング中の押下時の確認や、スレッド作成直後のフォーカス挙動が未定義。",
+    "suggestion": "仕様化: ①入力中は確認ダイアログ(下書き保持可) ②ストリーミング中は無効化 or 中断確認 ③新規作成後は入力欄にフォーカスし、プレースホルダで案内。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §4.4（S-36 QRスキャン）",
+    "issue": "Vibration APIはiOS Safari/PWAで動作に差異がある。触覚フィードバックが環境により発火しない可能性。",
+    "suggestion": "VibrationはFeature Detectで条件付き実行し、未対応環境では視覚フィードバック(スキャン枠の色反転/短いフラッシュ)を代替提���。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

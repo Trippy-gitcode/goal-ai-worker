@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §4.4 vs §4.5",
+    "issue": "レベル計算式と説明文が矛盾（Lv.1→2が100EXPと1000EXPの両記載）。このままでは育成カーブ実装が確定できない。",
+    "suggestion": "§4.4の式（次レベル=100+(現在Lv-1)×50）と整合する値に統一し、テーブルも再計算して更新。§4.5の説明も同一値に修正。E2EテストにLv境界（Lv1→2, 5→6, 10→11等）を追加。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project §7.3 vs ux §2.2/§8.2",
+    "issue": "「SVG直接レンダリングはプロフィール詳細のみ」（project）と、GROWヒーローでのアバター進化演出（ux）が混在。ヒーロー表示がSVGかPNGか不明瞭。",
+    "suggestion": "方針を一本化: 1) リスト/ヒーロー/友達カード=事前ラスタPNG（64/128/256）を表示、2) プロフィール詳細（S-31/S-41）のみSVG合成。進化演出はPNGクロスフェードで統一。design_system.mdに「アバター表示ポリシー」を明記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux §3.1（TALKヘッダー）",
+    "issue": "ヘッダーに「☰=履歴ドロワー」「🕐=履歴」と2つの履歴導線が併存。役割が重複し、ユーザー/実装の一貫性を損なう。",
+    "suggestion": "履歴導線を1つに集約。推奨: ☰を廃止し🕐を「履歴」ボタンに統一（または逆）。残したアイコンのアクセシビリティラベルとタップ領域44px以上を明記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §3.1（TALKヘッダー📝）",
+    "issue": "「📝 新規チャット」ボタンの動作仕様が未定義（新規スレッド作成か、現スレッドのクリアか等）。",
+    "suggestion": "新規チャットのスレッドモデルを定義: 例）押下→新規スレッド作成→S-21履歴の先頭に追加→エディタにフォーカス。スレッド上限/命名/削除ルールも合わせて追記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system（未作成）",
+    "issue": "4テーマのカラートークン（semantic/functional）が未定義。アクセント/成功/警告/危険/情報、surface/elevation/overlay、brand gradient等が不足。",
+    "suggestion": "design_system.mdで以下を定義: 色トークン階層（ref→role→component）。例）role.primary/secondary/tertiary、role.success/warning/error/info、surface.bg/surface.1-3、border.muted、text.primary/secondary/inverse。各テーマでWCAG AA達成のコントラスト表を付与。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system（未作成）",
+    "issue": "タイポグラフィが未定義（日本語/欧文フォント、サイズスケール、行間、字間、見出し階層）。ブランドの「洗練」を支える基礎が不足。",
+    "suggestion": "推奨: 見出し/本文のタイプスケール（12/14/16/18/20/24/28/32）。日本語はNoto Sans JPまたはBIZ UDPゴシック可変+欧文Inter/SF Proのフォールバックスタックを指定。行間1.4〜1.6、字間-0.01〜0、数字はTabular Liningを採用。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system（未作成）",
+    "issue": "スペーシング/レイアウトトークン未定義（8ptグリッド/コンテナ幅/角丸/影/Elevation体系）。画面間で余白がブレる懸念。",
+    "suggestion": "4/8ptベースのスケール（4,8,12,16,24,32,48,64）。コンテナmax-width 480px（タブレットは中央寄せ）。角丸: xs=4, sm=8, md=12, lg=16。影: z1〜z4を定義。リスト行/カード/モーダルごとのデフォルトパディングも規定。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system（未作成）",
+    "issue": "アニメーション設計が分散（200/250/300msなど）。モーションの一貫性やReduced Motion時の置換ルールがトークン化されていない。",
+    "suggestion": "motionトークン導入: duration.sm=150ms, md=200ms, lg=300ms, xl=500ms / easing.standard=ease-out, emphasized=cubic-bezier(0.32,0.72,0,1), decel=ease-out, accel=ease-in。prefers-reduced-motion時の置換表も定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system（未作成）",
+    "issue": "アイコン体系が未定義。現状は絵文字を多用しており、テーマやブランド一貫性・可読性にばらつきが出る。",
+    "suggestion": "単一のアイコンセット（例: Phosphor/Material Symbols Rounded）に統一。サイズ（16/20/24）、線幅、塗り/線の使い分け、押下時の���変化を規定。絵文字は文中表現のみでUIアイコンには使用しない方針を明記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project §7.3（SVGレイヤー合成）",
+    "issue": "レイヤー順序が「frameの上にaura」。発光/エフェクトが前景に出ると可読性低下・オーバードロー増大・フレーム視認性の毀損が起こり得る。",
+    "suggestion": "既定の順序を background → aura → body → hair → face → accessory → frame に変更。例外的に前景オーラが必要なアイテムは個別にz-indexメタデータで上書きできる仕様を定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "project §7.3（SVG→PNGラスタライズ）",
+    "issue": "ラスタライズ/キャッシュ戦略の詳細が未定（キー設計/サイズ/失効）。PWAでの初回合成や頻繁な装備変更で描画コストが跳ねる懸念。",
+    "suggestion": "キャッシュキー: avatar:{phase}:{baseId}:{hairId}:{faceId}:{accessoryIds hash}:{frameId}:{auraId}:{theme}:{scale}@{dpr}。OffscreenCanvas+Workerで合成→`caches`/IndexedDB保存。サイズは64/128/256を用途別に生成���、LRUで最大100枚/ユーザーを上限。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux §8.6 / §9.1",
+    "issue": "オフラインからの大量同期時、EXP演出を「まとめて再生」とあるが上限/サマリ表示の定義がない。8秒上限超過の可能性。",
+    "suggestion": "同期演出の上限をハードに規定（例: 最大3件分を個別再生＋残りは『+N件をまとめて反映』のサマリバナー）。Reduced Motion時は全てサマリのみ。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux §7.4（Today手動並び替え）",
+    "issue": "手動順と開始時刻ソートの優先順位は定義済みだが、『元の時刻順へ戻す』操作が未定義。日次リセット後の順序継承も明示なし。",
+    "suggestion": "ソートモードトグル（時刻順↔手動）と『手動順をクリアして時刻順に戻す』アクションを追加。日次リセット時は既定で時刻順に戻す等のポリシーを明記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §2.3 / §7.1",
+    "issue": "操作100ms以内のフィードバック方針は散在。全インタラクティブ要素のpressed/hover/focus/disabled状態の視覚トークンが未整備��",
+    "suggestion": "stateトークンを定義（pressed.opacity=0.8, focus.outline=2px brand, disabled.opacity=0.5等）。ボタン/チップ/タブ/リスト行/アイコンに適用ルールをdesign_system.mdで体系化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "design_system（テーマ方針）",
+    "issue": "「洗練×ゲーミフィケーション」の視覚言語が文章中心で、具体的なビジュアル原則（配色・コントラスト・モーションの抑制/強調箇所）が不足。",
+    "suggestion": "原則を明文化: 通常UIは低彩度+高コントラストで静的、成果時のみ高彩度+モーション（紙吹雪/グロー）。Harajuku系はアクセント彩度を上げ、Night/Dawnはトーナルサーフェス＋アクセント1色に限定。演出は1アクション1演出を厳守。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §2.3 / §7.1",
+    "issue": "モバイルWebでの触覚フィードバックが限定的。QR検出時のみのVibration指定で、タスク完了等の達成感が触覚連携されていない。",
+    "suggestion": "Vibration API対応端末でタスク完了時に10–20msの短いバイブを追加（Reduced Motion/Accessibility設定に追従）。設定でON/OFF可能に。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux §6.1（ハーフモーダル×iOS PWA）",
+    "issue": "visualViewportでのモーダル追従はiOS PWAで挙動差が出ることがあるが、代替フォールバック（固定ヘッダー/閉じるボタン常時可視等）が明示されていない。",
+    "suggestion": "iOS判定時のフォールバックを定義：モーダル内部に固定ヘッダー（✕と保存）を残し、contentは独立スクロール。visualViewport未対応時はwindow.innerHeightで再計算。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "UX_BENCHMARK",
+    "location": "ux §0.3",
+    "issue": "ベンチマークの知見は反映されているが、パフォーマンス計測のUX内指標（ユーザー体感）に具体的なゲート/計測方法が不足。",
+    "suggestion": "UX側にも体感指標を追加：『操作→100ms以内のpressed/ハイライト』『AI応答1秒以内にタイピングインジケータ』『初回描画LCP<2s』などを計測イベントとして定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_system（未作成）",
+    "issue": "ダーク/ライト両対応のElevation/オーバーレイ（特にダークのsurface+translucent overlay）ポリシーが未定義。ダークでの層表現が不安定になる恐れ。",
+    "suggestion": "ダークテーマではelevationに応じてoverlayカラーを加算（例: surface+white@2%, 4%, 8%）。モーダル/ドロワー/backdropの透過度とブラー半径もトークン化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux §1.1-§1.2（画面一覧/遷移）",
+    "issue": "S-34 SHOPが「Coming Soon」だが、プレミア特典のフレーム装備手段はS-41で独立UIと記載。装飾導線が将来SHOPに統合される際の遷移/情報設計が未記載。",
+    "suggestion": "将来統合方針を予告: S-41は『装備管理』、購入はS-34 SHOPへ遷移に統一。S-41内の未所持アイテムタップ→SHOPの該当詳細へディープリンク仕様を追記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

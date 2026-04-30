@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "1",
+    "issue": "opId を timeout コールバック/ finally で 0 にリセットしているため、次回送信が直後に開始されると opId=1 が再利用され、タイムアウト済みの古い操作の応答が isCurrent() をすり抜けて副作用（route/setState）を実行してしまう可能性がある（ID 再利用バグ）。",
+    "suggestion": "opId は単調増加カウンタにし、決して 0 に戻さない（opIdRef.current += 1 を一貫適用）。あるいは Symbol/UUID をトークン化する。新規操作開始時にのみ採番し、timeout/finally では opId を変更しない。これにより古い応答が現行操作と一致することを物理的に不可能にする。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1",
+    "issue": "タイムアウトや新規送信時に、既存のネットワークリクエストを中断していない。結果としてサーバ側副作用の継続（重複サインイン試行、ロックアウト、レート制限悪化）や到着した古い応答の不要処理が発生し得る。",
+    "suggestion": "AbortController を導入し、signIn/signUp 呼び出しに signal を伝播（Supabase JS v2 は signal サポート）。timeout 発火・新規送信開始・アンマウント時に abort() を実行。abort した場合は catch で AbortError を判別して UI を汚さない。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1",
+    "issue": "同時送信のハードガードが不十分。aria-disabled ではクリックや Enter 提交を物理的に止められず、inFlightRef は設定はしているが handleSubmit 冒頭での排他チェック記載がないため連打・多重 Enter で並列リクエストが走る恐れ。",
+    "suggestion": "handleSubmit 冒頭で if (inFlightRef.current) return; を追加。さらに form の onSubmit で一度処理したら e.preventDefault() を徹底、ボタンの onClick でも同様のガードを二重化。マウス連打対策として pointerdown 時点で inFlight を確定させることも検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "5",
+    "issue": "バックグラウンドタブやモバイル環境では setTimeout が大きくクロックされる（15s が 60s+ など）。UI は即時タイムアウトを期���しているが実際には遅延し、ユーザー体感と乖離する可能性。",
+    "suggestion": "AbortController による実リクエスト強制打ち切りを主とし、UI 側のタイムアウト表示は performance.now() を基準としたデッドライン比較で制御。document.visibilityState を参照し、非表示時は表示メッセージを明確化（例: “バックグラウンドで待機中”）するなどの分岐を追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "アンマウント時（他ルートへ遷移など）に残存する timeout を明示的にクリアしていない。safeSetState によりクラッシュは避けられるが、不要なコールバック実行やフラグ操作の残留が起こり得る。",
+    "suggestion": "useEffect の cleanup で最新操作の timeoutId を clearTimeout、かつ opId を無効化（単調増加なら +1 採番）し、保留中リクエストは abort。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2",
+    "issue": "サーバーエラーやタイムアウト文言の読み上げについて、aria-live（または role=alert）の言及がないため、ス��リーンリーダーに即時通知されない可能性。",
+    "suggestion": "サーバー/ネットワーク系メッセージを表示する領域に aria-live=\"assertive\"（または role=\"alert\"）を付与。併せて busy 状態を表現するためにフォームコンテナへ aria-busy=true を送信中に付与。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "日本語 IME 変換中に Enter を押すと submit 扱いになる端末があり、未確定文字列で誤送信される恐れがある。",
+    "suggestion": "compositionstart/compositionend を監視して変換中フラグを立て、変換中は Enter の submit を無効化。onKeyDown で e.isComposing を見て早期 return。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "1",
+    "issue": "極端に長い email/password（数千文字のペーストや改行混入）でバリデーション遅延や UI 劣化、サーバー負荷を招く可能性。",
+    "suggestion": "input 要素に maxlength を設定（現実的上限）、改行・制御文字を除去、クライアント側で長さチェックと早期エラー表示を行う。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "国際化メールアドレス（IDN、合成分解文字など）の正規化について記載なし。Unicode 正規化差により同一視できないケースがある。",
+    "suggestion": "メールローカル部の Unicode 正規化（NFC）を行い、ドメインは IDNA ToASCII/ToUnicode を適用。比較・重複判定時は正規化済み文字列で扱う。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "autofill 検出を animationstart(-webkit-autofill) に依存すると、prefers-reduced-motion: reduce 適用や非 WebKit で検出不能になる可能性。",
+    "suggestion": "複線化する: CSS アニメ依存をやめる/補完としてフォーカス・blur 後のポーリング、input イベント監視、遅延リトライ段数の増加、ブラウザ差分での feature detection を導入。reduced-motion 時はアニメ依存ロジックを無効化。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "エラーフォーカス時のスクロールが、ブラウザズーム 200%+ や reduced-motion 設定で不快なジャンプにつながる可能性。",
+    "suggestion": "scrollIntoView({block:'center'}) を用い、prefers-reduced-motion: reduce の場合は behavior:'auto' にフォールバック。固定ヘッダー分のオフセット考慮を追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "err.message をそのまま表示すると内部情報の漏洩や文言の非一貫性を招く（React はエスケープするが運用上の情報漏えいリスク）。",
+    "suggestion": "エラーコードにマッピングしてユーザーフレンドリな日本語文言を表示。未知エラーは汎用メッセージにフォールバックし、詳細はコンソール/ロギングにのみ送る。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "4",
+    "issue": "opId レースの単体テスト予定とあるが、ID 再利用（timeout→即再送→旧応答到着）の再現テストやバックグラウンドタイマー・ダブルクリックの E2E が未整備。",
+    "suggestion": "fake timers を用いたユニットテストで 1) timeout 後すぐ再送→旧成功応答の無効化、2) �� timeout が新操作中に発火→無害化、を検証。Playwright ではダブルクリック/連打・オンライン/オフライントグル・visibilitychange を含むシナリオを追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "1",
+    "issue": "オフライン→オンラインの揺れ（瞬断）時、表示中のタイムアウト/オフラインエラーが自動で解消されず、ユーザーが再試行可能か分かりにくい恐れ。",
+    "suggestion": "window 'online' イベントでエラーバナーを自動クローズ/弱めのインフォに格下げし、ワンタップ再試行（前回入力を保持したまま）を提案する UI を実装。タイムアウト後の即時再送を抑制する指数バックオフも検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

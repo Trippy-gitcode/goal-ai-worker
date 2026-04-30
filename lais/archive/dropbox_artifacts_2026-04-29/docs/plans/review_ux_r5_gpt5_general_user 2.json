@@ -1,0 +1,222 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3 Today操作 / project_v1.md §3.2 Today表示",
+    "issue": "Today内のタスク並び順。projectでは「開始時刻でソート（未設定は最後）」と定義されている一方、UXでは「ロングプレス→ドラッグで手動順を保存」となっており、どちらが優先か不明で矛盾している。",
+    "suggestion": "優先順位を明文化する。例: デフォルトは開始時刻ソート、ユーザーが並び替えたリストは当日内のみ手動順を優先（翌日4:00 JSTで自動順にリセット）。手動順の保存キー（date+userId）と戻す条件も記載。UI上も「手動順（今日のみ）」のバッジをTodayヘッダーに表示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1/§3.5 TALKヘッダー",
+    "issue": "TALKヘッダーにある🕐（履歴）と☰（ドロワー）の役割が重複/未定義。S-21は☰で開くとあるが🕐の挙動が不明。",
+    "suggestion": "ヘッダーアイコンの責務を統一。例: ☰=ドロワー廃止、🕐=履歴ドロワーを開く（ラベルを「履歴」）。または🕐削除して☰に統一し、仕様から🕐を除去。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.1 TALK 入力バー（画像添付）/ project_v1.md §3.3",
+    "issue": "画像添付のエラー/境界条件が未定義（10MB超過・非対応拡張子・EXIF削除失敗・権限拒否・アップロード失敗時のUI）。",
+    "suggestion": "各ケースのUIを定義: ①10MB超過→インラインエラー＋リサイズ提案、②非対応→トースト「JPEG/PNG/GIF/WebPのみ対応」、③権限拒否→設定誘導バナー、④アップロード失敗→サムネ上に「再試行」ボタン、⑤複数選択時の個別失敗表示など。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.3 ヒアリング / §3.4 TALKバナー",
+    "issue": "ヒアリングモード中の中断/再開/離脱の挙動が未定義（途中でタブ切替・アプリ中断・リロード時にどこから再開するか）。",
+    "suggestion": "セッション状態（current_step, started_at）を会話スレッドに保持し、TALK再入場時に「ヒアリングを再開(3/5)」バナーを表示。明示的に��断/終了できるUI（[中断][終了]）と、その際のDISCOVER反映ポリシー（完了時のみ反映）を定義。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §9.1 オフライン / project_v1.md §3.2.5",
+    "issue": "オフライン中に4:00 JSTを跨いだ場合のタスク完了記録日付・EXP日次上限判定の扱いが未定義。同期時にどの日付に計上するか曖昧。",
+    "suggestion": "クライアントでローカル完了タイムスタンプ（UTC）を保持し、同期時にサーバーがJST換算で日付バケットに割当てるルールを明記。日次上限超過分はサイレント無効だが、まとめて再生時の演出仕様（超過分は演出しない）も追記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3 Undoスナックバー",
+    "issue": "Undoが「タブを跨いで30秒維持」は定義されているが、アプリがバックグラウンド/タブクローズ/リロードされた場合のUndo継続可否が未定義。",
+    "suggestion": "UndoトークンをsessionStorageに保存し、残り時間も保存。リロード復帰時に残時間>0ならスナックバー���表示。バックグラウンドで残時間が進むことを明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1/§1.2 画面一覧・遷移（S-00）",
+    "issue": "未ログインのS-00ランディングの具体UI（価値提案・主要CTA・AI対話の説明・スクロール構成）が未定義で、初見で何のアプリか伝わるかが不明。",
+    "suggestion": "S-00のセクション構成を追加（ヒーロー: コンセプト+モック、3つのコア機能カード、比較表要約、Freeでも使える説明、CTA: サインアップ/ログイン）。「AIと話して行動が決まる」を短いコピーで明示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.1 TALKヘッダー",
+    "issue": "📝（新規チャット）の挙動が不記載。新規スレッド作成か、現在スレッドのクリアかが不明。",
+    "suggestion": "📝=新規スレッド作成を明記。作成後はタイトル未設定のスレッドを生成し、ドロワー先頭に追加。誤タップ防止の確認は不要、代わりに直後に「名称を付ける」インライン編集を提示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §5.3 / ux_v1.md §4.4 FRIENDS",
+    "issue": "projectではFRIENDSに「リクエスト」タブがあるが、UXでは「承認待ちセクション」表現。タブ/セクションの不一致。",
+    "suggestion": "UIを統一。MVPはセクションで運用するならproject側の「タブ」記述を「承認待ちセクション」に改訂。将来タブ化のロードマップ注記を追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §11.4 PWAインストール / §13.3 通知設定",
+    "issue": "iOSでPushを使うにはPWAインストールが必須だが、通知ON導線とPWAインストール誘導の連携が未定義で、許可に失敗しやすい。",
+    "suggestion": "通知設定でiOS判定時は先にPWAインストールガイドを出し、インストール完了検知→通知許可フローに遷移するステップを追加。失敗時の再試行導線も明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2 プラン管理（S-38）",
+    "issue": "Stripe Checkoutでユーザーがキャ���セル/失敗した場合の戻り先・メッセージが未定義。",
+    "suggestion": "キャンセル時はS-38に戻し、非破壊のトースト「キャンセルしました」。失敗時はエラーバナー+再試行。成功時は戻りトースト+即時反映済みラベル更新。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.1~7.4 ジェスチャー",
+    "issue": "全操作での100ms以内の押下フィードバックの網羅が明文化されていない（例: [+ゴール作成], [+タスク追加]の押下時ハイライト）。",
+    "suggestion": "全ボタン/行選択にアクティブ状態（press state）を必須化し、コンポーネントトークンに定義。Lighthouse TTIとは別にUI応答SLA:100msを明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "全体（初見理解）",
+    "issue": "「GROW」「DISCOVER」「EXP」「称号」「冒険EXP」「Phase」「ヒアリング」等の用語が一般ユーザーには直感的でない。初見で何のアプリか/何をすればよいか迷う恐れ。",
+    "suggestion": "タブ/用語の日本語ラベルを平易化（例: GROW→今日、DISCOVER→発見）。初回は各セクションに ? ヘルプ（ワンタップチップ）で意味を説明。用語の語彙表をS-00/S-03内や設定に配置。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §5 オンボーディング",
+    "issue": "必須5ステップで「スキップ非表示」は、自己成長に関心が薄いユーザーには面倒に感じやすい。",
+    "suggestion": "「クイック開始」（名前だけ→即GROWへ）を用意し、残りは後回しに。もしくは進行バーの下に「後で設定（推奨）」リンクを追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "初回体験（全画面）",
+    "issue": "オンボーディング後、主要操作のミニチュートリアル/ガイド（ハイライト・ツアー）が未定義。使い方が分かるまでの導線が空状態頼みになっている。",
+    "suggestion": "初回のみツアー（3枚以内）。例: ①今日のタスクの完了方法 ②AIに相談→タスク化 ③目標と紐付け。二度と表示しないトグル付き。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §3.5 チャット履歴（S-21）",
+    "issue": "会話削除後の遷移先/選択状態が未定義（削除したスレッド表示のままになる可能性）。",
+    "suggestion": "削除直後は直近の別スレッドに遷移、他が無ければ空状態に戻す。削除アニメーション後にトースト表示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §15 通知タップ時の遷移",
+    "issue": "iOSの既存タブが開いている場合のフォアグラウンド遷移（postMessage受信失敗/Service Workerなし）のフォールバックが未定義。",
+    "suggestion": "clients.matchAllで既存タブ検出→postMessage→タイムアウト（500ms）時はopenWindowを実行するフォールバックを追記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8.6 演出キュー",
+    "issue": "同時多発演出の直列化は定義されているが、通知バナー/Undoスナックバー/トーストとのZ-indexと優先順位が未定義で、重なり表示のリスクあり。",
+    "suggestion": "グローバルレイヤーマネージャを定義（上→下: システムダ��アログ > レベルアップ/ゴール達成 > Undoスナックバー > トースト）。各z-index値も固定で明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.4 ゴール詳細（S-14）",
+    "issue": "ゴール編集/削除時の確認と依存関係（紐づくタスクの扱い）が未定義。",
+    "suggestion": "削除→確認ダイアログ「紐づくタスクX件も削除（またはゴール紐付け解除）」。編集→タイトル変更は即時、期限変更は進捗計算影響なし等のルールを追記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "全体（継続理由）",
+    "issue": "継続のフックはあるが、自己成長に関心が薄い層には「日常の実利」が見えにくい（家事/予定の即効性）。",
+    "suggestion": "初期提案を“生活実務寄り”に最適化（支払い/買い物/家事テンプレ）。GROWに「クイック追加（定型）」ボタンを配置して摩擦を減らす。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "UX_BENCHMARK",
+    "location": "ux_v1.md §0.3 差別化マッピング → §5 オンボーディング",
+    "issue": "ベンチマーク方針「最小限で即価値」に対し、オンボーディング5画面（スキップ非表示）はやや逆行。",
+    "suggestion": "即価値優先へ微修正（R-014/R-015の対応）。1画面目完了でGROWに入れる“早期解放”を検討。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.1 設定 > 対話履歴を削除",
+    "issue": "対話履歴90日自動削除とAI理解メモのリセット範囲の利用者向け説明がUIに不足。",
+    "suggestion": "削除モーダル内に「過去90日より前は自動削除」「理解メモもリセット」の注意文を明記。設定トップにもデータ保持期間の簡易説明リンクを追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  }
+]

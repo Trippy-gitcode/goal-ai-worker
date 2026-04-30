@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "5",
+    "issue": "ルートレベルのコード分割が未実施で、supabase-js を初期バンドルに含める前提（Phase B へ分離）。初回表示（S-01）の体感に直結する重量が懸念。",
+    "suggestion": "S01Auth を lazy import（route-based split）し、@supabase/supabase-js は S01 チャンク内に閉じ込める。さらに初回は UI レンダ優先→フォーカス/入力/ホバーで動的 import。idle 時に modulepreload/prefetch。インタラクション時の submit 直前にも dynamic import のフォールバックを用意。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "2.1",
+    "issue": "認証のみの用途でも @supabase/supabase-js 全体をバンドル。Postgrest/Realtime/Storage 依存が載りやすく、数十 KB（gz）規模の余剰になりがち。",
+    "suggestion": "S-01 の範囲では @supabase/auth-js（GoTrue）単独に切替えて軽量化、もしくは将来機能のため supabase-js を維持するなら S01 チャンクに限定。bundle analyzer で比較し、より小さい方を採用。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "2.1",
+    "issue": "supabase クライアントをモジュール評価時に即生成（export const）。どこかで import されるだけで初期化コストと localStorage 同期が発生し、初回描画を阻害しうる。",
+    "suggestion": "遅延ファクトリ化。例: export async function getSupabase(){ if(!client){ const { createClient } = await import('@supabase/supabase-js'); client=createClient(...);} return client;} S01Auth で初回利用直前に await getSupabase()。フォーカス/idle 時に先行プリロード。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.2",
+    "issue": "NotFound で /terms /privacy へ window.location.assign を一度試行する設計は、配信 404 環境でフルナビゲーションを強制し、低速回線でブランクが長引く可能性。",
+    "suggestion": "同一オリジン限定で HEAD を先行確認して 200 のみフル遷移、または静的ページを SPA ルートとして同梱（SSR/静的ビルド）。最低限、1 回の失敗をセッション全体で抑制（timestamp を保持）し、連続訪問でもフルリロードを再試行しない。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "onInput ごとにコンポーネント全体が再レンダリング。規模は小さいが、低スペック端末でキータッチ→レイアウト/ペイントを増やす要因。",
+    "suggestion": "軽量化: 150ms 程度のデバウンス（useDeferredValue/useTransition 併用）、Field 単位に分割して React.memo、重い検証は onBlur 時に限定。ハンドラは useCallback で安定化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "Global",
+    "issue": "アセットのキャッシュ/プリロード戦略が未提示。初回/再訪での体感差を作りにくい。",
+    "suggestion": "ビルド出力を filename hashing + immutable キャッシュ（1y）に。HTML は短命キャッシュ。Service Worker で静的（S01 + テーマ CSS）を stale-while-revalidate。supabase ドメインへ preconnect、S01 チャンクは modulepreload、アイドル時に prefetch。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "Global",
+    "issue": "Web フォントのロード戦略不明（表示ブロックや CLS 悪化の懸念）。",
+    "suggestion": "font-display: swap/optional、WOFF2 サブセット化、使用文字範囲の限定、fonts CDN への preconnect、初回ビューで必要なスタイルのみ preload。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "aria-disabled による無効化はハンドラ実行を抑止しないため、無効状態でのクリック/Enter による同期検証・setState が都度走り得る。",
+    "suggestion": "handleSubmit の最上流で canSubmit と inFlight を即時 return（早期ガード）し、無効時は event.stopPropagation()。視覚クラス切替のみで不要 work を更に抑制。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2.1",
+    "issue": "複数タブ稼働時の autoRefreshToken/persistSession の負荷・重複リフレッシュ抑止方針が不明。",
+    "suggestion": "supabase-js のマルチタブ同期挙動を確認（BroadcastChannel の有無/仕様）。必要なら Page Visibility API で非表示タブは更新抑制、BroadcastChannel で“リーダー”タブのみ更新、unload 時にリーダー解放。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "Build/CI",
+    "issue": "バンドルサイズ計測と予算が未提示のため、Phase B 到達前に肥大化が検知しづらい。",
+    "suggestion": "CI に source-map-explorer/rollup-plugin-visualizer を組込み、初期ルート（S-01）で gz < 80KB 等の予算を設定。PR ごとの差分可視化と閾値超過で CI fail。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "3",
+    "issue": "E2E（Playwright）は機能検証のみで、Lighthouse/Web Vitals などのパフォーマンス計測が欠落。",
+    "suggestion": "Lighthouse CI を追加し、LCP/INP/TTI を計測。Web Vitals（web-vitals ライブラリ）を本番で収集し、S-01 の初回表示指標を継続モニタリング。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

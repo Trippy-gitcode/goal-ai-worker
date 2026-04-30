@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "2.1",
+    "issue": "/terms と /privacy ハンドリングが sessionStorage 不可環境で無限リロードに陥る。safeSessionStorage() が null を返す場合、ガードが効かず毎回 window.location.replace(path) が発火し、同一 URL へのフルリロードが繰り返される（実ページ未配信の現状では特に致命的）。",
+    "suggestion": "store が null（または setItem に失敗）時は replace を行わず route('/', true) にフォールバックする、もしくはメモリ内ガード（window.__lais_static_guard）やクエリパラメータで1回限りの遷移に制限する。最終的にはサーバ側に /terms /privacy の静的ページを配信し、このクライアント側リダイレクト自体を撤廃。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "2.2",
+    "issue": "15秒タイムアウト後も実ネットワークリクエストは中断されず継続するため、遅延完了時に古い結果で route('/') が実行される等の競合が起こりうる。ユーザが再送信した後に最初のリクエスト結果が割り込む“stale response”で状態矛盾・想定外遷移が発生。",
+    "suggestion": "各送信ごとに operationId を発行し、完了時/エラー時/遷移前に最新の operationId と一致確認して不一致なら一切の状態更新・遷移を無視。さらに CTA 再有効化を遅延させるか、明示的に「キャンセル」操作を設けて前リクエスト結果を必ず破棄。AbortSignal 未対応でも Promise.race と opId による擬似キャンセルで副作用を無効化する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "navigator.onLine は信頼性が低く（キャプティブポータルや一部ブラウザで常に true/false になるケース）、オフライン判定の偽陽性/偽陰性で送信を不必要にブロックまたは失敗メッセージ遅延を招く可能性。",
+    "suggestion": "onLine は参考程度に留め、送信自体は実施してエラーを正しく表面化。併せて online/offline イベントでバナーや再試行ガイダンスを更新。必要なら軽量 HEAD リクエスト（例: /healthz）で到達可能性確認を行う。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2.2",
+    "issue": "オートフィル同期は 0ms/100ms の1ショットであり、iOS Safari/1Password 等がフォーカス後や遅延で値を注入するケースを取りこぼす可能性がある（CTA が無効のまま／逆に不整合状態）。",
+    "suggestion": "短時間ポーリング or MutationObserver で value 変化を監視し、初回送信完了/blur まで有効化。加えて onFocus/onBlur 時にも DOM→state 同期を実施。WebKit の -webkit-autofill 検出用 animationstart ハック併用も検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": ".s01-link の負マージンによるヒット領域拡張は、近接要素とヒットボックスが重なるリスクがある。特に 200〜400% ズームや動的フォント拡大時、CTA/チェックボックスと重畳して誤タップを誘発する可能性。",
+    "suggestion": "ヒット領域は親コンテナ内に収める（負マージン回避）。行間/余白を十分確保し、リンクを独立行に配置。E2E で 200%/400% ズーム・動的テキスト拡大時のヒットテストを追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2/2.3",
+    "issue": "reduced-motion 環境への配慮が不明。送信中インジケータやフォーカスリングのトランジションが長い場合、動きに敏感なユーザに負担となる可能性。",
+    "suggestion": "prefers-reduced-motion: reduce を用いてアニメーション/トランジションを最小化（またはオフ）。スピナーは非アニメーションの進行テキストを併設。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "2.2",
+    "issue": "メールアドレスの国際化（IDN・非ASCII ローカルパート）の許可/禁止と正規化方針が不明。実装の emailInvalid 判定が ASCII 前提だと、正当なアドレスが拒否・あるいは誤許可されうる。",
+    "suggestion": "仕様で対応範囲を定義し、ドメイン部は UTS #46 に基づき punycode 変換（toASCII）、ローカルパートは許可方針を明示。バリデーションはライブラリ（validator.js 等）を利用し、テストに非ASCIIケースを追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "2.2",
+    "issue": "パスワードの最大長・バイト長制約（例：bcrypt の72バイ��上限）や Unicode 正規化方針が未定義。長大/絵文字混在パスワードでサーバ側が切り捨て・正規化すると、ユーザの想定と差異が生じうる。",
+    "suggestion": "バックエンド制約（アルゴリズム、上限バイト長、正規化方式）を確認し、クライアントでも明示（maxlength 目安、ヘルプ文言）。可能なら NFKC 正規化しつつ、バイト長超過はエラーで通知。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3/3",
+    "issue": "Windows High Contrast（forced-colors: active）下の可視性検証が未言及。CSS カスタム色が強制置換される環境でリンク/フォーカスリングが視認しづらくなる恐れ。",
+    "suggestion": "forced-colors: active で outline や text-decoration を system color に合わせて強制。-webkit-text-stroke/outline 併用でリンク下線の可視性を担保。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2.3",
+    "issue": "負マージンにより 400% ズーム時に横スクロールが発生する可能性がある（ヒット領域がコンテナ外にはみ出す）。",
+    "suggestion": "大ズーム���は margin を 0 にクリップ（@media (min-resolution) や container query 等で調整）し、親に overflow-x: hidden を適用して視覚オーバーフローを抑止。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "各フィールド下に role=\"alert\" を複数配置すると、送信時に同時読み上げが発生しうる。スクリーンリーダーでノイズが増え、フォーカス誘導と競合する恐れ。",
+    "suggestion": "最初のエラーのみ assertive（alert）、その他は polite または一括のライブリージョンで集約。CTA の aria-describedby は維持しつつ、読み上げは1箇所に統合。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2.2",
+    "issue": "err.message をそのまま表示しており、英語文言や内部コードが漏れる可能性。ユーザに分かりにくく、サポート問い合わせが増える恐れ。",
+    "suggestion": "Supabase のエラーコードに基づいてローカライズ済みメッセージへマッピング。詳細はコンソール/ロギングにのみ出力。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.1/2.3",
+    "issue": "利用規約/プライバシーへ遷移するとフォーム入力が失われる（現状は replace によるページリロードを伴う）。同意確認の文脈では戻った際に再入力の手間が大きい。",
+    "suggestion": "リンクは新規タブ（target=_blank, rel=noopener）で開くか、モーダル/シートで表示。もしくは遷移前にフォーム値を sessionStorage に保存し、戻り時に復元。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2/4",
+    "issue": "固定 15s タイムアウトは遅い回線（2G/3G、海外リージョン）で誤タイムアウトを誘発する可能性。逆に高速環境ではユーザが待たされるだけで介入手段がない。",
+    "suggestion": "回線状態（Network Information API の effectiveType など）や試行回数に応じてタイムアウトを可変化。10s 経過時にキャンセル/再試行ボタンを表示し、待機継続も選べる UX を検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2.2",
+    "issue": "aria-describedby の DOM 存在保証はコメント依存。将来の条件分岐改修で参照IDと要素のレンダ条件がずれるリスクがある。",
+    "suggestion": "単体テスト（レンダ条件の組合せで getById 成否を検証）を追加し、参照/定義を同一ユーティリティから生成する等で不整合を機械的に防止。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "R11-UI-01",
+    "persona": "ui_designer",
+    "severity": "MEDIUM",
+    "section": "§8.7",
+    "title": "通知バッジの font-size 10px が §3.2 タイポスケール最小値(11px)を下回る",
+    "detail": "§8.7 で通知バッジのフォントサイズを 10px とハードコードしているが、§3.2 で --font-size-xs=0.6875rem(11px) を最小値と定義し、さらにキャプション用途に限定している。10px はトークン体系外かつ §3.2 の原則違反で、デザインシステム内の一貫性が崩れている。",
+    "fix": "バッジ文字を --font-size-xs (11px) に統一するか、または §3.2 に --font-size-2xs(10px)をバッジ専用トークンとして追加し『バッジ1-2桁数字以外での使用禁止』と明記する。"
+  },
+  {
+    "id": "R11-UI-02",
+    "persona": "ui_designer",
+    "severity": "LOW",
+    "section": "§6.3",
+    "title": "Night Sky のアバター枠線 --accent(#79C0FF) が淡色アバターと視認性が低い可能性",
+    "detail": "§6.3 で円形アバターに border: 2px solid --accent を指定。Night Sky の accent は #79C0FF (淡いブルー)で、アバターパレットの肌色 #F4DFCD や服のパステル系と彩度が近いケースで枠線の分離感が弱くなる恐れがある。プロフィール詳細 128px/256px サイズでは問題ないが、リストインライン 40px では特に目立ちにくい。",
+    "fix": "§6.3 に『枠線は --border-strong を基調とし、選択状態/自分のavatarのみ --accent に切替』の運用ルールを追加、または border-width を 40px サイズ時 1.5px に調整。"
+  },
+  {
+    "id": "R11-UI-03",
+    "persona": "ui_designer",
+    "severity": "LOW",
+    "section": "§4.4",
+    "title": "z-tooltip(600) が z-toast(700) より低い — 多くの DS で逆",
+    "detail": "通常ツールチップは即時インタラクション補助のため最前面に置く設計が多い(Material, Fluent 等)。Lais は『トースト=通知最前面』のポリシーを取り意図的に逆転しているが、チュートリアルツールチップや初回オンボード吹き出しがトーストに隠れるケースが発生し得る。",
+    "fix": "設計ポリシーが明確なら現状維持で OK。ただし §4.4 に『ツールチップがトーストより下である理由』の1行コメントを追加して、実装者が誤って逆転しないようガードする。"
+  },
+  {
+    "id": "R11-UI-04",
+    "persona": "ui_designer",
+    "severity": "LOW",
+    "section": "§8.12",
+    "title": "空状態のアイコン 64px/--text-hint は Harajuku 系で埋没の恐れ",
+    "detail": "§8.12 は全テーマで icon color=--text-hint を指定。Harajuku Light の --text-hint=#7C5B66 は --bg-primary=#FDF6F7 上で約5〜6:1 で読めるが、64px の『面』として見たときにトーン差が弱く空状態感が強すぎる(=誘導 CTA が目立ちにくい)。",
+    "fix": "§8.12 に『アイコンのみ --text-secondary に引き上げる。見出しとCTAの重みを保つ』または opacity 0.85 のガイダンスを追記。"
+  },
+  {
+    "id": "R11-UI-05",
+    "persona": "ui_designer",
+    "severity": "LOW",
+    "section": "§8.12a",
+    "title": "Undo スナックバーの表示時間デフォルト(5000ms)がプロダクト仕様と乖離",
+    "detail": "§8.12a は『デフォルト5000ms』と書きつつ、ux_v1 §2.3 および project_v1 §3.2 の正は30000ms。DS 内に正規値として5秒が残っていると、実装者が DS をそのままコピペして5秒実装を作ってしまうリスクがある。『提案ログに記録』とは書いてあるが、DS のデフォルト値そのものが誤解を生む。",
+    "fix": "§8.12a の『デフォルト5000ms』を『仕様正=30000ms (ux_v1 §2.3)。5000ms/3000ms は別仕様の残骸で、v1.0 までに Claude.ai 調停で確定』に書き換える。"
+  }
+]

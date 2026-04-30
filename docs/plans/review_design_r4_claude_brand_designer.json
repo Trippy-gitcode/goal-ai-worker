@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§1 ブランド定義",
+    "issue": "R3 で指摘したロゴ・ブランドマーク定義が未追加のまま。§1.5 / §1.6 のサブセクションが追加されていない。ブランドシステムとしての最上位要素がない。",
+    "suggestion": "§1 に『1.5 ロゴ・ブランドマーク（未定・placeholder）』と『1.6 トーンオブボイス』を追加。確定前でも『placeholder』と明記することで抜けが検知しやすくなる。",
+    "model": "Claude Opus 4.6",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§1.2 デザイン原則 1",
+    "issue": "R3 で指摘したブランド原則 1（実世界との地続き感）と Harajuku テーマの緊張関係が解消されていない。Harajuku Light/Dark は「ポップ・カラフル・文化的」だが、原則 1 の『自然界の色』にそのまま当てはまらない。『文化的モチーフを許容』する旨が §1.2 に反映されていない。",
+    "suggestion": "§1.2 原則 1 の文言を『自然界 + 文化的モチーフ（桜・祭り・ベルベット・宝石等）。ネオン/サイバーパンクは禁止』に拡張。",
+    "model": "Claude Opus 4.6",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.3 アバター",
+    "issue": "アバターのアートディレクション詳細（肌色・髪型・服）が R3 で指摘したまま未反映。",
+    "suggestion": "§6.3 にサブセクション『アバターパレット』を追加。",
+    "model": "Claude Opus 4.6",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.8 トグルスイッチ",
+    "issue": "ON 状態でトラック背景が `--button-primary-bg` になるとしているが、Harajuku Light の primary bg は #C43361（濃いピンク）で、ベース bg #FDF6F7 と組み合わせると『警告・危険』を想起させる色。設定画面の通知 ON などで『危険』感を与える。",
+    "suggestion": "トグル ON 色を `--accent`（ブランド色）ではなく、success 系の落ち着いた色にテーマごとに変える選択肢を追記。または Harajuku テーマのトグル ON はもう少しくすんだ色に。",
+    "model": "Claude Opus 4.6",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§0.3 差別化マッピング",
+    "issue": "4 テーマ × グラス on/off = 8 バリエーションとしているが、この 8 パターンの視覚サンプル（サムネイル）が仕様書にない。ユーザーにも開発者にも全パターンが一目でわからない。",
+    "suggestion": "§5 の末尾に 8 パターンの配色見本（カラーチップ配置）または design_spec_v1.md への参照を追加。",
+    "model": "Claude Opus 4.6",
+    "persona": "brand_designer"
+  }
+]

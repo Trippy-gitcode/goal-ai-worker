@@ -1,0 +1,12 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.2.1",
+    "issue": "G8のAFTER記述が「realworld は G17 対象外」となっており、文脈上は「G8対象外」と書くべき箇所で意味が逆転している。現状の文言だと realworld が G17 の対象でもないように読め、§4.2.2・§5.4 の G17 定義と衝突する。",
+    "suggestion": "「realworld は G8対象外。G17 の対象」と明記し、§4.2.1 を修正する。例: `G8 = TDD証跡（unit/e2e限定）。realworld は G8対象外で、G17 で検証する`.",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4",
+    "issue": "XSS懸念点の確認: dangerouslySetInnerHTML / innerHTML の使用はなく、serverError/confirmNotice は Preact によりエスケープされて表示されるため、直近の反射型XSSリスクは低い。",
+    "suggestion": "今後リッチテキスト提示が必要になっても、dangerouslySetInnerHTML の使用は避け、やむを得ず使う場合は DOMPurify 等でサニタイズするポリシーを明文化する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "CSRF: 現状は Supabase の Bearer トークン送信（cookie 非依存）のため CSRF の直接的影響は小さいが、将来 Cookie ベースの自前 API を追加した場合に備えた対策が未定義。",
+    "suggestion": "将来の状態変更エンドポイントを Cookie 認証で実装する場合は、SameSite=Lax 以上 + CSRF トークン（二重送信/Origin チェック）を必須化する設計基準を追加する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "3.5",
+    "issue": "��ライアントに anon/publishable key を配布する前提のため、Supabase 側での RLS 有効化と厳格なポリシー設定が必須だが、本パッケージからは設定状況が確認できない。",
+    "suggestion": "全テーブルで RLS を有効化し、auth.uid() を用いた行レベルポリシーを作成。anon ロールでの read/write を意図通り拒否/許可できるか psql/PostgREST で実証テストを実施し、誤設定がないかをCIに組み込む。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "3.5",
+    "issue": "service_role キーをフロントに配置しない旨はコメントで明記されているが、実行時の誤投入防止ガードがない。",
+    "suggestion": "runtime ガードを追加し、キーがJWT形式（先頭が eyJ）なら payload を base64url デコードして role クレームを確認し、service_role が検出された場合は即 throw。publishable（sb_）は許可。CIでも gitleaks/secretlint で service_role をブロックする。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "6",
+    "issue": "明示的な CSP の定義が未設定（Phase B 項目）。localStorage にトーク��を保持するクライアントでは XSS 影響が大きく、CSP が重要。",
+    "suggestion": "配信ヘッダで厳格なCSPを設定: default-src 'self'; script-src 'self' 'nonce-...'; connect-src 'self' VITE_SUPABASE_URL; img/media/font は必要最小限に制限; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; require-trusted-types-for 'script' + Trusted Types ポリシー導入。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3.5",
+    "issue": "Supabase 側の CORS 設定が本パッケージからは不明。ワイルドカード許可だと悪性オリジンからの API 悪用リスクが上がる。",
+    "suggestion": "Supabase ダッシュボードで Allowed Origins/Redirect URLs を本番・ステージングのドメインに限定し、ワイルドカードを避ける。環境ごとに値を分離し、誤設定検出を運用点検項目に追加する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4",
+    "issue": "エラーメッセージに err.message をそのまま表示しており、内部情報（プロバイダ由来の詳細）を利用者に開示する可能性がある。",
+    "suggestion": "ユーザ表示用には一般化した文言をマッピングし、詳細は Sentry 等へサーバサイド/コンソール（開発時のみ）に送る。production ビルドでは詳細ログを抑制する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3.5",
+    "issue": "ブルートフォース/クレデンシャルスタッフィング対策がクライアントからは確認できない。",
+    "suggestion": "Supabase Auth/エッジでのレートリミット/WAF、reCAPTCHA などのボット対策、IP/ユーザ単位の試行回数制限、パスワード強度ポリシーの運用をバックエンド設定で有効化。アラート閾値とロックアウト方針を定義する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.2",
+    "issue": "NotFound の allowlist は厳格一致で安全だが、将来的にクエリパラメータ next でのリダイレクト等を導入するとオープンリダイレクトの温床になり得る。",
+    "suggestion": "外部/任意URLへのリダイレクト機能は導入しない。内部用に導入する場合も、同一オリジンかつパス起点のみ許可（new URL(next, location.origin) で検証）��、スキーム変更・絶対URL・制御文字を拒否する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.5",
+    "issue": "Supabase のセッショントークンは localStorage（lais.auth）に保存される設計で、XSS 発生時の奪取リスクが高い。",
+    "suggestion": "CSP/Trusted Types の強化、不要なサードパーティスクリプトの排除、依存パッケージのサプライチェーン監視（lockfile 厳格化、脆弱性監査）を実施し、XSS 面を極小化する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "シークレット露出チェック（grepレベル）: 本パッケージ内にハードコードされたAPIキー/シークレットは見当たらず、フロントは VITE_ 環境変数参照のみ。",
+    "suggestion": ".env.local を VCS から除外し、CI に gitleaks/secretlint を導入。誤って service_role を投入したコミットをブロックするプリフックも設定する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "6",
+    "issue": "一般的なHTTPセキュリティヘッダ（HSTS, Referrer-Policy, X-Content-Type-Options, Permissions-Policy 等）の要件が未記載。",
+    "suggestion": "配信レイヤで headers を設定: Strict-Transport-Security: max-age=31536000; includeSubDomains; preload、Referrer-Policy: strict-origin-when-cross-origin、X-Content-Type-Options: nosniff、Permissions-Policy は実際に必要な機能のみ許可。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

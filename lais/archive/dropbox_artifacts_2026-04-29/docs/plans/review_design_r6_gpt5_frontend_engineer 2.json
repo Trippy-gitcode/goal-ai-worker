@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0 テーマ切替（CSS）",
+    "issue": "html.theme-switching * に一括で transition を付与しており、DOM全体のスタイル計算・レイアウト無関係要素まで再計算対象になるため、切替直後にフレームドロップのリスクがある（タイムラインの多数行などで顕在化）。",
+    "suggestion": "セレクタを限定して適用範囲を縮小する（例: html.theme-switching :where(body,.app-shell,.card,.button,.chip,.input){transition:...}）。または各コンポーネントのルート要素に .themed を付け、html.theme-switching .themed のみに適用する。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0 setTheme()",
+    "issue": "トランジション解除が setTimeout(400ms) 固定。prefers-reduced-motion: reduce で --duration-normal が 1ms になると、不要に 400ms 間 theme-switching クラスが残留し、意図せぬ微小トランジションや無駄な再計算が続く。",
+    "suggestion": "transitionend を監視して解除するか、実行時に getComputedStyle で --duration-normal を読み取��ミリ秒換算して待機時間を決定する。フェイルセーフとして max 500ms のタイムアウトも併用。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0 テーマ切替（meta theme-color 同期）",
+    "issue": "「meta theme-color を --bg-primary と同期」とあるが実装手順・コード例が未提示。特にiOS Safari/PWAでは反映可否や挙動に制約があり、実装者が迷う。",
+    "suggestion": "テーマ変更時に document.querySelector('meta[name=\"theme-color\"]').setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim()) を実行する実装例を提示。iOS PWAは theme-color の色反映が限定的なため、apple-mobile-web-app-status-bar-style は 'default' で固定し、色変更は Android/Chrome 中心である旨を注記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§8.1 ボタン（Danger subtleの説明文）",
+    "issue": "説明中の記法「rgba(*danger*, 0.18)→ ...」は、開発者が誤って rgba(var(--danger), .18) と書く原因になり得る（CSSではhexをrgbaに直接渡せない）。",
+    "suggestion": "設計ドキュメント上の例示をトークン名に統一（--danger-subtle-hover などのみを参照）し、CSSで色から動的に派生する記法の使用を禁止する旨を明記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": "backdrop-filter は対応ブラウザでもスクロールや拡大DOMでGPU過負荷になりやすい。@supports 内で .glass-surface に常時宣言しているため、data-glass=\"off\" でも compositing が発生する実装になりがち。",
+    "suggestion": "backdrop-filter/-webkit-backdrop-filter の付与は data-glass=\"on\" の時だけ行うセレクタに限定（:root[data-glass=\"on\"] .glass-surface）。さらに .glass-surface に contain: paint と will-change: backdrop-filter を慎重に併用し、同時表示上限（30要素）をCI/Lighthouseのカスタム監視で検証。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§5.5 @supports 構文",
+    "issue": "条件式に or を用いた @supports は現行主要ブラウザで対応だが、サポート対象OS/ブラウザの下限が仕様内に明示されていない。",
+    "suggestion": "サポート対象の下限バージョン（iOS 16.4+, Chrome 84+ 等）を明記。下限未満は not ブロックでのフォールバックが常に適用される旨を注記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 イージングトークン",
+    "issue": "spring-bouncy（cubic-bezier(0.34, 1.56, 0.64, 1)）など overshoot 系を transform 以外に誤適用すると、opacity/filter/translate 系で視覚破綻や内容はみ出しが起こるリスクがある。",
+    "suggestion": "命名を spring-bouncy-transform に変更し、lintルール（stylelint plugin）で transform 以外への適用を禁止。さらに spring 系を使う要素の親に overflow: hidden を付けるガイドを追記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.3 タイポ（line-height）",
+    "issue": "line-height-display: 1.0 は一部OS/フォントで上部・下部がクリップされる事例がある（特にAndroidでの数値フォント）。",
+    "suggestion": "display系は最小1.05〜1.1に上げるか、該当要素の余白に em ベースの上下パディングを追加する運用指針を追記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§3.2 フォントサイズスケール",
+    "issue": "11px（0.6875rem）はiOSで可読性が低く、拡大設定や自動テキ��トサイズ調整の影響を受けやすい。",
+    "suggestion": "ユーザー設定の文字サイズ増加時に 11px が視認不十分とならないよう、.text-xs はキャプション限定のほか最小タップ領域やコントラストの追加チェックをガイドに追記し、-webkit-text-size-adjust: 100% をベーススタイルに含める。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.1 スペーシング",
+    "issue": "スペーシングがpx固定のため、OSのフォント拡大設定に追従しても余白が相対変化せず窮屈化の可能性がある。",
+    "suggestion": "主要スペーシング（sm〜lg）を rem 化し、視覚密度をOS文字サイズに連動させる方針を検討。微小単位のみpxを維持。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2.2 リンク色の役割分離",
+    "issue": "「テキストリンクには --accent + underline」と方針はあるが、グローバルな a スタイルのベースCSSが未提示。",
+    "suggestion": "a { color: var(--accent); text-decoration: underline; text-underline-offset: 0.1em; } a:hover { color: var(--accent-hover); } a:active { color: var(--accent-pressed); } をベースCSSとして提示。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§9 CSSトークンブロック",
+    "issue": "トークン定義は網羅されているが、ベース適用のスニペット（body{background:var(--bg-primary); color:var(--text-primary); font-family:var(--font-primary);} 等）がないため、初期導入時に見落としやすい。",
+    "suggestion": "ベースリセット/適用例を提示（html,body の背景・前景色、フォント、a/button/input の継承ルール、::selection の配色など）。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.6 prefers-reduced-motion",
+    "issue": "全要素に transition-duration: 1ms !important を適用しており、UIフィードバック（スイッチのON/OFFなど）まで過度に瞬断される可能性がある。",
+    "suggestion": "例外ホワイトリストを拡張（.switch, .accordion など状態変化の可読性に直結する要素は100ms程度を維持）。セレクタを限定し、副作用を抑制。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§5.0 FOUC対策（��述の揺れ）",
+    "issue": "説明文では html[data-theme=\"...\"] を推奨としつつ、実際のテーマ定義は :root[data-theme=\"...\"] を使用。動作上は同一だが、実装者視点で統一性に欠ける。",
+    "suggestion": "全章でセレクタ表記を html[data-theme=\"...\"] に統一し、コード例も揃える（または :root で統一）。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  }
+]

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Lais — S-15 GoalCreate | 案 E_v2 Cyberpunk 2077</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="screen">
+
+  <div class="statusbar">
+    <span class="time">07:18</span>
+    <span class="indicators">
+      <span class="ind-dot"></span>
+      <span class="net">5G</span>
+      <span class="bat">82%</span>
+    </span>
+  </div>
+
+  <!-- 背景 (薄ぼやけた S-10 風) -->
+  <div class="s15-bg">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; padding:4px 0 8px; border-bottom:1px solid var(--c-line);">
+      <div>
+        <div style="font-family: var(--f-display); font-size:11px; color: var(--c-magenta); letter-spacing:0.2em; margin-bottom:2px; font-weight:700;">// MORNING.OK</div>
+        <div style="font-family: var(--f-display); font-size:28px; color: var(--c-yellow); font-weight:900;">FTS_07</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family: var(--f-mono); font-size:18px; color: var(--c-cyan);">04.27</div>
+      </div>
+    </div>
+    <div style="background: rgba(252,238,10,0.06); border:1px solid var(--c-yellow); border-left:3px solid var(--c-magenta); padding:10px 12px; margin-bottom:12px;">
+      <div style="font-family: var(--f-jp); font-size:13px; color: var(--c-text); line-height:1.6;">
+        昨日の対話ログを確認した。今日の最優先タスクは...
+      </div>
+    </div>
+    <div style="background: rgba(21,21,26,0.85); border:1px solid var(--c-line); border-left:3px solid var(--c-yellow); padding:8px 12px; margin-bottom:6px;">
+      <div style="font-family: var(--f-jp); font-size:14px; color: var(--c-text);">朝のストレッチ 5分</div>
+    </div>
+    <div style="background: rgba(21,21,26,0.85); border:1px solid var(--c-line); border-left:3px solid var(--c-yellow); padding:8px 12px;">
+      <div style="font-family: var(--f-jp); font-size:14px; color: var(--c-text);">企画書 v2 ドラフト</div>
+    </div>
+  </div>
+
+  <!-- オーバーレイ -->
+  <div class="s15-overlay"></div>
+
+  <!-- モーダル wireframe (黄色枠 + 角度カット) -->
+  <div class="s15-modal">
+    <div class="s15-modal-header">
+      <div>
+        <div class="s15-modal-title">NEW_GOAL.exe</div>
+        <div class="s15-modal-title-jp">目 標 を 作 成</div>
+      </div>
+      <div class="s15-modal-close">×</div>
+    </div>
+
+    <div class="s15-modal-body">
+      <!-- 目標タイトル -->
+      <div class="s15-input-group">
+        <div class="s15-input-label">
+          <span>&gt; GOAL_TITLE</span>
+          <span class="label-jp">目標タイトル</span>
+        </div>
+        <input type="text" class="s15-input-text" value="Tokyo マラソン完走" readonly>
+      </div>
+
+      <!-- 期限ピッカー -->
+      <div class="s15-input-group">
+        <div class="s15-input-label">
+          <span>&gt; DEADLINE</span>
+          <span class="label-jp">期 限</span>
+        </div>
+        <div class="s15-date-picker">
+          <div class="s15-date-cell year">
+            <span class="num">2027</span>
+            <span class="unit">YEAR</span>
+          </div>
+          <div class="s15-date-sep">/</div>
+          <div class="s15-date-cell">
+            <span class="num">03</span>
+            <span class="unit">MONTH</span>
+          </div>
+          <div class="s15-date-sep">/</div>
+          <div class="s15-date-cell day">
+            <span class="num">02</span>
+            <span class="unit">DAY</span>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:6px; font-family: var(--f-mono); font-size:12px; color: var(--c-text-dim); letter-spacing:0.1em;">
+          <span>// COUNTDOWN_T</span>
+          <span style="color: var(--c-magenta); text-shadow: var(--g-magenta);">309 DAYS_REMAIN</span>
+        </div>
+      </div>
+
+      <!-- 優先度 -->
+      <div class="s15-input-group">
+        <div class="s15-input-label">
+          <span>&gt; PRIORITY</span>
+          <span class="label-jp">優先度</span>
+        </div>
+        <div class="s15-priority">
+          <div class="s15-prio-btn">
+            <span class="dot"></span>
+            <span>LOW</span>
+          </div>
+          <div class="s15-prio-btn">
+            <span class="dot"></span>
+            <span>MID</span>
+          </div>
+          <div class="s15-prio-btn selected">
+            <span class="dot"></span>
+            <span>HIGH</span>
+          </div>
+          <div class="s15-prio-btn">
+            <span class="dot"></span>
+            <span>P0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- メモ -->
+      <div class="s15-input-group">
+        <div class="s15-input-label">
+          <span>&gt; META_NOTE</span>
+          <span class="label-jp">メ モ</span>
+        </div>
+        <div class="s15-meta-note">
+          週3回ランニング、月1ハーフ、3ヶ月前から実走。
+          <span class="cursor"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="s15-modal-footer">
+      <button class="s15-cancel">CANCEL</button>
+      <button class="s15-create">CREATE »</button>
+    </div>
+  </div>
+
+  <!-- HUD コーナー (オーバーレイ上) -->
+  <div class="hud-corner tl" style="z-index:80;"></div>
+  <div class="hud-corner tr" style="z-index:80;"></div>
+  <div class="hud-corner bl" style="z-index:80;"></div>
+  <div class="hud-corner br" style="z-index:80;"></div>
+</div>
+</body>
+</html>

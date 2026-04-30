@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "2.3 S01Auth.css（E: :focus-visible カスタムリング）",
+    "issue": "フォーカスインジケータのコントラスト/太さ/面積要件（WCAG 2.2 AA 2.4.11 Focus Appearance (Minimum)）の実測・証跡が提示されていないため、適合が保証できない。",
+    "suggestion": "全フォーカス可能要素でアウトラインが少なくとも2 CSS px相当、かつ隣接色/背景とのコントラスト比≥3:1を満たすことを測定。例: :focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }。--focus-ring-color が背景色・ボタン塗りと3:1以上であることをスクリプト/手動で検証し、スクリーンショットと数値を残す。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2.2 S01Auth.jsx handleSubmit",
+    "issue": "バリデーション失敗時の「focus 誘導...」がコメントのみで、最初のエラー入力へプログラム的にフォーカス移動する実装が確認できない。",
+    "suggestion": "onSubmit 時に最初の無効フィールドへ focus() と scrollIntoView({block:'center'}) を実���。エラー要約（role=\"alert\"/aria-live=\"assertive\"）をフォーム先頭に設け、そこへ一時的にフォーカスを移し、各エラーへの内部リンクで入力へジャンプできるようにするのも有効。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2.2 S01Auth.jsx（M: オフライン/タイムアウト処理）",
+    "issue": "serverError（オフライン/タイムアウト/サーバーエラー）のメッセージが確実にスクリーンリーダーへアナウンスされる実装（role=\"alert\" など）の有無が不明。",
+    "suggestion": "サーバーエラー表示ノードに role=\"alert\"（または aria-live=\"assertive\"）を付与し、メッセージ発生時に読み上げられることを確認。可能ならエラー表示に tabindex=\"-1\" を付けて focus() し、キーボードユーザーにも即時認知可能にする。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2.1（C 記載）/ 2.2 S01Auth.jsx",
+    "issue": "aria-invalid/aria-errormessage の強化は記載されているが、各入力（email/password/agree）に状態に応じて適切に付与されているコード断片が未提示。",
+    "suggestion": "各入力に aria-invalid={hasError} を付与。エラー出現時のみ aria-errormessage=\"<error-id>\" を設定し、該当エラー要素には id と role=\"alert\" または aria-live=\"polite\" を付与。DOM 非存在時の参照は避け、条件一致で同時レンダリングを維持。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 S01Auth.jsx（ctaDescribedBy）",
+    "issue": "CTA ボタンの aria-describedby に複数のエラーメッセージ ID を列挙すると、フォーカス時に長文読み上げとなり操作負荷・冗長さが増す可能性。",
+    "suggestion": "CTA には短い補足のみ（例: \"未入力の項目があります\"）を関連付け、個別の詳細メッセージは各入力に aria-errormessage/aria-describedby で紐付ける。上部の簡潔なエラー要約1つのみを CTA から参照する構成も有効。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3 S01Auth.css（G: .s01-link の負マージン拡張）",
+    "issue": "負マージンでヒット領域を拡大しているため、隣接テキスト/リンクとヒット領域が重なり誤タップを誘発するリスク。フォーカスアウトラインが視覚レイアウトとずれて見える可能性もある。",
+    "suggestion": "隣接要素との間隔を確保し、リンクのヒット領域同士が重ならないことを E2E で確認。必要に応じて outline-offset を設定して視覚的一貫性を保持。親要素に overflow: hidden を適用しない。回帰テストとしてリンク間 8px 以上の見た目ギャップ確保を推奨。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "2.2 S01Auth.jsx（入力要素）",
+    "issue": "email/password フィールドの autocomplete 属性の有無が不明。WCAG 2.2 AA 1.3.5 Identify Input Purpose の適合には、対応する自動入力トークンの提供が望ましい。",
+    "suggestion": "サインアップ/ログインいずれも email に autocomplete=\"username\"（または \"email\"）、パスワードに autocomplete=\"new-password\"（サインアップ）/ \"current-password\"（ログイン）を設定。これによりパスワードマネージャの支援が強化され、3.3.8 への寄与にもなる。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2.2 S01Auth.jsx（認証UI全体）",
+    "issue": "3.3.8 Accessible Authentication (Minimum, AA) 対応の明示がない。コピー/ペーストやパスワード表示切替を阻害してい��場合は不適合となる恐れ。",
+    "suggestion": "password フィールドで paste/copy/drag&drop/auto-fill を禁止しないことをテストで保証。可能なら「パスワードを表示」トグル（button, aria-pressed, aria-label）を追加。将来的に magic link 等の代替手段も検討。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（CSS/コンポーネント）",
+    "issue": "prefers-reduced-motion への配慮の記載がない。フォーカスリングのアニメーション、エラーのフェード、ローディングスピナー等がある場合、感受性の高いユーザに負担となる可能性。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) で animation/transition を無効化または最短化し、スピナー使用時は同時にテキストによる進行状況（例: role=\"status\"）も提示。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "S01Auth.jsx（画面構造）",
+    "issue": "ランドマーク/見出し構造の明示がなく、支援技術でのページ内移動性が最適化されていない可能性。",
+    "suggestion": "<main> を配置し、画面タイトルを <h1>（例: 「サインアップ」/「ログイン」）で明示。フォームは <form aria-labelledby=\"<h1-id>\"> とし、セクション見出しを適切に用いて論理構造を提供。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 S01Auth.jsx（バリデーションUI）",
+    "issue": "<form noValidate> によりブラウザの事前ヒントが無効化されているため、最小文字数などの要件が事前に伝わりにくい。",
+    "suggestion": "各フィールドにヘルプテキスト（例: 「8文字以上」）を常時表示し、aria-describedby で入力に関連付ける。エラー前に要件を認知できるようにする。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "1.A（誤検知Aの説明）/ S01Auth.jsx",
+    "issue": "二重送信ガードとして onMouseDown を用いる設計が残っている場合、マウス/タッチとキーボードの発火タイミング差により 2.1.1 Keyboard/2.5.2 Pointer Cancellation のリスクがある。",
+    "suggestion": "アクション発火は button の既定 click に集約。onMouseDown は submit を開始しない純粋なガードに限定し、Enter/Space 操作が確実に動作することをユニット/E2E テストで担保。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.1 App.jsx NotFound（J/N 対応）",
+    "issue": "location.replace による遷移後、初期フォーカスがブラウザ既定に依存し、スクリーンリーダーユーザに文脈が十分伝わらない可能性。",
+    "suggestion": "遷移先ページで <h1 id=\"page-title\"> を用意し、マウント時に focus() するか、skip-link（先頭へ移動）を提供。少なくとも document.title の更新を行い、必要に応じて aria-live=\"polite\" のリージョンでタイトル変更を通知。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（モバイル/小画面）",
+    "issue": "2.4.12 Focus Not Obscured (Minimum, AA) への明示的対策が記載されていない。固定要素やモバイル環境でフォーカスが隠れる可能性。",
+    "suggestion": "フォーカス対象に scroll-margin-top/bottom を設定して固定ヘッダー/フッターを回避。固定要素がある場合はフォーカス時の可視領域を確保するレイアウトとし、E2E で可視性を検証。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3 .s01-link（利用規約/プライバシー）",
+    "issue": "リンクが文脈から切り離されても目的が明確に伝わるか（Link Purpose）を確認できない。",
+    "suggestion": "アンカーテキストを「利用規約を読む」「プライバシーポリシーを読む」のように自己完結的にし、必要に応じて aria-label で補強。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

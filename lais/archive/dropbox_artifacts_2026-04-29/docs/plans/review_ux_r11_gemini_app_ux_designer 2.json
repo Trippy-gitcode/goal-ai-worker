@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§13.1",
+    "issue": "オフライン時の強制ログアウトとService Workerバックグラウンド同期の競合",
+    "suggestion": "「未同期データあり + オフライン」で強制ログアウト（データ消失）を実行しローカルデータを消去した場合、Service Workerに登録済みのバックグラウンド同期タスク（Background Sync）が残っていると、オンライン復帰時にデータ不整合や別ユーザーセッションへの誤同期（またはエラー）が発生する致命的リスクがあります。強制ログアウト実行時は、必ずService Workerの同期キューをクリア（またはタスクを登録解除）する処理を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.2",
+    "issue": "画像のみのメッセージ送信が考慮されていない",
+    "suggestion": "「1文字以上で➤送信ボタンがアクティブに。0文字はグレーアウト」とありますが、画像添付（📎）機能が存在します。画像を添付した場合は、テキストが0文字であっても送信ボタンをアクティブにする仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.3",
+    "issue": "AIタスク提案を「不要（✕）」とした際の学習フィードバックが未定義",
+    "suggestion": "project_v1.md §3.3.1には「ユーザーが「不要」を選択したタスクパターンは学習し、類似パターンの提案頻度を下げる」とありますが、ux_v1.mdではカードを非表示にするUI挙動しか記載されていません。[✕]タップ時に、バックグラウンドでサーバーへ「提案拒否」のフィードバックAPIを送信する処理を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§9.1",
+    "issue": "オフライン時の画像添付ボタンの挙動が未定義",
+    "suggestion": "TALK画面の入力フィールドは無効化されるとありますが、画像添付ボタン（📎）の扱いが不明です。オフライン時に画像を選択してもSupabase Storageへのアップロードに失敗するため、オフライン時は画像添付ボタンも無効化（グレーアウト）し、タップ時に「オフライン時は画像を添付できません」とトースト表示する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§3.4, §8.6",
+    "issue": "GROW画面表示時の保留中演出とユーザー操作の競合",
+    "suggestion": "TALK画面でレベルアップ条件を満たしGROW画面に戻った際、保留されていたフルの演出が自動再生されますが、その再生中にユーザーが別のタスクを完了（⭕タップ）させた場合の挙動が不明確です。演出再生中はタスク完了操作を一時的にブロックするか、タップを受け付けた上で演出キューの末尾に追加する排他制御の仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§7.4",
+    "issue": "タスクの手動ソートと開始時刻ソートの競合ルールが不明確",
+    "suggestion": "Today内のタスクをドラッグ＆ドロップで手動ソートした後、別のタスクの開始時刻を編集した場合、そのタスクが時刻順の位置に移動するのか、手動ソートの末尾になるのかが不明確です。「手動ソート後はその日のTodayセクションはカスタム順モードとなり、以降の時刻変更タスクはリスト末尾に移動する」などの優先順位ルールを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§2.3, §4.3",
+    "issue": "色覚多様性（アクセシビリティ）への配慮不足",
+    "suggestion": "Overdueタスクを「赤系アクセントカラー背景」、強み/弱みを「緑系/オレンジ系チップ」と色のみで区別しています。色覚特性を持つユーザーのために、色だけでなく視覚的なアイコン（例：Overdueには⚠️アイコン、強みには✨や↑、弱みには🌱や↓など）を併用して状態や属性を伝える設計に変更してくださ���。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§2.3",
+    "issue": "iOS PWAにおけるTALK画面のUndoスナックバーとキーボードの重なりリスク",
+    "suggestion": "TALK画面で「キーボード表示中は入力バーと共に上昇する」とありますが、iOS PWAではvisualViewportの高さ計算の遅延により、スナックバーがキーボードの裏に隠れる、または入力バーと重なるリスクが高いです。キーボード表示中はUndoスナックバーを画面上部（ヘッダー直下）に一時移動させるか、キーボードが閉じるまでカウントダウンを一時停止するフォールバックを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§7, §8",
+    "issue": "重要な達成体験におけるハプティクス（触覚フィードバック）の欠如",
+    "suggestion": "QRスキャン成功時以外のハプティクス（Vibration API）が定義されていません。タスク完了時（軽い振動）、レベルアップ/ゴール達成時（リッチな振動パターン）、エラー時（警告の振動）など、重要なフィードバックにハプ��ィクスを追加することで、モバイルアプリとしての没入感と操作感が向上します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.5",
+    "issue": "ME画面（PROFILE/DISCOVER）のPull-to-refresh欠如",
+    "suggestion": "GROW / FRIENDS画面でのみ有効とされていますが、別端末での利用やバックグラウンドでのAI分析完了を反映させるため、ME画面（特にPROFILEのAI理解メモやDISCOVERの自己分析カード）でもPull-to-refreshを有効にし、手動で最新データを取得できるようにしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§2.3",
+    "issue": "習慣タスクの「今日だけスキップ」機能の欠如",
+    "suggestion": "習慣タスクは翌日リセットされますが、体調不良などで明示的に休みたい場合、未完了のまま放置するとユーザーに罪悪感を与え「罰なし」のコンセプトに反します。詳細パネルに「今日はスキップ」ボタンを追加し、タップするとEXPは付与されずにTodayリストから消去される（プレッシャーを消せる）機能の追加を検討してくだ��い。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

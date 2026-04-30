@@ -1,0 +1,218 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec_v1.md → test-guards.ts 分離設計 / 各アプリ側の構成",
+    "issue": "test-guards.tsは「共通・変更禁止」と明記されているが、各アプリにはコピー配布されるため差分・ドリフトが起きる前提になっている。",
+    "suggestion": "共通ファイルはシンボリックリンクかnpm内製パッケージ配布に統一する。最低限、先頭にDEV_SYSTEM_VERSIONとSHAを埋め込み、canopy_common.shでバージョン・ハッシュ一致を検証する。init_app.shはリンク優先で、コピーは最終手段にする。"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "init_app.sh",
+    "issue": "scripts/ディレクトリを作成していないのにscripts/*をcpしており、初期化時にコピーが失敗する。",
+    "suggestion": "mkdir -p scripts を追加してから cp \"$DEV_SYSTEM/scripts/*.sh\" scripts/ を実行する。"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "COMPLETENESS",
+    "location": "init_app.sh / test-guards.config.ts",
+    "issue": "init_app.shがtest-guards.config.ts（アプリ固有）を作成・配布していないため、test-guards.tsのimportが解決不能になる。",
+    "suggestion": "dev-system/test-helpersにtest-guards.config.template.tsを追加し、init_app.shで tests/e2e/helpers/test-guards.config.ts としてコピー（または最小の雛形をtouch/テンプレ書き込み）する。"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/mission_linter.sh",
+    "issue": "ミッションブロック抽出がsedの範囲指定で開始行（^###）に即座にマッチしてしまい、ブロック全体が正しく取得できない（多くのチェックが誤判定になる）。",
+    "suggestion": "次見出し行番号を算出して範囲抽出する。例: NEXT=$(grep -n '^### ' \"$SP\" | awk -F: -v s=$LINE_NUM '$1>s{print $1;exit}'); [ -z \"$NEXT\" ] && sed -n \"${LINE_NUM},\\$p\" \"$SP\" || sed -n \"${LINE_NUM},$((NEXT-1))p\" \"$SP\""
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "canopy/canopy_common.sh（仕様記述）",
+    "issue": "「APP_VERSION 4箇所一致」の4箇所がどのファイル/キーなのか未定義で、AI実装者がチェック対象を誤解する恐れがある。",
+    "suggestion": "一致対象を明記（例: app_config.yaml:app.version, package.json:version, frontend/src/version.ts, CLAUDE.md:Version）。canopy_common.shに正規表現/grepパスを具体記述する。"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec_v1.md → ビルド/デプロイ関連",
+    "issue": "『ビルド同期（frontend vs frontend-dist）』やdeploy.frontend_cmdではfrontend-distを前提にしている一方、build_cmdはvite build（デフォルトはdist）で整合しない。",
+    "suggestion": "app_config.yamlにbuild.out_dirを追加（既定値dist）。canopy_common.shとdeploy.*_cmdはこの設定を参照してdir名を統一する。"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "app_config_template.yaml → deploy.* / infrastructure.*",
+    "issue": "インフラにvercel/netlify/aws-lambda等を許容しているのに、deployコマンドはCloudflare wrangler固定で他プロバイダでは動作不能。",
+    "suggestion": "インフラ別にdeployコマンドテンプレートを切り替える仕組みを追加（deploy.provider: cloudflare|vercel|netlify|aws）。init時に選択し、canopyでproviderとコマンド整合チェックを行う。"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "g4_testing.md → G4-v6",
+    "issue": "「beforeAllでSupabase直接更新によりプラン切替」と記載しつつ、「Source of TruthはTOKEN_KV。DB更新だけでは反映されない」としており手段が矛盾。",
+    "suggestion": "切替手順をKVに統一（wrangler kv:key put ...）。必要ならDBは同期的に更新するが、判定はKVをソースとする旨を明記。tests/helpersにset-plan.ts（KV更新ラッパ）を追加。"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "g5_reporting.md",
+    "issue": "「try/catchでタイムアウト握りつぶしはSKIP扱い」とある一方、「条件付きSKIP禁止。唯一許容はプラットフォーム非対応」と記載が相反する。",
+    "suggestion": "タイムアウト握りつぶしはFAILに統一。SKIPはプラットフォーム非対応のみ許容と明示し、該当文言を修正。canopyのテスト品質チェックに「timeout握りつぶし→FAIL」検出を追加。"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "g2_ui_verification.md / claude_ai_protocol.md §6",
+    "issue": "G2でgetBoundingClientRect等のDOM APIチェックを必須化している一方、完了報告の判定基準ではDOM APIベースの判定を不受理としており矛盾。",
+    "suggestion": "G2は開発時の自己診断（補助）であり、受入判定はスクリーンショット比較のみ有効と明記。canopyに「比較画像枚数>=1」ゲートを追加し、DOM APIはレポート根拠に使わない旨を追記。"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "claude_ai_protocol.md §10 仕様書一覧",
+    "issue": "dev-system/tests/test_library.mdが参照されているが、dev-systemのディレクトリ構成にtests/が存在しない。",
+    "suggestion": "当該ファイルを追加するか、正しい配置（例: dev-system/docs/test_library.md）に修正。canopyで存在確認を行う。"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "docs/lessons_learned.md（参照）",
+    "issue": "教訓で参照されるtest_audit_v1.mdがリポジトリ内に存在しない。",
+    "suggestion": "test_audit_v1.mdをdev-system/docsに追加するか、参照を削除/置換。canopyに参照ドキュメント存在チェックを追加。"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "g2_ui_verification.md",
+    "issue": "Stage A用スクリプト（scripts/c16_stage_a.js）がdev-systemに含まれていない。",
+    "suggestion": "scripts/c16_stage_a.jsのテンプレ実装をdev-system/scriptsに追加し、init_app.shで配布。canopy_common.shで実行可否/戻りコードを検査する。"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "canopy/canopy_common.sh（仕様記述）",
+    "issue": "「テストアンチパターン（expect(true)/空catch/typeof-only）」の検出方法（対象ファイル範囲・grep正規表現・閾値）が具体化されていない。",
+    "suggestion": "testing-anti-patterns.mdの各項目に対応するgrep/ASTルールを定義し、canopy_common.shからscripts/test_lint.shを呼び出す構成にする。"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "各アプリ側の構成 / canopy_common.sh",
+    "issue": "development_rules.md（common+app結合）の生成手順がない。init_app.shはcommonとappを別ファイルで配布するのみで、canopyはdevelopment_rules.mdの行数を検査しており不整合。",
+    "suggestion": "scripts/build_rules.sh（cat development_rules_common.md development_rules_app.md > development_rules.md）を追加し、init_app.shとcanopy前処理で実行する。"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "test-guards.config.ts / g5_reporting.md",
+    "issue": "IGNORED_ERRORSにCORS系を含める設計だが、環境条件がなく本番でも誤って無視される恐れがある。",
+    "suggestion": "テストガードで「page.url().includes('localhost') || process.env.CI==='false'」のときのみCORS無視を許容する条件を追加。production環境ではCORSはFAILにする。canopyで本番URL時のCORS無視をブロック。"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "scripts/session_archiver.sh",
+    "issue": "300行超過時に『## 完了済み』が存在しない場合、行数は減らず閾値違反が解消されない（ループ的に失敗し続ける）。",
+    "suggestion": "『## 完了済み』が無い場合は、最古の完了ブロックや『保留』セクションを一時アーカイブに退避する、または明示的にエラー終了して手動整備を要求する分岐を追加。"
+  },
+  {
+    "id": "R-018",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "app-config/app_config_template.yaml → routing",
+    "issue": "modelsキー（gpt-5, claude-sonnet, gemini-flash）とratiosキー（gpt, claude, gemini, simple）の名前解決が一致せず、ルーティング実装が誤解釈する恐れ。",
+    "suggestion": "ratiosはmodelsのキーと一致させる（例: ratios: { gpt-5: 40, claude-sonnet: 30, gemini-flash: 30 }）。canopyで合計100検証とキー一致検証を追加。"
+  },
+  {
+    "id": "R-019",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec_v1.md → 共通/個別の分離ルール",
+    "issue": "共通資産は各アプリにコピーする運用のため、更新の横展開コスト・ドリフトが高い。",
+    "suggestion": "dev-systemのバージョンファイル（DEV_SYSTEM_VERSION）を導入し、各アプリに.pinファイルを配置して同期状態をcanopyで検査。scripts/update_from_dev_system.shで差分同期（rsync/チェックサム）を自動化する。"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec_v1.md → canopy.sh例 / init_app.sh生成",
+    "issue": "仕様例のcanopy.shはCANOPY_STARTや終了出力を含むが、init_app.shが生成するcanopy.shは簡略版で差異がある。",
+    "suggestion": "canopy.shのテンプレートを単一化（テンプレファイルを配布）し、init_app.shはそのテンプレをコピーする。"
+  },
+  {
+    "id": "R-021",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "g4_testing.md → 基本コマンド",
+    "issue": "Playwright結果判定をtail -1 | grep \"0 failed\"で行っており、出力フォーマット依存で脆い。",
+    "suggestion": "Playwrightの終了コードで判定（npx playwright test --project=mobile || exit 1）。または--reporter=jsonでJSONをjqパースし、\"failed\":0 を確認する。"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "g2_ui_verification.md → 追加チェック",
+    "issue": "docs/z_index_map.md / docs/dom_id_list.txtがテンプレ/初期化で提供されておらず、参照先が空の可能性。",
+    "suggestion": "両ドキュメントのテンプレ（空雛形）をdev-system/templatesに追加し、init_app.shでdocs/配下に配置。canopy_app.shで存在チェックを行う。"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "debugging-guide.md → 冒頭/Phase説明",
+    "issue": "「C11バグ対応フロー」への参照があるが、C11の定義・所在が本仕様群に含まれていない。",
+    "suggestion": "C11の定義文書へのリンク（development_rules_common.md内の該当セクション）を明示、または本文に要点を抜粋追記する。"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "templates/bootstrap.md（記述）",
+    "issue": "「Claude.aiプロジェクト唯一のナレッジ」という表現が、claude_ai_protocol.md等の別ドキュメントと矛盾して誤解を招く。",
+    "suggestion": "「Claude.ai起動時に最初に読み込む最小ナレッジ（正本は各docs/*.md）」のように表現を修正。"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "scripts/mission_linter.sh → 参照ファイル検査",
+    "issue": "『参照:』行のパス検査が「/を含むか否か」の単純判定で、URL/Windowsパス/相対パスなどの正当ケースを誤判定しうる。",
+    "suggestion": "http(s)://, ./, ../, 絶対パス(/)のいずれかにマッチすればOKとする正規表現に更新。例: grep -Eq '参照: (https?://|\\./|../|/)'."
+  },
+  {
+    "id": "R-026",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec_v1.md → canopy_common.sh バージョン同期",
+    "issue": "dev-system自体のバージョン同期方法が未定義で、各アプリがどの版の共通資産を使っているか可視化できない。",
+    "suggestion": "dev-systemにVERSIONファイルを追加し、init時にアプリ側に.dev-system.versionを配置。canopy_common.shで両者の一致を検査し、不一致時に警告/ブロックを行う。"
+  },
+  {
+    "id": "R-027",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "canopy/canopy_common.sh → 行数ゲート",
+    "issue": "development_rules.md ≤ 120行という固定上限は、教訓の集約や将来の拡張で容易に超過し、実質的な足かせになり得る。",
+    "suggestion": "章立て/別ファイル分割を推奨し、行数ゲートは「1ファイルに過度に集中しない」ためのソフトリミット（警告）に緩和。もしくは節数・見出し構造の品質ゲートに置換。"
+  }
+]

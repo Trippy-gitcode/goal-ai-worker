@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "2.4 S01Auth.css / 2.5 themes.css",
+    "issue": "エラーメッセージ (.s01-server-message-error) の前景色 var(--danger) と背景色 var(--danger-subtle) のコントラストが WCAG 2.2 AA (4.5:1) を満たさない可能性が高い。実測（仮定: var(--danger)=#F85149, ベース背景=白）では #F85149 対 #FFFFFF が約 3.35:1 で不合格。--danger-subtle は 8〜12% の微小着色であり、背景が実質的に白に近いため比率はほぼ同等（約 3.2〜3.5:1）で AA 不適合の可能性がある。",
+    "suggestion": "各テーマの var(--danger) の実値で実測し、4.5:1 を下回る場合は以下いずれか: 1) var(--danger) を暗くする（例: #8A1A1A 付近; 白背景で約 7.0:1）、2) エラー文言は通常の本文色で表示し、意味付けはアイコン/太字/境界線で補助、3) エラーパネル背景を大きく暗くし十分なコントラストを確保。測定は対象フォントサイズ/太さごとに実施（大きなテキストで 3.0:1 を用いる場合は 18.66px 以上か 14px 太字以上が条件）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "2.3 S01Auth.jsx / 2.4 S01Auth.css",
+    "issue": "フォーカスインジケータのカスタム定義が見当たらない。グローバルリセット等で outline が無効化されている場合、Focus Visible 不在は WCAG 2.2 (2.4.7/2.4.11 関連) に抵触しうる。",
+    "suggestion": "ボタン/入力/チェックボックス/リンクに対して :focus-visible の明確なスタイル（最低 3:1 の非テキストコントラスト差）を付与。例: .s01-cta:focus-visible, input:focus-visible, [type=\"checkbox\"]:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px }。併せて、グローバルで outline: none の除去確認。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "2.4 S01Auth.css（.s01-server-message-error）",
+    "issue": "サーバー由来のエラーメッセージ領域に role=\"alert\" / aria-live の指定が示されていない。フォーカスを移動しないエラー・状態メッセージはスクリーンリーダーに自動通知されず、WCAG 2.2 AA 4.1.3 (Status Messages) に不適合となる恐れ。",
+    "suggestion": "サーバーメッセージコンテナに role=\"alert\"（または aria-live=\"assertive\"）を付与し、メッセージ挿入時に読み上げを確実化。成功メッセージは aria-live=\"polite\" を推奨。見出し（例 h2）も併設し、フォーカス移動の代替としても機能させる。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "2.3 S01Auth.jsx",
+    "issue": "email/password/agree の <label> 関連付け（for/id）や aria-label/aria-labelledby の記述が確認できない。プレースホルダのみでは名前付与要件を満たさず、スクリーンリーダー利用者に入力意図が伝わらない可能性。",
+    "suggestion": "各入力に可視ラベルと for/id を実装（例: <label for=\"s01-email\">メールアドレス</label>）。視覚的に非表示にする場合は sr-only 手法で DOM 上は存在させる。補助文言（最小文字数など）は aria-describedby で関連付ける。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "2.3 S01Auth.jsx",
+    "issue": "同意チェックボックス（agree）の実装詳細が不明。ラベルとターゲットサイズ（44×44px 以上）を満たさない場合、モバイルでの操作困難やラベル未読上の問題が発生。",
+    "suggestion": "<input type=\"checkbox\" id=\"agree\"> と <label for=\"agree\">同意文言...</label> を関連付け、ラベル全体をクリック可能にする。CSS で label のヒット領域を少なくとも 44×44px（余白含む）に確保。ラベル文言はリンク（利用規約/プライバシー）を含む場合でもラベル全体でトグル可能とする。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "2.3 S01Auth.jsx（aria-describedby）",
+    "issue": "CTA ボタンの aria-describedby が参照する ID（ctaDescribedBy）の存在保証が不明。存在しない ID を参照すると名称計算が破綻し、支援技術に誤情報を与える。",
+    "suggestion": "aria-describedby で参照する要素 ID の存在を条件分岐で保証する（存在しない場合は属性自体を外す）。エラー原因はボタンではなく各入力要素の aria-describedby/aria-errormessage にも適切に紐付ける。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2.3 S01Auth.jsx（送信制御）",
+    "issue": "inFlight 時の二重送信防止が onMouseDown のみ抑止されており、キーボード操作（Enter/Space による submit/click）を完全には抑止できない可能性。",
+    "suggestion": "handleSubmit 内で inFlightRef を最初に判定し早期 return（イベント既定動作の抑止）を実施。加えて onClick でも同様��抑止を行い、ポインタ/キーボード双方で二重送信を防止。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.3 S01Auth.jsx",
+    "issue": "エラーフォーカス誘導は実装済みだが、当該入力に aria-invalid の付与やエラーメッセージのプログラム的関連付け（aria-errormessage/aria-describedby）が明示されていない。",
+    "suggestion": "検証失敗時は対象入力に aria-invalid=\"true\" を付与し、エラー文言要素の id を aria-errormessage または aria-describedby で紐付けて読み上げを確実化。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.3 S01Auth.jsx / 2.4 S01Auth.css",
+    "issue": ":active 時の transform: scale(0.98) はアニメーションではないが、動きに敏感な利用者向けの配慮が不明。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) で transform/transition を無効化（または最小化）し、将来的にスピナー等を実装する場合も同メディアクエリでフレームレート/移動距離を抑制。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "2.2 App.jsx — NotFound",
+    "issue": "window.location.assign や route によるリダイレクト後のフォーカス管理とタイトル更新が不明。画面遷移でフォーカスがページ先頭や主要見出しに移動しない場合、スクリーンリーダー利用者が新画面到達を把握しづらい。",
+    "suggestion": "遷移完了後に main 見出しへ programmatic focus、document.title の更新、ポライトな live region で「トップに移動しました」等の通知を行う。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "5. 既知の残存項目（メール確認リンク復帰動線）",
+    "issue": "メール確認リンク復帰時の /auth/callback 実装が後続タスク。セッション確立後の状態メッセージが読み上げられない/フォーカスが不適切になる恐れ。",
+    "suggestion": "/auth/callback でセッション確立後、状態メッセージ（例: ログイン完了）を aria-live=\"polite\" で通知し、遷移先のページ見出しへフォーカス移動。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3 S01Auth.jsx",
+    "issue": "フォームオートコンプリート属性の記載が不明。SR/音声入力/パスワードマネージャの支援が弱まる。",
+    "suggestion": "email に autocomplete=\"email\"、ログイン時パスワードに autocomplete=\"current-password\"、サインアップ時に autocomplete=\"new-password\" を付与。name 属性も適切に設定。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "S-01 画面全般",
+    "issue": "画像（ロゴ等）の有無・alt 方針が不明。装飾画像を alt=\"\" にせず読み上げるとノイズになる。",
+    "suggestion": "ブランドロゴがあり見出しの役割を兼ねない場合は alt=\"ブランド名\"。完全装飾は alt=\"\" + role=\"presentation\"。リンク内ロゴはリンクテキストで代替。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "S-01 主要操作（全ボタン/リンク）",
+    "issue": "タップターゲットの最小サイズ（44×44px）が満たされているか不明。モバイルで操作困難となる可能性。",
+    "suggestion": "主要操作（送信ボタン、同意ラベル内リンク、補助リンク等）に対して、パディング等で 44×44px 以上のヒット領域を確保。隣接タップの誤操作回避のため、十分な間隔も確保。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

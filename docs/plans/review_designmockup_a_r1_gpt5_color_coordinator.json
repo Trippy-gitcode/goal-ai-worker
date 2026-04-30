@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "同意文内の「利用規約」「プライバシーポリシー」リンク／画面下の「ログイン」インラインリンク",
+    "issue": "インラインリンクが色だけで識別されており下線がない。本文と色差のみで伝達しており WCAG 1.4.1（色のみに依存しない）に不適合。",
+    "suggestion": "インラインリンクは必ず text-decoration: underline を付与し、:focus-visible で outline: 2-3px var(--accent) を表示。ホバー/アクティブ時は下線の太さやスタイル変化を追加して非色手掛かりを補強。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "ALL",
+    "location": "主ボタン（s00「はじめる」、s02「次へ」、s12「作成」、s15「作成」など）",
+    "issue": "主ボタンが明るい水色背景＋濃色テキストで実装されており、design_system §5.1/§8.1 の --button-primary-*（Night Sky: #1A5FC8 背景＋白文字）と不一致。テーマ間一貫性・状態色定義とも矛盾。",
+    "suggestion": "全画面のPrimaryボタンを --button-primary-bg / --button-primary-fg / hover / pressed トークンに統一（Night Sky: 背景#1A5FC8＋白文字）。もしライト調の代替スタイルを採用する場合は --button-primary-alt-* を正式トークン化して全画面で統一・AAコントラスト検証を実施。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayリスト各行の右端の小さな色ドット（ゴール紐付け表示）",
+    "issue": "ゴールの紐付けが色ドットのみで示されており、色覚多様性のユーザーには識別が困難。色だけで情報を伝達しており WCAG 1.4.1 に不適合。",
+    "suggestion": "色以外の手掛かりを追加（例: 短いテキストタグ「副業」/ イニシャル入りチップ / ドット形状のバリエーションやパターン / 行左に小型チップを配置）。アクセシブルネームにもゴール名を含める。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "チャットバブル内のタイムスタンプ（14:02 など）",
+    "issue": "バブル背景に対して時刻テキストが薄く、小サイズで視認性が低い。通常テキストとして4.5:1を下回る恐れ。",
+    "suggestion": "タイムスタンプの色を --text-secondary 以上に引き上げる、またはバブル背景を1段暗くしてコントラスト≥4.5:1を確保。フォントサイズは14px以上（12pxの場合は太字）を確保。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "タイムラインの縦線と未完了ドット",
+    "issue": "非テキスト要素（縦線・ドット）のコントラストが背景に対して弱く、視認性が低い。WCAG 1.4.11（Non-text Contrast 3:1）に未達の可能性。",
+    "suggestion": "縦線/ドットの色を --border-strong に引き上げ、縦線は2pxへ、ドットには1pxの輪郭（CanvasText系）を付与して3:1以上を保証。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "所要時間チップ（選択中の「30分」）および上部トグル（単発タ��ク/習慣）",
+    "issue": "選択状態が青系の塗りつぶし＋白文字で表現されており、背景濃度によっては文字コントラストが4.5:1を下回るリスク。",
+    "suggestion": "選択状態の背景は --button-primary-bg を使用し白文字4.5:1を確保、もしくは背景を --accent-subtle のままにしてテキストを --on-accent-subtle（暗色）に変更。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s15_goal_create",
+    "location": "カテゴリ選択チップ（「仕事」選択時の白文字 on 青背景）",
+    "issue": "選択チップの白文字が背景と十分なコントラストを確保していない可能性（AA基準 4.5:1）。",
+    "suggestion": "選択時は --button-primary-bg と白文字の組み合わせに統一するか、チップのテキスト色を --on-accent-subtle（暗色）へ変更してAAを担保。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s00_splash",
+    "location": "アウトライン「ログイン」ボタン（薄い枠線）",
+    "issue": "ボタン境界のコントラストが背景に対して弱く、UI部品としての輪郭が3:1に満たない可能性（WCAG 1.4.11）。",
+    "suggestion": "枠線色を --border-strong に引き上げるか、hover/pressedで --accent-subtle 背景を付与して非テキスト3:1を確保。:focus-visible では 3px outline を表示。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "提案カード内の「登録する」「編集して登録」ボタン",
+    "issue": "ボタンの視覚高さが約36px程度に見え、最小タップ領域44×44px（WCAG 2.5.5/HIG）を下回る恐れ。",
+    "suggestion": "高さ48px（design_system §8.1既定）に統一し、上下paddingを拡張。必要に応じて透明なヒットエリアを追加して --tap-target-min: 44px を満たす。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "進捗表示の大きな数値「60%」",
+    "issue": "細めのウェイトでダーク背景上の可読性がやや低い（長時間視認で疲れやすい）。",
+    "suggestion": "見出し相当の数値は font-weight: var(--font-weight-semibold) とし、必要に応じて --letter-spacing-heading を適用して視認性を強化。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "基本情報セクション（各行の区切り線と情報量）",
+    "issue": "罫線が多く、ダーク面でコントラストの細かな線が積み重なり視線が分散。「Open Air」原則に対してややノイジー。",
+    "suggestion": "区切り線の使用を最小化し、行間・セクション間の余白（--space-lg/--space-xl）でグルーピング。重要行のみ細線（--border-strong）を残す。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

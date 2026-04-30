@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§9",
+    "issue": "CSSコードブロックのマークダウン構文が破損している。`--info: #58A6FF;` の後でコードブロックが閉じられずにテキストとして出力されており、AIがこのブロックをコピーして実装すると確実にCSS構文エラーが発生する。",
+    "suggestion": "`--info: #58A6FF;` の後に閉じカッコ `}` を追加し、マークダウンのコードブロック（```css と ```）が正しく連続するように修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§5",
+    "issue": "定義されてい���テーマが「Night Sky / Dawn / Adventure」の3種となっているが、project_v1.md（§3.5）およびux_v1.md（§5.2）では「Night Sky / Dawn / Harajuku Light / Harajuku Dark」の4種と定義されている。テーマ名と数が一致しておらず、実装時にテーマ切替機能が破綻する。",
+    "suggestion": "プロジェクト仕様に合わせて、Adventureテーマを削除し、Harajuku Light および Harajuku Dark のCSSトークン定義を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§8.1, §8.3",
+    "issue": "Dangerボタンの背景に `--danger / subtle`、チップの背景に「セマンティックカラーのsubtle版」を指定しているが、§2.2および§9のトークン定義には `--accent-subtle` しか存在せず、`--danger-subtle` や `--success-subtle` 等が未定義のため、CSS変数の参照エラーになる。",
+    "suggestion": "§2.2および§9のCSSトークン定義に、各セマンティックカラーのsubtle版（例: `--success-subtle: rgba(63, 185, 80, 0.1);` 等）を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§7.1",
+    "issue": "物理ベースのイージング���して定義されている `--spring-default` (y=1.275) や `--spring-bouncy` (y=1.56) は、要素が100%を超えてオーバーシュートする。これをハーフモーダルのスライドイン（translateY）や画面遷移に適用すると、画面外に突き抜けたり、意図しないスクロールバーが発生してレイアウトが破綻するリスクが高い。",
+    "suggestion": "オーバーシュートを許容するアニメーション（scale等）と、許容しないアニメーション（translate等）でトークンを分けるか、親要素に確実な `overflow: hidden` を強制するガイドラインを追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.4",
+    "issue": "グラスモーフィズム（backdrop-filter）の適用対象に「カード」が含まれている。Todayセクションのタスクリストなど、多数の要素に同時に `backdrop-filter: blur` を適用すると、モバイル端末（特にAndroidや古いiOS）で深刻なスクロールジャンク（FPS低下）を引き起こす。",
+    "suggestion": "グラスモーフィズムの適用対象を「ハーフモーダル / ボトムシート / ドロップダウン / ヘッダー」など、画面上に少数しか存��しない浮遊要素に限定し、リスト内の通常カードへの適用は除外する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5",
+    "issue": "テーマ切替およびグラスモーフィズムトグルの状態を保持・復元するためのJSロジック（localStorageのキー名）や、初期ロード時のFOUC（Flash of Unstyled Content）を防ぐための `<head>` 内のインラインスクリプト（hydrationタイミング）の仕様が欠落している。",
+    "suggestion": "localStorageのキー名（例: `lais-theme`, `lais-glass`）を定義し、FOUC防止のためにHTMLの `<head>` で同期的にテーマ属性を付与するブロックスクリプトの実装ガイドラインを追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4, §8",
+    "issue": "モバイルアプリUI（ボトムタブ、ハーフモーダル、トースト、ドロワー、スナックバー）の重なりを制御するための `z-index` トークンが一切定義されていない。実装時に各コンポーネントがハードコードされたz-indexを持ち、重なり順のバグ（モーダルの上にタブが表示される等���が確実に発生する。",
+    "suggestion": "§4または§9に、`--z-elevated` (10), `--z-dropdown` (100), `--z-sticky` (200), `--z-backdrop` (300), `--z-modal` (400), `--z-toast` (500) のような階層的な `z-index` トークンを定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§3.3",
+    "issue": "大数字のフォントウェイトに `200` を指定しているが、Androidのデフォルトシステムフォント（Roboto）は通常 300, 400, 500, 700 しか搭載していないデバイスが多く、200を指定すると400にフォールバックするかブラウザがフェイクウェイトを生成し、デザインの意図が崩れる。",
+    "suggestion": "システムフォントに依存する場合、ウェイトはOS間で安全にサポートされている 300 (Light), 400 (Regular), 600/700 (Bold) の範囲に制限するか、大数字専用に軽量なWebフォント（数字のみサブセット化）の導入を検討する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "frontend_engineer"
+  }
+]

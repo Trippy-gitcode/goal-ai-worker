@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3.4 S01Auth.jsx",
+    "issue": "パスワードが短い場合の送信時フォーカス誘導が実装されていない。email不正/同意未チェックにはfocus()するが、passwordTooShortのケースはフォーカスされず、支援技術/キーボードユーザがエラー位置を見失う。",
+    "suggestion": "password用のrefを追加し、canSubmit=falseでpasswordTooShortが真の場合にpassword入力へfocus()する分岐を追加。例: const passwordInputRef=useRef(null); <input ref={passwordInputRef} ...>; handleSubmit内のフォーカス分岐に else if (passwordTooShort && passwordInputRef.current) passwordInputRef.current.focus(); を加える。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3.4 S01Auth.jsx",
+    "issue": "ログイン時にも最小パスワード長(6)をクライアントで強制しているため、サーバ側ポリシーと不一致な既存アカウント（例: 過去に6未満で作成）をクライアント側で締め出す恐れがある。",
+    "suggestion": "最小長チェックはサインアップ時のみに限定し、ログイン時はサーバ検証に委ねる。具体的にはLOGIN_MIN_PASSWORDを削除し、canSubmitとpasswordTooShort/aria/minLengthの分岐をisSignupの時だけ有効化する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "3.5 supabase.js / 3.4 S01Auth.jsx",
+    "issue": "authオプション detectSessionInUrl=false のため、メール内リンクからのリダイレクト（マジックリンク/確認リンク）で返るトークンをクライアントが取り込まず、案内文「メール内のリンクをクリックするとサインインできます」と矛盾。サインアップ後のリンク踏みでセッション確立できない可能性が高い。",
+    "suggestion": "次のいずれかを実施: (A) detectSessionInUrl:true に戻す（推奨）; (B) 専用コールバックルート（例 /auth/callback）で supabase.auth.getSessionFromUrl()/exchangeCodeForSession を明示実行し、URLクリーンアップ(history.replaceState)する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "3.2 App.jsx (NotFound)",
+    "issue": "allowlistにマッチした場合にwindow.location.assignへ渡す値がクエリを除去したpathのみのため、/terms?lang=ja などのクエリ/フラグメントが失われる。",
+    "suggestion": "元のurl（クエリ・ハッシュ含む）をそのまま移譲する。例: const fullUrl=url; window.location.assign(fullUrl); もしくは path判定はsplit('?')[0]で行いつつassignは元のurlを使用する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.2 App.jsx (NotFound)",
+    "issue": "STATIC_PATHSが完全一致のみ（/terms, /privacy）。末尾スラッシュや大文字差（/terms/ /Privacy）で意図せずトップへリダイレクトされる。",
+    "suggestion": "正規化して判定する（小文字化・末尾スラッシュ除去）。startsWithや正規表現で /terms(\\/|$) / /privacy(\\/|$) を許容。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.4 S01Auth.jsx",
+    "issue": "認証APIにタイムアウトが無く、ネットワークハング時に『送信中…』のまま無期限で操作不能になる。",
+    "suggestion": "30〜60秒程度のクライアントタイムアウトを実装し、タイムアウト時はUIを解放・明確なエラーメッセージと再試行手段を提示。Promise.raceでタイムアウトと競��させるか、カスタムfetch（createClientのfetch差し替え）でAbortControllerを用いる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.4 S01Auth.jsx",
+    "issue": "オフライン/一時的障害時のエラーメッセージに生のerr.messageを表示しており、英語や内部表現が出る可能性。再試行導線もない。",
+    "suggestion": "ネットワーク系（TypeError: Failed to fetch, timeout等）を検知して日本語の汎用文言にマップし、「再試行」ボタンや自動リトライ（指数バックオフ1〜2回）を提供。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4 S01Auth.jsx",
+    "issue": "email/password入力にonInputとonChangeの二重ハンドラを付与しており、環境によっては二重発火・余分な再レンダを招く。",
+    "suggestion": "リアルタイム更新はonInputのみに統一。onChangeは削除。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.4 S01Auth.jsx",
+    "issue": "EMAIL_REが単純化されており、国際化ドメイン/Unicodeローカル部/複数サブドメイ��等の正当なアドレスを弾く可能性がある。",
+    "suggestion": "クライアントでは厳格検証を避け、type=emailのvalidityや最低限の@含有チェックに留め、最終判定はサーバに委譲。あるいはIDNをpunycodeに正規化してから検証する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4 S01Auth.jsx",
+    "issue": "モバイルでemail/passwordに自動大文字化・自動修正・スペルチェックが有効になりうるため、入力が意図せず変換される恐れがある。",
+    "suggestion": "email/password双方に autoCapitalize=\"off\" autoCorrect=\"off\" spellCheck={false} を付与。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4 S01Auth.jsx",
+    "issue": "同意チェックにrequired属性がなく、aria-requiredのみ。支援技術互換性と将来のネイティブ検証連携の観点で不足。",
+    "suggestion": "checkboxに required を追加（noValidateでも意味的に有益）。aria-requiredはそのまま維持可。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.7 S01Auth.css / 3.4 S01Auth.jsx",
+    "issue": "serverError/confirmNoticeが長文・改行なし英語・エラーコード混在の場合、狭小画面や高倍率ズームで横スクロール/レイアウト崩れの恐れ。",
+    "suggestion": "`.s01-server-message`に overflow-wrap:anywhere; word-break:break-word; max-inline-size を指定。視覚的に改行と余白を確保。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.4 S01Auth.jsx",
+    "issue": "送信中にブラウザの戻る/他ルート遷移（フッターLink以外の経路）でアンマウント後、非同期完了時にsetStateが走る可能性（環境により警告/リーク）。",
+    "suggestion": "mountedRefを導入し、useEffectでmount/unmountをトラッキング。finally内のsetState類はmountedRef.currentの場合のみ実行。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "3.5 supabase.js",
+    "issue": "環境変数未設定時にモジュール読み込み段階でthrowし、ユーザには白画面のみになる。運用ミス時の障害認知が困難。",
+    "suggestion": "即throwではなく、lazy初期化（bootstrap時に検査）へ移し、ユーザ向けのフ��ールセーフ画面（「設定不備」）を表示。開発者向けログはconsole.errorで詳細出力。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "3.4 S01Auth.jsx",
+    "issue": "ボタンdisabled中のEnter押下でonSubmitが発火するかはブラウザ・フォーカス要素により挙動差がある。attemptedフラグに依存したエラーメッセージ提示が一貫しない恐れ。",
+    "suggestion": "各フィールドonBlurでの検証は現状あり。加えて、入力中のEnterキーdown時にsetAttempted(true)を行うか、リアルタイム/blur時に必須エラーを常時提示してEnter依存を減らす。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4 S01Auth.jsx",
+    "issue": "最大文字数未指定。極端に長いemail/passwordでサーバ側制限に当たりやすく、不要な往復を招く。",
+    "suggestion": "emailにmaxLength=320程度、passwordにmaxLength=128〜256を設定し、超過時のユーザ文言を提示。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

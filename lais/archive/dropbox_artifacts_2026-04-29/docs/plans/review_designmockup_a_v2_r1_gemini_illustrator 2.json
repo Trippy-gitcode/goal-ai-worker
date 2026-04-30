@@ -1,0 +1,79 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「サインアップ」ボタン",
+    "issue": "disabled状態と思われるボタンの背景色（#1C2128）とテキスト色（#484F58）のコントラスト比が極めて低く、夜空の背景に沈み込んで視認性が著しく欠如している。",
+    "suggestion": "disabled状態であっても最低限の形状と文字が認識できるよう、テキスト色を明度の高いグレー（#7A8593など）に変更し、コントラストを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "プライマリボタン（はじめる、次へ、作成など）",
+    "issue": "ボタンの青（#1A5FC8）が、Night Skyテーマの淡く静かなトーン（#79C0FF基調）の中で彩度が高く浮いており、「夜空の静寂」というブランドの感情訴求（安心感）をやや損ねている。",
+    "suggestion": "白文字とのコントラスト比を保ちつつ、Night Skyのアクセント色（#79C0FF）のトーンに寄せた、少し彩度を落とした深みのある青（例: #1F4C8C）に調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow, s14_goal_detail",
+    "location": "完了済みタスクのチェックマーク",
+    "issue": "s10_growでは完了タスクのチェックが青系（#79C0FF）で表現されているのに対し、s14_goal_detailでは緑（#3FB950）が使われており、同じ「完了」状態のカラー表現に矛盾がある。",
+    "suggestion": "Night Skyテーマの統一感と静けさを保つため、完了状態のカラーを青系（#79C0FF）に統一するか、システム全体で完了＝緑とするならs10_growも緑に統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Todayセクション「ジムで筋トレ」のタスク行",
+    "issue": "特定のタスクに警告色（#D29922）の左ボーダーが使用されている。日常のタスク一覧で強い警告色がデフォルトで存在すると、ユーザーに不要な緊張感を与え、安心感を損なう。",
+    "suggestion": "期限切れ（Overdue）などの明確なエラー状態以外では、ニュートラルな色（#484F58）やアクセント色を使用し、ユーザーを急かさないカラー設計にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "画面下部「削除」ボタン",
+    "issue": "タスク詳細画面で「削除」ボタンが常に赤色（#F85149）で表示されている。破壊的アクションの赤が常時目に入ることで、静かなジャーナル空間に無意識の緊張感を生んでいる。",
+    "suggestion": "デフォルト状態の削除ボタンはニュートラルなグレーにし、タップ後の確認ダイアログで初めて赤（danger色）を提示することで、安心感のある空間を維持する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内「登録する」ボタン",
+    "issue": "チャット画面内のタスク提案カードにある「登録する」ボタン（#1A5FC8）が、周囲の淡いトーンの中で強烈なコントラストを放っており、会話の流れを読む視線を不自然に奪っている。",
+    "suggestion": "チャット内のインラインアクションであることを考慮し、ボタンの背景色をアクセント色のsubtle（rgba(121,192,255,0.14)）などに抑え、会話の邪魔にならない視覚的重さに調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "所要時間の選択チップ群",
+    "issue": "所要時間の選択チップが横一列に密集して配置されており、余白（Open Air）を重視するレイアウト原則に反して窮屈な印象を与えている。",
+    "suggestion": "チップ間の余白（gap）を広げるか、よく使われる選択肢（15分, 30分, 60分など）に絞り、その他はカスタム入力にするなどして情報密度を下げる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  }
+]

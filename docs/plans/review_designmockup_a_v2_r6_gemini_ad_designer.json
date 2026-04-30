@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "画面中央のキャッチコピーテキスト",
+    "issue": "「あなたの人生を、あなたらしく」というコピーが抽象的すぎて、初めて画面を見た人が3秒以内に「AIがサポートするタスク・習慣管理アプリ」というコア価値を理解できない。",
+    "suggestion": "「AIと育てる、新しい習慣」など、機能的ベネフィット（AI/タスク管理）と感情的ベネフィットを組み合わせた具体的なコピーに変更し、アプリの目的を即座に伝える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部の「サインアップ」ボタン",
+    "issue": "ボタン背景色（#1C2128）と画面背景色（#0D1117）のコントラスト比が極めて低く、主要CTAであるにもかかわらず非活性（Disabled）のように見え、視線が止まらない。WCAG AAの非テキストコントラスト（3:1）を満たしていない。",
+    "suggestion": "入力前であってもブランドのアクセントカラー（#1A5FC8等）を使用し、opacityを下げるかアウトラインスタイルにする等で「次に行うべきアクション」としての存在感とコントラストを担保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "アバター選択のグラフィック領域",
+    "issue": "「最初のパートナーを選びましょう」というメッセージに対し、アバターのグラフィックが小さく余白が広すぎるため、「一緒に成長する」という感情的なつながりやワクワク感（訴求力）が生まれない。",
+    "suggestion": "選択中のアバターを画面中央で大きく表示（プレビュー領域を設ける）し、選択によって表情や動きが変わるよ���な見せ方にして、ユーザーの愛着と自己投影を促すレイアウトに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "TodayセクションおよびGoalsセクション下部の「+ タスクを追加」「+ ゴールを作成」",
+    "issue": "日常的に最も頻繁に行う主要アクション（CTA）が単なるテキストリンクになっており、情報密度の高いリストの中で視覚的ウェイトが弱く、ユーザーの視線が迷う。",
+    "suggestion": "テキストリンクではなく、アイコンを伴うFAB（Floating Action Button）として画面右下に固定するか、リスト末尾に破線ボーダーを持つ明確なボタン領域を設けてタップ可能であることを強調する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow",
+    "location": "画面上部ヒーロー領域のEXPバー",
+    "issue": "EXPバーの高さが4pxと細く、レベルアップというゲーミフィケーションの「達成感」を視覚的に伝える要素としての訴求力が弱い。",
+    "suggestion": "EXPバーの高さを8px程度に太くし、現在値の先���に光るエフェクトやアクセントカラーのグラデーションを入れて、成長の進捗へ自然に視線が誘導されるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "「所要時間」の選択チップ群",
+    "issue": "選択肢（5分〜120分）が横並びになっているが、画面右端でリストが続いていることが視覚的に示唆されておらず、横スクロール可能であることが直感的に伝わらない。",
+    "suggestion": "右端のチップが意図的に画面外へ半分はみ出すように初期スクロール位置を調整するか、右端に背景色と同化する薄いグラデーションマスクをかけてスクロールを誘導する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s13_task_detail",
+    "location": "画面最下部の「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "AIアプリとしての最大の差別化要素（強み）への導線であるにもかかわらず、薄い背景色に青文字の控えめなデザインとなっており、上部の「編集」「削除」ボタンよりも視覚的優先度が低く見える。",
+    "suggestion": "AI相談ボタンに専用のアイコン（キラキラマーク等）を追加し、プライマリCTAとしてグラデーションボーダーや目立つ背景色を用い、視覚的なウェイトを上げる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "画面下部の「AI相談」「編集」「削除」ボタン群",
+    "issue": "ポジティブな主要アクション（AI相談）と破壊的アクション（削除）が同じサイズ・形状で等間隔に並んでおり、アクションの重要度に応じた視覚的階層化がなされていない（UXの基本原則矛盾）。",
+    "suggestion": "「AI相談」を上段の幅広なプライマリボタンとして配置し、「編集」「削除」は下段にテキストボタンまたはセカンダリボタンとして小さく配置するレイアウトに再構築する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "チャット内の「タスク提案カード」",
+    "issue": "カード内の「登録する」ボタンは目立つが、カード自体の背景色がチャットの吹き出しと似ており、システムからの重要なアクション要求としての際立ちがやや弱い。",
+    "suggestion": "提案カードの背景色を少し明るくするか、左側のアクセントボーダーを太くし、ドロップシャドウを追加して「操作可能な独立したUI」であることを強調する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s30_me",
+    "location": "画面中央のサブタブ（PROFILE, DISCOVER, FRIENDS, SHOP）",
+    "issue": "タブの上下パディングが12px、フォントサイズが12pxであり、全体の高さが約40px前後となるため、WCAG 2.5.5が要求する最小タップターゲットサイズ（44x44px）を満たしていない。",
+    "suggestion": "タブの上下パディングを増やすか、テキストサイズを大きくして、確実に44px以上のタップ可能領域を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  }
+]

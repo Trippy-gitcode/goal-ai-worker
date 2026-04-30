@@ -1,0 +1,5 @@
+[
+  {"id":"R-001","severity":"HIGH","category":"IMPROVEMENT","screen":"ALL","location":"色トークン","issue":"v2_r3 STAND 45件の Group A/E 機械修正 + Group B/D/F 構造修正を反映。#484F58→#6E7681（WCAG 1.4.11 3.6:1）、チップ44px達成、s15マルチ選択視覚手がかり追加、s13 AI導線 active化、s10 完了色 緑統一。","suggestion":"(適用済み)","model":"Code","persona":"manga_cover"},
+  {"id":"R-002","severity":"MEDIUM","category":"PENDING","screen":"s14_goal_detail","location":"完了チェック左端配置","issue":"Group C(s10右 vs s14左) は意図的差異として維持。s10=デイリー実行ビュー右スワイプ完了、s14=リストビュー左円形マーカー（iOS Reminders慣用）。Rebuttal で再説明予定。","suggestion":"(Rebuttal で再判定)","model":"Code","persona":"manga_cover"},
+  {"id":"R-003","severity":"LOW","category":"DEFERRED","screen":"s00_splash,s02_onboarding","location":"BRAND_DNA","issue":"Group G 独自性系は Phase B で独自キャラ/イラスト言語確立。現段階はプレースホルダ。","suggestion":"(Phase B 吸収 Rebuttal で合意依頼)","model":"Code","persona":"manga_cover"}
+]

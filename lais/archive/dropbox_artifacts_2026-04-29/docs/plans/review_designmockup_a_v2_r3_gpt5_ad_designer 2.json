@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "ロゴ直下〜CTA周辺",
+    "issue": "ロゴと短いタグラインのみで、3秒以内に「AIコーチ＋タスク/ゴール管理アプリ」であることが伝わらない。初回ユーザーの理解が不足する。",
+    "suggestion": "ロゴ下に価値提案を1行で明記（例:「AIコーチと一緒に、タスクとゴールを整える」）＋機能の3アイコン（タスク/ゴール/AIトーク）を追加。主要CTA文言を「無料ではじめる」にし、二次CTAに「デモを見る」を追加して理解→行動までを滑らかにする。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「ログイン」テキストリンク",
+    "issue": "インラインリンクがアクセント色のみで下線が無く、色だけでリンク性を伝達している（WCAG 1.4.1 違反／デザインシステム§2.2違反）。",
+    "suggestion": "「ログイン」に text-decoration: underline を適用。ホバー/押下時の下線濃度または色変化も付与してリンク性を明確化する。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」チェックボックス",
+    "issue": "チェックボックスの見かけサイズが約20×20pxで、タップターゲット最小44×44px要件（デザインシステム§4.5 / WCAG 2.5.5推奨）を満たしていない。",
+    "suggestion": "チェックボックスとラベル全体を44×44px以上のクリック領域にし、透明paddingまたは::beforeでヒットエリアを拡張。ラベル全体タップでも切替できるようにする。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayリスト1行目の完了チェック UI",
+    "issue": "完了トグルがカード右端に小さく配置されており、UX仕様§2.3の「[完了⭕]が左端」の構成と不一致。位置・操作認知がブレる。",
+    "suggestion": "完了トグルをリスト左端に移動し、全行で一貫した位置とサイズ（44×44px以上）を確保。���了時は左端トグル＋取り消し導線（Undoスナックバー）を仕様通り実装。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾「+ タスクを追加」",
+    "issue": "主要CTAが小さなテキストリンクのみで視覚的優先度が低く、次のアクションへの導線が弱い。",
+    "suggestion": "「+ タスクを追加」をアクセント色のピルボタンに昇格（アイコン＋ラベル）し、スクロール末尾でも常に到達できるようにヒーロー直下にも同CTAを配置。もしくは右下にFABを設置。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "「所要時間」チップ群（5分〜120分）",
+    "issue": "チップの視覚高さが約28px程度で、インタラクティブ最小44px（デザインシステム§4.5）を満たしていない。",
+    "suggestion": "チップにmin-height:44px相当のpaddingを付与、または透明ヒットエリアで拡張。横スクロール時も各チップのタップ領域を44×44px以上に維持する。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "ALL",
+    "location": "ハーフモーダルの×ボタン（S-12/S-13/S-15 右上 約28×28px）",
+    "issue": "閉じるボタンのタップターゲットが44×44px未満で、デザインシステム§4.5の最小タップ領域ルールに反する。",
+    "suggestion": "×ボタンのヒットエリアを44×44px以上に拡張（可視サイズは据え置きでも可）。周囲に十分な余白を確保して誤タップを防止。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "ボタン行「進め方を聞く／詰まりを相談」",
+    "issue": "AI導線ボタンが非活性（色:#484F58、pointer-events:none）で、UX仕様§2.3のTALK遷移（タスク文脈引き継ぎ）と矛盾。",
+    "suggestion": "両ボタンを常時アクティブにし、タップでS-20 TALKへ遷移。完了タスク時は文言を「振り返りを相談」「次の一手を聞く」に切替えるなど、状態に応じたマイクロコピー最適化を行う。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s02_onboarding",
+    "location": "上部の進行インジケータ（棒のみ）",
+    "issue": "色付きバーのみでステップ数が直感的に把握しづらい。初回体験の見通しが弱い。",
+    "suggestion": "バーの右側に「2/5」などの数値ラベルを追加。各ステップに短い見出しを付け、現在地と残り工程を即時把握できるようにする。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "OTHER",
+    "screen": "s20_talk",
+    "location": "ヘッダー左のメニュー/右の履歴・新規チャットアイコン",
+    "issue": "アイコンのみでテキストラベルが無く、初見では意味が伝わりにくい。行動の学習コストが発生。",
+    "suggestion": "初回起動時にコーチマークで各アイコンの役割を説明。長押しでツールチップ（アクセシビリティラベル）を表示する実装も併用。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "「+ タスクを追加」リンク",
+    "issue": "セクション末尾の小さなテキストリンクのみで、次の行動（ゴールにタスクを足す）が視覚的に弱い。",
+    "suggestion": "行���ボタン（アクセントのアウトラインピル）に格上げし、スクロール中も見失わないサイズとコントラストで提示。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "完了タスク行（1行目の青系ティント＋チェック）",
+    "issue": "完了状態の表現にブランドアクセント（青系）が使われており、セマンティックsuccess（緑系）と役割が混在。状態認知に迷いが生じる恐れ。",
+    "suggestion": "完了は--success系（緑）で統一し、カード/アイコン/ラベルの配色を一貫化。アクセント（青）は操作・強調、success（緑）は達成状態という役割分離を徹底する。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

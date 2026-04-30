@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5 テーマ定義（序文）",
+    "issue": "「性格差は色とマイクロコピー、アクセント濃度で表現する」と言語化されているが、マイクロコピー（トーン＆ボイス）の具体定義・トークン化が存在しない。各テーマの言葉遣い（敬体/常体/感嘆符・絵文字の可否/励まし語彙）指針が未定義のため、実装でブレるリスクが高い。",
+    "suggestion": "各テーマのトーン＆ボイスを「copy tokens」として定義（例: --copy-tone: calm|warm|pop, --copy-emphasis-level: 0-2, --copy-emoji-allow: true|false, --copy-exclaim-allow: true|false, --copy-cta-style: gentle|direct）。主要UIの文体ガイド（トースト/空状態/CTA/バナー）を1画面ずつ短文サンプルで付記。Night Sky=Dwelling calm、Dawn=Warm gentle、Harajuku Light=Cheerful pop、Harajuku Dark=Refined playful などの原則を明文化。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§5 テーマ定義／§7 アニメーション",
+    "issue": "テーマ間の性格差が主に色に依存しており、動き・エレベーション・角丸など他トークンでの差別化が弱い。ブランドDNAの「洗練＋親しみ」「夜の静けさ／昼の弾み」を動きでも体験化できていない。",
+    "suggestion": "テーマ別モーション/エレベーションプロファイルを追加。例: Night Sky=--duration-normal: 300ms, --spring-gentle 優先, shadowやblur控えめ／Dawn=shadow-sm/mdをやや広がり気味に／Harajuku Light=spring-bouncyを許容（特定演出のみ）, --duration-fast: 180ms／Harajuku Dark=--ease-out強め+elevationやや高め。角丸も— --radius-lg をHarajuku系で+2pxなど微差を設け、色以外でも性格を可視化。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.2 リンク色の役割分離／§3 タイポグラフィ",
+    "issue": "インラインリンクの下線必須は明記されているが、リンクの状態トークン（visited/hover/active/underline-style）の定義がないため、画面ごとに実装が揺れる恐れがある。",
+    "suggestion": "リンク専用トークンを追加: --link-fg: var(--accent); --link-visited: color-darker(accent) もしくは同色でunderline-style: dotted; --link-hover-underline: solid 2px; --link-active-underline-offset: 3px など。visited時の色変更がブランド意図に合わない場合は下線スタイルのみで状態差を設けるガイドを明記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§5.3/§5.4 テーマ（Harajuku Light/Dark）＋§8.7 ボトムタブバー",
+    "issue": "Harajuku Darkのアクセント（#F5A9BF）で、pill背景（--accent-subtle）上にアクセント文字/アイコンを置く場面のコントラストが環境によって4.5:1を下回る可能性がある。トークン内で実測値の裏付けがない。",
+    "suggestion": "各テーマで「accent on subtle」の組合せコントラストを実測し、4.5:1を満たすよう--accent-subtleのalphaを再調整（例: ダーク系は0.12→0.16-0.20へ）またはpill内の文字色を--text-primaryに切替。状態別（hover/pressed）も同様にテストカバーし、結果を注記として併記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§1.4 NGリスト（色）／§2.1-2.3 カラー原則",
+    "issue": "「1画面につきプライマリ1色＋セマンティック4色まで」の運用ルールはあるが、どのコンポーネントにどの色系を許容するかの割当表がなく、実��時に過剰な色使用へ逸脱しやすい。",
+    "suggestion": "「色使用マトリクス」を追加。行=コンポーネント（ボタン/リンク/バッジ/トースト/バナー/進捗/アイコン）、列=色スロット（accent/success/warning/danger/info/neutral）で◯/△/×の許容度を定義。NG例（accentとinfoの混在など）を視覚例で明示。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§3.3 ウェイト・行間・字間トークン",
+    "issue": "--font-weight-thin:200 を「大数字のみ」に指定しているが、Android端末や一部system-uiで200が実在しない/滲むケースがある。ブランド上「洗練＝細字」は重要だが、可読性と実機差のリスクがある。",
+    "suggestion": "フォールバック階段を規定（200→300→400）。大数字は字間微調整（letter-spacing負の強度をテーマ別に微差）も含め、実機検証済みの組合せを推奨セットとして追記。必要に応じて--font-weight-displayを独立トークン化し、OS別マッピング表を用意。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.2 レイアウト原則／§8.4 タイムラ���ン",
+    "issue": "Open Airを支える「要素間リズム（例: タスク行gap 20px以上）」が記述ベースで、トークン化されていないため、画面間で微差が生まれやすい。",
+    "suggestion": "コンポーネント固有スペーシングをトークン化（--gap-task-row: 20px, --gap-section: 40px, --gap-hero-bottom: 16px 等）。テーマ差は維持せず共通だが、明示することで一貫性を担保。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§6.1 アイコンスタイル",
+    "issue": "stroke-width:1.5px 固定は解像度/スケールにより輪郭のにじみや不均等ピクセルヒットが起きる場合がある。ブランドの精緻さが損なわれる可能性。",
+    "suggestion": "24pxグリッドでのピクセルスナップ基準とstrokeのround cap/join推奨を明記。1x/1.5x/2xでの視認検証ルールと、サイズ別にstroke倍率を可変にできる補助トークン（--icon-stroke-sm/md/lg）を用意。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§1 ブランド定義／§8 アニメーション",
+    "issue": "競合差別化として「大人の洗練＋感情的つながり」を掲げるが、視覚的にブランドを特定できる“署名モチーフ（形/粒子/パターン）”が未定義。色以外のブランド記憶装置が弱い。",
+    "suggestion": "テーマ別に祝祭パーティクルと背景パターンをモチーフ化しトークン化。例: Dawn=柔らかい光条・ダスト粒子、Night Sky=月光リング・星粒、Harajuku Light=桜花びら/丸フレーク、Harajuku Dark=ベルベットのラメ片。--particle-shape, --particle-colors[], --celebration-pattern のような抽象トークンを追加し、紙吹雪/ゴール達成に使用。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§2 カラーシステム全般",
+    "issue": "各テーマで背景/テキスト/ボーダー/アクセントは定義済みだが、中間階調（neutral-50〜900相当）の体系がなく、将来の状態/階層追加時に一貫した派生色が不足する恐れ。",
+    "suggestion": "テーマごとに3〜5段の中間ニュートラル（例: --neutral-1/2/3/4/5）を定義。装飾ではなく機能（区切り/ホバー/押下/無効）での再利用先を表で関連付け、color-mixを使わず固定値で管理。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§5.2 Dawn／§5.3 Harajuku Light",
+    "issue": "DawnとHarajuku Lightは双方ともライト/暖色系で、配色以外の差異が薄いため、実機では“似たテーマが2つ”の印象になりうる。",
+    "suggestion": "色以外での差別化を追加。例: Harajuku Lightのみボタン/チップの角丸を+2px、影をやや広げる、モーションにspring-bouncyを限定採用、空状態イラストの線の太さ/配色にポップ差を付与。Dawnは逆に影を薄め、easeアウト基調で静けさを強化。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§0.3 差別化マッピング／§1.3 ブランドチェックリスト",
+    "issue": "「ロゴを隠しても分かるか？」のチェックに対し、判別根拠（独自パターン/形/動き）の仕様化が不足。視覚的差別化の実現可能性は高いが、再現性を担保する設計が未定義。",
+    "suggestion": "ブランド識別子を3点セットで規定し再現ルール化（例: 1) タブのアクティブpillの比率/角丸/内側余白、2) タイムラインNOWドットの“外周リング12px”表現、3) 祝祭パーティクルのテーマ別形状）。「こ��3要素が同時に存在すればLaisらしさ」とする合意指標を明文化。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  }
+]

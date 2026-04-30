@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "実装 1. App.jsx / 2. S00Splash.jsx",
+    "issue": "JSX において HTML の class 属性を使用しており（class=\"...\"）、React 環境では警告が出る。また lint/型検出や SSR 水和時の挙動差異の温床になりうる。",
+    "suggestion": "フレームワーク方針を明確化し、React を正式採用するなら className へ統一（ESLint: react/no-unknown-property を有効化）。Preact を採用する場合は preact/compat などの方針を README と lint で明示し、プロジェクト全体で属性命名を統一する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.1 S00-1（ロゴ位置）/ 実測スクショ",
+    "issue": "仕様は「ロゴ中心が画面中央から上に60px（Y ≈ 340）」だが、実測ではロゴ中心 Y ≈ 326。スタック全体を -60px しているため、ロゴ直下のタグライン分（約20px）だけロゴがさらに上にズレている。",
+    "suggestion": "ロゴ自身を 60px オフセット基準にするか、現在の .s00-center のオフセットを translateY(calc(-50% - 40px)) 程度に調整してタグラインの半分相当を補正する（14～20px程度）。より厳密には、ロゴを別ラッパで単独定位（ロゴの中心=50%-60px）し、タグラインはその直下に通常フローで配置する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "実装 3. S00Splash.css（.s00-cta）",
+    "issue": "CTA コンテナの bottom を 140px 固定としており、デバイスのセーフエリア（home indicator 等）を考慮していない。端末や回転時に視覚的距離が変わる可能性がある。",
+    "suggestion": "bottom: calc(140px + env(safe-area-inset-bottom, 0px)); を用いてセーフエリアを考慮。必要に応じて padding-bottom も同様に加算してスクロール時の切れ込みを避ける。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "実装 1. App.jsx（app-root）/ 2. S00Splash.jsx（main）",
+    "issue": "role を持たない div に aria-label を付与してもランドマークにならず実益が薄い。main にも aria-label を付与しているが、単一 main のページでは必須ではなく、スクリーンリーダーに不要な情報となりうる。",
+    "suggestion": "app-root の aria-label を削除。main の aria-label も単一ランドマークであれば削除し、h1 見出し（Lais）をアクセシブルネームとして活用する。複数 main が将来発生する場合のみラベル付けを検討。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.1 S00-3 / S00-4（CTA 配置記述）",
+    "issue": "仕様テーブ���では「S00-3（はじめる）が画面下端から上 140px」と読める一方、レイアウト原則では「CTAスタックが下140px」、実測検証でも「セカンダリの下辺=140px」が前提。記述が相互に矛盾/曖昧で、実装判断が割れる恐れ。",
+    "suggestion": "仕様を「CTA スタックの下端=画面下端から140px（=下ボタンの下辺）」に統一し、S00-3/S00-4 の表記を修正。検証観点も同定義で明文化する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "実装 3. S00Splash.css（.s00-cta-primary:disabled 等）",
+    "issue": "現行スコープでは disabled 状態は未使用であり、スタイルがデッドコード化している。",
+    "suggestion": "M2 スコープ最小化の観点では削除するか、将来利用予定で保持するならコメントで意図を明記。デザインシステムの共通ボタンに移管できるならコンポーネント側へ集約。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "実装 2. S00Splash.jsx（props）",
+    "issue": "型安全性/実行時検証がなく、onStart/onLogin の渡し忘れ・型誤りが検知されない。",
+    "suggestion": "PropTypes で関数必須を宣言、または TypeScript 化してコンポーネントの props を明示（onStart: () => void, onLogin: () => void）。将来の拡張時のリグレッション防止になる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "実装 1. App.jsx / 2. S00Splash.jsx（import）",
+    "issue": "拡張子付きインポート（.jsx）と拡張子なしの混在は、ツールチェーン移行時に差異を生みやすい。",
+    "suggestion": "リポジトリの方針を定めて統一（Vite/webpack 前提なら拡張子省略、Node ESM を厳密運用するなら全て明記など）。eslint-plugin-import で統一を自動検出。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "実装 3. S00Splash.css（レイアウト全体）",
+    "issue": "基準 375×812 では良好だが、縦が短い端末で .s00-center（上方オフセット）と固定配置の CTA（bottom:140px）が衝突・重なり得る。可用性低下の恐れ。",
+    "suggestion": "高さが閾値未満のとき bottom を縮める/clamp するか、CTA を static 配置にフォールバックしてスクロール可能にする。例: bottom: clamp(40px, 20vh, calc(140px + env(safe-area-inset-bottom, 0px))); または @media (max-height: 700px) で position: static + padding-bottom を付与。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

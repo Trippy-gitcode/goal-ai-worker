@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8（コンポーネント）",
+    "issue": "Select/Dropdown（メニュー）コンポーネントの定義がない。仕様内で「ゴール紐付け」や「設定>テーマ選択」などドロップダウンを前提とするが、オーバーレイの背景/境界/項目高さ/選択・hover・pressed・disabled・フォーカス・キーボード操作・ARIA（menu/optionlist相当）の指針とトークンが未定義。",
+    "suggestion": "コンポーネントを新設: Dropdown/Menu + Option（ListItem）を定義。推奨トークン例: --menu-bg/--menu-border/--menu-shadow, --menu-item-height（44px）, --menu-item-padding（左右16px）, --menu-item-hover/--menu-item-pressed, --menu-separator-color, --menu-z-index: var(--z-dropdown)。ARIAは用途に応じて role=\"listbox\"+option または menuitem を明示。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8（コンポーネント）＋§2.2",
+    "issue": "Tooltipコンポーネントが未定義。文中で「info＝ツールチップ背景等」と言及し、z-indexに--z-tooltipもあるが、実体のスタイル/トークン/ARIAの��様がない。",
+    "suggestion": "Tooltipを追加定義（モバイルでは長押しヒント/説明で使用）。推奨トークン: --tooltip-bg（info-subtleまたはbg-elevated基準）, --tooltip-fg（text-primary）, --tooltip-radius（--radius-sm）, --tooltip-padding（8px 12px）, --tooltip-shadow（--shadow-sm）, --tooltip-max-width（240px）, --tooltip-z-index（--z-tooltip）。ARIAは triggerに aria-describedby、tooltipに role=\"tooltip\"。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§6.2 と §8.7",
+    "issue": "タブのアクティブ時ラベル色が不一致。§6.2では「ラベル=--accent」、§8.7では「ラベル=--on-accent-subtle」と記載が異なる。",
+    "suggestion": "タブの定義を§8.7へ統一（ラベル=--on-accent-subtle）。§6.2の説明を更新し、色指定の単一ソースを§8.7に寄せる。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.1-4.2",
+    "issue": "スペーシングスケールに20px相当のトークンがない一方、§4.2で「タスク間余白: 20px以上」と具体値を要求しているため、実装時に16/24pxへ丸めるか都度ハードコードの判断���必要になる。",
+    "suggestion": "スペーシングに20pxトークンを追加（例: --space-md-plus: 20px）またはルールを16/24pxへ揃える。レイアウト指針の具体値もトー��ン参照（var(--space-...))に置換して一貫性を担保。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§8.13 状態マトリクス",
+    "issue": "hover/pressedの処理が「背景のhoverトークン（またはopacity +0.04）」と記述されるのみで、非アクセント要素やリスト行等に適用する具体トークンが未定義。実装で各所バラバラの処理になりやすい。",
+    "suggestion": "ニュートラルな状態レイヤートークンを追加: --state-hover-overlay、--state-pressed-overlay（ダーク/ライトで透明度差分もテーマ別定義）。行やアイコンボタン、リストセルなど汎用のフィードバックはこれを参照。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.1/§8.2/§8.8/§8.13（フォーカス記述箇所横断）",
+    "issue": "focus-visibleのアウトライン太さ/オフセット値（3px/2px）が各所にハードコードされており、将来の一括調整が困難。",
+    "suggestion": "太さとオフセットをトークン化: --focus-outline-width: 3px、--focus-outline-offset: 2px。色は現状どおりvar(--accent)とし、forced-colors時の色置���（Highlight）はメディアクエリで直接指定を継続。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§6.1",
+    "issue": "アイコンサイズ（20/24/32px）が数値で明記されているが、トークン化されていないため、媒体別調整や将来拡張時の一貫管理が難しい。",
+    "suggestion": "アイコンサイズをトークン化: --icon-size-sm: 20px、--icon-size-md: 24px、--icon-size-lg: 32px。コンポーネント側はトークン参照に統一。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.1/§8.8/§8.13（disabled記述箇所）",
+    "issue": "disabledの不透明度0.6が散在指定。テーマやコンポーネントにより最適値が変動する可能性があるが、値が固定で管理されていない。",
+    "suggestion": "—disabled-opacityトークンを追加（例: --disabled-opacity: 0.6）。disabledスタイルは色（--text-disabled/--bg-disabled）＋不透明度の両輪で一括参照。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.2（リンク色）",
+    "issue": "リンクのvisited状態の��いが未定義。モバイルアプリ文脈では視覚差不要なケースが多いが、ブラウザ実装では既定のvisited色が適用され得る。",
+    "suggestion": "visitedポリシーを明記。例: a:visited { color: var(--accent); }（差を付けない）または --accent-visited トークンを定義して運用判断を可能にする。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§2.3（セマンティックカラー既定値）",
+    "issue": "既定値テーブルがbase/subtleのみで、実際に全テーマで運用されるhover/pressedやsubtle-hover/subtle-pressedの存在が一覧化されていない。テーマ追加時に見落としリスクがある。",
+    "suggestion": "セマンティックカラーの必須トークン集合を明示し、§2.3に一覧追記（例: success, success-hover, success-pressed, success-subtle, success-subtle-hover, success-subtle-pressed…danger/warning/info同様）。各テーマはこの全集合を上書き必須とする。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.4（タイムライン）/§8.4 Overdue",
+    "issue": "縦ライン幅（2px）やOverdue左バー幅（3px）が固定��でハードコードされており、テーマ/解像度調整時に一括変更しづらい。",
+    "suggestion": "ライン系太さトークンを追加: --timeline-lane-width: 2px、--overdue-bar-width: 3px。実装はこれらを参照。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  }
+]

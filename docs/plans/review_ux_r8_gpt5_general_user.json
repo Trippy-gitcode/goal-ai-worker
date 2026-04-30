@@ -1,0 +1,212 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 vs §4.5",
+    "issue": "レベル計算式と説明が矛盾（Lv1→2が100EXPと1,000EXPの記載が併存）。このままでは実装時にレベルカーブが不一致になる。",
+    "suggestion": "正とする式/値を1つに統一（例: 次Lv必要EXP=100+(現在Lv-1)*50、Lv1→2=100）。表・説明・初回体験の到達例を全て更新。ユニットテストでレベル計算を固定化。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §5.4, §7.2, §7.4",
+    "issue": "AI対話ログのテーブル名（messages）とソーシャルメッセージ（social_messages）の命名が混在。RLSの誤適用でAI対話が友達に漏洩する恐れ。",
+    "suggestion": "テーブルを厳密に分離（例: ai_messages と social_messages）。RLS例とデータライフサイクルのセクションも命名を揃える。RLS回帰テストを追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §3.1（TALKヘッダー）/ §3.5",
+    "issue": "TALK画面ヘッダーに「☰=ドロワー」「🕐=履歴」と2つの履歴導線が併存し、どちらを使うかが不明瞭。",
+    "suggestion": "履歴導線を1つに統一。推奨: ☰でドロワー展開に集約し、🕐は削除。もしくは☰=設定/メニュー、🕐=履歴に役割分担を明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §3.3",
+    "issue": "単一タスク提案はS-12モーダル編集だが、複数タスク提案の「個別に編集」はチャット内アコーディオン展開とされ、UI方針が不一致。",
+    "suggestion": "複数タスクの個別編集もS-12ハーフモーダルで1件ずつ順送りに統一（または一括編集モーダル）。チャット内インライン編集は不採用に。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §2.3（Today表示）/ project_v1.md §3.2.3",
+    "issue": "projectで定義された“週N回習慣の『今日やる』ボタン”の具体UIがUX側に未定義。",
+    "suggestion": "習慣行（Today/Upcoming）に『今日やる』チップを追加。タップ→当日分をTodayに強制表示。詳細（S-11）にも同操��を重複配置。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §2.3（タスク完了→EXP）/ project_v1.md §4.5",
+    "issue": "日次EXP上限（300）到達時のUI挙動が未定義。タスク自体は完了扱いだが、EXPが増えない理由が伝わらない恐れ。",
+    "suggestion": "上限到達時はトースト『本日のEXP上限に達しました（+0）』を表示。ヒーロー下に『上限リセット: 明日04:00』の小バナーを当日中維持。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §4.4（S-36 QRスキャン）",
+    "issue": "カメラ許可を拒否/取り消しした場合の代替導線・再許可手順が未定義。",
+    "suggestion": "許可拒否時に理由説明＋『設定でカメラを許可』リンク（iOS/Android案内）。代替として『リンクで招待』導線を同画面に提示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.1（画像添付）",
+    "issue": "画像添付の上限超過（>10MB）や複数枚選択時のエラー表示が未定義（MVPが1枚想定かも不��）。",
+    "suggestion": "MVPは1枚のみ受付を明記。10MB超は選択直後にインラインエラー『10MB以下の画像を選んでください』。複数選択時は最初の1枚のみ採用 or エラーで再選択を促す。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md §1.2（遷移マトリクス）",
+    "issue": "S-42（メール変更）, S-43（パスワード変更）, S-44（ブロックリスト）の遷移がマトリクスに未掲載（詳細セクションには記載あり）。最優先要件の“全画面経路網羅”に対して弱い。",
+    "suggestion": "§1.2の遷移マトリクスにS-37→S-42/S-43/S-44の分岐を追記し、S-00〜S-44すべての到達/戻りパスを明文化。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §2.3（ドラッグ&ドロップ並び替え）",
+    "issue": "手動並び替えの保持範囲（当日のみ/将来日も/タスク単位の永続）と、開始時刻ソートとの優先順位が不明。",
+    "suggestion": "方針例: Today内のみ有効（当日スコープ）、開始時刻ありタスクは常に時刻優先、未設定タスクのみ手動順適用。保存キーはdate+userで定義。仕様に明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §5.1（オンボーディング完了直後）/ §6（共通UI）",
+    "issue": "初回体験で「EXP/冒険/称号/Phase/ゴールと習慣の違い」の説明がアプリ内にない。用語が直感的でない層には意味が伝わりにくい。",
+    "suggestion": "初回のみGROWに軽いコーチマーク（3枚程度）を表示：『タスクを完了するとEXP』『新しい挑戦=冒険EXP』『称号/アバター進化』。ME>DISCOVERには『ヒアリング=自己理解の質問』の説明リンク追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "S-00 ランディング",
+    "issue": "初見で“何のアプリか”が直感的に伝わるコピー/ビジュアルの定義が不足。自己成長に興味が薄い層には動機づけが弱い。",
+    "suggestion": "ランディングに要約コピーを追加（例:『AIと話しながら今日やることが決まる。終わるたびに自分のレベルが上がる』）＋1スクショ（GROWヒーロー＋Today）。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md §5.1（オンボーディング）",
+    "issue": "5ステップは妥当だが、普段使いアプリ慣れした層には“面倒そう”に映る可能性。特にアバター/テーマ選択に興味が薄い場合。",
+    "suggestion": "Step2/5に『後で変更』の軽いスキップ導線を明記（選択済みデフォルトで進める）。所要時間表示（各ステップ約10秒）で心理的コストを下げる。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "GROW/TALK 全体",
+    "issue": "“使い方が分かるか”の観点で、最初の具体行動が明確にガイドされていない（空状態のCTAはあるが、初回導線の一貫した案内が弱い）。",
+    "suggestion": "初回起動後に『1分で使い方』ミニツアー（1）タスクを追加（2）完了してEXP体験（3）TALKで相談。完了ごとに進捗バッジを表示し、完走で+10EXP付与。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "継続設計（project_v1.md §2.5/§4.4/lais_ux_v1.md §15）",
+    "issue": "“続ける理由”はレベル/称号/週次レポートにあるが、アプリ内で『次の小さな目標』の常設提示が弱い。",
+    "suggestion": "GROWヒーロー直下に『次の到達点』小カード（例:『Lv13まであと215EXP』『今週の冒険あと1回でMAX』）を常時表示。タップで具体アクションへ。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §7.4（ドラッグ&ドロップ）/ §6.5（Pull-to-refresh）",
+    "issue": "Today先頭付近での下方向操作が、ロングプレス後のドラッグ（並び替え）とPull-to-refreshで競合する可能性がある。",
+    "suggestion": "ドラッグ中はPull-to-refreshを無効化。並び替えは500msロングプレス必須＋行のドラッグハンドル限定にし、競合を確実に回避。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §9.4（不正操作）/ §3.1（画像添付）",
+    "issue": "EXIF削除やVision送信のプライバシー注意はあるが、画像内顔・氏名など“推測可能PII”の注意喚起が初回のみで、再確認の導線がない。",
+    "suggestion": "入力バーの📎長押しで『画像送信ポリシー』をい���でも再確認できるヘルプを追加。設定>プライバシーにも同内容を掲載。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §15（通知タップ時の遷移先）/ §2.2（ヒーロー）",
+    "issue": "通知時間や日次リセット04:00(JST)の基準タイムゾーンがUIで説明されていない。海外滞在や出張時に混乱の恐れ。",
+    "suggestion": "設定>通知に『日次リセットはJST 04:00』の注記と、リセットまでのカウントダウン（ヒーロー下小テキスト）を追加。将来はタイムゾーン選択を検討。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §3.5（チャット履歴/新規チャット）",
+    "issue": "『新しいチャット』のセッション概念（スレッド化の条件、スレッド上限、再命名可否）が未定義。UX/データ整合に影響。",
+    "suggestion": "セッション開始条件（『新しいチャット』押下時のみ作成）、最大件数、タイトルの自動命名/編集可否、削除時のUIを定義。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "project_v1.md §3.2.6(7) vs lais_ux_v1.md §8.2",
+    "issue": "アバター進化演出がSVGモーフィング（project）とPNGクロスフェード（UX）��不一致。実装方式が確定していない。",
+    "suggestion": "MVPはPNGクロスフェードに統一（パフォーマンスと実装容易性）。projectの記載をUXに合わせて改訂。将来のSVG化はv0.2.0で再検討。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §4.4（FRIENDSお知らせ）",
+    "issue": "未読メッセージ/お知らせの既読化ルール（いつ既読になるか、手動既読の有無）が未定義で、バッジ不整合の恐れ。",
+    "suggestion": "『一覧表示時に既読化』『開封タップ時に既読化』など基準を明記。手動で全既読にするCTAも検討。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  }
+]

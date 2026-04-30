@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hフロー承認証跡テンプレート（PD-110 + PATCH-14 二重証跡版、v3.4 確定）",
+  "description": "instructions/approvals/<MISSION_ID>.hflow.approved に保存する承認証跡 JSON。deploy.sh Step 5 の verify_approval_authenticity.sh が二重証跡を検証。",
+  "type": "object",
+  "required": [
+    "approver",
+    "approver_name",
+    "date",
+    "mission_id",
+    "commit_sha",
+    "session_history_ref",
+    "approval_git_author",
+    "trigger_reason"
+  ],
+  "properties": {
+    "approver": {
+      "type": "string",
+      "enum": ["ADV", "PO"],
+      "description": "承認主体。PD-110 により ADV または PO のみ。ENG 自己付与禁止（changed-files-allowlist.sh で ENG 書込不可）"
+    },
+    "approver_name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_]+$",
+      "description": "承認者名の英数字識別子。例: claude_ai_G_47, desktop_code_adv_G_48, futoshi"
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC 形式。例: 2026-04-23T10:15:32Z"
+    },
+    "mission_id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_-]*$",
+      "description": "session_progress.md に実在する MISSION_ID と一致必須"
+    },
+    "commit_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$",
+      "description": "承認対象の HEAD sha（40 桁 hex）。commit 変更時は再承認必要（二重証跡検証 4）"
+    },
+    "session_history_ref": {
+      "type": "string",
+      "pattern": "^instructions/results/session_history\\.md#G_[0-9]+_L[0-9]+$",
+      "description": "承認判断の意思決定ログへの行アンカー。例: instructions/results/session_history.md#G_47_L123。二重証跡検証 2 で実在確認"
+    },
+    "approval_git_author": {
+      "type": "string",
+      "description": "承認ファイル commit 時の git author。二重証跡検証 3 でドメインマッチ。ADV: *claude_ai*|*claude@*|*anthropic*|*noreply@anthropic.com|*noreply@github.com / PO: futoshi メールドメイン（PATCH-14 + PATCH-19 Bug H）",
+      "examples": [
+        "claude_ai <noreply@anthropic.com>",
+        "Desktop Code ADV <noreply@github.com>",
+        "futoshi <tgw2104@gmail.com>"
+      ]
+    },
+    "trigger_reason": {
+      "type": "string",
+      "description": "Hフロー発火理由（変更ファイルパス等）。例: src/auth/** 変更、supabase/migrations/ 追加",
+      "minLength": 5
+    },
+    "notes": {
+      "type": "string",
+      "description": "任意の補足。承認判断の背景・検証内容・懸念点等"
+    }
+  },
+  "example": {
+    "approver": "ADV",
+    "approver_name": "desktop_code_adv_G_48",
+    "date": "2026-04-23T10:15:32Z",
+    "mission_id": "LAIS-M5-AUTH-FIX",
+    "commit_sha": "abc1234567890abcdef1234567890abcdef12345",
+    "session_history_ref": "instructions/results/session_history.md#G_48_L0456",
+    "approval_git_author": "Desktop Code ADV <noreply@github.com>",
+    "trigger_reason": "src/auth/signUpWithEmail の emailRedirectTo を環境変数化（LP-009 / Phase B-R-001 対応）",
+    "notes": "CSP / RLS は Phase B 別ミッションで対応。本ミッションは redirectTo のみスコープ。"
+  },
+  "verify_checklist": [
+    "承認ファイル存在 + JSON スキーマ妥当性（必須フィールド 7 件、型・pattern 合致）",
+    "session_history_ref の行アンカー実在（grep で確認）",
+    "approval_git_author ドメインマッチ（*claude_ai*|*claude@*|*anthropic*|*noreply@anthropic.com|*noreply@github.com or PO メール）",
+    "HEAD sha == commit_sha（git rev-parse HEAD と照合）"
+  ],
+  "related_files": [
+    "docs/plans/sub_hflow_protocol.md（本テンプレ使用手順）",
+    "docs/plans/dev_system_spec.md §6.4 / §21 §C4.5（Hフロー承認ゲート SSOT）",
+    "scripts/verify_approval_authenticity.sh（二重証跡検証スクリプト、PATCH-14 新設）",
+    "docs/po-decisions.md PD-110（Hフロー承認主体 ADV/PO 限定）"
+  ]
+}

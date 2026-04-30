@@ -1,0 +1,54 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "screen": "scripts/step0_lint.sh, scripts/verify_env.sh, scripts/verify_external_services.sh, scripts/proposal_log_lint.sh, canopy_common.sh",
+    "location": "改訂案① F, 改訂案② D.1/D.2, 改訂案③ D, 改訂案⑤ E",
+    "issue": "macOS標準環境（Bash 3.2, BSD grep/sed/date）と互換性のないコマンド・構文が多用されており、macOS環境で品質ゲートやデプロイが確実に失敗する（declare -A, grep -oP, sed +20p, date -Iseconds）。",
+    "spec_reference": "§4 品質ゲート体系、§8 C2デプロイフロー",
+    "actual": "macOS環境で構文エラーや不正なオプションエラーが発生し、スクリプトが異常終了してフローがブロックされる。",
+    "suggestion": "declare -A を通常の配列とループ分割に変更。grep -oP を awk や sed に変更。sed +20p を sed -n \"${START},$((${START}+20))p\" に変更。date -Iseconds を date -u +\"%Y-%m-%dT%H:%M:%SZ\" に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "screen": "scripts/verify_env.sh",
+    "location": "改訂案② D.1",
+    "issue": "Vite等のバンドラはビルド時に VITE_* 環境変数を値に置換するため、成果物（dist/）の中に変数名文字列自体は残らない。そのため grep -rq \"$VAR\" dist/ は常に失敗し、デプロイが確実にブロックされる。",
+    "spec_reference": "§8 C2デプロイフロー Step 10",
+    "actual": "ビルド成果物に変数名が存在しないため、正常に環境変数が設定されていてもFAIL判定となる。",
+    "suggestion": "変数名ではなく、ローカルの .env 等から取得した「値」が dist/ に含まれているかを検証するか、検証対象をソースコード（src/）での使用有無に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "screen": "scripts/verify_env.sh",
+    "location": "改訂案② D.1",
+    "issue": "wrangler pages secret list 実行時にCloudflareへの認証が済んでいない場合、エラーとなり DEPLOYED_VARS が空になる。結果として必須環境変数が未設定と誤判定され、デプロイがブロックされる。",
+    "spec_reference": "§8 C2デプロイフロー Step 10",
+    "actual": "未認証環境（ローカル等）でデプロイフローを実行すると、環境変数の取得に失敗してデプロイが停止する。",
+    "suggestion": "wrangler whoami 等で事前に認証状態を確認し、未認証の場合はFAILではなくWARNとして手動確認を促すロジックを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "screen": "dev-system/templates/hooks/pre-commit-sub",
+    "location": "改訂案⑤ C",
+    "issue": "サブディレクトリ用の pre-commit-sub において、git diff --cached --name-only の結果から grep と sed でサブディレクトリのパスを抽出しているが、Gitの設定（core.quotepath等）によってはパスの形式が変わり誤動作する可能性がある。",
+    "spec_reference": "§10.4.4 サブディレクトリアプリ側の必須設定",
+    "actual": "���ス文字列の操作に依存しており、環境によってG10シークレット検出が正しく発火しないリスクがある。",
+    "suggestion": "git diff --cached --name-only --relative を使用し、Gitの機能でカレントディレクトリ相対のパスを安全に取得する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  }
+]

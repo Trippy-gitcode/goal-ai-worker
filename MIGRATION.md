@@ -84,7 +84,7 @@ Lais 側既存を尊重、テンプレ参考用として保持。差分を手動
 
 | # | 対象 file | 影響 | 取扱い |
 |---|---|---|---|
-| 1 | `core_spec.md` (root) | dev-system v0.1.0 SSoT 切替、Lais 側 dev_system_v34_package.md (3503 行) と SSoT 競合 | E2-5 (a) 取込必須、Lais 側既存なし (root) のため新規追加で実質 [required] 扱い、ただし Step 6 で旧 SSoT archive と一体管理のため形式上 [breaking] 分類 |
+| 1 | `core_spec.md` (root) | dev-system v0.1.0 SSoT 切替、Lais 側 legacy v34 spec (3503 行、archived 2026-04-30) と SSoT 競合 | E2-5 (a) 取込必須、Lais 側既存なし (root) のため新規追加で実質 [required] 扱い、ただし Step 6 で旧 SSoT archive と一体管理のため形式上 [breaking] 分類 |
 | 2 | `scripts/adv_response_gate.sh` | 既存 hook 上書き、Lais 側既存と挙動差 | 既存 archive snapshot → 上書き → diff 記録、tag `v0.1.0-phase3-breaking-1` |
 | 3 | `scripts/lib/resolve_repo_root.sh` | App 非依存化方針 (PD-002) 適用、APP_REPO_MARKER 既定変更 | 既存 archive snapshot → 上書き → diff 記録、tag `v0.1.0-phase3-breaking-2` |
 | 4 | `scripts/main_session_writeguard.sh` | Lais 側 ADV writeguard、PD-006 修正済との整合 | 既存 archive snapshot → 上書き → diff 記録、tag `v0.1.0-phase3-breaking-3` |

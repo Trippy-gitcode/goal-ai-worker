@@ -1,0 +1,252 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §5.0.2（パスワードリセット Step 2）/ §1.1 画面一覧",
+    "issue": "メール内リンクから遷移する「新パスワード設定」画面にS-IDが割り当てられていない。画面一覧（S-xx）・遷移マトリクスに存在せず、ディープリンク/履歴/戻る挙動の定義が欠落。",
+    "suggestion": "「新パスワード設定」用にS-06を新設し、§1.1/§1.2/§5.0.2に統合。戻り先（成功→S-02、期限切れ→S-05 Step1）とhistory.pushStateルール、エラー（トークン無効/期限切れ）UIを明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §13.1（S-42 メール変更）",
+    "issue": "新メールアドレス認証リンクを踏んだ後のハンドオフUX（成功/期限切れ/無効トークン）の画面定義がない。成功時にどこへ遷移するか、失敗時の再送導線が未定義。",
+    "suggestion": "S-42配下に「メール確認中」→「成功」→「失敗（期限切れ/無効）」の3状態を追加。成功時はS-37に戻してトースト、失敗時は再送ボタン付きエラー画面を定義。URLパラメータで状態を識別し、historyルールも明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §3.1/§3.5（TALKヘッダー）",
+    "issue": "TALKヘッダーに「☰」「🕐」「📝」の3アイコンが併記されるが、履歴（S-21）を開くトリガーが☰と🕐で重複しているように読める。ユーザー操作と開くUI（ドロワー/履歴一覧）の対応が不明瞭。",
+    "suggestion": "履歴トリガーを1つに統一（例: ☰=ドロワー、🕐は削除）。📝は新規チャット専用のまま。ツールチップ文言も指定（例: ☰=「履歴を開く」、📝=「新しいチャット」）。§3.5の操作説明をヘッダーアイコンに一致させる。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §2.3（タスク完了）/ §8（演出）/ project_v1.md §4.5",
+    "issue": "日次EXP上限（300EXP）到達後にタスク完了した場合のUXが未定義。現状はサーバー検証OK時のみ演出発火だが、上限到達時のフィードバック（+10 EXP非表示/上限到達通知/バー不変）が規定されていな���。",
+    "suggestion": "サーバー応答が「上限到達」の場合はチェック確定のみ、EXPフロート/バー伸長は抑止。トースト「本日のEXP上限に達しています（ゴール達成ボーナスは別枠）」を表示。連続操作時の演出キューにも『上限時はスキップ』ルールを追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2/§7.4/§5.4",
+    "issue": "AI対話とソーシャルメッセージのテーブル命名が「messages」「social_messages」で混在。RLSの適用対象が曖昧で、誤実装時にAI対話履歴が友達へ漏洩するリスクがある。",
+    "suggestion": "テーブル命名を統一（例: ai_messages, social_messages）。RLSサンプルポリシーを両テーブル分、明示的に追記（UX仕様にもデータ可視性の境界を脚注）。データライフサイクル表も同名で更新。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §5.1（オンボーディング）/ §2.1（GROW初回）/ §3.6（TALK空状態）",
+    "issue": "初回体験のチュートリアル/コーチマークがない。初見で「何をすれば��いか」が分かりづらく、5ステップ完了後にGROWへ遷移するだけでは行動誘導が弱い。",
+    "suggestion": "初回GROW表示時に3枚のコーチマーク（1. ヒーロー=レベル/EXP、2. Today=タスク完了方法、3. Goals=分解と進捗）を追加。TALK初回は「話題チップ」+1回目送信で『タスク化カード』例を強制表示。設定で再表示ON/OFF可。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md §5.1（オンボーディング）",
+    "issue": "自己成長に特に興味がない一般ユーザー視点だと、5ステップはやや長く感じる。特にStep4（最初のゴール設定）は負荷が高く離脱リスク。",
+    "suggestion": "Step4に『スキップして始める』明示ボタンを追加し、GROWでAIが自動提案する導線を強調。Step2〜5は上部に「約1分」表記を加え、所要時間期待をコントロール。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2/§4.3/lais_ux_v1.md §3.4",
+    "issue": "「呼吸/日常/冒険EXP」「冒険EXP検出」などの用語が初見だと意味が伝わりにくい。何をしたら��えるのか、ペナルティがないのかの安心感も不足。",
+    "suggestion": "GROW初回に『EXPの仕組み』ミニ説明（3行）＋「罰なし」強調。TALK初回で『冒険EXPとは？』リンク（1枚説明シート）を用意。ME > PROFILEにもヘルプリンクを配置。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §2.3（タスク並び替え）",
+    "issue": "Today内の手動並び替えが「開始時刻ソートを上書き」とあるが、翌日や編集（開始時刻変更）時の優先順位・寿命が未定義。Overdueの固定表示との優先関係も不明。",
+    "suggestion": "手動順は当日スコープのみ有効（翌日リセット）、Overdueは常に最上段固定、開始時刻変更時は自動順に戻す等の優先度ルールを明記。ユーザーが手動順を解除できるUI（「時刻順に戻す」）も追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §2.4（S-14→S-20遷移）/ §1.4（戻りナビ）",
+    "issue": "S-14（ゴール詳細）からS-20（TALK）へ遷移時にreplaceStateでS-14を履歴から除去する仕様。ユーザーが『戻る���とGROWに戻ってしまい、直前に見ていたゴール詳細へ戻れない可能性がある。",
+    "suggestion": "S-14→S-20は通常のpushStateに変更し、戻るでS-14に戻れるように統一。どうしても履歴圧縮が必要なら、TALK画面に『GROW/G OALに戻る』ショートカットを常時表示して混乱を抑制。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.2（メッセージ送信）",
+    "issue": "画像添付の制限超過（>10MB）や非対応フォーマット時のエラーハンドリングが未定義。複数画像同時添付可否も不明。",
+    "suggestion": "サイズ/拡張子バリデーションとインラインエラー文言を追加（例: 『10MBを超えています』『対応していない形式です』）。複数枚の可否（MVPは1枚まで等）を明記し、UI（プレビュー並び/削除）も定義。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §8.6（演出キュー）/ §3.4（冒険EXP）/ §8.5（ログインEXP）",
+    "issue": "同時発火の演出優先順位はタスク完了/ゴール/レベルアップの3種のみ定義。冒険EXPやログ��ンボーナスが同時に起きた場合の順序が未定義。",
+    "suggestion": "優先度表に『冒険EXP（タスク完了と独立発火時の位置づけ）』『ログインボーナス（GROW初回表示時に他演出と重なった場合の順）』を追加。最大演出時間8秒の配分ルールも補足。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §4.4（FRIENDS）/ project_v1.md §5.1",
+    "issue": "フレンドリクエストの有効期限（7日間）がFRIENDS画面のUXに反映されていない。期限切れ時の表示/消滅タイミングや送信者側の見え方が未定義。",
+    "suggestion": "承認待ちリストに期限表示（残りN日）を追加。期限切れ時はリストから自動消滅＋送信者側は『期限切れ（通知なし）』のポリシーテキストをFRIENDS画面のヘルプに明示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §3.3（タスク提案カード）",
+    "issue": "「不要」選択時の学習挙動（類似パターンの提案頻度を下げる）がUIからは見えず、誤抑制の解除方法も未定義。",
+    "suggestion": "TALK設定（S-37配下）に『タスク提案の学習をリセット』メニューを追加。カード内に『提案の改善に使用します』程度の軽い説明を入れ、学習解除動線を用意。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md §14.1（起動フロー）/ project_v1.md §3.2.5",
+    "issue": "リセット時刻がJST固定（4:00）でUIにも『明日 04:00』と表示される。海外出張やサマータイム中は直感に合わない可能性。",
+    "suggestion": "MVPはJST固定のまま、UIに『（JST）』を併記。将来フラグでローカルタイム対応を切替可能にする旨を仕様に追記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §9.1（オフライン）/ §2.3（Undo）",
+    "issue": "オフライン中の連続完了→オンライン復帰時に1日のEXP上限/同名5分ルール/Undo最終状態の競合が起きた場合の優先順位が明記されていない。",
+    "suggestion": "同期時の優先順位を明記（1) Undo最終状態、2) 同名5分制限、3) 日次上限）。結果的に付与されない場合は『EXPは上限のため付与されませんでした』の��括トーストを復帰時に表示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md §1.1（画���一覧）/ §1.2（遷移）",
+    "issue": "S-34（SHOP）がMVPではComing Soonだが、どこからでも行ける戻り経路の明記（←戻る/タブ切替以外）が不足。初見で誤って遷移した場合の離脱が分かりづらい可能性。",
+    "suggestion": "Coming Soon画面内に『MEへ戻る』一次ボタンを表示。ブラウザバックでも閉じるようpushStateを明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §10（アクセシビリティ）",
+    "issue": "キーボードフォーカスリングの可視化ポリシー/タブ移動順序の事例図、チャット内の動的要素（タスク提案カード/冒険カード）のARIA通知タイミングが不足。",
+    "suggestion": "タブ順序の具体例（GROW上部→Today→Goals）を追記。TALKのカード挿入時はaria-live=politeで見出し→本文→アクションの順にアナウンスする旨を明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §15（通知タップ時の遷移先）",
+    "issue": "通知からのディープリンク時、対象データが既に削除/期限切れ（例: タスク削除/フレンドリクエスト失効）の場合のフォールバック画面が未定義。",
+    "suggestion": "該当データ不存在時は各タブの安全な既定画面に遷移し、バナーで『項目が見つかりませんでした（削除/期限切れ）』を表示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §4.2.1（S-41 アバター設定）",
+    "issue": "未所持アイテムタップ時のトーストのみで、なぜ装備できないかが一見で分からない。Coming Soon期間中は混乱の恐れ。",
+    "suggestion": "未所持カードに小さく『ショップ準備中』バッジを常時表示し、タップ時のトースト文言も『ショップ開始後に入手できます』と具体化。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md §0（ベンチマーク活用）/ §5.1（オンボーディング）/ §2.3（空状態）",
+    "issue": "競合の課題回避は概ね反映されているが、『Freeでもすぐ価値実感』の導線がUIコピーとして弱い。初見で「何のアプリか」が直感ではやや伝わりにくい。",
+    "suggestion": "ランディング/オンボ���了後のGROW上部にキャッチコピー（例: 『今日の行動を“経験値”に変えるアプリ』）を一度だけ表示。空状態CTAの文言も『タスクを追加』より『今日の一歩を登録』など、価値訴求に寄せる。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §3.5（チャットスレッド）",
+    "issue": "スレッド上限（100）超過時の自動アーカイブ条件はあるが、ユーザーから見た発見可能性（アーカイブ閲覧/復元可否）や警告表示が未定義。",
+    "suggestion": "上限到達時にバナーで通知し、『古いスレッドを自動アーカイブしました』と説明。MVPではアーカイブ閲覧不可なら仕様として明記し、将来の復元機能の検討を注記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md §1.1（画面一覧）",
+    "issue": "v1.1以降の追補でS-42〜S-44が追加されているが、タイトルに「S-00〜S-41の全IDに対応」とあるレビュー観点との齟齬が生じうる（レビュー時の対象範囲誤認）。",
+    "suggestion": "画面一覧タイトルか注釈に『本仕様ではS-44までを対象』と明記し、レビュー観点の文言と一致させる。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §2.3（Overdue）/ §15（通知）",
+    "issue": "Overdueに対する通知や日跨ぎの扱い（4:00 JSTリセット後の配置/バッジ）について、通知抑制ポリシーや既読管理が未定義。",
+    "suggestion": "OverdueはPush配信しない方針を明記（過剰通知防止）。Today先頭固定/赤ラベル表示/一度見たら当日中はバッジ非表示等の簡易既読ポリシーを定義。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-025",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §7.3（PWA edge swipe）/ §1.4（historyポリシー）",
+    "issue": "iOS PWAにおけるedge swipe抑止・カスタム戻りは実装難易度が高く、誤るとネイティブ履歴とSPA履歴が競合して戻り不能/二重遷移の不具合を招くリスクがある。",
+    "suggestion": "実装ガイドを追記（overscroll-behavior設定範囲/standalone判定/タブ切替はreplaceState限定/モーダルはpushState等のサンプルコード）。E2Eテストケースに『モーダル→ブラウザバック→閉じる』を必ず追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  }
+]

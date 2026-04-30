@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3, ux_v1.md §4.2.1",
+    "issue": "SVGレイヤー合成をクライアントサイドで行う際、各SVGパーツ（顔、髪、装飾など）内で定義された `<clipPath>`, `<mask>`, `<linearGradient>` などのIDが重複すると、DOM上でスタイルが衝突し、アバターの描画が完全に崩壊します（インラインSVGの仕様）。",
+    "suggestion": "SVGアセットの作成要件として「全IDにパーツ固有のプレフィックス（例: `hair-01-clip`）を付与する」ことを仕様に明記してください。また、テーマ切替時（ダーク/ライト）のアバター背景の透過性やブレンドモードの扱いも定義が必要です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4",
+    "issue": "iOSのPWA（ホーム画面追加状態）では、OSのバージョンによって `getUserMedia`（カメラアクセス）の挙動が不安定になったり、パーミッションが毎回リセットされる制約があります。カメラが起動できない場合、QRスキャン機能が完全にブロックされます。",
+    "suggestion": "カメラ起動失敗時や権限拒否時のフォールバックとして、「カメラロール（画像ファイル）からQRコードを読み込む」機能（ファイルピッカー経由のjsQR解析）をS-36に追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §7.3, ux_v1.md §4.4",
+    "issue": "FRIENDS画面等でリスト表示用に「Canvas経由でラスタライズ済みPNGをキャッシュ表示」とありますが、他人のアバターを初めて読み込んだ際、クライアント側で数十人分のSVG合成とCanvas描画が一斉に走ると、メインスレッドをブロックしUIがフリーズする懸念���あります。",
+    "suggestion": "他人のアバター（公開プロフィール）は、サーバー側（またはEdge Worker）でSVG合成・PNG化して配信するか、クライアントで行う場合はWeb Workerを用いてバックグラウンドで非同期にラスタライズする仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §9.1, project_v1.md §3.3",
+    "issue": "TALK画面でオフライン時にメッセージ送信が「送信中...」として保持されますが、最大10MBの画像が添付された場合のローカル保持メカニズム（IndexedDBへのBlob保存等）と、オンライン復帰時のバックグラウンドアップロードのUXが未定義です。",
+    "suggestion": "実装の複雑化とメモリ圧迫を防ぐため、MVPとしては「オフライン時は画像添付ボタン（📎）を無効化（グレーアウト）する」仕様とするか、IndexedDBへの保存と復帰時のアップロードプログレス表示を明確に定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALK画面で画像を添付・送信した��、チャット履歴内に表示された画像をタップして拡大表示（フルスクリーンプレビュー）する操作フローと画面定義が欠落しています。",
+    "suggestion": "画像バブルのタップでフルスクリーン画像ビューア（ピンチズーム対応、スワイプまたは✕ボタンで閉じる）を開く操作フローと、該当する画面ID（例: S-22）を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §6.1",
+    "issue": "ハーフモーダル内でテキスト入力中（キーボード表示中）にbackdropをタップした場合の挙動が未定義です。「キーボードだけが閉じる」のか「モーダル全体が閉じる」のか曖昧であり、誤操作で入力内容が失われるリスクがあります。",
+    "suggestion": "キーボード表示中のbackdropタップは「まずキーボードを閉じる（フォーカスを外す）」のみとし、もう一度タップでモーダルを閉じる挙動にするか、未保存の入力がある場合は確認ダイアログを出す仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3, project_v1.md §3.2.5",
+    "issue": "タスク完了後30秒間Undo可能ですが、日次リセット（午前4:00）の直前（例: 3:59:45）にタスクを完了した場合、30秒経過前にリセット時刻を跨ぎます。この時、リセット処理とUndoの仮確定状態が競合し、EXP計算に不整合が生じる可能性があります。",
+    "suggestion": "「日次リセット時刻（4:00）を跨ぐUndoは不可とし即時確定させる」か、「サーバー側で完了アクションのタイムスタンプベースで厳密にトランザクションを処理し、翌日分には影響させない」旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §8.3, §8.7",
+    "issue": "「洗練されたアプリ」というコンセプトに対し、ゴール達成やレベルアップで「画面全体に紙吹雪」が多用されると、チープな印象を与えブランドの一貫性を損なうリスクがあります。",
+    "suggestion": "紙吹雪のパーティクルデザインを「フラットな原色」ではなく、「テーマのアクセントカラーに合わせた透明度のある幾何学シェイプ（円や細いライン）」や「控えめな���ローエフェクト」に限定するなど、洗練さを保つビジュアル仕様を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md 全般",
+    "issue": "デザインシステム（design_system.md）で定義予定の項目に対するUX側からの要件指定が不足しています。特にアイコンのステータス表現や、インタラクティブ要素の余白基準がないため、洗練されたUIの操作感が担保できません。",
+    "suggestion": "UX仕様として「ボトムタブ等のアイコンは非アクティブ＝アウトライン、アクティブ＝塗りつぶしとする」「タップターゲット周辺は8pxベースのスペーシングシステムを使用する」等の基本原則を追記し、design_system.mdへのインプットとしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.2",
+    "issue": "S-42（メール変更）、S-43（パスワード変更）が画面一覧（§1.1）には存在しますが、遷移マトリクス（§1.2）の主要パスに記載されていません。",
+    "suggestion": "§1.2の遷移マトリクスに `S-37 設定 ├─[メール変更]→ S-42` および `├─[パスワード変更]→ S-43` のパスを追記し、遷移の完全性を確保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

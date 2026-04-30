@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.5 S12-9（S12TaskAdd.jsx: .s12-readonly）",
+    "issue": "非インタラクティブなdivに aria-readonly=\"true\" が付与されている。aria-readonly は主にウィジェット系ロール（textbox等）で意味を持つ属性で、汎用のdivでは無視されるか支援技術にノイズとなる可能性がある。",
+    "suggestion": "本要素が単なる表示であれば aria-readonly を削除する。読み取り専用の入力として意味付けしたい場合は、role=\"group\" か role=\"textbox\" を適切に付与し、aria-labelledby でラベルと関連付けた上で tabindex の有無を設計（フォーカス不要なら付けない）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.5 S12-9（ラベルspanと値コンテナ）",
+    "issue": "視覚ラベル（.s12-label）と値（\"今日\" 等）の関連付けがDOM上で行われていないため、スクリーンリーダーが値だけに移動した際に文脈（何の値か）が失われる恐れがある。",
+    "suggestion": "ラベルspanに一意のidを付与し、値コンテナ��.s12-readonly）に role=\"group\" aria-labelledby=\"<label-id>\" を付ける。もしくは <dl><dt><dd> 構造に変更してセマンティクスで関連付ける。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.5 S12-9（typeトグルに伴うラベル/値の差し替え）",
+    "issue": "type の変更によりラベル文言（「予定日」⇄「繰り返し周期」）や値が動的に変わるが、変更がスクリーンリーダーに通知される保証がない（ライブリージョン/フォーカス移動の設計が不明）。",
+    "suggestion": "変更される値要素に aria-live=\"polite\" を付与するか、type 切替操作後に新しいフィールドへ明示的にフォーカスを移す。また、type 切替UIと当該フィールドを aria-controls/aria-describedby で関連付けると理解が向上する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "CSS: .s12-type-pill-active / .s12-duration-chip-active",
+    "issue": "アクティブ状態の非テキスト・コントラストは改善されたが、選択・トグル状態を支援技術へプログラム的に公開しているか不明。見た目（色/太字）だ���だとスクリーンリーダーに状態が伝わらない可能性がある（WCAG 4.1.2）。",
+    "suggestion": "単一選択は role=\"radiogroup\" 配下に role=\"radio\" と aria-checked を用いる。トグルは <button aria-pressed> で状態を公開。キーボード操作は Tabで移動、Space/Enterで切替、ラジオは矢印キー移動を実装。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "全体（インタラクティブ要素のフォーカス可視化）",
+    "issue": "フォーカスリングの設計が不明。デフォルトoutlineを打ち消している場合、フォーカスが見えない状態となり WCAG 2.2 AA 2.4.7/2.4.11 に抵触する恐れがある。",
+    "suggestion": ":focus-visible に 2px 以上・背景に対してコントラスト3:1以上のアウトライン（例: outline: 2px solid #79C0FF; outline-offset: 2px）を設定。hoverとは異なる視覚で、キーボードのみでも判別可能にする。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ピル/チップ類および将来的なカレンダー起動UI",
+    "issue": "タップターゲットの最小サイズ（44×44 CSS px）の担保が不明。現在のカレンダーアイコンは14×14で装飾目的だが、将来的に起動ボタン化されると基準未達のリスクがある。",
+    "suggestion": "ボタン化する場合は、可視アイコンの周囲に十分なpaddingかヒットエリア（透明の::before等）を設け、44×44を満たす。密集配置の場合は2.5.8の例外条件を満たすかの検討を行う。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.5 S12-9（値の表現）",
+    "issue": "日付値（例: 「今日」）がプレーンテキストのみ。機械可読な日時情報が無いため、支援技術やツール連携で意味が伝わりにくい。",
+    "suggestion": "<time datetime=\"YYYY-MM-DD\">今日</time> のように <time> 要素で機械可読な日時を併記する（実際の日付に置換）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.5 S12-9（カレンダーSVG: color: var(--text-muted)）",
+    "issue": "カレンダーアイコンは aria-hidden で装飾扱いのため要件外だが、--text-muted の実値が不明。将来、装飾以上の意味を持たせた場合に非テキストコントラスト3:1未達となるリスクがある。",
+    "suggestion": "装飾のまま維持する（aria-hidden=\"true\"）か、意味付けする場合は --text-muted のコントラストを背景（#161B22想定）に対して3:1以上に調整する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

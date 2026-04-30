@@ -1,0 +1,79 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "タスク時刻/所要時間 (09:00 · 45分 等)",
+    "issue": "メタテキスト色が濃いグレー (#5A6880 相当) で背景 #0B1220 とのコントラスト比が約 3.8:1。本文 4.5:1 を満たさない恐れ。",
+    "suggestion": "#8AA0C0 相当に引き上げて 4.5:1 以上を確保。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s00_splash",
+    "location": "タグライン『あなたの人生を、あなたらしく』",
+    "issue": "タグライン色の明度が低く、背景とのコントラスト比が約 3.5:1。4.5:1 を下回る可能性。",
+    "suggestion": "#A0B4CC に引き上げ、コントラスト比 5:1 以上に。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "完了済みタスクのグレーアウト",
+    "issue": "完了タスク文字が #4A5870 程度でコントラスト比 ≈ 2.8:1。履歴として読むにも不足。",
+    "suggestion": "#6A8098 に引き上げ、打ち消し線で『完了』を示す。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s30_me",
+    "location": "『タップして入力』プレースホルダ",
+    "issue": "プレースホルダ文字が薄く、コントラスト比 3:1 前後。",
+    "suggestion": "#7890B0 以上に上げる、または枠線でフィールドの存在を明示。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "タスク行右端の青丸/緑丸ステータス",
+    "issue": "色のみでタスク状態を区別しており、色覚異常配慮が不足。WCAG 1.4.1。",
+    "suggestion": "形状差 (●/◆/▲) を付与、またはラベル併記。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "disabled サインアップボタン",
+    "issue": "disabled 文字コントラストが低く、押せない理由がユーザーに伝わりにくい。",
+    "suggestion": "disabled 文字を #6A7890 まで上げる、または常時 enabled + タップ時バリデーションエラー。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "提案カード内『登録する』ボタン",
+    "issue": "画面下 Primary CTA と同一色帯で CTA 階層の重複。",
+    "suggestion": "提案カード内 CTA を accent-muted に降格。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  }
+]

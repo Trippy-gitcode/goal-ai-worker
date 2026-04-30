@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4, §15",
+    "issue": "未ログイン状態でシェアリンクや通知をタップした際、リダイレクトURLを`sessionStorage`に保持すると定義されているが、新規ユーザーがメール認証を行う場合、メールアプリから別タブや別ブラウザでリンクが開かれる可能性が高く、`sessionStorage`が引き継がれずにリダイレクト先（友達追加画面など）を確実に喪失する障害が発生する。",
+    "suggestion": "リダイレクトURLの保存先を`localStorage`（またはCookie）に変更するか、Supabase Authのメール認証リンク生成時に`redirectTo`パラメ��タとしてリダイレクト先URLを含め、サーバー経由で引き継ぐ設計に修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3",
+    "issue": "「30秒間の取り消しを保証」とある一方で、「別タスクを完了した場合、前のUndoスナックバーは即時確定し、新しいスナックバーに置換される」と定義されている。ユーザーが誤って複数タスクを連続タップした場合、最後の1件以外は30秒以内であってもUndo手段が完全に消失し、不可逆なEXPが誤加算されるデータ不整合が発生する。",
+    "suggestion": "連続完了時はスナックバーをスタックさせない方針は維持しつつ、スナックバーの内容を「N件のタスクを完了しました [取り消す]」に動的更新し、タップで直近のN件すべてを一括Undoできる仕様に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2",
+    "issue": "画像添付時、サイズ超過(10MB)や非対応フォーマット選択時のエラー表示が定義されていない。また、送信時のアップロード中プ���グレス表示がないため、大容量画像（最大10MB）の送信時にユーザーが「アプリがフリーズした」「送信されていない」と誤認して連打する恐れがある。",
+    "suggestion": "ファイル選択直後にクライアント側でバリデーションを行い、違反時はトーストでエラーを表示する仕様を追加してください。また、送信中は入力バーの送信ボタンをスピナーに変更し、入力欄を一時的に無効化するUIフィードバックを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §4.4",
+    "issue": "友達リストは最大500人（project_v1.md §7.4）登録可能だが、FRIENDSサブタブには検索バーやソート機能がなく、カードグリッドのスクロールのみで特定の友達（最近追加した人や特定の名前の人）を探すのはUXとして破綻する。",
+    "suggestion": "FRIENDS画面の上部（承認待ちセクションの下など）に、名前検索用のテキストフィールドと、ソート順（追加日順/レベル順/名前順）を切り替えるドロップダウンまたはチップを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §13.1",
+    "issue": "オフライン時の強制ログアウトで「ローカルデータ消去」が実行されるが、オフライン状態ではSupabase AuthのログアウトAPI呼び出しが失敗するため、サーバー側のセッション（リフレッシュトークン）は有効なまま残存してしまう。",
+    "suggestion": "オフライン時の強制ログアウトでは、ローカルのセッション情報とデータを破棄して未ログイン状態に戻すことを明記し、セキュリティ上の注意点（サーバー側セッションはトークン有効期限まで残る）を仕様として許容するか、次回オンライン時に無効化キューを処理する仕組みを記載してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §8.6",
+    "issue": "TALK画面でレベルアップし、フルの演出が「次回GROW画面表示時」に保留されている状態で、GROW画面遷移直後にユーザーがタスクを完了した場合、保留されていたレベルアップ演出と新規のタスク完了演出のキュー順序が定義されておらず、アニメーションの競合が発生す��。",
+    "suggestion": "演出キュー（§8.6）の優先順位0として「保留されたレベルアップ演出」を追加し、GROW画面表示時に保留演出がある場合は即座に再生を開始し、再生中はタスク操作を一時的にブロックする（またはキューの先頭に積む）仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.4",
+    "issue": "ゴール達成後のUndoについては記載があるが、7日ルールにより「完了待ち（あとN日）」状態になった直後に、最後のタスクをUndoした場合の挙動（完了待ち状態の解除と進捗バーの巻き戻し）が明記されていない。",
+    "suggestion": "「完了待ち状態のゴールで最後のタスクをUndoした場合、完了待ち状態を即時解除し、進捗バーを100%未満に戻す」という仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.1",
+    "issue": "GROW画面でTodayセクションの下にGoalsセクションが配置されているため、1日のタスク（習慣含む）が多数ある場合、Todayセクションが肥大���し、Goalsセクションを見るために大量のスクロールが必要になる。",
+    "suggestion": "Todayセクション内の「完了済みタスク」を折りたたむアコーディオン機能を追加するか、TodayとGoalsをGROW画面内のサブタブ（またはトグル）で切り替えられるUI構造を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.4",
+    "issue": "友達へのメッセージ入力が100文字制限とされているが、入力中の文字数フィードバックや超過時の挙動が定義されていないため、ユーザーが送信ボタンを押すまで制限に気づかない可能性がある。",
+    "suggestion": "入力フィールドの付近に「0/100」の文字数カウンターを配置し、100文字を超過した場合はテキスト入力をブロックするか、送信ボタンを無効化してインラインエラーを表示する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  }
+]

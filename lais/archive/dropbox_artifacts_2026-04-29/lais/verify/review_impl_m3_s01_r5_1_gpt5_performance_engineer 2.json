@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "1. R4.1 → R5 差分 / Group A+B コードスニペット",
+    "issue": "旧オペレーションの setTimeout が次回送信時に明示的に解放されず、無効化後もタイマーが残存して後から NOP 実行されるため、連続送信でタイマーが累積し CPU ウェイク/バッテリー消費のスパイクを招く",
+    "suggestion": "アクティブなタイマーIDを useRef(timeoutIdRef) で保持し、新規送信/無効化時に clearTimeout(timeoutIdRef.current) を必ず実行して入れ替える。タイムアウトCB内でも timeoutIdRef.current=null を明示。アンマウント時にも一括クリア（R-002参照）。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "1. R4.1 → R5 差分（クリーンアップ記載なし）",
+    "issue": "コンポーネントアンマウント時に保留中のタイマー/オペレーションをクリーンアップするフローが明示されていないため、画面遷移直後に不要なタイマーが発火し続ける可能性がある",
+    "suggestion": "useEffect(() => { return () => { clearTimeout(timeoutIdRef.current); timeoutIdRef.current=null; opIdRef.current++; }}, []) を追加し、アンマウントで全待機処理を無効化。safeSetState だけでなくソースとなる非同期/タイマーも止める。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "1. R4.1 → R5 差分 / Group A+B（送信フロー）",
+    "issue": "aria-disabled 戦略のためボタンが操作可能で、inFlight 中の多重送信が起きると重複ネットワーク/タイマーが並走してパフォーマンスと帯域を悪化させる恐れがある",
+    "suggestion": "handleSubmit 冒頭で if (inFlightRef.current) { e.preventDefault(); return; } を厳格化。キーリピート対策として最後の送信時刻で 300〜500ms のデバウンスも併用。UI 上は aria-disabled に加えて視覚的フィードバック（スピナー）で連打意図を抑止。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "1. R4.1 → R5 差分 / Group A+B（タイムアウト処理）",
+    "issue": "タイムアウトや新規送信で旧リクエストを『無視』はできているが、ネットワーク自体は継続しサーバ/クライアント資源とバッテリーを消費する",
+    "suggestion": "AbortController を導入。新規送信/タイムアウト/アンマウントで abortRef.current?.abort()。Supabase SDK が signal を受けない場合は fetch レイヤをラップ or リクエストを分離して中断可能に。これにより late 応答も抑止でき、無駄な回線/CPU消費を削減。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. R4.1 → R5 差分 / Group A+B（safeSetState 内）",
+    "issue": "safeSetState のコールバック内で複数の setState（例: setSubmitting と setServerError）を個別発行しており、環境によっては再レンダリング回数が増える",
+    "suggestion": "1回の更新にまとめる（useReducer で集約、もしくは setState のオブジェクト/関数アップデータ内で複数フラグを同時更新）。React 18 の自動バッチングでも setTimeout 起点はバッチ対象だが、単一更新に集約すると確実。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. R5.1 更新（opId 単調増加）",
+    "issue": "opId を単調増加の数値で維持すると、超長時間稼働セッションでは理論上増加し続ける（実害は稀だが無制限成長）",
+    "suggestion": "数値ではなく Symbol など再利用不可のトークン方式に置換すると ABA を根本的に回避しつつ無制限成長を回避できる。現状維持の場合も Number.MAX_SAFE_INTEGER 近傍での wrap を考慮した保守指針をドキュメント化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "6. Phase B 分離（変更なし）",
+    "issue": "コード分割未実施のままだと、auth 画面表示時に supabase-js など比較的重量な依存が初期ロードへ混入し TTI を悪化させるリスクがある",
+    "suggestion": "ルート単位の動的 import（import('...')）で S-01 を分割。supabase-js は必要箇所で遅延ロードし、事前フェッチはヒューリスティック（viewport 内での初回フォーカス時など）で実行。Bundle Analyzer で実計測し sideEffects / treeshake を確認。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "1. R4.1 → R5 差分（SUBMIT_TIMEOUT_MS=15s）",
+    "issue": "15秒のタイムアウトはユーザー体感上の停滞が長く、モバイル低速回線でのリトライ行動を遅延させる可能性がある",
+    "suggestion": "段階的フィードバックを導入（5s: 軽微な遅延メッセージ、10s: 回線確認の提案、15s: タイムアウト）し、キャンセル/再送を明示。内部的には指数バックオフの再送や先行キャンセル（Abort）で無駄な待機を抑制。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. R4.1 → R5 差分（handleSubmit 定義）",
+    "issue": "handleSubmit が毎レンダーで新規生成されると、子コンポーネントに props で渡している場合に不要な再レンダリングを誘発する可能性がある",
+    "suggestion": "useCallback で handleSubmit をメモ化。依存を厳選し、依存変化時のみ差し替え。フォーム階層が浅い場合は影響軽微だが、将来の拡張に備え予防的に適用。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§6.3 / §7.1",
+    "issue": "推奨構成では Google Drive への同期を「1日1回または変更検知時」としている一方、4/25事故の教訓では数秒で8 bytes化するため日次バッチは手遅れと明記されています。実際に日次rsyncのみで運用すると、破損後の状態が次回同期で正常版を上書きし、クラウド側でも最新世代が破損版になるため、運用理解を誤ると復元余地を狭める恐れがあります。",
+    "suggestion": "Google Drive の役割を「変更検知時の即時エクスポート」か「一定世代を残すスナップショット型」のどちらかに明確化してください。日次同期を残すなら、復元力は限定的であることを明記し、`--backup` や日付付き出力先で世代を分けるなど、破損版の上書き伝播を防ぐ方式へ修正すると安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 手順 5",
+    "issue": "提示された `byte_floor_check.sh` は `violators=\"\"` に `\\n` 連結する文字列処理や `git diff --cached --name-only -z | tr | awk | tr` の多段変換に依存しており、可読性が低く保守時に壊しやすい実装です。NUL区切り安全性を謳いながら途中で `tr` と `awk` を挟んでおり、将来的な改変で簡単にパス処理バグを混入させる構造になっています。",
+    "suggestion": "フックは単純化し、`git diff --cached --name-only --diff-filter=AM -z -- '*.md'` を直接 `while IFS= read -r -d '' f` に渡す形へ整理してください。違反ファイルは配列で保持し、最後に `printf '%s\n'` で出力すると型・区切りの安全性が上がります。短い実装にすることで既存フックへの追記リスクも下げられます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§7.1 手順 4",
+    "issue": "`git add lais/ instructions/ docs/ templates/` を一括実行して即commitする手順は、意図しない生成物やレビュー未了ファイルまでまとめて追跡対象に入れる危険があります。今回の文脈は「untracked SSoT撲滅」ですが、ディレクトリ単位追加は責務が粗く、将来 `.gitignore` 設計不備があると不要物の混入や履歴肥大を招く可能性が高いです。",
+    "suggestion": "対象は SSoT の拡���子・パスに限定し、`git add -- 'lais/**/*.md' 'instructions/**/*.md' 'docs/**/*.md' 'templates/**/*.md'` のように明示してください。加えて `git status --short` の確認を必須手順にし、追加前後の差分確認を入れることで誤追跡を防げます。レビュー観点では「一括追加して即commit」より「確認→選択追加→commit」の順が安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.1 / §6.1 / §7.1",
+    "issue": "「8 bytes未満の .md を検知」という閾値が複数箇所に登場しますが、なぜ8なのか根拠が仕様化されていません。Markdownファイルには意図的に短いスタブやプレースホルダもあり得るため、将来の運用者が誤検知と感じてフックを無効化するリスクがあります。魔法の数字として残ると、保守性とルール遵守率を下げます。",
+    "suggestion": "8 bytesの根拠を「今回の破損事故で観測された異常値」であると明記し、定数名 `MIN_MARKDOWN_BYTES_FOR_SAFETY` などでスクリプト先頭に定義してください。さらに `README` や docs に『空ファイルを意図的にcommitしたい場合の手順』を追記し、例外運用を制度化するとフック無効化の誘惑を減らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§7.1 手順 6",
+    "issue": "既存 pre-commit に `bash \"${REPO_ROOT}/scripts/byte_floor_check.sh\" || FAIL=1` を追記する案ですが、`REPO_ROOT` の定義元が本文中にありません。既存フックがその変数を持たない場合は、コミット時に参照先が空になりチェックが実行されない、もしくは誤ったパスを参照する可能性があります。事故防止目的の手順としては依存前提が暗黙的です。",
+    "suggestion": "フック追記例には自己完結した形で `REPO_ROOT=$(git rev-parse --show-toplevel)` を先に定義するか、単に `scripts/byte_floor_check.sh` を相対参照せず絶対パス計算付きのワンライナーにしてください。既存フックへの依存変数を持ち込まないことで、環境差異による未実行バグを防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§3.4 / §6.3",
+    "issue": "Google Drive 連携で `rsync -av --delete` を例示していますが、バックアップ用途で `--delete` は誤設定時の被害が大きく、送信元の削除や一時的なパス解決ミスがそのままエクスポート先の削除に波及します。データ保全を目的とした資料としては、破壊的オプションをデフォルト例に置くのは危険で、後日必ず事故要因になり得ます。",
+    "suggestion": "バックアップ例は `--delete` を外し、必要なら `--backup --suffix` や日付付き出力ディレクトリで世代保持を優先してください。もし `--delete` を使う運用を残すなら、対象ディレクトリの存在確認、dry-run、誤パス防止ガードを必須手順として追加し、単純コピー例とは分けて記載するべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "全体 / §3 / §6 / §7",
+    "issue": "比較、推奨、実装手順が1文書に密結合しており、意思決定情報と運用Runbookが混在しています。現時点では読めますが、価格改定や手順変更のたびに全体更新が必要になり、記述の重複・矛盾が発生しやすい構造です。実際に Google Drive や iCloud の位置づけ説明が複数節に分散していて追跡しづらくなっています。",
+    "suggestion": "文書責務を分離し、(1)比較調査、(2)採用方針、(3)セットアップRunbook に分割するのが望ましいです。少なくとも本書内でも『方針のSSoT節』を1箇所に集約し、各手順から参照させてください。保守対象を分けることで価格や運用ルール更新時の差分管理がしやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.2 / §7.2",
+    "issue": "容量や費用の記述に `1 TB`, `200 GB`, `24h × 30d` などの数値が多数登場しますが、前提条件と算定根拠が本文中で揺れています。たとえば対象リポジトリは1.1 GiBなのに Time Machine 推奨容量は『ソース約200 GB→1 TB』へ飛んでおり、読者がどの値を信じるべきか迷います。数値が増えるほど魔法の数字化しやすいです。",
+    "suggestion": "容量関連は『リポジトリ単体』『Desktop全体』『Mac全体』の3粒度に分けて表記し、各節で同じ定義を再利用してください。推奨容量には算式または判断基準を添え、文中の数値は変数的に扱うと理解しやすくなります。数値の由来を揃えるだけで文書全体の信頼性が上がります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0371,
+    "input_tokens": 11309,
+    "output_tokens": 2299,
+    "model_id": "gpt-5.4"
+  }
+]

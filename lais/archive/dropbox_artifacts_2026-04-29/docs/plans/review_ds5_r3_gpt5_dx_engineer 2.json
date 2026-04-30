@@ -1,0 +1,222 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1 / §19.4 ⇄ §18 / sub_adv_protocol.md §10",
+    "issue": "UX仕様書の命名がセクション間で不一致（§19は docs/ux_v*.md、§18・sub_adv_protocolは docs/ux_redesign_v*.md）。依存チェーンや連鎖更新時の混乱・参照ミスを誘発する。",
+    "suggestion": "命名を単一基準に統一（例: docs/ux_v*.md）。メイン/サブ仕様書全体の記述・テンプレ・例・スクリプト出力を一括置換。既存リポジトリには移行ガイド（旧→新の対応表）を提示。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「dev-system準拠: docs/plans/dev_system_spec.md §19」はアプリ側リポジトリにそのパスが存在しないため、参照が実質的に解決不能。",
+    "suggestion": "ヘッダーはパスではなくバージョンを明示（例: 「dev-system準拠: v3.0 §19」）。.dev-system.versionの値と一致することをlinterで検証。必要に応じてGitHub permalinkも併記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダー「依存: {上流ファイルのパス + バージョン}」の形式が単一想定で、多数依存・バージョン範囲・ファイル種別を表現できない。機械可検証性が不足。",
+    "suggestion": "ヘッダーをYAMLフロントマター化し、依存は配列で明示する（例: dependencies: [{file: docs/project_v1.md, version: v1.3},{file: docs/design_system.md, version: v2.0}]）。この構造をlinterで必須化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.5",
+    "issue": "ヘッダー標準に対する自動検証（必須フィールド有無・依存の存在/バージョン一致・ステータス遷移条件）が未整備。規約逸脱を検出できない。",
+    "suggestion": "header_lint.sh（新規）を追加し、必須キー（タイトル/バージョン/ステータス/依存/責務/dev-system準拠）検証・依存先ファイル実在性・バージョン表記・.dev-system.version一致・ステータス許可値をチェック。canopyに統合（新G10など）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.6",
+    "issue": "参照表��が「ファイル名 + セクション番号」依存で、セクション挿入/並び替えで番号が変動すると参照が腐る。長期運用で整合性崩壊を招く。",
+    "suggestion": "安定ID参照へ移行。画面/機能単位は§12のSPEC-IDを必須付番し、仕様内セクションはアンカーID（例: PROJ-ARCH-SEC-01）を導入。ref_lint.shで「不明ID/孤立ID/死活リンク」を検知。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（design_spec_v1.md テンプレ）",
+    "issue": "インタラクティブ状態（hover/focus/active/disabled/error/readonly）や状態遷移、バリアント（サイズ/強調度）の記述欄が欠落。UI受入時の判定根拠が不足。",
+    "suggestion": "design_spec_v1.mdに「状態仕様（States）」「バリアント」「インタラクション（transition/easing/遅延）」の小節を追加し、各コンポーネントで必須化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（reference_v1.md テンプレ）",
+    "issue": "API設計の横断規約（ページネーション/フィルタ/並び替え/レート制限/再試行/冪等性キー/バージョニング/タイムアウト/エラー分類/バリデーション/一貫した日付/数値フォーマット）がテンプレで要求されていない。",
+    "suggestion": "reference_v1.mdの§1-§5に横断規約の必須チェックリストを追加。例: §1.5 REST共通規約（pagination, idempotency, versioning, rate limit headers, error schema(JSON)）等。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（design_system.md テンプレ）",
+    "issue": "アクセシビリティ関連のトークン/基準（最小コントラスト比、フォーカスリング、reduced motion、ヒットターゲット最小サイズ）が未定義。",
+    "suggestion": "design_system.mdに「A11yトークン/基準」節を追加（Contrast AA/AAA閾値、:focus可視仕様、prefers-reduced-motion用トークン、タップ領域min 44px等）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4（e2e_fullflow_test.md テンプレ）",
+    "issue": "SPEC-ID（§12）やtest_map.yamlとの対応をテンプレ内で要求していないため、テスト↔仕様のトレーサビリティが弱い。",
+    "suggestion": "e2e_fullflow_test.mdに「SPEC-ID対応表」と「test_map.yamlへのマッピング指示」を必須化（各テストケース行に [SPEC-XXXX] を付す等）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "App Storeレビュー分析を前提としているが、Web専業/未公開段階の競合では取得不能な場合がある。",
+    "suggestion": "代替データ源（Similarweb/Trustpilot/G2/各社公開ブログ/コミュニティ/サポートFAQ/SNS）を正式に許容。N/A時は「根拠リンク+理由」を必須記載。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力がMarkdown表のみで、機械検証（件数/分類/差別化3件以上/列必須）を自動化できない。",
+    "suggestion": "Markdownに加え、同内容のYAMLブロックを併記（code fence）。benchmark_lint.sh を追加し、(1) 直接競合≥5 (2) 各行の「Lais方針」必須 (3) 方針の許容値（同等/未対応/差別化） (4) 差別化≥3 (5) 対応セクションの解決性 を検証。canopyに統合。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7 ⇄ §13.2/§13.4",
+    "issue": "「Phase 0完了: 8ペルソナ×2モデル」は、§13.4の標準5ペルソナと不一致。また合計16呼び出しは§13.2の1セッション10呼び出し上限と���盾。",
+    "suggestion": "基準を統一。例: 標準5ペルソナ×2モデル=10回（上限内）をPhase 0必須にし、8ペルソナはオプション（PO承認時のみ上限緩和）と明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.5 / §13.6",
+    "issue": "ヘッダー「ステータス: CONFIRMED」をCRITICAL 0と連動させる運用だが、自動検証がないため誤設定のリスクがある。",
+    "suggestion": "header_lint.shで「CONFIRMEDの場合はdocs/plans/review_*.jsonに未dismissed CRITICAL=0」を強制し、違反時FAIL。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.6",
+    "issue": "「循環参照禁止」「上流変更時の連鎖更新」ルールがあるが、循環/不整合検出の仕組みが未提供。",
+    "suggestion": "docs_ref_lint.sh（新規）でヘッダーdependenciesをグラフ化し、循環/孤立/未定義バージョン/上流>下流のバージョン不一致を検出。canopy統合。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.5（例示）",
+    "issue": "ヘッダーの依存例が「docs/plans/lais_project_v1.md」となっており、§19.1の必須ファイル規約（docs/project_v1.md）と不一致。",
+    "suggestion": "例示をdocs/project_v1.mdに修正し、命名規約を統一。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.4（project_v1.md §7 と reference_v1.md §5）",
+    "issue": "セキュリティ記述の責務境界が曖昧（高レベル方針 vs 具体的RLS/トークン運用が混在しやすい）。重複・矛盾の温床。",
+    "suggestion": "責務分離を明記：project_v1.md §7＝非機能要件/リスク/方針（WHAT）、reference_v1.md §5＝具体ルール/実装規約（HOW）。テンプレ内に境界注記を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4（ux_v1.md / design_system.md / design_spec_v1.md）",
+    "issue": "アニメーション/レスポンシブ/共通UIパターンの記述が複数ファイルに跨っており、重複・不一致が発生しやすい。",
+    "suggestion": "RACI的な配置基準をテンプレ冒頭に明記：design_system＝トークン/原則、ux_v1＝利用シナリオ/遷移パターン、design_spec＝画面別具体値。相互参照の必須ルールを追記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.4（system_map.md §4）",
+    "issue": "「ファイル変更チェックリスト」の書式が未定義で、人により粒度がばらつく。affected-testsとの連動が弱い。",
+    "suggestion": "system_map.md §4にYAML構造の雛形（source_globs→影響ファイル/テストタグ）を提示し、affected-tests.shが参照可能な形式に統一。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダーに「更新日」「作成者/承認者」「ドキュメントID」の欄がなく、監査性・トレーサビリティが弱い。",
+    "suggestion": "ヘッダーに「最終更新」「作成者」「承認者」「Doc-ID（例: DOC-PROJECT-001）」を追記し、header_lint.shで必須化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.6",
+    "issue": "「dev-system §X準拠」の参照がバージョン非明示で将来の差分を吸収できない。",
+    "suggestion": "常に「dev-system v{X.Y} §N」形式で引用し、.dev-system.versionと���き合わせ検証。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7（差別化マッピング）",
+    "issue": "「対応セクション」の参照表記が自由記述で、機械的な追跡と逆引きが困難。",
+    "suggestion": "対応セクションは『{file}@{stable-id}』（例: project_v1.md@PROJ-ROADMAP-02 もしくは SPEC-XXXX）形式に統一。benchmark_lint.shで解決可能性を検証。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-022",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.1 / init_app.sh（周辺）",
+    "issue": "§19.4で定義された各仕様書テンプレ（project/ux/design_system/design_spec/reference/e2e）が実ファイル雛形として提供されておらず、init_app.shでも配布されない。新規開発者の着手が手作業になり、構造逸脱を招く。",
+    "suggestion": "dev-system/templates/ に各テンプレ（見出し+ヘッダー標準+必須セクション骨子）を追加し、init_app.shでdocs/に自動配置。header_lint.shで必須セクションの有無をチェック。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

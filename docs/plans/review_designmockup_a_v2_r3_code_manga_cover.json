@@ -1,0 +1,5 @@
+[
+  {"id":"R-001","severity":"HIGH","category":"STORYTELLING","screen":"s10_grow","location":"タイムライン全体","issue":"『積み重ね』の物語性が薄い。Phase B 独自装飾候補。","suggestion":"(Phase B 対応)","model":"Code","persona":"manga_cover"},
+  {"id":"R-002","severity":"MEDIUM","category":"ICON_LANGUAGE","screen":"s20_talk","location":"🕐 / 📝 / 📎 絵文字グリフ","issue":"OS依存グリフで視覚統一感弱い。Phase 4 実装時 SVG 化必須。","suggestion":"(実装時 SVG 化)","model":"Code","persona":"manga_cover"},
+  {"id":"R-003","severity":"LOW","category":"COMPOSITION","screen":"s14_goal_detail","location":"60% 巨大数字","issue":"LOCK #11 既決定 Phase B 吸収予定。","suggestion":"(対応不要)","model":"Code","persona":"manga_cover"}
+]

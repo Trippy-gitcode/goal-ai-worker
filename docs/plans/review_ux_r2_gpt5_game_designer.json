@@ -1,0 +1,222 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4, §4.5",
+    "issue": "EXP/レベル設計の数値矛盾（Lv.1→2が§4.4では100EXP、§4.5では1,000EXP。またLv.50到達目安を1.7年と記載しているが、累計63,700EXPと日次上限350EXP（300上限+ゴール50別枠）から計算すると最短約182日≒0.5年で到達可能）",
+    "suggestion": "レベル必要EXP式・累計表・到達目安・日次上限の整合を一括で再計算し、唯一の正解を定義する。例: 次Lv必要=100+(L-1)*50を採用するなら、到達目安を実測前提（平均日次獲得値）で再試算し、表の「到達目安」を更新。§4.5の『Lv.1→2=1,000EXP』は削除。日次上限350（300+ゴール50）を前提に、Lv.50到達の最短/中央値/現実値（p50/p90）を明示する。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1, §4.2（S-41 アバター設定）",
+    "issue": "画面ID S-41（アバター設定）のUXが未定義。ME > PROFILEから遷移できるが、具体的なUI/操作/装備ルールがないため行き止まりになる。",
+    "suggestion": "S-41の��面仕様を追加。最低限: 所有アイテム一覧（フレーム/オーラ/背景/衣装のタブ）、プレビュー、装備/外す、一括保存、未所持アイテムのプレースホルダー（ショップ未実装通知）、Premier特典フレームの受取/装備フロー、アクセシビリティ（フォーカス順/ラベル）、戻りナビ（←/スワイプ）を定義。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §2.5（通知設計）",
+    "issue": "通知文言に『GROWを送りました』が登場するが、GROWというリソース/行為は仕様内で未定義（FRIENDSでは“応援”として定義）。ユーザーに混乱と実装齟齬を招く。",
+    "suggestion": "通知文言をFRIENDSで定義済みの“応援”に統一（例:『{名前}さんがあなたを応援しました』）。もし“GROW”を新設する場合は、送受信の意味、上限、経済圧、UI、悪用防止を含む仕様を§5.3/ME > FRIENDSに追加し、既存“応援”との関係を明確化。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1（S-13）, §2.3",
+    "issue": "S-13（タスク編集）パネルの���ィールド/挙動が未定義。S-12（追加）と同等か差分が不明で実装がブレる恐れ。",
+    "suggestion": "S-13の入力項目・バリデーション・差分ルールを明記（S-12と同フィールドをプリフィル、保存時の差分のみ送信、予定日変更時のToday反映、ゴール紐付け変更の扱い、取り消しとの競合時の優先順位等）。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1（S-16）, §2.4",
+    "issue": "S-16（ゴールタスク追加）の具体仕様が未定義。S-12との違い（ゴール自動紐付け、予定日のデフォルト、Today反映、複数追加の連続入力など）が不明。",
+    "suggestion": "S-16を定義。例: 既定で当該ゴールに紐付け固定/編集不可、予定日デフォルト=未設定（ゴール詳細にのみ表示）、保存後“さらに追加”で連続作成、完了時のトースト/戻り動作（モーダル維持 or 自動閉じ）を明示。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2, §4.5; ux_v1.md §8",
+    "issue": "タスクEXPが一律+10のため、短時間タスク分割（マイクロタスク化）で日次上限到達を狙う行動を誘発。『同名5分以内』制限では名称を変える迂回が容易。",
+    "suggestion": "インフレ/不正対策を強化: ①“同一ゴール配下での短時間連続完了”の速度検知（例: 10分以内に3件以上は2件目以降EXP 0）、②“所要時間”を閾値でティア化（5/10/15/30/60+に応じ+6/+8/+10/+12/+15など上限内で差別化）、③“日次タスクEXPは20件まで付与”などのソフトキャップ、④サーバー側で類似名/短間隔のシグネチャ検知。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "project_v1.md §4.2（冒険EXP/ゴールEXP上限）, §4.5",
+    "issue": "上限ロジックの境界条件が曖昧。冒険EXPは日2回（100）で日次上限300に含むが、ゴール50は別枠。0:00〜4:00跨ぎや同刻付与の順序、上限超過時の丸め、同時発火時の優先順位と履歴表示が不明。",
+    "suggestion": "サーバー権威での付与順を定義（例: タスク→冒険→ゴール→ログイン）。同一タイムスタンプ競合時の順番、上限到達時のカット/繰越なしの明記、演出はux_v1.md §8.6の順序に同期しつつ“ゴールは別枠”のUIラベルを付与。履歴（当日獲得内訳）をME > PROFILEに簡易表示すると誤解が減る。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.4, §8.1",
+    "issue": "進行ペースに対する中期リテンションのテコ入れが弱い（機能は初日から全開放、レベル到達のご褒美は称号/アバター位）。1週/1ヶ月/3ヶ月の“新鮮味”が設計上不足。",
+    "suggestion": "段階的解放/定期ループを導入: ①Lv.5/10/20/30到達で小機能解放（例: DISCOVERカード上限拡張、アバター色替え、追加テーマ、週次クエスト解放）、②週次“冒険テーマ”（初体験の提案）で+10%ボーナス、③月次マイルストーン（称号バッジ/限定フレーム）で3ヶ月目の山場を演出。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §2.2, §4.4; ux_v1.md §4.5",
+    "issue": "アバター経済の肝が未定義（価格帯/通貨設計/入手経路/レア度/限定/再販/在庫/ギフティング/重複処理/プレビュー/返品ポリシー等）。Premier特典以外の動機付けが弱い。",
+    "suggestion": "SHOP設計の骨子を先行定��: ①通貨（日本円のみ/将来はソフト通貨併用）②価格帯（例: フレーム¥300-700/オーラ¥700-1200）③レア度（Common/Rare/Epic/Seasonal）④限定販売（季節/コラボ、再販方針）⑤装備スロット規則（同時装備可否）⑥プレビュー/返品不可の明示⑦購入フロー/レシート検証⑧Premierチケットの換算価値と除外品。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（QRスキャンS-36）",
+    "issue": "カメラ権限“拒否”時/恒久拒否（ブラウザ設定）時の代替導線・再許可手順が未定義。",
+    "suggestion": "権限拒否時はモーダルで案内（『ブラウザ設定でカメラを許可してください』+手順リンク）+代替導線（シェアリンク貼付/手動入力）。恒久拒否時はS-36に『設定を開く』『リンクで追加』の2ボタンを常設。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2（画像添付）, §9.2",
+    "issue": "画像添付の失敗系（10MB超、非対応拡張子、リサイズ失敗、Storageエラー）のUIが未定義。",
+    "suggestion": "インラインエラー/リトライを定義（例: サムネ枠に赤ラベル『10MBを超えています』、[再選択]ボタン、複数添付時の部分失敗処理、アップロード進捗、キャンセル、失敗時は自動削除）。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3（タスク完了→Undo）, §9.2",
+    "issue": "Undo猶予30秒中に“編集/削除”や“オフライン同期”が発生した場合の優先順位・サーバー整合が未定義。",
+    "suggestion": "優先順位を定義: Undo > 削除 > 編集の順。Undo中は編集/削除をブロック or 実行時にUndoを無効化。サーバーはリクエストIDで冪等化し、Undo成立時にEXP返却を必ず最終状態に合わせる。UIは競合時にトーストで結果を明示。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §6.1, §11.2",
+    "issue": "ハーフモーダル/フォームのキーボード干渉時の詳細が不足（特にS-12/S-13での入力フィールドが被る可能性）。",
+    "suggestion": "S-12/S-13でvisualViewportに準拠したinset調整、最下部に“完了/閉じる”ボタンのセーフエリア確保、長文メモ時の自動スクロールを追記。iOS PWAでのスクロールジャンプ対策（100vh問題回避）も明記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §4.3（冒険EXP検出）; ux_v1.md §3.4",
+    "issue": "冒険EXPは自動検出のみで、誤検出/見逃し時のユーザー側救済（申告/却下/再評価申請）がない。納得感を欠く可能性。",
+    "suggestion": "冒険ログを簡易表示（当日内訳に“冒険”行を追加）。ユーザー側で[取り消し申請]/[申告]（次のAI応答で再評価）を用意し、誤検出率を運用で下げる。申告回数に日上限を設け悪用防止。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.4（戻り）, §1.3（アニメーション）",
+    "issue": "ブラウザバックのヒストリー管理は方針記載のみで、モーダル/ドロワーのpushState運用（開閉で履歴を積むか）の細則がない。",
+    "suggestion": "モーダル/ドロワー開時にpushStateを積み、バックで閉じる運用を明記。タブ遷移は履歴に積まず、フルスクリーン遷移のみ履歴化。二重登録防止（同一状態連続push禁止）と初回ロード時の深いリンクの復元も追記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5（JST固定リセット）",
+    "issue": "日次リセットがJST固定のため海外/出張ユーザーに体験齟齬（夜間の不意なリセット）。UX上の混乱が起きうる。",
+    "suggestion": "v0.1.0注記として“JST固定”をアプリ内で明示（設定>言語/地域付近に説明）。将来計画（v0.2.0）に“ユーザータイムゾーン対応”と“出張時の一時TZ”をロードマップ表示。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.4（称号/アバター進化）; ux_v1.md §8.2",
+    "issue": "称号8段階は定義されているが、各称号到達の“ご褒美”演出差・解放要素の差別化が弱く、飽きポイント（1ヶ月/3ヶ月）でのモチベ維持に不安。",
+    "suggestion": "各称号で固有の小解放を設定（バナー/プロフィール枠/ホーム背景/粒子色の解放）。MVP資産負荷を抑えるため、色替え/既存パーツのバリエーション解放から開始。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §4.5（不正検出）, §7.3（PWAオフライン同期）",
+    "issue": "オフライン完了の大量同期待ち→復帰時一括同期の際、同名5分制限や日上限300の境界で“見た目の巻き戻し”が生じる可能性。",
+    "suggestion": "クライアント側で“同期待ち”バッジをより強調し、EXP演出はサーバー反映後のみ発火に統一（現状方針をUIでも強く伝える）。同期拒否されたレコードには理由コード（上限超過/短時間重複）を返し、トーストで説明。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.4（友達詳細/通報/ブロック）",
+    "issue": "通報送信後のフォローアップ（取り下げ/誤送信対応/ブロック併用の推奨）が未定義。",
+    "suggestion": "通報後の確認トーストに[ブロックする]ショートカットを追加。通報一覧の閲覧や取り下げはMVP外でも、ヘルプに“誤通報時の対応”を明示。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "UX_BENCHMARK",
+    "location": "ux_v1.md §0（ベンチマー���）→全体設計反映",
+    "issue": "競合の“長いオンボーディング”回避は明確だが、Finch型“感情接続”の一等最初体験（愛着形成）のUI導線が弱い。",
+    "suggestion": "オンボーディング完了直後に“初回レベルアップ or アバターとのショート対話演出”を追加し、1日目での愛着形成を強化。ヒーロー領域での自己投影を促す初回メッセージカードを表示。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §3.5（履歴ドロワー）",
+    "issue": "チャット履歴アイテム削除の確認導線はあるが、“削除＝会話全削除”か“スレッド非表示”かの文言が曖昧。",
+    "suggestion": "削除ボタンを『会話を削除（元に戻せません）』と明記。将来“アーカイブ”を導入予定であれば、用語の布石を設計メモに追記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8.6（演出キュー）",
+    "issue": "同時発火時の最大8秒制限は定義済みだが、Reduced Motion時の“短縮版キュー”が明言されていない。",
+    "suggestion": "prefers-reduced-motion有効時は、演出キュー全体を2-3秒に短縮し、テキスト＋最小限のバー伸長のみで完結する分岐を追加。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  }
+]

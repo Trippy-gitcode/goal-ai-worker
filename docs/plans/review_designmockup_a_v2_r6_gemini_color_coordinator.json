@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「すでにアカウントをお持ちですか？ ログイン」",
+    "issue": "インラインテキストリンク「ログイン」が色（#79C0FF）のみで示されており、下線がないためWCAG 1.4.1（カラーのみ伝達禁止）およびデザインシステム§2.2に違反している。",
+    "suggestion": "text-decoration: underline を追加し、色覚多様性ユーザーでもリンクと判別できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "タスク名入力フィールド「��い物リストを作る|」",
+    "issue": "フォーカスリング（outline）の色が rgba(121,192,255,0.2) に設定されており、背景色（#161B22）に対するコントラスト比が約1.5:1となり、WCAG 1.4.11の非テキストコントラスト要件（3:1以上）を満たしていない。",
+    "suggestion": "フォーカスリングの不透明度を上げるか、ソリッドカラー（例: var(--accent)）を使用して、背景とのコントラスト比3:1以上を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスクリスト",
+    "issue": "UX仕様書§2.3では「[完了⭕] [時刻] [タスク名]...」の順序と定義されているが、モックアップでは「[時刻] [完了⭕] [タスク名]...」のタイムライン風レイアウトになっており矛盾している。",
+    "suggestion": "UX仕様書をモックアップのタイムライン風レイアウトに合わせて更新するか、モックアップを仕様書の順序に修正して整合性を取る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "画面上部ヒーロー領域",
+    "issue": "UX仕様書§4.1ではME画面のヒーロー領域は「GROW同一」とされているが、モックアップではGROWが左揃えのコンパクト配置、ME（s30_me）が中央揃えの配置となっており矛盾している。",
+    "suggestion": "アプリ全体でユーザーのアイデンティティ表示の一貫性を保つため、GROWとMEのヒーロー領域のレイアウトコンポーネントを統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "チャット履歴のAIメッセージ",
+    "issue": "UX仕様書§3.1では「[AI応答バブル]」と定義されているが、モックアップではバブル（背景塗り）ではなく左ボーダーのみのスタイルで表現されており矛盾している。",
+    "suggestion": "視覚的なまとまりを示すため仕様書通りバブルスタイルにするか、現在の左ボーダースタイルを正とするならUX仕様書の記述を更新する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "画面下部 入力バー右側の送信ボタン",
+    "issue": "UX仕様書§3.2で「0文字はグレーアウト」と定義されているが、モックアップでは入力欄がプレースホルダー状態にも関わらず送信ボタンが通常アイコン色（#9BA7B4）で表示されている。",
+    "suggestion": "入力文字数が0の場合はボタンのアイコン色を --text-disabled に変更し、送信不可であることを視覚的に明示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "ALL",
+    "location": "s13_task_detail および s14_goal_detail の「削除」ボタン",
+    "issue": "s13では #FF7B72、s14では #F85149 と、同じ「削除」アクションに対して異なる赤色がハードコードされている。デザインシステム§5.1のセマンティックカラーと整合していない。",
+    "suggestion": "全ての破壊的アクションのカラーをデザインシステムの --danger トークン（#F85149）に統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "画面下部「AI相談」「編集」「削除」ボタン",
+    "issue": "3つのアクションボタンが等幅で横並びになっており、プライマリ（AI相談）とデストラクティブ（削除）の視覚的ウェイトが分散してユーザーの視線が迷いやすい。",
+    "suggestion": "「AI相談」を全幅のプライマリボタンとして上段に配置し、「編集」「削除」を下段に配置するなど、情報階層を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクション「12:00 ジムで筋トレ」",
+    "issue": "進行中を示すオレンジ色のバー（#E8A855）が幅8px、高さ1pxと非常に小さく、パッと見での状態把握が難しい。",
+    "suggestion": "進行中状態をより明確にするため、バーの太さを増すか、タスク行全体の背景に微かなオレンジのハイライト（--warning-subtle）を適用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダル上部中央のドラッグハンドル",
+    "issue": "ドラッグハンドルの色が #6E7681、背景が #161B22 でコントラスト比は約3.9:1。非テキスト要素の要件（3:1）は満たしているが、環境光によっては見落とされやすい。",
+    "suggestion": "モーダルのスワイプダウン操作のアフォーダンスを高めるため、ハンドルの色を少し明るくするか、不透明度を調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  }
+]

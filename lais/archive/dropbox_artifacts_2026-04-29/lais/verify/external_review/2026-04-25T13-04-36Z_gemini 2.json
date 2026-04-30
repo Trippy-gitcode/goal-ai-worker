@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "readSpecs関数、main関数のcontextFiles読み込み部",
+    "issue": "fs.readFileSyncにディレクトリパスが渡された場合、EISDIRエラーが発生してスクリプトがクラッシュします。--inputや--context-filesにディレクトリが指定された場合や、glob展開結果にディレクトリが含まれていた場合に確実に発生し、処理が停止します。",
+    "suggestion": "fs.readFileSyncを呼び出す前に、fs.statSync(f).isFile()を使用して対象がファイルであることを確認し、ディレクトリの場合はスキップするか適切な警告メッセージを出力する処理を追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "extractJson関数",
+    "issue": "JSON抽出用の正規表現 /[\\s\\S]*/ が貪欲マッチになっているため、AIのレスポンス内に複数のコードブロックや配列が含まれていた場合、最初の '[' から最後の ']' まで全体にマッチしてしまい、間のマークダウンテキストが混入してJSONパースエラーになります。",
+    "suggestion": "正規表現を /[\\s\\S]*?/ のように非貪欲マッチ（最短マッチ）に変更し、余分なテキストを巻き込まずに正確に単一のJSONブロックまたは配列を抽出できるように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "main関数 (runJob内)",
+    "issue": "ユーザーが --output オプションで存在しないディレクトリを指定した場合、fs.writeFileSync が ENOENT エラーをスローし、レビュー結果の保存に失敗します。runPrecommitMode ではディレクトリ作成が行われていますが、main 側では欠落しています。",
+    "suggestion": "main 関数の初期化処理（ファイルの読み込み後など）で、fs.mkdirSync(opts.output, { recursive: true }) を実行し、出力先ディレクトリが確実に存在するようにしてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "resolveFiles関数",
+    "issue": "globパターンの正規表現変換において、base.replace(/\\*/g, '.*') としていますが、ファイル名に含まれる '.'（ドット）がエスケープされていません。これにより、'sub_*.md' が 'sub_1_md' のような拡張子を持たない意図しないファイルにもマッチしてしまいます。",
+    "suggestion": "正規表現を構築する際、base.replace(/\\./g, '\\\\.').replace(/\\*/g, '.*') のようにドットをエスケープする処理を追加し、正確なファイルマッチングが行われるように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "main関数 (runJob内の集計処理)",
+    "issue": "results.push({ id: '_metadata', ... }) でメタデータを配列に追加した後に、for (const item of results) で集計を行っているため、_metadata が1件のレビュー指摘（severity: '?'）として totalItems にカウントされ、集計結果が狂いま���。",
+    "suggestion": "集計ループを results.push の前に移動するか、ループ内で if (item.id === '_metadata') continue; を追加して、メタデータを指摘件数の集計対象から除外してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "httpRequest関数",
+    "issue": "POSTリクエストで body を送信していますが、Content-Length ヘッダーが明示されていません。Node.jsはデフォルトでチャンクエンコーディングを使用しますが、一部のプロキシやWAF環境では 411 Length Required エラーでリクエストが弾かれるリスクがあります。",
+    "suggestion": "options.headers に 'Content-Length': Buffer.byteLength(body) を追加し、ペイロードの正確なバイト数を明示して送信するように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0205,
+    "input_tokens": 12509,
+    "output_tokens": 980,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow, s14_goal_detail, s01_signin",
+    "location": "s10: Today下部「+ タスクを追加」/ Goals下部「+ ゴールを作成」, s14: 画面最下部「+ タスクを追加」, s01: フッター文中「ログイン」リンク",
+    "issue": "インラインテキストリンクが下線なしで色だけに依存しており、デザインシステム §2.2『インラインテキストリンクは必ず underline を併用』に反しています",
+    "suggestion": "該当リンクに text-decoration: underline を付与するか、pillボタンや行全体のタップ領域に昇格して『色以外の手掛かり（アイコン・枠線・背景）』を追加する。例: .link{color:var(--accent);text-decoration:underline}",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow, s14_goal_detail",
+    "location": "タスク行左の完了サークル（直径22px）／チェックインジケータ",
+    "issue": "タップターゲットが44×44px未満（約22px）で��デザインシステム §4.5（WCAG 2.5.5 / Apple HIG 44px最小）に不適合",
+    "suggestion": "視覚サイズは現状維持でもよいが、::before などで透明パディングを設けてヒットエリアを44×44px以上に拡張する。行全体を完了トグルにする場合は、詳細遷移タップと競合しないよう左右で役割分離する",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域（Lv.12/EXPLORER/EXPバー/右端の数値）",
+    "issue": "EXP数値（1,240 / 2,000）が右端に独立配置され、視線がタイトル→バー→右端数値と往復しやすくZフローが切れます",
+    "suggestion": "EXP数値はバー直下に左揃えで配置し、Lv/称号→バー→数値の一筆書きフローに統一する。数値を小さめ（12–13px）で抑え、主要導線（Today）へ視線が流れる余白を確保",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "ヘッダー（左:メニュー／中央:TALK／右:履歴・新規）",
+    "issue": "左右にアクションが分散し、中央タイトルと合わせて3つの注視点が同時に存在。Z→Nへの視線が分断されます",
+    "suggestion": "右側は主要1アクションのみに絞り、その他は左ドロワー内に集約。アイコン間隔を縮め、タイトルの比重（太さ/大きさ）を上げて主従関係を明確化",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "12pxテキストの多用（��: s02 タイプA/B/C, s10 サブ情報『予定・◯分』, s14 日付ラベル等）",
+    "issue": "トークンスケール（11/14/16/20/28/36/48）外の12pxが頻出し、日本語UIでの可読性とリズムが不安定",
+    "suggestion": "キャプション/時刻は--font-size-xs(11px)に統一、日本語ラベル/補助文は--font-size-sm(14px)を使用。合わせて letter-spacing: var(--letter-spacing-ja), line-height: var(--line-height-ja-body) を適用",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "完了カード内のステータス行（背景rgba(63,185,80,0.06)＋テキスト#3FB950）",
+    "issue": "success-subtle背景の不透明度が設計トークン既定（0.12）より薄く、緑テキストとの局所コントラストが弱い",
+    "suggestion": "背景は--success-subtle (rgba(63,185,80,0.12)) を使用し、テキストは--success（#3FB950）を維持。もしくはテキストを--text-secondaryにし、緑はアイコン/左ボーダーで示し色依存を軽減",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s13_task_detail",
+    "location": "モーダルのタイトル行（右側：緑チェック＋��じる✕）",
+    "issue": "状態アイコン（完了）と閉じるが同一ウエイトで並列し、主従が曖昧。視線が右上で迷子になります",
+    "suggestion": "状態はタイトル下のサブ行に移設（「完了済み」ラベル）し、タイトル行右側は✕のみ。ボタン群との距離を--space-md以上確保して段落の『間』を作る",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s01_signin",
+    "location": "規約同意のチェックボックス行（チェックとテキストの段差）",
+    "issue": "左側の44pxボックスにより本文頭が下がり、フォーム全体の左エッジが揃いません",
+    "suggestion": "チェックはインラインでベースライン合わせにし、テキストブロックの左インデントをフォームラベルと揃える。複数行折返し時はアイコン分だけ適切にインデント",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "GOALSセクション（各プログレスバーの上下間隔）",
+    "issue": "バーと次のゴール行の間隔が詰まり気味で、セクション内の呼吸感がやや不足",
+    "suggestion": "各ゴール行のバー下に--space-md(16px)以上の余白、ゴール同士は--space-lg(24px)程度を確保し、Today→Goalsへの視線移行に『間』を作る",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択のラベル（タイプA/B/C, 12px, #7A8593）",
+    "issue": "選択操作の基準となるラベルが小さくコントラストも弱めで、タップ対象の識別が一瞬遅れます",
+    "suggestion": "ラベルを14px（--font-size-sm）に引き上げ、選択中は--text-primaryに。未選択は--text-secondaryのままでも、下に4pxの『間』を追加して識別性を底上げ",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

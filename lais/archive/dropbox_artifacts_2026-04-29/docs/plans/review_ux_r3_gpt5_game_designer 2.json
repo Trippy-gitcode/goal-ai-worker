@@ -1,0 +1,252 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 / §4.5 / §4.4 表「到達目安」",
+    "issue": "レベル計算と進行速度に数値矛盾がある。Lv1→2は式上100EXPだが§4.5で1,000EXPと記載。さらに日次上限350EXPならLv50累計63,700EXPは約182日（約0.5年）で到達可能だが、表の「到達目安」は1.7年や1年などと食い違う。",
+    "suggestion": "数値を一括整合。推奨いずれか: ①現行式維持（次Lv=100+(Lv-1)*50）→日次上限を100〜150EXPに再設計し、到達目安（週/月/年）を再計算して表を更新。②日次上限300/350維持→レベル式を逓増（例: 次Lv=150+75*(Lv-1) など）に変更し、Lv10/20/30/40/50の到達目安を実測ベースで再算出。正式なTTC（time-to-cap）表をJSONで定義し、reference_v1.mdにAPI定数として固定。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2.6 / ux_v1.md §2.3",
+    "issue": "タスク完了のUndo猶予がprojectでは「スナックバー3秒」、UXでは「30秒」に分裂している。",
+    "suggestion": "Undoを30秒に統一（UXに合わ��る）し、project_v1.md §3.2.6の記述を更新。サーバー側も30秒間はEXP/ゴール達成を仮確定（保留）にする状態機械を定義。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §3.1（TALKヘッダー）/ §3.5（S-21）",
+    "issue": "TALKヘッダーが☰と🕐の両方で「履歴」を示唆しており、同一機能の重複/矛盾がある。☰はドロワー、🕐は何を開くのかが不明瞭。",
+    "suggestion": "履歴入口を1つに統一。例: ☰を削除し🕐=履歴ドロワー、または🕐を「新規チャット」に限定。アイコンの役割をアイコンラベルとアクセシビリティラベルで明文化。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §4.2 / §4.5",
+    "issue": "タスクEXP一律+10と「同名タスク5分以内無効」だけでは名称を微変更した量産タスクでEXPインフレ/不正取得が起きやすい。",
+    "suggestion": "追加対策: ①1日あたりEXPが付与される「有効完了タスク」上限（例: 25件=250EXP）または逓減（21件目以降は+5→+2→0）。②類似文字列のファジー判定（Levenshtein���離）+同一ゴール配下の短時間多発完了を弾く。③完了密度レートリミット（例: 10分に付与される日常EXPは最大+30）。④習慣/単発の混在不正（即作成→即完了の連打）を検知し、一定閾値で一時審査フラグ。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.1 画像添付",
+    "issue": "画像添付のエラー/上限/キャンセル/再試行UIが未定義（10MB超・ネットワーク中断・権限拒否・リサイズ失敗など）。",
+    "suggestion": "添付フローに進捗バー、サイズ超過エラー（「10MB以下に圧縮してください」）、権限拒否時の再許可案内、アップロード失敗の[再試行]、キャンセル操作、複数枚同時制限の定義を追加。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5 / lais_ux_v1.md §9.3",
+    "issue": "日次リセットがJST固定のため海外ユーザーや夜型ユーザーにとって「04:00リセット」表示が直感的でない。",
+    "suggestion": "UIは「あとN時間でリセット」表現に統一。将来のv0.2.0でユーザータイムゾーン切替を提供予定と明記。通知/上限到達バナーにも相対表現を適用。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §4.4（称号・レベル帯）/ lais_ux_v1.md §4.4（FRIENDS表示）",
+    "issue": "称号は帯域（Lv1-4 Beginner等）のみ提示で、全レベルに対する正式リスト/文言/ローカライズ方針が未定義。",
+    "suggestion": "Lv1〜50の称号マッピング表（ID, 日本語, 英語）をreference_v1.mdに定義。FRIENDS/PROFILE/TALKバナーで同一IDを参照する単一ソース化。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §4.4（アバター進化）/ §8.1（MVP範囲）",
+    "issue": "MVPはPhase1-3のみのアセットだが、現行レベルカーブ/上限だと2〜3ヶ月でPhase4到達の可能性がある。Phase4/5到達時の代替表示が未定義。",
+    "suggestion": "対策いずれか: ①MVP期間はアバター進化をLv30でソフトキャップ（Phase4以上はPhase3見た目+色/オーラのみ）。②Phase4/5は暫定でPhase3を流用し「進化準備中」バッジを表示。③レベル進行の逓増でPhase4到達TTCをMVP期間外にずらす。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §2.2 / §4.4 / lais_ux_v1.md §4.2.1",
+    "issue": "アバター経済の「価格帯/入手性/希少性/消費先」が未定義。Premier特典フレーム以外の獲得動機とインフレ対策が弱い。",
+    "suggestion": "設計提案: 価格帯（フレーム¥360-1,200/背景¥240-720/オーラ¥600-1,800）、希少度（常設/シーズン/限定）、入手手段（購入/週次クエスト/連続7日ログイン宝箱）、消費先（リカラー/強化にコスメ通貨消費）、再入荷ローテーション（毎週月曜）、プレビューモード（48h試着）を定義。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §4.4（S-36 QRスキャン）",
+    "issue": "オフライン/権限拒否/暗所/QR無効などスキャン失敗時のUXが未定義。",
+    "suggestion": "S-36に失敗ケースを追加: ①権限拒否→設定アプリ誘導、②低照度→ライトONトグル、③オフライン→「オンラインで再試行」導線、④無効/期限切れ→エラーバナー+再スキャン、⑤読み取り中スピナー/キャンセル。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §7.3（PWA edge swipe）/ §3.1（TALKドロワー）",
+    "issue": "左端スワイプを「戻る」にも「ドロワー展開」にも割り当てており、競合の恐れ。",
+    "suggestion": "優先順位を固定: 左端0-20pxは「戻る」専用、ドロワーは20px以外のパン開始 or ヘッダー☰のみで開く。overscroll抑止とヒットボックス閾値を仕様化。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §7.4（ドラッグ&ドロップ）/ §2.3",
+    "issue": "手動並び替え後に「時刻順へ戻す」手段が未定義。ソートポリシーが持続する条件も不明。",
+    "suggestion": "Todayに「並び順: 手動/時刻」のトグルと[並び順をリセット]を追加。新規タスク追加/開始時刻編集時の優先適用ルール（手動が上書き/自動ソートを再適用）を明記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md §2.3（Upcomingセクション）",
+    "issue": "「7日以降 (N件)」タップ時の遷移先が未定義（インライン��開か別画面か不明）。",
+    "suggestion": "S-10内インライン展開（仮想リスト）か、S-11相当の「全タスク一覧」画面（S-17等）を定義。パンくず/戻り先も明記。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §5.5 / lais_ux_v1.md §4.4",
+    "issue": "ブロック済み相手へのアクションがサイレントで無視される設計は混乱を招く（送信できたように見える）。",
+    "suggestion": "ブロック状態のUIラベル（「このユーザーはブロック中です」）と送信ボタンの無効化、もしくは送信時に明示的エラートーストを表示。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1（Pro特典: 冒険EXP検出精度向上）/ §4.5",
+    "issue": "プランにより冒険EXP検出精度が異なると、無課金が不利（同じ内容でも未検出）と感じる恐れ。",
+    "suggestion": "冒険EXPの判定ロジック/しきい値は全プラン共通にし、差分は提案テキスト品質/説明の深さに限定。検出漏れを補う[手動申告→AI確認]導線（1日1回まで）を追加して公平性を担保。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2 / §7.4 / §5.4",
+    "issue": "AI対話とソーシャルでmessagesテーブル命名が混在（messages / social_messages）。実装時にRLS/参照先が不明瞭。",
+    "suggestion": "テーブル命名を統一（例: ai_messages / social_messages）し、RLS/SUPABASEスキーマをreference_v1.mdに確定。既出箇所の名称も全て置換。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §4（EXP）/ §9.2（継続要因）",
+    "issue": "1週間/1ヶ月/3ヶ月の飽きポイントに対して、中期ループ（週次クエスト/シーズン進行/協力要素）の明確な仕掛けが不足。",
+    "suggestion": "継続ループ提案: ①週次「旅のチャレンジ」（3枠、各+20〜50EXP、週1回リセット）②月次テーマ（例: Explorer月間）で限定称号/フレーム付与③2人協力ゴール（任意の友達と同じ週次チャレンジを共有し、クリアで双方に記念バッジ）。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §4.2 / lais_ux_v1.md §2.3",
+    "issue": "タスクEXPが所要時間に無関係のため「細切れ化」が進むインセンティブが残る。",
+    "suggestion": "逓減と併用して「デイリーボーナス構造」を導入: ①最長一本集中ボーナス（60分以上の連続作業を1回検出で+10）②『深掘り』タグのタスクは1日1件だけ+10上乗せ、等。単純な時間連動は避けつつ、細切れバラマキより『質』を選ぶ動機づけを追加。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §0（UXベンチマーク）→全体設計反映",
+    "issue": "ベンチマークの示唆（Finchの待機メカニクス回避、Habiticaの罰回避等）は反映されているが、TickTick/Todoistの「予定崩壊時の救済（自動リスケ/一括延期）」に対する具体UXが薄い。",
+    "suggestion": "Today末尾に[未完了を明日に一括延期]（選択式）や、Overdue群に対する一括操作/AI提案（最短で達成可能な再配置を提示）を追加。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §8.6（演出キュー）/ project_v1.md §3.3.4",
+    "issue": "TALKでのレベルアップとGROWの演出の整合は定義済みだが、同時多発（TALKの冒険EXP→即座にGROWへ遷移）時の重複再生/抑止条件が未定義。",
+    "suggestion": "グローバル演出キューをアプリ全体で単一化し、イベントIDで去重。『未再生レベルアップ演出』フラグは画面間移動で1回だけ再生→消灯を保証するルールを記載。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5（不正対策）/ lais_ux_v1.md §9.4",
+    "issue": "オフラインで大量完了→復帰同期時の衝突処理はあるが、日を跨いだ場合の「どの日の上限に割り当てるか」が未定義。",
+    "suggestion": "各完了イベントにローカルタイムスタンプを付与し、サーバーでJST日次バケットに帰属。上限超過分は切り捨て+『未付与理由（上限超過）』をクライアントへ返し、トーストで1回通知。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §4.2（ゴール達成ボーナス）/ lais_ux_v1.md §2.4",
+    "issue": "ゴール達成ボーナスが「別枠」で日次1回までだが、UI上で『本日は上限到達済み』の明確な見せ方がない。",
+    "suggestion": "ゴール詳細に『本日の達成ボーナス枠 残り: 1/0』のUIを追加。達成時に枠を消費し、同日の2件目以降はバナーに『ボーナスは明日以降』の注記を表示。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §4.4（FRIENDS）",
+    "issue": "ソーシャル動機が『応援+短文メッセージ』中心で継続的な共同行動が弱い。",
+    "suggestion": "週1の『ペア・チェックイン』導線（15分の同期作業/通話なし）と達成スタンプ、フレンドカードに『今週の冒険x/2』進捗（非競争）を追加。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §4.5（冒険EXPの不正検出）/ §6.2",
+    "issue": "『同一文脈の繰り返し投稿』の検出基準（同一とは何か/期間/閾値）が未定義で、誤検出・すり抜けのリスクが高い。",
+    "suggestion": "直近7日/30日ウィンドウでのテキスト類似度（埋め込みコサイン類似度>0.9）+メタ（場所/相手/初回性タグ）で判定し、しきい値/ロック期間（例: 48h）を定義。ユーザー向けには非表示だが、運営向けに監査ログを保存。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §2.5（通知）/ lais_ux_v1.md §15",
+    "issue": "通知タップのディープリンクは定義済みだが、Android Chromeの複数タブ/既存クライアントへのルーティング競合時の振る舞いが未記載。",
+    "suggestion": "Service Workerでclients.matchAll→既存クライアントにpostMessage優先、なければopenWindowのポリシーを記載。二重タブ防止フラグを導入。",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  }
+]

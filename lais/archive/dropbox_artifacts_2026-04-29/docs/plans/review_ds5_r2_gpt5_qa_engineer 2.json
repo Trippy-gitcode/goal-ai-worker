@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1/§17/§18",
+    "issue": "UX仕様ファイル名がセクション間で不一致（§19.1は docs/ux_v1.md、§17と§18は docs/ux_redesign_v*.md）。参照・連鎖更新時に誤参照や更新漏れを招く。",
+    "suggestion": "UX仕様ファイル名を統一する。推奨: docs/ux_v1.md（以後 v2, v3...へ）。§17の表と§18の依存マップ内の ux_redesign_v*.md を ux_v*.md に置換。§6承認ルールの低リスク判定に登場する ux_redesign_v*.md も同様に更新。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.5",
+    "issue": "仕様書ヘッダー標準（依存/バージョン/ステータス）の順守を自動検証する品質ゲートが存在しない。手作業運用だと循環参照・依存のバージョン欠落・ヘッダー欠落を検出できない。",
+    "suggestion": "scripts/spec_depcheck.sh を追加し、全docs/*.mdの先頭ヘッダーをパースして以下を検証: 1) 必須メタ（作成/ステータス/依存/責務/dev-system準拠）存在、2) 依存のバージョン表記あり、3) 依存DAGに循環なし、4) 依存ファイルが実在。canopy_common.sh から実行しFAIL化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存」記法が単一例のみで、複数依存や表記フォーマット（区切り/空白/相対パス/外部リポジトリ参照）のルールが未定義。",
+    "suggestion": "依存記法を明確化（例: 依存: [\"docs/project_v1.md v1.3\",\"docs/design_system.md v2.0\"]）。正規表現仕様とサンプルを追記し、spec_depcheck.shでJSON/CSVいずれかのみ許容。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.5",
+    "issue": "依存例が \"docs/plans/lais_project_v1.md v1.3\" となっており、§19.1の必須ファイル命名（docs/project_v1.md）と不一致。混乱の原因になる。",
+    "suggestion": "依存の記述例を実在のテンプレ名に修正（例: \"docs/project_v1.md v1.3\"）。同様に dev-system 準拠の参照も正規パス/ハッシュ付きに統一。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.6",
+    "issue": "参照ルール/依存チェーンの禁止事項（循環参照/バージョンなし依存）に対する自動検証が未実装。更新時の連鎖判断も手作業で、品質ゲートの実効性が不足。",
+    "suggestion": "R-002のspec_depcheck.shに以下を追加: a) ヘッダーの依存グラフ循環検出、b) バージョンの形式検証（^v\\d+\\.\\d+(\\.\\d+)?$）、c) 連鎖更新チェック（git diffで上流変更時に下流“依存”内の該当ファイルの“更新履歴”差分が同PR内に存在するか）。不一致はFAIL。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.7",
+    "issue": "競合ベンチマークの完了基準（5+3社・Lais方針全行記入・差別化3件以上）を自動で検証する仕組みがない。ベンチマーク出力もMarkdownのみで機械検証に不向き。",
+    "suggestion": "docs/*_benchmark.mdの先頭にYAML frontmatterを追加（direct=5, indirect=3, rows=..., lais_filled=true, differentiators=[...], updated:YYYY-MM-DD）。scripts/benchmark_lint.shでfrontmatterと表の列完全性（「Lais方針」全行非空/対応セクション存在）を検証。canopyに組み込み。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.7",
+    "issue": "ベンチマーク対象に reference_v1.md（API/セキュリティ）や system_map.md（アーキ/データフロー）が含まれていない。技術/運用観点の比較が抜け、設計の妥当性検証に空白が生じる。",
+    "suggestion": "ベンチマーク対象を拡張: reference_v1.md→API設計/レート制限/エラー設計/認証方式、system_map.md→アーキ/可用性/スループット/バックプレッシャ戦略。対応テンプレの出力フォーマット（機能/非機能マトリクス）と完了基準を追記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレ）",
+    "issue": "テスト分離の明示要件が不足。各テストのセットアップ/クリーンアップ/データ衝突回避の規定がなく、順序依存やデータ汚染でL2影響範囲テストの信頼性が低下し得る。",
+    "suggestion": "テンプレに「前提/後処理/データ分離」節を必須追加: - 前提: 固有テストデータ命名（prefix=AT-ID）、- 後処理: API/DBロールバック or 使い捨てエンティティ、- アイソレーション: テスト毎にログイン/セッション分離。sub_testing.mdのAP-2/8（serial依存/データ汚染）への参照を明記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレ）",
+    "issue": "§12のSPEC-ID（仕様ID）とテストケースの対応がテンプレ内で必須化されていない。トレーサビリティが弱く、影響範囲選定やG3カウントの妥当性確認が難しい。",
+    "suggestion": "各ケース見出しに必須で [SPEC-XXXX-NNN] を付与するルールをテンプレに追加。affected-tests.shがgrepするテスト名規約（--grep一致）にも合わせ、tests/test_map.yamlのtestsキーにもSPEC-IDを含めることを規定。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレ）",
+    "issue": "パフォーマンステスト項目（N+2）が抽象的で、測定方法・閾値・ツールが未定義のため実行不能になりやすい。",
+    "suggestion": "計測仕様を追加: - 指標: TTI/初回描画/API p95/エラー率、- 目標: 例）モバイル3G相当でTTI≤5s、API p95≤800ms、- ツール: Playwright Tracing+Lighthouse CI or k6、- 出力: results/perf_{DATE}.json に統一、- canopyで閾値超過をFAIL化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（system_map.md テンプレ §4）",
+    "issue": "「ファイル変更チェックリスト」と L2影響範囲テスト（tests/test_map.yaml）との連携ルールが未定義。ソース→テストのマッピング更新漏れが発生し得る。",
+    "suggestion": "system_map.md §4の各エントリに test_map.yaml のテストタグ/正規表現キーを併記する欄を追加。PRでその差分がある場合のみdeploy.sh内のaffected-tests.shをPASS可とするルールを記載。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.5（ステータス定義）",
+    "issue": "ステータスCONFIRMED=CRITICAL 0達成の裏付けとなるレビュー成果物のひも付けがヘッダーにない。review_gate.shはリポジトリ全体を走査するだけで、当該ドキュメントのレビュー完了と同期していない。",
+    "suggestion": "ヘッダーに「レビューID/レビューJSONパス」を必須追加（例: review_files: [docs/plans/review_project_v1.json]）。review_gate.shで各仕様書のステータスがCONFIRMEDの場合、紐付くreview_*.jsonのCRITICAL==0を必須化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.6（参照表記法）",
+    "issue": "参照表記が人間可読（\"dev-system §4.7準拠\"）のみで、機械抽出できるアンカー/IDスキーマが未定義。将来の自動クロスリファレンスや依存可視化の障害となる。",
+    "suggestion": "機械可読の参照IDを併記（例: dev-system:dev_system_spec.md#S4.7）。spec_depcheck.shがパターンを検証し、未対応をWARN/将来FAILへ。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.4（design_spec_v1.md テンプレ）",
+    "issue": "他テンプレは§0から開始だが、design_spec_v1.mdのみ§1開始で若干不統一。運用上の影響は小。",
+    "suggestion": "design_spec_v1.mdも§0から開始（「設計原則/前提」など）に揃えるか、理由を明記して意図的な差異とする。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4（e2e_fullflow_test.md テンプレ）",
+    "issue": "テストアンチパターン回避（AP-1,2,4,8など）をテンプレに明示していないため、AT記述段階での未然防止が弱い。",
+    "suggestion": "テンプレ末尾に「アンチパターン回避チェックリスト」を追加（ネガティブアサーション、条件付きskip禁止、固定wait禁止、共有データ禁止等）。sub_testing.md該当番号を併記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.5（dev-system準拠）",
+    "issue": "ヘッダー例の dev-system 準拠パスがアプリ側からの実在パスではなく、参照の粒度（コミット/バージョン）が未定義。",
+    "suggestion": "「dev-system準拠: dev-system v{VERSION} §19（commit:{short_sha}）」の形式に規定し、update_app.shで .dev-system.version と一致するかをcanopyで検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

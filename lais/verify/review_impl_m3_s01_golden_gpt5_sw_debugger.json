@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2. lais/src/components/screens/S01Auth.jsx（handleSubmit と フッター遷移）",
+    "issue": "認証リクエスト送信中（submitting=true）でもフッターのモード切替ボタンは有効なため、送信後にモードを切り替えると、非同期完了時に古い submit ハンドラが route('/') を実行して意図せずトップへ遷移する可能性がある（画面離脱後の競合）。",
+    "suggestion": "送信中はフッターのモード切替を無効化する、または非同期完了時に「まだこの画面がアクティブか」を判定するガード（useRef の inFlight トークンや isMounted フラグ）を入れてから route('/') する。Promise 完了時に最新の submissionId と一致する場合のみ遷移する等の仕組みを導入。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S01Auth.jsx（handleSubmit）",
+    "issue": "ダブルクリック/Enter 多重押下の超短時間レースで、setSubmitting(true) が反映される前に handleSubmit が複数回実行され、並行して複数の signIn/signUp リクエストが走る可能性がある。",
+    "suggestion": "同期的な再入防止フラグ（useRef）で最初の呼び出し以外は即 return、あるいは onSubmit 側で e.currentTarget.dataset.submitting を見るなどの一時ロックを導入。ボタンの onClick と form の onSubmit 多重発火も抑止する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "5. lais/src/lib/auth.js（onAuthStateChange 登録）",
+    "issue": "onAuthStateChange の購読解除を行っていないため、Vite の HMR やテスト環境でモジュールが再評価される度に購読が増え、メモリリークやハンドラ多重実行の恐れがある。",
+    "suggestion": "const { data: { subscription } } = supabase.auth.onAuthStateChange(...); を保持し、import.meta.hot?.dispose(() => subscription.unsubscribe()) で HMR 時に解除。あるいは初期化関数を一度だけ呼ぶパターンに変更。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "1. lais/src/components/App.jsx（AuthRoute）",
+    "issue": "AuthRoute 内で window.location.search を直接参照しており、SSR 下やテスト実行（jsdom 無し）でクラッシュ��る。また preact-router から渡る props を使わずグローバル参照に依存しているためテストが不安定になりやすい。",
+    "suggestion": "preact-router の Route 子に渡る props（url 等）からクエリを取得する、または useLocation 相当のフックを用意。少なくとも typeof window チェックでガードし、SSR/テストで安全にフォールバックする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2. lais/src/components/screens/S01Auth.jsx（同意チェックブロック）",
+    "issue": "label 要素内に a 要素（利用規約/プライバシーポリシー）を入れており、リンククリック時に preventDefault はしているがイベント伝播は止めていないため、リンクを押すと checkbox がトグルされる副作用が発生する可能性が高い。",
+    "suggestion": "リンクは label の外に出すか、リンク onClick で e.stopPropagation() も併用する。理想はチェック文言は label、規約リンクは別要素（aria-describedby で関連付け）に分離してセマンティクスと操作性を担保する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2. lais/src/components/screens/S01Auth.jsx（サインアップ成功時の遷移）",
+    "issue": "Supabase でメール確認必須の場合、signUp は成功しても session が null のことがある。現在は成功後に常に route('/') しており、未認証のままトップへ遷移→直後に未ログイン扱いになる等、UX が破綻しやすい。",
+    "suggestion": "signUp の戻り値 data.session が null の場合は「確認メール送信」状態の画面/メッセージを表示し、そのまま遷移しない。確認後に再ログインを促すフローへ。メール確認不要かつ session が得られた場合のみ '/' へ遷移。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "5. lais/src/lib/auth.js（getSession 初期化）",
+    "issue": "getSession() の error を無視しており、ローカルストレージ破損等で取得に失敗した際に沈黙する。デバッグやデグレ検出が困難。",
+    "suggestion": "try/catch で getSession のエラーを捕捉し、console.warn などで可視化、必要に応じて supabase.auth.signOut() または storageKey の初期化を行う。UI には軽微なエラーメッセージを出す。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S01Auth.jsx（入力値処理）",
+    "issue": "email を trim しておらず、前後の空白を含むペーストで不必要にエラーになったり、ユーザが原因に気づきにくい。",
+    "suggestion": "onInput で setEmail(e.currentTarget.value.trim())、または submit 直前に trim してバリデーション・送信する。ドメイン部は小文字化する等の正規化も検討。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2. lais/src/components/screens/S01Auth.jsx（バリデーション UX）",
+    "issue": "未タッチの Email が不正でも submit 押下時にエラー表示が出ず、CTA が disabled な理由が分かりにくい。",
+    "suggestion": "canSubmit=false で submit 試行時に setEmailTouched(true) を発火し、初回でもエラー文言とエラーハイライトを出す。エラーにフォーカス移動（scrollIntoView）も検討。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S01Auth.jsx（フッター遷移のセマンティクス）",
+    "issue": "視覚はリンクだが実体は button で、スクリーンリーダではボタンとして読み上げられるため意味論的不一致がある（ユーザ期待との齟齬）。",
+    "suggestion": "preact-router の <Link> を使用するか、<a href=...> の単独使用（onClick 併用を避ける）に戻す。もし button 維持なら role=\"link\" と aria-label で意図を補足。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "1. lais/src/components/App.jsx（NotFound）",
+    "issue": "render 中に route('/', true) を実行しており、副作用を render に混在させている。",
+    "suggestion": "NotFound は useEffect(() => route('/', true), []) でマウント後にリダイレクトするか、専用の Redirect コンポーネントパターンに変更して副作用を分離する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "4. lais/src/lib/supabase.js（detectSessionInUrl:false）",
+    "issue": "将来的に OAuth/マジックリンク等の URL フラグメント経由のセッション確立を導入した場合、detectSessionInUrl: false によりハンドオフできずログインが成立しない恐れがある。",
+    "suggestion": "Phase B 以降の要件に応じて detectSessionInUrl を有効化するか、専用のコールバックルートで supabase.auth.exchangeCodeForSession() を処理する方針をドキュメント化。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "パッケージ全体（テスト）",
+    "issue": "デグレ検出に重要なエッジケースの自動テストが不足（送信中のモード切替/ダブルサブミット/メールトリム/サインアップ後セッション無パスのハンドリング/HMR 下の購読多重）。",
+    "suggestion": "Playwright/E2E: 1) 送信中にモード切替しても '/' に遷移しないこと 2) ダブルクリックでも認証 API 呼び出し 1 回であること（MSW で検証） 3) email 前後空白の自動トリム 4) signUp session=null 時の確認画面表示 5) HMR/再読み込みで onAuthStateChange が多重にならないこと（console.warn フック）を追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "パッケージ全体（ログ/計測）",
+    "issue": "認証フローのイベントログや計測（開始/成功/失敗、所要時間、エラーコード）がなく、現場での障���分析・デグレ検出が困難。",
+    "suggestion": "開発時のみ有効な軽量ロギング（console.info）や debug フラグ、失敗時に error.code も合わせて表示/送信する仕組みを導入。ユーザ向け文言は簡潔に、詳細はデバッグログへ。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "1. lais/src/components/App.jsx（pushState ルーティング）",
+    "issue": "pushState ベースのパスルーティングのため、サーバ側で SPA リライト設定が無いと深い URL をリロード時に 404 となる。NotFound のクライアントリダイレクトでは初回リクエスト 404 を救済できない。",
+    "suggestion": "デプロイ先のサーバ/CDN（e.g. Vercel/Netlify/Cloudflare）で 200 リライト（fallback to index.html）を必須要件としてドキュメント化し、CI デプロイ設定に同梱する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "5. lais/src/lib/auth.js（初期化順序）",
+    "issue": "getSession() 解決と onAuthStateChange の発火順序が競合すると、より新しい状態（例: 直後の signOut）が古い getSession の結果で上書きされ���可能性がある。",
+    "suggestion": "初期化時は await getSession() 完了後に onAuthStateChange を購読する、または getSession の then で既に session.value が更新済みかを確認して不要な上書きを避ける。authLoading の完了もこの順に同期させる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

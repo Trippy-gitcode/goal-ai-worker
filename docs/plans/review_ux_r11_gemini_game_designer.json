@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3 / project_v1.md §3.2.5",
+    "issue": "アプリ起動中に日次リセット（午前4:00 JST）を迎えた場合のUX挙動とデータ同期が未定義。4:00を跨いで前日のタスクを完了した場合、サーバー側で日付不整合エラーが発生するか、翌日分のEXP上限を誤って消費する確実なデータ不整合リスクがある。",
+    "suggestion": "アプリ起動中に4:00 JSTを跨いだ場合、強制的に「日付が更新されました」ダイアログを表示し、GROW画面のTodayセクション、AI対話回数、EXP上限をリロード（再取得）する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §4.5 / ux_v1.md §9.4",
+    "issue": "インフレ・不正対策の抜け漏れ。「同名タスク5分以内の再完了は無効」とあるが、「a」「b」「c」など異なる名前のダミータスクを連続作成して即完了すれば、1日上限（300EXP）まで数分で到達可能。Spam-to-Winとなりゲームバランスが崩壊する。",
+    "suggestion": "「タスク作成から完了までの最小インターバル（例: 1分）」を設けるか、「1日のタスク完了によるEXP獲得回数上限（例: 20回=200EXPまで）」を設けるなど、ダミータスク量産へのシステム的な制限を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2 / ux_v1.md §9.1",
+    "issue": "TALK画面での画像添付（最大10MB）のオフライン挙動が未定義。オフライン時に画像付きメッセージを送信した場合、キューに巨大なペイロードがスタックし、オンライン復帰時の同期で帯域圧迫やクラッシュを引き起こす恐れがある。",
+    "suggestion": "オフライン時は入力バーの画像添���ボタン（📎）を無効化（グレーアウト）し、「オフライン時は画像を添付できません」というツールチップまたはトーストを表示する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "EDGE_CASE",
+    "location": "ux_v1.md §2.3",
+    "issue": "タスク完了のUndo（30秒間）と日次リセット（午前4:00）の競合エッジケース。3:59:45に習慣タスクを完了し、4:00:05にUndoを実行した場合、翌日分の未完了タスクに対してUndoが適用されるか、前日分のEXPが不正に返却される矛盾が生じる。",
+    "suggestion": "Undoスナックバー表示中に日次リセット（4:00）を迎えた場合、その時点でUndoスナックバーを強制的に消去し、完了を本確定させる（日跨ぎのUndoを禁止する）仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.4",
+    "issue": "ゴール「完了待ち（7日ルール）」から「達成」への状態遷移トリガーが曖昧。「次回アプリ起動時に自動でゴール達成」とあるが、PWAをバックグラウンドに置いたまま数日経過した場合や、起動しっぱなしの場合にいつ達成演出が発火するのか不明確。",
+    "suggestion": "「次回アプリ起動時」の定義を「Service Workerの起動時、またはGROW画面のPull-to-refresh時、または日次リセット（4:00）後の初回GROW画面表示時」と具体化し、不意な演出発火を防ぐ設計にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.2 / project_v1.md §4.4",
+    "issue": "レベルキャップ（Lv.50）到達後のGROW画面ヒーロー領域のEXPプログレスバーのUI表示が未定義。project_v1.mdには「表示は累計EXP」とあるが、バーの伸び方（MAX固定か、次のレベルがないのにどう描画するか）が不明。",
+    "suggestion": "Lv.50到達後はEXPバーを「100%（MAX）の状態で固定し、色はゴールド等の特別色に変更。テキストは『累計 65,000 EXP』のように現在値のみ表示する」といったUI仕様をux_v1.md §2.2に追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3",
+    "issue": "習慣タスクの「週N回」の進捗可視化が不足。Todayセクションに���示された際、今週何回目の実行なのか（例: 2/3回）がUI上で分からず、ユーザーが目標達成までの距離を直感的に把握できない。",
+    "suggestion": "Todayセクションのタスク行、またはS-11詳細パネル内に「今週の進捗: 2/3回」のようなバッジまたはテキスト表示を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.4 / project_v1.md §4.5",
+    "issue": "冒険EXPの1日上限（2回）に達した後のフィードバックが不足。3回目の冒険的発言をした際、AIが通常返答するだけでEXPが付与されないと、ユーザーは「AIの認識漏れ」か「上限到達」か区別がつかず不満を抱く。",
+    "suggestion": "上限到達後に冒険文脈を検出した場合、EXPは付与しないが、AIの返答内に「今日もたくさんの挑戦をしていて素晴らしいですね！（本日の冒険EXPは上限に達しました）」のようなソフトなシステムメッセージを添えるか、専用のトーストを表示してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.2",
+    "issue": "称号（Title）の全体像や次の目標を確認する画面が存在しない。8段階の称号が用意されているが、ユーザーが「次の称号は何か」「あとどれくらいで到達するか」を知る手段がなく、モチベーション向上に寄与しきれていない。",
+    "suggestion": "ME > PROFILE画面のアバタータップ時、または設定内に「称号一覧（ロードマップ）」を確認できるハーフモーダルを追加し、未到達の称号をシルエットや🔒アイコンで表示することを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §8.1 / ux_v1.md §4.2.1",
+    "issue": "アバター経済の初期モチベーション設計（飽きポイント）。MVPではSHOPが未実装で、カスタマイズ要素がPremier限定フレーム1種のみ。1〜3ヶ月プレイしたユーザーにとって、レベルアップ（5段階）以外の見た目の変化が乏しく、継続動機が弱まる懸念がある。",
+    "suggestion": "MVP段階でも、特定のレベル到達時（例: Lv.10 Explorer到達時）に無料のフレームや背景エフェクトを1〜2種アンロックする「達成報酬」の仕組みを入れ、カス���マイズの楽しさを早期に体験させることを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  }
+]

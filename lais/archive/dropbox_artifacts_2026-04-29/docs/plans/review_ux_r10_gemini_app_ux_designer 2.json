@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md 6.5 / ux_v1.md 14.3",
+    "issue": "退会フローにおいて、退会リクエスト時にStripeサブスクを「即時キャンセル」し、72時間のクーリングオフを設けている。しかし、ユーザーがクーリングオフ期間中に退会をキャンセルして復帰した場合、すでにStripe側で即時キャンセルされているため、支払い済みの当月分の利用権利を喪失した状態でFreeプランになってしまう。これはユーザーの課金権利の不当な侵害となり、重大なクレームや返金トラブルに直結する。",
+    "suggestion": "Stripeサブスクのキャンセ���処理は、退会リクエスト時ではなく、72時間のクーリングオフが経過しデータが物理削除されるタイミング（Worker Cronジョブ内）で実行するよう仕様を変更する。これにより、クーリングオフ中に復帰したユーザーは有料プランの権利を維持したまま再開できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md 3.2",
+    "issue": "project_v1.mdで定義されている画像添付のサイズ上限（10MB）や非対応フォーマットをアップロードしようとした際のエラーUI、およびアップロード中のプログレス表示（ローディング状態）が未定義。通信環境によってはアップロードに時間がかかり、ユーザーが複数回送信ボタンを押すなどの誤操作を招く。",
+    "suggestion": "添付時にクライアント側でサイズ・フォーマットをバリデーションし、違反時はトーストでエラー表示する。アップロード中は入力バーのサムネイル上にスピナーを表示し、送信ボタンを無効化する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md 1.4 / 4.1",
+    "issue": "ボトムタブを切り替えた際、各タブのナビゲーションスタック（例：MEタブで設定画面を開いている状態）やスクロール位置が保持されるかリセットされるか未定義。SPAでreplaceStateを使用する場合、状態が破棄されるとユーザーの作業（入力中のフォームなど）が意図せず失われ、強いストレスを与える。",
+    "suggestion": "各タブのスクロール位置とアクティブな子画面（フルスクリーンモーダル等）の状態をPreact Signals等でメモリに保持し、タブに戻った際に復元する「Tab State Preservation（タブ状態の保持）」の仕様を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md 9.2",
+    "issue": "複数端末での同時利用時における状態不一致（409 Conflict / 404 Not Found）のハンドリングが未定義。端末Aでタスクを完了または削除した後、同期されていない端末Bで同じタスクを操作した場合、サーバーエラーが発生するが、その際のUI復旧フローがない。",
+    "suggestion": "サーバーから状態不一致エラーが返された場合、楽観的UIを巻き戻し、「他��デバイスで変更されました。最新のデータを取得します」というトーストを表示して、Pull-to-refresh相当のデータ再取得を自動実行する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md 2.3 / 3.4",
+    "issue": "2.3で「Undoスナックバーは全タブに跨って表示」「Undo時のEXPバー巻き戻し: EXPバーが逆方向に縮小」とあるが、TALK画面にはヒーロー領域（EXPバー）が存在しない。TALK画面でUndoを実行した際、存在しないDOM要素をアニメーションさせようとしてJSエラーになるか、不自然な挙動になる。",
+    "suggestion": "Undo実行時に現在アクティブなタブを判定し、GROW/MEタブの場合はEXPバーの巻き戻しアニメーションを実行、TALKタブの場合はアニメーションをスキップ（バックグラウンドでデータのみ更新）するよう明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md 2.3 / 6.1",
+    "issue": "iOS PWAにおいて、ハーフモーダル内でキーボードを開き、さらにカスタムのカレンダーピッカーや時刻ピッカーを��いた場合、画面の高さが極端に狭くなりピッカーが隠れる、またはスクロール不能になるリスクが非常に高い。",
+    "suggestion": "モバイル環境では、ハーフモーダル内のピッカー（予定日・開始時刻）はカスタムUIでのインライン展開を避け、OSネイティブの `<input type=\"date\">` / `<input type=\"time\">` を使用してネイティブピッカーを呼び出すことを推奨する旨を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md 7.4 / 10.",
+    "issue": "Todayセクションのタスク並び替えがドラッグ＆ドロップのみで提供されており、スクリーンリーダーユーザーや運動機能障害のあるユーザーが並び替えを行えない。これはWCAG 2.2の「Dragging Movements」基準に違反する。",
+    "suggestion": "タスク詳細パネル（S-11）の「...」メニュー等に「上に移動」「下に移動」のアクションを追加し、キーボードやタップのみで順序変更できるアクセシビリティ代替手段を提供する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md 8.1 / 8.3",
+    "issue": "ゲーミフィケーション要素を持つアプリにおいて、タスク完了時やゴール達成時の爽快感は継続率に直結するが、視覚的アニメーションのみでハプティクス（触覚フィードバック）が定義されていない。",
+    "suggestion": "タスク完了（⭕タップ）時およびゴール達成時に、Vibration APIを用いた短いハプティクス（例: 50msの軽い振動）を追加し、物理的な達成感を補強する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md 7.4",
+    "issue": "縦に長いタスクリストで、画面外（上下）へタスクをドラッグして移動させたい場合の自動スクロール（エッジスクロール）の挙動が定義されていないため、長いリストでの並び替えが困難になる。",
+    "suggestion": "ドラッグ中の要素が画面の上端/下端から一定ピクセル（例: 40px）以内に入った場合、リストを自動的にスクロールさせるエッジスクロールの仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md 4.4",
+    "issue": "QRコード表示モーダルを開いたまま24時間経過しトークンが期限切れになった場合、またはオフラインから復帰した直後にQRを表示しようとした場合の、トークン再生成フローが不明確。",
+    "suggestion": "QRコード表示モーダル内でトークンの有効期限を監視し、期限切れ時はQRコードをぼかし、「有効期限が切れました [再生成]」ボタンをオーバーレイ表示する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

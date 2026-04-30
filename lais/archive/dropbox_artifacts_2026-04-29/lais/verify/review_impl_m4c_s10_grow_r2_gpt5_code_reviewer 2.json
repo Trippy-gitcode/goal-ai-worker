@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "lais/src/components/screens/S10Grow.css .s10-check::before",
+    "issue": "::before で 44x44 のヒット領域を拡張しているが、要素の外側へ広がる当たり判定が隣接要素（カード/ボタン等）と重なりうる。配置やスタッキング次第で意図しないクリック捕捉やヒット領域の干渉（特に密なレイアウト/スクロール中の誤タップ）が発生するリスクがある。",
+    "suggestion": "ヒット領域は要素自身のボーダーボックスで拡張するのが安全。具体案: (1) .s10-check に padding を付与し、見た目は 22px を維持するために負の margin を設定（例: width/height 22、padding 11、margin -11）; または (2) ラッパー要素（44x44）を用意して中央に 22px の見た目を配置。どうしても ::before を使う場合は、隣接要素への干渉を避けるためにレイアウトと z-index の検証を行い、必要に応じてヒット領域を左右/上下方向へ偏らせるなど重なりを回避する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "OverdueRow（lais/src/components/screens/S10Grow.jsx）および .s10-check / .s10-check-overdue（CSS）",
+    "issue": "OverdueRow の装飾用 <span class=\"s10-check s10-check-overdue\" aria-hidden=\"true\"/> が .s10-check のスタイル（cursor: pointer／44x44 ヒット領域）を継承しており、非インタラクティブ要素にクリック可能な見た目/ヒットスロップが付く。誤操作・操作不能の原因になり得る。",
+    "suggestion": "インタラクティブと装飾をクラスで分離する。例: ボタン用に .s10-check-btn（cursor/padding/::before 等のヒット領域拡張を含む）、装飾用に .s10-check-deco（見た目のみ、cursor: default、ヒット領域拡張なし）を定義。OverdueRow の span は .s10-check-deco のみ適用に変更する。最小対処として .s10-check-overdue { cursor: default; } と .s10-check-overdue::before { display: none; } を追加して誤タップを防止。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S10Grow.jsx handleToggle / S10Grow.css .s10-check-tap",
+    "issue": "JS のタイマー 400ms と CSS の var(--duration-fast) の値が分離しており、デザイントークン変更時にアニメーションとクラス解除のタイミングがズレる恐���がある（ちらつきや途中解除）。",
+    "suggestion": "アニメーション時間を単一情報源に統一する。例: 1) JS 側に DURATION_FAST_MS を定義し、CSS にも同値をカスタムプロパティとして注入（style={{'--duration-fast': DURATION_FAST_MS + 'ms'}}）; 2) または getComputedStyle で --duration-fast を取得してパースし、その値で setTimeout する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "S10Grow.jsx TodayRow レンダリング（tappingId の伝播）",
+    "issue": "tappingId の変更で TodayRow 全件が再レンダリングされる（各行が tappingId===task.id を評価）。行数が多い場合に不要な再レンダリングが発生しやすい。",
+    "suggestion": "行コンポーネントを React.memo でメモ化し、props を最小化するか、タップアニメーションの局所状態を Check コンポーネント内に閉じ込めて（self-timed）、親の tappingId 依存を排除する。代替として key={task.id + (tapping?'-tap':'')} のような一時再マウント手法も検討可能だが、まずはメモ化が無難。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-105",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S10Grow.jsx mountedRef の初期化/cleanup",
+    "issue": "mountedRef を初期値 true とし useEffect でも true に設定しているため、意図（マウント状態ガード）が読み取りづらい。実害はないが保守性を損なう。",
+    "suggestion": "mountedRef は初期値 false にし、mount 時に true、cleanup で false に戻す。もしくは一般化された useIsMounted フックを用いて意図を明確化する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "Check コンポーネント（aria-pressed とラベル設計）",
+    "issue": "aria-pressed を done のみ true、それ以外は false としており、3 状態（scheduled/active/done）のうち active の意味付けが『トグル未押下』に含まれる。SR によっては状態の差が伝わりにくい可能性がある。",
+    "suggestion": "検討案: active を aria-pressed=\"mixed\" とし、aria-label で次の遷移先を引き続き説明する。主要 SR（NVDA/JAWS/VoiceOver）での読み上げ確認を継続する。現実装でも破綻はないが可読性向上余地あり。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "lais/src/components/shared/BottomTabBar.jsx",
+    "issue": "JSX に class 属性を使用（className ではない）。Preact 等では妥当だが、React DOM への移行やツールチェーン変更時に非互換となるリスクがある。",
+    "suggestion": "プロジェクトとして Preact を標準化するなら alias（react → preact/compat）を README/tsconfig/vite 設定で明示。将来的な React DOM 互換性を担保するなら className に統一。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "lais/src/components/shared/BottomTabBar.jsx",
+    "issue": "ナビゲーションに <button> を使用しているため、デスクトップ環境での中クリック/コンテキストメニューによる新規タブ遷移といったブラウザ標準の挙動が得られない（SPA でも期待される場合がある）。",
+    "suggestion": "対象プラットフォームがモバイル専用であれば現状維持で可。デスクトップも想定するなら <a href> + router（preventDefault）または <Link> を用い、aria-current=\"page\" を併用してアクセシビリティとブラウザの期待動作を両立する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "⚠️ 最重要: ミッション定義によるスコープ外リスト",
+    "issue": "R1 CRITICAL の 4 件（S-13/S-14 遷移・EXP バー加算アニメ・Undo スナックバー）は本ミッションのスコープ外であることを確認。現状は console.log 代替のまま。",
+    "suggestion": "本ラウンドでは対応不要。Phase B での実装計画/チケット紐付けを README か追跡表に明記しておくと、後工程での取りこぼし防止になる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

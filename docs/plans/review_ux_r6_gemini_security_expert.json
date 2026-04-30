@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "project_v1.md §6.5 / project_v1.md §7.4",
+    "issue": "退会時のデータ物理削除対象に、ユーザーがアップロードした画像（Supabase Storage）が含まれていない。90日の自動削除に依存すると、退会後も最大90日間画像が保持され、GDPRの「忘れられる権利（Right to Erasure）」に違反し、重大なプライバシー侵害となる。",
+    "suggestion": "§6.5の削除対象に「Supabase Storage内の該当ユーザーの全画像ファイル」を明記し、退会処理のWorker CronジョブでStorage APIを呼び出して即時（72時間後）物理削除する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §5.4 / ux_v1.md §4.4",
+    "issue": "QRコードには「ユーザーUUID + 一時トークン」を含めるとあるが、シェアリンクのURLは `?token={一時トークン}` のみとなっている。トークンだけでユーザーを特定できるならQRコードにUUIDを含めるのは内部識別子の不必要な露出（セキュリティリスク）であり、逆にUUIDが必須ならシェアリンクが機能しないという矛盾がある。",
+    "suggestion": "トークン自体をサーバー側でUUIDと紐づく一意なセキュア文字列（例: JWTやランダムなハッシュ）とし、QRコード・シェアリンク共に「トークンのみ」を含める仕様に統一してUUIDの露出を防ぐ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §6.4 / ux_v1.md §3.2",
+    "issue": "テキストのPIIマスキングは定義されているが、添付画像内のPII（顔写真、免許証、書類等）に対する保護措置がない。初回警告ダイアログだけでは不十分であり、ユーザーが誤って個人情報を含む画像を送信した場合、そのまま��部API（OpenAI/Google）に流出する。",
+    "suggestion": "画像送信前にクライアントサイドまたはエッジワーカーで軽量な顔認識/テキスト検出（OCR）を行い、PIIが含まれる可能性が高い場合は送信をブロックするか、強い再確認を求める仕組みを導入する。MVPで困難な場合は、画像選択の都度「個人情報が含まれていないか」のチェックボックスを必須にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §5.5 / ux_v1.md §4.4",
+    "issue": "メッセージや応援（頑張れ！）の送信頻度制限が定義されていない。悪意のあるユーザーがAPIを連続で叩くことで、相手の通知をスパム状態にし、サーバーリソースを枯渇させるDoS/ハラスメント攻撃が可能。",
+    "suggestion": "サーバー側（Cloudflare Workers/Supabase）で送信レートリミット（例: 1ユーザーあたり1分間に最大5件、1日最大100件等）を設定し、超過時はHTTP 429エラーを返し、クライアントでエラートーストを表示する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §13.1",
+    "issue": "S-42（メール変更）で「新メールアドレスに認証リンク送信」した後の画面状態（S-04のような待機画面への遷移）が未定義。また、変更前のメールアドレスに対するセキュリティ通知が定義されておらず、アカウント乗っ取り時の被害拡大リスクがある。",
+    "suggestion": "認証リンク送信後はS-04相当の「メール認証待ち」画面に遷移させるフローを追記する。また、セキュリティ要件として「変更前のメールアドレスに変更通知（取り消しリンク付き）を送信する」仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §7.2 / ux_v1.md §13.1",
+    "issue": "JWT（アクセストークン、リフレッシュトークン）のクライアント側での保存場所が明記されていない。localStorageに保存した場合、XSS脆弱性によってトークンが窃取されるリスクが高い。",
+    "suggestion": "§7.2に「トークンはHttpOnly属性付きのセキュアCookieに保存する」または「Web Workerのメモリ内に保持し、永続化にはIndexedDBを暗号化して使用する」など、XSS耐性のあるセッシ���ン管理方針を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §5.4 / ux_v1.md §4.4",
+    "issue": "友達解除時に「メッセージ履歴も双方から削除」される仕様だが、ハラスメントを受けて「通報せずに即ブロック（友達解除）」した場合、サーバーからメッセージが物理削除され、後から運営が被害調査を行えなくなる。",
+    "suggestion": "友達解除・ブロック時のメッセージ削除を「論理削除（ユーザーのUIからは消えるが、DB上には一定期間保持）」に変更し、トラスト＆セーフティのための調査期間（例: 30日間）経過後に物理削除する仕様とする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §9.1",
+    "issue": "TALK画面のオフライン挙動で「入力フィールドを無効化」とあるが、画像添付ボタン（📎）の無効化が明記されていない。オフラインで画像を選択できてしまうと、復帰時の同期ペイロードが巨大になりエラーを引き起こす可能性がある。",
+    "suggestion": "§9.1のTALK画面オフライン挙��に「画像添付ボタン（📎）も無効化（グレーアウト）する」と追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §6.4",
+    "issue": "AI対話履歴にはユーザーの極めてプライベートな情報が含まれるが、アプリケーションレベルでの暗号化（TDEやユーザー固有キーによる暗号化）が定義されていない。DB管理者が生のテキストを閲覧できる状態はプライバシーリスクがある。",
+    "suggestion": "将来的な要件（v0.2.0以降など）として、AI対話履歴（messagesテーブル）のテキストデータをユーザーのパスワード由来のキー等で暗号化して保存する（E2EEに近いアプローチ）検討を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §2.3",
+    "issue": "30秒間のUndo受付期間中に、意図的なネットワーク遅延等を用いて「完了」と「Undo」のAPIリクエストを並列で大量送信された場合、EXPが不正に増殖するレースコンディションのリスクがある。",
+    "suggestion": "project_v1.md §7.3の同期API仕様に「タスク完��/Undoリクエストには一意な冪等性キー（Idempotency Key）を含め、サーバー側でトランザクションロックを用いて状態の不整合を防ぐ」と追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

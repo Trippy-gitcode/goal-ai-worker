@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 手順 4",
+    "issue": "`*.md` ファイルの untracked を洗い出した直後に、`git add lais/ instructions/ docs/ templates/` とディレクトリ全体を追加している。これにより、Markdown 以外の意図しないファイル（一時ファイル、バイナリ、`.DS_Store` など）がすべて Git の管理下に入り、リポジトリが汚染されるリスクがある。",
+    "suggestion": "ディレクトリ全体ではなく、Markdown ファイルのみを対象に追加するようコマンドを修正する。例: `find lais instructions docs templates -name \"*.md\" -exec git add {} +`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§7.1 手順 5 (byte_floor_check.sh)",
+    "issue": "pre-commit フックで検査対象を `--diff-filter=AM` (Added, Modified) に限定しているため、リネーム (`R`) やコピー (`C`) されたファイルが同時に編集されて 8 bytes 未満になった場合、検知をすり抜けてコミットされてしまう。",
+    "suggestion": "`--diff-filter=AM` を `--diff-filter=d` (Deleted 以外すべて) または `--diff-filter=AMRC` に変更し、リネームやコピーされたファイルもサイズ検査の対象に含める。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§7.1 手順 7",
+    "issue": "動作確認で `git commit -m \"...\"` を実行しているが、ユーザーが既に `git add` していた他のファイルの変更も一緒にコミット対象となる。もしフックが発火せずコミットが成功した場合、ユーザーの作業中の変更がテストコミットに巻き込まれ、意図しない状態変化を引き起こす。",
+    "suggestion": "テスト前に未コミットの変更がないことを確認する（`git diff --cached --quiet`）か、テスト用の別リポジトリ（`git init /tmp/test-repo`）���作成してフックの動作確認を行うよう手順を変更する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§3.4 セットアップ手順 5",
+    "issue": "Google Drive へのエクスポート用 `rsync` コマンドに `--prune-empty-dirs` (`-m`) が指定されていないため、`--include='*/'` によって除外対象ファイルしか存在しないディレクトリも空ディレクトリとして大量に同期・作成されてしまう。",
+    "suggestion": "空ディレクトリの同期を防ぐために、`rsync` コマンドに `-m` (`--prune-empty-dirs`) オプションを追加する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§3.1 セットアップ手順 1",
+    "issue": "`find . -type f -name \"*.md\" | xargs git check-ignore -v` において、ファイル名やディレクトリ名にスペースが含まれている場合、`xargs` が引数を正しく分割できずエラーや誤動作の原因となる。",
+    "suggestion": "NUL 文字区切りを使用してスペース耐性を持たせる。`find . -type f -name \"*.md\" -print0 | xargs -0 git check-ignore -v` に修正する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§7.1 手順 7",
+    "issue": "テストファイル名が `tmp_byte_floor_test.md` と固定されている。万が一同名のファイルが既に存在していた場合、`: > \"$TESTFILE\"` によって内容が上書きされ、テスト終了後に `rm -f` で完全に削除されてしまう（データ喪失）。",
+    "suggestion": "テストファイル名にタイムスタンプやプロセス ID を含めてユニークにする（例: `tmp_byte_floor_test_$$_${RANDOM}.md`）。または、作成前にファイルの存在確認を行い、存在する場合はエラーで止める処理を追加する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0191,
+    "input_tokens": 10992,
+    "output_tokens": 1062,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

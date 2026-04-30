@@ -1,0 +1,5 @@
+[
+  {"id":"R-001","severity":"HIGH","category":"ACCESSIBILITY","screen":"s10_grow","location":"完了タスク『企画書を仕上げる』","issue":"完了タスクのグレーアウトが背景に沈み、積み重ねの記録として視認性が弱い。","suggestion":"文字色を #7890A8 程度まで持ち上げ、取り消し線で完了表現。","model":"Code","persona":"web_designer"},
+  {"id":"R-002","severity":"MEDIUM","category":"VISUAL_HIERARCHY","screen":"s30_me","location":"62% 数値位置","issue":"EXPバー右端の小さな 62% はバー進行と視線上分離。","suggestion":"バー直下中央へ移動。","model":"Code","persona":"web_designer"},
+  {"id":"R-003","severity":"LOW","category":"LAYOUT","screen":"s13_task_detail","location":"完了時 AI相談ボタン","issue":"LOCK #3 既棄却（情報提示のみ）。","suggestion":"(対応不要)","model":"Code","persona":"web_designer"}
+]

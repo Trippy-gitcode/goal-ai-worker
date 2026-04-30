@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §9.1 vs project_v1.md §7.3",
+    "issue": "オフライン時のEXP演出方針が矛盾。projectは「EXP演出を表示しない（同期待ちバッジ）」だが、UXは「楽観的にEXP演出を表示し、同期後に補正」と定義。",
+    "suggestion": "どちらの方針を採用するかを1つに統一する。PWAの一貫性・信頼性を優先するならサーバー権威モデル（オフライン時はEXP演出なし＋同期待ちバッジ）を採用し、UX側を修正。楽観的演出を採るならproject §7.3も更新し、補正時のUI（レベル巻き戻し時の通知/演出抑制）とE2Eの整合（Undo/日次上限/レベルアップ再生抑止）を明記する。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.4 戻りナビゲーション",
+    "issue": "「ブラウザバック: ボトムタブ間: 前タブ」 はプラットフォーム標準に反する可能性が高い。Material/HIGではボトムナビの各タブはトップレベル目的地であり、Androidのシステム戻るはモーダル/詳細→前画面を優先し、タブ���履歴の遷移は一般的でない。",
+    "suggestion": "戻るの優先順位をプラットフォーム標準に合わせる: 1) 開いているモーダル/ドロワーを閉じる 2) 階層ナビを1段戻る 3) タブ内のスタックがなければアプリ終了（Android）/何もしない（iOS）。タブ選択は通常historyに積まない（または積む設定をAndroidのみ無効化）。仕様にプラットフォーム別のバック挙動を明記する。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.5, §7.3",
+    "issue": "チャット履歴の行スワイプ方向が不一致。§3.5は「左スワイプで削除露出」、§7.3は「左→右で削除露出」。",
+    "suggestion": "一般的パターン（iOS/Androidともに左スワイプでトレーリングアクション露出）に統一し、全箇所を「左スワイプ→削除」へ修正。ジェスチャー定義表も更新する。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（Todayセクション）／project_v1.md §3.2.3",
+    "issue": "projectで定義された「週N回習慣を手動でTodayに追加（『今日やる』ボタン）」のUXがToday画面に未定義。",
+    "suggestion": "習慣行に『今日やる』アクション（溢れメニュー or 行右端ボタン）を追加。押下で当日表示に即時反映されること、Undo（30秒）対応、Todayからの取り消し時の挙動を定義する。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §7（ジェスチャー）/ 全体",
+    "issue": "ハプティクスの定義がQRスキャン時のVibrationのみで、主要操作（タスク完了、並び替え開始、Pull-to-refresh閾値到達、レベルアップ等）に対する触覚フィードバックが未定義。",
+    "suggestion": "主要操作に軽微なハプティクスを追加（例: タスク完了=軽い成功(UIImpactFeedbackStyle.light/ HapticFeedbackType.ClockTick)、並び替え開始=選択(UISelectionFeedback)、Pull-to-refresh実行=中程度、レベルアップ=成功通知(UINotificationFeedback.Success/強め)）。設定に『触覚フィードバック』トグルも用意。PWAの場合はAndroidのVibration APIのみ有効、iOS PWAは非対応でフォールバックなしと明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.3（PWA���装注記）",
+    "issue": "root要素に一律でoverscroll-behavior-x: noneを適用する設計は、横スクロールUI（チップ横スクロール、サブタブスワイプ）やプラットフォーム期待挙動を阻害するリスクがある。",
+    "suggestion": "iOS Safariスタンドアロン時のみ、戻りジェスチャー競合箇所（フルスクリーン詳細や設定階層等）に限定して適用。コンテンツ横スクロール領域には適用しない。左端20pxのエッジスワイプ検出もiOS限定で有効化し、他環境ではシステム挙動を尊重する。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.5（ドロワー）/ §10（アクセシビリティ）",
+    "issue": "ドロワーのアクセシビリティ要件（フォーカストラップ、背景inert、Escape/Back閉じ、role/aria属性）が未定義。",
+    "suggestion": "ドロワーにrole=\"dialog\"（もしくはrole=\"navigation\"+aria-modal）+ aria-label を付与し、開時はフォーカスをドロワー内先頭へ移動、Tabで外に出ないようトラップ、背景はinert。Escape/Android戻るで閉じる。開閉時のフォーカス復帰先も明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（S-36 QRスキャン）",
+    "issue": "カメラ権限拒否・恒久拒否時（権限ダイアログでNever allow/設定で無効）のUI・代替導線が未定義。",
+    "suggestion": "権限拒否時は説明モーダルを表示し『設定でカメラを許可』の案内＋代替手段（シェアリンク入力/画像からスキャン）を提供。恒久拒否時はOSの設定画面へのディープリンク（可能な範囲で）を提示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §7.4（ドラッグ&ドロップ）/ §10",
+    "issue": "ドラッグによる並び替えのスクリーンリーダー代替操作が未定義。ロングプレス→ドラッグは支援技術利用者には操作不能。",
+    "suggestion": "『並び替えモード』トグルを用意し、各行に上下移動ボタン（Move up/down）+ aria-liveで順序変更を読み上げ。ドラッグハンドルにはaria-grabbed/aria-dropeffectを付与し、キーボード操作でも順序変更可能にする。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md ��3.1（TALKヘッダー）",
+    "issue": "TALKヘッダーに☰（履歴ドロワー）と🕐（履歴）が併存し、用途が曖昧かつ冗長。",
+    "suggestion": "履歴エントリを1つに統合（☰=ドロワー or 🕐=履歴いずれか）。もう一方は別機能（例: 📝=新規チャットのみ）に限定。各アイコンにラベル/ツールチップ/aria-labelを付与して意味を明確化。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3（Undoスナックバー）/ §3（TALK入力）",
+    "issue": "Undoスナックバーを全タブ跨ぎで30秒固定表示にすると、TALKの入力バーやボトムタブ上の重要操作を覆ってしまう可能性がある（小画面・キーボード表示時に特に顕著）。",
+    "suggestion": "スナックバーの表示位置と回避戦略を明記（キーボード表示時は入力バー上に重ならないようオフセット/縮退表示、TALKでは入力領域を押し上げ、MEではサブタブインジケータと干渉しない）。または画面別にコンパクト版（トースト内アクション）へ自動切替。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md 全体（レイアウト）",
+    "issue": "ノッチ/ホームインジケータ等のセーフエリア対応の明記がない。",
+    "suggestion": "CSS env(safe-area-inset-*)を使用し、ボトムタブ・スナックバー・フローティングCTA・ドロワーのパディングを調整。design_system.mdに安全余白トークンを定義して全画面で一貫適用。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §13.3（通知設定）",
+    "issue": "プッシュ権限の事前説明（pre-permission）と拒否後の再許可導線が簡略。iOS/Androidでの権限ダイアログは一度拒否されると再提示が困難。",
+    "suggestion": "『通知のメリット』を示す事前シート→[許可する]でOSダイアログ表示、拒否時は設定アプリへの導線/手順を表示。PWA特有の制約（iOSはホーム追加必須）も再案内。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（Overdue『明日に延期』）/ §10.1",
+    "issue": "行右端のテキストボタンは44x44pxの最小タップ領域を満たさない恐れ。狭小端末での誤タップが���念。",
+    "suggestion": "『明日に延期』をアイコンボタン化＋タップ領域拡大（min 44x44px/48dp）。スワイプアクション（左スワイプ→延期/削除）も提供し、片手操作を容易にする。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §6.5（Pull-to-refresh）",
+    "issue": "Pull-to-refresh閾値や完了時のフィードバックに触覚・音・明確な状態遷移が未定義。",
+    "suggestion": "閾値（約60px）到達時にインジケータを『解放で更新』に切替＋軽いハプティクス。更新完了時に『最新に更新』トースト/チェックマークアニメーションを表示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2（画像添付）/ §9（エラー）",
+    "issue": "画像添付の上限超過/非対応形式/ウイルススキャン失敗等のエラーUIが未定義。",
+    "suggestion": "添付時にクライアント側でサイズ/形式検証。違反時はインラインエラー（『10MB以下のJPEG/PNG/GIF/WebPのみ対応』）を表示。アップロード失敗時は再試行/削除アクションを提供。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4（QRスキャン・振動）",
+    "issue": "iOS PWAはVibration API非対応のため、QR検出時のバイブレーションが発火しない可能性が高い。",
+    "suggestion": "プラットフォーム検出でAndroidのみVibrationを有効化し、iOS PWAでは視覚（枠色変化/フラッシュ）＋小音量効果音（ユーザー操作時に許可がある場合）で代替する旨を明記。将来ネイティブラッパー化時はHIG準拠のHapticを有効化。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.3（アニメーション）/ §8",
+    "issue": "タブの再タップ時の期待挙動（リスト先頭へスクロール/状態リセット）が未定義。",
+    "suggestion": "現在選択中タブを再タップで、そのタブのスクロールを先頭へスムーズスクロール（reduced-motion時はinstant）。GROWではToday先頭、MEではアクティブサブタブ先頭へ。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §10.4（スクリーンリーダー対応）/ §3（TALK）",
+    "issue": "ストリーミング中のメッセージ更新は連続読み上げのノイズになる恐れ。aria-liveの詳細（polite/atomic/relevant）が未定義。",
+    "suggestion": "AIバブルはストリーミング中aria-liveをoff、確定時にaria-live=\"polite\"で全体を一度だけ読み上げる（aria-atomic=true）。『新しいメッセージ』フローティングボタンにaria-liveを設け、未読発生時に簡潔に通知。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.1 / §1.2（画面IDと遷移）",
+    "issue": "S-00〜S-41要件に対し、S-42（メール変更）/S-43（パスワード変更）が追加されている一方で、全IDの戻り動線は明記されているが、S-34（SHOP: Coming Soon）の戻り方法がサブタブ内の標準戻り以外に明示されていない（閉じ方の統一記述不足）。",
+    "suggestion": "S-34はME内サブタブであり戻りは不要である旨を明記し、全S-IDに対して『戻り方法/閉じ方』を表形式で網羅（ハーフモーダル/フルスクリーン/サブタブ/ドロワーごとに統一ルールを再掲）して行き止まりがないことを保証する。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

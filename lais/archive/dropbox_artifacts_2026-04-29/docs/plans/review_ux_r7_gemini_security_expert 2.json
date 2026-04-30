@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "SECURITY",
+    "location": "ux_v1.md §13.1",
+    "issue": "メールアドレス変更時（S-42）に、旧メールアドレスへのセキュリティ通知および変更キャンセル機能が定義されていません。セッションハイジャック等でアカウントに侵入された場合、攻撃者にメールアドレスを変更されると、正規ユーザーは完全にアカウントの制御を失い復旧不可能になります。",
+    "suggestion": "メールアドレス変更リクエスト時に、必ず「旧メールアドレス」宛に変更の事実と「身に覚えがない場合のキャンセル（アカウントロック）リンク」を含むセキュリ��ィ通知メールを送信する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "PRIVACY",
+    "location": "project_v1.md §6.5 / ux_v1.md §13.4",
+    "issue": "アカウント削除の72時間クーリングオフ期間中（account_status = deleted_pending）における、他のユーザー（友達）からのデータ可視性が未定義です。RLSポリシー（§7.2）に除外設定がないため、退会手続きをしたにもかかわらず、72時間は友達の図鑑やメッセージ履歴にプロフィールが表示され続けるプライバシー侵害（GDPR違反リスク）が発生します。",
+    "suggestion": "project_v1.md §7.2のRLSポリシーに「account_status != 'deleted_pending'」の条件を追加し、クーリングオフ期間に入った瞬間に他ユーザーから論理的に非表示（図鑑から消失、メッセージ送信不可）になる仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §5.4 / ux_v1.md §4.4",
+    "issue": "QRコードとシェアリンクのトークン仕様に矛盾があり実装が破綻します。§5.4では「QRコードにUUID + 一時トークンを含む」としていますが、§4.4のシェアリンクは「?token={一時トークン}」のみです。API側でトークンからユーザーを特定できるならUUIDをQRに含める必要はなく（含めるとUUID漏洩リスク）、特定できないならシェアリンクが機能しません。",
+    "suggestion": "UUIDをQRコードやURLに直接含めるのをやめ、サーバー側で発行する一時トークン（JWT、またはDBでUUIDと紐付けたランダム文字列）のみをQRコードおよびシェアリンクに含める仕様に統一してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "SECURITY",
+    "location": "ux_v1.md §5.0.2 / ux_v1.md §5.0",
+    "issue": "パスワードリセット（S-05）では未登録メールでも同じメッセージを表示しアカウント列挙攻撃を防いでいますが、サインアップ（S-01）において「既に登録済みのメールアドレス」を入力した場合のエラー挙動が未定義です。ここで明確なエラーを出すと、攻撃者がメールアドレスの存在確認を行えてしまいます。",
+    "suggestion": "サインアップ時に既存メールアドレスが入力された場合、画面上は「確認メールを送信しました」と表示���つつ、裏側では当該メールアドレス宛に「既にアカウントが存在するためログインしてください」という通知を送る仕様にするか、アカウント列挙リスクを受容するか明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "PRIVACY",
+    "location": "ux_v1.md §14.1 / ux_v1.md §9.1",
+    "issue": "オフライン時のローカルキャッシュ保護が欠落しています。オフライン状態でアプリを起動した場合、セッションが切れていてもローカルキャッシュからGROW画面（タスク等）やME画面（AI理解メモ等の機密情報）が閲覧できてしまいます。デバイス紛失時や共有端末でのプライバシーリスクが高いです。",
+    "suggestion": "アプリ起動時の生体認証/PINロック（App Lock機能）を導入するか、IndexedDB/CacheStorageに保存する機密データをユーザー固有の暗号化キー（セッションストレージ等で管理）で暗号化する設計を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.4",
+    "issue": "メッセージの通報機能（S-35）のUXフローにおいて、通報完了後に相手を自動的にブロックする、またはブロックを提案する導線がありません。通報後も加害者から引き続きメッセージが届く状態となり、ユーザー保護として不十分です。",
+    "suggestion": "通報送信完了時のトースト表示後、または確認ダイアログ内で「このユーザーをブロックしますか？」というプロンプトを表示し、ワンタップでブロックできるフローを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "PRIVACY",
+    "location": "project_v1.md §3.3 / project_v1.md §6.4",
+    "issue": "画像添付時のプライバシー保護が不十分です。テキストのPIIは正規表現でマスキングされますが、画像内のPII（顔写真、免許証、住所が写った書類など）はそのままVision APIに送信され、Supabaseに90日間保存されます。初回警告ダイアログだけではGDPR等の観点でリスクが残ります。",
+    "suggestion": "プライバシーポリシーでの明記に加え、画像データはAI処理完了後（またはセッション終了後）に即時削除する（90日保持しない）仕様に変更するか、サーバー側で顔認識・文字認識による自動ぼかし処理を入れることを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §1.4",
+    "issue": "未保存データがある状態での戻る操作（popstateイベント）をキャンセルするために「history.pushStateを再挿入する」手法は、iOS Safari等でブラウザの履歴スタックを破壊し、無限ループや意図しない画面遷移を引き起こす既知のバグ（SPAルーティングのアンチパターン）があります。",
+    "suggestion": "popstateイベント発生時は履歴スタックの変更をキャンセルするのではなく、状態（state）として「確認ダイアログ表示中」フラグを持たせ、ユーザーが「破棄」を選んだ場合にのみ実際にコンポーネントをアンマウントする（履歴は進んだままにするか、独自ルーターで整合性を取る）設計に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "QRスキャン（S-36）またはシェアリンクから友達リクエストを送信した後、相手が承認・拒否する前にリクエストを「キャンセル（取り消し���」するフローが定義されていません。誤ってリクエストを送った場合に取り消す手段がありません。",
+    "suggestion": "FRIENDS画面の「承認待ち」セクション、または送信済みリクエストの一覧に「リクエストを取り消す」ボタンを追加し、相手の画面に表示される前にキャンセルできる機能を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "SECURITY",
+    "location": "ux_v1.md §13.1",
+    "issue": "オフライン時に「強制ログアウト」を実行した場合、ローカルデータは消去されますが、サーバー側のセッション（リフレッシュトークン）が無効化されません。オンライン復帰時にトークンが盗まれていた場合、不正アクセスされるリスクが残ります。",
+    "suggestion": "オフラインでの強制ログアウト時は、次回オンライン接続時に該当デバイスのトークンを無効化するリクエストをService WorkerのBackground Syncキューに入れるか、トークンの有効期限自体を短く保つ設計を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

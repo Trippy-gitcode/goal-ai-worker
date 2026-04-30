@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "S14-2（S14GoalDetail.css .s14-title）",
+    "issue": "CSS プロパティ名のタイプミス（padting-top）によりタイトルの上余白が適用されず、spec「padding-top --space-md」に不一致",
+    "suggestion": "padting-top を padding-top に修正し、視覚リグレッションを確認する",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "App.jsx（/goal/:id lazy + Suspense）",
+    "issue": "lazy chunk 取得失敗（オフライン・一時的なネットワーク断・タイムアウト）時の ErrorBoundary 不在。import() の reject でアプリがクラッシュまたは空白になる恐れ",
+    "suggestion": "Suspense を ErrorBoundary でラップし、読み込み失敗時にリトライボタン/案内を表示（例: onClick で再 import、数秒後の自動リトライ）。または router レベルで chunk 読み込みリトライポリシーを入れる",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "S14GoalDetail.jsx（useState 初期化と id 変更）",
+    "issue": "goal を useState(() => GOALS_MOCK[id]…) の初期化で固定しており、同コンポーネントインスタンス上で /goal/g-1 → /goal/g-2 など param が変化しても UI が更新されない（preact-router は同一ルートを再利用することがある）",
+    "suggestion": "id を依存にして再計算する（例: const goal = useMemo(() => GOALS_MOCK[id] || null, [id])）または useEffect で state を更新。もしくは state に保持せず直接 props から導出して描画する",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "S14GoalDetail.jsx（id 未一致時の DEFAULT_GOAL フォールバック）",
+    "issue": "存在しない id に対しサイレントに別ゴール（g-1）を表示。将来的に編集/削除と結合時に誤操作リスクがある",
+    "suggestion": "404 風の状態画面（「ゴールが見つかりません」+ [GROW に戻る]）または /grow に自動リダイレクトしトースト通知を表示。少なくともコンソールではなくユーザーに明示する",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S14-3/S14-4（進捗%/プログレスバー aria-valuenow と width）",
+    "issue": "goal.progress に範囲外値（<0, >100, NaN）が渡った場合、バーがはみ出す/マイナス幅になる・ARIA の値域逸脱となる",
+    "suggestion": "表示前にクランプと数値化（const pct = Math.max(0, Math.min(100, Number(goal.progress)||0)); aria-valuenow と style.width 双方に pct を適用）",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "App.jsx（Suspense fallback）",
+    "issue": "role=\"status\" + aria-live=\"polite\" だがテキストノードが無く、支援技術に読み上げられない可能性。視覚的にも無表示でネットワーク遅延時に空白に見える",
+    "suggestion": "fallback に可視テキスト（例: 「読み込み中…」）と SR 用のライブテキストを入れる。ARIA 的には role=status 内に実テキストを置くか aria-atomic と組み合わせる",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S14-2（タイトルの長文/非ASCII/長い英単語）",
+    "issue": "長いゴール名（無改行のURL/英単語/絵文字連結）で横スクロールやオーバーフローが発生する可能性",
+    "suggestion": "タイトルに overflow-wrap: anywhere; または word-break: break-word; を付与し、必要に応じて multi-line clamp（-webkit-line-clamp）を検討",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": ".s14-goal（min-height: 100dvh）",
+    "issue": "100dvh 未対応ブラウザで高さ指定が無効になり、アクション行が画面下に配置されない可能性（古い iOS/Safari 等）",
+    "suggestion": "フォールバックとして min-height: 100vh を先に宣言し、その後 100dvh で上書き（@supports (height: 100dvh) などで条件分岐）",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "S14-8（タスク一覧 空状態）",
+    "issue": "tasks が空配列のとき空白のみで、ユーザーに状態が伝わらない",
+    "suggestion": "プレースホルダ行（例: 「まだタスクがありません」）と + タスクを追加 を誘導。アクセシブルに role=note なども検討",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S14GoalDetail.jsx（タスク行 onClick に無名関数を毎回生成）",
+    "issue": "大量タスク時にレンダリング毎に関数が再生成され微小なパフォーマンス低下",
+    "suggestion": "デリゲーション（親に onClick、一意の data-id を用いる）または useCallback でハンドラを再利用。あるいは handleOpenTask を currying せず event.currentTarget.dataset.id 参照に変更",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "@media (prefers-reduced-motion: reduce)",
+    "issue": "transition-duration を 1ms に縮退しているが、完全無効化ではないため一部環境で僅かなモーションが残る可能性",
+    "suggestion": "reduce モードでは対象プロパティの transition を none にする（例: transition: none !important）",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": ".s14-goal（safe-area 対応）",
+    "issue": "bottom の safe-area は考慮しているが、上部（notch/動的島）への余白付与が無い端末で戻るボタンが近接する可能性",
+    "suggestion": "必要に応じて padding-top: env(safe-area-inset-top) を段階的適用（@supports）し、タップ領域の余裕を確保",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

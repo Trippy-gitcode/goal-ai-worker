@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-201",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S02Onboarding.css §.s02-onboarding（min-height: 100dvh）",
+    "issue": "min-height を 100dvh のみで指定しているため、dvh 非対応ブラウザ（古い iOS Safari/Chromium 系 WebView 等）では宣言全体が無効化され、想定のフル高さが確保されない可能性がある。",
+    "suggestion": "段階的フォールバックを追加する。例: 先に min-height: 100vh; を書き、直後に min-height: 100dvh; で上書きする（または @supports (height: 100dvh) 内で上書き）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-202",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "S02Onboarding.css §S02-6 次へ CTA（.s02-next left/right）および §.s02-onboarding padding",
+    "issue": "ランドスケープ時や側面ノッチ（safe-area-inset-left/right）がある端末で、左右のセーフエリア加算がないため、CTA やコンテンツがノッチ/曲面に接近・一部欠けする可能性がある。",
+    "suggestion": "下端と同様に左右のセーフエリアも段階的フォールバックで考慮する。例: @supports (left: env(safe-area-inset-left)) { .s02-next { left: calc(env(safe-area-inset-left) + var(--space-lg)); right: calc(env(safe-area-inset-right) + var(--space-lg)); } .s02-onboarding { padding-left: calc(env(safe-area-inset-left) + var(--space-lg)); padding-right: calc(env(safe-area-inset-right) + var(--space-lg)); } }",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-203",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "修正方針および依存関係（HTML <meta name=\"viewport\">）",
+    "issue": "env(safe-area-inset-*) の有効値は viewport-fit=cover の指定有無に依存する。ドキュメント上この前提が明示されておらず、未設定だと env() が 0 を返し、期待するマージン加算が行われない可能性がある。",
+    "suggestion": "対象画面（またはアプリ全体）の <meta name=\"viewport\" content=\"... , viewport-fit=cover\"> の有無を明記・検証する。E2E で env() が 0 でないことを確認するテストを追加し、未設定でも致命影響がない設計かを合わせて記載する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-204",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "S02Onboarding.css §.s02-onboarding padding-bottom と §S02-6 次へ CTA（min-height: 52px 前提）",
+    "issue": "CTA の高さを 52px 固定前提で .s02-onboarding の padding-bottom を算出しているため、長文ラベル・多言語・改行・ユーザーの文字サイズ拡大（200〜400%）で CTA が 52px を超えると、コンテンツと CTA が重なりうる。",
+    "suggestion": "CTA 高さの可変に対応してレイアウトを組む。例: 1) CTA をフロー内配置に変更し position: sticky; bottom: calc(env(...) + 100px); として重なりを原理的に排除、2) JS で CTA の実測高さを CSS 変数（--cta-h）に反映し、padding-bottom: calc(env(...) + 100px + var(--cta-h) + var(--space-md)); にする、3) 純 CSS の場合は余裕を多めに取り max() や clamp() を用いて、max(52px, 2.5em) などで下部余白を確保する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-205",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02Onboarding.css §S02-6 次へ CTA（.s02-next transition）",
+    "issue": "prefers-reduced-motion: reduce 環境でも background-color・opacity のトランジションが有効のまま。感受性が高いユーザーに不要な変化を与える可能性がある。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) { .s02-next { transition: none; } } を追加し、必要に応じて他アニメーションも同様に抑制する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-206",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S02Onboarding.css 全般（design token 依存）",
+    "issue": "spacing/radius 等の design token（--space-*, --radius-*, --letter-spacing-ja など）にフォールバックがなく、トークンの未定義や読み込み順問題が発生した場合、該当プロパティ全体が無効化されてレイアウト崩れ（例: パディング消失・CTA ��置ズレ）を招く。",
+    "suggestion": "クリティカルなレイアウト値にはフォールバックを付与するか、トークン CSS の読み込み順をビルドで保証する。例: padding: var(--space-lg, 16px) var(--space-lg, 16px) calc(100px + 52px + var(--space-md, 8px)); border-radius: var(--radius-lg, 12px); など。合わせてトークン未定義時を検出する統合テストを追加する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

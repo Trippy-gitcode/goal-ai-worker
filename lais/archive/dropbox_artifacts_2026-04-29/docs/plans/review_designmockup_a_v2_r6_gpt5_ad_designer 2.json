@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "ロゴ下のサブコピー周辺（中央）",
+    "issue": "初見でアプリの機能が分かる説明がなく、タグライン「あなたの人生を、あなたらしく」だけでは用途が曖昧。3秒で「タスク/ゴール×AI」だと認識しづらい。",
+    "suggestion": "ロゴ直下に機能が明確な1行を追加（例:「AIと一緒にタスクと目標を管理」）。または3アイコン＋短文の価値訴求（タスク/ゴール/AIコーチ）を追設。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "OTHER",
+    "screen": "s00_splash",
+    "location": "主要CTA「はじめる」ボタン",
+    "issue": "CTA文言が抽象的で、遷移先（サインアップ）やコスト感が伝わりにくい。",
+    "suggestion": "文言を「無料ではじめる」または「サインアップ」に変更し、認知負荷を下げる。必要なら小さく「メールで登録」サブラベルを追加。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」チェックボックス",
+    "issue": "チェックボックスの見た目サイズが約20×20pxで、最小タップ領域44×44px要件（WCAG 2.5.5 / 仕様§4.5）を満たしていない可能性が高い。",
+    "suggestion": "視覚サイズはそのままでも、padding/透明ヒットエリアで44×44px以上に拡張。label全体をタップ可能にしてアクセシビリティ改善。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」リンク",
+    "issue": "インラインリンクが色差のみで示され、下線が無い。WCAG 1.4.1（色のみに依存した伝達の禁止）およびデザインシステム§2.2の下線併用ルールに不一致。",
+    "suggestion": "「ログイン」テキストに必ずtext-decoration: underlineを付与。ホバー/フォーカス時の下線強調とフォーカス可視化も付ける。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s01_signin",
+    "location": "フォーム下の「サインアップ」ボタン",
+    "issue": "ボタンが無効状態で理由が視覚化されておらず、次のアクション（どの条件で有効になるか）が直感的に分かりにくい。",
+    "suggestion": "ボタン直上にミニヘルパー「メール・パスワード入力と規約同意で有効化」を表示、または未充足項目に軽いエラー/ヒント表示を付ける。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "ステップインジケータ（上部の5本バー）",
+    "issue": "視覚的には段数が分かるが、現ステップの数値情報（2/5など）がなく、残り工程が一瞥で把握しづらい。",
+    "suggestion": "インジケータ右肩に「2/5」などの数値を追加。戻る/スキップの文言ボタンも右上に添えてフローの見通しを明確化。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクション内「＋タスクを追加」テキストリンク",
+    "issue": "追加CTAが小さくテキストリンク風で、リストの情報量に埋もれて見逃しやすい。主要行動の視認性が不足。",
+    "suggestion": "ヒーロー直下にアクセントのPillボタン（高さ44px以上）を配置、または右下にFAB（--button-primary-bg）を常設して主CTAを常時可視化。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Goalsセクション内「＋ゴールを作成」テキストリンク",
+    "issue": "タスク追加同様、CTAが弱く見落としやすい。次のアクションが明確に誘導されていない。",
+    "suggestion": "Goals見出しの近くに「+ ゴールを作成」Pillボタンを配置し、TodayのCTAと対にして行動を並列提示。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "入力バー右端の送信ボタン（紙飛行機アイコン）",
+    "issue": "添付アイコンと同等の視覚ウェイトで、送信の次アクションがやや弱い。入力有効時でも主動線として際立たない。",
+    "suggestion": "入��1文字以上で送信ボタン背景を--button-primary-bg（#1A5FC8）/アイコン白に切替、サイズ48–52pxで主ボタン化。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "ボタン群（下部）「編集／削除」および「進め方を聞く／詰まりを相談」",
+    "issue": "AI相談系ボタン（次の推奨アクション）がセカンダリと同等の見え方で、優先度が伝わりにくい。",
+    "suggestion": "AI相談のどちらかを主要CTAとして--accent-subtle背景＋太字、または1つをPrimaryボタン化し、編集/削除はゴーストに抑える。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "サブタブ見出し（PROFILE/DISCOVER/FRIENDS/SHOP）",
+    "issue": "非アクティブタブの視認性・可用感が低く、横スワイプで切替できることが直感しにくい。",
+    "suggestion": "下線インジケータのアニメーションに加え、左右端に軽いヒント（「←→ スワイプ」）や非アクティブタブのコントラストをわずかに上げる。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Today見出し直下の「1 / 4 completed」（フォントサイズ11px）",
+    "issue": "本文相当の進捗情報に--font-size-xs相当（11px）が使われ、デザインシステム§3.2「本文・重要情報への使用禁止」の方針とズレる可能性。",
+    "suggestion": "進捗ラベルは14px（--font-size-sm）に引き上げ、視認性と序列を担保。色は--text-secondaryを維持して主見出しとの差を保つ。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

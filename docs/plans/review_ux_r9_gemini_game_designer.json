@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.4",
+    "issue": "project_v1.md §4.2で定義されている「ゴール作成から完了まで最低7日間経過が必要。7日未満で全タスク完了した場合は完了待ち状態になる」という仕様が、ux_v1.md §2.4のUIフローに反映されていません。現状のUX仕様では全タスク完了時に即座に[ゴール完了にする]ボタンが表示されることになっており、実装時に矛盾が生じます。",
+    "suggestion": "ux_v1.md §2.4に、作成から7日未満で全タスクが完了した場合のUI状態（例: [達成にする]ボタンを非活性化し、「達成まであとN日」と表示��る）を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §9.1 / project_v1.md §7.3",
+    "issue": "オフラインで数日間にわたりタスクを完了し、後日オンラインに復帰して同期した場合の「1日上限300EXP」の計算基準日が未定義です。同期実行日の上限として一括処理されると、数日分の努力（EXP）が上限超過として切り捨てられ、深刻なデータ（経験値）損失とユーザーの不信感を招きます。",
+    "suggestion": "オフラインタスクの同期時は、サーバー側で「タスクの実際の完了記録日」ごとに日次上限（300EXP）を計算・適用する仕様を明記し、過去日付のEXPとして正しく付与されることを保証してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §4.4 / §4.5",
+    "issue": "レベルキャップ（Lv.50 = 63,700 EXP）への到達目安が1.7年とされていますが、毎日上限（300EXP + ゴール50EXP）を獲得するヘビーユーザーは約半年でカンストします。MVPではSHOPが未実装のため、カンスト後にEXPを消費・活用��るアバター経済の仕組みがなく、半年〜1年でモチベーションが完全に枯渇する（飽きポイント）リスクがあります。",
+    "suggestion": "Lv.50以降も「プレステージ（転生）」や「オーバーレベル（表示のみ無限上昇）」の仕組みを設けるか、将来的なSHOP実装時にEXPをゲーム内通貨に変換できる設計方針をproject_v1.mdに追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §8.6",
+    "issue": "演出キュー（同時発火時の優先順位）に「ログインボーナス（§8.5）」が含まれていません。ログインボーナス（+5 EXP）によってレベルアップ条件を満たす可能性（特にLv.1→2）がありますが、その際のアニメーションの競合と順序が未定義です。",
+    "suggestion": "§8.6の演出キューに「ログインボーナス」を追加し、ログインボーナス→レベルアップの順で直列実行されるように定義を更新してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.4",
+    "issue": "ゴール詳細(S-14)から[AI相談]でTALK(S-20)へ遷移する際、「S-14のpushState履歴をreplaceStateでGROW状態に書き換える」とあります。これにより、ユーザーがTALKで相談を終えてブラウザバックした際、ゴール詳細ではなくGROWトップに戻されてしまい、タスク追加などの連続した操作が阻害されます。",
+    "suggestion": "S-14からS-20への遷移時はreplaceStateを使用せず、S-14の履歴を残したままS-20へpushState（またはタブ切替）し、戻る操作でS-14に復帰できるようにナビゲーション設計を修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §8.3",
+    "issue": "ゴール達成ボーナスは1日1回制限（project_v1.md §4.2）ですが、同日に2つ目のゴールを達成した場合の演出が考慮されていません。EXPが付与されないにもかかわらず「🎉 ゴール達成！ +50 EXP」のバナーが表示されると、ユーザーに嘘のフィードバックを与えることになります。",
+    "suggestion": "同日2回目以降のゴール達成時は、バナーのテキストを「🎉 ゴール達成！」のみ（+50 EXP表記なし）とし、EXPバーの伸長演出をスキップする分岐ロジックを追記し���ください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.3",
+    "issue": "DISCOVER画面のヒアリングセッション（5問）がAI対話上限のカウントに含まれています。ヒアリング途中で上限に達した場合、「翌日のリセット後に再開」となりますが、自己分析というコア体験が翌日まで強制中断されるのはUXとして非常にストレスです。",
+    "suggestion": "ヒアリングセッション用のシステムプロンプトによる対話は、日次のAI対話上限カウントから除外する（またはヒアリング専用の無料枠を設ける）仕様に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.2.1",
+    "issue": "アバターの進化（Phase変更）が不可逆であり、ユーザーが以前のPhaseに戻すことができません。Lv.20等の全身リデザインでユーザーが新しい見た目を気に入らなかった場合、自己投影感が喪失し、即座に離脱する原因になります。",
+    "suggestion": "S-41（アバター設定）にて、到達済みの過去のPhase（基本アバターのシルエ��ト）をユーザーが任意で選択・切り替えられるように仕様を変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.3",
+    "issue": "TALK画面(S-20)のタスク提案カードから「編集して登録」をタップした際、S-12（タスク追加ハーフモーダル）が表示されますが、S-12の親画面はGROW(S-10)として定義されています。TALK画面上でそのままS-12が開くのか、GROW画面に遷移してから開くのかが曖昧です。",
+    "suggestion": "S-12ハーフモーダルは「呼び出し元の画面（S-10またはS-20）を親としてその上に表示される」という共通コンポーネントとしての挙動を明記し、背景がTALK画面のまま維持されることを明確にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §6.2",
+    "issue": "トーストの複数同時表示について「スタック最大2件」と定義されていますが、3件目のトーストがトリガーされた場合の挙動（最も古いものが即座に消去されるのか、キューに入って待機するのか）が未定義です。",
+    "suggestion": "「3件目が発生した場合は、最も古いトーストが即座にスライドアウトして消去され、新しいものが下から追加される」等のオーバーフロー時の挙動を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §4.5",
+    "issue": "「同名タスク5分以内再完了は無効」という不正対策がありますが、ユーザーが「タスクA」「タスクB」などの別名のダミータスクを大量に作成して即完了させることで、容易に1日上限（300EXP）に到達できてしまいます。",
+    "suggestion": "「タスク作成から完了まで最低1分経過が必要」などの作成・完了間隔の制限を追加するか、1日の単発タスク完了による獲得EXPにソフトキャップを設けることを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2 / ux_v1.md §2.3",
+    "issue": "project_v1.mdにはタスクの所要時間が「タイムライン表示の幅計算に使用」と記載されていますが、ux_v1.mdのTodayセクションのUI定義では単なる縦並びのリスト行となっ��おり、カレンダーのような幅（高さ）の概念が存在しません。",
+    "suggestion": "project_v1.mdの「タイムライン表示の幅計算に使用」という記述を削除するか、ux_v1.mdのUI定義をブロック状のタイムラインUI（所要時間に応じて高さが変わる）に変更して整合性を取ってください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  }
+]

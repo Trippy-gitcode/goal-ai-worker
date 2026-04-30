@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "改訂案② D.1 scripts/verify_env.sh",
+    "issue": "Viteの仕様上、VITE_* プレフィックスの環境変数はビルド時に実際の値に静的置換されるため、ビルド成果物 (dist/) 内に変数名 (VITE_API_URL 等) の文字列は残らない。そのため `grep -rq \"$VAR\" dist/` は常に失敗し、デプロイフローが確実にブロックされる。",
+    "suggestion": "VITE_* 変数については dist/ 内の変数名 grep を削除し、ビルド前にローカルの .env / .dev.vars に値が設定されているかの検証 (canopy E3) に留めるか、PaaS側の環境変数リストに含まれているかの検証から除外す���。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "改訂案⑤ B init_app.sh --subdir",
+    "issue": ".gitignore への追記の冪等性チェック `grep -q \"# Sub-app: $SUBDIR_NAME\"` において、SUBDIR_NAME が `app` で、既に `# Sub-app: app-backend` が存在する場合、部分一致してしまい追記がスキップされる。結果として必要なエントリが追加されない。",
+    "suggestion": "`grep -q \"^# Sub-app: $SUBDIR_NAME$\" \"$PARENT_DIR/.gitignore\"` のように行全体で完全一致させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "改訂案② D.2 scripts/verify_external_services.sh",
+    "issue": "Supabase API のレスポンスにおいて、`redirect_urls` はカンマ区切りの文字列ではなく JSON の配列（リスト）である。Python ワンライナー内で `.split(',')` を呼び出しているため、配列が返却された場合に AttributeError が発生しスクリプトがクラッシュする。",
+    "suggestion": "Python スクリプトを `urls=d.get('redirect_urls', []); print('\\n'.join(urls) if isinstance(urls, list) else '\\n'.join(urls.split(',')))` のように型を���慮した実装に変更するか、jq を使用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "改訂案① F scripts/step0_lint.sh",
+    "issue": "改訂案① E にて development_rules.md の G1〜G9 全てのゲート冒頭に Step 0 を追加すると定義しているが、step0_lint.sh の SUBCHECKS 配列では `development_rules.md:G1:§C2 / §C6` のみ定義されており、G2〜G9 の参照漏れが機械検証されない。",
+    "suggestion": "SUBCHECKS に G2〜G9 を追加するか、development_rules.md 内の全ての `### G[1-9]` に対して Step 0 が存在するかをループで検証するロジックに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "改訂案① F scripts/step0_lint.sh",
+    "issue": "`FLOW_START=$(grep -n \"^## $FLOW\\|^### $FLOW\" \"$SPEC\")` でセクションを検索しているが、FLOWS 配列のキー（例: `§9. デバッグ`）と実際のマークダウンの見出し（例: `§9. デバッグ4フェーズ`）の表記揺れ（ドットの有無や後続の文字列）によりマッチせず、WARNでスキップされる可能性が高い。",
+    "suggestion": "FLOWS のキーを正規表現とし���柔軟にする（例: `§9\\.? デバッグ`）か、grep 時に部分一致を許容する（`grep -n \"^## .*$FLOW\\|^### .*$FLOW\"`）ように修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "改訂案② D.1 scripts/verify_env.sh",
+    "issue": "`PROJECT_NAME=$(yq e '.deploy.project_name // \"\"' app_config.yaml)` としているが、app_config_template.yaml (改訂案② E) には `deploy.project_name` の定義が追加されていない。そのため、常に空文字となり `deploy.project_name not set` で FAIL する。",
+    "suggestion": "app_config_template.yaml の拡張部分に `deploy: project_name: \"my-project\"` のような定義を追加するか、wrangler.toml から name を取得するようにフォールバックを実装する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案② C canopy_common.sh 拡張",
+    "issue": "E3 必須環境変数存在チェックにおいて `grep -q \"^${VAR}=\" \"$ENV_FILE\"` としているため、.env ファイル内で `export VITE_API_URL=...` と書かれている場合や、イコールの前後にスペースが含まれている場合 (`VITE_API_URL = ...`) にマッチせ��� FAIL となる。",
+    "suggestion": "`grep -qE \"^(export[[:space:]]+)?${VAR}[[:space:]]*=\" \"$ENV_FILE\"` のように正規表現を柔軟にし、一般的な .env の記法に対応させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "改訂案② B §8. C2デプロイフロー",
+    "issue": "§19.10 で Hフローの発動タイミングを「デプロイ後の本番環境に対して」としているが、§8 のデプロイフロー本体（Step 12 の後など）に Hフローを実施する旨の記載がないため、ENGがデプロイ完了後に Hフローを呼び出し忘れるリスクがある。",
+    "suggestion": "§8 の Step 12 の説明、または Step 13 の前に「Step 12 PASS後、§19.10 Hフロー（統合フローレビュー）を実施する」という手順を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "改訂案② D.3 test_realworld_template.ts",
+    "issue": "`const DEPLOY_URL = process.env.DEPLOY_URL || '';` と定義し `await page.goto(DEPLOY_URL);` としているが、playwright.realworld.config.ts 側で `baseURL: process.env.DEPLOY_URL` が設定されているため、テストコード内で絶対URLを組み立てる必要はない。",
+    "suggestion": "`await page.goto('/');` および `await page.goto('/auth/signin');` に修正し、Playwright の baseURL 機能を活用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  }
+]

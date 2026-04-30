@@ -1,0 +1,100 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:27",
+    "issue": "path モジュールから `glob` を分割代入していますが、Node.js の標準 `path` に `glob` エクスポートは存在しません。現状は未使用なので直ちにクラッシュしないものの、将来この変数を使った時点で undefined 呼び出しによる実行時障害を招く地雷になっています。不要 import が実装意図も曖昧にしています。",
+    "suggestion": "未使用なら `const { glob } = require('path');` 自体を削除してください。実際に glob 展開が必要なら `glob` パッケージや `fast-glob` を明示的に依存追加し、`const { globSync } = require('glob')` のように正しい import パスへ修正してください。将来の誤用防止のため ESLint の no-unused-vars / import 系ルールも有効化すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "scripts/ai_review.js:325-331",
+    "issue": "GPT-5 呼び出しで `response_format: { type: 'json_object' }` を設定している一方、プロンプトでは「JSON配列のみ」を強制しています。OpenAI 側は json_object 指定時にオブジェクト返却へ誘導するため、仕様と API パラメータが矛盾しています。実際に `{\"items\":[...]}` や単一オブジェクトが返ると抽出処理の救済に依存し、出力品質が不安定になります。",
+    "suggestion": "配列を正とするなら `response_format` を外すか、Responses API / JSON Schema で `type: array` を明示できる方式へ統一してください。少なくとも gpt-5 にだけ json_object を付ける分岐は撤廃し、プロンプト・API パラメータ・extractJson の期待形を一致させるべきです。これにより再実行やパース補修ロジックへの依存を減らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:294-309",
+    "issue": "JSON 抽出で `/\\[[\\s\\S]*\\]/` により最初の `[` から最後の `]` までを貪欲に取得しており、モデル応答に説明文・コード例・別 JSON 断片が混在すると誤った範囲をパースします。たまたま成功しても別配列を拾う可能性があり、レビュー結果の欠落や誤読を後日必ず生みます。",
+    "suggestion": "正規表現の貪欲抽出ではなく、先��からブラケット深度を追跡して最初の妥当な JSON 配列だけを切り出す実装へ変更してください。もしくは API 側で構造化出力を強制し、extractJson はフォールバック専用に縮小すべきです。切り詰め補修も `},` 前提では壊れやすいため、JSON ストリーム風の手当ては避けた方が保守しやすいです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "scripts/ai_review.js:53-82",
+    "issue": "CLI 引数解析で値付きオプションの次要素存在チェックがありません。たとえば `--timeout` や `--input` を末尾で渡すと `undefined` が入り、`parseInt(undefined)` により NaN になったり、その後の split や path 処理で予期せぬ挙動になります。Unknown option 扱いにもならず、不正入力を静かに受け入れるため原因追跡が困難です。",
+    "suggestion": "値を要求するオプションは共通ヘルパーで次引数の有無と `--` 始まりでないことを検証し、欠落時は使用法付きで即 exit 1 してください。`parseInt` の結果は `Number.isFinite` で妥当性確認し、タイムアウトやトークン数には最小値も設けるべきです。yargs/commander 等の利用��検討すると保守負荷を減らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "scripts/ai_review.js:463-522",
+    "issue": "precommit モードの provider 実行で `Promise.all` により常時並列実行しており、CLI オプションの `--parallel` / 直列デフォルトという全体設計と挙動が一致していません。仕様コメントでは同期・非同期モードに触れているのに `opts.async` も未使用で、モードごとの責務が分離されていません。今後 provider 追加時に制御が破綻しやすい構造です。",
+    "suggestion": "precommit でも通常モードと同じジョブ実行基盤を使い、並列可否は `opts.parallel` または mode ごとの明示設定で制御してください。未実装の `--async` は削除するか fire-and-forget の実装を追加し、コメントと実コードを一致させるべきです。モード別の実行戦略を関数化すると責務分離と拡張性が向上します。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:436-444, 676-684",
+    "issue": "`_metadata` 要素を通常の findings 配列へ push した結果、集��側では severity 欠落を `?` として `totalItems` にも加算しています。現状は CRITICAL 判定へ直結しないものの、総件数やモデル別件数が常に水増しされ、将来この JSON を他ツールが findings 前提で読むと誤集計や表示崩れを引き起こします。",
+    "suggestion": "レビュー結果とメタデータは同一配列に混在させず、`{ findings: [...], metadata: {...} }` 形式へ変更してください。後方互換が必要なら少なくとも集計時に `severity` を持つ項目だけを対象にし、ファイルコメントやスキーマ定義を追加して契約を明文化すべきです。構造の曖昧さを放置すると連携先で必ず不具合になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:109-125",
+    "issue": "独自 glob 実装は `*` を単純に `.*` へ置換しているだけで、`.` など正規表現メタ文字をエスケープしていません。例えばファイル名中の `.` は任意文字として解釈され、意図しないファイルを拾う可能性があります。コメントも「trailing * only」とありますが実装は任意位置の `*` を許容しており、仕様と実装がずれています。",
+    "suggestion": "正規表現を手書きせず正式な glob ライブラリへ置き換えるのが最善です。自前継続ならベース名全体を regex escape したうえで `\\*` だけ `.*` に置換し、サポート範囲をコメントとテストで固定してください。入力ファイル解決は土台機能なので、曖昧な実装より信頼できるライブラリを使う方が保守的です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "scripts/ai_review.js:590-597",
+    "issue": "vote mode では `opts.proposal` をコマンドライン引数で直接受けていますが、長文や改行を含む提案を想定したエスケープ戦略がなく、シェル依存で簡単に壊れます。precommit で diff を標準入力化しているのに vote だけ入力経路が貧弱で、一貫性がありません。CI 連携時に提案文が途中で切れて誤判定しやすいです。",
+    "suggestion": "`--proposal-file` や stdin 読み込みを追加し、`--proposal` は短文専用の補助オプションとして扱ってください。入力元を抽象化した `loadTextInput` のような共通関数を作れば、context 系オプションとも再利用できます。シェル経由の長文引数は壊れやすいため、本番運用前にファイルまたは stdin ベースへ寄せるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:264-275, 314-352, 503-508",
+    "issue": "16384、32768、300000、32 * 1024 * 1024、5000 などの閾値が各所に散在しており、モデル更新や運用ポリシー変更時の追従漏れを招きます。現状コメントで一部説明されていますが、タイムアウト・リトライ間隔・バッファサイズの意図がコード上で統一されておらず、保守時の判断材料が不足しています。",
+    "suggestion": "運用定数は `const REVIEW_DEFAULTS = {...}` のように集約し、用途名を付けて参照してください。たとえば `DEFAULT_TIMEOUT_MS`、`GIT_DIFF_MAX_BUFFER_BYTES`、`RETRY_BACKOFF_BASE_MS` と分けると意図が明確になります。将来的に CLI で上書き可能なものと内部固定値を分離すると、変更影響も追いやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0424,
+    "input_tokens": 13772,
+    "output_tokens": 2519,
+    "model_id": "gpt-5.4"
+  }
+]

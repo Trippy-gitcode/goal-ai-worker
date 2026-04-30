@@ -22,7 +22,7 @@
 #   1: FAIL（必須項目欠落）
 #
 # 根拠:
-#   - lais/verify/dev_system_v34_package.md §2.25.21.1〜.3
+#   - core_spec.md §7 完了条件マトリクス (legacy v34 spec §2.25.21.1〜.3, archived 2026-04-30)
 
 set -eu
 

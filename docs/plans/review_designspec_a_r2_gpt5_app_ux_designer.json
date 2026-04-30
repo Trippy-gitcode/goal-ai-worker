@@ -1,0 +1,222 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§5.1 / §4.4 S10-10 / §4.9 S20-10 / §4.10 S30-7",
+    "issue": "ボトムタブのInactiveはアイコンのみ（ラベル非表示）。iOS HIGでは3タブ構成でも各タブにラベル表示が推奨。Material 3でもラベル省略は許容だが、判別性が低いアイコンでは非推奨。",
+    "suggestion": "プラットフォーム差分を定義。iOS: 全タブラベル常時表示（11–12pt）。Android: 現行の“Activeのみラベル”可だが、ユーザーテストで混同が出る場合は全表示へ。DSにplatform-variantトークン（tab.labelVisibility: all|activeOnly）を追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.1",
+    "issue": "タブバー高さ82pxはiOS既定（49–64pt + セーフエリア）より高め。TALKでは入力バー60px + タブ82pxの積み上げで有効表示領域が圧迫されやすい。",
+    "suggestion": "iOSでの既定は64pt程度（セーフエリア含む）を上限目安に再検討。Androidは80dp前後で可。端末のsafeAreaInsetsに応じてpaddingを可変化し、実高は最小限に。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.1",
+    "issue": "アクティブタブを再タップした際の既定挙動（スクロールトップ/スタックリセット）が未定義。",
+    "suggestion": "iOS/Androidとも「アクティブタブ再タップで該当リストを最上部へスクロール、ネストがあればルートへポップ」を規定。S-10/S-20/S-30の各リストで対応フックを実装。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4 S-10 / §4.10 S-30 / §6.1",
+    "issue": "Pull-to-refreshの有無・適用範囲が未定義。タスク/ゴール/プロフィールはサーバ同期が前提のため、手動リフレッシュ要件が必要。",
+    "suggestion": "S-10とS-30に下方向スワイプでの更新を定義。iOSはUIRefreshControl、AndroidはSwipeRefreshLayout相当。スケルトン/インジケータと競合しないよう上部ヒーロー圧縮と共存ルールを追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4 S10-4 / §4.7 S14-8",
+    "issue": "タスクリスト行のスワイプ操作（右/左で完了・延期・編��など）が未定義。HIG/Materialともリスト行のスワイプは主要クイックアクションとして一般的。",
+    "suggestion": "iOS: 右スワイプ=完了/未完トグル、左スワイプ=明日へ延期/削除（確認付）。Android: 同等のリビールアクションかコンテキストメニュー。ハプティクスとUndoスナックバー連動を規定。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.2 / §6.3",
+    "issue": "ハプティクス（触覚フィードバック）の規定が未定義。チェック完了、モーダルスナップ、削除確定、保存成功などの重要イベントに推奨。",
+    "suggestion": "iOS: UIImpactFeedbackStyle.light（タップ）/medium（チェック完了）/UINotificationFeedbackGenerator.success|warning|error。Android: VibrationEffect.createPredefined(HAPTIC_TICK/CONFIRM/REJECT)。prefers-reduced-motion相当で無効化オプションも定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.5 S-12 / §4.6 S-13 / §4.8 S-15 / §6.1",
+    "issue": "ハーフモーダルの高さが固定60%でデテント（中/大）遷移未定義。iOS/Androidともプラットフォーム���準ではdetents/expandedへのスワイプ拡張が一般的。",
+    "suggestion": "iOS: UISheetPresentationController（.medium/.large）のデテントを採用、ハンドルドラッグでスナップ。Android: Material BottomSheet（STATE_HALF_EXPANDED/EXPANDED）。内容量に応じた自動拡張と背景スクロールロックを明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.2 / §6.5",
+    "issue": "テキストサイズが固定pxでOSのダイナミックタイプ/フォントサイズ拡大対応が未定義。アクセシビリティ要件（iOS Dynamic Type/Android Font scale）に抵触の恐れ。",
+    "suggestion": "DSにスケーラブルなタイプスケール（TextStyle tokens）を追加し、iOSはUIFontMetrics/adjustsFontForContentSizeCategory、Androidはsp + scaledDensity対応を規定。主要文言は最小AAコントラスト維持でレイアウトラップ許容を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.9 S20-1 / §4.4 S10-4 / §4.7 S14-1 / §6.5",
+    "issue": "アイコンボタン（戻る/メニュー/送信/クリップ/AI相談等）のアクセシビリティラベル・ヒント・ロールが未定義。",
+    "suggestion": "各アイコンにaccessibilityLabel/Hint（例: “履歴を開く”, “メッセージを送信”），Traits/Role（button/toggle）を付与。チェックボックスは“完了/未完”の状態読み上げ、AIストリーミングはlive region（iOS: announcements, Android: LiveRegion）を規定。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.2 S-01",
+    "issue": "Authの入力UX詳細（Email用キーボード種別、Returnキーアクション、パスワード表示切替、オートフィル/パスキー対応）が未定義。",
+    "suggestion": "Email: keyboardType=emailAddress/autoCap=none/autoCorrect=off。Return: Email→NextでPasswordへ、PasswordのReturn=Submit。パスワード可視化トグル/長押し一時表示導入。iOS: Password AutoFill/Passkeys、Android: Autofill Framework対応を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§1.1 / §4.*",
+    "issue": "プッシュ通知のUX（許諾タイミング、通知種別、アクション、ディープリンク、Androidチャンネル）が未定義。タスク/期限リマインドの中核にも関わらず実装判断が分散する恐れ。",
+    "suggestion": "許諾: ファーストタスク作成後にインアプリ説明→システム許諾（iOSは暫定通知の活用も検討）���Android: チャンネル（リマインド/締切超過/AI返信）を定義。アクション: 完了/明日へ延期/スヌーズを追加しS-13/S-12へディープリンク。静音時間帯とバッジ/要配慮“時刻依存”分類も規定。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4 S-10 / §4.9 S-20 / §4.10 S-30 / §5.*",
+    "issue": "ローディング状態（スケルトン/インジケータ）の定義が不足。初回起動・タブ切替・再同期時の視覚的安定性が担保されない。",
+    "suggestion": "Open Air方針に沿った非シマーのスケルトンを定義（行テキスト2本+小バー/アバタープレースホルダ）。チャットは最新10件読み込み中にプレースホルダ気泡、過去読み込みは先頭に小型ローダ。スピナーは使用最小化。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4 S-10 / §4.9 S-20 / §4.10 S-30",
+    "issue": "空状態（タスク/ゴール0件、初回TALK、未入力プロフィール）の表示・行動喚起が未定義。",
+    "suggestion": "S-10: 空状態カードに説明 + “+ タスクを追加/ゴールを作成”CTA。S-20: ガイドメ��セージ例と推奨プロンプトチップ。S-30: プロフィール未入力のプレースホルダ + “編集を始める”。全てアイコン/簡潔テキストと学習コストの低い単一CTAで。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.5 S-12 / §5.10",
+    "issue": "エラー処理がトースト中心で再試行導線やフィールド内ヘルプが不足。視認性・操作性・アクセシビリティの観点で不十分。",
+    "suggestion": "送信系は“トースト+再試行ボタン”かCTAをRetryに切替。フォームはフィールド下にエラー理由＋修正ヒント、フォーカス誘導。A11yでエラー発生時にスクリーンリーダー通知（polite）。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.9 S-20",
+    "issue": "オフライン時のTALK送信/再送キュー、S-10同期不可時の扱いが未定義。",
+    "suggestion": "全タブ共通の“オフラインバナー”を規定。TALKは送信キュー（時計アイコン/再送ボタン/長押しで削除）、S-10は差分キューと“サーバと未同期”バッジを行に表示。オンライン復帰時に自動再送/再同期。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.9 スナックバー",
+    "issue": "Undoスナックバーが30秒と長く、iOSの一般的パターン（短時間/トースト中心）から乖離。長時間のフローティング要素は干渉リスクあり。",
+    "suggestion": "表示は6–10秒へ短縮し、通知センタ依存のない軽量設計を維持。iOSは一部ケースでAction Sheet/インラインUndoも検討。フォーカス移動やスクリーンリーダー読み上げを抑制（polite）し、連続操作を阻害しない。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.9 S20-2 / S20-8",
+    "issue": "チャットの自動スクロール制御の詳細（新着差し込み時のアンカー保持、編集/削除時の位置補正、長文折返し時の再レイアウト挙動）が未定義。",
+    "suggestion": "“下端付近なら自動追従、上方閲覧中は固定+新着バナー表示”ルールを明記。差し込みはリスト差分計算で高さ変動を補正。編集中は一時固定、送信完了で追従再開。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§6.1 / §4.5–4.8",
+    "issue": "AndroidのシステムBack/Navigate Upの挙動マッピング（ハーフモーダル閉、ドロワー閉、タブ内スタックのポップ）が未定義。",
+    "suggestion": "優先順位を定義: 1) 開いたドロワー/モーダル/ダイアログを閉じる→ 2) タブ内の詳細スタックをポップ→ 3) ルートで終了確認。iOSはスワイプバック/戻るで一貫性を確保。未保存変更時はconfirmを挟む。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§5.9 / §4.9 S20-8",
+    "issue": "フローティング要素の縦位置が“画面下から100px”など固定記述。ホームインジケータ/セーフエリア/キーボード表示時の干渉リスク。",
+    "suggestion": "safeAreaInsets.bottom + 固定オフセットに再定義し、keyboard可視時はvisualViewportに追随。小画面では重ならないよう最小マージンを指定。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.5 S-12 / §4.6 S-13 / §4.8 S-15",
+    "issue": "ハーフモーダル表示中の背景スクロールロック/フォーカストラップの規定がない。",
+    "suggestion": "モーダル開時に背面コンテンツのスクロールを無効化、フォーカスはモーダル内をトラップ。閉時に元位置へ復元。スクリーンリーダーのフォーカス遷移も同様に管理。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2.3 / §4.*",
+    "issue": "ステータスバーの外観（light/dark, translucent）と各画面のsafe area適用が未定義。",
+    "suggestion": "デフォルトはDark背景×Light content（iOS: lightContent, Android: light status bar icons=false）。モーダル/スクロール時の切替は避け、全体で一貫。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.4 S10-4 / §4.7 S14-8",
+    "issue": "長いタスク/ゴール名の折返し・省略（行数上限、ツールチップ）が未定義。視認性低下の恐れ。",
+    "suggestion": "1–2行まで折返し、超過は末尾省略（…）。詳細はタップでS-13へ。アクセシビリティでは全量を読み上げ。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "R2.1.1 §2.η' / §2.ε' / §2.δ'-1",
+    "issue": "STATUS自動遷移とdeploy前リスク判定の前提が崩れています。check_test_passは scripts/mission_risk_classifier.sh に instructions/session_progress.md 全体を渡していますが、同スクリプトは本来ミッション単位ファイルを前提にし、先頭の「対象ファイル」しか見ません。結果として別ミッションの対象ファイルを拾う、または high を low 誤判定し、READY_FOR_DEPLOY への自動遷移や deploy 時の高リスク判定が誤動作して高リスクでもデプロイを通す可能性があります。",
+    "suggestion": "mission_risk_classifier.sh の入力を『ミッション単位ブロック抽出済み一時ファイル』に統一してください。canopy_common.sh と deploy.sh は対象 MISSION_ID のブロックだけを awk/sed で切り出して mktemp に保存し、そのファイルを classifier に渡すべきです。あわせて verify_external_services.sh も同じ契約に揃え、リスク判定の入力契約を SSOT 化してください。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "R2.1.1 §2.β' / §2.γ' / §6.10",
+    "issue": "G15 tdd_trace_consistency.sh は実装不能に近い設計です。仕様側抽出は dev_system_spec.md / sub_testing.md から before/after/realworld-proof を拾いますが、実装側抽出対象が scripts/lib/canopy_common.sh のみで、G17 が参照する realworld-proof.json は realworld_proof_check.sh 側に存在します。そのため現状の比較ロジックでは spec と impl が必ず不一致になり、G15 が恒常FAILまたは価値のない比較になります。",
+    "suggestion": "G15 の実装側入力を canopy_common.sh 単体ではなく『G8/G17 関連スクリプト集合』に広げてください。例: canopy_common.sh + realworld_proof_check.sh + playwright.realworld.config.ts を抽出対象にするか、逆に G15 の責務を G8 の before/after 名称一致だけに限定して realworld-proof.json は別チェックに分離します。ゲート名と責務を一致させる必要があります。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "R2.1.1 §2.ε' deploy.sh 完全パッチ / R2.1 §5.5 発火タイミング総覧 / R2.1 §4.3 G6/G16/G17 定義",
+    "issue": "デプロイフローの依存関係がまだ整っ���いません。新 deploy.sh は G16→Hフロー→deploy→hash poll→G17 の順ですが、既存の C2 / G6 / 発火タイミング総覧では deploy.sh 内で canopy や既設ゲートをどう再実���・保証するかが曖昧です。R2.1 本体の G6『pre-push + pre-deploy』、C2 の Step3 canopy、R2.1.1 の deploy.sh 単独実装が三重化しており、どの経路で何が必須なのか不明なまま本番デプロイが通り得ます。",
+    "suggestion": "deploy.sh を唯一の pre-deploy オーケストレータとして再定義し、C2・G6・§5.5 発火タイミング表を同時更新してください。具体的には『deploy.sh 冒頭で必須再検証するゲート一覧』『pre-push は早期警告のみ』『pre-deploy が最終ブロック』を表で固定し、C2 Step1-12 を deploy.sh 実装順と1:1対応させてください。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "location": "R2.1.1 §2.δ'-4 proposal_log_lint.sh",
+    "issue": "proposal_log_lint.sh の滞留日数更新は実際には反映保証がありません。grep | while のパイプ構造で while がサブシェルになっているため、STALE_COUNT の更新は親に戻らず、さらに同一ファイルに対してループ中に繰り返し awk 書換えを行うため、複数提案があると前の更新が後続処理で上書き・欠落する可能性があります。自動更新前提のG12として不安定です。",
+    "suggestion": "入力走査と書換えを1回の awk で完結させてください。まず date_to_epoch を外部関数化し、awk には proposal 見出し・STATUS・滞留日数行をまとめて処理させ、最後に1回だけ tmp→mv する設計に変更すべきです。少なくとも grep | while を避け、STALE_COUNT は親シェルで確実に保持される形に直す必要があります。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "R2.1.1 §2.β' G17 / §2.ζ' / R2.1 §4.12 playwright.realworld.config.ts",
+    "issue": "G17 が要求する proof.json の JSON スキーマが未定義です。realworld_proof_check.sh は .timestamp と .results.failed を必須にしていますが、Playwright JSON reporter の標準出力構造はこの形ではなく、timestamp も results.failed も保証されません。つまり high-risk ミッションでは Playwright が正常終了しても G17 が恒常FAILする設計です。",
+    "suggestion": "realworld-proof.json を『Playwright生JSON』ではなく、専用整形スクリプトで生成する SSOT に変更してください。例: Playwright 実行後に scripts/normalize_realworld_report.sh が timestamp, mission_id, results.failed, screenshots を持つ正規化JSONを evidence/<MID>/realworld-proof.json に出力し、G17 はその正規化フォーマットだけを読むように定義を固定してください。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "R2.1.1 §2.ι' / §6.9.2 / §6.18",
+    "issue": "pre-commit のサブディレクトリ解決が二重仕様です。dev-system.yaml.template を新設して推奨としつつ、フォールバックで find 動的探索も残しているため、同一プロジェクトで両方が存在した場合の優先順位・重複実行防止・探索対象除外（node_modules, vendor, archived repos）が未定義です。共通基盤としては誤実行リスクがあります。",
+    "suggestion": "方式を一本化してください。推奨は dev-system.yaml SSOT です。存在時は find を完全無効化し、未存在時のみ明示 WARN + 単一フォールバックとするべきです。さらに find 方式を残すなら除外パス、最大件数、同一 realpath の重複除去を仕様に追加してください。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "R2.1.1 §2.γ'-8 / §6.5.4 / §6.10",
+    "issue": "POSIX互換確保の要となる shellcheck ゲートが『G1拡張 or 新設 shellcheck_lint.sh』と書かれており、最終的なゲート責務が確定していません。Golden R1 で最重要だった POSIX 崩れの再発防止策なのに、どのゲートで、いつ、失敗時に何をブロックするかが曖昧なため、実装時に抜けるリスクがあります。",
+    "suggestion": "shellcheck を明確にゲート化してください。例えば G13 か G14 に混ぜず、『G1 の一部として pre-commit 必須、scripts/**/*.sh 全件、severity=error でFAIL』と本文・発火表・development_rules.md に固定すべきです。『or』表現を廃止し、単一の実装場所と単一の責務に収束させてください。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "R2.1.1 §3.1-§3.7 / dev_system_spec.md 現行 §17・§19.10・§20",
+    "issue": "§C0-C6 は『起動時要約版』として妥当ですが、現行 dev_system_spec.md の既存節との参照整合がまだ不足しています。特に §17 の仕様書構成、§19.10 のレビューフロー、§20 のセキュリティ管理は要約対象として §C5/§C6 に分配されていますが、R2.1.1 §3 では各小節の引用元が粗く、読者が正本節に戻る導線が弱いです。将来の差分更新で §21 ��け陳腐化しやすい構造です。",
+    "suggestion": "§C1-C6 の各箇条書きに『正本参照: §X.Y』を小項目単位で付与してください。章単位の大雑把な参照ではなく、例えば C6.2 の G10 なら §20.2、C5.1 の severity inflation なら §13.9 のように戻り先を明示することで、§21 と既存章の同期ズレをレビュー時に機械検出しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  }
+]

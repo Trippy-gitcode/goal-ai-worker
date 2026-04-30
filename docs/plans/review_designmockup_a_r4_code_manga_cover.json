@@ -1,0 +1,68 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "日英混在タイポ（AI理解メモ以外）",
+    "issue": "s30_me の AI理解メモは §3.4 line-height 1.7 反映済みだが、TODAY/GOALS/PROFILE 等の他セクションには未適用。",
+    "suggestion": "英字: letter-spacing +0.1em / 日本語: +0.02em・line-height 1.7 を該当クラスに拡張。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "タイトル中央配置",
+    "issue": "r4 ロゴ太字化済。配置は中央のまま Z/N 字誘導が効かない。",
+    "suggestion": "タイトルを左上 1/3 に寄せ、右下に星/月シンボル。3 パターン案 A の候補。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "60% 巨大数字",
+    "issue": "LOCK #11 で 3 パターン吸収予定。",
+    "suggestion": "3 パターンで (a) 副次配置、(b) 円形プログレス、(c) 現状維持 の差別化。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "タイムライン余白リズム",
+    "issue": "機械的等間隔で呼吸がない。",
+    "suggestion": "タスク間余白 16/24/16/32 等で不等間隔化。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "『最初のパートナーを / 選びましょう』",
+    "issue": "2 行折返しが文節境界を割っている。",
+    "suggestion": "1 行収まるフォントサイズ調整 or サブテキスト分離。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s01_signin",
+    "location": "インラインリンクの鮮青",
+    "issue": "モノクロ基調にノイズとして乗る。",
+    "suggestion": "#6A8CC8 程度にトーンダウン。",
+    "model": "Code",
+    "persona": "manga_cover"
+  }
+]

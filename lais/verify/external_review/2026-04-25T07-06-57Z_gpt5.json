@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "scripts/handoff_validator.sh / §2.25.16.5",
+    "issue": "仕様では「SSOT 4 ファイルが揃って Read されない場合、handoff_validator.sh が WARN を返す」とある一方、実装は transcript が指定されても Read 履歴の不足を判定条件に使っておらず、4ファイルの存在さえあれば常に PASS を返します。運用上もっとも重要な「未読検出」が機能しておらず、後日ハンドオフ漏れや誤判断を確実に生む実装です。",
+    "suggestion": "transcript 指定時は存在確認と Read 履歴確認を分離せず、各 SSOT ファイルについて grep ヒット有無を必須判定に含めてください。例えば present=4/4 かつ read_hits=4/4 のときのみ PASS、いずれか不足時は WARN とし、不足ファイル名・未読ファイル名を別フィールドで出力すると運用が安定します。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "scripts/main_session_writeguard.sh / §2.25.16.2-§2.25.16.3",
+    "issue": "仕様書の書込禁止対象には「lais/verify/*」が含まれ、例外は adv_violation_log.md のみと明記されていますが、実装は docs/po-decisions.md・docs/learned-patterns.md・instructions/po_offline.flag など仕様本文にない追加例外を許可しています。さらに session_progress の記述では意思決定ファイルへの直接更新も行っており、禁止境界が文書間で不整合です。",
+    "suggestion": "例外パスは仕様書 §2.25.16.3 を唯一の真実源として一元化し、実装・仕様・運用記録で完全一致させてください。フラグファイルを許可したいなら仕様本文へ追記し、逆に学習記録などを許可対象から外すなら writeguard 例外から削除します。例外一覧を配列化し、仕様差分時に検証できるテストも追加すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/main_session_writeguard.sh",
+    "issue": "PreToolUse の JSON を sed/grep で直接抽出しており、file_path や tool_name にエスケープ文字、改行、JSON のネスト差異が入ると誤抽出・未抽出になります。とくに file_path が取得できなかった場合に PASS 扱いしているため、フック入力形式の微小変更だけで保護が無効化され、禁止対象への直接���込を見逃すリスクがあります。",
+    "suggestion": "JSON 入力は python3 などで厳密に parse し、tool_name と tool_input.file_path を構造的に取得してください。parse 失敗時や file_path 欠落時は fail-open ではなく fail-closed で block する設計に変えるべきです。少なくとも JSON パース失敗、改行含むパス、エスケープ文字を含むケースのテストを追加してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/completion_verifier.sh",
+    "issue": "必須項目判定が grep ベースで非常に緩く、本文中に「PASS」「Done」「test」等の単語が偶然含まれるだけで通過します。仕様では完了報告フォーマットの必須項目を検証するとしているのに、見出し・キー名・コマンド結果の対応関係を見ていないため、実質的には曖昧なキーワード存在確認に留まっています。",
+    "suggestion": "MISSION-ID、結果、検証コマンド、サマリーをそれぞれ明確な行フォーマットで要求し、`^[-* ]**` や `^MISSION-ID:` のようなアンカー付き判定へ強化してください。さらに required-files の存在確認と報告本文内の更���対象記載を突合するなど、仕様意図に沿った構造検証へ寄せると誤判定が減ります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "scripts/subagent_health_check.sh",
+    "issue": "連続失敗回数が `~/.dev-system/subagent_failures` の単一カウンタで管理されており、subagent ごとでもミッションごとでもありません。別件の失敗が累積して無関係な 3 回目で ALERT になる一方、1件成功すると全件リセットされます。複数 subagent 並行運用時に障害の因果関係を誤るため、将来の運用バグを生みやすい設計です。",
+    "suggestion": "失敗カウンタは少なくとも subagent_id 単位、可能なら mission 単位で分離してください。単一ファイルに TSV/JSON で状態を持つか、`~/.dev-system/subagent_failures/<id>` のように分割すると扱いやすいです。completed で全体一括リセットするのではなく、該当 ID のみクリアする実装へ変更すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "scripts/context_monitor.sh / §2.25.16.4",
+    "issue": "stdin の `context_size` は「token 数 or 推�� ratio %」とされていますが、実装は 100 以下なら常に ratio、101 以上なら token とみなします。このため小さい token 数を渡した場合に 80 token を 80% と誤解釈します。入力仕様が曖昧で、呼び出し側によって判定結果が大きく変わる不安定なインターフェースです。",
+    "suggestion": "入力形式は `--percent N` と `--tokens N` のように明示的な引数へ分離してください。stdin を使うなら `percent:72` / `tokens:140000` のようなプレフィックス付きフォーマットに変更し、曖昧な自動判定を廃止するのが安全です。少なくとも未知形式を PASS 扱いせず WARN にする方が運用事故を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/night_mode_dispatcher.sh",
+    "issue": "閾値や運用条件の多くが 30、2300、600 などの裸の数値で埋め込まれており、仕様変更時にスクリプト・仕様書・運用文書の同期漏れが起きやすいです。とくに夜間時間帯と usage 閾値は本文でも強く依存しているため、将来の調整で diff 追跡しづらく保守性を下げます。",
+    "suggestion": "時刻範囲、usage 閾値、失敗��数などの運用値は定数名を付けて冒頭に集約してください。可能なら app_config.yaml や環境変数から読むようにし、仕様本文にも設定元を明記すると DRY になります。定数化するだけでもレビュー性と将来の変更安全性が大きく改善します。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "instructions/session_progress.md / docs・instructions 全体",
+    "issue": "session_progress.md に同種の「Last done」が複数並び、decision_log.md・subagent_status.md・patches.md と同じ情報が長文で重複しています。SSOT を増やした目的に対して、更新点が複数ファイルへ分散し始めており、将来どれが正本か分からなくなる兆候があります。運用記録ほど重複は後から不整合を招きやすいです。",
+    "suggestion": "session_progress は本当に必要な 5 行サマリーへ縮約し、詳細は decision_log / in_flight_topics / subagent_status / patches への参照リンクだけに寄せてください。各ファイルの責務を定義し、同一事実を複数場所に全文転記しない方針を徹底すると更新漏れや認識齟齬を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0555,
+    "input_tokens": 27176,
+    "output_tokens": 2149,
+    "model_id": "gpt-5.4"
+  }
+]

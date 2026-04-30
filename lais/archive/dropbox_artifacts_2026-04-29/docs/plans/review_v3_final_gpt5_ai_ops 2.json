@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§6 承認ルール / §2 変更フロー",
+    "issue": "リスクベース承認（🟢/🟡/🔴）の機械的な強制がないため、ENGが誤って（または便宜的に）低リスク扱いで自律実行できてしまう余地がある（mockup変更なし/対象ファイル数/LoC≤500の検証が自動化されていない）。",
+    "suggestion": "canopyにapproval_lint.shを追加し、ミッションブロックに「RISK: 🟢/🟡/🔴」「APPROVED_BY: PO@ISO8601」を必須化。GATE条件: (1) 🟡/🔴はAPPROVED_BY必須、(2) 🟢はgit diffで変更ファイル数≤2・LoC差分≤N（例: 200）・docs/mockups/未変更を自動検証、(3) 🟡は変更ファイル≤6・LoC≤500を検証。満たさない場合FAIL。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.3 G9スクショ証跡規約 + canopy_common.sh（G8/G9スキップ条件）",
+    "issue": "「AT不要/grep検証のみ/テスト影響: なし」などの文字列でG8/G9がスキップされるが、ADVのみ設定可というポリシーを技術的に強制していないため、ENGが追記して受入判定（スクショ）を回避可能。",
+    "suggestion": "スキップ理由を自由記述から構造化に変更（例: AT_SKIP: platform）。missionにAUTHORED_BY署名（ADV）を必須化し、canopyでADV署名（GPG or 署名付きコミット）を検証。許容理由は定義済み列挙のみ（platform等）。未署名・未定義理由はFAIL。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.1 G10 / §20 セキュリティ管理 / canopy_common.sh",
+    "issue": "G10シークレットスキャンがpre-commit依存で、CI/サーバー側のcanopyでは実行されていない。さらに`.md`を除外しているため、ドキュメントに誤貼りした実シークレットを検出できない。",
+    "suggestion": "CIでも実行するsecrets_scan.shを追加し、canopyから必ず起動。除外は`.example`系のみに絞り、`.md`は全面除外ではなくdocs/dev-system配下だけ除外等のスコープ最適化を行う（または`.md`にも走らせつつ誤検出抑制のホワイトリスト導入）。検出時は即FAIL。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md §2.13 changed-files-allowlist.sh",
+    "issue": "origin/mainが存在しない/浅いクローン等の環境で`git merge-base`失敗時にHEAD~1フォールバックは変更範囲を誤検出しやすい。対象ファイル判定も単純なgrep一致で誤マッチ/取りこぼしのリスクがある。",
+    "suggestion": "上流取得可否を厳密判定し、なければ初回コミットをBASEに。対象ファイルはミッション側をYAMLコードブロック（targets: 配列、glob可）に変更し、yqで厳密パース。pathspec（git -X pathspec-from-file）を利用して誤一致を防止。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§6 承認ルール（中リスクバッチ） + canopy_common.sh（G8注記）",
+    "issue": "🟡中リスクで「3件まで連続実行→まとめて報告」を許容している一方、canopyのG8/G9は「直近1ミッションのみ検証」。運用を誤るとバッチ中の先行2件が証跡未検証で通過する恐れがある。",
+    "suggestion": "canopyを拡張し、前回のcanopy PASS以降にDONEになった全ミッションを列挙してG8/G9を順次検証（instructions/results/canopy_latest.txtに最終実行時刻を記録）。DONEが複数あるのに直近1件しか証跡がない場合をFAILにする。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§9.2 修正試行3回制限 / §16.1",
+    "issue": "「同一バグ3回失敗でHOLD→ADVエスカレーション」の運用は定義されているが、自動カウント/強制停止の仕組みが未実装。",
+    "suggestion": "strikes_tracker.shを追加し、バグID単位のストライク件数をinstructions/results内のログから集計。3回超過でcanopy FAILにし、session_progress.mdへ自動でBLOCKED追記とADV通知テンプレートを挿入。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§1.4 バグ対応フロー + changed-files-allowlist.sh",
+    "issue": "ENGが「ミッション遂行に必要なバグ」を別ファイルで即修正するケースで、対象外変更を禁止するallowlistと衝突しうる。誰が/どうやって対象ファイルを拡張するかが不明瞭。",
+    "suggestion": "即時修正が必要な場合のミニミッション（HOTFIX-BUG）テンプレを定義し、ADVがtargetsを追加→PO即時承認→ENG実行の短絡フローを明記。allowlistはAPPROVAL付きのtargets追加のみ許可するルールを実装。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§13.9-§13.10（棄却ルール） + sub_infrastructure.md §2.14 review_gate.sh",
+    "issue": "review_gate.shは`dismissed:true`のみでCRITICALを除外するため、ENGがJSONを直接編集して棄却可能。棄却者・根拠・時刻の検証がない。",
+    "suggestion": "dismissedの必須フィールド（dismissed_by ∈ {PO, ADV} / dismissed_reason / dismissed_at ISO8601）を追加し、review_gate.shで検証。JSONの編集者がENGの場合はFAIL等、git authorとロールのマッピング検証を追加。可能ならADV/PO署名済み別ファイルで棄却一覧を管理。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.1 G3 + canopy_common.sh",
+    "issue": "G3のテスト件数照合がgrepによる`test(`カウントで、パラメタライズ/ヘルパー経由定義で誤差が出やすい。",
+    "suggestion": "Playwrightの`list-tests`またはJSONレポーターから総数を取得して照合する方式に変更（もしくは`npx playwright test --reporter=json`のstats.totalを使用）。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.2 G2/G9の役割分担 + §3 鉄則⑨ + sub_testing.md §2",
+    "issue": "「DOM API禁止（受入判定）」はポリシー化されているが、自動検知がないため、受入用specにDOM依存アサーションが混入しうる。",
+    "suggestion": "test_lint.shに受入spec（tests/e2e/specs配下）での`page.$eval|getAttribute|hasClass|boundingBox`等の使用検出を追加。G2専用補助テストはtests/e2e/helpersやtests/dev-assist配下に隔離し、そこだけ許容。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md §2.9 rollback.sh / §8 C2デプロイフロー",
+    "issue": "rollback.shは「最新タグ以降の全コミットを一括revert」方式で、マージコミットや保護ブランチでの運用に失敗しやすく、`--amend`も履歴整合に影響。実運用での失敗率が高い。",
+    "suggestion": "コード/アーティファクト分離ロールバックに変更（直近アーティファクト再デプロイ）。Git操作はタグcheckout→build artifact再配信に限定。DBマイグレーションと連動する場合のガード（前方互換/段階的リリース）も追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2 変更フロー / §6 承認ルール",
+    "issue": "🔴/🟡のPO承認の存在がミッション実行前に機械的に検証されない（承認の記載形式・検証ルールが未定義）。",
+    "suggestion": "ミッションヘッダーにAPPROVALメタ（APPROVED_BY, APPROVED_AT, SCOPE, RISK）を必須化し、canopyの前段でapproval_lint.shが未承認ミッションのIN_PROGRESS/DONEをFAILにする。PRベース運用の場合はCODEOWNERSでPOレビュー必須を追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "sub_infrastructure.md §2.13 / §5 ミッション定義テンプレート v3",
+    "issue": "changed-files-allowlist.shは「対象ファイル: ...」の単一行から抽出するため、テンプレート通りに複数列挙・改行した場合に正しく認識されない恐れがある。",
+    "suggestion": "ミッション定義をYAMLコードブロック化（例: ```yaml targets: [\"src/x.js\",\"src/y.ts\"] ```）。allowlistはyqでtargets配列を厳密抽出。テンプレートとmission_linter.shを合わせて更新。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "dev-system/docs/incident_runbook.md（§4） + §8 C2デプロイフロー",
+    "issue": "アプリがDBマイグレーションを伴う場合のロールバック手順（スキーマ/データの戻し方）がdev-system側に雛形として未定義。コードのみrevertではDBドリフトが残り得る。",
+    "suggestion": "共通のDBマイグレーション運用ポリシーを追加（前方互換二段階リリース/リバーシブルDDL/バックアップ→検証→復旧手順）。`db/migrate.sh`/`db/rollback.sh`テンプレートと、C2で「ロールバック手順の存在チェック」をゲート化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

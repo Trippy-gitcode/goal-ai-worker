@@ -1,0 +1,232 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §7.3（PWAオフラインEXP方針） vs ux §9.1（オフライン時のEXP表示）",
+    "issue": "オフライン時のEXP表示方針が矛盾。projectは「EXP付与を表示しない（同期待ちバッジ）」、uxは「楽観的にEXP演出を表示し、同期後に補正」。実装が二分されると巻き戻し/二重演出/レベル不整合の原因になる。",
+    "suggestion": "どちらかに統一し、全画面（GROW/TALK/ME）で一貫させる。推奨: 楽観的表示を採用する場合は「演出は表示するが、サーバー確定時に差分があれば静かに補正。Undoやレベルアップも“仮確定→本確定”の2段階」を明記。もしくはprojectの“同期待ち表示のみ”に統一し、UXの記述を修正。演出キュー（§8.6）にも“オフライン確定時の再生可否”を追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project §4.4（必要EXP式）/ §4.5（表・到達記述）",
+    "issue": "「次レベルに必要なEXP=100+(現在Lv-1)*50」と「Lv.1→2=1,000EXP（最速でも約3日）」が矛盾。UX全体の初回体験（初日にLv2到達）と整合しない。",
+    "suggestion": "Lv1→2=100EXPを正とし、§4.5の「1,000EXP」「3日」記述を削除・修正。Lighthouse的に初回レベルアップ体験を確実にするため、初日タスク/ログイン/冒険の合計が100以上になる例も追記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §8.6（演出キュー）",
+    "issue": "同時発火時の演出順が「タスク完了→ゴール達成→レベルアップ」のみ定義。ログインボーナス（§8.5）や冒険EXP（§3.4/§8.4）が同時に入るケースの優先順位・直列/並列の扱いが未定義。",
+    "suggestion": "演出キューにログインボーナスと冒険EXPを追加し、例: 1) タスク完了 2) ゴール達成 3) 冒険EXP 4) レベルアップ 5) ログインボーナス のように優先順位を定義。合計演出時間上限（8秒）の超過時短縮ルールも拡張。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux §3.1（TALKヘッダー）/ §3.5（履歴ドロワー）",
+    "issue": "TALKヘッダーに「☰（履歴ドロワー）」「🕐（履歴）」「📝（新規チャット）」が並ぶが、☰と🕐の機能差が不明瞭で冗長。どちらも履歴に見えるため初見で迷う。",
+    "suggestion": "履歴アクセスは片方に統合（推奨: ☰=ドロワー）。🕐は削除するか別機能（最近表示のクイックジャンプ等）として明確化。ツールチップ/aria-labelも明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §3.1/§3.5（新規チャット）",
+    "issue": "「📝 新規チャット」タップ時の挙動（現在スレッドの未送信テキストがある場合の確認、既定のシステムプロンプト、会話タイトルの命名、初回メッセージが空のまま作成可否）が未定義。",
+    "suggestion": "新規チャット作成の仕様を追加。未送信テキストがある場合は確認ダイアログ、タイトルは初回ユーザーメッセージ先頭20字、空作成不可など具体ルールを定義。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §3.2（画像添付）",
+    "issue": "画像添付のアップロード進行状況/キャンセル/失敗時のリカバリー（10MB超過・形式エラー・ネットワーク断再���）が未定義。",
+    "suggestion": "プログレス表示（%/スピナー）、[キャンセル]、失敗時の再試行/差し替え、10MB超過時のインラインエラーを定義。送信前にローカル圧縮の有無も明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §1.4（戻りナビゲーション）/全モーダル・ドロワー",
+    "issue": "history.pushStateの運用が高粒度で未定義（例: S-11→S-13のインライン編集突入/離脱、S-21ドロワー開閉、Undoスナックバー可視状態の履歴反映）。ブラウザバック時の戻り先が不定になりうる。",
+    "suggestion": "オーバーレイ/編集モードごとにpush/popするURLハッシュ（?sheet=task&id=...等）とpopstate時の戻り先テーブルを追記。モーダル/ドロワー/編集モード/ディープリンクの全組合せを網羅。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §5.1（オンボーディング完了直後）/ §2（GROW初回表示）",
+    "issue": "初回GROW/TALK/MEの要点説明（コーチマーク/1スクリーンチュートリアル）が未定義。5ステップオンボーディング後に主要UI��意味が直感で分からない一般ユーザーが迷う恐れ。",
+    "suggestion": "初回のみ表示のコーチマークを追加（例: GROW=今日やること、TALK=AIに相談、ME=プロフィールと発見）。スキップ可能・再表示方法（設定）も明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ボトムタブ（全体）",
+    "issue": "「GROW/TALK/ME」の英語ラベルは初見の意味が伝わりづらい（LINE/Instagram慣れの一般層）。",
+    "suggestion": "ラベルの副題や日本語化（例: GROW 今日/TALK 話す/ME 自分）を検討。少なくとも初回はツールチップや下線の説明テキストを提示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project §4（冒険EXPの概念）/ux §3.4",
+    "issue": "「冒険EXP」という言葉の意味がゲーマー以外には直感的でない。何をすれば増えるのかが初見で分かりにくい。",
+    "suggestion": "GROW初回に「冒険＝いつもと違う挑戦や初めての体験。1日最大2回まで+50EXP」といった説明バナー/ヘルプを追加。TALKで初回検出時に“これは冒険EXPです”の説���を1回だけ表示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux §4.2.1（アバター設定）/project §4.4（称号/Phase）",
+    "issue": "「Phase」「称号」などの専門用語は意味が伝わりにくい。",
+    "suggestion": "「一定レベルごとに見た目が進化します」「Lv10で服装が変わります」など、具体的・平易な表現に置換。ヘルプリンクを追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §2.3（Today並び替え）",
+    "issue": "Todayの手動並び替えと開始時刻による自動ソートの優先関係が不明。新規タスク（開始時刻あり/なし）追加時にどちらが勝つか未定義。",
+    "suggestion": "優先順位を定義（例: 初期は自動ソート、手動並び替えが発生した日だけ“手動固定モード”に移行。モードは1日限り/リセット可）。新規タスク挿入時のルールも明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §2.3（Overdue/延期）/project §3.2.5（日次リセットJST）",
+    "issue": "Overdueや「明日に��期」など日付操作がJST固定の影響を受けるが、ユーザー移動/海外滞在時の体験が未定義。",
+    "suggestion": "MVPはJST固定を前提に、設定に「日付の更新は毎日04:00（JST）」注記を表示。将来のローカルタイム対応時の切替方針（自動/手動）も追記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §9.1（FRIENDSオフラインQRスキャンのキュー）",
+    "issue": "オフライン中にキュー積みした友達リクエストを、復帰前に相手をブロック/解除した場合の整合性（キュー破棄/送信拒否）が未定義。",
+    "suggestion": "送信時に最新のブロック状態を再確認し、ブロック中は破棄（サイレント）。冪等性キーとトークン期限再検証を明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux §7.3（PWA edge swipe実装注記）",
+    "issue": "iOS PWAでのedge swipeカスタム実装はスクロールパフォーマンス低下や誤検知のリスク。全画面で `overscroll-behavior-x:none` は副作用が大きい可能性。",
+    "suggestion": "iOS限定・左端16pxのみ・縦スクロー��優先（しきい値/角度判定）などの制限を追加。機種別のA/Bテスト/無効化トグル（設定）も検討。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §6.2（トースト）/ §2.3（Undoスナックバー）/ §9（エラーバナー）",
+    "issue": "トースト/Undoスナックバー/常駐バナーの同時表示時のZ-index・スタッキング・相互抑制ルールが不足。視認性/操作阻害のリスク。",
+    "suggestion": "優先順位を定義（例: Undo>致命バナー>通常バナー>トースト）。同時表示制限と自動退避（位置/不透明度）を仕様化。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §10（アクセシビリティ）",
+    "issue": "触覚フィードバック（Haptics）の方針が未定義（QRスキャン時のみ記載）。日常操作でも有効にすると体感が向上。",
+    "suggestion": "主要操作（タスク完了、レベルアップ、ゴール達成、エラー時）にHapticsを追加。`prefers-reduced-motion`と同様に無効化オプションも提供。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux §1.1/§1.2（画面ID）",
+    "issue": "要件ではS-00〜S-41の完全性確認が求められているが、実際はS-42/43も存在。テスト項目/遷��図の範囲指定と不一致。",
+    "suggestion": "要件・テスト記述をS-00〜S-43に更新。遷移図にもS-42/43を明示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §3.5（チャット履歴削除）/project §6.4（AI理解メモ更新）",
+    "issue": "個別スレッド削除時にAI理解メモへの影響（次回更新での再学習/無視）や保存90日ルールとの関係が未定義。",
+    "suggestion": "「個別削除→当該スレッドのみ学習対象から除外（次回5セッション更新で再要約）」「全削除→メモ初期化」など挙動を明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux §4.5（SHOP Coming Soon）/project §2.1（Premier特典）",
+    "issue": "SHOP未実装時にPremierの価値が伝わりにくい。初見で「課金しても何ができるの？」と感じる恐れ。",
+    "suggestion": "SHOPタブ内にPremierの現時点特典（限定フレーム装備方法、優先サポート、後日チケット遡及）を図解で明示し、ME>PROFILE>アバター設定へのCTAを配置。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux §1.4（ブラウザバック動作）",
+    "issue": "「ボトムタブ間: 前タブへ戻る」というブラウザバック動作はWeb慣習と異なり、ユーザーが混乱する可能性。タブ切替は通常URL履歴に残さないことが多い。",
+    "suggestion": "タブ切替はpushStateしない（履歴に積まない）か、URLにタブを明示してもpopstateでは直前の詳細/モーダルにのみ戻る等、一般的パターンに合わせる。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §0.3（差別化マッピング）/全体",
+    "issue": "ベンチマークの学びは明記されているが、具体的な“避けるUI例（アンチパターン）→本設計の対応UI”の対応表が操作レベルで不足。",
+    "suggestion": "例: 「Habiticaの長いオンボで離脱→Laisは5ステップ＋コーチマーク」「Finchの待機メカ→待機なし」など、UI要素単位の対照早見表を追記し、設計判断がUXに反映されていることを可視化。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "初見全体（ランディング/S-00、オンボーディン��/S-03完了直後）",
+    "issue": "「これは何のアプリか」「続ける理由」が初見コピーだけだと抽象的で、自己成長に興味が薄い層には刺さりにくい。",
+    "suggestion": "ランディングと初回GROWに“3秒で分かる”具体コピーを追加（例: 「今日やることをAIが一緒に決める」「終わらせるとレベルが上がる」「友達に応援を送れる」）。週次レポートのサンプル画像も提示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  }
+]

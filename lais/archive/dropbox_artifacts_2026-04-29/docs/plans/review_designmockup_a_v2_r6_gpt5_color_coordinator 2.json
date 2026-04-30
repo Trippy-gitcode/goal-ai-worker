@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "主要なボタン/リンク/タブ/チップ（例: s00 はじめる/ログイン, s10 タブバー, s20 ヘッダーアイコン, s14 +タスクを追加 等）",
+    "issue": "フォーカス可視化が一貫していない（多くの要素に明確なfocus-visible表示が見えない）。WCAG 2.2 2.4.7/2.4.11に抵触の恐れ",
+    "suggestion": "全インタラクティブ要素に:focus-visibleで2px以上・コントラスト≥3:1のアウトラインを実装（例: outline:2px solid var(--accent-pressed); outline-offset:2px）。forced-colors対応（outline: 2px solid Highlight）も併記。ホバーではなくキーボード操作時にも必ず表示",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "HTML実装（例: s20 ヘッダー内のアイコンボタン, s12/s13/s15 のフッター主要ボタン, 各種✕閉じる）",
+    "issue": "ボタン/リンクがdivで実装されており、ロール/キーボード操作/名前が欠落���2.1.1 Keyboard / 4.1.2 Name, Role, Value 違反）。style属性内にbutton要素やrole, tabindexの定義なし",
+    "suggestion": "divを<button>または<a>に置換。やむを得ずdivを使う場合はrole=\"button\" tabindex=\"0\" aria-labelを付与し、Enter/Spaceで作動するキーハンドラを実装。フォーカスインジケータも付与",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayリストの完了トグル（直径22pxの丸チェック）",
+    "issue": "タップターゲットが22×22pxと視覚的にも物理的にも小さい。44×44px基準（WCAG 2.5.5 / HIG）を満たさない可能性",
+    "suggestion": "丸チェック自体は22pxのままでも、透明パディングや::beforeでヒット領域を44×44px以上に拡張（例: .check-btn{position:relative} .check-btn::before{content:'';position:absolute;inset:-11px}）し、行全体タップも許可",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "画面上部のステップインジケータ（青/グレーのバーのみで進捗を表示）",
+    "issue": "現在ステップが色だけで伝達され��いる（テキストや形状差がない）。WCAG 1.4.1「色のみに依存」違反の恐れ",
+    "suggestion": "「2/5」などの数値ラベルを併記し、現在ステップは太さ/アウトライン/アイコンで形状差を付与。aria-valuenow/min/max付きprogressbarで支援技術にも提供",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "フッター文「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」",
+    "issue": "リンクが色（#79C0FF）だけで区別され下線なし。本文中インラインリンクの下線必須ルール（デザインシステム §2.2 / WCAG 1.4.1）に不整合",
+    "suggestion": "「ログイン」にtext-decoration: underlineを付与（常時）。またはボタン化して形状差で示す。フォーカス時は下線の太さ/色を強調",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "下部アクション「削除」（outlineボタン。border:1px solid rgba(248,81,73,0.3)）",
+    "issue": "コンポーネント境界のコントラストが背景(#161B22)に対して3:1未満の可能性（非テキストコントラスト 1.4.11 違反）",
+    "suggestion": "境界色を--border-strong相当か、danger系の不透明度を上げて3:1以上を確保（例: border:1px solid rgba(248,81,73,0.6)）。もしくは塗りつぶしdangerボタン（--button-danger-bg）に変更して確実に可視化",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayヘッダー直下の完了サマリ「1 / 4 completed」（font-size:11px）",
+    "issue": "11pxはデザインシステムで「キャプション・時刻のみ」推奨。要約指標としては小さく、可読性/視認性が落ちる",
+    "suggestion": "font-sizeを14px（--font-size-sm〜base）へ引き上げ、line-heightも1.5に。色は--text-secondaryを維持して情報階層はそのままに可読性を改善",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "状態ラベル「完了済み」（#56D364）",
+    "issue": "セマンティックsuccess色がデザイントークン(--success: #3FB950)と不一致。テーマ横断の色一貫性要件に反する",
+    "suggestion": "success系はトークン(--success / --success-subtle)��統一。必要なら段階色はhover/pressedトークンで表現し、本文テキストは常に--successで4.5:1確保",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "WCAG",
+    "screen": "s10_grow, s14_goal_detail",
+    "location": "「+ タスクを追加」「+ ゴールを作成」等のテキストリンク風CTA",
+    "issue": "プラス記号で非色依存の手掛かりはあるが、本文中リンクの下線ルール（§2.2）未適用で可視性が弱い",
+    "suggestion": "テキストリンクとして扱う場合は常時underline（hover/focusで太く）。あるいは小型のghostボタン化して形状で一貫表示",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add, s13_task_detail, s15_goal_create",
+    "location": "ハーフモーダル（ボトムシート）全体",
+    "issue": "role=\"dialog\"/aria-modal/aria-labelledby等のモーダル属性やフォーカストラップの記述が見られない。背景操作の抑止/戻るキー処理も不明（2.4.3/2.1.2/1.3.1に抵触の恐れ）",
+    "suggestion": "モーダルルートにrole=\"dialog\" aria-modal=\"true\" aria-labelledbyを付与。表示時に初期フォーカスを見出し/最��の入力へ移動し、Tab循環でフォーカストラップを実装。ESC/戻るで閉じ、閉後はトリガー要素へフォーカス復帰",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

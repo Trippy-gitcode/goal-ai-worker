@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 S01Auth.jsx handleSubmit/timeout",
+    "issue": "クライアント側タイムアウト発火時に inFlightRef を false に戻すことで、最初のリクエストが未完了のまま再送が可能になり、先行リクエストが後から解決して UI 更新や route('/') を発火させる“古い応答の勝ち”レースが発生しうる。",
+    "suggestion": "送信ごとに requestId（インクリメント番号）を発行し、各応答・catch・timeout で現在の requestId と一致した場合のみ状態更新・遷移を行う。もしくは promise にラップをかけて timeout 後は結果を無視するラッパ（ignoreStale）を適用。AbortSignal が使えない前提でも“古い応答を捨てる”仕組みでレースを抑止する。E2E: 15秒超でタイムアウト→即再送→先行応答が後から来ても UI/遷移が変化しないことを検証。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.1 App.jsx NotFound",
+    "issue": "STATIC_PATHS.includes(path) がクエリは除去する一方でハッシュ(#)・トレailing slash・エンコード差異を未正規化のまま比較しているため、/terms#top や /terms/ が期待動作せずトップへリダイレクトされる可能性がある。",
+    "suggestion": "正規化関数を導入し、(1) decodeURIComponent、(2) '?' と '#' 以降の除去、(3) 末尾のスラッシュ除去、(4) 大文字小文字正規化 を行ってから STATIC_PATHS と比較する。併せて /terms/ /privacy/ も許可。E2E: /terms#x /terms/?a=b /terms/ での動作確認を追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 S01Auth.jsx useEffect(syncFromDOM)",
+    "issue": "オートフィル同期が初回・100ms の2回のみで、ブラウザやパスワードマネージャによっては充填がより遅延/フォーカス時に行われ、CTA が有効化されないケースが残る。",
+    "suggestion": "同期トリガを拡張する。(1) 追加タイマー（例: 0/100/500/1000ms）、(2) focus/blur/change/input/animationstart(autofill) リスナ、(3) visibilitychange/ページ復帰時の再同期、(4) 値が空の間だけ短期ポーリング（<=2s）を併用。E2E: 各ブラウザでのオートフィル後に CTA が適切に有効化されることを検証。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.3 S01Auth.css .s01-link",
+    "issue": "負のマージンでタップ領域を拡大する実装は、隣接要素とのヒット領域が重なり、見た目と異なる要素がタップされる“当たり判定ズレ”が起こる可能性がある（特にリンクが近接するレイアウトや小画面）。",
+    "suggestion": "重なりを避けるため、各リンクをブロック化して親要素側にパディングを持たせる・スペーシングを増やす・ヒット領域の z-index/overflow を確認する等でオーバーラップを排除する。E2E: 各リンクの矩形クリックで正しい遷移先になることをヒットテスト。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3/4 実測・重点観点",
+    "issue": "レグレ検出観点で重要なケース（オフライン/タイムアウト/UI 復帰、Safari プライベートモードでの sessionStorage 無効、複数送信時のレース抑止、/terms#anchor 正規化など）の自動テストや診断ログが不足。",
+    "suggestion": "Playwright で (1) オフライン/遅延ネットワークを模擬し、15秒後のエラーメッセージとボタン復帰を検証、(2) WebKit で sessionStorage 不可時のフォールバック確認、(3) タイムアウト→再送→先行応答が来ても UI/遷移が変わらないこと、(4) /terms#x の正規化確認 を追加。NotFound/timeout 分岐で debug ログや telemetry を入れて回帰検知を強化。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 S01Auth.jsx handleSubmit オフライン判定",
+    "issue": "navigator.onLine は実際の接続状態と乖離することがあり（プロキシ/キャプティブポータル等）、誤検知・見落としが発生しうる。",
+    "suggestion": "onLine は“早期ユーザ通知”用のヒントとして維持しつつ、信頼はしない。軽量 HEAD リクエストによる疎通確認や online/offline イベントでのバナー表示に分離し、送信フロー自体はネットワークエラー/タイムアウトの実測でハンドリング。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2.2 S01Auth.jsx catch(err)",
+    "issue": "err.message をそのままユーザ表示すると英語や技術的文言が露出する可能性がある。逆に詳細が UI から消えることでデバッグ困難にもなりうる。",
+    "suggestion": "Supabase のエラーコード/分類でユーザ向け文言にマッピングし、詳細は console.debug もしくはテレメトリ（Sentry など）に送出。ユーザ表示は一貫した日本語メッセージ＋再試行案内に統一。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "2.1 App.jsx NotFound safeSessionStorage 周辺",
+    "issue": "try/catch で例外を握りつぶしており、どの条件でフォールバック（トップ遷移）が発生したかの可観測性がない。",
+    "suggestion": "開発/ステージング限定で console.warn もしくは telemetry カウンタを送出（reason: no-sessionStorage / quota / securityerror）。本番ではノイズを抑えつつ集計可能なイベントを送る。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 S01Auth.jsx mountedRef",
+    "issue": "mountedRef の初期値が true のため、理論上は“マウント前に非同期で setState を呼ぶ”コードが将来混入した際にガードが効かない余地がある（現状のコードでは実害は薄い）。",
+    "suggestion": "mountedRef を useRef(false) で初期化し、useEffect(mount) で true、クリーンアップで false にする一般的パターンへ変更し将来の回帰に備える。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.1 App.jsx safeSessionStorage",
+    "issue": "ストレージ容量超過など“通常モードでも書き込み不可”の場合に false negative で null 扱いとなり、/terms 等の遷移が不必要にトップへフォールバックする。",
+    "suggestion": "フォールバックとしてインメモリ実装（Map で getItem/setItem/removeItem を模倣）を返し、同タブ内でのループガードだけは機能させる。合わせて書込み不可時の理由を debug ログへ。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "2.2 S01Auth.jsx aria-describedby 構成",
+    "issue": "“同じ条件式で条件レンダリング”に依存した ID 存在保証は将来的なリファクタで破綻しやすい（分岐のずれで参照のみ残る等）。現状のコードでは暗黙的結合で可読性も下がる。",
+    "suggestion": "ID を定数化し、エラー要素を生成する関数が id とフラグを同時に返す設計にするか、テストで“describedby の各 id が DOM に存在する”ことをスナップショット/ARIA チェックで検証。ビルド時のリンタ/型でも参照の整合を担保。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2.2 S01Auth.jsx タイムアウト後の成功遷移",
+    "issue": "15秒タイムアウトでエラーメッセージを表示後、遅延して成功応答が到着すると直後に route('/') され、ユーザ視点では“エラーが出たのに成功して画面遷移した”ように見えるフリッカーが起こりうる。",
+    "suggestion": "timeout 発火時に timedOut フラグを立て、後続で成功した場合はエラーメッセージを直ちにクリアしてから遷移、もしくはタイムアウト後の応答は UI 更新を抑止して“再試行で成功した扱い”に統一する等、一貫した UX に調整。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

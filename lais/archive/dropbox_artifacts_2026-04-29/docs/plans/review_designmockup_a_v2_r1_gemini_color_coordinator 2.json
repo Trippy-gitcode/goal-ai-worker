@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "入力フィールド、チェックボックス、非アクティブチップの境界線",
+    "issue": "境界線に `#484F58` が使用されており、背景 (`#0D1117` または `#161B22`) とのコントラスト比が3:1未満（約2.2:1）です。WCAG 1.4.11 (Non-text Contrast) に違反します。",
+    "suggestion": "デザインシステム仕様書で定義されている `--border-strong: #6E7681` (コントラスト比3.6:1) をインタラクティブ要素の境界線に使用してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding, s10_grow, s14_goal_detail",
+    "location": "ステップインジケーター、EXPバー、ゴール進捗バーの未充填部分",
+    "issue": "バーの背景色 `#1C2128` と画面背景 `#0D1117` のコントラスト比が1.16:1しかなく、バーの全体長（最大値）が視覚的に認識できません。",
+    "suggestion": "バーの背景色を明るくするか、境界線を追加して、背景とのコントラスト比を3:1以上確保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s30_me",
+    "location": "趣味項目の「タップして入力」テキスト",
+    "issue": "テキスト色 `#484F58` と背景 `#0D1117` のコントラスト比が2.41:1であり、AA基準の4.5:1を満たしていません。",
+    "suggestion": "テキスト色を `--text-hint` (`#7A8593`, コントラスト比4.5:1以上) に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "アバター選択肢",
+    "issue": "選択されたアバター（タイプB）が枠線の色（青）のみで示されており、色覚多様性のユーザーには判別が困難です (WCAG 1.4.1)。",
+    "suggestion": "選択状態を示すチェックマークアイコンを追加するか、選択された項目の背景色を明確に反転させるなど、色以外の視覚的手掛かりを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "タスクリストの未完了チェックボックス",
+    "issue": "「今日」のタスク（青枠）と「予定」のタスク（グレー枠）の違いが枠線の色のみで表現されています (WCAG 1.4.1)。",
+    "suggestion": "枠線の色だけでなく、アイコンの形状を変えるか、テキストラベルのフォントウェイトを変えるなど、色以外の区別方法を併用してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "「タスク名」入力欄のアウトライン",
+    "issue": "フォーカス状態を示すアウトラインが `rgba(121,192,255,0.2)` と非常に薄く、背景とのコントラストが不十分です。",
+    "suggestion": "仕様書 §7.5 に従い、透過度のないソリッドな色（例: `outline: 2px solid var(--accent)`）を使用して明確なフォーカス表���を行ってください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部の「ログイン」リンク",
+    "issue": "インラインリンクが青色のみで示されており、下線がありません。仕様書 §2.2 および WCAG 1.4.1 に違反しています。",
+    "suggestion": "「ログイン」テキストに下線 (`text-decoration: underline`) を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "UX仕様書ではタスク詳細からAI相談への遷移が定義されていますが、完了済みタスクでボタンが無効化されています。仕様書に無効化の明記がありません。",
+    "suggestion": "完了済みタスクでは「振り返りをする」などの別のアクションに変更するか、仕様書に完了時のボタン無効化ルールを追記して整合性を取ってください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "背景の星の装飾",
+    "issue": "ブランド原則「実世界との地続き感」「ゲーム画面は出さない」に対し、星の装飾がやや宇宙的・SF的（AI slop的）な印象を与えます。",
+    "suggestion": "星の装飾を外し、Night Skyテーマの「月明かりの下で静かにジャーナルを書く感覚」に沿った、より抽象的で静かな余白のみの表現に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  }
+]

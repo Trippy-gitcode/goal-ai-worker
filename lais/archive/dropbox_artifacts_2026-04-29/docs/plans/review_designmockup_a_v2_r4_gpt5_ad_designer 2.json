@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "ロゴ直下〜主要CTA周辺（画面中央〜下部）",
+    "issue": "3秒以内に「何ができるアプリか」が伝わる要素がない。タグラインは抽象的で、AI/タスク/ゴール等の具体が見えない",
+    "suggestion": "ロゴ直下に1行の価値提案を追加（例:「AIコーチとタスク・ゴール管理で、毎日を前進」）。または3つの短いベネフィットチップ（AI相談/タスク/ゴール）をCTAの直上に配置して次アクションを補強",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「すでにアカウントをお持ちですか？ ログイン」行の『ログイン』テキストリンク",
+    "issue": "インラインテキストリンクに下線がなく、色のみで可視化している（WCAG 1.4.1 / デザインシステム§2.2違反）",
+    "suggestion": "『ログイン』にtext-decoration: underlineを付与（--accent使用）。もしく���リンク全体をボタンスタイルにして色以外の手掛かり（枠/背景/アイコン）を付加",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayリスト内の未完了タスク行（例:「ジムで筋トレ」「英語のリスニング」）",
+    "issue": "未完了タスクに完了トグル（⭕）が見当たらず、リストから直接完了できないように見える。UX仕様§2.3『⭕タップで完了』に矛盾",
+    "suggestion": "各タスク行の左端に44×44px以上の完了⭕を常時表示（未完了=アウトライン/完了=チェック済み）。タップで即時チェック→Undoスナックバー表示の仕様に揃える",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾の「+ タスクを追加」テキストリンク",
+    "issue": "主要CTAが単なるテキストリンクで弱く、視線が流れやすい。タップ領域/存在感ともに不足し、次アクションが直感的でない",
+    "suggestion": "アクセントのピルボタン化（アイコン+ラベル、最小高さ44px）または右下固定���FABを追加。Todayヘッダーにも小型の『+』ボタンを併設し、2箇所導線で認知を強化",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧の直下『+ タスクを追加』リンク",
+    "issue": "ゴール詳細での主要CTAがテキストリンクのみで埋もれやすい。セクション終端でスクロール停止時に見落としがち",
+    "suggestion": "『タスク』見出し行の右側に『+ タスクを追加』ピルボタンを常設（またはsticky化）。一覧末尾のテキストリンクは補助導線として残し、二重化で取りこぼしを防止",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択のラベル（タイプA/B/C）",
+    "issue": "ラベルが汎用的で感情的な結びつきが弱い。ブランドの『洗練＋親しみ』に対する独自性が出にくい",
+    "suggestion": "人格や雰囲気が伝わるネーミング/短い性格説明を付与（例:『落ち着き×コツコツ』『快活×行動派』）。選択中カードに1文の説明を表示して選択理由を言語化",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "下部のアクションボタン行（編集/削除）",
+    "issue": "『削除』が赤色で強く目立ち、主要操作『編集』よりも視線を奪っている",
+    "suggestion": "『編集』を主ボタン（アクセント枠または塗り）に格上げし、『削除』はテキストリンク+危険色アウトラインで視覚優先度を下げる。削除は2段階確認で安全性も担保",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "サブタブ見出し（PROFILE/DISCOVER/FRIENDS/SHOP）",
+    "issue": "横スワイプ可能性が視覚的に伝わりにくい。タブ名は見えるが、移動ジェスチャーの手掛かりが弱い",
+    "suggestion": "インジケータに左右矢印の微アニメーション、もしくは最初のみ『左右にスワイプできます』の1回限りチップを表示。タブ見出しの余白にドラックハンドル風の下線演出も有効",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "OTHER",
+    "screen": "s20_talk",
+    "location": "���力バー右端の送信アイコン（紙飛行機の代わりに回転矢印風）",
+    "issue": "送信の意味が直感的にやや弱い。入力が空のときは特に装飾不足で機能の予測がしづらい",
+    "suggestion": "紙飛行機アイコンに変更し、アクティブ時はアクセント色の塗り/拡大アニメで可視化。非アクティブ時は枠線のみで状態差を明確化",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow",
+    "location": "Todayセクションの進捗文言『1 / 4 completed』",
+    "issue": "日本語UIの中で英語の文章的表現が混在し、トーンオブボイス（基本は敬語日本語）から軽く逸れている",
+    "suggestion": "『4件中1件を完了』など日本語表記に統一。英字許容はTODAY/GOALS等の短いラベルに限定（デザインシステム§3.4方針に沿う）",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "タスク名入力フィールド（フォーカス時の青色アウトライン+枠線）",
+    "issue": "枠線とアウトラインの二重強調でやや眩しく、他要素の視認性を下げる恐れ���ある",
+    "suggestion": "アウトラインの不透明度を下げる（例: rgba(121,192,255,0.12)→0.08）か、枠線強調とどちらか一方に統一。フォーカスリングはデュレーション短めで品よく",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カードの見出し行『タスクにしますか？』",
+    "issue": "見出しが小さく色も抑えめで、長文会話の中でカードの目的が一瞥で掴みにくい",
+    "suggestion": "見出しのサイズ/ウェイトを+1段階上げ、左ボーダーやアイコンのコントラストを強化。カード全体に軽い浮き影（--shadow-sm）を付けてタイムラインからの層分けを明確化",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

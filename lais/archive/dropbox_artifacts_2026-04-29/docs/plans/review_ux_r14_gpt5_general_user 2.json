@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§3.1 TALK ヘッダー / §3.5 / §7.3",
+    "issue": "TALKヘッダーに☰（履歴ドロワー）と🕐（履歴）が並記され、履歴の入口が2つある。§7.3ではドロワーは☰タップのみで展開する方針と記載されており、🕐の役割が不明瞭。",
+    "suggestion": "履歴の入口を1つに統一。🕐アイコンを削除するか、役割を明確化（例: ☰=ドロワー、🕐=最近の3スレッドをヘッダーからクイック切替等）。遷移マトリクスにS-21への到達手段を1つに定義して矛盾を解消。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5.1 オンボーディング / 全体",
+    "issue": "初回体験に操作チュートリアル（コーチマーク/ガイド）がない。タブの意味、タスク完了とUndo（30秒）、TALK→タスク化、EXPの3層、冒険EXP上限など、初見ユーザーが戸惑いやすい要素が未説明。",
+    "suggestion": "オンボ完了後に3〜5枚のコーチマークをGROW/TALK/MEに順次表示（1回のみ、スキップ可）。GROWでは「⭕で完了＋取り消しは30秒以内」、TALKでは「会話からタスク化できます」、MEでは「DISCOVER=自己理解」。後から再確認できる「使い方」ページもS-37配下に追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §7.4 上限値 / ux §2.3, §3.5, §4.4",
+    "issue": "上限到達時のUXが未定義（タスク10,000件/ゴール100件/友達500人/チャットスレッド100）。満杯時の作成ボタンやエラーメッセージ、誘導が記載なし。",
+    "suggestion": "各作成UIで上限チェック→ボタン無効化＋インライン文言（例:「上限に達しました。不要な項目をアーカイブ/削除してください」）。スレッドは古い自動アーカイブ方針に合わせて作成時にトーストとガイドを表示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "タブ名 §3.1 / サブタブ名 §4.1",
+    "issue": "タブ名が英語（GROW/TALK/ME、DISCOVER）で初見で意味が取りづらい。自己成長に興味が薄いユーザーには直感的でない。",
+    "suggestion": "日本語ラベルに置換またはサブラベルを追加（例: GROW=今日/目標、TALK=AI相談、ME=自分、DISCOVER=自己理解）。タブに短いサブラベル（8文字以内）を付与。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "用語全般（§2, §3, §4, §8）",
+    "issue": "「EXP/冒険EXP/称号/Phase/ヒアリング/MBTI/ディープ分析」など、ゲーミフィケーションや心理学の専門/スラング的用語がアプリ内での意味説明なし。初見で理解しづらい。",
+    "suggestion": "各用語にiツールチップを付与（初回タップで簡潔説明と「詳しく見る」）。DISCOVERの「ヒアリング」は「質問セッション」など日常語に変更。冒険EXPカード文言を「新しい挑戦を記録しました」に調整。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§5.3 / §2.3",
+    "issue": "オンボ直後にAIが初回タスクを自動でTodayへ登録する仕様は、承認なし自動追加に見え、抵抗感・混乱の可能性。",
+    "suggestion": "GROW初回表示で「AIの提案」カードとして表示し、[追加する]/[内容を編集]/[スキップ]を選ばせる。自動でTodayに入れず、ユーザーの同意を前提に。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§2.4 7日ルール",
+    "issue": "ゴール完了が「7日未満は完了待ち」となるルールは直感に反し、初回時の驚きや不満を招く恐れ。UI上の簡易説明はあるが、理由やメリットが不明瞭。",
+    "suggestion": "初回だけ説明モーダルを表示（「短期の“駆け込み消化”でなく、継続を称えるための仕組みです」）。カードに「仕組みを見る」リンクを付与して詳細ヘルプへ。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3.4 冒険EXP演出",
+    "issue": "上限到達時に「+0 EXP（本日の上限に到達）」だけだと納得感に欠ける。なぜ上限があるのかが分からない。",
+    "suggestion": "上限到達カードに「公平性と誤検出防止のため、1日2回まで」のサブテキストを追加。初回到達時のみミニ説明を一度だけ表示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§2.4 ゴール詳細→[AI相談] 遷移",
+    "issue": "S-14からTALKへ遷移時にreplaceStateでS-14を履歴から消す��め、ブラウザバックでS-14に戻れない。ユーザーの期待（相談後に元のゴール詳細に戻る）と不一致。",
+    "suggestion": "pushStateに変更し、TALKヘッダーに「←ゴール詳細へ」戻りボタンを表示。もしくはTALKから戻るとS-14に戻す一時的スタックを実装。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§7.4 ドラッグ&ドロップ",
+    "issue": "Todayを手動並び替えにした後、開始時刻順への“リセット”方法が未定義。長期的に順序が意図せず固定化する懸念。",
+    "suggestion": "Todayセクションヘッダーに「並び順」メニューを追加（自動/手動/手動をリセット）。現在の状態をバッジ表示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.4 ドラッグ&ドロップ",
+    "issue": "長押し500msで並び替えは発見性が低い。タップで詳細/長押しでドラッグの二義性も初心者には分かりにくい。",
+    "suggestion": "行右端にドラッグハンドルを表示 or 「並び替えモード」を明示するトグルをTodayヘッダーに追加。初回はガイド表示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4 FRIENDS 承認待ち",
+    "issue": "友達リクエストの7日有効期限（project §5.1）に関するUXが未定義。期限までの残日数や失効時の表示/通知がない。",
+    "suggestion": "承認待ちリストに「有効期限までN日」表示。失効時は自動消滅＋送信者側に軽いバナー「リクエストは7日で期限切れになります」。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§13.2 プラン管理",
+    "issue": "Stripe Checkout戻りでWebhook遅延を最大10秒ポーリングとあるが、10秒超過時のUXが未定義（処理中のままか、ユーザーが迷う可能性）。",
+    "suggestion": "10秒超過時は「処理中」状態に遷移し、手動[再取得]ボタンと「数分後に自動反映されます」文言を表示。バックグラウンドで指数バックオフ再試行。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "project §4.4 レベルキャップ / ux 表示仕様なし",
+    "issue": "Lv.50到達後のUI（MAX表示/称号固定時のプログレス表現）がUX側に未定義。",
+    "suggestion": "EXPバーにMAXバッジを表示し、累計EXPを小さく表示。レベルはMaster固定で、進行は「累計EXP」で可視化する旨の説明ツールチップを追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§13.3 通知設定 / project §2.5 既定ON",
+    "issue": "初期状態で複数通知ONは、初見ユーザー（非自己啓発層）には負担になり得る。",
+    "suggestion": "初回は最小限（リマインダーのみ）を既定ONとし、他はJIT（Just-In-Time）での許可依頼に変更。オンボで目的に応じて推奨セットを提示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.3 タスク追加 / §2.4 ゴールタスク追加",
+    "issue": "「習慣はゴールに紐付け不可」の理由がUI上で不明（単発のみの設計思想はprojectに記載あるが、現場の説明なし）。",
+    "suggestion": "ゴール紐付けのヘルプに「ゴールは有限のステップで達成するため、習慣は紐付け対象外です」と明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.3 DISCOVER",
+    "issue": "DISCOVERの「強み=緑/課題=オレンジ」だけだと色覚多様性で区別しづらい可能性。",
+    "suggestion": "アイコンやパターンの併用（例: 強み=✓アイコン、課題=!アイコン）およびテキストラベルを視覚的に補強。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "S-00 ランディング（§1.1 画面一覧のみ記載）",
+    "issue": "ランディングページの具体要素が未定義。初見で「何のアプリか」が直感的に分かるコピー・スクリーンショット・AIの価値訴求が明記されていない。",
+    "suggestion": "S-00にヒーローコピー（例: 「AIと一緒に、今日の一歩を形にする」）、3枚の実画面モック（GROW/TALK/ME）、Freeでも十分使える点、罰なし設計、AI対話の強みを短文で配置。サインアップ前に価値が伝わる構成に。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "ux §15 / project §4.4, §4.5 矛盾メモ",
+    "issue": "project_v1.mdに残存する内部矛盾（EXP計算式など）がuxで運用方針化されているが、プロダクト側の正本が未修正。将来的に仕様ずれの温床になり得る。",
+    "suggestion": "project_v1.mdの矛盾を修正し、ux_v1.mdの注記をクローズ。EXP式・Undo時間・テーブル命名（messages/social_messages）・アバター演出仕様を正本に反映。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.5 チャットスレッド",
+    "issue": "スレッド名の手動リネーム不可は整理性に欠ける（MVPでは非対応と明記）。",
+    "suggestion": "将来の改善項目として、スレッドのリネーム（長押しメニュー）とピン留め機能をバックログに明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  }
+]

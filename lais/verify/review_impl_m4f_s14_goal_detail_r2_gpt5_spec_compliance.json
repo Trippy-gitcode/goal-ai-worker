@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-101",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "S14-8 実装 (S14GoalDetail.jsx)",
+    "issue": "JSXで class 属性を使用。React/JSX標準では className を使用するため、実行環境によってはクラスが適用されずスタイルが崩れる可能性がある。",
+    "suggestion": "本コンポーネントの実行フレームワークがReact系である場合、全ての class を className に置換。あわせてレンダリング確認を行う。React以外（Preact等）で class 許容の場合は、その旨をREADME/コメントに明記して誤用を防止する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-102",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "S14-8 実装コメント",
+    "issue": "コメントでは「visually-hidden な状態テキスト + aria-label」の二重化と記載があるが、コード上は aria-label のみで視覚非表示テキストは実装されていない。",
+    "suggestion": "いずれかに統一する。現状の実装で十分なためコメントを修正するか、仕様意図どおりに <span class=\"sr-only\">進行中</span> 等を追加して二重化する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.1 色トークン",
+    "issue": "s14-task-row / s14-check-* / s14-task-name-* の状態別色指定がコード上から確認できず、デザイントークン（例: var(--color-accent-*)）の使用可否が不明。",
+    "suggestion": "該当クラスのCSSを提示し、色指定がトークン参照であることを明示する。currentColor を用いる箇所は親要素でトークンを割り当てる。非テキストコントラスト(3:1)の達成も併記。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.2 タイポグラフィスケール",
+    "issue": "s14-task-name / s14-task-date のフォントサイズ/行間が離散スケール準拠か確認できない（CSS未提示）。",
+    "suggestion": "フォント関連はデザイントークン（例: var(--font-size-200), var(--line-height-tight)）で指定し、当該クラスのCSS抜粋を添付してスケール適合を示す。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.3 スペーシング",
+    "issue": "タスクリストおよび行内の余白がスペ���シングトークン準拠か不明（CSS未提示）。",
+    "suggestion": "ul.s14-task-list, li.s14-task-row, .s14-task-card の padding/margin を var(--space-*) トークンで定義し、左右/上下の値がスケールから外れていないことを提示する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S14-8 実装 (SVG属性)",
+    "issue": "JSX内のSVG属性にハイフン形式（stroke-width, stroke-linecap, stroke-linejoin）を使用。環境によりコンソール警告や属性未適用の可能性がある。",
+    "suggestion": "React/JSX互換を優先し camelCase（strokeWidth, strokeLinecap, strokeLinejoin）へ統一する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1.md §4.7 状態・インタラクション / S14-8 実装",
+    "issue": "M4-Fのスコープでは「タスク行タップ → S-13 統合」が除外とされている一方、実装では onClick={() => handleOpenTask(task.id)} が付与されており、遷移の有効/無効が不明。",
+    "suggestion": "遷移を本R2スコープで無効化する場合は no-op にするか feature flag でガードし、将来のS-13統合時に有効化する運用を明記。もし遷移を許容するなら遷移先・トランジションが仕様準拠でないことをREADMEで明示して“暫定”扱いとする。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_spec_v1.md §5.1 フォーカス可視性",
+    "issue": "キーボード操作時の .s14-task-card の focus-visible スタイル定義が不明。���視フォーカスのコントラストやアウトライン太さの基準適合が確認できない。",
+    "suggestion": ":focus-visible にデザイントークン（色・太さ・オフセット）を用いた明確なフォーカス指標を付与し、コントラスト(3:1以上)の検証結果を記載する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "design_spec_v1.md §4.7 状態表示",
+    "issue": "視覚ユーザー向けの状態ラベルは画面上に表示されず（aria-label のみ）、形状差のみで判別。要件は満たすが、学習コストがやや高い可能性。",
+    "suggestion": "スコープ影響が小さい範囲で、任意の状態バッジ（例: 小さな「進行中」/「予定」ラベル）を追加するか、ヘルプ/凡例で形状と状態の対応を説明する。ただしM4-Fのスコープを超える場合は後続タスクに記録する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

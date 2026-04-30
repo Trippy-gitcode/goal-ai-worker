@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§5.1, §4.4 S10-10",
+    "issue": "ボトムタブバーの非アクティブタブにラベルが表示されない仕様は、プラットフォーム標準から逸脱しており、発見性を損なう可能性があります。",
+    "suggestion": "iOSのHIG、AndroidのMaterial Designともに、主要なナビゲーションであるボトムタブには常にラベルを表示することを推奨しています。特にタブ数が3〜5個の場合は、アイコンとラベルを併記することで、ユーザーが各タブの機能を即座に理解できるようになります。非アクティブタブにも `--text-secondary` 等でラベルを追加することを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.4",
+    "issue": "メイン画面であるS-10 GROWにおいて、ユーザーが手動でデータを更新するための「Pull-to-refresh（下に引っ張って更新）」ジェスチャーが定義されていません。",
+    "suggestion": "サーバーとの同期や新しいデータの取得をユーザーが能動的に行えるよう、S-10のタスクリストおよびゴールリストの最上部でPull-to-refreshを実装することを推奨します。その際のローディングインジケータのスタイルも併せて定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "タスク管理や目標達��を支援するアプリとして非常に重要な、プッシュ通知に関する仕様が本書全体で定義されていません。",
+    "suggestion": "タスクの期限リマインダー、習慣化を促す通知、AIからの重要な提案など、ユーザーエンゲージメントに不可欠なプッシュ通知のUX（タイミング、文言、アクション、設定画面でのオプトアウトなど）を定義する必要があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.4, §4.9, §4.10",
+    "issue": "主要画面における「空状態（Empty State）」のUIが定義されていません。",
+    "suggestion": "S-10にタスクやゴールが一つもない場合、S-20にチャット履歴がない場合、S-14に紐づくタスクがない場合など、データが空の状態の画面デザインを定義してください。ユーザーが次に行うべきアクションを促すイラストやテキスト、CTAボタン（例：「最初のタスクを追加してみましょう」）を配置することがベストプラクティスです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "ネットワークエラー等でデータの取得に失敗した場合の「エラー状態（Error State）」の画面仕様が定義されていません。",
+    "suggestion": "Phase Cで定義予定とありますが、S-10 GROWのようなコア画面が初期表示できないケースはPhase Aでも考慮すべきです。画面全体に表示するエラーメッセージ、リトライボタン、オフライン時でも最低限の機能が使えるかの方針など、基本的なエラーステートのUXを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "ACCESSIBILITY",
+    "location": "§3.2, §5",
+    "issue": "OSのアクセシビリティ設定による文字サイズの動的な変更（Dynamic Type / Font Scaling）への対応が定義されていません。",
+    "suggestion": "ユーザーがOS設定で文字サイズを大きくした場合でも、レイアウトが崩れたり、テキストがコンポーネントからはみ出して読めなくならないように、動的なフォントサイズへの対応方針を定義してください。特に高さが固定値で指定されているコンポーネント（ボタン、入力フィールド等）の振る舞いを明確にする必要があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§4.4",
+    "issue": "完了したタスクに打ち消し線を使用しないデザインは、完了状態の視認性を低下させ、ユーザーの誤認を招くリスクがあります。",
+    "suggestion": "打ち消し線はタスク完了を示す強力なUIパターンです。デザイン原則「呼吸する」表現を尊重しつつも、アクセシビリティの観点から、色や背景の変化に加えて打ち消し線を併用することを強く推奨します。これにより、色覚特性を持つユーザーを含め、誰もが状態を明確に認識できます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "データ読み込み中の状態を示す「ローディング状態」のUI（スケルトンスクリーンやインジケータ）が定義されていません。",
+    "suggestion": "S-10 GROWのようなリスト画面の初期表示時には、レイアウトの骨格を先に表示するスケルトンスクリーンを定義することで、体感速度を向上させることができます。また、ボタンタップ後の非同期処理中など、短い待ち時間にはローディングスピナーの仕様を定��してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "アプリの操作感や満足度を高める「ハプティックフィードバック（触覚フィードバック）」に関する仕様が定義されていません。",
+    "suggestion": "タスクのチェック完了時、ボタンのタップ時、レベルアップ時など、重要なインタラクションに対して適切なハプティックフィードバック（iOSのUIFeedbackGeneratorなど）を設計・定義することで、よりリッチで心地よいUXを提供できます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4",
+    "issue": "S-10 GROWのタスクリストにおいて、一般的なタスク管理アプリで採用されている「スワイプアクション」が定義されていません。",
+    "suggestion": "タスク行を左右にスワイプすることで「完了」「延期」「削除」などのクイックアクションを実行できるジェスチャーを定義することを検討してください。これにより、ユーザーはより効率的にタスクを操作できます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.5, §4.8",
+    "issue": "ハーフモーダル（S-12, S-15）のコンテンツが画面高さを超えた場合のスクロール挙動が定義されていません。",
+    "suggestion": "モーダル内のコンテンツが画面内に収まらない場合（特に画面の小さいデバイスや、文字サイズを大きく設定した場合）に、モーダル自体が縦スクロール可能になる仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.3, §4.7",
+    "issue": "Androidプラットフォームにおけるシステムバック（ジェスチャーまたはナビゲーションバーの戻るボタン）の挙動が定義されていません。",
+    "suggestion": "アプリ内の「←戻る」ボタンと、OSのシステムバックの挙動を一致させる必要があります。例えば、ハーフモーダル表示中にシステムバックが実行された場合、モーダルを閉じるのか、背後の画面を戻るのか、その挙動を明確に定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "ACCESSIBILITY",
+    "location": "§4.4",
+    "issue": "インタラクティブな要素に対するスクリーンリーダーの読み上げ内容が一部未定義です。",
+    "suggestion": "1. S-10ヒーローがスクロールで圧縮された際に、スクリーンリーダーが読み上げるべき情報（例：「レベル12、エクスプローラー。経験値1,240、次のレベルまで2,000」）が省略されないように定義してください。 2. ラベルのない非アクティブタブには、スクリーンリーダーが読み上げるためのアクセシビリティラベル（例：「トーク画面へ移動」）を必ず設定するよう明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.9",
+    "issue": "Undoスナックバーの持続時間が30秒と設定されていますが、これは一般的なモバイルUX（通常5〜10秒）と比較して非常に長いです。",
+    "suggestion": "ユーザーがUndo操作を見逃さず、かつ画面に長時間残留して他の操作を妨げないよう、持続時間を7秒程度に短縮することを検討してください。30秒という長い時間が必要な特別な理由がある場合は、その意図を仕様書に明記することが望ましいです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

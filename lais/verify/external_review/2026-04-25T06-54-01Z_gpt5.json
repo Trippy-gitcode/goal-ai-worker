@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5 / §7.1",
+    "issue": "復元シミュレーションでは Git tracking 改善後に `git checkout HEAD -- ...` で30秒復元可能としていますが、§7.1 の実装最低ラインは pre-commit と日次監査が中心で、コミット頻度を強制していません。tracked 化だけでは commit 前の変更は失われるため、本文の効果説明と運用実態に差があり、事故再発時に『復元できるはずだったのにできない』誤認を生みます。",
+    "suggestion": "Git を主防衛線とするなら、tracked 化だけでなく『編集開始前に空コミット/作業ブランチ作成』『セッション終了時は必ず commit』『一定時間ごとの WIP commit か stash 自動化』まで明文化してください。§5 の復元時間も『直前 commit 時点まで』など条件付きに修正し、Time Machine やクラウドとの差分を正確に表現するべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 手順 4",
+    "issue": "`git add lais/ instructions/ docs/ templates/` をそのまま実行する手順は広すぎ、意図しない生成物・秘匿情報・未整理ファイルまで一括で staged/commit される危険があります。事故再発防止の名目で導入した手順が別種のヒューマンエラーを誘発し、後日ノイズ増大や情報漏えいの温床になり得ます。",
+    "suggestion": "tracked 化対象は `*.md` など最小単位に絞り、まず `git status --short` と `git diff --cached --name-only` の確認を必須化してください。例として `git add 'lais/**/*.md' 'instructions/**/*.md' ...` 相当の限定パス、または `git add -p` の採用を明記し、広域 add を避ける運用に変更すると安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§3.1 手順 4 / §6.1 / §6.3",
+    "issue": "`fswatch` による即時保護や launchd エージェントを推奨していますが、導入方法・監視対象・誤検知時の挙動・通知失敗時のフォールバックが未定義です。特に『直前比 90% 減』のような閾値は魔法の数字で、正常な大幅編集や truncate を伴う一時保存でも誤発火しやすく、運用開始後に無効化されて形骸化する可能性があります。",
+    "suggestion": "監視方式を採用するなら、対象��ィレクトリ、サイズ比較元、除外条件、一時ファイル名パターン、通知先、復旧手順を具体化してください。閾値は固定値ではなく『前回サイズ・最低行数・拡張子・エディタの保存方式』を組み合わせたルールにし、PoC で誤検知率を確認するまで本番導入の前提にしない方がよいです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.1 手順 3 / §7.1 scripts/byte_floor_check.sh",
+    "issue": "『8 bytes 未満の .md を検知』という基準は事故ファイルの症状に依存した局所対応で、1行だけ残った壊れた Markdown や数十 bytes の不完全ファイルは素通りします。一方で、意図的な空ファイルやプレースホルダ文書は不必要にブロックされます。再発防止策としては検出範囲が狭く、将来の類似事故を取りこぼす可能性があります。",
+    "suggestion": "サイズ閾値だけでなく、変更前後比較を前提に『既存 tracked Markdown が急激に縮小』『行数が一定割合以上減少』『見出し/コードフェンスなど最低構造を失う』を併用してください。少なくとも既存 tracked ファイルに限定した差分検��へ拡張し、閾値は定数として説明可能な名称付き変数に切り出すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§7.1 手順 6",
+    "issue": "既存 pre-commit の『最終 exit の前に1行追加』という手作業依存の改修は保守性が低く、hook 更新時に差し込み位置が壊れたり、`REPO_ROOT` が未定義で失敗したりするリスクがあります。文書内でも既存 hook が高機能と認識しているのに、統合方式がアドホックで責務分離できていません。",
+    "suggestion": "hook 本体を直接編集するのではなく、`pre-commit.d/` のようなディレクトリに分割実行する共通ランナーへ整理する案を提示してください。最低でも `REPO_ROOT` の定義方法、呼び出し順、失敗時の終了コード伝播を明記し、手動貼り付けではなく idempotent なセットアップスクリプトで追加できる構成にするべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 テスト手順",
+    "issue": "hook 動作確認で `git commit -m ... | grep` を使う例は、commit が実際に成功した場合の後始末や、既存 hook の別エラーで落ちた場合の判定が曖昧です。さらに `git reset HEAD` は未コミット前提の片付けであり、既存 index 状態に依存して副作用を残す可能性があります。テスト手順として再実行安全性が低いです。",
+    "suggestion": "検証は専用の一時ブランチまたは一時 worktree で実施し、終了時は `git restore --staged` と `rm` で明示的に片付けるよう修正してください。判定も grep だけでなく終了コードとメッセージの両方を確認し、既存 hook 由来の失敗と byte floor 失敗を区別できるようにすると保守しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§1.3 / 付録B",
+    "issue": "§1.3 では復元総作業時間を『約4〜6時間』としつつ、付録Bでは『14:44 起点 → 15:09 完了 ≒ 25分』と併記されており、説明を読まないと矛盾に見えます。事故報告書・比較資料として定量情報がぶれると、投資判断や対策優先度の根拠が弱くなります。",
+    "suggestion": "『実作業総時間』『commit に現れた可視時間』『復元後検証時間』を分離して同一表現で再定義し���ください。たとえば『手動再構築4–6時間、git 上の復元コミットから仕上げまで25分』のように明示すれば、比較���や推奨案の説得力が上がります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全文 / 付録A / 各セットアップ節",
+    "issue": "コマンド、価格、容量、パス、閾値が本文中に点在し、定数や前提条件として集約されていません。`1.1 GiB`、`200 GB`、`90%減`、`8 bytes`、`30日` などの魔法の数字が多く、今後の更新で相互不整合が起きやすい構成です。運用文書としては変更容易性が低めです。",
+    "suggestion": "前提値は『評価時点の定数一覧』として冒頭か付録に集約し、本文ではその参照名を使う形に整理してください。特に価格・容量・検知閾値・対象パスは更新頻度が高いため、値の根拠と見直し条件を併記すると、後日のメンテナンスとレビューコストを下げられます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0361,
+    "input_tokens": 11382,
+    "output_tokens": 2186,
+    "model_id": "gpt-5.4"
+  }
+]

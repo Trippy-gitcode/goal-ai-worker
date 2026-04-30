@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "タイトル『Lais』 + タグライン",
+    "issue": "『Lais』という 4 文字だけでは初見ユーザーが『何のアプリか』を 3 秒以内に理解できない。タグライン『あなたの人生を、あなたらしく』も抽象的で、競合 (Habitica / Finch / Dailyo) との違いが視覚的に伝わらない。",
+    "suggestion": "タグラインを機能軸に具体化: 例『AI と一緒に、ゴールを育てるジャーナル』。スプラッシュ上に小さく機能アイコン 3 つ (ゴール / トーク / 成長) を配置し、30 行前後で何ができるかを暗示する。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "ファーストビューの視線起点",
+    "issue": "視線が『アバター円 → 12 EXPLORER → EXP バー → TODAY』と 4 回ジャンプする前にようやくタスク行に到達する。最も重要な『今日のタスク』への到達コストが高い。",
+    "suggestion": "アバター + レベル + EXP を 1 つの小さなヘッダー行 (56pt) に集約、TODAY セクションをファーストスクリーンの 35% 以上で描画。『今日やること』を第一印象にする。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "LAYOUT",
+    "screen": "s01_signin",
+    "location": "サインアップ CTA ボタン",
+    "issue": "デフォルトでボタンがグレーアウト (disabled) されており、初見ユーザーが『何をすればタップできるか』を瞬時に判断できない。購読型アプリの CTA は常に能動的であるべき。",
+    "suggestion": "ボタンを enabled 状態で表示し、タップ時にバリデーションエラーを表示する設計に変更。もしくは入力補助として『続ける』の文言に変更し、押すと次へ進めるフォーカスを与える。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "提案カードの CTA",
+    "issue": "『登録する』『編集して登録』の 2 ボタンが同じ高さ・同じ幅で並び、どちらが主要アクションか一瞥では判断しにくい。",
+    "suggestion": "『登録する』を 60% 幅の Primary、『編集して登録』を 40% 幅の secondary ghost に差別化。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s02_onboarding",
+    "location": "進行インジケータ",
+    "issue": "画面上部の進行バーが 5 つのセグメントに分かれているが、現在何ステップ目かが一瞥では判別しにくい (色差が弱い)。",
+    "suggestion": "現在地を濃青、完了を淡青、未完了をグレーの 3 階調に。または『2 / 5』の数値ラベルを併記。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "削除 ボタン",
+    "issue": "削除がフォアグラウンドアクションとして 2 段目左に配置され、赤 (破壊) 色で目立っている。ユーザーの誤タップを誘発するだけでなく、成長系アプリで『削除』を強調するのは動機低下に繋がる。",
+    "suggestion": "削除を右上メニュー (…) 内に移動、もしくは長押しで表出させる。2 段目ボタンは AI 対話系 CTA に集中させる。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s00_splash",
+    "location": "タグライン文字",
+    "issue": "タグラインの文字色が暗すぎ、背景との差が小さく読みにくい。スプラッシュの数秒間で読めないと意図が伝わらない。",
+    "suggestion": "タグラインの明度を 2 段階上げる (#A0B4CC 相当)。fade-in でタイトル後に表示するアニメーションを追加。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s15_goal_create",
+    "location": "+ 最初のタスクを追加 リンク",
+    "issue": "カテゴリチップと Primary CTA の間にある単独リンクが視線の流れを分断している。",
+    "suggestion": "このリンクをチップ行の直後ではなく、ゴール名入力欄直下に移動し『任意: このゴールの最初のタスクを書いておく』と自然な流れにする。",
+    "model": "Code",
+    "persona": "ad_designer"
+  }
+]

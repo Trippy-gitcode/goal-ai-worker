@@ -1,0 +1,142 @@
+[
+  {
+    "id": "F-001",
+    "severity": "CRITICAL",
+    "location": "canopy_common.sh §G6 (deploy cmd check)",
+    "issue": "Command list from yq is iterated with `for CMD in $ALL_DEPLOY_CMDS` causing word-splitting on spaces. Multi-word deploy commands are broken into tokens, producing false FAILs (or missing checks) and blocking deploy.",
+    "suggestion": "Read commands line-by-line and use raw strings from yq. Example: `while IFS= read -r CMD; do ... done < <(yq -r '.deploy.frontend_cmd, .env.*.frontend_cmd | select(.!=null)' app_config.yaml)`; then test with `grep -F` on the full line."
+  },
+  {
+    "id": "F-002",
+    "severity": "CRITICAL",
+    "location": "changed-files-allowlist.sh",
+    "issue": "Targets are parsed as the single line after the first '対象ファイル:' in the entire file. This ignores the active mission block and multi-line targets, causing false FAILs or false PASS (unauthorized files slipping through).",
+    "suggestion": "Scope to the current IN_PROGRESS mission: extract the mission block between its header and the next header, then parse the full '対象ファイル:' section (support multi-line and comma/line-separated entries)."
+  },
+  {
+    "id": "F-003",
+    "severity": "CRITICAL",
+    "location": "canopy_common.sh §G8 (LATEST_MISSION detection)",
+    "issue": "LATEST_MISSION is derived via a loose regex that can capture non-mission IDs (e.g., SPEC-xxx) near status lines, leading G8/G9 to check a non-existent evidence directory and silently skip required TDD/screenshot gates.",
+    "suggestion": "Anchor extraction to the actual mission header format: find the last `### <MISSION-ID>:` block whose status is IN_PROGRESS or DONE, and capture `<MISSION-ID>` with a strict pattern like `^###[[:space:]]+([A-Z0-9_-]+):`."
+  },
+  {
+    "id": "F-004",
+    "severity": "CRITICAL",
+    "location": "canopy_common.sh §G8 (jq usage)",
+    "issue": "G8 parses before/after.json with jq without verifying jq is installed. On systems without jq, fallback `|| echo 0/-1` yields a false FAIL (e.g., RED-not-confirmed) and blocks deploy.",
+    "suggestion": "Add a hard precheck (`command -v jq || { echo 'FAIL: jq required for G8'; FAIL=1; }`) or introduce a toolchain_gate invoked before G8/G9 to fail early with a clear message."
+  },
+  {
+    "id": "F-005",
+    "severity": "CRITICAL",
+    "location": "deploy.sh (pre-build/pre-test)",
+    "issue": "No dependency installation step (npm/yarn/pnpm). On clean CI runners, `vite build`/`playwright` will fail, blocking deploy.",
+    "suggestion": "Detect package manager and install deterministically: `if [ -f package-lock.json ]; then npm ci; elif [ -f pnpm-lock.yaml ]; then pnpm i --frozen-lockfile; elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; fi` before build/tests."
+  },
+  {
+    "id": "F-006",
+    "severity": "CRITICAL",
+    "location": "deploy.sh (URL verification) + app_config_template.yaml",
+    "issue": "Default prod URL is `https://example.com`. With HTTP-status-only verification, C2 can “PASS” against the placeholder domain, giving a false sense of successful deploy.",
+    "suggestion": "Fail hard on placeholder URLs in prod: in canopy or deploy.sh, add `if [ \"$ENV\" = \"prod\" ] && echo \"$DEPLOY_URL\" | grep -q 'example.com'; then echo 'FAIL: prod URL not configured'; exit 1; fi`."
+  },
+  {
+    "id": "F-007",
+    "severity": "CRITICAL",
+    "location": "canopy_common.sh §G4 (Playwright invocation)",
+    "issue": "Tests run only if `node_modules/.bin/playwright` exists. In setups using global npx or pnpm with virtual bins, this condition is false and G4 silently skips, allowing deployment without tests.",
+    "suggestion": "Use `npx playwright --version >/dev/null 2>&1 || { echo 'FAIL: Playwright not available'; FAIL=1; }` and always run tests via `npx playwright test`."
+  },
+  {
+    "id": "F-008",
+    "severity": "CRITICAL",
+    "location": "canopy_common.sh §G6 (build.out_dir presence check)",
+    "issue": "The check enforces that frontend_cmd string literally contains the out_dir or placeholder. Provider CLIs may pass output dir via implicit config or quoted args; with current grep, valid commands can false-FAIL and block deploy.",
+    "suggestion": "Parse args robustly (split respecting quotes) or relax to: require either explicit `${build.out_dir}`/resolved value OR provider commands known to require a path (e.g., wrangler pages deploy) have at least one non-flag path token present."
+  },
+  {
+    "id": "F-009",
+    "severity": "CRITICAL",
+    "location": "deploy.sh (Playwright project name)",
+    "issue": "Project is hard-coded as `--project=mobile`. If the app uses different project names, all test runs fail, blocking deploy.",
+    "suggestion": "Read project from app_config.yaml (e.g., `.tests.playwright_project // \"mobile\"`) or default to no `--project` when unspecified."
+  },
+  {
+    "id": "F-010",
+    "severity": "CRITICAL",
+    "location": "deploy.sh (deployment verification)",
+    "issue": "If DEPLOY_URL is empty, verification is skipped with no failure. A production deploy could proceed without any endpoint check.",
+    "suggestion": "Require DEPLOY_URL for prod: `if [ \"$ENV\" = \"prod\" ] && [ -z \"$DEPLOY_URL\" ]; then echo 'FAIL: prod DEPLOY_URL missing'; exit 1; fi`."
+  },
+  {
+    "id": "F-011",
+    "severity": "CRITICAL",
+    "location": "changed-files-allowlist.sh (matching)",
+    "issue": "Allowed match uses `grep -q \"$PATTERN\"` substring match, so a short fragment can unintentionally allow unrelated files (e.g., pattern `src/a` matches `src/app/other.js`).",
+    "suggestion": "Use anchored/glob-aware matching. Example: use `case \"$FILE\" in $PATTERN) MATCH=1;; esac` with sanitized shell globs, or convert patterns to regex with path separators anchored."
+  },
+  {
+    "id": "F-012",
+    "severity": "HIGH",
+    "location": "report_lint.sh (G5)",
+    "issue": "Script scans the entire session_progress.md for banned phrases. This can flag AT definitions or contextual text (not just final report), causing false FAILs and blocking deploy.",
+    "suggestion": "Scope lint to explicit '完了報告' sections or to missions marked DONE, and ignore fenced code blocks."
+  },
+  {
+    "id": "F-013",
+    "severity": "HIGH",
+    "location": "canopy_common.sh §G3 (test count)",
+    "issue": "Counts only `test(` occurrences. Suites using `it(` or parameterized forms drift the count, leading to false FAIL/PASS and blocking legitimate deploys.",
+    "suggestion": "Count `test(` and `it(` and avoid double counting: `grep -Ec '\\b(test|it)\\s*\\('` per file and sum."
+  },
+  {
+    "id": "F-014",
+    "severity": "HIGH",
+    "location": "review_gate.sh",
+    "issue": "Relies on python3 to parse JSON but does not enforce it; missing python makes the count default to 0, silently bypassing unresolved CRITICAL review items.",
+    "suggestion": "Require python3 or switch to jq/node. If tool missing, fail with a clear error to prevent bypass."
+  },
+  {
+    "id": "F-015",
+    "severity": "HIGH",
+    "location": "affected-tests.sh",
+    "issue": "When BASE cannot be determined in certain CI states, it falls back to HEAD~1; for initial commits or shallow clones this can result in empty diff and only L1 running, reducing coverage unexpectedly.",
+    "suggestion": "If diff is empty/unknown base, run L3 full suite (or at least L2 mapped superset) instead of L1-only."
+  },
+  {
+    "id": "F-016",
+    "severity": "HIGH",
+    "location": "version_sync.sh (version.ts replacement)",
+    "issue": "Sed pattern `['\"][0-9.]*['\"]` is unanchored; if version.ts contains other numeric literals before the version string, it may replace the wrong token and break build.",
+    "suggestion": "Anchor to a known export pattern (e.g., `s/^(export const VERSION = )[\"'][^\"']*[\"']/\\1'$VER'/`) or read file path from app_config and update by key-aware script."
+  },
+  {
+    "id": "F-017",
+    "severity": "HIGH",
+    "location": "sub_system_spec.md §8 vs deploy.sh",
+    "issue": "Spec step 8 still documents `curl ... | grep version` while deploy.sh verifies by HTTP status only. This inconsistency can lead to conflicting acceptance expectations.",
+    "suggestion": "Align the spec with the accepted design: update §8 and incident_runbook to state HTTP-status verification, not body grep."
+  },
+  {
+    "id": "F-018",
+    "severity": "HIGH",
+    "location": "init_app.sh / update_app.sh (symlinks)",
+    "issue": "Hard symlinks to absolute dev-system paths will break if the dev-system directory is moved or on Windows without symlink privileges, breaking canopy/scripts.",
+    "suggestion": "Prefer relative symlinks where possible and add a preflight check that validates all required links exist, failing with remediation steps if broken."
+  },
+  {
+    "id": "F-019",
+    "severity": "HIGH",
+    "location": "canopy_common.sh (test-guards.config.ts count)",
+    "issue": "Guard count is computed by matching any leading-quote line, counting both IGNORED_ERRORS and ERROR_PATTERNS; typical templates can exceed the hard cap (15), causing false FAILs.",
+    "suggestion": "Count only IGNORED_ERRORS entries (parse within the array block) or raise the cap and/or make the cap configurable via app_config.yaml."
+  },
+  {
+    "id": "F-020",
+    "severity": "HIGH",
+    "location": "rollback.sh",
+    "issue": "Rollback uses mass revert to previous tag and immediate redeploy. On conflicts, it aborts and exits, leaving no automated recovery path, which can block urgent rollbacks.",
+    "suggestion": "Add a safe fallback: checkout previous tag to a new branch (detached clean tree), run deploy from that tree, and only then consider revert-commit path when clean. Document both paths in the runbook and wire a `--force-clean` option."
+  }
+]

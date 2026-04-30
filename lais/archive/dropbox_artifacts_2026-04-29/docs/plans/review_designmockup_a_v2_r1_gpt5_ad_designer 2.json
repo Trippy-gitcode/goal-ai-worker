@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "ロゴ下のサブコピー〜CTA周辺",
+    "issue": "初見3秒で「何ができるアプリか」が伝わらない。タグラインが抽象的で、タスク/ゴール/AIコーチなどの機能訴求が見えない。",
+    "suggestion": "ロゴ直下に1行の価値提案を追加（例：「AIコーチとタスク・ゴール管理で、毎日を前進させる」）。その下に機能3点の短い箇条書き（タスク計画/ゴール進捗/AI相談）を12–14pxで配置。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "主要CTA「はじめる」",
+    "issue": "CTA文言が抽象的で、押した後の期待値（サインアップ開始）が曖昧。",
+    "suggestion": "「無料ではじめる」や「サインアップ」など行き先を明確化。副CTAの「ログイン」はそのまま配置し、2ボタンの役割を明確に区別。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "フッター文「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」リンク",
+    "issue": "インラインリンクに下線が無く色のみで識別（WCAG 1.4.1違反）。HTML上も text-decoration 指定なし。",
+    "suggestion": "インラインリンクに必ず下線を付与（design_system §2.2）。ホバー/フォーカス時は下線太さや色の変化で強調。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "ALL",
+    "location": "S-12「所要時間」チップ（padding:6px 14px, font-size:13px）、S-15「カテゴリ」チップ（padding:8px 14px）",
+    "issue": "チップ系タップターゲットの視覚高さが約26–30pxで、設計ルールの最小44px（design_system §4.5）を満たしていない。",
+    "suggestion": "チップに min-height:44px/左右余白拡大、もしくは::beforeで透明タップ領域を拡張して --tap-target-min:44px を満たす。行間も広げ誤タップを防止。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Today セクシ���ン末尾「+ タスクを追加」リンク",
+    "issue": "主要行動のはずのタスク追加がテキストリンクのみで視認性が弱く、次のアクションが直感的に見つけにくい。",
+    "suggestion": "右下にFAB（+）を追加（--z-fab）またはセクション内に pillボタン（accent）を配置し常時目立たせる。スクロールに応じて表示/隠蔽の動きを付与。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧下部「+ タスクを追加」",
+    "issue": "追加導線がリンクテキストのみで埋もれる。主要CTAとして視覚的優先度が不足。",
+    "suggestion": "accent色のアウトラインボタンまたはaccent-subtle背景のpill化で視認性を強化。スクロール終端固定のミニCTAも検討。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "入力バー右端の送信ボタン（円形アイコン）",
+    "issue": "アイコンが回転したプラス/矢印風で意味が曖昧。無入力時の無効状態と有効時の差も弱く、送信が主要アクションとして際立��ない。",
+    "suggestion": "矢印（➤）アイコンに統一し、有効時は --button-primary-bg 相当のaccentで塗り＋無効時はoutline/淡色で差を明確化。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "ボタン行下段「進め方を聞く」「詰まりを相談」",
+    "issue": "完了タスクでボタンが無効化されており、詳細パネルからTALKへ繋ぐ導線（仕様§2.3）が途切れている。",
+    "suggestion": "完了済みでもTALK遷移は有効化し、送信文頭に「（完了済みタスク）〜」などのラベルで文脈を補足。少なくとも1件は常にAI導線を確保。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー内EXP表記「1,240 / 2,000」（font-size:10px）",
+    "issue": "10pxはタイポトークン外（最小は --font-size-xs=11px）。可読性と一貫性を損なう。",
+    "suggestion": "数値は --font-size-xs=11pxに統一し、行高/字間をトークン（--line-height-xs, --letter-spacing-body）に合わせて調整。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "アクションボタン「編集」「削除」",
+    "issue": "削除が赤文字アウトラインで中立ボタンと並列配置のため、破壊的操作の注意喚起と誤タップ防止が弱い。",
+    "suggestion": "削除はfilled danger（--button-danger-bg/fg）に変更し、間隔を広く。確認ダイアログの2段構造も併用（ブランド§1.4）。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s01_signin",
+    "location": "メール/パスワード入力欄",
+    "issue": "メール欄の「you@example.com」などが本文色に近く、入力済みと誤認のリスク。",
+    "suggestion": "placeholderは hint色（--text-hint）へ明確に寄せ、フォーカス時はラベル浮上/境界色accentで入力状態を強調。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "12:00「ジムで筋トレ」の左ボーダー（#D29922）",
+    "issue": "warning色（アンバー）に見え、意味（期限接近/ゴール色など）が文脈から読み取りづらい。",
+    "suggestion": "左ボーダーはゴ��ル色や状態凡例と連動させ、セクション見出し付近に小さな凡例（色=意味）を1行で提示。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

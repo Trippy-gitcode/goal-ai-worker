@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s00_splash",
+    "location": "画面中央 サブタイトル「あなたの人生を、あなたらしく」",
+    "issue": "文字間隔が均等なベタ打ちになっており、読点「、」の後のアキが不自然で日本語タイポグラフィとしての品格に欠けている。",
+    "suggestion": "読点後のカーニングを詰めるか、全体にわずかな字送り（トラッキング）を設定して「間」の美しさを演出する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部 「サインアップ」ボタン",
+    "issue": "非アクティブ（disabled）状態と思われるが、背景色とテキスト色の明度差が極端に低く、視認性が著しく損なわれている。",
+    "suggestion": "disabled状態であっても、テキスト色に最低限のコントラスト（例: --text-disabled）を確保し、存在を認識できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "アバター選択肢と「次へ」ボタンの間の空間",
+    "issue": "要素間の余白が広大すぎて「意図的な間」ではなく「抜け落ちた空間」に見え、画面全体のレイアウトが間延びしている。",
+    "suggestion": "コンテンツ全体を画面中央に寄せて上下の余白リズムを整えるか、アバターの補足説明を配置して空間を埋める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "チャットバブル内の日本語テキスト",
+    "issue": "行間が詰まっており、漢字の黒みが固まって重く見える。仕様書の「--line-height-ja-body: 1.7」が適用されていないように見受けられる。",
+    "suggestion": "日本語特有の余白のリズムを作るため、仕様通りに行間（line-height）を広げ、可読性と洗練さを向上させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "PROFILEタブ内の「基本情報」リスト",
+    "issue": "左側のラベル（名前、年齢など）と右側の値の距離が遠すぎ、視線が左右に大きく振られるため、対応関係を瞬時に把握しづらい（視線迷子）。",
+    "suggestion": "値を左寄せにしてラベルの直下に配置するか、左右分割を維持する場合は間に薄いリーダー（点線）を引いて視線を誘導する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "下部のアクションボタン群（編集、削除、進め方を聞く、詰まりを相談）",
+    "issue": "4つのボタンが同じ視覚的ウェイト（枠線・背景色）で2x2に並んでおり、明暗のコントラスト演出がないため、どのアクションが主役か迷う。",
+    "suggestion": "プライマリアクション（例: AI相談）は塗りつぶし、セカンダリ（編集・削除）はテキストのみにするなど、視覚的な優先順位をつける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "進捗率「60%」の表記",
+    "issue": "数字と「%」記号のフォントサイズが同じでジャンプ率がなく、野暮ったい印象を与えている。",
+    "suggestion": "「%」のサイズを数字の半分程度に下げ、ベースラインに合わせることで、数字のインパクトとタイポグラフィの品格を両立させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "タスクリスト内の完了済みタスク（ポートフォリオサイト作成など）",
+    "issue": "取り消し線の入ったテキストの色が暗すぎ、背景色とのコントラスト比がWCAG AA基準（4.5:1）を満たしていない可能性が高い。",
+    "suggestion": "完了済みであっても可読性を損なわないよう、テキストの明度を上げる（例: --text-secondary 程度のコントラストを確保する）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  }
+]

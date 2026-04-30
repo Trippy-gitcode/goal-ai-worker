@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3, project_v1.md §4.2",
+    "issue": "ゴール達成（進捗100%）でボーナスEXPを獲得した後、30秒以内に最後のタスクをUndoした場合の挙動が未定義です。ゴール未達成状態に戻る場合、翌日再度完了することで「1日1回のゴール達成ボーナス」を不正に毎日獲得し続けることが可能になり、EXP経済が破綻します。",
+    "suggestion": "ゴール達成条件を満たした時点で、そのゴールに紐づく全タスクのUndoを不可にするか、Undoした場合はゴール達成ボーナスEXPも没収し、日次上限の取得履歴もリセットする仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1, §4.2",
+    "issue": "S-41 アバター設定画面への遷移リンクは定義されていますが、画面内のレイアウト、フレームの選択・プレビュー・保存操作、未所持フレームの表示有無などのUXフローが完全に欠落しています。MVPのPremier特典として必須の機能です。",
+    "suggestion": "S-41の画面レイアウト（現在のアバタープレビュー、所持フレームのリスト、選択・保存ボタン）および操作フローを新規セクションとして追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §4.1, §4.3",
+    "issue": "ME画面のサブタブ切替は「コンテンツ領域の左右スワイプ」で実行されますが、DISCOVERサブタブ内の「強み/弱みチップ」は「横スクロール可」となっています。チップ領域での横スワイプがタブ切替を誤爆させるジェスチャー競合が発生します。",
+    "suggestion": "横スクロール可能な要素（チップ領域など）でのタッチイベントはイベント伝播（stopPropagation）を止め、タブ切替のスワイプ判定から除外する旨をジェスチャー定義に追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "FRIENDS画面で「N件の未読メッセージ」バナーをタップすると「受信一覧展開」とありますが、これがインラインでアコーディオン展開されるのか、ハーフモーダルなのか、別画面への遷移なのか、また一覧から各メッセージへのアクション（既読化、詳細画面への遷移）が未定義です。",
+    "suggestion": "受信一覧の表示形式（例：ハーフモーダルでリスト表示）と、タップ時の既読化・詳細画面（S-35）への遷移フローを明確に定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.1, §3.5",
+    "issue": "TALK画面ヘッダーの「📝 新規チャット」や履歴ドロワーの「新しいチャット」ボタンをタップした際の挙動が未定義です。現在の入力内容がクリアされるのか、AIのコンテキストがリセットされるのか不明です。",
+    "suggestion": "新規チャット開始時は、現在の会話コンテキストをリセットし、TALK空状態（§3.6）に遷移する（システムメッセージ等は表示しない）旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §4.4",
+    "issue": "レベルキャップはLv.50ですが、MVPで用意されるアバター進化アセットはPhase 1-3（Lv.30まで）のみです。ヘビーユーザーは半年でLv.31に到達可能ですが、到達時のアバターの扱い（エラーになるか、Phase 3のままか）が未定義です。",
+    "suggestion": "Lv.31以降はPhase 3のアセットを継続使用する（将来のアップデートで追加されるまで見た目は変わらない）旨を明記し、実装時のアセット参照エラーを防いでください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §8.6",
+    "issue": "演出キューは「タスク完了→ゴール達成→レベルアップ」の直列実行が定義されていますが、アプリ起動時の「ログインボーナス演出（§8.5）」や、TALK画面から戻った際の「冒険EXP反映（§3.4）」が同時に発生した場合の優先順位が定義されていません。",
+    "suggestion": "演出キューに「1. ログインボーナス、2. 冒険EXP反映、3. タスク完了...」のように、非同期で溜まっていた演出の再生順序を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3, project_v1.md §3.2.5",
+    "issue": "タスクを午前3:59に完了し、30秒のUndo猶予期間中に午前4:00（日次リセット）を跨いだ場合、Undoが前日分として処理されるのか、リセットされてUndo不可になるのかが未定義です。",
+    "suggestion": "午前4:00の日次リセット処理実行時は、表示中のUndoスナックバーを強制的に消去し、完了を確定させる（リセット跨ぎのUndoは不可とする）仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §9.1",
+    "issue": "TALK画面でAIからタスク提案カードが表示されている状態でオフラインになった場合、カードの「登録する」ボタンを押したときの挙動が未定義です。",
+    "suggestion": "オフライン時のタスク提案カード��らの登録も、通常のタスク追加と同様にローカルに記録し、オンライン復帰時に同期する仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.5",
+    "issue": "同名タスクの連続完了は防がれていますが、タスク名を変えれば（「あ」「い」等）即座に完了でき、1日上限300EXPまで容易に到達可能です。ゲームバランスが「作業」になり、飽きを早める懸念があります。",
+    "suggestion": "タスク作成から完了までに最低1分間のインターバルを設けるか、1日のタスク完了による獲得EXPにソフトキャップ（例：10件目以降は獲得EXP半減）を設けることを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  }
+]

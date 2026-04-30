@@ -1,0 +1,130 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§3.2",
+    "issue": "画像アップロード中のローディング状態および二重送信防止が未定義",
+    "suggestion": "最大10MBの画像アップロード（Supabase Storageへの送信）には数秒かかるため、送信ボタン押下後のプログレス表示、入力欄のロック（二重送信防止）、およびアップロード失敗時のエラーハンドリング（トースト表示と入力状態の復元）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§14.1",
+    "issue": "PWAがバックグラウンドから復帰した���の日またぎ（午前4:00 JSTリセット）処理が未定義",
+    "suggestion": "visibilitychangeイベント等でアプリがフォアグラウンドに復帰した際、現在時刻が前回同期時のリセット時刻（4:00 JST）を跨いでいるかを判定し、自動でTodayタスクの更新、AI対話回数のリセット、およびログインボーナス判定を再実行するライフサイクルフローを追加してください。これが無いと前日のタスクとして完了処理されデータが破損します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§9.2",
+    "issue": "トークン失効（401 Unauthorized）時のグローバルエラーハンドリングが未定義",
+    "suggestion": "パスワード変更等で他デバイスのセッションが失効した際、APIリクエストが401エラーを返します。これをグローバルに検知し、強制ログアウト処理（ローカルデータ消去）とS-02ログイン画面へのリダイレクト、および「セッションが切れました。再度ログインしてください」のトースト表示を行う仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2",
+    "issue": "AI応答のストリーミング中にタブ切替やバックグラウンド移行が発生した場合の挙動が未定義",
+    "suggestion": "ストリーミング中にGROW/MEタブに切り替えた場合、バックグラウンドでストリーミングを継続し、TALKタブに戻った際に最新状態を描画する仕様、またはタブ切替時にストリーミングを安全に中断・完了させる仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§14.1",
+    "issue": "PWAのService Workerアップデート（新バージョン配信）時のユーザー通知UIが未定義",
+    "suggestion": "新しいバージョンのアプリがデプロイされた際、Service Workerの更新を検知して画面下部に「新しいバージョンが利用可能です [更新して再読み込み]」のトーストまたはスナックバーを表示する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§3.2",
+    "issue": "iOS PWAでのキーボード表示時におけるスクロール追従制御が不十分",
+    "suggestion": "flexboxでの縮小に加えて、キーボード表示イベント（visualViewportのresize）発火時に、最新のメッセージバブルおよび入力欄が確実に可視領域に収まるよう `scrollIntoView` またはスクロール位置の自動補正を行うロジックを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§10.4",
+    "issue": "Undoスナックバーのカウントダウンがスクリーンリーダーで毎秒読み上げられ、深刻なノイズになる",
+    "suggestion": "Undoスナックバー全体に `aria-live` を設定するのではなく、出現時のみ「タスクを完了しました。30秒以内なら取り消せます」と読み上げ、毎秒更新されるカウントダウンのテキスト要素には `aria-hidden=\"true\"` を設定して読み上げを抑制してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "CONTRADICTION",
+    "location": "§2.1",
+    "issue": "project_v1.mdで要求されている「所要時間をタイムライン表示の幅計算に使用」がUI定義に反映されていない",
+    "suggestion": "GROW画面のTodayセクションのUI定義において、タスク行の左側または背景に、所要時間（5分〜120分）に比���した高さ（幅）を持つ縦ラインやブロック要素を描画する視覚的仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "UNDEFINED",
+    "location": "§8.6",
+    "issue": "TALK画面から持ち越されたレベルアップ演出と、GROW画面での新規演出のキューイング順序が未定義",
+    "suggestion": "TALK画面でレベルアップし、GROW画面に戻った直後にタスク完了等で新たな演出がトリガーされた場合、「持ち越されたレベルアップ演出を最優先で再生し、完了後に新規のタスク完了演出を再生する」等のキューイング合流ルールを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.3",
+    "issue": "DISCOVER画面からTALK画面へのヒアリング遷移時のhistory.pushStateの扱いが未定義",
+    "suggestion": "S-32からS-20への遷移はタブ切替の扱い（replaceState）とし、ブラウザバック時はS-32に戻るのではなく、通常のタブ間移動と同様に履歴に残さない（またはGROWに戻る）ルールを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§6.1",
+    "issue": "ハーフモーダルの下スワイプ閉じと内部スクロールのジェスチャー競合条件が不完全",
+    "suggestion": "「scrollTop > 0」の条件に加え、「scrollTop == 0 の状態からさらに上方向（コンテンツを下へ引く方向）へスワイプ（オーバースクロール）した場合のみモーダル閉じをトリガーする」というiOS標準シートに準拠した判定条件を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.3",
+    "issue": "TALK画面でタスク提案からS-12（タスク追加）を開き、保存した後の画面遷移先が未定義",
+    "suggestion": "S-12の保存完了後、モーダルが閉じた後はGROW画面に遷移せずTALK画面に留まり、提案カードが「✅ 登録しました」に置換されるフローであることを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§2.3",
+    "issue": "タスク所要時間の選択肢がproject_v1.md（5分刻み）とux_v1.md（8個のプリセット）で矛盾している",
+    "suggestion": "UX観点では8個のプリセットチップ（5/10/15/30/45/60/90/120分）の方が操作性が高いため、ux_v1.mdの仕様を正とし、project_v1.mdの矛盾リスト（§15の次）に「所要時間の選択肢を5分刻みからプリセットチップに変更」を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

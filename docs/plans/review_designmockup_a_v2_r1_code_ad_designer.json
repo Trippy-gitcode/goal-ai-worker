@@ -1,0 +1,57 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "タグライン『あなたの人生を、あなたらしく』",
+    "issue": "v2 据え置き。初見ユーザーが 3 秒でアプリの機能を把握できない。",
+    "suggestion": "機能軸タグライン（例『AI と一緒に、ゴールを育てるジャーナル』）への差替を Phase B で。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "GOALS セクションの 2 件表示",
+    "issue": "v2 で GOALS に 2 件表示 + ゴール作成リンクが追加され、情報量は適切。ただし 2 件の区別が薄く、どちらが重要/期限近いか視覚的に分からない。",
+    "suggestion": "期限近い or 達成率高い方を上、期限 or % を強調表示。期限タグを小さく併記。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "削除ボタン（赤文字）",
+    "issue": "v2 据え置き。破壊的アクションが前面で成長系アプリの動機線と矛盾。",
+    "suggestion": "削除を … メニュー/長押し降格。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "『ふとし』名前表示 + Lv.12 EXPLORER",
+    "issue": "v2 で名前が主役化しブランドフィットは改善。ただし名前下の Lv.12 EXPLORER が EXP バー + 62% と近接しすぎて情報密度が高い。",
+    "suggestion": "名前と Lv.12 の間を +8px、EXP バー下の 62% を別行に。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "進行インジケータ",
+    "issue": "v2 据え置き。5 セグメント現在位置の色差が弱い。",
+    "suggestion": "3 階調 + 『2/5』数値ラベル。",
+    "model": "Code",
+    "persona": "ad_designer"
+  }
+]

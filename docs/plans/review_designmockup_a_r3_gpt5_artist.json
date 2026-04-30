@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-101",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "s01_signin 下部の「ログイン」/ s10_grow Today末尾の「+ タスクを追加」/ s14_goal_detail 末尾「+ タスクを追加」",
+    "issue": "インラインリンクが色の違いのみで示されており下線がない。design_system §2.2（インラインテキストリンクは必ず下線）とWCAG 1.4.1に反する。",
+    "suggestion": "対象テキストに text-decoration: underline を付与。ボタン化する場合はpill背景（--accent-subtle）＋アイコン併用でインライン扱いをやめる。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-102",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "ALL",
+    "location": "s12_task_add「所要時間」チップ群 / s20_talk 送信ボタン(36×36) / s20_talk 提案カード内「✕」",
+    "issue": "タップターゲットが --tap-target-min=44px を満たしていない（例: 所要時間チップは高さ約27–30px）。design_system §4.5の最小44×44pxに不一致。",
+    "suggestion": "padding/透明ヒット��リア(::before)で44px以上を確保。小ラベルは視覚サイズそのままでもタップ領域のみ拡張。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-103",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s01_signin",
+    "location": "画面上部「Lais」ロゴタイプ",
+    "issue": "ロゴタイプがfont-weight:200で表示されており、暫定仕様（font-weight:600）に反する。ブランドの芯が弱く見える。",
+    "suggestion": "ロゴタイプをsystem-ui/600、letter-spacing -0.5pxに統一（design_system §1.3）。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-104",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Today 2行目タスク右端の小ドット（#D29922）",
+    "issue": "ゴール色ドットにwarning系の色相（アンバー）が使われ、注意/期限の意味と視覚的に衝突。誤読のリスクがある。",
+    "suggestion": "ゴール用の専用パレットを用意し、success/danger/warning/infoのセマンティック色はゴール色から除外。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-105",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "ヘッダーバー（左ハンバーガー/中央TALK/右アイコン2��）",
+    "issue": "アイコンが左右に散在し、中央タイトルと比重が拮抗。視線がヘッダー内で往復し初速の読解が鈍る。",
+    "suggestion": "タイトルの存在感を上げ（サイズ/ウェイト↑）、補助アイコンは右側へ集約または1つに簡素化。ラベル付きメニューはドロワー側に寄せる。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-106",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "配色・カード・アイコンの総体",
+    "issue": "「濃紺×青アクセント×角丸×アウトラインアイコン」の組合せに終始し、ジェネリックなAI生成UIに埋もれがち。ブランドの独自性が十分に立っていない。",
+    "suggestion": "スプラッシュの星粒モチーフやアバターの“成長環(halo)”をヒーロー/タブ/進捗UIに通底させる。EXPバーに月光の微グラデ/粒子を最小限で取り入れ、各テーマごとに固有のマイクロパターンを付与。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "ヒーローEXPバーと左右の数値（1,240 / 2,000）",
+    "issue": "数値がバーから離れ、意味連関が切れて見える。視線が数値→バーに戻る往復を生む。",
+    "suggestion": "数値をバー端に密着配置、またはバー内に小さく内包。単位/区切り（/）は薄���でサポートに落とす。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Goalsセクション各行（上ボーダー連発）",
+    "issue": "ヘアラインの連続で“区切り頼み”になり、Open Airの余白設計がやや損なわれている。",
+    "suggestion": "行間の余白を+8〜12px拡張し、ボーダーは先頭のみ/間引き。行頭に淡い進捗ドットや小見出しでリズムを作る。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "「編集」「削除」ボタン行",
+    "issue": "面積・配置が同格で、破壊的操作に不要な視覚重みが乗っている（誤タップ時の心理的抵抗が弱い）。",
+    "suggestion": "削除は右端に配置しアウトライン薄め（danger色はラベルのみ）。編集を主CTAとし、距離と余白で誤タップ距離を確保。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s01_signin",
+    "location": "画面上部「Lais」ロゴタイプ",
+    "issue": "letter-spacingが-1pxで詰み強め。スプラッシュ��-0.5pxと差が出ており、微妙な“声色”のズレを生む。",
+    "suggestion": "ロゴタイプの字間を -0.5px に統一（design_system §1.3）。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-111",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayタイムラインのマーカー（塗り/輪郭/破線の混在）",
+    "issue": "マーカー表現が3種混在（塗り/アウトライン/破線）しており意味が直観しづらい。視線が凡例を探す“迷子”状態になる。",
+    "suggestion": "状態と形状の一貫マッピングを定義（例: 現在=塗り+glow、未了=アウトライン、メモ/ドラフト=破線など）し、凡例をToday見出し直下に1行で示す。",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

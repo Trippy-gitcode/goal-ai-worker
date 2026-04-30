@@ -1,0 +1,11 @@
+--- /Users/futoshi/Desktop/goal-ai-worker/lais/archive/pre-xref-cleanup-2026-04-30/scripts/adv_response_gate.sh	2026-04-30 21:22:52
++++ /Users/futoshi/Desktop/goal-ai-worker/scripts/adv_response_gate.sh	2026-04-30 21:25:21
+@@ -49,7 +49,7 @@
+ #   instructions/gate_override.flag 存在時は exit 0（gate 一時無効化）
+ #
+ # 根拠:
+-#   - lais/verify/dev_system_v34_package.md §2.25.9-.14
++#   - core_spec.md §3 / §5.2 / §11 (legacy v34 spec §2.25.9-.14, archived 2026-04-30)
+ #   - docs/po-decisions.md PD-111
+ #   - evidence/MISSION-G49-PKG/PHASE2.1-RESEARCH/hook_capability_matrix.md
+ #   - PATCH-VIO13-GATE-PO-DISPLAY-FIX（2026-04-26、PO ふとし指示「章番号 / 引用元 /

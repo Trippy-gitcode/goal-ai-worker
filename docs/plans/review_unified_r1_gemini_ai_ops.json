@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md 「project_v1.md 内部矛盾」セクション / dev_system_spec.md §13.14",
+    "issue": "dev_system_spec.md §13.14で「上流修正なしに下流レビューを収束させることは禁止」と規定されているにもかかわらず、lais_ux_v1.md内に「project_v1.mdの内部矛盾であり、次回改訂時に解決が必要」として上流の矛盾（Undoの3秒/30秒問題など）を放置した記述が存在します。このまま実装に進むと、ENGはどちらの仕様を正としてテスト（AT）を記述すべきか判断できず、G7/G9ゲートで確実に破綻します。",
+    "suggestion": "lais_ux_v1.mdのレ��ューを一時停止（PAUSED）し、lais_project_v1.mdの矛盾（§3.2.6のUndo 3秒表示など）を修正してバージョンを更新した上で、lais_ux_v1.mdから「内部矛盾」セクションを削除してレビューを再開してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_project_v1.md §6.5 / lais_ux_v1.md §13.4",
+    "issue": "Stripe退会フローのアーキテクチャが矛盾しています。project_v1.mdでは「cancel_at_period_end: trueを設定し、72時間後にWorker Cronで即時キャンセル」と規定していますが、ux_v1.mdでは「Stripe schedule cancellation（キャンセル予約）を使用」と規定しています。使用するStripe APIとバックエンドの実装方針が根本的に異なるため、実装時に重大な手戻りが発生します。",
+    "suggestion": "どちらのStripe APIを使用するかPOと協議し、project_v1.mdとux_v1.mdの記述を統一してください。72時間のクーリングオフをStripe側で制御するならSchedule cancellationが適切ですが、実装難易度を考慮して決定してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md ヘッダー / dev_system_spec.md §19.6",
+    "issue": "lais_ux_v1.mdのヘッダーで「依存: docs/plans/lais_project_v1.md v1.3」と宣言されていますが、実際のlais_project_v1.mdはv1.4に更新されています。dev_system_spec.md §19.6の「上流変更時の下流遡及チェック」が機能しておらず、バージョン管理の整合性が取れていません。",
+    "suggestion": "lais_ux_v1.mdの依存バージョンをv1.4に更新し、project_v1.md v1.4での変更（内部矛盾4件修正など）がux_v1.mdに正しく反映されているか遡及チェックを実施してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md §13.11 / §13.14",
+    "issue": "§13.11（既知矛盾除外リスト）で矛盾をCRITICALから除外できる仕組みがある一方で、§13.14では「上流修正なしに下流を収束させることは禁止」としています。除外リストに入れた矛盾の修正を強制・追跡する仕組み（チケット化やゲート検証）がないため、矛盾が永遠に放置され、下流に伝播するリスクがあります。",
+    "suggestion": "§13.11に「既知矛盾を除外リストに追加する場合、必ず該当仕様書のspec_changelog.mdにTODOとして記録し、次回のバージョン更新時に解決を必須とする」等の追跡ルールを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §19.6",
+    "issue": "依存順序ゲートや遡及チェックがルールとして定義されていますが、スクリプトによる機械的な検証（§1.1 機械可検証の原則）が提供されておらず、ADVの手動運用に依存しています。ヘッダーの依存バージョン不一致（R-003）のようなミスを防げません。",
+    "suggestion": "review_gate.sh または新しいスクリプト（dependency_lint.shなど）を追加し、各仕様書のヘッダーにある「依存」バージョンと、実際の対象ファイルの最新バージョンが一致しているかを自動検証する仕組みを導入してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "lais_project_v1.md §3.2 / §3.2.6",
+    "issue": "lais_project_v1.md v1.4の変更履歴に「内部矛盾4件修正」とありますが、Undoスナックバーの表示時間について、§3.2の「30秒以内に取り消し」と§3.2.6の「3秒間���示」の矛盾が修正されずに残っています。",
+    "suggestion": "lais_project_v1.md §3.2.6の「3秒間表示」を、ux_v1.mdで採用されている「30秒間表示」に修正し、仕様を統一してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部の文「すでにアカウントをお持ちですか？ ログイン」の「ログイン」",
+    "issue": "インラインリンクが色のみで識別され、下線がない（WCAG 1.4.1: 色のみに依存）。仕様§2.2ではインラインテキストリンクは必ず下線併用と定義",
+    "suggestion": "「ログイン」に text-decoration: underline を付与し、hover/pressed時も維持。あるいは小ボタン化（pill + 枠線）して色以外の手掛かりを追加",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "画面上部ヒーロー領域（アバター+Lv+EXP）",
+    "issue": "初期表示からコンパクト版（アバター約48px/バー4px）になっており、UX仕様§2.2の「top=通常状態（アバター80px/バー8px）→スクロールで縮小」に矛盾",
+    "suggestion": "初期表示はフルサイズ（アバター80px/EXP 8px/ヒーロー高120px）を描��し、scrollY>60pxでコンパクトにトランジション（200ms ease-out）",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "複数箇所：本文15px（s10タスク名）、ラベル12–13px（s02ラベル・s01フォームラベル）、見出し18・22px（s30ヒーロー/Level表記）など",
+    "issue": "トークン外のフォントサイズが散在し、可読リズムと品格が揺らぐ（design_system §3.2）。日本語UIはサイズ差が目立ちやすく、行間設計も崩れやすい",
+    "suggestion": "サイズをトークンスケールに統一（本文=16px, ラベル=14px, セクション見出し=20px, 画面タイトル=28px など）。合わせてline-heightペアを適用（本文1.7/見出し1.35）",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s01_signin",
+    "location": "「メールアドレス」「パスワード」ラベル",
+    "issue": "ラベルが13pxでやや小さく、暗色背景での日本語可読性がわずかに低下。ブランドの落ち着きよりも“遠さ”が出る",
+    "suggestion": "ラベルを--font-size-sm=14pxに引き上げ、行間1.4を適用。入力値は本文系16px/line-height 1.5でコントラスト（情報階層）を明確化",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Todayリストのカード左ボーダー（12:00「ジムで筋トレ」=アンバー系）",
+    "issue": "注意色（warning系アンバー）を通常タスクの強調に使用しており、警告/期限接近の意味と混線。視線が不要に引き寄せられ“迷子”になる",
+    "suggestion": "左ボーダー色は「ゴール色」or中立（--border-strong）に統一。warning/dangerはOverdueや期限接近のみに限定（§2.4 Overdueトークン準拠）",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "数値強調「60%」ブロック",
+    "issue": "巨大数値（48px）がタイトルより強く、視線が先に数値へ飛ぶためZ→Nの流れが分断。タイトル→進捗の順で読みたい文脈に逆行",
+    "suggestion": "数値を36pxへ縮小 or タイトル右に横並びで配置。進捗バーとの距離を詰め、見出し→数値→バーの一筆書きで視線誘導を設計",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "OTHER",
+    "screen": "s12_task_add",
+    "location": "タイトル入力フィールドのフォーカススタイル（濃い枠＋3pxアウトライン二重）",
+    "issue": "枠線とアウトラインの二重強調で周辺より過剰に主張。暗色UIでハロ効果が強く、他要素とのコントラストバランスが崩れる",
+    "suggestion": "アウトライン方式に一本化（例: outline 2px rgba(121,192,255,.35), outline-offset 2px）。通常枠は--border-strongに抑え、focus時のみ色変化",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "基本情報行（年齢/職業/趣味）とAI理解メモ見出し/本文",
+    "issue": "日本語本文/ラベルでletter-spacingが0の箇所が混在し、字面がわずかに広がって見える。行間も項目によってまちまち",
+    "suggestion": "日本語本文=letter-spacing:-0.02em + line-height:1.7、見出し=letter-spacing:var(--letter-spacing-heading) + line-height:1.35を徹底（§3.4）",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s00_splash",
+    "location": "ロゴ上部の小さな星装飾",
+    "issue": "微��な輝点がロゴの静けさをわずかに削り、初回の“間”より先に視線を奪う。ブランド原則「静かな情報設計」に対し装飾寄り",
+    "suggestion": "星の数/明度/サイズをさらに抑制し、ロゴ直上から離す（上方へ移動）。ロゴ周囲の余白=ロゴ高の50%ルールを強調する配置に",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "ヘッダー（左=メニュー、中央=TALK、右=履歴/新規）",
+    "issue": "左右にアクションが分散し、中央タイトルと競合。初回視線がアイコン群を往復して落ち着きにくい",
+    "suggestion": "右側アイコンを1つに集約（メニュー内へ統合 or オーバーフローに格納）。中央タイトルの左右は非対称1アイコン程度に抑え、静かなZフローを確保",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "タスク提案カードのボタン群（「登録する」「編集して登録」「×」横並び）",
+    "issue": "長文ラベル＋3ボタン横並びで左右余白が薄く、端末幅によっては圧迫感が出る。視線が���タン群で滞留",
+    "suggestion": "レスポンシブで2行化（主要CTA=1段目フル幅Pill、補助CTA＋×=2段目）または「編集して登録」を「編集」に短縮し、余白--space-mdを死守",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

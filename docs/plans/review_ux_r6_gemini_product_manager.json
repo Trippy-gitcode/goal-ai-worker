@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§1.2, §2.4",
+    "issue": "S-14（ゴール詳細）からS-20（TALK）への遷移時のナビゲーションスタックとUI状態が破綻している。S-14はフルスクリーン遷移のためボトムタブが隠れる想定だが、そこからタブ画面であるTALKへ遷移した場合、戻るボタンの挙動やボトムタブの表示状態が矛盾する。",
+    "suggestion": "S-14からの「AI相談」タップ時は、S-14を閉じてボトムタブをTALKに切り替える（必要に応じて「TALKに移動しました」トーストを表示）か、S-14の上にTALK画面をフルスクリーンモーダルとして重ねるか、遷移の��タック管理を明確に定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§3.3",
+    "issue": "TALK画面のタスク提案カードで「[編集して登録] → カード内にインライン編集フィールド展開（S-12と同じフィールド構成）」とあるが、S-12は7つ以上の入力項目を持つ。これをチャットバブル内でインライン展開すると画面外にはみ出し、特にキーボード表示時にはスクロール・操作が不能になる可能性が高い。",
+    "suggestion": "「編集して登録」タップ時はインライン展開ではなく、S-12のハーフモーダルを呼び出し、AIの提案内容を初期値としてセットする方式に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.3",
+    "issue": "タスクの所要時間選択肢について、project_v1.md §3.2.1では「5分刻みプリセット」と定義されているが、ux_v1.md §2.3では「5/10/15/30/45/60/90/120分」の不均等なチップ選択になっており矛盾している。",
+    "suggestion": "UIのスペース効率を考慮するとux_v1.mdのチップ方式が現��的です。project_v1.mdの記述を修正するか、ux_v1.mdで「5分刻みのドラムロールピッカー」等に変更して両者の整合性を取ってください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§9.4, §2.3",
+    "issue": "「同名タスク5分以内再完了はEXP付与なし」の不正対策があるが、ユーザーがタスクを完了→直後にUndo→再度完了した場合、5分以内ルールに抵触し、正当な操作であるにもかかわらずEXPが付与されない恐れがある。",
+    "suggestion": "Undo実行時は、サーバー側で直前の完了履歴を物理削除（または無効化）し、5分以内再完了チェックの対象外とする仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.2",
+    "issue": "画像添付のサイズ上限（10MB）について、超過するファイルを選択した場合のエラーフィードバック（UI挙動）が定義されていない。",
+    "suggestion": "ファイル選択直後にクライアント側でサイズチェックを行い、10MB超過時はトースト「画像サイズは10MB以下にしてください」を表示し、添付をキャンセルする仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.4",
+    "issue": "タスク完了時には30秒のUndoスナックバーが表示されるが、タスクなしゴールの「ゴール完了にする」ボタンを手動タップした場合のUndo可否とUIが定義されていない。",
+    "suggestion": "ゴール手動完了時もタスク完了と同様にUndoスナックバーを表示し、誤タップを救済できるように明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.2.1",
+    "issue": "未所持の限定フレームについて「SHOPで購入」と案内しているが、MVPではSHOPがComing Soonのため行き止まりになる。Premierプランの特典フレームへのアップグレード導線として機能していない。",
+    "suggestion": "MVP期間中は、Premier限定フレームのタップ時に「Premierプランにアップグレードして限定フレームを獲得」というダイアログを出し、S-38（プラン管理）へ直接誘導するフローに変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§10.4, §2.3",
+    "issue": "Undoスナックバーに「残り秒数カウントダウン表示」があるが、スクリーンリーダーが毎秒読み上げると他の操作の著しい妨げになる。",
+    "suggestion": "カウントダウン部分には `aria-hidden=\"true\"` を設定し、スナックバー出現時のみ「タスクを完了しました。取り消すボタンがあります」と一度だけ読み上げるようアクセシビリティ仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§2.3, §14.1",
+    "issue": "午前4:00（JST）の日次リセットについて、アプリを起動したまま（フォアグラウンドで）午前4時を跨いだ場合、TodayタスクやEXP上限が自動で画面に反映されるのか、Pull-to-refreshが必要なのか定義されていない。",
+    "suggestion": "アプリがフォアグラウンドにある状態で午前4時を迎えた場合、自動でデータを再フェッチしUIを更新する（または「日付が変わりました」トーストを出して更新を促す）仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§7.3, §6.1",
+    "issue": "ハーフモーダルを下スワイプで閉じるとあるが、モーダル内のコンテンツ（タスク詳細など）が縦スクロールする場合、上へのスクロール操作とモーダルを閉じる操作が競合する。",
+    "suggestion": "「モーダル内のスクロール位置がトップ（scrollTop === 0）にある場合のみ、下スワイプで閉じるジェスチャーを有効にする」という条件を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

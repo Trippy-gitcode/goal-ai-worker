@@ -1,0 +1,302 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2, §7.4; ux_v1.md §4.4, §12 注記",
+    "issue": "AI対話(messages)とソーシャルメッセージ(social_messages)のテーブル命名が文書間で混在しており、RLSの適用対象が不明確。誤実装すると友達にAI対話が漏洩する重大リスク。",
+    "suggestion": "データモデル命名を一意に確定し、RLSルールを表形式で明記。例: ai_messages(対話)/social_messages(友達). RLSは各テーブルのSELECT/INSERT/UPDATE/DELETE条件を具体クエリで列挙。ux_v1.mdの関連箇所も名称を統一。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3 タスク完了, §8.1 演出, project_v1.md §4.5 EXP上限",
+    "issue": "日次EXP上限(300)到達時のGROW側UIが未定義。完了は確定すべきだがEXP演出/数値表示をどう抑制するかの規則がない。",
+    "suggestion": "上限到達時はチェック確定のみ行い、EXPフロート/バー伸長を抑止。スナックバーで「本日のEXP上限に達しました（タスクは完了）」を表示。翌4:00リセット案内も併記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2 プラン管理, project_v1.md §2.1",
+    "issue": "Premierの「無制限（フェアユース上限1,000回/日）」到達時のTALK側UI/文言が未定義。上限到達時バナーはFree/Basic向けしか記述がない。",
+    "suggestion": "Premier到達時は「フェアユース上限に達しました（リセット: 04:00）」と表示し、CTAは出さない。S-38のプランカードにも『実質無制限（目安1,000/日）』と但し書きを追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §8.6 演出キュー",
+    "issue": "『複数演出は直列で並列実行しない』と明記しつつ、『ゴール達成バナー表示中にレベルアップ演出を重ねてよい』と部分的並列を許容。規則が矛盾。",
+    "suggestion": "優先順位と並列可否を一貫化。案: 完全直列に統一（タスク→ゴール→レベル）。もしくは『バナーとレベル数字の更新のみ並列可』等、重ねる要素を限定明記し総時間上限も再計算。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3 タスク並び替え",
+    "issue": "Today内の手動並び替えの保存・適用範囲が曖昧。開始時刻変更や新規追加時、Overdueセクションの固定優先度との衝突時の挙動が未定義。",
+    "suggestion": "優先順位ルールを定義: 1) Overdueは常に最上段固定グループ、2) Overdue内も手動並び可/不可を明記、3) 手動順序は日跨ぎでリセット（推奨）/保持のいずれかを選択、4) 新規タスクの挿入位置（デフォルトは自動ソート末尾/手動領域末尾）を明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3 タスク追加（習慣）; project_v1.md §3.2.3",
+    "issue": "『週N回』習慣のN選択UI/バリデーション（最小/最大、初期値）が未定義。カスタム曜日と週N回の競合時の優先度も不明。",
+    "suggestion": "Nの選択レンジ(1-7), デフォルト(3)を定義。『週N回』と『カスタム曜日』は排他にし、同時指定不可と明記。説明文もUI内に提示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.1 入力バー（画像添付）, project_v1.md §3.3",
+    "issue": "画像添付の制約（対応拡張子/10MB上限/1200pxリサイズ/EXIF削除）のUXエラー処理が未定義。",
+    "suggestion": "不許可拡張子/サイズ超過時のエラートーストを定義（例:『10MBを超えています』）。送信前のクライアントリサイズの有無、複数添付可否(現状1件のみ等)も明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.5 チャットスレッドモデル",
+    "issue": "スレッド上限(100)到達時の挙動/UIが未定義（新規作成ボタンの無効化/古い自動アーカイブ時の通知など）。",
+    "suggestion": "上限到達時は『古いスレッドを削除/アーカイブ』の選択ダイアログを表示。デフォルト動作（最古自動アーカイブ）と直後のトースト通知を定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §13.3 通知設定; project_v1.md §2.5",
+    "issue": "通知時刻（21:00など）のタイムゾーン基準が未定義。日次/週次サマリーの曜日基準（JSTの4:00リセットと整合）がUIに反映されない恐れ。",
+    "suggestion": "通知はユーザー端末ローカル時刻を基準と明記。週次レポートの週区切りはJST/ローカルいずれかを定義し、設定画面にヘルプテキストを表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4 FRIENDS（QR/承認待ち）; project_v1.md §5.1",
+    "issue": "承認リクエスト有効期限7日（自動削除）のUXが未定義（カウントダウン表示/期限切れ時の自動消滅フィードバック）。",
+    "suggestion": "承認待ちリスト各行に有効期限の残日/残時間を表示し、期限切れ時は行をフェードアウト+『期限切れで削除されました』トーストを提示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4 FRIENDS（QR/スキャン）",
+    "issue": "自分自身のQRをスキャン/リンクを開いた場合のエラーハンドリングが未定義。",
+    "suggestion": "『自分自身は追加できません』のエラーダイアログを定義し、FRIENDSに戻す。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4 FRIENDS（メッセージ/��援）; project_v1.md §5.5 悪用防止",
+    "issue": "スパム抑止の送信レート制限値（例: 1ユーザーあたり1分にN件/日M件）が未定義。上限到達時のUXもない。",
+    "suggestion": "送信間隔(例: 15秒/件)と日次上限(例: 50件/日/ユーザー)を定義。超過時は『送信上限に達しました』トーストを表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3 タスク編集/削除（習慣）; project_v1.md §7.4",
+    "issue": "習慣の削除時に過去の完了履歴（90日保持）の扱い・確認文言が未定義。",
+    "suggestion": "確認ダイアログに『習慣を削除しても過去90日の完了履歴は保持/削除』のいずれかを明記（推奨: 履歴保持）。UIラベルを具体化。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.1 設定 > データ",
+    "issue": "AI対話履歴の自動削除(90日)や画像添付の保持期間のユーザー向け明示が設定画面にない。",
+    "suggestion": "『データ保持ポリシー』セクション/リンクを追加し、保持期間と削除不可逆性を説明。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.3.4/§3.4, project_v1.md §4.5",
+    "issue": "冒険EXPは3回目以降+0表記の仕様があるが、通常タスクEXP上限到達後に更にタスク完了した場合の+0表記有無が未定義。",
+    "suggestion": "通常タスクでも上限後は『+0 EXP（本日の上限に到達）』の小さな灰色フロートを出すか、出さない方針ならスナックバーのみで明示とする等、統一ポリシーを明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.5 チャットスレッド命名",
+    "issue": "自動命名のみで手動リネーム不可（MVP方針）は明記済だが、同名スレッドが多数になる可用性配慮（識別性改善）が未定義。",
+    "suggestion": "リスト項目に直近日時/モデル種別アイコン等の補助情報を追加し識別性を補強。将来のリネーム導線は非アクティブUIで示唆。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §7.3 PWA実装注記",
+    "issue": "iOS PWAのedge swipe抑止/カスタム戻る実装はブラウザ挙��に左右され不安定になり得る。戻りアニメとpopstateの競合が起きやすい。",
+    "suggestion": "iOS standalone判定下ではedge swipeを全面無効化し、ナビゲーションは明示UI（←ボタン）を主導に。技術仕様(reference)でイベント順序/キャンセル手順を詳細化。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §15 通知タップ遷移",
+    "issue": "未ログイン時の通知タップ→再ログイン→リダイレクトは定義済だが、失効・削除済み対象（例: 削除したタスク/友達メッセージ）に対するフォールバックが未定義。",
+    "suggestion": "対象不在時は安全なデフォルト（GROW/FRIENDSトップ）に遷移し『対象が見つかりません』のバナーを表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.4 ゴール詳細",
+    "issue": "ゴール期限超過時（期限日を過ぎた未達）の表示スタイル/ラベルが未定義。",
+    "suggestion": "『期限超過』ラベルと色（注意色）を定義。達成時のボーナスや完了待ち7日ルールとの組み合わせ表示も明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1, §2.2; ux_v1.md §13.2",
+    "issue": "MVP��点でショップ未実装のため、ゲーミフィケーション（アバター経済）が課金動機に直結しにくい。現状の主動機はAI対話回数のみで、Freeでもコア体験が十分に得られるためアップグレード誘因が弱い可能性。",
+    "suggestion": "短期対策: Basic/Proに『AI深掘り回答（長文/ツール呼び出し）』や『ヒアリング深度の拡張/ディープ分析の再生成回数上限』等の明確な質的差をUI上で提示。Premierは限定フレームの露出を高め、S-31/タブバー等に常時さりげなく表示。中期: v0.2でショップ早期実装/限定アイテムローテーション。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1, §3.3 画像添付",
+    "issue": "Freeでも画像Visionが利用可能（GPT-4o mini Vision）で対話1回カウントのみ。コストに比して収益誘因が弱く、持続性にリスク。",
+    "suggestion": "MVPでは画像添付をBasic以上に限定、またはFreeは1日1枚まで等の上限をUXに明記。到達時のアップセル文言/比較表もS-38に追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.4 冒険EXP演出",
+    "issue": "TALKでレベルアップ時にGROWでフル演出を『次回表示時に再生』とあるが、ユーザーがGROWに戻らないまま当日を終えると達成感の見逃しが起き得る。",
+    "suggestion": "TALK内でも簡易EXPバー/アバター縮小プレビューを一時的にオーバーレイ表示するか、MEヒーローでも簡易演出を許容するなど補完手段を検討。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.4 戻りナビゲーション",
+    "issue": "ブラウザバック時の未保存データ確認はハーフモーダル/編集に限定されている。設定フォームの自動保存失敗時やS-41未保存時の挙動は一部明記不足。",
+    "suggestion": "設定配下の各編集画面でもpopstate時の保存/破棄ダイアログ動作を表にして明記（S-41は既に定義済だがS-42/S-43も）。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4 FRIENDS（友達リスト上限）; project_v1.md §7.4",
+    "issue": "友達上限(500人)到達時のUIが未定義（追加ボタン無効化/警告）。",
+    "suggestion": "上限��達時は『上限に達しました（500人）』のツールチップを表示し、QR表示/リンク招待ボタンをグレーアウト。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3 Upcomingセクション",
+    "issue": "Upcomingで7日超過の『件数のみ』からの全一覧展開時の戻り/折りたたみ状態保持が未定義。スクロール位置復元も不明。",
+    "suggestion": "展開状態とスクロール位置を画面内stateで保持。戻り時は自動復元。大量件数時は仮想リスト化を技術仕様に追記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2 プラン管理（Premier注記）; project_v1.md §2.1-2.2",
+    "issue": "Premierの『チケットComing Soon/遡及配布』のUI注記がS-38に不足。",
+    "suggestion": "Premierカード内に『限定フレーム同梱』『ショップ開始時に過去分チケット配布』を明記。決済前確認モーダルにも同文言を表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §4.3 DISCOVER 強み/弱み",
+    "issue": "ユーザー手動追加/削除とAI自動検出の優先順位・競合解決（AIが復活させない等）の規則が未定義。",
+    "suggestion": "手動削除は『固定抑止』フラグを立て、AIは同一項目を再提案しない等のルールを明記。手動追加はAIが上書きしない。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §0 UXベンチマーク/§10 アクセシビリティ",
+    "issue": "ベンチマークの『高速性』課題への反映は全般で触れているが、操作ごとの100ms以内の初期フィードバック基準が網羅的に明文化されていない。",
+    "suggestion": "主要操作（タップ/送信/追加/削除）ごとに『100ms以内に何を出すか（リップル/ハイライト/スケルトン/タイピングインジケータ）』をチェックリスト化（付録）し、E2Eテスト項目に紐付け。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-029",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §1.1/§1.2 全体遷移; タブ構成",
+    "issue": "3タブ構成は良いが、タスクのスケジュール密度・日/週俯瞰ニーズに対しカレンダーがMVPに存在しない。『Upcoming』で補完しているが視覚的把握��は限定的。",
+    "suggestion": "将来のMINORでGROW内に週ビュー（簡易カレンダー）を追加する検討を明記。MVPではUpcomingの使い勝手（7日超）を強化。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-030",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §5.1 オンボーディング Step4",
+    "issue": "AI提案ゴールを0個で進めた場合の『初回タスク自動提案』条件（project側の自動提案と整合）がUIに見えない。",
+    "suggestion": "完了時の確認画面に『初回タスクを用意しました/後で追加できます』の一言と、GROW遷移後のハイライト演出を追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  }
+]

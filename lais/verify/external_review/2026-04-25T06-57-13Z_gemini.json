@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "frontend/js/chat.js",
+    "issue": "window.isPreactTalkMountedが呼び出されていますが、コードベースのどこにも定義されていません。これによりPreact移行後もVanilla JSの描画・送信ロジックが実行され、メッセージの二重送信や、履歴読み込み時に画面に反映されないバグが確実に発生します。",
+    "suggestion": "frontend/components/preact-bridge.jsのmountPreactTalk内でwindow.isPreactTalkMounted = () => true;を定義し、アンマウント時に削除するか、既存のフラグ変数を利用するよう判定ロジックを修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "scripts/night_mode_dispatcher.sh",
+    "issue": "NOW_INT=$(printf '%d' \"$NOW_HHMM\")において、NOW_HHMMが0830や0915の場合、先頭の0により8進数として解釈されますが、8や9は不正な文字のためエラーとなりスクリプトがクラッシュします。午前8時・9時台の判定が完全に破綻します。",
+    "suggestion": "NOW_HHMM=$(echo \"$NOW_HHMM\" | sed 's/^0*//') のように先頭のゼロを取り除くか、10進数として明示的に解釈させる処理を追加して、8進数解釈によるエラーを回避してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "frontend/components/GoalHub.jsx",
+    "issue": "sendChat内のstreamAIのエラーコールバック（catch句および第4引数）で、メッセージ状態を更新する際にstreaming: falseを設定し忘れています。APIエラー時にUIがストリーミング状態（点滅カーソル等）のまま永遠にスタックします。",
+    "suggestion": "エラー時のsetChatMsgsの更新ロジックにstreaming: falseを追加してください。例: next[next.length - 1] = { role: 'ai', content: 'エラーが発生しま��た。', streaming: false };",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "frontend/components/preact-bridge.js",
+    "issue": "mountTaskAddFlowおよびmountTaskCardの即時実行関数内で、既存のDOM要素の存在チェックを行わずにdocument.body.appendChild(host)を実行しています。HMRや再読み込み時にDOM要素とコンポーネントが無限に重複マウントされます。",
+    "suggestion": "mountTaskDetailPanelと同様に、document.getElementById('preact-task-add-host')等で存在チェックを行い、存在しない場合のみcreateElementとappendChildを実行するように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "frontend/components/GoalHub.jsx",
+    "issue": "useEffect内でwindow.openGoalHubやwindow.switchHubTabなどのグローバル関数を登録していますが、クリーンアップ関数でこれらをdeleteしていません。アンマウント後も古いクロージャが残り、メモリリークや古い状態を参照するバグを生みます。",
+    "suggestion": "useEffectのクリーンアップ関数（return () => { ... }）内で、登録したすべてのグローバル関数（delete window.openGoalHub; delete window.switchHubTab; 等）を削除する処理を追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "frontend/components/Talk.jsx",
+    "issue": "window.sendHomeMsgなどを定義するuseEffectの依存配列にmessagesが含まれているため、メッセージが追加されるたびにグローバル関数が削除・再定義されます。非同期処理の合間に呼ばれるとundefinedとなりクラッシュする恐れがあります。",
+    "suggestion": "sendMessageやstopStreamなどの関数をuseCallbackでメモ化し、グローバル関数の登録はマウント時のみ（依存配列を空にするか、不変な参照のみにする）行うようリファクタリングしてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.1483,
+    "input_tokens": 114446,
+    "output_tokens": 1042,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

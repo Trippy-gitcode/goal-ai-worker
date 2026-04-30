@@ -1,0 +1,80 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "resolveFiles 関数, readSpecs 関数",
+    "issue": "fs.readdirSyncで取得したパスがディレクトリかどうかの判定（fs.statSync(f).isFile()）を行っていません。globパターン（例: docs/plans/*）にサブディレクトリが含まれると、後続のfs.readFileSyncでEISDIRエラーが発生し、スクリプトが確実にクラッシュします。",
+    "suggestion": "files.pushする前に、fs.statSync(path.join(dir, f)).isFile()を使用してファイルのみをフィルタリングする処理を追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "loadEnv 関数",
+    "issue": ".dev.varsファイルが存在しない場合にprocess.exit(1)で強制終了しています。CI/CD環境ではシークレットを環境変数（process.env）から直接注入するのが一般的ですが、この実装ではCI環境で確実に動作不能（クラッシュ）になります。",
+    "suggestion": ".dev.varsが存在しない場合はエラー終了せず、process.envを返すようにフォールバック処理を実装してください。また、ファイルと環境変数のマージも検討してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "extractJson 関数",
+    "issue": "JSON抽出用の正規表現 text.match(/```(?:json)?\\s*(\\[[\\s\\S]*\\])\\s*```/) において、[\\s\\S]* が貪欲マッチになっています。AIのレスポンス内に複数のコードブロックが含まれる場合、最初の開始タグから最後の終了タグまでを全てキャプチャしてしまい、JSONパースエラーを引き起こします。",
+    "suggestion": "貪欲マッチを非貪欲マッチ [\\s\\S]*? に変更し、最初の有効なJSONブロックのみを正確に抽出できるように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "SECURITY",
+    "location": "callGemini 関数",
+    "issue": "Gemini APIの呼び出しにおいて、APIキーをURLのクエリパラメータ（?key=${apiKey}）として渡しています。HTTPリクエストエラー時などにURLがログ出力された場合、APIキーが平文で漏洩する重大なセキュリティリスクがあります。",
+    "suggestion": "クエリパラメータからAPIキーを削除し、HTTPヘッダー x-goog-api-key: ${apiKey} を使用して認証情報を安全に送信するように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "loadEnv 関数",
+    "issue": ".dev.varsから値を読み込む際、v.join('=').trim()で値を取得していますが、クォートの除去を行っていません。OPENAI_API_KEY=\"sk-...\" のように記述されていると、クォートが含まれたままAPIリクエストに渡され、確実に認証エラーになります。",
+    "suggestion": "値の先頭と末尾がクォートで囲まれている場合は、replace(/^[\"']|[\"']$/g, '') 等を使用してクォートをストリップする処理を追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "main 関数 (集計処理)",
+    "issue": "results.push({ id: '_metadata', ... }) でメタデータを配列に追加した直後に for (const item of results) で集計を行っています。これにより、メタデータが severity: '?' としてカウントされ、totalItemsやログ出力の集計結果が汚染されます。",
+    "suggestion": "集計ループの中で if (item.id === '_metadata') continue; としてスキップするか、集計処理を完了した後に _metadata を results に push する順序に変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "resolveFiles 関数",
+    "issue": "globの正規表現生成 new RegExp('^' + base.replace(/\\*/g, '.*') + '$') において、baseに含まれるドット（.）などの正規表現メタ文字がエスケープされていません。sub_*.md の . が任意の一文字として解釈され、意図しないファイルにマッチする可能性があります。",
+    "suggestion": "baseの文字列に対して、*を置換する前に replace(/[.+?^${}()|[\\]\\\\]/g, '\\\\$&') を適用してメタ文字をエスケープしてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0213,
+    "input_tokens": 12509,
+    "output_tokens": 1127,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

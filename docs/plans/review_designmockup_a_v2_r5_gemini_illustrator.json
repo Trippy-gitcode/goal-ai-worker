@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "「はじめる」ボタン",
+    "issue": "ボタンの青色（#1A5FC8）が彩度が高く、背景の夜空（#0D1117）や星の淡い水色に対して事務的・システム的な印象を与え、「洗練された夜空のジャーナル」という情緒的なトーンをやや損ねている。",
+    "suggestion": "仕様の範囲内で、ボタン背景色を夜空に馴染む深いトーン（例：少し紫がかったネイビー）にするか、グラスモーフィズム的な表現を取り入れ、ブランドの静けさと調和させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクション「ジムで筋トレ」の左ボーダー",
+    "issue": "左ボーダーに仕様書（#D29922）と異なる彩度の高いオレンジ（#E8A855）が使用されており、Night Skyテーマの静かなトーンの中で浮いて視線を奪っている（デザインシステム違反）。",
+    "suggestion": "仕様書で定義されたセマンティックカラー（warning: #D29922）を使用し、テーマ全体の彩度バランスと調和させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "チャットバブル全体",
+    "issue": "AIのバブル（左ボーダー）とユーザーのバブル（背景色微差）の視覚的な差異が弱く、パッと見でどちらの発言か直感的に把握しづらい（視線迷子）。",
+    "suggestion": "ユーザーのバブルの背景色をもう少しアクセントカラーに寄せるか、AI側に小さなアバターアイコンを添え、対話の感情的なキャッチボールを視覚的に明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "「削除」ボタン",
+    "issue": "ダークテーマの背景に対して赤（#F85149）とボーダーが強く出過ぎており、日常的に使うジャーナルアプリとしてはユーザーに強い緊張感を与えすぎている。",
+    "suggestion": "破壊的アクションの赤は維持しつつ、ボーダーの不透明度を下げるか、テキスト色を少し落ち着いたトーンに変更して、安心感を保つ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s12_task_add",
+    "location": "「単発タスク」「30分」などの選択中チップ",
+    "issue": "選択状態のチップ背景（rgba(121,192,255,0.14)）とテキスト色（#79C0FF）の組み合わせが、ダーク背景上でコントラストが弱く、ユーザーに「選択されている」という確信（安心感）を与えにくい。",
+    "suggestion": "選択状態のチップは、背景色を少し濃くするか、テキスト色を白（#FFFFFF）にしてコントラストを強調し、状態を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスク完了チェック",
+    "issue": "完了を示す緑（#3FB950）が、青基調のNight Skyテーマの中で唐突な印象を与え、達成の喜びを表現しつつもブランドの「洗練」と少しぶつかっている。",
+    "suggestion": "完了のセマンティックカラーを、Night Skyに馴染むエメラルドグリーン系に微調整するか、アクセントカラー（#79C0FF）の輝度を上げた色でテーマ内の調和を図る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s12_task_add",
+    "location": "入力フィールド群",
+    "issue": "各要素がボーダー（#6E7681など）で明確に区切られすぎており、夜空のようなシームレスな空間の広がり（Open Airの原則）が阻害され、やや窮屈な印象を与える。",
+    "suggestion": "入力フィールドの境界線をボーダーではなく、背景色のわずかな明度差（#1C2128など）で表現し、実世界と地続きの洗練された空間を演出する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s30_me",
+    "location": "サブタブ（DISCOVER, FRIENDS, SHOP）",
+    "issue": "非アクティブなタブのテキスト色（#7A8593）が背景に対��て沈みすぎており、他の機能への探索を促すワクワク感（喜び）が削がれている。",
+    "suggestion": "非アクティブタブのテキスト色を一段階明るいグレー（#9BA7B4など）にし、視認性と探索意欲を向上させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン",
+    "issue": "ボタンの背景色が #1C2128、テキストが #7A8593 で非アクティブ状態に見える。画面を開いた瞬間の主要CTAが沈んでおり、歓迎されている感情が薄い。",
+    "suggestion": "入力前でDisabled状態であるなら、プレースホルダー的にアクティブな色（#1A5FC8）を見せるか、Disabled状態でも「押せそうだが今は押せない」ことがわかるコントラストにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s02_onboarding",
+    "location": "アバター選択（タイプB）",
+    "issue": "選択中のアバターを囲む青いリングとシャドウが他の要素に比べて弱く、どれが選ばれているかの「決定感」が薄いため、ユーザーの感情的応答���弱い。",
+    "suggestion": "選択中のリングを少し太くするか、リングの内側の背景色をわずかに明るくして、選択に対する視覚的フィードバックを強化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタスクリスト",
+    "issue": "タスク間の余白が8pxしかなく、デザインシステム§4.2の「タスク間余白: 20px以上（呼吸するリズム）」に違反している。Open AirのブランドDNAが損なわれている。",
+    "suggestion": "タスク行の margin-bottom を 20px 以上（--space-lgなど）に変更し、ゆったりとしたレイアウトにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "画面上部のヒーロー領域（アバター、名前、レベル）",
+    "issue": "要素が中央揃えで配置されているが、デザインシステム§4.3の「左揃えベース。中央揃えは大数字・空状態メッセージのみ」というレイアウト原則に矛盾している。",
+    "suggestion": "アバター、名前、レベル、プログレスバーを左揃え（text-align: left）に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "「所要時間」の選択チップ（5分、10分など）",
+    "issue": "チップの視覚的な高さが約30px以下しかなく、WCAG 2.5.5の最小タップターゲットサイズ（44x44px）を満たしていない。",
+    "suggestion": "チップの padding を増やすか、::before 疑似要素を用いて透明なタップ領域を44x44px以上に拡張する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」のチェックボックス",
+    "issue": "チェックボックスのサイズが20x20pxであり、単独でのタップターゲットとしてWCAGの44x44px基準を下回っている。",
+    "suggestion": "ラ��ルテキストを含めた全体を <label> で囲みタップ可能領域を広げるか、チェックボックス周囲に透明なパディングを設けて44pxを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "ハーフモーダル右上の「✕」（閉じる）ボタン",
+    "issue": "ボタンのコンテナサイズが28x28pxに設定されており、モバイルでの確実なタップに必要な44x44pxの領域が確保されていない。",
+    "suggestion": "width と height を 44px に拡大し、アイコンを中央に配置するよう修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン",
+    "issue": "未入力時の非活性状態と思われるが、背景色（#1C2128）とテキスト色（#484F58）のコントラスト比が低すぎ（約2.2:1）、ボタンの存在自体が視認しづらい。",
+    "suggestion": "非活性状態でも最低限の視認性を確保するため、テキスト色を --text-disabled や --text-hint など少し明るい色に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s14_goal_detail",
+    "location": "タスクリストの未完了タスク「企画書を仕上げる」",
+    "issue": "未完了タスクのチェックサークルがアクセント色（#79C0FF）で強調されており、完了済み（緑）と同等の視覚的重みを持っているため、ステータスの判別が直感的でない。",
+    "suggestion": "未完了タスクのサークルは、他の未完了タスクと同様に --border-strong などのニュートラルな色を使用し、視覚的ノイズを減らす。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE, DISCOVER, FRIENDS, SHOP）",
+    "issue": "タブのラベルテキストが12pxと小さく、画面内の主要なナビゲーションとしての視覚的階層が弱くなっている。",
+    "suggestion": "フォントサイズを14px（--font-size-sm）に引き上げ、タップしやすさと視認性を向上させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

@@ -1,0 +1,146 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "COMPLETENESS",
+    "location": "sub_testing.md → §5. affected-tests.sh",
+    "issue": "The L2 (Affected Scope) testing strategy is entirely non-functional. The `affected-tests.sh` script, which is the core of this strategy, is just a template with commented-out examples, not a working implementation. This creates a major gap in the 3-layer test strategy.",
+    "suggestion": "Implement a concrete, working version of `affected-tests.sh`. Define a clear, maintainable mapping mechanism (e.g., in `app_config.yaml` or using code ownership annotations like `@owner`) to link source files to test files."
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → §2.6 canopy_common.sh",
+    "issue": "Two critical quality gates, G1 (Version Sync) and G6 (Build Sync), are described in comments within `canopy_common.sh` but have no corresponding implementation. The script will never fail even if versions or build configurations are out of sync.",
+    "suggestion": "Implement the shell script logic for G1 to parse and compare versions from `app_config.yaml`, `package.json`, `version.ts`, and `CLAUDE.md`. Implement G6 to parse `app_config.yaml` and verify the `build.out_dir` matches the path used in the `deploy.frontend_cmd`."
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §4.1 G9 UI受入判定",
+    "issue": "The entire UI acceptance criteria (G9) relies on screenshot comparison, which is notoriously brittle and incomplete. It cannot verify non-visual aspects like accessibility attributes (ARIA roles), `data-testid`s, element states (e.g., disabled vs. enabled if visually identical), or invisible elements. This is a fundamental risk when the PO does not read code.",
+    "suggestion": "Augment G9. While screenshots are useful for the PO's visual check, the automated gate should use a more robust method. Mandate the use of `data-testid` attributes on key elements and have Playwright's `expect(locator(...)).toBeVisible()` as the primary automated check. Screenshots should be considered artifacts for manual review, not the primary gate mechanism."
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §4.1 G8 テストファースト",
+    "issue": "The Test-First gate (G8) is described as 'ENG self-governed' and lacks any automated enforcement. There is no mechanism to verify that a failing test was committed before the implementation that makes it pass. This makes the TDD process a matter of trust rather than a verifiable gate.",
+    "suggestion": "Implement a pre-commit or CI hook that enforces the G8 gate. The hook could check git history to ensure that for a given feature, a commit with a failing test (identified by a specific tag like `[TDD-RED]`) precedes the commit that makes it pass (`[TDD-GREEN]`)."
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §7. 3層テスト戦略",
+    "issue": "The test pyramid is inverted and incomplete. The entire specification suite focuses exclusively on E2E tests (Playwright). There is no mention of unit or integration tests. This leads to a slow, expensive, and brittle testing process where all feedback comes from the slowest possible tests.",
+    "suggestion": "Explicitly define unit and integration test layers in the strategy. Specify tools (e.g., Vitest for unit tests) and set coverage expectations. Mandate that logic within components or backend services be tested at a lower level, reserving E2E tests for user flows."
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md → §4.2 テスト項目フォーマット",
+    "issue": "The test library's coverage status is tracked with manual markdown tags like `[COVERED]`. This system is not scalable and is guaranteed to become outdated and untrustworthy, as there is no automated process to update the status when tests are added or changed.",
+    "suggestion": "Replace the manual markdown tags with an automated system. Link test library items to test code using the spec ID system (e.g., `TL-001`). Generate a coverage report by parsing test files for these IDs and comparing it against the full list in `test_library.md`."
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md → §4.1 G5 報告フォーマット",
+    "issue": "Gate G5 (Report Format) is defined as 'Human confirmation'. This, along with the manual ENG report verification in `sub_adv_protocol.md`, directly contradicts the core design principle of 'Maximize Automation' and creates a human bottleneck.",
+    "suggestion": "Automate G5. Create a linter script that parses the ENG's completion report (e.g., a markdown file). The linter should fail if it finds any of the 12 forbidden ambiguous terms or if 'ALL PASS' is reported without a denominator (e.g., '25/25 PASS')."
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "sub_system_map.md → §1. 仕様書の依存関係",
+    "issue": "The file dependency map is an excellent guide for chain updates, but its enforcement is purely procedural. There is no automated check to ensure an AI agent follows the map, creating a high risk of inconsistent or incomplete updates.",
+    "suggestion": "Create a script (`dependency_check.sh`) that runs on pre-commit or in CI. This script would parse the dependency map and, by checking `git diff --name-only`, warn or fail the build if a source file is changed without a corresponding change in its specified dependents."
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §4.1 G3 テスト項目数",
+    "issue": "The G3 gate uses `grep -c` to count tests. This is unreliable because it will count commented-out tests (e.g., `// test(...)` or `test.skip(...)`), leading to a false sense of coverage.",
+    "suggestion": "Use a more robust counting method. Leverage Playwright's `--list` flag (`npx playwright test --list`) and pipe the output to `wc -l`. This will count only the tests that the test runner actually recognizes."
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §4.2 G2とG9の役割分担",
+    "issue": "The distinction between G2 (DOM API helper) and G9 (screenshot acceptance) is unclear in failure scenarios. If G2 passes but G9 fails, what is the expected action for the ENG agent? The spec says G2 is 'not for acceptance', but this ambiguity could lead to incorrect 'DONE' reports based on a passing G2.",
+    "suggestion": "Explicitly state the hierarchy. Add a rule: 'If G2 and G9 results conflict, the G9 result (screenshot verification) is the source of truth for acceptance. A passing G2 cannot override a failing G9.'"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §4.4 SKIPルール",
+    "issue": "The SKIP rule states that a skipped test is added to the next queue as 'SKIP-RETRY'. This creates a potential infinite loop for tests that are permanently skipped for a valid reason (e.g., a feature is legitimately not supported on a platform). There is no defined exit condition or escalation path.",
+    "suggestion": "Introduce a 'SKIP-PERMANENT' status. If a test is retried 3 times via SKIP-RETRY and still skipped, it should be flagged for ADV/PO review. The PO can then approve it as a permanent, accepted skip that is no longer retried."
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md → §4.4 SKIPルール",
+    "issue": "There is a consistency issue between the main spec and the testing sub-spec. `dev_system_spec.md §4.4` states 'Details: sub_testing.md' for SKIP rules. However, `sub_testing.md` does not contain any detailed rules; it only contains the `test_lint.sh` script for detecting skips.",
+    "suggestion": "Add a new section to `sub_testing.md` that explicitly details the SKIP rules (e.g., what constitutes valid 'platform incompatibility', how to document it, and the SKIP-RETRY process). Update the reference in `dev_system_spec.md` to point to this new, specific section."
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §12. 仕様書ID付番",
+    "issue": "The canopy script to verify spec-to-test linkage only compares the total counts of spec IDs. This is insufficient as it cannot detect if a specific spec ID exists in the documentation but is missing from all test files. The gate would still pass if another test file happens to reference a different ID twice.",
+    "suggestion": "Enhance the verification script. It should extract all unique `SPEC-*-NNN` IDs from docs, extract all unique IDs from tests, and then perform a set difference to find any IDs that are in docs but not in tests. Fail the gate if the difference is not empty."
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → §2.4 mission_linter.sh",
+    "issue": "The `mission_linter.sh` script checks that a mission definition contains a bash command, but it does not validate the command itself. For example, it doesn't check if the test file path in `npx playwright test path/to/spec.ts` actually exists, allowing a mission with a typo to pass linting but fail at runtime.",
+    "suggestion": "Improve `mission_linter.sh`. Add a step to parse out file paths from common commands (like `npx playwright test` or `wc -l`) and use `test -f` to verify that the referenced files exist."
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → §2.5 session_archiver.sh",
+    "issue": "The `session_archiver.sh` script relies on a hardcoded, case-sensitive string '## 完了済み' to find completed tasks. A simple typo or formatting change by the AI agent will cause the script to fail, violating the 300-line limit rule for `session_progress.md`.",
+    "suggestion": "Make the script more robust. Use a case-insensitive regular expression that allows for variable whitespace, e.g., `grep -in \"^##[[:space:]]*完了済み\"`."
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §5. ミッション定義テンプレート v3",
+    "issue": "The TDD state is tracked via manual markdown checkboxes (`RED: ☐ / GREEN: ☐`). This is error-prone, provides no real verification, and relies on the agent to remember to update it. It adds process overhead without automated validation.",
+    "suggestion": "Remove the manual checkboxes. Instead, require the ENG agent to provide the git commit hashes for the 'RED' state (failing test) and 'GREEN' state (passing test) in the completion report. This is verifiable evidence that G8 was followed."
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → §2.2 update_app.sh",
+    "issue": "Several scripts, such as `update_app.sh` and `build_rules.sh`, have a hardcoded default path for the dev-system repository (`$HOME/Desktop/dev-system`). This is not portable and will fail in CI/CD environments or on any machine with a different setup.",
+    "suggestion": "Modify the scripts to require the `dev-system` path as a mandatory argument, or use a relative path from the script's location by default (as `init_app.sh` does). Remove the hardcoded absolute path."
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md → §17. 仕様書構成",
+    "issue": "The criterion for splitting specifications into sub-files is an arbitrary line count ('200行以上'). This can lead to illogical splits where related topics are separated, or unrelated long topics are combined. A more logical organization would be based on domain or concern.",
+    "suggestion": "Change the splitting criterion from line count to architectural concern. For example: 'All specifications related to the testing process belong in `sub_testing.md`.' or 'All detailed script implementations belong in `sub_infrastructure.md`.' This makes the structure more predictable and maintainable."
+  }
+]

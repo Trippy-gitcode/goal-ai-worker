@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayリストの末尾（Upcoming の位置）",
+    "issue": "UX仕様 §2.3 で必須の「Upcoming（明日以降）」セクションが欠落している。",
+    "suggestion": "Todayの直下に折りたたみ式「Upcoming (N件)」を追加し、日付グルーピング＋7日以降の件数集約を実装（仕様 §2.3）。ヘッダーは英字ラベル＋件数、展開時は日付ごとにリスト表示。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクション最上部（Overdue の位置）",
+    "issue": "UX仕様 §2.3「期限切れタスク表示」要件が未実装。Overdueラベル＋赤系強調と左3pxバーの視覚手掛かり（DS §2.4）が存在しない。",
+    "suggestion": "Todayの最上部に「期限切れ」ラベル行を追加し、各Overdueタスクに --overdue（= --danger）色の3px左バー＋[明日に延期]テキストボタンを付与（仕様 §2.3・DS §2.4）。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "PROFILEタブ中段（AI理解メモの下）",
+    "issue": "UX仕様 §4.2 で定義された「MBTI/性格タイプ」カードが欠落している。",
+    "suggestion": "AI理解メモ直下にMBTIカード（4文字タイプ＋説明＋進捗/未推定文＋外部テスト結果入力導線）を追加（仕様 §4.2）。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Todayヘッダー直下のサブテキスト「1 / 4 completed」",
+    "issue": "日本語UIの中で英語の進捗文言が混在し、トーン（§1.4 敬語ベース）と不整合。情報の可読性・一貫性を損なう。",
+    "suggestion": "「1 / 4 完了」に置換（日本語短文）。英語UI許容ラベル（TODAY/EXPLORER等）と役割を分離し、本文/説明は日本語で統一。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s10_grow",
+    "location": "Todayリスト1行目（完了タスク行）",
+    "issue": "完了状態が「緑背景＋チェックリン��＋『達成』ラベル＋補助行＋カテゴリドット」の多重符号化で過密。視覚的緊張よりもノイズが勝ち、未完了行とのコントラストが過大。",
+    "suggestion": "完了行は「緑リング＋本文色フェード（text-secondary）＋補助行で『完了・XX分』」程度に簡素化。行全体の緑背景は削除し、一覧の呼吸（§4.2 Open Air）を回復。Goals内の完了表現（取り消し線）とも指標を揃える。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "AI応答直下の「タスクにしますか？」提案カード",
+    "issue": "AIメッセージの左ボーダー（2px）と提案カードの左ボーダー（3px）で太さ・インデントが不一致。会話から生まれたカードである連続性が弱く、視線が一度途切れる。",
+    "suggestion": "左インデントとボーダー太さを統一（2px or 3pxで全体を揃える）。カード上部に小ラベル「AI提案」を追加し、AIメッセージとの連結性を視覚的に補強。上下マージンはアイテム間8px、セクション��切り32px基準を厳守。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "全体（Splash/GROW/TALK/ME の基調）",
+    "issue": "夜空×青アクセント×角丸の一般的パターンに寄り、Phase Aの段階でもブランド固有の『設計された沈黙』と造形的モチーフがやや希薄。AI生成定番UIの印象に接近。",
+    "suggestion": "Night Skyの文脈を静的造形に落とす: 例) セクション見出し下に極薄の星座ライン（--borderで1px）、区切りの月相グリフ（8pxアイコン）、Splashの星屑をロゴ高さに呼応する非対称配置に最適化。タスク/ゴールの区切りは星図の経線風の等幅リズムに揃え、色に頼らず均整で個性を出す。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "戻る矢印＋ステッパーの上端（ノッチ直下）",
+    "issue": "上端余白が狭く（margin-top:4px）、視覚的に窮屈。初回体験の静けさ（§1.5）よりも圧迫感が先行する。",
+    "suggestion": "ステータスバー/ノッチ下に --space-lg(24px) 以上の安全余白を確保。ステッパ��とタイトル間も最小16pxを担保して呼吸をつくる（§4.1, §4.2）。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "進捗ヒーローの「60%」表記",
+    "issue": "数値48px（weight:200）と%記号20pxのベースライン／サイズ差が大きく、視覚重心が不安定。ヒーロー効果はあるが品位よりも違和感が先行。",
+    "suggestion": "数値= --font-size-3xl(48px, w200)・%記号= --font-size-lg(20px)→24pxへ引き上げ＋ベースライン揃え。字間は --letter-spacing-heading(-0.5px) を適用し、数字塊のまとまりを高める。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "ヘッダー下ボーダーと入力バー上ボーダー",
+    "issue": "ヘッダーは #6E7681（border-strong）、入力バーは #484F58（border）。主要分割線の強度が上下で不一致のため、画面の骨格リズムが弱まる。",
+    "suggestion": "主要セクション境界は一貫して --border-strong(#6E7681) を適用。副次分割に --border(#484F58) を使用し、階層コントラストを明確化（DS §2.1, §4.2）。",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

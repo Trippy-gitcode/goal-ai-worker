@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "3.2 lais/src/lib/auth.js + バックエンド設定全体",
+    "issue": "Supabase の RLS 設定状況が本パッケージから確認できない。クライアントから anon key で直接 DB/API を叩く前提では、RLS 未設定だと任意の第三者にデータの読み書きが可能となる重大リスク。",
+    "suggestion": "全テーブル/ビューで RLS を有効化し、認証済みユーザーのみに必要最小限の操作を許可するポリシーを作成。E2E/CI に anon での select/insert/update/delete が不許可であることを検証するテストを追加。ストレージ/エッジ関数も認可を明示。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "3.2 lais/src/lib/supabase.js（未提示）",
+    "issue": "クライアントに読み込まれる supabase.js の内容が未提示のため、service_role キーや他シークレットが誤って埋め込まれていない保証がない。もし service_role が含まれていれば全権限漏洩のクリティカル事故に直結。",
+    "suggestion": "クライアントは anon/publishable key のみ使用し、service_role はサーバ環境変数のみに限定。CI に gitleaks/secretlint を導入して公開鍵以外のキーをブロック。起動時にキー接頭辞/長さで service_role の誤配置を検知する安全弁を追加。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "配信設定（index.html/HTTP ヘッダ）",
+    "issue": "明示的な Content Security Policy (CSP) が見当たらない。XSS が成立した場合に localStorage のトークンやユーザーデータが即時に奪取される。",
+    "suggestion": "厳格な CSP を導入: default-src 'self'; script-src 'self' 'strict-dynamic' https: 'nonce-...'; style-src 'self'（必要時 nonce または最小限の 'unsafe-inline'）; img-src 'self' data:; connect-src 'self' https://<your-supabase-project>.supabase.co https://*.supabase.co; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests。インラインスクリプトは nonce 化し、eval/unsafe-inline は禁止。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "Supabase プロジェクト設定（CORS）",
+    "issue": "CORS 設定の記載がなく、ワイルドカードや不要なオリジン許可があると外��オリジンから API/ストレージ/関数が濫用される恐れがある。",
+    "suggestion": "Allowed Origins を開発/本番の正規ドメインに限定し、ワイルドカードを禁止。認証が必要なエンドポイントは Authorization ヘッダを必須化。不要な OPTIONS/プリフライトが発生しないようエンドポイント設計も見直す。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 lais/src/components/screens/S01Auth.jsx",
+    "issue": "サーバエラーを err.message のままユーザーに表示しており、内部情報の露出やアカウント有無の推測（ユーザー列挙）につながる可能性がある。",
+    "suggestion": "ユーザー表示は常に汎用メッセージ（例:「メールまたはパスワードが違います」「失敗しました。しばらくしてから再試行してください」）に統一し、詳細はログ/トレース（Sentry 等）にのみ送る。エラーコード→表示文言のマッピングで露出を制御。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.2 lais/src/lib/auth.js（アプリ全体）",
+    "issue": "Supabase の既定動作で��アクセストークンが localStorage に保持されるため、XSS が成立するとトークン流出の影響が大きい。",
+    "suggestion": "XSS を前提に防御を多層化（厳格 CSP、外部スクリプト最小化、依存の定期更新）。可能なら Cookie（HttpOnly/SameSite=Lax）ベースのセッション運用も検討。加えて、侵害時のトークン失効・強制ログアウト手順を運用に組み込む。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "バックエンド（未提示）",
+    "issue": "ログイン試行やサインアップ濫用に対するレート制限・ボット対策の記載がない。",
+    "suggestion": "Supabase Auth のレート制限を有効化。サインアップ/パスワードリセットに CAPTCHA（例: Turnstile）を導入。IP/ユーザー単位の試行回数制限、指数バックオフ、監査ログ/アラートを設定。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "配信設定（HTTP セキュリティヘッダ）",
+    "issue": "HTTPS 強制や HSTS 設定の記載がなく、中間者攻撃やダウングレード攻撃の余地が残る可能性がある。",
+    "suggestion": "常時 HTTPS を強制し、Strict-Transport-Security: max-age=15552000; includeSubDomains; preload を付与。HTTP から HTTPS へ 301 リダイレクトを設定。TLS の暗号スイート/バージョンも最新推奨へ。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "配信設定（HTTP セキュリティヘッダ）",
+    "issue": "クリックジャッキング対策（X-Frame-Options または CSP frame-ancestors）が明示されていない。",
+    "suggestion": "X-Frame-Options: DENY または CSP の frame-ancestors 'none' を設定。埋め込みが必要な場合のみ許可ドメインを厳格指定。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.2 lais/src/lib/auth.js",
+    "issue": "onAuthStateChange の購読解除がなく、HMR/再初期化時に重複購読で副作用が発生するリスク（既知事項として記載済み）。セキュリティ事故には直結しないが、状態不整合の原因になり得る。",
+    "suggestion": "購読の解除関数を保持し、unmount/HMR で確実に呼び出す。単一初期化のガードを入れて重複購読を防止。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 lais/src/components/screens/S01Auth.jsx",
+    "issue": "現状 dangerouslySetInnerHTML/innerHTML は未使用だが、将来の回帰を防ぐ仕組みが明記されていない。",
+    "suggestion": "ESLint で react/no-danger を有効化し、UI 層での生 HTML 注入を禁止。ユーザー入力は常に自動エスケープ経由で表示することをコーディング規約に明文化。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "本パッケージ全体（grep レベル確認）",
+    "issue": "提示ファイル内にハードコードされたシークレット/API キーの痕跡は検出されず（OK）。ただし supabase.js が未提示のため網羅確認は未完了。",
+    "suggestion": "リポジトリ全体を対象に gitleaks/secretlint/TruffleHog を CI で常時実行し、公開鍵以外のキーをブロック。機密値は .env* に隔離し、ビルド時の公開プレフィックス（例: VITE_）の���味をチームで共有。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

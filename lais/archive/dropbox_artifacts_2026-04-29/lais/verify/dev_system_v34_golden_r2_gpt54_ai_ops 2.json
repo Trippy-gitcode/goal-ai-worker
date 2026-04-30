@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "R2.1.1 §2.η' / §2.ε' / 既存 dev_system_spec.md §6",
+    "issue": "本改訂は高リスク任務のデプロイ前に HFLOW_APPROVED=1 を要求する強制ゲートを deploy.sh に追加している一方、承認ルールの正本である現行 dev_system_spec.md §6 は『🔴高 = 個別承認必須』までしか定義しておらず、Hフロー承認の主体・記録形式・承認済み証跡・誰が HFLOW_APPROVED=1 を付与してよいかが未定義です。結果として AI 自身が環境変数で自己承認する余地が残り、対人承認ゲートとして実効性がありません。",
+    "suggestion": "HFLOW_APPROVED=1 を単なる環境変数ではなく、POまたはADV承認済み証跡ファイルの存在でのみ通過可能にしてください。例: instructions/approvals/<MISSION_ID>.hflow.approved に承認者・日時・対象コミットを記録し、deploy.sh はそのファイルの署名済み存在を検証する。併せて dev_system_spec の承認ルール正本へ『Hフロー承認主体=ADV/PO、ENG自己付与禁止』を明記し、責務境界を仕様書本体に昇格させてください。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "R2.1.1 §2.η' / §2.δ'-1 / §2.ε' deploy.sh",
+    "issue": "STATUS 自動化の設計が mission_risk_classifier.sh に依存していますが、deploy.sh と canopy_common.sh は instructions/session_progress.md 全体を入力にしており、classifier はファイル先頭の最初の ### ミッションや複数ミッション混在の『対象ファイル』を誤って読む可能性があります。これにより現在実行中ミッションとは無関係な high/low 判定が返り、READY_FOR_DEPLOY 強制や realworld 必須判定が誤作動するため、自律実行と承認ゲートの境界が破綻します。",
+    "suggestion": "リスク分類は『session_progress.md 全体』ではなく必ず対象 MISSION_ID ブロック単位で行うようインターフェースを変更してください。例: extract_mission_block.sh <MISSION_ID> で一時ファイル化し、mission_risk_classifier.sh はそのブロックだけを読む。deploy.sh・canopy_common.sh・verify_external_services.sh の全呼び出し箇所を MISSION_ID ベースに統一し、複数キュー存在時でも現在ミッションだけが判定対象になることを明文化してください。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "R2.1.1 §2.ε' / §2.γ'-7 / §4.2 / §9.6",
+    "issue": "デプロイ失敗時のリカバリは append_deploy_fail.sh による DEPLOY-RECOVER 自動挿入へ寄せられていますが、誰がその recover ミッションの優先度を変更できるか、3回失敗後の停止権限、再デプロイ前に元コミットを修正する責務が ENG 単独でよいかが未定義です。AI が失敗→再試行→失敗を自律反復できる設計になっており、暴走防止としては弱く、誤判断時の停止条件が運用レベルで曖昧です。",
+    "suggestion": "DEPLOY-RECOVER には明示的な人間介入点を追加してください。最低限、1回目失敗で自動 recover 生成、2回目失敗で ADV レビュー必須、3回目失敗で PO 承認なし再試行禁止と段階化するべきです。さらに session_progress.md に STRIKE カウンタを構造化保存し、deploy.sh は上限超過時に自動停止して次回実行を拒否するようにしてください。これで AI の誤判断が継続実行に直結しなくなります。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "R2.1.1 §3.1 §C0.1-§C0.3 / 既存 dev_system_spec.md §1.3, §13.17 / sub_adv_protocol.md §1",
+    "issue": "責務境界の方向性は改善されていますが、『ADVは設計文書内で実装サンプル提示可』『ENGは scripts/** 全体の書込』という境界がまだ微妙です。実装サンプルがそのまま書込指示になっており、どこまでが設計、どこからが実装責任かが読み手により解釈分岐します。AI Ops 観点では、設計指示と実装権限の境界は文言だけでなく成果物種別で固定すべきです。",
+    "suggestion": "責務境界を『編集可能ファイル』だけでなく『決定可能事項』でも整理してください。例: ADV=仕様・パッチ方針・受入条件・承認要求、ENG=実装詳細・シェル/TS具体コード・ロールバック実行、PO=優先度と承認。さらに『設計文書中のコード例は normative ではなく informative』と明記し、正本は Code G_47 が実際に書いた scripts/** だと宣言すると境界が明確になります。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "R2.1.1 §2.β' G17 / §2.ζ' / §3.4 §C3.3",
+    "issue": "高リスク領域で realworld 証跡を必須化した点は妥当ですが、AI が G17 を失敗させたときのリ���バリ分類が不足しています。テスト失敗、証跡欠損、スクリーンショット欠損、timestamp逆転など失敗の種類が異なるのに、現状はいずれも一律 FAIL→DEPLOY-FAIL で扱われます。これでは AI が原因分析を誤りやすく、復旧手順が粗いまま再試行に流れます。",
+    "suggestion": "G17 の失敗コードを分類してください。例: exit 11=proof missing, 12=screenshot missing, 13=timestamp invalid, 14=tests failed。append_deploy_fail.sh には失敗種別も記録し、DEPLOY-RECOVER テンプレに『証跡再取得』『時刻整合修正』『機能バグ修正』などの分岐手順を追加してください。AI 誤判定時のリカバリを具体化することで、再試行の質が上がり暴走も防げます。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "ROBUSTNESS",
+    "location": "R2.1.1 §2.ι' / §6.9.2 / §6.18",
+    "issue": "pre-commit のサブディレクトリ探索はハードコード除去として前進ですが、find ... | while のサブシェル内 exit は親フック全体に確実に反映されない実装パターンが残っています。R2.1.1 は他箇所でこの種のサブシェル問題を修正しているのに、ここでは再発しています。フッ��失敗が親に伝播しなければ、AI の誤った変更が検査をすり抜ける危険があります。",
+    "suggestion": "フォールバック探索もパイプ while をやめ、一時ファイルまたは command substitution で一覧を取得して通常 for ループで回してください。例: HOOKS=$(find ...); for hook_sub in $HOOKS; do ... || exit $?; done。加えて G13 の verify_hooks.sh で『find | while』パターンを危険構文として検知し、フック実装の再発を機械的に防止してください。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "R2.1.1 全体 / §2.ε' / §4.1 / §9.5",
+    "issue": "AI の自律範囲は実装・テスト・デプロイ準備まで拡張されている一方、最終的に人が何を確認すればよいかの『人間向け最終判断面』が弱いです。PO は承認のみとしつつ、現行設計では承認前に提示されるべき要約情報が deploy 失敗時以外ほぼ定義されていません。結果として人間承認が形式化され、実質的には AI 主導で進む危険があります。",
+    "suggestion": "承認ゲートごとに人間へ提示すべき最小情報セットを定義してください。例: 高リスク deploy 前は『���象MISSION_ID、変更ファイル、risk理由、cmd-unit/e2e結果、G16結果、想定ユーザー影響』の5点、deploy 後は『URL、hash確認、G17結果、主要スクショ5枚、既知制約』の5点。これを session_progress.md か専用 approval summary に自動生成すれば、人間の承認が実質的な安全装置として機能します。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  }
+]

@@ -1,0 +1,242 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §8 C2デプロイフロー",
+    "issue": "Deploy step uses literal `${build.out_dir}` which will not expand in shell, causing `wrangler pages deploy` to deploy an empty/nonexistent path.",
+    "suggestion": "Replace with YAML parsing at runtime. Example: `OUT_DIR=$(yq -r '.build.out_dir' app_config.yaml); npx wrangler pages deploy \"$OUT_DIR\"` and add a canopy check to ensure OUT_DIR exists and is non-empty."
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §8 C2デプロイフロー",
+    "issue": "No environment separation (dev/staging/prod) or promotion gates. All steps imply direct-to-prod deploy.",
+    "suggestion": "Define three environments with guarded promotion: dev → staging → prod. Add wrangler.toml `[env.staging]` and `[env.production]`, Pages projects per env, and CI jobs with environment protection rules. Example deploy: `wrangler pages deploy \"$OUT_DIR\" --project-name=$CF_PAGES_PROJECT --branch=$GIT_BRANCH` and `wrangler deploy --env production` only after staging smoke/L2 PASS."
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → 2.6 canopy_common.sh",
+    "issue": "G1 (version sync) and G6 (build sync) are commented but not implemented. Canopy currently does not verify the 4-version consistency nor build/deploy alignment.",
+    "suggestion": "Implement checks: (1) Parse app_config.yaml `.app.version`, package.json `.version`, frontend/src/version.ts export, CLAUDE.md APP_VERSION line; ensure all equal. (2) Parse `.build.out_dir` and verify deploy command uses same path. Fail if mismatch. Use `yq` and `jq` with fallback grep/awk if not installed."
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md → §5 affected-tests.sh",
+    "issue": "--grep arguments are space-joined strings and wildcards like `design-*` which are not valid Playwright regex patterns; this will not select intended tests.",
+    "suggestion": "Construct a single regex OR pattern: `PATTERN=$(printf \"(%s|\" $TESTS | sed 's/|$//'); npx playwright test --grep \"$PATTERN\"`. Replace `design-*` with `design-.*`. Alternatively tag tests with `@tag` and use `--grep @tag`."
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md → §5 affected-tests.sh",
+    "issue": "Script assumes `HEAD~1` exists; on initial commits, squash merges, or CI PRs, this fails and yields empty FILES.",
+    "suggestion": "Detect base commit robustly: `BASE=${GITHUB_BASE_REF:-$(git merge-base origin/main HEAD)}`; guard: `git rev-parse --verify \"$BASE\" >/dev/null 2>&1 || BASE=HEAD~1`; then `git diff --name-only \"$BASE\"...HEAD`. Add a `--base` CLI arg override."
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §8 C2デプロイフロー",
+    "issue": "No rollback strategy or health check with retries; a single `curl | grep version` is brittle and does not validate backend Worker.",
+    "suggestion": "Add blue/green or last-known-good rollback: keep previous tag artifact; provide `wrangler rollback`/redeploy last Pages build. Verify `/version.json` (frontend) and `/api/health` (Worker) with retry/backoff: 10 tries, exponential backoff, fail CI if not healthy."
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → 2.6 canopy_common.sh",
+    "issue": "Uses hard-coded dev-system path `$HOME/Desktop/dev-system` to compare versions, which breaks in CI/other machines.",
+    "suggestion": "Standardize dev-system path via env `DEV_SYSTEM_DIR` defaulting to the realpath of the linked canopy script (e.g., `DEV_SYSTEM_DIR=$(dirname $(readlink -f tests/smoke/canopy_common.sh))/..`). Compare `.dev-system.version` to `$DEV_SYSTEM_DIR/VERSION`."
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → 2.1 init_app.sh / 2.2 update_app.sh / 2.3 build_rules.sh",
+    "issue": "Scripts lack `set -Eeuo pipefail` and do not trap errors; partial execution can leave inconsistent state.",
+    "suggestion": "Add `set -Eeuo pipefail` and `trap 'echo ERROR on line $LINENO; exit 1' ERR` to all bash scripts. Quote all variable expansions, check command existence (`command -v jq yq wrangler`), and exit non-zero on failure."
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → 2.1 init_app.sh",
+    "issue": "Potentially overwrites existing directories; does not check if APP_DIR exists or is non-empty; symlink creation fails on re-run.",
+    "suggestion": "Guard: if APP_DIR exists and non-empty, prompt/exit unless `--force`. Use `ln -sfn` for idempotent symlink creation. Add `git init -b main` and `git status` guidance."
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → 2.2 update_app.sh",
+    "issue": "Relies on absolute symlink targets; Windows and some CI environments may not support symlinks; no fallback.",
+    "suggestion": "Detect OS: if `uname -s | grep -qi mingw|msys|cygwin`, copy files instead of symlink; else use `ln -sfn`. Document requirement: `git config core.symlinks true` or provide `--copy` switch."
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "sub_infrastructure.md → 2.6 canopy_common.sh vs 1.2 各アプリ側の構成",
+    "issue": "Comment states canopy_app.sh minimum 10 lines, but code enforces only 5 active lines.",
+    "suggestion": "Align rule and check: either reduce documented minimum to 5 lines or change check to `if [ \"$APP_LINES\" -lt 10 ]`."
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → 2.6 canopy_common.sh",
+    "issue": "Routing ratio sum check (sum to 100) mentioned in app_config_template.yaml comment but not implemented.",
+    "suggestion": "Add: `if yq -e '.routing.enabled' app_config.yaml >/dev/null 2>&1; then SUM=$(yq '.routing.models.*.ratio' app_config.yaml | awk '{s+=$1}END{print s+0}'); [ \"$SUM\" -ne 100 ] && echo \"FAIL: routing ratio sum=$SUM (must be 100)\" && FAIL=1; fi`."
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §4.1 G3/G4",
+    "issue": "G3 (test count) describes grep-based validation but no source of truth/expected count is defined and canopy implementation is missing.",
+    "suggestion": "Introduce tests/expected_count.json or derive from `npx playwright test --list --reporter=json` and compare with a baseline committed file. Add canopy check to fail if below expected minus tolerance."
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md → §2 test_lint.sh",
+    "issue": "Skip detection flags any `.skip(` including legitimate unconditional skips used for platform gating comments; simple grep may produce false positives.",
+    "suggestion": "Improve rule: allow `test.skip(() => isPlatform('...'), ...)` or `test.skip(process.env.CI...)` via regex whitelist; or parse AST via `eslint` custom rule. At minimum, only fail on `test.skip(` without 'platform' or allowed tokens AND not in comment."
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → 2.4 mission_linter.sh",
+    "issue": "AT detection uses `^AT-[0-9]` which may miss the documented `AT-N:` template; also bash command detection scans whole block, not specifically the 完了コマンド section, causing false positives.",
+    "suggestion": "Adjust regex to `^AT-` or `^AT-[0-9]+:`; restrict bash command presence to the '完了コマンド' block via extracting lines between '完了コマンド:' and next blank/heading. Add `if [ ! -f \"$SP\" ]; then echo 'ERROR: session_progress not found'; exit 1; fi`."
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → 2.5 session_archiver.sh",
+    "issue": "Does not ensure archive directory exists; no backup copy before in-place modification; fails hard if '## 完了済み' missing.",
+    "suggestion": "Add `mkdir -p $(dirname \"$ARCHIVE\")`; create backup `cp \"$SP\" \"$SP.bak.$(date +%s)\"`; if '完了済み' missing and lines > MAX, move oldest missions (by heading) to archive with a fallback strategy instead of immediate exit."
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §8 C2デプロイフロー",
+    "issue": "No CI/CD pipeline definition (e.g., GitHub Actions/Cloudflare Pages build) though full automation is a core principle.",
+    "suggestion": "Provide a `ci/cd` template (yaml) with jobs: build (cache node_modules), canopy, L1, L2, deploy-staging, manual-approval, deploy-prod, tag-and-release. Upload Playwright HTML report and screenshots as artifacts and attach to session results."
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → 2.1 init_app.sh",
+    "issue": "Copies development_rules_common.md into app root then also runs build_rules.sh to generate a merged file, leaving redundant common file in app repo.",
+    "suggestion": "Do not copy `development_rules_common.md` to app repo. Instead read directly from dev-system path in `build_rules.sh`. Remove the `cp \"$DEV_SYSTEM/rules/development_rules_common.md\" .` line."
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §4.1 G1 / sub_infrastructure.md → 3. app_config_template.yaml",
+    "issue": "Version sync relies on a `frontend/src/version.ts` convention that is not included in the templates and may be absent in non-frontend apps.",
+    "suggestion": "Add a version source template file (e.g., templates/frontend/src/version.ts) and in canopy make the path configurable via app_config.yaml (e.g., `.version.file`). If missing, canopy should fail with actionable message."
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → 3. app_config_template.yaml",
+    "issue": "Missing configuration for wrangler environments, project names, account IDs, and KV namespace IDs/secrets.",
+    "suggestion": "Augment template with: `cloudflare: { account_id, pages_project_dev, pages_project_staging, pages_project_prod, worker_name, kv_namespaces: { TOKEN_KV: { dev, staging, prod } } }`. Add canopy checks to validate presence before deploy."
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → 2.6 canopy_common.sh",
+    "issue": "No dependency checks for required CLI tools (wrangler, yq, jq, node/npm).",
+    "suggestion": "Add preflight: for cmd in jq yq wrangler node npm; do command -v $cmd >/dev/null || { echo \"FAIL: $cmd not installed\"; FAIL=1; }; done."
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md → §5 affected-tests.sh",
+    "issue": "If no affected tests mapped, script falls back to `--grep \"smoke\"` assuming titles contain 'smoke'; not standardized.",
+    "suggestion": "Standardize smoke tag naming (`@smoke`) and use `--grep \"@smoke\"`. Add mapping file `tests/affected-map.yaml` to decouple mappings from script and make ADV-owned."
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §5 ミッション定義テンプレート",
+    "issue": "No instruction to persist and publish Playwright reports/screenshots for PO visual verification in automation context.",
+    "suggestion": "Augment completion commands to include `--reporter=html,json` and archive `playwright-report` and `test-results` to `instructions/results/` with timestamp; update canopy to confirm artifact presence."
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md → §8 and sub_infrastructure.md → 2.x",
+    "issue": "Deployment flow details are split between main spec and scripts without a single authoritative script; main spec lists steps but automation code is not centralized.",
+    "suggestion": "Create a single `scripts/deploy_c2.sh` (in dev-system) implementing the full §8 flow with guards and environment orchestration; reference it from main spec and link it into apps. Keep main spec high-level to avoid drift."
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §10.2 バージョンpin方式 / sub_infrastructure.md → 2.6 canopy_common.sh",
+    "issue": "Stated rule: mismatch is WARN for 3 sessions then FAIL, but canopy implementation doesn’t track sessions nor escalate WARN→FAIL.",
+    "suggestion": "Write a state file `instructions/results/canopy_version_mismatch.count` incremented on WARN; once >=3, convert to FAIL and reset on match. Or require update before deploy (C2) and fail in C2 context."
+  },
+  {
+    "id": "R-026",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §7 3層テスト戦略 / sub_testing.md",
+    "issue": "L1/L2 time budgets (2 min/5-10 min) are declared but not enforced; long-running tests can break pipeline SLAs.",
+    "suggestion": "Enforce with Playwright `--timeout` and job-level `timeout-minutes` in CI; canopy can parse duration from test JSON and warn/fail if exceeding budgets."
+  },
+  {
+    "id": "R-027",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §8 C2デプロイフロー",
+    "issue": "`git tag vX.Y.Z` in CI may silently fail to push; tags are not propagated to remote.",
+    "suggestion": "After creating the tag, run `git push origin \"v$VERSION\"` and optionally create a GitHub Release with changelog generated from commits/session logs."
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "sub_infrastructure.md → 2.4 mission_linter.sh",
+    "issue": "Reference path check flags any '参照:' line without a slash, but 'フルパス' definition is unclear (repo-root absolute vs relative).",
+    "suggestion": "Define rule: references must be repo-root relative (e.g., `docs/xyz.md`). Update linter to enforce `^参照:\\s+(docs/|tests/|src/)` and fail otherwise."
+  },
+  {
+    "id": "R-029",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "sub_system_map.md → §3 データフロー / dev_system_spec.md → §11",
+    "issue": "No validation ensuring TOKEN_KV binding exists in Worker envs; tests rely on KV but no preflight check.",
+    "suggestion": "Add canopy preflight using `wrangler kv namespace list | jq` to verify TOKEN_KV binding presence for the target env; fail if missing. Document required binding names in app_config.yaml."
+  },
+  {
+    "id": "R-030",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → shebangs across scripts",
+    "issue": "Shebangs use `#!/bin/bash`, which may not exist on all systems (e.g., some distros/macOS use /usr/local/bin/bash or default to zsh).",
+    "suggestion": "Switch to `#!/usr/bin/env bash` for portability."
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "§19.6の依存チェーンツリーと、§18の依存関係マップの間で矛盾が発生しています。§19.6では `e2e_fullflow_test.md` が `project_v1.md` のみに依存しているように描かれていますが、§18では `ux_redesign_v*.md`, `design_spec_v*.md`, `design_system.md` のすべてからテスト仕様書への更新連鎖が定義されています。この矛盾により、AIが仕様変更時のテスト更新を漏らすリスクがあります。",
+    "suggestion": "§19.6の依存チェーンを§18に合わせて修正し、`e2e_fullflow_test.md` が `ux_v1.md`, `design_spec_v1.md`, `reference_v1.md` の下��にも位置するようにツリーを再構築してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "dev-system §6で「リスクベースの承認（🔴高リスクは個別承認必須）」が定義されていますが、アプリ固有のどの機能やデータ操作が🔴高リスクに該当するか（例: 決済処理、ユーザーデータ削除、AIプロンプトの変更など）を定義するセクションが `project_v1.md` テンプレートに存在しません。これにより、AIの自律実行範囲と承認ゲートの境界がアプリごとに曖昧になります。",
+    "suggestion": "`project_v1.md` のテンプレートに「§11 リスクレベル定義（🔴高リスク機能・操作の指定）」を追加し、AIが自律実行してよい範囲とPO承認が必須な境界をアプリごとに明記させてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "`reference_v1.md` の「§3 AI活用設計」に、AIが不適切な出力をした場合やAPIがダウンした場合の暴走防止・フォールバック（デフォルトUIへの切り替え、出力フィルタリング、���ークン上限設定等）の設計要件が含まれていません。",
+    "suggestion": "`reference_v1.md` の§3を「AI活用・暴走防止設計」とし、プロンプト設計だけでなく、出力検証ルール、トークン上限、API障害時のフォールバック挙動を必須項目として追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "競合ベンチマークで「DL数/評価」「App Storeレビュー分析」を要求していますが、AI（ADV）はリアルタイムのストアデータにアクセスできない場合があり、鉄則⑧（事実確認せずに断言禁止）に違反して推測でデータを作成（ハルシネーション）するリスクがあります。",
+    "suggestion": "§19.7に「AIが取得できない最新データ（DL数、非公開アプリの内部UX等）は推測で埋めず、『PO入力待ち』としてプレースホルダーを残すこと」というルールを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§19.4",
+    "issue": "AIが自律的にユーザーのデータを操作・提案する機能を持つアプリの場合、ユーザーがそれをキャンセル・Undoする手段の定義が必須ですが、`ux_v1.md` のテンプレートにその観点が含まれていません。",
+    "suggestion": "`ux_v1.md` のテンプレートに「§N+11 AI介入のUndo/リカバリUX（ユーザー視点でのAI操作の取り消し手段）」を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の「依存」に `{上流ファイルのパス + バージョン}` を指定するルールとなっていますが、上流ファイルが頻繁に更新される場合、下流ファイルのヘッダーを手動で同期し続けるのは困難であり、バージョン不一致が常態化するリスクがあります。",
+    "suggestion": "依存バージョンはメジャーバージョン（例: v1）のみの指定とするか、`version_sync.sh` のようなスクリプトで仕様書間の依存バージョン整合性を自動検証（canopyゲート化）する仕組みを導入してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "AIを活用したアプリでは出力が非決定的にな��ますが、`e2e_fullflow_test.md` のテンプレートにAI出力のモック化やアサーション緩和（部分一致、型チェック等）のテスト戦略を定義するセクションがありません。",
+    "suggestion": "`e2e_fullflow_test.md` に「§N+3 AI非決定的出力のテスト戦略（モック化範囲、アサーション基準）」を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

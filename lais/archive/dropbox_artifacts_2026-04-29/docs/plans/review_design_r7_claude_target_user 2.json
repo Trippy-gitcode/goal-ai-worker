@@ -1,0 +1,4 @@
+[
+  {"id":"R-001","severity":"LOW","category":"USER_CONCERN","location":"§5.2 Dawn","issue":"Dawn の accent が #8F4D1F でやや暗め。朝の清々しさより『渋い大人の茶色』寄りで、20-40代男女の『朝開きたくなる』性格とフィット感が薄い。","suggestion":"Dawn アクセントの色相を 20-30 度くらい朝日寄り（オレンジ寄り）にシフト検討。ただし 4.5:1 を維持する。","model":"Claude Opus 4.6","persona":"target_user"},
+  {"id":"R-002","severity":"LOW","category":"USER_CONCERN","location":"§1.4 破壊的操作の文言","issue":"『ゴールを削除すると、関連するタスクも全て削除されます』の文言は事実だが、ユーザーとしては『それは怖い』となって躊躇する。Finch なら『ゴールをおやすみさせますか？』みたいな優しい表現。","suggestion":"§1.4 に柔らかい代替表現の例（『ゴールを消すと、一緒に設定したタスクも消えます。それでも削除しますか？』等）を追記。","model":"Claude Opus 4.6","persona":"target_user"}
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-201",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. App.jsx / 2. S00Splash.jsx",
+    "issue": "JSX 属性に class を使用。React DOM では className を使うのが標準で、ビルド設定次第では警告や意図しない挙動のリスクがある（Preact 等では class でも可だが可搬性が下がる）。",
+    "suggestion": "React を前提とする場合は全て className に統一（例: <div className=\"app-root\"> / <main className=\"s00\"> ...）。もし Prevac/独自トランスパイラで class を許容しているなら、リポジトリの README に明記して将来の移植性リスクを低減。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-202",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "3. S00Splash.css (.s00 / .s00-center / .s00-cta)",
+    "issue": "375×812 以外の低背高端末や横向き時に、中央配置ブロック（.s00-center）と絶対配置の CTA スタックが物理的に衝突・重なり得る。現在は iPhone X 相当で整合しているが、エッジケース対象範囲に含まれる。",
+    "suggestion": "衝突回避用の下部余白を確保。例: .s00 { min-height: 100svh; } とし、.s00-center に padding-bottom: calc(52px + 12px + 76px); を付与して CTA スペースを除外。あるいはメディアクエリで短辺のときにロゴのオフセットやフォントサイズをわずかに縮小し、重なりを防止。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-203",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "実測スクショ事実 セクション",
+    "issue": "本文の説明文が数値と矛盾。「secondary の下辺が 140px、primary が 204px」とあるが、計測 JSON では primary=140px、secondary=76px であり、CSS 実装（.s00-cta: bottom:76px）とも一致していない。",
+    "suggestion": "説明文を数値に合わせて修正（正: primary=140px、secondary=76px）。検証ログの一貫性を維持し QA 混乱を防止。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-204",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. App.jsx",
+    "issue": "非ランドマークの div.app-root に aria-label=\"Lais\" が付与されており、支援技術に不要な冗長ラベルを与える可能性がある。",
+    "suggestion": "app-root から aria-label を削除。ランドマーク（main）と見出し（h1）で十分に文脈が伝わる。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-205",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. S00Splash.jsx",
+    "issue": "main に aria-label=\"Lais スプラッシュ\" を付けており、ランドマーク名の付与自体は可能だが、本画面では h1=\"Lais\" が直下にあり名称の重複を招く場合がある。",
+    "suggestion": "特段の意図がなければ main の aria-label を省略し、ページ名は h1 に委ねる。名称付与が必要な要件があ��場合は維持可（いずれにせよ実行時の障害ではない）。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-206",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（アプリ HTML/SR サーバ設定範囲・本パッケージ外）",
+    "issue": "CSP 設定の記述は本パッケージに含まれていない。現段階の画面は静的で XSS ベクトルも未露出だが、将来の機能追加時に既定の強い CSP がないとリスクが上がる。",
+    "suggestion": "配信時に厳格な CSP を適用（例: default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'nonce-…'; style-src 'self' 'unsafe-inline' などアプリ要件に応じて調整）。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-207",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体",
+    "issue": "grep レベルで API キー/シークレット等のハードコードは検出されず（OK）。一方で、秘密情報の取り扱い方針（.env 運用/CI の secret scan）の明記がまだない。",
+    "suggestion": "README/CONTRIBUTING に secrets 管理方針を追記し、CI に secret scanning（例: GitHub Advanced Security または gitleaks）を組み込む。今後の Supabase/Worker 接続時もクライア��ト配信しないキーを徹底。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

@@ -1,0 +1,132 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダー項目「dev-system準拠: docs/plans/dev_system_spec.md §19」はアプリ側リポジトリには存在しないパスであり、依存の指し示し方が曖昧。",
+    "suggestion": "ヘッダーを「dev-system準拠: v{.dev-system.version}（repo URL + commit）」の形式に変更し、init_app.shで自動記入。canopyにdocs_header_lint.shを追加し、.dev-system.versionと一致するか検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.5",
+    "issue": "ヘッダー標準に「承認者/承認日時/作成者/最終更新日/Doc-ID（一意）」がなく、承認ゲートの実効性・変更追跡が担保されない。",
+    "suggestion": "必須メタに「作成者」「最終更新」「承認者」「承認日」「Doc-ID（例: DOC-UX-001）」を追加。docs_header_lint.shで必須キーの存在とフォーマット（ISO8601日付/Doc-IDパターン）をcanopyで自動検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.6",
+    "issue": "依存チェーン��定義はあるが、ヘッダーの「依存」記載と整合/循環/未記載を自動で検出する仕組みがない。AIの誤判断時に検出不能で暴走防止が弱い。",
+    "suggestion": "docs_dep_lint.shを追加し、(1) 各docsのヘッダー「依存」列挙が§19.6の許容エッジ内か検証、(2) 全docsをグラフ化して循環を検出、(3) 直近コミットで上流が変更された場合に下流のspec_changelog.md更新必須をチェック。canopyに統合。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.6",
+    "issue": "依存チェーン図にdesign_system.mdが重複記載されており、読み手に冗長。",
+    "suggestion": "重複箇所を整理し、design_system.md→design_spec_v1.mdの一方向のみを明示。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.4（e2e_fullflow_test.md テンプレ）/ §12",
+    "issue": "テストタイトルの識別子が§12の「SPEC-XXXX」と§19.4の「grepキー（test_map.yaml連動）」で二重定義。どちらを必須とするかが不明確で、L2抽出と仕様トレースが分断され得る。",
+    "suggestion": "統一ルール: テストタイトル���「[SPEC-XXXX][GREP-KEY] 説明」を必須とし、affected-tests.shはGREP-KEY、仕様整合チェックはSPEC-XXXXを使用。test_lint.shに両方の存在チェックを追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力フォーマットに「情報源（URL/出典）」列がなく、§19.7の事実確認ルール（情報源明記）を機械検証できない。",
+    "suggestion": "各表に「情報源」列を追加（URL/資料名/取得方法）。docs_benchmark_lint.shを追加し、空欄や非URL/不正文字列を検知。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "「直接競合5社+間接3社」など完了基準が初期フェーズ/ニッチ領域で達成困難な場合があり、承認ゲートのボトルネックになり得る。",
+    "suggestion": "段階基準を導入: DRAFTで最低3+1（未確認は明示）、REVIEWで5+3に拡充。未達時はPO承認で一時例外可（ステータスにEXCEPTION注記）。lintでステータス別閾値を検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（reference_v1.md テンプレ）",
+    "issue": "API仕様テンプレにバージョニング/ページネーション/整合ID（idempotency）/レート制限/エラー整形規約が明示されていないため、実装とテストの合意がぶれる恐れ。",
+    "suggestion": "reference_v1.mdに「§1.x API規約」を追加（versioning戦略、pagination標準、idempotency-key、rate limit値/ヘッダ、標準エラー形式/コード表）。e2e_fullflow_testに対応テストを追記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.4（system_map.md テンプレ）",
+    "issue": "「§4 ファイル変更チェックリスト」が§18の連鎖更新マップと二重管理になり、将来的な乖離リスクがある。",
+    "suggestion": "system_map.mdのチェックリストはdev-system §18を正本とし、「アプリ固有の追加差分のみ」を列挙する旨を明記。init_app.shで雛形にその注記を追記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存: {ファイル + バージョン}」のバージョン表記ルール（SemVer等）が未定義で、��記揺れが起きやすい。",
+    "suggestion": "SemVer準拠（vX.Y.Z）を明記し、docs_header_lint.shで正規表現（^v\\d+\\.\\d+\\.\\d+$）検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.4（project_v1.md / ux_v1.md）",
+    "issue": "両方のテンプレートに「AIレビュー計画」節があり、責務境界が重複。",
+    "suggestion": "project_v1.mdに全体のレビュー計画（ペルソナ/収束基準）を集約し、ux_v1.mdは「UX特有の追加観点のみ」を追記する形に整理。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.7 / §14",
+    "issue": "ベンチマーク完了（表の必須列充足/Lais方針全記入/差別化≥3）を機械検証するゲートがなく、AIが未完了のまま次フェーズに進む恐れ（暴走防止が不十分）。",
+    "suggestion": "docs_benchmark_lint.shを追加し、(1) 直接競合行数≥5、(2) 全行にLais方針記入、(3) 差別化マッピング≥3を検証。Phase 0完了時にcanopyで必須化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§19.7",
+    "issue": "ADVが誤った競合解釈/古い情報で判断した場合の是正手順（リカバリ）が明文化されていない。",
+    "suggestion": "project_v1.mdに「ベンチマーク訂正フロー」を追加（誤り検知→根拠付き差分追記→影響箇所の下流修正→spec_changelog記録→再レビュー）。lessons_learned.md逆流のテンプレをリンク。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

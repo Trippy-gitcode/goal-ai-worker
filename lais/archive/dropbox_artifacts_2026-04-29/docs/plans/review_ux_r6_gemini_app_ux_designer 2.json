@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§6.2, §2.3",
+    "issue": "トーストとUndoスナックバーの表示位置の競合",
+    "suggestion": "トースト（ボトムタブの上16px）とUndoスナックバー（ボトムタブの上16px固定）の表示位置が完全に被っています。Undoスナックバーが表示されている間にトーストが発火した場合、トーストのbottom位置をスナックバーの高さ分上にオフセットする動的レイアウト調整を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.3",
+    "issue": "習慣タスクの「週N回」「��スタム曜日」の入力UIが未定義",
+    "suggestion": "タスク追加（S-12）において、「週N回」を選択した際の回数指定UI（数値ピッカー等）および「カスタム曜日」を選択した際の曜日選択UI（月〜日のトグルボタン等）の具体的な操作フローとレイアウトを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.3",
+    "issue": "習慣タスクの「今日やる」ボタンのUIフローが欠落",
+    "suggestion": "project_v1.md §3.2.3で定義されている「今日やる」ボタンについて、Upcomingセクション等のどこに配置され、タップ時にTodayセクションへどう移動するかの具体的な操作フローを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2",
+    "issue": "画像添付時のバリデーションエラーとローディング状態が未定義",
+    "suggestion": "10MB超過時や非対応フォーマット選択時のエラートースト表示、および画像アップロード中のローディング状態（送信ボタンのスピナー化や入力フィールドのブロック等）のUIフィー��バックを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§7.4, §7.1",
+    "issue": "タスク行のロングプレスによるドラッグ＆ドロップとスクロール操作の競合",
+    "suggestion": "縦スクロール領域でのロングプレスからのドラッグは、通常のスクロール操作と誤爆しやすくUXを損ないます。タスク行の右端にドラッグハンドル（≡）アイコンを配置し、そこをタッチして並び替える仕様に変更することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.1",
+    "issue": "タスク所要時間のタイムラインUIへの反映が未定義",
+    "suggestion": "project_v1.mdでは「所要時間をタイムライン表示の幅計算に使用」とありますが、UX仕様のTodayセクションは単なるテキストリストになっています。所要時間に応じてタスク行の高さ（幅）が変わる視覚的表現を定義するか、project_v1.md側の要件をテキスト表示のみに修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2",
+    "issue": "AIストリーミング中のタブ切替時の挙動が未定義",
+    "suggestion": "AI応答のストリーミング中にGROWやMEタブに切り替えた場合、ストリーミングがバックグラウンドで継続し、TALK画面に戻った際に正しく状態が復元される（または完了している）旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§11.4",
+    "issue": "PWAインストールバナーの表示タイミングがproject_v1.mdと矛盾",
+    "suggestion": "project_v1.md §5.3では「初回起動時」、ux_v1.mdでは「3回目の起動時」となっています。UXとしては3回目が適切（フリクション軽減）ですが、仕様書間で統一してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.3",
+    "issue": "ゴール詳細から追加したタスクのTodayセクションへの反映タイミング",
+    "suggestion": "S-16（ゴールタスク追加）で作成したタスクの実行予定日が「今日」の場合、S-14のリストだけでなく、GROW画面のTodayセクションにも即時反映される旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.3",
+    "issue": "複数タスク一括登録時のデフォルト値が未定義",
+    "suggestion": "「まとめて登録」を実行した際、AIが抽出していない項目（所要時間、開始時刻等）はデフォルト値（所要時間30分、開始時刻未設定等）で登録される旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§13.1",
+    "issue": "オフライン時の強制ログアウトによるデータ消失リスク",
+    "suggestion": "オフライン時の強制ログアウトは未同期データ（タスク完了によるEXP等）が完全に消失するため、確認ダイアログで「削除」と入力させるなど、誤操作を防ぐより強力なフリクションを設けるか、原則ブロックを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§13.4",
+    "issue": "アカウント削除時の確認テキストがモバイル入力に不適",
+    "suggestion": "「アカウントを削除」という日本語入力は変���の手間や誤字を招きやすいため、「削除」の2文字や「DELETE」などの入力しやすい文字列に変更することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

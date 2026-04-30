@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4, §19.6",
+    "issue": "§19ではUX仕様書のファイル名が `ux_v1.md` と定義されているが、既存の§6（承認ルール）、§12（仕様書ID付番）、§18（依存関係マップ）では `ux_redesign_v*.md` とハードコード/定義されている。この不一致により、ホットフィックスパスの条件判定（§16.3）や連鎖更新マップが機能しなくなる。",
+    "suggestion": "全セクションでUX仕様書のファイル名を統一する（例: `ux_v*.md` に統一し、§6, §12, §16.3, §18の記述を修正する）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "§19.6の依存チェーン図では `e2e_fullflow_test.md` が `project_v1.md` の直下にのみ配置されているが、§18の連鎖更新マップでは `ux_redesign_v*.md`, `design_system.md`, `design_spec_v*.md` からも `e2e_fullflow_test.md` へ更新が連鎖するよう定義されている。§19.6のツリー構造が不完全であり、UIやデザイン変更時のテスト仕様書の更新漏れを誘発する。",
+    "suggestion": "§19.6の依存チェーン図を修正し、`e2e_fullflow_test.md` が `ux_v1.md`, `design_system.md`, `reference_v1.md` などの全下流仕様書に依存する最下流ノードであることを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "AI（Claude）に対して「App Storeレビュー分析」「競合5社の画面構成/遷移パターン/オンボーディングの調査」を要求しているが、AIは実機でのアプリダウンロードや最新のストアレビューへの直接アクセスができない。このままではハルシネーションによる架空の競合データが生成され、それに基づき誤った仕様が策定される（仕様策定プロセスとし��破綻している）。",
+    "suggestion": "ベンチマークの実施主体とインプット方法を明確にする。「POが競合アプリのスクショやレビューテキストをプロンプトで提供し、AIがそれを分析する」または「Web検索ツール（MCP等）の利用を前提とする」旨を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.5",
+    "issue": "仕様書ヘッダーに「作成日」はあるが「最終更新日」がない。また、依存先ファイル（上流）のバージョンが更新された際に、自ファイル（下流）のステータスを `CONFIRMED` から `REVIEW` や `DRAFT` に戻すトリガー・ルールが未定義。",
+    "suggestion": "ヘッダーに「最終更新日」を追加する。また「上流ファイルのバージョンが更新された場合、ステータスをREVIEWに戻して影響確認を行う」というルールを追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "`reference_v1.md`（詳細設計）に、システム全体のエラー監視、ロギング方針、アラート通知（ログレベルの定義や監視ツールの導���有無）に関するセクションが存在しない。運用時のインシデント対応（incident_runbook.md）に必要な基盤設計が漏れる。",
+    "suggestion": "`reference_v1.md` に「§7 エラー監視・ロギング（ログレベル、監視ツール、アラート条件）」のセクションを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "`e2e_fullflow_test.md` に、テストを実行する環境（対象デバイス、ブラウザ、ネットワーク帯域制限の有無、CI/CD上での実行条件）を定義するセクションがない。",
+    "suggestion": "`e2e_fullflow_test.md` に「§0 テスト環境要件（デバイス、ブラウザ、ネットワーク条件）」を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.6",
+    "issue": "§19.6の依存チェーンで `system_map.md` が `ux_v1.md` と `reference_v1.md` の両方に依存している。実装上の都合で `system_map.md` 側でフローを変更した場合、禁止されている「下流から上流への逆参照」が発生しやすい構造になっている。",
+    "suggestion": "`system_map.md` はWHAT/HOWの定���ではなく「実装の青写真（まとめ）」であることを明記し、実装上の変更が必要な場合は必ず上流（ux_v1.md や reference_v1.md）を先に修正するルールを強調する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.7",
+    "issue": "ベンチマーク完了基準に「直接競合5社以上の調査完了」とあるが、ニッチなアプリや新規性の高いアプリの場合、直接競合が5社存在しないケースがある。この場合、Phase 0の完了基準を満たせずプロセスがブロックされる。",
+    "suggestion": "「直接競合5社以上（存在しない場合は間接競合を含めて5社、またはPO承認により社数削減可）」のように、エッジケースに対するエスケープハッチを設ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

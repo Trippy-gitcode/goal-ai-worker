@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "依存チェーンのツリー図が§18の依存関係マップと矛盾している。§19.6では `e2e_fullflow_test.md` が `project_v1.md` の直下にあり他から独立しているように描かれているが、§18では `ux_redesign_v*.md` や `design_spec_v*.md` の変更時にもテスト仕様を更新する多重依存関係が定義されている。",
+    "suggestion": "§19.6の依存チェーン図を修正し、`e2e_fullflow_test.md` が `ux_v1.md`, `design_spec_v1.md`, `reference_v1.md` などの下流仕様書すべてに依存する多重依存構造であることを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "UXおよびデザインのベンチマーク要件において、「競合5社のオンボーディング/空状態/エラー表示/ジェスチャー」の調査を要求しているが、ADV（AI）は実機アプリを操作・閲覧する手段を持たない（§9.3の制約）。POが全画面のスクショを提供しない限り、AIがハルシネーションを起こす原因となる。",
+    "suggestion": "ベンチマーク要件に「AIがWeb検索で取得可能な公開情報（LP、ストアレビュー、公開記事）に基づく」という制約を追記するか、「アプリ内部のUX/UI詳細はPOがスクリーンショットを提供した場合のみ実施する」という条件を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1",
+    "issue": "UX仕様書のファイル名が§19.1では `ux_v1.md` と定義されているが、§18の依存関係マップや§16.3のホットフィックス条件では `ux_redesign_v*.md` と記載されており、名称が不一致。",
+    "suggestion": "システム全体でファイル名を統一する。新規アプリ立ち上げの標準化を考慮し、全箇���の表記を `ux_v*.md` に統一し、§16.3や§18の記述も修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.7",
+    "issue": "Phase 0の完了基準として「8ペルソナ×2モデルのAIレビュー」を要求しているが、§13.4で定義されている標準ペルソナは5つのみであり、残り3つが未定義。また、2モデルの指定も§13の規定に存在しない。",
+    "suggestion": "完了基準を「§13.4で定義された標準5ペルソナによるAIレビュー」に修正するか、§13.4に残り3つのペルソナ（例: セキュリティエンジニア、ビジネスアナリスト等）を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.5",
+    "issue": "ヘッダー標準で `> 依存: {上流ファイルのパス + バージョン}` を宣言しているが、上流ファイルが更新された際に下流ファイルの依存バージョンが古いままになることを検知する仕組み（canopyゲート等）がない。§1.1の「機械可検証」原則に反する。",
+    "suggestion": "依存バージョンの不整合を検知するスクリプト（例: `docs_dependency_lint.sh`）をインフラストラクチャに追加し、canopyの品質ゲートに組み込む構想を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "UX仕様（ux_v1.md）の必須セクションテンプレートに、モバイル/Webアプリで重要な「OS権限要求（カメラ、通知、位置情報など）のUXフロー」が欠落している。",
+    "suggestion": "ux_v1.mdのテンプレートに「§N+11 権限要求フロー（通知/カメラ/位置情報等の要求タイミングと拒否時フォールバック）」を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの記述例が `docs/plans/lais_project_v1.md` となっているが、§19.1やディレクトリ構成（§1.1）に従えば仕様書の正しい配置場所は `docs/project_v1.md` である。`docs/plans/` はAIレビュー結果の出力先（§13.5）と混同されている。",
+    "suggestion": "ヘッダーの例を `docs/project_v1.md v1.3` に修正し、正しいディレクトリ構成と一致させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  }
+]

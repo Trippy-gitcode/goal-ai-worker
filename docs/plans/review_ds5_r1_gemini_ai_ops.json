@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "§19.6の依存ツリーでは `e2e_fullflow_test.md` が `project_v1.md` の直下にのみ配置されているが、§18の連鎖更新マップでは `ux_redesign_v*.md`, `design_spec_v*.md`, `design_system.md` からも `e2e_fullflow_test.md` への依存が定義されている。また、§18では `ux_redesign_v*.md` となっているが、§19では `ux_v1.md` とファイル名が不一致。さらに§19.1の `system_map.md` が§18に存在しない。",
+    "suggestion": "§19.6のツリーを§18の実態に合わせて修正し、`e2e_fullflow_test.md` を全仕様書から依存される最下流に配置する。ファイル名を `ux_v1.md` に統一し、§18のマップにも `system_map.md` を追加して全体整合性を取る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md",
+    "issue": "AI Opsの観点から、アプリ固有のAI機能における「AIの自律アクションの許容範囲」「暴走時のフォールバック（安全側への倒し方）」「ユーザーの承認ゲート」を定義するセクションが不足している。§3「AI活用設計」だけではリスク管理の網羅性が担保できない。",
+    "suggestion": "`reference_v1.md` の§3に「AI自律範囲とユーザー承認ゲート」「暴走防止・フォールバックロジック」のサブセクションを必須として追加し、AIが誤判断した場合のリカバリ手順を明記させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "競合のDL数やApp Storeレビュー分析（★1-2離脱要因など）を要求しているが、AI（ADV/ENG）が正確な最新ストアデータを自律取得する手段が保証されておらず、ハルシネーションによる架空のデータが生成されるリスクが高い。",
+    "suggestion": "ベンチマークの実行主体（POがデータを提供しADVが分析する等）を明確化し、AIが生成したベンチマークデータに対する「POの事実確認（ファクトチェック）ゲート」を完了基準に明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーに `依存: {上流ファイルのパス + バージョン}` を記載するルールだが、複数ファイルに依存する場合の記法が不明。また、上流ファイル更新時に下流のヘッダーを連鎖更新する機械的検証がないため、バージョン指定が形骸化しやすい。",
+    "suggestion": "複数依存のフォーマット（カンマ区切り等）を明記する。また、手動管理の限界を防ぐため、上流ファイルの実際のバージョンと下流ヘッダーの記載が一致するかを検証する仕組み（linterの追加など）を検討する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 e2e_fullflow_test.md",
+    "issue": "アプリ固有のテストケースに、AIの非決定論的な出力（チャット応答、自律アクション）に対するテスト要件が��落している。sub_testing.mdには `#ai-response` タグが存在するが、仕様書テンプレートに反映されていない。",
+    "suggestion": "`e2e_fullflow_test.md` のテンプレートに「§N+3 AI応答・非決定論的出力のテストケース（#ai-response）」を追加し、フォーマット崩れやエラー時のリカバリ検証を必須とする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーのステータス（DRAFT / REVIEW / CONFIRMED）が、§14の仕様書開発フロー（Phase 1〜6）のどの段階に対応するのか明記されていないため、ステータス変更のトリガーが曖昧。",
+    "suggestion": "ステータスの遷移条件を§14のフェーズと明確に紐付ける（例: Phase 1完了でDRAFT、Phase 2-5中はREVIEW、Phase 6完了でCONFIRMED）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

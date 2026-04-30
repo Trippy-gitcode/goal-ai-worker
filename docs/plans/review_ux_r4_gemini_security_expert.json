@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §13.1 / project_v1.md §7.2",
+    "issue": "パスワード変更時（S-43）に、他のデバイスの既存セッションを強制終了（Revoke）する仕様が未定義です。アクセストークン（1時間）やリフレッシュトークン（30日）が生き残るため、アカウント乗っ取り時に攻撃者を排除できません。",
+    "suggestion": "パスワード変更成功時に、Supabaseの機能（例: `signOut({ scope: 'others' })`）を用いて、現在のデバイス以外の全セッションを強制無効化する仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §14.1 / project_v1.md §7.3",
+    "issue": "PWAのオフライン利用を謳っていますが、起動フロー（§14.1）で「セッション期限切れ（1時間経過）→ リフレッシュトークンで再認証 → 失敗 → ログイン画面」となっています。オフライン時は再認証APIが必ず失敗するため、1時間以上オフラインだとアプリから締め出され、オフラインタスク管理が破綻します。",
+    "suggestion": "オフライン起動時のセッション検証において、ネットワークエラー（fetch失敗）の場合はローカルのセッション情報（有効なリフレッシュトークンが存在すること）を信頼し、S-10 GROW画面（オフラインモード）へ遷移させるフォールバック処理を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §4.4 / project_v1.md §7.4",
+    "issue": "メッセージの通報機能がありますが、データライフサイクル（§7.4）で「友達解除時に双方から即時削除」と定義されています。悪意あるユーザーがスパム送信直後に友達解除を行うと、通報された��ッセージの証拠が即時削除され、管理者レビューが不可能になります。",
+    "suggestion": "通報されたメッセージは、友達解除が行われても管理者レビューが完了するまで論理削除（またはモデレーション用テーブルに退避）として保持する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.4 / ux_v1.md §2.3",
+    "issue": "ハーフモーダル（S-13 タスク編集など）を開いて未保存の変更がある状態で、Androidの物理戻るボタンやブラウザバック（popstate）が押された場合の挙動が未定義です。SPAのルーティングとブラウザ履歴の不整合が起きるか、確認なしでデータが破棄されるデータ損失リスクがあります。",
+    "suggestion": "編集状態でのブラウザバック（popstateイベント）をフックし、未保存の変更がある場合は遷移をブロックして「変更を破棄しますか？」の確認ダイアログを出す仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.3 / project_v1.md §6.4",
+    "issue": "AIへの画像添付機能において、テキストのPIIマスキング（正規表現）は画像には適用されません。ユーザーが個人情報（顔写真、免許証、住所が写り込んだ背景など）を含む画像を送信し、それがVision APIにそのまま送られるプライバシーリスクがあります。",
+    "suggestion": "画像添付UI（ファイルピッカー選択直後など）に、「個人情報を含む画像を送信しないでください」というプライバシー警告を明示的に表示する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.1",
+    "issue": "メールアドレス変更（S-42）において、新アドレスへの認証リンク送信は定義されていますが、旧アドレスへの「メールアドレスが変更されました」というセキュリティ通知が定義されていません。アカウント乗っ取りの検知が遅れます。",
+    "suggestion": "メールアドレス変更リクエスト受付時に、必ず旧メールアドレスに対して変更通知（身に覚えがない場合のサポート連絡先を含む）を送信する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "QRスキャン（S-36）で、ユーザーがOSのカメラアクセス権限を拒否した場合のフォールバックUIが定義されていません。権限拒否状態のまま行き止まりになります。",
+    "suggestion": "カメラ権限拒否時に、エラーメッセージとOS設定への誘導ボタン、またはシェアリンクを手動でペーストできるフォールバック入力欄を表示する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §9.1",
+    "issue": "オフラインでタスク完了し、30秒経過前にオンライン復帰して同期が走った場合、完了イベントがサーバーに送信されます。その後、30秒以内にユーザーがUndoをタップした場合、サーバーの完了状態を取り消すAPI呼び出しが必要ですが、その挙動が定義されていません。",
+    "suggestion": "オンライン復帰を跨いだUndo操作に対応するため、クライアントからサーバーへ「完了取消（EXP減算）」をリクエストするAPIエンドポイントの存在と、その呼び出しフローを明��してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §5.4 / ux_v1.md §4.4",
+    "issue": "QRコードのシェアリンク（一時トークン付き）がSNS等で公開された場合、24時間以内であれば誰でもプロフィールを閲覧し、無差別に友達リクエストを送れるため、スパムの温床になるリスクがあります。",
+    "suggestion": "シェアリンク経由のリクエストに対してレートリミット（1トークンあたりN回まで）を設けるか、設定画面に「リンクからのリクエスト受信を許可」のトグルを追加することを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §5.0",
+    "issue": "サインアップ時の同意チェックボックスが「利用規約とプライバシーポリシーに同意（AIデータの取り扱い含む）」と一括になっています。GDPR等の厳格なプライバシー法では、機微データ（健康、思想など）のAI処理に対する明示的かつ独立した同意（オプトイン）が推奨されます。",
+    "suggestion": "AIへのデータ送信に関する���立した同意チェックボックスを設けるか、EU圏ユーザーへの対応方針（GDPR適用範囲の免責など）をプライバシーポリシー要件として追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §8.6",
+    "issue": "演出キュー（同時発火時の優先順位）に「ログインボーナス（§8.5）」と「GROW画面での冒険EXP反映（§3.4）」が含まれていません。これらがタスク完了やレベルアップと同時に発生した場合のアニメーション競合が懸念されます。",
+    "suggestion": "演出キューの表に「ログインボーナス」と「冒険EXP（非同期反映分）」を追加し、全体の直列実行順序を再定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.1 / ux_v1.md §5.0.2",
+    "issue": "パスワードリセットのStep 2（新パスワード設定画面）は、メールのリンクから直接遷移する独立した画面ですが、画面一覧（§1.1）で固有のIDが割り当てられておらず、S-05の一部として扱われています。ルーティング設計時に混乱を招く可能性が���ります。",
+    "suggestion": "新パスワード設定画面に固有の画面ID（例: S-06）を割り当て、画面一覧および遷移マトリクスを更新してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

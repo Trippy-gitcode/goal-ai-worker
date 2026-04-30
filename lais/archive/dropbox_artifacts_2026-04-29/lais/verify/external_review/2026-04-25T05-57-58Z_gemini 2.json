@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md (deploy.sh 実行部分など複数箇所)",
+    "issue": "シェルスクリプトのコードが1行に結合され、`[ ]` が `\\[ \\]` に、`>` が `&gt;` に変換されています。このドキュメントからスクリプトを抽出して実行する仕組みがある場合、構文エラー（`2&gt;&1` など）となり確実にクラッシュします。",
+    "suggestion": "MarkdownのレンダリングやAIの置換ミスによる破壊を修正し、元の複数行のシェルスクリプトフォーマットに戻してください。HTMLエンティティ（`&gt;`, `&lt;`）や不要なエスケープ（`\\[`）を解除してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md (hflow_trigger_check.sh および risk_match.sh)",
+    "issue": "スクリプトの `case` 文の途中（`get_changed_files` 内）や `risk_match.sh` の途中に ` ``` ` が不正に挿入され、コードブロックが分断されています。これにより、抽出されたスクリプトが不完全となり、実行時に構文エラーが発生します。",
+    "suggestion": "誤って挿入された ` ``` ` を削除し、スクリプト全体が1つの正しいコードブロック内に収まるように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "scripts/append_deploy_fail.sh (OVERRIDE 変数定義)",
+    "issue": "`OVERRIDE=\"instructions/approvals/.strike_override.json\"` となっており、ミッションIDが含まれていません。これにより、全ミッションで同一の承認ファイルを共有してしまい、別のミッションの承認で誤ってデプロイが許可される重大なバグが発生します。",
+    "suggestion": "パスを `OVERRIDE=\"instructions/approvals/${MISSION_ID}.strike_override.json\"` に修正し、ミッションごとに独立した承認ファイルを参照するようにしてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/append_deploy_fail.sh (STRIKE >= 3 の case 分岐)",
+    "issue": "STRIKEが3以上でOVERRIDEファイルがない場合、`exit 1` してスクリプトを終了しています。このスクリプトはデプロイ失敗を記録するためのものですが、途中で終了すると `session_progress.md` への失敗ログ追記や STATUS の BLOCKED への変更が一切行われず、失敗の事実が隠蔽されます。",
+    "suggestion": "`append_deploy_fail.sh` 内でのOVERRIDE存在チェックと `exit 1` を削除し、失敗の記録は常に最後まで実行するようにしてください。OVERRIDEのチェックは次回のデプロイ実行前（`deploy.sh` の冒頭など）で行うべきです。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/append_deploy_fail.sh (tmp=$(mktemp) 部分)",
+    "issue": "`mktemp` で作成した一時ファイルに対して、`trap` コマンドによるクリーンアップ処理が設定されていません。`set -eu` が有効なため、後続の処理でエラーが発生してスクリプトが異常終了した場合、システムにゴミファイルが残り続けます。",
+    "suggestion": "`tmp=$(mktemp)` の直後に `trap 'rm -f \"$tmp\"' EXIT` を追加し、スクリプト終了時に必ず一時ファイルが削除されるようにしてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais/verify/dev_system_v34_package.md (証跡パス evidence/<MISSION_ID>/ 統一確認の grep コマンド)",
+    "issue": "`grep -c 'evidence/&lt;MISSION_ID&gt;/|...|evidence//'` となっており、本来 `evidence/<MID>/` であるべき箇所から `<MID>` が消失して `evidence//` になっています。Markdownのタグとして誤解釈され消去されたため、テストコマンドが正しく機能しません。",
+    "suggestion": "`evidence//` を `evidence/<MID>/` に修正し、必要に応じて `<` `>` をエスケープするか、コードブロック内で正しく保持されるように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0308,
+    "input_tokens": 20016,
+    "output_tokens": 1162,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

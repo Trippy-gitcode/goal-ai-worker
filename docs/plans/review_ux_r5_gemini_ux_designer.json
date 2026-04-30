@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3 (ゴールタスク追加 S-16)",
+    "issue": "S-16（ゴールタスク追加）における「習慣」トグルの扱いが矛盾・未定義",
+    "suggestion": "project_v1.md §3.2で「習慣タスクはゴールに紐付け不可」と定義されていますが、S-16のUI定義が「S-12と同一」としか記載されていません。S-16では「単発/習慣」のトグルを非表示にするか、単発固定（グレーアウト）にする仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.4, §8.3",
+    "issue": "ゴール達成の「7日間待機」状態のUXフローと演出が定義されていない",
+    "suggestion": "project_v1.md §4.2で定義された「7日未満で全タスク完了時は『あとN日で完了！』と表示」のUI状態、待機中のタスクUndo時の挙動、および7日経過時のボーナスEXP付与演出（次回アプリ起動時に自動発火するか等）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3, §6.1",
+    "issue": "キーボード表示時のUndoスナックバーの表示位置が未定義",
+    "suggestion": "TALK画面等でキーボードが表示されている際、画面下部固定のUndoスナックバーがキーボードの裏に隠れると「30秒以内の取り消し」が不可能になります。キーボード表示時はvisualViewportの上端に追従する、またはキーボードを閉じないと別タブのUndoが押せない等の仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2",
+    "issue": "画像添付時のエラーハンドリングとチャットバブル内での画像表示UIが欠落している",
+    "suggestion": "project_v1.md §3.3で定義されたサイズ上限（10MB）や非対応フォーマット選択時のエラートースト表示フローを追加してください。また、送信された画像がチャットバブル内でどのように表示されるか（サムネイルサイズ、タップでフルスクリーン拡大等）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3",
+    "issue": "習慣タスクの「今日やる」手動追加フローが定義されていない",
+    "suggestion": "project_v1.md §3.2.3で「ユーザーが手動でTodayに追加することも可能（『今日やる』ボタン）」と定義されていますが、ux_v1.mdにそのボタンの配置場所（Upcomingセクションのタスク詳細パネル内など）と操作フローが記載されていません。追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §4.3, §3.1",
+    "issue": "TALK画面での「ヒアリング中」モードの中断・再開挙動が不明確",
+    "suggestion": "ヒアリング途中でGROWタブ等に移動し、再度TALKタブに戻った場合にヒアリングモードが継続��ているか明記してください。また、ヒアリング中にユーザーが関係ない雑談を送信した場合、AIがヒアリングを中断して答えるのか、質問を優先するのかのコンテキスト管理方針を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.2.1",
+    "issue": "アバター設定（S-41）で未保存のままボトムタブを切り替えた際の挙動が未定義",
+    "suggestion": "「戻る」操作時の確認ダイアログは定義されていますが、ボトムタブ（GROW/TALK）を直接タップして画面を離脱しようとした場合、SPAの仕様上pushStateのpopが発生しません。タブ切替をブロックしてダイアログを出すか、変更を自動破棄するかの挙動を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.4",
+    "issue": "友達リスト（最大500人）の検索・ソート機能がない",
+    "suggestion": "project_v1.md §7.4で友達上限が500人と定義されていますが、カードグリッド表示のみでは特定の友達（最近QR交換した人やメッセージを送りたい人��を探すのが困難です。簡易的な検索バーやソート機能（追加順/レベル順）の導入を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §13.1",
+    "issue": "タスク完了直後（Undo待機中）のログアウト時のデータ状態が不明確",
+    "suggestion": "Undoスナックバーの30秒カウントダウン中にログアウトを実行した場合、そのタスクが「未同期データ」として扱われ即時確定（EXP付与）されるのか、それともUndo状態のまま破棄されるのか、エッジケースの挙動を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §4.4",
+    "issue": "友達解除時のメッセージ履歴削除に関する警告がダイアログにない",
+    "suggestion": "project_v1.md §7.4で「友達解除時に双方から即時削除」と定義されていますが、S-35の「友達をやめる」確認ダイアログの文言にメッセージ履歴が消える旨が含まれていません。ユーザーのデータ喪失に対する同意を得るため、ダイアログ文言に追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  }
+]

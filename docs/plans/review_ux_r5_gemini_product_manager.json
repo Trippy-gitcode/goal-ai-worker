@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2",
+    "issue": "画像添付時のサイズ・フォーマット違反時のエラーハンドリングが未定義",
+    "suggestion": "project_v1.md §3.3で「サイズ上限: 10MB」「対応フォーマット: JPEG/PNG/GIF/WebP」と定義されていますが、UX仕様書で違反ファイルを選択した際の挙動がありません。ファイル選択直後にクライアント側で検証し、違反時はエラートースト（例:「10MB以下の画像を選択してください」）を表示して添付をキャンセルする仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.3",
+    "issue": "ヒアリングセッション（5問）完了後の画面遷移・UXフローが未定義",
+    "suggestion": "TALK画面で5問目の回答を送信した後の挙動が不明です。AIが「ヒアリングが完了しました。DISCOVERタブで分析結果を確認してください」と発話し、TALK画面に留まる（またはDISCOVERへ戻るボタンを提示する）フローを明記してください。行き止まりになるのを防ぐ必要があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§6.1",
+    "issue": "ハーフモーダルの下スワイプ閉じと、内部コンテンツのスクロール操作が競合する",
+    "suggestion": "「下スワイプ（50px以上）で閉じる」とありますが、タスク追加のメモ欄やゴール詳細のタスク一覧など、縦スクロール可能なコンテンツを上へスクロール（下スワイプ）する操作と競合します。「モーダル内コンテンツのスクロール位置がトップ（scrollTop === 0）の状態で、さらに下スワイプした場合のみ閉じるジェスチャーとして判定する」という条件を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.5",
+    "issue": "チャット履歴（S-21）から過去の会話を選択した際の、入力欄の状態が未定義",
+    "suggestion": "「該当チャットを表示」とありますが、過去のチャットから会話を継続できるのか、読み取り専用（Read-only）になるのかが不明です。過去の文脈を引き継いで会話を継続できる仕様であれば、その旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.3",
+    "issue": "習慣タスクの「今日やる」手動追加ボタンのUI配置が漏れている",
+    "suggestion": "project_v1.md §3.2.3で「ユーザーが手動でTodayに追加することも可能（「今日やる」ボタン）」と言及されていますが、UX仕様書のUpcomingタスク表示等にそのボタンの配置や操作フローが定義されていません。Upcomingセクション内の習慣タスク行に「今日やる」ボタンを配置し、タップでTodayセクションに即時移動するフローを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.4",
+    "issue": "冒険EXPの1日上限（2回）到達後の、3回目以降の冒険文脈検出時のUI挙動が未定義",
+    "suggestion": "project_v1.md §4.5で冒険EXPは1日2回までとされています。上限到達後にAIが冒険文脈を検出した場合、EXP付与や冒険EXPカード（✨マーク含む）の演出を完全にスキップし、通常のAI応答のみを行う旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.3",
+    "issue": "タスク提案カードの「登録する」「まとめて登録」実行時のゴール紐付け状態が未定義",
+    "suggestion": "「編集して登録」の場合はS-12相当のパネルでゴールを選択できますが、ワンタップで登録する「登録する」「まとめて登録」の場合、どのゴールに紐づくのかが不明です。「デフォルトで『ゴール紐付けなし』として登録される」旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§13.2",
+    "issue": "ゲーミフィケーションと課金動機（アップグレード訴求）の接続が弱い",
+    "suggestion": "LaisはFree���でゲーミフィケーション機能が全開放されているため、課金動機が「AI対話回数・モデル」に依存しています。S-38（プラン管理）のプラン比較UIや、対話上限到達時のバナーにおいて、「より賢いAI（GPT-5/Claude）で、あなただけの強みや冒険をさらに深く発見しよう」といった、自己理解や冒険EXPの価値と結びつけたコピー設計を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.2.1",
+    "issue": "アバター設定で未保存のまま離脱した際のプレビュー状態のロールバックが不明確",
+    "suggestion": "「確認ダイアログ → [破棄]」を選択した場合、または未保存で画面を閉じた場合に、ローカルのプレビュー状態をサーバー上の現在の装備状態にリセット（ロールバック）する処理を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"STRUCTURE\",\n    \"location\": \"§1.2, §1.4, §2.3, §2.4\",\n    \"issue\": \"フルスクリーン画面（S-14 ゴール詳細等）から別タブ（S-20 TALK）へ遷移した際の、タブごとのナビゲーションスタックの扱いが未定義。TALKからGROWタブに戻った際、S-14に戻るのかS-10トップに戻るのか不明で、PWAのルーティングが破綻する。\",\n    \"suggestion\": \"フルスクリーン画面ではボトムタブを非表示にする（iOS標準のhidesBottomBarWhenPushed相当）か、別タブへプログラム遷移する際は「元のタブのスタックをトップ（S-10）にリセットする」仕様を明記し、PWAでの複雑なタブ内��歴管理を回避する。\"\n  },\n  {\n    \"id\": \"R-002\",\n    \"severity\": \"CRITICAL\",\n    \"category\"",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

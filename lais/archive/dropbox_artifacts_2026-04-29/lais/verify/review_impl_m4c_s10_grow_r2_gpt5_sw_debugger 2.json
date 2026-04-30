@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§ B-5 OverdueRow（S10Grow.jsx）+ § S10Grow.css .s10-check::before",
+    "issue": "Overdue の装飾チェック（<span class=\"s10-check s10-check-overdue\" aria-hidden=\"true\">）にもベースの .s10-check::before（44×44 ヒット領域拡張）が適用され、非インタラクティブ要素の疑似要素が周辺を覆ってクリック／タップを奪う可能性がある。レイアウト次第でカード領域や「明日に延期」ボタンの一部に“当たり判定のないゾーン”を作るリスク。",
+    "suggestion": "装飾用にはヒット領域拡張を無効化する。例: .s10-check-overdue, .s10-check-overdue::before { pointer-events: none; } または .s10-check を button に限定して拡張を適用（button.s10-check::before に変更）。さらに、重なりを避けるため .s10-check-overdue::before { display: none; } を検討。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§ B-3 S10Grow.css .s10-check::before（TodayRow 周辺）",
+    "issue": "Today 行の 44×44 ヒット領域拡張がカード領域まで食い込むと、カードタップ（S-13/S-14 への遷移は現状 console.log だが将来実装）を妨げたり、近接要素の操作性を落とす恐れがある。“動いているように見える”が、狭小幅や密なレイアウトで顕在化。",
+    "suggestion": "ヒット領域のオフセットを右方向へは抑制（例: 左右対称ではなく左優先へずらす）または .s10-task-card と十分な間隔（margin-left）を確保。別案として、ヒット拡張用の透明ボタン領域を独立要素として配置し、カードと物理的に重ならない構造にする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§ B-1 S10Grow.jsx handleToggle / tappingId",
+    "issue": "同一タスクを 400ms 以内に連続タップすると、.s10-check-tap クラスが既に付与済みのため CSS アニメーションが再発火しない。体感上“反応が鈍い”と感じる条件がある。",
+    "suggestion": "同一ID連打時もアニメを再開できるように、(1) 一旦クラスを外し requestAnimationFrame 後に再付与、(2) tappingId を {id, nonce} のような一意トークンにしてレンダリング差分を必ず出す、(3) animationend を待ってから再適用、のいずれかで再発火を保証す���。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§ B-1 S10Grow.jsx tapTimerRef（400ms） / § S10Grow.css --duration-fast",
+    "issue": "JS の 400ms タイマーと CSS の --duration-fast が分離管理で乖離リスク。デザイン変更で --duration-fast が変わると、JS 側のクラス除去タイミングがズレる可能性がある。",
+    "suggestion": "CSS Animation の animationend を監視してクラス除去するか、--duration-fast を JS 側に変数として同期管理（CSS Vars を getComputedStyle で読む、もしくは定数の単一ソース化）する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§ B-4 Check コンポーネント（aria-pressed）",
+    "issue": "aria-pressed=true を done のみに割り当て、active と scheduled をともに false としているため、支援技術上は active と scheduled の区別が“押されていない”で同一に見える。ラベルで意図は補えているが、状態の区別が音声上やや曖昧。",
+    "suggestion": "active を aria-pressed=\"mixed\" にする、もしくは aria-describedby で現在状態（予定／進行中／完了）を常時併記して SR に確実に伝える。live region は不要だが、名称と値の整合性を強化する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§ B-2 BottomTabBar.jsx（<button> + aria-current=\"page\"）",
+    "issue": "aria-current は技術的には任意要素に付与可能だが、実装・読み上げはリンク（<a>）での利用が最も広く安定している。ボタン上の aria-current を一部環境で“現在地”として十分に伝えないリスクがある。",
+    "suggestion": "可能なら <a href> に変更し aria-current=\"page\" を適用（ルーティングが SPA でも href を付けられる設計）。難しい場合は、aria-label に“（現在のページ）”等を付加、または視覚非表示テキストで現在地を補足して SR の信頼性を上げる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§ B-2 BottomTabBar 全般（キーボード／フォーカス移動）",
+    "issue": "タブ（ナビ）選択後のフォーカス管理方針が未明確。現在ページ遷移時にコンテンツ先頭へフォーカス移動しないと、キーボード利用者はタブに取り残される可能性。",
+    "suggestion": "画面遷移後に main 見出し等へフォーカス移動する共通ユーティリティを用意（S10Grow の mainRef フォーカスと同等の挙動を全画面に展開）。SR にはページタイトルの live announce も検討。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§ 全体（回帰検出）",
+    "issue": "R2 での修正点（44×44 ヒット領域、aria-current、aria-pressed、spring アニメ）に対する回帰テストや E2E の追加が記載されていない。環境差（iOS Safari/Android Chrome/スクリーンリーダ）の挙動差を検出しづらい。",
+    "suggestion": "Playwright などで以下を自動化: (1) クリック判定領域の重なりがないこと（Defer ボタンが常に押下可能）、(2) 連打時のアニメ再発火、(3) aria-current のアナウンス有無（最低限 DOM/属性検証）、(4) prefers-reduced-motion でアニメ・トランジションが停止すること。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§ S10Grow.jsx useEffect mainRef.focus()",
+    "issue": "マウント時に main へ即時フォーカス移動する実装は、読上げ環境で意図しない��ンテキストジャンプに感じられる場合がある。また、要素がフォーカス可能でないと無効。",
+    "suggestion": "main に tabindex=\"-1\" を付与し、ルート遷移トリガ時のみ（ユーザ操作後）フォーカス移動する条件分岐を明確化。フォーカス移動はユーザ操作に紐づけ、初期マウントでは行わないなど方針を統一する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§ B-1 S10Grow.jsx tappingId の粒度",
+    "issue": "tappingId がグローバル 1 つのため、複数行を素早く連続操作すると先行行のアニメが中断される。視覚的な一貫性が崩れやすい“見かけ上の不具合”。",
+    "suggestion": "タスクIDごとの発火管理に変更（Map<taskId, timeoutId> で個別にクラス付与/除去、あるいは Check を独立 state にしてローカル管理）。これにより他行のアニメに干渉しない。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

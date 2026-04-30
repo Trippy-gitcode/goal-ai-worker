@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "design_system.md §8.1（Secondaryボタン）/ §5.2 Dawn / §5.3 Harajuku Light",
+    "issue": "Secondary（背景=--accent-subtle／文字=--accent）のコントラストがライト系テーマでAA未達。実測（背景はrgbaの合成前提）: Dawn: テキスト #A85E28 / 背景 ≈ #F2E6DC（= #FEFCF9に#A85E28 14%合成）→ 約4.38:1。Harajuku Light: テキスト #C43361 / 背景 ≈ #F8E2E9（= #FFFAFBに#C43361 12%合成）→ 約4.06:1。いずれも4.5:1未満。",
+    "suggestion": "ライト系テーマではSecondaryの背景アルファを下げて背景をより明るくする（Dawn: --accent-subtle=rgba(...,0.08)程度、Harajuku Light: 0.08〜0.10）か、テキスト色を--accentではなく--text-primary相当の濃色に切替える。加えてhover/pressedも同様に見直し（アルファを上げるとさらに悪化するためNG）。代替として“outlined”スタイル（背景=transparent, ボーダー=--accent, テキスト=--accent）を用意してAAを確実化。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "design_system.md §8.3（チップ/バッジ subtle系）/ §2.3 セマンティックカラー / §5.2 Dawn / §5.3 Harajuku Light",
+    "issue": "セマンティック“subtle”背景（--danger-subtle／--warning-subtle 等）上の同系色テキストがライト系テーマでAA未達の恐れ。実測例（背景は親がsurface相当と仮定しrgba合成）: Dawn Danger: #CF222E / 背景 ≈ #F9E6E4（= #FEFCF9に#CF222E 10%）→ 約4.05:1。Dawn Warning: #9A6700 / 背景 ≈ #F6ECD9（= #FEFCF9に#9A6700 10%）→ 約4.2:1。Harajuku Light Danger: 同様に約4.1:1前後。4.5:1に届かない。",
+    "suggestion": "subtle系で“文字=同系色”をやめ、ライト系テーマでは文字=--text-primary（または十分濃い“on subtle”専用色）に変更。あるいは背景アルファを0.06〜0.08へ下げてコントラストを確保。状態強調はアイコン/ボーダー/ラベルで補い、色依存を低減。トークンとして --semantic-on-subtle（success/danger/warning/infoそれぞれ）を追加し、テーマ別にAA達成を担保。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "design_system.md §8.1（Secondary hover/pressed）/ §5.2 Dawn / §5.3 Harajuku Light",
+    "issue": "Secondaryのhover/pressed（--accent-subtle-hover/pressed）は背景アルファがさら���上がるため、文字=--accentとのコントラストが基準値からさらに乖離。実測（Dawn想定）: hover（~0.20）で約4.1:1、pressed（~0.26）で約3.8:1まで低下。",
+    "suggestion": "hover/pressedは“明度変化”ではなく“境界/影/トランジション”など非コントラスト依存のフィードバックに置換、またはhover/pressed時のみ“outlined”に切替（ボーダー強調）して文字色のコントラストを維持。どうしても背景彩度を上げる場合は、文字色を--text-primary等に切替える条件分岐を導入。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §5.* --focus-ring / §8.10 状態マトリクス / ux_v1.md §10.3 フォーカス管理",
+    "issue": "WCAG 2.2の2.4.11（Focus Appearance Minimum）の達成要件（少なくとも3:1のコントラスト差＋十分な可視領域）を“box-shadow: var(--focus-ring)”のみで満たす保証がない。特にライト系テーマのrgba(accent,0.4)は背景とのコントラストが不足しやすい。",
+    "suggestion": "通常モードでもoutlineベースを標準に: :focus-visible { outline: 2px solid var(--focus-outline); outline-offset: 2px; } を導入。トークンを分解（--focus-outline-color/--focus-outline-width/--focus-outline-offset）し、各テーマで3:1以上を実測保証。box-shadowは補助に留め、forced-colors時と実装様式を近づけて安定化。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_system.md §8.7 ボトムタブバー / ux_v1.md §10.4 スクリーンリーダー対応",
+    "issue": "ボトムタブのARIAが資料間で不一致。design_systemではa要素+aria-current=page想定、ux_v1ではrole=tablist/role=tab+aria-selectedを推奨。Webではボトムナビは“ナビゲーション”として扱うのが一般的で、タブロールは同一ページ内のパネル切替に適用される。",
+    "suggestion": "方式を統一: 画面遷移ナビなら<nav role=\"navigation\">内のa要素でaria-current=\"page\"。単一ページのパネル切替UIならrole=tablist/role=tab/aria-controlsを採用。今回の3タブはルーティング遷移前提のため前者推奨。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "design_system.md §4.5 タップターゲット最小サイズ",
+    "issue": "参照基準がWCAG 2.5.5（AAA）になっており、WCAG 2.2のAA達成基準は2.5.8（Target Size Minimum）。本文の方針（44px確保）は適切だが、規格の引用が誤解を招く。",
+    "suggestion": "文言を“WCAG 2.2 2.5.8（AA）に対し、Apple HIGの44×44pxを満たす強化基準を採用”に更新。例外（インラインテキスト等）も注記して実装時の判断を明確化。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "design_system.md 全体（トークン体系）",
+    "issue": "アクセシビリティ関連の補助トークンが未定義。例: --focus-outline-color/width/offset、--link-underline-thickness/offset（フォーカス時強調）、“on subtle”用文字色（--semantic-on-subtle-*）、高コントラスト嗜好（prefers-contrast）向けの強調用トークン。",
+    "suggestion": "以下を追加: 1) --focus-outline-* 3種、2) --link-underline-thickness/--link-underline-offset + :focus-visibleで太く、3) --semantic-on-subtle-{success|danger|warning|info}、4) @media (prefers-contrast: more) 内で --border-strong/--text-secondary/--focus-outline-color を増強する“high-contrast”上書き群。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §8.1 ボ��ン / §8.3 チップ/バッジ",
+    "issue": "“box-shadow: var(--focus-ring)”の適用対象が“全ボタン”と記載。ボタン以外（チップ/バッジ/アイコンボタン/タブ項目/タイムライン行のクリック領域等）へのフォーカス可視化要件が明示されていない。",
+    "suggestion": "“全インタラクティブ要素（button, a[href], [role='button'], [role='switch'], [tabindex]:not([tabindex='-1']) など）”にフォーカススタイルを適用するガイドラインを追加。コンポーネント実装チェックリストに“focus-visible対応”を必須化。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（Undoスナックバー）/ design_system.md §8.6 トースト",
+    "issue": "UndoスナックバーのARIA要件が未定義。操作可能なアクションを含むが、ロール/ライブリージョン/フォーカス遷移の扱いが明文化されていない。",
+    "suggestion": "Undoスナックバーはrole=\"status\" + aria-live=\"polite\"で自動アナウンス、アクション[取り消す]にはbuttonロールとキーボード操作（Enter/Space）を保証。フォーカスは奪わず、Tab移動でボタンに到達可能��。タイムアウトはaria-labelで残り秒数を更新（例: aria-liveで毎秒は避け、初回+5s毎程度の告知に抑制）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §3.2 フォントサイズスケール",
+    "issue": "キャプション用 --font-size-xs=11px は可読性リスク（低視力ユーザー、PWAズーム環境）。WCAGにフォント最小サイズの数値要件はないが、実利用では12–14pxが目安。",
+    "suggestion": "--font-size-xs を12pxへ引上げ検討。11pxを維持する場合は行間/文字間を増やし（line-height>=1.4、letter-spacing>=0.2px目安）、重要情報への使用を避ける旨をガイドに明記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §8.1 ボタン / §8.8 トグルスイッチ / §8.2 入力フィールド",
+    "issue": "無効状態の実装が視覚/ポインター制御中心（opacity/pointer-events）で、スクリーンリーダー向けの“操作不能”伝達（disabled属性 or aria-disabled）が明確でない。",
+    "suggestion": "ネイティブ要素はdisabled属性を使用。カスタム要素はaria-disabled=\"true\"を付与し、Tab移動から除外（tabindex=-1）する。見た目のみの無効化（pointer-events:none）に依存しないことを実装ルールとして明記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §5.5 グラスモーフィズム / §7.6 prefers-reduced-motion",
+    "issue": "Glass ON時の読解性に関する明示的なコントラスト検証ルールがない。現仕様では背景/ボーダーは定義済みだが、“背後コンテンツ”の影響に関する注意が未記載。",
+    "suggestion": "glass-surface上のテキスト/アイコンは常にAA達成（4.5:1/3:1）を満たすことを明記し、設計レビューで“背後が写真/動画/濃色のとき”の実測を必須化。必要に応じてglass用の“スクラム（内側塗りつぶしレイヤー）”や暗幕（背景グラデ）を追加できる代替スタイルを用意。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §2.2 リンク色 / §7.5 forced-colors",
+    "issue": "キーボードフォーカス時のインラインリンク強調（下線の太さ/オフセット変更等）が未定義。可視性は満たすが、より確実な強調が望ましい。",
+    "suggestion": "a:focus-visible { text-decoration-thickness: 2px; text-underline-offset: 3px; outline: none; } をガイドに追��。リンク以外のインライン操作子（例: テキストボタン）にも同等の強調ルールを適用。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "design_system.md §9 CSSトークン / 全体",
+    "issue": "UAコントロール（フォーム/スクロールバー等）の配色最適化を示すcolor-scheme指定が未記載。",
+    "suggestion": ":rootに color-scheme: light dark; を追加し、テーマ切替時にdocumentElementに対して適切な値を反映（例: ダーク系テーマでは color-scheme: dark）。フォーム既定部品の可読性を向上。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  }
+]

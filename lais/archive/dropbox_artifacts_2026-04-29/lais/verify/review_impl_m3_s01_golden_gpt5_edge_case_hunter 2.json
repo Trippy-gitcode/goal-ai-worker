@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§2 S01Auth.jsx",
+    "issue": "ブラウザの自動入力/パスワードマネージャによる値反映に未対応。完全に制御された input（value に state を直結）かつ onInput のみで同期しているため、オートフィルが DOM 値だけを変更してイベントを発火しないケースで state に反映されず、CTA が常に disabled になる可能性がある。",
+    "suggestion": "オートフィル対応を追加する。例: (1) 初回のみ uncontrolled（defaultValue）にして mount 時に実値を読み取って state 同期、(2) onChange もハンドリング、(3) WebKit のオートフィルトリック（:autofill/animationstart）で再同期、(4) name 属性を付けてフォームセマンティクスを確保。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§2 S01Auth.jsx",
+    "issue": "同意文言の <label> 内にリンク(<a href=\"#\">)が入っているため、リンククリックでもラベルクリックとしてチェックボックスがトグルされてしまう。利用規約リンクを押しただけで同意状態が変わる予期���ぬ動作。",
+    "suggestion": "リンククリックでチェックが切り替わらないように構造を見直す。例: ラベルはチェックボックスのみを囲み、テキストとリンクはラベル外に配置する、またはリンク onClick で e.stopPropagation() を呼ぶ。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§2 S01Auth.jsx",
+    "issue": "送信中にモード切替（フッター押下）や画面遷移が可能で、非同期完了時に古い submit ハンドラが route('/') を実行してしまう競合があり、利用者操作を上書きする可能性がある。",
+    "suggestion": "送信中はモード切替や離脱を抑止（ボタン無効化）し、ハンドラ内部でマウント状態（isMounted ref）を確認して unmounted 後は遷移しない。可能なら AbortController 等でリクエストを中断する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§1 App.jsx",
+    "issue": "AuthRoute 内で window.location.search を直接参照しており、SSR/プリレンダー/一部テスト環境で window 未定義によりクラッシュする可能性がある。",
+    "suggestion": "preact-router の props（url）や useLocation 相当の仕組みで location を受け取り、window 参照を避ける。少なくとも window 存在チェックを追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2 S01Auth.jsx",
+    "issue": "サインアップ成功時に常に '/' へ遷移するが、Supabase 側でメール確認必須の場合は session が null のままで「成功の定義」が不明確。未認証のままトップへ戻るため UX が破綻する恐れがある。",
+    "suggestion": "signUp 戻り値の data.session の有無で分岐し、session が無い場合は遷移せず「確認メールを送信しました」等のガイダンスを表示。もしくは onAuthStateChange で session 設定後に遷移する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3 S01Auth.css",
+    "issue": "iOS Safari で font-size 14px の input にフォーカス時、自動ズームが発生しレイアウトが崩れる可能性がある（固定高 48px のため視覚的なズレが顕著）。",
+    "suggestion": "iOS 環境ではフォームコントロールのフォントサイズを 16px 以上にする（またはプラットフォーム条件付きトークン適用）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2 S01Auth.jsx",
+    "issue": "ネットワーク遅延/ハング時のタイムアウトやリトライがなく、無期限に「送信中…」のままになる可能性がある。オフライン時の明示的ガイダンスもない。",
+    "suggestion": "Promise.race によるクライアント側タイムアウト（例: 15s）とユーザーが再試行できる UI を追加。オフライン検知（navigator.onLine / online/offline イベント）で適切なメッセージを表示。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3 S01Auth.css",
+    "issue": "reduced-motion 非対応。CTA の transform や各要素の transition が常に有効で、motion を減らす OS 設定を尊重していない。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) で .s01-cta / .s01-input / .s01-checkbox 等の transition/transform を無効化。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§2 S01Auth.jsx",
+    "issue": "Email 入力の前後空白やゼロ幅空白文字を考慮して���らず、見た目は正しそうでもバリデーション/サインインが失敗する。",
+    "suggestion": "submit 前に email を trim（必要に応じて Unicode 空白も正規化）し、比較や送信に normalized 値を用いる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§2 S01Auth.jsx",
+    "issue": "モード切替時に serverError が残留し、文言や構造が変わっても過去のエラーが表示され続けるため混乱を招く。",
+    "suggestion": "mode 変更（URL 変更）時に serverError をクリア。useEffect で mode を監視して setServerError('')。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§5 auth.js",
+    "issue": "onAuthStateChange の購読解除がなく、HMR（開発時のモジュール再読み込み）でリスナーが累積してメモリリークや多重実行の恐れ。",
+    "suggestion": "購読解除関数（subscription.unsubscribe）を保持し、import.meta.hot?.dispose で解除。もしくはコンポーネント内 useEffect 登録+クリーンアップに移行。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5 auth.js",
+    "issue": "supabase.auth.getSession() の Promise 失敗時のハンドリングがなく、Unhandled Promise Rejection になる可能性がある。",
+    "suggestion": ".catch でログとフォールバック（authLoading=false）を行い、UI が待ち状態のまま固まらないようにする。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3 S01Auth.css",
+    "issue": "min-height が 100svh のみで、古いブラウザや一部環境で未対応の場合に意図せぬ高さになる可能性。",
+    "suggestion": "フォールバックとして 100vh→100dvh→100svh の順に指定（後勝ち）するか、@supports で切替える。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3 S01Auth.css",
+    "issue": "長大なサーバーエラーメッセージ（英数字連続やトークン文字列等）で改行されずに横スクロール/はみ出しの恐れ。",
+    "suggestion": ".s01-server-error に word-break: break-word; または overflow-wrap: anywhere; を付与して折返しを保証する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

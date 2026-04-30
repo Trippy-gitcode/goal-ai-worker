@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.5 状態・インタラクション（閉じアニメ）/ S12TaskAdd.jsx + S12TaskAdd.css",
+    "issue": "モーダル閉鎖時に逆アニメーションが実装されておらず、open=falseで即時unmountされるためspecの「逆アニメ」挙動に反する。",
+    "suggestion": "unmount前にexitアニメを走らせる仕組みを追加する（例: open→closingフラグに遷移してCSSで@keyframes-downを適用し、animationend/transitionend後にunmount。あるいはCSSTransition/Presence系ユーティリティを使用）。overlay側も同様にfade-outを適用。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.5 画面タイプ（高さ60%）/ S12TaskAdd.css .s12-modal",
+    "issue": "specは「画面高60%」だが実装はmax-height:85vhのみで、実高さが内容量依存になっている。スクショ要件の「約60%」とも乖離の恐れ。",
+    "suggestion": "高さ要件を明示化（height:60vhまたはmin-height:60vh + max-height:85vh等）。デザイナー合意があればtokensへ昇格。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.5 S12-9 予定日",
+    "issue": "予定日フィールドに右側14pxのカレンダーSVGが仕様化されているが実装に存在しない。",
+    "suggestion": "S12-9のreadonlyブロックにカレンダーSVG(14px)を追加し、aria-hidden=\"true\"/focusable=\"false\"を付与。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§4.5 S12-3 ✕ボタン",
+    "issue": "✕アイコンが16px実装（specは20px）。タップ領域は満たすが視覚仕様から逸脱。",
+    "suggestion": "SVGサイズを20×20に変更（stroke幅・コントラストは現状維持で可）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S12-9 / S12-10 読み取り専用表示",
+    "issue": "div要素にaria-readonlyを付与しているが、ARIA属性として適用対象外。支援技術で混乱の恐れ。",
+    "suggestion": "aria-readonlyは削除。非インタラクティブな単なる表示であればARIA不要。将来クリック可能化する場合はrole=\"button\" + aria-disabledやaria-haspopup等の適切なロール/属性を検討。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "フォーカストラップ（S12TaskAdd.jsx useEffect(handleTab)）",
+    "issue": "Tabキー時のみ境界循環を実装。初期フォーカスが外部に逸脱した場合や不可視要素が含まれる場合に外部へ漏れる可能性がある。aria-disabledのCTAも巡回対象。",
+    "suggestion": "・dialog内にフォーカスがない場合はfirst要素へ強制移動するガードを追加・可視要素のみを対象（offsetParent/visibilityでフィルタ）・[aria-disabled='true']や[tabindex='-1']を除外・イベントはdialog要素にバインドし、activeElementがdialog外なら処理をスキップ。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ESCハンドラ（S12TaskAdd.jsx useEffect(handleKeyDown)）",
+    "issue": "ネイティブのtimeピッカー表示中にEscape押下がモーダル閉鎖まで伝播するブラウザでは「ピッカーを閉じたいだけ」が「モーダルも閉じる」になる恐れ（条件次第で再現）。",
+    "suggestion": "Escape処理前にe.targetのコンテキストを確認し、ネイティブピッカー等のクローズ操作で既に既定処理が行わ���た場合はreturn（e.defaultPreventedの確認/短いdeferで二重検知等）。E2Eでtimeピッカー→ESC時の挙動を検証。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S12-6/7/11 入力ID",
+    "issue": "id属性が固定文字列（s12-name-input等）。同一画面に複数インスタンスが存在した場合、id重複でlabel連携が破綻し得る。",
+    "suggestion": "useId()で各入力IDも生成し、labelのforと一致させる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "S12-5 種別ピル / S12-8 所要時間（radiogroup）",
+    "issue": "ARIAロールはradioだが、矢印キーによる移動・ロービングtabindex未実装。支援技術の期待する操作と不一致（既知のスコープ外だがUX/A11y観点では高リスク）。",
+    "suggestion": "roving tabindex（選択=tabindex=0/非選択=-1）と左右矢印キーで選択移動を実装。aria-activedescendantパターンも検討可。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.5 S12-6 プレースホルダ色",
+    "issue": "specはplaceholder=--text-mutedだが実装は--text-placeholderを参照。トークン値が同等でない場合に見た目差異。",
+    "suggestion": "トークン整合性を確認。差異がある場合はspec改訂 or 実装切替（--text-mutedへ）を合意の上で実施。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.5 S12-2 タイトル組版",
+    "issue": "letter-spacingがvar(--letter-spacing-ja)で指定。specは-0.02emの明示値。トークン値が異なると微差が出る可能性。",
+    "suggestion": "デザイントークンの値が-0.02emと一致するか確認。不一致ならtoken更新 or このコンポーネントに限り明示値を適用。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "S12TaskAdd.css（アニメ/トランジション変数）",
+    "issue": "animation/transitionのイージング・z-index等をvar参照のみでフォールバック未指定。未定義時にプロパティ全体が無効化される恐れ（気づきにくい劣化）。",
+    "suggestion": "var(--ease-out, ease)のようにフォールバックを指定。z-indexトークンも存在保証/デフォルト値をドキュメント化。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx bodyスクロールロック useEffect",
+    "issue": "単純にoverflowをhidden/復元しており、デスクトップでスクロールバー消失によるレイアウトシフトや多重ロック時の復元競合に弱い。",
+    "suggestion": "カウンタ方式のロック管理 or body-scroll-lock系ユーティリティを採用し、スクロールバー幅分のpadding-right補正を追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S12-12 CTA（aria-disabledゲート）",
+    "issue": "aria-disabledのみでdisabled未使用のため、見た目disabledでもフォーカス可能・巡回対象。支援技術によっては混乱要因。",
+    "suggestion": "aria-disabled時はtabIndex=-1を付与して巡回から除外し、フォーカストラップの対象からも除外。視覚・音声の両面でdisabledを伝えるlive regionの補助文言も検討。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx handleClose",
+    "issue": "returnFocusRef.focus()をsetTimeoutで遅延実行。ルート遷移等で要素がDOMから消えた場合に意図しないフォーカス試行の可能性（エラーは出ないがUX的に不安定）。",
+    "suggestion": "focus前に要素のisConnected/offsetParentを確認。コンポーネントunmount時に保留中のsetTimeoutをクリアできるようリファレンス管理。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "テスト/ログ（パッケージ全体）",
+    "issue": "E2E未整備。実装的に“動いて見えるが特定条件で壊れる”類（ESC×timeピッカー、フォーカストラップ漏れ、exitアニメ有無など）を検出しづらい。ログも作成時のみ。",
+    "suggestion": "Playwrightで以下を自動化: 1) 開閉3種/Escape連打 2) 初期フォーカスとTrapの循環（先頭/末尾/不可視要素） 3) aria-disabledゲート（Enter/Space/click） 4) timeピッカー表示中ESCの挙動 5) exitアニメの完了後unmount。開閉/submit/abortにデバッグログ（dev限定）を追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

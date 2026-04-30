@@ -1,0 +1,3 @@
+[
+  {"id":"R-001","severity":"LOW","category":"USER_CONCERN","location":"§8.12a Undo","issue":"Undoが5秒で消えるのは実用的だが、Finchでは『やっぱりundoしたい』と思った時、スナックバー消えた後でも最近の履歴から戻せる。Laisはその配慮がない。","suggestion":"§8.12a またはUX側に『最近の削除はアクティビティ履歴から復元可』という二層構造を検討。","model":"Claude Opus 4.6","persona":"target_user"}
+]

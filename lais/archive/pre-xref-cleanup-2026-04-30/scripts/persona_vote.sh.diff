@@ -1,0 +1,11 @@
+--- /Users/futoshi/Desktop/goal-ai-worker/lais/archive/pre-xref-cleanup-2026-04-30/scripts/persona_vote.sh	2026-04-30 21:22:52
++++ /Users/futoshi/Desktop/goal-ai-worker/scripts/persona_vote.sh	2026-04-30 21:25:21
+@@ -21,7 +21,7 @@
+ #   - どちらでもない場合 → ABSTAIN
+ #
+ # 根拠:
+-#   - lais/verify/dev_system_v34_package.md §2.25.14.7 / §2.25.23.4 step 2
++#   - core_spec.md §8.3 / §11.5 (legacy v34 spec §2.25.14.7 / §2.25.23.4, archived 2026-04-30)
+ #   - docs/po-decisions.md PD-112
+ 
+ set -eu

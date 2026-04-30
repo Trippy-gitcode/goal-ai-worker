@@ -1,0 +1,79 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「サインアップ」ボタン",
+    "issue": "ボタンテキスト(#7A8593)と背景(#1C2128)のコントラスト比が約4.3:1であり、WCAG AAの通常テキスト要件(4.5:1)を満たしていません。未入力時のDisabled状態を意図している場合でも、仕様書の `--text-disabled: #484F58` と一致していません。",
+    "suggestion": "アクティブ状態であればテキスト色をコントラストを満たす色に変更し、Disabled状態であれば仕様書で定義された `--text-disabled` トークンを適用してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "画面上部 プログレスバー",
+    "issue": "完了ステップ(青:#79C0FF)と未完了ステップ(グレー:#6E7681)が色のみで区別されており、両者のコントラスト比も約2.4:1と低いため、色覚多様性のユーザーには現在位置の把握が困難です(WCAG 1.4.1 非色依存)。",
+    "suggestion": "アクティブなステップの線の太さを変える、または未完了ステップの明度を下げて3:1以上のコントラスト差を確保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayセクション 「12:00 ジムで筋トレ」のタスクカード",
+    "issue": "カード左側のオレンジ色のボーダー(#E8A855)のみで特定のゴールへの紐付けを表現しており、テキストやアイコンによる補足がないため、色だけで情報を伝達しています(WCAG 1.4.1)。",
+    "suggestion": "カード内にゴール名を示すテキストラベルを追加するか、ゴール固有のアイコンを併記して色以外の手段でも判別可能にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayセクション タスクの左側チェックボックス枠線",
+    "issue": "「今日」のタスク(青枠)と「予定」のタスク(グレー枠)の違いを、枠線の色のみで表現しています。色覚多様性のユーザーには状態の違いが伝わりません(WCAG 1.4.1)。",
+    "suggestion": "「予定」のタスクには枠線を破線にする、またはタスク名の下に明示的なステータスラベル(例:「今日」「予定」)をテキストで配置してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域 EXPバー右下の数値「1,240 / 2,000」",
+    "issue": "EXPの現在値/最大値を示すテキストサイズが11pxで実装されています。デザインシステム仕様書§3.2の「--font-size-xs (11px) はキャプション・時刻のみ。本文・重要情報には使用禁止」というルールに違反しています。",
+    "suggestion": "ゲーミフィケーションの重要情報であるため、フォントサイズを14px(--font-size-sm)以上に引き上げてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "タスク名入力フィールド「買い物リストを作る」",
+    "issue": "フォーカスリング(outline)の色が `rgba(121,192,255,0.2)` に設定されており、背景色(#0D1117)とのコントラスト比が非テキスト要件の3:1を満たさず、フォーカス状態の視認性が著しく低いです(WCAG 1.4.11)。",
+    "suggestion": "フォーカスリングの不透明度を上げるか、透明度を含まないソリッドカラー(例: `--accent`)を使用して、背景とのコントラスト比3:1以上を確保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "画面下部 「削除」ボタン",
+    "issue": "ボタンの枠線色が `rgba(248,81,73,0.3)` に設定されており、背景色(#161B22)とブレンドされた結果、非テキストコントラスト要件の3:1を満たさず、ボタンの境界(タップターゲット)が視認しづらくなっています。",
+    "suggestion": "枠線の不透明度を上げるか、ソリッドな赤色を使用してボタンの境界を明確にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  }
+]

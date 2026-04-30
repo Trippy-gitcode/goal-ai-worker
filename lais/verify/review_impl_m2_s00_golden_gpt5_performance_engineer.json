@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S00Splash.css (.s00-cta-primary, .s00-cta-secondary)",
+    "issue": "タップ時のtransformスケール初回で合成レイヤー昇格がオンデマンドになり、低速端末で1フレーム落ちる可能性がある",
+    "suggestion": "CTAにwill-change: transformを付与して事前に合成レイヤー化。過剰なレイヤー増を避けるため2ボタンのみに限定し、必要なら@media (prefers-reduced-motion: no-preference)内のみに適用する。例: .s00-cta-primary, .s00-cta-secondary { will-change: transform; }",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3. lais/src/components/screens/S00Splash.css (.s00-cta)",
+    "issue": "iOS等のセーフエリア下端（env(safe-area-inset-bottom)）を考慮しておらず、端末によってはCTAがホームインジケータに近接しタップしづらくなる恐れがある",
+    "suggestion": "セーフエリア分だけ下余白を加算。例: .s00-cta { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); } 必要に応じて左右もenv(safe-area-inset-left/right)を加味",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "1. lais/src/components/App.jsx / 2. lais/src/components/screens/S00Splash.jsx",
+    "issue": "JSX属性にclassを使用。Reactの場合はclassName推奨で、開発時に警告と軽微なランタイムマッピングコストを生む可能性がある（Preact等ではclassでも問題なし）",
+    "suggestion": "利用フレームワークを明示し、React運用ならclassNameへリネームして警告と余計な差分計算を回避。Preact等なら現状維持で可",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx（handleStart/handleLogin）",
+    "issue": "console.logが本番バンドルに残るとバイト増・微小な実行コストを招く（特に大量ログ時）",
+    "suggestion": "ビルド時にconsole.*を除去（例: terserのdrop_consoleやbabel-plugin-transform-remove-console）し、本番での不要I/Oとバンドルサイズを削減",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2. lais/src/components/screens/S00Splash.jsx（import './S00Splash.css'）",
+    "issue": "スタイルが初期チャンクに同梱される構成のため、将来的に画面数が増えると未使用CSSの先読みが増えて初回描画が重くなるリスクがある",
+    "suggestion": "将来の多画面化を見据え、ルート単位のコード分割（lazy+Suspense等）でコンポーネントとCSSをチャンク分離し、初期描画に不要なCSS読込を回避",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S00Splash.css (.s00-cta-primary, .s00-cta-secondary)",
+    "issue": "一部の古いWebView/環境でタップ遅延や不要なハイライトが発生しうる（小さながら体感に影響）",
+    "suggestion": "ボタンにtouch-action: manipulation; と -webkit-tap-highlight-color: rgba(0,0,0,0); を指定し、タップ応答性と視覚ノイズを最適化",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "テーマ初期化スクリプト（付随説明: first-paint前にlocalStorage参照）/ themes.css",
+    "issue": "初回描画前のlocalStorage同期読み出しは数msながらメインスレッドをブロックしうる。低速端末では微小な初動遅延の体感リスク",
+    "suggestion": "可能ならサーバーで<html data-theme>を直書きして同期I/Oを不要化。代替として極小インラインスクリプトでtry/catchし、失敗時は既定テーマを即設定。加えて<meta name=\"color-scheme\" content=\"light dark\">を併用しシステムUI描画を最適化",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §7.4, project_v1.md §3.2",
+    "issue": "Today内タスクの並び順が矛盾。projectでは「開始時刻順（未設定は末尾）」だが、UXではロングプレスで手動順を保存と定義しており、優先順位・保持スコープが競合して実装不可。",
+    "suggestion": "並び順の優先ルールと保持スコープを明記。推奨: 既定=開始時刻順→ユーザーが並べ替えた日は当日限定で手動順優先（翌4:00に自動リセット）。UIに「並び順をリセット」追加、設定に「常に時刻順/当日だけ手動順」オプションも検討。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.1, §3.5（S-21）",
+    "issue": "TALKのチャットスレッドモデルが未定義。『📝新規チャット』『履歴』はあるが、会話スレッドの生成条件、命名、既定スレッド、削除の効果、90日保持との関係、上限・並び順・ピン留め等が不明で実装を特定できない。",
+    "suggestion": "スレッドのデータ構造（conversation_id, title, created_at, updated_at, message_count, pinned等）と挙動を定義。新規チャット=新conversation_id作成、タイトル=最初のユーザー発話先頭N文字、並び=updated_at降順、上限=100件（超過で最古をアーカイブ）など。削除は『スレッド内全メッセージ+添付を即時削除（不可逆）』等を明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1, §3.5",
+    "issue": "TALKヘッダーのアイコン役割が二重化。『☰=履歴ドロワー』と『🕐=履歴』の両方が履歴起動として読め、📝の機能も文脈依存で曖昧。",
+    "suggestion": "履歴起動アイコンを1つに統一（例: 🕐=履歴、☰は廃止）。📝は『新規チャット』として確定し、押下時の動作（空スレッド作成/現在スレッドのクリアなど）と未送信下書き時の確認ダイアログを定義。aria-labelも更新。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §2.5, ux_v1.md §13.3, §3.2",
+    "issue": "タスクリマインダーは『開始時刻の15分前』と記載だが、開始時刻未設定タスクの通知方針が未定義。JST固定運用時の海外ユーザーへの通知時刻の扱いもUX未定義。",
+    "suggestion": "開始時刻未設定タスクの既定（例: 通知なし/デフォルト時刻で通知/日次サマリーのみ）を定義し、設定で変更可に。通知の基準タイムゾーン（JST）とローカル表示の整合ルール、今後のローカルTZ対応方針も明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5, ux_v1.md §2.3, §8.1",
+    "issue": "日次EXP上限（300）到達時のオンライン挙動が未定義。タスク完了は成功させつつEXPのみ不付与にすべきだが、現在の定義だとAPI失敗としてロールバックする可能性がある。",
+    "suggestion": "サーバー応答の区別（完了成功/EXP不付与）に応じたUIを定義。チェックは確定、EXPフロートは非表示、トーストで『本日のEXP上限に達したため加算されませんでした』を表示。オフライン同期時と文言を統一。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.3, ux_v1.md §2.3",
+    "issue": "週N回習慣の『今日やる』手動追加のUI位置・取り消し方法がUXに具体化されていない。",
+    "suggestion": "Upcoming内の該当習慣行に『今日やる』ボタンを追加し、押下で当日限定のTodayピン留めに。取り消しはToday行のメニューから『今日やめる』でUpcomingに戻す、と操作フローを明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §5.3, ux_v1.md §4.4",
+    "issue": "projectでは『送信済みリクエストのステータス表示』が要件化されているが、UXは受信側『承認待ち』のみで送信済み一覧/取消動線がない。",
+    "suggestion": "FRIENDSに『リクエスト』タブ（受信/送信の2段）を追加。送信済みには状態（保留/期限切れ/承認）と『取消』ボタン、期限（7日）表示を実装。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §3.3（画像添付）, ux_v1.md §3.2（入力バー）",
+    "issue": "画像添付の枚数・合計容量・複数添付時の順序・送信中キャンセルなどの仕様が未定義。『10MB/枚』のみでは運用不明確。",
+    "suggestion": "1メッセージの上限を定義（例: 最大3枚、合計10MB、選択順に送信、各���辺1200px）。送信中はサムネイルにスピナー、✕で個別取消可。上限超過時のエラーメッセージを具体化。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.5（チャット履歴）",
+    "issue": "『左スワイプ→削除』の効果範囲（スレッド全削除/最新のみ）、取り消し可否、90日自動削除との優先関係が未定義。",
+    "suggestion": "削除=スレッド内全メッセージ+添付の即時物理削除（不可逆）と明記し、誤操作対策として5秒Undoを導入するか、ゴミ箱保留（7日後に自動削除）を定義。ユーザー削除は90日保持ルールより優先することも明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1, §6.1, ux_v1.md §13.2",
+    "issue": "価格設計はAI回数/モデル差中心で、Freeとの差がUI上で直感的に伝わりにくい。『冒険EXP検出精度向上』は体感価値が曖昧でアップグレード動機になりにくい。",
+    "suggestion": "プラン比較に『できること例』『サンプル応答比較』を追加。会話上限残量メーター、応答に“HQ”バッジ付与、Vision解析解像度などの数値指標を明示化。Basic/Proの即時価値をUIで見える化。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.2, §8.1, ux_v1.md §4.2.1",
+    "issue": "MVPでSHOP未実装のため、ゲーミフィケーション（アバター進化/装飾）が課金動機に直結しない。Premier特典（限定フレーム1種/優先サポート）の即効価値が弱く割高感の懸念。",
+    "suggestion": "MVPでも課金動機を補完：Pro以上に月1の限定フレーム/称号配布、週次限定バッジ、レベル到達で特典。Premierは『限定テーマ/名前色/優先AIレーン/限定ヒーロー演出』等の即時特典を追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §9.3, §4.3",
+    "issue": "AI対話上限は到達時のみ告知。直前予告がなく、ヒアリング中断などの不満につながる。",
+    "suggestion": "残り回数が10/5/1回の閾値で非侵襲バナー表示。ヒアリング開始時に必要見込み回数を提示し、不足時は継続/後で/アップグレードの選択肢を提示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4（S-36 カメラ拒否時）",
+    "issue": "PWAでは『設定を開く』でOS設定アプリを直接開けない場合があり、実装不能/不安定になり得る。",
+    "suggestion": "『設定を開く』は手順ガイド（OS別GIF）に置換。`navigator.permissions` で状態変化を監視し、許可復帰時に自動でスキャン再開。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.1, §11.1",
+    "issue": "大量データ時のリスト最適化（仮想スクロール/ページング）の定義がなく、非機能要件（初期表示2秒以内）を満たせないリスク。",
+    "suggestion": "Today/Upcoming/Goals/FRIENDSにwindowingを採用し、初期描画件数（例: 50件）と追加ロード戦略を明記。Skeleton件数としきい値も定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2（プラン管理）",
+    "issue": "Stripe Checkoutの失敗/キャンセル時の戻り先・ユーザー通知が未定義。",
+    "suggestion": "戻りURLに `?status=success|cancelled|failed` を付与し��S-38で状態別のトースト/再試行導線を表示。アップグレード即時反映/ダウングレード予約反映の確認メッセージも追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §8.6, §3.4",
+    "issue": "同期後に複数EXPイベントをまとめて反映する際、TALK/ME表示中にどこで演出再生するかが曖昧（GROWのみか、他タブもか）。",
+    "suggestion": "EXP/レベルのフル演出はGROW表示時のみと明記。他タブではバナーのみ。バックグラウンド計上時は『次回GROW表示時に再生』のフラグ管理を仕様化。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  }
+]

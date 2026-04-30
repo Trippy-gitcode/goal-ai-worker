@@ -1,0 +1,172 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §1.4 戻りナビゲーション",
+    "issue": "ブラウザ/システムバック時の挙動として「ボトムタブ間: 前タブに戻る」と記載されているが、Material Designの推奨ではボトムタブはトップレベル宛先であり、バックスタックに含めない（タブ遷移でBackしない）。Androidのハードウェアバックとも不整合。",
+    "suggestion": "ボトムタブ切替はhistory.replaceStateを用いてバックスタックに積まない。Back優先順位: ①モーダル/ドロワー/インライン編集を閉じる→②詳細画面で戻る→③タブ内のスクロール位置が深い場合は先頭へ→④トップレベル（タブ直下）でBack=アプリ終了/前ページへ。AndroidではトップレベルでBack=アプリ終了が自然。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §7.4 ドラッグ&ドロップ",
+    "issue": "Today内のドラッグ&ドロップで並び替えは定義されているが、スクリーンリーダー/キーボードユーザー向けの代替操作が未定義でアクセシビリティを満たさない。",
+    "suggestion": "各タスクにコンテキストメニュー「上へ移動/下へ移動/最上部へ/最下部へ」を追加し、aria-describedbyで現在順位を読み上げ。並び替えモード切替時はフォーカス可能な上下ボタンを行内に表示。変更時はaria-liveで『「◯◯」を3番目に移動』を通知。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §7 ジェスチャー・インタラクション（全般）",
+    "issue": "ハプティクス設計がQRスキャン時のVibration以外定義されていない。タスク完了/Undo/レベルアップ/ドラッグ開始/プルリフレッシュ到達などの主要操作に触覚フィードバックがない。",
+    "suggestion": "PWA前提のためプラットフォーム差を考慮し、Androidはnavigator.vibrateで軽微なパターン（成功:10ms×1、レベルアップ:20ms×2、ドラッグ開始:10ms、PTR到達:10ms）。iOS PWAは非対応のためフォールバック（無効化）。設定>アクセシビリティに『軽いバイブレーション』トグルを追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §4.3 DISCOVER、§7.3 スワイプ",
+    "issue": "MEサブタブの横スワイプとDISCOVER内の横スクロール（チップ/カード）のジェスチャー衝突時の優先順位が未定義。内部スクロール中に意図せずタブが切り替わる恐れがある。",
+    "suggestion": "タブ切替スワイプは『dx>dy かつ 内部スクロールが左右端に到達時のみ』発火。チップ/カードのコンテナにtouch-action: pan-xを付与し、左右端未到達時はタブ切替を抑制。しきい値16–24pxの予備移動を要求して誤発火を防止。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §4.4 FRIENDS > S-36 QRスキャン",
+    "issue": "カメラ許可拒否・未対応端末時の代替経路が未定義。アクセシビリティ/端末互換の観点で行き止まりになる。",
+    "suggestion": "許可拒否時はモーダルで手順案内（設定アプリでの許可）。代替: 『シェアリンクを貼り付け』入力欄をS-36内に用意、または『画像から読み取る』でフォトライブラリ選択→オフラインQR解析。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.2 メッセージ送信フロー, §10.4 スクリーンリーダー対応",
+    "issue": "ストリーミング中/新着メッセージのスクリーンリーダー通知仕様が不十分。会話ログのロール/ライブ領域が未指定。",
+    "suggestion": "メッセージリストにrole=\"log\" aria-live=\"polite\" aria-relevant=\"additions\"を設定。ストリーミング確定時に1度だけ読み上げる。『↓ 新しいメッセージ』ボタンはaria-labelで件数読み上げ+キーボードフォーカス可能に。タスク提案カードにもroleと見出しを付与。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §2.3 タスク完了（Undoスナックバー）",
+    "issue": "30秒Undoのアクセシビリティ配慮（タイムリミット調整、フォーカス移動、読み上げ）が未定義。WCAG Timing Adjustable観点で不足。",
+    "suggestion": "スナックバーは自動でフォーカスを奪わず、表示時にaria-liveで『取り消しは30秒間可能』を通知。キーボードからEscで閉じる/Focusで『取り消す』に移動可。時間延長（+30秒）リンクを用意、または設定で長めを選択可能に。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §7.3 スワイプ（PWA実装注記）",
+    "issue": "iOS PWAでのedge swipe抑制（overscroll-behavior等）はiOSバージョン差で挙動が不安定。ブラウザアクセス時に期待する戻る操作を阻害する恐れ。",
+    "suggestion": "display-mode: standalone のみでedge swipe抑制を有効化（CSS @media (display-mode: standalone)）。ブラウザ内ではネイティブ戻るを温存。左右端20px領域のみカスタムジェスチャーをフックし、他はパススルー。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §6.5 Pull-to-refresh, §7.4 ドラッグ&ドロップ",
+    "issue": "同一リストでPull-to-refreshとドラッグ並び替えのジェスチャー競合時の抑止条件が未定義。",
+    "suggestion": "ロングプレスで並び替えモード中はPTR無効化。PTRはスクロール位置=0かつ縦方向しきい値60px超過時のみ発火。並び替えドラッグは開始0.2秒のホールド+微小移動で確定し、縦パンの誤検出を低減。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §5 通知, §15 通知タップ時の遷移先",
+    "issue": "アプリ起動中の前景受信（応援/メッセージ/リマインダー）時のUIが未定義。現在は未読バッジのみで見落としが発生しうる。",
+    "suggestion": "前景時は軽量インアプリ通知（上部バナー/トースト）を表示しCTAで遷移（例:『返信する』）。通知設定に『前景通知をバナーで表示』トグルを追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §2.3 Today/Upcoming, project_v1.md §3.2.3 週N回習慣",
+    "issue": "project_v1.mdにある『週N回習慣を手動でTodayに追加（「今日やる」ボタン）』のUIがUX仕様に明記されていない。",
+    "suggestion": "Upcoming内の該当習慣行に『今日やる』ボタンを追加（タップでTodayに一時ピン留め）。当日完了または日付変更で自動解除。タップ時はトースト+バッジで反映を即時通知。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §7.4 ドラッグ&ドロップ, §2.3 Today表示",
+    "issue": "手動並び替えが��始時刻順の自動ソートを『上書き』するとあるが、開始時刻の後編集時や並び替え解除の挙動が未定義。",
+    "suggestion": "表示順のモードを明示（自動/手動）。手動モードは編集後も順序固定。『自動に戻す』で開始時刻順へ再整列。タスク個別に『上部に固定』オプションも検討。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §6 共通UI, §2.3/§3.2 入力バー/スナックバー",
+    "issue": "iPhoneのセーフエリア（home indicator）考慮の明記がなく、ボトムタブやトースト/入力バーが干渉する可能性。",
+    "suggestion": "ボトム固定要素にpadding-bottom: env(safe-area-inset-bottom)を適用。トースト/スナックバーの下余白にも同値を加算。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §1.4 戻りナビゲーション, §14 アプリ起動フロー",
+    "issue": "Androidハードウェアバックの明確な優先順位が未定義（モーダル>ドロワー>インライン編集>遷移>終了等）。PWAでの一貫性が担保されない恐れ。",
+    "suggestion": "Back処���の統一ルールを明記: ①開いているハーフモーダルを閉じる→②ドロワー閉じる→③編集中は『編集を破棄/保存しますか』→④詳細画面で戻る→⑤タブ直下ならアプリ終了（ブラウザは前ページへ）。history管理とpopstateで実装。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §7.3 スワイプ（チャット履歴）",
+    "issue": "チャット履歴の行アクションが『左→右で削除露出』となっており、iOSの一般的パターン（右→左で削除）と逆で学習負荷が高い。",
+    "suggestion": "iOSは右→左で削除（単一アクション）。Androidは左右どちらでも同一アクション可または両側に別アクション（推奨は一貫化）。PWAでは端末UA判定で方向を出し分けるか、明示的な『…』メニューで補完。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §4.4 FRIENDS（QR表示/スキャン）, §6.1 ハーフモーダル",
+    "issue": "『明日に延期』などテキストボタンのタップ領域・最小サイズに関する注記がない。小型端末で44px未満になる恐れ。",
+    "suggestion": "テキストボタンを含む全操作ターゲットにmin-height 44px/左右16px余白のヒットスロップを適用し、隣接ターゲット間8px以上を保証。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §13.2 プラン管理（S-38）",
+    "issue": "Stripe Checkout失敗/キャンセル時のUX（リトライ導線、エラーメッセージ）が未定義。",
+    "suggestion": "戻り時に『決済がキャンセルされました/失敗しました』トースト+『再試行』ボタン。失敗理由が取得できる場合は簡潔に表示。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

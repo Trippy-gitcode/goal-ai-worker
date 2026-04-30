@@ -1,0 +1,4 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"CONTRADICTION","location":"§8.1 ボタン / §8.13 状態マトリクス","issue":"§8.1 でボタンのフォーカス状態を outline 方式に変更したが、§8.13 の状態マトリクスはまだ `box-shadow: var(--focus-ring)` のまま。記述が矛盾している。","suggestion":"§8.13 focus-visible 行を outline 方式に更新、または『コンポーネントにより box-shadow/outline 併用』と明記。","model":"Claude Opus 4.6","persona":"ui_designer"},
+  {"id":"R-002","severity":"LOW","category":"MISSING","location":"§8.12a Undoスナックバー","issue":"スナックバーとトーストが併発した場合の z-index の優先順位と、スタック表示（複数の undo が連続発生した場合の挙動）が未定義。","suggestion":"§8.12a に『複数 undo はキューで 1 つずつ表示。時間が被ったら 500ms インターバルで入れ替え』を追記。","model":"Claude Opus 4.6","persona":"ui_designer"}
+]

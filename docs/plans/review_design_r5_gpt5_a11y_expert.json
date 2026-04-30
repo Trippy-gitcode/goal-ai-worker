@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.2 / §9",
+    "issue": "タイポグラフィ単位の不整合。§3.2ではrem基底を前提にしている一方、§9のAI実装向けトークンではfont-sizeがpx固定（例: --font-size-base: 16px）になっており、ユーザーのテキスト拡大（1.4.4 Resize text）やOSのフォントサイズ設定追従を阻害し得る。",
+    "suggestion": "§9のfont-sizeトークンをremに統一（--font-size-base: 1rem, --font-size-sm: 0.875rem 等）。併せてhtml { font-size }を16pxのままにする旨を§9にも明記。既存px表記は移行注記を付けて非推奨に。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§8.1/§8.3（Secondary/Chip）, §5.2 Dawn, §5.3 Harajuku Light",
+    "issue": "ライト系テーマの「subtle」系塗り（--accent-subtle など）がUIコンポーネントの外形境界として機能する箇所で、背景（--bg-surface）との差が3:1に届かない恐れ。例: Dawnの--accent-subtle = rgba(168,94,40,0.14) を --bg-surface #FEFCF9 上に重ねた合成色は概ね#FAF1EC相当で、#FEFCF9との差は約1.1:1→WCAG 1.4.11（非テキストコントラスト）不達。",
+    "suggestion": "Secondary/Chip/Badge等でsubtle塗りを用いる場合は、(a) 1px border: var(--border-strong) を必須にして外形を担保する、または (b) subtle不透明度を上げて合成後3:1以上を確保（Dawn/Harajuku Lightは0.26〜0.32目安）する規定を追加。適用対象コンポーネントを表で列挙し、ライト系テーマのみ特別ルールを明記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§5.1 Night Sky / §5.4 Harajuku Dark / §8.2 プレースホルダー",
+    "issue": "ダーク系テーマの--text-hintがbg-primaryでは約4.5:1（Night Sky: #7A8593 vs #0D1117 ≈4.5:1, Harajuku Dark: #8C7480 vs #140A10 ≈≥4.5:1）だが、実運用ではbg-surface/#161B22や#1F1018上で使われる場面が多く、対比が低下（試算: Night Sky #7A8593 vs #161B22 ≈4.0–4.2:1）しAA未満となるリスク。特に入力プレースホルダー等の重要テキストに影響。",
+    "suggestion": "ダーク系での--text-hint使用面を「補助的テキスト（読めなくても致命でない）」に限定し、プレースホルダー/説明文など必読要素には--text-secondaryを使用する運用規定を追加。あるいは--text-hint��一段明るく（Night Skyで#8893A1目安）再計算してbg-surfaceでも≥4.5:1を保証。テーマ別に「text-hint最小コントラスト表」を追記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§7.5 / §8.1 フォーカス状態",
+    "issue": "通常時のフォーカス可視化がbox-shadow単独。overflow:hidden要素や密接UI上でリングが切れたり視認性が低下するケースがある。WCAG 2.2 2.4.11（Focus Appearance）では隣接色に対して3:1かつ2CSS px以上の太さの可視指標が必要。",
+    "suggestion": "box-shadowに加えoutlineも併用可能にし、トークンを分離定義: --focus-outline-color, --focus-outline-width, --focus-outline-offset。デフォルト実装はoutline: 2px solid <theme focus color>; outline-offset: 2px + box-shadowを併用。主要背景（bg-primary/surface/elevated）上で合成コントラスト≥3:1を実測で確認し値を記載。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.3.1 / §4.4 / §6.1 ほか（✕/アイコンボタン）",
+    "issue": "小さな✕/アイコン系トリガーのタップターゲット最小サイズが明文化されていない箇所が��る（例: タスク提案カードの[✕]、QRモーダルの✕、ドロワー閉じなど）。2.5.8 Target Size (Minimum)（WCAG 2.2 AA=24px）とApple HIG（44pt）に対する保証が不足。",
+    "suggestion": "共通の .icon-button 規約を追加: min-width/height: var(--tap-target-min); 視覚サイズが小さい場合は ::before で透明ヒットエリア拡張。該当箇所（カード[✕]、QR✕、トーストのアクション等）を仕様に列挙し準拠を明記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.2 / §8.6 トースト / §2.3 GROW-Undo",
+    "issue": "Undoスナックバーやトーストのスクリーンリーダー通知仕様が一部明確でない。現在、トースト: role=\"status|alert\"は規定済みだが、Undo（30秒有効・操作可能）は操作性に直結するため通知の確実性がより重要。",
+    "suggestion": "Undoスナックバーに role=\"status\" + aria-live=\"polite\" を付与し、表示時にアクションボタン（取り消す）へプログラム的フォーカスを移さない代わりに、ボタンにaria-keyshortcuts（例: z）やEscで閉じる規約を明記。読み上げ文例を仕様に追記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.7 ボトムタブバー（通知バッジ）",
+    "issue": "通知バッジのアクセシブルネームが「通知あり」のみの例示で数値が読み上げに含まれない。数が分からないと情報欠落になり得る。",
+    "suggestion": "タブボタンのaria-labelを動的に更新（例: 「ME、未読3件」）。バッジ非表示時は数値を含めず通常名。「aria-current=page」と両立させる文言ガイドラインを追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§8.7 / §10.4",
+    "issue": "ボトムナビのARIAロールが不一致。§8.7ではaria-current=\"page\"（ナビゲーションパターン）、§10.4ではrole=\"tablist\"+role=\"tab\"（タブパターン）を想定。混在はSR挙動の不整合を招く。",
+    "suggestion": "どちらかに統一。SPAで主要ビューを切替えるトップレベルナビとしては「navigation内のリンク + aria-current=page」を推奨。タブロールを使う場合はtabpanelとaria-controls連携を厳密に実装し、同一ページ内パネル切替でのみ使用する旨を明記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "全体（共通パターン）",
+    "issue": "スキップリンク（\"メインコンテンツへスキップ\"）の規定がない。キーボード/スクリーンリーダーの初回フォーカス移動が冗長になりやすい。",
+    "suggestion": "ページ先頭に .skip-link を追加し、:focus時のみ表示。hrefは主要ランドマーク（例: #main）。主要画面（GROW/TALK/ME）に適用し、ランドマーク構造（header/nav/main/footer）を仕様に明記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§7.6 / §5（全テーマ横断）",
+    "issue": "高コントラスト嗜好（prefers-contrast: more）への最適化トークンが未定義。Windowsのforced-colorsには対応済みだが、他環境の高コントラスト嗜好検知に対する強化方針がない。",
+    "suggestion": "任意強化として @media (prefers-contrast: more) に対応し、--focus-ring/--border-strong/--accent-subtle の増強（コントラスト引上げ、outline優先）を切替えるスイッチを追加。トークン例: --contrast-mode: normal|more（data-attributeでも可）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.7 通知バッジ",
+    "issue": "通知バッジのフォントサイズが10pxで最小可読サイズとしてやや小さい。視認性・可読性（高齢者/遠視）観点で余裕がない。",
+    "suggestion": "最小でも12px相当に引上げ（rem基準）。小さなタブ幅時はバッジのサイズ優先で余白を再配分。ズーム時のオーバーフロー挙動（wrap/ellipsis）も仕様化。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§5.1–§5.4（全テーマ）",
+    "issue": "コントラスト検証の実測値が点在・一部背景限定の注記で、開発時の回帰検証に使える一覧がない。",
+    "suggestion": "各テーマの主要組合せのコントラスト表を付録として追加。推奨計測（相対輝度法）例: Night Sky: text-primary #E6EDF3 vs bg-primary #0D1117 ≈13:1（AA/AAA合格）、text-secondary #9BA7B4 vs bg-primary ≈5.5:1（AA合格）、text-hint #7A8593 vs bg-primary ≈4.5:1（AA下限）、accent #58A6FF vs bg-primary ≈5.4:1（AA合格）。Dawn: text-primary #2C2520 vs #FBF8F4 ≈14:1、accent #A85E28 vs #FBF8F4 ≈4.9:1。Harajuku Light: accent #C43361 vs #FDF6F7 ≈5.3:1。Harajuku Dark: text-primary #F5E8EE vs #140A10 ≈14:1、accent #F5A9BF vs #140A10 ≈8:1。これに加え、ダーク系のtext-hint vs bg-surface、およびライト系のsubtle塗り vs bg-surface も掲載。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  }
+]

@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "入力フィールドのプレースホルダーテキスト（you@example.com, 8文字以上）",
+    "issue": "テキスト色（#7A8593）と背景色（#161B22）の明暗コントラスト比が不足しており、視認性が低い。",
+    "suggestion": "プレースホルダーのテキスト色を明るくし、背景色とのコントラスト比がWCAG AA基準（4.5:1）を満たすよう調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "画面下部の「+ タスクを追加」テキスト",
+    "issue": "「ク」と「を」の文字が重なって表示されており、著しく可読性を損なっている。",
+    "suggestion": "letter-spacingのマイナス指定が特定の文字ペアで破綻しているため、カーニング設定を見直すか、該当部分のトラッキングを緩和する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスクリスト（時刻とタスクカードの間）",
+    "issue": "右揃えの時刻と左揃えのタスクカードの間に不規則な余白の「谷」ができ、視線が上から下へスムーズに流れない。",
+    "suggestion": "時刻を左揃えにするか、時刻とカードの距離を一定に保つグリッド設計に変更し、視線の垂直軸を揃える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の下部ボタン群",
+    "issue": "3つのボタン（登録する、編集して登録、✕）が横一列に窮屈に詰め込まれており、タップターゲット間の余白（間）が不足している。",
+    "suggestion": "「✕」ボタンをカード右上に���動させるか、ボタンを縦積みにして十分なタップ領域と余白を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "見出し「最初のパートナーを選びましょう」",
+    "issue": "行間が詰まりすぎており、日本語特有の「間」の美しさが欠如している。また、助詞「を」での改行が不自然。",
+    "suggestion": "line-heightを広げ（例: 1.5）、文節での改行を避けるか、フォントサイズを調整して1行に収める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "サブタイトル「あなたの人生を、あなたらしく」",
+    "issue": "読点「、」の後のアキが不足しており、機械的な文字組みに見える。ブランドの「洗練」というDNAに反する。",
+    "suggestion": "読点の後ろに半角スペース相当のアキを入れるか、プロポーショナルメトリクスを適用して日本語らしい自然なリズムを作る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "PROFILEタブ内の基本情報リスト（年齢、職業、趣味）",
+    "issue": "ラベル（左端）と値（右端）が離れすぎており、視線が左右に大きく振られるため、情報同士の結びつきが弱く見える。",
+    "suggestion": "値を左寄せにしてラベルのすぐ右に配置するか、リーダー罫線を用いて視線を誘導する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s12_task_add",
+    "location": "所要時間の横スクロールチップ群",
+    "issue": "画面右端でチップが唐突に切断されており、スクロール可能であることの視覚的アフォーダンス（連続性）が弱い。",
+    "suggestion": "右端にグラデーションマスク（フェードアウト）をかけるか、チップが画面端で半分だけ見えるように初期スクロール位置を調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "画面下部の「削除」ボタン",
+    "issue": "赤文字（#F85149）と赤枠がダーク背景に対して沈んでおり、破壊的操作としての明暗コントラスト（警告感）が弱い���",
+    "suggestion": "ボタンの背景色に薄い赤（danger-subtle）を敷くか、文字のフォントウェイトを上げて視認性を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "ヒーロー領域の進捗率「60%」",
+    "issue": "数字「60」に対する単位「%」のサイズ比率が中途半端で、タイポグラフィのメリハリ（コントラスト）が弱い。",
+    "suggestion": "「%」のフォントサイズをさらに小さくし、ベースラインを数字の下端に揃えることで、数字のインパクトを強調する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  }
+]

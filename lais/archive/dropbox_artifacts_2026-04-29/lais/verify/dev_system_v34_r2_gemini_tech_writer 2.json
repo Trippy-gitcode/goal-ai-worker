@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.8",
+    "issue": "G10が「仕様書ファースト (scripts/spec_first_lint.sh)」に上書きされており、現行の「シークレットスキャン (pre-commit + canopy)」が一覧から完全に消失している。これによりセキュリティ検証のゲートが失われる。",
+    "suggestion": "G10を「シークレットスキャン」に戻し、「仕様書ファースト」はG14として新設するか、既存の空き番号に正しく割り当てる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.4.2, §4.8",
+    "issue": "§4.8の表でG7のスクリプトが「canopy_common.sh::check_spec_map」に変更されているが、§4.4.2では「mission_linter がチェック」と記載されており、mission_linter.sh の位置づけが矛盾している。",
+    "suggestion": "G7のスクリプトを「mission_linter.sh」に戻すか、§4.4.2の記述を「canopy_common.sh::check_spec_map がチェック」に修正して整合させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.6.3",
+    "issue": "TDD証跡ファイル名を `before-unit.json` 等に分離する変更があるが、G8（テストファースト）を検証する `canopy_common.sh` 側のチェックロジックを新ファイル名に対応させる修正指示が漏れている。このままではG8が常にFAILする。",
+    "suggestion": "§4.6.3 または §4.2 に、`canopy_common.sh` の G8 検証ロジックを `before-*.json` および `after-*.json` に対応させる修正指示を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.3.4",
+    "issue": "`mission_risk_classifier.sh` の `awk '/^対象ファイル:/,/^$/'` は、対象ファイル行から次の空行までを抽出するが、ミッション定義テンプレートv3で��対象ファイル行の直後に空行があるとは限らないため、無関係な行まで抽出して誤動作する可能性が高い。",
+    "suggestion": "抽出ロジックを `grep \"^対象ファイル:\" \"$MISSION_FILE\" | cut -d':' -f2-` のように、対象ファイル行のみを正確に抽出するコマンドに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§3.2.2",
+    "issue": "`hflow_trigger_check.sh` が `git diff --cached --name-only --relative` を使用しているが、デプロイ時（`deploy.sh` 実行時）には既にコミットが完了している場合があり、`--cached` では変更ファイルを正しく抽出できない可能性がある。",
+    "suggestion": "`affected-tests.sh` と同様に、`git diff --name-only \"$BASE\"...HEAD`（または直近のコミットとの差分）を使用して変更ファイルを抽出するロジックに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§4.1.7",
+    "issue": "22フローのStep 0で「その他: §C0 のみ」と指定すると、AI（Claude Code）が1ページ要約である§C0のみをコンテキストに保持し、§C1-C6の詳細な���き込み規約やテスト戦略を無視するリスクが高い。",
+    "suggestion": "「その他: §C0（必要に応じて§C1-C6の詳細を参照）」とするか、遵守対象は常に「§C0-C6」とし、再読のトリガーを軽量化する表現に留める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.1.4",
+    "issue": "「アプリ実装コード」の定義に `scripts/*実装*.js` が含まれているが、dev-systemの主要なスクリプトである `.sh` ファイルが含まれていないため、シェルスクリプトの書き込み権限が曖昧になる。",
+    "suggestion": "定義を `scripts/**`（または `scripts/*.{js,sh}`）に修正し、シェルスクリプトもアプリ実装コードとしてENGに限定する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.1.2",
+    "issue": "§C0（規範サマリー）が新設されたが、POのReadリストが「§C1-C6 は任意」のままとなっており、§C0の扱いが不明確。",
+    "suggestion": "POのReadリストを「§C0-C6 は任意」に修正し、§C0も含めることを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "tech_writer"
+  }
+]

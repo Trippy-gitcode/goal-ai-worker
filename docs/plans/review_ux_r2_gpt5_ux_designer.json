@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3, §8.1; project_v1.md §4.5",
+    "issue": "日次EXP上限到達時のUXが未定義。サーバー側で上限によりEXPが付与されないケースでも、クライアントは「完了→EXP演出」を前提に楽観的更新しており、結果不一致が起こりうる。",
+    "suggestion": "上限到達時の扱いを明記し、成功レスポンス種別を3分類する: (a) 完了+EXP付与 (通常演出) (b) 完了+EXP非付与（EXPバー伸長/フロートを抑止し、バナー「本日のEXP上限に達しました」表示）(c) 完了失敗（技術エラーでロールバック）。また、EXP付与可否のサーバー判定が戻るまでの間はEXP演出を遅延（最大300ms）し、(b)の場合は演出をスキップ。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §8.6",
+    "issue": "「演出は直列実行・並列実行しない」としつつ、「ゴール達成バナー表示中にレベルアップ演出を重ねてよい」としており、並列可否の方針が矛盾。",
+    "suggestion": "直列/並列の原則を一本化。推奨: 完���直列に統一し、順序を「タスク完了→ゴール達成→レベルアップ」。重ね表示を許容する場合はZ-index・タイミング(何ms後に開始)・音/バイブ優先度・ユーザー操作ブロック範囲を定義する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.1, §4.3, §7.3",
+    "issue": "MEサブタブはコンテンツ領域の左右スワイプで切替だが、DISCOVER内の横スクロール（強み/弱みチップ）とジェスチャーが競合し、意図せずタブが切り替わる恐れ。",
+    "suggestion": "ネストされた横スクロール要素上ではサブタブスワイプを無効化（gesture recognizerの優先度制御、初動角度/距離しきい値の導入）。しきい値例: 横移動>24pxかつ縦移動<12pxでのみタブ切替。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1, §3.5",
+    "issue": "TALKヘッダーに☰（ドロワー）と🕐（履歴）が併存し、同目的の重複UIに見える。どちらが履歴/会話一覧を開く一次導線か不明瞭。",
+    "suggestion": "履歴導線を1つに統一。例: ☰を廃し🕐を「履歴」に固定、もしくは☰=ドロワー（履歴＋アクション集約）、🕐/📝は撤廃。ヘッダーのアイコンラベル/ツールチップも明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.2, ux_v1.md §2.4",
+    "issue": "ゴールの『7日間の完了待ち』状態のUI定義がUX側に存在せず、ユーザーが「達成済みなのに確定しない」理由を理解できない可能性。",
+    "suggestion": "GROWのゴール行とS-14詳細に「完了待ち」バッジとカウントダウン（あとN日）を表示。完了ボタンは無効化し、説明トースト/ヘルプテキストを追加。日次サマリーにも残日数を表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3, §6.2, §8.6",
+    "issue": "Undoスナックバー（30秒常駐）とその他トースト/演出の同時発火時の表示優先度/衝突解決（重なり・押し上げ・非表示領域）が未定義。",
+    "suggestion": "下部通知レイヤーの優先度と同時表示上限を定義。例: 1) Undoスナックバー（最上位・固定）2) 重要バナー（支払い/上限）3) 通常トースト。トーストはUndoの上にスタック最大1件、時間短縮。ボトムタブは常に可操作に。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.4, §2.3",
+    "issue": "Today内並び替えは「開始時刻の自動ソートを手動で上書き」とあるが、新規タスク追加/予定日変更時の挿入位置や、自動ソートへのリセット手段が未定義。",
+    "suggestion": "並び順モードを日単位で保持（Auto/Manual）。Manual時の挿入規則（デフォルト末尾/開始時刻近傍に差し込み等）を定義し、メニューに「自動順序に戻す」を追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3",
+    "issue": "Overdueの「明日に延期」実行時、開始時刻フィールドの扱い（維持/クリア/翌日に合わせてシフト）が未定義。",
+    "suggestion": "既存の開始時刻は維持（翌日に同時刻）をデフォルトとし、初回実行時に1度だけツールチップで通知。設定で『延期時の既定動作』を切替可能にする。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §2.1, §4.4; project_v1.md §7.4",
+    "issue": "大量データ時（タスク多数/友達最大500）のリスト性能・ページング方針が未定義。スクロール劣化や���モリ使用過多の懸念。",
+    "suggestion": "Today/Goals/Friendsでリスト仮想化を採用し、Friendsは『さらに読み込む』or 無限スクロール50件単位。スクロール位置復元とプレースホルダ（スケルトン）も定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALKの画像添付はサムネイル表示のみで、アップロード進行状況/失敗時の再試行やキャンセル動作が未定義。",
+    "suggestion": "サムネイル上に円形進行インジケータ、失敗時は警告アイコン＋[再試行]/[削除]。アップロード中は送信ボタンをスピナーに置換、キャンセルで即中断可能に。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（S-36）",
+    "issue": "QRスキャンでカメラ許可を拒否/非対応端末の場合の代替導線・復帰方法が未定義。",
+    "suggestion": "許可拒否時は理由付きダイアログ＋『設定で許可』リンク、代替として『招待リンクを貼り付け』入力欄を提示。非対応端末は静的QR読み込み（画像選択→デコード）を案内。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.1, §3.5",
+    "issue": "『📝 新しいチャット』の挙動（会話スレッドの生成・命名規則・未送信メッセージがある状態での遷移確認）が未定義。",
+    "suggestion": "新規は空スレッドを作成し、タイトルは最初のユーザー発話先頭20文字。未送信テキストがある場合は確認ダイアログ（下書き保存/破棄）。履歴ドロワーには『下書き』バッジを表示。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.1",
+    "issue": "設定内『ブロックリスト』画面のUI/操作が未定義（一覧/解除フロー/検索等）。",
+    "suggestion": "S-37配下に『ブロックリスト』詳細画面を定義。リスト（アバター/名前/解除ボタン）、解除確認ダイアログ、0件時の空状態を記述。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.4, §8.4",
+    "issue": "TALKで冒険EXP付与時、GROWのEXPバー反映が『次回表示時』で、即時の全体進捗変化が視認できない可���性。",
+    "suggestion": "TALK画面内に小型のグローバルEXPトースト（+50 EXP）とミニバーを一時表示。GROWヒーローが非表示でも達成感を即時伝える。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5, §4.5; ux_v1.md §9.3",
+    "issue": "日次リセット時刻がJST固定で海外ユーザーに直感的でない。AI対話回数ではローカル表示があるが、EXP関連では一貫していない。",
+    "suggestion": "全カウンターにローカル時刻での次回リセット時刻/カウントダウンを併記（例: 『リセット: 04:00 JST（あなたの時刻で20:00）』）。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.4",
+    "issue": "ブラウザバック時に『ボトムタブ間: 前タブへ』はWeb/モバイルの一般的な期待と異なる可能性（戻る=同タブ内の前画面が一般的）。",
+    "suggestion": "タブ切替はhistoryに積まない（または積んでも最下層）。戻るはモーダル/詳細→元画面の順に閉じる。タブ遷移履歴を戻る対象から外すことを検討。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.2, §11.2, §10.4",
+    "issue": "小型端末でLv/EXP数値が省略される可能性があり、視認性・読み上げの冗長性が不足する懸念。",
+    "suggestion": "幅が足りない場合は％表示にフォールバック（例: 『Lv.12・62%』）。スクリーンリーダー向けにaria-labelで『1240/2000（62%）』を提供。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §7.3（PWAオフライン）, ux_v1.md §2.3",
+    "issue": "オフライン時の完了に対するUndoの扱い（30秒経過後でもサーバ同期前なら取り消せるか等）が未定義。",
+    "suggestion": "ローカル完了は30秒間は常に取り消し可。30秒超過後は『同期待ち』であれば取り消しを許容（サーバー同期前にローカルキューから除去）。同期後は通常の取り消し不可。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.4, §8.6",
+    "issue": "TALKでの冒険EXP演出とGROWヒーローEXP演出の同時性・優先順位（アプリがGROW表示中に冒険EXPが発火など）のキュー統合が未定義。",
+    "suggestion": "グローバル演出キューを定義し、画面横断で一元管理。画面Aで発火→画面BのEXPバーが表示中なら次フレームに連結、非表示なら軽量トーストのみにする等のルールを明文化。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §1.4, §7.3",
+    "issue": "iOSで左端スワイプはシステムの『戻る』の期待が強い一方、TALKでは左端スワイプでドロワー展開を割り当てており、画面によって同ジェスチャーの意味が変わる。",
+    "suggestion": "左端スワイプは全画面で『戻る』に統一し、TALKのドロワーは☰アイコン/コンテンツ内パン（左端以外からのスワイプ）で開くルールに変更。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

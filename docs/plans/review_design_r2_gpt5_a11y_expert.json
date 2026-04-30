@@ -1,0 +1,192 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "WCAG_VIOLATION",
+    "location": "§5.1 Night Sky / §4.2 Open Air / §5.5 Glass",
+    "issue": "ダーク系テーマのボーダー色が非テキストコントラスト3:1を満たしていない。実測: border #30363D vs bg-surface #161B22 = 1.38:1、border-strong #484F58 vs bg-surface #161B22 ≈ 2.0:1。bg-primary #0D1117との対比でも ≈1.5〜2.2:1。Open Air原則で境界線に依存するためWCAG 1.4.11に抵触。",
+    "suggestion": "ダーク系の境界専用にコントラストを引き上げたトークンを追加。例: Night Sky: --border: #3D444D、--border-strong: #6E7681（#6E7681 vs #161B22 ≈3.4:1）。Harajuku Dark: --border: #523044、--border-strong: #7A3C5A（#7A3C5A vs #1F1018 ≈3.2:1 を目安）。境界が機能的役割を持つ場合は必ず strong を使用するルールを明記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§8.4 タイムライン / §4.5 タップターゲット最小サイズ",
+    "issue": "タイムラインのドット「視覚タップ領域は16px」と明記が、最小44×44px（WCAG 2.5.5/HIG）と矛盾。小ターゲットは誤タップや到達困難を招く。",
+    "suggestion": "ドットをbutton扱いにし、見た目8pxでも::before等で44×44pxのタップ領域を確保。リスト行全体をアクション領域にする等の代替も許可。トークン: --tap-target-min を強制適用する実装ガイドを追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5 各テーマ focus-ring / §8.1 ボタン フォーカス / §9 トークン",
+    "issue": "強制ハイコントラスト環境（Windows/Edge 等の forced-colors）への対応が未定義。box-shadowベースのフォーカスリングは forced-colors: active で無視され、キーボードフォーカスが不可視になるリスク。",
+    "suggestion": "強制配色用のフォールバックを追加: @media (forced-colors: active){ *:focus-visible{ outline: 2px solid CanvasText; outline-offset: 2px; box-shadow: none !important; } }。合わせてフォーカストークンを分解定義（--focus-ring-color/--focus-ring-width/--focus-ring-offset/--focus-ring-style）し、テーマごとの上書きとメディアクエリ上書きを可能にする。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5 各テーマ --focus-ring / §8.7 状態マトリクス",
+    "issue": "フォーカスリングが半透明box-shadow 3pxのみで、背景や要素色によりコントラスト3:1（WCAG 2.2 2.4.11の最小要件）を下回る恐れがある。リングの視認面積（ピクセル領域）要件も未検証。",
+    "suggestion": "リングを二重（内側: 2px solid currentColor、外側: 2px rgbaテーマ色）にして面積を確保しつつコントラストを担保。小要素（チップ/アイコンボタン）では outline-offset: 2px を使用。代表UIでの実測確認を設計チェックリストに追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§7.4 触覚フィードバック",
+    "issue": "「システムの『触覚を弱める』設定検知時にvibrate抑止」はWeb標準で検出不可能（該当メディアクエリ/APIなし）。要件どおりの実装が不可能。",
+    "suggestion": "要件を修正: 1) 設定に『触覚フィードバックを減らす』トグルを追加（既定=OSのprefers-reduced-motionを代理指標としてOFF）。2) 実装: if (matchMedia('(prefers-reduced-motion: reduce)').matches || !userSettings.haptics) { skip vibrate }。iOS未対応は既存フォールバック（視覚演出）を常に提供。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "WCAG_VIOLATION",
+    "location": "§2.2 セマンティックカラー / §6.1 アイコン状態 / 全般",
+    "issue": "リンク/インライン操作に下線等の非色依存の手掛かりが未定義。色のみで可視化はWCAG 1.4.1に抵触する恐れ。",
+    "suggestion": "インラインリンクの既定スタイルを規定: a{ color: var(--info); text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 2px;} :hover/:focusで下線強調。トークン --link, --link-visited, --link-hover, --link-focus を追加し、ボタン/タブ等の『色以外の手掛かり』（アイコン/下線/ラベル/形状）使用を必須化。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§9 CSSトークンブロック（共通）",
+    "issue": "視覚的に非表示だがスクリーンリーダー用に残すユーティリティ（sr-only/visually-hidden）が未定義。トースト/EXP通知/アイコンボタンの補助ラベル実装に必要。",
+    "suggestion": "ユーティリティを追加: .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important;}。併せて .sr-only-focusable パターンも定義。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§5.2 Dawn / §5.3 Harajuku Light（border vs border-strong）",
+    "issue": "ライト系テーマで --border（2.0:1程度）と --border-strong（3.2〜3.3:1）の使い分けがガイドのみで、どこでstrong必須かが不明瞭。UI境界の識別に--borderを使うと1.4.11不適合の恐れ。",
+    "suggestion": "『機能境界/操作対象を区切る線は常に--border-strong以上を使用』をルール化（例: 入力枠/カード/モーダル境界/区切り線）。--borderは装飾/非機能の区切りに限定。コンポーネント仕様表（§8.x）へ明記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§7.5 prefers-reduced-motion",
+    "issue": "reduce時のグローバル上書きがduration=1msのみで、アニメーション/トランジションが実質的に残りフリッカーを誘発し得る。スケルトンshimmer等の装飾停止も『1ms』指定だと点滅に見える可能性。",
+    "suggestion": "@media(prefers-reduced-motion:reduce){ *,*::before,*::after{ animation:none!important; transition:none!important; } }に変更。トークン側も --spring-* を非overshoot（--ease-out）に差し替える。必要演出（EXPバー等）は短縮版を個別許可。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5 テーマ定義 / 全般",
+    "issue": "ハイコントラスト配色の代替が未定義。『prefers-contrast: more』やアプリ内トグルでの高コントラスト版トークンがない。",
+    "suggestion": "@media(prefers-contrast: more) でテキスト=--text-primaryを上げ、境界=--border-strongを増光、focusリングを実線化。アプリ設定に『コントラストを上げる』を追加し data-contrast=\"more\" で同等のトークン上書きを提供。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.5 ボトムシート",
+    "issue": "ドラッグハンドルが40×4pxで操作対象としては最小サイズ不足。タップで展開/閉じを行う場合、ヒットエリアが44×44pxに満たない可能性。",
+    "suggestion": "見た目は4pxのまま、ハンドル周囲に44×16px以上の透明タップ領域（ボトムシー���上端一帯）を確保。『タップで開閉』を許可する場合は44×44px以上のボタンエリアを重ね、aria-label=\"シートを展開/閉じる\"を付与。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.5 グラスモーフィズムトグル",
+    "issue": "Glass ON（ライト系 --card-bg: rgba(255,255,255,0.65)）上のテキストが背景（下層コンテンツ/画像）に依存してコントラスト低下するリスク。現在はreduce-motion時のみOFF。",
+    "suggestion": "Glass面にテキストを載せる場合は背景ぼかし＋暗色/明色の『コンテンツシェード』を併用（例: inset box-shadow 0 0 0 9999px rgba(0,0,0,0.04) ライト系）。もしくはコンポーネント単位で--text-on-cardトークンを用意し、4.5:1を実測確認。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.1 ボタン / §8.2 入力フィールド",
+    "issue": "アイコンのみの操作（例: チップ閉じる/タブアイコン等）のAccessible Name要件がDS側に未定義。UXではaria-label方針が記載されるが、デザイントークン/コンポーネント仕様に反映されていない。",
+    "suggestion": "コンポーネント仕様に『全アイコンボタンはaria-label必須／ラベル併記推奨』を明記し、サンプルマークアップを追加。Undoスナックバーの[取り消す]等はrole=buttonと適切なアクセシブルネームを規定。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "レイアウト共通（推奨: §4 余白・レイアウト に追加）",
+    "issue": "キーボード/スクリーンリーダー向け『スキップリンク』（メインコンテンツへ移動）が未定義。SPAでも有効。",
+    "suggestion": "header直下に <a class=\"sr-only-focusable\" href=\"#main\">メインへスキップ</a> を追加し、フォーカス時のみ可視化。#main は各画面の主要ランドマーク（role=main）に付与。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§5 各テーマ --focus-ring / §9 トークン",
+    "issue": "フォーカス関連トークンが単一（--focus-ring: box-shadow式）のみで、色/幅/オフセット等の個別制御ができない。強制配色や高コントラスト対応の拡張性に乏しい。",
+    "suggestion": "下記トークンを追加: --focus-ring-color, --focus-ring-width, --focus-ring-offset, --focus-ring-style（solid/double）、--focus-ring-inner/outer。既存--focus-ringは後方互換のため残し、順次移行。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§3.2 サイズスケール",
+    "issue": "最小フォントサイズ11px（--font-size-xs）は高密度端末や遠視ユーザーで可読性リスク。WCAG違反ではないが実ユーザー影響が懸念。",
+    "suggestion": "システムのフォントサイズ拡大に追従する相対単位（rem）採用と、xs用途を限定（補助・非重要情報のみ）。メディアクエリ(prefers-reduced-motionとは別)で端末の最小可読サイズに応じたスケール調整方針をガイドに追記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-017",
+    "severity": "HIGH",
+    "category": "WCAG_VIOLATION",
+    "location": "§5.4 Harajuku Dark / §4.2 Open Air",
+    "issue": "Harajuku Darkのボーダーも非テキスト3:1未満。実測: border #3D1F2C vs bg-surface #1F1018 ≈1.4:1、border-strong #5C2E43 vs #1F1018 ≈2.1:1。Open Air方針で境界依存のため1.4.11不適合。",
+    "suggestion": "Harajuku Dark用に明度の高い境界色を設定し直す。目安: --border: #5A2F45、--border-strong: #8A4C6B（#8A4C6B vs #1F1018 ≈3.1:1）。併せてカード/入力等の機能境界はstrong必須をコンポーネント仕様に明記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§8.6 トースト / §8.1-8.3 演出",
+    "issue": "スクリーンリーダー通知の実装指針（aria-live領域の具体位置/ポリシー）がDS側に未反映。UX §10.4に方針はあるが、デザインシステムとしてのパターン化がない。",
+    "suggestion": "グローバルaria-live=politeリージョンをレイアウトに常設（トースト/EXP/レベルアップ文言をここに反映）。重要度に応じてpolite/assertiveを使い分けるガイドを追記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-019",
+    "severity": "HIGH",
+    "category": "VALIDATION",
+    "location": "コントラスト実測まとめ（各テーマ代表値）",
+    "issue": "代表コントラスト実測（抜粋）: Night Sky: text-primary #E6EDF3 / bg-primary #0D1117=13.6:1 PASS, text-secondary #9BA7B4 / bg-primary ≈6.1:1 PASS, text-hint #7A8593 / bg-primary ≈4.6:1 PASS, accent #58A6FF / bg-primary=5.41:1 PASS, button #FFFFFF / #1F6FEB=4.59:1 PASS; border系はFAIL(§R-001)。Dawn: text-primary #2C2520 / #FBF8F4≈14:1 PASS, text-secondary #5C5045 / #FBF8F4≈7.1:1 PASS, text-hint #7A6E62 / #FBF8F4≈4.7:1 PASS, accent #A85E28 / #FBF8F4=4.93:1 PASS, border #D9CFC2 / #FEFCF9=2.0:1 FAIL（strongは3.3:1 PASS）。Harajuku Light: text/accents PASS, border FAIL（strongは≈3.2:1 PASS）。Harajuku Dark: text/accents PASS, border/strong FAIL。",
+    "suggestion": "FAIL箇所（非テキスト境界）を前述R-001/R-017の代替値で修正。修正後、主要UI（入力枠/カード/区切り/タイムライン縦ライン）で3:1達成を再実測・記録する。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  }
+]

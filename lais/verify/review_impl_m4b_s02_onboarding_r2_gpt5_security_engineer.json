@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-101",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S02Onboarding.jsx（進捗バー aria-* 周辺）",
+    "issue": "aria-valuetext をテンプレート文字列で生成している。現状 JSX によるエスケープで XSS リスクは極小だが、将来的に外部入力がそのまま混入すると属性値インジェクションの温床になり得る。",
+    "suggestion": "CURRENT_STEP_INDEX / TOTAL_STEPS は Number() で数値化し、1〜TOTAL_STEPS の範囲に clamp してから使用する。プロジェクトとして JSX のデフォルトエスケープを前提にし、dangerouslySetInnerHTML/innerHTML を禁止（ESLint react/no-danger など）しておく。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-102",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S02Onboarding.jsx（全体）",
+    "issue": "JSX 内で class 属性を使用している点から、React 以外（または独自ビルド）でのレンダラ利用の可能性がある。レンダラによりエスケープ挙動が異なる場合、XSS 耐性が変動する懸念がある。",
+    "suggestion": "採用している JSX ランタイム（React/Preact/その他��における属性・テキストノードのエスケープ仕様を明文化し、テンプレート展開は常に自動エスケープされることを確認する。併せてテンプレートに直接 HTML 断片を注入する API（innerHTML 相当）はプロジェクト規約で禁止する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-103",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "R2 差分全体（grep チェック）",
+    "issue": "ハードコードされた API キーやシークレットは本差分中に検出されなかったが、検査は手動の域を出ない。",
+    "suggestion": "CI に gitleaks や trufflehog を導入し、pre-commit でも秘密情報スキャンを強制する。フロントエンドに埋め込むビルド時定数は公開前提（REACT_APP_* 等）に限定し、真正なシークレットは必ずサーバ側で保持・プロキシする。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-104",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02 次へ CTA（将来の API 連携に関する注意）",
+    "issue": "本差分ではネットワーク呼び出しや状態変更エンドポイントは登場しないため CSRF 面の影響はなし。ただし将来 CTA による状態変更 API を接続する際の CSRF 考���が未記載。",
+    "suggestion": "状態変更エンドポイントは SameSite=Lax/Strict クッキー運用と CSRF トークン（ダブルサブミット/同期トークン）を必須化し、Fetch には withCredentials とカスタム CSRF ヘッダを付与する。GET を副作用レス、変更は POST/PUT/DELETE に限定する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-105",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "アプリ全体の配信設定（本差分外だが関連）",
+    "issue": "CSP/CORS 設定は本パッケージからは確認できず、デフォルトのままでは XSS 影響面が広い可能性がある。",
+    "suggestion": "配信レイヤで厳格な CSP を設定（default-src 'self'; script-src 'self' 'nonce-...'; object-src 'none'; base-uri 'self'; frame-ancestors 'none' など）。CORS は必要最小限のオリジンを明示許可し、認証付与時は credentials 要否を精査する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ナビゲーション/リダイレクト処理（本差分外の将来実装）",
+    "issue": "本差分内にはオープンリダイレクトは存在しないが、今後クエリや state 経由の next/redirect パラメータを扱う場合の検証方針が未定義。",
+    "suggestion": "ユーザ入力に基づく遷移先は許可リスト方式（アプリ内パス限定、または事前に合致検証）でのみ許可し、絶対 URL・プロトコル指定・スキーム相対 URL は拒否する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

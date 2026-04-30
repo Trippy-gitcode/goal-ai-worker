@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "画面中央のコピーテキスト",
+    "issue": "「あなたの人生を、あなたらしく」というコピーが抽象的すぎて、初めて画面を見た人が3秒以内に「AIがサポートするタスク管理アプリ」というコアバリューを理解できない。",
+    "suggestion": "アプリの具体的な便益（AIコーチングやタスク達成）を想起させる、より直接的で訴求力のあるタグラインに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s01_signin",
+    "location": "画面下部の「サイ��アップ」ボタン",
+    "issue": "未入力時のdisabled状態のボタンが背景色に溶け込みすぎており、ユーザーが次に行うべき最終アクション（CTA）の存在感が薄く、視線誘導が弱い。",
+    "suggestion": "disabled状態でもボタンの輪郭や存在感が最低限伝わるよう、背景色とのコントラスト比を調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s02_onboarding",
+    "location": "画面中央のアバター選択イラスト",
+    "issue": "アバターのビジュアルが非常に簡素なアイコンレベルであり、「洗練＋親しみ」「ユーザーの自己表現（自己投影）」というブランドDNAを満たしていない。",
+    "suggestion": "フラットベクター風で、ユーザーが感情移入できる洗練されたアバターイラスト（髪型や服のバリエーションを感じさせるもの）に差し替える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタスク行左側のドット",
+    "issue": "UX仕様の「[完了⭕]」と異なり、単なるタイムラインの��飾ノードに見え、タップしてタスクを完了できるインタラクティブなチェックボックスであることが視覚的に伝わらない。",
+    "suggestion": "チェックボックスであることを明示するため、未完了状態のドットを中抜きの円（枠線のみ）にするなど、タップ可能なアフォーダンスを持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタスク行右端の色付きドット",
+    "issue": "右端の青や緑の小さなドットが何を示すのか（ゴール紐付けの色？）初見で理解できず、視覚的なノイズになっている。",
+    "suggestion": "色のみでの情報伝達を避け、ゴール名の一部をチップとして表示するか、不要であれば削除して情報密度を下げる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "AIチャット内のタスク提案カード",
+    "issue": "「登録する」ボタンの背景色が暗く、カードの背景色と同化しているため、会話からタスク化へ繋げる重要なCTAとして目立ってい��い。",
+    "suggestion": "「登録する」ボタンにアクセントカラー（Primaryボタンのスタイル）を適用し、次のアクションとして視覚的に際立たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "PROFILEタブ内の基本情報（名前、年齢など）",
+    "issue": "UX仕様で「タップでインライン編集」と定義されているが、編集可能であることを示す視覚的キュー（ペンアイコンや下線、背景色の違いなど）が一切なく、操作方法が伝わらない。",
+    "suggestion": "各項目の右側に編集アイコンを配置するか、値の部分を入力フィールド風の微かな背景色で囲むなど、インタラクティブ性を明示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "画面下部のボタン群",
+    "issue": "アプリのコア価値である「進め方を聞く」「詰まりを相談」ボタンが、単なるセカンダリボタンのスタイルになっており、主要CTAとして視線を惹きつけない。",
+    "suggestion": "AI相談系のボタンにア���セントカラーやアイコン（AIのキラキラマークなど）を付与し、編集・削除ボタンよりも視覚的優先度を高くする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧の完了済みタスク",
+    "issue": "完了済みタスクのテキストに引かれた取り消し線が可読性を著しく下げており、「洗練された」UIというブランドDNAの印象を損なっている。",
+    "suggestion": "取り消し線を廃止し、テキストの色を薄くする（text-disabled）か、左側のチェックアイコンの緑色のみで完了状態を表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  }
+]

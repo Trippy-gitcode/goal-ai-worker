@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§3.5 supabase.js / §3.4 S01Auth.jsx",
+    "issue": "createClient の auth.detectSessionInUrl=false により、メール確認リンクからのリダイレクト時にセッションが自動保存されず、UI文言「メール内のリンクをクリックするとサインインできます」と矛盾する可能性が高い。",
+    "suggestion": "auth.detectSessionInUrl を true に戻す（推奨）。もしくはアプリ起動時に URL を検査し、supabase.auth.exchangeCodeForSession()/getSessionFromUrl() 相当を明示実行してセッションを保存する処理を追加。上記を実装しない場合は文言を「確認後にログインしてください」等へ修正。E2E で確認リンク→復帰で session が確実に確立されることを検証すること。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.7 S01Auth.css / §3.6 themes.css",
+    "issue": "placeholder 以外の色指定がデザイントークン参照か不明（.s01-error, .s01-hint, .s01-cta, .s01-link, focus ring などの色定義が未掲載）。色値の直書き混入リスクがある。",
+    "suggestion": "S01Auth.css の全色指定を themes.css のトークン（例: --text-primary, --text-secondary, --text-error, --accent, --focus-ring 等）に統一していることを明示し、差分を掲載。トークン未定義のバリアント（error/notice/disabled など）があれば design system に追加して参照へ差し替える。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.7 S01Auth.css",
+    "issue": "フォントサイズが離散スケール（タイポグラフィトークン）に従っているかを確認できない。",
+    "suggestion": "見出し・本文・ヒント・エラー・CTA の font-size/line-height を --font-size-xxx, --line-height-xxx 等のトークン参照に統一。使用マップ（例: h1=--font-size-600, h2=--font-size-500, body=--font-size-300 等）を明記し、スケール外指定が無いことを確認。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.7 S01Auth.css",
+    "issue": "余白（margin/padding/gap）がスペーシングトークン参照か不明。実装の離散スケール準拠が確認できない。",
+    "suggestion": "すべての余白指定を --space-xx トークン（例: --space-100/200/300）に統一し、フィールド間隔・フォームの上下左右パディング・CTA とフッターリンク間の余白などの値を設計表と突合。px 直書きがあればトークンへ置換。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.7 S01Auth.css / §3.6 themes.css",
+    "issue": "状態別スタイル（エラー文言、ヒント、CTA disabled、リンク hover/focus）のコントラストが全テーマで WCAG 達成しているか未検証。placeholder 以外の実測が示されていない。",
+    "suggestion": "各テーマで .s01-error/.s01-hint/.s01-cta[disabled]/.s01-link:hover,:focus-visible の前景/背景コントラストを実測（小テキストは 4.5:1 以上、focus インジケータは WCAG 2.2 2.4.11 準拠）。不足があれば該当トークン（--text-error, --text-muted, --focus-ring-* 等）を調整。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.4 S01Auth.jsx",
+    "issue": "テキスト入力で onInput と onChange の二重バインドがあり、Preact 環境では重複更新が発生する可能性がある。",
+    "suggestion": "テキスト入力は onInput のみに統一（checkbox は onChange）。不要なハンドラを削除してレンダリング回数とハンドラ複雑性を低減。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3.4 S01Auth.jsx",
+    "issue": "サーバー側エラー発生時（認証失敗など）、role=alert による読み上げは行われるが、キーボードユーザーのフォーカスはエラー領域へ移動しないため見逃しの恐れがある。",
+    "suggestion": "サーバーエラー表示時にエラーメッセージコンテナへ focus() を移す、またはタブ移動順上に配置して aria-live と組み合わせる。例: エラーメッセージ <p> に tabIndex=-1 を付与し、setServerError 後に ref.current.focus()。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§3.2 App.jsx NotFound",
+    "issue": "静的ページ allowlist がハードコード（['/terms','/privacy']）。将来的な静的ルート追加時に実装追従漏れリスクがある。",
+    "suggestion": "外部ナビ対象を設定ファイル/環境変数に委譲、またはパスプレフィックス（例: '/legal/'）で包括判定。仕様書にも対象パスの定義を明記して設計と実��を同期。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.2 App.jsx / §3.4 S01Auth.jsx",
+    "issue": "認証成功後の遷移先が '/'（Splash）に固定。spec §4.2 における期待遷移（S-02 Onboarding もしくは Home）との整合が不明。",
+    "suggestion": "仕様で明示された遷移先に合わせて route の遷移先を定義（例: セッションありなら '/home'、初回は '/onboarding'）。起動時ルートでもセッション検知してルートガードを実装。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§3.7 S01Auth.css",
+    "issue": "要素の配置（レイアウト/座標：フォーム幅、中央寄せ、ブレークポイント挙動）が設計の赤入れと一致しているかを確認できない。",
+    "suggestion": "コンテナ最大幅、左右マージン（auto センタリング）、フィールドの縦リズム、モバイル/タブレットのブレークポイントにおける配置を設計値（px→トークン）で明記し、Snap-to-redline のスクリーンショットを添付。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§3.7 S01Auth.css",
+    "issue": "focus-visible の適用が全インタラクティブ要素（.s01-input, .s01-checkbox, .s01-cta, .s01-footer-link, .s01-link）に反映されているか、またコントラストが十分かをコード上で検証できない。",
+    "suggestion": "該当セレクタのスタイル定義を明示し、--focus-ring-* トークン参照で統一。WCAG 2.2 2.4.11 に基づき focus インジケータの最小サイズと 3:1 コントラストを担保。キーボード操作での可視性を手動テストで確認。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§3.5 supabase.js",
+    "issue": "環境変数未設定時にモジュール初期化で例外を投げ、アプリ全体が即時クラッシュする。ユーザーに原因が伝わらない。",
+    "suggestion": "bootstrapAuth 時に try/catch して UI 側の .s01-server-message-error に人間可読なメッセージを表示、もしくはフェイルクローズで S01 画面に『設定エラー』を出す。開発時は console.error、運用時は監視へ送出。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

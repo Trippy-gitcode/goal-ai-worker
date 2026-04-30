@@ -1,0 +1,1319 @@
+/* =============================================
+   案 A_v2: Apple オリジナル + となりのトトロ
+   - 配色: 白基調 (#ffffff) + off-white (#fafaf7) + System Blue (#007aff)
+   - 暖色アクセント: 薄緑 #d4e5cd / 薄黄 #fff5d9 / 朝焼け桃 #f8d4d4
+   - フォント: SF Pro / -apple-system / Yu Gothic
+   - モチーフ: 印章「籟」(葉っぱ装飾を伴う再解釈) / 月相 / 木漏れ日
+   - 装飾: 葉っぱ・木・どんぐり・雨粒・雨傘の柔らかい線画
+   - 雰囲気: Apple メモ/リマインダー/ジャーナル風 × ジブリの暖かさ
+   ============================================= */
+
+:root {
+  /* === Apple オリジナル ベース配色 === */
+  --white: #ffffff;
+  --off-white: #fafaf7;       /* 暖色寄りのオフホワイト */
+  --apple-blue: #007aff;      /* System Blue */
+  --apple-blue-light: #4d9eff;
+  --apple-blue-bg: #e9f2ff;
+  --apple-gray-1: #f2f2f0;    /* 薄グレー (カード背景) */
+  --apple-gray-2: #e5e5e0;    /* 罫線 */
+  --apple-gray-3: #c7c7c0;    /* セカンダリ */
+  --apple-gray-text: #6e6e6a; /* 副文 */
+  --apple-text: #1c1c1e;      /* 本文 (オリジナル: 黒寄り、warm tint で柔らか) */
+
+  /* === トトロ温度感 アクセント === */
+  --leaf-green: #d4e5cd;       /* 木漏れ日の薄緑 */
+  --leaf-green-deep: #a8c895;  /* 葉っぱの濃い緑 */
+  --leaf-green-bg: #eaf3e4;    /* セクション背景 */
+  --soft-yellow: #fff5d9;      /* 朝の光、薄黄 */
+  --soft-yellow-deep: #f5d97a; /* どんぐり、強いアクセント */
+  --dawn-pink: #f8d4d4;        /* 朝焼け桃 */
+  --dawn-pink-deep: #e8a5a5;
+  --rain-blue: #d6e4ed;        /* 雨粒の薄水色 */
+  --acorn-brown: #b08968;      /* どんぐり茶 */
+  --warm-shadow: rgba(168, 200, 149, 0.18); /* 緑ベースの暖かい影 */
+
+  /* === 籟のシール (Apple+和風 維持) === */
+  --seal-shu: #c04040;         /* 印章の朱 (uniqueness) */
+  --seal-shu-soft: #e8b8b8;
+
+  /* === タイポ === */
+  --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", sans-serif;
+  --font-rounded: -apple-system-rounded, "SF Pro Rounded", -apple-system, "Helvetica Neue", "Hiragino Maru Gothic ProN", "Yu Gothic Medium", sans-serif;
+  --font-mincho: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
+
+  /* === 余白 (Apple iOS spacing) === */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+
+  --duration-fast: 200ms;
+  --duration-mid: 350ms;
+
+  /* === Apple 角丸 (12-16px) === */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+
+  /* === Apple 薄影 (0.05-0.1 alpha) === */
+  --shadow-sm: 0 1px 2px rgba(28, 28, 30, 0.04), 0 1px 3px rgba(28, 28, 30, 0.05);
+  --shadow-md: 0 2px 6px rgba(28, 28, 30, 0.06), 0 4px 12px rgba(28, 28, 30, 0.04);
+  --shadow-warm: 0 2px 8px var(--warm-shadow);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+  width: 390px;
+  height: 844px;
+  overflow: hidden;
+  background: var(--white);
+  color: var(--apple-text);
+  font-family: var(--font-system);
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+/* ===== 木漏れ日の背景 (ベース white + warm wash) ===== */
+.komorebi-bg {
+  position: relative;
+  background: var(--off-white);
+  background-image:
+    radial-gradient(ellipse 200px 280px at 18% 12%, rgba(245, 217, 122, 0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 240px 320px at 88% 25%, rgba(212, 229, 205, 0.22) 0%, transparent 70%),
+    radial-gradient(ellipse 180px 220px at 12% 78%, rgba(248, 212, 212, 0.14) 0%, transparent 70%),
+    radial-gradient(ellipse 200px 240px at 90% 88%, rgba(212, 229, 205, 0.15) 0%, transparent 70%);
+}
+
+/* ===== 葉っぱシルエット 浮遊 ===== */
+.leaf {
+  position: absolute;
+  opacity: 0.32;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(0.3px);
+}
+.leaf svg { display: block; }
+
+/* ===== 共通: 画面コンテナ ===== */
+.screen {
+  width: 390px;
+  height: 844px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  overflow: hidden;
+}
+
+/* ===== StatusBar ===== */
+.statusbar {
+  height: 47px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 var(--sp-6) 6px;
+  font-family: var(--font-system);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--apple-text);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 12;
+}
+.statusbar .island {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 28px;
+  background: #000;
+  border-radius: 999px;
+}
+.statusbar .icons {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 12px;
+}
+
+/* ===== BottomTabBar (Apple 標準 + 葉っぱアクセント) ===== */
+.tabbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 84px;
+  background: rgba(255, 255, 255, 0.92);
+  border-top: 1px solid var(--apple-gray-2);
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding: 10px 0 30px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 10;
+}
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-system);
+  font-size: 10px;
+  color: var(--apple-gray-text);
+  cursor: pointer;
+}
+.tab.active { color: var(--apple-blue); font-weight: 600; }
+.tab .ic {
+  font-size: 22px;
+  line-height: 1;
+}
+.tab.active .ic {
+  font-weight: 700;
+}
+
+/* ===== 印章「籟」(葉っぱ装飾付きの再解釈) ===== */
+.seal-totoro {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.seal-totoro .seal-box {
+  width: 36px;
+  height: 36px;
+  background: var(--seal-shu);
+  color: var(--white);
+  font-family: var(--font-mincho);
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 6px;
+  transform: rotate(-3deg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.5px;
+  box-shadow: 0 2px 4px rgba(192, 64, 64, 0.18);
+}
+.seal-totoro .seal-leaf {
+  position: absolute;
+  top: -7px;
+  right: -10px;
+  width: 16px;
+  height: 16px;
+  color: var(--leaf-green-deep);
+  transform: rotate(28deg);
+}
+.seal-totoro.lg .seal-box {
+  width: 88px;
+  height: 88px;
+  font-size: 36px;
+  border-radius: 14px;
+}
+.seal-totoro.lg .seal-leaf {
+  top: -14px;
+  right: -22px;
+  width: 32px;
+  height: 32px;
+}
+.seal-totoro.lg .seal-leaf-2 {
+  position: absolute;
+  bottom: -10px;
+  left: -16px;
+  width: 24px;
+  height: 24px;
+  color: var(--leaf-green-deep);
+  transform: rotate(-145deg);
+  opacity: 0.85;
+}
+
+/* ===== チェック印 (Apple リマインダー風 + 籟タッチ) ===== */
+.check-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1.6px solid var(--apple-gray-3);
+  border-radius: 50%;
+  background: var(--white);
+  color: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.check-mark.done {
+  background: var(--apple-blue);
+  border-color: var(--apple-blue);
+  color: var(--white);
+}
+.check-mark.done::before {
+  content: "✓";
+  font-family: var(--font-system);
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* ===== 月相メーター (8 段階、トトロ夜空風 ソフト) ===== */
+.moon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--apple-text);
+  border: 1px solid var(--apple-gray-3);
+  vertical-align: middle;
+}
+.moon.new { background: var(--white); border-color: var(--apple-gray-3); }
+.moon.crescent { background: linear-gradient(90deg, var(--white) 50%, var(--apple-text) 50%); }
+.moon.half { background: linear-gradient(90deg, var(--apple-text) 50%, var(--white) 50%); }
+.moon.gibbous { background: radial-gradient(circle at 70% 50%, var(--white) 25%, var(--apple-text) 27%); }
+.moon.full { background: var(--apple-text); }
+
+/* ===== ボタン (Apple iOS スタイル) ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  padding: 0 24px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-system);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--duration-fast);
+}
+.btn-primary {
+  background: var(--apple-blue);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+.btn-secondary {
+  background: var(--apple-gray-1);
+  color: var(--apple-blue);
+  font-weight: 500;
+}
+.btn-text {
+  background: transparent;
+  color: var(--apple-blue);
+  height: auto;
+  padding: 8px 12px;
+  font-weight: 500;
+  font-size: 15px;
+}
+.btn-block { width: 100%; }
+.btn-apple {
+  background: var(--apple-text);
+  color: var(--white);
+  font-weight: 500;
+}
+.btn-passkey {
+  background: var(--white);
+  color: var(--apple-text);
+  border: 1px solid var(--apple-gray-2);
+  font-weight: 500;
+}
+.btn-leaf {
+  background: var(--leaf-green-bg);
+  color: #4a6e3a;
+  border: 1px solid var(--leaf-green-deep);
+  font-weight: 600;
+}
+
+/* ===== 入力欄 (Apple iOS 角丸) ===== */
+.input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--apple-gray-2);
+  border-radius: var(--radius-md);
+  background: var(--off-white);
+  font-family: var(--font-system);
+  font-size: 17px;
+  color: var(--apple-text);
+  outline: none;
+  letter-spacing: -0.01em;
+}
+.input:focus {
+  border-color: var(--apple-blue);
+}
+.input-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--apple-gray-text);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+/* ===== カード (Apple ノート風) ===== */
+.card {
+  background: var(--white);
+  border: 1px solid var(--apple-gray-2);
+  border-radius: var(--radius-md);
+  padding: var(--sp-5);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== Header ===== */
+.header {
+  padding: 8px var(--sp-6) 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+.header h1 {
+  font-family: var(--font-system);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--apple-text);
+  letter-spacing: -0.02em;
+}
+.header .greeting {
+  font-family: var(--font-system);
+  font-size: 13px;
+  color: var(--apple-gray-text);
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+/* ===== コンテンツ域 ===== */
+.content {
+  flex: 1;
+  overflow: hidden;
+  padding: 0 var(--sp-6) 100px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== セクション heading ===== */
+.section-title {
+  font-family: var(--font-system);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--apple-text);
+  margin: var(--sp-7) 0 var(--sp-3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.02em;
+}
+.section-title:first-child { margin-top: 0; }
+.section-title .accent-leaf {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  color: var(--leaf-green-deep);
+}
+
+.divider {
+  height: 1px;
+  background: var(--apple-gray-2);
+  margin: var(--sp-4) 0;
+}
+
+/* ===========================================
+   S-00 Splash
+   =========================================== */
+.s00 {
+  background: var(--off-white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  position: relative;
+}
+
+.s00 .logo-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-6);
+  padding: var(--sp-7) var(--sp-6);
+  position: relative;
+  z-index: 2;
+}
+.s00 .brand {
+  font-family: var(--font-system);
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--apple-text);
+  letter-spacing: -0.04em;
+  margin-top: var(--sp-4);
+}
+.s00 .tagline {
+  font-family: var(--font-rounded);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--apple-gray-text);
+  text-align: center;
+  line-height: 1.7;
+  letter-spacing: -0.01em;
+  margin-top: -4px;
+}
+.s00 .tagline-sub {
+  font-family: var(--font-rounded);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--apple-gray-3);
+  letter-spacing: 0.05em;
+  margin-top: var(--sp-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.s00 .moon-deco {
+  display: flex;
+  gap: 14px;
+  margin-top: var(--sp-5);
+  opacity: 0.85;
+}
+.s00 .cta-area {
+  width: 100%;
+  padding: 0 var(--sp-6) var(--sp-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  position: relative;
+  z-index: 2;
+}
+.s00 .copyright {
+  font-size: 11px;
+  color: var(--apple-gray-3);
+  text-align: center;
+  margin-top: var(--sp-3);
+  letter-spacing: 0.08em;
+  font-family: var(--font-rounded);
+}
+
+/* ===========================================
+   S-01 Auth
+   =========================================== */
+.s01 {
+  background: var(--white);
+  position: relative;
+}
+.s01 .content {
+  padding: 0 var(--sp-6) var(--sp-7);
+}
+.s01 .auth-title {
+  font-family: var(--font-system);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--apple-text);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--sp-2);
+  margin-top: var(--sp-3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.s01 .auth-subtitle {
+  font-family: var(--font-rounded);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--apple-gray-text);
+  margin-bottom: var(--sp-7);
+  letter-spacing: -0.01em;
+  line-height: 1.6;
+}
+.s01 .form-group {
+  margin-bottom: var(--sp-4);
+}
+.s01 .auxiliary {
+  display: flex;
+  justify-content: flex-end;
+  margin: var(--sp-2) 0 var(--sp-5);
+}
+.s01 .divider-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: var(--sp-5) 0;
+  color: var(--apple-gray-3);
+  font-size: 12px;
+  font-weight: 500;
+}
+.s01 .divider-or::before,
+.s01 .divider-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--apple-gray-2);
+}
+.s01 .alt-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.s01 .signup-link {
+  text-align: center;
+  margin-top: var(--sp-5);
+  font-family: var(--font-system);
+  font-size: 14px;
+  color: var(--apple-gray-text);
+}
+.s01 .signup-link a {
+  color: var(--apple-blue);
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+/* ===========================================
+   S-10 Grow (Apple リマインダー × トトロ)
+   =========================================== */
+.s10 {
+  background: var(--off-white);
+  position: relative;
+}
+.s10 .header {
+  padding: 4px var(--sp-6) 8px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.s10 .header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.s10 .greeting-block {
+  display: flex;
+  flex-direction: column;
+}
+.s10 .moon-current {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-rounded);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--apple-gray-text);
+  background: var(--white);
+  border: 1px solid var(--apple-gray-2);
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+/* AI 一言 (吹き出し風 - リーフ装飾) */
+.ai-message {
+  background: linear-gradient(135deg, var(--leaf-green-bg) 0%, var(--soft-yellow) 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-4) var(--sp-5);
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+  position: relative;
+  margin-bottom: var(--sp-5);
+  box-shadow: var(--shadow-warm);
+  border: 1px solid rgba(168, 200, 149, 0.3);
+}
+.ai-message .leaf-deco {
+  position: absolute;
+  top: -12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  color: var(--leaf-green-deep);
+  transform: rotate(20deg);
+  opacity: 0.7;
+}
+.ai-message .ai-seal {
+  position: relative;
+  flex-shrink: 0;
+}
+.ai-message .ai-seal-box {
+  width: 36px;
+  height: 36px;
+  background: var(--seal-shu);
+  color: var(--white);
+  font-family: var(--font-mincho);
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transform: rotate(-3deg);
+  box-shadow: 0 2px 4px rgba(192, 64, 64, 0.18);
+}
+.ai-message .ai-seal-leaf {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 16px;
+  height: 16px;
+  color: var(--leaf-green-deep);
+  transform: rotate(40deg);
+}
+.ai-message .ai-text {
+  font-family: var(--font-system);
+  font-size: 14px;
+  color: var(--apple-text);
+  line-height: 1.7;
+  letter-spacing: -0.01em;
+}
+.ai-message .ai-meta {
+  font-family: var(--font-rounded);
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b8a5a;
+  margin-top: 6px;
+  letter-spacing: 0;
+}
+
+/* タスクリスト (Apple リマインダー風) */
+.task-list-card {
+  background: var(--white);
+  border: 1px solid var(--apple-gray-2);
+  border-radius: var(--radius-md);
+  padding: 0 var(--sp-4);
+  box-shadow: var(--shadow-sm);
+}
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--apple-gray-2);
+}
+.task-item:last-child { border-bottom: none; }
+.task-item .task-name {
+  flex: 1;
+  font-family: var(--font-system);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--apple-text);
+  letter-spacing: -0.01em;
+}
+.task-item .task-name.done {
+  color: var(--apple-gray-3);
+  text-decoration: line-through;
+}
+.task-item .task-meta {
+  font-family: var(--font-rounded);
+  font-size: 12px;
+  color: var(--apple-gray-text);
+  font-weight: 500;
+}
+.task-item .task-icon {
+  font-size: 14px;
+  color: var(--leaf-green-deep);
+}
+
+/* 目標進捗カード (どんぐり/雨傘 装飾) */
+.goal-card {
+  background: var(--white);
+  border: 1px solid var(--apple-gray-2);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-3);
+  position: relative;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.goal-card .goal-deco {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 22px;
+  opacity: 0.6;
+}
+.goal-card .goal-title {
+  font-family: var(--font-system);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--apple-text);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+  padding-right: 32px;
+}
+.goal-card .goal-meta {
+  font-family: var(--font-rounded);
+  font-size: 12px;
+  color: var(--apple-gray-text);
+  margin-bottom: var(--sp-3);
+  font-weight: 500;
+}
+.goal-card .progress-bar {
+  height: 6px;
+  background: var(--apple-gray-1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.goal-card .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--leaf-green-deep) 0%, var(--soft-yellow-deep) 100%);
+  border-radius: 3px;
+}
+.goal-card .progress-text {
+  font-family: var(--font-rounded);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--apple-gray-text);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* 月齢ゲージ */
+.moon-gauge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--white);
+  border-radius: 999px;
+  border: 1px solid var(--apple-gray-2);
+  font-family: var(--font-rounded);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--apple-gray-text);
+  box-shadow: var(--shadow-sm);
+}
+.moon-gauge .moons {
+  display: flex;
+  gap: 3px;
+}
+
+/* FAB (リーフ装飾) */
+.fab {
+  position: absolute;
+  right: var(--sp-6);
+  bottom: 100px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--apple-blue);
+  color: var(--white);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 300;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.32);
+  cursor: pointer;
+  z-index: 9;
+}
+.fab .leaf-on-fab {
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  color: var(--leaf-green-deep);
+  transform: rotate(28deg);
+}
+
+/* ===========================================
+   S-15 GoalCreate (Apple モーダル + 葉っぱ)
+   =========================================== */
+.s15 {
+  position: relative;
+  background: var(--off-white);
+}
+.s15 .bg-blur {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 28, 30, 0.32);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 5;
+}
+.s15 .bg-hint {
+  position: absolute;
+  inset: 0;
+  padding: var(--sp-7) var(--sp-6);
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 1;
+}
+.s15 .bg-hint .hint-title {
+  font-family: var(--font-system);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--apple-text);
+  letter-spacing: -0.02em;
+}
+.s15 .bg-hint .hint-line {
+  height: 18px;
+  background: var(--white);
+  border: 1px solid var(--apple-gray-2);
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.modal {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border-radius: 22px 22px 0 0;
+  padding: var(--sp-5) var(--sp-6) var(--sp-7);
+  z-index: 10;
+  max-height: 85%;
+  box-shadow: 0 -4px 28px rgba(0, 0, 0, 0.10);
+}
+.modal .grip {
+  width: 38px;
+  height: 5px;
+  background: var(--apple-gray-2);
+  border-radius: 3px;
+  margin: 0 auto var(--sp-5);
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-5);
+}
+.modal-title {
+  font-family: var(--font-system);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--apple-text);
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modal-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--apple-gray-1);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--apple-gray-text);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+}
+.modal-body { padding-bottom: var(--sp-5); }
+.modal-form-group {
+  margin-bottom: var(--sp-4);
+}
+
+/* 期限ピッカー (Apple カレンダー風 + 葉っぱ装飾) */
+.date-picker {
+  background: var(--off-white);
+  border: 1px solid var(--apple-gray-2);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+  margin-top: var(--sp-3);
+}
+.date-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-3);
+  font-family: var(--font-system);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--apple-text);
+}
+.date-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.date-picker-grid .dow {
+  font-family: var(--font-rounded);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--apple-gray-text);
+  text-align: center;
+  padding: 4px 0;
+}
+.date-picker-grid .day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-system);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--apple-text);
+  border-radius: 50%;
+}
+.date-picker-grid .day.muted { color: var(--apple-gray-3); opacity: 0.5; }
+.date-picker-grid .day.selected {
+  background: var(--apple-blue);
+  color: var(--white);
+  font-weight: 700;
+}
+.date-picker-grid .day.today {
+  border: 1.5px solid var(--apple-blue);
+  color: var(--apple-blue);
+  font-weight: 700;
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--sp-3);
+  margin-top: var(--sp-5);
+}
+.modal-actions .btn {
+  flex: 1;
+  height: 50px;
+}
+
+/* ===========================================
+   S-20 Talk (Apple メッセージ風 × 籟)
+   =========================================== */
+.s20 {
+  background: var(--white);
+  position: relative;
+}
+.s20 .talk-header {
+  padding: 6px var(--sp-5) 10px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  border-bottom: 1px solid var(--apple-gray-2);
+  position: relative;
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.s20 .talk-back {
+  font-family: var(--font-system);
+  font-size: 24px;
+  color: var(--apple-blue);
+  width: 28px;
+  font-weight: 400;
+}
+.s20 .talk-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.s20 .talk-avatar-header {
+  position: relative;
+}
+.s20 .talk-avatar-header .avatar-box {
+  width: 32px;
+  height: 32px;
+  background: var(--seal-shu);
+  color: var(--white);
+  font-family: var(--font-mincho);
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transform: rotate(-3deg);
+}
+.s20 .talk-avatar-header .avatar-leaf {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  width: 14px;
+  height: 14px;
+  color: var(--leaf-green-deep);
+  transform: rotate(28deg);
+}
+.s20 .talk-title-text h2 {
+  font-family: var(--font-system);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--apple-text);
+  letter-spacing: -0.01em;
+}
+.s20 .talk-title-text .sub {
+  font-family: var(--font-rounded);
+  font-size: 11px;
+  color: var(--apple-gray-text);
+  font-weight: 500;
+}
+.s20 .talk-menu {
+  color: var(--apple-blue);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.talk-area {
+  flex: 1;
+  overflow: hidden;
+  padding: var(--sp-5) var(--sp-5) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  background: var(--white);
+  position: relative;
+}
+
+/* 日付セパレータ */
+.talk-day-sep {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0;
+  font-family: var(--font-rounded);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--apple-gray-text);
+}
+.talk-day-sep::before,
+.talk-day-sep::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--apple-gray-2);
+}
+
+/* 吹き出し (Apple iMessage 形 + 暖色) */
+.bubble {
+  max-width: 78%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-family: var(--font-system);
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  position: relative;
+  word-wrap: break-word;
+}
+.bubble.ai {
+  align-self: flex-start;
+  background: var(--apple-gray-1);
+  color: var(--apple-text);
+  border-bottom-left-radius: 5px;
+}
+.bubble.user {
+  align-self: flex-end;
+  background: var(--apple-blue);
+  color: var(--white);
+  border-bottom-right-radius: 5px;
+}
+.bubble-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.bubble-row.user-row {
+  justify-content: flex-end;
+}
+.bubble-avatar {
+  position: relative;
+  flex-shrink: 0;
+}
+.bubble-avatar .avatar-seal {
+  width: 30px;
+  height: 30px;
+  background: var(--seal-shu);
+  color: var(--white);
+  font-family: var(--font-mincho);
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transform: rotate(-3deg);
+  margin-bottom: 2px;
+}
+.bubble-avatar .avatar-leaf {
+  position: absolute;
+  top: -6px;
+  right: -7px;
+  width: 12px;
+  height: 12px;
+  color: var(--leaf-green-deep);
+  transform: rotate(30deg);
+}
+.bubble-meta {
+  font-family: var(--font-rounded);
+  font-size: 10px;
+  color: var(--apple-gray-3);
+  margin-top: 4px;
+  font-weight: 500;
+  padding-left: 4px;
+}
+
+/* DeepCheck info chip (リーフ風) */
+.deepcheck-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 4px 10px;
+  background: var(--leaf-green-bg);
+  border: 1px solid var(--leaf-green-deep);
+  border-radius: 12px;
+  font-family: var(--font-rounded);
+  font-size: 11px;
+  color: #4a6e3a;
+  font-weight: 600;
+}
+
+/* 入力バー (Apple iOS 角丸 + リーフ) */
+.talk-input-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px var(--sp-4) 30px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--apple-gray-2);
+  z-index: 5;
+}
+.talk-deepcheck-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+.deepcheck-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-system);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--apple-gray-text);
+}
+.deepcheck-toggle .seal-mini {
+  position: relative;
+  width: 22px;
+  height: 22px;
+}
+.deepcheck-toggle .seal-mini .seal-mini-box {
+  width: 22px;
+  height: 22px;
+  background: var(--seal-shu);
+  color: var(--white);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-family: var(--font-mincho);
+  font-weight: 700;
+  transform: rotate(-3deg);
+}
+.deepcheck-toggle .seal-mini .seal-mini-leaf {
+  position: absolute;
+  top: -4px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  color: var(--leaf-green-deep);
+  transform: rotate(30deg);
+}
+.deepcheck-toggle.active { color: var(--apple-text); font-weight: 600; }
+
+.toggle-switch {
+  width: 51px;
+  height: 31px;
+  background: var(--leaf-green-deep);
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+}
+.toggle-switch .knob {
+  position: absolute;
+  top: 2px;
+  left: 22px;
+  width: 27px;
+  height: 27px;
+  background: var(--white);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: left var(--duration-fast);
+}
+.toggle-switch.off { background: var(--apple-gray-2); }
+.toggle-switch.off .knob { left: 2px; }
+
+.talk-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.talk-input {
+  flex: 1;
+  min-height: 40px;
+  max-height: 100px;
+  padding: 10px 14px;
+  border: 1px solid var(--apple-gray-2);
+  border-radius: 20px;
+  background: var(--off-white);
+  font-family: var(--font-system);
+  font-size: 15px;
+  color: var(--apple-text);
+  outline: none;
+  resize: none;
+  letter-spacing: -0.01em;
+}
+.talk-input.deepcheck-on {
+  border-color: var(--leaf-green-deep);
+  background: var(--leaf-green-bg);
+}
+.talk-send {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--apple-blue);
+  color: var(--white);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-system);
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 122, 255, 0.3);
+}
+.talk-attach {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--apple-gray-1);
+  color: var(--apple-blue);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-system);
+  font-size: 22px;
+  font-weight: 400;
+  flex-shrink: 0;
+  cursor: pointer;
+}

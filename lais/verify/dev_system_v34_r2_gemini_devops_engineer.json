@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.2.1",
+    "issue": "Viteのデフォルトビルドでは `index.html` にコミットハッシュが出力されないため、`curl -s \"$URL\" | grep -q \"$COMMIT_HASH\"` によるポーリングは常に30秒タイムアウトし、デプロイが確実にFAILする。",
+    "suggestion": "Viteのビルド設定でコミットハッシュをHTMLに埋め込む仕様を追加するか、ポーリング対象を `APP_VERSION`（version_sync.shで更新される値）に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.6.3, §4.8",
+    "issue": "`before.json` を `before-unit.json` 等に分離しているが、G8（`canopy_common.sh::check_tdd`）の検証ロジックを更新する指示がない。現行のG8は `before.json` をハードコードで探すため、ファイル名分離によりG8が全ミッションで確実にFAILし、デプロイがブロックされる。",
+    "suggestion": "§4.8 の G8 定義または §4.6.3 に、`canopy_common.sh` が `before-*.json` および `after-*.json` をワイルドカードで存在確認するように更新する指示を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§3.2.2, §4.3.5",
+    "issue": "`hflow_trigger_check.sh` は `git diff --cached` を前提としているが、`deploy.sh` 内で呼び出すタイミングが明記されていない。`deploy.sh` の `git commit` 後に呼び出された場合、`--cached` は空になり、Hフローは絶対に発火しない。",
+    "suggestion": "`deploy.sh` 内での `hflow_trigger_check.sh` の呼び出し位置を `git commit` の前に明記するか、判定ロジックを `git diff HEAD~1 HEAD --name-only`（コミット後判定）に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.3.3",
+    "issue": "`proposal_log_lint.sh` で日付の差分を動的計算する仕様だが、macOS (BSD date) と Linux (GNU date) でコマンド構文が異なり、クラスターAの「POSIX互換シェルスクリプト化」方針と衝突して実装が極めて困難。また、現在のセッションIDを取得する手段も未定義。",
+    "suggestion": "日付の差分計算は `verify_external_services.sh` と同様に Python スクリプトに委譲するか、セッションIDの差分計算を廃止して日付のみ（Python処理）に倒す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.4.5",
+    "issue": "`testDir` を `./tests` に広げ `--grep \"MISSION-ID\"` で抽出すると、同じミッションIDを持つモック前提の `e2e` テストも `cmd-realworld` 実行時に巻き込まれ、実機環境でFAILする可能性が高い。",
+    "suggestion": "`testDir` は `./tests/realworld` のまま維持し、ミッション固有の realworld テストをそのディレクトリ内に作成する運用にするか、grep パターンを `--grep \"@realworld.*MISSION-ID\"` のようにタグと組み合わせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.5.4",
+    "issue": "`logs/canopy_fire.log` に `[pre-commit]` などの呼び出し元タグを追加する仕様だが、`canopy.sh` 自身が呼び出し元を判別するための引数（`$1`）や環境変数の受け渡し仕様が定義されていない。",
+    "suggestion": "`canopy.sh` の実行コマンドを `bash tests/smoke/canopy.sh pre-commit` のように引数を取る仕様に変更し、スクリプト内で `$1` をログに記録する旨を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.2.4",
+    "issue": "`scripts/cf_rollback.sh` を新設する指示があるが、既存の `scripts/rollback.sh`（git revert 方式）と役割が重複・競合し、障害発生時にどちらを実行すべきか混乱を招く。",
+    "suggestion": "`cf_rollback.sh` を新設するのではなく、既存の `rollback.sh` に CF Pages のロールバック手順（`wrangler pages deployment tail` 等）を統合するか、用途の違い（コードのrevert vs インフラのrevert）を明確に定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  }
+]

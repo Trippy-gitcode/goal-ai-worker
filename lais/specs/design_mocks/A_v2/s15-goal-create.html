@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Lais — S-15 Goal Create (案 A_v2: Apple+トトロ)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="screen s15">
+
+    <!-- StatusBar -->
+    <div class="statusbar" style="opacity: 0.5;">
+      <span>9:41</span>
+      <div class="island"></div>
+      <div class="icons">
+        <span>●●●</span>
+        <span>◴</span>
+        <span>▮▮</span>
+      </div>
+    </div>
+
+    <!-- 背景の薄い暗幕 -->
+    <div class="bg-blur"></div>
+
+    <!-- 背景 (薄く Grow を示唆) -->
+    <div class="bg-hint">
+      <div class="hint-title">歩み 🌱</div>
+      <div class="hint-line" style="width: 80%;"></div>
+      <div class="hint-line" style="width: 65%;"></div>
+      <div class="hint-line" style="width: 75%;"></div>
+      <div class="hint-line" style="width: 60%;"></div>
+    </div>
+
+    <!-- モーダル -->
+    <div class="modal">
+      <div class="grip"></div>
+
+      <div class="modal-header">
+        <div class="modal-title">
+          <span style="font-size: 22px;">🌱</span>
+          あたらしい歩み
+        </div>
+        <button class="modal-close" data-testid="s15-close">✕</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- タイトル入力 -->
+        <div class="modal-form-group">
+          <label class="input-label">なにを、なしとげたい?</label>
+          <input class="input" type="text" value="事業の構想を、ことばにする" placeholder="">
+        </div>
+
+        <!-- 期限選択 (date picker preview) -->
+        <div class="modal-form-group">
+          <label class="input-label">期限</label>
+          <div class="date-picker">
+            <div class="date-picker-header">
+              <span style="color: var(--apple-blue); font-size: 22px;">‹</span>
+              <span>2026年 5月</span>
+              <span style="color: var(--apple-blue); font-size: 22px;">›</span>
+            </div>
+            <div class="date-picker-grid">
+              <div class="dow">日</div>
+              <div class="dow">月</div>
+              <div class="dow">火</div>
+              <div class="dow">水</div>
+              <div class="dow">木</div>
+              <div class="dow">金</div>
+              <div class="dow">土</div>
+
+              <div class="day muted">27</div>
+              <div class="day muted">28</div>
+              <div class="day muted">29</div>
+              <div class="day muted">30</div>
+              <div class="day">1</div>
+              <div class="day">2</div>
+              <div class="day">3</div>
+
+              <div class="day">4</div>
+              <div class="day">5</div>
+              <div class="day">6</div>
+              <div class="day">7</div>
+              <div class="day">8</div>
+              <div class="day">9</div>
+              <div class="day">10</div>
+
+              <div class="day">11</div>
+              <div class="day">12</div>
+              <div class="day">13</div>
+              <div class="day">14</div>
+              <div class="day">15</div>
+              <div class="day">16</div>
+              <div class="day">17</div>
+
+              <div class="day">18</div>
+              <div class="day">19</div>
+              <div class="day">20</div>
+              <div class="day today">21</div>
+              <div class="day">22</div>
+              <div class="day">23</div>
+              <div class="day">24</div>
+
+              <div class="day">25</div>
+              <div class="day">26</div>
+              <div class="day">27</div>
+              <div class="day">28</div>
+              <div class="day">29</div>
+              <div class="day">30</div>
+              <div class="day selected">31</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 期限ヒント -->
+        <div style="margin-top: 14px; display: flex; align-items: center; gap: 8px; font-family: var(--font-rounded); font-size: 13px; color: var(--apple-gray-text); font-weight: 500;">
+          <span class="moon gibbous" style="width: 12px; height: 12px;"></span>
+          <span>月末まで、34日。</span>
+          <span style="margin-left: auto; color: var(--apple-blue);">未定にする</span>
+        </div>
+
+        <!-- アクション -->
+        <div class="modal-actions">
+          <button class="btn btn-secondary" style="flex: 1;">やめる</button>
+          <button class="btn btn-primary" style="flex: 2;">
+            <span style="font-size: 17px;">🌱</span>
+            つくる
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

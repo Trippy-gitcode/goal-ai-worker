@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "3. S30MeProfile.jsx — S30-1 ヒーロー（EXP バー）",
+    "issue": "expPercent が未クランプ。expNext=0/undefined/小さい値や expCurrent>expNext の場合、NaN%/100%超の width、ARIA の now>max 破綻が発生しうる。",
+    "suggestion": "数値正規化とクランプを実施。例: const next=Math.max(0, Number(USER.expNext)||0); const cur=Math.max(0, Number(USER.expCurrent)||0); const pct=next>0?Math.min(100, Math.round(cur/next*100)):0; aria-valuenow={Math.min(cur, next)}; style={{width:`${pct}%`}}。負値も0に丸める。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3. S30MeProfile.jsx — S30-5 MBTI 進捗バー",
+    "issue": "mbtiProgress の範囲チェックが無く、0未満/100超/NaN で視覚と ARIA の不整合が起きうる。",
+    "suggestion": "0〜100 にクランプし、数値化失敗時は 0 を既定値に。aria-valuetext で「進捗 X%」も付与すると SR で理解しやすい。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "1. App.jsx — Suspense fallback",
+    "issue": "<main role=\"status\" aria-live=\"polite\"> はランドマーク(main)とステータス(role=status)の意味衝突。さらに可視テキストが無く、支援技術での告知が不十分になりうる。",
+    "suggestion": "main ではなく <div role=\"status\" aria-live=\"polite\" aria-atomic=\"true\"> を用い、可視の「読み込み中…」テキストを配置。必要なら外側 main に aria-busy を付ける。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "3. S30MeProfile.jsx — S30-2 サブタブ",
+    "issue": "ボタンに aria-current=\"page\" を付与しているが、WAI-ARIA Tabs/Navigation のどちらのパターンかが曖昧で SR に誤解を与える恐れ。",
+    "suggestion": "どちらかに統一。Tabsなら role=tablist/role=tab/aria-selected/aria-controls/roving tabIndex + 矢印キー操作。Navigationなら <a href> + aria-current=\"page\"。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3. S30MeProfile.jsx — 非 PROFILE サブタブ placeholder",
+    "issue": "aria-live=\"polite\" によりタブ切替ごとに「…is coming soon.」が毎回読み上げられノイズになりうる。",
+    "suggestion": "aria-live を外すか初回表示時のみ status を出す。代替として role=\"region\" + aria-labelledby（サブタブラベル参照）で十分。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3. S30MeProfile.jsx — S30-3 基本情報（未入力プレースホルダ）",
+    "issue": "ボタンの可視テキストが「タップして入力」のみだと、SR では項目名との関連が不明（どのフィールドを編集するのかが伝わらない）。",
+    "suggestion": "各 dt に id を付け、dd 内ボタンに aria-labelledby=\"{dtId} {buttonTextId}\" を付与、または aria-label=\"趣味: タップして入力\" 等で項目名を明示。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1. App.jsx — lazy import / Suspense",
+    "issue": "lazy チャンク読込失敗時（ネットワーク一時障害等）に備えた ErrorBoundary/リトライ UI が無く、白画面化の恐れ。",
+    "suggestion": "Suspense を ErrorBoundary でラップし、エラーメッセージ + 再試行ボタンを提供。chunk load error をキャッチし再 import 試行・メトリクス送信を実装。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3. S30MeProfile.jsx — placeholder 文言生成",
+    "issue": "SUBTABS.find が不一致時に undefined?.label となり \"undefined is coming soon.\" を表示しうる（state 破損時の見栄え劣化）。",
+    "suggestion": "const tab = SUBTABS.find(...); const label = tab?.label ?? 'This tab'; とし、フォールバック文言を定義。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3. S30MeProfile.jsx — S30-2 サブタブ",
+    "issue": "タブのキーボード操作（←/→/Home/End）未対応。視覚的タブである一方、キーボード利用者の操作性が不足。",
+    "suggestion": "ARIA Tabs パターンに従い onKeyDown で矢印キー・Home/End を実装し、roving tabIndex でフォーカス移動を行う。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3. S30MeProfile.jsx — S30-6 リンク行",
+    "issue": "ナビゲーション用途の UI を <button> で実装。将来的に /settings などへの遷移時、セマンティクスがリンクと不一致。",
+    "suggestion": "クライアントルーティングでも <a href=\"/settings\"> を使用（デフォルト挙動/長押しメニュー/コピーに対応）。見た目は CSS でボタン風に。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3. S30MeProfile.jsx — 初期フォーカス制御",
+    "issue": "マウント時に常に main へフォーカスを移動。キーボードでタブバーから遷移した直後に予期せぬフォーカスジャンプと感じる可能性。",
+    "suggestion": "遷移起点がプログラム的な場合のみフォーカス移動する等の条件付け、または直前のアクティブ要素が body のときのみ実行。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4. S30MeProfile.css — サブタブ下線とボーダー",
+    "issue": "border-bottom と ::after 下線が重なる実装で、拡大時に 1px のギャップやにじみが見える場合がある。",
+    "suggestion": "下線は border-bottom を用い、inactive は透明ボーダー、active 時のみ色変更に統一するか、背景グラデーションによる 2px ラインに置換。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "全体 — ログ/テスト",
+    "issue": "console.log のみで計測・検出が不可。E2E/アクセシビリティ回帰テストが未整備のた���デグレ検出が困難。",
+    "suggestion": "on-device 無効化できるロガー導入（レベル/サンプリング/メトリクス送信）。E2E: /me ルート遷移、サブタブ操作、フォーカスリング、progressbar ARIA、safe-area レイアウトを自動化。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3. S30MeProfile.jsx — 文言",
+    "issue": "placeholder が英語（\"is coming soon.\"）で日本語 UI と混在。最終更新も固定文字列でタイムゾーン不明。",
+    "suggestion": "i18n に統一（例: 「近日公開」）。日時はロケール/タイムゾーンを明示し、将来は動的フォーマット化（toLocaleString 等）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

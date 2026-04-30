@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "S20-9 入力バー（.s20-input-field::placeholder）",
+    "issue": "プレースホルダーのコントラストが 4.48:1 で WCAG 2.2 AA（1.4.3 最低コントラスト 4.5:1）を満たしていない。",
+    "suggestion": "placeholder の前景色をわずかに明るくして 4.5:1 以上になるよう調整（例: --text-muted を一段明るい値に）するか、背景をやや暗くする。もしくは placeholder を補助情報に留め、明示ラベルを主要な手掛かりにしてプレースホルダー色の依存を減らす。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "S20-9 入力バー（.s20-input-field 高さ 40px）",
+    "issue": "タップターゲット高さが 40px のため、要求の 44×44px を満たしていない（タップターゲット要件違反）。",
+    "suggestion": "テキスト入力の min-height を 44px 以上に引き上げ、上下パディングや line-height を調整して可読性を維持する（例: min-height: 44px; padding: 12px 16px;）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "S20-3 AI バブル（.s20-bubble-ai aria-live）",
+    "issue": "各 AI バブルに aria-live=\"polite\" を付与しており、ライブリージョンが複数存在。初期マウント時の一括読み上げや重複読み上げのリスクがある。",
+    "suggestion": "メッセージリスト（ol）側に単一のライブリージョンを設ける（例: role=\"log\" aria-live=\"polite\" aria-relevant=\"additions\"）うえで、個々のバブルから aria-live を外す。新規追加のみが読み上げ対象になるよう構造で担保する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "S20-3 / S20-4 メッセージ項目",
+    "issue": "話者（AI / ユーザー）の区別が視覚的配置に依存しており、スクリーンリーダー利用者には話者情報が十分に伝わらない可能性がある。",
+    "suggestion": "各メッセージ先頭に視覚的非表示テキストで話者を明示（例: <span class=\"s20-visually-hidden\">AI:</span>）するか、li に aria-label（例: \"AI 09:31: 〜\"）を付与。WAI-ARIA chat パターンに倣い、リストに role=\"log\"、各項目に role=\"listitem\" のまま話者名を名前計算に含め��。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "App.jsx Suspense fallback",
+    "issue": "<main role=\"status\" aria-live=\"polite\" aria-label=\"読み込み中\"> のように landmark (main) に他ロールを上書きしており、ランドマークが不正かつライブリージョンの文言がテキストノードでないため支援技術で通知されない可能性がある。",
+    "suggestion": "fallback は <div role=\"status\">読み込み中…</div> のようにテキストノードを含む単独のステータスリージョンに変更するか、既存 main に aria-busy=\"true\" を付与する。landmark のロール上書きは避ける。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "S20-1 ヘッダ（<header role=\"banner\">）",
+    "issue": "ページ内 main の内部で role=\"banner\" を使用しており、サイト全体ヘッダ用ランドマークの想定から外れる。ランドマークの重複・誤用でナビゲーションが紛らわしい。",
+    "suggestion": "role=\"banner\" を削除し、素の <header>（または必要なら role=\"region\" + aria-label）で十分。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "S20-9 送信ボタン（aria-disabled + pointer-events:none）",
+    "issue": "aria-disabled 時もフォーカス可能でキーボード操作により onClick が発火し得る（実処理はガードされているが、支援技術上は「押したのに反応しない」体験になりうる）。",
+    "suggestion": "onClick/OnKeyDown 双方で canSend を明示的にガードし、aria-disabled の際は操作を一切実行しない。また、\"入力すると送信できます\" などの補助説明を aria-describedby で関連付ける。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S20-3 AI バブル（border-left 2px var(--accent-subtle)）",
+    "issue": "左ラインの非テキストコントラストが約 1.2:1 と非常に低く、要素の区切りとしての知覚が困難になりやすい（装飾扱いとの記載はあるが、構造の手掛かりとして機能させるなら 1.4.11 に近づけたい）。",
+    "suggestion": "ラインの不透明度を上げる・太さを上げる、または AI バブル全体に極薄の背景面を設けるなど、視覚的区切りが 3:1 近辺を満たすよう調整。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "S20-5 タスク提案カード（.s20-task-card-label）",
+    "issue": "ラベル「タスクにしますか？」のコントラストが 3.47:1 と WCAG 1.4.3 の達成基準を満たしていない（既知課題として Phase 4 対応予定）。",
+    "suggestion": "ラベル色を --text-secondary 相当などに上げる、もしくは文字サイズ/太さを上げて大きなテキスト基準で 3:1 を満たす（14pt/18.66px 以上または 14px 太字相当）などで AA を満たす。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S20-9 入力フィールド（label と aria-label の二重指定）",
+    "issue": "textarea に可視外ラベル（<label><span class=\"s20-visually-hidden\">…</span>）と aria-label を同時指定しており、名前計算の冗長さ・不整合のリスクがある。",
+    "suggestion": "aria-label を削除し、明示ラベル（label 要素）に統一。placeholder は補助として扱う。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S20-3 / S20-4 <time> 要素",
+    "issue": "<time> に datetime 属性がなく、機械可読性が不足している。",
+    "suggestion": "実時間に基づく ISO 8601 形式の datetime を付与（例: <time datetime=\"2026-04-15T09:31\">09:31</time>）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "S20-1 ヘッダ（🕐 ボタン aria-label=\"時刻\"）",
+    "issue": "「時刻」は意図が曖昧で機能が伝わりにくい。支援技術利用者に操作結果が想像しづらい。",
+    "suggestion": "具体的な機能に合わせてラベルを明確化（例: 「履歴を時刻順に並べ替え」「最近の更新を表示」など）。実装未定の場合は「履歴（時刻）」のように文脈を補う。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

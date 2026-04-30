@@ -1,0 +1,68 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "全体のレイアウト構造",
+    "issue": "中央寄せタイトル + 縦積みフォーム + ボトムタブ + Primary という典型 SaaS テンプレに収斂しており、Lais 固有の視覚的シグネチャが弱い。r1 ボタン色修正で Night Sky トーンは改善したが、構図の独自性はなお不足。",
+    "suggestion": "少なくとも 1 画面 (splash) で非対称構図 + 縦ガイドラインの存在感を強める。3 パターン作成時の A 案の差別化軸にする。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "星屑の密度",
+    "issue": "星が 5〜6 点の均等散布のみ。『月明かりの下のジャーナル』という詩情に対して密度・リズム・サイズ差が不足。",
+    "suggestion": "100〜200 点のポアソンディスク配置 + 3 段階の明度。月のグラデーション or 薄雲を右上に追加。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "TODAY タイムラインの等間隔",
+    "issue": "縦線 + ドット + タスクが機械的等間隔で、手書きジャーナルの呼吸がない。",
+    "suggestion": "時間帯ギャップを実寸比例化 (09:00→12:00 の間は 1.5 倍余白)。午前/午後境界に薄い時刻ラベル。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "チャットバブル + タスク提案カードの混在",
+    "issue": "チャット部分は iMessage 言語、提案カードは SaaS カード言語で、異なるデザイン語彙が同居している。",
+    "suggestion": "提案カードを吹き出しの延長 (ネスト) として設計し、独立カードに見せない。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択 3 円",
+    "issue": "丸アイコン 3 個の均等配置は Notion/Slack 等で既視感が強い。",
+    "suggestion": "横カード (タロット風) で並べる、またはサイズ差/z-index で選択中を前面に浮き出させる。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "s30_me",
+    "location": "PROFILE / DISCOVER / FRIENDS / SHOP タブ",
+    "issue": "4 つの英字大文字 + 下線アクティブは典型 Web UI で、ジャーナルの手触りが失われる。",
+    "suggestion": "横スワイプ + ドットインジケータに変更、or PROFILE 単体で縦スクロール化。",
+    "model": "Code",
+    "persona": "artist"
+  }
+]

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "TODAYセクションの各タスク左側のアイコン",
+    "issue": "s10_growではタスク完了UIがタイムライン風の小さなドットになっているが、s14_goal_detailではチェックボックス風の大きな丸になっており、画面間でデザインの一貫性がない。また、s10_growのドットはタップ可能なボタンとしてのアフォーダンスが弱い。",
+    "suggestion": "s10_growのタスク完了アイコンをs14_goal_detailと同じチェックボックス型（未完了は中空の丸、完了はチェックマーク）に統一し、操作の直感性と一貫性を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "ヘッダー左右のアイコン（☰ と 🕐）",
+    "issue": "UX仕様書では左のハンバーガーアイコン（☰）が「履歴ドロワー」を開くと定義されているが、右側にも履歴を連想させる時計アイコン（🕐）が配置されている。機能が重複しているか、役割が不明確でユーザーの迷いを生む。",
+    "suggestion": "履歴へのアクセス経路を整理し、重複している場合は時計アイコンを削除する。別の機能（例：リマインダー等）であれば、より適切なアイコンに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "TODAYセクションの各タスク右端の小さな色付きドット",
+    "issue": "タスクがどのゴールに紐づいているかを「色のみ」で表現しており、WCAG 1.4.1（カラーのみの伝達禁止）に抵触する。また、ドットが小さいため、色を記憶していないと直感的に判別できない。",
+    "suggestion": "色ドットの横にゴールの頭文字や短いラベル（例：「��業」）を併記するか、ゴールごとに異なる形状のアイコンを採用し、色以外の視覚的手掛かりを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "チャット内のタスク提案カード（「タスクにしますか？」）",
+    "issue": "カード内のアクションボタン（「登録する」「編集して登録」「✕」）が密集して横並びになっており、視覚的な高さも小さいため、誤タップを誘発しやすい（タップターゲット44px未満の懸念）。",
+    "suggestion": "ボタンの上下パディングを増やして十分なタップ領域を確保するか、レイアウトを縦積みに変更して各ボタンの押し間違いを防ぐ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "「所要時間」の横スクロール選択チップ",
+    "issue": "所要時間を選択するチップの高さが視覚的に小さく（約25px）、モバイル環境でのタップターゲット（最小44x44px）として不十分な可能性がある。",
+    "suggestion": "チップの上下パディングを増やすか、CSSで `min-height: 44px` を設定し、透明なタップ可能領域を含めて操作しやすくする。（s15_goal_createのカテゴリチップも同様）",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域（アバター・EXP）とTODAYセクションの間の余白",
+    "issue": "ヒーロー領域とTODAYセクションの間の余白が狭く（margin-top: 8px）、デザインシステム仕様の「セクション間: 40px（Open Air原則）」に反して窮屈な印象を与えている。",
+    "suggestion": "TODAYセクションの上部マージンを増やし、仕様通りのゆったりとした余白（--space-xl: 40px）を確保して視覚的な呼吸のリズムを作る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

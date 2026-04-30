@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx — <section role=\"dialog\" aria-label={`タスク詳細: ${task.name}`}>",
+    "issue": "task が未定義の可能性を考慮しておらず、テンプレートリテラル内で task.name に即時アクセスしているため、open=true かつ task 未設定の瞬間があると実行時エラー（TypeError）でクラッシュし得る。",
+    "suggestion": "レンダー時に task の存在をガードする（if (!open || !task) return null）か、aria-label を安全に評価する（aria-label={`タスク詳細${task?.name ? `: ${task.name}` : ''}`})。併せて表示側でも task フィールド参照前にガードを入れる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx — handleCancelEdit",
+    "issue": "handleCancelEdit は `if (!task) return;` で早期 return しており、task が一時的に欠落したケースで edit モードから view モードへ戻らない可能性がある（UI が編集状態に取り残されうる）。",
+    "suggestion": "setMode('view') は task の有無に��存しないため、早期 return の外（先）で実行する。例えば最初に setMode('view') を行い、その後 task があれば draft を復元する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx — useEffect(open, task), handleCancelEdit",
+    "issue": "draft の初期化ロジックが useEffect と handleCancelEdit に重複して記述されており、今後のフィールド追加や仕様変更時に片方の更新漏れリスクが高い（DRY 違反）。",
+    "suggestion": "task から draft 群へコピーする関数（resetDraftFromTask(task)）を切り出し、useEffect と handleCancelEdit の双方で共通利用する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-104",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx — titleId / <h2 id={titleId}>",
+    "issue": "aria-labelledby を廃止した結果、titleId と <h2 id={titleId}> はダイアログのアクセシブルネーム決定に使われておらず、事実上の死蔵プロップになっている。",
+    "suggestion": "不要であれば titleId と該当 id 属性を削除する。将来の利用意図がある場合はコメントで��図を明記する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx — payload.name",
+    "issue": "name を trim のみで保存しており、空文字列のまま保存可能。UI から見えづらい“無名タスク”が生じうる。",
+    "suggestion": "保存前バリデーションを追加し、空文字はエラー表示・保存不可にするか、null 扱いに統一する。少なくとも UX 的にユーザーへフィードバックを出す。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx — <input ... onInput> / class 属性",
+    "issue": "React 環境の場合、class ではなく className、テキスト入力は onChange を用いるのが一般的。現状の onInput と class は React 純正 JSX と慣習に反し、チーム内の一貫性とリンタの自動修正の恩恵を損ないやすい。",
+    "suggestion": "React を前提とする場合は className と onChange に統一する（Preact/compat 等で意図的に class を使う方針なら README/コメントで明示）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx — payload.duration",
+    "issue": "Number(draftDuration) による数値変換で、予期せぬ文字列が入った場合 NaN が保存ペイロードに混入し得る。サーバや後続処理でエラーや暗黙キャストが発生するリスク。",
+    "suggestion": "保存前に厳格バリデーション（/^\\d+$/ のみ許可等）を行い、Number.isFinite で検証。失敗時は保存を中断しユーザーへエラー表示、または null にフォールバックして明示的に扱う。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx — <select value={draftDuration}>",
+    "issue": "既存データに DURATION_OPTIONS に含まれない値（例: 0 やカスタム値）が入っている場合、UI 上は空（未設定）に見え、再保存で元の値が失われる可能性がある。",
+    "suggestion": "不明な既存値は “カスタム: {current}分” の一時オプションを動的に追加して選択状態を維持するか、読み取り専用表示で警告を出す。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx — <input maxLength={120}>",
+    "issue": "120 がマジックナンバー化しており、他画面との一貫性や将来変更時の追従漏れリスクがある。",
+    "suggestion": "MAX_TASK_NAME_LENGTH のような定数に切り出し、ドメイン仕様（要件）にひも付くコメントを添える。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx — ダイアログの aria-label",
+    "issue": "編集中に名前を変更してもダイアログのアクセシブルネームは元の task.name のまま。支障は小さいが、スクリーンリーダー体験として名称が最新でない可能性がある。",
+    "suggestion": "編集モード時は aria-labelledby を editNameId に切り替える、または `aria-label={`タスク詳細: ${draftName || task?.name || ''}`}` のように draftName 優先で反映する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-111",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "m4e_s13_task_detail_review_package_r2.md — 変更ファイルコメント",
+    "issue": "「import 追加: editNameId」という記述は��際には useId の呼び出し追加（変数追加）であり、import 自体の追加ではないため誤解を招く。",
+    "suggestion": "「useId による ID 変数（editNameId）を追加」に表現を修正し、実コードとの差分を正確に記述する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

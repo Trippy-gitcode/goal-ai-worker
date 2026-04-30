@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "画面上部のプログレスバー（非アクティブ部分）",
+    "issue": "非アクティブなステップを示すグレーの線の明度が低く、背景（#0D1117）との非テキストコントラスト比が3:1を満たしていないため、全体のステップ数が視認できない。",
+    "suggestion": "非アクティブな線の色を `--border-strong`（#6E7681）などに変更し、背景に対して3:1以上のコントラストを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "タスク名入力���（フォーカス状態）",
+    "issue": "フォーカス状態がボーダー色の変更（青）のみで表現されており、仕様書（§8.2: outline-offset使用）と矛盾。色覚多様性のユーザーにフォーカスが伝わりにくい（WCAG 2.4.11）。",
+    "suggestion": "仕様書通り、入力欄の外側にオフセットを持たせた太いアウトライン（outline: 3px solid var(--accent); outline-offset: 2px;）を描画し、形状変化を伴わせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧の完了済みタスク（ポートフォリオサイト作成など）",
+    "issue": "完了済みタスクの取り消し線付きテキストの色が暗すぎ、背景とのコントラスト比が4.5:1（WCAG 1.4.3）を満たしていない可能性が高い。完了済みでも読める必要がある。",
+    "suggestion": "テキスト色を `--text-secondary` または `--text-hint` に設定し、最低限の可読性（4.5:1）を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s00_splash",
+    "location": "「ログイン」ボタンのボーダー",
+    "issue": "ボ���ンの境界を示すボーダーの色が暗く、背景色とのコントラスト比が3:1（WCAG 1.4.11 非テキストコントラスト）を満たしていないため、ボタンの形状が認識しづらい。",
+    "suggestion": "ボーダー色を `--border-strong` に変更し、ボタンの境界を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン（disabled状態）",
+    "issue": "disabled状態のボタン背景とテキストのコントラストが極端に低く、ボタンの存在自体が認知しづらい。「入力完了すれば押せる」というアフォーダンスが欠如している。",
+    "suggestion": "disabled状態のテキスト色と背景色の明度差を広げるか、不透明度を下げるアプローチに変更し、ボタンの存在を視認できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "「編集」「削除」ボタン",
+    "issue": "破壊的操作である「削除」と安全な操作である「編集」が同じ視覚的ウェイト（アウトラインボタン）で隣接して配置されており、誤操作を誘発しやすい。",
+    "suggestion": "「削除」ボタンは枠線なしのGhostボタン（赤テキスト）にするか、配置を離すなどして視覚的階層と操作の安全性を分ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタイムライン",
+    "issue": "完了タスク（緑ドット）のテキストが未完了タスクと同じ明度で表示されており、次にやるべき未完了タスクへ視線が誘導されにくい。",
+    "suggestion": "完了済みのタスク名には取り消し線を適用し、テキスト色を `--text-secondary` に落として視覚的優先度を下げる（s14_goal_detailと統一）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の「登録する」「編集して登録」ボタン",
+    "issue": "チャットバブル内の限られた幅に複数のアクションボタンが横並びで配置されており、タップターゲットが密集して誤タップのリスクが高い。",
+    "suggestion": "ボタンを縦積みにするか、カード内の余白を広げてボタン間のスペース（44px以上のタップ領域）を確実に確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s30_me",
+    "location": "サブタブ（DISCOVER, FRIENDS, SHOP）",
+    "issue": "非アクティブなタブのテキスト色が背景に沈んでおり、選択可能なタブとしてのアフォーダンスが弱い。",
+    "suggestion": "非アクティブタブのテキスト色を一段階明るい `--text-secondary` に引き上げ、視認性を向上させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s15_goal_create",
+    "location": "カテゴリチップ（仕事、健康、学習など）",
+    "issue": "チップが複数行に折り返して配置されているが、行間の余白が左右の余白に対して狭く、タップ領域が近接している。",
+    "suggestion": "チップのコンテナに適切な `gap` を設定し、上下左右の余白を均等に確保してタップターゲットの独立性を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  }
+]

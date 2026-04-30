@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.2.1, §8.2",
+    "issue": "アバターSVGのテーマ（ダーク/ライト）対応と、S-41でのリアルタイム合成時のパフォーマンス・FOUC（チラつき）対策が未定義です。テーマ切替時にSVGの輪郭線や肌の色が背景に溶け込んで視認性を失う確実なリスクがあります。",
+    "suggestion": "SVGアセットのカラーパレットがテーマ（4種）に連動するか、テーマ非依存（白フチを付ける等）かを明記してください。また、S-41でのパーツ選択時にSVGを再合成する際のロード遅延・チラつきを防ぐため、プレビュー用SVGパーツのプリ��ード戦略を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§2.3, §3.1",
+    "issue": "Undoスナックバーが「全タブに跨って表示を維持（ボトムタブの上16px）」と定義されていますが、TALK画面（S-20）には画面下部に入力バーが存在します。キーボード表示時も含め、TALK画面でUndoスナックバーが入力バーや最新メッセージに重なり、操作を完全に阻害するレイアウト競合が発生します。",
+    "suggestion": "Undoスナックバーの表示を「GROW画面およびME画面限定」とするか、TALK画面表示中は入力バーの上部（または画面上部）に動的に位置をずらすレイアウト調整の仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§6.1, §2.3",
+    "issue": "キーボード表示時のハーフモーダル（S-12タスク追加など）の高さがvisualViewport.heightに制約されると定義されていますが、入力項目が多いため内部スクロールが発生します。この際、「作成/保存」ボタンがスクロールアウトして隠れてしまうと操作性が著しく低下します。",
+    "suggestion": "ハーフモーダルの内部レイアウトを「固定ヘッダー（ドラッグハンドル）＋ スクロール可能なコンテンツ領域 ＋ 固定フッター（アクションボタン）」として定義し、キーボード表示時でも常にボタンがタップ可能であることを保証してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§9.1",
+    "issue": "オフライン時のTALK画面で「送信済み未応答メッセージは送信中表示を維持し復帰時に再送信」とありますが、オフラインのままアプリが終了（タスクキル）された場合、この未送信メッセージが失われるかどうかが未定義です。",
+    "suggestion": "未送信メッセージのIndexedDB等へのローカル永続化と、次回起動時（オンライン復帰時）の自動再送信キューの仕様を明記し、ユーザーの入力データ消失を防いでください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§2.3, §3.1",
+    "issue": "S-11（タスク詳細）やS-14（ゴール詳細）から「AI相談」でTALK画面に遷移し自動送信される際���これが「当日の既存チャット」に追記されるのか、「新規チャット（S-21で別スレッド扱い）」として開始されるのかが不明確です。",
+    "suggestion": "コンテキスト付き遷移時のチャットセッションの扱い（原則として当日のアクティブなセッションに追記する、等）を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "全体",
+    "issue": "デザインシステム（design_system.md）作成前とはいえ、「赤系アクセントカラー背景」「16px margin」などハードコードや曖昧な表現が混在しています。テーマ切替を前提とする場合、実装時に色の解釈がブレる原因となります。",
+    "suggestion": "「color-danger-bg」「color-surface」「spacing-md」などのセマンティックなデザイントークン名（仮）を用いてUI仕様を記述し、将来のdesign_system.mdとの紐付けを明確にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§2.3",
+    "issue": "習慣タスクの「今日だけ時刻を変更等の個別インスタンス編集はMVP非対応」とありますが���体調不良等で「今日はできない」場合に未完了のままTodayに残り続けるのは、ユーザーに罪悪感を与え「罰なし」のコンセプトに反する恐れがあります。",
+    "suggestion": "習慣タスクに対して「スキップ（今日はやらない）」アクションを追加し、EXPペナルティなしでTodayから非表示にできる機能（Finch等の優しさに倣う）を検討・明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.7",
+    "issue": "「洗練」をコンセプトとするUIにおいて、30-50個の紙吹雪パーティクルはゲームっぽさが悪目立ちし、チープな印象を与えるリスクがあります。",
+    "suggestion": "パーティクルの形状（例：ミニマルなラインや幾何学図形）、不透明度、ブレンドモード（screenやoverlay等）を指定し、UIの「洗練」を損なわないモダンなビジュアル仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4",
+    "issue": "QRスキャン（S-36）フローにおいて、[キャンセル] ボタンをタップした際、および初回カメラアクセス拒否時の戻り先画面（フォールバック遷移）が明記されていません。",
+    "suggestion": "S-36で [キャンセル] タップ時、およびカメラアクセス拒否時の遷移先が「S-33 FRIENDS画面」であることを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§8.2",
+    "issue": "アバター進化演出で「旧PNGがcross-fade→新PNG」とありますが、ユーザーがS-41でフレーム等の装飾を設定している場合、この演出用PNGに装飾が含まれるのか（合成済みPNGを使うのか）が不明確です。",
+    "suggestion": "アバター進化演出時に使用する画像が「現在の装飾を維持したまま基本アバター（Phase）のみが変化した合成済みPNG」であることを明記し、演出時のアセット生成タイミングを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

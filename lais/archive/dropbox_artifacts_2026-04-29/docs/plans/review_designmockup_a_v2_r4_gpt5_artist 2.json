@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」テキスト",
+    "issue": "インラインテキストリンクが下線なしで色のみで可視化されている。WCAG 1.4.1（色依存禁止）およびデザイン仕様§2.2の「インラインテキストリンクは必ずunderline」に不一致。",
+    "suggestion": "「ログイン」に text-decoration: underline を付与。もしくは後ろに矢印アイコンを追加し、下線と併用して色以外の手掛かりを提供する。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "タスクリスト先頭のチェックサークル（.check: 22×22px）",
+    "issue": "インタラクティブ要素のタップターゲットが22×22pxで最小44×44px要件（WCAG 2.5.5 / 仕様§4.5）を下回る。",
+    "suggestion": "見た目は22pxのままでも良いので、paddingやヒットスロップでタッ���領域を44×44px以上に拡張する。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s14_goal_detail",
+    "location": "ゴール詳細冒頭の巨大「60%」数値＋細バーのヒーローブロック",
+    "issue": "NGリスト「ヒーローメトリクスレイアウト（大数字+小ラベル…）」に近い構成で数値が画面ヒーロー化している。ブランドの「静かな情報設計」に反し、数値の主張が強すぎる。",
+    "suggestion": "数値サイズを見出しレベルへ縮小し、進捗バーと同一行にまとめる（例: 『進捗 60%』+バー）。強調はバー（構造）で、数値は補助扱いに。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "全画面共通（Night Skyテーマの表現）",
+    "issue": "ダーク+青アクセントの汎用UIに留まり、夜空モチーフやLais固有の情緒が弱い。一般的なAI/タスク系の既視感が強い。",
+    "suggestion": "Night Skyの“実世界”要素を最小限で織り込む。例: ヘッダーやヒーローにごく淡い星座グリッド/細い月弧（実線1px・--border色）を配置、アバター枠���レベルに応じた微弱な月光リング（--accent-subtle）を付与。演出は常時ではなくキーフレームで抑制し、Open Airを維持する。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタイムライン（時刻列＋曲線ガイド＋左ボーダー＋各行情報）",
+    "issue": "時刻列・曲線ガイド・左ボーダー・完了/所要時間表記が同一階層で競合し視線が分散。完了行は緑面、ほかは左線と情報が混在し、視覚的緊張がノイズ化。",
+    "suggestion": "ガイド線は--borderで極細・低コントラスト化し、状態表現は「左ボーダーのみ」に統一（完了=success系、期限接近=warning系等）。行内の所要時間は1色トーンダウンして主文とのコントラスト差を明確化。セクション行間を+4〜8px拡張して“設計された沈黙”を確保。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s20_talk",
+    "location": "メッセージバブル＋提案カード周辺",
+    "issue": "チャットの見た目が汎用（左右バブル＋角丸）で、Laisらしさ（コーチ/育成���メタファー）が弱い。",
+    "suggestion": "AIメッセージの左縁2pxラインを“芽”のピンアイコンや小さな星ピンで始点化（SF Symbols風1.5px線）。提案カードは左ボーダー＋見出しに小さなseedlingアイコン、カード角は--radius-mdで統一。AI名ラベル『Lais』を初回発話のみ上に極小表示し、役割の個性を付ける。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Today末尾とGoals見出し下の「+ タスクを追加」「+ ゴールを作成」",
+    "issue": "テキストリンクが下線なしで色のみ依存。リスト本文の中に置かれるため非リンクテキストとの差が色だけになりやすい。",
+    "suggestion": "リンクに必ずunderlineを付与（仕様§2.2）。または行頭の「+」をアイコン化し、ホバー/フォーカス時に下線と色変化の両方を提示。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "タスクリスト下の「+ タスクを追加」",
+    "issue": "インラインリンクが下線なしで色の違いに依存（WCAG 1.4.1観点）。",
+    "suggestion": "text-decoration: underline を常時表示。フォーカス/ホバーで--accent-subtleの下地を併用し、色以外の手掛かりを追加。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "サブタブ直下から各セクションにかけての多数の区切り線",
+    "issue": "水平ルールが多く、Open Airの間（ま）が分断されている。情報は多くないのに“硬い”印象になり、設計された沈黙が弱まっている。",
+    "suggestion": "区切り線を1段層に限定（カード単位でまとめる）し、代わりに--space-xlの余白でセクション区切り。見出しと本文の字間/行間コントラストでグルーピングを担保する。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダル内のフォーム群（各フィールドの1pxボーダー×多段）",
+    "issue": "枠線が多層に重なりフォーム感が強く、ブランドの“静かな情報設計”よりも事務的に見える。",
+    "suggestion": "未フォーカス時はボーダーを--border（薄）か下線のみへ簡素化、フォーカス時だけ--accentのアウトラインで持ち上げる。セクション見出し間に--space-lg/--space-xlを確保して可読リズムを優先。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "左上の戻る矢印アイコン（20px）",
+    "issue": "見た目のアイコンが小さく、タップ領域が44px以上か不明。誤タップ/届きづらさの懸念（片手操作）。",
+    "suggestion": "アイコン周囲に透明パディングを付け、実タップ領域を--tap-target-min: 44px以上に。視覚は20pxのままでOK。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "ロゴ上部の微小な星点配置と広い余白",
+    "issue": "余白は心地よいが、星点が小さすぎて“夜空”の意図が伝わりにくく、無目的な空白に見える恐れ。",
+    "suggestion": "星点を数個だけ“並置/群化”してリズムを作るか、細い月弧を1本だけ追加（--border色/不透明度低め）。“一点の緊張”を置いて沈黙を意味化する。",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

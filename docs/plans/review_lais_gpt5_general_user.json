@@ -1,0 +1,242 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§1.1-1.3",
+    "issue": "コンセプトとブランド文が抽象的で、初見で「何のアプリか」（=習慣/タスク管理＋AI相談）を直感的に掴みにくい。",
+    "suggestion": "ランディングと未ログイン画面に「AIと一緒にタスク管理・目標達成をするアプリ」という一文と、3つの主要行動（タスク完了→EXP、AIに相談、ゴール進捗を見る）の図解を追加。ポケモン比喩は補助的に置き、実用説明を先頭に。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.5",
+    "issue": "オンボーディングは5ステップで終了しており、実際の使い方（GROW/TALK/MEの回り方）を学ぶチュートリアル/コーチマークがない。",
+    "suggestion": "初回起動後、60秒のガイド（コーチマーク4-5枚）を用意。1) 今日のタスクを完了してみる 2) TALKで相談してみる（プロンプト提案）3) ゴールを分解する 4) MEでプロフィール/発見を見る、の順に一度だけ誘導。スキップ可能に。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.2, §3.3, §3.4",
+    "issue": "初回の空状態（タスク・ゴール・友達・DISCOVER）の空画面設計が記載されていないため、何をすれば良いか迷う可能性が高い。",
+    "suggestion": "各空状態に具体的CTAとサンプル表示を追加（例: GROW: サンプル3タスクの一括追加ボタン、TALK: 相談テンプレ「明日の朝やること決めたい」など5件、FRIENDS: QR以外にシェアリンク誘導）。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.2, §5.3",
+    "issue": "タスクの時間指定はあるが、実行を促すリマインド通知仕様（時刻/日次/週次/当日朝のまとめ）が未記載。日常運用で必須の機能が抜けている。",
+    "suggestion": "Web Pushでのタスク通知（開始時刻/締切前/任意の時間）と、Todayの朝/夜サマリー通知を実装。通知権限リクエストは初回完了体験後に表示し、PWA未インストール時はポーリング/メール通知でフォールバックを検討。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§3.2",
+    "issue": "タスク完了の取り消しが30秒限定で、それ以降は復元不可。誤タップ時にストレスと不信感を生む可能性が高い。",
+    "suggestion": "タスク詳細から「未完了に戻す」を常時可能にし、対応するEXPトランザクションを自動で差し引くリバース処理をサーバー側で冪等的に実装。取り消し履歴も表示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.2",
+    "issue": "「所要時間はタイムライン表示の幅計算に使用」とあるが、GROW画面はリスト表示の記述が中心でタイムラインUIの定義が不明瞭。",
+    "suggestion": "タイムライン表示の有無を明確化し、ある場合はレイアウト仕様（時間スロット、重なり、スクロール動作）をUX仕様に追記。なければ「並び順のみで幅には未使用」と明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.2",
+    "issue": "ゴール達成ボーナスは作成から7日経過必須のため、初週の達成感が得にくい。新規ユーザーの早期離脱リスク。",
+    "suggestion": "初回のみ「ミニゴール」（例: 2-3��で完了）にボーナスを適用、または7日条件の例外を1回だけ許容。代替として「分解タスクを全完了で小ボーナス」も検討。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.3, §6.2",
+    "issue": "冒険EXPの判定基準がユーザー視点では分かりづらく、何を報告/相談すれば良いかが不透明。",
+    "suggestion": "TALK画面に「冒険になる例」チップ（初めて行った場所/新しい人と話した/怖かったけど挑戦）を常設し、判定時は理由をミニトーストで説明。HELPに詳細ガイドを掲載。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.5",
+    "issue": "日次EXP上限や冒険EXP上限に到達したかの可視化・事前予告が未記載。突然上限で止まるとモチベーションが下がる。",
+    "suggestion": "GROWヒーロー領域に「本日のEXP残りメーター」を表示し、上限接近時にソフト通知。上限理由のヘルプリンクも設置。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.5",
+    "issue": "日次リセットが固定でJST 4:00。出張/海外滞在時に混乱しやすい。",
+    "suggestion": "アカウントのタイムゾーン設定を導入し、リセットはユーザータイムゾーンの4:00に。旅行時は自動検出/手動切替のどちらも可能にする。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§1.1, §2.1, §3.4, §4.*",
+    "issue": "一般ユーザーには「冒険EXP/図鑑/称号/フェアユース上限/マルチAIルーティング/Phase/MBTI/AI理解メモ」などの用語が分かりにくい。",
+    "suggestion": "用語集/ヘルプを用意し、UI文言は平易化（例: フェアユース→「上限（目安）」、図鑑→「フレンド一覧」）。初回はツールチップで意図と使い方を一言説明。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§3.4 FRIENDS, §5.2",
+    "issue": "人を「図鑑」に登録する表現に抵抗感がある可能性。",
+    "suggestion": "ユーザー向け表示は「Friends/フレンド」に統一し、内部的な設計比喩としてのみ「図鑑」を使用。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§5.1",
+    "issue": "友達追加がQR/シェアリンク限定で、アプリ内で新たに誰かに出会う手段がなく、継続動機のソーシャル要素が弱い。",
+    "suggestion": "完全公開検索は避けつつ、同意したユーザー同士の「テーマ別公開ロビー」や「近況カードの発見（匿名/限定公開）」など、低リスクのライトな発見導線を検討。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§7.2, §3.5",
+    "issue": "サインアップがメール/パスワードのみ。ライトユーザーには登録摩擦が大きい。",
+    "suggestion": "MVPからGoogle/Appleでのワンタップ登録を優先実装。メール登録はサブとして残し、未認証時の制限付きお試し（ゲスト/ローカル保存→後で引き継ぎ）も検討。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§2.1, §2.2",
+    "issue": "Premierプランが高額かつ目玉のチケットが「Coming Soon」。購入時点の価値が限定フレームと優先サポートのみで、期待ギャップが大きい。",
+    "suggestion": "ショップ実装までPremierは非表示/ウェイトリスト化するか、即時価値（限定AIスタイル、追加テーマ、月次限定装飾2-3種の即配布）を用意。既存案内には明確な但し書きと返金ポリシーの追記を。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§7.1, §2.*",
+    "issue": "PWAでのStripe決済は一般ユーザーに安全性が伝わりにくい（アプリ内課金に慣れている）。",
+    "suggestion": "決済画面にStripeのセキュリティ説明/ロゴ、ドメイン一致の確認、返金ポリシーとサポート連絡先を明記。初回は小さく「なぜ安全か」を説明するモーダルを用意。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§6.1 vs §8.1",
+    "issue": "MVP機能表に「マルチAIルーティング」とあるが、§6.1ではBasic以上のみ有効と記載。Freeユーザーの挙動が機能表から読み取りづらい。",
+    "suggestion": "MVP機能表のTALK欄に「Freeは単一モデル、Basic以上でマルチAI」と脚注を追記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.2, §4.2",
+    "issue": "タスク/ゴールを削除・編集した場合のEXP整合（付与済みEXPの扱い）が未定義。誤操作や整理時に数値がずれる恐れ。",
+    "suggestion": "EXPはイベント駆動の台帳方式にし、削除/未完了戻し時は逆仕訳を発行。UIにも「過去のEXP調整」を示す履歴を表示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§3.2",
+    "issue": "「習慣はゴールに紐づけ不可」が直感に反する（例: 週3回の運動はダイエット目標に関係）。",
+    "suggestion": "理由をUI/ヘルプで説明し、代替として「習慣の累計回数を単発タスク化してゴールに変換」するブリッジ機能を検討。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§2.1",
+    "issue": "「フェアユース上限」の表現が一般ユーザーに伝わりづらい。",
+    "suggestion": "「1日の上限（目安）: 1,000回」と平易に表記し、超過時の挙動（翌日自動回復）を明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§6.4",
+    "issue": "AI対話履歴が90日保存で自��削除される点のユーザー向け明示やエクスポート方法が未記載。",
+    "suggestion": "設定に保存期間の明記と「履歴をエクスポート（JSON/テキスト）」を追加。削除前にリマインド通知も検討。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§9.2",
+    "issue": "自己成長に強い関心がないユーザーにとって、継続理由（即時の実用メリット）が弱い。",
+    "suggestion": "日常タスクの実用性を高めるライト機能を追加（買い物/用事のクイック追加、今日の3つだけ提案、終業前の1タップ振り返り、ウィークリーまとめDM風カードの自動生成）。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§5.3",
+    "issue": "FRIENDSのメッセージは100文字の簡易版であり、ユーザーがLINE的な往復を期待すると肩透かしになる可能性。",
+    "suggestion": "FRIENDSに「簡易メッセージ（チャットではありません）」の説明と使用例を表示し、必要なら外部チャットに共有できるリンクボタンを用意。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§2.1",
+    "issue": "プラン比較がモデル名中心（GPT/Claude/Gemini）で、一般ユーザーには価値��が伝わりにくい。",
+    "suggestion": "各プランの価値を行動ベースで再表現（例: Basic=深い相談がしやすい、Pro=提案の質がより高い＋調査が速い、Premier=待ち時間最短＋限定装飾）。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  }
+]

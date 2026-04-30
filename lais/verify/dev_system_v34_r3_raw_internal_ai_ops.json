@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R3I-AIOPS-001",
+    "severity": "CRITICAL",
+    "category": "AMBIGUITY",
+    "location": "§2.18 PD疑義2 / §3.5 / §5.2 PD-110",
+    "issue": "AI⇔人間の責務分離の中核である Hフロー承認ゲートを、app_config.yaml の `hflow.enabled: false` で高リスク変更でも全面スキップできる設計。『ADV/PO のみ承認可』『ENG 自己付与禁止』という PD-110 の責務境界が、設定ファイル1 つで無効化される。AI 暴走防止の実効性が低下し、AI ops 観点で承認ゲートが名目化するリスク。`hflow.enabled` 自体が ENG 書込可ファイル（changed-files-allowlist.sh の制約対象外）であれば、ENG が自律的に opt-out 化する抜け穴が存在。",
+    "spec_reference": "R2.2 §2.18 L1520-1546 / §3.5 L273 / §5.2 L2120-2123 PD-110 本文",
+    "suggestion": "Hフロー opt-out を全面廃止ではなく対象限定: (a) auth/payment/external/supabase/migration の最重要領域（PD-105 対象）は常時承認必須、hflow.enabled=false でも警告のみではなく exit 1、(b) low/mid リスクのみ opt-out 有効、(c) hflow.enabled の変更自体を Hフロー対象化（app_config.yaml を risk_patterns.sh に追加）、(d) opt-out 変更履歴・理由・有効期限を別証跡として instructions/approvals/_hflow_optout_log.json に記録、(e) 期限切れで自動的に enabled=true に戻る設計。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R3I-AIOPS-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§2.2 MISSION_ID 解決 / §3.1 入力契約 / §3.2 STATUS / §2.6 canopy_common",
+    "issue": "MISSION_ID 解決ロジックが 3 箇所で非同期。deploy.sh（§2.2 L412-416）は session_progress.md の『最初の ### ブロック』を拾う、canopy_common get_current_mission_block（§2.6 L796-810）は『IN_PROGRESS 優先、なければ QUEUED の先頭』、§3.1 入力契約 SSOT は『session_progress.md 全体ではなく単一ブロックを入力』と方針のみ。複数 QUEUED/IN_PROGRESS/READY_FOR_DEPLOY が混在する場合、deploy.sh と canopy が別ミッションを対象化し、ゲート検証と実デプロイが乖離する暴走パターン発生。AI が誤判定のまま別ミッションの証跡で deploy を通過させる致命的リスク。",
+    "spec_reference": "R2.2 §2.2 L412-416 / §2.6 L796-817 / §3.1 L139-142 / §3.2 L182-200",
+    "suggestion": "MISSION_ID 解決を単一スクリプト `scripts/resolve_target_mission.sh` に集約。コンテキスト別ルール明示: deploy = READY_FOR_DEPLOY 優先、存在しなければ exit 1 / canopy = IN_PROGRESS 優先、次に QUEUED の先頭 / classifier = 引数渡し（`$1=mission_file`）のみ受け付け、session_progress 全体を読まない。複数 READY_FOR_DEPLOY 存在時の曖昧解消ルール（最新エントリ優先 or exit 1）も明記。§2.2/§2.6/§3.1 の全実装サンプルを本スクリプト呼出しに統一。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R3I-AIOPS-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.2 Step 11 / §2.4 append_deploy_fail / §2.6 update_status",
+    "issue": "AI の誤判定リカバリ手順がデプロイ失敗時に偏っており、『誤成功』『誤 DONE』『誤った MISSION_ID への書換え』の巻き戻し責務が未定義。AI 暴走防止の文脈では、失敗検出よりも『正しく見える誤判定』のほうがリスクが高い。update_status が誤 MISSION_ID で READY_FOR_DEPLOY → DONE にした場合、誰が検知・巻き戻すのか不明。",
+    "spec_reference": "R2.2 §2.2 L510-515 Step 11 / §2.4 L628-664 append_deploy_fail / §2.6 L854-867 update_status",
+    "suggestion": "AI Ops 観点で『STATUS_CORRECTION プロトコル』新設: (1) ENG が update_status 後に post-condition 検証（例: 対象ファイルの lint/test が実際に通ったか）で失敗検出、(2) ADV が STATUS_CORRECTION 承認ファイル発行（instructions/approvals/<MID>.status_correction.json）、(3) 専用スクリプト `scripts/status_rollback.sh` で before/after 差分を残しつつ STATUS を直前に戻す、(4) 誤デプロイ時は rollback.sh を必須起動、(5) session_progress.md と deploy.log の両方に誤判定ログを追記。sub_hflow_protocol.md §5 として追加。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R3I-AIOPS-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§2.4 append_deploy_fail / §3.6 STRIKE",
+    "issue": "1 回目失敗で自動 DEPLOY-RECOVER ミッションを生成する設計は、AI が原因を誤認したまま復旧作業を自己増殖させる危険が残る。同一根因で連続失敗するケースでは、人間（ADV/PO）が原因確認する前に新しい RECOVER ミッションが積まれ、キューが汚染される。特に env 変数設定ミス・依存パッケージ欠落等の『環境起因』失敗は、コードレビューでは治らず、自動 RECOVER が無駄に実行される。",
+    "spec_reference": "R2.2 §2.4 L643-646 / §3.6 L313-318",
+    "suggestion": "1 回目失敗の RECOVER を『ログ収集専用』に限定: STATUS を QUEUED ではなく BLOCKED_REVIEW 相当の待機状態に設定、`AUTO_CREATED=true` マーク付与、ADV レビュー完了まで ENG 実行不可を明記。2 回目以降も同一運用。暴走防止と復旧のバランスを改善。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R3I-AIOPS-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.2 STATUS / §5.1 PD-109 / §6.4 sub_adv_protocol",
+    "issue": "BLOCKED 長期滞留時の人間介入 SLA が未定義。BLOCKED 手動遷移は許容されたが、『AI が BLOCKED にして終わり』で回収責任が曖昧。AI 暴走防止の観点では BLOCKED を『人間の判断を呼ぶトリガー』として運用しなければ、単なるスキップルートになる。BLOCKED エスカレーションの時間制約が無いため、後続ミッションが無期限に進まない可能性。",
+    "spec_reference": "R2.2 §3.2 L190-200 / §5.1 L2086-2093 / §6.4 L2196",
+    "suggestion": "BLOCKED SLA 追加: (a) 24 時間超の BLOCKED は ADV レビュー必須（next session 冒頭で Claude.ai が自動検出）、(b) 72 時間超は PO 通知必須（session_progress.md に ALERT マーク）、(c) 解除時は原因分類を learned-pattern 候補に登録。BLOCKED 理由にカテゴリ（ENV_FAIL / EXT_DEPS / TOOL_BUG / SPEC_AMBIGUITY 等）を必須化し、エスカレーション先を自動選択。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R3I-AIOPS-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§3.5 Hフロー承認 / §2.3 σcrit / §6.7 sub_hflow_protocol",
+    "issue": "Hフロー承認ファイルの真正性検証が commit_sha 一致にほぼ依存。承認者本人性 / 承認ファイル改ざん耐性が弱い。運用事故時に『誰が本当に承認したか』が曖昧化するリスク。AI ops 観点では『PR と同等の監査証跡』が必要だが、承認ファイルは単なるリポジトリ内 JSON で、誰でも git commit できる。",
+    "spec_reference": "R2.2 §3.5 L257-273 / §2.3 L540-565 / §6.7 L2210-2243",
+    "suggestion": "承認プロセスに二重証跡: 承認ファイルに `approved_via_session` や `review_log_ref` を追加し、対応する session_history / review artifact の参照を必須化。git author/committer metadata と承認ファイル生成コマンドを紐付け（approver_name == git config user.name の一致検証）。ADV/PO 専用の承認スクリプト（`scripts/approve_hflow.sh`）を用意し、環境変数 `CLAUDE_AI_SESSION_ID` がセットされているコンテキストのみで実行可、そのセッションIDを承認ファイルに記録。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R3I-AIOPS-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§0.4 本パッケージの読み方 / §6 連鎖更新 / §2.3 σcrit",
+    "issue": "ADV は『コードを書かない』鉄則②を維持しつつ、Code G_47 に対して多数のスクリプト実装サンプルを逐語転記させる構造。結果として『実装サンプルの欠陥（PATCH-2/3 のようなバグ）』が発生した場合、ADV 設計ミス vs ENG 実装ミスの判別が困難。責務境界は明示されているが、不具合追跡時の原因帰属が曖昧になる。",
+    "spec_reference": "R2.2 §0.4 L48-50 / §6.1-§6.12 / §2.3 L550-565",
+    "suggestion": "R2.2 各 §2.X の Target 節に『design authority: ADV / implementation authority: ENG / approval authority: PO or ADV』の 3 者メタ情報を追加。各スクリプト sample に『テスト済 / 未テスト』フラグを付け、未テストサンプルは Code G_47 で dry-run 検証してから本実装する運用規約を §6 に追加。不具合時の監査性を向上。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R3I-AIOPS-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§2 全体 / §9 Golden R3 実行計画",
+    "issue": "AI レビュー運用で『外部 API 障害時の自律フォールバック』プロトコル（本セッションで発動した Step 2.1）の設計が事後追加で、§9 Golden R3 実行計画には統合されていない。今後同様の失敗が再発する可能性は高く、恒久ルール化が未完了。AI ops 観点で災害復旧プロトコルの SSOT 不在。",
+    "spec_reference": "R2.2 §9 L2448-2506 / session_progress.md L119-124（Step 2.1 追加）",
+    "suggestion": "§9 Golden R3 実行計画に『§9.6 API 障害時のフォールバック』を新設。条件（片方モデル全本数 / 過半数失敗 + 無料枠）・対応（Internal Opus 代替実行）・ファイル命名規約（r3_raw_internal_{persona}.json）・triage での扱い（2モデル相当 / 異モデル合意度に準ずる集計）を明文化。本セッションの実績を LP-029 候補として learned-patterns.md に登録。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "ai_ops"
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/App.jsx",
+    "issue": "意味論的な役割（role）を持たない `div` 要素に `aria-label` が使用されています。このラベルはスクリーンリーダーのサポートが不完全な場合があり、読み上げられない可能性があります。また、子コンポーネントの `<main aria-label=\"Lais スプラッシュ\">` と情報が重複しており、冗長です。",
+    "suggestion": "`<div class=\"app-root\" aria-label=\"Lais\">` から `aria-label` 属性を削除することを推奨します。アプリケーションの主要なコンテンツ領域は `main` ランドマーク要素で示されており、そのラベルでスクリーンリーダー利用者には十分なコンテキストが提供されます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "`.s00-cta-primary` ボタンに `:disabled` および `[aria-disabled=\"true\"]` のスタイルが定義されていますが、コンポーネント側でボタンが無効化されるロジックは現在実装されていません。",
+    "suggestion": "これは将来の拡張（例：オフライン時の操作不可など）を見越した実装であれば問題ありません。その意図をCSSコメントとして記載すると、コードの保守性が向上します。もし将来的な利用予定がない場合は、未使用のCSSコードとして削除を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_engineer"
+  }
+]

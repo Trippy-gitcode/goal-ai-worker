@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx",
+    "issue": "S01Auth を静的 import しているため、/ での初期表示時にも S01Auth→auth.js→supabase.js がバンドルへ取り込まれ、Supabase クライアント分の重量が初期ペイロードに乗る。",
+    "suggestion": "ルート単位のコード分割を行い、/auth 遷移時にだけ S01Auth と supabase クライアントを読み込む。例: const S01Auth = lazy(() => import('./screens/S01Auth.jsx')); Suspense でフォールバックを出しつつ、プレロードはユーザー意図（hover/touchstart）や requestIdleCallback で。Vite の dynamic import を使って Supabase を別チャンクに切り出す。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "5. lais/src/lib/auth.js",
+    "issue": "supabase.auth.onAuthStateChange の購読を解除しておらず、HMR/テスト環境でリロードを跨いで購読が累積しメモリリークと重複更新を招く。",
+    "suggestion": "購読オブジェクトを保持して明示的に unsubscribe する。例: const { data: { subscription } } = supabase.auth.onAuthStateChange(...); if (import.meta.hot) import.meta.hot.dispose(() => subscription.unsubscribe()); または initAuth() 関数化して一度だけ初期化するガードを入れる。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "1. lais/src/components/App.jsx (NotFound)",
+    "issue": "コンポーネントの render 中に route('/') を呼んでおり、副作用がレンダーに混入。場合により余計なレンダー/レイアウトスラッシングの原因となる。",
+    "suggestion": "useEffect 内でリダイレクトを行うか、preact-router のデフォルトリダイレクトを使う。例: function NotFound(){ useEffect(()=>{ route('/', true); },[]); return null; }",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx (AuthRoute)",
+    "issue": "毎レンダーごとに window.location.search から URLSearchParams を生成しており、軽微ながら不要なパースが発生。SSR 考慮も欠ける。",
+    "suggestion": "Router から渡される url を利用するか、search のみを useMemo でメモ化。あるいは /auth/login | /auth/signup のパスに分ければパース自体を不要化でき、ルーターの���マウント境界にもなって状態管理が明確になる。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx",
+    "issue": "/auth を遷移時ロードにすると対話遅延が出やすいが、現状プレフェッチ戦略の記載/実装がない。",
+    "suggestion": "ユーザーの意図検知で /auth チャンクを先読みする。例: S00Splash の「はじめる/ログイン」ボタンに onPointerEnter/onTouchStart で import('./screens/S01Auth.jsx') を仕込む、もしくは <link rel=\"prefetch\" as=\"script\"> を挿入。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "全体（index.html / ドキュメントヘッダ）",
+    "issue": "Supabase へ初回接続時の DNS ルックアップ/ハンドシェイク短縮のための preconnect/dns-prefetch が未定義。",
+    "suggestion": "Supabase プロジェクト URL に対して <link rel=\"preconnect\" href=\"https://xxxxxxxx.supabase.co\" crossorigin> と <link rel=\"dns-prefetch\" href=\"//xxxxxxxx.supabase.co\"> を追加し、認証リクエストの初回レイテンシを削減する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "全体（フォント読み込み戦略）",
+    "issue": "Web フォント使用時のフォント表示戦略（font-display: swap 等）や事前読み込みの方針が不明で、FOUT/FOIT による初期描画遅延の可能性。",
+    "suggestion": "@font-face に font-display: swap を付与し、主要ウェイトのみサブセット化。CDN 利用時は preconnect を設定、ローカル配信時は <link rel=\"preload\" as=\"font\" type=\"font/woff2\" crossorigin> を検討。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S01Auth.jsx",
+    "issue": "input/onInput などの無名関数が毎レンダーで再生成され、マイクロ GC を誘発（本フォーム規模では軽微だが積み重なると影響）。",
+    "suggestion": "ハンドラを useCallback で安定化、もしくは Preact Signals を使い input の再レンダー範囲を限定する（例: value を signal にし、onInput={(e)=>emailSig.value=e.currentTarget.value}）。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "5. lais/src/lib/auth.js",
+    "issue": "ト��クン自動リフレッシュ等で onAuthStateChange が高頻度に発火すると、session signal を購読する全コンポーネントが再レンダーしうる。",
+    "suggestion": "session に格納する情報を最小化し、値が実際に変わったときのみ更新（浅い同値チェック）する。または下位ツリーごとに分割し選択購読（selector パターン）で再レンダー範囲を抑制。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S01Auth.css",
+    "issue": "100svh は一部環境でスクロールや UI 表示変化時に再計算が走り描画更新が発生する可能性（軽微）。",
+    "suggestion": "意図に応じて 100dvh/100lvh の併用や、モバイルでの再レイアウト抑制が必要なら min-height を固定し内部をスクロールにする等、ビューポート単位の使い分けを検討。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

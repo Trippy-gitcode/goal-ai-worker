@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-401",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "修正後の該当 CSS — .s02-onboarding:focus:not(:focus-visible)",
+    "issue": "キーボード操作でもブラウザのヒューリスティクスにより :focus-visible が付与されない場合（特に tabindex=-1 要素や一部 Safari 系の挙動）、:focus:not(:focus-visible) が発火して outline を明示的に消してしまい、実質的にフォーカスインジケータが非表示になるリスクがある。",
+    "suggestion": "CSS だけで抑制するのではなく、LP-002 の programmatic focus 直後のみ抑制する制御に限定する。例: ルート遷移時に data-focus-origin=\"programmatic\" を main に一時的に付与し、.s02-onboarding[data-focus-origin=\"programmatic\"]:focus { outline: none } を適用、次のタスク/フレームで属性を除去する。あるいは安全側に倒して :focus:not(:focus-visible) の outline: none 自体を削除し、可視リングは :focus-visible のみで上書き、その他は UA デフォルトに委ねる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-402",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "R4 レビュー観点（ターゲットブラウザ記載）",
+    "issue": ":focus-visible 非対応ブラウザ（ターゲット外だが実機アクセスの可能性はゼロではない）では両セレクタが無視され、programmatic focus 時のアウトライン非表示要件が満たせない（視覚ノイズ）。",
+    "suggestion": "@supports selector(:focus-visible) で囲って明示的に対応範囲を限定し、未対応環境では UA デフォルトに委ねる旨をドキュメント化。必要なら WICG focus-visible ポリフィル導入を検討。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-403",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "修正後の該当 CSS — .s02-onboarding:focus-visible { outline: 3px solid var(--accent) }",
+    "issue": "フォーカスインジケータ色 var(--accent) のコントラストが背景（var(--bg-primary) など）に対して 3:1 を下回る可能性があると WCAG 2.1 1.4.11（非テキストコントラスト）違反となるリスクがある。",
+    "suggestion": "デザイントークン側で var(--accent) と各テーマ背景のコントラストを自動検証（ビルド時）し、閾値未満なら安全色にフォールバックする仕組みを導入。E2E でスクリーンショット差分と併せてコントラストチェックを追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-404",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "修正後の該当 CSS — outline-offset: -3px",
+    "issue": "負の outline-offset は内側��描画されるため、狭いパディングや濃色のコンテントと重なるとリングが視認しづらい場合がある。Safari/Firefox では角丸や overflow 組合せでクリッピングや滲みが発生することがある。",
+    "suggestion": "主要ブラウザで可視性を実機確認。必要に応じて offset を 0 〜 +2px に変更、もしくは box-shadow ベースのインジケータに切り替えて形状・角丸と整合させる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-405",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "LP-002 説明（mainRef.current.focus()）",
+    "issue": ".s02-onboarding（おそらく <main>）がフォーカス可能である前提が明文化されていない。tabindex が設定されていない場合、focus() が no-op になり、意図した通知/インジケータ制御が効かない可能性がある。",
+    "suggestion": "対象要素に tabindex=\"-1\"（または 0）を必ず付与し、role=\"main\" と aria-label/aria-labelledby を適切に設定する旨を仕様に明記。Playwright で focus() 成功を assert（document.activeElement と一致）するテストを追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-406",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "グローバル CSS リセット（ドキュメント外）",
+    "issue": "プロジェクト全体で *:focus もしくは :focus に対する outline: none のリセットが存在する場合、今回の修正を上書きしフォーカスインジケータを消してしまう恐れがある。",
+    "suggestion": "Stylelint で outline: none を禁止（except when paired with :focus-visible などのホワイトリスト条件）。グローバルリセットを監査し、:focus のみの outline 抑制を撤廃する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-407",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "テスト/ビルド結果",
+    "issue": "フォーカス可視リングの有無に関する自動テスト・可視リグレッションテストが欠如しており、将来のデグレを検出できない。",
+    "suggestion": "Playwright で以下を自動化: (1) ルート遷移直後の programmatic focus でリング非表示、(2) Tab 到達でリング表示、(3) マウスクリックで非表示。さらに forced-colors: active 環境のスクリーンショット比較を含める。computed style（outline-width/outline-style/outline-color）も検証。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-408",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "@media (forced-colors) 想定外動作",
+    "issue": "Windows High Contrast（forced-colors: active）では UA が色を上書きする一方、:focus:not(:focus-visible) の outline: none が残ると本来の可視リングを阻害する可能性がある。",
+    "suggestion": "@media (forced-colors: active) では .s02-onboarding:focus { outline: 2px solid CanvasText; outline-offset: 0 } のように明示的に表示を強制し、:focus:not(:focus-visible) 側は無効化する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-409",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "R4 レビュー観点（入力モダリティ）",
+    "issue": "アクセスキー/スキップリンク/読上げ支援技術によるフォーカス移動など、入力モダリティが混在するケースで :focus-visible の判定がブラウザ間でばらつく可能性がある。",
+    "suggestion": "入力モダリティの明示制御（例: document へ data-input-modality=keyboard/pointer を付与）や WICG/focus-visible ポリフィルで挙動を標準化。最低限、該当ケースの手動検証チェックリストを QA に追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-410",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "軽審コメント（\"compositor only �� layout shift なし\"）",
+    "issue": "outline/outline-offset はレイアウトには影響しないが、必ずしも compositor-only 描画ではなく、環境によってはペイントコストが発生する。コメントが誤解を招きうる。",
+    "suggestion": "コメントを「レイアウトに影響しない（no layout shift）」に留め、compositor-only と断言しない。必要なら PerformanceObserver で実測し、描画負荷が問題化しないことを確認。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

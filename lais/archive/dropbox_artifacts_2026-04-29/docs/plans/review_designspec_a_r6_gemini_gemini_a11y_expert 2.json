@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "はい、承知いたしました。Webアクセシビリティ専門家として、ご提示いただいたデザインシステム仕様書「Lais デザイン仕様書 v1.0（Phase A）」をレビューします。特にご指定の観点（コントラスト比、フォーカスリング、タップターゲット、ハプティクス、色のみでの情報伝達、スクリーンリーダー対応）に注目し、WCAG 2.2 AA準拠の観点から網羅的に問題を指摘します。\n\nご指示通り、結果はJSON配列形式で返却し、`severity inflation`を避け、既知の課題（§7等）の再指摘は行いません。\n\n以下がレビュー結果です。\n\n```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"HIGH\",\n    \"category\": \"USER_CONCERN\",\n    \"location\": \"§3.1, §5.1, §5.5, §4.4, §4.5, §4.7, §4.8\",\n    \"issue\": \"アクセントカラー（--accent）と、その薄い背景色（--accent-subtle）の組み合わせで、テキストのコントラスト比がW",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  }
+]

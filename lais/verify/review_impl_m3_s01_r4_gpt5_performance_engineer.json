@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "2.1 App.jsx NotFound",
+    "issue": "SPA 経由で /terms /privacy に遷移し、useEffect 発火後に window.location.replace で同一パスへ再遷移するため、初回ヒット時にアプリのブート＋二度目のナビゲーションが発生し、余計な CPU/ネットワークコストがかかる可能性がある。",
+    "suggestion": "ルーティング/配信レイヤで /terms /privacy を SPA 例外として直接静的配信する（例: CloudFront/NGINX でリライト除外）。アプリ内リンクは router のリンクハンドラをバイパスしてネイティブナビゲーションさせる（<a href=\"/terms\" data-native> 等）。代替として、初回ペイント後に <link rel=\"prefetch\" href=\"/terms\"> を投入し、ユーザー操作前に静的ページをウォームアップする。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "5. Phase B (H5/H6) 未実施",
+    "issue": "supabase-js を含む認証関連バンドルの分離/遅延読込が未実装のまま S-01 初期表示に混在する可能性があり、初期表示の LCP/TTI を悪化させる���スクが高い（supabase-js v2 は圧縮後でも ~80–120KB gz 程度になるケースが多い）。",
+    "suggestion": "認証画面でのみ必要な依存は dynamic import で遅延化し、ユーザーの明示操作（フォーカス/入力/クリック）でロード開始。<link rel=\"preload module\" as=\"script\"> で TTFB 後すぐに取り込み、<link rel=\"prefetch\"> を idle で発火。バンドル分析（sourcemap + bundle-stats）を CI に組み込み、S-01 初期 JS 予算（例: ≤35KB gz）を設定。可能なら gotrue エンドポイントを最小クライアントで直叩きして認証のみを薄く実装するか、supabase-js のサブパス/ESM のみを確実に取り込む。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 S01Auth.jsx handleSubmit",
+    "issue": "SUBMIT_TIMEOUT_MS の setTimeout がコンポーネントのアンマウント時に必ずクリアされないため、画面遷移直後でも最長 15 秒残存し、アイドル時とはいえ不要なタイマー実行が残る（safeSetState で setState は防げているが、クロージャとコールスタックは生きる）。",
+    "suggestion": "timeoutId を useRef に保持し、useEffect のクリーンアップ���常に clearTimeout。submit 前に既存の timeout もクリアして再利用を防止。将来的に SDK が AbortSignal 対応したら AbortController を併用してネットワーク自体も明示中断。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 S01Auth.jsx mounted/unmounted 管理",
+    "issue": "mountedRef の初期値が true のため、極めて稀な非同期フロー差し込み時に「初期レンダ直後〜effect 実行まで」の短時間を mounted と誤認する可能性がある（実害はほぼ無いがガードの厳密性が落ちる）。",
+    "suggestion": "mountedRef の初期値を false にし、mount effect で true、cleanup で false にする。safeSetState は mountedRef を常に参照。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 S01Auth.jsx オートフィル同期 (K)",
+    "issue": "0ms + 100ms の2段階同期は多くのブラウザで十分だが、ケースによっては 300–500ms で反映されることがあり再同期が必要になる。一方でタイマーは 100ms 時点での不要レンダーを 1 回誘発しうる。",
+    "suggestion": "requestAnimationFrame で 3〜5 フレーム観測 or requestIdleCallback フォールバックで 500ms 以内に最大数回の軽量ポーリングへ変更し、変更が検出された時点で停止。あるいは CSS の :-webkit-autofill 検知＋AnimationStart ハックで同期トリガーを最小化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.1 App.jsx safeSessionStorage",
+    "issue": "毎回 try/catch で setItem/removeItem を実行して可否判定しており、NotFound 経由アクセスのたびに同期ストレージ I/O が発生する。",
+    "suggestion": "モジュールスコープにキャッシュ（let cached: Storage|null|undefined）を持ち、初回のみ判定。以降はキャッシュを返却して try/catch の同期コストを回避。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "全体（ネットワーク起点）",
+    "issue": "Supabase 認証エンドポイントへの初回接続で DNS/TLS/ALPN の遅延が発生しやすいが、preconnect/preresolve のリソースヒントが見当たらない。",
+    "suggestion": "<link rel=\"preconnect\" href=\"https://<YOUR-PROJECT>.supabase.co\" crossorigin> を <head> に追加。フォームフォーカス時に warm up（軽量な HEAD/OPTIONS や fetch keepalive で TCP/TLS をウォーム）。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ナビゲーション（/terms /privacy）",
+    "issue": "静的ページへの体感速度改善のための事前取得戦略（prefetch/prerender）が未記載。",
+    "suggestion": "ビューポート内でリンクが見えたら <link rel=\"prefetch\" href=\"/terms\" as=\"document\"> を挿入（IntersectionObserver で制御）。Wi‑Fi/5G など回線が速い場合に限定。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3 S01Auth.css .s01-link",
+    "issue": "negative margin + inline-block によりインライン整形コンテキストでの再レイアウト領域がやや広がる。対象要素数は少なく実害は小さいが、長文テキスト化した場合に影響が増える。",
+    "suggestion": "ヒット領域拡張は親ラッパーに padding を与える方式を優先し、視覚デザイン維持が難しい場合のみ negative margin を限定使用。Layout Shift 回避のため line-height と padding の相互影響を visual regression で監視。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2 S01Auth.jsx ctaDescribedBy",
+    "issue": "毎レンダーで配列生成と join を実行（軽微）。フォーム入力で高頻度レンダーの場合でも積算コストは小さいが、ホットパス最適化の余地はある。",
+    "suggestion": "依存（emailMissing/emailInvalid/passwordTooShort/agreeMissing）に基づく useMemo で文字列をメモ化。もしくは falsy の場合に undefined を直接返す分岐で join を回避。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "グローバル配信設定",
+    "issue": "静的アセット/CSS のキャッシュ戦略が文書化されておらず、初回以降の往復回数が最適化されているか不明。",
+    "suggestion": "ファイル名ハッシュ＋Cache-Control: public, max-age=31536000, immutable を適用。HTML は短 TTL＋ETag、サブリソースは SRI。サービスワーカーがある場合は runtime caching（stale-while-revalidate）を GET に限定して導入。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "フォント配信（未記載）",
+    "issue": "フォント���ード戦略が不明なため、FOIT/FOUT に伴うレンダリングブロックやレイアウトシフトのリスクがある。",
+    "suggestion": "webfont 使用時は font-display: swap / optional を指定し、事前に <link rel=\"preload\" as=\"font\" crossorigin>。可能ならシステムフォントスタックを優先して S-01 初期描画のブロックを回避。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

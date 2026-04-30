@@ -1,0 +1,70 @@
+/*
+ * S-43 NotFound — design tokens via theme variables (Stage 7-3)
+ */
+
+.s43-notfound {
+  flex: 1;
+  background: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--space-lg);
+}
+
+.s43-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  text-align: center;
+  max-width: 420px;
+}
+
+.s43-code {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-accent);
+  font-family: var(--theme-font-display);
+  letter-spacing: 4px;
+}
+
+.s43-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-display);
+}
+
+.s43-message {
+  font-size: var(--font-size-base);
+  color: var(--theme-color-text-secondary);
+  line-height: var(--theme-font-line-height-body);
+}
+
+.s43-cta {
+  margin-top: var(--space-md);
+  min-height: 52px;
+  padding: 0 var(--space-xl);
+  background: var(--theme-color-accent);
+  color: var(--theme-color-button-text-inverse);
+  border: none;
+  border-radius: var(--theme-radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--theme-font-base);
+  cursor: pointer;
+  box-shadow: var(--theme-shadow-md);
+  transition: background var(--theme-motion-fast) var(--theme-motion-easing);
+}
+
+.s43-cta:hover {
+  background: var(--theme-color-accent-hover);
+}
+
+.s43-cta:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}

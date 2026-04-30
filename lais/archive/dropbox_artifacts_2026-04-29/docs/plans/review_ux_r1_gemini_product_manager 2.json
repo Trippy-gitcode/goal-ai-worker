@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§7.3",
+    "issue": "「右→左 | フルスクリーン詳細の右端 | 前画面に戻る（iOS風）」と定義されているが、iOSの標準的な戻るスワイプは「左端から右（Left-to-Right）」である。右から左へのスワイプは進む操作やドロワー展開と競合し、ナビゲーションが根本的に破綻する。",
+    "suggestion": "「左→右 | フルスクリーン詳細の左端 | 前画面に戻る（iOS風）」に修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§8",
+    "issue": "タスク完了、レベル���ップ、ゴール達成、冒険EXP検出の各アニメーションが同時に発生した場合（例：最後のタスク完了でゴール達成し、同時にレベルアップする）の優先順位やキューイングの仕組みが未定義。同時に発火すると画面がパーティクルとバナーでカオスになり、UXが著しく低下する。",
+    "suggestion": "アニメーションのキューイングシステムを定義し、再生順序（例：1. タスク完了EXP → 2. ゴール達成演出 → 3. レベルアップ演出）を直列で実行するよう明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.3",
+    "issue": "project_v1.md §3.2では「完了から30秒以内に取り消し可能」とあるが、UX仕様書 §2.3では「Undoスナックバーが3秒後に自動消去」とされている。スナックバー消去後の残り27秒間、ユーザーがどうやってUndoするのかUIが未定義。",
+    "suggestion": "スナックバーの表示時間を30秒に変更するか、タスク詳細パネル（S-11）内に完了後30秒間だけ「完了を取り消す」ボタンを配置する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§1.1, §4.2",
+    "issue": "S-41（アバター設定）が画面一覧に定義され、MVPでPremier限定フレームを装備する重要な画面（課金価値の提供）であるにもかかわらず、画面構成や操作フローが仕様書内に一切記述されていない。",
+    "suggestion": "§4.2または新規セクションにS-41の画面構成（プレビュー領域、フレーム一覧、装備ボタン、未所持時の課金導線）を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.4",
+    "issue": "S-36（QRスキャン）でユーザーがカメラ権限を拒否した場合、手動でのID入力機能がないため、友達追加機能が完全にデッドロックされる。権限再要求や設定アプリへの誘導UIが未定義。",
+    "suggestion": "QRスキャンフローに「権限拒否時: 『カメラへのアクセスが必要です』というメッセージと、OSの設定アプリを開くボタンを表示する」と追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§1.1, §14.2",
+    "issue": "S-02（ログイン）画面から、パスワードを忘れたユーザーがリセットするための導線と画面（S-04 パスワードリセット等）が定義されていない。",
+    "suggestion": "§1.1にパスワードリセット画面を追加し、§14.2のフローに「パスワードを忘れた場合 → メール入力 → リセットリンク送信」のフローを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.3",
+    "issue": "S-11（タスク詳細パネル）から「編集」をタップした後のS-13（タスク編集）の画面構成や遷移方法が未定義。S-12のモーダルを再利用するのか、インラインで切り替わるのか不明。",
+    "suggestion": "§2.3に「[編集]タップ → S-12と同じ構成のハーフモーダル（S-13）が開き、既存データが入力済みの状態になる」と追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.2",
+    "issue": "TALK画面での画像添付において、project_v1.mdで定義された10MB上限や非対応フォーマットを選択した場合のUIフィードバック（エラー表示）が未定義。",
+    "suggestion": "��9.2または§3.2に「10MB超過または非対応形式の場合、トーストで『10MB以下のJPEG/PNG/GIF/WebPを選択してください』と表示し添付をキャンセルする」と追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.4",
+    "issue": "「[ゴール完了にする] ボタン（タスクなしゴール用。全タスク完了済みの場合は自動表示）」とあるが、全タスク完了時に自動でゴール完了状態になるのか、手動でボタンを押す必要があるのか曖昧（project_v1.mdでは自動完了と読める）。",
+    "suggestion": "「全タスク完了時は自動でゴール完了演出が発火し、ボタンは表示されない。タスクなしゴールの場合のみ手動完了ボタンを表示する」と明確化してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§7.4",
+    "issue": "「開始時刻による自動ソートを手動で上書き」とあるが、手動で並び替えた後にタスクの開始時刻を編集した場合、手動ソート順が維持されるのか、再度時刻順にソートされるのかが不明確。",
+    "suggestion": "「開始時刻を編集した場合は、手動ソート順がリセットされ、再度時刻順で自動ソートされる」等の競合解決ルールを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "BEST_PRACTICE",
+    "category": "STRUCTURE",
+    "location": "§4.2, §13.2",
+    "issue": "PremierプランのMVP特典が「限定フレーム」のみだが、SHOPがないため課金へのモチベーション喚起が弱い。未課金ユーザーに限定フレームを見せてアップグレードを促す導線がない。",
+    "suggestion": "S-41（アバター設定）でPremier限定フレームに鍵アイコンを付けて表示し、タップ時にS-38（プラン管理）へ誘導するTeasing UIを導入してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§4.4",
+    "issue": "「応援ボタン（ワンタップ送信）」とあるが、タップ時の視覚的フィードバックや完了トーストが定義されていないため、送信できたか不安になり連打される懸念がある。",
+    "suggestion": "タップ時にボタンのアニメーション（scale等）と、トースト「応援を送りました」を表示し、数秒間ボタンを非活性にする仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.1 Night Sky / §9 CSS Tokens",
+    "issue": "Night SkyのPrimaryボタン背景トークンが不一致。§5.1では --button-primary-bg: #1A5FC8、§9では #1F6FEB。",
+    "suggestion": "正値を1つに統一し、§9のデフォルトブロックを更新。合わせて変更履歴に「§9の--button-primary-bgを#1A5FC8に統一」と追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.3 行間トークン / §9 CSS Tokens",
+    "issue": "行間トークンの体系が不一致。本文ではサイズ別(--line-height-xs〜--line-height-3xl)だが、§9では--line-height-display/heading/bodyを記載。",
+    "suggestion": "§9をサイズ別行間トークンに揃える（--line-height-xs〜--line-height-3xlを出力）。旧--line-height-display/heading/bodyは非推奨として互換用に残す場合は注記を追加。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8 コンポーネント",
+    "issue": "UndoスナックバーがUX仕様ではトーストと別物として定義されているが、デザ���ンシステムに独立したコンポーネント定義/トークンがない。",
+    "suggestion": "Snackbarコンポーネントを追加。推奨トークン: --snackbar-bg/fg, --snackbar-height, --snackbar-padding, --snackbar-shadow, --snackbar-radius, --snackbar-duration, --z-snackbar(タブ跨ぎ固定のためトーストと干渉しない層を定義)。状態: default/with-action/timeout/cross-tab。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8 コンポーネント（ツールチップ未定義）",
+    "issue": "z-indexと色の役割にツールチップが登場するが、ビジュアル/寸法/余白/影/矢印等の定義がない。",
+    "suggestion": "Tooltipコンポーネントを追加。トークン例: --tooltip-bg, --tooltip-fg, --tooltip-padding, --tooltip-radius, --tooltip-shadow, --tooltip-max-width, --tooltip-arrow-size, --z-tooltip(既存参照)。表示遅延/消失遅延・focus/focus-withinでの出し分けガイドも明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.2 入力フィールド（ドロップダウン参照あり）",
+    "issue": "Select/Dropdownメニューのコンポーネント定義とトークンが未定義。",
+    "suggestion": "Dropdown/Selectを追加。--menu-bg/fg, --menu-border, --menu-shadow, --menu-radius, --menu-item-height, --menu-item-padding, --menu-item-hover-bg, --menu-item-selected-bg, --menu-item-disabled-fg, --z-dropdownを定義。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.1 画面遷移（S-21ドロワー参照）/ §4.4 z-index",
+    "issue": "Drawer（左スライドドロワー）のビジュアル/寸法/背景/影/スクラブ挙動がデザインシステムに未定義。",
+    "suggestion": "Drawerコンポーネントを追加。--drawer-width, --drawer-bg, --drawer-fg, --drawer-shadow, --drawer-radius, --drawer-scrim(=--scrim), --z-drawer(既存)と開閉アニメーション（ease/duration）を規定。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§8.8 トグルスイッチ",
+    "issue": "サム色が --button-primary-fg 固定のため、OFF時（トラック=--border-strong）にHarajuku Darkでサムが暗色(#140A10)となりコントラスト低下の恐れ。",
+    "suggestion": "スイッチ専用トークンを追加。--switch-track-on/off, --switch-thumb-on/off, --switch-thumb-shadow をテーマ別に定義。デフォ���ト: thumb-on= #FFFFFF or 高コントラスト色、thumb-off= #FFFFFF（ダーク系）/ #2C2520等（ライト系）。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8 コンポーネント（チェックボックス/ラジオ未定義）",
+    "issue": "UXで複数選択（☑）が登場するが、チェックボックス/ラジオのビジュアル・トークンが未定義。",
+    "suggestion": "Checkbox/Radioを追加。--control-size(20/24px), --control-border, --control-checked-bg, --control-checked-icon-color, --control-hover-bg, --control-pressed-bg, --control-disabled-fg/bg, focusは--focus-ring準拠。ラベル間隔(--space-sm)も規定。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§8.1 ボタン（Danger subtle説明文）",
+    "issue": "「rgba(*danger*, 0.18) → --danger-subtle-hover」等の記述はCSS変数から直接は算出不能で、解釈が曖昧。",
+    "suggestion": "計算式の説明を削除し、明示トークン（--danger-subtle-hover/pressed）への参照に統一。実装者が演算を試みないよう注意書きを追加。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§6.1 アイコンスタイル",
+    "issue": "状態色で「押下= --accent-hover」としており、命名と意味（pressed≠hover）が不一致。",
+    "suggestion": "押下は--accent-pressedを使用に修正。必要なら--icon-fg-default/active/pressed/disabledの語彙を追加してアクセント系からの独立も検討。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§8.11 スケルトン / §8.13 状態マトリクス",
+    "issue": "スケルトンの配色が§8.11ではbg-secondary⇆bg-elevatedのグラデ、§8.13ではbg-disabled⇆bg-elevatedと記載が揺れている。",
+    "suggestion": "スケルトンは§8.11の定義（bg-secondary⇆bg-elevated）に統一。§8.13の表記を修正。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.x 各テーマ / §8 共通ステート",
+    "issue": "フォーカスリングが単一トークン(--focus-ring: box-shadow値)のみで可変性が低い。",
+    "suggestion": "--focus-ring-color, --focus-ring-width, --focus-ring-offset を分解トークンとして追加。コンポーネントごとの適用（外側/内側）をガイド。forced-colorsのoutline��装は現状維持でOK。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2 カラーシステム",
+    "issue": "テキスト選択（::selection）の背景/文字色トークンが未定義で、テーマにより読みにくくなる恐れ。",
+    "suggestion": "各テーマに --selection-bg / --selection-fg を追加（例: ダーク=accent-subtle系背景+text-primary、ライト=accent 15-20%の淡色+text-primary等）。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4 余白・レイアウト / §8 コンポーネント",
+    "issue": "境界線幅・コントロール高さ・無効時の不透明度がハードコード（1px/48px/0.6）で再利用性が低い。",
+    "suggestion": "基盤トークンを追加: --border-width-hairline:1px, --border-width-strong:2px, --control-height-sm:40px/--md:48px/--lg:56px, --opacity-disabled:0.6。コンポーネントはこれらを参照。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§5.2 Dawn",
+    "issue": "Dawnの--danger-hoverと--danger-pressedが同一(#8A1520)で、hover/pressedの差が表現できない。",
+    "suggestion": "pressedはhoverより一段階濃い/暗い色を設定（例: hover=#8A1520, pressed=#751019 等）。全テーマでhover/pressedのコントラスト階層を明確化。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  }
+]

@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "DESIGN_SYSTEM",
+    "screen": "ALL",
+    "location": "フォーム入力フィールド（s01_signin の各入力 / s12_task_add・s15_goal_create の各入力）",
+    "issue": "入力フィールドの背景が画面ごとに #161B22（--bg-surface）と #0D1117（--bg-primary）で混在し、フォームの一貫性と視覚リズムが崩れている",
+    "suggestion": "フォーム系は --bg-surface（#161B22）に統一し、ボーダーは --border-strong（#6E7681）で揃える。半モーダル内も同ルールを適用して全体の統一感を出す",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow, s30_me",
+    "location": "ヒーロー部の肩書き（EXPLORER）/ サブタブ見出し（PROFILE/DISCOVER/FRIENDS/SHOP）",
+    "issue": "大文字ラベルの letter-spacing が 1.0px（EXPLORER）や 0.5px（サブタブ）などバラつき、DS既定のラベル用トラッキング（--letter-spacing-label: 1.5px）に未準拠",
+    "suggestion": "大文字ラベルは共通で letter-spacing: 1.5px を適用。視覚的な張りとブランドの芯を揃える",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "各所のラベル/キャプション（例: s02_onboarding アバターラベル 12px、s30_me サブタブ 12px）",
+    "issue": "font-size に 12px が多用され、DSの離散スケール（11/14/16/20/28/...）から外れている。可読性と階層表現の一貫性が弱まる",
+    "suggestion": "12pxは使用せず、キャプション/時刻は 11px (--font-size-xs)、ラベル/本文は 14px (--font-size-sm) に揃える",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域「Lv.12」",
+    "issue": "font-size:20px に対して font-weight:200（thin）が使用されており、DSの「thinは --font-size-2xl 以上限定」に未準拠で視認性がやや弱い",
+    "suggestion": "「Lv.12」は weight を 400 または 600 に引き上げ、数値周辺の見出し整合を確保する（ラベルは12px→14pxへも併せて調整）",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow, s30_me",
+    "location": "ヒーロー部 EXPバー",
+    "issue": "EXPバーの太さが s10=4px、s30=3px と不一致で、同一ヒーローパターン間のリズムがずれている",
+    "suggestion": "EXPバーの高さを共通値（例: 4px）に統一し、両画面で同一のヒーロー構成に揃える",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "AI提案カード（タスク化カード）と前後メッセージの間",
+    "issue": "カードの上下マージンが小さく（上14px/下8px）、周囲のメッセージと塊としての区切りが弱く、読み流しやすい",
+    "suggestion": "上下マージンを各16〜20pxへ拡張し、カードの左ボーダーと余白の両輪でブロック性を高める",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-107",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "コア3タブ（GROW/TALK/ME）の共通ビジュアル",
+    "issue": "夜空×ブルーアクセントの汎用的パターンに寄り、Phase Aの『画面を開いた瞬間の“らしさ”』が弱い。星屑以外に���ランド固有の“設計された沈黙”や余白の緊張感が立ち切れていない",
+    "suggestion": "Night Skyの物語性を微量に加える: 1) ヘッダー/ヒーローに月光のニュアンス（微差の濃淡/ハイライト）を導入 2) セクション切り替えの間（32px+）に用途に応じた“静かな余白”の再配分 3) タブアクティブPillや進捗に夜空由来の微かなノイズ/テクスチャ（実装は1色同値で）で個性を付与",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s14_goal_detail",
+    "location": "タスクリスト各行の区切り（下ボーダー連打）",
+    "issue": "各行に 1px の下ボーダーが連続し、Open Air原則に対してやや線が勝っている。視線が水平線で分断されがち",
+    "suggestion": "行間を+4〜6px広げ、ボーダーは先頭/末尾/グループ切替のみ、または --border（#484F58）に落としてコントラストを抑制。余白で区切る設計へ寄せる",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "時刻・数値表示（s10_growの時刻列、s20_talkのタイムスタンプ等）",
+    "issue": "時刻/数値の一部で tabular-nums が未徹底（s10の時刻は適用、他は未適用に見える）。横桁が揃わず、微小な揺らぎが出る",
+    "suggestion": "時間・レベル・EXP・パーセンテージなど数値系テキストには font-variant-numeric: tabular-nums を全画面で統一適用",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Today セクションの「＋ タスクを追加」リンク",
+    "issue": "本文と同ウエイトで直下に置かれ、視線が“次のリスト項目”として誤読されやすい。設計された沈黙（区切り）が弱い",
+    "suggestion": "リンク上に8〜12pxの余白を追加し、リンク自体は本文よりワンステップ弱いトーン（text-secondary）→hoverで --accent に昇格する設計にすると流れが自然",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

@@ -1,0 +1,262 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §4.4 vs §4.5",
+    "issue": "レベル式はLv.1→2=100EXPだが、§4.5の注記に「Lv.1→2=1,000EXP」と記載が残存。日次上限の説明と到達目安が矛盾し、実装・テレメトリ分析時に基準値が揺らぐ",
+    "suggestion": "正とする数式/値を単一化（次Lv=100+(Lv-1)×50、Lv1→2=100）し、§4.5の説明文を修正。「理論上の1日最大EXP=300+50=350」も踏まえ、全到達目安を式から再計算しテーブルを自動生成（reference_v1.mdに算出式とスナップショットを記載）",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §7.2 / §7.4 / ux §15（命名周辺）",
+    "issue": "AI対話メッセージのテーブル命名が「messages」と「social_messages」で混在。RLSの例外もmessagesと記載があり、ソーシャル用とAI対話用の誤適用リスクが高い（友達にAI対話が漏洩する恐れ）",
+    "suggestion": "AI対話は ai_messages、ソーシャルは social_messages 等に厳密分離し、RLSポリシーを各テーブルに明記。ux_v1.mdの内部矛盾メモをproject_v1.mdに反映して命名を確定（reference_v1.mdにRLSルール全文を掲載）",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project §4.2（タスク=10EXP固定）",
+    "issue": "タスクEXPが一律10のため、長時間タスクの不公平・短タスク大量分割のインセンティブが強い。日次上限300まで“分割”で稼ぐ行動を誘発し、習慣形成を歪める恐れ",
+    "suggestion": "日次の逓減報酬を導入（例: 当日1〜5件=10、6〜10件=6、11件以降=3）。または所要時間チップを重み付けに利用（例: 15/30/60/90/120分で+0/+2/+4/+6/+8のボーナス上限、ただし総日次上限は維持）。分割対策として「同一ゴール内の連続完了は逓減」の選択肢も検討",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "project §4.4（到達目安テーブル）",
+    "issue": "到達目安（1週=Lv5、1ヶ月=Lv10、1年=Lv40、1.7年=Lv50）は“平均日次約110EXP”を前提に見えるが、冒険+50は日2回上限かつ稀、タスク一律10では平均到達がやや楽観的",
+    "suggestion": "運用前にシミュレーション3パターン（軽=60/日、標準=90/日、ヘビー=130/日）を算出し、アプリ内コピーは中央値に合わせる。日次上限や冒険頻度の想定を表に併記（reference_v1.mdにモンテカルロ計算ログを残す）",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §4.2（ゴール達成=+50、1日1回）",
+    "issue": "ゴール達成ボーナスが規模難易度非依存の固定値。小粒ゴール量産の動機付けは7日ルールと1日1回上限で抑制されるが、中〜大ゴールの報酬不足でモチベーション差が出やすい",
+    "suggestion": "ゴールに“規模（S/M/L）”メタを追加し、達成EXPを40/50/70等に段階化（1日1回上限は維持）。規模はAI提案やタスク分解件数/総見積時間から自動推定＋ユーザーが上書き可",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §4.5（不正対策）",
+    "issue": "「同名タスク5分以内無効」だけでは、名称を少し変えた量産や自動化投稿で日次上限まで到達可能",
+    "suggestion": "サーバー側で行動異常検知を追加（短時間・大量作成/完了の閾値、同一デバイス/UA/IPのパターン分析、同一ゴール内の急連続完了のスコアリング）。疑義時はEXP仮付与→夜間バッチで確定（人間には体験を損ねないUIに）",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §4.3（冒険EXP検出）",
+    "issue": "「新しい出会い」がTALK内検出前提のため、実際の友達追加（QR承認完了）時に冒険EXPが付与されない。行動と報酬が乖離する可能性",
+    "suggestion": "friends承認完了イベントでも冒険カテゴリ（もしくは専用“出会い+30EXP/日1回”）を付与。TALK検出と二重計上しない排他ロジックをreference_v1.mdに定義",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §2.5（通知）・§5.3（応援）",
+    "issue": "通知文言に「GROWを送りました」とあるが、応援の正式名称/効果（EXP付与なし？リアクション？履歴表示？）が未定義で、ソーシャル・メタの核が曖昧",
+    "suggestion": "応援オブジェクトを定義（名称=GROW/励まし等、スタンプ種、1ユーザー→同友達への日上限、既読/未読、ミュート）。応援でEXPは増えないが“ソーシャルヒート”���してFRIENDS内で可視化する等の二次効果を設計",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §4.4（アバター進化）、ux §4.2.1",
+    "issue": "アバター進化5段階のうち、MVPはPhase1-3アセットのみ。Lv31到達時（Phase4）以降のフォールバック仕様や入替時期が未定義",
+    "suggestion": "Phase4-5未実装時のフォールバック（Phase3を継続表示＋「進化準備中」バッジ）を定義。Phase4の暫定アセット投入時期をマイルストーン化し、レベル到達ユーザーへの補填（限定装飾配布）ポリシーを明記",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project §4.5（日次上限=300、ゴール別枠+50）",
+    "issue": "日次上限到達後に行動の意味が薄れる“キャップ疲れ”が発生しうる。上級者の継続時間を削るリスク",
+    "suggestion": "上限到達後は“Overflow”を蓄積（表示のみ）。週末にOverflow 100につき装飾通貨1等のコスメ換算（Pay-to-Win回避）。またはレベル30+で“週次上限”の導入に置換し、日々の硬直を緩和",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project §4.2 / §3.2.5",
+    "issue": "日次リセットをJST固定にしているため海外ユーザーの生活時間と乖離。EXP/対話回数/習慣の境界体験が不自然になる",
+    "suggestion": "v0.2でタイムゾーン選択を明記（ユーザー選択 or 自動推定）。実装までの暫定として、UIにJST基準明示と「あなたの現地時刻ではxx:xxに相当」を併記",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux §3.1（TALKヘッダー）",
+    "issue": "TALKヘッダーに「☰=履歴」と「🕐=履歴」が併記されており、履歴のトリガーが重複して見える（S-21は☰タップ前提）",
+    "suggestion": "履歴起動は☰に一本化。🕐は削除または別機能（最近の提案等）に名称変更。アイコンとラベルの対応をヘッダー仕様に明記",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §2.2 / §1.3（アバター経済）",
+    "issue": "アイテム課金の設計が粗い（価格帯、レアリティ、入手経路、在庫回転、限定/常設、セット/コレクショ��、返品ポリシー未定義）",
+    "suggestion": "v0.2までに経済設計を追加: 1) 価格帯（¥200/¥480/¥980/¥1,480）とレア度（Common/Rare/Epic） 2) ローテーション（週替わり） 3) Premierチケット=任意アイテム1枚/週に縮小 or 月3枚据え置きのいずれかを検証 4) コレクション達成バッジ 5) 返品不可ポリシー明記",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §2.1（Premier特典、チケット）",
+    "issue": "Premierの“月3枚チケット”の使用タイミング/失効/在庫上限/対象外アイテムが未定義。Coming Soonのまま課金を受けるため、期待値齟齬のリスク",
+    "suggestion": "チケット仕様を先出し公開: 付与日（毎月1日/加入日に即時+翌月から月初付与）、未使用繰越の可否（最大6枚まで等）、対象外（限定/コラボは不可 等）、SHOP開始時の遡及付与ルールをUIに明記",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project §4.4（称号）",
+    "issue": "称号は8レンジで定義済みだが、長期運用では“細粒度の節目”が不足し、1〜2週間ごとのご褒美フィードバックが希薄化",
+    "suggestion": "レンジ内にサブ称号（例: Explorer I〜V）を自動付与して小刻みに演出（軽量バナーのみ）。称号一覧表（Lv→称号）をreference_v1.mdに固定化",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project §4.3（冒険EXP）",
+    "issue": "冒険EXPは「初めて/怖かった/いつもと違う」を検出するが、ユーザーが“今日は新しいことをしていない日”のモチベーションが切れやすい",
+    "suggestion": "週次クエスト（例: 新しい場所で作業する/新レシピを試す）を3件提示し、達成で+30×最大2/週。AIが個人化提案。日次の冒険がなくても週次で挑戦の余地を設ける",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §2.3 / project §7.3",
+    "issue": "オフラインで大量完了→オンライン復帰時のEXP一括反映はUI負荷が高く、演出の連続再生が煩雑になりうる",
+    "suggestion": "一括反映時は“まとめ演出”モードを導入（EXPバーは最終値まで補間、フロートテキストは合算1回、レベルアップは最終レベルのみ���出）",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "project §5.3（応援/メッセージ）",
+    "issue": "ソーシャルの“継続動機”としての再来動線（送受信後の軽いミッションやバッジ）が不足",
+    "suggestion": "月内に応援10回送信/3人にメッセージ送信等のソーシャル実績を追加（コスメ報酬）。フレンド同士の“二人称バッジ”（初めての相互応援 等）を図鑑に表示",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "project §4.3 / §6.2",
+    "issue": "冒険EXPの“同一文脈連投抑止”は文面類似度に依存しがち。表層言い換えで迂回可能",
+    "suggestion": "冒険記録に「時刻・場所・関与オブジェクト（固有名）」の軽量フィンガープリントを保持し、短期重複を除外。7日以内の同一カテゴリ冒険は+50→+20→+0の逓減も検討",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §1.2 / §1.4（遷移・戻る）",
+    "issue": "S-34（SHOP: Coming Soon）からの戻りUIの明示が弱い（一般的には左上戻るで推定可能だが、プレースホルダー画面は迷いやすい）",
+    "suggestion": "Coming Soon画面に「← 戻る」テキストボタン＋MEタブへのショートカッ���ボタンを併記（次にやるべき行動の提案）",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "project §0 / ux §0",
+    "issue": "UXベンチマークの所見は設計に反映されているが、反映トレーサビリティ（どの課題→どの仕様変更か）のマッピングが散在",
+    "suggestion": "ux_v1.md §0.3のマッピング表に“仕様ID（S-xx/§x.x）”列を追加し、各対応がどのUI/フローで満たされているかを明示してレビュアビリティを向上",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project §4.4（Lv50以降）",
+    "issue": "Lv50到達後は累計EXP表示のみで“余剰成長の使い道”が希薄。長期ユーザーの飽きポイントになりうる（3ヶ月〜）",
+    "suggestion": "Master後の“Prestige Track”を予告（累計1,000EXP毎にMasterコイン1→限定コスメ交換）。正式導入までの暫定は到達記念の限定フレーム配布を自動化",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project §9.2（継続要因取り込み）",
+    "issue": "1週間時点の“ご褒��”がレベル/称号以外に薄い。飽きポイント（1週間）の対策として視覚変化以外の報酬が必要",
+    "suggestion": "7日目ログイン時に“Starter Pack”コスメ（無料フレーム）を付与。1ヶ月時点は“Explorer背景”、3ヶ月時点は“オーラ”などの長期キフ化をロードマップに明記",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "project §4.2 / ux §2.4",
+    "issue": "ゴールの“チート防止”として7日ルールは定義済だが、作成→完了待ち→再編集→再完了を繰り返して日跨ぎで量産する手口への記述がない",
+    "suggestion": "同一ゴールIDの“完了確定”は月内最大3回などの上限/クールダウンを導入。完了待ちからタスク追加で待機解除→再完了時は新規に7日必要、をUIでも強調",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §3.3.1（会話→タスク化）",
+    "issue": "タスク抽出のconfidence閾値（0.7）は固定。ユーザーごとに“提案うるささ”の感じ方が異なる",
+    "suggestion": "設定に“タスク提案の頻度”スライダー（控えめ/標準/積��）を追加し、内部で0.75/0.7/0.6などにマップ。不要を繰り返すパターンは自動減衰を維持",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "project §4.5（不正対策）、ux §9.4",
+    "issue": "タスク連打対策は“同名5分以内”のみだが、同内容の多言語/絵文字差し替えで回避できる。検出粒度の定義が不足",
+    "suggestion": "名称トークナイズ＋類似度（Jaccard/Levenshtein）で同義語・装飾を正規化し、短時間の実質同一完了を1件に集約。ゴール/予定日/所要時間の一致も重み付け",
+    "model": "GPT-5",
+    "persona": "game_designer"
+  }
+]

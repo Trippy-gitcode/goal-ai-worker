@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "S14-8（タスク行）",
+    "issue": "タスク状態（active と scheduled）が色の違い（枠線色）だけで区別されており、非色覚ユーザーや低コントラスト環境では判別不能。WCAG 2.2 AA 1.4.1（色の使用）に違反。",
+    "suggestion": "色以外の視覚的手掛かりを追加する。例: 状態バッジ「進行中/予定」をタスク名の直後に表示、またはアイコン形状差（active: 中央に 8px ドット、scheduled: 中空サークル、done: チェック）を導入。あわせてスクリーンリーダー向けにテキストも提供（sr-only だけでは可視利用者に伝わらないため、可視・不可視の両レイヤで補完）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "App.jsx（Suspense fallback）",
+    "issue": "<main> に role=\"status\" を付与し aria-live/aria-label のみで表示。<main> は ARIA in HTML の制約上、他ロール付与が不適切で、さらに多くのスクリーンリーダーは aria-label のみの live region 追加を読み上げないことがある。",
+    "suggestion": "<div role=\"status\" aria-live=\"polite\">読み込み中…</div> のように、main ではなく汎用要素に live region を付与し、テキストノードを実体として配置する。必要なら visually-hidden でレイアウト影響を最小化。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "S14-8（.s14-task-card ボタン）",
+    "issue": "aria-label を指定しているため、ボタン内部の可視テキスト（タスク名・日時）がアクセシブルネーム計算で無視され、スクリーンリーダーが日時を読まない可能性が高い。",
+    "suggestion": "aria-label を外し、可視テキストをそのまま名前にするか、状態/所要時間など追加情報は aria-describedby で関連付ける。例: <button aria-describedby=\"task-<id>-meta\">…</button> + <span id=\"task-<id>-meta\" class=\"sr-only\">進行中・15分</span>。どうしても aria-label を使う場合は、タスク名・日時・状態をすべて含める。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "全体（--tap-target-min）",
+    "issue": "タップターゲットサイズを --tap-target-min に依存しているが、本���ッケージ内に値の定義が見当たらない。44×44px 未満だった場合は WCAG 目標および社内基準違反となる。",
+    "suggestion": "トークン定義を確認し 44px 以上を保証する。安全策として CSS で var(--tap-target-min, 44px) のフォールバックを設定。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "全体（focus ring 変数）",
+    "issue": "focus 可視リングが var(--focus-ring-*) に依存。未定義の場合、outline 指定が無効となりキーボードフォーカスが可視化されない恐れ（2.4.7 Focus Visible 重大リスク）。",
+    "suggestion": "CSS でフォールバックを設定（例: outline: var(--focus-ring-width, 2px) solid var(--focus-ring-color, #79C0FF)）。あわせてリングのコントラスト（UI 境界に対して ≧ 3:1）を実測確認。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S14-2（.s14-title）",
+    "issue": "CSS の typographical error: padting-top（padding-top の誤記）により意図した余白が反映されない。",
+    "suggestion": "プロパティ名を padding-top に修正し、見出しの視認性と一貫したレイアウトを保証。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

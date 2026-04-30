@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "画面中央のキャッチコピー「あなたの人生を、あなたらしく」",
+    "issue": "コピーが抽象的すぎて、初めて画面を見た人が3秒以内に「AIタスク管理・習慣化アプリ」であることを理解できない。",
+    "suggestion": "アプリの核心的価値（AIが伴走するタスク管理など）が直感的に伝わる、より具体的でベネフィットにフォーカスしたマイクロコピーに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "全体のカラースキームとUIの質感",
+    "issue": "全体的に無機質で開発者向けツールのような印象を受ける。ブランドDNAの「洗練＋親しみ」「よく行くカフェの心地よさ」が視覚的に表現されておらず、冷たい印象を与える。",
+    "suggestion": "Night Skyテーマであっても、テキストのコントラストや余白、角丸の処理で「親しみやすさ」を演出する。例えば、アクセントカラーの彩度を微調整し、温かみを持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタスクリスト左側のステータスアイコン",
+    "issue": "タスクの完了・未完了を示すアイコン（青丸、グレー丸）が直感的に分かりづらい。UX仕様書にある「⭕タップでチェックマーク」の挙動が視覚的にアフォーダンスとして伝わらない。",
+    "suggestion": "未完了は空の円、完了は明確なチェックマーク（または塗りつぶし＋チェック）にするなど、パッと見で状態が判別でき、タップ可能であることが伝わるデザインに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "TODAYセクション末尾の「+ タスクを追加」",
+    "issue": "主要なCTAであるタスク追加がリストの末尾にテキストリンクとして配置されており、タスクが増えるとスクロールしないと見えなくなる。視線誘導として弱い。",
+    "suggestion": "画面右下にFAB（Floating Action Button）を配置するか、ヘッダー付近に常にアクセス可能な追加ボタンを設ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の「登録する」ボタン",
+    "issue": "AIからのタスク提案という重要なコンバージョンポイントにおいて、「登録する」ボタンがチャットバブルと同化しており、主要CTAとして際立っていない。",
+    "suggestion": "提案カードの背景色とボタンのコントラストを強め、ボタンの形状（角丸やシャドウ）を強調して、思わずタップしたくなるアフォーダンスを持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "所要時間の横スクロールチップ（5分, 10分...）",
+    "issue": "チップの上下パディングが狭く、タップターゲットの最小サイズ（44x44px）を満たしていない。モバイルでの操作ミスを誘発する。",
+    "suggestion": "チップの上下パディングを増やすか、min-height: 44px を指定して、WCAGのタップターゲット基準をクリアする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s14_goal_detail",
+    "location": "タスクリストの完了・未完了アイコン",
+    "issue": "完了済みの緑チェックと、未完了の青/グレーの円が混在しており、視覚的なノイズが多い。特に未完了の青枠（今日）とグレー枠（予定）の差が分かりにくい。",
+    "suggestion": "アイコンの線の太さや色使いを整理し、ユーザーが「今やるべきこと」に瞬時に視線を向けられるようコントラストを調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s02_onboarding",
+    "location": "アバター選択領域",
+    "issue": "アバターのイラストが小さく、ユーザーが「自分のパートナー��として感情移入するための視覚的訴求力が不足している。",
+    "suggestion": "選択中のアバターを大きく表示する、またはカルーセル形式にして1つ1つのディテールをしっかり見せるレイアウトに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "AI理解メモのテキストブロック",
+    "issue": "AIが分析したインサイトという特別な情報が、単なる平文テキストとして表示されており、読むモチベーションを喚起しない。",
+    "suggestion": "重要なキーワードをハイライトする、またはテキストの行間やフォントウェイトにメリハリをつけ、サッと見で内容が頭に入ってくるタイポグラフィに改善する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "「単発タスク」「習慣」のトグルボタン",
+    "issue": "トグルの選択状態（青背景）と非選択状態（黒背景＋枠線）のコントラストはついているが、タブとしての繋がりが弱く、独立した2つのボタンに見える。排他選択��あることが伝わりにくい。",
+    "suggestion": "1つのコンテナ内に2つの選択肢を内包するセグメントコントロール（Pill型トグル）のUIに変更し、排他選択であることを視覚的に明示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  }
+]

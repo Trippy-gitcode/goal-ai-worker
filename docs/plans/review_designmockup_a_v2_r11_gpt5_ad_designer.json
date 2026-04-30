@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "ロゴ下のサブコピー周辺（中央）",
+    "issue": "初見3秒で「何ができるアプリか」が伝わりにくい。サブコピーが抽象的で、具体機能（AIコーチング/タスク管理/ゴール育成）が読み取れない。",
+    "suggestion": "サブコピーを価値提案に差し替え（例: 「AIコーチとタスク管理で、毎日を設計する」）。その下に小さな3アイコン＋短い説明（GROW=タスク/GOALS、TALK=AI相談、ME=プロフィール）を1行で配置し、機能像を一瞥で伝える。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "OTHER",
+    "screen": "s00_splash",
+    "location": "画面下部 CTAボタン",
+    "issue": "主要CTA「はじめる」が汎用的で、押した後に起こること（無料登録/アカウント作成）が直感しにくい。",
+    "suggestion": "ボタン文言を「無料ではじめる」または「サインアップ」に変更。副CTAは「ログイン」を文言維���しつつ、主要/副の視覚コントラスト差をやや拡大して意思決定を促進する。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Today セクション末尾「+ タスクを追加」",
+    "issue": "主要な次アクション（タスク追加）がテキストリンク風で視認性が弱く、リストに埋もれて見落としやすい。",
+    "suggestion": "「+ タスクを追加」を小型の強調ボタン（pill/ghost-primary）に変更し、周囲に24px以上の余白を確保。Today見出しの右端に「＋」アイコンを併設する案も検討し、ファーストビューで追加行動へ誘導する。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧下「+ タスクを追加」",
+    "issue": "ゴール詳細での主要行動がテキストのみで目立たず、長いリストの中で見失いやすい。",
+    "suggestion": "「+ タスクを追加」をゴール色（accent-subtle）背景のpillにし、前後32pxのセクション間余白で区切る。スクロール時に常に見つけやすい位置へ固定（上固定ツール��ー内に＋）する代替案も検討。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "入力バー右端 送信ボタン",
+    "issue": "送信ボタンが中間色背景で周囲と同化し、主要CTAとしての視覚的優先度が不足。入力完了時の「送る」が直感しづらい。",
+    "suggestion": "テキスト1文字以上で送信ボタンをブランド色（--button-primary-bg）に昇格し、アイコン色を反転（白）して状態変化を明確化。無入力時は現状のサブデュードで非アクティブ感を保つ。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "画面下部の「アバター設定」「設定」行",
+    "issue": "ナビゲーション行が本文と同じトーンで並び、CTAとしての手がかりが弱い（視線が止まりにくい）。",
+    "suggestion": "各行のタップ領域全体にhoverlessの subtle 背景（--accent-subtle 5〜8%）を付与し、縦リスト間に16pxのアイテム間余白と32pxのセクション間余白を再強調。行末の山括弧アイコンを--text-secondary→--accentにして視線を導く。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow",
+    "location": "Today 見出し直下の進捗テキスト「1 / 4 completed」",
+    "issue": "日本語UIの中で英語「completed」が混在し、トーン（敬語ベース・日本語主体）から軽く逸脱している。",
+    "suggestion": "「1 / 4 完了」に統一し、トーンオブボイスの一貫性を担保。数字はタブラー（font-variant-numeric: tabular-nums）を維持する。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s02_onboarding",
+    "location": "上部ステッパー（進行状況表示）",
+    "issue": "段階数がビジュアルバーのみで、現在ステップを数値で即座に把握しにくい。",
+    "suggestion": "ステッパー右側に「2 / 5」などの数値ラベルを追加し、残ステップの認知負荷を低減。タイトル直下の補助行に小さく配置しても良い。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "提案カード内の✕ボタン",
+    "issue": "✕がアウトラインボタンで他のセカンダリアクシ���ンと視覚的重みが近く、主要CTAから注意を分散させる可能性。",
+    "suggestion": "✕はアイコンのみのテキストレス・ゴースト（境界線なし、text-secondary）にして存在感を下げる。主要/副ボタンの優先度差を明確化。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.1 S00-2",
+    "issue": "タグラインに letter-spacing（var(--letter-spacing-ja)）と line-height（var(--line-height-ja-body)）が追加されているが、§4.1 では指定がなく仕様外の追加タイポグラフィ設定になっている。",
+    "suggestion": "仕様に追記して許容値（字詰め・行間）を定義するか、本画面では追加指定を削除して §4.1 の最小指定（font-size 14px / weight 400 / color --text-muted）のみに揃える。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.1 S00-3/S00-4",
+    "issue": "CTA に disabled 状態（:disabled, [aria-disabled]）と対応トークン（--button-disabled-*）のスタイルが実装されているが、§4.1 の状態仕様には未定義で仕様外追加になっている。",
+    "suggestion": "本フェーズでは disabled 状態を削除するか、デザイン仕様 §4.1（または共通ボタン仕様）に disabled 状態とトークンの定義を追加して整合させる。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "実装コード App.jsx / S00Splash.jsx",
+    "issue": "JSX で class 属性を使用しており、React/JSX の一般的な推奨（className）から外れている。ツールチェーンや型付けで警告の原因になりうる。",
+    "suggestion": "全ての class を className に置換して、React/JSX の標準的な記法に揃える。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.1 S00-1",
+    "issue": "ロゴの Y 座標が実測 y=326 と記録されており、§4.1 の『中央から上に60px（≈340）』から差分がある。測定基準（テキストボックスの中心/ベースライン等）による可能性が高いが、許容範囲が明文化されていない。",
+    "suggestion": "検証基準（中心点の定義と許容誤差 ±16px など）を仕様に明記するか、配置計算を見直し（例: ロゴ基準で top: calc(50% - 60px) を基点にする等）て数値の再確認を行う。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "実測スクショ事実",
+    "issue": "本文の説明『secondary（ログイン）の下辺が画面下端から 140px、primary（はじめる）は 204px』が JSON 記録（primary 140px / secondary 76px）および §4.1 と矛盾している。",
+    "suggestion": "実測スクショ事実の説明を『primary（はじめる）: 140px / secondary（ログイン）: 76px』に訂正し、仕様と一致させる。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§4.1 レイアウト/エッジケース",
+    "issue": "CTA スタックを bottom: 76px 固定で配置しており、縦寸が 812 未満の端末やセーフエリア（home indicator）環境で重なり・窮屈化のリスクがある。",
+    "suggestion": "env(safe-area-inset-bottom) を考慮した下マージンに変更（例: bottom: calc(56px + env(safe-area-inset-bottom))); または min()/clamp() を用いて 76px を下限にしつつ可変化するなど、エッジケースでの安全領域を確保する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

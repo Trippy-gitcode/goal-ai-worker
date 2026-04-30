@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.2（遷移マトリクス）",
+    "issue": "S-06（パスワード再設定完了画面）、S-42（メール変更）、S-43（パスワード変更）の遷移が主要パスのマトリクスに明示されていない。画面一覧（§1.1）や各詳細（§5.0.2, §13.1）には記述があるが、一覧マトリクスが網羅的でないため実装チームが見落とすリスクがある。",
+    "suggestion": "§1.2の遷移マトリクスを拡張し、S-37（設定）からS-42/S-43への遷移、およびメールリンク経由でS-06に入るフロー（外部遷移の扱いを注記付きで）を明記する。各行き止まりがないことをマトリクス上で保証する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1, §3.5（TALKヘッダー/履歴）",
+    "issue": "TALKヘッダーに「☰=履歴ドロワー」「🕐=履歴」「📝=新規チャット」とあり、履歴への入口が☰と🕐で重複している。機能の重なりは認知負荷と誤タップを増やす。",
+    "suggestion": "履歴への入口を1つに統一する。推奨: ☰でS-21（履歴ドロワー）を開き、🕐は削除。📝はクイック新規チャットとして残す。ヘッダーアイコンの役割はツールチップ/ラベル（SR用aria-label含む）で明確化する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.4（S-14 ゴール詳細）",
+    "issue": "ゴールの[削除]操作時に、紐づく単発タスク（未完/完了/Overdue/完了待ち中含む）をどう扱うかの仕様が未定義。タスクの孤児化や意図せぬ大量削除のリスクがある。",
+    "suggestion": "削除確認ダイアログで選択肢を提示: ①ゴールのみ削除（タスクの紐付け解除・タスク自体は保持）②ゴールと紐づく未完了タスクも削除 ③キャンセル。デフォルトは①。どの選択でも不可逆性を明記し、取り消し不可を確認する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §9.1（オフライン復帰時の同期演出）/ §8.6（演出キュー）",
+    "issue": "オフライン中に多数のタスク完了→復帰時にEXP演出を「まとめて再生」と記載があるが、件数が多い場合の上限や凝��方針が未定義。長尺の連続演出で操作阻害・疲労を招く恐れ。",
+    "suggestion": "復帰時は演出を集約: 例）『一括同期: 12タスク完了 +120 EXP』のサマリーバナー+EXPバーを1回だけ伸長（最終値にease補間）。レベルアップ/ゴール達成は個別優先度で最大2件まで再生、それ以上はバッジで要約。合計再生時間上限（例: 4秒）を定義。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.4（Today並び替え）/ §2.3（Today操作）",
+    "issue": "Todayの手動並び替えが「開始時刻による自動ソートを手動で上書き」とあるが、再び自動ソートに戻す方法や、新規タスク追加時/開始時刻変更時の優先順位が未定義。",
+    "suggestion": "並び順ルールを明記: ①デフォルト=時刻ソート ②手動並び中は新規タスクは末尾に追加 ③[並び順をリセット]で時刻ソートに復帰 ④開始時刻を編集したタスクは、時刻ソート時のみ位置反映（手動並び中は反映しない）。画面上に『手動並び中』の小ラベルと[リセット]を配置。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 と §4.5",
+    "issue": "レベル計算が『Lv.1→2=100EXP』と『Lv.1→2=1,000EXP』で矛盾。UX側で注記はあるが、実装工程で混乱・誤実装の恐れ。",
+    "suggestion": "§4.5の誤記（1,000EXP）を修正し、§4.4の式/表を正と明記。両所から参照される単一の定義表を用意し、UX仕様内の表示例（EXPバー/日次サマリー）も同一計算式に合わせて再確認する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2（RLS）/ §7.4（データライフサイクル）/ §5.4（プライバシー）",
+    "issue": "AI対話の保存先を「messages」と表記しつつ、ソーシャルのメッセージは「social_messages」と別記。テーブル命名の不整合はRLS誤適用に直結し、AI対話が友達に漏洩する重大リスク。",
+    "suggestion": "AI対話=ai_messages、ソーシャル= social_messages等に命名を固定し、両者のRLS/保持期間/権限を明確に分離して再記載。設計ファイル（reference_v1.md, system_map）にも同名で反映し、UX文面の用語も統一する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4（FRIENDS 図鑑グリッド）",
+    "issue": "友達最大500人のグリッド表示に対するバーチャライゼーション/ページングの記述がなく、PWA環境での初期描画・スクロール性能低下が懸念される。",
+    "suggestion": "FRIENDSリストにリストバーチャライゼーションを導入（IntersectionObserver + windowing）。初回は20-40件、スクロールで逐次ロード。検索/フィルタはMVP外でも、ソート（最近追加/レベル高）切替はUX補助として検討。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.4（TALKでのレベルアップ認知）",
+    "issue": "TALKではヒーロー領域がなくレベルアップ時はバナーのみ。成長実感（EXPバー遷移/アバター変化）との結びつきが弱く、気づき損ねる可能性がある。",
+    "suggestion": "TALKでも最小限の『ミニEXPバー+Lv』を一時的にヘッダー下へ表示（3秒で自動消去、Reduced Motion配慮）。もしくはバナーに『GROWで演出を見る』リンクを付与。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §11.2（小型端末のラベル短縮）",
+    "issue": "DISCOVERを「DISC」に短縮すると日本語UIで意味が伝わりにくい。サブタブの可読性が低下する恐れ。",
+    "suggestion": "短縮ではなくアイコン併用（例: 🔍=DISCOVER）や2行ラベルで省スペース化を検討。もしくはタブラベルはそのままにし、タブ外側の左右パディングを縮小して4タブを1行に収める。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.2（PROFILE 基本情報の自動保存）",
+    "issue": "各フィールドのフォーカスアウトごとにトースト「保存しました」を出すと多発しやすく、ノイズになる。",
+    "suggestion": "カード右上に『保存済み✓』のインライン軽量フィードバック（aria-live）に変更し、トーストはエラー時のみ。複数項目連続編集時はデバウンスして1回の保存/表示にまとめる。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.4（ドラッグ&ドロップ）/ §6.5（Pull-to-refresh）",
+    "issue": "Todayでのロングプレス並び替えとPull-to-refreshの上スワイプ/下スワイプが同一領域で競合する可能性。",
+    "suggestion": "ドラッグ中（long-press発火後）はPull-to-refreshジェスチャーを一時無��化。先頭到達時のみPull-to-refreshを有効にするガード（scrollTop==0 && notDragging）を仕様に追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.5（チャット履歴）",
+    "issue": "スレッドが100件まで増えると自動命名のみでは目的の会話を探しづらい。MVP範囲としては許容だが、使いこなすほど探索性が低下する。",
+    "suggestion": "将来拡張として『スレッド名の手動リネーム』『簡易検索（タイトル/日付）』の優先度を上げる。MVPでは並び替え（最近更新順固定）を明記し、最終メッセージにハイライト語を含める等の視認性向上を検討。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5（日次リセットJST 4:00）/ ux_v1.md（複数箇所で参照）",
+    "issue": "全ユーザーにJST 4:00リセット固定は、海外ユーザーや出張時に体感とズレる。リマインダー/日次サマリー時間との不一致が混乱を招きうる。",
+    "suggestion": "MVPはJST固定のまま、UI上で『リセット: 毎日 04:00 JST』を明示。将来のv0.2.0で『ユーザータイムゾーン対応』のロードマップ注記を追加。サマリー通知文面にもタイムゾーン表記を含める。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §9.1（オフライン→同期後の上限制御）/ project_v1.md §4.5（EXP上限）",
+    "issue": "オフライン中の多数完了→同期時に日次上限で一部EXPが不付与になる場合のユーザー向け説明が不足。『同期待ち』が解除された後、何がどれだけ加算されたか不透明になりやすい。",
+    "suggestion": "同期結果サマリーを表示: 例）『同期完了: 12件中 10件が+10EXP、2件は本日の上限で0EXP』。詳細内訳までは不要だが、上限で抑制された事実を明示することで不信感を避ける。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

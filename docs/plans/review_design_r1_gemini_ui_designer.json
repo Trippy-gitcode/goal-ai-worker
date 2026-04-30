@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§9",
+    "issue": "CSSトークンブロックのマークダウン構文エラー。`--info: #58A6FF;` の直後に誤ってコードブロックを閉じる ```` ` が挿入されており、CSSが途切れている。AIがこのブロックをそのままコピーして使用する前提（dev-system §19.9準拠）であるため、確実にCSSパースエラーが発生しアプリ全体のスタイルが崩壊する。",
+    "suggestion": "途中の ```` ` を削除し、1つの連続したCSSコードブロックとして正しくフォーマットする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "§2.2, §5, §8.1, §8.3",
+    "issue": "セマンティックカラーのsubtle版（`--danger-subtle`, `--success-subtle`等）が未定義。§8.1のDangerボタンや§8.3のチップで「subtle版」を使用するよう指定されているが、§5のテーマ定義および§9のCSSトークンに存在しない。実装時に存在しないCSS変数を参照するため、背景が透明になり文字が読めなくなる等のUI破綻が確実に発生する。",
+    "suggestion": "§5の各テーマ定義および§9のCSSトークンに、`--success-subtle`, `--danger-subtle`, `--warning-subtle` を追加する（例: `rgba(248, 81, 73, 0.1)` 等）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "z-index階層のトークンが完全に欠如している。UX仕様書にはハーフモーダル、トースト、ドロワー、ボトムシート、固定ヘッダー、ボトムタブなど多数のオーバーレイ要素が定義されているが、z-indexの体系がないため、実装時に各コンポーネントが場当たり的な値（999等）を使用し、トーストがモーダルの裏に隠れる等の致命的なレイヤー重なりバグが確実に発生する。",
+    "suggestion": "��ザインシステムにz-indexスケールを追加する。例: `--z-base: 0`, `--z-elevated: 10`, `--z-sticky: 100`, `--z-drawer: 200`, `--z-modal: 300`, `--z-toast: 400` 等を定義し、各コンポーネントの仕様に紐づける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "全体",
+    "issue": "Disabled（無効）状態のカラートークンが未定義。UX仕様書には「作成ボタン無効（グレーアウト）」「入力フィールドを無効化」等の指定があるが、対応する色（`--bg-disabled`, `--text-disabled`）がない。テーマ（特にダーク/ライト）間でコントラストが破綻するリスクが高い。",
+    "suggestion": "§5および§9に `--bg-disabled` と `--text-disabled` を追加し、§8.1ボタンおよび§8.2入力フィールドのDisabled状態のスタイルとして明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "Shadow / Elevation（影）のトークンが未定義。UX仕様書§7.4で「影(elevation)が付く」、§6.2で「トースト: 背景 + shadow」と指定されているが、デザインシステムにシャドウの定義がないため、一貫した浮遊���の表現が実装できない。",
+    "suggestion": "§4または新規セクションにシャドウトークン（`--shadow-sm`, `--shadow-md`, `--shadow-lg`）を追加する。ダークテーマではシャドウが見えにくいため、borderや背景色の明度変化と組み合わせる方針も併記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.2",
+    "issue": "アクセシビリティ用のフォーカスリング（Focus Ring）トークンが未定義。UX仕様書§10.3でTabキーによるフォーカス移動が要求されているが、フォーカス時の視覚的フィードバック（`outline` や `box-shadow`）が定義されていないため、キーボード操作時の現在位置が分からなくなる。",
+    "suggestion": "§8.2の入力フィールドだけでなく、全インタラクティブ要素に適用可能な `--focus-ring` トークン（例: `0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent)`）を定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§3.3, §4.2, §9",
+    "issue": "タイポグラフィ（weight, line-height）と角丸（border-radius）がCSSトークンとして§9に定義されていない。§3.3や§4.2で数値としては定義されているが、AIが実装時に直接参照できるCSS変数になっていない。",
+    "suggestion": "§9のCSSブロックに `--font-weight-regular: 400`, `--font-weight-bold: 600`, `--line-height-base: 1.5`, `--radius-sm: 4px`, `--radius-md: 8px`, `--radius-lg: 12px`, `--radius-pill: 999px` 等を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§8.1",
+    "issue": "GhostボタンのHover状態の背景色、およびセマンティックカラー（Danger等）のHover色が未定義。モバイルでもタップ時の視覚的フィードバックとして必要。",
+    "suggestion": "GhostボタンのHover背景色（例: `--bg-elevated` または `--accent-subtle`）を定義し、セマンティックカラーにも `--danger-hover` 等を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.5",
+    "issue": "ボトムシートのオーバーレイ背景色 `rgba(0,0,0,0.4)` がハードコードされている。他のモーダルやダイアログでも使用されるため、トークン化すべき。",
+    "suggestion": "カラーシステムに `--overlay-bg: rgba(0, 0, 0, 0.4)` を追���し、§8.5やUX仕様書のbackdrop指定をこのトークンに置き換える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  }
+]

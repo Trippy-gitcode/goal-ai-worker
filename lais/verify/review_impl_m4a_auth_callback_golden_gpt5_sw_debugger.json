@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "2. AuthCallback.jsx",
+    "issue": "detectSessionInUrl の非同期処理と getSession 判定が競合し、回線遅延や SDK 内部交換の遅延時にセッション未確立と誤判定してエラールートへ送ってしまう可能性がある（特に code パラメータあり・exchange が遅い場合）。",
+    "suggestion": "code がある場合は即時に失敗とせず、(1) exchangeCodeForSession 実行 → (2) onAuthStateChange を購読して一定タイムアウト（例: 5〜10 秒）までセッション到着を待機 → (3) 最終的に getSession で確定、の順でオーケストレーションする。onAuthStateChange でセッションが来たらエラータイマーをクリアし成功遷移に切り替える。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. AuthCallback.jsx",
+    "issue": "error_description の二重デコード（URLSearchParams.get() は既に % デコード済み）により、含まれる '%' などで decodeURIComponent が例外を投げ「URI malformed」などの不適切な文言が表示されうる。",
+    "suggestion": "URLSearchParams.get() の戻り値はそのまま使用し、decodeURIComponent は行わない。スペース化が必要な “+” のみ replace する等、最小限の整形に留める。また decode 処理は try/catch で安全にフォールバックする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. AuthCallback.jsx",
+    "issue": "exchangeCodeForSession の例外を握りつぶしており、既消費エラー以外（ネットワーク断・invalid_grant 等）も区別できないため、原因追跡・回復戦略が困難。",
+    "suggestion": "catch で error.code / error.message を判別し、\"already_used/invalid_for_pkce\" 系は無視、それ以外はログ出力（レート制御可）し、必要に応じて軽いリトライや onAuthStateChange 待機にフォールバックする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. AuthCallback.jsx",
+    "issue": "エラー分岐後に 2 秒の遅延でログインへ遷移するが、その間にセッションが確立してもエラータイマーをキャンセルしないため、成功後に誤って /auth?mode=login へ遷移しうる。",
+    "suggestion": "コンポーネント内で supabase.auth.onAuthStateChange を購読し、セッションが到着したら errorTimer をクリアして成功フローへ切り替える。またはエラー表示直後に一定間隔で getSession を再試行し、セッション確立でタイマーを停止する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. AuthCallback.jsx / 3. AuthCallback.css",
+    "issue": "WELCOME_HOLD_MS が 900ms とハードコードされ、design token (--duration-celebration: 800ms) と乖離。トークン変更時にデグレを招く恐れ。",
+    "suggestion": "JS 側の遅延は CSS カスタムプロパティから動的取得（getComputedStyle(document.documentElement).getPropertyValue('--duration-celebration') を ms に正規化）し、それに +α のバッファ（例: +50ms）を加える方式に変更する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2. AuthCallback.jsx",
+    "issue": "main 要素に role=\"status\" を付与しており、ランドマークとライブリージョンが混在。スクリーンリーダーで予期せぬ読み上げ順・範囲になる可能性。",
+    "suggestion": "role=\"status\"/aria-live はテキストコンテナ（p/div）に限定し、main からは除去する。状態遷移ごとに適切な aria-live 属性（polite/assertive）を子要素側に設定する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2. AuthCallback.jsx",
+    "issue": "エラーメッセージに低レベルの e.message（\"URI malformed\" 等）がそのまま出る可能性。ユーザーにとって行動可能性が低く、サポートにもつながりにくい。",
+    "suggestion": "想定エラーをコード別にマッピングし、日本語のガイダンスに変換（例: ネットワーク断、リンク有効期限切れ、すでに確認済み等）。未知エラーは汎用文言 + エラーID（timestamp/uuid）を表示し、詳細は console/error ログにのみ出す。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2. AuthCallback.jsx / 5. auth.js",
+    "issue": "重要分岐（code 検出、exchange 試行/結果、getSession の成否、遷移先決定）に開発時ログがなく、レースやリグレッションの原因追跡が難しい。",
+    "suggestion": "開発ビルド限定で構造化ログを追加（[AuthCallback] phase, codePresent, exchangeResult, sessionPresent, redirect, errorCode など）。本番では INFO→DEBUG 抑制 or サンプリング。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ミッション全体（テスト）",
+    "issue": "PKCE code exchange の E2E が未整備のまま。特に detectSessionInUrl と明示 exchange の競合・遅延を再現する自動テストがないため、デグレ検出が困難。",
+    "suggestion": "Supabase mock で以下のテスト行列を用意: (1) code あり/なし、(2) detectSessionInUrl 先行/遅延/失敗、(3) exchange 成功/既消費/invalid_grant/ネットワーク遅延、(4) reduced-motion on/off、(5) error_description に % と + を含む。各ケースで遷移先・表示・タイミングをアサート。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "1. App.jsx / 6. supabase.js",
+    "issue": "「SSR/prerender 将来対応のため」というコメントに反し、supabase.js は import 時に createClient を実行し、環境変数未設定時に即 throw。SSR/プリレンダ環境で評価されるとビルド/実行が失敗しうる。",
+    "suggestion": "クライアント環境でのみ Supabase クライアントを初期化する（例: if (typeof window !== 'undefined') 遅延初期化、あるいは dynamic import）。環境変数未設定時はクライアント側でのみ警告/フェイルさせ、SSR ではスタブを返���など二相化する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2. AuthCallback.jsx",
+    "issue": "外部由来の error_description をそのまま表示するため、異常に長い文字列でレイアウト崩れや可読性低下の恐れ（XSS はテキストノードのため原則回避されるが UX 上の懸念）。",
+    "suggestion": "表示長を適度にトリム（例: 200〜300 文字）し、省略記号を付与。詳細はログのみに残す。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

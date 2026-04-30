@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部の「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」テキストリンク",
+    "issue": "インラインのテキストリンクが色のみで区別されており、下線がない（WCAG 1.4.1 カラーのみに依存 禁止／デザイン仕様 §2.2で下線併用を要求）",
+    "suggestion": "「ログイン」テキストに text-decoration: underline を付与し、hover/pressed時は下線濃度や色で状態変化を加える。ボタン化しない場合は--accent色＋下線で統一する",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」行のチェックボックス",
+    "issue": "チェックボックスが約20×20pxで最小タップ領域44×44px未満（WCAG 2.5.5／デザイン仕様 §4.5）",
+    "suggestion": "チェックボックスとラベル全体をクリック領域にし、ヒット���ックスを44×44px以上に拡張（paddingまたは::beforeで透明領域を追加）。行全体をタップ可能にして誤タップを防ぐ",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域右端のEXP数値「1,240 / 2,000」",
+    "issue": "フォントサイズが10pxで、タイポグラフィスケール（最小--font-size-xs=11px）に反し仕様と不整合（デザイン仕様 §3.2）",
+    "suggestion": "EXP数値は--font-size-sm(14px)または最低でも--font-size-xs(11px)に引き上げ、行間は日本語本文規定(--line-height-ja-body)もしくは数値表示に合わせて1.4以上を確保",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "各メッセージ下のタイムスタンプ（例: 14:03）",
+    "issue": "タイムスタンプが10pxで、定義済みスケール外（--font-size-xs=11pxが最小）。タイポグラフィ仕様に不整合（§3.2）",
+    "suggestion": "タイムスタンプは--font-size-xs(11px)に引き上げ、可読性確保のため字間は--letter-spacing-body相当を維持。コントラストは--text-hintを継続",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "ボタン行の「進め方を聞く」「詰まりを相談」",
+    "issue": "TALK導線のボタンが無効状態（pointer-events:none/低コントラスト）。UX仕様ではS-11からTALKへ遷移できることが前提（UX §2.3）",
+    "suggestion": "完了済みタスクでもTALK導線を有効化し、タップでS-20に遷移（コンテキスト自動送信）。もし無効化ルールがある場合は理由テキストと代替導線を提示",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "タスクリスト各行の右端チェックアイコン（完了トグル）",
+    "issue": "チェックアイコンが約14pxでタップ領域が44px未満の可能性が高い。誤タップのリスク（WCAG 2.5.5／Apple HIG）",
+    "suggestion": "行全体または行右側44×44px以上を完了トグルのヒットエリアとして確保。視覚サイズはそのままでも、透明paddingで実効タップ領域を拡張する",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "テキストCTA「+ タスクを追加（s10/s14）」「+ 最初のタスクを追加（s15）」",
+    "issue": "インラインリンクが色のみで可視化され、下線がない。色覚多様性に配慮した非色依存の手掛かり不足（WCAG 1.4.1／デザイン仕様 §2.2）",
+    "suggestion": "インラインリンクは必ず下線を併用。もしくは小型テキストリンクをやめ、44px以上のテキストボタン（アクセント-subtle背景＋アイコン）に置き換え視認性とタップ性を両立",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "12:00「ジムで筋トレ」行の左ボーダー色（#D29922）",
+    "issue": "warning系セマンティック色（アンバー）が中立タスクの区切りに使われており、注意喚起や期限接近と誤認される恐れ（カラーシステム §2.3）",
+    "suggestion": "中立タスクの区切りは中立border（--border-strong）またはゴールに基づくドット色に統一。warning色は期限接近等の意味がある場合のみに限定",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "サブタブバー（PROFILE/DISCOVER/FRIENDS/SHOP）",
+    "issue": "各タブラベルの視覚高さが小さく、行全体のタップ領域も44px未満と見受けられるため、誤タップ・押しにくさの懸念",
+    "suggestion": "サブタブはmin-height:44pxを保証し、横スワイプ対応に加えて左右paddingを拡大。アクティブ下線は2px→3-4pxにし、視覚的に的確な焦点を与える",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "ヘッダー右側の2アイコン（時計・鉛筆）",
+    "issue": "ラベルなしアイコンが3つ並び、初見で意味が取りにくい。主要導線の直感性がやや不足",
+    "suggestion": "初回のみラベル付きツールチップを表示、もしくは「履歴」「新規」テキストを一時的に併記。アクセシビリティ名（aria-label）を適切に付与し、長押しで説明を表示",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

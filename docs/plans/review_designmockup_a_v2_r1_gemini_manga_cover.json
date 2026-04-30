@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン",
+    "issue": "ボタンの背景色（#1C2128）とテキスト色（#484F58）の明暗コントラスト比が著しく低く、視認できないレベルでありWCAG AA基準を満たしていない。",
+    "suggestion": "無効状態であっても、テキスト色を明るくし（例: #7A8593）、最低限の可読性（コントラスト比3:1以上）を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "TODAYセクション内のタスク行間",
+    "issue": "デザイン���ステム仕様書で「タスク間余白: 20px以上（呼吸するリズム）」と定義されているが、実際の画面ではタスク間のマージンが非常に狭く（4px程度）、仕様およびブランドDNAの「Open Air」と矛盾している。",
+    "suggestion": "タスク行間のマージンを仕様通り20px以上に拡大し、各タスクが独立した「間」を持つようにレイアウトを修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "下部の「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "無効状態と思われるボタンの背景（#1C2128）とテキスト（#484F58）のコントラストが極めて低く、テキストが背景に完全に沈んでしまっている。",
+    "suggestion": "無効状態を示す場合でも、最低限のテキスト可読性を満たす色（例: #7A8593）を使用し、ユーザーに機能の存在を認識させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダル全体",
+    "issue": "狭い領域内にトグル、テキスト入力、時刻、日付、横スクロールチップなど多種多様なUIコンポーネントが等間隔に近い形で詰め込まれており、情報の強弱（明暗・大小のコントラスト）が不足して視線が迷う。",
+    "suggestion": "必須項目と任意項目の間に意図的な余白（セクション間マージン）を設け、視覚的なグループ化を行うことで情報の密度を緩和する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "見出し「最初のパートナーを選びましょう」",
+    "issue": "文字サイズに対して行間（line-height: 1.35）がやや詰まっており、特に漢字や濁音の密度が高い部分で窮屈な印象を与え、品格あるタイポグラフィの「間」が不足している。",
+    "suggestion": "日本語見出しの行間を 1.4〜1.5 程度に微調整し、文字の周囲に呼吸できる余白を持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "進捗率「60%」の表示",
+    "issue": "「60」の数字に対して「%」の記号がベースライン揃えで配置されているが、数字のウェイト（200）���対して「%」のウェイト（400）が太く、視覚的な太さのバランスが不自然。",
+    "suggestion": "「%」のフォントウェイトを数字に合わせて細くする（200または300）か、サイズ比率を調整してタイポグラフィの美しさを統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード「企画書を仕上げる」",
+    "issue": "カード内の要素が左揃えで均等に配置されており、Z字の視線誘導の終点となる「登録する」ボタンへの視覚的な流れが弱い。",
+    "suggestion": "アクションボタン群を右下に配置するか、カード内の余白にメリハリをつけて、タイトルからボタンへ自然に視線が流れるようにレイアウトを調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE, DISCOVER, FRIENDS, SHOP）",
+    "issue": "選択中の「PROFILE」の下線インジケータが文字幅より短く、かつ他の非アクティブタブとの明暗コントラストが弱いため、現在地が瞬時に把握しづらい。",
+    "suggestion": "アクティブタブのテキスト色をより明るくし、下線インジケータの幅を文字幅に合わせることで、視覚的なアンカーとして機能させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s00_splash",
+    "location": "画面全体の要素配置",
+    "issue": "画面中央のロゴ群と下部のボタン群との間の余白が均等に近く、画面全体に「間」の緊張感（リズム）が欠けている。",
+    "suggestion": "ロゴ群を少し上部に配置し、下部ボタンとの間に意図的な「大きな余白（ネガティブスペース）」を作ることで、洗練された印象を強調する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  }
+]

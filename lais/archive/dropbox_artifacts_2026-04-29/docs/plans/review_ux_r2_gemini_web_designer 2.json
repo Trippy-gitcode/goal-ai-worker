@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2",
+    "issue": "最大10MBの画像アップロード時の非同期処理UX（ローディング表示やキャンセル操作）が定義されていません。モバイル回線では送信完了まで数秒〜十数秒かかる場合があり、ユーザーがアプリのフリーズと誤認する恐れがあります。",
+    "suggestion": "サムネイルプレビュー上にアップロード進捗（%またはスピナー）を表示し、送信中は入力バーと送信ボタンを無効化（または✕ボタンでアップロードキャンセル可能）する仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §13.1",
+    "issue": "テーマが4種（手動選択）定義されていますが、OSのダーク/ライトモード設定（prefers-color-scheme）に自動追従するオプションがありません。夜間にライトテーマのままになり、視覚的ストレスを与える可能性があります。",
+    "suggestion": "テーマ選択の選択肢に「システム設定に従う（デフォルト）」を追加し、OSがライトならDawn、ダークならNight Skyを自動適用する挙動を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3 / ux_v1.md §4.1",
+    "issue": "アバターはSVG合成されますが、テーマ（ダーク/ライト）切り替え時にアバターの配色（境界線、影、背景色など）がテーマに馴染むかどうかの定義がありません。「洗練」をコンセプトとする場合、ダークテーマでアバターが白背景のまま浮いてしまうとブランド一貫性が損なわれます。",
+    "suggestion": "アバターSVGのパーツ（特に輪郭線やベースカラー）にCSS変数（currentColor やテーマのトークン）を適用し、���ーマ切り替えに連動してアバターの色調が最適化される仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3 / §6.1",
+    "issue": "タスク追加（S-12）などのハーフモーダル内でテキスト入力フィールドにフォーカスし、ソフトウェアキーボードが表示された際、モーダルがキーボードに隠れないように押し上げられる挙動が定義されていません。",
+    "suggestion": "キーボード表示時は、visualViewport APIを利用してハーフモーダルの高さを動的に調整し、入力中のフィールドが常に可視領域に収まるようスクロール可能にする、または一時的にフルスクリーンへ拡張する仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md 全般 (例: §6.2, §6.6)",
+    "issue": "design_system.md で色や余白を定義する予定ですが、UX仕様書内に「16px margin」「12px」「rgba(0,0,0,0.4)」などのハードコードされた値が散見されます。実装時にデザインシステムとの乖離を生む原因となります。",
+    "suggestion": "ハードコードされたピクセル値や色指定を、デザイントークンのプレースホルダー（例: spacing-md, text-sm, color-backdrop）に置き換え、詳細は design_system.md に委譲する旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §6",
+    "issue": "「洗練」を謳うUIにおいて、アイコンのスタイル（Filled/Outlined、線の太さ、角丸、システムアイコンとカスタムアイコンの使い分け）のガイドラインがUX仕様書およびプロジェクト仕様書で言及されていません。",
+    "suggestion": "design_system.md で定義すべき項目として「アイコン体系（ウェイト、スタイル、サイズバリエーション）」を明記し、UX仕様書内の絵文字（☰, 🕐, 📝）はプレースホルダーであり、実装時は統一されたアイコンセットを使用することを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §8.2 / §2.2",
+    "issue": "GROW画面を下スクロール中、ヒーロー領域は縮小（アバター32x32）されています。この状態でタスクを完了��てレベルアップ演出が発生した場合、縮小された領域では演出の視認性が低く、「洗練された達成感」が損なわれます。",
+    "suggestion": "レベルアップ演出がトリガーされた際は、自動的にスクロール位置をトップに戻してヒーロー領域を最大化（80x80）してからアニメーションを開始するか、画面中央にフルスクリーンのモーダル演出として表示するよう変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.5",
+    "issue": "チャット履歴（S-21）から「新しいチャット」ボタンをタップした際、現在のTALK画面（S-20）のメッセージがどうなるか（画面がクリアされるのか、履歴として保存されてから空状態になるのか）が明記されていません。",
+    "suggestion": "「新しいチャット」タップ時、現在の会話を履歴に保存した上でTALK画面を空状態（§3.6）にリセットし、ドロワーを閉じるフローを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §8.6",
+    "issue": "演出キューによ��最大8秒間のアニメーションが直列実行されますが、この間ユーザーの他の操作（別のタスクの完了やタブ切り替え）がブロックされるのか、非同期でバックグラウンド実行されるのかが不明確です。",
+    "suggestion": "演出中もユーザー操作はブロックせず（ノンブロッキングUI）、タブを切り替えた場合は残りの演出キューをスキップ（または次回該当画面表示時に再開）する仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

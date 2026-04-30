@@ -19,7 +19,7 @@
 #   2: HANDOFF 推奨（caller は引継ぎ準備に入る）
 #
 # 根拠:
-#   - lais/verify/dev_system_v34_package.md §2.25.16.4
+#   - core_spec.md §6.3 コンテキスト管理閾値 (legacy v34 spec §2.25.16.4, archived 2026-04-30)
 
 set -eu
 

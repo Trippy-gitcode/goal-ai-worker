@@ -1,0 +1,112 @@
+[
+  {
+    "id": "PRE-R3-DEVOPS-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "screen": "R2.2 §4",
+    "location": "R2.2 L1638 vs L2051",
+    "issue": "§21 新設時の見出しレベル不整合。§4.1 のテンプレート本文（L1638）は `#### §21. 共通規範集（起動時要約版）` (h4) だが、§4.8 書込手順 Step 2（L2051）は `## §21. 共通規範集（起動時要約版）` (h2)。Code G_47 が §4.1 の逐語転記を指示される（§4.8 Step 3）一方で §4.8 Step 2 は h2 見出しを指定。どちらを正とすべきか不明。既存 dev_system_spec.md の他章は `## 1.` `## 2.` スタイル（h2）なので h2 が妥当だが、その場合 §4.1 内部の `#### §21` は不整合。結果として Code G_47 実装時に章ネスト破綻が発生する。",
+    "spec_reference": "R2.2 §4.1 L1638 '#### §21. 共通規範集（起動時要約版）' / §4.8 Step 2 L2051 '改行を2行挿入して `## §21. 共通規範集（起動時要約版）` 見出しを追加' / 既存 dev_system_spec.md L12 '## 1. 設計原則' (h2)",
+    "actual": "L1638 と L2051 で §21 見出しの heading level が h4 と h2 で矛盾。§4.1 のテンプレートをそのまま転記すれば既存 ## 1-## 20 と同階層に来ない",
+    "suggestion": "§4.1 L1638 を `## §21. 共通規範集（起動時要約版）` (h2) に統一。あるいは既存 dev_system_spec の番号体系（§ なし）に合わせて `## 21. 共通規範集（起動時要約版）` とする（§8.2 PD 記述との整合も要確認）。§4.8 Step 2 と一致させる修正を R2.2 本体で行う"
+  },
+  {
+    "id": "PRE-R3-DEVOPS-002",
+    "severity": "CRITICAL",
+    "category": "CORRECTNESS",
+    "screen": "R2.2 §2.2",
+    "location": "deploy.sh Step 8 (L480-486)",
+    "issue": "deploy.sh Step 8 のデプロイ失敗検出が機能しない。`eval \"$FRONTEND_CMD\" 2>&1 | tee -a logs/deploy_stdout.log` のようにパイプライン経由で tee につながれており、POSIX sh では pipeline の終了ステータスは最後のコマンド（tee）のもの。set -e + POSIX sh は pipefail を持たない（pipefail は bash 拡張、§3.7 では禁止）。結果 `DEPLOY_EXIT=$?` は if 文の終了ステータス（0）を拾い、wrangler deploy 失敗でも `[ \"$DEPLOY_EXIT\" -ne 0 ]` が成立せず、append_deploy_fail.sh は呼ばれない。STRIKE カウンタ更新（§3.6）も起動しない。デプロイ失敗の暗黙通過 = ρcrit 設計意図の根本破壊。",
+    "spec_reference": "R2.2 §2.2 L480 `if [ -n \"$FRONTEND_CMD\" ]; then eval \"$FRONTEND_CMD\" 2>&1 | tee -a logs/deploy_stdout.log; fi` / L482 `DEPLOY_EXIT=$?` / §3.7 L341 '`(( ... ))` 禁止' および bash 拡張禁止方針（pipefail 使用不可）",
+    "actual": "パイプライン末尾が tee のため、eval 失敗が $? で取得できない。set -e も POSIX sh では pipefail なしでパイプラインの非末尾コマンド失敗を検出しない",
+    "suggestion": "代替案: (a) 一時ファイル経由に変更 `eval \"$FRONTEND_CMD\" > /tmp/deploy.out 2>&1; FRONTEND_EXIT=$?; cat /tmp/deploy.out >> logs/deploy_stdout.log` (§3.7 POSIX 規約準拠)。(b) FIFO + tee の組合わせで exit status を取得。(c) pipefail を §3.7 禁止構文から除外し限定的使用を許可。最も単純な (a) を採用し R2.2 §2.2 の deploy.sh サンプルを修正"
+  },
+  {
+    "id": "PRE-R3-DEVOPS-003",
+    "severity": "CRITICAL",
+    "category": "CORRECTNESS",
+    "screen": "R2.2 §2.9",
+    "location": "proposal_log_lint.sh (L1215-1220)",
+    "issue": "proposal_log_lint.sh の G12 スコア集計ロジックが壊れている。L1215 で `rm -f \"$STALE_DATA\"` により tmp ファイルを削除した直後、L1218 で `STALE_COUNT=$(awk '{if ($2+0 > 7) c++} END{print c+0}' FS=: \"$STALE_DATA\" 2>/dev/null || echo 0)` として既に削除済みの `$STALE_DATA` を awk で読もうとしている。awk がファイル非存在エラーを吐き、`|| echo 0` で常に STALE_COUNT=0 にフォールバック。結果 `[ \"$STALE_COUNT\" -le 10 ]` は常に true、滞留提案が 11件以上あっても G12 FAIL しない。ωcrit（R2 Golden #17/#27）修正の根本意図が破壊されている。",
+    "spec_reference": "R2.2 §2.9 L1215 `rm -f \"$STALE_DATA\"` / L1218 `STALE_COUNT=$(awk '{if ($2+0 > 7) c++} END{print c+0}' FS=: \"$STALE_DATA\" 2>/dev/null || echo 0)` / L1220 `[ \"$STALE_COUNT\" -le 10 ] || { echo \"FAIL: G12 stale proposals > 10\"; exit 1; }`",
+    "actual": "ファイル削除 → 削除済みファイルから awk 読み取り → フォールバックで 0 → FAIL 判定不動作",
+    "suggestion": "L1215 の `rm -f \"$STALE_DATA\"` を L1220 の `[ \"$STALE_COUNT\" -le 10 ]` 判定後に移動。または STALE_COUNT を 2nd pass 前に sh 側ループで集計（iso_to_epoch ブロックと同時に）して STALE_DATA 依存を外す。もしくは `wc -l < \"$STALE_DATA\"` ベース集計に変更し awk 不要化"
+  },
+  {
+    "id": "PRE-R3-DEVOPS-004",
+    "severity": "HIGH",
+    "category": "CORRECTNESS",
+    "screen": "R2.2 §2.6",
+    "location": "canopy_common.sh check_blocked_integrity (L872-886)",
+    "issue": "check_blocked_integrity の awk パターン順序に δcrit'（R2 Golden #8）と同型のバグが残存。L875 `/^### [A-Z][A-Z0-9_-]*:/ { mid = $0 }` が無条件で mid を更新し、L878 `in_blocked && /^### [A-Z][A-Z0-9_-]*:/` が同じ行で発火した時には mid が既に新ミッション側に更新されている。結果 BLOCKED without reason の誤報で **次のミッションID** が FAIL 報告される。§2.13 δcrit' の `print; next` パターンは append_deploy_fail.sh / update_status には適用されたが、check_blocked_integrity には横展開されていない。",
+    "spec_reference": "R2.2 §2.6 L873-886 check_blocked_integrity 本体 / §2.13 L1323-1328 δcrit' 修正パターン『$0 ~ \"^### \" mid \":\" { in_block=1; print; next }』",
+    "actual": "新ミッション行で mid が先に上書きされ、続くルールで前ミッションの BLOCKED 違反が新ミッション名で報告される",
+    "suggestion": "awk ロジックを以下に書換え:\n```awk\n{ prev_mid = mid }\n/^### [A-Z][A-Z0-9_-]*:/ { mid = $0 }\n/^- \\*\\*STATUS:\\*\\*[[:space:]]*BLOCKED/ { in_blocked = 1; has_reason = 0; next }\nin_blocked && /^- \\*\\*BLOCKED 理由:\\*\\*/ { has_reason = 1 }\nin_blocked && /^### [A-Z][A-Z0-9_-]*:/ && NR > 1 {\n  if (!has_reason) print \"FAIL: BLOCKED without reason: \" prev_mid\n  in_blocked = 0\n}\nEND { if (in_blocked && !has_reason) print \"FAIL: BLOCKED without reason: \" mid }\n```\n（or 先に在 in_blocked ルールを評価するため順序入替）"
+  },
+  {
+    "id": "PRE-R3-DEVOPS-005",
+    "severity": "HIGH",
+    "category": "CORRECTNESS",
+    "screen": "R2.2 §2.7",
+    "location": "realworld_proof_check.sh (L1034-1044)",
+    "issue": "realworld_proof_check.sh の deploy.log timestamp 比較が事実上 no-op。logs/deploy.log への追記は deploy.sh Step 12 で行われる（§2.2 L518）が、G17 proof_check は Step 10 で実行される。G17 実行時点では当該ミッションの deploy.log エントリはまだ存在せず、`tail -1 logs/deploy.log` は **前回の別ミッション** のタイムスタンプを返す。PROOF_EPOCH（現在時刻）は常に DEPLOY_EPOCH（前回）より大きく、比較は常に PASS。`proof_epoch < deploy_epoch` の検出意図（証跡が deploy 完了前にキャプチャされていないかの確認）は機能しない。χcrit 修正の G17 timestamp バグ（#9）が別形で残存。",
+    "spec_reference": "R2.2 §2.7 L1037 `DEPLOY_ISO=$(tail -1 logs/deploy.log | awk '{print $1}')` / §2.2 L518 `echo \"$(date -u ...) DEPLOY-OK $MISSION_ID sha=...\" >> logs/deploy.log` (Step 12、G17 は Step 10 で実行)",
+    "actual": "当該デプロイの deploy.log エントリは G17 実行後に追記されるため、G17 が比較できるのは前デプロイのタイムスタンプのみ",
+    "suggestion": "(a) deploy.log への「開始時刻」追記を Step 0-1 に前倒し（DEPLOY-START エントリ追加）、G17 はその行と比較。(b) evidence/<MID>/deploy_started_at の tmp ファイルに deploy.sh 冒頭で now を書込、G17 はそれを参照。(c) 比較対象を MISSION_ID でフィルタ `grep \"DEPLOY-OK $MISSION_ID\" logs/deploy.log | tail -1` に変更し、該当エントリがなければ比較スキップ（初回デプロイ時の意味ある動作）"
+  },
+  {
+    "id": "PRE-R3-DEVOPS-006",
+    "severity": "HIGH",
+    "category": "CORRECTNESS",
+    "screen": "R2.2 §2.6",
+    "location": "check_test_pass (L841-843)",
+    "issue": "check_test_pass の READY_FOR_DEPLOY 自動遷移条件が OR セマンティクス。`PASS=1 以上` で遷移するが、§3.4 では cmd-unit/cmd-e2e はどちらも全ミッション必須（N/A 許容は明示時のみ）。現状 unit だけ PASS で e2e が FAILED 状態でも READY_FOR_DEPLOY に自動遷移する。コメント『最低 1 種類の証跡が PASS であれば遷移（cmd-e2e が N/A の低リスクミッションに対応）』は「N/A宣言時」と「単に e2e 未実行/FAILED」を区別していない。N/A 宣言は mission block の cmd-e2e: N/A で表現されるべきで、その判定ロジックが欠落。",
+    "spec_reference": "R2.2 §2.6 L841-843 `if [ \"$PASS\" -ge 1 ]; then update_status \"$MID\" \"READY_FOR_DEPLOY\" ...` / §3.4 L240-242 『cmd-unit: 全ミッションで必須（N/A 許容）/ cmd-e2e: 全ミッションで必須（N/A 許容）』",
+    "actual": "N/A 明示 と e2e 単なる未PASSが区別されず、e2e FAILED の場合でも unit PASS なら READY_FOR_DEPLOY 遷移",
+    "suggestion": "check_test_pass 内で LATEST_MISSION_FILE を grep し cmd-e2e: N/A を検出。N/A 明示時は e2e スキップ扱い。それ以外は unit+e2e 両方 PASS で遷移。擬似コード:\n```sh\nE2E_NA=$(grep -E '^[[:space:]]*cmd-e2e:' \"$LATEST_MISSION_FILE\" | grep -q 'N/A' && echo yes || echo no)\nUNIT_NA=$(... cmd-unit ... N/A ...)\nif { [ \"$UNIT_PASSED\" = yes ] || [ \"$UNIT_NA\" = yes ]; } && { [ \"$E2E_PASSED\" = yes ] || [ \"$E2E_NA\" = yes ]; }; then update_status ...; fi\n```"
+  },
+  {
+    "id": "PRE-R3-DEVOPS-007",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "screen": "R2.2 §3.6",
+    "location": "deploy STRIKE override (§3.6 L317 / §2.4 L618)",
+    "issue": "STRIKE ≥ 3 時の PO 明示承認ファイル `instructions/approvals/<MID>.strike_override.json` の **スキーマが未定義**。§3.5 Hフロー承認の JSON 形式は詳細定義されているが、strike_override は「存在のみで PASS」扱い（L619 `[ ! -f \"$OVERRIDE\" ]`）。何を PO が書くべきか・commit_sha 検証の有無・approver 名の要否が未決定。ENG が空ファイルを touch でバイパス可能（changed-files-allowlist で instructions/approvals/ を ADV/PO 書込専用にしていても、実装スクリプト側で検証していないため）。",
+    "spec_reference": "R2.2 §3.6 L317 『PO 明示承認（instructions/approvals/<MID>.strike_override.json 存在）がない限り deploy.sh が exit 1』 / §2.4 L618 `OVERRIDE=\"instructions/approvals/${MISSION_ID}.strike_override.json\"; if [ ! -f \"$OVERRIDE\" ]; then ...` / §3.5 と対称的に schema 定義が欠落",
+    "actual": "存在チェックのみで内容検証なし。schema 未定義で PO が何を書くべきか不明",
+    "suggestion": "§3.6 末尾に strike_override.json スキーマを追加:\n```json\n{\n  \"approver\": \"PO\",\n  \"approver_name\": \"futoshi\",\n  \"date\": \"...\",\n  \"mission_id\": \"...\",\n  \"strike_count\": 3,\n  \"override_reason\": \"<テキスト必須>\",\n  \"commit_sha\": \"<現HEAD必須>\"\n}\n```\nappend_deploy_fail.sh に schema 検証ロジック追加（jq -e）。§C4.2 STRIKE カウンタ記述にも同一スキーマ反映"
+  },
+  {
+    "id": "PRE-R3-DEVOPS-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "screen": "R2.2 §2.2",
+    "location": "deploy.sh Step 11 (L510-515)",
+    "issue": "deploy.sh Step 11 の STATUS → DONE 書換え awk ブロックが update_status 関数（§2.6 L854-867）を使わず inline で実装。同一機能の二重定義で将来の STATUS ロジック変更時に更新漏れリスク。また append_deploy_fail.sh（§2.4）も update_status を使わず inline awk。SSOT 原則（§3 設計意図）からの逸脱。",
+    "spec_reference": "R2.2 §2.2 L510-515 deploy.sh Step 11 inline awk / §2.6 L854-867 update_status 関数定義 / §2.4 L630-635 append_deploy_fail.sh inline awk",
+    "actual": "update_status 関数があるのに deploy.sh Step 11 と append_deploy_fail.sh で inline awk 重複",
+    "suggestion": "deploy.sh Step 11 を `. scripts/lib/canopy_common.sh; update_status \"$MISSION_ID\" DONE` に置換。append_deploy_fail.sh も同様に `update_status \"$MISSION_ID\" IN_PROGRESS` に置換。canopy_common.sh を source 可能にする（既存ベタ書きとの互換は `[ \"${CANOPY_COMMON_LOADED:-}\" = 1 ] && return 0` ガードで担保）"
+  },
+  {
+    "id": "PRE-R3-DEVOPS-009",
+    "severity": "MEDIUM",
+    "category": "COMPATIBILITY",
+    "screen": "R2.2 §2.14",
+    "location": "shellcheck_lint.sh (L1377-1388)",
+    "issue": "shellcheck_lint.sh が `SCRIPTS=$(find scripts -type f -name '*.sh' 2>/dev/null)` + `for f in $SCRIPTS` で word splitting 展開。ファイル名にスペース・タブ・改行が含まれる場合に誤動作。通常 scripts/ 下では発生しにくいが §3.7 POSIX 規約の厳格さと乖離。G10 拡張として pre-commit で強制される重要スクリプトのため、境界ケース対応が望ましい。",
+    "spec_reference": "R2.2 §2.14 L1377-1388 shellcheck_lint.sh / §3.7 L346 `find | while read で exit 1 禁止` の趣旨（ファイル名安全）",
+    "actual": "for f in $SCRIPTS の word splitting 展開でスペース含みファイル名が分断される",
+    "suggestion": "`find scripts -type f -name '*.sh' -exec sh -c 'head -1 \"$1\" | grep -q \"^#!/bin/sh\" && shellcheck --shell=sh --severity=error \"$1\"' _ {} \\;` に置換。exit code 集約は `if ! find ... -exec ... \\; -print 2>&1 | grep -q ...; then FAIL=1; fi` 等で対応。または find -print0 + xargs -0（POSIX 2024 で標準化予定、現状 GNU/BSD 両対応）"
+  },
+  {
+    "id": "PRE-R3-DEVOPS-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "screen": "R2.2 §6.1",
+    "location": "dev_system_spec §21 命名規則",
+    "issue": "既存 dev_system_spec.md は `## 1. 設計原則` `## 2. 変更フロー` のように § 記号なしの番号体系。R2.2 §4.8 は `## §21.` を指定（§ 付き）。Code G_47 が §21 新設時に § 付きか否かで既存章と不統一な見出しが発生する。§6.1 連鎖更新指示にも命名規則の明示なし。",
+    "spec_reference": "既存 dev_system_spec.md L12 `## 1. 設計原則`（§ なし）/ R2.2 §4.8 L2051 `## §21. 共通規範集`（§ あり）/ R2.2 §6.1 連鎖更新指示（命名規則言及なし）",
+    "actual": "既存章は § なし、R2.2 指示は § あり。Code G_47 実装時に命名統一性が破れる",
+    "suggestion": "R2.2 §6.1 末尾に明示: 『§21 の見出しは既存章（§ なし）に揃えるか、全章を § 付きにリネームするかを v3.4 確定前に PO が選択』。推奨は **現状維持**（新設 §21 を `## 21. 共通規範集` とし、§C0-C6 の内部見出しは `### §C0` のまま）。§21 の § を外しても §C0-C6 の § は鉄則⑭の 'ルールを曲げるな、変えろ' に準ずる明示的命名として残存"
+  }
+]

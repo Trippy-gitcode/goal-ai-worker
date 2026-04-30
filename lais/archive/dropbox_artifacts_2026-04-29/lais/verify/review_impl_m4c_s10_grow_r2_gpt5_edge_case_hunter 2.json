@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§B-3 + §修正後ファイル S10Grow.css .s10-check::before",
+    "issue": "44×44 のヒット領域拡張を ::before 擬似要素で実装しているが、ブラウザのヒットテスト領域は要素の border box に限定されるため、擬似要素で視覚的に広げても実際のクリック/タップ領域は 22×22 のままで拡張されない可能性が高い。",
+    "suggestion": "ボタン自体のヒット領域を拡張する実装に変更する。例: .s10-check に padding: 11px を与え margin: -11px で周囲レイアウト影響を相殺、または 44×44 のラッパー要素を用意して中央に 22px の見た目を配置。必要に応じて min-width/height: 44px; を適用。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§修正後ファイル S10Grow.jsx S10Grow() tappingId state",
+    "issue": "spring アニメーションの発火対象を単一の tappingId で管理しているため、複数タスクを短時間に切り替えると先にタップした行のアニメーションが直ちに打ち切られる（tappingId が上書きされる）。",
+    "suggestion": "タップ中 ID の集合（Set）または id→タイマーの Map を保持し、各行ごとに独立して s10-check-tap を付与/解除する。もしくは各 Check コンポーネントをメモ化し、animationend リスナで自身のクラスを外す。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§B-1 + §修正後ファイル S10Grow.jsx handleToggle",
+    "issue": "アニメーション終了の制御が setTimeout(400ms) に固定されており、CSS の --duration-fast 値と乖離した場合やテーマ変更時にズレる。prefers-reduced-motion: reduce のときも 400ms 待つため無駄なタイマが走る。",
+    "suggestion": "animationend イベントで終了を検知しクラスを外す（reduce 時はアニメーション自体が発火しないためイベントも不要）。タイマ方式を残す場合は getComputedStyle で実効 duration を取得して待機時間を算出する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§B-4 + §修正後ファイル S10Grow.jsx Check コンポーネント",
+    "issue": "aria-pressed が done のみ true、scheduled/active はどちらも false のため、スクリーンリ���ダー上で scheduled と active の区別が付きにくい。状態遷移時の発話も乏しくなる可能性がある。",
+    "suggestion": "active では aria-pressed=\"mixed\" を用い��か、aria-describedby で現在状態を別要素に明示。状態変更トリガ時に aria-live で変更を通知することも検討する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§B-2 + §修正後ファイル BottomTabBar.jsx",
+    "issue": "画面遷移ナビを <button> + aria-current=\"page\" で実装しているため、右クリックの「新しいタブで開く」やモバイルの長押しメニュー等のリンク固有機能が使えない。aria-current の読み上げも一部 SR ではボタン上で弱いことがある。",
+    "suggestion": "<a href> を用い、SPA 側で onClick で遷移をフック（preventDefault）するパターンに変更する。aria-current=\"page\" は <a> に付与。ボタンを維持する場合は role=\"link\" の検討や、ショートカット/コンテキストメニュー代替 UI を用意する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§修正後ファイル S10Grow.jsx useEffect 初期フォーカス",
+    "issue": "マウント時に mainRef に強制フォーカスするため、戻る遷移や支援技術使用時に予期せずフォーカスが奪われる可能性がある。",
+    "suggestion": "初回遷移時のみ、または document.activeElement が body のときのみフォーカスするなど条件分岐を入れる。ユーザーの明示操作（キーボードナビ開始）を検出したときにフォーカスを移す実装も検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§R2 レビュー観点（空状態は未記載）/ S10Grow 全体",
+    "issue": "Today/Overdue/Upcoming/Goals の空状態（要素 0 件）の表示やナビゲーションが未定義。現在の実装では単に何も表示されない可能性がある。",
+    "suggestion": "空状態用プレースホルダ（例: 「今日のタスクはありません」）と、次のアクション（追加ボタン/ガイド）を設計・実装する。SR 向けに aria-live での更新通知も検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§修正後ファイル S10Grow.jsx OverdueRow 延期ボタン aria-label",
+    "issue": "aria-label に task.name を全量挿入しており、長文・絵文字多数・非ASCII・RTL 名称で極端に冗長な発話や方向性の混乱が起こり得る。",
+    "suggestion": "aria-labelledby で���面上の短いラベル + task.name を参照させる、または aria-label を簡潔にし task.name は aria-describedby に分離。必要に応じて dir=\"auto\" を付与して双方向テキストを安定させる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§修正後ファイル S10Grow.css .s10-check フォーカススタイル",
+    "issue": ":focus-visible 非対応環境（旧 Safari/Chrome 派生等）では outline が消える可能性がある（:focus:not(:focus-visible) で outline を外している）。",
+    "suggestion": ":focus にも最低限のアウトラインを残すフォールバックを追加するか、@supports selector(:focus-visible) の条件分岐で :focus の解除を限定する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§B-4 文言設計 + Check aria-label",
+    "issue": "aria-label の動詞が「タップすると」で固定のため、キーボード/スクリーンリーダー利用者に不自然（デスクトップでの操作は“押す/選択する”）。",
+    "suggestion": "「押すと」や「選択すると」などデバイス非依存の文言に変更。プラットフォーム毎に文��を切り替える i18n 設計も検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-111",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§S10Grow 全体（大量データ時のパフォーマンス）",
+    "issue": "タスク配列を map で全更新するため、タスクが大量（数百〜）の場合に毎回全行が再レンダリングされる。スクロール中に多数の DOM が存在することでパフォーマンス劣化の恐れ。",
+    "suggestion": "行コンポーネントのメモ化（React.memo）、個別アイテム更新の最適化、リストのバーチャライゼーション（react-window 等）の導入、スクロールハンドラのスロットリング/RAIL 準拠の見直しを行う。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-112",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§B-1/§CSS spring と他 transform 併用",
+    "issue": "s10-check に transform: scale を付与するアニメーションは、親要素や将来のスタイルで transform を併用した場合に競合する（最後に適用された transform が勝つ）。",
+    "suggestion": "transform を合成する utility（CSS カスタムプロパティで scale のみ分離、あるいは個別ラッパ要素にアニメーションを適用）��干渉を避ける。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

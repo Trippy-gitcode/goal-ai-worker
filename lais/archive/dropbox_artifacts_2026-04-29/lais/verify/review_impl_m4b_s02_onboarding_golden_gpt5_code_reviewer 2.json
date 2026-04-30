@@ -1,0 +1,132 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "App.jsx",
+    "issue": "Router に <NotFound default /> を配置しているが、本ファイルは「現状全文」と記しつつ NotFound の import/定義が省略コメントのまま。実体が無い場合は初回レンダリングで ReferenceError になりクラッシュする。",
+    "suggestion": "NotFound を確実に import/定義する（例: import { NotFound } from './NotFound.jsx'）。あわせて CI でビルド時の未定義コンポーネント検出を有効化し、E2E で未知ルート遷移を 1 本追加。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "S02-5（S02Onboarding.jsx / .css）",
+    "issue": "role=\"radiogroup\" 内の各候補が button + role=\"radio\" で複数タブ停止点になり、左右矢印での移動・ロービング tabindex・ARIA パターンが未実装。キーボード操作とスクリーンリーダーの期待と乖離する。",
+    "suggestion": "WAI-ARIA Authoring Practices のラジオグループに準拠。推奨いずれか: 1) ネイティブ input type=\"radio\" + 視覚的にカスタム UI、2) roving tabindex（1 つだ�� tabIndex=0、他は -1）と ArrowLeft/Right で選択・フォーカス移動、Home/End 対応、aria-checked の同期。radiogroup に aria-activedescendant を使う選択肢も可。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "S02-5（S02Onboarding.css）",
+    "issue": "grid-template-columns: repeat(3, 100px) + gap 24px により、320px 幅端末で 348px を超えて横スクロール/はみ出しが確実に発生する。",
+    "suggestion": "レスポンシブ対応で溢れを防ぐ。例: grid-template-columns: repeat(3, clamp(80px, 28vw, 100px)); gap: clamp(12px, 3vw, var(--space-lg)); もしくは @media (max-width: 360px) で 2 列にフォールバック。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S02-5（S02Onboarding.css）",
+    "issue": "選択時の border を 1px → 2px に増やしており、要素サイズが変わるためグリッドにレイアウトシフトが発生する（視覚的なガタつき）。",
+    "suggestion": "通常時の border 厚みは固定のまま、選択強調は box-shadow/outset/inset で表現する。例: .s02-avatar { border: 2px solid transparent; } .s02-avatar-selected { box-shadow: 0 0 0 2px var(--accent) inset, 0 0 0 4px var(--accent-subtle); }",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "S02-6（S02Onboarding.css）",
+    "issue": "仕様では「次へ」CTA は画面下 100px 固定だが、現実装は margin で下寄せしているのみで固定位置にならない（キーボード表示・画面回転・可視領域変化で位置がずれる）。",
+    "suggestion": "固定配置にする。例: .s02-next { position: fixed; left: var(--space-lg); right: var(--space-lg); bottom: calc(env(safe-area-inset-bottom) + 100px); } 親に十分な padding-bottom を付与し重なりを回避。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "S02-1（S02Onboarding.jsx handleBack）",
+    "issue": "window.history.back() は外部オリジンへ戻る可能性があり、アプリ離脱や予期せぬページ遷移を誘発する（セキュリティ・UX 観点）。",
+    "suggestion": "document.referrer のオリジンを検査し、同一オリジンのみ back、そうでなければアプリ既定ルートへ。例: if (document.referrer && new URL(document.referrer).origin === location.origin) history.back(); else route('/', true);",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02Onboarding.jsx（handleSelect）",
+    "issue": "アニメーション解除の setTimeout 400ms が魔法の数字。デザイントークンや CSS の --duration-normal との乖離リスクがある。",
+    "suggestion": "時間定数をモジュール定数化（SPRING_MS=350、RELEASE_OFFSET=50）し、合わせて CSS トークン変更時の検出用コメントを明示。もしくは getComputedStyle(document.documentElement).getPropertyValue('--duration-normal') をパースして同期。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "S02-6（S02Onboarding.css）",
+    "issue": "letter-spacing: var(--letter-spacing-ja) のトークン定義が本パッケージ内で確認できないため、未定義時にプロパティ無効化となる可能性。",
+    "suggestion": "design_system.md に --letter-spacing-ja を明示定義するか、フォールバック値を指定（例: letter-spacing: var(--letter-spacing-ja, 0.02em);）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "S02-5（S02Onboarding.jsx）",
+    "issue": "onClick={() => handleSelect(a.id)} の無名関数がアバター数ぶん毎レンダーで再生成される。現状 3 件で影響は軽微だが、将来的に候補数増加時に不要な再レンダリングの温床になりうる。",
+    "suggestion": "onClick ハンドラを 1 本にし、data-attribute から id を読む、または useCallback + 固定クロージャ生成ヘルパを使用。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "S02-2（S02Onboarding.jsx）",
+    "issue": "TOTAL_STEPS と CURRENT_STEP_INDEX が画面内ハードコードで、他ステップと不整合が起きやすい（DRY 破り）。",
+    "suggestion": "オンボーディング全体のステップ定義を 1 か所（config/context）に集約し、現在ステップはルート or コンテキストから注入して表示側は参照のみとする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02-2（S02Onboarding.jsx）",
+    "issue": "離散ステップのインジケータに role=\"progressbar\" を用いると、スクリーンリーダーが連続値として読み上げるため認知負荷が上がる場合がある。",
+    "suggestion": "代替として nav/ol + aria-current=\"step\" の���ターンを検討。仕様で progressbar が必須なら aria-valuetext（例: \"2 of 5\"）を併記して意味を補足。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "S02-6（S02Onboarding.css）",
+    "issue": "iOS のホームインジケータや折り畳み端末の safe area を考慮しておらず、下部 CTA が近接しすぎる/重なる可能性がある。",
+    "suggestion": "safe area を考慮。例: padding-bottom: calc(env(safe-area-inset-bottom) + 140px); とし、固定 CTA の bottom にも env(safe-area-inset-bottom) を加算。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "App.jsx（Suspense fallback）",
+    "issue": "fallback が aria-label のみでテキストノードが無いため、支援技術によっては読み上げが安定しない可能性がある。",
+    "suggestion": "視覚的に非表示のテキストを含める。例: <main role=\"status\" aria-live=\"polite\"><span class=\"sr-only\">読み込み中…</span></main>（.sr-only はユーティリティクラスで実装）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

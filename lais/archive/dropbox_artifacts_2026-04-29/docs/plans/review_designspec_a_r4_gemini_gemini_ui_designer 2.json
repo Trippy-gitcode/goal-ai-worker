@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§3.1 カラー",
+    "issue": "複数テーマ（ライト/ダーク等）への切り替えを想定した場合、現在のsubtle系カラートークンの定義方法ではデザインが破綻します。`--accent-subtle` の値が `rgba(121,192,255,0.14)` のように、特定の色（`#79C0FF`）のRGB値をハードコードしているため、テーマ切替で `--accent` の色が変わっても `--accent-subtle` は元の青系の半透明色のままになってしまいます。",
+    "suggestion": "テーマ切替に対応するため、色の定義を構造化してください。まず、基本となる色のRGB値を分割してトークン化します（例: `--accent-rgb: 121, 192, 255`）。その上で、subtle系カラーを `rgba(var(--accent-rgb), 0.14)` のように定義します。これにより、テーマファイルで `--accent` と `--accent-rgb` を変更するだけで、関連する全ての派生色が追従するようになります。`--success-subtle` も同様の対応が必要です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3 トークン参照, §5.9 スナックバー",
+    "issue": "Elevation（高さ）を表現するためのシャドウ（影）に関するデザイントークンが完全に欠落しています。§5.6のフォーカスリングや§5.9のスナックバーで `box-shadow` の使用が示唆されていますが、「box-shadow（軽）」のような曖昧な記述では、実装者ごとに解釈が異なり、UIの一貫性が著しく損なわれます。",
+    "suggestion": "Elevationシステムとして、シャドウのスタイルをトークン化してください。例えば、`--shadow-sm`, `--shadow-md`, `--shadow-lg` のように複数のレベルを定義し、それぞれの `box-shadow` の値を具体的に指定します。そして、スナックバー、トースト、フォ��カスリング等のコンポーネント仕様でこれらのトークンを参照するように変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3 トークン参照",
+    "issue": "モーダル、スナックバー、トースト、ドロワーなど、複数のレイヤーが重なり合うUI要素が存在するにも関わらず、それらの重ね順を管理するためのz-index階層がトークンとして定義されていません。これにより、実装時に要素の重なり順が意図せず逆転するなどの表示不具合が発生するリスクが非常に高いです。",
+    "suggestion": "z-indexの階層を管理するトークンを定義してください。例: `--z-index-default: 1`, `--z-index-sticky: 100`, `--z-index-modal-backdrop: 900`, `--z-index-modal: 1000`, `--z-index-snackbar: 1100`。各コンポーネント仕様では、これらのトークンを用いてz-indexを指定するようにしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.1 カラー",
+    "issue": "インタラクティブな要素の状態（state）を表現するカラートークンが不足しています。`--accent-hover` は定���されていますが、主要なCTAであるプライマリボタン（`--button-primary-bg`）やセカンダリボタン、その他のタップ可能な要素のホバー（hover）やアクティブ（active/pressed）状態の色が定義されていません。",
+    "suggestion": "主要なインタラクティブ要素に対して、状態別のカラートークンを網羅的に定義してください。例: `--button-primary-bg-hover`, `--button-primary-bg-active`, `--border-strong-hover`。これにより、インタラクションの一貫性が担保され、実装の効率も向上します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.5 S-12 Task Add, §5.6 入力フィールド",
+    "issue": "入力フィールドのフォーカス（focus）時のスタイル定義に矛盾があります。§4.5では「focus 時 `--accent`」とボーダー色の変更のみが記載されていますが、共通コンポーネントを定義する§5.6では「border `--accent` / box-shadow `0 0 0 2px --accent-subtle`」と、シャドウ（フォーカスリング）も含む詳細なスタイルが定義されています。この不一致は実装時の混乱を招きます。",
+    "suggestion": "定義を一元化してください。§4.5��個別記述を削除し、「フォーカス時のスタイルは§5.6の共通定義に従う」と明記することで、§5.6が唯一の正しい仕様となります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.10 S-30 ME Profile",
+    "issue": "S-30のプロフィール画面で使われるインライン編集用の入力フィールドスタイルが、標準コンポーネントのバリエーションとして定義されていません。「border-bottom `1px solid --accent` のみ」というスタイルは、§5.6で定義された標準の入力フィールドとは大きく異なります。アドホックなスタイル定義は、デザインシステムの一貫性と再利用性を損ないます。",
+    "suggestion": "§5.6に、入力フィールドのバリエーションとして「インライン用（例: `variant: 'inline'`）」を正式に追加してください。そのスタイル（背景透明、下線のみ、フォーカス時の下線スタイル等）を明確に定義することで、コンポーネントとして管理・再利用できるようになります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§5.1 ボトムタブバー",
+    "issue": "Inactive状態のボトムタブが「SVGのみ（ラベルなし）」と規定されています。これはミニマルな表現ですが、ユーザーによってはどのタブが何を表すのか瞬時に判断しにくい可能性があります。また、スクリーンリーダーなどの支援技術を利用するユーザーにとっては、ラベルがないとタブの機能を理解できません。",
+    "suggestion": "アクセシビリティとユーザビリティ向上のため、Inactive状態のタブにもテキストラベルを表示することを推奨します（例: `--text-secondary`色で表示）。もし視覚的にラベルを非表示にするデザインを維持する場合でも、実装時に`aria-label`属性などでアクセシブルな名前を提供することを仕様書に明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§3.3 スペーシング",
+    "issue": "「タスク行間: 8px（§4.2 の「呼吸するリズム」規定）」という記述に誤りがあります。参照先の§4.2は認証画面（Auth）であり、タスク行間に関する記述は含まれていません。このような参照エラーは、仕様の信頼性を損ない、実装者を混乱させる��能性があります。",
+    "suggestion": "参照先を正しいセクション番号に修正してください。この場合、関連する記述がある§2.3「Open Air レイアウト原則」または§4.4「S-10 GROW」が適切です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  }
+]

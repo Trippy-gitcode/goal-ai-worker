@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §2.4",
+    "issue": "ゴール詳細(S-14)からTALK(S-20)へ遷移した後の戻りパスが不便。replaceStateでGROW状態に書き換えるため、ブラウザバックでS-10(GROW)に戻ってしまう。ユーザーは「特定のゴールについて相談した後、そのゴールの詳細画面に戻ってタスクを追加・編集したい」というメンタルモデルを持つため、UXを大きく損なう。",
+    "suggestion": "S-14からTALKへの遷移はpushStateで行い、TALK画面の左上に「← ゴールに戻る」ボタンを一時的に表示するか、ブラウザバックでS-14に戻れるようにナビゲーション履歴の管理方針を修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.3",
+    "issue": "DISCOVER画面からTALK画面に遷移して行う「ヒアリングセッション」完了後の、DISCOVER画面への復帰フローが定義されていない。5問完了後、ユーザーがどうやって分析結果を確認しに行くのか（自動遷移か、手動か）が不明。",
+    "suggestion": "ヒアリング完了時、AIの最後のメッセージ内に「分析が完了しました。[結果を見る]」というインラインボタン（カード）を表示し、タップでS-32(DISCOVER)へ遷移させるフローを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.2",
+    "issue": "画像添付時のファイルサイズ超過（10MB以上）時のエラーハンドリングと、アップロード中のUIフィードバックが定義されていない。無言で失敗するか、アップロード完了前にユーザーが送信ボタンを押してしまうリスクがある。",
+    "suggestion": "「10MB超過時は選択をキャンセルし、トースト『画像は10MB以下にしてください』を表示する」「選択後、プレビュー画像上にローディングスピナーを表示し、アップロード完了まで送信ボタンを無効化する」旨を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.4",
+    "issue": "タスクの手動ドラッグ＆ドロップによる並び替えと、開始時刻による自動ソートの競合解決ルールが曖昧。「手動順は保存される」とあるが、翌日以降の習慣タスクや、新規で開始時刻付きタスクを追加した際に、保存された手動順序と自動ソートがどうマージされるか不明確で、リストが混乱する原因になる。",
+    "suggestion": "「手動並び替えは当日のTodayセクションの表示順のみを一時的に上書きする。翌日のリセット時、または新規タスク追加時は、再度開始時刻順で自動ソートされる」と明確に定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3",
+    "issue": "タスクの所要時間プリセット値が、project_v1.md §3.2では「5分刻み（5/10/15/.../120分）」と定義されている��、ux_v1.mdでは「5/10/15/30/45/60/90/120分」と飛び飛びの値になっている。",
+    "suggestion": "横スクロールチップのUI制約上、ux_v1.mdの飛び飛びの値が現実的です。ux_v1.mdの値を正とし、project_v1.mdの矛盾リスト（§16など）に「所要時間は5分刻みではなく特定のプリセット値とする」旨を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3 / §6.6",
+    "issue": "タスク名（100文字）やメモ（500文字）などの入力文字数制限に達した場合のUI挙動が定義されていない。",
+    "suggestion": "各入力フィールドの定義、または§6.6 インラインエラーの項目に「最大文字数に達した場合はそれ以上のテキスト入力をブロックする（または文字数カウンターを赤字表示し、保存ボタンを無効化する）」を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §13.1",
+    "issue": "パスワード変更（S-43）完了後の画面遷移が定義されていない。「トーストを表示」とあるが、画面がS-43に留まるのか、S-37（設���トップ）に戻るのか不明。",
+    "suggestion": "「トースト表示後、S-37(設定トップ)に自動で戻る（左スライドアウト）」を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.2",
+    "issue": "AI理解メモが5セッションごとに自動更新される仕様だが、更新されたことをユーザーに知らせるフィードバックがない。ユーザーがMEタブを開かない限り気づかず、AIの価値（自分を理解してくれている感）が伝わりにくい。",
+    "suggestion": "メモが更新された際、MEタブのアイコンに一時的なバッジ（またはドット）を表示するか、TALK画面でAIが「あなたについての理解を更新しました」と軽く言及する仕組みを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.4",
+    "issue": "TALK画面内で冒険EXPを獲得し、同時にレベルアップ条件を満たした場合の演出タイミングが不明確。チャットバブル下の「冒険EXPカード」と画面上部の「レベルアップバナー」が同時に出現すると視覚的に��らかる。",
+    "suggestion": "§3.4に「冒険EXPカードが表示された後、1秒遅れて画面上部にレベルアップバナーがスライドインする」など、TALK画面内での演出の直列キューを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.2.1",
+    "issue": "project_v1.md §2.1でPremierプランのMVP特典として「限定アバターフレーム1種」が同梱されると定義されているが、S-41アバター設定のフレーム一覧モックに該当アイテムの記載がない。",
+    "suggestion": "§4.2.1のフレーム一覧モックに「クラウンフレーム（Premier限定）」などの具体的なアイテム名を追記し、実装漏れを防いでください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

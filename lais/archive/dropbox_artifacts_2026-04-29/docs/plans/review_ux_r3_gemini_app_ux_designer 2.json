@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3, §6.2",
+    "issue": "Undoスナックバーの表示時間（30秒）とトーストの共通仕様（3秒消去、最大2件）が矛盾しており、UIが破綻する。30秒間画面下部を占有するとボトムタブの操作やコンテンツ閲覧を阻害し、連続してタスクを完了した場合にスナックバーがスタックして画面を埋め尽くす。",
+    "suggestion": "スナックバーの表示時間は5秒程度に短縮し、複数タスク完了時は同一スナックバー内で「N件のタスクを完了」とまとめるか、最新のものに上書きする仕様に変更する。30秒のUndo猶予は「��了済みタスク一覧」やタスク詳細パネル（S-11）内からの操作として担保する設計に修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §6.1",
+    "issue": "ハーフモーダルの下スワイプで閉じるジェスチャーと、モーダル内コンテンツ（テキストエリアやリスト）の下スクロールが競合する。このまま実装すると、コンテンツをスクロールしようとしただけでモーダルが閉じてしまう誤操作が頻発する。",
+    "suggestion": "「モーダル内コンテンツのスクロール位置がトップ（scrollTop === 0）の状態で、さらに下方向へスワイプした場合のみ閉じるジェスチャーを発火させる」という条件を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALK画面での画像添付（最大10MB）におけるアップロード状態のUXが未定義。大容量ファイルのアップロードには時間がかかるため、送信ボタン押下後のプログレス表示や、エラー時のハンドリングがないとユーザーはフリーズしたと誤��する。",
+    "suggestion": "画像選択時にプレビュー上にローディングインジケータを表示し、アップロード完了まで送信ボタンを無効化するか、送信後にチャットバブル内でプログレスバーを表示する仕様を追加してください。また、容量超過や通信エラー時のインラインエラー表示も定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.2, §3.2, §6.1",
+    "issue": "キーボード表示時のボトムタブの挙動が未定義。iOS/AndroidのPWAにおいてキーボードが表示されるとviewportが縮小し、ボトムタブがキーボードのすぐ上に押し上げられて入力領域を著しく圧迫する。",
+    "suggestion": "「キーボード表示時（visualViewport.heightの変化検知時）は、ボトムタブを display: none にして非表示にし、入力領域を最大化する」という仕様を共通UIパターンに追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "QRスキャン（S-36）でカメラアクセスを拒否された場合、またはカメラが故障し���いる場合のフォールバック手段が未定義。この状態に陥ると友達追加が一切できなくなる。",
+    "suggestion": "カメラアクセス拒否時やエラー時には、エラーメッセージとともに「自分のQRコードを表示して相手にスキャンしてもらう」または「シェアリンクを送信する」画面へ誘導する代替導線（ボタン）をカメラビュー上に表示するよう定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §13.3, §5.1",
+    "issue": "プッシュ通知の許可リクエストが設定画面（S-39）にしか存在しない。ユーザーが自発的に設定を開かない限り通知が有効にならず、リテンション施策（リマインダー等）が機能しない。",
+    "suggestion": "オンボーディングの完了時（Step 5の後）、またはユーザーが初めてタスクに「開始時刻」を設定したタイミングで、コンテキストに沿った通知許可のソフトプロンプト（アプリ内モーダル）を表示するUXフローを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §7.1, §7.2, §7.4",
+    "issue": "モバイルUXにおいて重要なハプティクス（触覚フィードバック）がQRスキャン成功時にしか定義されていない。タスク完了時やドラッグ開始時の物理的なフィードバックがないと、操作感が損なわれる。",
+    "suggestion": "タスク完了時（Success/Heavy）、ドラッグ＆ドロップ開始時（Light）、エラー発生時（Error）に `navigator.vibrate()` または対応するHaptics APIを利用したフィードバックを行う定義を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALK画面でユーザーが上方スクロール中にAIのストリーミング応答が完了した場合の「↓ 新しいメッセージ」ボタンの挙動が不明確。未読状態がユーザーに伝わらない可能性がある。",
+    "suggestion": "「↓ 新しいメッセージ」ボタンに未読インジケータ（青いドットなど）を表示し、タップ時に最下部へスムーズスクロール（behavior: 'smooth'）する仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "ACCESSIBILITY",
+    "location": "ux_v1.md §7.4, §10",
+    "issue": "タスクの並び替えがドラッグ＆ドロップ（ロングプレス＋スワイプ）のみで定義されており、スクリーンリーダーユーザーや運動機能に制限のあるユーザーが順序を変更できない。",
+    "suggestion": "アクセシビリティ対応として、タスク詳細パネル（S-11）の「...」メニュー等に「上に移動」「下に移動」のテキストアクションを追加し、タップ操作のみでも並び替えが可能な代替手段を提供してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

@@ -1,0 +1,342 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §7.2 認証設計 / §7.4 データライフサイクル",
+    "issue": "RLS記述で“messages テーブル”がソーシャルメッセージのRLSとして説明されているが、§7.4ではAI対話履歴も“messages”と読める。一方でソーシャルは“social_messages”と別名で管理と記載。命名の不一致によりRLSを誤適用するとAI対話が友達に開示される重大なリスク。",
+    "suggestion": "データモデルを明示的に分離し、表記を統一する。例: ai_messages（AI対話）/ social_messages（ソーシャルDM）。RLSルールもテーブル名を明記し、AI対話はowner-only SELECT/INSERT、social_messagesはsender_id=auth.uid() OR recipient_id=auth.uid()のみSELECT/INSERTに限定。全箇所の“messages”表記を監査・修正。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §7.2 認証設計",
+    "issue": "セッション管理の実装詳細（アクセストークン/リフレッシュトークンの保存場所、ローテーション、ログアウト時の無効化、複数端末からの強制ログア��ト等）が未定義。",
+    "suggestion": "PWA前提での安全なトークン取り扱いを定義。例: アクセストークンはメモリ保持、リフレッシュはhttpOnly Secure SameSite=strictクッキー（Supabase PKCE + Auth Helpers）。リフレッシュトークンローテーションとトークン窃取検知（トークン再利用検出時に全セッション失効）。ユーザーの「他の端末からログアウト」UI/エンドポイントを用意。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project 全体（セキュリティ設計）",
+    "issue": "データ暗号化の方針が未定義（TLS強制、保存時暗号化、ストレージ署名URLTTL等）。Supabase/Storage/Pushの暗号化要件が明文化されていない。",
+    "suggestion": "通信はTLS1.2+強制、HSTS設定。DBはSupabase側の暗号化at-restを前提にしつつ、Storageは署名URL（有効期限≤5分）を必須化。プッシュはVAPID鍵管理を明記。機密度別の暗号化方針表（在庫: 画像添付/AIログ/ソーシャルDM等）をreference_v1.mdに追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project §5.4 プライバシー��計（QRコード）",
+    "issue": "QRコードにユーザーUUIDを含めているため、トークン失効後もUUID自体が第三者に保存・流通し、照合リスクが残る。トークンも24時間と長めでリプレイ・撮影拡散耐性が弱い。",
+    "suggestion": "QR/シェアリンクはopaqueな短期ワンタイムトークンのみ（128bit以上の乱数、5〜15分TTL、1回使用で失効）。サーバー側でトークン→ユーザー解決。QR再表示で既存トークン無効化（ローテーション）。スキャン回数/分あたりの検証レート制限も導入。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §5.1 友達登録 / §5.3 簡易メッセージ",
+    "issue": "友達リクエスト/応援/メッセージ送信のレート制限・再送クールダウン・同一相手への連投規制が未定義。スパム/ハラスメント耐性が不足。",
+    "suggestion": "サーバー側に厳格なRate Limitを実装（例: リクエスト送信は1相手/日1回、全体/時5件、メッセージは相手ごと/分1件、全体/分10件）。同一相手への未承認連投禁止、クールダウン（24h）。リクエスト総量CAP（例: 未承認が10件超なら新規送信不可）。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §4.4 FRIENDS / project §5.5 悪用防止",
+    "issue": "ブロック/解除機能のUIフローがUXに未定義（projectでは存在）。ユーザーが即時に防御できない。",
+    "suggestion": "S-35 友達詳細の「…」メニューに[ブロック]を追加（確認ダイアログ、結果トースト）。ブロック一覧管理UI（S-33内サブページ）と[ブロック解除]を実装。ブロック時は相互不可視+送受信遮断を明文化。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §4.4 FRIENDS / project §5.5 悪用防止",
+    "issue": "メッセージ通報（report）UI/フローがUXに未定義（projectでは記載）。証拠保全/レビューフロー/ユーザーへのフィードバックが不明。",
+    "suggestion": "各受信メッセージに[通報]長押し/メニューを追加→理由選択→送信→トースト。通報時は当該メッセージを凍結（ユーザー側からは削除不可）、モデレーションキューへ。エスカレーションSLA/誤通報対応/ブロック推奨導線も定義。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project §5.3 通知配信 / §2.5 通知設計",
+    "issue": "Web Push通知にメッセージ本文/相手名がそのまま表示されるとロックスクリーンで第三者に露出する可能性がある。",
+    "suggestion": "通知のプライバシーモード設定を追加（既定ON推奨）。本文を伏せ字にして「新しい応援/メッセージがあります」のみ表示。詳細はアプリ内で表示。ユーザーがオプトアウトできるトグルをS-39に追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project §6.4 AIデータプライバシー",
+    "issue": "AI対話の“分類結果ログ保存”の保持期間/削除ポリシーが未定義。ユーザー削除時の連動削除の記載もない。",
+    "suggestion": "分類ログの保持期間を対話と同一（90日）に定義し、退会時の物理削除を明記。個人識別子をハッシュ化/匿名化して保存する選択肢も検討。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project §6.4 外部API送信データ",
+    "issue": "PIIマスキングが正規表現中心で不完全。ユーザー教育のみに依存しているため、誤送信リスクが残る。",
+    "suggestion": "高感度モードを用意（既定ON推奨）: 送信前にクライアントで簡易NER/辞書照合、疑わしいPII検知時に確認ダイアログ。プロバイダ別オプトアウト/選択UI（OpenAI/Anthropic/Google）と、プロンプトに“不要な機微情報は含めない”システムガードレール追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §6.5 退会・データ削除 / §7.4 バックアップ",
+    "issue": "バックアップからの消去方針（削除要求後のバックアップ保持期間、復旧時の再混入防止）が未定義。GDPRの消去義務に抵触の恐れ。",
+    "suggestion": "バックアップ保持期間と削除ポリシーを明記（例: バックアップは30日保持、復元時に削除済みユーザーの再流入を防ぐ“削除IDリスト”でマスク）。プライバシーポリシーにも記載。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §6.4/§6.5 / 設定S-37",
+    "issue": "GDPR対応のデータ主体の権利（アクセス/ポータビリティ/訂正/処理制限/異議）の具体フローが未定義。エクスポートはv0.2.0以降“検討”のまま。",
+    "suggestion": "MVPでも手動処理フローを定義：S-37に“データをエクスポート/照会”を配置→バックエンドでJSONエクスポート、30日以内対応SLA。訂正/処理制限の問い合わせ窓口、管理画面/チケット駆動ワークフローを用意。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §7 技術スタック（Cloudflare/Supabaseの地域）",
+    "issue": "データ所在地/越境移転の取り扱いが未定義。Cloudflare Workersはグローバル実行で、EUユーザーの個人データ越境に関するSCC/DAAの根拠が明文化されていない。",
+    "suggestion": "データ所在地ポリシーを明記（例: Supabaseは東京/またはEUリージョン、Workersは地域ピニング/Ai Gatewayの地域コントロール使用）。SCC/データ処理契約の整備、プライバシーポリシーに越境の法的根拠（契約の履行/正当利益）を記載。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §6/§11",
+    "issue": "高リスク処理（AIによる行動/性格推定、プロファイリング）に対するDPIAの実施計画がない。",
+    "suggestion": "DPIAを実施し、処理目的/範囲/リスク/緩和策（保存90日、匿名化、オプトアウト、ユーザー通知）を文書化。定期レビュー（年1回）。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §2.5 通知設計 / ux §15",
+    "issue": "通知タップのディープリンクで、未ログイン時の認証後リダイレクトは定義済みだが、失効/削除済みオブジェクト（例: 友達解除後のメッセージ）時の遷移先/エラーUIが未定義。",
+    "suggestion": "対象不存在時は安全なフォールバック（S-33へ遷移し“対象は削除されました”トースト）。通知自体はサーバー側で自動クローズ/既読化する。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §4.4 FRIENDS（承認待ち/送信済み）",
+    "issue": "送信済みリクエストの一覧/取消UIがUXに明示されていない（project §5.3では“送信済みステータスも表示”とある）。整合性不足。",
+    "suggestion": "S-33にタブ（受信/送信）を追加。送信側は[取消]操作可、期限（残り時間）表示。取消時は相手側の保留を即時撤回。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-017",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §4.4 FRIENDS / project §5.5",
+    "issue": "応援/メッセージのレート/スロットリングに関するUXフィードバックが未定義（送信ボタン無効/クールダウン表示等）。",
+    "suggestion": "サーバーのRate Limitと整合するUIを実装。送信直後にクールダウンタイマー表示、超過時はエラートースト（残り時間表示）。応援は1日あたり/相手あたりの上限を明示。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §7.3 PWAオフライン / ux §9.1",
+    "issue": "オフライン保存されるデータ（タスク/ゴール/プロフィール）のローカル保護方針（暗号化/アプリロック）が未定義。端末紛失時のリスクが残る。",
+    "suggestion": "ローカル保存は最小限にし、機微メモはオプション。アプリロック（PIN/生体）をS-37に追加。WebCryptoでキーラップした暗号化保存（IndexedDB）を検討。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §7 技術スタック（セキュリティヘッダ）",
+    "issue": "CSP/COOP/COEP/Referrer-Policy等のセキュリティヘッダ方針が未定義。XSS/クリックジャッキング対策が明文化されていない。",
+    "suggestion": "厳格CSP（default-src 'self'; connect-src API/WS; img-src self blob data; frame-ancestors 'none' 等）、X-Frame-Options DENY、Referrer-Policy strict-origin-when-cross-origin、Permissions-Policy（camera/microphoneは必要時のみ）を定義。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project §7.2 認証設計",
+    "issue": "リフレッシュトークンの有効期間30日は記載あるが、ローテーション/失効時のユーザー影響（強制再ログイン時のUX）が未定義。",
+    "suggestion": "サイレント再認証失敗時のUX（小さなモーダルで“再ログインが必要です”→S-02誘導）を定義。トークンローテーションと不正検知（IP/UA大幅変化で再認証）方針を記述。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §7.4 データライフサイクル（画像添付）",
+    "issue": "画像添付はEXIF削除・縮小のみで、ストレージ公開範囲/署名URL/マルウェアスキャン/Content-Type固定化の安���策が未定義。",
+    "suggestion": "Storageは非公開バケット+署名URL（短TTL）。アップロード後にMIME検証、SVG無効化、アンチウイルススキャン（ClamAV等）をワーカーで実施。コンテンツはAI対話専用で第三者公開を禁止（RLS/署名URLで強制）。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-022",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux S-41 アバター設定 / project §8.1 MVP",
+    "issue": "MVP要件（限定フレーム装備）の具体的なUI/操作フローがS-41に未定義。実装がブロックされる。",
+    "suggestion": "S-41に装備UI（所持フレーム一覧→選択→[装備]→即時反映/保存）と未所持時の状態（グレーアウト/入手方法）を定義。戻り動作/エラー/オフライン時の挙動も追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §9.1 ネットワーク断 / §3.2 メッセージ送信",
+    "issue": "オフライン中に送信保留のTALKメッセージが、再送時にJWT期限切れ/認証失敗となった場合のUXが未定義。",
+    "suggestion": "再送前にセッション再検証。不一致時は“セッションが切れました。再ログインして���ださい”バナー→S-02誘導。保留メッセージはローカルに残し、再ログイン後自動再送の確認を取る。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §4.4 FRIENDS",
+    "issue": "友達上限（500人）到達時のUXが未定義（追加ボタンの無効化/ガイダンス）。",
+    "suggestion": "上限到達時は[QRを表示][QRスキャン]を無効化し、上部に“上限に達しました（500/500）”バナーと整理誘導。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §8 アニメーション / project §4.6 差別化",
+    "issue": "同時発火時の演出優先順位（例: タスク完了によるレベルアップとゴール達成が同時）が未定義。視覚競合の恐れ。",
+    "suggestion": "優先順位を定義: 1) クリティカル実績（ゴール達成）→ 2) レベルアップ → 3) 通常EXP演出。上位演出中は下位演出をキューイングし、演出間隔を最長2.5秒に制限。Reduced Motion時はテキストのみ連結表示。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §1.4 戻りナビ��ーション / §1.2 遷移マトリクス",
+    "issue": "ブラウザバックとモーダル/ドロワーのヒストリースタック連携が高レベル記載に留まり、TALKドロワー開閉やハーフモーダル多段時の具体規則が不明瞭。",
+    "suggestion": "history.pushStateのルールを詳細化（モーダル開→push、閉→pop、ドロワー開→push、タブ間はreplace等）。E2Eテストケースをe2e_test.mdに追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §4.4 FRIENDS（お知らせ/受信一覧）",
+    "issue": "“受信一覧”の0件時やページネーション/ロードモアの挙動が未定義。",
+    "suggestion": "空状態メッセージを定義し、20件ずつ“さらに読み込む”。既読化ルール（開封で既読）と全既読ボタンも追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "project §5.1 友達登録",
+    "issue": "重複リクエスト（同一相手へ再送）やブロック済みユーザーへのリクエストのサーバー/UX挙動が未定義。",
+    "suggestion": "同一ペアに未処理リクエストがある場合は新規送信を拒否し“既に���クエスト済みです（残りxx時間）”を表示。ブロック関係がある場合はサイレントドロップし、送信者には一般化エラーを返す。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-029",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §2.5 通知設計 / §7.2 認証設計",
+    "issue": "退会時にPushサブスクリプション（endpoint）や通知トークンを失効/削除する処理の記載がない。",
+    "suggestion": "退会ワーカーで当該ユーザーのPushサブスクリプションを全削除。再登録時は新規発行。通知DBに外部トークン（endpoint）の管理と自動クリーンアップジョブを追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-030",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project §2.4 プラン変更 / Stripe 連携",
+    "issue": "決済関連の個人データ（氏名/メール/請求先）に関するデータ管理者/処理者の役割・法的根拠が未明記。",
+    "suggestion": "プライバシーポリシーにStripeをサブプロセッサとして明記し、法的根拠（契約履行）・共有項目・保持期間・問い合わせ窓口を追記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-031",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §0 ターゲット/年齢層 / 利用規約",
+    "issue": "未成年者の利用可否/年齢制限（例: 16歳未満のGDPR同意）に関するガイダンスが未定義。",
+    "suggestion": "利用規約で年齢制限（16+等）と保護者同意の扱いを明記。オンボーディングで年齢確認UI（生年月日/年齢範囲選択）を追加し、未成年のデータ処理方針を定義。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-032",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §3.5 チャット履歴 / §6 共通UI",
+    "issue": "メッセージ/カード類のキーボードフォーカス順・エスケープキーでのモーダル/ドロワー閉じの規則が部分的に未定義。",
+    "suggestion": "ESCキー動作（モーダル/ドロワーのクローズ）とTab順序（送信→添付→本文→タスクカード内ボタン）を定義。スクリーンリーダーテキストもカードに追加（例: “このカードはタスク提案です”）。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-033",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §0 ベンチマーク適用",
+    "issue": "ベンチマークで指摘した“Free版機能制限の不満”はプロダクト方針で解消しているが、UX内でFreeユーザーの上限に到達した際の代替価値提示（AI以外の行動提案）が弱い。",
+    "suggestion": "TALK上限到達時（§9.3）に“今日はGROWで進めること”のカードを表示（AI不要の行動提案/振り返りテンプレ）。Freeでも“やれること”の提示で離脱抑止。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-034",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "project §6.4 AIデータプライバシー",
+    "issue": "AIプロバイダのサブプロセッサ一覧/保持ポリシー/監査ログについての外部リンクやまとめが未記載。",
+    "suggestion": "プライバシーポリシーにOpenAI/Anthropic/Googleのデータ取り扱いページへのリンクと、当社側での呼び出しログ保持期間（例: 90日）を明記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  }
+]

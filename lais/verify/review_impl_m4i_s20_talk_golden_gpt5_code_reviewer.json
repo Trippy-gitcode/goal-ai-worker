@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "USER_CONCERN",
+    "location": "§4 S20Talk.jsx",
+    "issue": "送信ボタンに onClick と form の onSubmit の両方で sendMessage() を呼んでおり、ボタンをクリックすると2回送信される（二重投稿バグ）。",
+    "suggestion": "どちらか一方に統一する。推奨: form の onSubmit のみに sendMessage() を置き、送信ボタン(type=\"submit\")から onClick を削除する。あわせて onSubmit 内で canSend を再確認してガードする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§4 S20Talk.jsx",
+    "issue": "IME 日本語入力中（composition中）の Enter で送信される可能性がある（e.isComposing 未考慮）。誤送信の UX リスクが高い。",
+    "suggestion": "textarea の onKeyDown で e.isComposing を確認し、composition 中は送信を無効化する。例: if (e.isComposing) return; Enter 無修飾のみ送信という現在の条件にこれを追加する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§4 S20Talk.jsx",
+    "issue": "AI バブルの各要素��� aria-live=\"polite\" が付与されており、複数の live region が同時に存在する。SR によっては不要な再アナウンスや読み上げノイズの原因になる。",
+    "suggestion": "live region は1箇所に集約し、新規メッセージ追加時のみ更新する。例えばリスト全体に aria-live を付ける、または直近メッセージ1件のコンテナにのみ aria-live を付与する。タイピングインジケータ等に限定するのも有効。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S20Talk.jsx",
+    "issue": "送信ボタンは aria-disabled だが、キーボード操作（Space/Enter）では onSubmit が発火し、実質的にアクションが走る（sendMessage内のtrimで無送信になるが、セマンティクス上は不一致）。",
+    "suggestion": "onSubmit/sendMessage 内で canSend を検証し、無効時は即 return することで、視覚・ARIA・実動作を揃える。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S20Talk.jsx",
+    "issue": "スクロールハンドラで毎回 setShowScrollBanner(distance > 80) を実行。値が変わらない場合でも setState が呼ばれうるため、不要な再レンダリングが発生する可能性。",
+    "suggestion": "prev と比較して変更時のみ更新するか、requestAnimationFrame で集約する。例: setShowScrollBanner(prev => { const next = distance > 80; return prev === next ? prev : next; });",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S20Talk.jsx",
+    "issue": "textarea 自動伸長の lineHeight（20）や padding 加算（+20）がマジックナンバー。CSS の line-height や padding とズレると挙動不一致やあふれの原因になる。",
+    "suggestion": "getComputedStyle から line-height/padding を取得して算出する、または JS での高さ調整をやめ CSS のみ（max-height と content-size に応じた自動高さ）で統一する。定数化（MAX_ROWS など）と CSS の max-height（100px）も同期させる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S20Talk.jsx",
+    "issue": "しきい値 80px（オートスクロールバナー表示条件）がマジックナンバーとして直書きされている。",
+    "suggestion": "COMPONENT 定数（例: const AUTO_SCROLL_THRESHOLD_PX = 80;）として定義し、コメントで spec 由来であることを明示。将来の仕様変更に追従しやすくする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§4 S20Talk.jsx",
+    "issue": "useMemo が import されているが未使用（デッドコード）。",
+    "suggestion": "未使用の import を削除してノイズを減らす。ビルド出力やツリ―シェイキングの最適化にも有利。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4 S20Talk.jsx",
+    "issue": "textarea ラベルの重複指定（視覚的に隠した <span> と aria-label の併用）。支援技術の name 計算上は aria-label が優先されるが、冗長でメンテ性を下げる。",
+    "suggestion": "どちらか一方に統一する。推奨: label 要素 + 視覚的に隠したテキストで name を提供し、aria-label は削除。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5 S20Talk.css",
+    "issue": "line-clamp の非標準プロパティ（line-clamp: 2）の併記はブラウザ間で無効になる可能性がある（-webkit-line-clamp のみ有効）。",
+    "suggestion": "ベンダープレフィクス版のみを残すか、対応状況をコメントで明示。可能なら CSS のブレークや max-lines による代替を検討。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S20Talk.jsx",
+    "issue": "ヘッダに role=\"banner\" を付与。SPA 内で複数画面に banner ランドマークが存在するとランドマークの重複となりうる。",
+    "suggestion": "application 内の局所ヘッダであれば role=\"banner\" は外し、単に header 要素（デフォルトのセマンティクス）で運用する。最上位レイアウトのみに banner を限定。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4 S20Talk.jsx",
+    "issue": "AI 応答の時刻に送信時の time を再利用しており、待機中に分が変わった場合に不自然な同一タイムスタンプになる可能性。",
+    "suggestion": "AI 応答生成時に現在時刻を取得して time を設定する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4 S20Talk.jsx",
+    "issue": "メッセージ ID の生成��� Date.now() ベースの単純連結を使用。極短時間の連続送信やマルチタブでの競合の可能性は低いがゼロではない。",
+    "suggestion": "単調増加カウンタや nanoid/uuid 等の衝突回避手段を使用して ID の一意性を高める。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§4 S20Talk.jsx",
+    "issue": "TaskProposalCard/QuestCard を同ファイル内に定義しており、S20Talk の責務がやや肥大化。",
+    "suggestion": "小コンポーネントとして ./partials ディレクトリなどに切り出し、S20Talk はデータ配列→描画の調整に専念させる。テストと再利用性が向上する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§1 App.jsx",
+    "issue": "TalkRoute は preact-router のルートとして機能するが、受け取る props（matches/location 等）を明示的に型付け/受け流ししていないため、将来の拡張時に不具合の温床になりうる。",
+    "suggestion": "必要に応じて props を受け取り、<S20Talk {...props} /> として委譲するか、<S20Talk path=\"/talk\" /> の直接指定に簡素化する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "callGPT5 / JSON_INSTRUCTION / extractJson",
+    "issue": "OpenAI 呼び出しで gpt-5 に対して response_format: { type: 'json_object' } を指定している一方、プロンプトでは最上位を JSON 配列で返すよう強制しています。json_object は配列単体を許容しないため、モデルが仕様どおり配列を返せず、抽出側の補正に依存した不安定な挙動になります。レビュー結果が壊れるか parse error になり、運用上の誤判定を確実に生みます。",
+    "suggestion": "出力契約を一つに統一してください。最上位配列が必要なら response_format を外すか、responses API / json_schema 等で array を表現できる方式へ変更します。逆に json_object を維持するなら {\"items\":[...]} にプロンプトと extractJson を揃え、全モデルで同一形式を保証してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "冒頭 import 群",
+    "issue": "const { glob } = require('path'); は path モジュールに存在しない export を分割代入しており、常に undefined になります。現状未使用なので即時クラッシュはしませんが、将来 glob を使う前提で保守者がこの import を信じると実行時エラーの原因になります。誤った import が放置されている点自体が可読性と保守性を大きく下げています。",
+    "suggestion": "不要なら当該 import を削除し、glob が必要なら fast-glob や glob パッケージを明示的に導入してください。標準 path で代替するなら変数名も残さず除去し、resolveFiles のコメントに『独自簡易 glob 実装』と明記して誤解を防ぐべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "parseArgs",
+    "issue": "オプション値の取り込みで次要素の存在確認がなく、--input や --timeout などの末尾指定時に undefined をそのまま代入します。さらに parseInt(undefined) は NaN になり、そのまま timeout や maxTokens に流れるため、API 呼び出しや後続ロジックが不定になります。CLI ツールとして入力バリデーションが不足しています。",
+    "suggestion": "値付きオプションは共通ヘルパーで次引数の存在と形式を検証してください。数値は Number.isInteger / Number.isFinite でチェックし、異常値時は具体的な usage を表示して exit 1 にするべきです。--sync と --async の同時指定禁止など、排他条件もここで検証すると安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "runPrecommitMode",
+    "issue": "コメントでは async モードは fire-and-forget とありますが、実装は opts.async を一切参照せず、常に Promise.all で全 API 完了を待ってから終了します。pre-commit hook で重い外部 API を同期的に待つため、コミット体験が悪化し、仕様と実装の乖離による運用トラブルを生みます。仕様どおり動く前提で導入すると確実に期待を裏切ります。",
+    "suggestion": "非同期モードを本当に提供するなら、子プロセスや detached 実行へ切り出して親プロセスは即終了させてください。少なくとも現状のままなら --async オプションと説明コメントを削除し、仕様書側も『現時点では未実装』に揃えるべきです。未使用フラグの放置は後続運用者を誤誘導します。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "runPrecommitMode / main",
+    "issue": "API 呼び出し失敗時の扱いがモードによって曖昧です。precommit では git diff 取得失敗は exit 0 で通し、レビュー API 失敗時も HIGH の疑似結果を書いて commit を通します。一方、通常モードでは fail したジョブは totalHigh に集計されず、サマリも成功件数に含まれません。失敗をレビュー結果と混同しており、品質ゲートとしての信頼性が低いです。",
+    "suggestion": "『レビュー失敗』と『レビュー結果 HIGH』を別概念として扱ってください。実行ステータスを明示するメタデータを分離し、sync モードでは API 全失敗時の扱いを設定可能にします。通常モードも失敗ジョブ数をサマリに含め、必要なら exit code を非 0 にすることで監視しやすくしてください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "resolveFiles",
+    "issue": "簡易 glob 実装がコメントに対して実際には『末尾 * のみ』より広く見えつつ、正規表現エスケープをしていないため、ファイル名中の . や + などを意図せず正規表現として解釈します。入力パターンによっては想��外マッチや見落としが起き、レビュー対象ファイルが静かに変わる危険があります。",
+    "suggestion": "独自実装をやめて信頼できる glob ライブラリへ置き換えるのが最善です。継続する場合でも base を regex escape してから * だけ置換し、サポート範囲を関数名・コメント・テストで明確化してください。レビュー対象の欠落は発見しづらく、後から原因追跡が困難です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "main / runJob / runPrecommitMode",
+    "issue": "副作用が広範囲に散っており、関数内で console 出力・ファイル書き込み・process.exit が直接行われています。I/O と判定ロジックが密結合なため、ユニットテストしにくく、分岐追加時に挙動を壊しやすい構造です。特に process.exit を深い関数で呼ぶ形は再利用性を著しく損ないます。",
+    "suggestion": "各モード関数は『結果オブジェクトを返す』責務に寄せ、終了コード決定と出力は main に集約してください。書き込み処理も saveReviewResult のような関数へ分離するとテスト可能性が上がります。CLI ツールでも副作用の境界を整理しておくと今後の機能追加で破綻しにくくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "withRetry / callGemini / callGPT5 / runPrecommitMode",
+    "issue": "リトライ回数 2/3、待機 5000ms*(i+1)、Gemini maxOutputTokens 16384、git diff maxBuffer 32MB などの数値が散在しており、根拠のない魔法の数字になっています。モデルや環境が変わった際に調整箇所を見落としやすく、レビューコスト・待ち時間・メモリ消費の最適化が困難です。",
+    "suggestion": "定数を設定セクションへ集約し、用途が分かる名前を付けてください。例えば RETRY_BACKOFF_MS, PRECOMMIT_DIFF_MAX_BUFFER, GEMINI_MAX_OUTPUT_TOKENS のように定義すると意図が明確になります。CLI 引数または環境変数で上書き可能にすると、CI とローカルでの運用差にも対応しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0377,
+    "input_tokens": 13772,
+    "output_tokens": 2045,
+    "model_id": "gpt-5.4"
+  }
+]

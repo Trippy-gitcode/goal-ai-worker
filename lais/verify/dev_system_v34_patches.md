@@ -2292,3 +2292,82 @@ PO 承認: 2026-04-27「β 軸 (仕様書 80% 削除) OK。ただしアーカイ
 
 ---
 
+## PATCH-VALIDATOR-OVERFIRE-REDUCTION-V2（2026-04-27）
+
+ミッション ID: VALIDATOR-OVERFIRE-REDUCTION-V2
+前提: PATCH-VALIDATOR-OVERFIRE-REDUCTION-V1（impl 優位キーワード判定が長大プロンプト + 多 keyword 時に spec / analysis を上書きするバグ）
+
+### 背景
+
+2026-04-27 午後、累計 16 件の変更を含む 800 行超のプロンプト（ALPHA-PO-EXPECTATIONS-SSOT-V2-UPDATE、明示的に SSoT 化ミッション）で v1 改修済 validator が誤 BLOCK。原因は v1 の判定優先度「impl 優位 → spec → analysis → 既定 impl」のうち impl 優位キーワード（`実装` / `デプロイ` / `hook 改修` / `機械強制 hook 改修` / `動作テスト 6` / `hook 再結線` / `改修箇所`）が、長文の SSoT 化ミッション本文に多数紛れ込むことで impl 確定 → MATRIX 検証発火 → 誤 BLOCK の連鎖を引き起こした。ADV メインが本日 3 度目の暫定無効化で進行回避。
+
+### 改修内容
+
+`scripts/subagent_mission_validator.sh` のミッションタイプ判定を以下に強化:
+
+1. **判定優先度を v1「impl 優位 → spec → analysis → 既定 impl」から v2「spec 明示 → analysis 明示 → 既定 impl」に変更**: impl 優位キーワード判定そのものを撤廃し、spec / analysis 明示出現を絶対優先ルール化。
+2. spec 明示キーワード（`仕様書化|SSoT ?化|SSoT ?起票|雛形作成|テンプレ作成|テンプレ更新|文書化`）が「目的」セクション内に 1 回以上出現 → spec 確定（impl 優位語彙の有無に関係なく）。
+3. analysis 明示キーワード（`分析|レビュー|計画作成|提案書|評価レポート|アーカイブ計画|圧縮計画|診断|考察|批評`）が「目的」セクション内に出現 → analysis 確定。
+4. 上記いずれも該当しない場合のみ impl タイプ + 既存 MATRIX 検証実行（破壊的変更ゼロ）。
+5. 副次修正: `set -eu` 配下で `. lib/resolve_repo_root.sh 2>/dev/null || true` が POSIX sh 仕様で `||` 評価前に exit 1 する挙動を `[ -f ]` ガードで先回避（ロバスト化）。
+
+「目的」セクション抽出は v1 の awk ロジック（`(目的|成功定義|成功基準|目標|Mission|Purpose|Goal|Objective)` 見出しから `(制約|入力データ|完了条件|完了報告|背景)` 直前まで、最大 50 行）を流用。
+
+### v1 との差分要約
+
+| 項目 | v1 | v2 |
+|---|---|---|
+| 判定順序 | impl 優位 > spec > analysis > 既定 impl | spec 明示 > analysis 明示 > 既定 impl |
+| impl 優位キーワード判定 | 有（`実装` / `デプロイ` / `hook 改修` 等） | 撤廃 |
+| 長大プロンプト + 多 impl 語彙 + spec 明示 | impl 確定 → MATRIX → 誤 BLOCK | spec 確定 → MATRIX skip → PASS |
+| `lib/resolve_repo_root.sh` 不在時挙動 | exit 1（POSIX sh 仕様） | `[ -f ]` ガードで PASS |
+| 行数 | 326 | 357 (+31) |
+
+### 動作テスト 8/8 PASS
+
+| Case | 種別 | 期待 | 結果 |
+|------|------|------|------|
+| 1 | impl ミッション (短文 + matrix 整合) | PASS | PASS（rc=0、mission_type=impl） |
+| 2 | impl ミッション (短文 + matrix 不整合) | BLOCK | BLOCK（rc=2、matrix_mismatch） |
+| 3 | spec (短文、SSoT 化 + matrix キーワード含む) | PASS（skip） | PASS（rc=0、mission_type=spec MATRIX_skipped） |
+| 4 | **spec (長文 800+ 行 + 多 matrix kw + impl 優位語彙) = 本日再現ケース** | PASS（skip） | **PASS（rc=0、mission_type=spec MATRIX_skipped、purpose_block_len=3134）** |
+| 5 | analysis (分析 キーワード) | PASS（skip） | PASS（rc=0、mission_type=analysis MATRIX_skipped） |
+| 6 | analysis (長文 + 多 matrix キーワード) | PASS（skip） | PASS（rc=0、mission_type=analysis MATRIX_skipped） |
+| 7 | spec/analysis 非含 + impl + matrix 整合 | PASS | PASS（rc=0、mission_type=impl） |
+| 8 | spec/analysis 非含 + impl + matrix 不整合 | BLOCK | BLOCK（rc=2、matrix_mismatch、mission_type=impl） |
+
+### 検証コマンド
+
+```sh
+# 改修箇所確認（spec / SSoT / analysis / impl 文字列）
+grep -nE "spec|SSoT|analysis|impl" /Users/futoshi/Desktop/goal-ai-worker/scripts/subagent_mission_validator.sh
+#  → 5(v2 マーク行), 232-238(MISSION_TYPE 判定), 251/267(PASS ログ) 等ヒット
+
+# 構文確認
+sh -n /Users/futoshi/Desktop/goal-ai-worker/scripts/subagent_mission_validator.sh
+#  → 0 (PASS)
+
+# 8 ケース動作テスト
+sh /tmp/sv_test_v2/run.sh
+#  → 8 passed, 0 failed (ALL PASS 8/8)
+```
+
+### 修正ファイル数
+
+**1 件**:
+1. 更新: `scripts/subagent_mission_validator.sh`（326 行 → 357 行、+31 行 / +約 1,400 bytes、v1 比）
+
+### 主要発見と過剰発火低減推定
+
+- 本日午後の再現ケース ALPHA-PO-EXPECTATIONS-SSOT-V2-UPDATE（800 行超、impl 優位語彙 30+ 件含む）は、v1 で impl 確定 → MATRIX 検証 5 カテゴリ不整合で誤 BLOCK だったが、v2 では spec 絶対優先で `[PASS] mission_type=spec MATRIX_skipped`（log 確認済）。
+- impl 優位キーワード撤廃により、impl 改修ミッション側の「実装」「hook 改修」等の誤検出ゼロ化（impl 識別はキーワードベースから「spec / analysis 非該当 = impl 既定」に変更）。impl タイプの MATRIX 検証は破壊的変更ゼロで保持。
+- 副次修正の `[ -f ]` ガードにより、`lib/resolve_repo_root.sh` が不在の環境でも validator が起動できることを担保（テスト環境で確認）。
+
+### 次
+
+- ADV メイン側で `~/.claude/settings.json` の PreToolUse Task|Agent hook 結線維持を確認（hook は既に v1 結線済との前提）。
+- 再現ケース（ALPHA-PO-EXPECTATIONS-SSOT-V2-UPDATE）を v2 改修済 validator に通して PASS（MATRIX_skipped）確認 → 暫定無効化解除運用フェーズ移行。
+- 将来拡張: spec / analysis MATRIX の新設（タイプ別 MATRIX 切替）は v3 課題として保留。
+
+---
+

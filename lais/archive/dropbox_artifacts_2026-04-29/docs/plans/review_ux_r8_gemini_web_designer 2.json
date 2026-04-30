@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md 全般",
+    "issue": "「洗練」を掲げているが、UI要素に対するセマンティックなカラートークン（surface, primary, text-secondary等）のマッピングが未定義。テーマ4種を切り替える仕様上、各コンポーネントがどのトークンを参照するかが不明確だと、ダーク/ライト対応時のコントラスト保証やデザイン実装が進行できない。",
+    "suggestion": "design_system.mdで定義予定とされているが、UX仕様の段階で「Overdueの赤系アクセント」「チップの緑系」などを抽象化し、各UI要素が参照すべきカラートークンとタイポグラフィの階層（Heading 1, Body等）を明記すべき。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "project_v1.md §7.3, ux_v1.md §2.2",
+    "issue": "アバターの描画について「リスト表示時はPNG、プロフィール詳細画面のみSVG」とあるが、GROW画面およびME画面の「ヒーロー領域（80x80px）」がSVGなのかPNGなのか曖昧。また、装飾変更時（S-41）にCanvas経由でPNGを再生成する際の処理時間（ローディングUX）が未定義。",
+    "suggestion": "ヒーロー領域のアバター描画形式を明記すること。また、アバター更新時にバックグラウンドでラスタライズ処理が走る間のプレースホルダー表示やスケルトンアニメーションのUXフローを定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.4",
+    "issue": "S-14（ゴール詳細）からS-20（TALK）へ遷移する際、履歴をreplaceStateでGROWに書き換えるため、ブラウザバックでS-14に戻れない。ユーザーは「特定のゴールについて相談し、終わったらそのゴールの詳細に戻ってタスクを追加したい」というメンタ���モデルを持つため、摩擦が大きい。",
+    "suggestion": "S-14からS-20への遷移時はpushStateを使用し、TALK画面の左上に「← ゴール詳細に戻る」ボタンを一時的に表示するか、ブラウザバックでS-14に直接戻れるようにタブ間遷移の履歴管理の例外ルールを設ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3",
+    "issue": "アバターがSVGレイヤー合成で生成されるが、テーマ（Night Sky等のダークとDawn等のライト）によって背景色が変わる。アバターの輪郭線や影の色が固定値だと、特定のテーマで背景と同化し視認性が著しく低下する。",
+    "suggestion": "アバターのSVGパーツ設計において、テーマのカラートークン（CSS Variables）をfillやstrokeに参照させる仕様にするか、アバターの背後にテーマに依存しない固定色のハイライト/グロー（オーラとは別のベース敷き）を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §9.1",
+    "issue": "オフライン状態で日次リセット時刻（午前4:00 JST）を跨いだ場合の挙動が未定義。クライアント側で習慣タスクの未完了リセットやTodayセクションの更新が走るのか、オンライン復帰時まで前日の状態が維持されるのか不明。",
+    "suggestion": "オフライン時でもクライアントのローカル時計ベースで日次リセット（UI上の表示更新）を行うか、オンライン復帰時にサーバー時刻ベースで一括処理するかのポリシーを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.3",
+    "issue": "複数タスク提案カードで「個別に編集」を選択すると「各タスクの編集フィールドをアコーディオン展開」とあるが、チャットのインラインで巨大なフォームが複数展開されると、画面外にはみ出し、キーボード表示と相まって操作不能になるリスクが高い。",
+    "suggestion": "複数タスクの個別編集もインライン展開は避け、単一タスク同様にハーフモーダル（S-12）を順次開く形式にするか、専用のフルスクリーン確認画面（S-16相当）に遷移させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.2",
+    "issue": "GROW画面でキーボード表示時にヒーロー領域を `display: none` にすると、画面全体の高さが急激に変わり、スクロール位置がジャンプしてユーザーが現在見ているタスクを見失う（レイアウトシフト）可能性がある。",
+    "suggestion": "`display: none` による即時消去ではなく、高さを0にアニメーションさせるか、キーボード表示時はヒーロー領域を画面外にスクロールアウトさせる（フォーカスした入力欄へスムーズスクロールする）挙動に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §2.3, §6.1",
+    "issue": "Undoスナックバーが「ボトムタブの上16pxで固定表示」とあるが、ハーフモーダル（S-11, S-12等）を開いた際のZ-indexの重なり順（Stacking Context）が未定義。モーダルの上に表示されるのか、下に隠れるのかが不明。",
+    "suggestion": "Z-indexの階層を定義する。Undoスナックバーはハーフモーダルよりも上（最前面）に表示するか、モーダル表示中は一時的に隠す（またはモーダル内に移動する）かのルールを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALK画面で画像を添付・送信できるが、送信後にチャット履歴内で画像をタップして拡大表示（ライトボックス）する機能が定義されていない。サムネイルサイズでは視認性が低い。",
+    "suggestion": "送信済み画像バブルのタップアクションとして、フルスクリーンでの画像プレビュー（ピンチズーム対応、スワイプで閉じる）を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §13.1",
+    "issue": "テーマ切替（S-37）が「即時反映」となっているが、洗練されたアプリとしては、テーマ変更時に画面全体がフラッシュする視覚的ショックは避けるべき。",
+    "suggestion": "テーマ切替時に200ms程度のクロスフェードアニメーション（CSS `color-scheme` と `transition` の組み合わせ等）を追加し、視覚的なショックを和らげる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

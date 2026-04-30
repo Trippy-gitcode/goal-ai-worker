@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §5.0.1",
+    "issue": "メール認証待ち画面（S-04）で、ユーザーが別端末や別アプリ（Gmailアプリ等）で認証リンクを踏んだ場合、元のS-04画面が「認証完了」を検知してオンボーディング（S-03）に自動遷移するメカニズムが定義されていません。このままでは元の画面がスタックし、手動でリロードしない限り進行不能になります。",
+    "suggestion": "S-04表示中はSupabase Authの `onAuthStateChange` イベントをリッスンし、セッションの確立（SIGNED_IN）を検知した瞬間に即座にS-03へ自動遷移する仕様を明記してくだ���い。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3",
+    "issue": "タスク完了のUndoスナックバーについて「別タスクを完了した場合、前のUndoスナックバーは即時確定し、新しいスナックバーに置換される」とあります。ユーザーが誤ってタスクAとタスクBを連続でタップしてしまった場合、タスクAのUndoが即座に不可能（データ復旧不可）になり、「罰なし・安心感」のUX思想に反します。",
+    "suggestion": "Undoスナックバーをスタック可能にする（最大3件程度）か、スナックバーではなくタスク行自体に「取り消し」ボタンをインラインで30秒間表示するUIに変更し、連続操作時でも個別にUndoできるようにしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALK画面での画像添付（📎）フローはありますが、送信後にチャットバブル内に表示された画像をタップして拡大表示（Lightbox/フルスクリーンプレビュー）する仕様がありません。また、10MB超過時のクライアント側バリデーションエラーのUIも未定義です。",
+    "suggestion": "送信済み画像のタップでフルスクリーン画像ビューア（ピンチズーム対応、✕ボタンで閉じる）を開く仕様と、ファイル選択時に10MBを超過していた場合のエラートースト（「10MB以下の画像を選択してください」）を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §4.4",
+    "issue": "FRIENDS画面の友達リストは最大500人（project_v1.md §7.4）まで登録可能ですが、UIが「カードグリッド」のみです。500人から特定の友達を探してメッセージを送る際、無限スクロールで目視で探すしかなく、操作性が著しく低下します。",
+    "suggestion": "FRIENDS画面のヘッダー下部（またはリスト上部）に、名前で絞り込める検索バー（インクリメンタルサーチ）を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.3",
+    "issue": "DISCOVER画面から開始する「ヒアリングセッション（5問）」について、途中でGROWタブに移動したりアプリを閉じたりした場合の中断・再開仕様が不明確です。",
+    "suggestion": "ヒアリングの進捗状態を保持し、TALK画面に戻った際に続きから再開できる仕様にするか、TALK画面上部のバッジに「[✕] 中断する」ボタンを設け、明示的にキャンセルできる仕様を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §13.2",
+    "issue": "プラン管理からStripe Checkoutに遷移した後の戻り処理について、「成功時にアプリに戻る」とありますが、ユーザーがCheckout画面で「戻る/キャンセル」を押した場合や、決済エラーで戻ってきた場合のUIフィードバックが定義されていません。",
+    "suggestion": "Stripeの `cancel_url` から戻った場合はトースト「決済をキャンセルしました」、エラー時は「決済に失敗しました」を表示し、元のプラン管理画面を維持する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "QRスキャン（S-36）起動時にカメラアクセス許可をリクエストしますが、ユーザーが「拒否」した場合のフォールバックUIが定義されておらず、画面が真っ暗なまま進行不能になる恐れがあります。",
+    "suggestion": "カメラアクセス拒否を検知した場合、スキャン枠の代わりに「カメラへのアクセスが許可されていません。設定アプリから許可してください」というメッセージと、「キャンセル（戻る）」ボタンを表示する空状態UIを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §4.4",
+    "issue": "FRIENDS画面の「お知らせ（未読あり時）」バナーを展開して受信一覧を表示した後、各メッセージを「既読」にするトリガーと、そのメッセージから相手に返信する導線が不明確です。",
+    "suggestion": "受信一覧の各メッセージ行をタップすると既読状態になり、該当する友達の詳細画面（S-35）へ遷移して直接返信できる仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3",
+    "issue": "タスク追加（S-12）で「単発タスク」と「習慣」を切り替える際、入力フィールド（予定日 vs 繰り返し周期、ゴール紐付けの有無）が動的に切り替わりますが、この時のレイアウトシフト（ガタつき）への配慮が記載されていません。",
+    "suggestion": "フィールドの切り替え時にスムーズなアコーディオンアニメーション（expand/collapse）を適用するか、モーダルの高さを最大フィールド数に合わせて固定し、レイアウトシフトを軽減するよう追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §11.4",
+    "issue": "iOSのPWAインストール誘導モーダルを「3回目のアプリ起動時」に表示するとありますが、このタイミングでログインボーナス演出やレベルアップ演出が重なった場合、モーダルが連続して表示されユーザー体験を損ねます。",
+    "suggestion": "インストール誘導モーダルの表示条件に「他の重要な演出（オンボーディング完了直後、レベルアップ等）が実行されていない、GROW画面のアイドル状態であること」を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  }
+]

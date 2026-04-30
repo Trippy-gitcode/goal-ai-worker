@@ -1,0 +1,57 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "タグライン",
+    "issue": "『あなたの人生を、あなたらしく』は抽象的で 3 秒判読性が低い。",
+    "suggestion": "機能軸タグラインに差し替え（例: 『AI と一緒に、ゴールを育てるジャーナル』）。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "ファーストビュー視線起点",
+    "issue": "アバター→レベル→EXPバー→TODAY の 4 ジャンプ。",
+    "suggestion": "スリムヘッダー集約、TODAY を 35% 以上で描画。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "削除の赤文字",
+    "issue": "成長系アプリの動機線と矛盾する破壊色強調。",
+    "suggestion": "削除を … メニュー/長押し降格。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s00_splash",
+    "location": "タグライン明度",
+    "issue": "タグライン明度が低くスプラッシュの数秒で読みにくい。",
+    "suggestion": "#A0B4CC 程度に引き上げ、fade-in 追加。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "進行インジケータ",
+    "issue": "5 セグメント中の現在位置色差が弱い。",
+    "suggestion": "3 階調 + 『2/5』数値ラベル。",
+    "model": "Code",
+    "persona": "ad_designer"
+  }
+]

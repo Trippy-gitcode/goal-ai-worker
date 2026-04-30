@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§8.1 ボタン / §5.1-5.4",
+    "issue": "Secondary ボタン (背景 --accent-subtle + text --accent) の hover/pressed 背景は --accent-subtle-hover/pressed に対応するはずだが、§8.1 表では「--accent-subtle (opacity 0.18)」のような数値表記のままで、新設した --accent-subtle-hover/pressed トークンに参照が更新されていない。表と §5 トークン定義が解離している。",
+    "suggestion": "§8.1 の Secondary/Ghost 行を --accent-subtle-hover / --accent-subtle-pressed トークン参照に書き換える。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§8.1 ボタン (Danger行) / §2.3",
+    "issue": "Danger 塗りつぶしボタンの hover/pressed 背景を color-mix(in srgb, var(--danger) 88%, black) のように算出しているが、color-mix は iOS Safari 16.2+ が必要。また、算出値でなくトークン化されていないため実装者ごとに解釈が分かれる。",
+    "suggestion": "各テーマで --danger-hover / --danger-pressed を直接定義。color-mix 依存を廃止。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§8.3 チップ/バッジ / §4.5 タップターゲット",
+    "issue": "§8.3 で「padding: 8px 14px（視覚高 32px）」→ ::before で 44×44 を確保、としているが、リスト内に連続して並ぶチップ群（例: Goal詳細の「タグ」「カテゴリ」）で 44px透明領域が重なって親要素のタップ判定が干渉する。実装時に hit area 重複バグが発生する。",
+    "suggestion": "連続配置されるチップの最小間隔を --space-sm（8px）以上とし、::before は親要素のhit判定を妨げないよう pointer-events: none にする明記を追加。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5 全テーマ / §2.3 セマンティック",
+    "issue": "セマンティックカラー（success/danger/warning/info）の hover/pressed/subtle-hover/subtle-pressed バリエーションが未定義。通知バナーや Delete ボタン等でインタラクティブに使われるが、階層が1段しかない。",
+    "suggestion": "各セマンティックに -hover / -pressed の派生を定義するか、少なくともボタン系ではセマンティック用の共通処理（opacity オーバーレイ）をトークン化する。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§5.2 Dawn",
+    "issue": "Dawn の bg-primary #FBF8F4 と bg-surface #FEFCF9 の差分が約 2.8% で、人の目ではほぼ識別不能。Open Air 原則で border-strong でカード境界を描くとしても、カード面の視覚的立体感が得られない。",
+    "suggestion": "bg-surface を #FFFCF7 程度に、bg-elevated を #FFFEFA に調整、または border-strong 依存を明示する設計意図を §5.2 に明記する。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§7 / §9",
+    "issue": "Skeleton loader の shimmer アニメーションについて、トークンと CSS キーフレームが未定義。ux_v1 §6.4 で「background-secondary を使う」と指定されているが、アニメーション波形（@keyframes shimmer）やグラデーション方向が未定。",
+    "suggestion": "§7.3 または §8 に shimmer の @keyframes とグラデーション定義を追加し、prefers-reduced-motion 時の停止方法を明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.3 / §9",
+    "issue": "font-weight 200 (thin) を「大数字」に使うとあるが、iOS system-ui では SF Pro Display Ultralight 相当。小さな画面で大数字（例: EXP 1234）を 200 にするとアンチエイリアスで線が消えかけ、視認性が落ちるリスクがある。",
+    "suggestion": "font-weight を 300 (Light) に変更するか、サイズ --font-size-2xl 以上限定で 200、それ以下は 400 以上を使う制約を明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.1 アイコン",
+    "issue": "アイコン体系について、実装ソース（SF Symbols 準拠の SVG セット / iconify / ローカル SVG ライブラリ）のいずれを使うかが未定義。アイコンは数十種必要になるがスタイル一貫性の担保方法がない。",
+    "suggestion": "使用するアイコンライブラリまたは独自 SVG セットの管理方法（path/xxx.svg、sprite等）を §6.1 に明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  }
+]

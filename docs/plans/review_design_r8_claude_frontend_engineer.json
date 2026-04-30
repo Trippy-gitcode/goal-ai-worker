@@ -1,0 +1,4 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"MISSING","location":"§8.1 ボタン focus outline","issue":"outline 方式はシンプルだが、CSS outline は要素の border-radius に追従しない（Chromium 94+ では追従するが、古い Safari/iOS は外枠が角丸にならず四角く出る）。見た目が崩れる。","suggestion":"§8.1 に『outline は古いSafariで角丸追従しない。見た目重視の場合は box-shadow 併用か @supports 分岐を検討』を注記。","model":"Claude Opus 4.6","persona":"frontend_engineer"},
+  {"id":"R-002","severity":"LOW","category":"BEST_PRACTICE","location":"§9 CSSトークンブロック","issue":"--focus-ring トークンは残したまま box-shadow→outline 方式に変更したので、--focus-ring が使われなくなった箇所がある可能性。","suggestion":"§9 に --focus-ring トークンを残す理由（互換性のため）を注記、または廃止する。","model":"Claude Opus 4.6","persona":"frontend_engineer"}
+]

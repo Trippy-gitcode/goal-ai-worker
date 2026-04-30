@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"CONTRADICTION\",\n    \"location\": \"13.1\",\n    \"issue\": \"Magic Link（パスワードレス）で登録・ログインしたユーザーは「現パスワード」を持たないが、メール変更(S-42)やパスワード設定(S-43)で「現パスワード入力」が必須とされており、該当ユーザーが操作不能に陥る。\",\n    \"suggestion\": \"パスワード未設定ユーザー向けに、現在のパスワード入力をスキップする（代わりに再度のMagic Link認証を求める、または直接新パスワードを設定させる等）フローを定義してください。\"\n  },\n  {\n    \"id\": \"R-002\",\n    \"severity\": \"HIGH\",\n    \"category\": \"CONTRADICTION\",\n    \"location\": \"2.3, 8.1, 8.2\",\n    \"issue\": \"タスク完了時に即時POS",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

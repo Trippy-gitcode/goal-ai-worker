@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_project_v1.md ヘッダー / lais_ux_v1.md ヘッダー / dev_system_spec.md ヘッダー",
+    "issue": "依存バージョンの不整合。projectは dev_system_spec.md v3.1を依存として宣言しているが提供ファイルはv3.0。uxは project v1.3に依存しているが提供のprojectはv1.4。§19.5/§19.6のヘッダー準拠・遡及更新ルールに反する",
+    "suggestion": "各ファイルのヘッダー依存メタデータを最新に同期（project → dev_system_spec.md v3.0 もしくはdev-system側を正しくv3.1/3.2に更新、ux → lais_project_v1.md v1.4）。あわせて§19.6「上流変更時の下流遡及チェック」を実行し、spec_changelog.mdに更新記録を追記",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §19.6",
+    "issue": "依存順序ゲート/遡及チェックの運用は規定されているが、自動検証が不足。上流確定前の下流レビュー禁止や依存バージョンの整合性を機械でブロックできない",
+    "suggestion": "canopyにspec_header_lint.shを追加: 1) 各docs/*.mdのヘッダー���ら『依存: パス vX.Y』を抽出→実ファイルのversion見出しと突き合わせ 2) 上流のステータスがCONFIRMEDでない限り下流のREVIEW/CONFIRMEDをFAILに 3) review_gate.sh前に実行してGATE FAILにする",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md ヘッダー / §13.7",
+    "issue": "本ファイルヘッダーは「8ラウンドレビュー完了」と記載だが、§13.7は「最低10ラウンド繰り返す」と規定。自仕様への不整合",
+    "suggestion": "いずれかで整合: 1) 変更履歴に例外適用理由を明記した上で§13.7に『dev-system v3.0は移行前基準のため8ラウンドで確定済み』の但し書きを追記、または 2) レビューを追加実施（2ラウンド）し変更履歴を更新",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_project_v1.md §6.5 vs lais_ux_v1.md §13.4",
+    "issue": "退会クーリングオフ中のStripe処理が不一致。projectは「即時はcancel_at_period_end:true→72時間後に即時キャンセル」、uxは「72時間後キャンセルを予約し、キャンセル時に確定」",
+    "suggestion": "どちらかに統一。推奨: uxの『72時間後にキャンセル予約（cancel_atまたはスケジュール）→期間中に取り消し可能→満了時に確定』に合わせ、project §6.5も同フローへ修正。キャンセル取り消し時のStripe API（サブスクのキャンセル予約解除）も明記",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais_project_v1.md §3.2.6/§7.4 と lais_ux_v1.md §2.3",
+    "issue": "「EXPは加算のみ（減算なし）」と「UndoでEXP返却」の整合ルールがサーバー側で未定義。現状記述だと付与→Undoで減算が発生しうる",
+    "suggestion": "サーバーに『仮確定→本確定』の確定猶予（30秒）を導入。完了イベントは一意のrequest_idで受理しpendingに保持→Undo時はpendingを破棄→30秒経過で本確定（EXPトランザクション書き込み）。本確定後はUndo不可。冪等性と期限超過時の扱いをreference_v1.mdに追記",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md §16",
+    "issue": "プラットフォーム互換性の方針は網羅的だが、A〜G各項目の環境別（E1〜E4）差分が混在記述で読み取りにくい��dev-system §19.8の『環境ごとに挙動を定義』要件に対する可読性が不足",
+    "suggestion": "A〜G各項目ごとにE1〜E4の列を持つ簡易マトリクス（対応/フォールバック/対象外）を追補。既出の詳細説明は残し、冒頭にサマリーマトリクスを置いて参照性を向上",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "dev_system_spec.md §13.10",
+    "issue": "『Readで原文を確認』の“Read”がどの手段/ツールを指すか未定義（APIレビュー実行時の具体操作が曖昧）",
+    "suggestion": "sub_adv_protocol.mdに『Read = レビューツールの全文取得API（省略表示を抑止）で該当セクションを再取得する操作』として手順を明文化。CLI/スクリプト例を追記してENGの運用を定型化",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §6（承認ルール）",
+    "issue": "リスクベース承認/ホットフィックスパスの条件（対象ファイル数・LoC等）が自動検証されていないため、AIの自律実行範囲の逸脱を機械で防げない",
+    "suggestion": "canopyにapproval_guard.shを追加: 1) 直近コミットの変更ファイル数・LoC差分の集計 2) docs/mockups配下の変更有無検知 3) セッション内のホットフィックス件数カウント。条件違反時は自動的に『🔴高』扱いで実行前停止",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §16.5（D2 Storage永続性）",
+    "issue": "認証トークンをService Worker Cache APIに二重保存する案は不適切（意図しないキャッシュ共有・漏洩リスク、失効管理の複雑化）",
+    "suggestion": "トークン保存はSupabase推奨のlocalStorage/IndexedDBに限定し、Cache APIには保存しない。永続性対策は『iOSはPWAインストールを推奨』『定期的なサイレント再認証（許容範囲で）』『有効期限切れ時の再ログインUX最適化』で代替。D2の記述を修正",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md ヘッダー/変更履歴",
+    "issue": "本文には§13.10-14や§19.8が含まれる一方、ヘッダーのversionはv3.0のまま。v3.2相当の変更が反映されているのに版数が未更新",
+    "suggestion": "ヘッダーversionと変更履歴をv3.2に更新し、追加・修正点（§13.10-14/§19.6/§19.8）を履歴に明記。下流の依存ヘッダー（project/ux）も連鎖更新（§18, §19.6）",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md §2.6（canopy_common.sh G8抽出ロジック）",
+    "issue": "LATEST_MISSION抽出が『STATUS行の5行上の見出し』前提（-B5）で脆弱。ミッション定義の体裁や空行で取りこぼすリスクがある",
+    "suggestion": "sed/awkで『### MISSION-ID』から次の『### 』までをブロック抽出→そのブロック内のSTATUSを解析する方式に変更。STATUS位置への依存を排除し、G8/G9の対象特定を堅牢化",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "lais_project_v1.md §7.2（RLS例外ルール）",
+    "issue": "箇条書きの番号付け（①〜⑤）が順序不整合で読み取りにくい（③→⑤→④のように見える）",
+    "suggestion": "RLS例外ルールの番号を整理し、各テーブルごとに『INSERT/SELECT/UPDATE/DELETE』の許可条件を小見出しで統一表記（ai_messages / social_messages / profiles / friends）に再構成",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

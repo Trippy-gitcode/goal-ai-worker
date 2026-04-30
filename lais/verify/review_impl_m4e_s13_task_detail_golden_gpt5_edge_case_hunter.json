@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§1 S13TaskDetail.jsx / LP-002",
+    "issue": "モーダルオープン時に初期フォーカスをどこにも当てていないため、Tab開始時に背景へフォーカスが逃げる。focus trap は「モーダル内に現在フォーカスがある」前提でしか機能しない実装になっている。",
+    "suggestion": "open時にdialog要素へ明示的にフォーカスを移す。実装: .s13-modal に tabIndex=\"-1\" を付与し、openのuseEffect内で dialogRef.current?.focus() を実行。あわせて初期フォーカス対象（見出し or 最初の有効な操作要素）を決めるロジックを追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§1 S13TaskDetail.jsx / focus trap / §5.0 A",
+    "issue": "focus trap のフォーカス候補抽出で [aria-disabled=\"true\"] を除外していない。S13-12のinactive AIボタンや保存不可の保存ボタン（aria-disabled）がTab移動対象のままになり、\"真のdisabled\"（§5.0 A）要件と矛盾。",
+    "suggestion": "focus trap 抽出時に [disabled] および [aria-disabled=\"true\"] を除外するフィルタを追加。CSSも :disabled を基準に調整し、inactive/保存不可時は disabled 属性を併用してTab移動から外す。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§1 S13TaskDetail.jsx / ESCキー処理",
+    "issue": "IME入力中の Escape 押下（e.isComposing=true）でもモーダルが閉じてしまう可能性がある。日本語入力中の候補キャンセル操作がタスク編集内容の消失（未保存）に直結する。",
+    "suggestion": "Escapeハンドラで e.isComposing をチェックし、構文変換中はクローズを抑止。または keydown ではなく捕捉対象をkeydown→keyupに変更してIMEキャンセルと競合しないよう調整。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§1 S13TaskDetail.jsx / モーダル分離",
+    "issue": "背景コンテンツを inert/aria-hidden で無効化していない。初期フォーカス未設定と相まって、スクリーンリーダーやキーボード操作で背景要素に到達可能。",
+    "suggestion": "open中はアプリのルート要素に inert または aria-hidden=\"true\" を付与（解除も忘れずに）し、背景��フォーカス可能要素を無効化。もしくは専用のdialog管理ユーティリティで一括管理。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§1 S13TaskDetail.jsx / ボタンdisabled設計",
+    "issue": "保存ボタン・AIボタンの無効化に aria-disabled を使用しているが、実DOMの disabled 属性を付与していないため、キーボードでのフォーカス移動対象のままになりうる。",
+    "suggestion": "buttonには disabled 属性を用いて無効化し、CSSは :disabled セレクタでスタイル適用。AI inactive は disabled + aria-disabled の両方を設定し、正式な無効状態として扱う。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.6 S13-6（メタデータ行）",
+    "issue": "dl 直下に div を挟み、その内側に dt/dd を配置しており、HTML仕様上の定義リスト構造として不正（dl の直下は dt/dd のみが妥当）。ATへの意味付けが不安定になる可能性。",
+    "suggestion": "マークアップを <dl><dt><dd> の直接子に変更し、レイアウトは CSS Grid/Flex で調整。もしくは意味付け不要なら <ul><li> 等へ置換。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§1 S13TaskDetail.jsx / aria-labelledby",
+    "issue": "aria-labelledby が編集モード時は input（id=titleId）を参照するため、ダイアログのラベルが入力欄の値やプレースホルダーになり変動する。SRユーザにとってダイアログ見出しが把握しづらい。",
+    "suggestion": "常設のh2（視覚的に非表示可）を用意し、aria-labelledby は常にその見出しを参照。入力欄は <label for> または aria-label/aria-labelledby で個別にラベリング。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3 S10Grow.jsx / フォーカス復帰",
+    "issue": "削除時に returnFocusRef が削除済み要素を指すとフォーカス復帰に失敗し、フォーカスロスト（body直下など）を起こしうる。",
+    "suggestion": "削除後のフォーカス復帰は「次の行アイテム→前の行アイテム→リストコンテナ→画面見出し」のフォールバック順で探索して focus()。isConnected を確認し、切り替え先が存在しない場合の最終フォールバックも用意。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§2 S13TaskDetail.css / メモ・長文",
+    "issue": "メモ本文やカテゴリー名に極端に長い非改行文字列（URL等）が入ると横オーバーフローの恐れ。折返し指定がない。",
+    "suggestion": ".s13-memo, .s13-meta-value に overflow-wrap:anywhere; word-break:break-word; を追加し、長文/非ASCII/URLでもレイアウト崩れを防止。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§1 S13TaskDetail.jsx / スクロールロック",
+    "issue": "body.style.overflow='hidden' だけではiOS Safari等で背面スクロールバウンスが残るケースがある（特に100vh未満のハーフモーダル）。",
+    "suggestion": "open中は html/body に overscroll-behavior: contain を適用し、iOS向けに body固定（position:fixed + top保存）方式か、touchmove をオーバーレイで prevent する補助を追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§1 S13TaskDetail.jsx / type=time 入力",
+    "issue": "type=\"time\" の既定値 '10:00' はロケール/12h制設定によってレンダリ���グが不揃いになりうる。ステップ/最小・最大値未設定でバリデーション挙動も環境差が出る可能性。",
+    "suggestion": "step/min/max の明示やフォールバックフォーマットを検討。古い/一部モバイルブラウザ向けにプレーンtext + マスク/バリデーションに切り替える用のガードも用意。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

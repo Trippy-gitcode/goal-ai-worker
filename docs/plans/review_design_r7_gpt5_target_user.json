@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §5.1 / §9",
+    "issue": "Night SkyのPrimaryボタン色がセクション間で不一致。§5.1では --button-primary-bg=#1A5FC8だが、§9（AI実装向けトークン）では #1F6FEBのまま。実装者が§9をコピペするとWCAG検証も含めて食い違う。",
+    "suggestion": "§9のトークンを§5.1の最終値に合わせて更新し、トークンの自動整合テスト（lint/visual snapshot）を導入。変更履歴にも「§9へ反映済み」を追記して二重管理ミスを防ぐ。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_system.md §3.2-§3.3 / §9",
+    "issue": "line-heightトークンの方針不一致。本文ではサイズ別の --line-height-xl 等を推奨しているが、§9は --line-height-heading/body など用途別のみ。実装例も --line-height-xl を参照しており整合しない。",
+    "suggestion": "§9にサイズ別line-heightトークン（--line-height-xs〜3xl）を追加し、用途別（heading/body）はエイリアスに統一。実装例も§9に揃える。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "project_v1.md §3.2 / ux_v1.md §2.1, §2.3",
+    "issue": "「所要時間」を“タイムライン表示の幅計算”に使うと記載があるが、GROWのリストは縦タイムライン（§8.4）前提で、幅表現のスケール・最小/最大・開始時刻未設定時の扱いが不明。",
+    "suggestion": "幅表現の仕様を明記（例: 5〜120分を最小32px〜最大160pxに線形マップ、開始時刻未設定時は相対バーのみ等）。小型端末の「数値省略→色バー」にも同じスケールを適用する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.5 / ux_v1.md §2.3, §8.1-8.3",
+    "issue": "日次EXP上限到達後のGROW側UIが不明確。TALK側は+0カード表示の定義があるが、GROWでタスク完了時に何が起きるか（+10表示抑止や告知バナー表示など）が曖昧で混乱しそう。",
+    "suggestion": "GROWで上限到達時: ①フロート「+10」は表示しない ②初回のみトースト「本日のEXP上限に達しました」 ③タスク自体の完了は通常通り を仕様に追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1, §4.5",
+    "issue": "Proで『冒険EXP検出精度向上』とあるが、Pay-to-Win対策として『上限は同一��と言いつつ、検出機会自体が有料ほど有利に感じられる可能性がある（公平性への不安）。",
+    "suggestion": "公平性の明文化（例: Freeでも検出候補は全て提示し、1日2回までユーザーが手動確定可）。プラン差は“説明の深さや提案品質”に限定する等、UXと文言で納得感を担保。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3（週N回のToday表示）",
+    "issue": "週N回習慣の自動非表示ロジックは賢いが、『今日は表示されない＝やらなくていい』と誤解して週末に詰む不安がある。",
+    "suggestion": "各習慣に『今週 残りN/3』チップを常時表示し、『常にTodayに出す』トグルを追加。空状態や初回作成時にロジック解説ツールチップを表示する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.1（TALKヘッダー）/ §3.5",
+    "issue": "TALKヘッダーが☰=履歴ドロワー、🕐=履歴と二重の履歴入口に見える。どちらが何を開くか直感的でない。",
+    "suggestion": "履歴入口は1つに統一（☰でドロワー開閉）。🕐は削除または別機能に割当。アイコンの意味をヘルプで明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §11.4 / §13.3",
+    "issue": "iOSで通知を使うにはPWAインストールが必要だが、インストール誘導は“3回目起動時”タイミング固定。リマインダー必須の人は初日から価値を取り逃しやすい。",
+    "suggestion": "通知ON操作やQR共有などの文脈で即誘導するコンテキストトリガーを追加。固定3回目表示は維持しつつ、行動起点の誘導を優先する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1-§2.2 / ux_v1.md §4.2.1",
+    "issue": "Premierはショップ機能がComing Soonのため価値がわかりにくい。限定フレーム/優先サポートのみでは価格差の納得感が弱い。",
+    "suggestion": "アプリ内に『現在のPremier特典一覧』を明示。初月割引/トライアルや、将来特典のロードマップ提示を追加。ショップ公開までPremierを非表示にする選択肢も検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3 / §7.4",
+    "issue": "Todayの手動並び替えと開始時刻ソートの優先順位・保存範囲（日跨ぎでリセットか、日ごとに保存か）の記述が分散し初見で分かりづらい。",
+    "suggestion": "優先順位を一箇所に明記（例: 当日は手動順が勝ち、翌日は再度時刻順に戻る／または日ごとに手動順を保持等）。仕様を表にして誤解を防ぐ。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "design_system.md §5.5",
+    "issue": "Glass ON時のbackdrop-filter『同時30要素以内』制約は実装難。画面構成や状態で容易に超過しうるが、検出/防止のガイドがない。",
+    "suggestion": "glass-surfaceクラスの使用箇所を限定する設計指針（禁則リスト）と、E2E計測（要素数のランタイム監視）を定義。Lintルール/Storybookでの監視も導入。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.5",
+    "issue": "チャットスレッド100件超過時は自動アーカイブとあるが、ユーザーがアーカイブを閲覧/復元する手段が未定義。",
+    "suggestion": "履歴ドロワーに『アーカイブ』タブを追加し、復元/削除が可能なUIを定義。自動アーカイブ時のトーストや案内も入れる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §6.4 / ux_v1.md §3.2",
+    "issue": "AI対話の90日保存とPII自動マスキング方針はあるが、入力直前の注意は初回画像添付時のみ。テキストでも個人情報を入れがち。",
+    "suggestion": "TALK入力欄に『個人情報の入力は避けてください』常設ヒントと、メッセージごとの“保存せず送信（エフェメラル）”オプションを検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（Undoスナックバー）",
+    "issue": "Undoスナックバーはタブ跨ぎで30秒維持とあるが、アプリがバックグラウンド/リロード時の扱い（復元するか、キャンセル扱いか）が未定義。",
+    "suggestion": "Undo状態をtimestamp付きでメモリ保持し、リロード/復帰時に残秒数を再計算して表示継続。セッションを跨いだ場合は自動確定と明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.4 / ux_v1.md §2.3",
+    "issue": "Overdueタスクのクイックアクションが『明日に延期』のみ。『今日やる』や任意日付への変更がワンタップでできず不便に感じる可能性。",
+    "suggestion": "Overdue行の右端に『…』メニューを追加し、『今日やる』『日付を変更』を提供。デフォルトは“明日に延期”でOK。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §6.3 / ux_v1.md §4.2",
+    "issue": "AI理解メモが5セッションごとに上書き保存（履歴なし）は、自己変化の追跡という観点で物足りない。",
+    "suggestion": "メモ履歴の時系列ビュー（簡易版でOK）を提供し、最新だけを既定表示。履歴はいつでも消去可能にする。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5 / ux_v1.md §9.3",
+    "issue": "カウンターやリセット時刻の表示が『明日 04:00』固定でタイムゾーン表記がない。出張/海外在住時に混乱しそう。",
+    "suggestion": "ローカル時間に変換して表示（例: 『リセット: 明日 04:00（JST基準、あなたの現地時刻でxx:yy）』）。設定でリセット時刻説明を常設。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §3.3（画像添付）",
+    "issue": "画像はサーバーで1200pxへリサイズだが、アップロード前のクライアント圧縮が未記載。モバイル回線でデータ量が気になる。",
+    "suggestion": "送信前にブラウザ上でのリサイズ/圧縮（picaやcanvas）を推奨し、10MB超は選択時点で警告。設定に『モバイルデータ節約』を追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

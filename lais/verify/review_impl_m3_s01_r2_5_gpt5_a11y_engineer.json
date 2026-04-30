@@ -1,0 +1,132 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§3.4 S01Auth.jsx（form / button.s01-cta）",
+    "issue": "送信ボタンを disabled にしているため、キーボードで Enter 提交を試みても（環境によっては）onSubmit が発火せず attempted が立たず、エラーの role=alert が出ない可能性がある。disabled の CTA はフォーカス不能なため、aria-describedby による原因提示も読まれない。",
+    "suggestion": "CTA はフォーカス可能のまま（disabled 属性は使わず）aria-disabled=\"true\" とし、onClick/onMouseDown/onSubmit で canSubmit を判定して preventDefault しつつ setAttempted(true)→最初のエラーへ focus を移動する。あわせて、主要必須条件（メール必須/形式、PW最小桁、同意必須）は初期表示〜blur 時点でテキスト説明が常時見えるようにし、CTA 側の aria-describedby は補助的に保つ。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§3.4 S01Auth.jsx（handleSubmit）",
+    "issue": "最初のエラー要素への focus 移動が email と agree のみ。パスワード長不足時にパスワードへフ���ーカスが移動しない。",
+    "suggestion": "handleSubmit 内の canSubmit=false 分岐で、email 無効→password 不足→（サインアップ時）agree 未チェックの順にフォーカス移動を網羅する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3.4 S01Auth.jsx（フィールドエラーメッセージ）",
+    "issue": "email/password/agree の各フィールドで role=alert を用いており、複数同時表示やタイプ中の再描画でアナウンスが連発・競合する可能性がある。",
+    "suggestion": "フィールド単位は role=status または aria-live=\"polite\"（もしくは単なる説明テキスト + aria-describedby）に変更し、assertive（role=alert）はページ上で1つ（例: フォーム上部のエラーサマリーまたはサーバーエラー）のみに限定する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.7 S01Auth.css（.s01-footer-link / .s01-link）",
+    "issue": "タップターゲットの最小サイズ（要求 44×44）の担保が .s01-agree-label 以外で明記されていない。特にフッターリンクと「利用規約 / プライバシーポリシー」リンクはテキストサイズ依存のままでは 44×44 を満たさない可能性が高い。",
+    "suggestion": "インラインリンクにもヒット領域を拡張する。例: a.s01-link, .s01-footer-link { display:inline-flex; align-items:center; min-height:44px; min-width:44px; padding:8px 12px; } あるいは ::after で不可視ヒット領域を付与（position:absolute; inset: -10px;）。実機で 44×44px を計測確認する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.7 S01Auth.css / §3.6 themes.css（フォーカスリング）",
+    "issue": "focus-visible の適用は言及されているが、WCAG 2.2 AA「2.4.13 Focus Appearance (Minimum)」の定量要件（指標の太さ/面積・3:1 コントラスト）を満たすか数値根拠が未提示。",
+    "suggestion": "各インタラクティブ要素でフォーカスインジケータの太さ≥2px かつ周囲色とのコントラスト比≥3:1を満たすことを実測（スクショ + Contrast Ratio ツール）で証明する。CSS 例: outline: 2px solid var(--focus-ring-color); outline-offset: 2px; --focus-ring-color は背景・隣接色に対し≥3:1。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.7 S01Auth.css / §3.6 themes.css（テキスト/リンク/エラー色）",
+    "issue": "placeholder 以外（.s01-link, .s01-error, .s01-server-message-* など）のコントラスト比実測値が提示されていない。",
+    "suggestion": "通常文言・リンク・エラー文言の前景/背景の組合せを全テーマで計測し、4.5:1（本文）/3:1（大文字・ボタン等）を満たす色トークンを明示。デザインシステムのトークン定義コメントに比率を併記する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§3.4 S01Auth.jsx（初期レンダリング / モード切替）",
+    "issue": "画面表示時や mode 切替時の初期フォーカスが未定義。SPA 遷移後にフォーカス喪失状態になりやすい。",
+    "suggestion": "S01Auth マウント時・mode 変更時に useEffect でメール入力（またはページ見出し）へ programmatic focus を移す。遷移後にスクリーンリーダーが主要見出しを読み上げるよう、main 内の h1/h2 へ focus() or aria-live を併用する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3.4 S01Auth.jsx（���用規約/プライバシーリンク）",
+    "issue": "target=\"_blank\" で新規タブを開くが、その事前通知がテキストから分からない。",
+    "suggestion": "リンク文言末尾に視覚/音声の両方で通知を追加（例: 視覚=外部リンクアイコン, 音声=span.sr-only で「（新しいタブで開きます）」）。もしくは aria-label で補足（例: aria-label=\"利用規約（新しいタブで開きます）\"）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.4 S01Auth.jsx（checkbox 必須）",
+    "issue": "同意チェックで aria-required=\"true\" は付与されているが、ネイティブの required 属性が未指定。",
+    "suggestion": "input[type=\"checkbox\"] に required を付けてネイティブ検証も有効化しつつ、aria 属性は支援技術向け補助として併用する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.4 S01Auth.jsx（button.s01-cta）",
+    "issue": "disabled と aria-disabled を同時指定しており冗長。前者はフォーカス不可のため理由説明（aria-describedby）が読まれにくい。",
+    "suggestion": "R-001 の方針に合わせ、どちらかに統一。推奨は disabled を外して aria-disabled + 送信ガードで一貫し、理由提示を読み上げ可能にする。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§3.4 S01Auth.jsx（見出し構造）",
+    "issue": "h1 がブランド名、実質的なページ見出しが h2 になっており、スクリーンリーダーで目的の特定に一手間かかる。",
+    "suggestion": "「アカウントを作成 / ログイン」を h1 に昇格し、ロゴは装飾（aria-hidden=\"true\"）または role=\"img\" + aria-label（画像化時）など意味付けを整理する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§3.2 App.jsx（NotFound リダイレクト/SPA ルーティング）",
+    "issue": "SPA 内遷移時のフォーカス移動・スクロール位置リセットの方針が明記されていない。",
+    "suggestion": "Router onChange でページ遷移後に main 先頭へ focus() と scrollTo(0,0) を行うヘルパーを導入し、各スクリーン側でも初期フォーカスの整合を取る。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§3.7 S01Auth.css（prefers-reduced-motion）",
+    "issue": "reduce 対応は継承とあるが、対象アニメーション（フォーカスリングのトランジション、ホバー/活性化時の移動・フェードなど）の網羅が不明。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) で全トランジション/アニメーションを none/0ms に落とす共通ユーティリティを適用し、対象一覧（ボタン/リンク/入力フォーカス/エラーメッセージ表示時など）を棚卸しする。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

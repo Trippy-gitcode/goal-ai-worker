@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.4/§19.6（他: §6, §18, sub_adv_protocol §10）",
+    "issue": "UX仕様書のファイル名がセクション間で不一致（§19はdocs/ux_v1.md、他セクションはdocs/ux_redesign_v*.md）。参照・連鎖更新・承認ルールの条件判定に齟齬が出る。",
+    "suggestion": "UX仕様書の正準ファイル名を単一化（例: docs/ux_v*.md）。§6, §18, sub_adv_protocol, init_app.shのコピー元/表記も含め全箇所で一括修正。移行期は両方のファイル名を受け入れる互換レイヤ（canopyの参照検出）を一時導入。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "仕様書ヘッダーの「依存」が単一・非構造（Markdown記法の行）で、複数依存/機械検証に不十分。依存管理・循環検出・正確な影響範囲判定が困難。",
+    "suggestion": "全仕様書にYAMLフロントマターを採用し、dependencies配列（path, version, commit, roleを必須）で宣言。例: ---\\ndependencies: [{path: docs/project_v1.md, version: 1.3.0, commit: abcd1234}]\\n---。併せてcanopyにspec_lint.shを追加し、必須キー・複数依存の有無を機械検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.5, §19.6",
+    "issue": "ヘッダー標準・参照ルールに対する自動ゲートが未定義。循環/未定義依存/バージョン不整合の検出が人的運用に依存し、逸脱時の発見が遅延する。",
+    "suggestion": "scripts/spec_lint.shを新設しcanopyに組み込み: (1) 各docsのYAMLフロントマター必須チェック (2) 依存先ファイルの存在/バージョン整合 (3) 依存DAGの循環検出 (4) 上流更新時の下流のversion範囲・更新履歴有無検証を実装。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの「dev-system準拠: docs/plans/dev_system_spec.md §19」という参照パスが、実レポジトリ配置（ルート直下のdev_system_spec.md）と不一致の可能性がある。",
+    "suggestion": "dev-system参照はリポジトリ相対ではなく正規URL（例: https://github.com/org/dev-system/dev_system_spec.md#19）またはDEV_SYSTEM_DIR環境変数ベースの論理参照に統一。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-105",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.2（任意ファイル）/ §18（連鎖更新時の必須更新）",
+    "issue": "spec_changelog.mdが§19.2では任意扱いだが、§18ではdocs変更時にUPDATE必須と記載。必須/任意の扱いが矛盾。",
+    "suggestion": "spec_changelog.mdを「必須」に昇格（§19.1へ移動）し、各仕様書の変更履歴と併せて中央集約ログを維持。canopyに“spec_changelog更新必須”チェック（直近コミットで対象docsが変更された場合に差分IDの追記有無を検証）を追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 design_spec_v1.md",
+    "issue": "モックアップがSoTであることの明示・原本パス/ハッシュの必須化がテンプレートに含まれていない。受入判定や差分追跡の信頼性が低下。",
+    "suggestion": "design_spec_v1.mdに「§0.5 モックアップ原本（SoT）」を追加し、docs/mockups/*.htmlのパス・コミットSHA・生成手順（再生成禁止明記）を必須化。canopyに当該ファイル存在チェックを追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md",
+    "issue": "API/データモデルのスキーマ成果物（OpenAPI/JSON Schema/DBマイグレーション定義）の添付要件が未定義。レビューや自動生成との連携が困難。",
+    "suggestion": "reference_v1.mdに「§1.1 OpenAPI仕様」、「§2.1 DBマイグレーションDDL（バージョン付き）」を必須化。/docs/schemas/以下に配置し、canopyでファイル存在とバージョン同期（reference_v1.mdのversionと一致）を検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 e2e_fullflow_test.md",
+    "issue": "§12で定義したSPEC-IDとテストケースの厳密なマッピングがテンプレートに明記されていない。",
+    "suggestion": "e2e_fullflow_test.mdの各テストケースにSPEC-ID列を必須化（例: `SPEC-TODAY-003`）。canopyでdocs内SPEC-ID件数とtests内参照数の突合を追加し、乖離>±10%でFAIL。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "競合ベンチマーク出力がMarkdown表のみで機械可検証性が不足。完了基準（全行「Lais方針」記入）を自動で判定しにくい。",
+    "suggestion": "Markdownと併せて同内容のCSV/JSON（docs/benchmarks/*.json）出力を必須化。canopyに“Lais方針未記入ゼロ”と“差別化ポイント>=3”の自動検証を追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "直接競合5社+間接3社・DL数/評価の取得はニッチ領域や制約環境で困難な場合があるが、例外運用が定義されていない。",
+    "suggestion": "PO承認の例外ルールを追加（例: 代替として近接カテゴリ/参考プロダクトで補完、入手不能項目は“NA+理由”明記）。canopyでは“NAに理由必須”を検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-111",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.6",
+    "issue": "参照表記が“§X.Y”番号のみで、章再編時のリンクロットが起きやすい。安定アンカー/IDが未定義。",
+    "suggestion": "各セクションに安定アンカーID（例: UX-S1-FLOWS）を付与し、参照は「file §X.Y（#ANCHOR）」の二段指定に統一。spec_lint.shで存在検証を追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-112",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.5（ヘッダーStatus）/ §2（変更フロー）",
+    "issue": "上流仕様書がCONFIRMEDでない状態でも実装着手可能な抜け道が残っている（ヘッダーStatusとcanopy/フローの連動が未定義）。",
+    "suggestion": "canopyに“実装対象の上流docs（dependencies.role in ['WHAT','UX','DESIGN']）が全てStatus=CONFIRMED”ゲートを追加。REVIEW/DRAFTが含まれる場合はStep 4開始をFAIL。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-113",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§19.4/§19.7",
+    "issue": "AI（ADV）がベンチマーク解釈や差別化マッピングを誤った場合のリカバリ手順が§19内に明記されていない。",
+    "suggestion": "各docsに“ERRATA/訂正履歴”小節を追加し、誤判定→訂正→再レビュー（review_*.json差し替え）の簡易手順を定義。ADVは訂正理由と影響範囲をspec_changelogにも追記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-115",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§19.5（ステータス定義）/ §13.6-13.9",
+    "issue": "CONFIRMED=CRITICAL 0の定義がreview_gate（dismissedフラグ考慮）と連動しているか明確でない。REVIEW状態での期待成果物要件も未���義。",
+    "suggestion": "Statusルールを追記: REVIEW=docs/plans/review_*.json必須、CONFIRMED=review_gate PASS（未dismissed CRITICAL=0）。canopyでヘッダStatusとreview_gate結果の整合を検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

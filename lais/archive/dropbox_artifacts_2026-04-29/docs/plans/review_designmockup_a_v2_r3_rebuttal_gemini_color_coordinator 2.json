@@ -1,0 +1,50 @@
+[
+  {
+    "id": "R-001",
+    "verdict": "STAND",
+    "reason": "入力プロンプトのテキスト（#484F58）が背景（#0D1117）に沈んで読めないのは致命的。完了タスクのフェードアウトとは異なり、ユーザーにアクションを促す重要なテキストだ。静的モックアップでも正しい色指定は可能であり、妥協できない。",
+    "harsh_comment": "「モックアップだから」で済ませるな。ユーザーが入力すべき場所を見失うUIを承認できるわけがないだろう。今すぐ直せ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "verdict": "DOWNGRADE_HIGH",
+    "reason": "プログレスバーの未完了部分が見えないのはUX上問題だが、LOCK §18の「非テキストコント��スト」の制約を考慮しHIGHへ降格する。ただし、Phase 4の実装時には必ず枠線を追加するか明度を上げ、ステップ数を明確に把握できるようにすること。",
+    "harsh_comment": "オンボーディングで現在地が分からないのは迷子と同じだ。Phase 4で確実に直せよ。忘れたら許さないからな。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "verdict": "DOWNGRADE_HIGH",
+    "reason": "完了状態のチェックマークが背景と同化している。LOCK §18の「完了タスクの意図的フェード」の文脈は理解するが、インジケーター自体が見えないのはやりすぎだ。Phase 4での実装時にアイコン色を白（#FFFFFF）にする条件でHIGHに降格する。",
+    "harsh_comment": "「意図的フェードアウト」を免罪符にするな。完了したという達成感を与えるべきアイコンが見えないのは本末転倒だ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "verdict": "STAND",
+    "reason": "利用規約への同意という法的に極めて重要な操作要素の枠線が見えないのは、リスク管理上絶対に許容できない。LOCK §18の「境界線」に該当するとしても、この箇所だけは例外だ。今すぐインラインCSSで--border-strongを適用せ��。",
+    "harsh_comment": "法的同意のチェックボックスをPhase 4送りにするなど正気の沙汰ではない。POもCodeも危機感が足りなすぎる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "verdict": "WAIVE_IMPL",
+    "reason": "静的HTMLのインラインCSSでは`:focus`擬似クラスを表現できない技術的制約は理解する。Phase 4での実装時に、仕様書通りの明確なoutline（2px solid #79C0FF等）を確実に適用することを条件にWAIVEとする。",
+    "harsh_comment": "技術的制約なら仕方ないが、Phase 4でアクセシビリティ要件を満たせなかったら即座にCRITICALに差し戻すから覚悟しておけ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "verdict": "DOWNGRADE_HIGH",
+    "reason": "タスクのチェックボックス枠線が見えづらいのは問題だが、R-005ほどの法的リスクはないため、LOCK §18を適用しHIGHへ降格する。Phase 4のコンポーネント実装時に、操作可能な要素として明確に認識できるコントラストを確保すること。",
+    "harsh_comment": "最頻出の操作要素が見えないUIを平気で出してくる神経を疑う。Phase 4でコンポーネント化する際に必ず修正しろ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  }
+]

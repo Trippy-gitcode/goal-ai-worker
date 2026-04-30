@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§5 テーマ定義",
+    "issue": "project_v1.md(§3.5)およびux_v1.md(§5.2)ではテーマが4種（Night Sky / Dawn / Harajuku Light / Harajuku Dark）と定義されていますが、design_system.mdでは3種（Night Sky / Dawn / Adventure）となっており、数も名称も完全に矛盾しています。このままでは実装時にどちらの仕様を採用すべきか判断できず破綻します。",
+    "suggestion": "プロダクト仕様とデザインシステムでテーマの数と名称を完全に統一してください。Harajuku Light/Darkを採用するか、Adventureを採用してproject/ux側を修正するか決定してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5.2, §5.3",
+    "issue": "§2.2で「セマンティックカラーの値はテーマごとに調整」と記載されていますが、§5.2(Dawn)や§5.3(Adventure)のCSS定義ブロックに `--success` や `--danger` などの変数が含まれていません。AIがこのブロックをコピーして実装すると、ライト系テーマでもNight Sky用の色が使われ、コントラストが崩れるか不自然になります。",
+    "suggestion": "各テーマのCSS定義ブロック（:root[data-theme=\"...\"]）内に、そのテーマの背景色に合わせたセマンティックカラー（--success, --danger, --warning, --info）の値を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§6.3",
+    "issue": "フルビューのアバターサイズが「120px」と定義されていますが、ux_v1.mdの§4.4（友達詳細）では「128x128」、§4.2.1（アバター設定）では「256x256」と指定されています。コンポーネントのサイズ定義が仕様間で一致していません。",
+    "suggestion": "ux_v1.mdのレイアウト要件に合わせて、アバタ���のサイズトークン（例: 40px, 64px, 128px, 256px）を正確に定義し直してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§5.3, §8.4",
+    "issue": "Adventureテーマではタイムラインの線が「レインボーグラデーション」になりますが、その上に配置されるドット（NOW=--accent, DONE=--success）の色がグラデーションの色と被る可能性が高く、現在のタスクや完了状態が視覚的に判別できなくなる恐れがあります。",
+    "suggestion": "グラデーションの線を使用する場合、ドットには白の太いボーダー（`border: 2px solid var(--bg-surface)`）を付けるなど、背景の線とドットを明確に分離する視覚的工夫をコンポーネントトークンに追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§9",
+    "issue": "ux_v1.md(§10.5)ではアニメーションのアクセシビリティ配慮（prefers-reduced-motion）が求められていますが、AI実装向けのCSSトークンブロックに該当のメディアクエリが含まれていません。AIがそのまま実装すると要件が漏れます。",
+    "suggestion": "§9のCSSブロックの末尾に `@media (prefers-reduced-motion: reduce)` を追加し、アニメーションのduration変数を `0ms` または `instant` に上書きする定義を含めてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§3.2",
+    "issue": "最小フォントサイズ（--font-size-xs）が11pxに設定されています。Apple HIGやWCAGの観点から、11pxは可読性が低く、特に仕事終わりで疲れている時や移動中にアプリを確認するユーザーにとってストレスになります。",
+    "suggestion": "--font-size-xsを最低でも12pxに引き上げるか、11pxを使用する箇所（キャプション等）のコントラストを通常より高く設定するルールを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "USER_CONCERN",
+    "category": "USER_CONCERN",
+    "location": "§5",
+    "issue": "ユーザー視点として、夜暗い部屋でアプリを開いた時にDawn（ライト）テーマのままだと眩しくて不快です。ux_v1.mdでは「OS連動は初回のみ」とされていますが、デザインシステム側でも「自動切り替え」をサポートするテーマ設計がないと、毎���手動で切り替える手間が発生し、継続の妨げになります。",
+    "suggestion": "テーマの選択肢に「システム追従（OSの設定に合わせてNight SkyとDawnを自動切替）」を追加し、CSSトークンでも `@media (prefers-color-scheme: dark)` に対応する設計を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "USER_CONCERN",
+    "category": "USER_CONCERN",
+    "location": "§5.4",
+    "issue": "ユーザーとして「グラスモーフィズム」という専門用語が設定画面にそのまま出ると意味がわかりません。また、`backdrop-filter: blur(16px)` は古いスマホや一部のAndroid端末で動作を著しく重くする原因になります。過去にHabitifyの「フリーズする」不満で離脱した経験から、パフォーマンス低下は致命的です。",
+    "suggestion": "設定画面での表示名を「すりガラス効果」や「リッチUI」などユーザーに伝わる言葉にすること（UX仕様へのフィードバック）。また、パフォーマンス低下を防ぐため、デフォルトOFFの維持と、低電力モード時の自動OFFを仕様に含めることを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  }
+]

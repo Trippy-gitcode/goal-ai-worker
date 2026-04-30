@@ -1,0 +1,145 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "OTHER",
+    "screen": "s00_splash",
+    "location": "ロゴ下のサブコピー周辺",
+    "issue": "初見でアプリの目的が分かる具体情報がなく、「あなたの人生を、あなたらしく」だけでは3秒以内に『AI×タスク/ゴール支援アプリ』と伝わらない",
+    "suggestion": "サブコピーを具体化（例:「AIと計画を立てて、タスクとゴールを前に進める」）。もしくは3点アイコン行で機能を明示（AIコーチ/タスク/ゴール）。CTA直上に短い価値提案1行を追加",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "ロゴとCTAの間",
+    "issue": "タグラインが汎用的で競合との差別化（AIコーチング×習慣/タスク/ゴール）が伝わらず、第一印象の独自性が弱い",
+    "suggestion": "「AIコーチが毎日を伴走」など、AI中核とゲーミフィケーション（レベル/EXP）要素を含む差別化コピーに刷新。小さなアイコン付きで��覚的にも個性を付与",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "同意文「利用規約とプライバシーポリシー」および下部「ログイン」テキストリンク",
+    "issue": "インラインテキストリンクが色のみで示されており、下線が見当たらない。デザイン仕様§2.2とWCAG 1.4.1（色のみに依存しない）に不適合",
+    "suggestion": "インラインリンクに常時下線を付与し、hover/pressed時は下線スタイルのみ変化で状態を示す。色覚多様性にも配慮してコントラストも確認",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s01_signin",
+    "location": "フォーム下部〜「サインアップ」ボタン周辺",
+    "issue": "プライマリCTAが無効状態の理由が一見で伝わりにくい（必須入力と同意チェックが原因であることが見落とされやすい）",
+    "suggestion": "CTA直下にヒント「必要事項の入力と同意で有効化」を常時表示。もしくは未充足項目を段階的にガイド（チェック未入力時は同意行に軽い強調）",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "OTHER",
+    "screen": "s02_onboarding",
+    "location": "アバター選択（タイプA/B/C）",
+    "issue": "選択肢ラベルが「���イプA/B/C」と抽象的で、初見での違い・選びどころが不明瞭",
+    "suggestion": "各タイプに一言性格/雰囲気ラベル（例:「落ち着き/元気/ナチュラル」）と小さな説明行を追加し、選択根拠を与える",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "画面上部のステップインジケータ",
+    "issue": "進行度がバーのみで数値表現がなく、残りステップ数が直感的に把握しづらい",
+    "suggestion": "「2/5」などの数値表記をインジケータ右側に追加し、完了見通しを明確化",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "TODAYセクション下部「+ タスクを追加」テキストリンク",
+    "issue": "主要行動のタスク追加がテキストリンクのみで視認性が弱く、初回ユーザーの次アクションが埋もれている",
+    "suggestion": "セクション内に目立つセカンダリボタン（アクセントsubtleのボタン）または右下FABを配置。空状態時はフル幅ボタンで強調",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "タスクリスト各行右端の小さなカラードット（ゴール紐付け示唆）",
+    "issue": "ゴール紐付けの識別が色のみの傾向。色覚多様性のユーザーには意味が伝わりにくい可能性がある",
+    "suggestion": "ドットに形状差（リング/スクエア）や小ラベルのツールチップ相当を追加。もしくは行内にゴール名の短縮テキストを併記",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "OTHER",
+    "screen": "s20_talk",
+    "location": "ヘッダー右側のアイコン（時計/鉛筆）",
+    "issue": "アイコンのみで機能が推測しづらく、初回の学習コストが発生",
+    "suggestion": "初回のみヘッダーツールチップ（ラベルバッジ）を表示、またはアイコン横に短いラベルを一時的に併記して意味を周知",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "ボタン行（編集/削除/進め方を聞く/詰まりを相談）",
+    "issue": "危険操作の「削除」（赤塗り）が最も目立ち、主要導線のAI相談ボタンよりも視線を奪っている",
+    "suggestion": "削除をサブtle（枠線）に格下げし、AI相談2ボタンの視認性を引き上げ（セカンダリ=accent subtle、あるいは1つをプライマリに）。削除は右上アイコン化も検討",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "ゴール詳細 上部アクション群（現在は非表示）",
+    "issue": "UX仕様§2.4で定義された[AI相談]導線がゴール詳細画面に見当たらない",
+    "suggestion": "ゴール名付近に[AI相談]ボタンを追加（セカンダリ）。タップでTALKへ遷移し、ゴール名をコンテキスト渡し",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "PROFILEタブ上部（見出し付近）",
+    "issue": "UX仕様§4.2に記載の『設定リンク（⚙️）』が画面上に見当たらず、設定への明確な導線が欠落",
+    "suggestion": "ヘッダー右上に⚙️アイコンを設置し、設定画面へ右スライド遷移。リスト下部にもテキストリンクで冗長導線を用意",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s15_goal_create",
+    "location": "「+ 最初のタスクを追加」リンク",
+    "issue": "作成直後の推奨行動がテキストリンクのみで弱く、次のアクションが目立たない",
+    "suggestion": "リンクをチップ風ボタン（accent subtle）に変更し、アイコン付きで視認性を上げる。初回はガイド吹き出しで促す",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

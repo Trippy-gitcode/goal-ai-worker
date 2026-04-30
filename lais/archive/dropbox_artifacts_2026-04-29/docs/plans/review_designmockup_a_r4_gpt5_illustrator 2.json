@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "入力バー右端の送信アイコン（矢印）",
+    "issue": "アイコンのストローク色が#484F58、背景が#1C2128でコントラストが約2:1程度と低く、インタラクティブ要素の非テキストコントラスト（WCAG 1.4.11 3:1以上）を満たしていない可能性が高い",
+    "suggestion": "送信アイコンの色を#9BA7B4以上の明度に上げるか、--accent（#79C0FF）を使用。もしくはアイコン背景を--accent-subtleではなく--button-primary-bgに変更して白アイコンにする等で3:1以上を確保",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "下部アクション行の「削除」アウトラインボタン",
+    "issue": "赤文字#F85149が背景#161B22上で約3:1前後と見られ、通常サイズのテキストコントラスト（WCAG 1.4.3 4.5:1）を満たしていない可能性が高い",
+    "suggestion": "デザインシステムの--button-danger-bg（ダーク用の濃い赤）+白文字の塗りボタンに変更、またはテキストサイズを18px以上にしつつ赤の明度/彩度調整で4.5:1以上を担保",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "タスク提案カードのアクション（「登録する」「編集して登録」「✕」）",
+    "issue": "ボタンの実高さが約28pxで、タップターゲット最小44×44px（デザインシステム §4.5 / WCAG 2.5.5）要件に未達",
+    "suggestion": "視覚デザインを維持する場合でも、::before等で透明パディングを足してヒットエリアを44px以上に拡張。あわせて左右パディングも+4〜6pxして誤タップを防ぐ",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "所要時間チップ群（5/10/15/30/45/60/90/120分）",
+    "issue": "各チップの高さが約28pxで、最小タップ領域44pxの要件に未達（デザインシステム §4.5）。横スクロール時に誤タップの恐れ",
+    "suggestion": "ラインハイト/パディングを見直し、実高さ44px以上に。見た目を小さく���つ場合はヒットエリアのみ透明拡張し、フォーカスリングも44px領域で表示",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayタイムライン（縦ルール/チェックサークル/区切り線）",
+    "issue": "濃い線とマーカーが密に並び、夜空の静けさよりも“管理ツール”の硬さが先行。視線が分散して主要タスクに集中しづらい",
+    "suggestion": "縦ルールをより淡いトーン（--borderをさらに下げる or ドット/グラデ端フェード）に、行間を+4px、区切り線は削減し“Open Air”を強めて主要タスクのコントラストを相対的に上げる",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "2行目タスク右端の黄ドット（#D29922）",
+    "issue": "warning系（アンバー）をカテゴリ/属性ドットに流用しており、注意喚起や期限接近と誤読されるリスクがある（セマンティック色の役割と混同）",
+    "suggestion": "カテゴリ/ゴールドット用に中立の限定パレット（同一色相の明度バリエーション or グレー系）を新設。warningは注意喚起に限定使用",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "入力バー���プレースホルダ「メッセージを入力…」",
+    "issue": "文字色#7A8593が背景#161B22上でコントラスト不足（4.5:1未満）の恐れ。ヒントテキストは実質的な入力指示のため判読性が重要",
+    "suggestion": "プレースホルダ色を--text-secondary（#9BA7B4）相当まで引き上げ、4.5:1以上を保証。入力時は不透明度低下ではなく色相維持のまま明度で状態差を付与",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "完了ステータス（緑テキスト/チェック）",
+    "issue": "成功色#3FB950の彩度が高く、青系を基調とする夜空トーンの中で視線を奪いがち。次アクション（編集/AI導線）よりも状態表示が強く感じられる",
+    "suggestion": "テキストは--success-subtleベース＋アイコンのみ緑、または小さなピル背景（success-subtle）＋本文は--text-secondaryにして“静かな達成感”にトーンダウン",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "基本情報〜AI理解メモのセクション区切り線",
+    "issue": "区切り線（rgbaボーダー）が連続し、面で区切る“Open Air”よりも線で区切る印象が強い。情報は読みやすいが呼吸感が損なわれ、夜の寛ぎから一歩遠ざかる",
+    "suggestion": "セクションヘッダ前後の余白を+8〜12px、罫線は節目のみ（セクション先頭/末尾）に限定。中間行は余白とテキスト階層（ラベル色/太さ）で分離",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "「+ タスクを追加」テキストリンク",
+    "issue": "単独テキストがクリックターゲットの場合、行高/パディングが小さく44px最小タップ領域に満たない恐れ。夜間片手操作で誤タップリスク",
+    "suggestion": "行全体（左右16px余白含む）をボタン化してヒット領域を拡張。視覚はテキストのみのままでも、透明パディングで44px以上を確保",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

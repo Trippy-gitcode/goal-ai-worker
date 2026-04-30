@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.4",
+    "issue": "アカウント乗っ取り時に攻撃者が退会リクエストを行った場合、正規ユーザーに通知が行われないため、72時間後に気づかないまま全データが物理削除される（データロスト）リスクがある。",
+    "suggestion": "退会リクエスト受付時に、登録メールアドレス宛に「アカウント削除リクエストを受け付けました。心当たりがない場合は直ちにログインしてキャンセルし、パスワードを変更してください」というセキュリティ通知メールを送信する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §13.4",
+    "issue": "project_v1.md §6.5では退会時に「Stripeサブスクを即時キャンセル」としているが、ux_v1.md §13.4では「72時間後にキャンセル予約」としている。後者の場合、クーリングオフ期間中に請求更新日が到来すると、退会手続き中にもかかわらず課金が発生する事故に繋がる。",
+    "suggestion": "project_v1.mdの定義通り、退会リクエスト時にStripeサブスクは即時キャンセル（期間満了での解約）とする仕様に統一してください。クーリングオフで復帰した場合はFreeプランとして再開させることで金銭的被害を防げます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2",
+    "issue": "messagesテーブルのRLSが「受信者が友達関係にあるユーザーのみSELECT可能」と定義されているが、§7.4ではAI対話履歴もmessagesテーブルに保存されることになっている。このまま実装すると、極めてプライベートなAI対話履歴が友達に漏洩する、あるいはAI対話が正常に保存・取得できな��なる。",
+    "suggestion": "AI対話用テーブル（例: ai_messages）とソーシャル用テーブル（social_messages）を明確に分離し、ai_messagesのRLSは「作成者本人のみCRUD可能」と定義してください（ux_v1.md末尾の指摘を正式な仕様修正として反映）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §5.4",
+    "issue": "QRコードにユーザーUUIDが直接含まれている。スクショ等からUUIDが抽出されると、将来的にUUIDをキーとする他APIへの攻撃（列挙や不正アクセス）の足がかりになるプライバシー・セキュリティ上の懸念がある。",
+    "suggestion": "QRコードには「一時トークン（ランダムな文字列）」のみを含め、サーバー側でトークンに紐づくUUIDを解決する設計に変更し、UUIDをクライアント間で直接露出させないでください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §3.3",
+    "issue": "画像のEXIF情報（位置情報等）の削除をサーバー側で行う設計になっているが、機微データがネットワーク経由でサーバーに送信されること自体がプライバシーリスクとなる。",
+    "suggestion": "クライアント側（ブラウザ/PWA）のCanvas API等を使用して、画像のリサイズおよびEXIF情報のストリップを行ってからサーバーにアップロードする設計に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §13.1",
+    "issue": "ログアウト時にCacheStorageを全削除すると、PWAの動作に必要な静的アセット（HTML/JS/CSS）のキャッシュまで消去され、次回起動時にオフライン環境でログイン画面すら開けなくなる（PWAのオフライン起動要件を満たせなくなる）。",
+    "suggestion": "削除対象を「ユーザーデータ（APIレスポンス等の動的キャッシュ、IndexedDB、localStorage、sessionStorage）」に限定し、PWAの静的アセットキャッシュ（App Shell）は保持するよう明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §5.4, ux_v1.md §4.4",
+    "issue": "QRコードやシェアリンクのトークンが24時間固定で有効なため、SNS等にスクショがアップロードされ��と、24時間の間不特定多数から承認待ちリクエストが届き続けるスパムリスクがある。",
+    "suggestion": "トークンの有効期限を短くする（例: 1時間）、または「リクエストがN件届いた時点でトークンを自動無効化する」レートリミット機構を導入してください。また、承認待ち一覧に「すべて拒否」ボタンを追加することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3",
+    "issue": "タスク詳細の「進め方を聞く」等でタスク名がそのままAIに送信される。タスク名に「〇〇病院に行く」「〇〇さんの連絡先整理」等のPIIが含まれている場合、正規表現マスキングをすり抜けて外部APIに送信される可能性がある。",
+    "suggestion": "AI相談への遷移時に、ユーザーに対して「タスク名がAIに送信されます。個人情報が含まれていないか確認してください」という確認ダイアログ（初回のみ、または設定で非表示可能）を表示するフローを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §13.1",
+    "issue": "メールアドレス変更時、新アドレスの認証が完了するまでの間、DB上のメールアドレスがどう扱われるか（ログインに使用するアドレスは旧か新か）が定義されていない。",
+    "suggestion": "「新メールアドレスの認証が完了するまでは旧メールアドレスでログイン可能であり、DB上のアドレスも更新されない（Supabase Authのセキュアなデフォルト挙動に従う）」旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3",
+    "issue": "Undoによってレベルダウンが発生した場合、レベル数字と称号は即時変更されるとあるが、アバターのPhase（見た目）がレベルダウン前のままになるか、ダウングレードされるかが明記されていない。",
+    "suggestion": "レベルダウンによってアバターのPhase閾値を下回った場合、アバターのビジュアルも前のPhaseに即時（アニメーションなしで）戻す旨を明記し、状態の不整合を防いでください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

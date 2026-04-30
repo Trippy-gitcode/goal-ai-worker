@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FLOW",
+    "location": "ux_v1.md §4.3, §3.5",
+    "issue": "ヒアリング完了後のTALK画面での遷移・フィードバックが未定義。5問目の回答後、ユーザーはTALK画面に取り残され、結果がどこに反映されたか（DISCOVERタブ）気付けない可能性が高い。",
+    "suggestion": "5問目回答後、AIが完了メッセージを返し、TALK画面内に「分析が完了しました [DISCOVERで結果を見る]」というシステムバナーまたはボタン付きカードを表示し、タップでS-32（DISCOVER）へ遷移するフローを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.5, §4.3",
+    "issue": "ヒアリングセッション中（TALK画面）に、ユーザーが履歴ドロワー（☰）を開いて「新しいチャット」を作成したり、別の過去スレッドに切り替えたりした場合の挙動が未定義。ヒアリング状態が別スレッドに引き継がれるのか、強制中断されるのか不明確。",
+    "suggestion": "ヒアリング中は履歴ドロワー（☰ボタン）を無効化（グレーアウト）するか、別スレッドに切り替えようとした時点で§4.3の「ヒアリング中断ダイアログ」を表示し、中断を明示的に確認する仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3, §7.4",
+    "issue": "Todayセクションでのタスクの「開始時刻による自動ソート」と「ドラッグ＆ドロップによる手動ソート」が混在した場合の挙動が未定義。手動ソート後に、開始時刻付きの新規タスクを追加した場合、どこに挿入されるか（リストの末尾か、時刻位置か）が不明。",
+    "suggestion": "「一度でも手動ソートが行われた場合、その日のリストはカ���タム順として固定され、以降の新規追加タスクは（開始時刻の有無に関わらず）リストの末尾に追加される」などの明確な挿入ルールを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "EDGE_CASE",
+    "location": "ux_v1.md §5.2, §5.3",
+    "issue": "オンボーディングのStep 4でゴールを1つも設定せずにスキップ（0個で次へ）した場合、完了後にAIが自動提案する「初回タスク」の生成基準が存在しない。",
+    "suggestion": "ゴール未設定でオンボーディングを完了した場合のフォールバックとして、AIが汎用的なタスク（例：「Laisの使い方を見る」「最初のタスクを追加してみる」）を自動提案する仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.1, project_v1.md §4.4",
+    "issue": "ヒーロー領域のEXPバーの数値表示（例: 1,240/2,000）が「累計EXP」なのか「現在のレベル内でのEXP」なのか不明確。累計の場合、バーの伸びが遅く見え、タスク完了時の爽快感（フィードバックの即時性）が損なわれる。",
+    "suggestion": "ゲームのベストプラクティスに倣い、EXPバーの分母分子は「現在のレベル開始時からの獲得EXP / 次のレベルアップに必要なEXP（例: 240/550）」とすることを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "EDGE_CASE",
+    "location": "ux_v1.md §3.2, project_v1.md §3.3",
+    "issue": "TALK画面での画像添付時、ファイルサイズが上限（10MB）を超過した場合のクライアント側のUIフィードバックが定義されていない。",
+    "suggestion": "ファイル選択直後にクライアント側でサイズチェックを行い、10MB超過時は添付をキャンセルし、トースト「画像サイズは10MB以下にしてください」を表示するエラーハンドリングを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.1, §2.3",
+    "issue": "タスク名（最大100文字）がGROW画面のTodayセクションでどのように表示されるか（折り返し、またはTruncate）が標準端末向けに定義されていない（小型端末の省略のみ記載あり）。",
+    "suggestion": "Todayリスト上ではタスク名を「最大2行でTruncate（末尾...）」とし、全文はS-11詳細パネルで確認できる仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §4.1",
+    "issue": "ME画面の4つのサブタブ（PROFILE, DISCOVER, FRIENDS, SHOP）のテキストラベルを標準スマホ（375px幅）で横並びにすると、文字数が多いため（計26文字+余白）窮屈になり、タップターゲットの最小サイズ（44px）を確保しづらい。",
+    "suggestion": "サブタブを「アイコン＋短いテキスト」にするか、横スクロール可能なタブバー（Scrollable Tab）として実装する方針を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.4",
+    "issue": "シェアリンクによるリモート友達追加において、送信者が共有アイコンをタップした際、常に新しいトークン（有効期限24時間）が生成されるのか、既存の有効なトークンが再利用されるのかが不明確。",
+    "suggestion": "「共有アイコンタップ時は常に新しいトークンを生成し、有効期限を24時間にリセットする」旨を���記し、期限切れリンクの再発行手順を明確にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  }
+]

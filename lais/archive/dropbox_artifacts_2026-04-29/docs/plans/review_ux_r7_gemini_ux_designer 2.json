@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §3.2",
+    "issue": "「入力テキストは改行可能（Shift+Enter）」とあるが、スマートフォン（iOS/Android）の標準的なソフトウェアキーボードにはShiftキーが存在しないため、ユーザーが改行を入力できない。",
+    "suggestion": "スマホ向けUIの標準に従い、ソフトウェアキーボードの「改行（Enter）」キーで改行を行い、メッセージの送信は入力バー右側の「➤（送信）」ボタンのタップで行う仕様に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md §1.2, §1.4, §2.4",
+    "issue": "S-14（ゴール詳細・フルスクリーン）からS-20（TALK）へ「タブ切替として遷移」し「戻るボタンでGROWに戻る」とあるが、S-14はpushStateされているため、ブラウザの戻るボタンを押すとS-14に戻ってしまう。SPAの履歴管理とタブ切替のポリシーが矛盾している。",
+    "suggestion": "S-14からTALKへ遷移する際は、S-14の履歴を`history.replaceState`でGROWトップ（S-10）に上書きしてからTALKタブに切り替えるか、TALK画面をタブ切替ではなくS-14の上に被さるフルスクリーン画面としてスタックする仕様に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md §3.3",
+    "issue": "単一タスク提案では「画面スペースの制約上、インライン展開は不採用（S-12を使用）」としているが、複数タスク提案の「個別に編集」では「各タスクの編集フィールドをアコーディオン展開」となっており、設計方針が矛盾している。複数展開するとさらにスペースが破綻する。",
+    "suggestion": "複数タスクの「個別に編集」時もインライン展開を避け、S-12ハーフモーダルをタスクの数だけ順次表示する（1つ保存したら次のタスクのモーダルが開く）か、複数タスク専用の編集モーダルを定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md §2.2, §6.1",
+    "issue": "キーボード表示時にGROW画面のヒーロー領域を`display: none`にする仕様だが、タスク追加（S-12）などのハーフモーダル内でキーボードを開いた場合、背面のGROW画面のヒーロー領域が突然消え、背景のリストが上にガクッとズレる視覚的な破綻（レイアウトシフト）が発生する。",
+    "suggestion": "キーボード表示時のヒーロー領域非表示は「GROW画面自体にフォーカスがある場合」に限定し、ハーフモーダル（S-12, S-15等）の表示中（backdropの背面にある状態）は背面のレイアウトを変更しない（`display: none`にしない）仕様とする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §4.4",
+    "issue": "友達リストが最大500人（project_v1.md §7.4）になる可能性があるが、FRIENDS画面には検索やソート、フィルタリング機能が定義されていない。500人のグリッドから特定の相手を探して応援やメッセージを送るのはUXとして非常に困難。",
+    "suggestion": "FRIENDS画面のヘッダー下部に、名前によるテキスト検索バー、または「レベル順/追加日順/未読あり」などのソート・フィルター機能を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §7.3",
+    "issue": "ME画面のサブタブコンテンツ領域での「左→右スワイプ（サブタブ切替）」と、iOS標準の「左端からの右スワイプ（戻る）」の判定境界が曖昧。トップレベルのME画面（S-30）で左端からスワイプした際、戻る画面がないため挙動が不自然になる。",
+    "suggestion": "ボトムタブのトップレベル画面（S-10, S-20, S-30）では、左端からのスワイプ（edge swipe）による戻るナビゲーションを完全に無効化し、サブタブ切替ジェスチャーのみを有効にするよう明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §2.4, §8.6",
+    "issue": "ゴール達成演出（紙吹雪やバナ���）が発火した直後（30秒以内）にUndoを実行した場合、進行中のアニメーション（紙吹雪、EXPバー伸長、レベルアップ等）をどう中断・巻き戻すかの視覚的定義がない。",
+    "suggestion": "Undoが実行された瞬間に、進行中の全アニメーション（紙吹雪、バナー、EXPバー伸長）を即時停止・非表示にし、EXPバーの巻き戻しアニメーション（§2.3）のみを再生する仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §8.6",
+    "issue": "タスク完了やゴール達成、レベルアップの直列演出（最大8秒）の実行中に、ユーザーがボトムタブでTALKやMEに切り替えた場合の挙動（演出のキャンセル、バックグラウンド進行、再開など）が定義されていない。",
+    "suggestion": "演出中にタブが切り替えられた場合はアニメーションを即時完了状態（最終状態の数値・UI）にスキップし、次回GROW画面に戻った際は演出を再生せず最新状態を表示する仕様を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md ��2.3, §7.4",
+    "issue": "習慣タスクの「今日だけ時刻を変更」ができない仕様だが、日常的なタスク管理において不便。§7.4のドラッグ＆ドロップによる順序変更が、この制約の代替手段として機能するかどうかの関連付けが不明確。",
+    "suggestion": "§2.3の習慣タスクの制約部分に、「一時的な予定変更は、Todayセクション上でのドラッグ＆ドロップ（§7.4）による順序変更で対応可能」という旨を明記し、ユーザーの摩擦を軽減する代替手段を提示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  }
+]

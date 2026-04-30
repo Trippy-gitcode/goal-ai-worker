@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存」項目が単一・自由記述で、多数の上流を持つ現実に対応しづらく機械可検証もしにくい",
+    "suggestion": "依存宣言をYAMLフロントマターで配列化し、file/version/sectionsの明確なキーを持たせる（例: dependencies: [{file: docs/project_v1.md, version: v1.3, sections: [\"§3.2-§3.5\"]}, ...]）。準拠スクリプト（scripts/spec_dep_lint.sh）で存在・バージョン書式・循環の検証をcanopyに組み込む。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.5",
+    "issue": "「dev-system準拠: docs/plans/dev_system_spec.md §19」という相対パスはアプリ側リポジトリに存在しない可能性が高く参照切れを招く",
+    "suggestion": "ヘッダーを『dev-system v{VERSION} §19（repo URLまたはcommit hash）』の形式に変更し、.dev-system.versionと一致することをspec_dep_lint.shで検証する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.6",
+    "issue": "循環参照禁止・バージョン必須は規定されているが、機械検証手段が未定義のため逸脱を早期検知できない",
+    "suggestion": "ヘッダー依存を収集しDAG検証・未解決参照・重複バージョン混在をチェックするscripts/spec_dep_lint.shを追加しcanopyで必須化（G系いずれかに編入）。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.6",
+    "issue": "依存チェーン図でe2e_fullflow_test.mdがproject_v1.mdからのみ下流に置かれており、§18の連鎖更新（design_spec/ux変更→e2e更新）との関係が読み取りづらい",
+    "suggestion": "e2e_fullflow_test.mdの上流にproject/ux/design_system/design_specを併記するか、『検証仕様は複数上流を持つ（§18準拠）』の注記を追加。依存宣言の例も複数ファイルで記載する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力がMarkdown表のみで機械可検証に不向き。完了基準（全行にLais方針等）の自動検証ができない",
+    "suggestion": "Markdownと併せてJSON/YAMLのサイドカーファイル（docs/benchmarks/{scope}.json）を必須化。スキーマ: apps[], features[], matrix[feature][app], policy（同等/未対応/差別化）, links[]. scripts/benchmark_lint.shで件数（直接≥5/間接≥3）、全行のLais方針記入、差別化≥3件を検証しcanopyに組み込む。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.7",
+    "issue": "『直接5社+間接3社』要件に対し、マトリクス例は5列（競合A〜E）で間接競合の扱いが不明",
+    "suggestion": "間接競合用の別マトリクス（影響度/代替解の比較）を追加するか、列拡張（A〜H）と『direct/indirect』属性をJSON側に持たせlintで件数を検証する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.7 と §13.4",
+    "issue": "Phase 0完了基準で『8ペルソナ×2モデル』とする一方、標準は5ペルソナ（§13.4）。追加3ペルソナの定義が未提示",
+    "suggestion": "いずれかに統一。8ペルソナを採用するなら追加3つの定義と役割差分を§13.4に追記、review_gate.shで『要求ペルソナ×モデル数』の達成を検証する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.4（e2e_fullflow_test.md）",
+    "issue": "パフォーマンステストのKPI/測定手順/閾値が未定義で、実行可能��と合否判定が不明確",
+    "suggestion": "計測指標（LCP/FID/CLS/TTFB/初回API p95等）とツール（Lighthouse CI/Playwright trace）を明記。しきい値とJSON出力パスを定め、canopyで閾値検証を実施。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4（reference_v1.md §3 AI活用設計）",
+    "issue": "AIの誤判断・暴走防止に直結する運用設計（レート制限/タイムアウト/フェイルオーバ/危険プロンプト検知/コスト上限/サーキットブレーカー等）の必須項目がテンプレに明示されていない",
+    "suggestion": "AI運用安全項目を必須サブセクションとして追加：rate limit（プラン別）、timeout/retry/backoff、fallbackモデル、コンテンツ安全・PIIガード、予算上限/警報、監査ログ、意図分類の信頼度閾値/人手承認ゲート条件。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "責務分離・承認トレーサビリティ観点で、ヘッダーに更新者/承認者/最終更新の明確なメタが不足",
+    "suggestion": "ヘッダーに『更新: YYYY-MM-DD』『作成者/責任者（ADV）』『承認者（PO）』『承認ID（session/commit）』を追加。日付はISO-8601で統一しlint対象にする。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.6・§19.5",
+    "issue": "『バージョンなしの依存宣言禁止』に対し、現行の自由記述フォーマットではバージョン抽出の曖昧さが残る",
+    "suggestion": "依存のバージョンキーを明示（version: 'v1.3' または semver）。正規表現を規定（^v\\d+\\.\\d+(\\.\\d+)?$）し、spec_dep_lint.shで厳格に検証する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4（system_map.md）",
+    "issue": "失敗パス/リトライ/ロールバック手順のマッピングがテンプレに含まれておらず、インシデント時の手順連携（§sub_infrastructure: incident_runbook）に橋渡しがない",
+    "suggestion": "system_map.mdに『§5 失敗パスとリカバリ』を追加し、各主要フローでのエラー発生点→検知→リトライ/フォールバック→ユーザー提示→incident_runbookへの参照を定義する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.4（ux_v1.md / project_v1.md）",
+    "issue": "両方に『AIレビュー計画』セクションがあり、どちらが正本か不明瞭",
+    "suggestion": "AIレビュー計画の正本をproject_v1.mdに統一し、ux_v1.md側は『project §10参照』に変更。重複記述を回避する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "テンプレ表記に固有名『Lais方針』が残っており、他アプリ転用時に混乱を招く恐れ",
+    "suggestion": "{AppPolicy}のプレースホルダに置換し、init_app.sh適用時にアプリ名で埋める運用に変更。bench_lintでも列名を検証する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の「依存」欄が単一ファイル+バージョンの体裁で記述例が示されており、複数上流（例: design_spec_v1.mdはux_v1.mdとdesign_system.mdに依存）を正しく列挙できるか不明確。",
+    "suggestion": "依存の記法を配列化して明示（例: 「依存: - docs/ux_v1.md v1.2 - docs/design_system.md v1.0」）。canopy用に正規表現も固定し、複数依存を機械検出可能にする。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.5, §19.6",
+    "issue": "上流→下流のバージョンドリフト検出が手運用に依存しており、上流更新後に下流の「依存」ヘッダーが未更新のまま進行するリスクが高い（機械可検証の原則に未達）。",
+    "suggestion": "spec_dep_lint.sh（新規）を追加し、各docs/*.mdのヘッダーを走査して依存ファイルの現行バージョンと一致するか検証。canopyに統合し、不一致時はFAIL。commit差分から影響下流候補を提示する簡易レポートも出す。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7 と §13.4",
+    "issue": "Phase 0完了基準で「8ペルソナ×2モデルのAIレビュー」とあるが、標準定義は「5ペルソナ」。要求数に齟齬がある。",
+    "suggestion": "いずれかに統一。例: 標準5ペルソナ×2モデル必須＋任意追加（最大8）に変更し、§13.4にも同一表現を反映。canopyのreview_gate.shに閾値（必要レビュー種別・件数）をパラメトリックに設定できるよう拡張。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.5",
+    "issue": "ヘッダーにドキュメントのRACIがなく、AI⇔人間（PO/ADV/ENG）の承認・責務境界がドキュメント単位で明示されていない。",
+    "suggestion": "ヘッダーに「所有者:」「承認者:（最終承認PO）」「最終更新:」を追加。CONFIRMED遷移時には承認者名と日付を必須化し、canopyで未記入をFAIL。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.6",
+    "issue": "参照表記が「§X.Y」番号依存で脆弱。セクションの増減で番号が変わると参照が腐る��能性がある。",
+    "suggestion": "各重要セクションに安定ID（例: DS-SEC-COLOR-SYSTEM）を付番し、「design_system.md §DS-SEC-COLOR-SYSTEM」形式で参照。Markdownアンカー名規約を定め、機械検証対象にする。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレート）",
+    "issue": "テスト仕様から§12のSPEC-IDやtests/test_map.yamlへの対応が必須化されていないため、影響範囲テスト（affected-tests.sh）とのトレーサビリティが弱い。",
+    "suggestion": "各テストケースに「SPEC-ID」「test_mapキー（またはgrep用タグ）」列を必須追加。canopyでe2e_fullflow_test.md内の全ケースにSPEC-IDが付与されていることを検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.5",
+    "issue": "ヘッダーのステータス（DRAFT/REVIEW/CONFIRMED）が運用ルールにはあるが、実行ゲートに未連動。DRAFT/REVIEW状態の仕様に依存するミッションが実装進行する恐れがある。",
+    "suggestion": "spec_status_gate.sh（新規）をcanopyに追加。ミッション定義の「参照」欄に列挙された仕様書のステータスがCONFIRMEDでない場合はFAIL（但しPO緊急承認時にバイパスできるフラグを別途用意）。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（ux_v1.md テンプレート）",
+    "issue": "§2「仕様協議時の操作フロー確認」で必須としている「開始操作/中断・キャンセル/操作後の戻り先」の三点がテンプレート内で明示的な必須枠になっていない。",
+    "suggestion": "各画面フローに必須小見出し「開始操作」「キャンセル動線」「完了後の戻り先」を追加し、未記入時はmission_linter相当のlintでFAILにする。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの「dev-system準拠: docs/plans/dev_system_spec.md §19」はアプリ側リポジトリに当該パスが存在しない可能性が高く、参照先が曖昧。",
+    "suggestion": "「dev-system準拠: v{.dev-system.version}（URL: https://.../dev_system_spec.md#§19）」のようにバージョンと正規URLを併記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ベンチマークの出力フォーマットに出典エビデンス（URL/取得元/アプリ版/スクショID/取得日/サマリ根拠）がなく、AIの誤読・幻覚を発見しづらい。",
+    "suggestion": "各表に「出典URL」「アプリバージョン/ビルド」「証跡（evidence/benchmark/YYYYMMDD/）への相対パス」「抽出基準」列を追加。screenshot_lint類似のbenchmark_evidence_lint.shで存在性を検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "App Storeレビュー分析（★1-2離脱要因/★4-5継続要因）の抽出手順・サンプリング設計・リージョン/言語の扱いが未定義で再現性が低い。",
+    "suggestion": "サンプリング規約を明記（例: 直近6ヶ月、各評価帯からn件ランダム/重複アプリ名除外/リージョンJP-US比較）。抽出プロトコルをdocs/benchmark_method.mdに固定し、テンプレに参照を追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.6 と §18",
+    "issue": "§18では「design_system.md→e2e_fullflow_test.md」の連鎖が明記されて��る一方、§19.6の依存チェーン図には同リンクが登場しないため、読者視点で依存が漏れて見える。",
+    "suggestion": "§19.6のチェーン図を§18と整合させる（または§18を正本として§19.6の図は簡略図である旨と差分リンクを明記）。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4（system_map.md テンプレート）",
+    "issue": "「ファイル変更チェックリスト」の書式が自由で、changed-files-allowlist.sh等の機械検証と連動できない。",
+    "suggestion": "system_map.mdにYAMLブロック「change_impact_map: - feature: X files: [a/b/c] tests: [tag1,...]」を標準化。affected-tests.sh/allowlistスクリプトで参照可能にする。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "差別化マッピングの「対応セクション」がファイル名か節番号かの規約不明で、下流テスト/仕様追跡と結びつきにくい。",
+    "suggestion": "「対応セクション」列を「{ファイル名} §{安定ID}」表記に統一（例: project_v1.md §PRJ-ROADMAP-01）。§19.5の安定ID規約と連携。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7",
+    "issue": "「直接競合5社以上」の完了基準はニッチ領域で実現困難な場合があるが、例外手順が未定義。",
+    "suggestion": "例外ルールを追加（PO承認の上で3社以上＋隣接カテゴリ補完、代替として機能比較の深度要件を引き上げる等）。ヘッダーに「例外承認: PO/日付」を追記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§19.4, §19.7",
+    "issue": "AI（ADV）が誤ったベンチマーク解釈や「Lais方針」分類を行った場合のリカバリ手順がテンプレに記載されていない（再実施条件・差し戻しの記録様式が不明）。",
+    "suggestion": "各仕様書末尾の「変更履歴」に「差し戻し記録」小節を追加し、誤判定根拠/修正方針/再レビューIDを必須化。project_v1.md §10/ux_v1.md §N+10のAIレビュー計画に「再実施トリガー（矛盾指摘/重大差分発見）」を追記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（reference_v1.md §3 AI活用設計）",
+    "issue": "AIルーティング/プロンプト変更に対する承認ゲート（§6のリスクベース承認）との対応ルールがテンプレ内に明記されていない。",
+    "suggestion": "reference_v1.md §3に「変更リスク分類（例: 低=句読点/トーン調整、中=プロンプトセクション追加、高=ルーティング比率/モデル変更）」と各リスクに対応する承認方式（🟢/🟡/🔴）をテンプレとして追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーに「作成: {日付}」はあるが、最終更新日が別管理で変更追跡がしづらい。",
+    "suggestion": "「更新: {日付}」を追加し、変更時に自動更新するヘッダー整形スクリプト（spec_header_sync.sh）を提供。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §「project_v1.md 内部矛盾」/ project_v1.md §4.2",
+    "issue": "ux_v1.mdは「ゴール作成から7日間の完了待ちルールはproject_v1.md v1.3に存在しない」と注記しているが、project_v1.md §4.2には明確に7日待機と自動完了（ボーナス付与）が定義されている。両ファイル間でルールの有無が矛盾。",
+    "suggestion": "7日待機ルールを採用で統一。ux_v1.mdに以下を追加: S-14に「完了待ち」ステータスUI（進捗100%＋『あとN日で完了』バッジ）、手動『完了にする』は7日未満時は無効（理由ツールチップ）。7日経過時の自動完了演出フロー（紙吹雪＋+50 EXP、Undo不可）も定義。通知（週次/日次）からの導線も追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 / §4.5",
+    "issue": "レベル計算が矛盾。§4.4の式ではLv1→2は100EXPだが、§4.5には『Lv.1→2=1,000EXP』と記載があり整合しない。レベルカーブ実装が不可能。",
+    "suggestion": "正（想定）をLv1→2=100EXP���確定し、§4.5の1,000EXP記述を削除。累計式/テーブルも再検算して整合性を確認。ux_v1.md内の演出トリガー（EXPバー到達/レベルアップ）もこの式に基づく注記を追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.2 遷移マトリクス / §13.1 設定",
+    "issue": "画面IDにS-42（メール変更）/S-43（パスワード変更）/S-44（ブロックリスト）が定義されているが、§1.2の遷移マトリクスに遷移パスが記載されていない。",
+    "suggestion": "遷移マトリクスに『S-37 設定 → S-42 メール変更 / S-43 パスワード変更 / S-44 ブロックリスト』を追加し、戻りナビゲーション（左上戻る/スワイプ）も明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3 タスク完了 / §8.1 演出 / project_v1.md §4.5",
+    "issue": "日次EXP上限（合計300、冒険100/日）到達時のUIが未定義。上限到達後にタスク完了するとタスクは成立するがEXPは付与されない想定だが、ユーザーへの明示や演出抑止条件がない。",
+    "suggestion": "上限到達時の挙動を定義: ���タスク完了は成立（チェックは維持）②EXPバー伸長/フロートテキストは抑制③トースト『本日のEXP上限に達しています。EXPは加算されません』④初回到達時のみ情報ダイアログ⑤GROWヒーローに『上限到達』バッジ（当日中）。冒険EXP/ゴールボーナスの別枠有無もUIで区別。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §8.5 ログインボーナス / §8.6 演出キュー / §3.4 TALKでのレベルアップ",
+    "issue": "演出優先度に『ログインボーナス（+5EXP）』と『TALK発のレベルアップ/冒険EXPがGROW表示時に反映される瞬間』の競合定義がない。初回起動直後にタスク完了・ログインボーナス・（前回TALK分の）レベルアップが同時に起きるケースで順序が未定義。",
+    "suggestion": "演出キューをグローバル化し、優先順位を『1. ログインボーナス → 2. タスク完了 → 3. ゴール達成 → 4. レベルアップ → 5. その他（TALK起因の反映）』に統一。TALK起因のレベルアップはGROW初回表示時にキュー投入し、上記シーケンスに従って直列実行。合計演出時間上限内に収めるルールを追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.4 ドラッグ&ドロップ / §2.3 Today表示",
+    "issue": "Today内の並び替えは『開始時刻による自動ソートを手動で上書きし保存』とあるが、手動並び替えから元の自動ソートへ戻す操作が未定義。混在時の優先順位も不明瞭。",
+    "suggestion": "Todayヘッダーに『並び順』メニュー（自動: 時刻順 / 手動）を追加。初回ドラッグ時に自動→手動へ切替を明示し、メニューから自動に戻せるようにする。Overdue/未設定時刻/習慣のグルーピング順も仕様化。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4 FRIENDS / project_v1.md §7.4（友達最大500）",
+    "issue": "友達最大500人に対してグリッド一覧の無限化/仮想化やソートが未定義。PWAで500枚のアバター（PNG）を一度にレンダリングするとパフォーマンス劣化が懸念。",
+    "suggestion": "FRIENDSにリスト仮想化（IntersectionObserver + windowing）と段階ロードを導入。既定ソート（最近の相互作用/名前昇順）を定義。画像は遅延読み込み＋低解像度プレースホルダーを採用。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.5 S-21 チャット履歴ドロワー",
+    "issue": "スレッド0件時の空状態UIが未定義。上限100件到達時の自動アーカイブのユーザー通知/復元パスも未定義。",
+    "suggestion": "S-21に空状態（『まだ会話がありません』『新しいチャット』CTA）を追加。100件到達時は『古いスレッドを自動アーカイブしました』トースト一度だけ表示し、フィルタ（すべて/アーカイブ）や検索（MVPは見送り可）設計を検討。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3 Upcoming / §2.3 Today",
+    "issue": "大量タスク（例: 7日で100件以上、タスク総数1万件上限）の表示・操作性の劣化対策が弱い。日付グループのデフォルト展開や無限スクロール/バーチャルリストの記述がない。",
+    "suggestion": "Upcomingを『デフォルト閉じる＋日付ごと遅延展開』に変更。Today/Upcoming/Goalsリストはいずれも仮想化を適用。日付見出しのスティッキー���、クイックスクロール（今日/明日/週末ジャンプ）も検討。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §9.1 オフライン / project_v1.md §4.5",
+    "issue": "オフライン中に多数のタスク完了→復帰時にEXP上限で一部が不付与となるケースのユーザー通知が不十分。同期完了トーストのみだと『どれが付与されたか』の透明性が不足。",
+    "suggestion": "復帰同期結果サマリーを追加（例:『5件完了を同期。EXP付与4件、上限超過で1件はEXPなし』）。対象タスク行に一時的な『EXPなし（上限）』バッジを付与（当日中のみ表示）。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5 / ux_v1.md 全般",
+    "issue": "日次リセットがJST固定（4:00）で海外/出張ユーザーに直感的でない可能性。UX上の説明が画面内に不足。",
+    "suggestion": "S-39通知設定またはプロフィールに『日次リセットはJST 04:00』の注記リンクを追加。将来のタイムゾーン対応予定も明示。日次サマリー通知文面に『（JST基準）』を1回だけツールチップで案内。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8.* 演出 / §10.4 スクリーンリーダー",
+    "issue": "レベルアップ/EXP獲得/冒険検出など視覚演出のスクリーンリーダー通知が抽象的（aria-live=politeのみ）。具体的な発話文や重複抑止が未定義。",
+    "suggestion": "各演出にSR専用のテキストを定義（例:『タスク完了。+10EXP。現在Lv12、次のレベルまで760EXP』）。同一イベント多発時は最終状態のみ読み上げるデバウンスルールを追加。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2 メッセージ送信（画像添付）/ project_v1.md §3.3",
+    "issue": "画像添付の失敗・上限（10MB超過）・アップロード進捗UIが未定義。大きな画像や低速回線時のユーザー不安が残る。",
+    "suggestion": "添付時にクライアント側でファイルサイズ検証（>10MBは即エラー）。送信時にアップロード進捗バー/キャンセルを表示。失敗時はサムネにエラー表示＋[再試行]。初回警告ダイアログに『10MB上限』を明記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.3 DISCOVER（強み/弱みチップ）/ §4.1 サブタブスワイプ",
+    "issue": "DISCOVER内の横スクロール（強み/弱みの横並びチップ）とMEサブタブの横スワイプが競合し、誤スワイプでサブタブが切り替わる恐れ。",
+    "suggestion": "水平方向パンの優先度をチップセクションに与える（水平スクロール中はサブタブスワイプを一時無効化）。閾値（startXから15px以内はコンテンツ、超過でサブタブ）を実装。ビジュアルでスクロール方向を示す。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.2 ヒーロー領域（小型端末対応）",
+    "issue": "ヒーロー圧縮時のEXP数値『1,240/2,000』が小型端末で可読性低下の恐れ（桁数増加やローカライズ時）。",
+    "suggestion": "小型端末では『進捗%』か『残りEXP』表示への切替を検討（例:『Lv12（62%）』）。桁区切り・略記（1.2k）のポリシーをdesign_systemに追記。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

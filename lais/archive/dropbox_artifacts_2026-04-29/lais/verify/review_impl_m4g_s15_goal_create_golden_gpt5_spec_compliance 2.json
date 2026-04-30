@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.8 S15-7",
+    "issue": "「+ 最初のタスクを追加」の上方向スペーシングが仕様と不一致。フォームに gap: var(--space-md) がある上に、.s15-add-task に padding-top: var(--space-md) を付与しており、実効的に二重分の余白になっている。仕様は margin-top --space-md を要求。",
+    "suggestion": "フォームの gap と競合しないように .s15-add-task の padding-top を削除し、代わりに margin-top: var(--space-md) を明示する（または直前要素との間隔を gap で統一する場合は、.s15-add-task の追加パディングを持たせない）。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.8 S15-7",
+    "issue": "テキストラベルが仕様の記載「+ 最初のタスクを追加」と一致していない。実装は先頭の「+」記号がテキストに含まれず、SVG アイコンのみで表現している。",
+    "suggestion": "視覚ラベルを仕様どおり「+ 最初のタスクを追加」に合わせるか、仕様側に「プラス記号はアイコンで代替可」を明記して整合を取る。実装側はボタン内のテキストを「+ 最初のタスクを追加」に変更するのが最短。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.8 S15-3, §4.8 S15-6",
+    "issue": "タップ領域・チップの最小高さがトークン var(--tap-target-min) に委ねられており、仕様の固定値 44px との一致が保証されていない。",
+    "suggestion": "デザイントークン定義で var(--tap-target-min) が 44px であることを確認・固定するか、.s15-close と .s15-category の min-height/size を 44px に明示し、トークンが将来変更されても S-15 の要件が崩れないようにする。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§4.8 S15-4",
+    "issue": "ラベル要素の関連付け属性に JSX での 'for' を使用している。Preact/React では一般に htmlFor を用いるため、ラベルクリックで入力にフォーカスが移らない可能性がある。",
+    "suggestion": "label の属性を for から htmlFor に変更し、id と正しく対応付ける。例: <label htmlFor=\"s15-name-input\">。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.8 S15-5",
+    "issue": "期限表示のコンテナに aria-readonly=\"true\" を付与しているが、素の div でロール未設定のためアクセシビリティ上の意味を持たない。",
+    "suggestion": "現状は純表示のため ARIA は不要。将来的にピッカー起動を担うなら role=\"button\" と aria-haspopup=\"dialog\"（または適切なロール）を付与、もしくは readOnly な input 要素にして aria-readonly を正しく適用する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.8 S15-7",
+    "issue": "仕様は「リンク」と記載だが、実装はボタン要素を使用。動作はインラインでの追加アクションでありボタンが妥当だが、仕様語彙と乖離がある。",
+    "suggestion": "仕様文言を「テキストリンク風ボタン」とするか、実装コメントに「リンク表現は視覚スタイル、要素は button」と明記して意図を揃える。��素を a に変更する必要はない。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§4.8 S15-6",
+    "issue": "選択状態で font-weight: semibold を追加しており、仕様には明記がない追加スタイル。",
+    "suggestion": "仕様に選択時の太字化を追記して承認を得るか、太字化を外して仕様記述（背景・ボーダー・文字色・チェックアイコン）の範囲に収める。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.8 S15-8",
+    "issue": "CTA の無効時は aria-disabled のみで、フォーカス移動では依然としてタブ移動対象。キーボードユーザーにとって無効ボタンへの到達が冗長になる可能性がある。",
+    "suggestion": "無効時は tabindex=\"-1\" を付与してタブ順から外す、または実際の disabled 属性を併用しつつ見た目・ロジックは現状どおり維持（仕様が aria-disabled を要求するため、実装注記で整合方針を記載）。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.8 S15-2",
+    "issue": "タイトルのフォント���イズがトークン var(--font-size-lg) 参照で、仕様の 20px（regular）と離散スケール上で一致しているかが不明。",
+    "suggestion": "タイポグラフィスケールの定義を確認し、var(--font-size-lg)＝20px であることを設計側に記録（デザイントークン表へ明示）。相違があればトークンまたはクラス指定を調整する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

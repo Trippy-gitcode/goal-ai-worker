@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "戻る操作で window.history.back() を優先しており、履歴が同一オリジンでない場合でも外部オリジンへ遷移し得る。Open redirect ではないが、予期せぬアプリ離脱やクリックジャッキング文脈からの離脱を招く可能性がある。",
+    "suggestion": "同一オリジンのみ back を許可し、その他はアプリ内既定ルートへフォールバックする。例: const ref = document.referrer; try { if (ref && new URL(ref).origin === location.origin) history.back(); else route('/', true); } catch { route('/', true); }",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "CSP の適用（LP-003）は本画面では未適用と明記されており、アプリ全体のベースライン防御が未確立。",
+    "suggestion": "サーバ側で強力なグローバル CSP を設定する。推奨例: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.example.com; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests;（必要に応じて Trusted Types も検討）",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "将来の永続化（users.avatar_id 更新）における RLS 設定の方針が明示されていない。RLS 未設定や不備は他ユーザーのプロフィール改ざん・閲覧に直結する重大リスク。",
+    "suggestion": "DB で RLS を有効化し、認可ポリシーを厳格化する。例（Supabase/Postgres）: ALTER TABLE public.users ENABLE ROW LEVEL SECURITY; CREATE POLICY \"update_own_avatar\" ON public.users FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id); 必要最小権限のロール設計とサーバ側検証も併用する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "1",
+    "issue": "/onboarding ルートへのアクセス制御がクライアント側でも未実装で、未認証でも直接遷移可能。現状はローカル状態のみだが、将来的にユーザー状態と結合する際に不整合や情報露出につながり得る。",
+    "suggestion": "App レベルで認証状態を確認し、未認証の場合は /auth へ誘導、認証済みかつ完了ステ��プに応じて適切なステップへリダイレクトする。サーバ側でも必ず同等の制御を実装する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2",
+    "issue": "将来のアバター選択結果の永続化（state-changing リクエスト）に対する CSRF 対策の方針が未記載。",
+    "suggestion": "セッションクッキーを用いる場合は SameSite=Lax/Strict に加え、CSRF トークン（ヘッダ送出）＋ Origin/Referer 検証を実装。Authorization ヘッダのベアラートークン運用でも、サーバ側で Origin/Referer を検証し、POST/PUT/PATCH/DELETE は JSON ボディのみ許容するなどの対策を講じる。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "アバター SVG は現状ハードコードで安全だが、将来的にサーバ由来の SVG/HTML をそのまま描画すると DOM XSS の危険がある。",
+    "suggestion": "永続化は avatar_id のみを保存し、クライアント側で安全なローカル辞書により対応する。どうしても外部提供 SVG を扱う場合はサニタイズ（DOMPurify の SVG 対応など）と dangerous な属性/要素��除去、dangerouslySetInnerHTML/innerHTML の不使用を徹底する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "将来的にリダイレクト系クエリ（returnTo など）を導入した場合に Open Redirect 化するリスクへの対処方針が未定。",
+    "suggestion": "クエリで遷移先を受ける場合はホワイトリスト制（アプリ内既知パスのみ）にし、絶対 URL は拒否する。URL を解決して origin が一致するか検証し、不一致は既定ルートへフォールバックする。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体",
+    "issue": "本パッケージには API 呼び出しがないため CORS 設定は不明。将来の API 追加時にワイルドカード許可や credentials と * の併用などのミスコンフィグが懸念。",
+    "suggestion": "サーバで厳格な CORS を設定。具体例: Origin はアプリのオリジンのみ許可、Access-Control-Allow-Credentials を使う場合は Allow-Origin にワイルドカードを使わない、適切な Allow-Methods/Headers を限定、Vary: Origin を付与。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体",
+    "issue": "提供コード内に危険な innerHTML/dangerouslySetInnerHTML の使用やハードコードされたシークレットは検出されなかったが、継続的な検出仕組みが未記載。",
+    "suggestion": "継続的な漏えい防止として secret-scan（git-secrets/trufflehog/ggshield など）を CI に組み込み、.env.* をコミット対象外にする。併せて（参考）本パッケージでの grep 結果は dangerous/innerHTML=0, key/token らしき定数=0。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

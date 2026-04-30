@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Todayセクション 09:00「企画書を仕上げる」行のカード背景/完了バッジ",
+    "issue": "成功状態のティントがトークン値から逸脱。背景 rgba(63,185,80,0.06)、チェック周囲 rgba(63,185,80,0.20) を直指定しており、--success-subtle（rgba(63,185,80,0.12)）および派生トークンに不一致。",
+    "suggestion": "背景は var(--success-subtle) を使用し、ホバー/押下は --success-subtle-hover / --success-subtle-pressed を使用。完了バッジの内側/外側の色も --success / --success-subtle 系に統一（直指定のrgbaを撤廃）。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "COLOR",
+    "screen": "s30_me",
+    "location": "ヒーロー領域 EXPバー（トラック背景）",
+    "issue": "EXPバーのトラックが rgba(121,192,255,0.18) で描画されており、design_system v0.12（および既修正リスト#30）の --accent-subtle=rgba(121,192,255,0.14) に不一致。",
+    "suggestion": "トラ��ク背景を var(--accent-subtle)（rgba(121,192,255,0.14)）へ統一。関連する全画面のプログレス系トラックも同値にそろえる。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "TYPOGRAPHY",
+    "screen": "s12_task_add",
+    "location": "各フォームラベル（開始時刻/所要時間/予定日/ゴール紐付け 等）",
+    "issue": "font-size:12px を使用。タイポスケールに12pxトークンは存在せず、フォームラベルは --font-size-sm(14px) を用いる想定に反する。",
+    "suggestion": "フォームラベルは font-size: var(--font-size-sm)（14px）+ line-height: var(--line-height-sm) に統一。日本語ラベルには letter-spacing: var(--letter-spacing-ja) を併用。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Todayセクション各行のメタ情報（例:「達成・45分」「予定・30分」）とEXP数値（右寄せ）",
+    "issue": "font-size:12px を複数箇所で使用。タイポスケール外で、キャプション/時刻は --font-size-xs(11px)、本文や副次テキストは --font-size-sm(14px) を使う設計に不一致。",
+    "suggestion": "時間や短い補助情報��� 11px（--font-size-xs）に、説明的な副次テキストは 14px（--font-size-sm）に整理。日本語は line-height: var(--line-height-ja-body) を適用して可読性を維持。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "TYPOGRAPHY",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内のメタ（「09:00 ・ 45分」）",
+    "issue": "font-size:12px を使用。タイポスケール外。メタデータはキャプション扱いで --font-size-xs(11px) または本文扱いで --font-size-sm(14px) を用いるべき。",
+    "suggestion": "メタは可読性を保ちつつ視覚階層を下げるため 11px（--font-size-xs）に変更。行間は --line-height-sm もしくは日本語文脈では --line-height-ja-body を適用。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "ヒーロー領域「Lv.12 EXPLORER」およびサブタブラベル（PROFILE/DISCOVER/FRIENDS/SHOP）",
+    "issue": "いずれも font-size:12px を使用。タイポスケールにないサイズで、UIラベル/タブは --font-size-sm(14px) への統一が必要。",
+    "suggestion": "タブ/ラベル系は font-size: var(--font-size-sm)=14px + letter-spacing: var(--letter-spacing-label)=1.5px を適用し、階層を整える。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "タスクリストの補助行（例:「完了・4/8」「今日・09:00」「4/15・予定」）",
+    "issue": "font-size:12px を使用。スケール外。日付/時刻などのキャプション用途は --font-size-xs(11px) が規定。",
+    "suggestion": "補助行は 11px（--font-size-xs）に変更。主要行（タスク名）は 14px（--font-size-sm）でコントラストと階層を明確化。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "ヘッダーのボトムボーダー（stroke/border色）",
+    "issue": "border-bottom: 1px solid rgba(110,118,129,0.4) を直指定。トークン --border / --border-strong を使わず濃度も不定で、画面間で一貫しない恐れ。",
+    "suggestion": "ヘッダーや区切り線は var(--border) または var(--border-strong) を使用し、必要に応じてテーマ別の濃度トークン（strong/標準）で統一。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s00_splash",
+    "location": "ロゴ/タグライン/CTAの縦配置（中央寄せ気味）",
+    "issue": "要素が中央寄せに集約され、Open Air原則の“静かな余白のリズム”がやや単調。ブランドの『夜空に吸い込まれる奥行き』が弱い。",
+    "suggestion": "ロゴ/タグラインをやや上（視覚重心）に、CTA群は下部余白を広く確保。星屑モチーフとの間に縦方向の間（セクション間≧32px）を強調し、呼吸感を出す。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

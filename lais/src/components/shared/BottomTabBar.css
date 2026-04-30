@@ -1,0 +1,99 @@
+/*
+ * BottomTabBar — design_spec_v1.md §4.4 S10-10 準拠
+ * トークンは全て design_system.md §2〜§7 を参照
+ */
+
+.bottom-tab-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 82px; /* §4.4 S10-10 固定値 */
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-strong);
+  padding-top: 10px; /* §4.4 S10-10 固定値 */
+  z-index: var(--z-tab-bar, 100);
+}
+
+/* iOS safe-area 対応: env() の段階的フォールバック（M4-B で学んだパターン） */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottom-tab-bar {
+    height: calc(82px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+.bottom-tab-bar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+}
+
+.bottom-tab-bar-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-tab-bar-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 6px 16px; /* §4.4 S10-10 Active 仕様 */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.bottom-tab-bar-btn:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.bottom-tab-bar-btn:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.bottom-tab-bar-btn-active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.bottom-tab-bar-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-tab-bar-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.bottom-tab-bar-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+/* LP-001: prefers-reduced-motion 対応 */
+@media (prefers-reduced-motion: reduce) {
+  .bottom-tab-bar-btn {
+    transition: none;
+  }
+}

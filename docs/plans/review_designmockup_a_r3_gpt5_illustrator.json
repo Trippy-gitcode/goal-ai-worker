@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "入力フィールド（メールアドレス／パスワード）のボーダー",
+    "issue": "ボーダー色 #484F58 とフィールド背景 #161B22 のコントラストが低く、コントロールの境界が判別しづらい（非テキストコントラスト WCAG 1.4.11 3:1 未達の可能性が高い）",
+    "suggestion": "フォーム要素のデフォルト境界に --border-strong（Night Sky: #6E7681）を使用、またはボーダー太さを 1.5px〜2px に強化。ホバー/フォーカスだけでなく通常時も境界を明瞭化する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "ヘッダー両端のアイコン（22px）、送信ボタン（36×36px）、提案カードの✕ボタン（小チップ）",
+    "issue": "インタラクティブ要素のタップ領域が 44×44px を下回っている（design_system §4.5 の最小タップターゲット要件に不一致）",
+    "suggestion": "���た目サイズは維持しつつ、ボタンやアイコンの ::before などで透明ヒット領域を 44×44px 以上に拡張。小チップの✕も同様にパディングまたは透明ヒット領域を追加する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部の「ログイン」リンク",
+    "issue": "テキストリンクが色のみで区別され、下線がない（WCAG 1.4.1「色のみに依存した伝達」違反）",
+    "suggestion": "インラインリンクは必ず下線を付与（design_system §2.2）。「ログイン」に text-decoration: underline を適用する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "「ジムで筋トレ」行 右端の小ドット（#D29922）",
+    "issue": "警告色（warning系アンバー）に近い色をゴール/カテゴリ指標として使用しており、セマンティックカラーの意味と混同しやすい",
+    "suggestion": "ゴールドットは専用パレット（各ゴールに割当）または中立色＋ラベル併用に統一。danger/warning/success/info はセマンティック用途のみに限定する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "AI直後の「タスクにしますか？」提案カード",
+    "issue": "カード背景が周囲のチャットバブル（#161B22）と同一で、左ボーダー3px以外の差が弱く視認性が低い。重要な分岐UIとして埋もれている",
+    "suggestion": "bg-elevated（#1C2128）や --border-strong の枠線でレイヤー差を付与し、上下に余白（16px+）を追加。タイトル行にアイコンや色面積を増やして視線をキャッチする",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "主要CTAボタン（#1A5FC8 のソリッド）",
+    "issue": "鮮やかな企業系ブルーが面積大で出現し、Night Sky の「静けさ・月明かり」よりもプロダクティブな硬さが前景化",
+    "suggestion": "低緊急度の場面では accent-subtle ピル＋アクセント文字に切替え、ソリッド濃青は明確な主要アクション時のみに限定。必要に応じて彩度を一段抑え、夜空の落ち着きを優先する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "ロゴ「Lais」テキスト",
+    "issue": "ロゴ色が #E6EDF3（白系）で表示されており、design_system §1.3 の暫定ルール「ロゴは --accent を使用」に不一致",
+    "suggestion": "ロゴ文字色をテーマの --accent（Night Sky: #79C0FF）に変更。周囲の月明かりドットとの色調も揃い、夜空の一体感が増す",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "ヒーローEXPバー周辺とリスト内の青系要素",
+    "issue": "青系が複数（accent #79C0FF / button #1A5FC8 / info系 #58A6FF）混在し、役割の切り分けがやや曖昧に見える",
+    "suggestion": "役割分離を徹底（リンク/タブ=accent、情報バナー=info、主要CTA=button）。タイムラインの進捗・ドットはaccentに統一して「月明かりの青」をブランドシグネチャとして固定化",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "EXP数値ラベル（1,240 / 2,000）",
+    "issue": "フォントサイズが極小（約11px相当）で、§3.2 ではxsは「時刻・キャプションのみ推奨」。数値メトリクスとしては視認性が弱い",
+    "suggestion": "数値ラベルを --font-size-sm（14px）に引き上げ、line-height-ja-bodyを適用。バーの左右端よりやや外側に置くか、トラッキング微調整で読みやすさを確保",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s10_grow, s20_talk",
+    "location": "ボトムタブバー上端ボーダー（#484F58）",
+    "issue": "背景（#161B22）とのコントラストが弱く、セクション境界の視覚的区切りとして効果が薄い",
+    "suggestion": "Open Air方針に合わせてボーダーを削除し上下余白で分離、または --border-strong を使用して最小限の明瞭さを出す",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "タスクリスト（完了済みと未完了の混在表示）",
+    "issue": "完了タスクは打消し＋グレーで抑えられているが、今日の未完了タスク（例: 企画書を仕上げる）が他未完了と同等の視覚ウェイトで、今日タスクへの誘目が弱い",
+    "suggestion": "「今日」タスクの行にアクセント系ド��ト/ラベルや subtle背景（accent-subtle 5–8%）を付与し、当日の実行対象へ視線を誘導する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

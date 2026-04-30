@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "末尾注記 および §2.4",
+    "issue": "ux_v1.mdの末尾注記で「ゴール作成から7日間の完了待ちルールはproject_v1.mdに存在しない」と記載されているが、project_v1.md §4.2には「7日未満で完了した場合は完了待ち状態になり『あとN日で完了！』と表示」と明確に定義されている。この誤認により、7日未満で全タスク完了した際の「完了待ち」状態のUIや、7日経過時の自動達成演出のトリガー仕様がUX仕様から完全に欠落している。",
+    "suggestion": "末尾注記を削除し、§2.4（ゴール詳細）に「完了待ち」状態のUI（進���バー100%＋「あとN日で完了！」テキスト）を定義する。また、§8.3に7日経過して自動達成となるタイミング（例：アプリ起動時やGROW画面表示時）での演出トリガー仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.3",
+    "issue": "project_v1.md §3.2.3で「週N回の習慣タスクがTodayに非表示の場合、ユーザーが手動で『今日やる』ボタンでTodayに追加可能」とされているが、ux_v1.md §2.3のUpcomingセクションの定義には、その「今日やる」アクションをどこからどう実行するかのUI操作が定義されていない。",
+    "suggestion": "§2.3のUpcomingタスク表示の仕様に、「習慣グループ内のタスクをタップして開く詳細パネル（S-11）に『今日やる』ボタンを配置し、タップでTodayセクションに移動させる」旨の操作フローを追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2",
+    "issue": "TALK画面でAI応答がストリーミングされている最中に、ユーザーがボトムタブでGROWやME画面に切り替えた場合の挙動が未定義。ストリーミングがバックグラウンドで継続するのか、中断されるのか、並行して行われる冒険EXPの検出処理がどうなるのかが不明。",
+    "suggestion": "「タブを切り替えてもストリーミングおよびタスク/冒険EXP検出処理はバックグラウンドで継続し、完了状態は保持される。TALK画面に戻った際に最新状態が描画される」という仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§2.3 および §6.1",
+    "issue": "タスク追加（S-12）などのハーフモーダルを開き、キーボードが表示されている状態で、直前に完了したタスクのUndoスナックバー（30秒間表示）がどう配置されるか未定義。キーボードやモーダルの裏に隠れて操作不能になるか、visualViewportの調整と干渉してレイアウト崩れを起こす懸念がある。",
+    "suggestion": "「ハーフモーダル表示中およびキーボード表示中は、Undoスナックバーをモーダルの背面（非表示）にするか、モーダル内のキーボード上部に一時的に移動させる」などのZ-indexおよび配置の競合解決ルールを定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.3",
+    "issue": "S-11（タスク詳細ハーフモーダル）から「進め方を聞く」等でS-20（TALK）へ遷移する際、S-11のハーフモーダルを閉じる処理が明記されていない。タブ切り替え時にモーダルが開いたままになる矛盾が生じる。",
+    "suggestion": "「TALK画面への遷移時、S-11ハーフモーダルは自動的に閉じる（下降アニメーションは省略し即時破棄）」と追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.3",
+    "issue": "複数タスク提案カードで、一部のタスクだけをチェックして「まとめて登録」した場合、チェックを外した（登録されなかった）タスクの扱いが未定義。カードが消えることで破棄されるのか、再度提案されるのか分からない。",
+    "suggestion": "「『まとめて登録』実行時、チェックされなかったタスクは『不要』とみなされ破棄（学習データとして記録）され、カード全体が登録完了UIに置換される」旨を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§2.3",
+    "issue": "ユーザー視点として、週N回の習慣タスクが「今日やらなくても達成可能」な日にTodayから自動で消える仕様は、「設定したはずのタスクが消えた（バグだ）」という強い混乱を招く。UI上での説明やフィードバックが足りない。",
+    "suggestion": "習慣タスクがTodayから非表示になる条件を満たした際、Upcomingセクションのヘッダー付近に「今週の目標に余裕があるため、一部の習慣はお休み（Upcoming）に移動しました」などのツールチップや初回案内を表示する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.3",
+    "issue": "ヒアリング中断時の確認ダイアログで「回答済みの内容は保存されます」とあるが、これがDISCOVER画面の分析結果（強み/弱みチップ等）に途中段階でも反映されるのか、単にTALKのチャット履歴として残るだけなのかが曖昧。",
+    "suggestion": "「回答済みの内容はチャット履歴としてのみ保存され、DISCOVER画面の分析結果（チップやカード）の更新は全5問が完了するまで行われない」など、状態の反映タイミングを明確化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  }
+]

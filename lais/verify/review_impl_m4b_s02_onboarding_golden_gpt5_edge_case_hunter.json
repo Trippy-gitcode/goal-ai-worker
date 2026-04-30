@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1. lais/src/components/App.jsx",
+    "issue": "S02Onboarding を lazy import しているが、チャンク取得失敗（オフライン/タイムアウト/404）時の ErrorBoundary が存在せず、ユーザーには永続的な空状態またはサブツリー崩壊が発生し得る。",
+    "suggestion": "OnboardingRoute を ErrorBoundary でラップし、import() 失敗時にエラーメッセージ＋再試行ボタンを表示。import の再試行ラッパ（指数バックオフ）や navigator.onLine を用いたオフライン検知も追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx",
+    "issue": "Suspense fallback が空の <main role=\"status\" aria-label=\"読み込み中\"> のみで視覚的手掛かりがなく、また一部スクリーンリーダーでは aria-label のみの live region を告知しない場合がある。",
+    "suggestion": "fallback に実テキスト「読み込み中…」とスピナー/スケルトンを表示し、aria-live を保ったまま視覚的にも進行中が分かる UI にする。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "3. lais/src/components/screens/S02Onboarding.css",
+    "issue": "アバター 3 列の固定幅 grid-template-columns: repeat(3, 100px) + gap 24px により、320px 端末や高倍率ズーム時に横スクロールが発生し UI がはみ出す。",
+    "suggestion": "レスポンシブ化（例: grid-template-columns: repeat(auto-fit, minmax(88px, 1fr))）またはメディアクエリで 3→2→1 列にブレーク。コンテナに overflow-x: hidden を安易に当てず、レイアウトで解決する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "2. lais/src/components/screens/S02Onboarding.jsx",
+    "issue": "role=\"radiogroup\"/role=\"radio\" を用いているが、ラジオグループのキーボード操作（左右/上下矢印での選択移動、ロービング tabindex）が未実装。Tab で全項目に入れる状態は WAI-ARIA Authoring Practices と不整合。",
+    "suggestion": "ロービング tabindex（選択中のみ tabindex=0、他は -1）と keydown(ArrowLeft/Right/Up/Down/Home/End) を実装して選択移動を可能にするか、原生 input type=\"radio\" を用いてネイティブ挙動を活用する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S02Onboarding.jsx",
+    "issue": "button 要���に role=\"radio\" を付与しており、支援技術によっては期待されるラジオ操作とボタン動作の齟齬が生じる可能性がある（例: 矢印操作未対応時の読み上げと操作が不一致）。",
+    "suggestion": "視覚はボタンのまま、実体を input type=\"radio\"（視覚非表示）＋label クリックに切替、もしくは ARIA パターンを完全実装する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2. lais/src/components/screens/S02Onboarding.jsx",
+    "issue": "戻るボタンで window.history.back() を無条件に呼ぶため、直前履歴が外部オリジンの場合にアプリ外へ遷移してしまう。",
+    "suggestion": "document.referrer のオリジンが自アプリと一致する場合のみ history.back()、それ以外は安全な既定ルート（例: '/'）へ route()。または常に明示的なアプリ内遷移に統一。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3. lais/src/components/screens/S02Onboarding.css",
+    "issue": "「次へ」CTA は仕様上「下端固定」だが、flex+margin:auto によるレイアウトのため、コンテンツが縦に溢れる/横向き時にボタンがビューポート外へ押し出され固定されない。",
+    "suggestion": "position: sticky; bottom: max(var(--space-lg), env(safe-area-inset-bottom)); もしくは position: fixed で下端固定し、main に対する下パディングで重なりを回避。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S02Onboarding.css",
+    "issue": "iOS のホームインジケータ等のセーフエリア考慮がなく、CTA が下端に近接/接触する可能性がある。",
+    "suggestion": "安全域に対応（padding-bottom: calc(var(--space-2xl) + env(safe-area-inset-bottom)); CTA の bottom 余白にも env(safe-area-inset-bottom) を加味）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S02Onboarding.css",
+    "issue": "min-height: 100dvh のみを使用しており、100dvh 非対応ブラウザ/古い iOS Safari でアドレスバー重なりや表示不具合の可能性がある。",
+    "suggestion": "フォールバックを用意（例: :root { --vh: 100vh; } @supports (height: 100dvh) { --vh: 100dvh; } とし、min-height: var(--vh) を使用）または 100vh を併記。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx",
+    "issue": "lazy チャンク読み込みの待機にタイムアウトや再試行 UI がなく、ネットワーク遅延時にユーザーが待機の終了見込みを判断できない。",
+    "suggestion": "一定時間（例: 10s）でタイムアウトし、再試行ボタンや「オフラインの可能性があります」等のメッセージを提示。バックグラウンドで import 再試行を行う。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.3 / design_system.md §2",
+    "issue": "タイトルの上下余白指定で spec は「--space-2xl (40px)」とする一方、design_system は 64px。実装はトークンを優先しており、スクリーン基準と不一致の可能性がある。",
+    "suggestion": "ADV でトークン値と spec のいずれを正とするか確定。どちらかに統一し、E2E スクショ検証基準も合わせる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S02Onboarding.css",
+    "issue": "letter-spacing に var(--letter-spacing-ja) を使用しているが、トークン未定義時のフォールバック指定がないため、ブラウザによっては宣言が無効化され得る。",
+    "suggestion": "letter-spacing: var(--letter-spacing-ja, 0); のようにフォールバックを指定。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "2. lais/src/components/screens/S02Onboarding.jsx",
+    "issue": "進捗表示に role=\"progressbar\" を用いているが、離散ステップのステッパーとしては list＋aria-current=step 等の方が適合する場合がある。支援技術での読み上げが期待と異なる可能性。",
+    "suggestion": "UX/a11y 要件に合わせ、list+aria-current=\"step\" か progressbar を採用するかを再確認。採用時は SR での読み上げ確認を追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S02Onboarding.jsx",
+    "issue": "アバター aria-label に全角ダッシュ（—）を使用しており、一部スクリーンリーダーで「ダッシュ」と冗長に読まれる可能性。",
+    "suggestion": "区切り記号を読まれにくい読点/カンマに変更（例: 「Lumen、静かな朝の光」）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx",
+    "issue": "S02 チャンクは lazy だが、事前のヒント（prefetch/link rel=prefetch）や遷移直前プリロードがなく、低速回線での待機時間が長くなる。",
+    "suggestion": "スプラッシュやステップ1からの遷移時に import('./screens/S02Onboarding.jsx') を先読み、または <link rel=\"prefetch\"> でヒントを出す。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

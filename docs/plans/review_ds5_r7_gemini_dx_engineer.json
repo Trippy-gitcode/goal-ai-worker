@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4, §19.6",
+    "issue": "§18の依存関係マップでは `ux_redesign_v*.md` と定義されているファイルが、§19では `ux_v1.md` となっている。同様に `reference_v*.md` と `reference_v1.md` など、ファイル名の命名規則に矛盾がある。これにより連鎖更新時の自動/手動チェックで漏れが発生する。",
+    "suggestion": "§18と§19でファイル名を完全に統一する。新規アプリ向けには `ux_v1.md` のようなシンプルな命名が望ましいため、§18側を `ux_v*.md` に修正することを推奨する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "§19.6の依存チェーン図で `e2e_fullflow_test.md` が `project_v1.md` のみに依存しているように描かれているが、§18のマップでは `ux_redesign`, `design_spec`, `design_system` からも依存されている。テストはUXやデザイン仕様に直接依存するため、§19.6の図は不完全で矛盾している。",
+    "suggestion": "§19.6の依存チェーン図を修正し、`e2e_fullflow_test.md` が `ux_v1.md`, `design_spec_v1.md`, `reference_v1.md` の下流に位置するように矢印を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ADV（AI）に対して「競合5社の画面遷移/アニメーション/空状態」のベンチマーク調査を求めているが、AIは実機アプリを直接操作・視認できないため、Web上の静的情報だけでは正確な調査が不可能であり、ハルシネーションのリスクが高い。",
+    "suggestion": "AIが自律調査可能な範囲（Web上の機能比較、ストアレビュー分析）と、POが手動で提供すべき情報（実機のアニメーションや操作感の録画・スクショ）の責務分担を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4, §19.7",
+    "issue": "汎用的なテンプレートであるべき仕様書内に「Laisプロジェクトの実績に基づく」「Lais方針」といった特定のプロジェクト名がハードコードされている。",
+    "suggestion": "「Lais方針」を「{アプリ名}方針」に、「Laisの対応方針」を「自社アプリの対応方針」に変更し、汎用的なテンプレートとしてクリーンアップする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の `依存:` メタデータにおいて、複数の上流ファイルに依存する場合（例: design_spec_v1.md が ux_v1.md と design_system.md に依存）の記述フォーマットが定義されていない。",
+    "suggestion": "複数依存の場合はカンマ区切り（例: `依存: docs/ux_v1.md v1.0, docs/design_system.md v1.2`）または複数行で記述するルールを明記し、機械的なパースを可能にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "project_v1.mdの§7には「オフライン要件」が含まれているが、ux_v1.mdのテンプレートにはオフライン時のUX（キャッシュ表示、同期中インジケーター、オフラインエラー等）を定義するセクションが欠落している。",
+    "suggestion": "ux_v1.mdのテンプレートに「§N+11 オフライン・同期UX」を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.1, §19.5",
+    "issue": "ファイル名（例: project_v1.md）にメジャーバージョンが含まれ、ヘッダー内に詳細バージョン（v1.3）が含まれている。メジャーバージョンアップ時（v2.0）にファイル名をリネームするのか、別ファイルを作るのかの運用ルールが曖昧。",
+    "suggestion": "「メジャーバージョンアップ（v2.0等）時は別ファイル（project_v2.md）を作成し、マイナー更新時は同一ファイルのヘッダーバージョンを上げる」という運用ルールを§19.5に追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  }
+]

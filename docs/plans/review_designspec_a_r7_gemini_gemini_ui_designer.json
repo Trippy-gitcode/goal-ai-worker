@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.4 S-10",
+    "issue": "仕様書冒頭の免責事項と、本文のタスク状態のテキスト色指定が矛盾しています。免責事項には『予定タスクテキスト色はS-10/S-14で--text-secondaryに統一済み』とありますが、§4.4 S-10のタスクカード仕様では、サブ行の『予定』時のテキスト色が`--text-muted`と指定されています。この矛盾は実装者を混乱させ、意図しないUIになる可能性があります。",
+    "suggestion": "§4.4のタスクカード仕様における、サブ行の『予定』時のテキスト色を、免責事項の記述に合わせて`--text-secondary`に修正���てください。これにより、仕様書内の一貫性が保たれます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "§4.2 S-01 Auth",
+    "issue": "ログインモード時の『パスワードを忘れた場合』のリンクについて、『Phase A では未実装のため非表示』と記載されていますが、そのリンクの具体的なUIスタイル（タイポグラフィ、色、配置、マージン等）が一切定義されていません。Phase Bで実装する際に、この仕様書だけではデザインが確定できず、実装不能となります。",
+    "suggestion": "Phase Bのスコープであっても、本書で言及している以上、スタイルを定義すべきです。例えば『S01-10のリンクと同スタイルで、その下に`margin-top: var(--space-sm)`で配置』のように具体的なスタイルを追記するか、参照すべき別仕様書を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.2, §5.4, etc.",
+    "issue": "プライマリCTAや破壊的ボタンなど、背景色が指定されたボタン上のテキスト色が`#FFFFFF`とハードコードされています。これはデザインシステムのトークン化の原則に反しており、テーマ切替時にデザインが破綻する重大なリスクがあります。例えば、Lightテーマでボタン背景が明るい色になった場合、白文字ではコントラストが確保できず読めなくなります。",
+    "suggestion": "`--text-on-primary`や`--text-on-danger`のような、背景色と対になるセマンティックなテキストカラートークンを定義し、仕様書全体で`#FFFFFF`のハードコードを置き換えてください。これにより、テーマ切替時の堅牢性が確保されます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§3.1 カラー",
+    "issue": "`subtle`系カラー（例: `--accent-subtle`）の定義が『透過率のみ共通ルール』となっています。これはテーマによって地となる色が異なるため、上に乗るテキスト（例: `--accent`）とのコントラスト比が保証されません。§7 A-2で`success`系の問題は指摘されていますが、`accent`系も同様のリスクを抱えており、テーマによってはアクセシビリティ基準（WCAG AA）を満たさなくなる可能性があります。",
+    "suggestion": "各テーマにおいて���`--accent` on `--accent-subtle`のような組み合わせのコントラスト比を事前に計算・検証してください。基準を満たさないテーマがある場合は、そのテーマの`--accent-subtle`の不透明度を調整するか、上に乗るテキスト用に`--accent-on-subtle`のような専用のカラートークンを定義するルールを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§5.5, §4.8 S-15",
+    "issue": "共通コンポーネント『ピル』の選択状態のスタイルに一貫性がありません。§5.5のActive定義では『背景 `--accent-subtle` / color `--accent`』とボーダーなしですが、§4.8 S-15のカテゴリ選択ピルのSelected状態では、それに加えて`border: 1px solid --accent`が指定されています。同じコンポーネントの同じ状態に対して異なるスタイルが定義されています。",
+    "suggestion": "ピルの選択状態のスタイルを統一してください。もしボーダーが必要なバリエーションが存在する場合は、`Pill--bordered`のような明確なバリアントとして定義し、アドホックな上書きを避けてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.7 S-14",
+    "issue": "S-14 Goal Detail画面のタスク行（S14-8）のスタイルが『S10-4 と完全一致』と記載されていますが、記述が不十分です。S14-8の仕様ではタスク名のテキスト色にしか言及がありませんが、S10-4では状態（完了/進行中/予定）に応じてサブ行のテキスト色やアイコンなどの詳細なスタイルが定義されています。このサブ行のスタイルもS-14で適用されるのかが不明確です。",
+    "suggestion": "S14-8の仕様に『タスク名だけでなく、サブ行のテキスト色や装飾もS10-4の定義と完全に同一とする』と明記し、曖昧さを排除してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.3 S-02",
+    "issue": "S-02 Onboarding画面のアバター選択肢（S02-5）で、選択状態を示すために`box-shadow: 0 0 0 4px --accent-subtle`が使用されています。これは入力フィールドのフォーカスリング（§5.6）と似ていますが、シャドウ（§3.8）やフォーカスリング（§6.5）のトークンとしては定義されていません。このような『選択状態を示すリング』の���めのトークンが欠落しています。",
+    "suggestion": "選択状態を示すためのリングスタイルを、`--ring-accent`や`--shadow-ring-accent`のようなトークンとしてデザインシステムに定義してください。これにより、同様の表現が必要な場合に一貫性を保ち、再利用が容易になります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.2 タイポグラフィ",
+    "issue": "タイポグラフィの`letter-spacing`の指定で、`-0.02em`（相対値）と`-0.5px`（絶対値）のように単位が混在しています。意図的な使い分け（フォントサイズに連動させるか否か）がある可能性もありますが、その設計意図がドキュメントに記載されていないため、一貫性を欠いているように見え、将来のメンテナンスで混乱を招く可能性があります。",
+    "suggestion": "単位をどちらかに統一するか、あるいは単位を使い分ける設計方針（例: 本文系はem、見出し系はpxなど）をドキュメントに明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§4.10 S-30",
+    "issue": "S-30 ME Profile画面の基本情報行（S30-3）をタップした際のインライン編集スタイルが、『border-bottom `1px solid --accent` のみ』とアドホックに定義されています。これは§5.6で定義された標準の入力フィールドとは異なるスタイルであり、共通コンポーネントとして管理されていません。",
+    "suggestion": "インライン編集用の入力フィールドを`Input--inline`のようなバリアントとして§5の共通コンポーネントセクションで定義してください。また、その際のフォーカススタイル（キーボード操作時の視認性）も明確に定義することが望ましいです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  }
+]

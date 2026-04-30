@@ -1,0 +1,352 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1 / project_v1.md §14.2",
+    "issue": "サインアップ後の「メールを確認してください」中間画面がS-ID未定義で、画面遷移図にも登場しない。S-03オンボーディングへの到達条件（メール認証完了）もUI上の動線が不明。",
+    "suggestion": "S-04（仮）『メール確認待ち』を追加し、S-01→S-04→（認証リンク踏破）→S-03の遷移と、リトライ/メール再送/別メールで登録の分岐を定義。通知バナーとブラウザバック挙動も明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.1（設定）",
+    "issue": "設定に『メール変更』『パスワード変更』が記載されているが、対応する画面ID・フローが未定義。",
+    "suggestion": "S-42『メール変更』、S-43『パスワード変更』を追加し、入力項目、バリデーション、確認メール送信、失敗時のエラー、戻り先、オフライン時の挙動を定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §5.4-5.5 / ux_v1.md §4.4（FRIENDS）",
+    "issue": "プロジェクト仕様で定義された『ブロック/解除』『メッセージ通報』のUXが未定義。友達詳細やメッセージUIに操作がない。",
+    "suggestion": "S-35の『...』メニューに『ブロック』『通報』を追加。通報モーダル（理由選択＋任意テキスト）、ブロック時の確認/解除手順、通報送信後のトースト、ブロック状態のUI（送受信不可表示）を定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2.6 vs ux_v1.md §2.3",
+    "issue": "タスク完了のUndo許容時間がProjectでは『30秒』、UXではスナックバー表示『3秒』と矛盾。",
+    "suggestion": "Undoの有効期間を30秒に統一し、スナックバーは3〜5秒で消えても、タスク行やヒーロー付近に『取り消す（30秒）』の二次導線を残す仕様に。タイマーUIと期限超過時の挙動を明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §8（アニメーション）",
+    "issue": "同時発火（タスク完了＋レベルアップ＋ゴール達成＋冒険検出）が起きた場合の優先順位やキュー制御が未定義。重複演出で可読性低下・音/視覚過負荷の恐れ。",
+    "suggestion": "優先順位を定義（例: 1. ゴール達成 2. レベルアップ 3. 冒険EXP 4. タスク+10表記）。同時発火時はシーケンス再生（最大合計3秒超えない）。Reduced Motion時はテキストのみ。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5 / ux_v1.md §2.3, §9.2",
+    "issue": "日次EXP上限到達後のタスク完了時のUXが未定義。完了は成功だがEXP付与なしのケースで、現在は一般的な『完了失敗』として巻き戻す可能性がある。",
+    "suggestion": "サーバー応答で『完了成功・EXP付与なし（上限到達）』を区別。UIはチェック確定＋小さなバナー『本日のEXP上限に達しました。明日4:00にリセット』を表示。Undoは通常通り。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §7.3 / ux_v1.md §9.1",
+    "issue": "オフライン完了時に『同期待ち』バッジを各アイテムに表示する旨がProjectにあるが、UXに個別表示・同期��の反映/差分演出が未定義。",
+    "suggestion": "タスク行右端に『同期待ち』ピル、ヒーローEXPは保留表示。復帰後に一括同期→同期成功の個数トースト＋各行のバッジを順次フェードアウト。上限超過で未付与分がある場合の注記も表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3 / ux_v1.md §3.2（TALK入力）",
+    "issue": "画像添付のサイズ上限/形式エラー時のフィードバック、アップロード中のスピナー/キャンセル、失敗時の再試行UIが未定義。",
+    "suggestion": "添付選択時にバリデーション（>10MB/非対応形式は即エラー）。アップロード中はサムネにスピナーと✕キャンセル。失敗時は『再試行/削除』ボタン付きエラーステータスを表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘッダー）",
+    "issue": "ヘッダーに『☰=履歴ドロワー』『🕐=履歴』の2系統が混在し、どちらも履歴を想起させる。機能重複で混乱の恐れ。",
+    "suggestion": "履歴はアイコン1つに統一（☰ or 🕐��どちらか）。もう一方は『新規チャット一覧』など別機能に割り当てるか非表示に。ツールチップとアクセシビリティラベルも整備。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.4 / §2.3 / §2.3（Overdue）",
+    "issue": "Todayの手動並び替えが開始時刻ソートやOverdue固定表示とどう競合するか未定義。翌日リセット時に手動順はどう扱うかも不明。",
+    "suggestion": "優先ルールを明記: 1) Overdueは常に最上段固定で並べ替え不可 2) 次に手動順 3) 手動未設定は時刻順。日替わりで構成が変わった場合は手動順は同一グループ内でのみ維持。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.4（戻りナビゲーション）",
+    "issue": "『ブラウザバック＝前タブ』はWeb標準の履歴期待とズレる恐れ。ディープリンクやリロード後に想定外のタブ遷移が起きうる。",
+    "suggestion": "historyスタックにタブ変更をpushせず、前画面/モーダルの閉鎖を優先。タブ切替はURL（/grow,/talk,/me）で直行し、Backは純粋に直前URLへ戻���。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §7.4（上限値）/ ux_v1.md 全体",
+    "issue": "タスク/ゴール/友達の上限到達時のUI（追加ボタンの無効化、エラーメッセージ、何が上限かの明示）が未定義。",
+    "suggestion": "上限到達時は追加ボタンをdisabled＋インラインヘルプ『ゴールは100件までです』。エラー時は具体的な残数ガイダンス。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.1（📝新規チャット）/ §3.5",
+    "issue": "『新規チャット』押下時の挙動（現在スレッドの扱い、未送信テキストの保持/破棄、初期プロンプト）が未定義。",
+    "suggestion": "新規チャットは新スレッドIDを作成し、現スレの未送信テキストがあれば確認ダイアログ。初回メッセージのPlaceholderを目的別テンプレから選べるポップを追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.2（ロングプレス）",
+    "issue": "ドラッグ並べ替えや長押し削除はスクリーンリーダーでは操作困難。アクセシビリティの代替手段が未定義。",
+    "suggestion": "『並べ替えモード』トグル＋上下矢印ボタンで順序変更可能に。チップ削除はフォーカス時にDeleteボタン表示。aria-describedbyで操作ヒントを提供。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3.1 / ux_v1.md §3.3",
+    "issue": "タスク提案カードで『不要』選択の学習（再提案抑制）のUI/解除方法が未定義。",
+    "suggestion": "カード右上に『この提案を今後表示しない』チェックと、設定＞AI提案学習のリセット項目を追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.4（QRスキャン）",
+    "issue": "カメラ権限拒否時の代替導線（画像から読み取り、手動コード入力等）が未定義。",
+    "suggestion": "権限拒否時は『リンクを貼り付け』『画像から読み取る』の代替UIを提示。許可再要求のガイダンスも表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §15（通���遷移）",
+    "issue": "未ログイン状態で通知タップ→ログイン→遷移の間、トークン失効や多重タップ時のフォールバックが未定義。",
+    "suggestion": "リダイレクトURLの保存期限（例: 10分）を明記し、失効時はホームに遷移＋バナー『有効期限切れ』を表示。多重タップはクライアント側でデバウンス。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.5（SHOP）",
+    "issue": "MVP時『Coming Soon』だが、Premierユーザーの限定フレーム装備導線（S-41）との関係がUI上あいまい。",
+    "suggestion": "SHOPタブに情報バナー『装飾はPROFILE>アバター設定で装備可能（ショップ準備中）』を表示し、S-41へショートカットを設置。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（Overdue）",
+    "issue": "『明日に延期』のUndoはトーストにあるが、有効時間や多重操作（連打/日跨ぎ）の取り扱い、サーバー反映失敗時のUIが未定義。",
+    "suggestion": "Undo有効期間（例: 15秒）を明記し、連打は最新操作のみ有効。サーバー失敗時は元の日付へロールバック＋インラインエラー表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2（EXP=タスク一律10）",
+    "issue": "タスク所要時間や難易度に関わらず一律10EXPだと、大きなタスクの達成感が薄れ、モチベーションが下がる懸念（Habiticaで感じた『作業ゲーム化→飽き』の再来）。",
+    "suggestion": "任意オプションとして『大タスクボーナス』を導入（AIまたは手動タグ付けで+5〜+10）。濫用防止に日次上限と重複制限を設ける。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5 / §4.5",
+    "issue": "日次リセットがJST固定のため、海外出張や在外ユーザーは『今日の区切り』が体感とズレる。リマインダー/上限表示の混乱要因。",
+    "suggestion": "MVPでも端末タイムゾーン準拠を検討 or 少なくとも設定で『日次区切りのタイムゾーン』を選択可能に。UIの全箇所にタイムゾーン注記を併記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1, §3.3 / ux_v1.md §3",
+    "issue": "FreeのAI回数20/日は、会話→タスク化/自己分析/コーチングを日常的に使うとすぐ枯渇する可能性。HabitifyのFree制限ほどではないが『肝のAI体験が鈍る』懸念。",
+    "suggestion": "Free向けに『会話→タスク登録』と『ヒアリング5問』は回数非カウント（または別枠）を検討。少なくとも回数残の丁寧な可視化と優先使用の提案を実装。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §5.1 / ux_v1.md §4.4",
+    "issue": "友達追加がQR/リンク限定で、ユーザー名検索がないため、遠隔の友人やオンラインコミュニティでの追加がやや手間。",
+    "suggestion": "セキュリティ/プライバシー方針を維持しつつ、期限付き招待コード（テキスト）や、リンクの有効期限延長オプションを提供。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1, §2.2 / ux_v1.md §4.5, §13.2",
+    "issue": "Premierの価値（ショップ未実装・チケットComing Soon）に対する即時性が���く、当面はProとの差が『限定フレーム+優先サポート』のみで課金動機が弱い。",
+    "suggestion": "Premier限定の即時価値（例: TALKの長文/画像同時処理の優先レーン、ディープ分析の更新頻度UP、限定テーマ）を早期に追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALKの『新しいメッセージ』フローティングボタンのフォーカス/キーボード操作が未定義で、アクセシビリティ面の操作が難しい可能性。",
+    "suggestion": "キーボード操作でバブル末尾へジャンプ可能にし、ボタンにrole=button/aria-liveで新着を通知。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.4（FRIENDS お知らせ）",
+    "issue": "『お知らせ』一覧の詳細画面や、既読/未読の切り替え操作、既読化ルールが未定義。",
+    "suggestion": "『お知らせ詳細』のインライン展開 or S-44（仮）で一覧/詳細画面を用意。タップで既読化、スワイプで既読/未読切替。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.4（ゴール詳細）",
+    "issue": "『ゴール完了待ち』（作成から7日未満で全タスク完了）の表示・解除・通知のUXが未定義。",
+    "suggestion": "ゴール詳細に『完了待ち：あとN日』バナー、Todayへの自動表示/非表示、期間満了時のアプリ内バナーやPush（任意）を定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §1.3（遷移アニメ）/ §8",
+    "issue": "アニメ同時再生時のオーディオ（効果音）の有無、ON/OFF設定、ミュート方針が未定義。",
+    "suggestion": "効果音はデフォルトOFF、設定でON可能に。Reduced Motion時は自動的に効果音も抑制。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-029",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §5（オンボーディング）",
+    "issue": "5ステップでスキップ非表示のため、急ぎのユーザーが離脱する恐れ。Finchの長い導線への反発を十分回避できない可能性。",
+    "suggestion": "Step2〜5は右上に『後で』を表示し、最短2タップで開始可能に。完了後に『最初の設定を続ける』導線で回��させる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-030",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（タスク追加）",
+    "issue": "『週N回』習慣のToday手動追加『今日やる』のUIがGROWに記載されているが、UX画面上の具体的な場所/操作が未定義。",
+    "suggestion": "習慣行に『今日やる』トグルを追加し、Today表示ロジックに関係なく当日表示へ強制。解除手順も定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-031",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.1（画面一覧）",
+    "issue": "S-34（SHOP）がMVPで『Coming Soon』のため、ユーザーが誤って期待しないようにタブ自体の露出有無/順序が未明記。",
+    "suggestion": "MVPではSHOPタブは表示するがバッジで『準備中』を明示、またはS-34をS-30配下の末尾に固定し、初回起動時に一度だけ説明モーダルを表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-032",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.3（会話→タスク化）",
+    "issue": "タスク提案カードの『編集して登録』で毎回細かなフィールドが展開されると、操作が煩雑化しが��（TickTick的な“副クエスト感”）。",
+    "suggestion": "直近の入力値をプリセットとして記憶（所要時間/開始時刻など）し、2タップで登録できる軽量編集モードを用意。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-033",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §10（アクセシビリティ）",
+    "issue": "プログレスバーの数値読み上げ（EXPやゴール%）の丸め/単位表現が未定義で、読み上げが冗長になる恐れ。",
+    "suggestion": "aria-valuenowは整数、aria-valuetextで『レベル12、次のレベルまで760EXP』の簡潔表現に統一。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-034",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.2（PROFILE 自動保存）",
+    "issue": "自動保存の衝突（多端末同時編集）やオフライン編集競合時の解決方針が未定義。",
+    "suggestion": "最後の保存時刻表示と『サーバーの内容で上書き/端末の変更を送信』の解決ダイアログを用意。自動マージ不可項目は最後の保存優先ルールを提示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-035",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.4��友達解除）",
+    "issue": "『友達をやめる』が自然消滅で相手に通知なしだが、相手視点での表示変化（突然消える）が驚きを生む可能性。",
+    "suggestion": "相手側には『フレンド関係が終了しました』の非Push・お知らせ一覧内の静かな通知を検討（送信者非開示）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

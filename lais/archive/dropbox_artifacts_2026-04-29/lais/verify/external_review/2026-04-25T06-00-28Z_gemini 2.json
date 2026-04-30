@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md 行 796-840",
+    "issue": "シェルスクリプトのコードブロック内で改行が失われ1行に結合されている上、`[` が `\\[`、`>` が `&gt;` にエスケープされています。このままスクリプトとして抽出・実行されると構文エラーやリダイレクトエラーが発生し、確実にデプロイプロセスがクラッシュします。",
+    "suggestion": "Markdownの変換ツールやエディタのフォーマット機能による意図しないエスケープと改行削除を修正し、元の正しいシェルスクリプトの構文（改行保持、`[ ]`、`>` の使用）に戻してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md 行 815, 837",
+    "issue": "jqコマンドのフィルタ文字列内で配列アクセスやキーアクセスが `.\\[0\\].url` や `del(.\\[$mid\\])` のようにエスケープされています。jqはこれを不正な構文として解釈し、パースエラーでクラッシュします。",
+    "suggestion": "jqのフィルタ文字列内のバックスラッシュを削除し、`.[0].url` および `del(.[$mid])` のように正しいjq構文に修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md 行 825",
+    "issue": "sedコマンドの正規表現内で `[[:space:]]\\*` とアスタリスクがエスケープされています。これにより「0回以上の空白」ではなく「リテラルのアスタリスク」にマッチしてしまい、STATUSの自動書換えが機能しなくなります。",
+    "suggestion": "正規表現内のバックスラッシュを削除し、`[[:space:]]*` として0回以上の空白文字に正しくマッチするように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md 行 2355",
+    "issue": "検証用のgrepコマンドで `|` を使用してOR条件を指定していますが、`-E` オプションが付与されていません。また、`<` や `>` が `&lt;`、`&gt;` にエンティティ化されているため、意図した文字列にマッチせず検証が必ず失敗します。",
+    "suggestion": "grepコマンドに `-E` オプションを追加し、HTMLエンティティ化された文字を元の `<`、`>` に戻してください。例: `grep -cE 'evidence/<MISSION_ID>/|...'`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md 行 457",
+    "issue": "`append_deploy_fail.sh` 内で `OVERRIDE` 変数が定義されていますが、スクリプト内で一度も参照されていません（Dead code）。コメントには次回deploy.shでチェックするとありますが、環境変数としてexportもされていません。",
+    "suggestion": "不要な変数定義を削除するか、後続のプロセスで必要であれば `export OVERRIDE` を追加して環境変数とし���渡すように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "ERROR_HANDLING",
+    "location": "lais/verify/dev_system_v34_package.md 行 467",
+    "issue": "`tmp=$(mktemp)` で作成した一時ファイルを `trap 'rm -f \"$tmp\"' EXIT` で削除していますが、このスクリプトが他のコンテキストからsourceされた場合や、将来的に別のtrapが追加された場合に既存のtrapを上書き・破壊するリスクがあります。",
+    "suggestion": "一時ファイルの削除はtrapに依存せず、処理の最後（成功時およびエラーハンドリングの分岐内）で明示的に `rm -f \"$tmp\"` を実行するか、trapを使用する場合は既存のtrapハンドラを保存・復元する仕組みを導入してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0305,
+    "input_tokens": 20022,
+    "output_tokens": 1092,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

@@ -1,0 +1,6 @@
+[
+  {"id":"R-001","severity":"HIGH","category":"CONTRAST","screen":"s10_grow","location":"完了タスク文字","issue":"完了グレーアウトが背景に沈み視認性弱い。","suggestion":"#7890A8 + 打ち消し線。","model":"Code","persona":"color_coordinator"},
+  {"id":"R-002","severity":"MEDIUM","category":"COLOR","screen":"s10_grow","location":"進行中タスク左ボーダー #E8A855","issue":"warning #D29922 から分離 ✅。定義は『進行中』セマンティックカラーとして design_system に追加必要。","suggestion":"§2.1 に『進行中 #E8A855』エントリ追加を design_spec_v1.md で定義。","model":"Code","persona":"color_coordinator"},
+  {"id":"R-003","severity":"LOW","category":"TYPOGRAPHY","screen":"s10_grow","location":"EXP 1,240/2,000 11px","issue":"§3.2 最小値適合 ✅。","suggestion":"(問題なし)","model":"Code","persona":"color_coordinator"},
+  {"id":"R-004","severity":"LOW","category":"SPACING","screen":"s10_grow","location":"タスク間 8px","issue":"§4.2 改定後 ≧8px 許容 ✅。","suggestion":"(問題なし)","model":"Code","persona":"color_coordinator"}
+]

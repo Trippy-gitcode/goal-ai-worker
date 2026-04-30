@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案① §3.3 / 改訂案④ §5.2 / 改訂案② §8 Step 10-12",
+    "issue": "ENGの起動後ルールが「ミッション定義に書かれた完了コマンド以外を実行しない」とされており、deploy.sh内のStep 10-12や品質ゲート用スクリプト実行のようなミッション外・フロー内コマンドとの関係が矛盾している。現状の文言だと、デプロイフロー実行やcanopy実行がミッション定義に列挙されていない限り違反になりうる。",
+    "suggestion": "§3.3 を「ENGはキュー先頭ミッション定義に記載された完了コマンド、およびそのミッション/該当フローで必須と定義された補助コマンドのみ実行可」に修正し、§5の完了コマンドと§8/§4のフロー必須コマンドの優先関係を明文化する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案② §7.1 / 改訂案④ §5.1 / 改訂案④ §5.2 / 改訂案④ §5.3",
+    "issue": "3層テスト戦略と完了コマンド3区分の対応が不整合。改訂案④サマリーでは「L1=cmd-realworld / L2=cmd-e2e」としている一方、改訂案② §8 ではStep 4でL1をデプロイ前に実行し、Step 12で再度realworld実機E2Eを実行している。L1がローカルスモークなのか実デプロイ先スモークなのかが二重定義になっており、品質ゲート設計として運用不能または重複実行を招く。",
+    "suggestion": "L1/L2/L3とcmd-unit/cmd-e2e/cmd-realworldの対応表を1箇所で正本化し、少なくとも「L1-local」「L1-realworld」などに分離するか、Step 4 と Step 12 の役割差を明確化する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "改訂案④ §5.1 / sub_testing.md §9.1（改訂案④ B）",
+    "issue": "統合E2E（cmd-e2e）の定義がマトリクスと一致していない。§5.1では「画面実装（単一画面）」でもcmd-e2e必須だが、§9.1では「単一画面の操作のみで完結する場合は任意扱い」と読める。これによりmission_linterの期待値とsub_testingの定義が食い違い、全FAILまたはレビュー解釈ブレを生む。",
+    "suggestion": "§5.1と§9.1のどちらかに統一し、「cmd-e2e必須」の条件を明文化する。単一画面でも必須なら§9.1の任意文言を削除、任意なら§5.1マトリクスを修正する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案② §7.1 / 改訂案④ §5.1 / 改���案④ G サマリー",
+    "issue": "認証追加をL1必須化した点は妥当だが、同時に「画面実装（単一画面）」でcmd-realworld任意としており、認証UIを含む単一画面ミッションがマトリクス上はrealworld未実施で完了可能になる。D2解消を目的にした設計と矛盾し、認証関連の本番漏れを再発させうる。",
+    "suggestion": "§5.1で『認証を含むミッションは画面数に関わらず認証・セッション関連として分類し、cmd-realworld必須』を明記する。単一画面分類より認証分類を優先するルールも追加する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案② §8 Step 11 / 改訂案⑥ §4.H / 改訂案② F deploy.sh拡張",
+    "issue": "外部サービス連携確認のFAIL/WARNポリシーが一貫していない。§8 Step 11ではAPIキーがない項目はWARNでPO手動確認とする一方、deploy.shではverify_external_services.shが非ゼロ終了した場合のみFAIL扱いで、WARN時はそのまま通過する。さらにHフローではexternal_services整合をPre-Review必須としており、WARN許容とCRITICAL対象が混在している。",
+    "suggestion": "Step 11の結果種別をPASS/WARN/FAILで正式定義し、デプロイ完了条件・Hフロー投入条件との対応を明文化する。認証や決済など本番障害直結の外部連携はAPIキー未取得時でも『手動証跡必須、証跡なしはFAIL』など一貫したゲートにする。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "改訂案③ §4.1 G12 / 改訂案⑤ E / 総合サマリー",
+    "issue": "品質ゲート番号の管理が不整合。改訂案③でG12追加、改訂案⑤で§15.3項目11追加、総合サマリーでG11-G13新設としているが、§4.1の一覧にG13の正式行追加が本文で明示されていない。development_rules.md側もG1-G9表現が残っており、ゲート一覧の正本が不明確。",
+    "suggestion": "dev_system_spec §4.1にG11/G12/G13を正式な一覧行として明記し、development_rules.mdもG1-G13に更新するか『開発者向け索引はG1-G9のみ、G11+はspec正本参照』と明確化する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案② D.1 scripts/verify_env.sh",
+    "issue": "verify_env.shのCloudflare Pages検証方法が技術的に不正確な可能性が高い。Pagesのビルド時環��変数は`pages secret list`だけでは取得・網羅できず、VITE_*を`dist/`内で変数名grepする方式も『値が埋め込まれたか』の検証になっていない。結果として必須環境変数未反映でもPASSする恐れがある。",
+    "suggestion": "『変数名grep』ではなく、ビルド成果物または実機ページ上で該当機能が初期化されることを検証する方式に修正し、Cloudflare Pagesで取得可能な設定情報の範囲を仕様に合わせて明示する。取得不能な場合は手動証跡必須へ倒す。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案⑤ C pre-commit-sub / 改訂案⑤ D G13",
+    "issue": "サブディレクトリアプリで`$APP_DIR/.git/hooks/pre-commit-sub`を前提にしているが、通常サブディレクトリには独自の`.git/`が存在しないため配置先として成立しない。親repo配下の通常ディレクトリなら`lais/.git/hooks`は作れてもgit hookとしては機能せず、G13もその仮想パスを検証してしまうため、設計上PASSしても実フック発火保証にならない。",
+    "suggestion": "pre-commit-subはサブディレクトリ内の通常ファイル（例: `scripts/pre-commit-sub.sh`）として配置し、親`.git/hooks/pre-commit`からそのファイルを呼ぶ設計に変更する。G13も実際の呼び出し先パスを検証対象にする。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改訂案⑤ E canopy発火ログ永続化 / 改訂案⑤ D G13",
+    "issue": "B3対応として『発火したか』を確認したい意図に対し、G13はフック存在のみ、発火ログはcanopyが直接実行された場合でも残るため、hook経由発火の証明になっていない。『手動実行でもログが残る』状態ではトリガー検証として不十分。",
+    "suggestion": "発火ログに呼び出し元（pre-commit/pre-push/manual/CI）を記録する仕様を明示し、B3の目的が『hook設置確認』か『実発火確認』かを分離して定義する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "改訂案① E 全22フローへのStep 0追加 / 改訂案① F G11",
+    "issue": "『全22フロー』としながら、G11の実装例ではdev_system_spec側は17フロー、sub系5フローを別扱いしている。文書側の『全22フロー』とスクリプトの対象定義が一致しておらず、将来の追���・削除時に参照漏れが起きやすい。",
+    "suggestion": "『22』という固定数ではなく正本リストを1箇所に置き、G11もそのリストを参照する形にするか、本文とスクリプトの対象一覧を完全一致させる。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "改訂案④ §5.2 / 改訂案④ G サマリー / §4.6 G8言及",
+    "issue": "TDD証跡（G8）との整合が崩れている。§5.2ではATごとにRED/GREENチェック欄があるが、完了コマンド3区分との関係が未定義で、サマリーでは『cmd-unit / cmd-e2e 両方でbefore.json/after.json必須』としている一方、cmd-realworldについては扱いが不明。どの粒度でG8を満たすかが曖昧で、実装者により全PASS/全FAIL判定がぶれうる。",
+    "suggestion": "G8の適用単位を『AT単位』『cmd-unit/cmd-e2e単位』『mission単位』のどれかで固定し、cmd-realworldはTDD対象外なのか証跡対象なのかを明文化する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "改訂案② D.3 test_realworld_template.ts / 改訂案④ B sub_testing §9",
+    "issue": "realworldテンプレートがPlaywrightのDOMアサーション（toHaveURL, locator, toContainText）を多用しており、同文書内の『UI検証はスクショ画像判定のみ』という規範との境界が曖昧。これ自体は内部状態・URL検証として合理的だが、現行文言のままだと規範違反扱いされる可能性がある。",
+    "suggestion": "§C2で『視覚状態判定は禁止、ただしURL遷移・API応答・存在確認など非視覚条件の自動アサーションは可』のように禁止対象を限定して、テンプレートとの整合を取る。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改訂案② §7.1 認証なしアプリの扱い / 改訂案④ §5.1 N/Aルール / 改訂案④ G サマリー",
+    "issue": "SKIPルールの表現が一貫していない。L1-2では`[SKIP-AUTH] disable_auth: true`、§5では`N/A — 理由`、proposalや棚卸しではWARN運用など、同じ『実施しない』状態に複数の記法が混在している。これによりlint対象や完了報告フォーマットがぶれる。",
+    "suggestion": "SKIP/N/A/WARNの用語を定義し、L1・mission・deploy・reviewで共通ルールに統一する。例えば『テスト未適用=SKIP（理由必須）』『コマ��ド不存在=N/A（仕様上不要）』『実行不能だが手動確認へ移譲=WARN』のように整理する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "改訂案① 3.1.A と後半の改訂案①本文全体",
+    "issue": "§3改訂案が前半と後半で二重記載されており、微妙に文言差がある。レビュー対象としては解釈可能だが、正本化時にどちらを採用するか曖昧になる。",
+    "suggestion": "パッケージ内では重複記載を避け、最終書き込み用の正本案を1つに統一する。",
+    "model": "GPT-5.4",
+    "persona": "qa_lead"
+  }
+]

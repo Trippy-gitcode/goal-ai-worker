@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "CTA 多重送信の競合リスク。inFlight 制御が onMouseDown にしか掛かっておらず、Enter キー送信・タッチ環境の click では二重 submit が発火しうる。サインアップ時は二重メール送信・アカウント作成競合、ログイン時は不要 API 呼び出しが発生。",
+    "suggestion": "handleSubmit の先頭で inFlightRef.current を検査して二重送信を確実に抑止し、送信開始直前に true、finally で false に戻す。加えて form の onSubmit 側で抑止（keyboard/touch を包含）。送信中はボタンに aria-disabled=true と視覚的に inactive クラスを付け、pointer/key 双方を一貫してブロックする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2.3",
+    "issue": "signup 時に input[minLength] を付与しているため、ブラウザのネイティブ検証が submit イベント自体を阻止し、JS 側の handleSubmit が走らない可能性がある。結果として「attempted」の更新・エラーメッセージ読み上げ・フォーカス誘導が発火せず、H3/H2 の改善がケースによって無効化される恐れ。",
+    "suggestion": "form 要素に noValidate を付けてクライアント検証を JS に統一するか、minLength 属性を外して JS 側のみで長さ検証を行う。ネイティブ検証に依存しない形に統一し、常に attempted 更新とフォーカス誘導が実行されることを E2E で検証する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "2.2",
+    "issue": "NotFound ガードが sessionStorage を無条件に参照しており、サンドボックス/3rd-party iframe/一部プライバシーモードで SecurityError を投げてクラッシュする可能性がある。",
+    "suggestion": "sessionStorage アクセスを try/catch で保護し、失敗時はガード機能をスキップして安全なフォールバック（route('/', true)）へ。失敗を console.warn するか、デバッグフラグ下でロギングしてデグレ検出を容易にする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.1",
+    "issue": "Supabase storageKey を 'lais.auth' に変更したことで、既存ユーザーのセッションが無効化（サイレントログアウト）される回帰リスク。旧キーは LocalStorage に残存し混乱を招く可能性もある。",
+    "suggestion": "初期化時に旧キー（sb- 系や従来キー）を検出して一度だけ移行（コピー）する、もしくは明示 signOut してクリーンアップするマイグレーションを実装。移行実施ログを出す。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "onInput のみで IME 入力（日本語など）を扱うと、合成中（isComposing）の中間文字でバリデーション/エラーメッセージが点滅し、UX と読み上げ体験が悪化する。",
+    "suggestion": "handleEmailInput/handlePasswordInput 内で e.isComposing（もしくは e.nativeEvent?.isComposing）を検査し、合成中はバリデーションを遅延。compositionend で最終値を検証・エラー表示する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "email の前後空白を未トリムだと、見た目は正しいのに認証失敗する“ハマりどころ”（ペースト・モバイル入力で多発）。",
+    "suggestion": "submit 前に email = email.trim() を適用し、���リデーションもトリム後の値で実施。表示値はユーザー入力を保持したい場合、内部用正規化値を別変数で持つ。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.3",
+    "issue": "送信中に aria-busy は付与しているが、aria-disabled を付与していないため、AT に“操作不可”が十分に伝わらず、ユーザーが Enter/Space 連打で再送信を試みる可能性がある。",
+    "suggestion": "submitting 中はボタンに aria-disabled=true と視覚的 inactive スタイルを同時適用。フォーム側でも submitting ガードで二重送信を確実に抑止。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2.2",
+    "issue": "/terms /privacy へ遷移時にクエリ（例: ?lang=ja, UTM）が失われる。静的ページにローカライズやトラッキングがある場合に影響。",
+    "suggestion": "allowlist マッチ後は元の search 部分を保持して遷移する（window.location.assign(path + search)）。path は固定ホワイトリストなのでオープンリダイレクトにはならない。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3, 4",
+    "issue": "E2E が aria-disabled の可視状態中心で、重要シナリオ（メール確認リンク復帰での自動セッション確立、二重送信防止、IME 合成中の検証、NotFound ガードの失敗時フォールバック）が未網羅。",
+    "suggestion": "Playwright に以下を追加: 1) magic link/confirm email 復帰の URL を模擬し getSession 確立まで待機、2) Enter 連打・クリック連打で二重送信されない、3) IME 合成中はエラー非表示、4) sessionStorage 例外時でも NotFound から '/' にフォールバック。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "2.1, 2.2, 4",
+    "issue": "デグレ検出用の最小限ログが不足。auth URL 取り込みの成否や NotFound ガード分岐がサイレントで、再現が難しい。",
+    "suggestion": "開発/ステージングでのみ有効な debug フラグを設け、(a) detectSessionInUrl がトークンを検出したか、(b) onAuthStateChange の遷移、(c) NotFound ガードの分岐・例外 を console.debug で記録。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2.1, 4",
+    "issue": "detectSessionInUrl により起動時のセッション復元と URL 取り込みが競合するタイミングで UI が一瞬未ログインとして描画される可能性（フリッカー）。その間に保護リソースの取得を行うと 401 を誘発。",
+    "suggestion": "アプリ初期化時に“auth 初期化中”のゲート（スプラッシュ/ブロッカー）を設け、getSession + URL 取り込み完了（または onAuthStateChange 初回発火）まで保護 API コール・画面遷移を保留する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "2.1",
+    "issue": "Safari プライベートモード等で localStorage.setItem が QuotaExceeded を投げる既知問題があり、persistSession:true 利用時に予期せぬ失敗が起こりうる。",
+    "suggestion": "Supabase client 作成時に storage アダプタを差し込み、localStorage 失敗時はメモリストレージへフォールバックする実装を検討。失敗時は警告ログを出す。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "5",
+    "issue": "flowType:'pkce' を有効化したが、将来的に OAuth プロバイダを UI に出す前提では /auth/callback 実装が未完了。設定だけ有効で UI を出すと成立しない。",
+    "suggestion": "OAuth を表に出す前に /auth/callback の実装と E2E（コード交換完了・URL クリア）を完了。起動時に OAuth プロバイダが有効ならルート存在をアサートしてフェイルファスト。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "aria-describedby が参照する要素 ID（ctaDescribedBy）が存在しないケースで参照切れになると AT が混乱する可能性。",
+    "suggestion": "ctaDescribedBy は対象要素が存在する時のみ付与するか、常在のプレースホルダ要素に集約。E2E/axe で属性参照の整合性を検査。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.4",
+    "issue": "ボタンの :active で transform を適用しており、動きの低減設定（prefers-reduced-motion）未考慮。",
+    "suggestion": "prefers-reduced-motion: reduce の場合は transform を無効化し、視覚的フィードバックを色やシャドウに置換する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

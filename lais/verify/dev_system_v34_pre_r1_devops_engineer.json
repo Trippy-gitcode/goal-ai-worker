@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "連鎖更新・権限",
+    "screen": "改訂案⑦ §D / CLAUDE.md",
+    "location": "review_package 行3143-3149 + CLAUDE.md 契約セクション",
+    "issue": "改訂案⑦ §D は CLAUDE.md の「ふとしの方針メモ」から「デザイン照合は双方向必須」「チェックリスト検証の一括PASS禁止」を削除する提案を含む。しかし「ふとしの方針メモ」は契約セクション内に存在し、Code変更禁止（§16.5 項目2 + CLAUDE.md 冒頭「Code変更禁止。変更権限はClaude.ai経由のみ」）。本パッケージ §1.1 は CLAUDE.md を9改訂対象ファイルの1つとしてCode実行を前提にリストしているが、契約セクション内の変更はCode実行不可。",
+    "spec_reference": "dev_system_spec.md §16.5 項目2「契約変更（CLAUDE.md無断変更）」禁止 + CLAUDE.md「🔒 契約セクション（Code変更禁止。変更権限はClaude.ai経由のみ）」",
+    "actual": "改訂案⑦ §D の「削除対象」に契約セクション内項目を含み、実行主体を区別していない",
+    "suggestion": "CLAUDE.md の変更を2段階に分割: (1) 契約セクション外（鉄則セクション全削除、Compact Instructions縮退、【絶対禁止】縮退）→ Code実行可。(2) 契約セクション内（ふとしの方針メモから2項目削除）→ Claude.ai（ADV）経由で実行。§4.7（連鎖更新チェックリスト）に実行主体カラムを追加し、CLAUDE.md行を2行に分割して明記する"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "ゲート整合性",
+    "screen": "改訂案② §B / §8 C2デプロイフロー",
+    "location": "review_package 行1150-1199",
+    "issue": "§8 改訂後のステップ番号に Step 9 のギャップが発生。現行 Step 9（git tag）を Step 13 に移動する際、Step 9 自体が注釈行（「Step 10-12 に繰り上げ」）になり、実際の処理ステップがない。deploy.sh 等のスクリプトが step 番号でログを出力する場合、「Step 9」の出力が欠落し混乱を招く。",
+    "spec_reference": "dev_system_spec.md §8 C2デプロイフロー（現行9ステップ）",
+    "actual": "Step 1-8（既存）→ Step 9（注釈のみ）→ Step 10-12（新設）→ Step 13（旧 Step 9）",
+    "suggestion": "Step 9 ギャップを解消。Step 1-8 維持、Step 9-11 を新設3ステップ（環境変数/外部サービス/実機E2E）、Step 12 を git tag とする。合計12ステップ。deploy.sh のログ出力番号も連番になる"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "自動化・プラットフォーム互換性",
+    "screen": "改訂案① §F / G11 step0_lint.sh",
+    "location": "review_package 行936-1004",
+    "issue": "step0_lint.sh は `declare -A FLOWS` で bash 4+ の連想配列を使用。macOS デフォルトの bash は 3.2。zsh ユーザー（本プロジェクトのシェル）が `bash scripts/step0_lint.sh` で実行する場合も /bin/bash が 3.2 なら失敗する。canopy_common.sh 内の他スクリプトは基本的な bash 構文のみ使用しており、G11 だけが bash 4+ 依存になる。",
+    "spec_reference": "sub_infrastructure.md §2.6 canopy_common.sh（既存スクリプトは bash 3.x 互換）",
+    "actual": "declare -A は bash 4.0+ 必須",
+    "suggestion": "連想配列を使わない実装に変更。例: フロー名と参照§Cをパイプ区切りの配列に格納し、IFS='|' で分割して処理する。またはシバンを `#!/usr/bin/env bash` + スクリプト冒頭で bash バージョンチェック（`if ((BASH_VERSINFO[0] < 4)); then echo 'ERROR: bash 4+ required'; exit 1; fi`）"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "自動化・プラットフォーム互換性",
+    "screen": "改訂案② §D.1 / verify_env.sh",
+    "location": "review_package 行1261",
+    "issue": "verify_env.sh の `grep -oP '(?<=name:\\s)[A-Z_]+'` は Perl 正規表現（-P オプション）を使用。macOS デフォルトの grep は BSD grep で -P 非対応。GNU grep（homebrew 経由）を前提とするならスクリプト冒頭で確認が必要。",
+    "spec_reference": "sub_infrastructure.md §2 スクリプト一覧（既存スクリプトは POSIX 互換 grep のみ使用）",
+    "actual": "grep -oP は GNU grep 専用機能",
+    "suggestion": "grep -oP を grep -oE に置き換える。`grep -oE 'name:\\s+[A-Z_]+' | sed 's/name:\\s*//'` で同等の結果を得る。または前提条件に GNU grep を明記し、sub_infrastructure.md §1.3（前提ツール）に追記"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "ゲート整合性",
+    "screen": "改訂案⑤ §E / canopy 発火ログ",
+    "location": "review_package 行2514-2523",
+    "issue": "canopy 発火ログの JSONL 出力で `$DURATION` 変数を参照しているが、この変数の定義（タイマー開始/終了）が示されていない。canopy_common.sh の既存コードにも SECONDS ベースのタイマーは存在しない。",
+    "spec_reference": "sub_infrastructure.md §2.6 canopy_common.sh（現行版にタイマー実装なし）",
+    "actual": "$DURATION 未定義のため JSONL 出力が空値になる",
+    "suggestion": "canopy_common.sh の冒頭に `START_SECONDS=$SECONDS` を追加、末尾で `DURATION=$((SECONDS - START_SECONDS))` を計算。ログ出力をその後に配置"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "ゲート整合性",
+    "screen": "§8 C2フロー / development_rules.md",
+    "location": "development_rules.md 行113 vs sub_infrastructure.md §2.8",
+    "issue": "既存の C2 フロー順序不整合が本改訂で解消されていない。development_rules.md は「実装→/simplify→L1→bump→canopy→L2→デプロイ」と記載。deploy.sh 実装は「version_sync→build→canopy→L1→L2→deploy」。L1 と canopy の順序が逆。改訂案②は Step 10-12 の追加に集中しており、既存の順序不整合には触れていない。",
+    "spec_reference": "development_rules.md 3層テスト戦略セクション（行109-114）+ sub_infrastructure.md §2.8 deploy.sh",
+    "actual": "L1/canopy の実行順が2文書で異なる",
+    "suggestion": "本改訂で §8 を拡張する際に、正規の実行順を確定して development_rules.md と deploy.sh の両方を統一する。deploy.sh の実装順（canopy→L1→L2）が実態に即しているため、development_rules.md 側を更新するのが最小変更"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "連鎖更新・完全性",
+    "screen": "改訂案① / §4 連鎖更新チェックリスト",
+    "location": "review_package 行266-276",
+    "issue": "§4.1 の連鎖更新チェックリストが dev_system_spec.md 内部の「鉄則」参照を列挙していない。§3 全面改訂後、spec 内部の他セクション（§4.7、§7、§9.3 等）で「鉄則⑨」「鉄則⑧」等の番号参照が残存する可能性がある。内部相互参照の破損は §4.8 検証方法の項目4「相互参照が切れていないか」に該当。",
+    "spec_reference": "review_package §4.8 連鎖更新完全性の検証方法 項目4",
+    "actual": "§4.1 表に dev_system_spec.md 内部の鉄則番号参照の検索指示がない",
+    "suggestion": "§4.1 に検証ステップ追加: `grep -n '鉄則[①-⑮]\\|鉄則#' dev_system_spec.md` で旧鉄則番号参照を検出し、§C参照に書き換える。連鎖更新チェックリストの全ファイルに同様の grep を実行"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "自動化・依存関係",
+    "screen": "改訂案② §D.2 / verify_external_services.sh",
+    "location": "review_package 行1319, 1339",
+    "issue": "verify_external_services.sh が JSON パースに python3 -c を使用。sub_infrastructure.md §1.3 前提ツールに python3 はリストされていない。jq を使えば追加依存なし（yq が既に前提ツール）。",
+    "spec_reference": "sub_infrastructure.md §1.3 前提ツール一覧",
+    "actual": "python3 依存が暗黙的",
+    "suggestion": "python3 -c を jq に置き換える。例: `curl -s ... | jq -r '.redirect_urls // \"\" | split(\",\")[]'`"
+  }
+]

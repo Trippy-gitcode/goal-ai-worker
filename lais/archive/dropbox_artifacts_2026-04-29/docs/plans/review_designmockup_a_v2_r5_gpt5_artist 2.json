@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "最下部「すでにアカウントをお持ちですか？ ログイン」の「ログイン」テキスト",
+    "issue": "インラインテキストリンクが下線なしで色のみの区別。design_system §2.2の「インラインリンクは必ず下線」およびWCAG 1.4.1に反する",
+    "suggestion": "「ログイン」に text-decoration: underline を付与（hover/focus時は下線の濃度を上げる）。色は --accent を維持しつつ、フォーカス時は outline 2px で可視化",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s02_onboarding",
+    "location": "画面左上の戻る矢印（20pxアイコンのみ）",
+    "issue": "タップ領域が44×44px未満に見える。design_system §4.5の --tap-target-min=44px 要件に不一致",
+    "suggestion": "戻るボタンに44×44pxのヒットスロップを設定（透明paddingまたはボタンコンテナ）。視覚は20pxのまま、インタラクティブ領域の���拡張",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "ロゴ直下のヒーロー構成（中央寄せロゴ＋2CTA）",
+    "issue": "センター配置のロゴ＋大ボタンという汎用パターンで、Laisの独自性（夜空モチーフや“実世界との地続き感”）が弱い",
+    "suggestion": "星空をロゴ周囲に意図的に配置（弧状の星群や薄い月光のハイライト）し、ボタン群を下端にさらに寄せて“設計された沈黙”の面を広く確保。ロゴ近辺に微かな水平ライン（--border-strong 1px）で重心を作る",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayリストの完了タスク（1行目・濃い緑ティントのカード）",
+    "issue": "完了済み行の緑背景が強く、未完了タスクより視線を奪っている。次にやるべき項目への誘導が弱まる",
+    "suggestion": "完了行は背景を --success-subtle 程度に抑え、テキストを --text-secondary へ。未完了行の強調（左ボーダー、タイトルのコントラスト）で視線の流れを“いま→次”に再配分",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "ユーザーバブル（右寄せ・濃紺ティント）",
+    "issue": "背景 #0D1117 とバブル #1C2128 の明度差が小さく、会話の役割分離がやや弱い",
+    "suggestion": "ユーザーバブル背景を --accent-subtle 方向にわずかに明るくし、1pxの --border-strong を追加。AI側は左ボーダー強度を+10〜20%で役割差を強調",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Today見出し直下の進捗テキスト「1 / 4 completed」（font-size:11px）",
+    "issue": "重要指標に --font-size-xs 相当（11px）が使われ、可読性・重みが不足（§3.2では本文や重要情報への11px使用は非推奨）",
+    "suggestion": "サイズを14px（--font-size-sm）に引き上げ、letter-spacing: var(--letter-spacing-ja) を適用。必要なら“バー”や小さなドット行で視覚補助を追加",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s30_me",
+    "location": "プロフィール基本情報リスト（年齢/職業/趣味の各行ボーダー）",
+    "issue": "各行のボーダーが連続し、面の分節が細かすぎて視線が断続的に止まる。Open Air原則の“余白で区切る”からやや逸脱",
+    "suggestion": "ボーダーはセクションの上下のみ（最小2本）に減らし、行間を --space-lg（24px）へ拡張。行内はテキストコントラスト差と余白で層を作る",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の3ボタン（登録する／編集して登録／✕）",
+    "issue": "3要素が同階調で横並びし、主要アクションの優先度が弱い。視線が分散する",
+    "suggestion": "［登録する］を主ボタン（--button-primary-bg）で左固定、［編集して登録］はテキスト+アイコンボタンに弱め、［✕］はカード右上のアイコンへ移動して面積を削減",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域のラベル「EXPLORER」（letter-spacing:1px）",
+    "issue": "大文字ラベルの字間がトークン既定（--letter-spacing-label: 1.5px）より狭く、���覚的な抜けが不足",
+    "suggestion": "letter-spacing を 1.5px に調整。必要に応じてfont-weightを+1段（600）でヘッダ内の対比を最適化",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "下部の「+ タスクを追加」テキストリンク",
+    "issue": "インラインテキストリンクだが下線がなく、色＋先頭の「+」記号に依存。design_system §2.2の“必ず下線”ルールに未準拠",
+    "suggestion": "text-decoration: underline を付与。ホバー/フォーカスで下線濃度を上げ、フォーカスアウトラインも追加して非色依存を強化",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "ロゴ上部の星粒（散在）とロゴ周囲の余白帯",
+    "issue": "星の配置が偶然的で、ロゴへの視線誘導が弱い。“設計された沈黙”が単なる空白に見えやすい",
+    "suggestion": "星粒をロゴへ収束する放射/弧に再配置し、中央から上にかけて緩いグラデーションの密度変化をつける。星の一部は --accent-subtle のリングで微光を与え���中心へのテンションをつくる",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

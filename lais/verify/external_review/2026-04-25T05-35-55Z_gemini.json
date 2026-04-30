@@ -1,0 +1,80 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "location": "lais/verify/dev_system_v34_package.md L648 (deploy.sh)",
+    "issue": "`if ! npx wrangler pages deploy ... 2>&1 | tee ...` のようにパイプを使用しているため、`pipefail` が無効な POSIX sh 環境では `tee` が成功すると全体の終了ステータスが 0 になります。結果としてデプロイ失敗が検知されず、後続の STATUS が DONE に誤遷移します。",
+    "suggestion": "パイプを使用せず、`npx wrangler ... > \"$deploy_stdout\" 2>&1` のように一時ファイルにリダイレクトしてから、必要に応じて `cat` や `tail` で出力・ログ記録を行うように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "location": "lais/verify/dev_system_v34_package.md L564-L596 (proposal_log_lint.sh)",
+    "issue": "`grep ... | while read ...; do STALE_COUNT=$((STALE_COUNT + 1)); done` のようにパイプの右側で `while` ループを実行しているため、ループ内はサブシェルとなり、インクリメントされた `STALE_COUNT` がループ外に反映されません。結果として警告が永久に出力されません。",
+    "suggestion": "パイプを使用せず、`while read ...; do ... done < tmp_file` のように一時ファイルからリダイレクトして読み込むか、プロセス置換が使用可能なシェル環境を前提とするよう修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md L146 (canopy_common.sh::check_tdd)",
+    "issue": "Playwright の JSON レポーター出力を `jq -e '.failed > 0'` で検証していますが、Playwright の出力にはルートに `.failed` は存在しません。仕様書 (§4.6) に記載されている通り、正しくは `.stats.unexpected` を参照する必要があります。現状では常にテス���が FAIL 扱いになります。",
+    "suggestion": "`jq -e '.stats.unexpected > 0' \"$before\"` および `jq -e '.stats.unexpected == 0' \"$after\"` を参照するように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md L184 (realworld_proof_check.sh)",
+    "issue": "`proof_ts=$(jq -r '.timestamp' \"$PROOF\")` でタイムスタンプを取得していますが、Playwright の JSON レポーターにはルートに `.timestamp` が存在しません。また、取得した値と ISO8601 形式の `deploy_ts` を文字列比較しているため、正しく前後関係が評価されません。",
+    "suggestion": "Playwright の出力に合わせて `jq -r '.stats.startTime'` などを参照し、両者のタイムスタンプをエポック秒に変換した上で数値比較を行うように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md L226, L478, L615",
+    "issue": "仕様書 (§C6.4) で POSIX 互換規約を定めているにもかかわらず、スクリプト内で GNU 拡張である `grep -m1` や、POSIX 非互換の `grep -hoE` が使用されています。厳密な POSIX sh 環境では動作せず、エラーになります。",
+    "suggestion": "`grep -m1` は `sed -n '1p'` や `awk 'NR==1{print; exit}'` に置き換え、`grep -hoE` は `awk` や `sed` を用いた抽出処理に書き換えてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md L670 (deploy.sh)",
+    "issue": "仕様書 (§C6.4) で `sed -i` 系の使用が明示的に禁止されているにもかかわらず、`deploy.sh` 内で `sed -i.bak` が使用されています。BSD と GNU で挙動が異なり、移植性の問題を引き起こします。",
+    "suggestion": "他のスクリプトと同様に、`awk` や `sed` で一時ファイルに出力した後、`mv` コマンドで元のファイルを上書きする方式に統一してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "ROBUSTNESS",
+    "location": "lais/verify/dev_system_v34_package.md L320 (verify_hooks.sh)",
+    "issue": "日付のパースに `date -j -f` (BSD系) と `date -d` (GNU系) をフォールバックで使用していますが、どちらも POSIX 標準には存在しません。環境によっては両方のコマンドが失敗し、エポック秒の取得ができません。",
+    "suggestion": "POSIX 互換を保証するため、Python (`python3 -c 'import datetime...'`) や `awk` を使用して日付文字列からエポック秒を計算するように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.2784,
+    "input_tokens": 217198,
+    "output_tokens": 1378,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

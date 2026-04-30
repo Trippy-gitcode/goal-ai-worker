@@ -1,0 +1,139 @@
+/*
+ * S-33 DeleteAccount — design tokens via theme variables (Stage 7-3)
+ * 退会フローは赤系 (--theme-color-danger) を WCAG AA 担保で前面表示。
+ */
+
+.s33-delete-account {
+  flex: 1;
+  background: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 var(--space-2xl);
+  min-height: 100dvh;
+  gap: var(--space-md);
+}
+
+.s33-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-md);
+  background: var(--theme-color-bg-elevated);
+  border-bottom: 1px solid var(--theme-color-border);
+}
+
+.s33-back {
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  color: var(--theme-color-text);
+  cursor: pointer;
+  border-radius: var(--theme-radius-md);
+}
+
+.s33-back:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s33-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-danger);
+  font-family: var(--theme-font-display);
+}
+
+.s33-warning {
+  margin: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--danger-subtle);
+  border: 2px solid var(--theme-color-danger);
+  border-radius: var(--theme-radius-md);
+}
+
+.s33-warning-text {
+  font-size: var(--font-size-base);
+  color: var(--theme-color-text);
+  line-height: var(--theme-font-line-height-body);
+}
+
+.s33-warning-text strong {
+  color: var(--theme-color-danger);
+}
+
+.s33-confirm-label {
+  margin: 0 var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--theme-color-text-secondary);
+}
+
+.s33-confirm-input {
+  margin: 0 var(--space-md);
+  padding: var(--space-md);
+  background: var(--theme-color-bg-card);
+  color: var(--theme-color-text);
+  border: 1px solid var(--theme-color-border-strong);
+  border-radius: var(--theme-radius-md);
+  font-size: var(--font-size-base);
+  font-family: var(--theme-font-mono);
+  min-height: 52px;
+}
+
+.s33-confirm-input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s33-delete-cta {
+  margin: var(--space-md);
+  min-height: 52px;
+  background: var(--danger-solid);
+  color: var(--theme-color-button-text-inverse);
+  border: 1px solid var(--danger-solid);
+  border-radius: var(--theme-radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--theme-font-base);
+  cursor: pointer;
+}
+
+.s33-delete-cta:disabled {
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
+  border-color: var(--button-disabled-border);
+  cursor: not-allowed;
+}
+
+.s33-cancel {
+  margin: 0 var(--space-md);
+  min-height: 44px;
+  background: transparent;
+  color: var(--theme-color-text-secondary);
+  border: 1px solid var(--theme-color-border);
+  border-radius: var(--theme-radius-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--theme-font-base);
+  cursor: pointer;
+}
+
+.s33-cancel:focus-visible,
+.s33-delete-cta:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (min-width: 768px) {
+  .s33-warning,
+  .s33-confirm-label,
+  .s33-confirm-input,
+  .s33-delete-cta,
+  .s33-cancel {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    width: calc(100% - var(--space-lg));
+  }
+}

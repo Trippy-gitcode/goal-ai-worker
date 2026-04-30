@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§13.4",
+    "issue": "退会クーリングオフ時のStripeサブスクリプション処理において、「72時間後にキャンセル予約（Stripe schedule cancellation）」としているが、ユーザーの次回の請求日が72時間以内の場合、退会手続きをしたにも関わらず課金が実行されてしまう。",
+    "suggestion": "退会リクエスト時にStripeの次回請求日時を確認し、72時間以内の場合は即時キャンセル（または期間終了時キャンセル）とするか、クーリングオフ期間中の請求を停止する処理を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.3 / ux_v1.md §2.3",
+    "issue": "週N回習慣のToday表示ロジックが「今日やらなくても週内に達成可能なら表示しない」となっているため、週の前半にタスクがTodayに表示されず、ユーザーが自分のペースでタスクを実行できません。「アプリがタスクを消した」と誤認する原因になります。",
+    "suggestion": "週N回のタスクは、その週の目標回数に達するまで毎日Todayに表示し、完了したらその日はチェック済みとし、目標回数達成後に非表示（または完了表示）にする仕様に変更することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§2.4",
+    "issue": "ゴール達成の7日ルールにより、短期的な目標（例：週末の片付け）をゴールに設定して数日で達成した場合、5日間も「完了待ち」状態になり、達成感のタイミングが大きくズレます。ユーザー体験として非常に不自然です。",
+    "suggestion": "ゴールの完了状態と達成演出（紙吹雪など）は即時実行し、「ゴール達成ボーナス（50EXP）」の付与のみを7日経過条件とするか、短期ゴールと長期ゴールで扱いを分ける設計を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§2.3 / §3.2",
+    "issue": "TALK画面でキーボード表示中に入力バーの上にUndoスナックバー（48px）が30秒間表示されると、チャットの可視領域が極端に狭くなり、メッセージ入力の大きな妨げになります。",
+    "suggestion": "TALK画面ではUndoスナックバーを画面上部（ヘッダーの直下）に表示するか、キーボード表示中はスナックバーを一時的に非表示/透明化する仕様に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§2.3",
+    "issue": "タスク詳細パネル（S-11）から「進め方を聞く」等でTALK画面（S-20）に遷移する際、S-11のハーフモーダルが閉じられるのか開いたままなのかが明記されていません。",
+    "suggestion": "「遷移時にS-11のハーフモーダルは自動的に閉じられる」旨を明記してください（S-14の仕様と統一）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§7.4",
+    "issue": "Todayセクションでタスクを手動でドラッグ＆ドロップして並び替えた後、開始時刻が設定された新しいタスクを追加した場合、そのタスクがどこに挿入されるのか（手動順序と自動ソートの優先関係）が不明確です。",
+    "suggestion": "手動ソート後は「カスタム順」として扱われ、新規タスクはリストの末尾（または未完了タスクの最後）に追加される等のルールを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.3",
+    "issue": "習慣タスクのマスターデータを編集した際、「当日分の完了/未完了状態は変更されない」とありますが、タスク名や所要時間を変更した場合、Todayに表示されている当日分のタスクの「表示内容」が即時更新されるかどうかが曖昧です。",
+    "suggestion": "「当日分の完了状態（⭕）は維持されるが、タスク名や所要時間などの表示内容は即時反映される」旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§2.3",
+    "issue": "単発タスクには「明日に延期」がありますが、習慣タスクにはありません。ユーザーが「今日は体調不良で習慣ができないからTodayから消したい」と思った場合、消す手段がありません。",
+    "suggestion": "習慣タスクに対して「今日はスキップ」ボタンを追加し、EXPペナルティなしでTodayから非表示にする機能を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3.2",
+    "issue": "初回画像添付時のプライバシー警告を「今後表示しない」で消せる仕様ですが、ユーザーが後日忘れて機密情報を含む画像をAIに送信してしまうリスクがあります。",
+    "suggestion": "ダイアログでの警告に加え、画像選択後のプレビューUI付近に「画像はAI分析のため外部サーバーに送信されます」という免責テキストを常に小さく表示する設計にすることを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§9.1",
+    "issue": "オフライン時のQRコード表示ボタンを「グレーア��ト + ツールチップ」としていますが、モバイル（タッチデバイス）ではホバーができないためツールチップを表示できず、無効化されたボタンはタップイベントも発火しないため理由が伝わりません。",
+    "suggestion": "ボタンを完全に無効化（disabled）するのではなく、タップ可能にしておき、タップ時にトーストで「オフライン時は利用できません」とエラーメッセージを表示する設計に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  }
+]

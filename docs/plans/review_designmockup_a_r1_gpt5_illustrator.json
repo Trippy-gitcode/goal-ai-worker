@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "ALL",
+    "location": "主要アクションのPrimaryボタン（例: s00_splash「はじめる」、s12_task_add「作成」、s15_goal_create「作成」）",
+    "issue": "Night SkyテーマのPrimaryボタンが明るい水色の塗り+濃色テキストで描かれており、design_system §5.1/§8.1のトークン（--button-primary-bg: #1A5FC8 + 白文字）と不一致。ブランドの統一感と可読性要件に矛盾。",
+    "suggestion": "Night Skyでは--button-primary-bgを#1A5FC8、--button-primary-fgを#FFFFFFに統一。ホバー/プレスもトークン（#1158C7/#0A4AAD）へ準拠し、現在の明るい水色はSecondaryやaccent-subtle用途に限定。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "チェックボックス行の「利用規約」と「プライバシーポリシー」テキストリンク",
+    "issue": "リンクが青色のみで識別されており、下線などの非色依存の手掛かりが見えない。WCAG 1.4.1（色のみで情報を伝達しない）およびdesign_system §2.2に抵触。",
+    "suggestion": "インラインテキストリンクは常時text-decoration: underlineを付与。ホバー/フォーカスで下線の太さや色（--accent-hover）を強め、キーボードフォーカス時はoutlineも表示。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "タイムライン右端の小ドット（例:「ジムで筋トレ」の緑ドット）",
+    "issue": "カテゴリ表現に成功色（緑）を使用しており、完了・成功のセマンティックと混同の恐れ。未完了なのに“完了”の印象を与える可能性。",
+    "suggestion": "カテゴリは中庸のニュートラル（--border-strong基調）や低彩度パレットに統一し、成功（--success）は完了状態のみに限定。形状（内塗り/枠のみ）で完了/未完了を併記して非色依存も担保。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "ヒーローのリング/EXPバー/「+ タスクを追加」リンク/タイムラインの装飾要素",
+    "issue": "同一画面内で青系アク��ントの出現頻度が高く、装飾要素までアクセントが波及して視線が散る。Night Skyの静けさより“寒色の主張”が前面化。",
+    "suggestion": "装飾・区切りは--border/--border-strongに後退。インタラクション（ボタン/アクティブタブ/主要リンク）のみに--accentを集中。EXPバー以外の青系面積を削減して“月明かりの一点集中”を演出。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "s20_talk",
+    "location": "AI/ユーザーメッセージバブルの背景色（青系トーン）",
+    "issue": "バブルが濃い青系で広い面積を占有し、Night Skyの「静かな夜空」より“冷たさ”が勝つ。会話面で常時アクセント面積が大きい。",
+    "suggestion": "バブル背景を--bg-surface/--bg-elevated寄りにし、境界やカード左ボーダーのみ--accent-subtleを使用。CTA（登録ボタン等）でのみ鮮やかなアクセントを使い、全体の色圧を下げる。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "WCAG",
+    "screen": "s00_splash",
+    "location": "セカンダリ（アウトライン）ボタン「ログイン」",
+    "issue": "ボーダーが背景に溶け気味で、コンポーネントの境界コントラスト（1.4.11 非テキスト3:1）の満たし損ねリスク。視覚的な押下可能性が弱い。",
+    "suggestion": "アウトラインは--border-strong（約3.6:1相当）に統一し、線幅1.5pxまたは内側シャドウで視認性を補強。ラベル色は--text-primary維持で明度差を確保。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s02_onboarding",
+    "location": "アバター選択行（タイプB選択時の緑シャツ＋青リング）",
+    "issue": "選択中リング（青）と衣服色（鮮やかな緑）の主張が競合し、焦点が分散。Night Sky基調の色静けさから浮いて見える。",
+    "suggestion": "衣服色は低彩度/低明度のグリーンに調整（夜空寄りのトーン）し、選択強調は青リングと微光（accent-subtle）に集約。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾「+ タスクを追加」（テキストリンク）",
+    "issue": "インラインリンクが色のみで区別され、下線などの非色依存サインが見えない。リス��文脈でもWCAG 1.4.1とdesign_system §2.2の要件を満たしていない。",
+    "suggestion": "テキストリンクは常時下線を付与。もしくは小さなpill（accent-subtle背景）にして“ボタン化”し、色以外の形状で可視化。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "「+ タスクを追加」（見出し下のリンク）",
+    "issue": "アクセント色のみで可用性を示しており、下線やアイコン以外の手掛かりが不足。色依存の操作手掛かりになっている。",
+    "suggestion": "下線の常時表示か、先頭に明瞭な追加アイコン＋下線の併用。ホバー/フォーカスで下線太さを強調し、キーボードナビでも明確化。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "メッセージ気泡内のタイムスタンプ（右下の薄色テキスト）",
+    "issue": "バブル背景（濃い青）に対してタイムスタンプのコントラストが低く見え、読み取りづらい。小サイズテキストのため4.5:1未満のリスク。",
+    "suggestion": "タイムスタンプ色を--text-hintより明るい--text-secondary相当へ引き上げるか、バブル背景を暗めに調整。サイズ11pxの場合でも4.5:1を確保。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "画面上部の星ドット演出",
+    "issue": "星が極小・希薄で、Night Skyの詩的な“夜空感”がやや弱い。初回体験でのブランド想起が薄まっている。",
+    "suggestion": "星の大小に緩いばらつきとごく控えめな濃淡差を追加（accent-subtleレベル）。中央付近に淡い星団/薄いグラデを1箇所だけ配置し、過剰演出を避けつつ世界観を強化。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CTA",
+    "screen": "s00_splash",
+    "location": "『はじめる』『ログイン』CTA",
+    "issue": "Primary=#1A5FC8 塗り、Secondary=枠線で階層明瞭。ただし2ボタンが同幅で視線の優先順位弱め。",
+    "suggestion": "Primary を微妙に太く、または padding を増やして重みづけ。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "HOOK",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域 Lv.12 EXPLORER + 1,240/2,000",
+    "issue": "B群v2 #2 EXP 11px 化 ✅。視認可能。ただしアイコン（アバター）が汎用シルエットで心を掴む要素欠如。",
+    "suggestion": "アバターを Phase B でキャラクター化、または Lv. 数値を視覚主役に。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONVERSION",
+    "screen": "s01_signin",
+    "location": "『サインアップ』ボタン disabled 表示",
+    "issue": "初期状態でボタンが disabled に見える（利用規約同意前）。ユーザーが押せないと感じ離脱リスク。",
+    "suggestion": "同意チェック後に色が切り替わる動線を視覚的に補強（矢印/アニメ）。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "CTA",
+    "screen": "s12_task_add",
+    "location": "『作成』ボタン",
+    "issue": "#1A5FC8 で下部固定。押しやすく問題なし。",
+    "suggestion": "(問題なし)",
+    "model": "Code",
+    "persona": "ad_designer"
+  }
+]

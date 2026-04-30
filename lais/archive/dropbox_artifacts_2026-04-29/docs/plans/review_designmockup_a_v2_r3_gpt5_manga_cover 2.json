@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s01_signin",
+    "location": "フォーム下「利用規約とプライバシーポリシーに同意します」行の左チェックボックス（見た目20×20px）",
+    "issue": "タップターゲットが44×44px要件（design_system §4.5）を満たしていないように見える。小さく、押し間違いリスクが高い。",
+    "suggestion": "視覚サイズは20pxのままでもよいが、透過パディングまたはヒットスロップで44×44px以上のタップ領域を確保する（例: ::beforeでクリック領域拡張 or 親divにpadding付与）。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダルの右上「×」アイコン（28×28pxコンテナ）",
+    "issue": "閉じるアイコンのタップ領域が--tap-target-min 44px未満に見える。モーダルの基本操作に対して誤タップ余地が大きい。",
+    "suggestion": "見た目16pxアイコンは維持しつつ���44×44pxの透明ボタン領域を確保。余白は右上角に寄せず、指の入りやすい位置に配置。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s15_goal_create",
+    "location": "ハーフモーダルの右上「×」アイコン（28×28pxコンテナ）",
+    "issue": "s12同様、閉じる操作のタップターゲットが44×44px未満に見える（design_system §4.5）。",
+    "suggestion": "44×44px以上のヒットエリアを設定。見た目サイズは据え置きでOKだが、ボタンの押下領域を拡大する。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "下部のテキスト「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」リンク",
+    "issue": "インラインテキストリンクに下線がなく、色のみでリンク性を表現（design_system §2.2要件/ WCAG 1.4.1）。",
+    "suggestion": "「ログイン」に text-decoration: underline を付与（--accentの色指定は維持）。ホバー/フォーカス時は下線濃度または色も強調。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "上部の進捗ステッパー（未到達のバー = background:#1C2128、画面背景=#0D1117）",
+    "issue": "未到達バーと背景のコントラストが低く、進捗情報（非テキスト情報）の視認性が不足（WCAG 1.4.11 非テキストコントラスト 3:1未満の疑い）。",
+    "suggestion": "未到達バーに--border-strong相当の明度を適用（例: background: var(--border-strong)）または1pxアウトライン追加で3:1以上を担保。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayタスクリスト各行（左列の時刻／タスクカード内の完了UI）",
+    "issue": "UX仕様 §2.3の行構成「[完了⭕][時刻][タスク名]…」と不一致。未完了行に完了トグルが見当たらず、完了済みのみ右端に✔が出るため操作位置が一貫しない。",
+    "suggestion": "全行で左端に完了トグル列を確保（未完了=⭕、完了=✔）。左右レイアウトを固定し、チェック操作の学習コストを下げる。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾「＋タスクを追加」行〜Goals見出しの間",
+    "issue": "セクション間スペースが約24pxに見え、design_system §4.2の推奨（標準40px/許容32px）を下回り、呼吸感が弱い。",
+    "suggestion": "Today→Goals間のマージンを--space-xl相当（40px）に拡張。見出し前後の余白差で階層を明確化。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カード上部ラベル「タスクにしますか？」（font-size:11px）",
+    "issue": "11pxは「キャプション/時刻のみ」推奨（design_system §3.2）。操作系ラベルとしては小さく、日本語の可読性・品格を損なう。",
+    "suggestion": "ラベルを14px（--font-size-base）に引き上げ、line-heightは--line-height-ja-body 1.7で余白の『間』を確保。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "ゴール名の直下にある大きな「60%」表示（48px相当）",
+    "issue": "数値がタイトルより強く前面化し、主従が逆転。タイトル→進捗のZフローが崩れ、視線が数値に吸われやすい。",
+    "suggestion": "数値を32px前後に縮小 or 色を--text-secondaryへ抑制し、タイトルを主見出しとして先に読ませる。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "「＋タスクを追加」テキストリンク（単独行、下線なし）",
+    "issue": "色（--accent）に加え形状の手掛かりが弱く、インラインテキストリンク要件（下線併用）に準拠していない解釈の余地がある。",
+    "suggestion": "テキストリンクとして扱う場合は下線を付与。ボタンとして扱うならPill化やアイコンボタン化で色依存を脱却。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Todayタスク行の左ボーダー色（例: #E8A855, #484F58, accent系などが混在）",
+    "issue": "左ボーダー色の意味が画面内で説明されず、色のみで暗黙の状態/カテゴリを示しているように見える。解釈に個人差が出る。",
+    "suggestion": "色の役割を限定（例: overdue=赤3pxのみ）。ゴール色は行右端の小ドットで補助表示し、必要に応じてラベル/アイコンを併用（1.4.1非色依存）。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Today見出し直下の進捗文言「1 / 4 completed」",
+    "issue": "日本語UIの中で英語が混在し、品位のトーンがわずかにブレる。視線のリズム上も読み替えが発生。",
+    "suggestion": "「1/4 完了」など日本語化。ラベルは--letter-spacing-jaと--line-height-ja-bodyを適用して読みやすく。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§8.1 ボタン",
+    "issue": "Danger(塗りつぶし)のhover/pressedにcolor-mix()を直接使用しており、iOS Safari 16系や古いWebView環境で未対応の可能性がある。非対応環境ではhover/pressedの視覚変化が失われる。",
+    "suggestion": "各テーマに--danger-hover / --danger-pressedトークンを追加して明示値を定義し、color-mix()は対応環境でのみ上書きする。例: @supports (color: color-mix(in srgb, black, white)) { .btn-danger:hover { background: color-mix(in srgb, var(--danger) 88%, black); } }。通常は background: var(--danger-hover); pressedも同様。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "PERFORMANCE",
+    "location": "§5.5 グラスモーフィズムトグル",
+    "issue": "backdrop-filter: blur(16px) saturate(180%) はモバイルSafariでGPU負荷が高く、スクロール領域に跨る要素や多数の半透明レイヤーでフレーム落ち・発熱のリスクがある。PWA(iOS)では特に顕著。",
+    "suggestion": "負荷低減ガイドを明記: 1) ぼかし半径をテーマ共通で12px以下に、saturateは120%以下推奨。2) スクロ��ルする大量の子要素では禁止し、コンテナ単位の1要素に限定(既出方針の再強化)。3) サイズ/opacity/positionのトランジションでbackdrop-filterをアニメートしない。4) .glass-surfaceにwill-change: backdrop-filterを付けず、必要箇所のみに限定。5) 端末検知(matchMedia『(prefers-reduced-motion: reduce)』や簡易測定)で--card-backdropをnoneに切り替えるフックを追加。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.0 テーマ切替の永続化・FOUC対策 / §16.2 A4",
+    "issue": "「<meta name=\"theme-color\">を現在の--bg-primaryと同期」方針は妥当だが、iOS PWAのstatus bar文字色はapple-mobile-web-app-status-bar-styleに依存し、実行時に変更が反映されない(再読込が必要)ケースがある。ライト/ダーク間の即時切替で読みにくい状態が発生し得る。",
+    "suggestion": "ランタイムで確実に反映されるのはtheme-colorの背景色のみであることを注記し、iOS PWAではstatus bar文字色(黒/白)は固定ポリシーにする。推奨: 1) apple-mobile-web-app-status-bar-styleは常にblack(=白字)に固定し、アプリ上部に安全領域背景(--bg-primary)を敷いて視認性を担保���2) テーマ変更時にmeta[name=theme-color]は更新しつつ、iOSではstatus barの文字色が固定である旨をUIに反映(必要なら軽いリロード案内)。同期コード例も追記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§8.1 ボタン",
+    "issue": "テーマトークンに--button-danger-fgが追加されているが、ボタン表のDanger(塗りつぶし)テキスト色指定が固定色#FFFFFFのままでトークン方針と不整合。将来テーマでの例外調整が困難になる。",
+    "suggestion": "Danger(塗りつぶし)のテキスト色指定は--button-danger-fgを必須使用に統一する(表も『--button-danger-fg』表記に修正)。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.1 ボタン",
+    "issue": "セマンティック系(subtle含む)のhover/pressedトークンが未定義のため、実装時に各所で不定形なopacity操作や色計算が発生し、テーマ間で不統一になりやすい。",
+    "suggestion": "各セマンティックに-hover/-pressedトークンを追加(例: --success-hover/--success-pressed, --success-subtle-hover/--success-subtle-pressed 等)。ボタン/チップ/バナーで横断利用し、opacity操作の代わりにトークン参照を原則化する。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5 テーマ定義（共通方針）",
+    "issue": "OSネイティブのフォーム部品/スクロールバーの配色整合を示すcolor-scheme宣言が無く、ダーク系テーマでシステム部品がライト配色になるリスクがある(iOS Safariで顕著)。",
+    "suggestion": ":rootにcolor-scheme: light darkを宣言し、テーマごとに最適化(例: ダーク系テーマ適用時はcolor-scheme: dark; ライト系はlight)。フォームUI/選択ハイライト/スクロールバーの違和感を低減。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0 テーマ切替の永続化・FOUC対策",
+    "issue": "初期FOUC対策のhead内インライン適用は明確だが、ユーザーがアプリ内でテーマを切り替えた後にmeta[name=\"theme-color\"]を同期する具体コードとイベントフックが未記載。実装抜けのリスクがある。",
+    "suggestion": "設定変更時に即時同期する実装例を追記: const root=getComputedStyle(document.documentElement); const bg=root.getPropertyValue('--bg-primary').trim(); (document.querySelector('meta[name=\"theme-color\"]')||createMeta()).setAttribute('content', bg); さらにiOS PWAの制約(文字色固定)の注記も併記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 イージングトークン",
+    "issue": "spring-bouncy(cubic-bezier(0.34, 1.56, 0.64, 1))はy>1のためオーバーシュートする。ガイドに『scale系専用』とあるが、誤用でopacity/translateに適用されると不自然なフラッシュやスクロール外突き抜けが発生し得る。",
+    "suggestion": "lint/スタイルガイドを強化: spring-bouncyはtransform: scale専用クラス(例 .anim-scale-bouncy)経由でのみ利用可、その他プロパティではビルド時lintで弾く。ドキュメントにも『opacity/translate禁止』を太字で明記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "PERFORMANCE",
+    "location": "§7.6 prefers-reduced-motion 対応",
+    "issue": "『*, *::before, *::after { transition-duration: 1ms !important; }』は全プロパティに強制適用され、アコーディオンのheight/clip-path等の瞬間切替がレイアウトスラッシングやチラつきを誘発する可能性がある。",
+    "suggestion": "対象をtransform/opacity/box-shadow等のアニメ系に限定(例: [data-animatable])やコンポーネントのアニメーションクラス���スコープ。あるいはtransition: noneに切替える方式に変更してreflow系プロパティへの副作用を回避する。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.5 グラスモーフィズムトグル",
+    "issue": ".glass-surface にはbackdrop-filter適用のみが示され、背景色/枠線に--card-bg/--card-borderを適用する共通CSSが記載されていない。実装者ごとに適用漏れの可能性がある。",
+    "suggestion": ".glass-surfaceのベース定義を追加: .glass-surface { background: var(--card-bg); border: var(--card-border); } @supportsブロック内でbackdrop-filterを上乗せする。これでカード/モーダル/ドロップダウンの一貫性を保証。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-111",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§2.2 リンク色の役割分離",
+    "issue": "リンクは--accentとし下線必須は明確だが、visited状態(既読リンク)の扱いが未定義。モバイルではvisited色差分を付けない方針もあるが、仕様として明言がないため実装ブレが発生し得る。",
+    "suggestion": "visitedは色差分なし(可読性優先)とするか、--accent-visitedトークンを追加���て明示。下線は常時維持。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-112",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§9 CSSトークンブロック",
+    "issue": "フォント/余白/サイズがpx固定で定義されている。iOSのダイナミックタイプ等のユーザー設定スケールに連動しないため、将来的な拡張性が下がる。",
+    "suggestion": "最小限で良いのでルートに--scale-text(=1.0)のような倍率トークンを用意し、font-sizeをcalcで掛けられる拡張余地を記載。または一部をrem化する移行ガイドをdesign_spec側に追記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  }
+]

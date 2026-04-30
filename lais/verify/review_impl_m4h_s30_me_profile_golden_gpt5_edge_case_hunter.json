@@ -1,0 +1,222 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "1. App.jsx / LP-012",
+    "issue": "lazy import に対する Error Boundary が無く、/me チャンクの取得失敗（オフライン・タイムアウト・壊れたキャッシュ）時に画面が空白化/クラッシュして回復不能になる可能性が高い。",
+    "suggestion": "Suspense を ErrorBoundary でラップし、import() 失敗時はユーザー向けエラーメッセージ＋「再試行」UIを表示。失敗ログを計測し、再試行時は動的に再 import。必要に応じて offline 検知（navigator.onLine）でオフライン用メッセージに切替。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.10 S30-1（EXP バー）",
+    "issue": "expPercent が 0–100 にクランプされておらず、expNext=0/負値/小さすぎる値で NaN/Infinity、expCurrent>expNext で >100% となりスタイル幅が不正値になる恐れ。",
+    "suggestion": "安全な計算関数を導入し、(a) expNext<=0 は 0% にフォールバック、(b) 比率は 0–100 にクランプ、(c) Number.isFinite で検証した上で width を設定。aria-valuenow/max 側も同じ境界値に整合。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§4.10 S30-5（MBTI 進捗バー）",
+    "issue": "mbtiProgress を 0–100 にクランプしておらず、負値・100超でバー表示やアクセシビリティ値が不整合になる可能性。",
+    "suggestion": "mbtiProgress を Math.min(Math.max(value,0),100) でクランプし、NaN/Infinity 時は 0% にフォールバック。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§4.10 S30-3（基本情報）",
+    "issue": "コメントでは dl 内に dt/dd のみとある一方、CSS には .s30-info-row ラッパーが存在。dl > div > dt/dd 構造だと HTML の定義リスト仕様から外れ、スクリーンリーダーの読み上げ順や関連付けが崩れる恐れ。",
+    "suggestion": "dl 直下は dt/dd のみとし、スタイルは dl を display:grid などで行分け。どうしてもラッパーが必要なら dl を避けて table/リスト＋aria を用いる、またはラッパーに role=\"group\" を使わず dt/dd の兄弟として構成。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.10 S30-6（リンク行）",
+    "issue": "左アイコン／右 chevron の SVG が装飾用途だが aria-hidden/focusable の付与が省略されている可能性。読み上げノイズやフ��ーカス不整合の恐れ。",
+    "suggestion": "装飾 SVG には aria-hidden=\"true\" focusable=\"false\"（および role=\"img\" を付けない）を明示。テキストでアクセシブルネームを提供。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.10 S30-2（サブタブ）",
+    "issue": "aria-current=\"page\" をボタンで使用しており、同一ページ内のサブタブとしては不適切。ボトムタブ（ページ単位）と併用で「現在のページ」が複数アナウンスされうる。",
+    "suggestion": "WAI-ARIA Tabs パターンに準拠（role=tablist/tab/tabpanel、aria-selected/aria-controls）するか、現行ナビのままなら aria-current は使わず aria-pressed/aria-selected いずれかに置換。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.10 S30-2 → コンテンツ領域",
+    "issue": "サブタブ切替時に新パネルへのフォーカス移動や明示的アナウンスが無く、支援技術利用者に状態変化が伝わりづらい。",
+    "suggestion": "タブ選択時に対応する panel の見出し（h2）へ focus()、または role=tabpanel に aria-live=polite を付与。タブに aria-controls でパネルと関連付け。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "1. App.jsx（Suspense fallback）",
+    "issue": "fallback が role=\"status\"＋aria-label のみで、視覚上何も表示されず、読上げも実装依存で発話されないケースがある。遅延や低速回線時の不安を招く。",
+    "suggestion": "目視できる文言（例: 「読み込み中…」）とスケルトン/スピナーを表示。AT 向けには live 領域内のテキストノード更新で確実に通知。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.10 S30-3（基本情報）",
+    "issue": "氏名/職業/趣味が長文（改行なし英単語・URL・絵文字列）だと横溢れやラベルとのオーバーラップ、タップ領域のずれが起こる可能性。",
+    "suggestion": "値側に word-break: break-word; min-width/ max-width の制約、必要に応じて text-overflow: ellipsis と title/aria-label で全量参照手段を提供。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.10 S30-4 / S30-5（見出し ID）",
+    "issue": "s30-ai-memo-label / s30-mbti-label が固定 ID。将来マルチマウント（モーダルプレビュー等）で重複し a11y 衝突の恐れ。",
+    "suggestion": "useId() を用いて動的 ID を生成し、aria-labelledby の対応先も同一フック値で紐付け。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.10 S30-2（プレースホルダ）",
+    "issue": "「is coming soon.」が英語固定でローカライズ未対応。日本語 UI 中に英語が混在し一貫性を欠く。",
+    "suggestion": "i18n リソース化し、ラベル（PROFILE/DISCOVER/FRIENDS/SHOP）に応じたローカライズ文言を表示。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.10 S30-5（MBTI 手動入力）",
+    "issue": "仕様は「手動入力リンク（underline）」だが実装は <button>。役割とスタイルの不一致で支援技術の期待と異なる可能性。",
+    "suggestion": "外部遷移なら <a href> に、内部起動アクションなら文言を「入力する」等に見直しつつ、リンク風スタイルは text-decoration/色で明示。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "1. App.jsx / LP-012",
+    "issue": "遅延/瞬断時のリトライ・タイムアウト制御が無く、fallback が無限に出続けるか、永続的に空白化するリスクがある。",
+    "suggestion": "import のタイムアウト（例: 10s）で明示的に失敗へ遷移し、再試行ボタン・指数バックオフ・オンライン復帰（online イベント）時の自動再試行を実装。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "LP-014 / S30MeProfile.css",
+    "issue": "抜粋では .s30-info-button / .s30-link-row / .s30-mbti-manual の :focus-visible スタイル記述が確認できない。全要素に適用済みか不明。",
+    "suggestion": "全インタラクティブ要素に :focus:not(:focus-visible){outline:none} と :focus-visible のリングを明示。回帰を防ぐためのビジュアル回帰テストを追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.10 S30-2（サブタブ下線）",
+    "issue": "下線を擬要素で bottom:-1px 配置。高倍率ズーム/サブピクセル環境で線の滲み・ズレが起こりやすい���",
+    "suggestion": "コンテナの border-bottom を用いた描画に変更、または inset box-shadow 等でサブピクセル誤差の影響を軽減。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.10 S30-4（AI 理解メモ）",
+    "issue": "最大 800 文字の制約が実装に見当たらず、長文・改行なし・URL を含む場合にレイアウトが大きく伸長・崩れる恐れ。",
+    "suggestion": "CSS で line-clamp による折りたたみ＋「もっと見る」展開、入力文字数の上限・サニタイズ、word-break: break-word の適用を検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.10 S30-5（MBTI 進捗）",
+    "issue": "progressbar に aria-valuetext が無く、数値だけでは文脈が伝わりづらい場合がある。",
+    "suggestion": "aria-valuetext=\"35% 完了\" 等を付与、または近傍テキストで進捗の意味（推定の進み具合）を明文化。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.10 S30-2（サブタブ状態）",
+    "issue": "サブタブの選択状態がルーティ��グやストレージに永続化されず、復帰時に常に PROFILE に戻る。",
+    "suggestion": "クエリ/ハッシュ（?tab=friends）または sessionStorage に保存し、初期マウント時に復元。ブラウザ戻る/進むでも一致するよう履歴を同期。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4. S30MeProfile.css（レイアウト）",
+    "issue": "min-height:100dvh は旧 iOS/Safari でアドレスバー計測差異により下部が隠れる可能性。",
+    "suggestion": "fallback として 100vh 併記、もしくは動的ビューポート単位（svh/lvh）判定・切替、または JS で実測し CSS 変数に反映するポリフィルを用意。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. S30MeProfile.jsx（各ハンドラ）",
+    "issue": "console.log が本番で残存する可能性。将来 PII を含むログ流出・パフォーマンス低下の懸念。",
+    "suggestion": "NODE_ENV によるガード、専用ロガーの導入（本番は無効/サンプリング）、またはビルド時ストリップを適用。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.10 サブタブ（プレースホルダ）",
+    "issue": "aria-live=\"polite\" のプレースホルダが切替毎に毎回読み上げられ、冗長になりやすい。",
+    "suggestion": "初回表示時のみ通知する仕組み、または role=\"region\"＋見出しで十分にし、live 領域は削除。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. App.jsx / LP-012",
+    "issue": "遅延読み込みの事前プリフェッチが無く、ME タブ初回遷移時の体感待ちが増大する。",
+    "suggestion": "BottomTabBar のビューポート内出現時または idle 時に /me チャンクを prefetch（<link rel=\"prefetch\">、または router の prefetch API）し、タップ直後の待ち時間を低減。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§19.7 競合ベンチマーク要件",
+    "issue": "ADV（Claude.ai）の能力制約（§9.3「静的コード解析のみ可能。シミュレーターでの確認手段を持たない」）と、競合アプリの画面構成やApp Storeレビューを調査する要件が根本的に矛盾しています。AIがWeb検索や実機操作なしに競合調査を行うと、高確率でハルシネーション（架空の競合データ）を生成し、仕様の前提が破綻します。",
+    "suggestion": "ベンチマークのデータ収集（競合のスクショ、レビューテキストの抽出）はPOの責務とし、ADVはその提供されたデータ��基づく分析とマトリクス作成のみを担当するよう、明確な役割分担を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6 ファイル間参照ルール",
+    "issue": "§19.6の依存チェーンにおいて、`e2e_fullflow_test.md` が `project_v1.md` のみに依存する構造になっていますが、§18の依存関係マップでは `ux_redesign_v*.md` や `design_system.md` の変更時にもテスト仕様書を更新すると定義されています。テスト仕様書はUXやデザインの詳細に依存するため、§19.6のツリー構造は実態および§18と矛盾しています。",
+    "suggestion": "§19.6の依存チェーンを修正し、`e2e_fullflow_test.md` が `ux_v1.md`, `design_spec_v1.md`, `reference_v1.md` などの下流仕様書に依存する構造（または複数親を持つ構造）に改めてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.5 仕様書ヘッダー標準",
+    "issue": "ヘッダーの「依存」メタデータに上流ファイルのバージョンを記載するルールですが、上流ファイルが更新された際に下流ファイルのヘッダーを自動検証・更新する仕組み（canopyゲート等）が存在しません。手動管理では確実にバージョンが乖離し、§1.1の「機械可検証」の原則が崩れます。",
+    "suggestion": "新しいLinter（例: `spec_dependency_lint.sh`）を追加し、ヘッダーの依存バージョンと実際の上流ファイルのバージョンが一致しているかをCI/canopyで自動検証する仕組みを導入してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5 仕様書ヘッダー標準",
+    "issue": "「依存: {上流ファイルのパス + バージョン}」のフォーマットが単一ファイルのみを想定しているように見えます。§19.6のツリーで複数ファイルに依存するケース（例: `design_spec_v1.md` は `ux_v1.md` と `design_system.md` に依存）の記述方法が不明確です。",
+    "suggestion": "複数ファイルに依存する場合のフォーマット（例: カンマ区切り、またはYAMLフロントマターの配列形式）を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 各仕様書の必須セクションテンプレート (ux_v1.md)",
+    "issue": "`project_v1.md` の§7に「オフライン要件」が含まれていますが、`ux_v1.md` にオフライン時のUX（キャッシュ表示、同期待ちUI、オフラインエラー）を定義するセクションが存在しません。",
+    "suggestion": "`ux_v1.md` の必須セクションに「§N+11 オフライン・同期状態UX」を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 各仕様書の必須セクションテンプレート (reference_v1.md)",
+    "issue": "データモデルやAPIの定義は網羅されていますが、定期実行ジョブ（Cron）、バッチ処理、データのパージ/アーカイブ処理に関する仕様を定義するセクションがありません。",
+    "suggestion": "`reference_v1.md` に「§7 バッチ処理・定期実行ジョブ」のセクションを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.1 必須ファイル",
+    "issue": "セクションタイトルが「アプリ仕様書構成テンプレート」ですが、`tests/test_map.yaml` と `tests/test_meta.json` というテスト基盤の設定ファイルが同列に扱われており、仕様書（docs/配下）のスコープが曖昧になっています。",
+    "suggestion": "仕様書（docs/）と設定ファイル（app_config.yaml, tests/）を明確に分離するか、セクション名を「アプリ固有定義ファイル一覧」等に変更して構造を整理してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4 各仕様書の必須セクションテンプレート (design_system.md)",
+    "issue": "カラーやタイポグラフィの定義はありますが、アクセシビリティ（WCAGコントラスト比基準など）のビジュアル面での制約を定義するセクションがありません（ux_v1.mdにはありますが、デザインシステム側にも必要です）。",
+    "suggestion": "`design_system.md` の§2 カラーシステム、または独立したセクションに「アクセシビリティ基準（コントラスト比等）」を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  }
+]

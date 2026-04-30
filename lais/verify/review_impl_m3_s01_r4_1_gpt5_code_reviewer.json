@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2.2",
+    "issue": "認証要求が15秒でタイムアウトした後でも、遅延して成功/失敗が返ってきた結果をそのまま処理しており、\"タイムアウト\"表示後に突然 route('/') へ遷移する等の矛盾したUXが発生し得る（タイムアウトコールバックと本来のtry/awaitの競合）。",
+    "suggestion": "タイムアウト発生時に requestId もしくは cancelled/timedOut フラグを立て、await解決後の成功/失敗ハンドリングで現在のrequestIdと一致しない、またはtimedOutの場合は結果を無視する。可能ならAbortControllerで中断（SDK未対応なら結果無視で代替）を行い、遅延解決による状態更新や遷移をブロックする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "タイムアウト時に inFlightRef.current を false に戻すため、元リクエストがまだサーバ側で処理中でも再送が可能になり、二重送信や副作用の重複が発生し得る。",
+    "suggestion": "inFlight の意味を「UI上の送信抑止」と「リクエ��ト存否の真実値」で分離する。例: requestIdRefを発行し、submitごとに増分。ハンドラは最新requestId以外の解決を無視する。UI上の再送許可は別フラグ（例えば canRetryAfterTimeout）で制御し、遅延解決の結果は常に無視して整合性を保つ。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.2",
+    "issue": "オートフィル同期がマウント直後と100ms後の2回のみのため、ブラウザや環境により遅延して挿入されるオートフィルを取りこぼす可能性がある（CTAが有効化されない等）。",
+    "suggestion": "同期戦略を強化する。例: 複数ディレイ（[0,100,300,1000ms]）で再試行、visibilitychange/focus/animationstart(webkit-autofill) 監視、短時間のpolling（最大2〜3秒）でDOM値を監視。同期用ディレイは定数化（AUTO_FILL_SYNC_DELAYS）し、環境差に耐性を持たせる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "2.1",
+    "issue": "safeSessionStorage() で利用可否判定はしているが、その後の getItem/setItem に個別のtry/catchが無く、ストレージクォータや一時的制限で例外��発生すると useEffect 内で未捕捉例外となるリスクがある。",
+    "suggestion": "NotFound内の store.getItem/store.setItem もtry/catchでラップし、失敗時はガードを諦めてSPAトップにフォールバックする等のフェイルセーフに倒す。safeSessionStorageの結果を使う箇所は全て例外安全にする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "2.1",
+    "issue": "safeSessionStorage() をNotFound内ローカル関数として毎回テスト書き込みで評価しており、ナビゲーションのたびに副作用を伴う。",
+    "suggestion": "アプリ共通ユーティリティに切り出し、一度判定した結果をメモ化する（例: モジュールスコープのキャッシュ）。テストキー名も定数化して重複や衝突を避ける。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.3",
+    "issue": "タップターゲット拡大を negative margin で行っており、複雑な周辺レイアウトや折返し時に隣接要素のヒット領域とオーバーラップし、意図しないリンクが押下される可能性がある。",
+    "suggestion": "より安全な��大方法を検討する。例: リンクをブロック要素化して親コンテナ内でpadding確保、または ::before 擬似要素でヒット領域のみ拡大（pointer-events: auto）しつつ視覚ボックスは維持。オーバーラップ検知のためのE2Eを追加。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "mountedRef の初期値が true かつマウント時に再度 true を代入しており冗長。safeSetStateパターンは有用だが、初期化方針が一貫していない。",
+    "suggestion": "mountedRef は初期値 false にしてマウント時に true、アンマウント時に false にするか、初期値 true ならマウント時の再代入を削除する。safeSetStateの意図（メモリリーク/警告防止）をコメントで明示する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "navigator.onLine は信頼性が低く、実際のネットワーク到達性を正確に示さない場合がある（プロキシ/キャプティブポータル/一部ブラウザ）。これに依存した早期リターンは誤検知を招く可能性。",
+    "suggestion": "onLineはヒ��トとして扱い、実際の失敗はcatchでハンドリングする。必要なら軽量な疎通（HEAD /health など）で再検証、または online/offline イベントを購読してUIメッセージを更新する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "オートフィル同期の遅延 100ms がマジックナンバー化している（SUBMIT_TIMEOUT_MS は定数化済みだが、こちらは未抽象化）。",
+    "suggestion": "AUTO_FILL_SYNC_DELAYS などの定数（配列）に抽出し、根拠をコメント化。将来の調整容易性と一貫性を高める。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "2.2",
+    "issue": "aria-describedby に渡すIDの判定と、実際のエラーメッセージDOMの条件レンダリングが別々の場所で重複管理されており、将来的な条件変更で不整合が生まれるリスクがある（ID参照が存在しない等）。",
+    "suggestion": "単一ソース・オブ・トゥルース化する。例: useMemoで{id, shouldShow, message}の配列を生成し、同配列から(1)実DOMレンダリングと(2)describedby文字列の両方を導出するヘルパ��を用意。ID定数も集中管理。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2.2",
+    "issue": "err?.message をそのまま表示しており、バックエンドの生メッセージがユーザーに露出する可能性がある（専門用語や情報過多）。",
+    "suggestion": "エラーコード/種別に応じたユーザー向け文言へのマッピング層を設ける（未知のエラーは汎用メッセージ＋エラーID付与）。ログには原文を残し、UIは整形した文言のみ表示。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.2",
+    "issue": "エラー/確認メッセージ表示時のフォーカスマネジメントが不明で、SRユーザーが新規に発生したアラートを確実に知覚できない可能性がある（role=\"alert\"はあるが、コンテキストに応じて初回フォーカス移動が必要なケースがある）。",
+    "suggestion": "送信失敗・バリデーションエラー時に、エリア（role=\"alert\"/\"status\"）へ明示的にフォーカスを移すか、最初のエラー入力にフォーカスを当てるロジックを実装し、スクリーンリーダー通知の確実性を高める。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

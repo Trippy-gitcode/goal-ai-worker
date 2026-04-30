@@ -1,0 +1,132 @@
+/*
+ * S-42 About — design tokens via theme variables (Stage 7-3)
+ */
+
+.s42-about {
+  flex: 1;
+  background: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-bottom: var(--space-2xl);
+}
+
+.s42-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-md);
+  background: var(--theme-color-bg-elevated);
+  border-bottom: 1px solid var(--theme-color-border);
+}
+
+.s42-back {
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  color: var(--theme-color-text);
+  cursor: pointer;
+  border-radius: var(--theme-radius-md);
+}
+
+.s42-back:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s42-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-display);
+}
+
+.s42-info {
+  padding: var(--space-2xl) var(--space-md);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.s42-app-name {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-accent);
+  font-family: var(--theme-font-display);
+  letter-spacing: 3px;
+}
+
+.s42-version {
+  font-size: var(--font-size-sm);
+  color: var(--theme-color-text-secondary);
+  font-family: var(--theme-font-mono);
+}
+
+.s42-tagline {
+  font-size: var(--font-size-base);
+  color: var(--theme-color-text);
+  font-style: italic;
+}
+
+.s42-meta {
+  padding: 0 var(--space-md);
+}
+
+.s42-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  background: var(--theme-color-bg-card);
+  border: 1px solid var(--theme-color-border);
+  border-radius: var(--theme-radius-md);
+  padding: var(--space-md);
+}
+
+.s42-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--theme-color-divider);
+}
+
+.s42-meta-row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.s42-meta-row dt {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  color: var(--theme-color-text-secondary);
+  letter-spacing: var(--theme-font-letter-spacing-loose);
+  font-weight: var(--font-weight-semibold);
+}
+
+.s42-meta-row dd {
+  font-size: var(--font-size-base);
+  color: var(--theme-color-text);
+}
+
+.s42-link {
+  color: var(--theme-color-accent);
+  text-decoration: underline;
+}
+
+.s42-link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (min-width: 768px) {
+  .s42-info,
+  .s42-meta {
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}

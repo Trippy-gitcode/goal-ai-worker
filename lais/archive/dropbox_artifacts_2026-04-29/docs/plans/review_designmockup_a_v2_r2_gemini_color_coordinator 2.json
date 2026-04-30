@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "画面上部のプログレスバー",
+    "issue": "未完了ステップの背景色（#1C2128）と画面背景色（#0D1117）のコントラスト比が約1.3:1と極めて低く、非テキストコントラストのWCAG AA基準（3:1）を満たしていないため、全体のステップ数が視認できない。",
+    "suggestion": "未完了ステップのインジケータ色を、背景に対して3:1以上のコントラストを持つ色（#484F58など）に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s30_me",
+    "location": "PROFILEタブ内の「趣味」項目の未入力テキスト",
+    "issue": "「タップして入力」のテキスト色（#484F58）と背景色（#0D1117）のコントラスト比が約3.6:1であり、通常テキストのWCAG AA基準（4.5:1）を満たしていない。",
+    "suggestion": "未入力状態を示すテキスト色を、仕様書で定義されている --text-hint（#7A8593、コントラスト比4.5:1以上）に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "タスク名入力欄（「買い物リストを作る」）",
+    "issue": "フォーカスリングが rgba(121,192,255,0.2) の不透明度の低い色で実装されており、背景とのコントラストが不足しているため、キーボード操作時のフォーカス位置が明確に視認できない。",
+    "suggestion": "フォーカスリングの不透明度を上げるか、仕様書§7.5に準拠して forced-colors にも対応できる明確な outline 色（アクセントカラーのベタ塗りなど）を使用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスク「ジ���で筋トレ」",
+    "issue": "左側のボーダーが warning 色（#D29922）で表示されているが、テキスト情報（期限間近など）が併記されておらず、色のみで情報を伝達している（WCAG 1.4.1違反）。",
+    "suggestion": "warning状態である理由を示すテキストラベル（例：「期限間近」）やアイコンを追加し、色に依存しない情報伝達を行う。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "画面下部の「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "タスクが「完了済み」になるとAI相談ボタンがdisabled状態（操作不可）になっている。UX仕様書には完了時に無効化する記述はなく、完了後の振り返り相談を阻害している。",
+    "suggestion": "完了済みタスクであってもAI相談ボタンをアクティブ状態に保つか、完了時専用のボタン（「振り返りをする」など）に切り替える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "所要時間選択チップ（「5分」「10分」など）",
+    "issue": "チップの視覚的な高さが小さく、CSS上で透明なタップ領域の拡張（::before等）も実装されていないため、仕様書§4.5で規定された最小タップ領域（44x44px）を満たしていない。",
+    "suggestion": "チップ要素に対して padding を増やすか、::before 疑似要素を用いて透明なタップ領域を 44x44px 以上確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "ゴール進捗バー（60%表示部分）",
+    "issue": "進捗バーの未達成部分の背景色（#1C2128）が画面背景（#0D1117）に溶け込んでおり、バーの全長（100%の位置）が視覚的に把握しづらく、直感的な進捗理解を妨げている。",
+    "suggestion": "進捗バーの背景色を少し明るくするか、微かなボーダーを追加して、バーの全体長を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s01_signin",
+    "location": "メールアドレス・パスワード入力欄",
+    "issue": "入力欄内のテキスト（#7A8593）が、上部のラベル（#9BA7B4）よりも暗い色で表示されており���入力済みテキストなのかプレースホルダなのかの判別がつきにくい。",
+    "suggestion": "入力済みのテキストには --text-primary（#E6EDF3）を使用し、プレースホルダと明確に区別する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "アクセントカラー（#79C0FF）の使用箇所全般",
+    "issue": "Night Skyテーマのアクセントカラーがやや彩度が高く、仕様書§1.6の「AIっぽさ（サイバー感）の排除」「自然界に根ざす」というブランドDNAに対して、ややデジタル感が強い印象を与える。",
+    "suggestion": "アクセントカラーを、夜空や月明かりを連想させる、もう少し彩度を抑えた落ち着いたブルーに微調整することを検討する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  }
+]

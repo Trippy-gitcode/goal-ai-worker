@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_spec §4.5 / S12TaskAdd.css .s12-modal",
+    "issue": "spec は「画面高 60%」だが、実装は max-height: 85vh。スクショ根拠も約60%と明記されており整合しない。",
+    "suggestion": "モーダル高さを spec に合わせる（例: height: 60vh または max-height を 60vh）。端末キーボード出現時の配慮が必要なら条件分岐で 60vh をベースにしつつ、超過時のみ内部スクロールにする。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_spec §4.5 状態・インタラクション / S12TaskAdd.jsx",
+    "issue": "閉じる際の「逆アニメーション」未実装。open=false で即時アンマウントされ、クローズアニメが再生されない。",
+    "suggestion": "開閉を CSS だけで切り替えず、open を「可視/非可視」状態に分け、unmount 遅延（アニメ終了待ち）を入れる。例: open → isVisible state + CSS class切替 + animationend でアンマウント。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx S12-12（CTAボタン）/ フォーカストラップ",
+    "issue": "disabled 制御が aria-disabled のみで、CTA はタブ移動・クリック可能。フォーカストラップも aria-disabled を無視するため、操作できない要素にキーボードフォーカスが当たる。",
+    "suggestion": "ボタンに disabled 属性を併用し（CSS は :disabled でスタイル）、フォーカストラップの focusables から [aria-disabled='true'] も除外する。Enter 提交は form onSubmit で一元ガード。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx S12-5 / S12-8（role='radiogroup' + role='radio'）",
+    "issue": "ラジオグループのキーボード操作（左右矢印）と roving tabindex 未実装。ボタンのまま全項目がタブ停止し、スクリーンリーダー上も期待されるラジオ挙動にならない。",
+    "suggestion": "WAI-ARIA APGに準拠し、選択中要素のみ tabindex=0、他は -1 にする roving tabindex を実装。radiogroup で ArrowLeft/Right をハンドリングしてフォーカス移動 + aria-checked の更新を行う。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx フォーカストラップ useEffect",
+    "issue": "タブ循環の対象抽出で [disabled] のみ除外し、[aria-disabled='true'] は除外していない。結果とし���禁則要素にタブが当たりうる。",
+    "suggestion": "enabled 抽出条件に (el.getAttribute('aria-disabled') !== 'true') を追加。あわせて CTA は disabled 属性を使い整合させる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx 入力ID（s12-name-input / s12-time-input / s12-memo-input）",
+    "issue": "ID が固定文字列のため、将来複数モーダルを同時にレンダリングした場合や SSR での重複の恐れがある。",
+    "suggestion": "useId() を用いて各ラベル/入力の id/for を動的に連結し、一意性を担保する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx body scroll lock useEffect",
+    "issue": "body.style.overflow を直接上書き・復元するため、複数モーダルや他機能が overflow を制御している場合に競合・取りこぼしのリスクがある。",
+    "suggestion": "ロックの参照カウントを持つユーティリティで管理（開くたび +1 / 閉じたら -1、0 のときのみ解除）。または inert 属性で背面フォーカス抑止と合わせ、overscroll-behavior と組み合わせる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.css .s12-modal / .s12-overlay",
+    "issue": "iOS でのバウンスや背面スクロール伝播の可能性（-webkit-overflow-scrolling: touch を用いつつ overscroll-behavior 未指定）。",
+    "suggestion": ".s12-modal に overscroll-behavior: contain（必要なら y: contain）、.s12-overlay に overscroll-behavior: none を付与してスクロール連鎖とバウンスを抑止する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "S12TaskAdd.jsx ESC ハンドラ（document.keydown）",
+    "issue": "複数のダイアログが同一ドキュメントで開いた場合、どちらでも ESC が捕捉され先に登録した側が閉じる可能性がある（スタック/最前面判定なし）。",
+    "suggestion": "モーダルスタックを管理し、最前面のモーダルのみ ESC を処理する。もしくは、このダイアログ内にフォーカスがある場合のみ閉じる等のスコープ条件を追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx 読み取り専用表示（S12-9 / S12-10）",
+    "issue": "aria-readonly を div に付与しているが、role を持たない非フォーム要素では意味を持たない。支援技術に不要/誤解を招く可能性。",
+    "suggestion": "単なる静的テキストとして扱う（ARIA を外す）か、選択可能にしたい場合は role='textbox' + aria-readonly を正しく付与。将来インタラクティブにするなら button など適切なロールを設定。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.css アニメーション定義",
+    "issue": "overlay/modal のアニメーションに fill-mode が指定されておらず、環境によってはマウント直後に 1フレームの描画ブレが発生する可能性。",
+    "suggestion": "animation-fill-mode: both を付与し、初期フレームから終端までのスタイルを安定させる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "design_spec §4.5 入力高さ / S12TaskAdd.css .s12-input",
+    "issue": "固定高さ 48px が 200% ブラウザズームや OS 大きな文字時にテキストが上下クリップされる可能性。",
+    "suggestion": "min-height を 48px とし、line-height と padding を可読性優先でスケールさせる。必要に応じてメディアクエリ（prefers-reduced-motion と同様に）や clamp で調整。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "design_spec §4.5 S12-3 / S12TaskAdd.jsx .s12-close 内 SVG",
+    "issue": "✕ アイコンは spec で 20×20 指定だが、実装は 16×16。",
+    "suggestion": "SVG サイズを 20×20 に合わせる（タップ領域は 44×44 のまま維持）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "仕様未記載事項 / S12TaskAdd.jsx handleClose",
+    "issue": "未保存入力を閉じたときの状態復帰が未定義。現実装ではクローズ→再オープンで入力が保持されるため、ユーザ期待と乖離する可能性。",
+    "suggestion": "「閉じる時にリセットする/保持する」の方針を仕様化。保持する場合は再オープン時に前回値へフォーカス・選択範囲復元等を定義、リセットする場合は onClose で state をクリアする。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.css @media (prefers-reduced-motion: reduce)",
+    "issue": "アニメ/トランジションを 1ms に縮退しているが、完全に無効化されず微小な動きが残る可能性。reduced-motion の意図に十分ではない。",
+    "suggestion": "animation: none と transition: none を明示して完全に無効化する（!important で上書き）。必要に応じて transform 初期値も非アニメ状態に合わせる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "要求されている品質ゲート（G1-G13）、デプロイフロー（C2）、新設ゲート（G11/G12/G13）、およびcanopy検証の具体的な仕様がドキュメント内に一切記述されていません。これにより、CI/CDパイプラインの整合性、ゲート間の矛盾によるデプロイ通過リスク、セキュリティ検証の抜けを評価することが根本的に不可能です。",
+    "suggestion": "G1からG13までの各品質ゲートのトリガー条件、検証内容、通過・ブロック基準、およびC2デプロイフローのステップ間依存関係を明記した詳細な���様セクションを追加してください。自動化前提のスクリプト要件も併記する必要があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "案A, 案B",
+    "issue": "案Aおよび案Bで提案されている「Orchestrator daemon」の常駐プロセスについて、macOS（launchd）とLinux（systemd）間でのプラットフォーム互換性を担保する仕組みが定義されていません。自動化基盤として、プロセスダウン時の死活監視や自動再起動の設計が欠落しており、運用中にレビュー機能が停止するリスクがあります。",
+    "suggestion": "daemonの起動・停止・再起動を管理するクロスプラットフォーム対応のスクリプト仕様を定義し、OSネイティブのサービス管理システム（launchd/systemd）への登録手順と、クラッシュ時の自動リカバリ（Restart=always等）の要件を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "案D",
+    "issue": "案Dにおける「外部APIワンショット（post-commit / on-demand）」および「CI/cronバッチ」について、具体的な発火メカニズムが定義されていません。Git hooks（pre-commit/post-commit）に依存するのか、外部CIサービス（GitHub Actions等）を使用するのかが不明確であり、品質ゲートとしての確実な発火保証（バイパス防止）が担保できません。",
+    "suggestion": "post-commit時の自動実行を強制するためのローカルGit hooksのセットアップ手順（husky等の導入）、またはCIパイプライン上でのトリガー条件を明確化し、開発者が意図せず検証をバイパスできないアーキテクチャ設計を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "案D",
+    "issue": "案Dで外部API（GPT-5.4, Gemini）をCI/cronバッチやワンショットスクリプトから呼び出す際、APIキーなどのシークレット情報をどのように管理・保護するかが定義されていません。自動化スクリプト内にハードコードされたり、不適切な権限で環境変数が扱われたりすると、重大なセキュリティインシデントに繋がる危険性があります。",
+    "suggestion": "環境変数管理の厳格なルール（.envファイルのGit除外、CI環境でのシ���クレット変数設定）を定義し、スクリプト実行時に安全に認証情報を注入する仕組みを明記してください。ローカルとCI環境でのシークレット管理の差異も考慮する必要があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "案A, 案B, 案D",
+    "issue": "案A、B、Dのいずれにおいても、Orchestrator daemonや外部API連携時のネットワークエラー、APIレートリミット到達、またはタイムアウト発生時のエラーハンドリングとフォールバック戦略が定義されていません。CI/CDパイプライン内でこれらが発生した場合、パイプラインがハングアップするか、誤って成功判定となる懸念があります。",
+    "suggestion": "自動化スクリプトおよびdaemonの実装要件として、指数的バックオフを伴うリトライロジックの組み込み、最大リトライ回数の設定、および致命的エラー発生時のフェイルセーフ（パイプラインの明示的な失敗とPOへの通知）の仕組みを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  }
+]

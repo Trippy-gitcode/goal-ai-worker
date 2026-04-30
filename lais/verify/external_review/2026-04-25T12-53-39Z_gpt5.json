@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "scripts/ai_review.js",
+    "issue": "この差分では `scripts/ai_review.js` が `new file mode 100644` として新規作成されていますが、仕様書や進捗ログでは既存ファイルに `runVoteMode` と `parseArgs` を追加した前提で記述されています。実際に既存運用があるリポジトリでこの差分をそのまま適用すると、従来の precommit/postcommit 用実装を丸ごと置き換え、既存経路を壊す可能性が極めて高く、即時のレビュー基盤障害を招きます。",
+    "suggestion": "まず Git 上で `scripts/ai_review.js` の実在を確認し、既存ファイルがあるなら新規追加ではなく差分更新に修正してください。もし意図的な全面置換なら、既存インターフェース互換性の検証結果と差分要約を明示し、少なくとも旧 CLI オプション・出力形式・hook 呼出側との互換テストを patches.md に追記してから反映すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §2.25.23.8 / lais/verify/dev_system_v34_patches.md",
+    "issue": "仕様書では `adv_response_gate.sh` に §2.25.3 該当検出時の `vote_dispatcher.sh` 起動条件を組み込むと明記していますが、今回の staged diff には `scripts/adv_response_gate.sh` の変更が一切含まれていません。patches.md でも「別 PATCH 対象」と自己記載しており、仕様・完了報告・実装が不整合です。この状態では 14 票投票機構が実際には起動されず、仕様上必須の承認前判定が素通りします。",
+    "suggestion": "本 PATCH の完了条件から `adv_response_gate.sh` 連携を外すか、実際に `adv_response_gate.sh` へ `vote_dispatcher.sh` 呼出しを追加して同一 PATCH に含めてください。少なくとも `§2.25.23` を enforce する入口が未実装のまま「完遂」と記録するのは危険なので、仕様・進捗・実装の三者を同時に整合させるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "scripts/vote_dispatcher.sh / lais/verify/dev_system_v34_package.md §2.25.23.6",
+    "issue": "仕様では `logs/vote_log.log` は TAB 8 列で投票ログを記録するとされていますが、実装は集計結果 1 行しか書かず、§2.25.23.4 step 2 にある「内部 10 ペルソナ投票を記録」、step 3 の外部 AI 個票記録が存在しません。これでは後日「なぜ escalate/autonomous になったか」の追跡が不可能で、監査ログとして要件未達です。",
+    "suggestion": "集計ログとは別に、各ペルソナ/各外部 AI の個票ログを残す構造へ拡張してください。最低でも `vote_id`、voter、provider 種別、verdict、weight、mode を個票単位で出力し、最後に集計行を追加する設計に分離すべきです。現状の 8 列固定を維持するなら別ファイルで詳細ログを持つ形でも構いません。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/persona_selector.sh / scripts/persona_vote.sh / scripts/vote_dispatcher.sh",
+    "issue": "複数スクリプトでペルソナ名一覧や trigger 語彙がハードコードされており、`persona_selector.sh`・`persona_vote.sh`・仕様書本文の 3 箇所以上に同一知識が重複しています。今後ペルソナ追加や名称変更が入ると高確率で差分漏れが発生し、選抜対象と投票対象のズレ、ログ件数不整合、仕様違反の温床になります。",
+    "suggestion": "ペルソナ定義は単一の設定ファイル���集約し、各シェルはそこから読み込む構成に変更してください。たとえば TSV/JSON/YAML で `name / triggers / vote_rules / required` を定義し、`persona_selector.sh` と `persona_vote.sh` はそのデータを参照するだけにすると DRY・保守性・仕様追従性が大きく改善します。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "scripts/ai_review.js",
+    "issue": "`const { glob } = require('path');` という import は未使用かつ意味的にも不自然で、Node の `path` モジュールは `glob` を提供しません。現状ただちにクラッシュはしないものの、誤った import が残っていることでレビュー基盤コードの信頼性を下げ、将来 `glob()` を使う実装が追加された際に誤用由来のバグを誘発します。",
+    "suggestion": "未使用 import は削除し、必要であれば `glob` パッケージや `fs` ベースの既存 `resolveFiles` に統一してください。併せて ESLint/TypeScript あるいは `node --check` だけでなく unused import 検出を CI に入れると、この種の紛れ込みを機械的に防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js parseArgs",
+    "issue": "`parseInt(args[++i])` を複数箇所で使っていますが、引数欠落時や不正値時の検証がなく、`NaN` がそのまま `timeout` や `maxTokens` に入る実装です。現状 vote mode では小さな値しか渡していないものの、将来 hook や運用スクリプトから壊れた引数が流入すると API 呼出し失敗や予期せぬデフォルト挙動の原因になります。",
+    "suggestion": "数値引数は `Number.isFinite()` で検証し、欠落・不正時は明示的にエラー終了するユーティリティ関数を切り出してください。例えば `readIntArg('--timeout', args, i, { min: 1 })` のような共通処理にすると、重複も減り、CLI の保守性と型安全性が改善します。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "scripts/vote_dispatcher.sh",
+    "issue": "内部 10 票では `score_abstain` を単純に 1 ずつ、外部 AI では 2 ずつ加算しており、ログ上の `ABSTAIN` が「票数」なのか「投票主体数」なのか曖昧です。仕様本文では ABSTAIN を分母に含めないとだけ書かれており、監査や集計分析で `score_for/against` と同じ重み付き値��して読むのかが判別できず、後工程の誤解を生みます。",
+    "suggestion": "`score_abstain` を重み付き票数として扱う���ら仕様とログ定義に明記し、主体数を残したいなら `abstain_voters` を別列に分けてください。少なくともコードコメント・仕様書・ログ列定義の三箇所で意味を統一しないと、月次分析や閾値見直し時に誤読が起こります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/vote_dispatcher.sh / scripts/persona_selector.sh",
+    "issue": "1MB のローテーション閾値、28 日保持、外部 AI 重み 2、margin 閾値 4/3 など重要値が各所でリテラル埋め込みされています。仕様に由来する値ではあるものの、コード上で定数化されていないため変更時の追従漏れが起こりやすく、複数スクリプトに同種ロジックが増えると設定不一致の温床になります。",
+    "suggestion": "ファイル先頭で意味付き定数として宣言し、コメントで対応する仕様節を付けてください。たとえば `LOG_ROTATE_BYTES=1048576`、`RETENTION_DAYS=28`、`MARGIN_FULL=4` のように名前を与えるだけでも可読性が上がり、仕様改定時の検索性と保守性が改善します。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0648,
+    "input_tokens": 33684,
+    "output_tokens": 2265,
+    "model_id": "gpt-5.4"
+  }
+]

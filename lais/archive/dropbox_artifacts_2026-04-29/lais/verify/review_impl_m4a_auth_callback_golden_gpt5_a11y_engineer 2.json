@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "2. lais/src/components/screens/AuthCallback.jsx",
+    "issue": "SPA ルート遷移時のフォーカス移動が実装されておらず、新画面（/auth/callback）読み込み後もキーボードフォーカスが前画面や body に残る可能性がある。スクリーンリーダーで新しい主要コンテンツが確実に読まれないリスクがある（WCAG 2.4.3/1.3.1 の観点）。",
+    "suggestion": "main 要素をフォーカスターゲットにして初回マウントでフォーカスを移動する。例: const mainRef = useRef(null); useEffect(()=>{mainRef.current?.focus();},[]); <main ref={mainRef} tabIndex=\"-1\" ...>。加えて、アプリ全体で Router の onChange（または各画面の useEffect）でページ最上位の見出し/メインにフォーカス移動する仕組みを統一実装すると良い。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "2. lais/src/components/screens/AuthCallback.jsx",
+    "issue": "<main> に role=\"status\" を付与しており、暗黙の landmark（main ロール）が失われる。ランドマークがなくなると見出し/ラ��ドマークナビゲーションの利便性が下がる。",
+    "suggestion": "main はセマンティックなランドマークのまま維持し、live region は子要素に分離する。例: <main ...> <div role=\"status\" aria-live=\"polite\" aria-atomic=\"true\"> ...状態テキスト... </div> </main>。このとき main から role と aria-live は外す。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2. lais/src/components/screens/AuthCallback.jsx",
+    "issue": "エラー時のメッセージは aria-live=\"polite\" で通知されるが、2 秒後に自動遷移するため、読み上げ完了前に画面が切り替わるおそれがある。結果としてエラー内容を把握できない利用者が出る可能性が高い。",
+    "suggestion": "エラーメッセージには即時通知の role=\"alert\"（= assertive）を使用し、かつ遷移先（/auth?mode=login）でも同じエラーを再掲・読み上げできるように引き継ぐ（例: クエリ文字列 auth_error=... または sessionStorage 経由）。遷移先では role=\"alert\" で表示して確実に伝える。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/AuthCallback.jsx",
+    "issue": "ウェルカム演出テキスト（あなたの冒険が始まります）も live region 内で読み上げ対象になってお���、直後に自動遷移するため読み上げが途中で切れる、または不要な読み上げが発生する可能性がある。",
+    "suggestion": "ウェルカム演出は装飾目的のため、スクリーンリーダーには非表示にする（例: <div aria-hidden=\"true\">）。状態通知用 live region と演出用コンテンツは DOM 上で分離する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "3. lais/src/components/screens/AuthCallback.css",
+    "issue": "本文（.auth-callback-text: 14px, var(--text-secondary)）と背景（var(--bg-primary)）、エラー（var(--danger)）および演出テキスト（var(--accent)）の色コントラストが不明。トークン値が未提示のため WCAG 1.4.3（AA: 通常テキスト 4.5:1 以上）の準拠可否を実測できない。",
+    "suggestion": "実行時の計算色で実測し、4.5:1 以上（通常 14px 相当）、大きな文字なら 3:1 以上を満たすようデザイントークンを調整する。DevTools の Accessibility/Contrast、または色比計算ツール（APCA/従来比）で var(--text-secondary)/var(--danger)/var(--accent) × var(--bg-primary) を検証し、比率（例: 4.7:1 など）を記録に残す。達しない場合はトークンの明度・彩度を調整。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/AuthCallback.jsx",
+    "issue": "読み込み中の状態がテキストのみで、進捗の伝達が最小限。動的更新中であることを支援技術により確実に伝える配慮が不足。",
+    "suggestion": "loading 状態中は main（または live region コンテナ）に aria-busy=\"true\" を付与し、完了時に false に戻す。進捗割合がない場合は role=\"status\" + テキストで十分だが、aria-busy の併用で状況把握が安定する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "2. lais/src/components/screens/AuthCallback.jsx",
+    "issue": "ページを示す見出し（h1）が存在せず、ランドマーク内のページ名が分かりにくい。短時間表示であってもページ構造上の手掛かりが不足する。",
+    "suggestion": "視覚的表示はそのままでもよいので、スクリーンリーダー向けに sr-only の h1 を用意（例: <h1 class=\"sr-only\">認証状態の確認</h1>）し、main に aria-labelledby で関連付けるとページ構造が明確になる。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/AuthCallback.jsx",
+    "issue": "role=\"status\" は既定で aria-live=\"polite\" を内包するため、aria-live=\"polite\" の併記は冗長。",
+    "suggestion": "live region を子要素に分けたうえで、role=\"status\" のみ、または aria-live のみのどちらかに統一し、不要な重複指定を避ける。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/AuthCallback.jsx と 3. AuthCallback.css",
+    "issue": "WELCOME_HOLD_MS（900ms）がデザイントークン --duration-celebration（800ms）と乖離。画面遷移タイミングとアニメーション完了が一致せず、ナレーション/視覚の同期ずれが起こりうる。",
+    "suggestion": "CSS カスタムプロパティから計算値を取得するか、値を 800ms に揃える。reduced-motion では既にスキップしているため、通常時のみ整合性を確保する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx（NotFound, ルート遷移全般）",
+    "issue": "SPA 内の自動リダイレクト（route('/', true) など）後のフォーカス位置が未定義。キーボード利用者/支援技術ユーザーが新画面の先頭にすぐ到達できない可能性。",
+    "suggestion": "グローバルに \"ページ先頭（main/h1）へフォーカス移動\" を標準化。例: 画面コンテナに id を振り、onRouteChange で document.getElementById('app-main')?.focus()。または共通 Layout で <main tabIndex=\"-1\" ref> を提供して各画面で確実に移動する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/AuthCallback.jsx",
+    "issue": "ドキュメントタイトルの更新がなく、画面遷移時にタイトルで状態が把握しづらい。",
+    "suggestion": "状態に応じて document.title を更新（例: 認証確認中／エラー／完了）。特にエラー時は遷移先でも同旨のタイトル/アラートを再掲して状況理解を補助する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

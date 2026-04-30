@@ -1,0 +1,6 @@
+[
+  {"id":"R-001","severity":"HIGH","category":"MISSING","location":"§9 CSSトークンブロック","issue":"§9 は依然として Night Sky のみの掲載で、v0.6 では Night Sky の accent が #79C0FF に変更されたが他テーマの構造は §5.2〜5.4 にしかない。マルチテーマ実装者向けの一覧掲載が未提供のまま。","suggestion":"§9 末尾に 4 テーマ全てを横並びで示す「クイックリファレンス表」を追加（主要トークン10件程度のみ）。","model":"Claude Opus 4.6","persona":"ui_designer"},
+  {"id":"R-002","severity":"MEDIUM","category":"MISSING","location":"§8.10 ダイアログ","issue":"ダイアログの入場/退場アニメーションが未定義。他のコンポーネント（ボトムシート等）はアニメ仕様があるが、ダイアログは触覚的なフェードイン/スケール演出の定義がない。","suggestion":"§8.10 にダイアログの入場（scale 0.96→1 + opacity 0→1, ease-out, duration-normal）と退場演出を追記。","model":"Claude Opus 4.6","persona":"ui_designer"},
+  {"id":"R-003","severity":"MEDIUM","category":"MISSING","location":"§8.11 スケルトン","issue":"スケルトンのバリエーション（テキスト行用・カード用・アバター用など形状違い）が未定義。実装時に `lais-skeleton-text` / `lais-skeleton-avatar` 等のクラスが必要になる。","suggestion":"§8.11 にバリエーション 3 種（text: height 1em radius 4px, avatar: circle, card: full width height variable）を追加。","model":"Claude Opus 4.6","persona":"ui_designer"},
+  {"id":"R-004","severity":"LOW","category":"BEST_PRACTICE","location":"§6.3a アバターパレット","issue":"アバターパレットの肌色は 5 色だが、WCAG 上『肌色そのもの』にコントラスト要件はないが、背景カードやラベルとの関係でコントラストを保てるか未検証。","suggestion":"各肌色が `--bg-surface` 上で 3:1 以上のコントラスト（1.4.11 非テキスト）を持つか §6.3a に検証表追加。","model":"Claude Opus 4.6","persona":"ui_designer"}
+]

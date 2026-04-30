@@ -1,0 +1,22 @@
+[
+  {
+    "id": "R-101",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "S20-9 入力バー（handleKeyDown / form onSubmit）",
+    "issue": "送信経路の一本化後も、同一レンダーフレーム内で Enter 送信（keydown）直後に送信ボタンを押下すると、再レンダー前の canSend/入力値クロージャが有効なため sendMessage が二重実行されるレースが残存。結果として同一テキストが連続投稿される（二重送信）。",
+    "suggestion": "sendMessage の再入防止ガードを導入（例: sendingRef を true にし、microtask/次フレームまでの再入を拒否、または lastSentText/lastSentAt Ref で同一テキストの短時間重複送信を抑止）。もしくは onKeyDown からは e.currentTarget.form?.requestSubmit() を呼び、送信は onSubmit のみで実行し、onSubmit 内で同期的に sendingRef を立てる。送信開始時に実ボタン disabled 属性を付与してキーボード活性も抑止。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-102",
+    "severity": "CRITICAL",
+    "category": "USER_CONCERN",
+    "location": "S20-9 入力バー（textarea の Enter ハンドリング）",
+    "issue": "日本語 IME 変換中（composition 中）でも Enter キーで e.preventDefault() と sendMessage() が走るため、確定前の未変換/意図しない内容が送信される。JP ロケールの主要操作で高頻度に誤送信が発生しうる。",
+    "suggestion": "IME 構成中は送信しない制御を追加。handleKeyDown で if (e.isComposing || e.keyCode === 229) return; を先頭に入れるか、onCompositionStart/End で composingRef を管理し、Enter 送信条件に !composingRef.current を加える。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

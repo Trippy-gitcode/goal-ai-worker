@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.4, §14.1",
+    "issue": "project_v1.md §4.2で定義されている「ゴール作成から7日未満で全タスクを完了した場合の『完了待ち』状態」に関するUXフローが完全に欠落しています。進捗バーのUI変化（「あとN日で完了！」）、および7日経過時の自動完了演出のトリガー（アプリ起動時か？）が未定義のため、ユーザーはバグと誤認し、実装も不可能です。",
+    "suggestion": "§2.4に「完了待ち」状態のUI（進捗バー100%＋「あとN日で完了！」ラベル表示、手動完了ボタンの非表示）を追加してください。また、§14.1（アプリ起動フロー）に「完了待ちゴールの7日経過判定と自動達成演出のトリガー」を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md 末尾「project_v1.md 内部矛盾」",
+    "issue": "ux_v1.md末尾の注記に「ゴール作成から7日間の完了待ちルールはproject_v1.md v1.3に存在しません」と記載されていますが、提供されたproject_v1.mdの§4.2には明確に記載されています。この誤った注記を残したまま実装に進むと、インフレ対策の要である7日間ルールが実装から意図的に落とされる危険性があります。",
+    "suggestion": "ux_v1.md末尾の該当注記を削除し、R-001の通りux_v1.md内に7日間ルールのUXフローを正しく定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §9.1, §8.6",
+    "issue": "オフライン中に多数のタスクを完了し、オンライン復帰時に同期した場合、§9.1では「EXP演出をまとめて再生」とありますが、§8.6の「最大8秒以内」の制約と衝突します。例えば10個のタスク完了が同期された場���、フロートテキストが10個同時に出るのか、合算値で1回出るのかが未定義であり、UIが破綻します。",
+    "suggestion": "§9.1に「オフライン同期時のEXP演出は、獲得した合計EXPを1つのフロートテキスト（例: +100 EXP）として合算表示し、EXPバーの伸長も1回のアニメーションにまとめる」と明記し、演出の競合と遅延を防いでください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.4, §9.4",
+    "issue": "冒険EXPは1日2回（100EXP）の上限がありますが、上限到達後にAIとの対話で「冒険的な行動」を報告した場合のUXが未定義です。サイレントに無視されると、ユーザーは「AIが自分の挑戦を認識してくれなかった」と落胆し、コア体験であるAIコーチングの信頼性が損なわれます。",
+    "suggestion": "§3.4または§9.4に、上限到達時の専用フィードバックを追加してください。EXPは付与しなくても、AIのテキスト応答内で「今日も新しい挑戦をして素晴らしいですね！（本日の冒険EXPは上限に達しています）」のように、挑戦自体は認識・承認するUXにしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3",
+    "issue": "習慣タスクに対して「完了」か「未完了（放置）」の選択肢しかありません。体調不良などで意図的に休む場合、未完了のままTodayに残り続けるのは「罰なし」のコンセプトに反して心理的負担（タスク未消化の罪悪感）を生みます。",
+    "suggestion": "S-11（タスク詳細パネル）に「今日はスキップ」ボタンを追加し、タップするとEXP付与なしでTodayから非表示（未完了ではなくスキップ扱い）にするフローを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §4.2.1, project_v1.md §4.4",
+    "issue": "ゲームデザインの観点から、Lv16（約2ヶ月）からLv31（約7ヶ月）の間、アバター進化がなくレベルアップ頻度も低下するため、強烈な「中だるみ（飽き）」が発生します。現在のUIでは「次のレベル」しか見えず、中長期的な目標が可視化されていません。",
+    "suggestion": "ME > PROFILE画面のアバター設定（S-41）内に、「次の進化（Phase X）まで��とLv.N」や「次の称号まであとLv.N」を確認できるプログレスUIを追加し、遠い目標へのマイルストーンを提示して継続モチベーションを維持する設計にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §8.2",
+    "issue": "アバター進化時の演出で「旧PNGがcross-fade→新PNGがscale(1.2→1)で出現」とありますが、アバターは装飾（フレーム等）を重ねた状態です。ベースのアバターだけがクロスフェードするのか、装飾を含めた全体がクロスフェードするのかが不明確です。",
+    "suggestion": "§8.2に「装飾を含めた合成済みPNG画像同士でクロスフェードを行う」と明記し、アニメーション実装時の解釈のブレを防いでください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  }
+]

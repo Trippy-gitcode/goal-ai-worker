@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.1 Night Sky / §5.4 Harajuku Dark / §8.1 ボタン",
+    "issue": "Danger(塗りつぶし)ボタンの配色がWCAG 1.4.3(4.5:1)を満たしていない。背景 --danger=#F85149 にテキスト #FFFFFF のコントラストは約3.35:1で、仕様内コメント「4.52:1」と不一致。",
+    "suggestion": "ダーク系テーマのみDangerボタン向けに専用トークンを定義し、可読組み合わせに変更する。例: --button-danger-bg: #B02934 (whiteテキストで≈7.0:1)、--button-danger-fg: #FFFFFF。既存 --danger はセマンティック色として維持し、ボタン実装では --button-danger-bg/fg を参照に切替。併せて §9トークンブロックにも追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§8.1 ボタン（Danger subtle）/ §5.1 Night Sky / §5.4 Harajuku Dark",
+    "issue": "Danger (subtle) バリアントで、背景=--danger-subtle(rgba(248,81,73,0.12)@Night Sky 等) とテキスト=--danger(#F85149) の組み合わせがダーク系で境界的（≈4.4:1）になり、環境差でAA割れのリスクがある。",
+    "suggestion": "セマンティックsubtle上のテキスト用に --on-danger-subtle（および他セマンティック用）を追加し、ダーク系では #FFFFFF 等の高コントラスト色を採用。代替として subtle背景のαを0.10→0.08へ下げて暗度を高めるか、枠線(1px)を追加して視認性を補強。コンポーネント実装（ボタン/チップ/バッジ）では『on-*-subtle』を参照。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§2.3 セマンティックカラー / §8.3 チップ/バッジ",
+    "issue": "accent系には --on-accent-subtle が定義されたが、success/danger/warning/info の各 subtle 背景上のテキスト色トークン（--on-success-subtle 等）が未定義。現在のままだとセマンティックsubtleのAA担保がテーマ/背景で一貫しない。",
+    "suggestion": "各セマンティックに --on-{semantic}-subtle トークン（Light=--text-primary基準、Dark=#FFFFFF基準など）を追加し、チップ/バッジ/二次ボタン等のコンポーネントは on-トークンを参照。全4テーマで4.5:1以上を実測し、§9トークンブロックに見本を併記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-104",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "（デザインシステム全般。推奨: §8 コンポーネントに追加）",
+    "issue": "繰り返しナビゲーションをバイパスする『スキップリンク』（WCAG 2.4.1 Bypass Blocks）が未定義。SPA/PWAでも必要。",
+    "suggestion": "『スキップして本文へ』リンクをコンポーネントとして定義。例: .skip-link { position: absolute; left: -9999px; } .skip-link:focus-visible { left: 16px; top: 16px; background: var(--bg-elevated); color: var(--text-primary); outline: 3px solid var(--accent); padding: 8px 12px; border-radius: var(--radius-sm); z-index: var(--z-toast); }。DOM先頭に配置し、メイン領域idへアンカー。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-105",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.4 触覚フィードバック",
+    "issue": "ハプティクス抑制を prefers-reduced-motion のみで代替しているが、ユーザー自身が触覚のみオフにしたいケースへのUIが未定義（Webに触覚専用プリファレンスは無いため）。",
+    "suggestion": "設定に『触覚フィードバックを無効化』トグルを追加（既定=ON、PRM=reduce時は強制OFF）。実装は vibrate呼出し前にアプリ設定を必ず参照。仕様書§13（設定）に追記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§2 カラーシステム / §5 テーマ / §8 コンポーネント",
+    "issue": "コントラストの実測値が記述箇所に分散し、全面の数値保証が読み取りづらい。監査用の横断表がない。",
+    "suggestion": "§2末尾に『コントラスト監査表』を新設し、主要ペアの実測値を明記（例・概算値）: Night Sky: text-primary(#E6EDF3) on bg-primary(#0D1117) ≈15.6:1、text-secondary(#9BA7B4) on bg-primary ≈7.8:1、accent(#79C0FF) on bg-primary ≈6.0+:1；Dawn: text-primary(#2C2520) on bg-primary(#FBF8F4) ≈13+:1、accent(#8F4D1F) on bg-surface(#FEFCF9) ≈6.4:1；Harajuku Light: accent(#C43361) on bg-surface(#FFFAFB) ≈5.3:1；Harajuku Dark: accent(#F5A9BF) on bg-primary(#140A10) ≈9.5:1；Primary Buttons: Night Sky #FFFFFF on #1A5FC8 ≈6.0:1、Dawn #FFFFFF on #8F4D1F ≈6.5:1、Harajuku Light #FFFFFF on #C43361 ≈5.2:1、Harajuku Dark #140A10 on #F5A9BF ≈10.3:1；Danger Buttons(現状): #FFFFFF on #F85149 ≈3.35:1（要修正）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.5 forced-colors",
+    "issue": "forced-colors: active 時の一般状態はoutlineで良いが、semantic subtle面やpill等の背景はOS配色に置換しないため視認性がばらつく可能性がある。",
+    "suggestion": "@media (forced-colors: active) 内で、アクセント/セマンティック系の塗り背景を 'background: Canvas'、枠線を '1px solid CanvasText' に正規化するユーティリティクラス（.hc-surface）を定義し、チップ/タブpill/ボタンsubtleに適用する方針を追記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  }
+]

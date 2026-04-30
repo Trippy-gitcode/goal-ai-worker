@@ -1,0 +1,3 @@
+[
+  {"id":"R-001","severity":"LOW","category":"AMBIGUITY","location":"§8.1 Secondary / §8.3 チップ","issue":"--on-accent-subtle を定義したが、ライト系テーマでテキストが `--text-primary` 系の色（#2C2520 / #2A1A20）になり、ブランドアクセントが視覚から消える。Secondary の存在感がモノトーンに寄る。","suggestion":"v1.0 の LAIS-BRAND-02 で、ライト系でもアクセント感を残せる案（accent を更に濃く / 下線/border でアクセント色を残す等）を再検討。","model":"Claude Opus 4.6","persona":"brand_designer"}
+]

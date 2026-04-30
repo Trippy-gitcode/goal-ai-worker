@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§2.1, §4.2, §5.2",
+    "issue": "ライトテーマ（特にDawn）の--borderが白背景で約2.0:1と明記されており、Open Air原則の「薄いborderで区切る」と組み合わさるとWCAG 1.4.11（非テキストコントラスト3:1）を満たさない場面が発生する恐れがある。",
+    "suggestion": "Dawnの--borderを3:1以上に引き上げるか、区切り用途は常に--border-strongを使用する運用ルールを§4.2に明記する。加えて「区切り線/コンポーネント境界」専用の--divider（各テーマで3:1以上保証）トークンを新設して参照先を統一する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§2.2, §5.2–5.4, §8.1",
+    "issue": "ライト系テーマのsubtle系背景（--accent-subtle, --danger-subtle など）がopacity 0.10前後で定義されており、ボタン（Secondary/Danger subtle）やアクティブタブのpill背景など“インタラクティブ面の可視境界”としては背景との差が弱く、非テキスト3:1を満たさないリスクが高い。",
+    "suggestion": "ライト系テー��のsubtle系はopacityを0.16–0.20に引き上げるか、1pxの--border-strong相当ボーダーを併用するガイドを§8.1ボタン表と§6.2タブ定義に明記。併せて--subtle-border（=1px solid var(--border-strong) など）を共通トークン化して一貫適用できるようにする。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5（テーマ定義 概要）",
+    "issue": "テーマ間の“性格差”が主に色（+ごく軽い影/フォーカスリング差）に留まり、ブランドDNAの「洗練/静けさ（Night/Dawn）」と「文化的ポップ（Harajuku）」の体験差がトークン全体として十分に表現されていない。",
+    "suggestion": "色以外のトークンもテーマ上書き可能にする方針を追記。例: 1) モーション振幅/オーバーシュート（--spring-*係数、--press-scale）をHarajukuではやや大きめ、Night/Dawnは小さめ 2) エレベーション（--shadow-*のブラー/アルファ）をHarajukuで一段強め、Dawnは拡散強めで柔らかく 3) セレクション面の濃度（--accent-subtle opacity）をHarajukuで+0.02〜0.04。これらを各テーマブロックで上書き可能にする。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.1",
+    "issue": "フォント方針は「system-ui統一・Webフォント禁止」だが、--font-primary/--font-displayに'SF Pro Text/Display'が列挙されており、“system-uiのみ”の解釈と齟齬がある。実装者がローカルフォント前提で別環境差異を想定しづらい恐れ。",
+    "suggestion": "優先順をsystem-ui系を先頭に変更（例: system-ui, -apple-system, BlinkMacSystemFont, sans-serif）し、明示的なSF Pro名は削除または注釈「ローカル解決のみ。Web配信禁止」を追記。目的が“ネイティブ一致”であることを§3.1に明文化。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§1.4（NGリスト）, §7.1, §8.1",
+    "issue": "NGリストで「ease-in-outを“長時間の注意を惹く演出”に使用」禁止とある一方、--ease-in-outトークンは定義され、EXPバー等で使用（§8.1）。“長時間”や使用可否の境界が不明確。",
+    "suggestion": "「--ease-in-outは≤500msの状態遷移/プログレスに限定。>500msや反復アニメでは禁止」と閾値を明文化。§7.1のルール群に時間基準を追加し、実装者が判断可能��チェックリストを併記する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§1.3（ブランドチェックリスト）, §6（アイコン・イラスト体系）",
+    "issue": "「ロゴを隠しても自ブランドと分かるか？」に対し、SF Symbols風アイコン+一般的なOpen Airレイアウトのみでは識別子が弱い。独自アバターはあるが、UI全域に通底する“シグネチャモチーフ”がトークン化されていない。",
+    "suggestion": "共通モチーフのデザイントークン化を検討（例: 1) Night Skyの月相を示すセグメント付きプログレス 2) GROW系の若葉ドット形状（タブピルや選択リングの角度/端形状） 3) 区切り線の点線パターン比率など）。§6に“ブランドモチーフ・パターン”項を新設し、数値化したトークン（角度/角丸/セグメント数）で定義。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§1.2, §7–§8",
+    "issue": "ブランド原則の「構造的ゲーミフィケーション」は言語化されているが、UIに横断適用する“報酬系の一貫表現”トークン（例: 成功/レベルアップ/��見時の共通音色・光彩・サイズ感）が未トークン化。",
+    "suggestion": "“Reward Tokens”を新設: --reward-scale, --reward-glow-color, --reward-pulse-count, --celebration-confetti-palette等を定義し、成功・レベルアップ・ゴール達成で同系統の感情曲線を再生できるよう数値化。Harajuku系はやや強め、Night/Dawnは控えめに上書き可能にする。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§5（テーマ定義 概要）",
+    "issue": "「性格差は色とマイクロコピーで表現」とあるが、マイクロコピーのスタイルガイド（句読点/絵文字/語調/感嘆符上限/英数字全角半角等）が未定義で、テーマ差の運用が属人的になりやすい。",
+    "suggestion": "各テーマ別マイクロコピー基準を付録として追加（例: Harajuku=絵文字1個まで/文末『！』は最大1/3件、Night=終助詞控えめ/句点必須、Dawn=丁寧語+やわらかい形容詞など）。UIテキスト用に--copy-tone（calm|warm|pop）等のガイドタグ化も検討。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§6.2（タブアイコン）, §5.2–5.4",
+    "issue": "アクティブタブの“pill背景（--accent-subtle）+色+ラベル”の3要素で識別する設計は良いが、ライト系でのpill背景コントラストが低いと視認性が弱く、Harajuku系の“弾む気分”も視覚的に伝わりにくい。",
+    "suggestion": "ライト系テーマのpill背景を濃度+0.02〜0.04または1pxボーダー追加。さらにHarajuku系のみピルの角丸/インセットシャドウを微増（--radius-pill=999pxは共通のまま、--tab-pill-inset-shadow等で差を出す）して“ポップさ”を色以外でも補強。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§1.4（NGリスト：エフェクト）, §8（コンポーネントトークン）",
+    "issue": "NGで「drop-shadow/blurの装飾利用禁止（Glass on時は機能目的で許可）」とある一方、--shadow-*を各所で使用。どこまでが“装飾”でどこからが“機能”かの線引きが実装側で判断しづらい。",
+    "suggestion": "影の使用ポリシーを具体化: 1) “触れる要素/浮いて重なりを示す要素”のみ--shadow-*許可、2) 純装飾（カードの見栄え向上目的）は禁止、3) 例外一覧（トースト/モーダル/ボトムシート=許可、リストセル=原則禁止）を§8各コンポーネントに明記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.5（グラスモーフィズム）",
+    "issue": "ライト系Glass ONの--card-borderがrgba(0,0,0,0.08)で、明所環境では境界がさらに弱く見える可能性がある。ブランド原則の“実世界との地続き”観点でも“曖昧なガラス境界”が情報区切りを損なうリスク。",
+    "suggestion": "ライト系Glass ON時の--card-borderを0.10〜0.12に強化、もしくは--card-outline（内側1px）を併用可能に。ガラス面の使用箇所を“まとめ容器（モーダル/ボトムシート/ドロップダウン）限定”と断言し、リスト反復要素では禁止を再強調。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§0.3（差別化マッピング）, §6（アイコン・イラスト体系）",
+    "issue": "競合との差別化（“実世界に溶け込む + 構造的ゲーミフィケーション”）は言語で明快だが、視覚的な“差の見え方”がデザインキットレベルで再現しやすい形（例: アバター外でも使えるカラー/モチーフ/動��のプリセット集）としてまだ不足。",
+    "suggestion": "Figma/コード両対応の『差別化プリセット』を定義: 1) 祝祭アニメのキーフレームセット、2) 進捗表現バリエーション（連珠/月相/葉脈）、3) アバター外でも使えるアクセントパレット（tint/shade 8段階）。§6に“プリセット集”の節を追加し、導入ガイドを追記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  }
+]

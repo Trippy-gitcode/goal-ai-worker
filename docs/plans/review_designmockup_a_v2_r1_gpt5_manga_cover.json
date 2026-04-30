@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」リンク",
+    "issue": "インラインリンクが色のみで識別され、下線がない（WCAG 1.4.1／デザインシステム§2.2で下線必須）。周囲本文と色差のみではリンクと判断しづらい。",
+    "suggestion": "「ログイン」に text-decoration: underline を付与し、--accent と併用。ホバー/フォーカス時は下線の太さ/色を強調して視認性を補強。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s30_me",
+    "location": "PROFILEセクション > 「趣味」行 右側のプレースホルダ「タップして入力」",
+    "issue": "本文テキストに#484F58が使われ、背景#0D1117に対するコントラストが約3.4:1とAA基準（4.5:1）未満。実用テキストとしては不十分。",
+    "suggestion": "色を --text-hint（#7A8593）または --text-secondary（#9BA7B4）へ引き���げ、少なくとも4.5:1を確保。フォントサイズが13pxのままなら色で担保、12px以下に落とさない。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の「編集」「✕」チップ／入力バー右の送信ボタン（円形36px）",
+    "issue": "インタラクティブ要素の視覚高さが約30〜36pxで、デザインシステム§4.5の最小タップ領域44×44pxに不一致。誤タップリスク。",
+    "suggestion": "各ボタンにpadding/透明ヒット領域を追加して44×44pxを満たす。送信アイコンは直径44pxのタップ領域を確保しつつ、視覚サイズは現状維持でもOK。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayリスト1行目（完了タスク）の右端チェックアイコン",
+    "issue": "完了タスクのチェックが明るいアクセントで強調され、未完了タスクよりも強い視覚重心を作っている。視線が「次にやるべきタスク」から逸れる。",
+    "suggestion": "完了アイコンの彩度/明度を落としてセカンダリ化（例: --text-hint相当 + subtleな背景）。チェック位置を左端に寄せ、未完了の時刻→タスク名へと自然にZ字で流れる配置に再設計。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Todayセクション終端〜Goals見出しの間",
+    "issue": "セクション間の縦間隔が約24〜28pxで、Open Air原則（§4.2）に定義のspace-xl=40pxを満たしていない。区切りの「間」が弱い。",
+    "suggestion": "Goals見出し（またはToday末尾）にmargin-top: var(--space-xl)（40px）を適用し、セクション間の呼吸感を確保。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "「タスク名」テキストフィールド（フォーカス時）",
+    "issue": "1pxの--accent枠に加え3pxのアウトラインが発生し、周囲より過度に輝度が高く主役化。モーダル全体の視線バランスを崩している。",
+    "suggestion": "フォーカス可視化をoutline 2px単独に縮退（または外側3px→2pxへ）。枠線は通常色のまま、アウトラインのみで状態表現して騒がしさを抑制。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カード（メッセージ直下の角丸カード）",
+    "issue": "カード背景#161B22が周囲のチャット面と同トーンで、情報ブロックとしての区切りが弱い。視線が流れにくい。",
+    "suggestion": "左ボーダーに--accentの2pxラインを追加（AIバブルと同ルール）または--accent-subtleな背景を薄く敷き、カード化のコントラストを確保。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "アバター下のラベル「タイプA／B／C」",
+    "issue": "12px + セカンダリ色でやや細く、暗所では可読閾に寄る。選択状態とのコントラスト差も小さい。",
+    "suggestion": "ラベルを13–14pxに拡大し、選択時は--accent（またはon-accent-subtle）で明度差を明確化。未選択は--text-hint程度に抑え、階層差を明瞭に。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "進捗表示「60%」の数字と%記号",
+    "issue": "数値48pxに対して%記号が相対的に小さく、ベースラインもわずかにずれて見えるため、視覚的なまとまりが弱い。",
+    "suggestion": "%を数値の約60–70%サイズでベースラインを微調整（下に1–2px下げる）し、数字側はletter-spacing -0.5〜-1pxで締める。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "ロゴ群とボトムCTAの間（中央〜下部の大きな空白）",
+    "issue": "ロゴ塊とCTAの距離が広く、上部の星装飾へ視線が滞留。Z字の下降動線が弱く、主要CTAへの誘導が遅れる。",
+    "suggestion": "CTAブロックを上方向へ16–24px引き上げ、ロゴ下コピー〜CTA間のリズムを圧縮。微小な下向きアイコンやスクロールインジケータは不使用のまま、間の再配分で解決。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow",
+    "location": "セクション見出し「TODAY／GOALS」",
+    "issue": "日本語UI内で英字見出しが混在し、品格・統一感がわずかに揺らぐ。ブランド原則「実世界と地続き」の観点で日本語化の余地あ��。",
+    "suggestion": "見出しを「今日」「ゴール」に統一（全画面で）。英字ラベルを維持する場合は全タブ/全セクションで英字統一し、混在を避ける。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

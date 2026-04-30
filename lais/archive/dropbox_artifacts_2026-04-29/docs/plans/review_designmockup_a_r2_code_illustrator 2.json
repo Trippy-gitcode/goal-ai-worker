@@ -1,0 +1,68 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s02_onboarding",
+    "location": "アバター衣装色 (青/緑/黄)",
+    "issue": "3 つのアバターがそれぞれ原色シャツで描かれ、Night Sky の静けさに対して色相が強すぎる。",
+    "suggestion": "衣装をモノクロ + アクセント 1 点 (銀/金/青銅) に抑え、原色は SHOP で解放。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow,s30_me",
+    "location": "アバターバストアップ円",
+    "issue": "既成の人型シルエットアイコンを円で囲んだだけ。Lais 独自のイラスト言語が未定義。",
+    "suggestion": "オリジナルラインアート (1px 手描き風) + 時間帯で表情切替 + 月相アイコン併置。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "背景の奥行き",
+    "issue": "ほぼフラットな黒で宇宙の深さ・星雲の濃淡がない。静けさは伝わるが『広大さ』『詩情』が不足。",
+    "suggestion": "ラジアルグラデ #0A0E1B → #1A2338 + 画面下端に星雲の霞 (透過 20%)。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "削除 赤文字",
+    "issue": "夜空モノクロ基調に純赤が差し込み、視線が強制固定される。",
+    "suggestion": "削除色を煤赤 #7A5A5A に置換、またはメニュー内に隠す。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "AI バブル / ユーザーバブル",
+    "issue": "2 種のグレーの明度差が 15-20% で発話者の区別が瞬時につきにくい。",
+    "suggestion": "AI=月光銀、ユーザー=深紺に差別化、左縁 2px アクセントライン。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s14_goal_detail",
+    "location": "完了タスク取り消し線",
+    "issue": "『積み重ね』ではなく『消去』の表現になっており報酬感が弱い。",
+    "suggestion": "明度を落とすだけに留め、チェック丸を金/銀着色で『小さな勲章』化。",
+    "model": "Code",
+    "persona": "illustrator"
+  }
+]

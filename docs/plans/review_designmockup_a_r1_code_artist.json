@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "全体のレイアウト構造",
+    "issue": "どの画面も『中央寄せタイトル + 縦積みフォーム / リスト + ボトムタブ + Primary ボタン』という 2024 年以降の AI 生成 SaaS テンプレの最大公約数に収斂している。Night Sky Journal という固有 DNA を語る構図的緊張感・非対称・余白の演出がない。",
+    "suggestion": "少なくとも 3 画面 (splash / grow / talk) で非対称構図 or 縦ガイドラインの存在感を強め、他の夜空系アプリと差別化できる視覚的シグネチャを作る。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "星屑表現",
+    "issue": "星が 5〜6 点しかなく、しかも均等に散布されて偶発性・リズムがない。『月明かりの下のジャーナル』という詩情を表現するには星の密度・グラデーション・サイズ差が不足。",
+    "suggestion": "100〜200 点の星をポアソンディスクで配置、3 段階のサイズ/明度を混在。右上に月のグラデーション or 薄雲を追加して時間の深さを暗示。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "TODAY タイムラインと縦線",
+    "issue": "縦ラインとドットは良いが、各タスクが等間隔に機械的に並び、時間の進行感/呼吸がない。ジャーナル (手書きの日記帳) の感覚と乖離している。",
+    "suggestion": "時間帯ギャップを実際の間隔で可視化 (9:00→12:00 の間に余白を 1.5 倍)、縦線に微細なグラデーションか点線の揺らぎを入れる。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "チャットバブル + タスク提案カード",
+    "issue": "チャットが iMessage のコピー構造、提案カードは Stripe 系のコピー構造と、異なるデザイン言語が同居している。視線が一貫しない。",
+    "suggestion": "提案カードを吹き出しの延長 (ネスト表現) として設計し、独立したカードに見せない。吹き出し内のインラインアクションとして統合。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択 3 円",
+    "issue": "丸アイコン 3 個が均等配置されたフォーマットは Notion / Slack / Figma など無数の SaaS で既視感が強く、Lais の独自性を毀損する。",
+    "suggestion": "3 つのアバターを円ではなく横カード (縦長タロット風) で並べる、or サイズ差・z軸オーバーラップで選択されたものが前面に浮き出る構図にする。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s30_me",
+    "location": "PROFILE / DISCOVER / FRIENDS / SHOP タブ",
+    "issue": "4 つの英語大文字ラベルが画面上部で等間隔・下線アクティブという典型的 Web UI で、ジャーナルの手触り感が完全に喪失している。",
+    "suggestion": "サブタブを削除して PROFILE 単体スクロール or 横スワイプのページング (ドットインジケータ) に変更。『月のページをめくる』隠喩を視覚化。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s12_task_add,s13_task_detail,s15_goal_create",
+    "location": "ボトムシート上の余白",
+    "issue": "ボトムシートの上部に大きな黒い余白が残っているが、そこに何の表現もない (背景画面がほぼ真っ黒)。ジャーナルの余白ではなく『切れた紙』に見える。",
+    "suggestion": "背景にごく薄い星屑か月光のグラデーションを透過 20% で残し、シート越しに世界観を感じられるようにする。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s14_goal_detail",
+    "location": "60% 数値の色",
+    "issue": "スカイブルーの巨大な 60% が画面の重心を 1 点に集め、構図の静けさを破壊している。",
+    "suggestion": "数値をより抑えた色 (星の銀 #C4D4E8 相当) にし、プログレスバーの方に色の役割を持たせる。",
+    "model": "Code",
+    "persona": "artist"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "design_spec_v1.md §4.1 S00-3/S00-4 と 実装: lais/src/components/screens/S00Splash.css",
+    "issue": "仕様表では S00-3「はじめる」を画面下端から140pxに配置し、その下にS00-4「ログイン」を12px間隔で配置と読める一方、実装はCTAスタック全体の下端を140pxに固定し、最下段が「ログイン」になっている。Playwright実測でも「ログイン」=140px/「はじめる」=204pxで、表の解釈と乖離。",
+    "suggestion": "どちらを正とするかを明記（スタック下端=140px か、プライマリCTA下端=140px か）し、実装を合わせる。もしプライマリを140pxにしたい場合は .s00-cta を column-reverse にするか、ボタンのDOM順を [ログイン, はじめる] に入れ替える。逆に現状通りを正式化するなら仕様表のS00-3/S00-4位置記述を「スタック下端=140px（下段=ログイン、上段=はじめる）」へ修正する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "実装: lais/src/components/App.jsx, lais/src/components/screens/S00Splash.jsx",
+    "issue": "JSX内で class 属性を使用しており、React環境では unknown DOM property 警告が出る（将来の型チェックや自動テストのノイズ源）。",
+    "suggestion": "ビルド環境がPreact等でない限り、class を className に置換する（例: <div className=\"app-root\">, <main className=\"s00\"> など）。併せて ESLint の react/no-unknown-property を有効化し再発防止。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "実装: lais/src/components/screens/S00Splash.css (.s00-center, .s00-cta)",
+    "issue": "中央ブロックのabsolute配置 + CTAスタックのbottom:140px固定は、375×812以外（特に背の低い端末・横向き・ユーザーの文字サイズ拡大）で上下領域が競合し、重なりやはみ出しが起きやすい。",
+    "suggestion": "余白を可変にして弾力性を持たせる。例: .s00-cta { bottom: calc(env(safe-area-inset-bottom) + clamp(48px, 10vh, 140px)); } とし、中央群はflexの space-between/余白で調整する、もしくはmin-height: 100svhで縦レイアウトの安定性を確保する。文字スケール拡大時の重なり回避のため、CTAコンテナに margin-top を許容し折返しを防止する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "実装全体（セキュリティ観点）",
+    "issue": "本スコープでは XSS/CSRF 起点は存在しないが、将来差し込みの際に dangerouslySetInnerHTML/innerHTML 使用が混入するリスクの予防線が未提示。",
+    "suggestion": "フロントエンド静的解析で XSS 系のルールを明示（eslint-plugin-security, jsx-a11y と合わせて `react/no-danger` の禁止、SAST で innerHTML 検出をCIブロック）。CSP/Trusted Types はサーバ側で検討し、少なくとも `script-src 'self'; object-src 'none'` と `require-trusted-types-for 'script'` を将来の配信設定に追加予定として記録する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

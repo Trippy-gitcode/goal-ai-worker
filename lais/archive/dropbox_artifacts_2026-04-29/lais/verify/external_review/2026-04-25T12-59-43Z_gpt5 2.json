@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "callGPT5 / JSON_INSTRUCTION / extractJson",
+    "issue": "GPT-5 系呼び出しで response_format: { type: 'json_object' } を指定している一方、プロンプトでは最上位が JSON 配列であることを強制しています。API が単一オブジェクトを返すと extractJson は配列を期待して補正し、場合によっては _metadata 追加時に想定外構造になります。モデルや API 挙動変更時に即座にパース失敗または誤集計を起こす矛盾した実装です。",
+    "suggestion": "配列を返させたいなら response_format を使わず、JSON Schema か text 出力に統一してください。少なくとも GPT-5 でも json_object 指定を外すか、出力仕様を {\"items\":[...]} に変更して extractJson・保存形式・集計を全てオブジェクト前提へ揃えるべきです。プロンプト、API パラメータ、パーサの三者を同一契約に統一してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "runJob / runPrecommitMode",
+    "issue": "結果配列に _metadata エントリを混在させ��いますが、後段処理では severity 未定義でも totalItems を加算し、ログ上の件数にも含めています。現状は crit 集計だけ偶然無害ですが、別ツールや将来の集計コードが findings と metadata を区別し忘れると件数不整合や誤判定を生みやすく、保守時のバグ源になります。",
+    "suggestion": "レビュー指摘とメタ情報は同一配列に混在させず、{\"items\":[...],\"metadata\":{...}} のように構造分離してください。互換性維持が必要なら保存前に findings と metadata を別キーへ退避し、totalItems や severity 集計は findings のみに限定する明示的なヘルパー関数を用意すると安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "parseArgs",
+    "issue": "--max-tokens と --timeout の値を parseInt するだけで NaN 検証がありません。引数欠落や不正値を渡すと opts に NaN が入り、HTTPS timeout や OpenAI max_completion_tokens にそのまま渡されます。環境依存で即エラーになったり、原因が分かりにくい API 失敗として現れるため、運用時に再現しづらい不具合を招きます。",
+    "suggestion": "数値オプションは共通パーサを作り、未指定・NaN・0以下・上限超過を明示検証してください。たとえば parsePositiveInt(arg, name, defaultValue) を導入し、無効値なら usage を表示して exit 1 する形にすると、異常系が早期に表面化し API 呼び出し前に防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "main / loadEnv",
+    "issue": "main の開始時点で常に loadEnv を実行し、さらに GEMINI_API_KEY と OPENAI_API_KEY の両方を必須にしています。vote モードでは単一 provider しか使わず、dry-run でも API は呼ばないのに両鍵が無いと失敗します。責務分離が不十分で、利用モードに不要な前提条件を課しており、CI やローカル運用で不要な失敗を生みます。",
+    "suggestion": "モードごとに必要なキーだけ検証するよう分岐を前倒ししてください。dry-run は env 読み込み不要、vote は provider に応じた片方のみ必須、通常レビューは使用モデル集合から必要キーを算出する形が適切です。バリデーション関数を validateEnvForMode(opts, env) のように分離すると保守しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "トップレベル import",
+    "issue": "const { glob } = require('path'); は未使用かつ path モジュールに glob は存在しません。現状は分割代入で undefined が入るだけで直ちにクラッシュしませんが、コード読解時に glob 対応済みと誤認させます。将来これを使った瞬間に実行時エラーとなる典型的な死にコードで、import パス観点でも不正確です。",
+    "suggestion": "この import は削除してください。実際に glob 機能が必要なら fast-glob や glob パッケージを明示導入し、resolveFiles をライブラリ利用へ置き換えるべきです。未使用 import の検出を ESLint で自動化し、存在しない named import を CI で弾くルールも追加すると再発防止になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "resolveFiles",
+    "issue": "glob 解決が自前の簡易実装で、コメントにもある通り filename 内の * しか実質考慮していません。docs/**/sub_*.md や ?、[] など一般的パターンを silently 無視するため、入力指定が少し変わるだけで対象漏れが発生します。レビュー対象ファイルが欠けても異常として表面化しにくく、後日の見逃しバグに直結します。",
+    "suggestion": "glob ライブラリに置き換え、サポートするパターン仕様を標準準拠にしてください。最低でも、ワイルドカードを含むのに 1 件も解決できなかった場合は警告または失敗とし、実際に解決されたファイル一覧を検証可能にすると、対象漏れを早期発見できます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "runPrecommitMode",
+    "issue": "関数コメントに async モードは fire-and-forget とありますが、実装では opts.async を一切参照せず常に Promise.all で API 完了まで待機します。仕様と実装が乖離しており、フック利用者は commit を待たないと誤解する可能性があります。将来的に運用設計をこのコメント前提で組むと、想定外の待ち時間やフロー破綻を招きます。",
+    "suggestion": "opts.async の分岐を実装するか、未対応ならオプションとコメントを削除してください。非同期化するなら子プロセス化して detached 実行し、ログ・終了コード・出力先の整合も定義する必要があります。現状のような仕様だけ存在する状態は保守上もっとも危険なので、実装か削除のどちらかに寄せるべ���です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "withRetry / httpRequest / callGemini / callGPT5",
+    "issue": "リトライは全例外一律で実施しており、4xx の恒久的失敗や認証エラーでも 5秒・10秒待って再試行します。不要な API 呼び出し増加と待機時間悪化を招き、pre-commit の体験を悪化させます。エラーハンドリングが粗く、障害種別に応じた制御がありません。",
+    "suggestion": "HTTP ステータスやエラー種別を判別し、429/5xx/timeout のみ再試行、400/401/403 などは即失敗にしてください。httpRequest で statusCode を構造化して返すか、独自 Error に retryable フラグを持たせると分岐しやすくなります。待機時間も指数バックオフにまとめると意図が明確です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0378,
+    "input_tokens": 13772,
+    "output_tokens": 2060,
+    "model_id": "gpt-5.4"
+  }
+]

@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"CONTRADICTION\",\n    \"location\": \"§3.2, §2.6, §4.4 §C3.2, §5.1\",\n    \"issue\": \"STATUS 5状態モデルの定義が文書内で不一致です。§3.2では QUEUED→IN_PROGRESS が『ENGが最初のコミット時に canopy の pre-commit hook が自動遷移』と読める一方、表では『ENG 着手宣言時 → IN_PROGRESS』、§4.4 §C3.2 と §5.1 では『ENG（初回コミット時に canopy 自動）』となっています。手動遷移なのか自動遷移なのかが揺れており、実装者が異なる動作を入れる危険があります。\",\n    \"suggestion\": \"QUEUED→IN_PROGRESS の責任主体を1つに固定してください。例: 『主体=canopy 自動、トリガー=初回コミット時に before-*.json を検出したとき』または『主体=EN",
+    "model": "GPT-5.4",
+    "persona": "tech_writer"
+  }
+]

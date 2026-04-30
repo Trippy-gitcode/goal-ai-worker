@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"HIGH\",\n    \"category\": \"MISSING\",\n    \"location\": \"実装パッケージ 5. lais/src/lib/auth.js\",\n    \"issue\": \"オフライン起動時など、`supabase.auth.getSession()` が失敗した場合の考慮が漏れています。Promiseがrejectされると`.then()`ブロックが実行されず、`authLoading` signalが永遠に`true`のままになり、アプリケーションがローディング状態で停止する可能性があります。\",\n    \"suggestion\": \"`getSession()`呼び出しに`.catch()`ブロックを追加し、エラーが発生した場合でも`authLoading.value = false`が実行されるようにしてください。また、オフライン状態をユーザーに通知する仕組みも検討することが望ましいです。\"\n  },\n  {\n    \"id\": \"R-002\",\n    ",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.3 Open Air / §4.9 S20-5, S20-6, §4.10 S30-5",
+    "issue": "Open Air 原則で「カードで囲まない」と明記しつつ、チャット内のタスク提案カード・EXPカード、ME の MBTI カードなど明確な“カード”UIを複数導入している。原則と実体のズレがあり、実装者がどこまで許容されるか判断できない。",
+    "suggestion": "Open Air 原則を「常設一覧はカードで囲まない。例外として“インライン補助情報”と“自己情報サマリー”の単発カードのみ許可」と再定義し、許可カードの条件（背景トークン、余白、ボーダー種別、同一画面での同時層数=1まで等）を追記。許可リストとして S20-5, S20-6, S30-5 を明記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.2 タイポグラフィ / §4.4 S10-3, §4.4 S10-7, §4.7 S14-7",
+    "issue": "英字ラベルは 11px・uppercase・letter-spacing 1.5px と規定しているが、画面仕様で TODAY/GOALS を 14px としている箇所がある。ラベル階層のルールが不整合。",
+    "suggestion": "英字ラベルのサイズ階層を定義（例: セクション見出し=14px、サブラベル=11px）。各画面に適用するサイズを統一し、§5 共通コンポーネントに「ラベル（英字）」のサイズバリエーションを追加。S10-3/S10-7/S14-7 の数値を揃える。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.4 NG リスト / §3.1, §4 全般",
+    "issue": "NG リストに「純黒/純白のベタ使用禁止」とある一方で、ボタン文言に #FFFFFF を使用、オーバーレイに rgba(0,0,0,0.6) を使用している。テキストや半透明での使用可否の境界が不明瞭。",
+    "suggestion": "NG の適用範囲を明文化（例: “純色のベタ面（背景・大面積フィル）を禁止。文字色やアイコン、半透明スクラムは許可”）。加えて、--overlay-scrim トークンを新設し、rgba(13,17,23,0.72) などブランド基調色ベースに置換する指針を提示。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.1 ブランドDNA / §3 トークン",
+    "issue": "「自然・文化モチーフ（桜、祭り、ベルベット）」が言語化されているが、��・形・陰影・アイコン等のトークン/パターンに落ちていない。Night Sky 情緒は色だけで実装され、モチーフの可視化が不足。",
+    "suggestion": "モチーフをトークンへ写像する補助規定を追加。例: カテゴリパレットに“自然由来の色相レンジ”を割り当て（春=桜系、収束=墨紺系など）、区切りラインの太さや角の丸みで“ベルベットの柔らかさ”を表現（--border-soft を用意、--radius-md/--radius-lg の使い分けルールを明文化）。アイコンの角Rや角度も原則化する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.2-2.4 / §3 / §7 A-6",
+    "issue": "テーマの性格差別化（Dawn / Harajuku Light / Harajuku Dark）が色以外のトークンまで波及する設計方針が未提示。A-6 で回帰検証のみ言及されるが、差別化の“軸”が不明なため、色替え以上のブランド体験差が担保しづらい。",
+    "suggestion": "各テーマごとに最小差別化セットを定義。例: 背景層（--bg-*-hierarchy）の明度ステップ、--accent-subtle のアルファ、--overlay-scrim の色相、リスト区切り線の強度（--border vs --border-strong）を微調整。タイポやモーションは共通、色階とボーダー/サーフェス階層のみテーマ差と明記。テーマ別“性格タグライン”と参照トークン表を design_system.md に追加し、本書 §3.1 からリンク。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.5 S-12, §4.6 S-13 / §3.1",
+    "issue": "モーダルのスクラムが rgba(0,0,0,0.6) と純黒起点で、Night Sky の世界観から浮きやすい。ブランド一貫性と可読性の両立で専用トークン化した方が安全。",
+    "suggestion": "モーダル用 --overlay-scrim を新設し、--bg-primary を起点にした色（例: rgba(13,17,23,0.72)）へ統一。prefers-reduced-transparency も考慮し、スクラム不使用時は --bg-primary を段階的に暗くする代替も併記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§2.1 ブランドDNA / §3.1 カラー",
+    "issue": "Night Sky を掲げつつ GitHub Dark と極めて近似の数値（#0D1117, #161B22, #1C2128, #79C0FF）を採用しており、競合（汎用ダークUI）との差別化が弱い。視覚的に“Laisらしさ”が残りにくい。",
+    "suggestion": "ブランド固有性を担保する微差設計を導入。例: アクセント色を月光寄りの青（緑味を少し抑え、Lab 空間で b* をわずかに下げる）に調整、--accent-subtle のアルファと混色比を変更して“青白い霞”のニュアンスを作る、プログレス/アクティブ境界の角Rをわずかに大きく（--radius-pill を 999→“optical 900”相当へ）、区切り線を冷色寄りに（--border を H を数度シフト）。小改訂でも全画面に“微光”の同一性が出る。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§5 共通コンポーネント / §3 トークン",
+    "issue": "共通コンポーネントに“ラベル（英字）”の階層・“カード（許可例外）”のスタイル・“オーバーレイ”のトークンが未集約。画面別に散在し、テーマ拡張時の変更源が増える。",
+    "suggestion": "§5 に以下を追加集約: 1) ラベル（英字）サイズと文字間隔のバリエーション（11/14の使い分け）、2) 許可カードのスタイル定義（背景、ボーダー、余白、半径、影の禁止/許容）、3) --overlay-scrim を含むオーバーレイ/モーダルの基底トークン。画面側は参照のみに簡素化。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§2.2 設計原則 4 / §7 A-6",
+    "issue": "「ユーザーの自己表現（4テーマ＋アバター）」は宣言されているが、本書内にテーマ選択導線・既定テーマの表示差（例: フレーム、ヘッダ、ピル色味差）説明はない（上位DS参照の旨は明記済み）。Phase A 実装時の可視差が読み取りづらい。",
+    "suggestion": "本書に限り“Phase A で実際に可視差が出る箇所”を注記（例: 背景層・アクセント・ピル背景・タブActiveの配色はテーマ反映）し、上位 design_system.md の該当小節へアンカーリンクを付与。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§2.3 レイアウト原則 / §4.4 S10-4, §4.9 S20-3",
+    "issue": "“静かな情報設計 / Open Air”の意図は体現されているが、行間/字間/余白の“呼吸感”を保証する最小/最大密度ルールが画面横断で曖昧。リスト密度が実装差で硬質に見える恐れ。",
+    "suggestion": "密度ガードレールを追加。例: 主要リスト行間は min --space-sm、カード内テキストの段落間は min 2px、セクション間は --space-xl 固定、タスク時刻列は最小40px厳守など。VRT基準に“行間≥8px”などの数値アサーションを増やす。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  }
+]

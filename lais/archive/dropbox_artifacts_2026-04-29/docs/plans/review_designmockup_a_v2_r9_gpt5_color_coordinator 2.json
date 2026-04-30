@@ -1,0 +1,79 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s14_goal_detail",
+    "location": "下部ボタン列「削除」",
+    "issue": "ボーダー色に rgba(248,81,73,0.3) を直接指定。デザインシステムのセマンティックトークン（--danger / --button-danger-*）不使用でトークン逸脱。",
+    "suggestion": "アウトライン運用を続ける場合は border:1px solid var(--danger) + color:var(--danger) に統一。より一貫させるなら s13 と同様に solid を採用し、background:var(--button-danger-bg) + color:var(--button-danger-fg) に変更。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "フッター主要CTA「次へ」",
+    "issue": "主要ボタンのフォントウェイトが 500。DSでは主要ボタンは視認性確保のため 600 を基準とする運用が全体で採用されている（他画面は600）。",
+    "suggestion": "font-weight を 600 に統一（例: font-weight: var(--font-weight-semibold)）。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "英字の大文字ラベル（例: s10_grow ヒーロー「EXPLORER」= letter-spacing:1px、s30_me サブタブ=0.5px）",
+    "issue": "大文字ラベルの字間が画面間で不一致。DSの --letter-spacing-label:1.5px に満たない指定が散見され、視覚リズムが崩れている。",
+    "suggestion": "英字ラベルは letter-spacing: var(--letter-spacing-label)（1.5px）で統一。該当箇所の 0.5〜1px 指定を置換。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Today セクション末尾→Goals セクション先頭の間隔（margin-bottom:28px）",
+    "issue": "セクション間余白が 28px。DS §4.2「セクション間≧32px」に未達で、セクション区切りが弱い。",
+    "suggestion": "Todayブロックの下マージンを 32〜40px に拡大（例: var(--space-xl)=40px）。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE等��→基本情報ブロックの間隔（margin-bottom:28px）",
+    "issue": "サブタブと最初のコンテンツの間隔が 28pxでセクション基準（≧32px）未満。見出しと本文の分離感が弱い。",
+    "suggestion": "サブタブ直下の余白を 32px 以上に拡大。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s13_task_detail",
+    "location": "パネルタイトル「企画書を仕上げる」",
+    "issue": "見出しの letter-spacing が -0.3px。DSの見出し用トークン（--letter-spacing-heading:-0.5px）と不一致で微妙に緩い。",
+    "suggestion": "letter-spacing を var(--letter-spacing-heading)（-0.5px）に統一。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カードのアクション行（登録する／編集して登録／✕）",
+    "issue": "3ボタンが1行で横並びのため、375px幅でも窮屈。会話本文との区切りが弱く、視線が停滞しやすい。",
+    "suggestion": "余白を増やすか、二段レイアウト（主要=左、二次=右／下）に再構成。✕はカード右上にアイコン配置してアクション��を2ボタン化すると流れが改善。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

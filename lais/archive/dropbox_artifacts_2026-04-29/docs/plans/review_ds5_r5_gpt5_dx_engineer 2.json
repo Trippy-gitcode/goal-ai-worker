@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1 / §18 / sub_adv_protocol.md §10",
+    "issue": "UX仕様書のファイル名が箇所により不一致（docs/ux_v1.md vs docs/ux_redesign_v*.md）。依存チェーン（§19.6）や連鎖更新マップ（§18）との参照整合性が崩れる。",
+    "suggestion": "UX仕様書の正準名をdocs/ux_v*.mdに統一（例: ux_v1.md, ux_v2.md）。§6, §17, §18, sub_adv_protocol.md §10の表記も一括置換。canopyにdocs/ux_v*.md存在検証を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存」欄が単一文字列例示で、複数上流（例: design_spec_v1.mdはux_v1.mdとdesign_system.mdの両方に依存）を機械可検証で表現できない。",
+    "suggestion": "ヘッダーをYAMLフロントマターに変更し、depends_on配列で複数依存を明示可能にする（例: depends_on: [{file: docs/project_v1.md, version: 1.0}, {file: docs/design_system.md, version: 1.2}]）。この構造をcanopyの新ゲート(doc_depcheck.sh)で検証。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.6",
+    "issue": "参照表記法がセクション番号（§N）依存のため、後追い改訂で番号がズレると参照が壊れる。安定IDの規定がない。",
+    "suggestion": "各仕様書セクションに安定アンカーID（例: ux:nav-flow, ds:tokens:color）を付与し、参照は「ファイル名 + #anchor」で行う（例: ux_v1.md #nav-flow）。§12のSPEC-ID体系は機能単位、こちらはセクション単位で併存。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.6",
+    "issue": "循環参照・未更新の検知方法が手作業前提。禁止ルールはあるが自動検出の仕組みがない。",
+    "suggestion": "YAML化したdepends_onを走査するdoc_depcheck.shを追加し、(1) 循環検出 (2) 参照先ファイルのversion不一致検出 (3) 参照先ファイルの存在検証をcanopyでFAIL判定にする。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§19.7（Phase 0の完了基準） / §13.4",
+    "issue": "「8ペルソナ×2モデルのAIレビューでCRITICAL 0」とあるが、§13.4では標準5ペルソナのみ定義。仕様として充足不能。",
+    "suggestion": "どちらかに統一。（推奨）Phase 0完了基準を「標準5ペルソナ×2モデル」へ修正、または§13.4に3ペルソナ追加定義（名称・観点を明���）し、review_gate.shが参照するチェックロジックも更新。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.7（実施要件/出力フォーマット）",
+    "issue": "「直接5社+間接3社」要求に対し、マトリクス列は5社分の例示のみで、間接競合の扱いが不明確。",
+    "suggestion": "直接/間接を別テーブルに分離、または列を8社分に拡張し列ヘッダにDirect/Indirectタグを付与。完了基準も「直接5社以上 + 間接3社以上」に明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.7（出力フォーマット）",
+    "issue": "ベンチマーク成果がMarkdown表のみで機械検証が困難。canopyでの自動ゲート化ができない。",
+    "suggestion": "Markdownに加え、同内容のJSON/YAML（bench_project.json等）を必須化。スキーマ例: {targets:[...], matrix:[{feature, compA..compE, policy}], differentiators:[{issue, policy, link:\"project_v1.md#sec\"}] }。canopyに件数/必須列/『Lais方針』未記入検出を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "��19.5（ヘッダー：dev-system準拠）",
+    "issue": "例示のパス「dev_system_spec.md → docs/plans/dev_system_spec.md §19」が実リポジトリ構成と不一致の可能性（本ファイルはリポジトリ直下）。新規開発者がリンク切れで迷う。",
+    "suggestion": "パス依存を避け『dev-system §19（version X.Y.Z）』の表記に変更し、リポジトリURL+コミットハッシュを任意で追記できる欄を追加（dev_system_repo, dev_system_commit）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（各テンプレート共通）",
+    "issue": "用語の定義・同義語排除を行う『用語と定義/Glossary』セクションがテンプレートに含まれず、用語不整合の温床になりうる。",
+    "suggestion": "project_v1.mdに『§0.5 用語と定義』、ux_v1.mdに『§0.5 用語とUIラベル統一』を追加。dev-systemの曖昧用語禁止と連携し、用語表はSoTとして参照。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md",
+    "issue": "API仕様にエラーコードはあるが、リトライ/バックオフ/タイムアウト/レート制限等の��敗戦略がテンプレート必須項目に含まれていない。",
+    "suggestion": "reference_v1.mdに『§1.x リトライ/タイムアウト/レート制限/バックオフ方針』を必須追加。e2e_fullflow_test.mdにも異常系の計測・上限超過シナリオを連動追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダーにdoc_id/slugや最終更新者・更新日時フィールドがなく、検索性・変更追跡性が弱い。",
+    "suggestion": "YAMLフロントマターにdoc_id, slug, updated, updated_byを追加。SPEC-ID（§12）と紐付ける場合はspec_ids: [...]を許容。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.5（依存の例） / §19.1",
+    "issue": "依存の例がdocs/plans/lais_project_v1.md v1.3と特定プロジェクト名/ディレクトリを前提にしており、§19.1の標準配置（docs/project_v1.md）と矛盾。",
+    "suggestion": "例示を汎用に修正（例: docs/project_v1.md v1.3）。プロジェクト固有名（Lais）はテンプレートから排除。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§19.4 / §19.7 全般",
+    "issue": "テンプレートとベンチマーク例の文言に「Lais」固有名が残存し、他アプリ立ち上げ時に混乱を招く可能性。",
+    "suggestion": "全箇所を{アプリ名}もしくは{AppName}のプレースホルダーに変更。init_app.sh適用時に自動置換される旨を明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.6（参照表記/依存チェーン）",
+    "issue": "『対応セクション』などの相互リンクの記法が自由記述で、検証不能。依存のバージョンピンも手作業で整合しづらい。",
+    "suggestion": "『対応セクション』は『file:#anchor』の正規表現に統一し、canopyのdoc_depcheck.shで存在チェック。依存はヘッダーdepends_onと整合必須（ズレたらFAIL）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5 / §19.6",
+    "issue": "現行ヘッダー形式（Markdown行）では自動整合性チェック（多依存、循環、バージョン不一致）が実装困難で、Single Source of Truth原則（§1.1）にも反する。",
+    "suggestion": "全アプリ��様書ヘッダーをYAML化し、dev-systemにschemas/spec_header.schema.jsonを追加。canopyにdoc_header_lint.shを追加して必須フィールド（title, version, status, depends_on[]）とバージョン形式を検証。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

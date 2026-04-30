@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-401",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "R4 修正説明（「これにより:」1行目）",
+    "issue": "「SPA 遷移直後の programmatic focus では outline を出さない」と明記されているが、:focus-visible は直前の入力モダリティがキーボードの場合に一致しうるため、遷移直後でもアウトラインが表示されるケースがある。説明が実挙動を過剰保証している。",
+    "suggestion": "説明文を「ポインタ操作主体のユーザーでは遷移直後にアウトラインが出ない。直前がキーボード操作の場合は表示されることがある」に修正し、受け入れ条件も同趣旨に合わせる。実装自体はWCAGの意図に沿っており変更不要。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-402",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ターゲットブラウザ要件（design_spec_v1.md ブラウザ対応章相当）",
+    "issue": ":focus-visible のサポート前提（Safari 15.4+ / Chrome 86+ / Firefox 85+）とあるが、設計仕様で定義されたターゲットブラウザ範囲への明示的なトレーサビリティが本文から読み取れない。非対応環境でのフォールバック方針も未定義。",
+    "suggestion": "design_spec_v1.md の対象ブラウザ表に準拠していることを明記し、非対応ブラウザ向けの方針（例: UAデフォルトのアウトラインを許容、あるいは :focus {outline: ...} と :focus:not(:focus-visible){outline:none} の組合せ、polyfill採用の有無）を仕様追補に記載。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-403",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §(間隔/スペーシング・トークン) 相当",
+    "issue": ".s02-onboarding の padding に calc(100px + 52px + var(--space-md)) と固定pxが混在しており、余白はトークンで定義するという設計方針に反する可能性が高い。",
+    "suggestion": "固定値 100px/52px をトークン化（例: var(--size-header), var(--size-cta) など）し、calc(var(--size-header) + var(--size-cta) + var(--space-md)) のように置換。該当トークンが未定義なら design_spec_v1.md に追加定義。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-404",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "design_spec_v1.md §(色/フォーカスインジケータ・トークン) 相当",
+    "issue": "フォーカスリング色に var(--accent) を使用し���おり、テーマ間で常に十分なコントラストを満たすとは限らない。フォーカス専用トークンの不使用は将来のテーマ拡張性を下げる。",
+    "suggestion": "専用トークン var(--focus-ring)（または --focus-outline-color, --focus-ring-thickness 等）を設計仕様に定義し、.s02-onboarding:focus-visible { outline: var(--focus-ring-thickness) solid var(--focus-ring); } に変更。ハイコ���トラスト/ダークテーマでのマッピングも仕様に明記。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-405",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": ".s02-onboarding:focus-visible ルール",
+    "issue": "outline-offset: -3px によりアウトラインが内側へ描画され、コンテンツ端と重なって視認性を損ねる可能性がある（特にコンテンツが縁まで迫るレイアウト時）。",
+    "suggestion": "正の outline-offset を検討、または box-shadow によるアウトライン表現に切替。内側描画を維持する場合はコンテナの内側パディングを最小3px増やして重なりを回避。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-406",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "WCAG 2.2 AA 2.4.13/2.4.7 適合根拠",
+    "issue": "アウトライン太さ3pxは面積要件を満たす可能性が高いが、背景とのコントラスト3:1を満たす保証が設計仕様上に明記されていない。",
+    "suggestion": "design_spec_v1.md にフォーカスインジケータの最小コントラスト（3:1）と太さ（≥2px）の要件を明記し、--focus-ring トークンの各テーマ値が要件を満たすことを可視化（自動テスト/デザイントークンCI��する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-407",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "LP-002 フォーカスマネジメント要件",
+    "issue": "CSSのみの提示で、main 要素が programmatic focus 可能（例: tabindex=\"-1\" 付与）であることの仕様リンクが不明。実装側で欠落すると LP-002 が満たせない。",
+    "suggestion": "component 実装で <main tabindex=\"-1\" role=\"main\"> を保証し、LP-002 とのトレーサビリティをコメントやテストで補強。設計仕様にも main の focusable 要件を明記。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

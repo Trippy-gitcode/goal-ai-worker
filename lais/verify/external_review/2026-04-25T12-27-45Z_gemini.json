@@ -1,0 +1,80 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md 行 899 付近",
+    "issue": "シェルスクリプトの関数 `get_changed_files()` の内部に、マークダウンのコードブロック終了タグである ` ``` ` が誤って挿入されています。これにより、このスクリプトを実行した際に確実に syntax error が発生し、デプロイや検証プロセスがクラッシュします。",
+    "suggestion": "挿入された ` ``` ` を削除してください。マークダウンのコードブロックの終了位置を誤って解釈した編集ミスと思われます。スクリプトの構文の完全性を保つため、修正後に `sh -n` 等で構文チェックを行うことを推奨します。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md 行 3401-3411 付近",
+    "issue": "`/tmp/section17.txt` や `/tmp/c0c6_spec.txt` などの固定ファイル名を使用しています。並列実行時やマルチユーザー環境でファイル名の競合が発生し、データ破壊や誤判定、シンボリックリンク攻撃（TOCTOU）の脆弱性に繋がります。",
+    "suggestion": "`mktemp` を使用して動的な一時ファイル名を生成するように修正してください。例: `tmp_spec=$(mktemp)` とし、使用後は確実に削除するようにしてください。これにより競合やセキュリティリスクを排除できます。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md 行 845-858, 1050-1064 付近",
+    "issue": "`tmp=$(mktemp)` で作成した一時ファイルを `awk ... > \"$tmp\" && mv \"$tmp\" ...` で処理していますが、`awk` が失敗した場合に `mv` が実行されず、一時ファイルが `/tmp` ディレクトリに残存し続けます。長期間稼働する環境ではディスク容量を圧迫する原因となります。",
+    "suggestion": "スクリプトの冒頭または `mktemp` 直後に `trap 'rm -f \"$tmp\"' EXIT` を設定し、スクリプトの成否に関わらず確実に一時ファイルがクリーンアップされるようにしてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md 行 3409-3411 付近",
+    "issue": "`diff /tmp/c0c6_spec.txt /tmp/c0c6_pkg.txt` は差分が存在する場合に終了コード 1 を返します。`set -e` が有効な環境で実行された場合、ここでスクリプトが異常終了し、直後の `rm -f` による一時ファイルの削除処理が実行されません。",
+    "suggestion": "`diff ... || true` のようにエラーを許容してスクリプトの実行を継続させるか、一時ファイルの削除を `trap` コマンドを用いて確実に行う設計に変更してください。これにより検証環境での予期せぬ中断を防げます。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md 行 858, 1064 付近",
+    "issue": "`mv \"$tmp\" instructions/session_progress.md` を使用してファイルを上書きすると、元の `session_progress.md` が持っていたパーミッションや所有者情報が失われ、`mktemp` が生成したデフォルトの権限（通常 600）に置き換わってしまいます。",
+    "suggestion": "`mv` の代わりに `cat \"$tmp\" > instructions/session_progress.md && rm -f \"$tmp\"` を使用することで、元のファイルのパーミッションと所有者を維持したまま内容のみを安全に更新できます。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md 行 846, 1053 付近",
+    "issue": "`awk -v mid=\"$MISSION_ID\"` のように `-v` オプションで変数を渡すと、`$MISSION_ID` 内のバックスラッシュがエスケープシーケンスとして解釈されてしまいます。意図しない文字列の変形を引き起こすリスクがあります。",
+    "suggestion": "`-v` オプションの代わりに、環境変数経由で値を渡す方法（`MISSION_ID=\"$MISSION_ID\" awk 'BEGIN { mid = ENVIRON[\"MISSION_ID\"] } ...'`）を使用すると、エスケープの副作用を完全に防ぐことができます。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md 行 849, 1056 付近",
+    "issue": "`if ($0 ~ \"^### \" mid \":\")` のように変数 `mid` を正規表現の一部として結合しています。`MISSION_ID` に正規表現のメタ文字（`.` や `*` など）が含まれていた場合、意図しない行にマッチするバグの温床となります。",
+    "suggestion": "正規表現の結合ではなく、文字列検索関数を使用してください。例: `if (index($0, \"### \" mid \":\") == 1)` とすることで、安全なプレーンテキストとしての前方一致判定が可能になり、エッジケースでの誤作動を防げます。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0425,
+    "input_tokens": 28227,
+    "output_tokens": 1447,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

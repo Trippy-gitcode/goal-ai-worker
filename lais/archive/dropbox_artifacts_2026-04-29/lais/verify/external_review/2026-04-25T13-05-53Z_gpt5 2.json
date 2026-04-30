@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BEST_PRACTICE",
+    "location": "callGPT5",
+    "issue": "GPT-5 に対して response_format: { type: 'json_object' } を付与していますが、レビュー指示は JSON配列のみを要求しています。OpenAI Chat Completions の json_object はトップレベル object を強制するため、モデルが配列を返せず、extractJson が単一 object を配列化して 1 件だけ扱う経路に入り、必須の 5-10 件出力条件を恒常的に破ります。",
+    "suggestion": "配列を必須にするなら json_object を使わず通常テキストで配列生成を促すか、Responses API / json_schema 等でトップレベル array を表現できる方式へ切り替えてください。少なくとも gpt-5 にだけ json_object を付ける現状は Gemini と挙動差が大きく、レビュー結果の件数保証を壊すため修正が必要です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "冒頭 import",
+    "issue": "const { glob } = require('path'); となっていますが、path モジュールに glob は存在せず未使用です。現状たまたま参照されていないためクラッシュし���せんが、将来この変数を使う前提で保守すると誤解を招きます。import パスと API の意味がずれており、可読性と保守性を下げる dead code です。",
+    "suggestion": "未使用なら完全に削除し、本当に glob 展開が必要なら fast-glob や glob パッケージを明示的に導入してください。resolveFiles は独自実装なので、コメントも含めて「簡易ワイルドカード対応」であることを明記し、標準 glob 互換と誤認されないよう整理するのがよいです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "runPrecommitMode / main",
+    "issue": "--async オプションが parseArgs では受理される一方、runPrecommitMode でも main でも分岐に使われていません。ヘルプには fire-and-forget とありますが実装は常に await Promise.all で同期実行されるため、利用者は非同期だと信じて commit フローを設計し、想定外の待ち時間や hook 詰まりを招きます。",
+    "suggestion": "--async を本当に実装するなら child_process.spawn でデタッチ実行し親プロセスは即終了、結果だけ所定ディレクトリへ書く設計にしてください。未実装のままなら CLI ヘルプとオプション受付を削除し、使える機能だけを公開して誤用を防ぐべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "main / runJob",
+    "issue": "allResults・totalCritical・totalHigh・totalItems を runJob 内で直接更新しており、--parallel 指定時は複数ジョブから共有状態へ同時書き込みされます。Node.js は単一スレッドでも非同期完了順が不定なため、要約順序や件数集計の追跡が難しく、将来ロジック追加時に race 的な不整合を生みやすい構造です。",
+    "suggestion": "runJob は集計済みの結果オブジェクトを return し、呼び出し側で Promise.all の完了後に reduce して totals と allResults を構築してください。副作用を外に出さないことで責務分離が明確になり、並列実行時の保守性とテスト容易性が大きく向上します。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "parseArgs",
+    "issue": "--max-tokens と --timeout に parseInt を使っていますが、NaN や負数の検証がありません。誤った入力でもそのまま API 呼び出しまで進み、原因が分かりにくい失敗になります。CLI ツールとしてエラーハンドリングが弱く、利用者が設定ミスをしたときの診断性が低いです。",
+    "suggestion": "Number.isInteger で数値検証し、0 以下や NaN は即座に usage とともに exit 1 にしてください。許容レンジも定数化すると魔法の数字を排除できます。例: validatePositiveInt('--timeout', opts.timeout, { min: 1000, max: 900000 }) のような共通関数化が有効です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "resolveFiles",
+    "issue": "簡易 glob 実装が * を .*​ に変換しただけで、他の正規表現メタ文字をエスケープしていません。たとえばファイル名に . や +、[] が含まれると意図しない一致が発生します。コメントでは simple glob とありますが、入力パターン解釈が暗黙的で将来バグを埋め込みやすい実装です。",
+    "suggestion": "正規表現化する前に base を regex escape したうえで * だけをワイルドカードに変換してください。あるいは glob ライブラリに置き換え、サポート仕様を明確化するほうが安全です。少なくとも関数名やコメントで「限定的な擬似glob」であることを強調し、期待値を揃えるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "extractJson",
+    "issue": "JSON 抽出のフォールバックが広すぎ、テキスト全体に含まれる最初の [ から最後の ] までを array とみなします。説明文や diff、コード片に角括弧が含まれるだけで誤検出しやすく、壊れた JSON を『補修』して別物として受理するため、AI 出力の破損を静かに隠蔽する危険があります。",
+    "suggestion": "先頭・末尾の空白を除いた全文が JSON 配列かをまず厳密判定し、失敗時のみ fenced json ブロックを対象にしてください。自動補修はログに明示したうえで opt-in にし、通常は parse failure として再試行した方が、誤ったレビュー結果を保存するリスクを下げられます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "runPrecommitMode / withRetry / 定数群",
+    "issue": "16384、32768、300000、32 * 1024 * 1024、retry 2/3、backoff 5000 などの数値が各所に直書きされています。意味がコード上で読み取りづらく、モデル追加や制限変更時に更新漏れを起こしやすいです。とくに API 制限系の閾値は運用変更で頻繁に見直されるため、魔法の数字のままは危険です。",
+    "suggestion": "DEFAULT_TIMEOUT_MS、GIT_DIFF_MAX_BUFFER_BYTES、GEMINI_MAX_OUTPUT_TOKENS、RETRY_BASE_DELAY_MS など意味付き定数へ切り出し、可能なら CLI や設定ファイルから上書き可能にしてください。関連する説明コメントも定数定義に寄せると、運用変更時の修正箇所が一元化されます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0355,
+    "input_tokens": 12853,
+    "output_tokens": 1947,
+    "model_id": "gpt-5.4"
+  }
+]

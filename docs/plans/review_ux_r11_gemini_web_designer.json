@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.3 / ux_v1.md §8.2",
+    "issue": "SVGアバターのCanvasキャッシュサイズが物理ピクセル（デバイスピクセル比）を考慮しておらず、Retinaディスプレイで画像がぼやける。",
+    "suggestion": "「ラスタライズ済みPNG（64x64）」という固定サイズ指定を廃止し、「表示サイズ × window.devicePixelRatio（例: 64x64表示なら192x192で生成）」でCanvas描画・PNG生成する仕様に変更してください。これを怠ると「洗練されたビジュアル」というコンセプトが根本から破綻します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §11 / §6",
+    "issue": "PWA（standaloneモード）特有のセーフエリア（iPhoneのノッチ/Dynamic Islandや下部ホームインジケータ）への対応が未定義。",
+    "suggestion": "レスポンシブまたは共通UIのセクションに、CSSの `env(safe-area-inset-top)` および `env(safe-area-inset-bottom)` を使用して、ヘッダー上部やボトムタブ下部に適切なパディングを確保する仕様を明記してください。未対応の場合、ボトムタブがOSのホームバーと重なり操作不能になります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §13.1",
+    "issue": "テーマ切替において、OSのシステムテーマ（ダーク/ライト）に自動連動する設定が存在しない。",
+    "suggestion": "テーマ選択の選択肢に「システムに従う（System Default）」を追加し、`prefers-color-scheme` メディアクエリに応じて Night Sky（ダーク）と Dawn（ライト）を自動適用する仕様を追加してください。モダンなモバイルアプリのベストプラクティスとして必須です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3 / ux_v1.md §4.2.1",
+    "issue": "SVGアバターのカラーパレットとアプリテーマ（4種）の依存関係が未定義。テーマ切替時にアバターの主線や肌の色が背景に溶け込むリスクがある。",
+    "suggestion": "アバターのSVGカラーパレットは「テーマ非依存（固定色）」とするか、SVG内にテーマのセマンティックカラー（CSS変数）を注入して動的に色を変えるか、方針を明記してください。洗練されたデザインを保つためには前者の固定色が安全です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md 全般",
+    "issue": "デザインシステムの基礎トークン（色、フォント、アイコン体系）が未定義のまま、UI仕様で「アクセント色」「surface色」などの用語が使われている。",
+    "suggestion": "ux_v1.mdの冒頭または共通UIセクションに、本ドキュメントで前提とするセマンティックカラーのリスト（primary, surface, background, error等）、フォントウェイトの使い分け、アイコンのスタイル（例: 24px, 1.5px stroke, Outlined）の前提条件を定義��てください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §8",
+    "issue": "「洗練」と「ゲーミフィケーション」の両立において、紙吹雪やglowエフェクトのビジュアル制約がなく、実装次第でチープなゲームUIになる。",
+    "suggestion": "アニメーション仕様にビジュアルガイドラインを追記してください。例：「パーティクルの色はテーマのアクセントカラーと同系色に限定する」「glowエフェクトは原色を避け、不透明度20%のソフトなシャドウ（box-shadow）で表現する」など。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALK画面での画像添付（最大10MB）時のアップロードプログレス表示と、アップロード中の送信ボタンの制御が未定義。",
+    "suggestion": "画像選択後、サムネイル上に円形のプログレスインジケータを表示し、アップロード完了まで送信ボタンを無効化する（または「送信中」状態としてキューに入れる）仕様を追記してください。モバイル回線でのUX低下を防ぐためです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §6.1",
+    "issue": "キーボード表示時にハーフモーダルが縮小された状態で、backdrop（背景の暗い部分）をタップした際の挙動が未定義。",
+    "suggestion": "backdropタップ時の挙動を段階的に定義してください。「キーボード表示中は、まずキーボードを閉じる（inputのblur）。キーボードが閉じた状態でのタップでモーダルを閉じる」とすることで、誤ってモーダルごと閉じてしまう入力中の事故を防げます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §6.2",
+    "issue": "トーストの表示位置が「ボトムタブの上16px」と固定されているため、TALK画面等でキーボードが表示された際に裏に隠れるか、入力バーと干渉する。",
+    "suggestion": "キーボード表示中（visualViewportの高さが変化している状態）は、トーストの表示位置を入力バーの上、または画面上部（top: 16px）に動的に変更する仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3 / §4.2 / §5.0",
+    "issue": "各種入力フォームにおいて、適切なソフトウェアキーボードを呼び出すための属性（inputmode, type）が明記されていない。",
+    "suggestion": "アクセシビリティと操作性向上のため、年齢入力には `inputmode=\"numeric\"`、メールアドレスには `type=\"email\"`、パスワードには `type=\"password\"` を指定する旨を各UI定義に追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

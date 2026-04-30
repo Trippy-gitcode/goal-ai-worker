@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §8",
+    "issue": "ゴールに紐づく最後のタスクを完了した際、タスク完了演出(8.1)、ゴール達成演出(8.3)、およびそれに伴うレベルアップ演出(8.2)が同時にトリガーされる。アニメーションの優先順位や直列実行（キューイング）の仕様がないため、UIの破綻やEXPバーの不整合な描画が発生する。",
+    "suggestion": "アニメーションマネージャー（キュー）を導入し、「タスク完了演出 → (完了待機) → ゴール達成演出 → (完了待機) → レベルアップ演出」の順で直列に再生する仕様を追記してください��",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §1.4, §7.3",
+    "issue": "TALK画面のチャット履歴ドロワー（S-21）は「左からスライドイン」で表示されるが、閉じるジェスチャーが「右スワイプ」と定義されている。物理的な直感に反し、開く方向と同じ方向にスワイプすることになるため、ユーザーがドロワーを閉じられなくなる。",
+    "suggestion": "ドロワーを閉じるジェスチャーを「左スワイプ」に修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.1, §4.2",
+    "issue": "画面一覧に「S-41 アバター設定」があり、ME > PROFILEから遷移するとされているが、S-41の画面レイアウトや操作フロー（MVP特典のフレーム装備方法など）がUX仕様書内に一切定義されていない。",
+    "suggestion": "S-41 アバター設定画面のUXフロー（プレビュー領域、フレーム一覧、装備/解除トグル、保存ボタン等）を新規セクションとして追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §3.2.3",
+    "issue": "「週3回」の習慣で、金曜時点で0回完了の場合、残り土日の2日では3回達成が不可能になる。この「達成不能状態」になったタスクがTodayセクションにどう表示されるか（エラー表示？非表示？そのまま表示？）が未定義。",
+    "suggestion": "達成不能になった時点でTodayセクションから非表示にするか、または「今週は未達成」としてグレーアウト表示する仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §4.5",
+    "issue": "「同名タスク5分以内の再完了は無効」という不正対策があるが、「あ」「い」「う」など別名の単発タスクを連続で作成し即完了すれば、容易に1日上限（300EXP）まで稼げてしまう。",
+    "suggestion": "「タスク作成から完了まで最低1分経過が必要（即時完了はEXP付与なし）」または「1日のタスク作成数上限」などの追加の不正対策を導入してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §4.4",
+    "issue": "アバター進化のPhase切り替わり（Lv6, 16, 31, 46）と、称号の切り替わり（Lv5, 10, 15, 20, 30, 40）のレベルが一致していない。ユーザーにとって成長のマイルストーンが分かりにくくなる。",
+    "suggestion": "アバター進化のタイミングを称号変更のタイミング（例: Lv10, 20, 30, 40）に合わせるか、ズレている明確な意図（報酬獲得タイミングの分散）を仕様書に明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §5.3, ux_v1.md §4.4",
+    "issue": "ソーシャル機能の目的が「成長の共有」であるにもかかわらず、友達がレベルアップしたことを知る手段が図鑑を能動的に見に行くしかない。応援ボタンを押す動機付けが弱い。",
+    "suggestion": "友達がレベルアップした際に、FRIENDS画面の「お知らせ」に「〇〇さんがLv.10になりました！」という自動通知を追加し、そこからワンタップで応援を送れるようにしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.2",
+    "issue": "iOS PWAでキーボード表示時にヒーロー領域を `display: none` にすると、スクロール位置が急激に変わり、ユーザーがタップしようとしていたタスクがズレて誤操作を誘発する恐れがある。",
+    "suggestion": "`display: none` ではなく、ヒーロー領域を折りたたむアニメーション（height: 0）にするか、スクロール位置を維持するようJSで `scrollTop` を補正する仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.4",
+    "issue": "S-14から「[+タスクを追加]→ S-16」と遷移するが、S-16の入力項目がS-12（通常のタスク追加）と同じなのか、ゴール紐付けが固定されているのか明記されていない。",
+    "suggestion": "S-16はS-12のコンポーネントを流用し、「ゴール紐付け」フィールドが対象ゴールで固定（変更不可）となる旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "game_designer"
+  }
+]

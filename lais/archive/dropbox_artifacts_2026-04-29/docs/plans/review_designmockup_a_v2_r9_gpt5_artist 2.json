@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-101",
+    "severity": "CRITICAL",
+    "category": "TEXT_CONTRAST",
+    "screen": "s14_goal_detail",
+    "location": "画面下部の操作行［削除］ゴーストボタン（枠線のみ）",
+    "issue": "前景テキスト #F85149 vs 背景 #0D1117 のコントラスト比が約4.01:1で、AA基準4.5:1を下回る。design_system §5.1/2.3のdanger系トークン使用意図にも反する",
+    "suggestion": "ゴーストではなく --button-danger-bg/#DA3633 + #FFFFFF のsolidボタンに統一（s13準拠）するか、危険操作のみ強調行へ分離。ゴースト継続なら背景を--danger-subtle系で塗り、テキストは#FFFFFFにして4.5:1以上を確保",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "全体の色調・コンポーネント語彙",
+    "issue": "Night Skyテーマ＋青アクセント＋丸カードの組合せが汎用的なAI/ダークUIの既視感に寄り、独自の視覚的個性が弱い。星屑以外でブランドらしさの“設計された沈黙”が十分に機能していない",
+    "suggestion": "夜空/月明かりのメタファーをUIリズムへ翻訳（セクション間の“影”となる余白パターン、細いルーラー、微小な位相ズレ）を導入。Hero付近にだけ現れる繊細な星座グリッドや、進捗バー端の月相ピップ等、微細だが再現性のあるブランドモチーフで差別化する",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "タスク行右端の［ゴールドット＋カテゴリ名］と左列の時刻",
+    "issue": "左の時刻カラム→中央のタイトル→右端メタ（カテゴリ）への視線ジャンプが大きく、1行内でZ字の往復が生まれて読み流しのテンポを阻害している",
+    "suggestion": "カテゴリはタイトル下の2ndライン左寄せへ集約し、右端は所要時間など短い定形値のみに限定。行内の情報を“縦2段・左揃え”のブロックで完結させ、視線を左→右の一筆書きに整える",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "ヘッダー下ボーダー/入力バー上ボーダー（rgba(110,118,129,0.4), rgba(72,79,88,0.4)）",
+    "issue": "ボーダー色にトークン外の半透明RGBAが散在。--border(#484F58) / --border-strong(#6E7681)の階調ポリシーから逸脱し、面ごとに微差が増えて“設計された��黙”がノイジーになる",
+    "suggestion": "線は --border or --border-strong に統一し、濃度差は1px/2pxや間隔で表現。半透明での濃度調整は撤廃し、カード/面区切りの一貫性を担保",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "ステッパー〜タイトル〜説明〜アバター列の縦リズム",
+    "issue": "タイトル塊とアバター選択がやや詰まり、下半分に大きな空白が滞留。意図的な“静けさ”ではなく未使用スペースに見える",
+    "suggestion": "セクション間隔を§4.2基準の≥32pxで再配分（タイトル群→32px→アバター→40〜48px→CTA）。タイトルブロック幅を8〜12pxだけ狭め、視線を左上→中央へ緩やかに誘導",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "フォーム全体（開始時刻/所要時間/予定日の連続ブロック）",
+    "issue": "各フィールド間が16px中心で等間隔に並び、群としての意味（時間系/メタデータ系）が読み取りにくい。思考のチャンク化が弱い",
+    "suggestion": "時間系フィールド（開始時刻/所要時間/予定日）を1グループとし、上位グループ間は32px、グループ内は8–16pxで段差を付ける。見出しラベルに微小ルーラー（1px線 or ラベル上マージン）を用い、段落感を強調",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "「AI理解メモ」セクション見出し（小ラベル体裁 11px・uppercaseトラッキング）",
+    "issue": "英字用の大文字ラベル設計（letter-spacing:1.5px）を和文混在見出しに適用しており、視覚リズムが硬くなる。§3.4の日本語見出しルール（line-height 1.35 / letter-spacing 見出し用）と齟齬",
+    "suggestion": "和文主体のセクション見出しは --font-size-sm/14px + --line-height-ja-heading 1.35 + letter-spacing: var(--letter-spacing-heading)（-0.5px相当）へ統一。英字ラベル体裁は英字のみ（PROFILE等）に限定",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "サブタブ下のコンテンツ開始位置（下線インジケータ直下）",
+    "issue": "インジケータ直下〜最初の行の間隔が28px前後で、§4.2のセクション間≥32pxにわずかに満たないため、タブ切替時の“呼吸”が浅く見える",
+    "suggestion": "タブインジケータ下を+4〜8px拡張し32–36pxへ。見出しラベル（年齢/職業/趣味）列の先頭は上マージンを+4px積んで段落感を強化",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "タスク行の進行中インジケータ（小さなアンバーライン + テキスト）",
+    "issue": "進行中の視覚手掛かりが細線+テキストのみで、低照度環境では埋没しやすい。セマンティック色は適切だが“状態面”としての面積が不足",
+    "suggestion": "行内メタの背景に --warning-subtle を8–12%面積で敷き、ラインは維持。色依存にならないよう「進行中」をピルラベル化して形でも認識可能にする",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §2.ε'-1 付近（deploy.sh パッチ引用部）",
+    "issue": "deploy.sh のコードブロックが改行崩壊と HTML エスケープ混入で壊れており、`if` や複数コマンドが同一行に潰れています。`[ ... ]` が `\\[` に変化し、`>` は `&gt;`、さらに `awk` の正規表現も崩れているため、仕様書から実装サンプルを転記すると確実に構文エラーまたは誤動作を起こします。",
+    "suggestion": "当該コードブロックはプレーンなシェル構文に戻し、1 コマンド 1 行の整形を復元してください。Markdown 変換時の HTML エスケープを禁止し、少なくとも `sh -n`/`bash -n` で仕様書中のサンプル自体を検証するチェックを追加してください。実装サンプルを SSOT にするなら、コピペ実行可能性を CI で担保すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §2.ε'-3 付近（hflow_trigger_check.sh 抜粋）",
+    "issue": "`get_changed_files()` の関数本体途中に不要な ``` が混入しており、コードブロックの境界が壊れています。この状態では仕様書上のシェル関数が不完全になり、以降の行もコードとして読めません。実装者がここを正とみなすと、そのままではシェルとして成立しない壊れたスクリプトを生成する危険があります。",
+    "suggestion": "コードフェンスの開始・終了位置を全面見直し、関数単位で完結したコードブロックに修正してください。特に仕様書内コードは機械抽出前提なので、フェンス混入検知を `spec_lint` 系に追加し、``` の個数とネスト不整合を CI で落とすべきです。人手レビューだけでは再発しやすい崩れ方です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "instructions/session_progress.md / instructions/subagent_status.md / instructions/in_flight_topics.md",
+    "issue": "session_progress では「Phase 0 完遂」と記録されている一方、subagent_status では同じ `SUBAGENT-G49-P0` が `running` のまま、in_flight_topics でも `TASK-G49-P0` が `in_progress` のままです。SSOT を名乗る 3 ファイル間で状態が食い違っており、次セッション��依存判定や並列実行判断を誤らせる実運用バグの温床になります。",
+    "suggestion": "完了時に `session_progress` だけでなく `subagent_status` と `in_flight_topics` を同一トランザクションで更新する運用に変更してください。少なくとも `completion_verifier` 後に 3 ファイル整合を検査するスクリプトを追加し、同一ミッションの状態が `completed/running/in_progress` のように分裂していたら FAIL で止めるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/night_mode_dispatcher.sh",
+    "issue": "`pending` 件数と `auto_eligible: true` 件数を別々に数えて AND 判定しているだけで、同一タスクブロック内で両条件を満たすかを確認していません。そのため、あるタスクが pending、別タスクが auto_eligible:true なら起動条件を満たしたと誤判定します。夜間自動着手で対象外タスクを選ぶ将来バグに直結します。",
+    "suggestion": "awk などで `## TASK-` 単位にブロックを解析し、各ブロックごとに `status: pending` と `auto_eligible: true` と依存解消済みを同時評価してください。現在の `ELIGIBLE_COUNT` は未���用でロジックも無効なので削除し、対象タスク ID を実際に列挙する実装に置き換えると誤起動を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "scripts/main_session_writeguard.sh",
+    "issue": "subagent 判定を `DEV_SYSTEM_SUBAGENT=1` 環境変数の有無に全面依存していますが、この変数を立てる実装・結線が diff 内に存在せず、仕様書にも強制経路が見えません。結果として subagent 側でも scripts や docs/plans への書込が誤って BLOCK されるか、逆に手動で環境変数を立てれば main session が簡単に回避できる脆い設計です。",
+    "suggestion": "Task tool 起動時に必ず付与される識別子や hook input のセッション属性で main/subagent を判定するよう変更してください。少なくとも環境変数だけに依存せず、署名付きの caller context、または subagent 専用 working dir/metadata を検証する二重化が必要です。現状のまま本番運用すると将来必ず誤ブロックか迂回が起きます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/completion_verifier.sh",
+    "issue": "完了判定が `grep -qE 'PASS|完了|completed|Done|done'` や `grep -qE '完了コマンド|verify|check|test'` といった曖昧な文字列検出に依存しており、本文中に単語が含まれるだけで PASS します。失敗報告でも「test」「completed manually」等があれば通り得るため、機械検証としては誤判定率が高く将来バグを埋め込みます。",
+    "suggestion": "必須項目は行頭フォーマットを厳密に定義し、`^MISSION-ID:`、`^cmd-unit:`、`^cmd-e2e:`、`^cmd-realworld:`、`^Result:` のようにアンカー付きで検査してください。さらに PASS/FAIL の件数整合や required-files の存在と合わせて総合判定すると、長文自然文のノイズに左右されない堅い verifier になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "scripts/context_monitor.sh / lais/verify/dev_system_v34_package.md §2.25.16.4",
+    "issue": "入力値が 100 以下なら百分率、100 超なら token 数という暗黙ルールは曖昧で、`95` が 95 tokens なのか 95% なのか判別不能です。`CONTEXT_MAX_TOKENS` の既定値 200000 も魔法の数字として埋め込まれており、モデル変更時に判定が簡単にずれます。運用���が誤形式で渡しても PASS/WARN が静かに返るため気づきにくいです。",
+    "suggestion": "入力形式を `--ratio` と `--tokens` で明示分離し、曖昧入力は FAIL にしてください。閾値 70/85/95 と最大 token 数は app_config か定数セクションに集約し、説明付きで参照可能にすると保守性が上がります。異常入力を `PASS` 扱いにせず `WARN` 以上にするのも再発防止に有効です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "DEAD_CODE",
+    "location": "scripts/night_mode_dispatcher.sh",
+    "issue": "`ELIGIBLE_COUNT` を求める awk ブロックは値を実運用で使っておらず、しかも `n` の初期化やブロック境界処理が中途半端で意味のある集計になっていません。将来メンテナが「既に厳密判定済み」と誤認してロジックを信用する危険があり、デッドコードとして保守コストだけを増やしています。",
+    "suggestion": "未使用の `ELIGIBLE_COUNT` 算出は削除するか、実際の対象 TASK を返す厳密なブロック解析へ置き換えてください。判定責務を `list_night_mode_tasks` のような関数に分離するとテストもしやすくなり、条件追加時の修正漏れも��らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0907,
+    "input_tokens": 54640,
+    "output_tokens": 2244,
+    "model_id": "gpt-5.4"
+  }
+]

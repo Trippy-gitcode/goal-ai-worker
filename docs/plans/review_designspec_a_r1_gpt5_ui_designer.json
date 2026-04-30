@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.1 / §4.2 / §4.3",
+    "issue": "S-02 の画面IDが矛盾。「S-02 Onboarding」と定義されている一方、S-00 と S-01 からの遷移先として「S-02 ログイン」と記載があり、ログイン画面は本書内に定義がない。",
+    "suggestion": "ログイン画面を別ID（例: S-03 Sign-in）として新設し、S-00/S-01 の遷移先表記を S-03 に修正。もしくは Phase A の対象外とするなら、S-00/S-01 の文言を「（Phase B）」などに明示して S-02 参照を削除。変更は目次と各セクションの参照も併せて更新。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3 トークン参照 / §4 全般（S-12, S-20, トースト/スナックバー/ドロワー）",
+    "issue": "レイヤリング基準（z-index 系）のトークンや規定が未定義。ハーフモーダル、履歴ドロワー、トースト、スナックバー、レベルアップ演出、タブバー固定など複数の浮遊要素が干渉する可能性がある。",
+    "suggestion": "z-index スケールをトークン化（例: --z-base, --z-tabbar, --z-modal, --z-drawer, --z-toast, --z-snackbar, --z-overlay, --z-confetti）し、各コンポーネントに割当てを明記。合わせてオーバーレイ/スクラム色もトークン化（--overlay-scrim）してテーマ間整合を担保。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.5 / §5.5 / §5.6 / §4（ピル・ボタン・アバター選択）",
+    "issue": "フォーカスリングの設計が入力以外の要素で未定義。入力フィールドには box-shadow による focus があるが、ボタン、ピル、アクションアイコン、アバター選択などのキーボード/スイッチ操作時の focus-visible が規定されていない。",
+    "suggestion": "フォーカスリングをトークン化（--focus-ring-color, --focus-ring-width, --focus-ring-offset, --focus-ring-inset 等）し、ボタン/ピル/タブ/アバター等の共通スタイルを §5 共通コンポーネントに追加。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.2 S-01（S01-4, S01-6）/ §4.5 S-12（S12-6 他）/ §5.6 入力フィールド",
+    "issue": "入力フィールド背景がセクション間で不一致。S-01 は --bg-surface、S-12 は --bg-primary、共通定義 §5.6 は --bg-primary と記載され、どれが正か不明。",
+    "suggestion": "入力フィールドの既定背景を1つに統一（推奨: --bg-surface か --bg-primary のいずれか）し、例外がある場合は「例外条件と理由」を明記。§5.6 を単一の出典として各画面仕様を整合させる。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3 トークン参照 / §5.2/§5.3/§4 各ボタン",
+    "issue": "Disabled/Pressed の状態設計が不十分。多くのボタンで opacity:0.5 のみが指定され、色コントラストやテーマ切替時の一貫性を担保するトークンがない。",
+    "suggestion": "状態別トークンを追加（--button-primary-bg-pressed, --button-secondary-bg-pressed, --button-text-disabled, --control-disabled-opacity など）。Disabled は色（text/icon/border）も含めてセマンティックに定義し、opacity のみ依存を回避。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.1 カラー / §5.2 プライマリCTA / §5.4 破壊的ボタン / §4 各CTA",
+    "issue": "ボタン上のテキスト色が直接 #FFFFFF 指定でトークン不在。実装ポリ���ー（ハードコード禁止）と不整合で、テーマ切替時の調整が困難。",
+    "suggestion": "前景テキストのセマンティックトークンを追加（--text-on-primary, --text-on-danger, --icon-on-primary 等）。本書内の #FFFFFF 記述は該当トークン参照へ置換。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.2 タイポグラフィ / §4.4 S-10（S10-3/7）/ §4.7 S-14（S14-7）",
+    "issue": "英字ラベルのフォントサイズが不一致。§3.2 では英字ラベルを 11px と定義しているが、S-10 の TODAY/GOALS は 14px、S-14 の TASK は 11px と混在。",
+    "suggestion": "英字ラベルの既定サイズを 11px（推奨）に統一するか、文脈別に 11px/14px の2系統を正式定義（例: セクション見出し=14px、サブラベル=11px）して §3.2 と各画面仕様を整合。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.1 ボトムタブバー / §4.5 S-12（ハーフモーダル）/ §6.1 画面遷移",
+    "issue": "タブバーの表示優先度が不明確。§5.1 に「全画面から隠れない（キーボード時のみ非表示）」とあるが、ハーフモーダルやドロワー表示時の被り/非表示方針が明記されていない。一般的にはモーダルがタブバー上に覆い被さる。",
+    "suggestion": "モーダル/ドロワー出現時はタブバーを背面に回す（見えない/操作不可）方針を明記し、z-index とヒットテスト（pointer-events）規定を追加。§5.1 の文言は「通常時は固定表示。モーダル/ドロワー/キーボード表示時は不可視」に修正。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§3.3 スペーシング",
+    "issue": "「タスク行間: 8px（§4.2 の『呼吸するリズム』規定）」などの参照先が誤っており、該当原則は §2.3（Open Air レイアウト原則）に記載。",
+    "suggestion": "参照箇所を §2.3 へ修正。併せて「セクション間: 32px」の参照も正しい章節へ更新。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.4 NGリスト / §5 全般",
+    "issue": "「純白 #FFFFFF のベタ使用禁止」との方針がある一方で、ボタンのテキスト色は #FFFFFF を採用。ベタ使用の定義が曖昧で実装判断に揺らぎが生じる。",
+    "suggestion": "NG の適用範囲を明確化（例: 画面/広い面の背景での使用禁止。テキスト/アイコンは可）。その上で前景色はトークン化（R-006）し、テーマ回帰検証を前提に許容/不許可を明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.3 スペーシング / §4 全般（S00-4, S10-4, S12-5/8 等）",
+    "issue": "12px 系のスペース/パディングが多数登場するが、スペーシングトークンは 4/8/16/24/32/40/64px のみ。トークン逸脱が散見される。",
+    "suggestion": "12px を公式トークンとして追加（例: --space-ms: 12px）するか、既存トークンへ丸める設計指針を提示。ピル/ボタン/カードの内側パディング用に『コンポーネント内間』専用トークン群を設けるのも有効。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3 トークン参照 / §4 全般（アイコン仕様）",
+    "issue": "アイコンのサイズ（14/20/22px）、ストローク太さ（1.5px）などが画面ごとに直指定で、アイコンサイズ/ストロークのトークンが未定義。",
+    "suggestion": "アイコン用トークン��--icon-size-sm/md/lg、--icon-stroke-width）を追加し、各画面の SVG 指定をトークン参照へ統一。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.1 カラー / §4.5 S-12（背景オーバーレイ）/ §6.1",
+    "issue": "背景オーバーレイが rgba(0,0,0,0.6) の直指定でトークン化されておらず、テーマ（Light/Dark）切替時に最適濃度へ調整できない。",
+    "suggestion": "オーバーレイ用の色/不透明度をトークン化（--overlay-scrim, --overlay-scrim-strong など）し、モーダル/ドロワー/画像ビュー等に共通適用。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§6.4 モーション全般の禁止事項 / §5.9 スナックバー / §4.3/4.5（box-shadow 利用箇所）",
+    "issue": "「drop-shadow/blur の装飾目的使用禁止」とあるが、スナックバーや選択リングで box-shadow を使用。装飾と機能的エレベーションの線引きが不明瞭。",
+    "suggestion": "『装飾目的ではなく可読性/階層性向上のための box-shadow は許可』などの基準を明文化し、シャドウトークン（--shadow-1/2/3）を定義して用法を統���。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.1 カラー / §4.4 S-10（S10-4 サブ行ダッシュ）",
+    "issue": "進行中ダッシュ色や一部のポイントカラーが直値参照（例: #E8A855）。§7 C 群で DS 拡張予定だが、本書内でも『直値禁止』の原則と齟齬が残る。",
+    "suggestion": "暫定的にもセマンティックトークン名（--in-progress-marker 等）で記述し、値の確定は DS v0.13 に委ねる旨を注記。実装側が HEX を埋め込まないようガード。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§4.5 S-12 / §4.9 S-20（OS ピッカー/入力自動伸長）",
+    "issue": "「OS 時刻ピッカー」「入力最大4行の自動伸長」などプラットフォーム依存の挙動があるが、iOS/Android/Web（PWA）での差分方針が未記載。",
+    "suggestion": "プラットフォーム差異の扱い方針を付記（例: ネイティブは OS ピッカー、Web はカスタムピッカー/HTML input[type=time] fallback）。入力自動伸長のしきい値/アニメ要否も共通規定へ追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  }
+]

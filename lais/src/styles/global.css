@@ -1,0 +1,121 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+button, input, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+  }
+}
+
+/*
+ * Route Suspense fallback（PATCH-PB5-CODE-SPLIT、2026-04-25）
+ * lazy() chunk 読込中の最小フォールバック。視覚的にはほぼブランクで FOUC を防ぐ。
+ * components/shared/Loading.jsx と App.jsx の Suspense fallback で共有。
+ */
+.route-fallback {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/*
+ * Stage 7-4 prep — Skip link (WCAG 2.4.1 Bypass Blocks Level A).
+ * Tab で focus した時のみ可視 (左上にスナップ). enter で `#main-content` へ遷移し
+ * BottomTabBar / ヘッダ多項目の Tab ピンポンを 1 stop で短絡.
+ *
+ * ミッション ID: TASK-STAGE7-4-PREP-DEBT-CLEANUP-V1 (a11y CRITICAL K1)
+ */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  z-index: var(--z-tooltip, 800);
+  padding: 8px 16px;
+  background: var(--theme-color-accent, #007aff);
+  color: var(--theme-color-button-text-inverse, #ffffff);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  text-decoration: none;
+  border-radius: var(--theme-radius-sm, 8px);
+  border: 2px solid var(--theme-color-accent, #007aff);
+  /* min-tap-target 確保 */
+  min-height: var(--tap-target-min, 44px);
+  display: inline-flex;
+  align-items: center;
+  /* Tab focus 時に visible */
+  transition: top 100ms ease-out;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 8px;
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring-color, var(--theme-color-accent));
+  outline-offset: var(--focus-ring-offset, 2px);
+}
+
+/*
+ * Stage 7-4 prep — 共通インラインエラーバナー (`role="alert"` 用).
+ * H-2 解消: --bg-error / --text-error はもう themes.css で 4 テーマすべて定義済.
+ */
+.lais-inline-error,
+.s10-load-error,
+.s30-load-error {
+  padding: 8px 16px;
+  background: var(--theme-color-error-bg, var(--bg-error));
+  color: var(--theme-color-error-text, var(--text-error));
+  font-size: 12px;
+}

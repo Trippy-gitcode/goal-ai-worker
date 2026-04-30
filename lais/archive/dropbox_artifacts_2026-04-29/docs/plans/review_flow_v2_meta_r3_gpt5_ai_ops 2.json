@@ -1,0 +1,232 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "B. アプリ仕様レビュー / レビュー対象 × フロー マッピング",
+    "issue": "Bフローではペルソナ9種と定義している一方、マッピング表では各成果物のペルソナ数が8と記載されており不整合がある。",
+    "suggestion": "Bフローの対象成果物ごとに使用するペルソナの最終リストを明示し、総数（8 or 9）を統一。除外するペルソナがある場合は除外理由と影響（コスト・カバレッジ）を追記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "D. 実装レビュー / レビュー対象 × フロー マッピング",
+    "issue": "Dフローではペルソナ7種と定義しているが、マッピング表では実装コードのペルソナ数が6と記載されている。",
+    "suggestion": "実装レビューの最終ペルソナ数を6または7に確定し、マッピング表と本文を一致させる。除外する場合は、ゴールデンで拾う根拠とリスク低減策（補完チェック）を併記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "指摘の妥当性判定クライテリア（Filter 5）",
+    "issue": "「3+モデル/ペルソナが同一指摘」の“同一指摘”定義とカウント方法が未定義。2モデル構成下での集計軸（モデル×ペルソナの重み）も不明確。",
+    "suggestion": "同一指摘の正規化キー（対象セクション/コンポーネント、カテゴリ、ルールID、位置情報）を定義。合意度はモデル×ペルソナ単位で集計し、重複判定はファジーマッチ閾値を明記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "指摘の妥当性判定クライテリア（Filter 5・6）",
+    "issue": "Filter 5の単独指摘ダウングレードとFilter 6の影響度判定の優先関係が曖昧で、致命的でも単独ならHIGHのまま残る可能性がある。",
+    "suggestion": "最終severityは impact優先の決定規則に統一（final = max(ImpactToSeverity, DomainExceptionRule)）。単独でも影響度が致命的/重大なら必ずCRITICALへ再昇格する明文化を追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "共通ルール / 改善4: 信頼度ス��アリング",
+    "issue": "信頼度Aのみ必須修正とする運用は“自己強化バイアス”を招き、B/B+由来の真のCRITICALを見落とすリスクがある（特に新設ペルソナやニッチ領域）。",
+    "suggestion": "ドメイン重大性例外を追加（セキュリティ・データ破壊・決済は信頼度に依存せず必須）。スコアはベイズ平滑＋最小サンプルサイズで安定化し、ゴールデンでは重み付け集計（信頼度×合意度）に変更。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "共通ルール / エスカレーション（Filter 7含む）",
+    "issue": "RACIが未定義で、Code/ADV/POの責務境界と承認権限が不明。AIの自律範囲と人間ゲートの線引きが曖昧。",
+    "suggestion": "RACIを明文化（例: Code=R, ADV=A for Filter1-6適用監査, PO=A for Filter7承認, ペルソナ= C, QA=I）。承認SLA・記録媒体（PRコメント/Issue）と必要証跡（フィルター判定ログ）を規定。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "Code Pre-Reviewの改善",
+    "issue": "Pre-Review段階でFilter 7に相当する上位仕様変更ガード���なく、Codeが自己修正でDS/UXを破壊する恐れがある。",
+    "suggestion": "Pre-ReviewにもFilter 7簡易版を適用し、上位仕様に波及する変更はPR化してADV/PO承認必須。自律修正は“対象ファイル内完結”に限定。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "共通ルール / 改善2: diffレビュー",
+    "issue": "修正ラウンドをdiff限定にすると非局所的副作用を見逃しやすい（スタイルトークンや共有コンポーネントの波及）。",
+    "suggestion": "リスクベースで周辺スコープのサンプリング監査（ランダム5〜10%）と影響分析に基づく関連ファイル自動追加（依存グラフ/静的解析）を導入。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "改善3: ゴールデンレビュー",
+    "issue": "2回目ゴールデン後にCRITICAL>0の際の“POエスカレーション”の着地点（延期/仕様変更/スコープ切り出し）が未定義で収束条件が不明。",
+    "suggestion": "エスカレーション先の意思決定オプションと締切（SLA）を規定。例: 72h以内に①仕様改定②次フェー���切替③中止のいずれかを決定。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "A/B/C/E/F/G 各フロー",
+    "issue": "CRITICAL定義はD（実装）にのみ明確化。デザイン/仕様/技術文書/テスト/プロンプトの各ステージにおけるCRITICAL/HIGHの境界が未定義。",
+    "suggestion": "各フロー固有のCRITICAL/HIGH基準表を追加（例: デザイン=法令/WCAG違反、仕様=機能矛盾/要件欠落、技術文書=API破綻、テスト=重要シナリオ未カバー、プロンプト=安全/逸脱リスク）。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "指摘の妥当性判定クライテリア（Filter 7）",
+    "issue": "「DS/UX/project仕様の変更が必要」の判断基準が運用可能な形で具体化されていない。",
+    "suggestion": "チェックリスト化（DSトークン追加/変更、情報設計の項目追加、状態遷移の変更、API契約変更等）。どれか該当で自動的にADV/PO承認ゲートへ。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "指摘の妥当性判定クライテリア（Filter 5）",
+    "issue": "モデル間基準差を是正する重み付けがなく、信頼度Aの指摘が過大に通りやすい/通りにくい偏りが残る。",
+    "suggestion": "合意度を信頼度重み付きに変更（WeightedConsensus = Σ(confidence_weight × 一致フラグ)）。最小2“重み単位”以上で中確度、3以上で高確度などの閾値を定義。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "指摘の妥当性判定クライテリア（Filter 5 例外）/ F. テスト仕様",
+    "issue": "セキュリティ単独指摘のCRITICAL維持はDに限定されている。Fのsecurity_testerやデータ消失系（backend_architect, code_reviewer）に同等の例外がない。",
+    "suggestion": "ドメイン例外を横断適用：セキュリティ、データ破壊、課金誤りは単独でもCRITICAL維持（信頼度不問）。対象ペルソナを列挙し明文化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "指摘の妥当性判定クライテリア（Filter 4）",
+    "issue": "Phase 4対応リストへの登録後の責任者/期限/引継ぎが未定義で、持ち越し漏れの恐れがある。",
+    "suggestion": "Phase 4対応リストにオーナー、期日、優先度、次回レビュー時の再チェック項目を必須メタデータとして付与。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "共通ルール / フィルター適用フロー",
+    "issue": "AIが適用したフィルター判定の監査性（改ざん防止・追跡可能性）が不十分。",
+    "suggestion": "フィルター結果を変更不可な監査ログに記録（コミットに紐付け、ハッシュ化、PRコメント自動生成）。人間承認が必要な判定はチェックリスト付きで残す。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "冒頭「目的」 vs 各フローのモデル数",
+    "issue": "冒頭で「3モデル」とあるが、各フローは「GPT-5 + Gemini」の2モデル運用になっている。",
+    "suggestion": "現在の正式運用モデル数を2に訂正するか、3モデル目（例: Claudeなど）の導入条件と使用箇所（ゴールデン限定等）を明記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "指摘の妥当性判定クライテリア（Filter 3）",
+    "issue": "CUMULATIVE_CONTEXT（既決定リスト）の単一の正規格納先と更新手続きが未定義で、再指摘の確実な抑止が困難。",
+    "suggestion": "既決定リストのSoT（例: repo内 decision_log.yaml）を定義し、キー（対象/理由/期限/根拠）と自動参照手順（PRテンプレ適用）を規定。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "各フローの主審選定",
+    "issue": "主審が固定のため、修正内容が主審ドメイン外に及ぶ場合の検出力が低下する恐れがある。",
+    "suggestion": "修正申告の影響タグ（security, backend, a11y等）に応じて主審に“可変スロット”を1枠追加し、関連ドメインのペルソナを一時的に主審化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-019",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "共通ルール / リカバリ",
+    "issue": "AIが誤った判断/修正を行った場合のリカバリ手順（ロールバック、ブロック、再評価基準）が未定義。",
+    "suggestion": "リカバリ手順を明文化：①自動リバート（最後の安全タグ付きコミット）②緊急フリーズと人間レビュー③Root Cause記録とフィルター調整④再実行は“ゴールデンのみ”で再開。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "改善4: 信頼度スコアリング",
+    "issue": "採用率ベースはサンプル数に敏感で、初期フェーズや主審非対象ペルソナの評価が不安定。",
+    "suggestion": "最小サンプルサイズとウィルソン区間での推定、フェーズ間の忘却率（decay）を導入。評価は成果物種別ごとに分離。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改善4: 信頼度スコアリング",
+    "issue": "false positive率の定義（どのフィルターで棄却されたらFPと数えるか）が曖昧で、格下げ判定の恣意性が残る。",
+    "suggestion": "FP定義を明確化：Filter1-2=厳密FP、Filter3-4=運用FP、5以降=不問。格下げは厳密FPのみを分母/分子に採用。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-022",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "AI⇔人間の責務分離（全体設計）",
+    "issue": "Filter1-7の適用・最終判断をAI（Code）単独で完結させる設計が多く、承認ゲートにおける人間監査の介在が限定的。",
+    "suggestion": "高影響判定（Filter6=致命的/重大）とFilter7分岐は人間承認必須（ADV/AまたはPO/A）。��審AIが出した“修正不要”判断の5〜10%を人間が抜き取り監査。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "改善2: diffレビュー / Filter 7",
+    "issue": "影響範囲の自己申告のみだと過小申告リスクがある。",
+    "suggestion": "影響範囲推定を自動化（依存グラフ生成・変更セット解析）し、検出結果をdiffレビュー対象に自動追加。自己申告との乖離が大きい場合は人間承認ゲートへ。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "背景の星型パーティクル装飾",
+    "issue": "背景に散りばめられたドット（星）の装飾が、仕様書で排除すべきとされている「AIっぽい宇宙的・サイバー空間的」な安易な表現に陥っている。「実世界との地続き感」「自然界/文化ソース」というブランドDNAに反し、洗練さを損なっている。",
+    "suggestion": "意味のないパーティクル装飾を完全に削除し、純粋な背景色とタイポグラフィの美しさのみで「設計された沈黙」を体現する画面構成に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「サインアップ」ボタン",
+    "issue": "非アクティブ状態のボタン背景（#1C2128）とテキスト（#484F58）のコントラスト比が極端に低く（約1.5:1）、画面環境によってはボタンの存在自体が視認できない。非アクティブ要素の例外を考慮してもUX上の障壁となる。",
+    "suggestion": "テキスト色を `--text-disabled` などの少し明るい色に変更し、最低限の形状とテキストが視認できるコントラストを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "中央「タイプB」アバターの選択状態ハイライト",
+    "issue": "選択状態を示す青いボーダーと外側のシャドウ（box-shadow）の組み合わせが、仕様書で禁止されている「装飾目的のblur/glow」に近い、安価なデジタル表現に見える。",
+    "suggestion": "グロー効果に頼らず、線の太さのコントラストや、背景の微かなソリッドな色面変化など、より洗練された手法で選択状態を表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタイムライン縦線",
+    "issue": "タイムラインの左側の縦線（2px）とタスク間の余白が単調。タスクの重要度や時間の流れの「リズム」が感じられず、視覚的な緊張感に欠ける単なるリストの装飾に留まっている。",
+    "suggestion": "ドットのサイズに対して縦線を少し太くしてコントラストをつけるか、タスク間の余白を時間の長さに応じて微調整するなど、視覚的なリズムを持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "「所要時間」の選択チップ群",
+    "issue": "8つもの選択チップ（5分〜120分）が狭い領域に敷き詰められており、視覚的に過密。認知負荷が高く、「呼吸するリズム」という余白の原則を損なっている。",
+    "suggestion": "頻出する選択肢（例: 15分, 30分, 60分）のみをチップとして表示し、その他は横スクロールや別UIに逃がすことで、画面内の要素数を減らし余白を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "画面下部「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "完了済みのタスクに対して、AI相談ボタンが非アクティブ（グレーアウト）で残存している。「静かな情報設計（必要な情報だけ表示）」の原則に反し、不要な視覚的ノイズとなっている。",
+    "suggestion": "完了済みのタスクでは不要なアクションボタンを画面から完全に削除し、その分の空間を「設計された沈黙」として美しく見せる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "「60%」のヒーロー数字とプログレスバーの間",
+    "issue": "巨大なヒーロー数字（48px）と直下のプログレスバーの間隔が近すぎる。大文字が持つ視覚的な重さに対して周囲の余白が不足しており、窮屈な印象を与えている。",
+    "suggestion": "ヒーロー数字の下部に十分な余白（例: 24px以上）を設け、タイポグラフィが「呼吸」できる空間を設計する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s20_talk",
+    "location": "チャット画面全体のUI構成",
+    "issue": "吹き出しの形状、配置、入力バーの構成が既存の標準的なメッセージングアプリの完全な模倣であり、Lais独自の「洗練＋自然体」という視覚的個性が全く立っていない。",
+    "suggestion": "吹き出しの角丸の取り方、背景色との境界線の扱い、余白の取り方を工夫し、単なる「チャットアプリ」ではなく「パーソナルなAIノート」のような独自のアートディレクションを取り入れる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "PROFILEタブ内の各セクション（基本情報、AI理解メモ、性格タイプ）",
+    "issue": "各セクションが等間隔の罫線で区切られており、仕様書の「全要素が等間隔」NGルールに抵触している。余白が「設計された沈黙」として機能しておらず、単調な情報カタログになっている。",
+    "suggestion": "セクション間の余白（--space-xl: 40px）を大胆に取り、罫線に頼らずに空間（ホワイトスペース）の広がりで情報のグループを区切るレイアウトに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  }
+]

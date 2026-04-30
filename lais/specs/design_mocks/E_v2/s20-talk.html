@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Lais — S-20 Talk | 案 E_v2 Cyberpunk 2077</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="screen">
+
+  <div class="statusbar">
+    <span class="time">22:51</span>
+    <span class="indicators">
+      <span class="ind-dot"></span>
+      <span class="net">5G</span>
+      <span class="bat">76%</span>
+    </span>
+  </div>
+
+  <div class="s20-content">
+    <!-- ヘッダ -->
+    <div class="s20-header">
+      <div class="s20-back-btn">&lt;</div>
+      <div class="s20-ai-info">
+        <div class="s20-ai-name">AI_LAIS <span class="jp">念</span></div>
+        <div class="s20-ai-status"><span class="dot"></span>ONLINE · OPUS_4.7</div>
+      </div>
+      <div class="s20-deepcheck-toggle">
+        <span class="kanji-jp">確</span>
+        <span>DEEP</span>
+        <span class="switch"></span>
+      </div>
+    </div>
+
+    <!-- メッセージ -->
+    <div class="s20-messages">
+
+      <!-- 区切り timestamp -->
+      <div style="text-align:center; font-family: var(--f-mono); font-size:11px; color: var(--c-text-faint); letter-spacing:0.3em; margin-bottom:2px;">
+        ── 22:47 SESS_INIT ──
+      </div>
+
+      <!-- AI 1 -->
+      <div class="s20-msg-ai">
+        <div class="s20-avatar-ai">念</div>
+        <div class="s20-bubble-ai">
+          <div class="meta">// LAIS_OPUS · ROUND_01</div>
+          今日の振り返りを始めようか。<span class="glitch-line">企画書 v2</span> のドラフト、無事に終わった?
+        </div>
+      </div>
+
+      <!-- User 1 -->
+      <div class="s20-msg-user">
+        <div class="s20-bubble-user">
+          <div class="meta">// USR_FTS &gt;</div>
+          終わった。けど、競合分析の章だけ、自分でも納得いってない。なんか浅い気がする。
+        </div>
+      </div>
+
+      <!-- AI 2 -->
+      <div class="s20-msg-ai">
+        <div class="s20-avatar-ai">念</div>
+        <div class="s20-bubble-ai">
+          <div class="meta">// LAIS_OPUS · ROUND_02 · DEEPCHECK_ON</div>
+          <span class="glitch-line">「浅い」</span>って感じるとき、どこに引っかかってる? 情報量が足りないのか、それとも視点の角度が <span class="glitch-line">通り一遍</span> に感じるのか — どちらに近い?
+        </div>
+      </div>
+
+      <!-- User 2 -->
+      <div class="s20-msg-user">
+        <div class="s20-bubble-user">
+          <div class="meta">// USR_FTS &gt;</div>
+          後者かな。ありきたりに見えそう。
+        </div>
+      </div>
+
+      <!-- AI typing -->
+      <div class="s20-typing">
+        <span>// PROCESSING</span>
+        <span class="dots"><span></span><span></span><span></span></span>
+        <span>OPUS_THINKING</span>
+      </div>
+    </div>
+
+    <!-- 入力エリア -->
+    <div class="s20-input-area">
+      <div class="s20-input-row">
+        <div class="s20-input-box">
+          <span class="placeholder">// メッセージを入力 / TYPE_HERE</span>
+          <span class="cursor"></span>
+        </div>
+        <button class="s20-send-btn">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="M2 8 L13 8 M9 4 L13 8 L9 12" stroke="#0a0a0a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="s20-input-meta">
+        <span>// CTX: 12_TURNS · TOK_2.3K</span>
+        <span class="right">
+          <span class="deep-on">確 DEEP_ON</span>
+          <span class="opus">OPUS_4.7</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

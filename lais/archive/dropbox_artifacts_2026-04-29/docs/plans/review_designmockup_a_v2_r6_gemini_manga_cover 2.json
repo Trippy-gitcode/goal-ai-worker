@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s00_splash",
+    "location": "サブタイトル「あなたの人生を、あなたらしく」",
+    "issue": "読点「、」の後のアキが広すぎ、日本語の組版として間延びして見え、ブランドの「洗練」というDNAを損ねている。",
+    "suggestion": "font-feature-settings: 'palt' などを適用し、約物周りのカーニングを詰めて自然な文字組みにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "画面タイトル「最初のパートナーを / 選びましょう」",
+    "issue": "助詞「を���の直後で強制改行されており、文節が分断され日本語としての読みやすさと美しさが欠如している。",
+    "suggestion": "改行位置を「最初の / パートナーを / 選びましょう」とするか、改行をなくして1行に収まるようフォントサイズを調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "TODAYセクションの各タスク行",
+    "issue": "時刻、アイコン、タスク名が横一列に並んでいるが、要素間の余白が均等に近く、視線が左から右へスムーズに流れない（グループ化の法則が効いていない）。",
+    "suggestion": "時刻とアイコンを一つのグループとし、タスク名との間の余白（マージン）を広げて明確な「間」を作り、情報の塊を視覚的に分離する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダル内の入力フォーム全体",
+    "issue": "狭い画面内に多数の入力項目（時刻、予定日、所要時間、ゴール、メモなど）が均等な余白で詰め込まれており、情報過密でユーザーの視線が迷子になる。",
+    "suggestion": "必須項目と任意項目でセクション間の余白にメリハリをつけるか、詳細設定は折りたたみ（アコーディオン）にして初期表示の認知負荷を下げる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s13_task_detail",
+    "location": "下部のアクションボタン群（編集、削除、進め方を聞く、詰まりを相談）",
+    "issue": "4つのボタンが同等の視覚的重みで2x2のグリッド状に配置されており、どのアクションが主役（プライマリ）なのか視線誘導が機能していない。",
+    "suggestion": "AI相談系のボタンをプライマリとして目立たせ、編集・削除はテキストリンクやアイコンのみにするなど、コントラスト（視覚的階層）をつける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内のボタン群",
+    "issue": "狭いカード幅の中に「登録する」「編集して登録」「✕」の3つのボタンが横並びで詰め込まれており、余白が窮屈で誤タップを誘発しやすい。",
+    "suggestion": "「登録する」を幅広の主ボタンとし、「編集して登録」はテキストリンク化、「✕」はカード右上のアイコンとして配置し、余白のリズムを整える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "AI理解メモの本文テキスト",
+    "issue": "行間は確保されているが、背景色に対するテキスト色の明度コントラストが弱く、長文を読む際の可読性が低下している。",
+    "suggestion": "長文の本文にはより明度の高いテキスト色を使用し、タイトルとの明暗コントラストを逆転させるか強調する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "進捗表示の「60%」",
+    "issue": "数字と「%」のベースラインやウェイトのバランスが取れておらず、巨大な数字が浮いて見え、洗練されたタイポグラフィになっていない。",
+    "suggestion": "「%」のサイズをさらに小さくし、数字とのベースラインを揃え、数字の字間（letter-spacing）を微調整して一体感を持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s15_goal_create",
+    "location": "カテゴリ選択のチップ群",
+    "issue": "チップが複数行に折り返されているが、行間（上下の余白）がチップ間の横の余白に対して狭く見え、要素が密集して息苦しい（「間」がない）印象を与える。",
+    "suggestion": "チップの行間（row-gap）を横の余白（column-gap）と同等以上に広げ、タップしやすさと視覚的な呼吸空間を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "所要時間の横スクロールチップ",
+    "issue": "チップが画面幅にぴったり収まっているように見え、右端が画面外に見切れる演出がないため、横スクロール可能であることの視覚的アフォーダンスが欠如している。",
+    "suggestion": "最後のチップが画面右端で半分見切れるようにコンテナの幅やパディングを調整し、スクロール可能であることを視線誘導で伝える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "QRスキャン（S-36）にて、OSのカメラアクセス許可リクエストでユーザーが「拒否」を選択した場合のフォールバック挙動が未定義です。このまま実装すると、画面が真っ暗なまま進行不能（行き止まり）になるリスクがあります。",
+    "suggestion": "カメラアクセス拒否時のエッジケースを追加してください。例：「カメラへのアクセスが許可されていません。設定から許可してください」というエラーメッセージと、S-33（FRIENDS画面）へ戻るための明示的な[戻る]ボタンを表示する仕様��追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4",
+    "issue": "シェアリンクによるリモート友達追加の受信者フローにおいて、未ログインユーザーがS-01（サインアップ）→S-04（メール認証待ち）と進んだ際、別端末（PC等）でメールを開いて認証を完了させると、元の端末のsessionStorageに保存されたリダイレクト先URL（一時トークン）が別端末に引き継がれません。結果として友達追加フローが破綻します。",
+    "suggestion": "リダイレクト先URL（一時トークン）をクライアントのsessionStorageではなく、サインアップ時にSupabase Authの `user_metadata` に一時保存する設計に変更してください。オンボーディング完了時にサーバー側でメタデータのトークンを評価し、自動で友達関係を構築してメタデータから削除するフローを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2 / ux_v1.md §13.4",
+    "issue": "退会クーリングオフ中（deleted_pending）のデータ可視性について、UI上は「友達の図鑑から非表示」と定義されていますが、project_v1.md §7.2のRLS例外ルールに `account_status = 'active'` の条件が明記されていません。APIを直接叩けば退会手続き中のユーザーのプロフィールやメッセージが取得できてしまい、プライバシー保護の要件と矛盾します。",
+    "suggestion": "project_v1.md §7.2のRLSルールのSELECT条件に、「対象ユーザーの account_status が active であること」を必須条件として明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §13.1",
+    "issue": "「対話履歴を削除」機能において、「AI理解メモもリセット」と記載されていますが、DISCOVERタブの「自己分析カード」や「強み/弱みチップ」「MBTI推定結果」もAI対話から生成された派生データです。これらも削除対象に含まれるのかがプライバシーの観点で曖昧です。",
+    "suggestion": "削除対象に「自己分析カード」「強み/弱みチップ」「MBTI推定結果」を含めるか、あるいはこれらは「抽象化された分析結果」として保持し続けるのか、仕様を明確に定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §5.5 / ux_v1.md §4.4",
+    "issue": "簡易メッセージ機能の悪用防止として通報・ブロック機能は定義されていますが、短時間に大量のメッセージを送信するスパム攻撃（嫌がらせ）をシステム的に防ぐレートリミットが定義されていません。",
+    "suggestion": "サーバー側（Cloudflare Workers）でメッセージ送信APIに対するレートリミット（例：1ユーザーあたり1分間に5件まで等）を設ける仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.3 / ux_v1.md §3.2",
+    "issue": "AIへの画像添付機能において、テキストのPIIはマスキングされますが、画像はEXIF削除とリサイズのみでVision APIに送信されます。画像内に含まれる個人情報（顔写真、書類の文字など）に対するシステム的な保護がありません。",
+    "suggestion": "初回添付時のプライバシー警告（ux_v1.md §3.2）に加えて、「送信された画像はAIモデルの学習には使用されません」というAPIプロバイダの規約に基づく安心材料をUI上に明示するか、将来的なクライアントサイドでの顔ぼかし処理の検討をproject_v1.mdに記載してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §5.4",
+    "issue": "QRコードに含まれる一時トークンの生成規則（エントロピー）と、無効なトークンでのアクセス試行に対する防御策が未定義です。推測可能な短いトークンが使用された場合、総当たり攻撃で他人のプロフィールが不正に閲覧されるリスクがあります。",
+    "suggestion": "一時トークンはCSPRNGで生成された十分な長さ（例：32バイトのBase64URLエンコード）を持つことを明記し、無効なトークンでのプロフィール取得API試行に対する厳格なレートリミットを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §5.0.2 / §1.2",
+    "issue": "パスワードリセットのStep 2（新パスワード設定画面）に固有の画面IDが割り当てられておらず、§1.2の遷移マトリクスにも記載がありません。実装時にディープリンクからのルー��ィング定義が漏れる原因になります。",
+    "suggestion": "Step 2に固有の画面ID（例：S-06）を割り当て、遷移マトリクスに「メール内リンク → S-06 → S-02」の遷移パスを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §13.1",
+    "issue": "オフライン時に未同期データがある状態での「強制ログアウト」は、ローカルデータを完全に消去するため不可逆なデータロストを引き起こします。現在の確認ダイアログの[そのまま強制ログアウト]ボタンだけでは、誤操作による被害が大きすぎます。",
+    "suggestion": "強制ログアウトの実行ボタンに対して、長押し（ロングプレス）を要求するか、「削除」とテキスト入力させるなど、より強いフリクション（摩擦）を設けて誤操作を防止してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §7.1",
+    "issue": "AI対話履歴や自己分析データなど、非常にパーソナルなデータを取り扱いますが、DBレベルでの暗号化（Supabaseのデフォルト保存時暗���化）以上のアプリケーションレベルの暗号化方針が明記されていません。",
+    "suggestion": "MVPとしてはSupabaseのデフォルト暗号化で許容範囲ですが、将来的な内部犯行対策やデータ漏洩時の被害軽減のため、センシティブなカラム（messagesの本文など）に対するアプリケーションレベルでの暗号化（または将来のE2EE検討）について言及しておくことを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

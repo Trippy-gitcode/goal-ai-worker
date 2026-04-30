@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s00_splash,s02_onboarding,s12_task_add,s15_goal_create",
+    "location": "Primary ボタン『はじめる』『次へ』『作成』",
+    "issue": "背景が薄いスカイブルー (#7FBFF0 相当)、文字が黒で描かれている。design_system.md §5.1 の Night Sky テーマは Primary ボタン fg=#FFFFFF bg=#1A5FC8 を規定しており、仕様と矛盾。実測上 #7FBFF0 と #000000 のコントラスト比は約 9.8:1 で AA は満たすが、仕様と色が異なる点と、bg が明るすぎて『夜のジャーナル』のトーンを破壊する点で CRITICAL。",
+    "suggestion": "仕様通り bg=#1A5FC8 / fg=#FFFFFF に戻す (コントラスト比 ≈ 6.5:1 で AA 通過)。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "disabled 状態の『サインアップ』ボタン",
+    "issue": "disabled ボタンの背景と文字のコントラスト比が約 1.8:1 程度と極めて低く、WCAG 2.2 AA (1.4.11 非テキスト要素のコントラスト 3:1) を満たさない。さらに『利用規約』『プライバシーポリシー』を認識できていないユーザーはボタンが押せない理由が理解できない。",
+    "suggestion": "disabled 文字を #6A7890 相当まで上げる、または disabled を廃止し常時 enabled + タップ時フィードバックにする。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "タスクの時刻/所要時間 (09:00 · 45 分 等)",
+    "issue": "タスク名 (白) の下のメタテキストが濃いグレー (#5A6880 程度) で描画されており、背景 #0B1220 に対するコントラスト比が約 3.8:1。body 本文の 4.5:1 を満たさない。",
+    "suggestion": "メタテキスト色を #8AA0C0 相当に引き上げ、コントラスト比を 4.5:1 以上にする。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "フォーカス状態の視認性",
+    "issue": "全 10 画面でフォーカスリングが描画されていない (Tab / VoiceOver 経由のキーボードフォーカスが視認不能)。WCAG 2.4.7 (Focus Visible) AA 違反の恐れ。",
+    "suggestion": "全インタラクティブ要素に 2px 外側リング (#7FBFF0 / 透過度 70%) を付与。design_system.md にも focus-ring トークンを追加。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "タスク行右端の青丸 / 緑丸ステータス",
+    "issue": "タスク状態を色ドットのみで表現しており、色盲ユーザー (赤緑色覚異常で緑丸 vs 青丸の区別が困難) が情報を得られない。WCAG 1.4.1 (Use of Color) AA 違反。",
+    "suggestion": "ドットに形状差 (●/◆/▲) を付与、またはラベル (進行中/完了/予定) を小さく併記。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s00_splash",
+    "location": "タグライン『あなたの人生を、あなたらしく』",
+    "issue": "タグライン色が薄いグレー (#6A7890 推定) で、背景 #0B1220 に対するコントラスト比が約 3.5:1 と 4.5:1 を下回る。",
+    "suggestion": "色を #A0B4CC に引き上げ、コントラスト比 5:1 以上にする。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "WCAG",
+    "screen": "s30_me",
+    "location": "『タップして入力』プレースホルダ",
+    "issue": "プレースホルダ文字が薄く、背景とのコントラストが 3:1 前後。WCAG AA を満たさない可能性。",
+    "suggestion": "プレースホルダ色を #7890B0 以上に上げる、または枠線を明示してフィールドの存在を色以外で認識可能にする。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s14_goal_detail",
+    "location": "完了済みタスクのグレーアウト",
+    "issue": "完了タスクの文字色が #4A5870 程度でコントラスト比 ≈ 2.8:1。完了タスクも『履歴として読める』必要があり、4.5:1 を満たすべき。",
+    "suggestion": "完了タスク文字を #6A8098 相当に引き上げ、打ち消し線で『完了』を示す。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内『登録する』ボタン",
+    "issue": "『登録する』ボタンの色が Primary CTA と同一色で、CTA の階層が画面内で重複する。ユーザーが主要アクションを見失う。",
+    "suggestion": "提案カード内 CTA を副次色 (accent-muted) に降格し、Primary CTA は画面下の固定 CTA 1 箇所に限定。",
+    "model": "Code",
+    "persona": "color_coordinator"
+  }
+]

@@ -1,0 +1,222 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.1, §3.3",
+    "issue": "S-12（タスク追加ハーフモーダル）の親がS-10（GROW）と定義されている一方、TALK（S-20）からも起動する設計になっており、親子関係と戻り挙動が不整合のまま。",
+    "suggestion": "S-12の親を「S-10/S-20（汎用ハーフモーダル）」に訂正し、history/backdrop/戻るボタン時の戻り先を明記（親画面を保持したまま閉じる）。URL履歴のpushStateも『表示中タブに対してpush』で統一。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §7.4, project_v1.md §3.2, §3.2.1",
+    "issue": "Today内の手動並び替え（ロングプレスで順序保存）が、projectの「開始時刻がある場合は時刻順、未設定は最後」の自動ソート方針と衝突している。どちらが優先か不明。",
+    "suggestion": "優先順位を明記。例: 1) 時刻ありは常に自動時刻ソート（並び替え不可）、2) 時刻なしは手動並び替え可、3) グループ（時刻あり→時刻なし）の中でのみドラッグ可、のように制約を定義。UI上もグループ見出しで区切る。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.3, ux_v1.md §2.3",
+    "issue": "「週N回」習慣をTodayに手動で出すための「今日やる」ボタンがUX側に未定義。projectには明記されているが、どこで操作できるかがわからない。",
+    "suggestion": "Upcomingの習慣リストおよび習慣詳細（S-11相当）に『今日やる』トグル/ボタンを追加。押下時の表示位置（Today上部/時刻未設定末尾）と解除動作も定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.3",
+    "issue": "単一タスク提案はS-12モーダルで編集する一方、複数タスク提案の『個別に編集』はチャット内アコーディオン展開とされており、編集パターンが不一致。",
+    "suggestion": "編集UIを統一。MVPは単一/複数ともS-12モーダル（複数は順送り）に揃えるか、両方ともチャット内インライン編集に統一。アクセシビリティ/入力7項目の扱いを考えるとモーダル統一が妥当。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §9.1, §8.6",
+    "issue": "オフライン中に多数のタスクを完了→復帰時に『まとめて再生』とあるが、再生時間上限（8秒）を超えるケースや多数のEXP伸長が長尺化するケースの具体制御が未定義。",
+    "suggestion": "同期時は『X件の完了を同期（+Y EXP）』の集約バナー＋EXPバーは一括で最終値にスムーススクロール（1回）に短縮。必要なら詳細内訳をトーストや履歴に残す。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.4, §8.2",
+    "issue": "TALK中やオフライン同期で複数レベルを跨いだ場合の演出が不明。『次回GROWで1回だけ再生』だと多段レベルアップの見落としや演出破綻が起きうる。",
+    "suggestion": "『Lv.A→Bに到達』の単一バナー表示＋アバターは最終Phaseへ直接クロスフェード。中間Lv演出はスキップする方針を明記。称号変更も最終状態のみ反映。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 vs §4.5（ux_v1.md §15で指摘済）",
+    "issue": "レベル計算の矛盾（Lv1→2が100EXPと1,000EXPの二重記載）。このままでは実装・テストで不一致が発生。",
+    "suggestion": "正値を§4.4に統一（Lv1→2=100）し、§4.5の誤記を削除。全テキスト/テーブル/到達目安を再計算して一貫化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1",
+    "issue": "TALKヘッダーに『☰ TALK 🕐 📝』とあるが、☰=履歴/S-21の一方、🕐も履歴を想起させる。各アイコンの機能が紛らわしい。",
+    "suggestion": "ヘッダーアイコンの意味を明示（例: ☰=ドロワー、📝=新規チャット、🕐は削除or名称変更）。起動先（S-21 or 新規スレッド作成）を表に定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.4",
+    "issue": "モーダル/ドロワーをpushStateし、popstateで未保存確認→pushState再挿入の流れは履歴ループのリスクがある。",
+    "suggestion": "popstate中にpushしない・再入禁止フラグ・履歴深度カウンタを使う擬似コードを明記。ルート遷移のみpop許可など安全網を仕様化��",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.4, ux_v1.md §2.3",
+    "issue": "Overdue表示が『赤系+期限切れ』で罪悪感を誘発しやすい（Habitica由来の不満の再燃）。25歳ユーザー視点でも圧を感じそう。",
+    "suggestion": "文言/色の緩和（例: 『昨日からのタスク』+オレンジ系）と『明日に延期』を主要アクションに。完了/延期ボタンを並置し、失敗感を減らす。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1, §2.2; ux_v1.md §4.2.1",
+    "issue": "MVPでSHOP未実装のままPremierを案内すると、課金価値（チケット/限定要素）が実感しにくく、友人に勧めにくい。",
+    "suggestion": "MVP期間はPremierの訴求を『限定フレーム即時解放+月次優先対応の可視化（アプリ内バッジ）+コミュニティ投票権』など即効価値に寄せるか、Premier露出を控えめに。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1; ux_v1.md §4.3",
+    "issue": "FreeのAI対話20回/日���ヒアリング（5問=5回）で一気に消費し、初週の体験密度が下がる懸念。継続阻害につながりうる。",
+    "suggestion": "初週ブースト（例: 7日間は40回/日）またはヒアリングを1セッション=1回カウント扱いに。少なくとも開始前に残回数警告＋代替導線（通常対話を勧める）を強化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §15",
+    "issue": "通知タップ時にclients.openWindow()のみだと、PWA起動済みでも新規ウィンドウが増殖しやすい。",
+    "suggestion": "notificationclickでclients.matchAll({type:'window', includeUncontrolled:true})→既存クライアントにpostMessage/フォーカス。なければopenWindowの二段構えを仕様に追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3.1, ux_v1.md §3.3",
+    "issue": "タスク提案カードで『不要』を選んだ提案パターンの再表示制御はバックエンド仕様にあるが、誤ってブロックした場合の解除UIが未定義。",
+    "suggestion": "TALK設定に『提案の学習をリセット』や、カード内に『この会話��は再び提案する』リンクを用意。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.4（S-14 ゴール詳細）",
+    "issue": "ゴール削除時の紐づくタスク（未完了/完了/予定日設定あり）の扱いが未定義。データ消失や意図せぬ残骸のリスク。",
+    "suggestion": "確認ダイアログで選択肢を提示：『1) ゴールのみ削除（タスクは残す・紐付け解除）』『2) ゴールと未完了タスクを削除（完了済は履歴保持）』。デフォルト推奨も明示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3 画像添付, ux_v1.md §3.2",
+    "issue": "画像10MB超や非対応フォーマット時のエラーメッセージ/再圧縮UXが未定義。",
+    "suggestion": "選択直後にクライアント検証して『10MBを超えています。自動で圧縮しますか？/別の画像を選ぶ』を提示。非対応拡張子は即時エラー表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "ACCESSIBILITY",
+    "location": "ux_v1.md §10.4, §2.3",
+    "issue": "Undoスナックバーのカウントダウンは視覚依存。スクリーンリーダーでの時間経過の把握が難しい。",
+    "suggestion": "aria-liveで『取り消し可能：残りN秒』を1秒間隔でpolite更新、または固定メッセージ＋音声フィードバック（開始/終了時のみ）に変更。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5; ux_v1.md §3.3, §9.3",
+    "issue": "日次リセットがJST固定（04:00）で海外/出張時に直感とズレる。Freeユーザー視点でも『なぜ4時？』が疑問。",
+    "suggestion": "設定に『表示リセット時刻の説明』リンクを設け、将来のローカルTZ対応予定を明記。ヘルプ内にFAQを追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.3, §11.3",
+    "issue": "iOS Safariのpull-to-refresh/バウンスとアプリ内Pull-to-refreshの競合、edge swipeカスタム実装は不安定になりがち。",
+    "suggestion": "iOSではルートにtouch-actionとoverscroll-behaviorの併用、Pull-to-refresh閾値を高める/無効化の条件を仕様化。テストデバイス要件も明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3",
+    "issue": "Undoは直近1件のみ・30秒限定。短時間に複数完了した時の誤操作を戻せず、実体験として不安（EXP設計上の制約は理解するが不満は残る）。",
+    "suggestion": "『最近の操作』簡易ログ（直近5件、取り消し不可でも履歴可視化）を用意し、少なくとも何が確定したかを確認できる安心感を提供。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1, §9.1",
+    "issue": "Freeで主要体験が開放されている点はHabitifyの不満を強く解消。自分（25歳）として『まず使ってみる/続ける』動機は十分だが、課金動機（Basic→）はAI回数/質以外の差分が見えにくい。",
+    "suggestion": "Basic以上限定の小さな即時価値（例: DISCOVERの更新頻度向上、AI提案のUI優先表示、レベルアップ演出のカスタムテーマ解放な��）を1〜2個追加して、課金理由を明確化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §7.2, §7.4（ux_v1.md §15での指摘継続）",
+    "issue": "messagesテーブル命名がAI対話とソーシャルで混在（messages/social_messages）。RLS誤設定でデータ露出のリスク。UXでは直接触れないが、画面の『削除/保持期間』挙動に影響。",
+    "suggestion": "reference_v1.mdで命名規則を確定（ai_messages / social_messages 等）。RLS例とUXの保持期間表記を同名で揃える。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "scripts/changed-files-allowlist.sh",
+    "issue": "Targets the first '対象ファイル:' occurrence globally via `grep -A1` and uses only the next single line, not the currently active mission block. This can both falsely FAIL or, worse, allow unauthorized file changes to slip through if it reads a different mission’s allowlist.",
+    "suggestion": "Scope parsing to the current IN_PROGRESS mission block. Example: derive CURRENT_MISSION by scanning session_progress.md for the mission with 'STATUS: IN_PROGRESS', then use `sed -n '/^### CURRENT_MISSION$/,/^### /p'` to isolate, and extract all lines under '対象ファイル:' (support inline, comma-separated, and fenced code or bullet lists)."
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "scripts/changed-files-allowlist.sh",
+    "issue": "Assumes the allowlist is on a single line immediately following '対象ファイル:'. Multi-line/bulleted/fenced lists are ignored, causing empty ALLOWED and an early WARN+exit 0, effectively disabling enforcement.",
+    "suggestion": "After scoping to the mission block, collect allowlist lines until a blank line/next heading. Normalize by stripping bullets and commas, then iterate. If still empty after parsing, hard FAIL (not WARN) to avoid silent bypass."
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "tests/smoke/canopy_common.sh — G6",
+    "issue": "Deployment command validation tokenizes commands by shell word splitting (`for CMD in $ALL_DEPLOY_CMDS`), then checks each token for build.out_dir. This produces false FAILs when the overall command is correct but the current token does not contain the path.",
+    "suggestion": "Iterate per command line safely: `while IFS= read -r CMD; do ... done <<< \"$(yq e -o=tsv '...')\"` and test the entire line. Alternatively, emit JSON array from yq and loop with `jq -r '.[]'`."
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "tests/smoke/canopy_common.sh — G8 mission detection",
+    "issue": "`LATEST_MISSION` detection uses broad regex (`MISSION-\\S+|[A-Z]+-[0-9]+`) and `grep -B1` on status lines, which can capture unrelated IDs (e.g., SPEC-XXX). G8/G9 may read the wrong evidence directory and FAIL incorrectly.",
+    "suggestion": "Determine the active mission by locating the most recent `### <ID: Title>` block that contains `STATUS: IN_PROGRESS` (fallback to the last DONE within the current session) using sed/awk block parsing. Extract the exact ID from that heading line only."
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "scripts/report_lint.sh (G5)",
+    "issue": "Lints the entire session_progress.md for banned phrases, not just the '完了報告' contents. Legitimate mission text or templates can trigger FAIL and block deployments.",
+    "suggestion": "Restrict scanning to the current mission’s '完了報告:' subsection: slice the active mission block, then from the '完了報告' line to the next '### ' heading. Only lint that segment."
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "tests/smoke/canopy_common.sh — G8",
+    "issue": "Uses `jq` unconditionally to parse before/after.json. If jq is not installed, `UNEXPECTED` defaults to 0 and G8 incorrectly FAILs (RED not confirmed), blocking deployment.",
+    "suggestion": "Gate with `command -v jq` and hard FAIL with a clear message if missing, or provide a Node fallback: `node -e 'console.log(JSON.parse(fs.readFileSync(\"before.json\")).stats?.unexpected||0)'`."
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "tests/smoke/canopy_common.sh — G6",
+    "issue": "Enforces that frontend_cmd must contain build.out_dir substring. Valid deployments that reference output indirectly via provider config (or cd into dir) will false-FAIL.",
+    "suggestion": "Relax to WARN unless no command references build.out_dir AND the directory does not exist at runtime. Alternatively, verify that `${BUILD_OUT}` exists before deploy rather than enforcing CLI string presence."
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/deploy.sh — URL verification",
+    "issue": "Single-attempt HTTP status check (no retry/backoff). CDN propagation or cold start can intermittently return non-2xx, falsely blocking deployment.",
+    "suggestion": "Add retry with backoff (e.g., up to 5 attempts, 3s/5s intervals) and accept 2xx/3xx. Example: loop curl with `--max-time 10`, break on 2xx/3xx, else fail after retries."
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/version_sync.sh",
+    "issue": "Naive `sed` replacement `s/['\"][0-9.]*['\"]/'$VER'/` on version.ts can alter unrelated numeric strings if present on the first occurrence.",
+    "suggestion": "Anchor to a named export/const (e.g., `export const APP_VERSION = \"...\"`) and replace that exact line via a targeted regex, or update via a small Node script that edits only that constant."
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "tests/smoke/canopy_common.sh — G3",
+    "issue": "Counts tests by grepping `test(` in files, missing alternative APIs or parameterized cases. This can under/over-count and falsely trip ±20% drift.",
+    "suggestion": "Use Playwright’s `--list` (v1.38+) or run `npx playwright test --reporter=json` and parse the discovered tests count from JSON without executing them."
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "scripts/review_gate.sh",
+    "issue": "Fails open if python3 is absent (COUNT defaults to 0), allowing unresolved CRITICAL review items to pass the gate silently.",
+    "suggestion": "Require a parser that’s guaranteed present (Node). Replace with `node -e \"const fs=require('fs');let c=0;process.argv.slice(1).forEach(f=>{const a=JSON.parse(fs.readFileSync(f,'utf8'));c+=a.filter(i=>i.severity==='CRITICAL').length});console.log(c)\" docs/plans/review_*.json` and hard FAIL if Node is missing."
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/test_lint.sh (AP-4)",
+    "issue": "Pattern `grep -rn \"test\\.skip\\|\\.skip(\"` will match non-test APIs containing `.skip(` (e.g., unrelated methods), causing false FAILs.",
+    "suggestion": "Scope regex to test declarations only (e.g., `(^|\\W)test\\.skip\\(`) and exclude known non-test contexts."
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "tests/smoke/canopy_common.sh — G4",
+    "issue": "Runs Playwright only if `node_modules/.bin/playwright` exists. In setups with a workspace-level install (monorepo) this skips G4 entirely, reducing protection.",
+    "suggestion": "Fallback to `npx playwright test --project=mobile` unconditionally; if it fails due to missing install, then WARN/FAIL explicitly."
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "scripts/affected-tests.sh",
+    "issue": "Uses `test(\"$FILE\")` in yq which interprets regex. Unescaped file paths (e.g., `src/a+b.ts`) can cause unintended matches or errors.",
+    "suggestion": "Pass FILE via env and escape for regex: `yq e '... select(.source == strenv(FILE) or (.source | test(strenv(ESC)))) ...'` after pre-escaping special chars."
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "scripts/deploy.sh",
+    "issue": "Uses `eval` for build/deploy commands. Complex commands containing special chars/newlines can break or execute partially.",
+    "suggestion": "Execute via bash -lc with arrays or here-strings, or store commands as YAML arrays and run them without eval (e.g., iterate over a list)."
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "scripts/screenshot_lint.sh (G9)",
+    "issue": "Validates presence of before_/after_ files and non-identical pairs but does not ensure at least one pair per AT (spec requires per-AT evidence).",
+    "suggestion": "Parse AT IDs in the mission block (AT-1, AT-2, ...) and require both before_AT-N.png and after_AT-N.png to exist for each."
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "tests/smoke/canopy_common.sh — GUARD_COUNT",
+    "issue": "Counts lines starting with a quote in test-guards.config.ts. May miscount (comments/formatting), causing spurious FAILs near the limit.",
+    "suggestion": "Count actual array entries with a TypeScript-aware approach (Node script that imports/parses the config) or a tighter regex limited to IGNORED_ERRORS/ERROR_PATTERNS literal arrays."
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §8 vs scripts/deploy.sh",
+    "issue": "Spec step 8 mentions body grep (`grep version`) for deployment verification, but accepted decision and deploy.sh implement HTTP status-only checks.",
+    "suggestion": "Update spec §8 and incident_runbook to reflect status-based verification (no body grep) for SPA compatibility to keep Single Source of Truth aligned."
+  },
+  {
+    "id": "R-019",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/changed-files-allowlist.sh (initial runs)",
+    "issue": "If no tags exist, falls back to `git diff --name-only HEAD~1`, which fails on the first commit and yields empty CHANGED, disabling enforcement.",
+    "suggestion": "Robust base selection: use `BASE=$(git merge-base origin/main HEAD 2>/dev/null || git rev-list --max-parents=0 HEAD | tail -1 || echo HEAD~1)` then diff `BASE..HEAD`."
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "tests/smoke/canopy_common.sh — test output handling",
+    "issue": "Suppresses Playwright stderr (`2>/dev/null`), making root-cause analysis harder when G4 fails.",
+    "suggestion": "Preserve stderr or tee to a log file (e.g., `results/g4_fail.log`) while still failing on non-zero exit."
+  }
+]

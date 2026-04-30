@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタスク行",
+    "issue": "仕様書2.3で「[完了⭕] [時刻] [タスク名]」の順と定義されているが、モックアップでは時刻が左端、完了チェックが右下に配置されており仕様と矛盾している。",
+    "suggestion": "仕様書通りに左端に完了チェック（⭕）を配置し、操作の一貫性と視認性を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域のEXP数値 (1,240 / 2,000)",
+    "issue": "フォントサ���ズが10pxで実装されている。仕様書3.2の「11px未満禁止、重要情報への極小サイズ使用禁止」に違反している。",
+    "suggestion": "フォントサイズを12pxまたは14px（--font-size-sm）に引き上げ、視認性を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "所要時間選択チップ (5分, 10分...)",
+    "issue": "チップの視覚的な高さが25pxしかなく、WCAG 2.5.5の最小タップターゲット44x44pxを満たしていない。",
+    "suggestion": "チップの上下paddingを増やすか、CSSの::before疑似要素を用いて透明なタップ領域を44px以上に拡張する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s15_goal_create",
+    "location": "カテゴリ選択チップ (仕事, 健康...)",
+    "issue": "チップの高さが29pxしかなく、最小タップターゲット44x44pxを満たしていない。",
+    "suggestion": "チップのpaddingを拡大し、タップ可能な領域を44x44px以上確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の「✕」ボタン",
+    "issue": "ボタンの高さが29pxしかなく、最小タップターゲット44x44pxを満たしていないため誤タップを誘発する。",
+    "suggestion": "ボタンのサイズを大きくするか、透明なパディングを追加してタップ領域を44x44pxに拡張する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "ハーフモーダル全体",
+    "issue": "仕様書1.4でハーフモーダルの戻り方法として「✕ボタン」が明記されているが、画面内に閉じるための✕ボタンが存在しない。",
+    "suggestion": "モーダルの右上、またはヘッダー部分に明確な「✕」閉じるボタンを配置する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "タスクリストのチェックマーク",
+    "issue": "タスクの完了チェックマークが左側に配置されており、s10_grow画面（右下配置）とUIパターンが一致していない。",
+    "suggestion": "アプリ全体でタスク行のレイアウト（チェック��ークの位置）を統一する（s10_growの修正に合わせて左側配置で統一を推奨）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s30_me",
+    "location": "サブタブ (PROFILE, DISCOVER...)",
+    "issue": "タブのテキストが12pxと小さく、高さも36pxしかないため、タップしづらく視認性が低い。",
+    "suggestion": "タブのフォントサイズを14pxに上げ、上下のpaddingを増やして44pxのタップ領域を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "画面下部の「← 戻る」リンク",
+    "issue": "テキストのみのリンクで高さが不十分であり、44x44pxのタップターゲットを満たしていない。",
+    "suggestion": "上下に十分なpaddingを設けるか、アイコンを含めたボタンスタイルに変更してタップ領域を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン (disabled状態)",
+    "issue": "背景色#1C2128に対してテキスト色#484F58を使用し��おり、コントラスト比が極端に低く、ボタンの存在自体が認識しづらい。",
+    "suggestion": "disabled状態であっても、テキスト色をもう少し明るくする（例: #7A8593）などして、ボタンとしての形状を認識できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§7.1 戦略 1: Git tracking 改善 (scripts/byte_floor_check.sh)",
+    "issue": "`wc -c < \"$f\"` はワーキングツリーのファイルサイズを計算しています。`git diff --cached` を対象とする pre-commit フックでは、ステージされたインデックス上のファイルサイズを評価すべきです。ワーキングツリーとインデックスの状態が異なる（例：ステージ後にワーキングツリーでファイルを編集した）場合、誤検知や検知漏れが発生します。",
+    "suggestion": "`size=$(git cat-file -s \":$f\")` を使用して、インデックスにステージされたオブジェクトの���イズを直接取得するように修正してください。これにより、インデックス上の正確なサイズが取得でき、`[ -f \"$f\" ]` によるワーキングツリー上の存在チェックも不要になります。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§3.4 戦略 4: Google Drive (セットアップ手順 5)",
+    "issue": "`rsync -av --delete .../*.md .../` のように送信元にワイルドカードを指定すると、シェルの展開により複数ファイルが個別に渡されるため、rsyncの仕様上 `--delete` が意図通りに機能しません。送信元で削除されたファイルが宛先で削除されず、古いファイルが残り続けるため、SSoTエクスポートとしての正確性が損なわれます。",
+    "suggestion": "ディレクトリ単位で同期し、フィルタを使用する構文に変更してください。例: `rsync -av --delete --include=\"*/\" --include=\"*.md\" --exclude=\"*\" /Users/.../verify/ ~/GoogleDrive/.../lais_verify/` のように指定することで、削除されたファイルも正しく同期されます。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§7.1 戦略 1: Git tracking 改善 (手順 6)",
+    "issue": "既存の pre-commit フックへの追記例として `bash \"${REPO_ROOT}/scripts/byte_floor_check.sh\"` が指定されていますが、既存フック内で `REPO_ROOT` 変数が定義されている保証がありません。未定義の場合、パス解決に失敗しフックがエラーで異常終了するため、コミットがブロックされる原因になります。",
+    "suggestion": "`REPO_ROOT=$(git rev-parse --show-toplevel)` を事前に定義するよう手順に追記するか、コマンド展開を用いて `bash \"$(git rev-parse --show-toplevel)/scripts/byte_floor_check.sh\"` のように直接パスを解決するよう修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§7.1 戦略 1: Git tracking 改善 (手順 7 動作確認)",
+    "issue": "フックの動作確認テスト手順において、もしフックが正しく発火せずに `git commit` が成功してしまった場合、`git reset HEAD \"$TESTFILE\"` では作成されたコミットを取り消すことができず、テスト用のゴミコミットがリポジトリの履歴に残ってしまいます。",
+    "suggestion": "コミットが成功してしまった場合のロールバック処理を追加してください。例えば、コミットが成功したことを検知した場合は `git reset HEAD~1` を実行してコミットを取り消し、失敗した場合は `git reset HEAD \"$TESTFILE\"` でインデックスから降ろすロジックに変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 戦略 1: Git tracking 改善 (scripts/byte_floor_check.sh)",
+    "issue": "拡張子の判定 `[[ \"$f\" == *.md ]]` が小文字の `.md` のみにマッチする仕様になっています。大文字を含む `.MD` や `.Md` などのファイルがチェックをすり抜ける可能性があります。macOSのファイルシステムはデフォルトで大文字小文字を区別しませんが、gitは区別するため注意が必要です。",
+    "suggestion": "`shopt -s nocasematch` をループの前に宣言して大文字小文字を区別せずにマッチさせるか、`[[ \"${f,,}\" == *.md ]]` のように変数展開で小文字化してから比較するように修正してください。これにより、拡張子の大文字小文字の揺れに対応できます。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§3.1 戦略 1: Git tracking (セットアップ手順 1)",
+    "issue": "`find . -type f -name \"*.md\" | xargs git check-ignore -v` は、ファイルパスにスペースや特殊文字が含まれている場合に正しく動作しません。xargs がデフォルトで空白を区切り文字として引数を分割してしまうため、意図しないパスとして扱われエラーになります。",
+    "suggestion": "NUL文字区切りを使用して安全に処理するよう、`find . -type f -name \"*.md\" -print0 | xargs -0 git check-ignore -v` に修正してください。これにより、空白や改行を含むファイル名でも安全に処理できるようになります。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0197,
+    "input_tokens": 10577,
+    "output_tokens": 1297,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

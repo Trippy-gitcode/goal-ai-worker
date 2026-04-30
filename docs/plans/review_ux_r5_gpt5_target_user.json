@@ -1,0 +1,212 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.3 / ux_v1.md §2.3",
+    "issue": "週N回習慣のToday表示ロジックに「今日やる」手動追加が記載されているが、UX側に具体的なUI（ボタン配置/操作手順）が存在しない。",
+    "suggestion": "習慣行に「今日やる」ボタンを追加（S-10のTodayリスト上で表示）。またはS-11詳細パネルに「今日だけ表示」トグルを設置。操作結果＝当日分のインスタンスをTodayに即時追加することを明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1, §3.5",
+    "issue": "TALKヘッダーに☰（履歴ドロワー）と🕐（履歴）が併存し、同義の操作が重複しているように見える。ユーザーの学習コストが上がる。",
+    "suggestion": "履歴アクセスを1つに統一。例: ☰=ドロワー（履歴一覧/新規チャットボタン含む）、🕐は削除または別機能（ピン留め/未読のみ）に再割当。ヘッダーアイコンの凡例も更新。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3 / ux_v1.md §3.2",
+    "issue": "TALKの画像添付でサイズ超過/非対応形式/アップロード失敗時のエラーUX、送信中インジケータ/キャンセル操作が未定義。",
+    "suggestion": "添付サムネイルに進捗バー/✕キャンセルを実装。10MB超や非対応形式はインラインエラー表示。アップロード失敗時はリトライ/削除アクションを提示。スクリーンリーダー向け代替テキスト入力も追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §9.1（復帰時）/ §8.6",
+    "issue": "オフライン中に多数のタスク完了が蓄積した場合のEXP演出再生ポリシーが未定義。合計8秒の上限は“同時発火”のみで、バックログ再生の時間制御がない。",
+    "suggestion": "復帰同期時は「まとめ演出」方針を明記。例: フロートテキストを1回に集約（+X EXP）、必要ならレベルアップ演出のみ再生。タスクごとの個別演出は省略。ユーザーに「同期で+X EXP/レベルアップ」のバナーを表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2, §7.4",
+    "issue": "AI対話messagesテーブルとソーシャルメッセージsocial_messagesテーブルの命名/RLSの境界が曖昧。誤ってRLSを適用するとAI対話が友達に漏洩するリスクがある。",
+    "suggestion": "テーブル命名を明確化（ai_messages / social_messages など）し、RLSポリシーをファイル名/テーブル単位で明記。参照する箇所（§5.4, §7.2, §7.4）を一貫した名称に修正。RLSに回帰テストを追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4, §4.5 / ux_v1.md 「内部矛盾」#1",
+    "issue": "レベル計算式と説明文（Lv.1→2が100EXP vs 1,000EXP）が矛盾。UX側は100EXPに寄せているが、元仕様は未解消のまま。",
+    "suggestion": "project_v1.md本体を100EXPに統一。表/文中の数値を一斉修正し、単体テスト（Lv別累計計算）をreference_v1.mdに追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §7.4 / §10.4",
+    "issue": "Today内のドラッグ&ドロップ並び替えにキーボード/スクリーンリーダー代替操作がない。アクセシ��リティ要件未達の恐れ。",
+    "suggestion": "各タスクのコンテキストメニューに「上へ/下へ移動」を追加。aria-liveで順序変更を告知。キーボードショートカット（Option+↑/↓など）も検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "project_v1.md §6.1 / ux_v1.md §3.4, §4.3",
+    "issue": "AI対話回数カウントの対象に、タスク提案カードやヒアリングセッション（AIからの連続質問）がどうカウントされるかの説明が不足。",
+    "suggestion": "「ユーザー送信メッセージのみカウント、カード操作はカウント外。ヒアリングも各回のユーザー返信=1回」と明記。上限到達バナーにも補足を表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（S-36）",
+    "issue": "QRスキャンでカメラ許可が拒否/恒久拒否された場合のUXが未定義。",
+    "suggestion": "拒否時は説明モーダルを表示（設定アプリでの許可手順/代替のシェアリンク追加）。恒久拒否はボタンを無効化しツールチップで案内。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §7.3（PWA実装注記）",
+    "issue": "iOS PWAのedge-swipe抑止とカスタム戻りジェスチャーは挙動が不安定になりやすい。Safariの実装差異で副作用のリスクがある。",
+    "suggestion": "スタンドアロン時のみカスタムジェスチャーを有効化し、ブラウザ内起動時はネイティブ戻りに委ねるフォールバックを明記。ABガード（設定で無効化）も用意。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5, §4.5",
+    "issue": "日次リセットがJST固定。出張/海外滞在時に04:00表示が直感的でない可能性がある。",
+    "suggestion": "当面は「リセット: 明日 04:00（JST）」の明記と、カウントダウン（あとX時間）を併記。v0.2.0でローカルタイムゾーン対応予定と注記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2",
+    "issue": "Stripe Checkoutをユーザーが中断/閉じた場合の戻りUXが未定義（リダイレクト失敗時やタブを閉じた時）。",
+    "suggestion": "中断時は現プランのまま/エラートースト表示のポリシーを明記。復帰案内（もう一度決済を開く）をS-38に常設。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.4, §2.3",
+    "issue": "Todayの手動並び替えと開始時刻ソートの優先関係は示されるが、手動並び替えをリセットして時刻順に戻すUIがない。",
+    "suggestion": "Todayセクションのメニューに「時刻順に戻す」を追加。現在の並び基準（手動/時刻）をトグル表示し、状態を永続化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALKのストリーミング応答に停止（Stop）操作がない。長文応答時にユーザーが制御できない。",
+    "suggestion": "AI応答中は入力バー右に[停止]ボタンを表示し、停止時はそこまでのテキストを確定。再送信/続き要請も可能にする。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.4（S-14）",
+    "issue": "ゴール削除時の確認ダイアログ仕様が明記されていない（タス��削除は明記あり）。",
+    "suggestion": "S-14に「[削除]→確認ダイアログ（関連タスク処理の説明付き）」を追記。完了済みゴール削除は更に強い警告を表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.2.1 / project_v1.md §2.2",
+    "issue": "アバター設定から未所持アイテムをタップすると「SHOPへ」の導線があるが、MVPではSHOPがComing Soonで購入不可。Premierの特典も「後日」に寄るため体験が分かりづらい。",
+    "suggestion": "MVP期間は「近日公開」モーダルに置換し、Premierは即時使える限定フレームのみ強調。SHOP遷移は無効化し、代わりに「通知を受け取る」登録を提供。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.4（PROFILE: AI理解メモ）/ ux_v1.md §4.2",
+    "issue": "AI理解メモが「5セッションごとに更新」とあるが、UI上の進捗表示や次回更新までの目安がなく、更新タイミングが体験的に分かりにくい。",
+    "suggestion": "カードに「次の更新まで: 3/5セッション」などの進捗を表示。更新時は軽いバナー演出で通知。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.1, §4.4",
+    "issue": "メッセージ/応援の「受信一覧」はS-33内に存在するが、個別画面IDがなく遷移/戻りの一貫性検証がしにくい。",
+    "suggestion": "S-33配下に「S-33a 受信一覧（フルスクリーン or ハーフモーダル）」などのIDを付与し、ディープリンク/戻る挙動を定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.2, §11.2",
+    "issue": "所要時間がタイムライン幅表示のみに使われ、EXPに影響しない点がUIから読み取りにくい。長時間タスクを完了しても+10EXPで落胆する恐れがある。",
+    "suggestion": "タスク作成/編集モーダルに「所要時間は表示のみ（EXPには影響しません）」の補足を追記。将来は“挑戦度”別EXPや冒険EXPの活用を案内。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "全体（§0ベンチマーク/§2.1プラン/§3〜5機能）",
+    "issue": "ユーザー視点レビュー: Habiticaの��やUI過多、Finchの待機・深度不足、HabitifyのFree制限という不満は概ね解消されている。自分は使いたい/続けられそう（ログインEXPや優しい演出、AI提案が刺さる）。課金はBasic（¥580）なら検討、PremierはShop未実装で時期尚早。友達には「優しめの習慣＋AI相談したい人」に勧められる。一方、AI 20回/日はFreeだと物足りない日もありそう、SHOP導線の未実装感、画像添付やQR許可拒否など細部のエラー時の説明不足は不安。",
+    "suggestion": "Freeの体験価値を更に伝える（冒険EXP上限は有料と同一等の案内）。未実装導線は「近日公開」表記の徹底。エラー/拒否時の案内文を充実させ“詰まり感”を無くす。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §5.0.2（パスワードリセット Step 2）/ §1.1 画面一覧",
+    "issue": "パスワードリセットのStep2（新パスワード設定）が個別画面IDとして一覧に記載されていない（S-05に内包か不明）。戻り/ブラウザバックの挙動検証が困難。",
+    "suggestion": "S-06（新パスワード設定）などのIDを追加し、S-05→S-06→S-02の遷移/戻り/失効時の分岐を明記。history.pushStateポリシーも適用。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

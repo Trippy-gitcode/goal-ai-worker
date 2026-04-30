@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン",
+    "issue": "非アクティブ状態のボタン背景色（#1C2128）とテキスト色（#484F58）のコントラスト比が著しく低く、文字として視認困難です（WCAG AA不適合）。",
+    "suggestion": "非アクティブ時のテキスト色を#7A8593などコントラスト比4.5:1を満たす色に変更するか、不透明度で調整してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタスクリスト",
+    "issue": "タスク間の余白が8px（margin-bottom: 8px）となっており、デザインシステム仕様書の「タスク間余白: 20px以上（呼吸するリズム）」に違反しています。画面が詰まって見え、Open AirのブランドDNAが損なわれています。",
+    "suggestion": "タスク間のmargin-bottomを20px以上に拡大し、余白を「間」として機能させてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "非アクティブ状態のボタン背景色（#1C2128）とテキスト色（#484F58）のコントラスト比が低く、視認性が著しく損なわれています。",
+    "suggestion": "テキスト色を明るくし、最低限の可読性を担保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "タスク提案カード",
+    "issue": "カード内（padding: 16px）にアイコン、タイトル、時間、3つのボタンが密集しており、余白のリズムが失われ情報過密に陥っています。視線が迷子になりやすい状態です。",
+    "suggestion": "カード内の行間（margin-bottom）を広げ、ボタン群とテキスト情報の間に明確な余白（間）を設けてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "進捗率「60%」の表示",
+    "issue": "数字「60」がfont-weight: 200で繊細に表現されているのに対し、「%」がfont-weight: 400のため視覚的に太く目立ちすぎ、タイポグラフィの品格と調和を崩しています。",
+    "suggestion": "「%」のfont-weightを200または300に落とし、数字の繊細なトーンと統一してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s00_splash",
+    "location": "サブタイトル「あなたの人生を、あなたらしく」",
+    "issue": "letter-spacing: -0.02emが指定されており、ブランドの顔となるスプラッシュ画面のコピーとしては字間が窮屈で、洗練された「間」が不足しています。",
+    "suggestion": "キャッチコピーのletter-spacingを0またはわずかにプラス（例: 0.05em）に設定し、ゆったりとした品格を持たせてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダル上部のドラッグハンドル",
+    "issue": "ハンドルバーの色（#484F58）とモーダル背景色（#161B22）の明暗コントラストが弱く、ドラッグ操作のアフォーダンスが低下しています。",
+    "suggestion": "ハンドルバーの色を#6E7681など少し明るい色に変更し、背景とのコントラストを強めてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域の「Lv.12 EXPLORER」",
+    "issue": "「Lv.12」（22px）と「EXPLORER」（12px）がbaselineで揃えられていますが、フォントサイズとウェイトの差により視覚的なベースラインがわずかにズレて見え、タイポグラフィの美しさを損ねています。",
+    "suggestion": "EXPLORERのmargin-bottomを微調整するか、flexのalign-itemsを調整して視覚的な底辺を厳密に揃えてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  }
+]

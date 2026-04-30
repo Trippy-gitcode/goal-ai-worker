@@ -1,0 +1,22 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/App.jsx, lais/src/components/screens/S00Splash.jsx",
+    "issue": "JSXファイル内で`class`属性が使用されています。主要なUIフレームワークであるReactでは、JavaScriptの予約語`class`との衝突を避けるため`className`の使用が標準的なベストプラクティスです。`class`属性は、ビルドツールやフレームワークのバージョンによっては意図しない挙動や非互換性を引き起こす潜在的���リスク要因となります。",
+    "suggestion": "プロジェクトの技術スタックがReactである場合、すべての`class`属性を`className`に置換してください。例: `<div class=\"app-root\">` → `<div className=\"app-root\">`。もしPreactなど`class`属性を意図して使用している場合は、この指摘は無視してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/App.jsx",
+    "issue": "ランドマークロールを持たない汎用的な`div`要素(`app-root`)に`aria-label`が設定されています。WAI-ARIA仕様上、このような使い方では多くのスクリーンリーダーがラベルを読み上げず、アクセシビリティ上の効果が期待できません。また、子要素である`<main>`に適切なラベルが設定されているため冗長であり、将来的に混乱を招く可能性があります。",
+    "suggestion": "`<div class=\"app-root\">`から`aria-label=\"Lais\"`を削除してください。���面の目的は、`S00Splash.jsx`内の`<main aria-label=\"Lais スプラッシュ\">`によってスクリーンリーダーユーザーに適切に伝えられます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_engineer"
+  }
+]

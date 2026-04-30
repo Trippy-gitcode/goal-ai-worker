@@ -1,0 +1,302 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 vs §4.5",
+    "issue": "レベルアップ必要EXPの数値が矛盾（式ではLv1→2=100EXP、一方§4.5で1,000EXPと記載）。クライアント/サーバーで別実装になるとレベル・EXPが破綻する。",
+    "suggestion": "正とする計算式・テーブルを単一化し、UX/アニメーション仕様・日次上限とも整合する数値に訂正。design_system/referenceにも同一ソースから参照する定数を定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §7.2, §7.4, §5.4",
+    "issue": "AI対話とソーシャルのメッセージテーブル命名が混在（messagesとsocial_messages）。RLS例外の誤適用によりAI対話が友達に漏洩するリスク。",
+    "suggestion": "テーブルを明確に分離（例: ai_messages, social_messages）し、RLSポリシーをそれぞれ定義。reference_v1.mdにスキーマとRLS例を明記し、既存の箇所を全置換。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §3.1, ��3.5, §1.1(S-21)",
+    "issue": "TALKヘッダーに☰（履歴ドロワー）と🕐（履歴）が併存。両者の動作差が不明でユーザー/実装が混乱。",
+    "suggestion": "履歴入口を一つに統一。☰を会話ドロワー、📝を新規チャットとし、🕐は削除。もしくは🕐=フルスクリーン履歴ならS-XXとして画面定義と遷移を追記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3, lais_ux_v1.md §8.2, §3.4",
+    "issue": "「SVGはプロフィール詳細のみ直描画」とある一方、GROW/MEヒーローでアバター進化・装飾反映が必要。どの画面をSVG/PNGにするか最終方針が未統一。",
+    "suggestion": "描画方針を画面別に確定。推奨: リスト/カード=PNGキャッシュ、ヒーロー=PNG（OffscreenCanvasで合成しキャッシュ）、詳細=SVG直描画。レベルアップ演出はPNGクロスフェードに統一。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_design_system.md（未作成）",
+    "issue": "テーマ・色の役割（semantic tokens）が未定義。Overdueや成功/警告/危険など状態色、surface/elevation��テキストコントラスト基準が不足。",
+    "suggestion": "色トークンを定義（primary/secondary/success/warning/error/info、text-high/medium/low、bg/surface/elevated、border/outline、overlay/ scrim）。各4テーマでコントラストAA以上を表に落とし込み。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_design_system.md（未作成）",
+    "issue": "タイポグラフィ体系が未定義（フォントファミリ、ウェイト、スケール、行間、数字タブラー等）。日本語+Latinの組合せも未決定。",
+    "suggestion": "推奨: 見出し/本文/キャプション/数値の4スケール。日本語=『Noto Sans JP』（可変/サブセット）or『IBM Plex Sans JP』、Latin=『Inter』。line-height/letter-spacing/数字はtabular lining指定。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_design_system.md（未作成）",
+    "issue": "スペーシング/レイアウト/角丸/影/境界線のデザイントークンが未定義。画面間の「洗練」一貫性が担保できない。",
+    "suggestion": "8ptグリッド（4の倍数）をベースにspacing xs–3xl、radius（xs=4, sm=8, md=12, lg=16, full）、elevation層（shadow 0–5）とborder(1/2px)を定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_design_system.md（未作成）",
+    "issue": "アイコン体系が未定義。仕様中に絵文字が混在し、スタイルが不統一になる恐れ。",
+    "suggestion": "24pxグリッド/2pxストロークのモノラインアイコンセット（例: Remix/Iconoir/Phosphor）を採用し、塗り/線/コーナー半径/命名規則を定義。絵文字はモック表現のみとし実装はSVGに置換。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §8.2, §8.3",
+    "issue": "紙吹雪・バナーの頻度が多いと“洗練”より“賑やかさ”が勝り疲労感を生む恐れ。",
+    "suggestion": "演出出現頻度キャップ/希少化（例: 同一セッション2回目以降は紙吹雪簡略）、ミニ演出バリアントを用意。Reduced Motionだけでなく“Reduced Celebration”ユーザー設定も検討。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3（PWA同期）, lais_ux_v1.md §9.1",
+    "issue": "オフライン完了イベントのタイムスタンプ規約が未定義。JST 4:00日次リセット跨ぎ同期時に当日/前日のEXP・習慣カウントがズレる恐れ。",
+    "suggestion": "クライアントで完了時のUTCタイムスタンプを保存し、同期時にサーバーでJST換算で日次バケットに確定。衝突時はサーバー権威で調停し、UIには結果差分の説明を通知。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §4.3（DISCOVERチップ横スクロール）, §7.3（サブタブ横スワイプ）",
+    "issue": "サブタブ横スワイプと横スクロールUIの競合が起きうる。意図せぬタブ切替はストレス。",
+    "suggestion": "ネストスクロール優先（水平スクロール要素内はサブタブスワイプ無効）。開始閾値（横移動>24px/縦<12px）を明示。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.2（画像添付）",
+    "issue": "画像アップロードの進捗/失敗/再試行UIが未定義。大容量圧縮・EXIF除去の待ち時間が不透明。",
+    "suggestion": "各画像にアップロード進捗バー/キ���ンセル/失敗時の[再送]を定義。アップロード→解析→送信の各段階で状態ラベルを表示。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §7.4（タスク並び替え）",
+    "issue": "Todayを手動並び替えすると時刻ソートを上書きとあるが、戻し方/スコープ（当日限定or永続）が不明。",
+    "suggestion": "並び順モードトグル（自動/手動）と「時刻順に戻す」アクションを追加。手動順は当日スコープとし、日次リセットで自動に戻る旨を明記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §6.2, §2.3（Undoスナックバー）",
+    "issue": "トースト/スナックバー/バナーのz-indexや重なり優先度が未定義。入力バーやボトムタブと干渉の恐れ。",
+    "suggestion": "レイヤー階層を定義（例: modal(1300)>drawer(1200)>snackbar(1100)>toast(1000)>tabbar(900)）。重複表示時のスタッキング/自動間引きをルール化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §7.1, §12.2(6)",
+    "issue": "全操作に対する100ms以内のフィードバックが原則だが、押下時の“pressed/hover/focus”ビジュアルがトークン化されていない。",
+    "suggestion": "stateトークン（pressed/hover/focus/disabled）の不透明度・色変化・影量を定義し、全ボタン/行/チップに適用。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3（アバターレイヤー）",
+    "issue": "frame/aura等でCSSフィルタやブラーを多用するとモバイルGPUで描画負荷・バッテリー消費が増大。",
+    "suggestion": "光彩・ブラー等は可能なら事前焼き込みPNGで提供。リアルタイムはtransform/opacity中心にし、filterは最小限。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §3.5（テーマ選択）, lais_ux_v1.md §10.2",
+    "issue": "ダーク/ライト4テーマの“役割→色”マッピングが未定義。Overdueの赤やアクセント色がテーマ間でコントラスト担保される保証がない。",
+    "suggestion": "semantic→brand mapping表を作成。各テーマでWCAG AA達成を検証し、アクセントの彩度/明度を個別最適化。背景・Surfaceのレイヤー色（0/1/2段）とテキスト階調も明示。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md §3.4（TALK内レベルアップ）",
+    "issue": "会話中のレベルアップ紙吹雪が認知負荷を上げ対話の流れを阻害する可能性。",
+    "suggestion": "TALKでは小型バナーのみ/紙吹雪なしに固定（既に簡略化済だが更に2秒→1秒へ短縮）。完全演出はGROWだけに限定。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §7.1, §4.4（QR振動）",
+    "issue": "触覚/微振動の設計が一貫していない。チェック完了など主要操作の“手応え”が弱い可能性。",
+    "suggestion": "Web Vibration API対応端末での短いhapticプリセットを定義（例: 完了=10ms、Undo=2x5ms、エラー=30ms）。設定で無効化可能に。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §7.3（アバター PNGキャッシュ）",
+    "issue": "PNGキャッシュの無効化・更新戦略（装飾変更/レベル進化時のキー更新）が未定義。古いアバターが表示され続ける恐れ。",
+    "suggestion": "キャッシュキーをavatar_version（phase+itemsのhash）で付与。Service Worker/IndexedDB双方でversion mismatch時に差し替え。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §1.2–§1.3",
+    "issue": "“洗練 × ゲーミフィケーション”のビジュアル基準（写真/イラストのスタイル、色面の使い方、余白哲学）が未定義で、Harajuku系テーマとコンセプトのブレが起きうる。",
+    "suggestion": "ブランドガイドを追加（ロゴ・色面比率・余白・イラストトーン・アニメーション抑制度）。Harajukuは配色/背景パターンのみで情報密度を上げない方針を明記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3（SVG→Canvasラスタライズ）",
+    "issue": "FRIENDSグリッドで多数アバターを同時表示する際の初回ラスタライズ・スクロール時のGC負荷が懸念。パフォーマンス劣化の恐れ。",
+    "suggestion": "初回インストール時に主要組合せをバックグラウンド生成/キャッシュ。可視領域+1画面分のみ遅延生成（IntersectionObserver）。OffscreenCanvas対応端末でワーカー合成。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais_design_system.md（未作成）",
+    "issue": "アニメーションのトークン（duration/easing/距離）とReduced Motion時の代替表が未定義。各所でバラつく恐れ。",
+    "suggestion": "motion tokensを定義（fast=150ms/standard=250ms/slow=400ms、easing: standard, emphasized, exit）。Reduced Motion時の置換表を全演出に適用。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md §15（通知タップ）",
+    "issue": "通知ディープリンク時、既存モーダル/ドロワーが開いている場合のクローズ順が未定義。予期せぬ多重UIが残存する恐れ。",
+    "suggestion": "遷移前に“UIスタックをクリア”ポリシーを定義（ドロワー→モーダル→サブタブの順に閉じる）。popstate発火順と連動させる。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.3（複数タスク提案）",
+    "issue": "タスク提案カードが日次上限・同名5分制限に抵触した場合のカード内エラーハンドリングが未定義。",
+    "suggestion": "登録時に上限超過/重複検出をカード内でインライン警告表示し、当該行だけ無効化。成功行は部分的に登録可能に。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §10.4",
+    "issue": "aria-liveでEXP/完了通知を多用するとスクリーンリーダーが冗長になる可能性。",
+    "suggestion": "重要イベントのみpolite、連続タスク完了はまとめて要約通知へスロットル。ユーザー設定で通知の詳細度を選べるように。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-027",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §2.3（Overdue）, §2.4（ゴール完了）",
+    "issue": "Overdue色・ゴール完了色など“意味色”がテーマごとに未定義で、暗色テーマ時の可読性が担保されない可能性。",
+    "suggestion": "semantic colorの状態マップ（success/warning/error/info）をテーマ毎に策定し、ラベル/背景/枠線/アイコンの組み合わせを指定（contrast比含む）。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §4.2（週N回）, lais_ux_v1.md §2.3",
+    "issue": "週N回習慣で目標達成後に“追加達成”した場合の処理（達成数の超過カウント可否、Today表示継続）が未定義。",
+    "suggestion": "達成後はToday非表示/記録は可能（週内統計に加算しない）などのルールを定義し、UIにも達成済みバッジを表示。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-029",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §11.1–§11.2",
+    "issue": "小型端末時のタイポ縮小/省略のしきい値・禁則（数字/単位の省略規則）が未定義。",
+    "suggestion": "タイポスケールのレスポンシブルール（例: <360pxでbody 14→13px、タスク時間はアイコン化）と省略箇所の優先度を定義。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-030",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §7.5（初期表示2秒目標）",
+    "issue": "日本語Webフォント・SVG合成・Canvas演出の合算でLCPリスク。洗練さを損なう可能性。",
+    "suggestion": "初回はOSシステムフォントフォールバック→遅延で可変フォント適用（FOIT回避）。ヒーローPNGはプリレンダ/HTTPキャッシュ。不要JSの分割/遅延読込を徹底。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

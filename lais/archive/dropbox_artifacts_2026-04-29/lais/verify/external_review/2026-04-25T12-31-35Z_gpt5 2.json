@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §17 / §19.4",
+    "issue": "§17 の scripts 一覧は 1〜39 まで拡張された一方、§19.4 の検証コマンドは `grep -cE \"^[0-9]+\\.\"` で行頭が整数+ドットの行しか数えません。表内の `30.`〜`39.` が Markdown 表行 `| 30. | ...` として記載されているため集計漏れし、仕様が期待 39 本なのに検証が別値を返す恒常的不整合になります。",
+    "suggestion": "scripts 数の SSoT を 1 つに寄せ、検証式も表記形式に合わせて更新してください。たとえば `grep -cE \"^\\|[[:space:]]*[0-9]+\\.\"` で表行を数えるか、一覧自体を箇条書きへ統一して表記揺れをなくすべきです。期待値 39 と実計測が一致することを CI で固定化すると、後続の追加・削除でも破綻しません。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md §2.γ' / deploy.sh サンプル",
+    "issue": "`tmp=$(mktemp)` の直後に `awk ... > \"$tmp\" && mv \"$tmp\" ...` としていますが、awk 失敗��や途中中断時の一時ファイル削除がなく、`mktemp` 失敗も明示処理されていません。実行例として参照されたときに /tmp へゴミが残留し、後日のトラブル調査やディスク逼迫の温床になります。",
+    "suggestion": "`tmp=$(mktemp) || exit 1` を明示し、`trap 'rm -f \"$tmp\"' EXIT HUP INT TERM` を設定したうえで、成功時のみ `trap - EXIT` 後に `mv` する形へ修正してください。仕様書内の実装サンプルはそのままコピペされやすいため、異常系まで含めて fail-safe な形を正本として置くのが保守上安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "lais/verify/dev_system_v34_package.md §2.25.14.5",
+    "issue": "応答末尾に `[Review: N rounds, M personas]` の付記を必須とし `adv_response_gate.sh` で欠落時 BLOCK としていますが、どの出力が機械検査対象かが未定義です。PO 向け通常応答だけでなくコードブロック・JSON・1行要約・subagent 指示にも適用されると、実運用で正当な応答まで誤ブロックしやすく、運用停止を招きます。",
+    "suggestion": "対象メッセージ種別を明文化し、除外条件を列挙してくだ��い。たとえば AskUserQuestion、通常自然文応答、subagent 起動指示のみ必須で、JSON-only 出力・パッチ本文・ログ貼付は除外など、判定基準を正規表現レベルまで固定するべきです。合わせて BLOCK 例と PASS 例を 3〜5 件追加すると実装ぶれを防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "instructions/session_progress.md 5行サマリー",
+    "issue": "`Last done` と `Last done (前回)` が連続で複数ぶら下がり、しかも旧 `Last done` を残したまま新しい `Last done` を追加しています。人間の読み手には追えますが、見出し名ベースで最新状態を抽出するスクリプトや grep 運用ではどれが正本か判定できず、後続自動化が誤読する危険があります。",
+    "suggestion": "5行サマリーは固定キーを 1 回ずつに制限し、履歴は別節へ退避してください。たとえば `Last done` は常に最新 1 件、直前履歴は `Recent history` に箇条書きで 2〜3 件保持する構造にすると機械可読性が上がります。更新規則を明文化し、重複見出しを lint で検出すると再発防止できます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais/verify/dev_system_v34_package.md §19.4",
+    "issue": "POSIX 互換化のため process substitution を一時ファイルへ置換したのは妥当ですが、検証コマンドで `/tmp/section17.txt` や `/tmp/c0c6_spec.txt` のような固定ファイル名を使用しています。並列実行や再入時に別プロセスと衝突して内容を上書きし、diff や件数チェックが誤判定するため、CI や複数端末運用で後日バグ化します。",
+    "suggestion": "検証例でも `mktemp` によるユニーク名生成へ変更してください。`tmp1=$(mktemp) || exit 1` / `tmp2=$(mktemp) || exit 1` のように確保し、`trap` で必ず削除する形をテンプレート化すると安全です。仕様書のサンプルはそのまま自動化へ流用されるため、固定 `/tmp` 名の使用は避けるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §17 / §6.10 補足表",
+    "issue": "§17 では番号付きリスト 1〜39 を SSoT としつつ、後段の詳細表では `No.1〜29` と `Phase 1-3 拡張 No.23〜29` の二段表記を残し、注記で『重複あり』と説明しています。同一ファイル内で番号体系が 2 種共存しており、参照時に `No.29` が何を指すのか一意でなく、後続パッチで高確率に誤参照が発生します。",
+    "suggestion": "番号体系は全節で単一化してください。最も安全なのは全表を 1〜39 の通し番号に再採番し、旧番号が必要なら `legacy_no` 列として保持する方法です。『重複ありだが注記で説明』は人間依存で壊れやすいため、参照IDを一意化してリンク先・検証コマンド・patch 記述をすべて同じIDへ揃えるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md 全体",
+    "issue": "`http://CLAUDE.md` や `http://patches.md` などの phantom リンクを一部修正した一方で、PATCH-G49-PA にも `M-3 phantom http リンク多発` として残置が明記されています。リンク表記がバッククォートと URL 風表記で混在すると、文書整形や自動リンク化時に誤解を招き、レビューや検索のノイズになります。",
+    "suggestion": "ファイル参照はすべてバッククォート記法へ統一し、URL は実在する外部参照だけに限定してくださ��。既知課題として残す場合も別 PATCH 送りではなく、今回のような大規模整形のタイミングで一括置換した方が再発しません。`grep -R \"http://[A-Za-z0-9._-]+\\.md\"` の lint を追加すると継続的に防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais/verify/dev_system_v34_package.md §2.25.14.4 / §2.25.20",
+    "issue": "ペルソナレビューは `CRITICAL 0 / HIGH 0 まで反復、上限 5R` とし、残る場合は §2.25.20 へ escalate とありますが、escalate 後の動作が未定義です。送信を block するのか、fail-open で送るのか、PO 承認待ちにするのかが決まっていないため、実装時に各スクリプトが別挙動となり、停止系の事故や無限差戻しの原因になります。",
+    "suggestion": "5R 到達時の単一ルールを決めてください。例として『CRITICAL/HIGH 残存時は送信禁止、`instructions/po_alerts.md` へ記録し次応答は要約のみ許可』のように、遷移先・ログ先・ユーザー向け表示文まで固定すると実装ぶれを防げます。状態遷移図を 1 つ追加し、BLOCK / ALERT / FAIL-OPEN 条件を整理するのが有効です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0581,
+    "input_tokens": 27874,
+    "output_tokens": 2328,
+    "model_id": "gpt-5.4"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §2.ε'-1 / §C4.1",
+    "issue": "deploy.sh のサンプルコードブロックが途中で壊れており、コードフェンス混入、HTMLエスケープ、1行化、`\\[` のような記法混在でシェルとして実行不能な断片になっています。仕様書が実装正本・検証根拠として参照される前提では、このまま転記実装すると確実にデプロイスクリプトが壊れ、失敗時処理や STATUS 更新も動かなくなります。",
+    "suggestion": "deploy.sh の記載を実行可能な POSIX sh スクリプトとして全面復元し、コードブロックの開始終了を再点検してください。Markdown 表示用エスケープと実コードを混在させず、仕様書内サンプルはコピペ実行可能な状態を維持すること。CI で `sh -n` 対象に仕様掲載コードを抽出して検証する運用も追加してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §2.γ'-7",
+    "issue": "append_deploy_fail.sh の変更で STRIKE 3 回以上は `instructions/approvals/${MISSION_ID}.strike_override.json` を使う説明なのに、後半の §C4.2 では `instructions/approvals/.strike_override.json` と MISSION_ID が欠落した別パスになっています。承認ファイルの探索先が不一致のまま実装されると、正しい承認があっても再実行不能または誤承認になり得ます。",
+    "suggestion": "承認ファイルの SSoT を 1 か所に固定し、全文から旧表記・欠落表記を除去してください。少なくとも `instructions/approvals/<MISSION_ID>.strike_override.json` に統一し、関連節・表・サンプル・検証コマンドを一括更新するべきです。chain update チェックで承認パスの文字列一致を監査対象に含めると再発防止になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "instructions/session_progress.md Open issues / 方針",
+    "issue": "Open issues では「ADV 再 Stage 2 レビュー」は v3.5 確定後の事後追加検証と記載される一方、直前までの経緯では v3.5 確定の前提確認として扱っていた履歴が残っています。方針も「v3.5 確定済み」へ更新されていますが、他箇所の説明と整合しておら���、レビューのゲート条件が前提か事後監査か判別しづらい状態です。",
+    "suggestion": "v3.5 確定判定に対する ADV 再 Stage 2 の位置づけを明文化し、全箇��を「必須ゲート」か「事後監査」どちらかに統一してください。タイムラインには変更理由と適用日を 1 行で追記し、旧運用表現を残す場合は『履歴』として分離すると誤読を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md 全般",
+    "issue": "今回の差分で空のコードフェンス追加、箇条書きの崩れ、表の1行化、URL自動リンク化（`deploy.sh` など）が複数箇所に混入しています。内容変更ではなく Markdown 構造破損が多数含まれており、レビュー対象の仕様書として可読性と保守性を大きく下げています。特に検証コマンドのコピペ性が失われています。",
+    "suggestion": "文書整形専用の修正を先に行い、意味変更とフォーマット変更を分離してください。Markdown lint や fenced code block の整合チェックを pre-commit に追加し、URL 自動変換や HTML エスケープ混入を検出するルールを設けるとよいです。仕様書は『読めること』自体が品質要件なので、機械的整形崩れは優先して除去すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "docs/plans/dev_system_spec.md 19.10",
+    "issue": "AI レビュープロバイダーが `GPT-5/5.4 + Gemini 2.5/3.1 Pro` に拡張されていますが、どの条件でどのモデルを使うか、互換性差分や合意度算出の扱いが未定義です。session_progress でも合意度分母の未整理が open issue として残っており、レビュー結果の比較基準が揺れる状態です。",
+    "suggestion": "モデル選択規則、最低実行モデル数、合意度の分母、フォールバック条件を仕様に明記してください。特に『2プロバイダー』という既存表現を維持するなら、各プロバイダー内で複数モデルをどう扱うかのルールが必要です。未確定なら候補列挙ではなく現時点の正式対象モデルだけに絞る方が安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "docs/plans/dev_system_spec.md レビュー時の送信ルール / 参照関係",
+    "issue": "レビュー送信対象が 4 ファイルから 7 ファイルへ増え、さらに sub_review_flow と sub_external_review_protocol の双方向参照が必須化されています。参照増加自体は妥当でも、依存の中心となる正本が複数箇所に分散し、読む順序や『どちらが最終決定権を持つか』が文中で明示されていません。運用者ごとに解釈差が出やすい構造です。",
+    "suggestion": "依存関係図に加えて、各サブ仕様書の責務と優先順位を 1 行ずつ定義してください。たとえば『レビュー運用の正本は sub_review_flow、外部自動化の正本は sub_external_review_protocol、競合時は後者の §x を優先』のように解決規則を明示すると保守しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §6.10 scripts/ 一覧",
+    "issue": "scripts 一覧で `append_deploy_fail.sh` の説明が `STRIKE 1→BLOCKED_REVIEW` と書かれていますが、前段の仕様・実装例では `BLOCKED` と `DEPLOY_STRIKE_1_REVIEW_REQUIRED` が正式語です。状態名と理由名が混ざっており、5状態モデルの記述とも一致しません。状態値として BLOCKED_REVIEW を導入したと誤読される危険があります。",
+    "suggestion": "状態値と理由コードを厳密に分離し、一覧・本文・コード例すべてで同一語彙を使ってください。状態は `BLOCKED`、理由は `DEPLOY_STRIKE_1_REVIEW_REQUIRED` に統一し、説明文でも『BLOCKED 化』と『理由コード付与』を分けて記述すると実装者の誤解を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md 複数節",
+    "issue": "検証コマンドや grep パターンの記述で過剰なエスケープや正規表現の劣化が見られます。例として `evidence//` のような意図不明のパターン、`^### 3.\\[1-7\\]` のような過剰エスケープがあり、ドキュメントとしての説明力が落ちています。将来の保守で『なぜこの形なのか』が追えません。",
+    "suggestion": "表示都合のエスケープは最小限にし、実際に端末で使うコマンドはそのまま掲載してください。複雑な grep はコメントで意図を補足し、期待件数も別行に分離すると読みやすくなります。検証コマンドは仕様の補助であり、読者が即実行できる明瞭さを優先すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0462,
+    "input_tokens": 19148,
+    "output_tokens": 2225,
+    "model_id": "gpt-5.4"
+  }
+]

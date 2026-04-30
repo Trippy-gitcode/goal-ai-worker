@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<!-- CSP meta（二重防御、HTTP ヘッダ `lais/public/_headers` が一次防御。frame-ancestors / report-uri / sandbox は meta では効かないため _headers 側のみで指定。詳細: docs/ops/csp_setup.md PATCH-PB3-CSP） -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-xN2ruSGYpDWge2+lxzwq8bku3gQIzLHJ6FoZiZ/xL7I=' 'sha256-56yLdg/Pcm84NF2Lrgef9UWwckXzOsqFZiMmPRwCj40=' 'sha256-2O+EFmsWV2c4o29p6za+QOMDIaXmYD7djYLNSh4iFxc=' 'sha256-tVDke3825o7bWNav9XNIgw+QIWA2kqUa1vpxXZNLVE4='; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in; img-src 'self' data: blob: https://*.supabase.co; font-src 'self' data:; media-src 'self'; worker-src 'self' blob:; manifest-src 'self'; frame-src 'none'; child-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<title>Lais</title>
+<script>
+  // Theme bootstrap (FOUC prevention). Must run before first paint.
+  // Stage 7-1 (2026-04-27): 4 themes apple / totoro / dq / cyberpunk.
+  // Storage key: lais_theme. Default: apple.
+  (function () {
+    var allowed = ['apple', 'totoro', 'dq', 'cyberpunk'];
+    var fallback = 'apple';
+    try {
+      var saved = localStorage.getItem('lais_theme');
+      var theme = allowed.indexOf(saved) >= 0 ? saved : fallback;
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (_) {
+      document.documentElement.setAttribute('data-theme', fallback);
+    }
+  })();
+</script>
+<link rel="stylesheet" href="/src/styles/tokens.css">
+<link rel="stylesheet" href="/src/styles/themes.css">
+<link rel="stylesheet" href="/src/styles/animations.css">
+<link rel="stylesheet" href="/src/styles/global.css">
+<!--
+  PATCH-PB5-CODE-SPLIT prefetch（2026-04-25 / 主導線 = S00 → S01 → S10）
+  - S00Splash は eager（main bundle 同梱、prefetch 不要）
+  - S01Auth: 「はじめる/ログイン」CTA タップ前にバックグラウンド取得
+  - S10Grow: 認証成功後の主着陸ページ、Phase A 主導線として最重量画面 chunk
+  modulepreload は dev では効かない（vite-rollup-plugin が dist 用 hash 解決）。
+  そのため prefetch は dev では無視され、本番 build 後の dist/index.html 内 prefetch
+  により Cloudflare Pages 配信時に有効化される（Vite vite-prefetch 同等の挙動）。
+  詳細: docs/ops/code_splitting.md §5
+-->
+<link rel="prefetch" href="/src/components/screens/S01Auth.jsx" as="script" crossorigin>
+<link rel="prefetch" href="/src/components/screens/S10Grow.jsx" as="script" crossorigin>
+</head>
+<body>
+<div id="app"></div>
+<script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

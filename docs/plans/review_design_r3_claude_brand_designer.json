@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§1.2 デザイン原則 / §5 テーマ定義",
+    "issue": "デザイン原則 1「実世界との地続き感」と、Harajuku Light/Dark テーマの「ポップ・カラフル・文化的」な性格が緊張関係にある。Harajuku 系のアクセント色（ローズレッド #C43361 / パステルピンク #F5A9BF）は原則 1 の「自然界の色」から外れる。テーマ性格とブランド原則の統合が曖昧。",
+    "suggestion": "§1.2 原則 1 を「自然界 + 文化的モチーフ（桜/祭り/宝石等）」に拡張するか、Harajuku テーマの性格定義に「文化的ソースとして原則 1 に準拠」と明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§1 ブランド定義",
+    "issue": "Lais の「ロゴ」「ブランドマーク」の定義が完全に欠落している。ブランドシステムの最上位要素であるロゴタイプ/シンボル/余白ルールが未定義のまま、下位のトークンだけが整備されている状態。",
+    "suggestion": "§1 に「1.5 ロゴ・ブランドマーク」セクションを追加し、少なくともロゴのコンセプト、制作時期、暫定形（プレースホルダー）を明記。確定前でも placeholder であることを示す。",
+    "model": "Claude Opus 4.6",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§5 テーマ性格差別化",
+    "issue": "4 テーマの差別化が「色とマイクロコピー、アクセント濃度」に限られ、radius/shadow/spring/font-weight は全テーマ共通。Harajuku Light/Dark の「ポップ」性格は色以外で表現する余地がない。Finch のパステル vs Habitica のピクセルのような「同じ色でも性格が違う」レベルの差別化が弱い。",
+    "suggestion": "Harajuku 系テーマに限定して radius を 12px→16px に、shadow を強めに、spring-bouncy を default に置換する『テーマ別パラメータ上書き』を認める。ただし動きは prefers-reduced-motion 設定で打ち消される。",
+    "model": "Claude Opus 4.6",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§6.3 アバター",
+    "issue": "アバターのアートディレクション詳細（顔パーツのスタイル、色数、肌色バリエーション、性別/ジェンダーニュートラル対応、文化的多様性）が未定義。Lais のコア体験の一つだが、仕様からは「フラットベクター・アウトライン無し・単色+1段濃淡」しか分からない。",
+    "suggestion": "§6.3 にアバターのアートディレクションサブセクションを追加。肌色パレット、髪パレット、服パレットの色数と WCAG 対応（肌色にもコントラスト基準）を明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§1.4 NGリスト",
+    "issue": "「純白 #FFFFFF を背景として広範に使用禁止」と書いているが、「広範」の閾値が曖昧。例えば 1 モーダル内が白でも OK なのか、画面の 30% を超えたら NG なのか解釈が分かれる。",
+    "suggestion": "「広範」の定義を「画面全体、または画面面積の 50% 以上」と数値化。",
+    "model": "Claude Opus 4.6",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§1 ブランド定義 / §11 想定",
+    "issue": "ブランドトーンオブボイス（マイクロコピーの語尾、敬語/丁寧語/カジュアル、絵文字使用可否）が未定義。テーマごとに性格が違うのに、全テーマで同じコピーを使うのか、Harajuku 系だけ語尾を変えるのか不明。",
+    "suggestion": "§1 に「1.6 トーンオブボイス」セクションを追加し、基本原則（敬語・絵文字不使用等）と、テーマ別の例外を明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§1.4 NGリスト 色",
+    "issue": "「ネオンカラー on ダーク背景」を NG としているが、Harajuku Dark の accent #F5A9BF は暗背景では十分鮮やかで、ユーザーによっては「ネオン的」と認識される可能性。ネオンの定義が曖昧。",
+    "suggestion": "NG の「ネオン」を「彩度 S>90% かつ明度 L>70%」等の HSL 範囲で定義し、Harajuku 系の pink は除外する旨を明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "brand_designer"
+  }
+]

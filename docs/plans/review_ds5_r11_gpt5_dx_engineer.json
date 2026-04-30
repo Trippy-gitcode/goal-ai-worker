@@ -1,0 +1,212 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力フォーマットに情報源（URL/出典）の記載欄がない。実施方法の要件（各項目に調査日と情報源を明記）と不整合。",
+    "suggestion": "各テーブルに「情報源（URL）」列を追加。少なくとも「調査対象」表と「機能/UX/デザインマトリクス」に情報源列を設け、セルごとに出典リンクor『PO提供資料（ファイル名）』を明示。未確認は『未確認』で統一。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「dev-system準拠: docs/plans/dev_system_spec.md §19」はアプリ側リポジトリに存在しないパスを指しうる（dev-systemは別リポジトリ）。参照切れの恐れ。",
+    "suggestion": "『dev-system準拠』は『dev-system v{VERSION}（コミットハッシュ） §19』のようにバージョン+リンク（リポジトリURL）で表記する。例: dev-system v3.0 (§19) https://github.com/org/dev-system/blob/v3.0/dev_system_spec.md#19-。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存: {上流ファイルのパス + バージョン}」が単一文字列想定で、複数依存やバージョンの構造化表現が不明瞭。",
+    "suggestion": "依存はYAMLリストで構造化（ファイル、バージョン、コミット/タグを明示）。例: 依存: - file: docs/project_v1.md, version: v1.3, ref: 1a2b3c - file: docs/design_system.md, version: v2.0, ref: v2.0。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.6",
+    "issue": "依存チェーン図でdesign_system.mdが重複記載されており、読解時に混乱を招く可能性。",
+    "suggestion": "design_system.mdの記載を一箇所に整理（project_v1.mdの子として一度だけ示し、design_spec_v1.mdがそれに依存する矢印を保持）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.6",
+    "issue": "参照表記を『§X.Y』の節番号に依存させると、節の増減で参照が不安定になりやすい。",
+    "suggestion": "節番号に加え、安定したアンカー方式（見出しスラッグ）またはSPEC-IDでの参照を併記。例: 『project_v1.md §3.2（SPEC-AUTH-002）参照』。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.2 と §19.6",
+    "issue": "spec_changelog.mdは任意（§19.2）だが、§19.6では『更新範囲はspec_changelog.mdに記録』と必須同等に扱っている。",
+    "suggestion": "spec_changelog.mdを必須ファイルに格上げするか、§19.6の文言を『存在する場合は記録』に緩和。運用としては必須化を推奨。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 project_v1.md",
+    "issue": "事業・プロダクトの成功指標/KPI、非目標/スコープ外、法令遵守・プライバシー/データ保護（法的観点）がテンプレートに明示されていない。",
+    "suggestion": "以下の節を追加: §11 成功指標/KPI（計測方法/閾値）、§12 スコープ外・前提・制約、§13 法令遵守・プライバシー指針（データ保持/削除/同意）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 ux_v1.md",
+    "issue": "i18n（多言語）や入力バリデーション指針、オフ���イン時のUX方針がテンプレートに不足。",
+    "suggestion": "節を追加: 『国際化（言語切替/日付・数値/RTL対応）』『入力バリデーションとエラーメッセージ指針』『オフライン/再接続UX（表示/再試行）』。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 design_system.md",
+    "issue": "アクセシビリティのコントラスト比基準（WCAG）や状態トークン（hover/focus/active/disabled）、ブレークポイント定義の明文化がない。",
+    "suggestion": "『§9 アクセシビリティ基準（最小コントラスト比/最小タップ領域）』『§10 状態/インタラクション用トークン』『§11 レスポンシブ・ブレークポイント定義』を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 design_spec_v1.md",
+    "issue": "テスト追跡性（§12のSPEC-ID付番）との接続がテンプレートに明記されていない。",
+    "suggestion": "各画面セクションの先頭に対応するSPEC-ID（例: SPEC-TODAY-001）を必須化し、モックアップ/パラメータと紐づけるガイドを追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md",
+    "issue": "API/データ設計におけるレート制限/スロットリング、APIバージョニング、標準エラーレスポンス、監査ログ/テレメトリ/監視、移行・バックアップ方針が欠落。",
+    "suggestion": "節を追加: 『APIバージョニング/互換性ポリシー』『レート制限/スロットリング』『標準エラー構造/再試行ポリシー』『監査ログ/メトリクス/アラート』『スキーマ移行/バックアップ/リストア』。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 system_map.md",
+    "issue": "失敗時のハンドリング（タイムアウト/リトライ/バックオフ/冪等性）や状態管理方針、キャッシュ無効化/更新戦略が未定義。",
+    "suggestion": "『§5 失敗時戦略（各フローのタイムアウト/リトライ/冪等性キー）』『§6 状態管理（グローバル/ローカル/同期）』『§7 キャッシュと無効化（SW/HTTPキャッシュ/ETag）の方針』を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.4 e2e_fullflow_test.md",
+    "issue": "パフォーマンステストの閾値・測定方法（環境/計測指標/許容値）がテンプレートに規定されておらず、実行可能性が担保されにくい。",
+    "suggestion": "『パフォーマンス測定ガイド』をテンプレートに追加（例: FCP/TTI/主要操作応答≤X秒、計測環境/ネットワーク条件、検証コマンド）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.4（テストID命名ルール）と §7/ sub_testing.md",
+    "issue": "affected-tests.shはtest_map.yamlのtests値をPlaywrightの--grepに渡す想定だが、命名ルールのGREP-KEYとtest_map.yamlの値の同一性要件が明文化されていない。",
+    "suggestion": "test_map.yamlのtests配列には『テストタイトルに含まれるGREP-KEY（角括弧含む or 固定接頭語）』を必須化する旨を明記し、canopyでタイトルとマッピングの不一致lintを追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§19.6",
+    "issue": "『依存メタデータ』を連鎖更新判断に用いるとあるが、機械可検証なスキーマ/検証手段が���定義。",
+    "suggestion": "§19.5のヘッダー依存をYAMLスキーマ化し、専用lint（例: scripts/spec_dep_lint.sh）で循環/未バージョン/不在ファイルを検出。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "『直接競合5社以上』はドメインにより困難な場合があり、運用上の例外手続きが未定義。",
+    "suggestion": "例外ルールを追加（例: 3社未満の場合は間接競合・代替カテゴリで補完し、PO承認の上で完了扱い）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5 と §13.5/ scripts/review_gate.sh",
+    "issue": "CONFIRMED=CRITICAL 0達成の運用はdocs/plans/review_*.jsonを前提とするが、§19.1の必須ファイルにdocs/plans/が含まれていないため、アプリ仕様書での格納位置が暗黙的。",
+    "suggestion": "§19.1に『docs/plans/（AIレビューJSON格納）』を必須ディレクトリとして追加し、ヘッダーに『レビューID/ファイル名』欄を設けて相互参照を明確化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダーに『作成』のみで『最終更新』『作成者/責任者』の明示がなく、トレーサビリティが弱い。",
+    "suggestion": "ヘッダーに『更新: {日付}』『作成者/責任者: {名前/役割}』を追加。変更履歴の最新エントリと一致させるガイドを記載。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー例の依存ファイルパスが『docs/plans/lais_project_v1.md』と、§19.1の命名（docs/project_v1.md）と不整合。",
+    "suggestion": "例示をテンプレートの実ファイル名に統一（docs/project_v1.md 等）。固有名（lais_）は避け、プレースホルダに置換。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7",
+    "issue": "ベンチマーク成果がMarkdown表のみで機械検証が難しく、§1.1『機械可検証』原則と弱く整合。",
+    "suggestion": "Markdownに加え、同内容のJSONをdocs/plans/bench_*.jsonとして保存（スキーマ定義）。canopyで『競合≥5』『Lais方針が全行に定義』『差別化≥3』を自動検証。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§19.7",
+    "issue": "『差別化マッピングの必須ルール』がproject/uxへ���紐付けに限定され、デザイン起因や技術起因の差別化（design_system/design_spec/reference）への直接の紐付けが想定外になっている。",
+    "suggestion": "対応セクションの対象を『project/ux/design_system/design_spec/reference』のいずれにも拡張可と明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

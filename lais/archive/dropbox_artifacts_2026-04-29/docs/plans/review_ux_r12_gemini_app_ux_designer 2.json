@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.3, §7.3",
+    "issue": "DISCOVER画面の「強み/弱みチップ」の横スクロール操作と、ME画面のサブタブ切替の横スワイプ操作が競合しています。ユーザーがチップを横にスクロールしようとすると、誤ってサブタブが切り替わってしまい、操作が成立しません。",
+    "suggestion": "チップ領域でのタッチイベント（スワイプ）は `stopPropagation` で親への伝播を止めるか、ME画面におけるサブタブの横スワイプ切替を無効化（タブのタップのみで切替）する仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§1.4, §2.3, §2.4",
+    "issue": "S-11（ハーフモーダル）やS-14（フルスクリーン）から「AI相談」でTALKタブに遷移する際の履歴管理（history.pushState）が破綻しています。S-14の履歴をreplaceStateでS-10に書き換えてからタブを切り替えると、通常のタブ切替（pushStateしない）との一貫性が崩れ、ブラウザバック時に予期せぬ画面遷移やアプリ終了を引き起こします。",
+    "suggestion": "タブ切替を伴う遷移（AI相談）を行う前に、現在開いているモーダルやフルスクリーン画面をプログラム的に閉じ（history.back()を実行してpopstateを待機、または状態をクリア）、クリーンなGROW画面の状態に戻してからTALKタブへ切り替えるフローに統一してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.3",
+    "issue": "project_v1.md §3.2.3で定義されている「週N回習慣を手動でTodayに追加する『今日やる』ボタン」のUI定義と操作フローがux_v1.mdに存在しません。UpcomingタスクからTodayへ移動させる手段が欠落しています。",
+    "suggestion": "Upcomingタスクセクション内の習慣タスク行に「今日やる」ボタンを追加し、タップ時にそのタスクをTodayセクションへ移動（当日タスクとして扱う）させる操作フローを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.4, §9.1",
+    "issue": "オフライン時にQRコード表示・スキャンが無効化されることは定義されていますが、同様にサーバー発行の一時トークンが必要な「シェアリンク生成（リンクをシェア）」ボタンのオフライン時の挙動が定義されていません。そのまま実行するとAPIエラーになります。",
+    "suggestion": "§9.1のME画面のオフライン挙動に、「シェアリンク生成ボタンも無効化（グレーアウト＋『オフライン時はリンクを生成できません』等のツールチップ表示）」を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§2.3, §3.4",
+    "issue": "Undoスナックバーは全タブに跨って表示されますが、GROW画面以外（TALK/ME）で「取り消す」をタップした場合のEXPバー巻き戻しアニメーションの挙動が未定義です。TALK/MEにはヒーロー領域（EXPバー）がないため、アニメーション処理がJSエラーになるか空振りする可能性があります。",
+    "suggestion": "GROW画面以外でUndoが実行された場合は、EXPバーのアニメーション演出をスキップし、データ（状態）の静的更新のみを行う旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.4",
+    "issue": "QRスキャン（S-36）でカメラ許可拒否時に「[リンクで追加する] ボタン（シェアリンク入力欄を表示）」とありますが、この入力欄がS-36の画面内にインラインで表示されるのか、別モーダルなのか不明です。また入力後の「追加」アクションの定義がありません。",
+    "suggestion": "「[リンクで追加する] ボタンタップ → 入力用ハーフモーダルを表示。URLペースト後 [追加] ボタンでトークンを検証し友達リクエスト送信」のように、具体的なUIと遷移フローを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.5",
+    "issue": "スレ��ド上限（100件）超過時に「古いスレッドを自動アーカイブ（表示対象外だがDB保持）」とありますが、アーカイブされたスレッドを閲覧・復元するUIが存在しません。DBに保持されていてもユーザーからアクセスできなければ削除と同じ体験になります。",
+    "suggestion": "チャット履歴ドロワーの最下部に「アーカイブされたスレッドを見る」リンクを追加し、別画面またはモーダルで過去ログを閲覧できるUIを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3.2",
+    "issue": "AI応答のストリーミング中に「最下部に追従」とありますが、ユーザーがその最中に上スクロール（過去メッセージ閲覧）を試みた場合、自動スクロールが停止するかどうかが明記されていません。停止しないとユーザーの操作が強制的に引き戻され、強いストレスを与えます。",
+    "suggestion": "「ストリーミング中にユーザーが上方向へスクロール操作（touchmove/wheel）を行った場合、最下部への自動追従を即座に停止し、『↓ 新しいメッセージ』ボタンを表示する」と追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§2.3",
+    "issue": "タスク追加時の所要時間プリセットが「5/10/15/30/45/60/90/120分」となっていますが、project_v1.md §3.2では「5分刻み（5/10/15/.../120分）」と定義されています。モバイルUIとしてはux_v1.mdの飛び飛びの値が適切ですが、仕様間の不整合があります。",
+    "suggestion": "project_v1.md側の「5分刻み」という制約を緩和し、ux_v1.mdの「実用的なプリセット値（5/10/15/30/45/60/90/120分）」を正とする旨を注記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.3, §6.4",
+    "issue": "TALK画面の過去会話履歴の上スクロール追加読み込み時、スケルトンスクリーンが表示されるのかスピナーが表示されるのか不明確です。スケルトンだと既存メッセージが押し出されるような視覚的違和感が生じます。",
+    "suggestion": "履歴の追加読み込み時は、スケルトンではなく上部に小型の円形スピナー（Pull-to-refreshと同等）を表示する仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "共通ルール（ゴールデンで出たCRITICALは信頼度Aのみ修正必須）",
+    "issue": "品質ゲートがCRITICAL=0達成のみを強調しており、HIGH以下の扱いが未定義。HIGHが多数残存したまま確定できる余地があり、実効的な品質ゲートにならない。",
+    "suggestion": "最終受け入れ基準を明文化する。例: ゴールデン時点で「CRITICAL=0、HIGH≤N（根拠付きWAIVE含む）、MEDIUM/LOWはチケット化必須」。WAIVE/DOWNGRADEの根拠テンプレートと承認者（主審/PO）も定義する。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "改善4: 信頼度スコアリング（信頼度BのCRITICAL → HIGH扱い）",
+    "issue": "信頼度BのCRITICALを自動的にHIGHへ格下げすると、真の重大欠陥が見逃されるリスクがある。",
+    "suggestion": "格下げは自動ではなくトリアージ必須にする。提案: (a) 信頼度BのCRITICALは「要再審」キューへ送る、(b) 信頼度Aの主審または別モデルで再判定、(c) 2者一致（またはA×1+具体的証拠）で確定。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "改善2: diffレビュー（修正ラウンドは差分のみ）",
+    "issue": "修正ラウンドを完全にdiff限定にすると、影響範囲の誤見積りや思わぬ副作用を検出できない可能性が高い。",
+    "suggestion": "コストを抑えた安全網を導入する。例: 各diffラウンドで1) 低コストの全体スモーク（軽量チェックリスト型）を1〜2ペルソナで実施、2) 高リスク領域（a11y/セキュリティ/データ整合）用のセンチネルチェックを常時実行。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "改善2: diffレビュー（修正箇所+影響範囲のみ）",
+    "issue": "「影響範囲」の定義と特定方法が未定義で、信頼性の担保ができない。",
+    "suggestion": "影響範囲決定手順を定義する。例: 変更点分類（UI文言/構造/トークン/ロジック/セキュリティ）、依存マップ（セクション/コンポーネント/ペルソナ関与表）、自動補助（差分+参照関係から推定）、レビューアが上書き可。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "改善2: 入力形式（修正前→修正後 + 影響範囲 + 確認依頼）",
+    "issue": "diffレビューの入力スキーマが未定義で、��ビュア間のばらつきや見落としの原因になる。",
+    "suggestion": "JSONスキーマを定義する。例: {id, change_type, before, after, rationale, risk_level, impacted_sections[], impacted_personas[], related_defects[], verification_items[] }。スキーマ必須化とLintをCIに組み込む。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "改善4: 信頼度スコアリング",
+    "issue": "修正採用率/false positive率の定義と算定方法（分母・観測窓・判定者・閾値補正）が不明瞭で運用不能になり得る。",
+    "suggestion": "評価設計を明文化。例: 分母=指摘案件数、採用=実装反映/仕様更新/根拠付きWAIVE、FP=実在/再現不可/証拠不備。観測窓=直近NフェーズorM件の移動平均。モデル/ペルソナ別に集計し信頼度を自動更新。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "レビュー種別ごとのフロー（全体）",
+    "issue": "モデル間・ペルソナ間で判定が割れた場合のコンフリクト解消手順がない。",
+    "suggestion": "合議ルールを導入。例: 重要度ごとに「2/4合意」「A信頼度×1 + 具体例」のようなクォーラム基準、タイブレークは主審、主審同士の不一致はPO/専門ペルソナで裁定。裁定結果は学習データ化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "B/Cの主審選定（qa_engineer/qa_leadが非主審）",
+    "issue": "テストアンチパターン検出の中心となるqa系ペルソナが主審から外れており、網羅性が不足する恐れがある。",
+    "suggestion": "qa_engineer/qa_leadをローテーション主審またはセンチネルとして各diffラウンドに最低1本含める。加えてアンチパターンカタログ（境界値、状態爆発、同値分割漏れ、NFR抜け等）に基づく固定チェックを運用。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "共通ルール（全体）",
+    "issue": "テスト分離（再現性）に関わるプロンプト/モデル/コンテキストの固定化、ラウンド間汚染防止の規定がない。",
+    "suggestion": "分離要件を定義: モデルバージョン固定、プロンプトテンプレートのハッシュ化、コンテキスト初期化、乱択の無効化、温度固定、APIリトライ/タイムアウト方針。���レビューにseed/設定をログ化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改善3: ゴールデンレビュー（最終1回だけフル/最大2回）",
+    "issue": "2回目ゴールデンの発動条件や、1回目で再発見されたCRITICALへの戻し方が不明確。",
+    "suggestion": "トリガー条件を明記。例: ゴールデン失敗→最低1ラウンドdiff修正+2連続CRITICAL=0達成後に再ゴールデン。再失敗時はPOエスカレーション+フェーズスコープ/期日再定義。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "A/B/C: 主審選定理由",
+    "issue": "主審が固定で、対象や変更内容に応じた動的最適化がない。",
+    "suggestion": "信頼度と変更タイプに基づく主審の動的割当てを導入（例: a11y影響あり→a11y_expertを一時主審昇格）。ルールを表形式で明示。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "改善1: 初回フル→修正は主審のみ",
+    "issue": "コスト/時間削減効果が定量化されておらず、期待効果の現実性検証が困��。",
+    "suggestion": "ベースラインと目標をKPI化。例: 1ラウンド当たりAPI本数、平均TAT、ゴールデン到達までのラウンド数。予算上限/打ち切り条件（Stop-loss）を設定し、逸脱時にフローを見直す。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "共通ルール（全体）",
+    "issue": "重大度基準のキャリブレーションが未定義で、モデル/ペルソナ間でCRITICAL/HIGH境界が揺らぎやすい。",
+    "suggestion": "重大度定義表を制定（影響度×再現性×回避策有無×安全性）とサンプル事例集を共有。モデル応答を重大度ヒント→最終重大度は合議ルールで確定。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "改善4: 信頼度スコアリング",
+    "issue": "スコア更新に必要な審査ログ（採否理由、根拠、再現手順、エビデンス）の最低項目が未定義。",
+    "suggestion": "レビュー項目台帳を実装（ID、発見源、証拠、採否、理由、最終重大度、修正コミット/PRリンク、再発防止タグ）。これを基に採用率/FP率を自動算出。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "改善2: diffレビュー",
+    "issue": "過去に指摘されたCRITICALの再検証（回帰確認）手順が明記されていない。",
+    "suggestion": "「クローズ条件」チェックリストを各diffラウンドに含め、該当項目は必ず再確認。該当が多い場合は対象範囲の自動拡大（近接領域スキャン）を行う。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "背景と課題（モデル間基準差）",
+    "issue": "モデル間の基準差に対する較正/正規化の具体策が未提示。",
+    "suggestion": "校正セット（既知の正解付きタスク）で各モデル×ペルソナの感度/特異度を推定し、しきい値補正や信頼度初期値に反映。分歧スコアが高い案件は自動で再審へ。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "改善3: ゴールデンレビュー",
+    "issue": "主審でCRITICAL=0直後にゴールデンへ進むと再発見の揺り戻しが起こりやすい。",
+    "suggestion": "ゴールデン前に「2連続diffラウンドでCRITICAL=0」���追加条件とし、揺り戻しを低減。達成できない場合は主審構成や影響範囲推定の見直しをトリガー。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "共通ルール（全体）",
+    "issue": "影響範囲とペルソナの対応表がなく、どの変更で誰を呼ぶかの判断が属人化する。",
+    "suggestion": "「変更タイプ→必須/任意ペルソナ」マトリクスを定義。例: 配色/コントラスト→color_coordinator必須、用語/ラベル→ux_researcher+tech_writer、RLS/認可→security_engineer。マトリクスを基に自動選出。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

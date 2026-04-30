@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s00_splash",
+    "location": "中央ロゴ「Lais」",
+    "issue": "ロゴ色が #E6EDF3（本文色）で表示されており、design_system §1.3「ロゴの色: テーマの --accent」を満たしていない（Night Skyの--accentは #79C0FF）。",
+    "suggestion": "ロゴの文字色を var(--accent) = #79C0FF に変更し、夜空ブランドの主色で統一する。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s01_signin",
+    "location": "ヘッダーのロゴ「Lais」",
+    "issue": "ロゴ色が本文色 #E6EDF3 のまま。design_system §1.3の「ロゴの色＝--accent」に不一致。",
+    "suggestion": "ロゴを var(--accent) = #79C0FF に統一（他画面と一貫）。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Todayリスト 09:00 行（達成カード）",
+    "issue": "success-subtle 背景（rgba(63,185,80,0.12)) 上でラベル文字色 #3FB950 を併用し、緑×緑で視認性と視線誘導が過多。ブランドの静けさよりも色の主張が勝つ。",
+    "suggestion": "ラベル「達成 · 45分」を中立色（例: var(--text-secondary) #9BA7B4）にし、緑はチェック/枠線だけに限定して情報階層を落ち着かせる。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "タスク提案カード（左ボーダー #79C0FF と主ボタン #1A5FC8 の並置）",
+    "issue": "カード内でブランドアクセント #79C0FF とボタン用ブルー #1A5FC8 の“二種類の青”が競合し、夜空のワントーン感がやや崩れる。",
+    "suggestion": "カード文脈では、左ボーダーを #A5D6FF（accent-hover）に弱めるか、主ボタンの影響を下げる（余白拡張/ボタンサイズS/角丸縮小）などで青の主張を一方に寄せる。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "フッターCTA「次へ」",
+    "issue": "ボタンのfont-weightが500で、他画面（例: s00/s01/s12）の主要ボタン600と不一致。視覚的な押しどころの強さが画面間で揺��る。",
+    "suggestion": "主要ボタンのfont-weightを600に統一して、行動の強度を一貫化する。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "所要時間チップ（未選択状態）",
+    "issue": "未選択チップが #7A8593 テキスト + #6E7681 枠で“無効”にも見え、選択可能性の印象が弱い。",
+    "suggestion": "未選択はテキスト #9BA7B4（secondary）+ 枠 #6E7681（現状）でコントラストをわずかに上げ、選択可であることを示す。選択中のみ accent-subtle 塗り＋太字で差別化。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s14_goal_detail",
+    "location": "アクション行（AI相談/編集/削除の3ボタン）",
+    "issue": "accent-subtle（AI相談）、中立アウトライン（編集）、赤系アウトライン（削除）が同列で並び、色相が分散して視線が散る。",
+    "suggestion": "主要行動1件（AI相談）のみ目立たせ、編集/削除は同一スタイル（アウトライン）に寄せる。削除は文言/アイコンで危険性を補い、色面積を最小化。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s12_task_add",
+    "location": "タスク名フィールドのフォーカス装飾（outline: 3px rgba(121,192,255,0.2) + 枠 #79C0FF）",
+    "issue": "暗背景での強いブルー外枠がやや“ネオン風”に見え、Night Skyの静けさから一歩強調過多。",
+    "suggestion": "outlineを2pxに減衰、または外枠のみ淡色（rgba(121,192,255,0.14)）にして発光感を抑え、集中感を保つ。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

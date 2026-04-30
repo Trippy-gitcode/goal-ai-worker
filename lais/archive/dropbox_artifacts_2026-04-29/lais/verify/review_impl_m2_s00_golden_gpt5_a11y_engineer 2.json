@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-001",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx",
+    "issue": "非インタラクティブな div.app-root に aria-label=\"Lais\" が付与されている。ランドマークでもフォーカス対象でもない要素への aria-label は支援技術に冗長な名前を与える可能性があり、メインランドマーク(main)の名前付けと重複する。",
+    "suggestion": "app-root の aria-label は削除し、main（<main class=\"s00\" aria-label=\"Lais スプラッシュ\">）の名前付けのみを維持する。汎用コンテナにアクセシブルネームは不要（必要なら適切な role を検討）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "Global (index.html / ドキュメントルート)",
+    "issue": "言語属性の設定状況が本パッケージから確認できない。日本語コンテンツを含むため、html[lang] 未設定だと WCAG 3.1.1（ページの言語、A）に不適合となり、スクリーンリーダーでの読み上げ精度が低下する。",
+    "suggestion": "index.html の <html> に lang=\"ja\"（必要に応じて ja-JP）を明示す���。将来多言語対応する場合は要素単位で lang を切り替える。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S00Splash.css ＋ global.css",
+    "issue": "prefers-reduced-motion: reduce 時に transition は 0ms になるが、:active 時の transform: scale(0.98) 自体は適用され続けるため、瞬間的なスケール変化が残る。AAの必須要件ではないが、動きに敏感なユーザーには無効化が望ましい。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) で .s00-cta-primary:active, .s00-cta-secondary:active { transform: none !important; } を追加し、インタラクション由来のモーションを完全に抑制する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S00Splash.css",
+    "issue": "将来の無効状態スタイルとして [aria-disabled=\"true\"] を用意しているが、ネイティブの disabled 属性を使わず aria-disabled のみで無効化すると、要素がフォーカス可能なまま残りキーボード操作で作動する恐れがある（pointer-events: none はキーボード操作を阻止しない���。",
+    "suggestion": "無効化は <button disabled> を基本とし、イベントハンドラでも早期 return で確実にブロックする。どうしても aria-disabled を使う場合は tabindex=\"-1\" 付与や keydown/click のガードを併用してキーボード操作も抑止する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "global.css",
+    "issue": "Windows High Contrast（forced-colors）環境でカスタム outline 色が上書き・不可視になる場合がある。現状でも多くの環境では可視だが、確実性を高める余地がある。",
+    "suggestion": "@media (forced-colors: active) で :focus-visible { outline: 2px solid CanvasText; outline-offset: 2px; forced-color-adjust: auto; } 等、システム色を用いたフォーカス可視化を追加し HC 環境での視認性を担保する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

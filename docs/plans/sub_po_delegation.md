@@ -202,8 +202,8 @@ PO が直接「ふとしの判断で X してくれ」「ADV が決めて」と�
 
 ```
 cmd-unit:
-  test -f /Users/futoshi/Desktop/dev-system/docs/plans/sub_po_delegation.md → PASS
-  test -f /Users/futoshi/Desktop/dev-system/skills/adv-check.md → PASS
+  test -f docs/plans/sub_po_delegation.md → PASS
+  test -f skills/adv-check.md → PASS
 
 cmd-e2e:
   本ファイル行数 ≥ 200 (wc -l)

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "USER_CONCERN",
+    "location": "§4.6 S13-6",
+    "issue": "未設定の時刻/所要時間が編集→保存でデフォルト値（'10:00' / 30）が上書き保存され、表示上の '—'（未設定）状態が失われる。draft 初期化とキャンセル復帰時に固定値を入れており、保存時は常に draft を反映してしまうため、意図せずデータの意味が変質する。",
+    "suggestion": "draft の初期値/キャンセル復帰は task の実値を忠実に反映し、未設定は空（''）や null を保持する。保存時は差分マージで未変更フィールドは元値を維持するか、未設定を許容するUI（select に '未設定' option、time は空許容）にする。例: setDraftTime(task.time ?? ''), setDraftDuration(task.duration ?? ''), 保存時に { time: draftTime || null, duration: draftDuration === '' ? null : Number(draftDuration) } とし、S10 側も null をそのまま保持する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.6 S13-1（モーダル骨格 / LP-002）",
+    "issue": "モーダルオープン時にフォーカスをダイアログへ移動しておらず、section 自体も focus 不能（tabIndex が無い）。そのため初期フォーカスが背面に残り、Tab フォーカス・トラップも発火条件を満たさず背面へフォーカスが逃げる可能性がある。",
+    "suggestion": "section.s13-modal に tabIndex=\"-1\" を付与し、open 時 useEffect で dialogRef.current?.focus() する。併せて背面コンテンツへ inert/aria-hidden を付与（モーダル開閉でルートに切替）するか、少なくとも初期フォーカスをモーダル内の先頭要素に移す。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§4.6（フォーカストラップ）",
+    "issue": "フォーカストラップのフォーカス可能要素抽出が aria-disabled 要素を除外していないため、保存ボタンの無効時や AI inactive（aria-disabled）も循環に含まれる。実質操作不能な要素にフォーカスが当たってしまい、操作感・可用性が低下する。",
+    "suggestion": "querySelectorAll 後のフィルタに [aria-disabled=\"true\"] を除外条件として追加する。また、保存ボタンの無効時は disabled 属性を用いるか、少なくとも tabIndex=\"-1\" を付与してタブ順から外す��",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§4.6 S13-2/3/4（ヘッダ / aria-labelledby）",
+    "issue": "aria-labelledby がモードにより h2（閲覧）と input（編集）で同一 ID を使い回しており、編集時はダイアログの名前が入力の aria-label（『タスク名』）になってしまう。ダイアログ名としての一貫性が損なわれ、支援技術での文脈把握が難しい。",
+    "suggestion": "常在する見出し（視覚的には sr-only でも可）を用意し、aria-labelledby はその見出し（現在のタスク名）を常に指す。編集フィールドは別 ID/aria-label を用い、ダイアログのラベルを UI モードに依存させない。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.6 S13-10（[保存] ボタン）",
+    "issue": "保存ボタンの無効化を aria-disabled と onClick ガードで表現しているが、pointer-events は無効化しておらず、見かけ上押下できてしまう。キーボード/スクリーンリーダーの体験とも整合しづらい。",
+    "suggestion": "無効時は disabled 属性（推奨）を使用するか、少なくとも [aria-disabled='true'] に pointer-events:none と tabIndex=\"-1\" を適用して『真の無効』に寄せる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.6（モーダル開閉時のスクロールロック）",
+    "issue": "body.style.overflow を直接上書き・復元しており、将来モーダルが多重に開く場合や他機能が overflow を管理している場合に競合・取りこぼしが生じうる。",
+    "suggestion": "ロックカウンタ方式や専用クラスの付け外し（例: document.body.classList.toggle('is-locked', open)）に変更するか、既存の scroll-lock ユーティリティに委譲して副作用を集約する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.6 S13-6（初期値定義）",
+    "issue": "『10:00』『30』などのマジックナンバーが複数箇所（state 初期化/キャンセル復帰）に散在している。意味付けが不明瞭で、将来の仕様変更時に見落としの温床になる。",
+    "suggestion": "DEFAULT_TIME/DEFAULT_DURATION として定数化し、仕様上の根拠（コメントで spec リンク）を付与する。R-001 の方針に合わせ、未設定を維持できる設計に見直す。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.6 S13-5（ステータスラベルメタ）",
+    "issue": "STATUS_META のプロパティ名に 'klass' を使用しており、慣習的でない命名で意図が読み取りにくい。",
+    "suggestion": "className あるいは classSuffix など、目的が自明なプロパティ名に変更する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "S13TaskDetail.css（.s13-modal フォーカススタイル）",
+    "issue": ".s13-modal の :focus-visible スタイルが定義されているが、要素自体がフォーカス不能のため現状デッドコードになっている。",
+    "suggestion": "R-002 に従い .s13-modal に tabIndex=\"-1\" を付与し、オープン時に programmatic focus を当ててスタイルが活きるようにする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§4.6（キーハンドラ）",
+    "issue": "document への keydown リスナーが ESC 用と Tab 用で別々に追加されており、肥大化時に重複処理や管理漏れのリスク��ある。",
+    "suggestion": "単一の keydown ハンドラでキー種別ごとに分岐し、追加/削除を一元化する。将来的にはユーティリティ（useModalKeys 等）へ切り出し、DRY とテスト容易性を高める。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.6 S13-12（AI 相談ボタン）",
+    "issue": "inactive 側は aria-disabled + pointer-events:none だがタブ順からは外れておらず、フォーカスは当たるが操作不能という状態が発生する。ユーザーが理由を把握できない場合、混乱の恐れがある。",
+    "suggestion": "非活性時は tabIndex=\"-1\" でタブ順から外すか、あえてフォーカス可能にする場合は aria-describedby で『このタスク状態では利用できません』等の説明を関連付けて意味付けを明確にする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S10Grow 統合（task 検索）",
+    "issue": "open ごとに tasks.find(...) を実行しており、タスク数が増えると再レンダリング時に O(n) 探索が走る。",
+    "suggestion": "オープン時に選択タスクを state として保持する（setSelectedTask）か、tasks を id→task の Map で管理して O(1) 参照にする。パフォーマンスの観点からも責務分離の観点���らも明瞭化できる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

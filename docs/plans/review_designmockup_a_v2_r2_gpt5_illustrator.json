@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」テキストリンク",
+    "issue": "インラインリンクが色（#79C0FF）のみで示され、下線がない。WCAG 1.4.1（色の使用）およびデザインシステム§2.2「インラインテキストリンクは必ずunderline併用」に不適合。",
+    "suggestion": "「ログイン」に text-decoration: underline を付与するか、末尾に矢印アイコンを追加して非色情報を補強する。もしくはボタン化（pill背景 + アクセント色ラベル）してリンクと視覚的に差別化する。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "「単発タスク/習慣」トグル（padding:8px）/ 所要時間チップ列（padding:6px 14px）",
+    "issue": "タップターゲット高さが約28〜32pxで、デザインシステム§4.5の最小44×44px要件に未達（WCAG 2.5.5/Apple HIG準拠要件に矛盾）。",
+    "suggestion": "min-height: var(--tap-target-min)（44px）を適用。見た目サイズを維持したい場合は ::before で透明ヒット領域を拡張し、line-height/padding で実効ターゲットを44px以上に確保する。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s15_goal_create",
+    "location": "カテゴリチップ（仕事/健康/学習/趣味/人間関係/その他）",
+    "issue": "チップの見た目高さが約28〜32pxで、最小タップ領域44pxを満たしていない（§4.5）。",
+    "suggestion": "各チップに min-height:44px と左右余白の見直しを適用。あるいは行全体（wrapコンテナ）に ::before で透明ヒット領域を拡張し、個別チップにも padding を増やして44pxを下回らないよう調整する。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "入力バー右端の送信ボタン内アイコン（紙飛行機）",
+    "issue": "アイコンのstroke色 #484F58 とボタン背景 #1C2128 のコントラスト比がおよそ2.0:1で、UIコンポーネント/グラフィックに求められる3:1（WCAG 1.4.11 AA）を満たしていない。",
+    "suggestion": "アイコン色を #9BA7B4（text-secondary）または --accent に変更し、3:1以上を確保。アクティブ時は --accent、無効時は --text-secondary など状態で切り替える。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayリストの時刻カラム（09:00/12:00/18:00/20:30）",
+    "issue": "時刻表示の色が #7A8593 と #9BA7B4 の2系統で混在し、強弱のルールが画面内で読み取りづらい（過去/未来などの意味付けが不明確）。視線誘導がぶれる。",
+    "suggestion": "時刻は1トークンに統一（例: --text-hint で全時刻を表示）。もし過去/未来の別を表現するなら凡例なしでも直感できる設計に（例: 未来=secondary、過去=hint＋淡い区切り線）統一ルールを明記して一貫適用する。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "12:00「ジムで筋トレ」行の左ボーダー",
+    "issue": "warning色（#D29922）が通常タスクの左ボーダーに使われ、期日接近/注意喚起などのセマンティック意��と誤解されやすい。",
+    "suggestion": "通常タスクの左ボーダーは中立（--border もしくは --border-strong）またはゴール色ドットのみで表現。warning/danger色はOverdueや注意喚起のみに限定してセマンティクスの純度を保つ。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Todayセクション「1 / 4 completed」",
+    "issue": "11px（caption相当）が用いられ、§3.2の「--font-size-xsはキャプション・時刻のみ。本文・重要情報には使用禁止」に抵触気味。進捗サマリーとしては小さく、可読性/視認性が落ちる。",
+    "suggestion": "本文の補助情報として --font-size-sm（14px）を推奨。字間は --letter-spacing-ja とし、色は --text-secondary でバーや日付との階層差を保つ。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "ユーザー吹き出し（青みのある背景）とAIメッセージ（左ボーダー青系）",
+    "issue": "両者とも青系で統一されており、送受の役割差が色感情的に近く、パッと見の区別が弱い（アバター非表��時に特に）。",
+    "suggestion": "役割分離の配色を再設計。例: ユーザー= --accent-subtle（青）維持、AI=中立（surface+薄ボーダー）へ変更、またはユーザー側をわずかに暖色寄りのニュートラルへ振る。形状（角丸/尻尾）や小さなロールラベルも併用。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "主要アクション（#1A5FC8）とリンク/進行バー（#79C0FF）の二系統ブルー",
+    "issue": "プライマリボタンのコバルト系(#1A5FC8)とブランドアクセント(#79C0FF)が共存し、画面によっては“主役色が2つ”に見える瞬間がある。Night Skyの静けさよりもやや企業プロダクト寄りの硬さを感じる場面がある。",
+    "suggestion": "ボタン色相を --accent に近づけるか、彩度/明度を1段落として月明かりの柔らかさに寄せる。もしくはリンク/小UIは --accent、主要ボタンは同色相のdarker版（AA担保）に統一して“青の系譜”を一本化する。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-010",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」チェックボックス（20×20px）",
+    "issue": "チェックボックス自体が約20px角で、§4.5の最小タップ領域44×44pxを満たしていない。実機での誤タップリスクが高い。",
+    "suggestion": "チェックボックスとラベル全体にクリック領域を拡張（label要素で関連付け）し、行高を44px以上に。見た目サイズは維持しても、透明ヒットエリア/余白で実効タップ領域を確保する。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "「削除」ボタン（細い赤枠+赤文字）",
+    "issue": "枠線が rgba(248,81,73,0.3) と薄く、暗いsurface上で危険操作としての視覚強度がやや不足。周囲の中立ボタンと並んだ際に優先度が埋もれがち。",
+    "suggestion": "削除ボタンは danger-subtle 背景（rgba赤系）+ 赤文字、または赤枠の不透明度を上げつつアイコン（🗑）を併用して視覚強度を一段引き上げる。",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

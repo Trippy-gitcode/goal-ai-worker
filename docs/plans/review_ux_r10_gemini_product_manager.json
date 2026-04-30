@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§2.4, 注記",
+    "issue": "`project_v1.md` §4.2には「ゴール作成から完了まで最低7日間経過が必要。7日未満で全タスク完了した場合は完了待ち状態になる」と明記されているが、`ux_v1.md`の注記で「存在しない」と誤認している。このため、7日未満でタスクを全完了した際の「完了待ち状態」のUXや、7日経過時の自動完了演出のトリガーが完全に欠落しており、実装時に矛盾と進行不能バグを引き起こす。",
+    "suggestion": "注記を削除し、§2.4に「7日未満で全タスク完了した場合のUX（進捗バー100%＋『あとN日で���了！』ラベル表示、この間のUndo可否）」および「7日経過後にアプリを開いた際の自動達成演出フロー」を定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§2.4, §8.3",
+    "issue": "`project_v1.md` §4.2でゴール達成ボーナス（+50 EXP）は「1日1回まで」と制限されているが、同日に2つ目のゴールを達成した場合のUXが未定義。制限超過時にも§8.3の「+50 EXP」演出が表示されると、実際のデータ（EXPが付与されない）とUIが矛盾し、ユーザーの混乱と不具合報告に直結する。",
+    "suggestion": "§8.3に条件分岐を追加し、同日2つ目以降のゴール達成時はバナーテキストを「🎉 ゴール達成！」のみ（+50 EXP表記なし）とし、EXPバーの伸長アニメーションも省略するよう明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§3.3",
+    "issue": "TALK画面のタスク提案からS-12（タスク追加モーダル）を開いて「作成」を実行した後の遷移が不明確。S-12はGROW画面の要素であり、作成後にTALK画面に留まるのかGROW画面に遷移するのか定義されていない。TALK画面に留まる場合、Todayセクションへの反映が見えないため、登録成功のフィードバックが不足する。",
+    "suggestion": "TALK画面からS-12を開いて作成した場合は、モーダルを閉じた後にTALK画面に留まり、トースト「タスクを登録しました」を表示してフィードバックを補完する旨を§3.3に追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.2",
+    "issue": "画像添付の仕様（10MB上限、JPEG/PNG/GIF/WebP対応）に対するクライアント側のバリデーションエラー時のUXが定義されていない。超過サイズの画像を選択した際に無言で失敗するか、APIエラーになるリスクがある。",
+    "suggestion": "§3.2に「10MB超過または非対応フォーマットの画像選択時、添付をキャンセルしエラートースト『画像は10MB以下のJPEG/PNG/GIF/WebPのみ対応しています』を表示する」と追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.4, §8.6",
+    "issue": "TALK画面でレベルアップした場合、「次回GROW画面表示時にフルの演出を自動再生���とあるが、GROW画面を開いた瞬間にログインボーナス（§8.5）が発生する場合や、オフライン同期（§9.1）が走る場合との演出キュー（§8.6）の優先順位が未定義であり、演出が衝突する可能性がある。",
+    "suggestion": "§8.6の演出キューに「0. ログインボーナス」「1. TALK画面からの持ち越しレベルアップ/冒険EXP演出」「2. オフライン同期による一括演出」を追加し、画面遷移直後の演出の直列実行順序を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.3, §2.4",
+    "issue": "タスク編集（S-13）には未保存破棄の確認ダイアログがあるが、新規作成（S-12, S-15, S-16）で入力途中にモーダル外（backdrop）をタップしたり下スワイプした場合の挙動が定義されていない。誤操作による入力データ消失のリスクがある。",
+    "suggestion": "S-12, S-15, S-16についても、1文字でも入力がある状態で閉じようとした場合、「入力内容を破棄しますか？」の確認ダイアログを表示するよう統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§3.2",
+    "issue": "ユーザーが1回のAI対話で送信できる最大文字数が定義されていない。長文をペーストされた場合のUI崩れや、APIトークンの大量消費（コスト増大）のリスクがある。",
+    "suggestion": "§3.2の入力バー仕様に「最大入力文字数（例: 2000文字）」を定義し、超過時は文字数カウンターを赤字表示して送信ボタンを無効化する仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.3",
+    "issue": "Undoスナックバー表示中にGROW画面からTALK画面にタブを切り替えた際、スナックバーの位置が「ボトムタブの上」から「入力バーの上」に変わるが、この位置変更が瞬時に行われるのかアニメーションするのかが不明確で、視覚的なグリッチに見える懸念がある。",
+    "suggestion": "タブ切替時はスナックバーを一度フェードアウトさせ、新タブの適切な位置で即座にフェードインさせるか、位置の再計算を瞬時に行う（アニメーションなし）旨を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§4.4, §13.3",
+    "issue": "友達からのメッセージはFRIENDS画面で確認できるが、運営からの重要なお知らせや、過去のシステム通知（支払い失敗、プラン変更完了など）を見返すインボックス（通知履歴）画面が存在しない。",
+    "suggestion": "将来的な拡張（v0.2.0以降）として、ME画面または設定内に「システム通知履歴」を追加することを検討する旨を記載する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§3.5",
+    "issue": "チャットスレッドが上限100を超過すると「古いスレッドを自動アーカイブ（表示対象外だがDB保持）」されるが、ユーザーが過去のヒアリング結果などの重要な対話にアクセスできなくなる懸念がある。",
+    "suggestion": "ドロワーの最下部に「アーカイブされたチャットを見る」リンクを追加し、過去スレッドを読み取り専用で表示できるUIを設けるか、ヒアリングスレッドはアーカイブ対象外にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "画面中央のコピーテキスト",
+    "issue": "コピー「あなたの人生を、あなたらしく」が抽象的すぎて、ブランドDNA「洗練して生きよう。憧れの姿になるように。」のニュアンス（成長や憧れ）を反映していない。また、初めて見た人が3秒以内に「AIがサポートするタスク/習慣管理アプリ」というコアバリューを理解できない。",
+    "suggestion": "ブランドDNAに沿い、かつAIによるサポートや自己成長（タスク・習慣化）を想起させる、具体的で期待感を高めるコピーに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾の「+ タスクを追加」",
+    "issue": "画面の主要アクションである「タスクの追加」がリスト末尾のテキストリンクのみであり、画面を開いた瞬間の視線誘導としてCTAが極めて弱い。初めて見た人が「次に何をすべきか」迷う原因になる。",
+    "suggestion": "画面右下などにFAB（フローティングアクションボタン）を配置するか、リスト外に明確なボタン形状のCTAを設けることで、主要アクションへの導線を強化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の「登録する」ボタン",
+    "issue": "AIからのタスク提案カード内にある「登録する」ボタンが、背景色（薄い青）とテキスト色（青）の組み合わせによりコントラストが弱く、チャットの文脈の中で主要なコンバージョンポイントとして際立っていない。",
+    "suggestion": "「登録する」ボタンをプライマリボタン（塗りつぶしの強いアクセント��ラー）に変更し、ユーザーが直感的に「ここを押せば完了する」と認識できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s14_goal_detail",
+    "location": "画面下部の「AI相談」「編集」「削除」ボタン群",
+    "issue": "画面下部に固定されている3つのボタンが同等のサイズで横並びになっており、ユーザーにどのアクションを最も期待しているのか（プライマリアクション）が視覚的に不明瞭で視線が迷う。",
+    "suggestion": "最も推奨するアクション（AI相談）を幅広のプライマリボタンにし、編集・削除はアイコンやテキストリンクにするなど、視覚的な優先順位（ヒエラルキー）をつける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s13_task_detail",
+    "location": "画面下部の「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "完了済みのタスク詳細において、AIアプリならではの独自機能ボタンが単にグレーアウトされており、機能の存在感やAIの価値が死んでいる。",
+    "suggestion": "完了済みタスクの場合はボタンを無効化するのではなく、「AIと振り返りを行う」「次のステップを相談する」など、完了後コンテキストに合わせたアクティブなCTAに置き換え、独自性をアピールする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s02_onboarding",
+    "location": "中央のアバター選択領域（タイプB）",
+    "issue": "現在選択されているアバター（タイプB）のインジケーターが細い青枠のみであり、パッと見で「自分がどれを選んでいるか」の確信が持ちにくい。",
+    "suggestion": "選択中のアバターの背景色を微かに変える、またはチェックマークのバッジを追加するなどして、選択状態をより強調する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s12_task_add",
+    "location": "所要時間の選択チップ群",
+    "issue": "多数並ぶチップの中で、選択中の「30分」が青背景になっているが、非選択のチップ（枠線のみ）との視覚的な差異が弱く、一瞬でどれが選ばれているか視認しづらい。",
+    "suggestion": "選択中のチップの背景色をよ��濃くするか、文字色を白（#FFFFFF）にするなどして、非選択状態とのコントラスト比を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "EXPバーやレベル表示などのゲーミフィケーション要素",
+    "issue": "全体的にダークテーマのトーンが均一で、ゲーミフィケーション要素がUIに溶け込みすぎており、「達成感」や「高揚感」といった感情的な訴求力が弱い。",
+    "suggestion": "レベルやEXPバーなど、ユーザーのモチベーションに関わる要素には、ブランドDNAで許容されている範囲内で、より彩度の高いアクセントカラーを取り入れ、視覚的なメリハリをつける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  }
+]

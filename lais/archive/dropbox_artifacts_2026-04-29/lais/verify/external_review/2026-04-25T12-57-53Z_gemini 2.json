@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "callGPT5 および JSON_INSTRUCTION",
+    "issue": "プロンプトで「必ずJSON配列のみを出力し、最初の文字は [ とすること」と強く指示している一方、GPT-5のAPI呼び出しで `response_format: { type: 'json_object' }` を指定しています。OpenAI APIの仕様上、`json_object` はトップレベルがオブジェクト `{}` であることを強制するため、プロンプトの指示と完全に矛盾し、APIが400エラーを返すかハルシネーションを起こす原因となります。",
+    "suggestion": "`JSON_INSTRUCTION` の指示を「トップレベルはオブジェクトとし、その中の `items` プロパテ��に配列を含めること」に変更するか、`response_format: { type: 'json_object' }` の指定を削除して標準モードで配列を出力させてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "loadEnv",
+    "issue": "`.dev.vars` のパース処理で `env[k.trim()] = v.join('=').trim();` としているため、値がダブルクォーテーションで囲まれている場合（例: `KEY=\"sk-...\"`）や、行末にインラインコメントがある場合（例: `KEY=val # comment`）、それらがそのまま値に含まれてしまいます。これによりAPIキーが不正な文字列となり、確実に認証エラー（401 Unauthorized）が発生します。",
+    "suggestion": "値の前後のクォーテーションを除去する処理 `replace(/^[\"']|[\"']$/g, '')` を追加し、`#` 以降のインラインコメントを切り捨てる処理（`split('#')[0].trim()` など）を実装してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "extractJson",
+    "issue": "JSONブロックを抽出する正規表現 ````(?:json)?\\s*(\\[[\\s\\S]*\\])\\s*```` の `[\\s\\S]*` が貪欲マッチになっています。LLMが解説を含めて複数のコードブロックを出力した場合、最初の ```` から最後の ```` まで全てを1つのマッチとして取得してしまい、間に含まれるテキストが原因で `JSON.parse` が確実に失敗します。",
+    "suggestion": "貪欲マッチを非貪欲マッチ `[\\s\\S]*?` に変更し、最短のコードブロックを正しく抽出できるように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "resolveFiles",
+    "issue": "`base.replace(/\\*/g, '.*')` でワイルドカードを正規表現に変換していますが、ファイル名に含まれるドット `.` がエスケープされていません。そのため `sub_*.md` が `^sub_.*.md$` となり、`sub_123_md` のような拡張子を持たない意図しないファイルまで読み込んでしまうリスクがあります。",
+    "suggestion": "ワイルドカードを変換する前に、ドットをエスケープする処理を追加してください。例: `base.replace(/\\./g, '\\\\.').replace(/\\*/g, '.*')`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "runPrecommitMode",
+    "issue": "`git diff --cached` の結���をそのまま LLM に送信していますが、`package-lock.json` などの変更が含まれて diff が数MBに及ぶ場合、APIのペイロードサイズ制限やトークン数上限を超過して確実にエラーになります。さらに `withRetry` によって複数回リトライされるため、コミット処理が数十秒間ブロックされ開発体験を著しく損ないます。",
+    "suggestion": "`diffContent` の文字数またはトークン数を事前にチェックし、上限（例: 100,000文字）を超える場合は警告を出してレビューをスキップするか、`*.lock` やバイナリファイルの diff を除外する処理を追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "callGemini",
+    "issue": "Gemini API の呼び出しで `?key=${apiKey}` と URL のクエリパラメータに直接 API キーを埋め込んでいます。この方法は、プロキシのアクセスログやエラー監視ツールに URL が記録された際に API キーが漏洩するリスクが高く、セキュリティ上のベストプラクティスに反します。",
+    "suggestion": "クエリパラメータから `key` を削除し、HTTP ヘッダー `x-goog-api-key: ${apiKey}` を使用して API キーを送信するように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "main (集計ループ)",
+    "issue": "`results` 配列に `_metadata` オブジェクトを `push` した後、その配列をループして `totalItems` をカウントしています。そのため、出力される `Total items` の数が実際の指摘件数よりも常に1つ多くなってしまい、サマリーの正確性が損なわれます。",
+    "suggestion": "ループ内で `if (item.id === '_metadata') continue;` のようにメタデータをスキップするか、メタデータを追加する前に `totalItems` をカウントするように処理順序を変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "httpRequest",
+    "issue": "`req.on('timeout')` を使用していますが、これはソケットのアイドルタイムアウトであり、サーバーがゆっくりとデータを返し続けている場合には発火しません。LLMの生成が極端に遅い場合、設定した `timeout` 時間を超えてもスクリプトがハングアップしたままになる可能性があります。",
+    "suggestion": "`setTimeout` を使用してリクエスト全体の実行時間を計測し、指定時間を超えた場合は `req.destroy()` を呼んで強制終了させる全体タイムアウトの仕組みを導入してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0244,
+    "input_tokens": 13475,
+    "output_tokens": 1506,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

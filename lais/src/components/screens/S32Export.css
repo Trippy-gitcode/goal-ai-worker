@@ -1,0 +1,147 @@
+/*
+ * S-32 Export — design tokens via theme variables (Stage 7-3)
+ */
+
+.s32-export {
+  flex: 1;
+  background: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 calc(82px + env(safe-area-inset-bottom, 0px));
+  min-height: 100dvh;
+}
+
+.s32-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-md);
+  background: var(--theme-color-bg-elevated);
+  border-bottom: 1px solid var(--theme-color-border);
+}
+
+.s32-back {
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  color: var(--theme-color-text);
+  cursor: pointer;
+  border-radius: var(--theme-radius-md);
+}
+
+.s32-back:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s32-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-display);
+}
+
+.s32-section {
+  padding: var(--space-lg) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.s32-section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--theme-font-letter-spacing-loose);
+}
+
+.s32-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm);
+}
+
+.s32-type-pill,
+.s32-format-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--theme-color-bg-card);
+  color: var(--theme-color-text);
+  border: 1px solid var(--theme-color-border);
+  border-radius: var(--theme-radius-md);
+  cursor: pointer;
+  min-height: 44px;
+  font-size: var(--font-size-sm);
+  transition:
+    background var(--theme-motion-fast) var(--theme-motion-easing),
+    border-color var(--theme-motion-fast) var(--theme-motion-easing);
+}
+
+.s32-type-pill:has(.s32-type-checkbox:checked),
+.s32-format-pill:has(.s32-format-radio:checked) {
+  background: var(--theme-color-accent-subtle);
+  border-color: var(--theme-color-accent);
+  color: var(--theme-color-accent);
+}
+
+.s32-format-row {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.s32-format-pill {
+  flex: 1;
+  justify-content: center;
+}
+
+.s32-cta {
+  margin: var(--space-lg) var(--space-md);
+  min-height: 52px;
+  background: var(--theme-color-accent);
+  color: var(--theme-color-button-text-inverse);
+  border: none;
+  border-radius: var(--theme-radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--theme-font-base);
+  cursor: pointer;
+  transition: background var(--theme-motion-fast) var(--theme-motion-easing);
+}
+
+.s32-cta:hover:not(:disabled) {
+  background: var(--theme-color-accent-hover);
+}
+
+.s32-cta:disabled {
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
+  cursor: not-allowed;
+}
+
+.s32-cta:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (max-width: 320px) {
+  .s32-type-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .s32-section,
+  .s32-cta {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    width: calc(100% - var(--space-lg));
+  }
+}

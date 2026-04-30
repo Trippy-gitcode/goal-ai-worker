@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§2.1 NotFound",
+    "issue": "/terms と /privacy へのアクセス時、sessionStorage が使用不可（Safari プライベートモード等）の環境では安全策として常に SPA トップへフォールバックしており、法的文書に到達できない。機能上の退行であり一部ユーザーが規約/ポリシーを参照不能。",
+    "suggestion": "ストレージ非依存のループガードを採用する。例: ①クエリパラメータ/ハッシュ（?static=1 など）による一回限りのガードで window.location.replace を試行し、同一パラメータが付与済みなら即座に外部遷移を中止して 404 画面か代替リンクを表示。②window.name を用いた一時ガード（Safari プライベートでも可）を sessionStorage の代替に。③最小限の静的 HTML をアプリ内でレンダリングするフェールセーフを用意（Phase B 本配信までの暫定）。④target=\"_blank\" で新規タブに開く等、ループから分離。いずれも仕様上の遷移要件があればそれに合わせて選択。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§2.3 S01Auth.css .s01-link",
+    "issue": "リンクの状態別スタイル（hover/active/visited/focus-visible）が未定義。現在は color と underline のみで、仕様の離散状態設計やコントラスト要件に対する準拠が不明。",
+    "suggestion": "design_spec_v1.md の状態設計に従い、--link-fg / --link-hover-fg / --link-visited-fg 等のセマンティックトークンを参照して状態別スタイルを明示。:focus-visible は --focus-ring-* トークンで可視リングを必ず適用。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.3 S01Auth.css 色",
+    "issue": "リンク色に --accent を使用しているが、背景とのコントラスト実測は提示なし（--danger のみ実測）。全テーマで AA 最低 4.5:1（本文同等）または仕様要求の閾値を満たすか不明。",
+    "suggestion": "lais_contrast_check.mjs を拡張し、--accent（通常/hover/visited）× 背景のコントラストを全テーマで自動検査し、結果をレビューパッケージに添付。必要に応じてセマンティックトークン（--link-*）へ切替。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§2.2 S01Auth.jsx handleSubmit",
+    "issue": "setTimeout によるタイムアウト時に inFlightRef.current を false に戻すため、元のリクエストが未解決のまま再送が可能になり、重複リクエストや遅延解決による状態競合（エラー表示後に成功遷移など）が発生しうる。",
+    "suggestion": "リクエスト単位のトークンで整合性を担保。例: const token = Symbol(); inFlightRef.current = token; タイムアウト時は timeoutExpiredRef.current = true などのフラグのみを更新し、inFlight は元リクエスト解決時まで維持。await 後は if (inFlightRef.current !== token) return で後着/時限切れを無視。再送は明示的キャンセル/再試行アクションで制御。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.2 S01Auth.jsx handleSubmit",
+    "issue": "navigator.onLine は信頼性が限定的で、プロキシ/キャプティブポータル等で誤検知がありうる。",
+    "suggestion": "軽量の疎通チェック（HEAD/GET）を Supabase 側の軽量エンドポイントに実施するか、送信試行→ fetch エラーをハンドリングしてユーザーへ適切に通知。online/offline ��ベント購読で UI メッセージを更新。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.3 tokens.css",
+    "issue": "新設トークン --checkbox-size:20px と、calc(--checkbox-size + --space-sm) による 28px オフセットが、仕様の離散スケール（8px グリッド等）準拠かの根拠が提示されていない。",
+    "suggestion": "design_spec_v1.md のスケール（例: 4/8px 基準、コンポーネントサイズ表）への準拠を明記。サイズはセマンティックトークン（--control-size-sm/md 等）を参照し、空間トークンも --space-* の離散値のみで構成する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§2.3 tokens.css",
+    "issue": "--tap-target-min トークンが定義されているが、実体の CSS で最小サイズ強制（min-block-size/min-inline-size 等）が適用されていない。",
+    "suggestion": "アクション要素（button, a.s01-link, .s01-footer-link など）に min-block-size: var(--tap-target-min) を適用し、Playwright 監査を tokens 準拠として維持可能にする。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§2.2 アクセシビリティ",
+    "issue": "aria-invalid/aria-errormessage の適用強化は記述があるが、R4 差分のコード断片では確認できないため、入力とエラーメッセージの関連付けの網羅性が不明。",
+    "suggestion": "email/password/agree 各入力の aria-invalid、aria-errormessage の ID 付与と DOM 存在保証のユニット/スナップショットテストを提示。画面リーダー実測ログ（VoiceOver/NVDA）も添付すると確実。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.3 S01Auth.css .s01-link",
+    "issue": "タップ領域拡張を negative margin で実現しており、コンテナ幅が逼迫した環境でオーバーフローやヒット領域の重なりを誘発する懸念がある。",
+    "suggestion": "::before 擬似要素で透明のヒットスロップ（position:absolute; inset: calc(...)）を付与するか、padding による純粋拡張＋周囲余白で吸収。E2E で水平スクロール発生がないことを検証。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.3 フォーカス可視化",
+    "issue": "「--focus-ring-* ト���クン参照で全要素に定義済」とあるが、該当 CSS が本パッケージに含まれておらず検証困難。",
+    "suggestion": "入力/チェックボックス/CTA/リンクに対する :focus-visible の CSS 抜粋とビジュアルリグレッション結果を添付。HC モード/ダークテーマでも 3:1 コントラストを満たすことを確認。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.3 タイポグラフィ",
+    "issue": "var(--font-size-sm) と var(--line-height-ja-body) の組み合わせが、仕様の離散フォントスケールおよび行間規定に準拠しているか根拠がない。",
+    "suggestion": "design_spec_v1.md §タイポグラフィのスケール表に対する対応表を提示（--font-size-sm = 14px 等）。日本語行間の最小ラインハイトの基準（例: 1.6 以上）との整合を明記。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.2 S01Auth.jsx mountedRef",
+    "issue": "mountedRef の初期値が true で、useEffect で再度 true 設定→unmount 時 false。初期レンダリング直後の非同期動作で真偽が曖昧になる余地がある。",
+    "suggestion": "mountedRef を useRef(false) で初期化し、マウント時に true、クリーンアップで false とするか、setState 安全化用の専用フック（useSafeState）に置換して意図を明確化。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

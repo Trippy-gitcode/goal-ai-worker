@@ -1,0 +1,192 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§5 共通コンポーネント / §6.5 アクセシビリティ / 全体",
+    "issue": "キーボードフォーカスの視覚指標（focus ring）がコンポーネント横断で統一定義されていない。入力フィールド（§5.6）は focus border/box-shadow があるが、ボタン/リンク/ピル/タブ/アイコンボタン（戻る・閉じる等）における focus-visible 時のスタイル定義がない。",
+    "suggestion": "アクセシビリティトークンを追加し、全インタラクティブ要素で共通適用する: --focus-ring-color（例: #79C0FF）, --focus-ring-width（2px）, --focus-ring-offset（2px）, --focus-ring-radius（要素に追従）。CSS: :focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: var(--focus-ring-offset); }。SVGアイコンボタンにも適用。forced-colors 時は outline に currentColor を使用。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.5 S-12 / §4.6 S-13 / §4.8 S-15 / §6.1",
+    "issue": "モーダル（ハーフモーダル）でのキーボード操作要件が未定義。フォーカストラップ、オーバーレイ背後の非アクティブ化、開閉時のフォーカス移動・復帰（focus restore）などが記載されていない。",
+    "suggestion": "モーダルオープン時に1) 初回フォーカスをタイトルまたは最初の入力へ移動、2) タブキーでモーダル内を循環（フォーカストラップ）、3) 背景に inert または aria-hidden を付与、4) 閉じ時にトリガ要素へフォーカス復帰、5) Escape で閉じる（確認ダイアログがある場合は例外処理）を明記。WAI-ARIA Authoring Practices『Dialog (Modal)』に準拠。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§3.1 / §4.2 S-01 / §4.4 S-10 / §4.7 S-14 / §4.10 S-30",
+    "issue": "小サイズラベル（11px）に多用している --text-muted（#7A8593）がダーク背景（--bg-primary #0D1117 / --bg-surface #161B22）上で 3.47:1 程度となり、通常テキストの4.5:1を満たさない。具体例: S01-3/S01-5 ラベル、S10-3/S14-7/S30-3 のラベルなど。",
+    "suggestion": "§7 A-1/A-5 の方針に沿い、‘--label-on-dark’（または ‘--placeholder-on-dark’/‘--label-on-surface’）など専用トークンを新設して 4.5:1 以上に引き上げる（例 #8A94A3 以上）。出現箇所（全ラベル・小見出し・補助テキスト）を洗い出し一括置換。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.4 S-10 / §4.6 S-13 / §7 A-2",
+    "issue": "完了状態の ‘--success’ (#3FB950) を ‘--success-subtle’ 背景 (rgba(63,185,80,0.12)) 上に表示する箇所のコントラストが 2.13〜3.01:1 と AA 未達（1.4.3）。Today タスクのサブ行 ‘達成’、S-13 ステータス等が該当。",
+    "suggestion": "§7 A-2 に従い、1) ‘--success-on-subtle’ を新設して 4.5:1 以上の緑を用意、または 2) サブ行テキストは常に --text-primary/--text-secondary にし、色はアイコン/ラベル補助に限定。背景側（--success-subtle）のアルファを上げる選択肢も検討。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.6 S-13 / §7 A-3",
+    "issue": "S-13 の完了ステータス ‘--success’ (#3FB950) が --bg-primary 上で 2.47:1（大きさ 20px でも 3:1 未満）となり、AA 未達（1.4.3）。",
+    "suggestion": "§7 A-3 の通り ‘--success-accessible’ を新設し 3:1（大文字）/4.5:1（通常）を満たす値に。代替として、完了ステータスは --text-primary で表示し、色は補助アイコンに限定。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.5 ピル / §4.5 S-12（S12-5/S12-8）/ §4.8 S-15（S15-6）",
+    "issue": "Active ピル背景が --accent-subtle（rgba(121,192,255,0.14)）のみでボーダーなしのため、ピルの塗りと周囲背景の非テキストコントラスト（1.4.11）が 3:1 に満たない可能性が高い（概算 1.3〜1.8:1）。ヒット領域の視認性が低下。",
+    "suggestion": "Active ピルに 1) 外枠 1px（--accent か 3:1 を満たす色）を追加、または 2) --accent-subtle のアルファを ≥0.30 程度に引き上げる、3) もしくは背景を --bg-surface に変更し境界コントラストを確保。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§4.9 S-20（S20-3 AI バブル）",
+    "issue": "AI バブルの左縦ラインが --accent-subtle（薄色）2px のみで、背景との差が低コントラスト。バブル領域の可視的境界としては 1.4.11 の 3:1 を満たさない可能性がある。",
+    "suggestion": "縦ラインを --accent に変更するか太さを 3px に拡大���、または AI バブル全体にごく薄い面（--bg-surface など）+ 1px 枠で境界コントラスト ≥3:1 を確保。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.4 S-10（チェック 22×22）/ §5.7",
+    "issue": "タスクリストのチェック UI が 22×22 と明記される一方、‘すべてのタップ要素は 44×44’（§3.6/§6.5）に依存してヒット領域拡張を暗黙とする記述。個別要素でのヒットスロップ確保が実装に伝わりにくい。",
+    "suggestion": "チェック UI について hit-area: 44×44（見た目 22×22、周囲に透明パディング）を明記。ARIA ‘checkbox’/‘switch’ のロールと合わせ、実装チェックリストに個別項目を追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.5 アクセシビリティ / §3.5 モーション",
+    "issue": "ハプティクス（振動/触覚フィードバック）に関する方針が未定義。OS の“モーション削減”“触覚フィードバック無効化”設定の尊重や、Web 実装（Vibration API 等）の使用可否が明記されていない。",
+    "suggestion": "ハプティクス方針を追加: 1) 既定はオフ（Web では Vibration API 非推奨）または最小化、2) ‘prefers-reduced-motion: reduce’ 時は常に無効、3) ネイティブ実装時は OS の触覚設定を尊重、4) トークン --haptics-enabled（bool）を DS に追加して統一制御。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§6.5 アクセシビリティ / 全体",
+    "issue": "高コントラスト環境への対応が未定義。‘prefers-contrast: more’/‘forced-colors: active’ 等のメディアクエリ対応や代替トークン（High Contrast モード）の指針がない。",
+    "suggestion": "DS に High Contrast レイヤーを追加。例: @media (prefers-contrast: more) { --border-strong: #8A94A3; --accent-subtle: rgba(...,0.3); } @media (forced-colors: active) { outline/ボーダーを CurrentColor に、非本質の背景を transparent に }。主要 UI（ピル/ボタン/入力/タブ/進捗）の検証ケースをテスト計画に追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.1 タブバー / §4.10 S-30 サブタブ / §4.9 S-20 ヘッダアイコン群",
+    "issue": "タブ/サブタブ/アイコンボタンのスクリーンリーダー対応（ロール、状態、ラベル）が未定義。‘aria-selected’/‘role=tablist,tab’、アイコンの aria-label、タブの roving tabindex 等が記載されていない。",
+    "suggestion": "WAI-ARIA APG Tabs を適用（role=tablist/role=tab/aria-selected/aria-controls）。タブにキーボード操作（←/→、Home/End）を定義。アイコンボタン（戻る/閉じる/送信/履歴）は aria-label を明記。ボトムタブは ‘aria-current=page’ を利用。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.2 S-01 / §5.6 入力フィールド",
+    "issue": "入力エラーのスクリーンリーダー通知要件が未定義。エラー発生時に aria-invalid/aria-describedby、送信失敗の live リージョン等の規定がない。",
+    "suggestion": "フィールドに aria-invalid=true、エラーテキストIDを aria-describedby で関連付け。サブミット時のバリデーション結果は aria-live=assertive（または role=alert）で通知。成功トーストは aria-live=polite。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.8 プログレスバー / §4.4 S-10 EXP/Goals 進捗 / §4.7 S-14 大プログレスバー",
+    "issue": "進捗バーの ARIA セマンティクス（role=progressbar/aria-valuenow/min/max）が未定義。視覚以外の手段で進捗が伝わりにくい。",
+    "suggestion": "各進捗バーに role=progressbar と aria-valuemin=0, aria-valuemax=100（または実値）を付与。EXP/レベルは ‘Lv.12, 62%’ のように隣接テキストで数値も提供。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.9 S-20（AI ストリーミング/オートスクロール）/ §5.9 スナックバー",
+    "issue": "ダイナミック更新のアナウンス仕様が部分的。AI バブルに aria-live=polite はあるが、タイピングインジケータ置換、‘↓ 新しいメッセージ’ バナー、Undo スナックバーの読み上げ要件が未定義。",
+    "suggestion": "‘新しいメッセージ’ バナーに role=button と明確な aria-label（例: ‘新着があります。末尾へ移動’）を付与。スナックバーは role=status（polite）で ‘取り消す’ は button とし、フォーカス移動/ショートカットも検討。ストリーミングは1メッセージごとにまとめて announce し、タイピングは aria-live から除外。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.2 タイポグラフィ",
+    "issue": "フォントサイズが px 固定（11/14/16/20/28/36/48px）。Web でユーザーのテキストサイズ変更（200%）時の相対拡大が保証されない恐れ（1.4.4/1.4.10観点）。",
+    "suggestion": "設計トークンを rem ベースに変更（例: --font-14: 0.875rem など）し、root のユーザー設定に追従。行高・コンポーネント高も ‘em/rem’ 化してリフロー耐性を確保。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§3.1 カラー（--border / --border-strong）/ §5.6 入力 / §5.3 セカンダリCTA",
+    "issue": "UI 境界の非テキストコントラストがケースにより不足する恐れ。--border（#484F58）が背景（#0D1117/#161B22）に対して 3:1 未満となる可能性があり、‘境界が唯一の可視インジケータ’な場面では 1.4.11 に抵触し得る。",
+    "suggestion": "インタラクティブ境界は常に --border-strong を用いる指針を明記し、--border は装飾/セパレータ専用に限定。必要に応じて --border-strong の明度を引き上げ（3:1 以上を保証）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.9 S-20（装飾アイコン/絵文字）/ §4.7 S-14（戻る矢印）/ 全���",
+    "issue": "装飾アイコン/絵文字の読み上げ方針が未定義。スクリーンリーダーで不要に読み上げられる可能性（例: 絵文字名、装飾的 SVG）。",
+    "suggestion": "純装飾は aria-hidden=true / focus不可に。意味のあるアイコンは aria-label か sr-only テキストを併設。絵文字は aria-label で意味を補足、またはテキストに置換。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§6.2 要素フィードバック / §6.5",
+    "issue": "タップフィードバックに scale を用いるが、低視力ユーザには視覚的変化が乏しい場合がある。reduce-motion 時は duration 0ms とあるが、状態変化が視覚的に伝わらない懸念。",
+    "suggestion": "タップ/アクティブ時に色・境界の同時変化（例: 背景を少し明/暗に、または枠線を強調）を追加。reduce-motion 時も色/枠の変化は残すことで知覚可能性を維持。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-019",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§7 A 群（A-1, A-2, A-3, A-5, A-6）該当箇所全般",
+    "issue": "本書内で明記されているコントラスト未達箇所（プレース��ルダー、完了タスク ‘成功’ 表示、完了ステータス、ラベル on surface 等）は WCAG 2.2 AA に不適合。Phase 4 での DS 改訂前提だが、実装基準としては未充足。",
+    "suggestion": "§7 の対応計画を維持しつつ、実装前に DS v0.13 へ昇格してトークン（--placeholder-on-dark, --success-on-subtle, --success-accessible, --label-on-surface など）を確定。全画面で回帰検証（Dawn/Harajuku Light/Dark を含む）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  }
+]

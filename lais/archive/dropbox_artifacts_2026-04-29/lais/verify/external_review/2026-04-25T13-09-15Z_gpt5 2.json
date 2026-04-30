@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:28",
+    "issue": "path モジュールから { glob } を import していますが、Node.js の標準 path に glob は存在せず、この変数は後続でも未使用です。現状は分割代入で undefined を受けるだけで即時クラッシュはしないものの、存在しない API を前提にした import は保守時の誤読を招き、実際に利用し始めた時点で確実に不具合化します。",
+    "suggestion": "未使用の `const { glob } = require('path');` は削除してください。将来的に glob 解決を標準化したいなら `glob` パッケージや `fast-glob` を明示的に依存追加し、`resolveFiles` の自前実装を置き換える方が意図も明確で、import パスの誤解も防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "scripts/ai_review.js:61-69",
+    "issue": "`--mode` の判定式が `arg === '--mode=precommit' || arg === '--mode' && args[i + 1] === 'precommit'` となっており、演算子優先順位に依存した読みづらい実装です。現状の評価結果自体は意図通りでも、同様の���岐追加時に条件の取り違えが起きやすく、CLI 解析のバグ温床になります。",
+    "suggestion": "条件式は括弧で明示し、`const next = args[i + 1]` を使って可読化してください。加えて `--mode` を一般化して `opts.mode = args[++i]` のように一箇所で受け、許可値をバリデーションする構成にすると重複分岐を排除でき、vote/precommit 追加時の保守性が大きく向上します。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "scripts/ai_review.js:54-60, 557-585",
+    "issue": "CLI 仕様で `--async` を受け付けていますが、precommit モード実装では非同期 fire-and-forget が実際には存在せず、`opts.async` もどこでも参照されていません。利用者は非同期実行されたと誤認しますが、実際は API 応答待ちで処理がブロックされ、フック遅延や運用誤解を確実に招きます。",
+    "suggestion": "`--async` を実装しないならオプション自体を削除し、unknown option 扱いにしてください。実装するなら子プロセスを `detached` で起動して即 return し、親は exit 0、子は結果ファイルへ書き込む責務に分離してください。ヘルプ文にも同���/非同期の実際の挙動差を明記すべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "scripts/ai_review.js:640-644",
+    "issue": "起動時に `GEMINI_API_KEY` と `OPENAI_API_KEY` の両方を必須にしていますが、vote mode では `--provider` に応じて片方しか使わず、通常レビューでも models 指定次第で片方だけで十分です。このため必要ないキー欠如で処理不能となり、仕様上可能な実行パターンを不必要に壊しています。",
+    "suggestion": "環境変数の必須チェックはモードと選択モデルに応じて分岐してください。たとえば vote mode は provider ごと、通常 mode は `models` に含まれるプロバイダのみ、precommit mode は両方必須、のように最小要件で検証すると運用時の無駄な失敗を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:323-345",
+    "issue": "OpenAI 呼び出しで `gpt-5` に対して `response_format: { type: 'json_object' }` を付けていますが、同時に出力仕様は JSON 配列を要求しています。モデルがオブジェクトでラップして返す可能性を `extractJson` で吸収しているとはいえ、プロンプト仕様と API 制約が矛盾しており、配列直返し前提の downstream が将来壊れるリスクが高いです。",
+    "suggestion": "配列を厳密に要求したいなら chat completions の `json_object` ではなく、レスポンスをテキストで受けて厳密な後処理を行うか、配列を持つ固定スキーマ `{ items: [...] }` にプロンプト側を統一してください。API レベルの制約とプロンプトの期待値を一致させるのが安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "scripts/ai_review.js:106-124",
+    "issue": "`resolveFiles` はコメント上『trailing * のみ対応』ですが、デフォルト値に `docs/plans/sub_*.md` を与えており、実際には basename 全体を `.*` 化する独自実装です。仕様説明と実装が一致しておらず、正規表現エスケープもしていないため、将来 `.` や `[` を含むパターンで意図しない一致が起こり得ます。",
+    "suggestion": "独自 glob を続けるならコメントを実装に合わせて修正し、basename の正規表現メタ文字は `replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')` で��スケープしたうえで `*` だけ置換してください。より良いのは専用ライブラリ採用で、仕様と挙動を外部実装に委ねることです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js:407-420, 691-738",
+    "issue": "JSON 解析失敗時に `PARSE-ERROR` を HIGH として配列へ混入させ、さらに通常集計ループでそのまま件数に加算しています。加えて `_metadata` も同じ配列へ push しており、findings とメタ情報の責務が混在しています。後段集計が severity 欠落を前提にしているため、別ツール側変更で簡単に数値が壊れます。",
+    "suggestion": "レビュー結果は `{ findings: [...], metadata: {...} }` のように構造分離してください。少なくとも内部集計では `severity` を持つ妥当な finding のみ対象にするフィルタを明示し、`PARSE-ERROR` や `_metadata` を業務上の指摘件数と混同しない設計に改めるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "scripts/ai_review.js:44-48, 461-531",
+    "issue": "`parseArgs` では `maxTokens` と `timeout` を `parseInt` して��ますが、NaN チェックや範囲検証がありません。不正値入力時は `max_completion_tokens: NaN` や `timeout: NaN` が下流 API/https.request に渡り、実行環境依存で異常終了や即時失敗になります。CLI としてエラーハンドリングが不足しています。",
+    "suggestion": "数値オプションは `Number.isFinite(parsed) && parsed > 0` を満たすか検証し、不正時は使用法を表示して即 `exit(1)` にしてください。既定値へフォールバックする方針でもよいですが、静かに NaN を流すのは避け、入力値と採用値をログ出力して挙動を明確にするべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0379,
+    "input_tokens": 13772,
+    "output_tokens": 2069,
+    "model_id": "gpt-5.4"
+  }
+]

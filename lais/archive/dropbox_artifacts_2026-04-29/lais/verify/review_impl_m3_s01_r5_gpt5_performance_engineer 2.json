@@ -1,0 +1,132 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "タイムアウトや新規送信時に旧リクエストをネットワーク層で中断していないため、古いリクエストが裏で完走して帯域・バッテリー・サーバ資源を消費する。",
+    "suggestion": "AbortController を導入し、opId 切替・timeout・アンマウント時に abort() を呼ぶ。signIn/signUp ラッパーで fetch に signal を渡せるようにし、Supabase クライアントが signal をサポートしていない場合は低レベル fetch を注入する。これにより Promise.race や不要な遅延応答のコールバック実行も抑止できる。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "1",
+    "issue": "コンポーネントアンマウント時に保留中の setTimeout を確実に破棄するパスが記載されていない（ガードで副作用は防げるが、無駄なタイマーファイアは残る）。",
+    "suggestion": "timeoutId を ref に保持し、useEffect のクリーンアップで clearTimeout を実行。opId 切替時に前回の timeoutId もクリアして、不要な wakeup を抑制す���。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "非同期ハンドラ内で setSubmitting, setServerError, setConfirmNotice など複数の setState が個別に発火しており、環境（Preact/古い React）によってはバッチ化されず不要な再レンダリングを誘発する可能性がある。",
+    "suggestion": "単一の useReducer あるいはオブジェクト state に集約して 1 回の setState で更新する。もしくは利用ライブラリのバッチ API（React 18 なら自動、Preact なら options.debounceRendering 等）を前提にしつつ、念のため更新をまとめる。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "1",
+    "issue": "inFlightRef と submitting state の二重管理により、読み取り元が分散して可読性低下・将来的な不整合のリスクがある（パフォーマンス面でもガード分岐が増える）。",
+    "suggestion": "通信中かどうかの唯一のソースを submitting state（もしくは reducer の status）に統一し、参照用途の ref は不要化する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "6",
+    "issue": "コード分割（H5/H6）が未適用のまま Auth ルートに Supabase SDK を同梱すると、初回表示でバンドルが肥大化し FCP/TTI を劣化させる可能性が高い。",
+    "suggestion": "Auth 画面専用チャンクを作り supabase-js/gotrue を動的 import。入力開始・フィールド focus をトリガに prefetch。成功後に遷移するホーム画面の主要チャンクも idle 中に prefetch して白画面時間を最小化する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "6",
+    "issue": "外部オリジン（Supabase 認証 API 等）への接続最適化が未記載で、TLS ハンドシェイク遅延が初回試行時に顕在化する。",
+    "suggestion": "HTML head に rel=preconnect / dns-prefetch を追加して auth ドメインへの初回接続コストを削減。必要に応じて keep-alive を有効化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "6",
+    "issue": "フォントロード戦略の記述がなく、FOIT/FOUT による描画ブロックや再レイアウトの可能性がある。",
+    "suggestion": "webfont に font-display: swap/optional を指定し、主要サブセットの preload（rel=preload, as=font, crossOrigin）を適用。アイコンは可能なら CSS/インライン SVG に置換してフォント依存を削減。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "6",
+    "issue": "Service Worker のランタイムキャッシュ戦略が未定義で、静的アセットの再取得やフォント再ダウンロードにより体感遅延が発生しうる。",
+    "suggestion": "Workbox などで、フォント/CSS/画像は stale-while-revalidate、アプリシェル/認証画面の JS チャンクは precache、HTML は network-first を採用。Auth 成功後に必要なホーム画面リソースを warm-up する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "固定 15s タイムアウトはバックグラウンドタブのタイマースロットリングで大幅に遅延し、ユーザー体感の悪化を招く可能性がある。",
+    "suggestion": "Page Visibility API で非アクティブ時はリクエスト自体を Abort し、復帰時に再試行を促す。タイムアウトは fetch レイヤ（AbortController + setTimeout）に委譲し、UI タ��ムアウトは短めに設定する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "新規操作開始時に前操作の timeout を明示的に clear しておらず、isCurrent ガードで no-op になるものの不要なタイマー wakeup が残る。",
+    "suggestion": "opId 切替直後に前回の timeoutId があれば clearTimeout する実装に変更し、タイマーの散在を防止。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "1",
+    "issue": "タイムアウト直後の再送を無制限に許可すると、ネットワーク不安定時に連続リトライでサーバ負荷と体感遅延が増大する。",
+    "suggestion": "指数バックオフと最大試行回数を導入し、UI にクールダウンを表示。サーバ側 Rate Limit と整合する間隔にする。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "成功遷移直前に次画面（'/'）の依存リソースを先読みしておらず、ログイン直後に白画面待ちが発生しうる。",
+    "suggestion": "ユーザーが入力を開始/パ���ワード欄にフォーカスした段階でホーム画面の主要チャンクを rel=prefetch/rel=preload または router の prefetch API で先読みする。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "6",
+    "issue": "Auth 画面のクリティカル CSS 分離が記載されておらず、初回表示のレンダーブロックが発生する可能性がある。",
+    "suggestion": "Auth 画面に必要な最小限のスタイルを critical CSS としてインライン化し、残りは media=print + onload 切替や遅延読み込みで分割。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

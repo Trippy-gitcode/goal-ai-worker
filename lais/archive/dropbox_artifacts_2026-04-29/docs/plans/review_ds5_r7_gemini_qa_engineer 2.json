@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6 / §18",
+    "issue": "§19.6の依存チェーンツリーで `e2e_fullflow_test.md` が `project_v1.md` にのみ依存しているが、§18の連鎖更新マップでは `ux_redesign_v*.md` や `design_system.md` から `e2e_fullflow_test.md` への更新が定義されている。この矛盾により、UXや詳細設計の変更時にテスト仕様書が連鎖更新されず、テストの信頼性が損なわれる。",
+    "suggestion": "§19.6の依存チェーンを修正し、`e2e_fullflow_test.md` が `ux_v1.md`, `design_spec_v1.md`, `reference_v1.md` の下流にも位置するように多重依存を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.4 system_map.md / tests/test_map.yaml",
+    "issue": "`system_map.md` の「§4 ファイル変更チェックリスト」と、`tests/test_map.yaml` のマッピング定義が役割として重複している。自然言語の仕様書と機械可読なyamlで二重管理となり、乖離が発生してL2（影響範囲テスト）の自動特定（affected-tests.sh）が機能不全に陥るリスクがある。",
+    "suggestion": "`system_map.md` の §4 を削除するか、「影響範囲マッピングは `tests/test_map.yaml` をSingle Source of Truthとする」という参照のみに変更し、二重管理を排除する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4 e2e_fullflow_test.md",
+    "issue": "テストケースのテンプレートに、sub_testing.md §4.1で定義されたタグ（`#all`, `#chat`等）や、§7のL1/L2/L3の実行レイヤーを指定する項目がない。これにより、L1スモークテストの自動抽出やカバレッジ管理が仕様書上で追跡できなくなる。",
+    "suggestion": "`e2e_fullflow_test.md` の「機能別テストケース」の項目に、「タグ（#all等）」と「テストレイヤ���（L1/L2/L3）」の指定を必須化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md",
+    "issue": "test-guards.tsでエラーログやトーストを厳密に監視しているが、`reference_v1.md`（詳細設計）にエラーコード体系やログ出力の標準仕様（何をconsole.errorに出し、何をトーストに出すか）を定義するセクションがない。基準がないためテストガードの実効性が落ちる。",
+    "suggestion": "`reference_v1.md` に「§7 エラーハンドリング・ログ設計（フロント/バックエンドのエラー出力・トースト表示基準）」を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5 仕様書ヘッダー標準",
+    "issue": "`> 依存: {上流ファイルのパス + バージョン}` となっているが、`design_spec_v1.md` のように複数の上流ファイル（ux_v1.md, design_system.md）に依存する場合の記述フォーマットが未定義。機械的なパースエラーや更新漏れの原因になる。",
+    "suggestion": "複数依存を許容するフォーマット（例: カンマ区切り、または複数行の��スト形式）を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7 競合ベンチマーク要件",
+    "issue": "Phase 0（DRAFT作成前）の段階で「差別化マッピング」に「対応セクション」を紐付けるよう要求しているが、仕様書のセクション構成が確定していない初期段階では正確な紐付けが困難。",
+    "suggestion": "「対応セクション」はPhase 1以降の改訂時に追記するか、初期段階では「対応予定の機能名」での紐付けを許容するよう条件を緩和する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§19.1 / §18",
+    "issue": "ファイル名の命名規則が§18（`ux_redesign_v*.md`）と§19.1（`ux_v1.md`）で異なっている。スクリプト（mission_linter.sh等）やcanopyのgrep検証でファイル名不一致によるエラーが起きる可能性がある。",
+    "suggestion": "ファイル名を `ux_v1.md` または `ux_redesign_v1.md` のいずれかに統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

@@ -1,0 +1,130 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → §2.2, §2.6",
+    "issue": "Scripts contain a hardcoded, user-specific path (`$HOME/Desktop/dev-system`) to the core `dev-system` repository. This will cause the system to fail in any automated CI/CD environment or if the local directory structure changes.",
+    "suggestion": "Replace the hardcoded path with a more robust mechanism. Use a system-wide environment variable (e.g., `DEV_SYSTEM_PATH`) or calculate the path relative to the script's location to ensure portability."
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "COMPLETENESS",
+    "location": "sub_testing.md → §5 affected-tests.sh",
+    "issue": "The L2 'Impact Scope' testing strategy is non-functional because the core logic for mapping changed source files to specific tests is provided only as a commented-out example. The ENG AI has no concrete specification for implementing or maintaining this critical mapping.",
+    "suggestion": "Define a machine-readable format for the file-to-test mapping, such as a `test-map.json` file. The spec should require ENG to maintain this file, and the `affected-tests.sh` script should be updated to parse this file to determine which tests to run."
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §8 C2デプロイフロー",
+    "issue": "The deployment flow script uses a shell variable `${build.out_dir}` which is defined in `app_config.yaml`. However, no mechanism is specified for the shell script to read this value from the YAML file, meaning the deployment command will fail.",
+    "suggestion": "Mandate the use of a command-line YAML parser (e.g., `yq`). The deployment script must begin by reading the configuration value into a shell variable, for example: `BUILD_DIR=$(yq e '.build.out_dir' app_config.yaml)`, and then use `$BUILD_DIR` in subsequent commands."
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §1.2 3層構造",
+    "issue": "The boundary of ENG's autonomous authority is unclear. ADV is responsible for 'リポジトリ書き込み' (repository writes), but ENG is responsible for all implementation. This creates ambiguity about who writes what and where, potentially leading to race conditions or unauthorized changes.",
+    "suggestion": "Define explicit write permissions for each AI role. For example: 'ADV has write access ONLY to `.md` files within `docs/` and `instructions/`. ENG has write access to all other files, including source code, tests, and scripts. ADV queues a mission by writing to `session_progress.md`, which ENG then reads.'"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §4.1 G9 UI受入判定",
+    "issue": "The system relies critically on screenshot comparison for UI validation, but the specific tool, configuration (e.g., pixel difference threshold), and handling of dynamic content are completely undefined. This leaves a core quality gate open to ENG's interpretation, risking inconsistent and unreliable validation.",
+    "suggestion": "Specify a screenshot comparison tool and its configuration. Add a `visualTesting` section to `app_config.yaml` to define parameters like `pixelThreshold: 0.1` and `ignoredRegions`. Mandate that the G9 gate uses this configuration."
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §6 承認ルール",
+    "issue": "The condition for ENG's autonomous 'hotfix pass' includes '仕様変更なし' (no spec change). This is ambiguous because a bug fix inherently changes system behavior and could be interpreted as a spec change, paralyzing autonomous fixes.",
+    "suggestion": "Replace the ambiguous term with a more precise, verifiable condition. For example: 'Does not alter user-facing functionality documented in `docs/ux_redesign_v*.md`' or 'Only modifies files listed in the `target_files` section of the mission definition.'"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md → §1.3 vs §2",
+    "issue": "The bug response flow (§1.3) states the PO can communicate directly with ENG for simple bugs. This contradicts the main change flow (§2) and ADV's role as the sole definer of missions, creating a rogue workflow that bypasses proper specification, AT definition, and risk assessment by ADV.",
+    "suggestion": "Remove the direct PO-to-ENG communication channel. Standardize the flow so that all work, including bug reports, is given to ADV first. ADV then creates a properly formatted mission in `session_progress.md` for ENG to execute."
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §15.3 棚卸し",
+    "issue": "The inventory process requires a 'contradiction check between all rule files' ('全ルールファイル間の矛盾チェック'). This is a highly abstract reasoning task that is not feasible for an AI to perform reliably and will likely result in missed contradictions or false positives.",
+    "suggestion": "Replace the abstract instruction with a concrete, tool-assisted process. For example: 'ADV will run a script to extract all imperative statements (e.g., 'MUST', 'SHALL NOT') from all rule files, group them by keyword, and present the list to the PO for a focused consistency review.'"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §9.2 修正試行3回制限",
+    "issue": "The '3-strike' limit for bug fixes, a key runaway prevention mechanism, is not well-defined. It's unclear what constitutes a 'strike' (e.g., a failed commit, a failed CI run, a PO rejection), which could lead to either premature escalation or the AI getting stuck in a loop.",
+    "suggestion": "Define 'strike' precisely. A strike is counted when a mission for a specific bug ID is marked `DONE` by ENG but subsequently fails the PO's final confirmation or causes a regression in L1/L2 tests. The bug ID must be tracked with a strike count."
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §4.4 SKIPルール",
+    "issue": "The process for handling skipped tests involves re-queuing them as 'SKIP-RETRY'. However, there is no limit on the number of retries. This creates a loophole where a persistently failing or flaky test can be skipped indefinitely, effectively hiding a bug.",
+    "suggestion": "Implement a retry limit for skipped tests. For example: 'A test can be re-queued as `SKIP-RETRY` a maximum of 2 times. If it is skipped a third time, the mission must be moved to `BLOCKED` status, and ADV must be assigned to investigate the test's validity.'"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §5 ミッション定義テンプレート v3",
+    "issue": "The mission template includes `RED: ☐ / GREEN: ☐` checkboxes, a concept from Test-Driven Development. However, the spec does not explain what these mean or what action ENG is supposed to take with them. This ambiguity means the check is likely to be ignored, defeating its purpose.",
+    "suggestion": "Provide explicit instructions for the checkboxes in the template's description. 'ENG must first run the new AT, confirm it fails, and place the failure log link next to `RED: ☑`. After implementation, ENG must place the passing log link next to `GREEN: ☑`. Both must be checked for mission completion.'"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "Multiple files",
+    "issue": "Rules and protocols for the ADV agent are scattered across multiple documents (`dev_system_spec.md` §3 '鉄則一覧', `sub_adv_protocol.md` §2, §8). This diffusion increases the cognitive load for the AI and makes contradictions between rules more likely over time.",
+    "suggestion": "Consolidate all rules governing ADV's behavior into a single source of truth within `sub_adv_protocol.md`. The main spec's '鉄則一覧' should only contain universal principles applicable to all layers (PO, ADV, ENG) and then explicitly reference the detailed ADV protocol file."
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §11 データソースのSource of Truth",
+    "issue": "The spec correctly identifies `TOKEN_KV` as the runtime Source of Truth for user plans and Supabase DB as a secondary source. However, it fails to define a process for keeping these two data stores synchronized or for recovering if they diverge.",
+    "suggestion": "Add a process for data synchronization and reconciliation. Specify that all plan-modifying operations must write to both systems. Add a weekly automated job (`scripts/reconcile_kv_db.sh`) that compares both sources and flags discrepancies for ADV to resolve."
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → §2.5 session_archiver.sh",
+    "issue": "The `session_archiver.sh` script archives the entire '## 完了済み' (Completed) section based on the heading alone. If an incomplete mission is accidentally placed under this heading, it will be archived and removed from the active work queue, potentially being lost.",
+    "suggestion": "Make the archiving logic more robust. Modify the script to only archive missions that are both under the '## 完了済み' heading AND are explicitly tagged with `STATUS: DONE` or a `✅` emoji. This prevents accidental archiving of active work."
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §15.4 metrics.jsonl",
+    "issue": "The system specifies the collection of valuable metrics in `metrics.jsonl` after each session. However, there is no defined process for analyzing or acting upon this data, making it an unused asset.",
+    "suggestion": "Incorporate metric analysis into the recurring '棚卸し' (§15.3) process. Add a step: 'ADV will analyze `metrics.jsonl` to report on trends in test failures, bug counts, and mission duration, and must propose at least one process improvement based on the data.'"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "sub_system_map.md → §1 仕様書の依存関係",
+    "issue": "The 'Specification Dependency Map' defines a core, system-level process for change management that applies to all projects. However, it is located in `sub_system_map.md`, which is described as containing application-specific content.",
+    "suggestion": "Move the 'Specification Dependency Map' section from `sub_system_map.md` to a more appropriate, system-level location like `dev_system_spec.md` (§16 or a new section). This improves the logical structure by separating general system rules from specific application architecture."
+  }
+]

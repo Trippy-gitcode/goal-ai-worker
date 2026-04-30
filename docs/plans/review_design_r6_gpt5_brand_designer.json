@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5（テーマ定義）/ §7（アニメーション）/ §4.2（Open Air）",
+    "issue": "テーマの性格差が主に「色＋マイクロコピー」に限定されており、半径・影・モーション挙動など他トークンに十分反映されていない。ブランドDNAの『洗練（Night/Dawn）』『文化的ポップ（Harajuku）』が、色以外の手掛かりで表現しきれていない。",
+    "suggestion": "テーマ横断で共通にする範囲を維持しつつ、テーマ別差分トークンを少数追加する。例: 1) radius-scale（Harajuku系だけ--radius-md/--radius-lgを+2px） 2) shadow-softness（Dawnは拡散大・濃度低、Nightは拡散中・濃度中、Harajuku Darkは拡散小・濃度高） 3) motion-profile（Harajuku系は--spring-bouncy許可/係数↑、Night/Dawnは--spring-gentle優先） 4) accent-subtle粒度（Harajukuはsubtle濃度を一段高めて“弾み”を出す）。小さな差分でも、色以外のトークン層で性格を感じられるようにする。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§5.3 Harajuku Light / §2.3 セマンテ���ックカラー / §8.1 ボタン",
+    "issue": "Harajuku Lightのプライマリアクセント（#C43361：ローズ系）がdanger（#CF222E：赤系）と色相・明度が近接し、UI上で「主要アクション」と「破壊的操作/エラー」が同系統に見えやすい。色覚多様性や瞬時認知で混同リスクがある。",
+    "suggestion": "Harajuku Lightの--accentを赤寄りから“青みピンク/ラズベリー”方向に5–15°程度色相シフト（例 #B73A8C 前後）するか、dangerをオレンジ寄りにシフトして知覚距離（ΔE）を拡大。あわせてSubtle系の合成色も再計算。色覚シミュレーターでリンク/ボタンとエラー状態が十分に判別できるか検証する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§1.6 NGリスト（色）/ §5.5 グラスモーフィズム",
+    "issue": "NGリストで『純白#FFFFFFを背景として広範に使用しない』としている一方、ライト系テーマのGlass ONが--card-bg: rgba(255,255,255,0.65)の純白ベース。合成上は許容範囲でも、ブランド原則『実世界のオフホワイト』のニュアンスがカード面で失われやすい。",
+    "suggestion": "ライト系Glassの--card-bgをテーマのオフホワイトに寄せたRGBAへ変更（Dawn例: rgba(254,252,249,0.70)、Harajuku Light例: rgba(255,250,251,0.70)）。同時に--card-borderも暖色/寒色寄りの微調整で『実世界トーン』を維持。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.1 アイコンスタイル / §6.2 タブアイコン",
+    "issue": "アイコンを“SF Symbols風 + stroke 1.5px”とだけ定義しており、ブランド固有のキーレイングリッド、端部処理（stroke-linecap/linejoin）、角度ルール、コーナー内R等の『らしさ』を担保する設計指針が未定義。ロゴ非表示時の識別性が弱まる恐れ。",
+    "suggestion": "24px/20px用のキーライン（円/正方/傾き角）とstrokeルール（例: linecap=round/linejoin=round）をトークン化。アイコン内角R/斜辺角度（例: 45°/30°など）を統一し、芽（GROW）などコアモチーフの造形規範をミニガイドとして追記する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§1.5 ブランドチェックリスト / §8 コンポーネントトークン",
+    "issue": "『ロゴを隠してもどのアプリか分かるか？』に対し、色以外の“ブランド特有の形/動き”が体系化されていない。現状はsystem-uiと一般的なアウトラインアイコンに依存し、競合と視覚的に同質化しやすい。",
+    "suggestion": "タイムライン・タブ・ボタンに横断する“Laisモチーフ”を最小限で規格化。例: 1) NOWリングの外周径/厚みを他アプリと差別化する定数化 2) タブのpillに“種（seed）”由来の先端Rを付けた特徴的形状 3) アクティブ状態で現れる“アクセントサークルの柔らかい膨張（scale 0.96→1）”を全アクションに共通化。コンポーネント横断の視覚/動作モチーフを『Signature Pattern』として§8に追記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§3.3 ウェイト・行間・字間トークン",
+    "issue": "見出し/大数字用に--font-weight-thin:200を指定しているが、Androidのsystem-ui（Roboto）環境では200が存在せず100/300にフォールバックするため、プラットフォーム間で見た目がズレやすい。",
+    "suggestion": "thin用途は300（Regularより軽い視覚印象）に統一、もしくはweight可変フォント前提の環境でのみ200を許可する条件分岐コメントを追記。代替としてletter-spacingやサイズ/行間で“軽さ”を演出するガイドも補足する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.1 ボタン / §7.5 forced-colors",
+    "issue": "フォーカスリングが単一トークン（--focus-ring）で、アクセント塗りボタン上など明度が高い面での視認性がテーマ/状態により不足する可能性がある（特にHarajuku Darkの明色ボタン）。",
+    "suggestion": "“on-accent”用のフォーカスリング（例: --focus-ring-inverse: 0 0 0 3px rgba(0,0,0,0.6)）を追加し、Primaryボタンなど背景が高輝度の場面で自動切替。forced-colors以外の通常環境でも『必ず3:1以上の合成コントラスト』を満たす選択ルールを§8.1に追記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§1.6 NGリスト（フォント）/ §3.1 フォントファミリー",
+    "issue": "NGに『system-uiのみ』とある一方、フォントスタックで'SF Pro Text/Display'を個別明記。Webフォントは読み込んでいないため実害はないが、“system-uiのみ”の解釈がやや曖昧。",
+    "suggestion": "NG文言を『カスタムWebフォント禁止。フォント指定はsystem-ui系スタック（-apple-system/BlinkMacSystemFont/system-ui/sans-serif）に限定。ブランド名の直接指定はOS内蔵に解決される場合のみ許可』へ明確化。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.3a アバターパレット",
+    "issue": "アバターパレットがplaceholderのままで、『各テーマのアクセント色を含む多文化対応パレット』が未トークン化。ブランドの自己表現（原則4）を担う核だが、設計の最終ルールが不在。",
+    "suggestion": "LAIS-BRAND-02で確定予定の色群を、design system側にも--avatar-skin-*, --avatar-hair-*, --avatar-cloth-*のトークンで暫定投入。Harajuku/Night/Dawnと紐づく“推奨組合せ”のサンプル（3〜5組）を§6.3aに追加し、自己表現×ブランド一貫性の両立を図る。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§0.2 デザイン言語マトリクス / §6 アイコン / §3 タイポグラフィ",
+    "issue": "差別化方針に対し、system-ui + SF Symbols風ラインのみだと競合（Habitify/Streaks/Material系）と近似しやすく、『ロゴを隠しても分かる』達成が難しいリスク。",
+    "suggestion": "最小限で効く差別化を追加: 1) アクションの“呼吸”モーション（0.96→1のspring-default）を全CTAに共通化 2) Seedling由来の輪郭R（角Rと端部Rの比率）をボタン/チップ/タブに統一 3) タイムライン縦ラインのドット内径/外径比をブランド定数化。『Laisらしさの最小セット』を§8に1ページで定義する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§1.4 トーンオブボイス / §5 テーマ定義",
+    "issue": "Harajuku系のみ通知/トーストの語調を柔らかくする方針はあるが、文体差を運用レベルで再現するための“ボイスガイド（NG/OK例・語尾/助詞の規則）”が不足。テーマの性格差がコピー面で再現されにくい。",
+    "suggestion": "各テーマ1枚の“Microcopyカード”を追補。例: 語尾の硬軟、ひらがな比率、助詞の省略可否、同義語の推奨（保存→保存しました/完了、など）を明文化し、UIテキストの校正ルールとしてdesign_spec側と連携。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.5 グラスモーフィズム / §7.6 prefers-reduced-motion",
+    "issue": "Glass ON時の視覚効果はブランドらしさに寄与する一方、低スペック端末や長時間使用で“アプリっぽさ”を強める懸念（原則1の『実世界との地続き感』と緊張関係）が残る。",
+    "suggestion": "テーマ別の“Glass強度”トークン（--glass-opacity, --glass-blur）を設け、Night/Dawnは控えめ、Harajuku系はやや強めなどの勾配を設定。設定画面に『視覚効果をやわらげる』クイックトグルも提示し、ブランド原則と快適性を両立。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  }
+]

@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §13.1, project_v1.md §7.3",
+    "issue": "ログアウト時にローカルデータ（IndexedDB等）を全削除する仕様だが、オフライン状態でタスクを完了し、オンライン同期する前にログアウトを実行できてしまうと、未同期のデータが永久に失われる（データ損失）。",
+    "suggestion": "未同期のローカルデータが存在する場合、ログアウト実行時に「未同期のデータがあります。ログアウトすると失われますがよろしいですか？」という警告ダイアログを出すか、同期完了までログアウトをブロックする仕様を追加���てください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §9.1, §13.1, §13.4",
+    "issue": "オフライン状態でのエラーハンドリング（§9.1）において、設定画面（ログアウト、アカウント削除、パスワード変更等）の挙動が定義されていません。オフラインで退会やパスワード変更を実行した場合の不整合リスクがあります。",
+    "suggestion": "オフライン時は「アカウント削除」「ログアウト」「パスワード変更」「メール変更」等のセキュリティおよびアカウント管理操作を無効化（グレーアウト）し、オンライン復帰を求めるエラーメッセージを表示する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §5.4, ux_v1.md §4.4",
+    "issue": "QRコード（24時間有効なトークン付き）をスクショしてSNS等に公開した場合、24時間は誰でもスキャンして友達リクエストを送信できるため、スパムリクエストが大量に届くリスクがあります。",
+    "suggestion": "QRコードのトークンを1回使い切り（���たは少数のスキャン回数制限）にするか、設定画面に「QRコードからのリクエスト受信を一時停止する」機能、またはリクエストの一括拒否機能を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §7.2, ux_v1.md §5.0",
+    "issue": "ログイン、サインアップ、パスワードリセット等の認証関連APIに対するレートリミット（ブルートフォース攻撃やクレデンシャルスタッフィング対策）が明記されていません。",
+    "suggestion": "Supabase Authのデフォルトレートリミット設定を利用する旨、またはCloudflare Workers側でのIPベースのレートリミット実装をセキュリティ設計として明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §6.5, ux_v1.md §14.3",
+    "issue": "アカウント削除のクーリングオフ期間（72時間）中に、同じメールアドレスで「新規サインアップ（S-01）」を行おうとした場合のエッジケース挙動が未定義です。",
+    "suggestion": "クーリングオフ中のメールアドレスでサインアップを試みた場合、「このメールアドレスはアカウント削除手続き中です。ログインして削除をキャンセルするか、72時間経過後に再度お試しください」というエラーメッセージを表示する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §13.1",
+    "issue": "「対話履歴を削除」を実行すると「AI理解メモもリセット」とありますが、DISCOVER画面の「自己分析カード」や「強み/弱みチップ」も対話から生成されたデータです。これらも削除されるのか仕様が曖昧です。",
+    "suggestion": "対話履歴削除時に、派生データ（自己分析カード、強み/弱みチップ、MBTI推定結果）を保持するのか、すべてリセットするのかを明記してください。プライバシー観点ではリセットが望ましいですが、ユーザーの成長記録喪失にもなるため方針の決定が必要です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §5.0.2, §15",
+    "issue": "パスワードリセットのStep 2（新パスワード設定）はメール内リンクから遷移し��すが、§15のディープリンク定義にパスワードリセット用URLが含まれていません。PWAとしてインストール済みの場合、リンクタップでアプリが正しく開くルーティングが未定義です。",
+    "suggestion": "§15のディープリンク定義にパスワードリセット（例: `/reset-password?token=...`）およびメール認証（例: `/verify-email?token=...`）のURLスキームと遷移先（S-05 Step 2, S-03）を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §7.2, §7.4",
+    "issue": "AI対話履歴やAI理解メモには、ユーザーの健康状態や深い悩みなどの機微情報が含まれる可能性が高いですが、DB保存時のデータ暗号化要件が定義されていません。",
+    "suggestion": "機微情報を含むテーブル（messages, profilesのAI理解メモ等）に対する暗号化方針（Supabaseのデフォルトの保存時暗号化に依存するのか、pgcrypto等を用いたカラムレベル暗号化を行うのか）を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §5.5, ux_v1.md §4.4",
+    "issue": "100文字の自由記述メッセージにおいて、フィッシングURLや悪意のあるサイトへのリンクが送信されるリスクがあります。",
+    "suggestion": "メッセージ内のURLを自動リンク化（クリッカブルに）しない仕様とするか、送信時にURLを含むメッセージをブロックする簡易フィルタリングの導入を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §3.3",
+    "issue": "画像添付時、「サーバーでリサイズ＋EXIF情報削除後にSupabase Storageに保存」とありますが、クライアントからサーバーへのアップロード通信経路上にはEXIF（位置情報など）が含まれたまま送信されます。",
+    "suggestion": "通信量削減とプライバシー保護の観点から、クライアント側（ブラウザ/PWA内）でCanvas等を用いてリサイズおよびEXIF削除を行ってからサーバーへアップロードする設計に変更することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §6.4",
+    "issue": "アプリ側（Supabase）のデータは��会時に物理削除されますが、OpenAI等のAIプロバイダ側にAPI経由で送信されたデータは、各社のポリシー（不正監視目的で30日間保持等）に従って残ります。この点がユーザーに説明されていません。",
+    "suggestion": "プライバシーポリシーおよびサインアップ時の同意画面において、「AIプロバイダ側で不正利用監視の目的で最大30日間データが保持されること（学習には使用されない）」を明記する要件を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §8. C2デプロイフロー",
+    "issue": "The specification completely lacks environment separation (e.g., development, staging, production). The C2 deploy flow appears to deploy directly to a single, undefined environment, which is extremely risky for production systems.",
+    "suggestion": "Update the specification to define at least a 'staging' and 'production' environment. Modify `app_config.yaml` to include environment-specific configurations (e.g., different URLs, KV bindings). Update the C2 deploy flow to include steps for deploying to staging first, running tests, and requiring manual PO approval before promoting to production."
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → §2.2 update_app.sh, §2.3 build_rules.sh",
+    "issue": "Scripts contain hardcoded, user-specific absolute paths (e.g., `DEV_SYSTEM=${2:-\"$HOME/Desktop/dev-system\"}`). This makes them non-portable and guaranteed to fail in any automated CI/CD environment or for any other user.",
+    "suggestion": "Remove all hardcoded absolute paths. The location of the `dev-system` repository should be passed as a required command-line argument or a documented environment variable (e.g., `DEV_SYSTEM_PATH`). Update the script usage instructions accordingly."
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "sub_infrastructure.md → §2.6 canopy_common.sh",
+    "issue": "Key quality gates G1 (Version Sync) and G6 (Build Sync), which are mandated in the main spec, are not implemented in `canopy_common.sh`. They exist only as comments, meaning critical checks are not being performed.",
+    "suggestion": "Implement the logic for G1 and G6 in `canopy_common.sh`. For G1, add commands to parse `app_config.yaml`, `package.json`, `version.ts`, and `CLAUDE.md` and assert that the version strings match. For G6, parse `app_config.yaml` to get `build.out_dir` and check its consistency with the `deploy.frontend_cmd`."
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md → §5. affected-tests.sh",
+    "issue": "The implementation of `affected-tests.sh` relies on a large, manual mapping of changed file paths to test names within a shell script. This is brittle, hard to maintain, and contradicts the 'Automation Maximization' principle. It will inevitably become outdated and lead to missed tests.",
+    "suggestion": "Replace the shell script's `if/grep` chain with a more structured and maintainable approach. Either use a configuration file (e.g., `test-mapping.yaml`) to define dependencies or, for a more advanced solution, use static analysis to trace dependencies from changed files to tests automatically."
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → §2. All scripts",
+    "issue": "The shell scripts lack robust error handling. They do not use `set -e`, so a command can fail (e.g., a `cp` or `ln` command due to permissions) without stopping the script, potentially leaving the repository in a partially configured or broken state.",
+    "suggestion": "Add `set -e` and `set -o pipefail` to the beginning of all bash scripts (`init_app.sh`, `update_app.sh`, etc.). This will ensure that the script exits immediately if any command fails, preventing subsequent errors and inconsistent states."
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §8. C2デプロイフロー",
+    "issue": "The C2 deploy flow lacks any mention of automated rollback procedures. If the post-deployment `curl` check or a manual PO check fails, there is no defined process to revert to the previous working version.",
+    "suggestion": "Specify an automated rollback procedure. For Cloudflare Pages, this can be achieved by using the Wrangler CLI to find the previous successful deployment and immediately redeploying it if the verification step fails. Add this as a step in the C2 flow."
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → §2.4 mission_linter.sh",
+    "issue": "The `mission_linter.sh` script uses complex `grep`, `sed`, and `awk` commands to parse Markdown. This is notoriously brittle and will likely break with minor, otherwise valid, changes to the Markdown formatting in `session_progress.md`.",
+    "suggestion": "Replace the shell script-based parser with a more robust tool. A short script using a proper Markdown parsing library in a language like Python or Node.js would be far more resilient to formatting changes and easier to maintain."
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §8. C2デプロイフロー",
+    "issue": "The version bump process is described as manually synchronizing a version number across 4 different files. This is an error-prone manual task that violates the 'Single Source of Truth' principle.",
+    "suggestion": "Create a dedicated script (e.g., `bump-version.sh`) that takes a version number as an argument. This script should use tools like `yq` (for YAML), `jq` (for JSON), and `sed` to update the version number in all 4 specified locations from a single command, ensuring consistency."
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §8. C2デプロイフロー",
+    "issue": "The `git tag` command is executed at the end of the deployment flow, after the application has been deployed. The tag should mark the commit that is intended for deployment, not the state after a potentially failed deployment.",
+    "suggestion": "Move the `git tag` step to occur immediately before the `npx wrangler pages deploy` command. This ensures the tag correctly points to the exact code that was deployed, which is crucial for rollbacks and release tracking."
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §11. データソースのSource of Truth",
+    "issue": "The specification identifies Cloudflare KV (`TOKEN_KV`) as the source of truth for plan information, but there is no defined process for managing, versioning, or deploying changes to this configuration. This leads to manual, untracked changes directly in the Cloudflare dashboard.",
+    "suggestion": "Introduce an Infrastructure as Code (IaC) approach for managing KV store data. Store the KV configurations in a version-controlled file (e.g., `kv_data.json`) and add a step to the CI/CD pipeline that uses the Wrangler CLI to apply these configurations to the appropriate environment."
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §4.1 G9, §9.3",
+    "issue": "The specification mandates screenshot-based UI validation (G9) and debugging on simulators, but it fails to specify any tooling for this. This is a significant technical gap, as visual regression testing and simulator management require specific infrastructure and libraries.",
+    "suggestion": "Specify the tooling to be used for screenshot validation. Recommend integrating Playwright's built-in visual comparison features (`toHaveScreenshot`). Add a step to the C2 flow for updating golden screenshots and a process for reviewing visual diffs."
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "sub_infrastructure.md → §2.1 init_app.sh",
+    "issue": "The `init_app.sh` script does not handle the edge case where the target directory already exists and contains files. It will proceed to copy and link files, potentially overwriting existing configurations or creating an inconsistent project state.",
+    "suggestion": "Add a check at the beginning of `init_app.sh` to verify if the target directory exists and is not empty. If it is not empty, the script should exit with an error message, forcing the user to provide a clean directory."
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "sub_testing.md → §1.2 test-guards.config.ts",
+    "issue": "The `isLocal` logic improperly groups the CI environment with local development (`process.env.CI === 'true'`). A CI environment for a staging deployment should behave like production (e.g., no CORS exceptions) and connect to a staging backend, not a local one.",
+    "suggestion": "Refine the environment detection logic. Introduce a separate `isStaging` or `isCI` check based on distinct environment variables (e.g., `ENVIRONMENT=staging`). The CORS exception should only apply for true local development, not for CI builds."
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "dev_system_spec.md → §10.2 バージョンpin方式",
+    "issue": "The spec states that a dev-system version mismatch will be a WARN for 3 sessions and then become a FAIL. However, the implementation in `canopy_common.sh` only outputs a WARN and has no mechanism for tracking session counts or escalating to a FAIL.",
+    "suggestion": "Either implement the session tracking and escalation logic (e.g., by writing a timestamp to a temporary file and checking its age) or simplify the rule in the main spec to state that it is always a WARN to match the current implementation."
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md → §8. C2デプロイフロー",
+    "issue": "The C2 deploy flow is defined as a list in a Markdown file. While descriptive, this is not an executable source of truth. It can easily drift from the actual implementation in the CI/CD system.",
+    "suggestion": "Define the CI/CD pipeline as code. Create a template for a GitHub Actions workflow file (e.g., `.github/workflows/deploy.yml`) within the `dev-system` repository. This file should be the single source of truth for the deployment process."
+  }
+]

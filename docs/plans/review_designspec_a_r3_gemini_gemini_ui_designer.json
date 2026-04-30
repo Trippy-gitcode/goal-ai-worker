@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§5.2, §5.4, §13.12, §20.9",
+    "issue": "ボタンコンポーネントの無効（disabled）状態のスタイル定義が複数存在し、一貫性がありません。プライマリCTAは`opacity: 0.5`、AI相談ボタンは`背景--bg-elevated, 文字--text-muted`、送信ボタンは`背景--bg-elevated`と指定されており、実装者がどのスタイルを適用すべきか判断できません。",
+    "suggestion": "デザインシステムとして、無効状態のスタイルを統一的に定義してください。例えば、`--button-disabled-bg`、`--button-disabled-text`、`--button-disabled-border`のような専用トークンを§3で定義し、§5の各コンポーネント仕様でそれを参照するように統一します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.4 (S10-4), §4.7 (S14-8)",
+    "issue": "「予定」状態のタスクのテキスト色指定が画面間で矛盾しています。S-10 GROW画面では`--text-secondary`と指定されていますが、S-14 Goal Detail画面では`--text-muted`と指定されています。同じ状態を示す要素の見た目が異なると、ユーザーが情報を誤認する可能性があります。",
+    "suggestion": "「予定」状態のタスクテキスト色をどちらかのトークンに統一してください。デザインシステム全体で状態と色の対応関係を明確に定義し、両方のセクションの記述を修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3",
+    "issue": "z-indexの階層を管理するためのデザイントークンが定義されていません。ハーフモーダル、スナックバー、トースト、タブバーなど、複数の要素が重なり合うため、z-indexの定義がないと実装時に表示順序の競合や不具合が発生するリスク���非常に高いです。",
+    "suggestion": "§3にz-index階層を定義するトークンを追加してください。例：`--z-index-bottom-nav: 100; --z-index-modal-backdrop: 200; --z-index-modal: 201; --z-index-toast: 300;` のように、各UI要素の重なり順を明確に定義します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3, §5.9",
+    "issue": "シャドウ（box-shadow）のデザイントークンが定義されていません。S-5.9 スナックバーで「box-shadow（軽）」という曖昧な記述があるほか、S-02アバター選択やS-20オートスクロールバナーでもシャドウが使用されています。トークンがないと、シャドウのスタイルが画面ごとにバラバラになり、デザインの一貫性が損なわれます。",
+    "suggestion": "§3にシャドウの階層を定義するトークンを追加してください。例：`--shadow-sm: 0 1px 2px rgba(0,0,0,0.2); --shadow-md: 0 4px 6px rgba(0,0,0,0.2);` のように複数のレベルを定義し、各コンポーネント仕様で参照するようにします。「（軽）」のような曖昧な記述は具体的なトークンに置き換えてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.6, §4.10 (S30-3)",
+    "issue": "要素のフォーカス（focus）状態のスタイルがコンポーネント間で一貫していません。§5.6の共通入力フィールドでは`border: --accent`と`box-shadow`の両方でフォーカスを示しますが、§4.10のインライン編集では`border-bottom`のみと指定されています。アクセシビリティとUIの一貫性の観点から、フォーカスインジケータは統一されるべきです。",
+    "suggestion": "アプリケーション全体で統一されたフォーカススタイルを定義し、すべてのインタラクティブ要素に適用してください。§5の共通コンポーネントセクションに「フォーカススタイル」の項目を追加し、各コンポーネントがそれを参照するようにします。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§5.4, §5.5",
+    "issue": "共通コンポーネントの定義に不足があります。§5.4「破壊的ボタン」や§5.5「ピル」の無効（disabled）状態が定義されていません。これらのコンポーネントがフォーム内で使用される場合、無効状態は必須です。",
+    "suggestion": "§5.4と§5.5に、それぞれのコンポーネントの無効状態のスタイル（背景色、文字色、ボーダー色など）を明記してください。R-001で提案した統一的な無効状態トークンを参照することが望ましいです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.1",
+    "issue": "インタラクティブ要素のホバー（hover）やアクティブ（active/pressed）状態に対応するカラートークンがほとんど定義されていません。`--accent-hover`は存在しますが、プライマリボタン（`--button-primary-bg`）や破壊的ボタン（`--danger-solid`）などのホバー/アクティブ色がありません。モバイルファーストではありますが、PWAや将来のWeb展開を考慮すると、デザインシステムとして不完全です。",
+    "suggestion": "主要なインタラクティブカラー（`--button-primary-bg`, `--danger-solid`など）に対して、ホバー状態とアクティブ状態のトークン（例: `--button-primary-bg-hover`, `--button-primary-bg-active`）を§3.1で定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.5 (S12-6), §5.6",
+    "issue": "S-12 Task Add画面の入力フィールドのフォーカススタイルが曖昧です。§4.5の要素仕様では「focus 時 --accent」とボーダー色の変更のみが記載されていますが、§5.6の共通コンポーネント定義では`box-shadow`も指定されています。どちらのスタイルが適用されるのか不明確です。",
+    "suggestion": "§4.5の記述を修正し、§5.6の共通コンポーネント定義を参照するように明記してください。例：「フォーカススタイルは§5.6の規定に従う」など。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§4.4",
+    "issue": "ドキュメント内の参照が不正確です。S-10 GROWの仕様で「タスク行間: 8px（§4.2 の「呼吸するリズム」規定）」と記載されていますが、§4.2にそのような規定は存在しません。該当する規定は§2.3にあります。",
+    "suggestion": "参照箇所を「§2.3 Open Air レイアウト原則」に修正してください。ドキュメントの正確性を保つことで、実装者の混乱を防ぎます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.2 (S01-4)",
+    "issue": "エラーメッセージのテキスト色として、ボーダーやアイコンと同じ`--danger`トークンが指定されています。よりセマンティックで堅牢なトークン体系にするためには、テキスト専用のトークンを定義することが推奨されます。",
+    "suggestion": "エラーテキスト専用のトークン、例えば`--text-danger`を§3.1で新設し、エラーメッセージの指定箇所でそちらを使用するように変更することを検討してください。これにより、将来的にテキスト色のみを調整することが容易になります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§5.1, §4.4 (S10-10)",
+    "issue": "ボトムタブバーの非アクティブ（Inactive）なタブが、ラベルなしのアイコンのみで表現されています。アイコンの意味が全てのユーザーにとって自明でない場合、ユーザビリティを損なう可能性があります。また、スクリーンリーダー利用者に対するアクセシビリティの懸念もあります。",
+    "suggestion": "非アクティブなタブにも、視認性の低い色（例: `--text-muted`）でラベルを表示することを検討してください。これにより、タブの機能がより明確になり、アクセシビリティも向上します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  }
+]

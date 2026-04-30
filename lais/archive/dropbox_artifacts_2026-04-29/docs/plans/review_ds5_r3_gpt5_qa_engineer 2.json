@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4-19.6 vs §17, §18",
+    "issue": "UX仕様書の命名がセクション間で不一致（ux_v1.md と ux_redesign_v*.md が混在）。依存チェーン（§19.6）と連鎖更新マップ（§18）で参照先が異なるため、上流変更時の更新先判定がブレる。",
+    "suggestion": "UX仕様書の正名を単一に統一（例: docs/ux_v1.md）。§17の一覧、§18の連鎖更新マップ、§19.6の依存チェーン、本文中の全参照を一括置換。旧名は「別名」扱いの移行注記をspec_changelog.mdに追記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4（project_v1.md §7 と reference_v1.md §5）",
+    "issue": "セキュリティ領域がproject_v1.md（高位）とreference_v1.md（詳細）に重複記述されSingle Source of Truthの観点で分散しやすい。",
+    "suggestion": "責務分離を明文化: project_v1.mdは方針・非機能要件の要約のみ（正本はreference_v1.md）。reference_v1.mdを正本としてRLS/トークン管理/認可ルールの唯一の定義源に指定。project側には『正本: reference_v1.md §5』と明記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.5（ヘッダー標準）",
+    "issue": "ヘッダーの『dev-system準拠: docs/plans/dev_system_spec.md §19』のパス例がアプリ側リポジトリ構成（docs/直下）と不整合。実リポジトリに該当パスが存在しない可能性が高い。",
+    "suggestion": "『dev-system準拠』はdev-systemリポジトリのタグURLかコミットSHAで参照（例: https://github.com/org/dev-system/blob/v3.0/dev_system_spec.md#19）。あわせてinit_app.shでこのフィールドの雛形を生成。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§13.5, §19.5 と review_gate.sh（sub_infrastructure.md §2.14）",
+    "issue": "AIレビューJSONの保存先を仕様は『docs/plans/』と規定する一方、init_app.shはdocs/plans/ディレクトリを生成しない。review_gate.shはdocs/plans/review_*.jsonのみ走査するため、別階層に置かれるとGATEがサイレントバイパスされる。",
+    "suggestion": "init_app.shでdocs/plans/を必ず作成。review_gate.shの探索パスを『docs/plans/』に加え『docs/』直下も走査（重複は除外）。��様にも保存先を『docs/plans/（必須）』と明記し、存在チェックをcanopyに追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5（ヘッダー標準）",
+    "issue": "依存管理をヘッダで行う設計だが、依存宣言の必須フィールド（複数指定、バージョンの正規表現、存在/循環の機械検証）が未定義。『機械可検証』原則に対し自動化フックが不足。",
+    "suggestion": "spec_header_lint.shを追加しcanopyから起動。検証内容: 1) 必須メタ存在（タイトル/ステータス/依存/責務） 2) 依存先ファイルの存在とバージョン表記（vN.N形式） 3) 依存グラフの循環検知 4) 依存先の最新版より古い参照がないかの警告。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4（system_map.md §4 と tests/test_map.yaml）",
+    "issue": "system_map.mdの『ファイル変更チェックリスト』とtests/test_map.yamlの影響マッピングの同期ルールが未定義。両者不整合はL2影響範囲テストの見落としを招く。",
+    "suggestion": "同期ルールを追記: system_map.md §4の各エントリはtests/test_map.yamlに必ず1件以上のtestsを紐付ける。affected-tests.shに『system_map.md §4エントリ未マップ検出』を追加しFAIL。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7（ベンチマーク出力フォーマット）",
+    "issue": "ベンチマーク出力がMarkdown表のみで機械可読な構造化データがないため、自動検証（件数・差別化3件以上・日付レンジ等）が困難。",
+    "suggestion": "Markdownに加えJSON（bench_{scope}.json）を必須化。必須フィールド: app_name, store_url, region, checked_at(ISO8601), dl_count, rating, matrix[{feature, competitors[], lais_policy}], differentiators[{text, linked_section, spec_id}]。canopyに『直接競合≥5』『差別化≥3』『Lais方針未記入0件』の検証を追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.7（Phase 0完了基準） vs §13.4",
+    "issue": "『8ペルソナ×2モデルのAIレビューでCRITICAL 0』と、標準ペルソナ数（5）の不一致。追加3ペルソナの定義が本文にない。",
+    "suggestion": "いずれかに統一。推奨: 標準5ペルソナ+アプリ固有3ペルソナ（合���8）を§13.4に追記し、§19.7には『標準5+アプリ固有3』と明記。対象モデルも具体名を列挙。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.4（e2e_fullflow_test.md §N+2 パフォーマンステスト）",
+    "issue": "性能項目の閾値・測定方法・出力形式が未定義。『計測』のみではAT化困難で、合否基準が揺れる。",
+    "suggestion": "パフォーマンスATの共通テンプレを追加: 指標（TTI, P95 API latency, Largest Contentful Paint等）、しきい値、測定ツール（Lighthouse CI/Playwrightトレース）、出力JSONスキーマ、FAIL基準を明記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.5（ヘッダー標準）",
+    "issue": "『作成: {日付}』のみで更新履歴との直結が弱い。ドキュメントの現行性が判別しづらい。",
+    "suggestion": "ヘッダーに『更新: {日付}』『変更履歴: docs/spec_changelog.md #{項番}』を追加必須化。canopyのspec_header_lint.shで両フィールドの存在を検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7（差別化マッピング）",
+    "issue": "『対応セクション』はあるがSPEC-ID（§12）やテストIDへのリンクがないため、検証トレーサビリティが弱い。",
+    "suggestion": "差別化マッピングに『対応SPEC-ID』『対応E2EケースID』列を追加必須化。e2e_fullflow_test.mdの各ケースにSPEC-IDコメントを付与するルールを§19.4に追記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.5（ヘッダー標準）",
+    "issue": "依存先の『バージョン』がドキュメント名（v1系）とヘッダー版（vX.Y.Z）で二重管理になりうる。",
+    "suggestion": "ドキュメントの実体バージョンはヘッダーのvX.Y.Zに統一し、ファイル名のv1等は版系（メジャー系）として運用指針を追記。依存欄にはヘッダー版のみ記載。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

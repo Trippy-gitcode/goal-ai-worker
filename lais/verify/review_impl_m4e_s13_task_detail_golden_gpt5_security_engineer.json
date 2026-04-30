@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. S13TaskDetail.jsx — S13-7 カテゴリドット",
+    "issue": "task.category の生値をクラス名に連結しており（`s13-cat-dot-${task.category}`）、将来的に未検証値が混入すると任意のクラス名を注入できる（スタイル崩しや意図しない無効化の温床）。現状は実害が出にくいが、安全側のホワイトリスト化が望ましい。",
+    "suggestion": "クラス名は許可リストでマッピングする（例: const ALLOWED=[\"work\",\"health\",\"learn\",\"hobby\",\"social\",\"other\"]; const cat=ALLOWED.includes(task.category)?task.category:\"other\";）。サーバ側でも category のバリデーションを実施して整合性を担保する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "スコープ外（後続）: Supabase 書き込み",
+    "issue": "将来の Supabase 連携において RLS（Row Level Security）方針の記述・確認がない。RLS 未設定のまま公開すると他ユーザーのデータ閲覧/更新が可能になる重大な認可不備のリスクがある。",
+    "suggestion": "Supabase で必ず RLS を有効化し、`auth.uid() = user_id` 等で行レベルを厳格に制限するポリシーを作成。保存/削除 API について、E2E/ポリシーテストで“他ユーザーの行には一切アクセスできない”ことを自動テスト化する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "スコープ外（後続）: 保存/削除エンドポイント",
+    "issue": "CSRF 対策方針が未記載。Cookie ベース認証で state-changing リクエスト（保存/削除）を行う場合、CSRF 脆弱性が生じ得る。",
+    "suggestion": "Cookie 認証の場合は SameSite=Lax/Strict とし、CSRF トークン（Double Submit または SameSite+トークン）を実装。トークンはヘッダ送信・検証を徹底。トークンレス運用にする場合は Cookie を使わず Authorization ヘッダ（Bearer/JWT）で送る方式を採用する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "全体（フロントエンド配信設定）",
+    "issue": "CSP/Trusted Types の方針が未提示。現コードは dangerouslySetInnerHTML/innerHTML を用いず XSS 耐性は高いが、CSP 不在は将来の変更で XSS ��響範囲が拡大しうる。",
+    "suggestion": "厳格な CSP を導入（例: default-src 'self'; script-src 'self' 'nonce-<rand>'; object-src 'none'; base-uri 'none'; frame-ancestors 'none' 等）。可能であれば Trusted Types を有効化し、TT ポリシー外のシンクを拒否する。ビルド時に nonce/hash を自動付与できる構成にする。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "スコープ外（後続）: API 連携/CORS",
+    "issue": "CORS 設計が未記載。将来 API を公開する際にワイルドカード許可や `Access-Control-Allow-Credentials: true` と `*` 併用などの誤設定は情報漏えい・認可迂回の温床になる。",
+    "suggestion": "CORS は厳格なオリジン許可リストで限定し、`Allow-Credentials` を使う場合は `Allow-Origin` にワイルドカードを使わない。プリフライト/メソッド/ヘッダも必要最小限に絞る。ステージング/本番で別オリジンを明示許可し、自動テストで逸脱を検知する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. S13TaskDetail.jsx — 保存ボタン（S13-10/11 行）",
+    "issue": "保存ボタンは aria-disabled による無効化だが、disabled 属性は未使用。現状 onClick ガードで安全だが、セマンティクスとフォーカス可否の観点で disabled を併用すると堅牢性が上がる。",
+    "suggestion": "無効時は `disabled` 属性も付与し、CSS は `[disabled]` に合わせて適用。フォーム送信化する場合は `<form onSubmit={handleSave}>` とし、Enter キーの既定動作でもガードできるようにする。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（入力/出力バリデーション方針）",
+    "issue": "クライアント側で最小限のバリデーション（非空/長さ等）は実装されているが、サーバ側スキーマ/制約の記述がない。将来の保存時に信頼境界での検証が不足すると、不正データ混入や後段の表示時 XSS（リッチテキスト化時）に繋がる可能性。",
+    "suggestion": "サーバ側でスキーマバリデーション（例: Zod/JSON Schema/DB 制約）を実装し、time フォーマット、duration の許容値、memo 長さ上限を強制。出力時は常にコンテキスト適切なエスケープを行い、HTML/Markdown を許容する場合はサニタイズ（allowlist ベース）を徹底する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "スコープ外（後続）: AI 相談ボタンの実遷移先",
+    "issue": "今後ナビゲーションや外部 URL へ遷移を実装する際、ユーザー入力由来 URL をそのまま遷移先に使うと Open Redirect の温床になる。",
+    "suggestion": "遷移先は定数/許可リストで制限し、ユーザー入力で URL を受ける設計を避ける。どうしても必要な場合は同一オリジン/特定パスのみ許容する検証を実施し、`javascript:` スキームやスキーマレス URL を拒否する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "リポジトリ全体（シークレット検知）",
+    "issue": "grep レベルでハードコードされた API キー/シークレットは未検出だが、継続的なシークレット検出や露出防止のパイプライン化が未記載。",
+    "suggestion": "CI に gitleaks/detect-secrets 等のスキャナを導入し、PR 時に秘匿情報混入をブロック。`.env` はコミットしない運用を徹底し、ブラウザ配信が必要な公開キー以外はクライアントに埋め込まない���",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

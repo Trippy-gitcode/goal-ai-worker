@@ -1,0 +1,4 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"MISSING","location":"§5 全テーマ","issue":"コントラスト検証表がまだ未追加。各テーマのトークン×トークン組み合わせで WCAG 達成状況を一覧化するのが望ましい。","suggestion":"§5 末尾に検証表を追加。","model":"Claude Opus 4.6","persona":"a11y_expert"},
+  {"id":"R-002","severity":"LOW","category":"BEST_PRACTICE","location":"§8.1 focus outline","issue":"outline-offset: 2px は良いが、ボタンの外縁がスクロール領域の端にある場合、outline が画面外にクリップされる可能性。","suggestion":"§8.1 に『scroll-margin の併用、または offset を 1px に小さくするオプション』を注記。","model":"Claude Opus 4.6","persona":"a11y_expert"}
+]

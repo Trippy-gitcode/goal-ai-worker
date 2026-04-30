@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "背景のドット装飾とプライマリボタンの色",
+    "issue": "背景の星屑のようなドット配置と、純度の高い青色（#1A5FC8）のボタンの組み合わせが、一般的なテック系/AI系アプリの典型的なパターン（AI slop）に陥っており、「実世界との地続き感」「自然界/文化ソース」というブランドDNAから乖離している。",
+    "suggestion": "ドット装飾を排除し、余白そのものを「夜空の静寂」として機能させる。ボタンの色をNight Skyテーマのアクセント色（#79C0FF）の彩度を少し落としたものにするか、より���然なトーンに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスクリスト",
+    "issue": "左側の時刻と右側のタスクカードの間の余白が均質で、視線が左右に分断されている。また、タスクカードの左ボーダーが視覚的なノイズとなり、静かな情報設計を阻害している。",
+    "suggestion": "時刻をタスクカードの上部または内部に統合し、1カラムの強い垂直方向の視線誘導を作る。左ボーダーの代わりに、カード全体の背景色の微かな明度差で状態を表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s12_task_add",
+    "location": "所要時間の選択チップ群",
+    "issue": "所要時間の選択チップ（5分〜120分）が横一列に密集して並んでおり、視覚的な圧迫感を生んでいる。「呼吸するリズム（Open Air）」の原則に反している。",
+    "suggestion": "頻出する選択肢（例: 15分, 30分, 60分）のみをチップとして表示し、その他はドロップダウンやカスタム入力に隠すことで、画面内の「設計された沈黙」を取り戻す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s14_goal_detail",
+    "location": "ヒーロー領域の「60%」の数字とプログレスバー",
+    "issue": "巨大な数字が配置されているが、周囲の余白が不足しており、数字の持つ達成感や感情的な喚起力が窮屈なレイアウトによって殺されている。",
+    "suggestion": "数字とプログレスバーの周囲に、現在の2倍程度の余白を設け、数字を空間の主役として際立たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "チャットバブルとタスク提案カード",
+    "issue": "AIのメッセージ（左ボーダー）とユーザーのメッセージ（背景色）、さらにタスク提案カードに同じ青系が多用されており、画面全体の視覚的階層が平坦になり視線が迷子になる。",
+    "suggestion": "ユーザーのメッセージ背景をより無彩色に近いトーンに落とし、アクセントカラーは「インタラクティブな要素」のみに限定して視覚的緊張感を取り戻す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s02_onboarding",
+    "location": "アバターのイラスト",
+    "issue": "アバターのイラストがフラットで幾何学的すぎ、「一緒に成長するパートナー」としての感情的な温かみや、実世界との地続き感が欠如している。無機質なアイコンに見える。",
+    "suggestion": "完全な円や直線だけでなく、わずかな手描きの揺らぎや、自然界の光を感じさせる微かなグラデーション（またはテクスチャ）を取り入れ、生命感を与える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE, DISCOVER...）",
+    "issue": "サブタブの文字間隔とサイズが均等に配置されているが、トラッキング（字送り）が狭く、大文字の連続が視覚的な塊となって重く見える。",
+    "suggestion": "サブタブのフォントサイズを1段落とし、letter-spacingを広く（1.5px以上）取ることで、抜け感のある洗練されたタイポグラフィにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "完了済みのチェックアイコンとテキスト",
+    "issue": "完了済みを示す緑色のチェックアイコンとテキストが、画面内で最も強い視覚的ウェイトを持っており、本来の主目的である「タスクの振り返り」や「次のアクション」から視線を奪っている。静かな情報設計に矛盾。",
+    "suggestion": "完了状態は、タスク名の取り消し線や、テキストの明度を下げるなどの「引き算の表現」で示し、チェックアイコンの彩度とサイズを抑える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "画面全体の角丸（border-radius）の適用",
+    "issue": "全体的に角丸の使い方が、ボタンは12px、カードは8px、チップは999pxと標準的すぎて、ありきたりなUIコンポーネントの寄せ集めに見え、Lais独自の視覚的個性が感じられない。",
+    "suggestion": "ブランドの「洗練＋自然体」を体現するため、角丸のルールを再考する。例えば、自然物のようにより有機的な曲線を一部に取り入れるか、逆にシャープなエッジと大きな角丸を極端に組み合わせるなど、シルエットに特徴を持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s15_goal_create",
+    "location": "カテゴリの選択チップ群",
+    "issue": "カテゴリのチップが複数行に折り返して配置されているが、形状が完全な楕円（pill）であるため、行間のネガティブスペース（余白）が不規則な波打ちを生み、視覚的なノイズとなっている。",
+    "suggestion": "チップの形状を少し角を持たせた長方形（--radius-md）にするか、行間の余白（gap）を広げて、整然としたグリッド感を持たせることで、静けさを保つ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  }
+]

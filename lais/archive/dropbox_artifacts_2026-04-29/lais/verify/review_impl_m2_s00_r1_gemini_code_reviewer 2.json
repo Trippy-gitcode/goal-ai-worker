@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"CONTRADICTION\",\n    \"location\": \"design_spec §4.1 S00-3, S00Splash.css `.s00-cta`\",\n    \"issue\": \"CTA「はじめる」ボタンの位置が仕様と実装で明確に矛盾しています。仕様書ではS00-3「はじめる」ボタンの位置を『画面下端から上 140px』と規定していますが、実装および実測データでは、S00-4「ログイン」ボタンの下端が140pxの位置にあり、「はじめる」ボタンの下端は画面下から204pxの位置になっています。\",\n    \"suggestion\": \"仕様の意図を再確認し、実装と仕様を一致させてください。もしCTAスタック全体の下端を140pxに合わせるのが正しいのであれば、仕様書S00-3の記述を『CTAスタックの下端が画面下から140px』のように修正してください。もし「はじめる」ボタン単体の下端が140pxであるべきなら、CSS",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "code_reviewer"
+  }
+]

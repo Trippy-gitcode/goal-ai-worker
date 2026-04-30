@@ -1,0 +1,192 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.1 / §20.4 / sub_infrastructure.md §2.6",
+    "issue": "G10（シークレットスキャン）を「pre-commit + canopyで実装済み」としているが、テンプレート配下にpre-commitフックの実体（templates/hooks/pre-commit）が存在せず、init_app.shでもフックを設置していない。さらにcanopy_common.shにはシークレットスキャン処理が実装されていないため、G10は実質未実装。",
+    "suggestion": "1) templates/hooks/pre-commit を追加し、init_app.shで .git/hooks/pre-commit にコピー+chmodする処理を実装。2) scripts/secret_scan.sh を新設し、canopy_common.shからも呼び出してG10をCI側でも強制。3) §20.2の検出パターンをsecret_scan.shに反映し、除外ルールも同一箇所で一元管理。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "sub_infrastructure.md §2.6（canopy_common.sh G8/G9）/ §5 / §15.4",
+    "issue": "G8/G9の対象ミッション抽出が正規表現「[A-Z][-A-Z]*-[0-9]+」前提のため、数値を含まないMISSION-ID（例: SPEC-REVIEW）が最新の場合にTDD証跡とスクショ検証がスキップされ得る。metrics.jsonlの例にも「SPEC-REVIEW」があり、ゲート迂回の温床になる。",
+    "suggestion": "mission_linter.shでMISSION-ID命名規則（英大文字+ハイフン+連番必須）を強制し、違反時はFAIL。canopy_common.sh側も「STATUS: IN_PROGRESS/DONE」ブロックそのものをパースしてタイトル文字列を厳格取得（数値の有無に依存しない）し、抽出失敗時はFAILにする。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "sub_infrastructure.md §2.8（deploy.sh ヘッダコメント）/ §8",
+    "issue": "deploy.shの先頭コメントが「bump-version→build→canopyが完了していること」を前提とする一方、スクリプト本体はversion_sync/build/canopy/L1/L2を実行する。§8のC2フロー説明とも合致しており、コメントだけが矛盾。",
+    "suggestion": "deploy.shのヘッダコメントをC2の正規フローに整合する内容へ修正。「単独実行禁止」の文言を削除または『C2フローの一部として実行される想定（内部でversion_sync/build/canopy/L1/L2を実施）』に更新。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.1（G2）/ §4.2",
+    "issue": "G2（UI開発補助）を「スクリプト・実装済み」と明記しているが、具体的なスクリプト名・配置・呼び出し方法の記載がなく、dev-system内にも該当スクリプトが見当たらない。",
+    "suggestion": "G2用の具体スクリプト（例: scripts/ui_dev_check.sh）を追加し、「目的/使い方/出力例/完了報告には使わない」等をsub_infrastructure.mdに明記。§4.2から当該スクリプトへ参照リンクを付与。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.4 / §5（完了コマンド）/ §8 / sub_infrastructure.md §2.6",
+    "issue": "全体でPlaywright実行を『--project=mobile』前提としているが、テンプレートに当該プロジェクト定義（playwright.config.*）の存在が明記されていない。新規アプリで「mobile」プロジェクトが未定義だとG4/G8/G9/C2が即FAILする。",
+    "suggestion": "templatesへplaywright.config.tsテンプレートを追加し、'mobile'プロジェクト（デバイスビューポート/UA設定込み）を定義。init_app.shで配置。代替として環境変数PLAYWRIGHT_PROJECTの導入と既定値'mobile'の両対応を��載。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§13.15.5（cmd2集計ルール）/ sub_infrastructure.md §2.14（review_gate.sh）",
+    "issue": "§13.15.5で『CRITICALカウントは最終ラウンドのファイルのみ対象』と定義しているが、review_gate.shはdocs/plans/review_*.jsonを無差別集計し、過去ラウンドのCRITICALもFAIL要因になる。",
+    "suggestion": "review_gate.shで『ミッション×モデル×ペルソナごとの最新rN（preは除外）』のみを集計対象に限定。命名規則に従い、最大ラウンド番号のファイルだけをカウントするロジックを実装。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§10.2 / sub_infrastructure.md §2.6（canopy_common.sh）",
+    "issue": "§10.2で『dev-systemバージョンpin不一致はWARN（3セッション放置でFAIL）』とあるが、canopy_common.shは常にWARNのみで、3セッション放置の追跡/昇格が未実装。",
+    "suggestion": "instructions/results/session_history.mdまたは.git追跡を用い、連続3セッションWARN検知でFAILへ昇格するカウンタ実装を追加。もしくは仕様を『常時WARNのみ』に訂正。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.1 / sub_adv_protocol.md §10",
+    "issue": "UX仕様書のファイル名が§19.1ではdocs/ux_v1.md、sub_adv_protocol.md §10ではdocs/ux_redesign_v*.mdと表記揺れ。新規開発者が参照先で迷う。",
+    "suggestion": "命名をux_v*.mdに統一し、sub_adv_protocol.md §10の表記を修正。過去のリネーム履歴がある場合は互換パスの注記を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§19.9",
+    "issue": "『既存C16強化』という参照が登場するが、C16に該当する定義が仕様内に存在しない（C2はある）。参照不備で理解を阻害。",
+    "suggestion": "『C2』の誤記であれば修正。別概念なら当該C16の定義セクションを追加し、§19.9からリンク。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md §2.6（canopy_common.sh G4）",
+    "issue": "G4のPlaywright実行がnode_modules/.bin/playwrightの存在チェック依存のため、PnPや他パッケージマネージャ構成でスキップされる可能性がある。",
+    "suggestion": "存在チェックを廃止し、常に『npx --yes --no-install playwright test ... || FAIL』で終了コード判定する方式に変更。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.3 / sub_infrastructure.md §2.11（screenshot_lint.sh）",
+    "issue": "§4.3は『各ATに最低 before/after 各1枚』と定めるが、screenshot_lint.shはAT数とスクショ対の対応関係を検証していない。",
+    "suggestion": "missionブロックからAT件数を抽出し、evidence/MISSION-ID/配下の『before_AT-{n}.png / after_AT-{n}.png』のペア数と一致するか検証するロジックを追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md §2.13（changed-files-allowlist.sh）",
+    "issue": "差分基点をorigin/main前提で算出しており、デフォルトブランチ名やリモートが異なる環境で誤判定/空振りが生じる。",
+    "suggestion": "BASE_BRANCH環境変数（既定: origin/HEAD から解決）を導入し、git symbolic-ref refs/remotes/origin/HEAD → 参照先ブランチを動的取得する実装に変更。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md §2.9（rollback.sh）",
+    "issue": "ロールバック対象タグを『最新の任意タグ』として取得しており、現在ブランチから到達不能なタグを選んでしまう可能性がある。",
+    "suggestion": "『HEADから到達可能なタグのみ』に絞り、直前のリリースタグを選択。例: prev=$(git tag --merged HEAD --sort=-creatordate | grep '^v' | sed -n '2p') を用いる。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§6（🟡中・3件連続）/ sub_infrastructure.md §2.6（G8/G9）",
+    "issue": "『中リスク3件連続→まとめて報告』時に、canopy_common.shは直近1ミッションのみG8/G9検証するため、先行2件分の証跡未検証リスクがある（運用依存）。",
+    "suggestion": "canopy.shの引数で『検証対象MISSION-ID明示』や『本セッションのDONE全件を順次検証』モードを追加。運用ルール（各ミッション完了毎にcanopy実行）も§6に太字で再強調。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md §2.6（G6）/ app_config_template.yaml",
+    "issue": "G6でfrontend_cmdにbuild.out_dirの含有を必須化しているが、プロバイダやCLIによっては不要/自動解決のケースがあり、偽陽性FAILの恐れがある。",
+    "suggestion": "app_config.yamlに『deploy.require_build_out_dir: true/false（既定: true）』のフラグを追加し、false時はG6の該当チェックをWARNにダウングレード。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§20.2",
+    "issue": "G10の除外対象に*.mdが含まれており、誤って機密値をドキュメントに貼り付けた場合に検出漏れとなる。",
+    "suggestion": "除外は『docs/** 内のコードブロックに限る』等の限定に変更し、少なくとも非docs配下の*.mdはスキャン対象に含める。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の『dev-system準拠: docs/plans/dev_system_spec.md §19』のパスが、アプリ側リポジトリの実在パスと一致しない可能性がある（相対/外部参照の不整合）。",
+    "suggestion": "dev-system参照は『GitリポジトリURL + 固定タグ/コミット』で明示（例: https://github.com/.../dev_system_spec.md@v3.0 §19）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md §2.8（deploy.sh）",
+    "issue": "CI環境でgitユーザー設定/権限が無い場合、version_sync後の自動コミット・タグ付けが失敗して停止する可能性がある。",
+    "suggestion": "CI環境では自動コミット/タグ付けをスキップできる環境変数（SKIP_GIT_TAGGING=true等）を導入し、失敗時はWARN継続とする。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.5（SKIPルール）/ sub_testing.md §1, §6",
+    "issue": "『SKIPされたATは次キューにSKIP-RETRYとして追記』の具体的な運用（誰が・どのファイルへ・どの書式で）が未定義。",
+    "suggestion": "session_progress.mdへの追記テンプレート（例: [SKIP-RETRY:{AT-ID}] 理由/対策/次回実施条件）をsub_adv_protocol.mdに追加し、mission_linter.shで検出・件数制限（最大2回）を検証する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

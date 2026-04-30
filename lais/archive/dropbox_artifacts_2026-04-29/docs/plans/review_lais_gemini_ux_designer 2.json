@@ -1,0 +1,110 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "3.2",
+    "issue": "タスク完了後「30秒以内に取り消し可能」とあるが、完了したタスクがTodayリスト上でどのように表示され続けるか（その場に残るのか、完了済みセクションに移動するのか、即座に消えるのか）が未定義。移動や消失する場合、ユーザーがUndoボタンを探す間に30秒経過する恐れがあり、UIとして成立しない。",
+    "suggestion": "タスク完了時はその場で「完了状態（チェックマーク＋取り消しボタン）」に変化して30秒間留まり、30秒経過後にリストから消える（または下部の「完了済み」アコ���ディオンに移動する）仕様を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "3.2, 4.5",
+    "issue": "EXPやAI回数のリセットは「午前4:00(JST)」と定義されているが、GROW画面の「Today」セクションのタスク日付が切り替わるタイミングが明記されていない。0:00〜3:59の間にアプリを開いた際、前日のタスクが表示されるのか、当日のタスクが表示されるのか不明確であり、データ記録に矛盾が生じる。",
+    "suggestion": "「Today」の論理的な日付境界も午前4:00とし、0:00〜3:59は「前日のタスクリスト」を表示・操作可能とする旨を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "4.2",
+    "issue": "ゴールが7日未満で全タスク完了し「完了待ち」となった後、7日経過後に「自動でゴール完了＋ボーナスEXP付与」される仕様だが、ユーザーがアプリを起動していない非同期のタイミングで自動完了した場合、ゴール達成の「大量EXP＋演出」がいつどのように再生されるか未定義。クライアント側での見せ方が破綻��る。",
+    "suggestion": "自動完了条件を満たした後の「次回アプリ起動時（またはGROW画面表示時）」に、未再生のゴール達成演出をサーバーから受け取り、キューとして再生する仕組みを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "3.2",
+    "issue": "Todayセクションで「所要時間をタイムライン表示の幅計算に使用」とあるが、開始時刻が「任意」であるため、開始時刻を持つタスク（絶対座標が必要）と持たないタスク（相対的なリスト配置）が混在した場合、タイムラインUIとしてどのように描画・整列するのかレイアウト仕様が破綻している。",
+    "suggestion": "タイムラインUI（縦軸が時間）ではなく単なる「リスト表示」とし、所要時間は「カードの高さ」や「プログレスバー的な視覚的重み」として表現する。または、開始時刻ありのタスク群と、未設定のタスク群（Anytime）でセクションを明確に分割する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "3.4",
+    "issue": "ME画面のヒーロー領域（アバター等）が「固定」とされている。GROW画面のようにスクロール時の縮小仕様がないため、小型端末で4つのサブタブ（特にDISCOVERやFRIENDSのリスト）を表示する際、コンテンツの閲覧領域が極端に狭くなり操作性が著しく低下する。",
+    "suggestion": "ME画面のヒーロー領域も、GROW画面と同様に上スクロールに合わせて縮小・ヘッダー化するレスポンシブ仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.2, 3.4",
+    "issue": "Todayのタスクが0件、Goalsが0件、FRIENDSが0人の場合など、各主要画面の「空状態（Empty State）」のUIとユーザーへのネクストアクションが定義されていない。特に初回起動直後にユーザーが何をすべきか迷う原因になる。",
+    "suggestion": "各セクションの空状態において、AIパートナーからの提案メッセージや、タスク/ゴール追加、友達追加への明確な導線（イラスト付きのCTAボタンなど）を配置する仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3.2",
+    "issue": "習慣タスクは��日リセットされ、Todayセクションは当日分のみ表示されるため、過去に完了したタスクの履歴（自分がどれだけ頑張ったか）を振り返る画面・動線が存在しない。自己成長の実感が削がれる。",
+    "suggestion": "ME画面のPROFILEまたはDISCOVER内に「アクティビティ履歴（カレンダーや完了タスク一覧）」を追加するか、GROW画面の下部に「過去の記録」へのリンクを設ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "6.1",
+    "issue": "AI対話回数が上限に達した際、突然入力フィールドが無効化される仕様。対話が盛り上がっている最中や、長文を入力しようとした瞬間に遮断されるとユーザーの強い不満に直結する。",
+    "suggestion": "残り回数が5回（または10%）を切った時点で、チャットUI上部に「本日の対話はあとN回です」という控えめな警告インジケーターを表示する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "3.4",
+    "issue": "「設定（テーマ切替/プラン管理など）」がME画面のPROFILEサブタブ内に���置されている。設定はグローバルな操作であるため、サブタブ内にあると階層が深く、直感的に見つけにくい。",
+    "suggestion": "設定へのアクセスは、ME画面の右上に常に表示される「歯車アイコン」として配置し、サブタブの切り替え状態に依存せずアクセスできるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "3.5",
+    "issue": "オンボーディング完了時にAIが提案する初回タスクの実行予定日が「当日」に自動セットされる。ユーザーが深夜（例: 23:50や3:30）に登録した場合、すぐにリセット時間を迎えてしまい、タスクをこなす前に消滅して失敗体験になる恐れがある。",
+    "suggestion": "現在時刻がリセット時間（4:00）に近い場合（例: 0:00〜3:59の間）にオンボーディングを完了した際は、初回タスクの予定日を「翌日（実質的な今日の起床後）」にセットするロジックを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  }
+]

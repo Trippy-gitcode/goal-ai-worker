@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§9 AI実装向けCSSトークンブロック",
+    "issue": "AI実装向けの:rootトークン一覧に --on-accent-subtle が未定義。Secondaryボタン/チップ/タブのラベル色がこのトークンに依存しており、§9をコピペ実装すると未定義参照で文字色が崩れる可能性が高い。",
+    "suggestion": "§9の:rootブロックに --on-accent-subtle を追加（Night Sky既定値）。あわせてコメントで「全テーマ必須トークン」である旨を明記。例: --on-accent-subtle: #79C0FF;（Night Sky）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§6.2 タブアイコン / §8.7 ボトムタブバー",
+    "issue": "アクティブタブラベル色の記述が不一致。§6.2ではラベル=--accent、§8.7ではラベル=--on-accent-subtle。",
+    "suggestion": "アクティブタブラベル色を --on-accent-subtle に統一（v0.10方針）し、§6.2の文言を更新する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§8.3 チップ/バッジ",
+    "issue": "「::before で透明領域を44×44pxに拡張」の手法は、要素のレイアウトボックス外までタップ領域を安定的に拡張できない（ヒットテストは親の境界外では保証されない）。pointer-eventsの指定次第では無効化される可能性もある。",
+    "suggestion": "タップ領域拡張は包むラッパ要素にpaddingを与える、またはクリック可能領域用の不可視要素（position:absolute）を親のボックス内に確保する手法に変更。擬似要素で拡張する場合は、overflow: visible前提かつ擬似要素にpointer-events:autoを付与し、イベントを親に委譲する実装例を併記する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-104",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": ".glass-surface向けの@supportsブロックが2回登場し、最初のブロックがbackdrop-filterのみを設定、後段のブロックでbackgroundも上書きするなど重複・冗長。読み手/実装者に混乱を与える可能性がある。",
+    "suggestion": "progressive enhancement方針に統一して@supportsブロックを1つに集約。非対応フォールバック（不透明背景+通常ボーダー）→対応環境で半透明背景+backdrop-filterを一括で上書きする。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-105",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.7 ボトムタブバー",
+    "issue": "非アクティブ状態は「アイコンのみ・ラベル非表示」とあるが、アイコンのみになる場合のアクセシブルネーム付与方法（aria-labelや視覚的非表示テキスト）が未定義。スクリーンリーダー���タブ名が読み上げられない恐れがある。",
+    "suggestion": "各タブ項目に必ずアクセシブルネームを付与するガイドを追加（例: <a aria-label=\"GROW\">、または視覚的に非表示のテキストを含めるutilityクラス定義）。nav+aria-current採用時の推奨DOM例を提示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§8.1 ボタン（状態テーブル）",
+    "issue": "Danger (subtle)行のhover/pressedに「rgba(*danger*, 0.18)→ --danger-subtle-hover」のような混在表記があり、最終的にどの値を参照するのか読み手が迷う。",
+    "suggestion": "状態色はトークン参照（--danger-subtle-hover / --danger-subtle-pressed）のみに統一し、説明上のrgba例は脚注に移すか削除して混乱を避ける。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.2 Dawn テーマ",
+    "issue": "--danger-hover と --danger-pressed が同一値（#8A1520）で、押下時の視覚差が出ない。状態遷移の一貫性・可視性の観点で非推奨。",
+    "suggestion": "pressedをhoverより5〜10%暗くするなど、hover/pressedで段階差が分かる値に再��算。もし同値に意図があるなら注記を追加して誤解を防ぐ。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§6.2 タブアイコン / §8.7 ボトムタブバー",
+    "issue": "非アクティブ時にラベルを完全に非表示にする設計は、初回ユーザーが各アイコンの意味を理解しづらい可能性がある（学習コスト）。",
+    "suggestion": "初回起動からN回は全タブにラベル表示、または幅に余裕があるデバイスでは常時ラベル表示するルールをDSとして推奨。少なくともツールチップ/説明テキストの導線を明記する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§1.6 NGリスト（フォント） / §3.1 フォントファミリー",
+    "issue": "「NG: Inter, Roboto, Arial を指定（system-uiのみ）」とある一方、Android等でsystem-uiは実質Robotoに解決されるため、読者が「Roboto使用がNGなのか」誤解しやすい。",
+    "suggestion": "NGの意味を「明示指定がNG（Webフォントや固定指定）」に明確化し、「system-uiがOS標準フォント（AndroidではRoboto等）に解決されるのは許容」と補足する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0 テーマ切替（meta theme-color同期）",
+    "issue": "「<meta name=\"theme-color\"> をJSで --bg-primary と同期」とあるが、取得と更新の実装方針（computed styleからの読み取り/変更トリガ）が未記載で実装者が迷う。",
+    "suggestion": "実装例を追加（例: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary') で取得→ <meta name=\"theme-color\"> のcontentを書き換え。テーマ切替時やDOMContentLoaded時にフックする処理をサンプルコードで提示）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

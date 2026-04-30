@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクションの完了済みタスクのチェックマーク",
+    "issue": "チェックマークの背景色がアクセント色（青）になっている。デザインシステム§2.1およびs13/s14の表現では完了（success）は緑系（#3FB950）と定義されており、状態を示す色に一貫性がない。",
+    "suggestion": "チェックマークの色を `var(--success)` に変更し、アプリ全体で完了状態の色を統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「サイ���アップ」ボタン",
+    "issue": "ボタンの背景色（#1C2128）とテキスト色（#484F58）のコントラスト比が非常に低く、WCAG AA基準を満たしていない。Disabled状態であっても視認性が低すぎる。",
+    "suggestion": "テキスト色を `var(--text-disabled)` や `var(--text-hint)` に変更し、背景に対して最低限の可読性（3:1以上）を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "下部の「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "Disabled状態のボタンの背景色とテキスト色のコントラスト比が低すぎ、文字がほとんど読めない（s01と同様の問題）。",
+    "suggestion": "Disabled状態のテキスト色を見直し、ユーザーが「何の機能が使えないのか」を視認できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "タスクリストのチェックアイコン",
+    "issue": "s10（GROW画面）ではタスクの完了チェックが「右端」に配置されているのに対し、s14（ゴール詳細）では��左端」の円形アイコンになっている。同じ「タスクの完了」操作に対するUIレイアウトと形状に矛盾がある。",
+    "suggestion": "タスク完了のUIパターン（配置位置、アイコン形状）をs10とs14で統一する。円形はラジオボタンと混同されやすいため、チェックマーク型を推奨。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s15_goal_create",
+    "location": "カテゴリ選択のチップ群",
+    "issue": "UX仕様書§2.4で「複数選択可」と定義されているが、現在のUI（選択状態が色変化のみ）では単一選択（ラジオボタン）のように見え、複数選べる手がかりがない。",
+    "suggestion": "複数選択可能であることを明示するため、選択済みのチップにはテキストの横にチェックマーク（✓）アイコンを表示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の下部ボタン群",
+    "issue": "「登録する」「編集して登録」「✕」の3つのボタンが狭い横幅に詰め込まれており、特に「✕」ボタン��タップターゲット領域が仕様（44x44px）を満たしていない可能性が高く、誤タップを誘発する。",
+    "suggestion": "「✕」ボタンをカード右上の絶対配置に移動するか、「編集して登録」をテキストリンクに変更して、主要アクションのタップ領域と余白を確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスク行の左ボーダー",
+    "issue": "12:00のタスクにオレンジ色（#E8A855）のボーダーが使用されているが、デザインシステムに定義のない色であり、色の意味（ゴール紐付け、時間帯、警告など）が不明瞭で視線を迷わせる。",
+    "suggestion": "左ボーダーの色の意味を仕様として明確に定義し、デザインシステムのセマンティックカラーまたはゴールカテゴリ色に準拠した色のみを使用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "所要時間の横スクロールチップ",
+    "issue": "画面幅を超えてチップが並んでいるが、右端が唐突に切れており、横スクロール可能であることを示す視覚的な手がかり（Visual Cue）が弱い。",
+    "suggestion": "リストの右端に背景色（--bg-surface）へのフェードアウトグラデーションを追加し、隠れた選択肢があることを直感的に伝える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE等）のインジケータ",
+    "issue": "アクティブなタブを示す下線インジケータが短く細いため、視覚的な階層として弱く、現在位置の把握がややしづらい。",
+    "suggestion": "下線インジケータの幅をテキスト幅（またはタブ幅）に合わせ、太さを2〜3pxに増やしてアクティブ状態を強調する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

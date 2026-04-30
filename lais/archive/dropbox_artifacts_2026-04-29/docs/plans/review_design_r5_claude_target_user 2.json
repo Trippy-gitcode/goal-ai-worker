@@ -1,0 +1,6 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"USER_CONCERN","location":"§8.4 OVERDUE","issue":"R3/R4 から継続で OVERDUE の『怒られ感』がまだ残っている（赤＋!マーク＋左バー）。Finch 経験者としては罰則的すぎて続かない。","suggestion":"OVERDUE の視覚表現を柔らかくするオプション（warning寄りの色変更、アイコンを時計に）を明示。","model":"Claude Opus 4.6","persona":"target_user"},
+  {"id":"R-002","severity":"MEDIUM","category":"USER_CONCERN","location":"§5 テーマ定義","issue":"Night Sky / Dawn / Harajuku Light / Harajuku Dark の 4 テーマから選ぶとき、『今の自分にどれが合うか』が分からない。オンボーディング Step 5 で選ぶが、ux_v1 には選択ガイドがない。","suggestion":"§5 冒頭にテーマ選択ガイド（『集中したい→Night Sky / 朝型→Dawn / 週末気分→Harajuku Light / 夜の気分転換→Harajuku Dark』等の一言コピー）を追加。","model":"Claude Opus 4.6","persona":"target_user"},
+  {"id":"R-003","severity":"LOW","category":"USER_CONCERN","location":"§8.9 プログレスバー","issue":"EXPバーのフィル色が `--accent` 一色で、テーマごとに異なる色になる。ゴール達成の視覚的高揚感が『テーマの地味な色』に左右されるのはもったいない（Night Sky は青で静的、Dawn は茶色で控えめすぎ）。","suggestion":"プログレスバーのフィルだけ専用トークン `--progress-fill` を設け、テーマに関わらず共通の鮮やかな色（例: 緑系の希望感）を使う選択肢を検討。","model":"Claude Opus 4.6","persona":"target_user"},
+  {"id":"R-004","severity":"LOW","category":"USER_CONCERN","location":"§1.4 トーンオブボイス","issue":"『敬語で絵文字なし』はブランドとして良いが、25歳の自分としては少し堅苦しい。友人に勧めるとき『真面目すぎる』と言われそう。","suggestion":"敬語を維持しつつ、ほんの少し柔らかい表現（『〜ですね』『今日も一歩』）を許容する旨を補足。","model":"Claude Opus 4.6","persona":"target_user"}
+]

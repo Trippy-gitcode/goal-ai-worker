@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "ALL",
+    "location": "区切り線（例: s20_talk ヘッダー直下 border-bottom: rgba(110,118,129,0.4)／入力バー上 border-top: rgba(72,79,88,0.4)、s30_me サブタブ下・基本情報行、s13_task_detail／s14_goal_detail のセクション区切り rgba(72,79,88,0.2~0.3)",
+    "issue": "ボーダー/区切り線にトークン外のRGBA値が使用されている。design_system §5.1 の --border(#484F58)／--border-strong(#6E7681) からの乖離。",
+    "suggestion": "全画面の装飾/区切り線は var(--border) または var(--border-strong) に統一し、透過の自前RGBAは廃止。視覚強度が必要な箇所のみ --border-strong を使用。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Today セクション末尾（Goals 直前）",
+    "issue": "セクション間余白が 28px（margin-bottom:28px）で、DS §4.2の基準「セクション間≧32px」に未満。",
+    "suggestion": "Today→Goals の間隔を >=32px（��奨40px）に拡張し、セクションの独立性と呼吸感を高める。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "全画面の配色と要素様式",
+    "issue": "Night Sky配色とOpen Airは美しいが、全体としてGitHub系ダークUIに近似し個性が埋没。チャット/リスト/カードの構成も既視感が強い。",
+    "suggestion": "Night Sky Journalの物語性を可視化する微細モチーフを導入（例: 見出し左の星座ピン、Talk左ボーダーに星のドット、EXPバー端の月光ハイライト）。アクセント色相をわずかに温度差シフトし、他社ダークUIとの差別化を出す。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "完了タスク行（「企画書を仕上げる」カード）",
+    "issue": "緑のチェック + 緑テキスト + 緑系サブトーン背景が同時に使われ、行全体がセマンティック色で飽和。視線が完了済みに過度に引かれる。",
+    "suggestion": "カード背景はニュートラル（--bg-surface）に戻し、緑はチェックと小さなステータスラベルに限定。重���度が低い完了項目は色面積を抑え、未完了/進行中へ視線を誘導。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "AI応答ブロック直後のタスク提案カード",
+    "issue": "AI応答（左ボーダーのみ）と提案カードの視覚差が小さく、1塊として読まれやすい。カードの独立性が弱い。",
+    "suggestion": "AI応答とカードの間隔を +8〜12px増やし（合計16〜20px推奨）、カードの上マージンを拡張。代替案: カード上部に微小見出し行（📋 +『提案』）を追加して文脈の切り替えを明示。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域の称号ラベル（Explorer）および s30_me の「EXPLORER」",
+    "issue": "英字ラベルの字間が 1px 指定。DS §3.3 推奨の --letter-spacing-label: 1.5px に未満で、ラベルの緊張感が弱い。",
+    "suggestion": "称号ラベルは letter-spacing を 1.5px に統一（text-transform: uppercase 維持）。視覚的な伸びと品位を出す。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "見出しブロック（左揃え）とアバター選択列（中央配置）の関係",
+    "issue": "見出しは左、選択UIは中央で軸が分断され、中間の余白が“間延び”として知覚される。視線が蛇行。",
+    "suggestion": "アバター列を左グリッドに寄せるか、見出しを中央寄せに揃えて“塊”として編成。もしくはサブコピーを1段増やしてブリッジを作り、視線移動を滑らかにする。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "INFO_DENSITY",
+    "screen": "s10_grow",
+    "location": "各タスク行 右端（ゴール色ドット + カテゴリ名の併置）",
+    "issue": "色ドットとテキストラベルが重複伝達になり情報量が過多。特に縦に4行以上並ぶと視線が端に引っ張られる。",
+    "suggestion": "狭幅ではドットのみ、タップ時にツールチップ/詳細でテキスト補完。もしくはラベルはToday冒頭の凡例に退避し、行内はドットで最小表現。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s01_signin",
+    "location": "プライマリCTA（サインアップ）と下部補助テキストの間",
+    "issue": "CTA下の余白が約24pxでやや詰まり、フォーム完了後の“呼吸”が損なわれている。",
+    "suggestion": "余白を32px以上に拡張（§4.2）。CTAの独立性を高め、スクロール方向の視線を穏やかに減速させる。",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "ロゴ直上〜画面上部の星屑分布",
+    "issue": "星屑が上部に疎密の偏りがあり、ロゴ直上の“設計された沈黙”がやや中途半端。視点の誘導が弱い。",
+    "suggestion": "星の重心をロゴのやや上に寄せ、中心密度を抑えつつ対角へ流す配置に再設計。ロゴブロックを+24px上げるか、CTA群を+8px上げて視線の落とし先を明確化。",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

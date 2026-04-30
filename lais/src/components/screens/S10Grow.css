@@ -1,0 +1,641 @@
+/*
+ * S-10 GROW — design_spec_v1.md §4.4 準拠
+ * トークンは全て design_system.md §2〜§7 を参照
+ * §4.4 由来の固定値（40px 時刻列 / 22px チェック / 4px EXPバー / 60px スクロール閾値 等）は
+ * spec 由来として許容（LP-011: 算出根拠のある値は OK）
+ */
+
+.s10-grow {
+  min-height: 100dvh;
+  background: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+  padding: 0 var(--space-lg)
+    /* BottomTabBar 82px + 余白分のスクロール空間 */
+    calc(82px + var(--space-lg));
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .s10-grow {
+    padding-bottom: calc(82px + env(safe-area-inset-bottom) + var(--space-lg));
+  }
+}
+
+/* LP-002 / M4-B 学習: programmatic focus で outline を出さない */
+.s10-grow:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.s10-grow:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+/* ========================================================================
+   S10-1 ヒーロー
+   ======================================================================== */
+.s10-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 20px 0 32px; /* §4.4 固定値 */
+  transition:
+    padding var(--duration-fast) var(--ease-out);
+}
+
+.s10-hero-avatar {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--theme-color-accent);
+  background: var(--theme-color-bg-elevated);
+  box-shadow: var(--theme-shadow-sm);
+  transition:
+    width var(--theme-motion-fast) var(--theme-motion-easing),
+    height var(--theme-motion-fast) var(--theme-motion-easing);
+}
+
+.s10-hero-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.s10-hero-lv-row {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.s10-hero-lv {
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: var(--theme-font-letter-spacing-tight);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-display);
+}
+
+.s10-hero-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.s10-hero-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--theme-color-accent-subtle);
+  border-radius: var(--theme-radius-pill);
+  margin-top: var(--space-sm);
+  overflow: hidden;
+}
+
+.s10-hero-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--theme-color-accent);
+  border-radius: var(--theme-radius-pill);
+  transition: width var(--theme-motion-slow) var(--theme-motion-easing);
+}
+
+.s10-hero-exp {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 圧縮状態: scrollY > 60px で avatar 縮小 + 3 行 → 1 行 */
+.s10-hero-compressed {
+  padding: 10px 0 var(--space-md);
+}
+
+.s10-hero-compressed .s10-hero-avatar {
+  width: 32px;
+  height: 32px;
+}
+
+/* キーボード表示時（将来の Phase A+ で VisualViewport API 連動） */
+@media (max-height: 400px) {
+  .s10-hero {
+    display: none;
+  }
+}
+
+/* ========================================================================
+   共通: セクション
+   ======================================================================== */
+.s10-section {
+  margin-top: var(--space-xl);
+}
+
+/* ========================================================================
+   S10-2 Overdue
+   ======================================================================== */
+.s10-overdue-label {
+  margin: 0 0 var(--space-sm);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--danger);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* ========================================================================
+   S10-3 Today ヘッダ
+   ======================================================================== */
+.s10-today-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-xs);
+}
+
+.s10-today-label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.s10-today-date {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.s10-today-counter {
+  margin: 0 0 var(--space-md);
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ========================================================================
+   S10-4 Today タスク行（共通）
+   ======================================================================== */
+.s10-task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.s10-task {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* §4.4 固定値 */
+  margin-bottom: 8px; /* §4.4 固定値 */
+}
+
+.s10-task-time {
+  flex-shrink: 0;
+  width: 40px; /* §4.4 固定値 */
+  text-align: right;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* チェック */
+/*
+ * R2 a11y fix R-002 (WCAG 2.5.5 / 2.5.8 Target Size):
+ * 視覚サイズ 22×22 は §4.4 固定値として維持するが、
+ * ::before で 44×44 の透明なヒット領域を拡張する。
+ * position: relative + ::before absolute で本体レイアウトに影響を与えない。
+ */
+.s10-check {
+  flex-shrink: 0;
+  position: relative;
+  width: 22px; /* §4.4 視覚サイズ */
+  height: 22px;
+  border-radius: 50%;
+  background: transparent;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.s10-check::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  /* ヒット領域のみ。視覚的には不可視 */
+}
+
+.s10-check:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.s10-check:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.s10-check-done {
+  background: var(--success-subtle);
+  border: 2px solid var(--success);
+  color: var(--success);
+}
+
+.s10-check-active {
+  border: 2px solid var(--accent);
+}
+
+.s10-check-scheduled {
+  border: 2px solid var(--border-strong);
+}
+
+/* Overdue 行用: 装飾のみの空チェック（インタラクションなし） */
+.s10-check-overdue {
+  border: 2px solid var(--danger);
+}
+
+/*
+ * R2 spec-compliance R-003 fix:
+ * §4.4 チェックタップ: spring-default / scale(0.9 → 1.1 → 1) / --duration-fast
+ * JS 側で .s10-check-tap class を 400ms 付与し、keyframes で scale を変化させる。
+ * LP-001: prefers-reduced-motion 時は CSS 末尾のメディアクエリで animation: none に縮退。
+ */
+.s10-check-tap {
+  animation: s10-check-spring var(--duration-fast) var(--spring-default) both;
+}
+
+@keyframes s10-check-spring {
+  0%   { transform: scale(0.9); }
+  50%  { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* カード */
+.s10-task-card {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 10px 14px; /* §4.4 固定値 */
+  min-height: 44px;
+  border-radius: var(--theme-radius-md);
+  background: var(--theme-color-bg-elevated);
+  box-shadow: var(--theme-shadow-sm);
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--theme-motion-fast) var(--theme-motion-easing),
+              box-shadow var(--theme-motion-fast) var(--theme-motion-easing);
+}
+
+button.s10-task-card:focus:not(:focus-visible) {
+  outline: none;
+}
+
+button.s10-task-card:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.s10-task-done .s10-task-card {
+  background: var(--success-subtle);
+}
+
+.s10-task-active .s10-task-card {
+  background: var(--theme-color-accent-subtle);
+}
+
+.s10-task-scheduled .s10-task-card {
+  background: var(--theme-color-bg-elevated);
+}
+
+.s10-task-card-overdue {
+  border-left: 2px solid var(--danger);
+  padding-left: 12px;
+}
+
+.s10-task-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.s10-task-name {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+}
+
+.s10-task-name-done {
+  color: var(--text-secondary);
+}
+
+.s10-task-name-active {
+  color: var(--theme-color-text);
+}
+
+.s10-task-name-scheduled {
+  color: var(--text-secondary);
+}
+
+.s10-task-meta {
+  margin: 2px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.s10-task-meta-done {
+  color: var(--success);
+}
+
+.s10-task-meta-active {
+  color: var(--text-secondary);
+}
+
+.s10-task-meta-scheduled {
+  color: var(--text-muted);
+}
+
+.s10-task-meta-dash {
+  display: inline-block;
+  width: 8px;
+  height: 1px;
+  background: var(--theme-color-status-overdue); /* §4.4 amber → Stage 7-3 token */
+}
+
+.s10-task-category {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.s10-task-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.s10-task-dot-work {
+  background: var(--cat-work, #79c0ff);
+}
+
+.s10-task-dot-health {
+  background: var(--cat-health, #7ee787);
+}
+
+.s10-task-dot-learn {
+  background: var(--cat-learn, #d2a8ff);
+}
+
+.s10-task-category-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: -0.02em;
+}
+
+.s10-task-defer {
+  margin-left: var(--space-sm);
+  font-size: 14px;
+  color: var(--theme-color-accent);
+  font-family: var(--theme-font-base);
+  text-decoration: underline;
+  background: transparent;
+  border: none;
+  padding: 0;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.s10-task-defer:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ========================================================================
+   S10-5 + タスクを追加
+   ======================================================================== */
+.s10-add-task {
+  margin-top: var(--space-sm);
+  margin-left: 52px; /* §4.4 固定値: 時刻列 40px + gap 12px */
+  min-height: 44px;
+  font-size: 14px;
+  color: var(--theme-color-accent);
+  font-family: var(--theme-font-base);
+  text-decoration: underline;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.s10-add-task:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* ========================================================================
+   S10-6 Upcoming 折りたたみ
+   ======================================================================== */
+.s10-upcoming {
+  margin-top: var(--space-xl);
+}
+
+.s10-upcoming-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+  background: transparent;
+  border: none;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.s10-upcoming-header:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.s10-upcoming-header:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.s10-upcoming-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.s10-upcoming-chevron {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.s10-upcoming-panel {
+  margin-top: var(--space-sm);
+}
+
+.s10-upcoming-group {
+  margin-bottom: var(--space-md);
+}
+
+.s10-upcoming-date {
+  margin: 0 0 var(--space-sm);
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.s10-task-upcoming .s10-task-card {
+  background: var(--bg-surface);
+}
+
+/* ========================================================================
+   S10-7 / S10-8 Goals
+   ======================================================================== */
+.s10-goals-label {
+  margin: 0 0 var(--space-md);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.s10-goals-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.s10-goal {
+  width: 100%;
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  margin-bottom: var(--space-sm);
+}
+
+.s10-goal:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.s10-goal:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.s10-goal-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.s10-goal-name {
+  font-size: 14px;
+  letter-spacing: var(--theme-font-letter-spacing-normal);
+  color: var(--theme-color-text);
+}
+
+.s10-goal-pct {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.s10-goal-bar {
+  height: 3px;
+  background: var(--accent-subtle);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.s10-goal-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-pill);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+/* ========================================================================
+   S10-9 + ゴールを作成
+   ======================================================================== */
+.s10-add-goal {
+  margin-top: var(--space-sm);
+  padding: 14px 0;
+  min-height: 44px;
+  font-size: 14px;
+  color: var(--accent);
+  text-decoration: underline;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.s10-add-goal:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* ========================================================================
+   LP-001: prefers-reduced-motion 対応
+   ======================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .s10-hero,
+  .s10-hero-avatar,
+  .s10-hero-bar-fill,
+  .s10-check,
+  .s10-task-card,
+  .s10-goal-bar-fill {
+    transition: none;
+  }
+  .s10-check-tap {
+    animation: none;
+  }
+}
+
+/* ========================================================================
+   BUG-RT-S12-OPTIMISTIC-UPDATE V4: 楽観更新中の半透明 UI
+   ======================================================================== */
+.s10-task-optimistic {
+  opacity: 0.55;
+  transition: opacity 240ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s10-task-optimistic {
+    transition: none;
+  }
+}

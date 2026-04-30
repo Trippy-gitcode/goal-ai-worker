@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"HIGH\",\n    \"category\": \"UNDEFINED\",\n    \"location\": \"2. lais/src/components/screens/S01Auth.jsx\",\n    \"issue\": \"サインアップとログインのモードを切り替えた際に、フォームの入力内容やエラー状態がリセットされません。これは、preact-routerが同じパス(`/auth`)のコンポーネントを再利用し、propsのみを更新するためです。ユーザーがログイン試行でエラーになった後、サインアップに切り替えると、入力したパスワードや表示されたエラーメッセージが残ったままになり、混乱を招きます。\",\n    \"suggestion\": \"`mode` propの変更を検知してフォームの状態をリセットする`useEffect`フ��クを追加してください。\\n```jsx\\nimport { useEffect } from 'preact/hooks';\\n\\n// S01Auth comp",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "sw_debugger"
+  }
+]

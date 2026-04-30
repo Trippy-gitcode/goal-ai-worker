@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "変更ファイル S30MeProfile.jsx（AI_MEMO_MAX_LENGTH 切り詰め）",
+    "issue": "AI メモ 800 文字制限を JS の String.prototype.slice で実装すると、サロゲートペア/結合文字（絵文字・濁点結合など）を分断し表示崩れや文字化けが発生する可能性がある。仕様上の「文字」≠UTF-16 コードユニット長。",
+    "suggestion": "Intl.Segmenter（grapheme）または GraphemeSplitter を用い、ユーザー知覚上の「文字」単位で 800 を厳密カウント・切り詰めする。保存・表示の双方で同一ロジックを共有。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.10 S30-4 + データ層（Supabase スキーマ/サーバサイド）",
+    "issue": "800 文字上限が UI/JS 依存でサーバ側制約が未提示。上限超データの混入や将来の別クライアントからの破り込みが起きうる。",
+    "suggestion": "DB レベルで CHECK (char_length(ai_memo) <= 800) 制約を付与し、API/サーバでもバリデーション（422）を返す。移行スクリプトで既存データの検出・是��も実施。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S30MeProfile.css .s30-ai-memo-body（line-clamp 30 行）",
+    "issue": "行クランプを「800 文字相当」として併用しているが、フォント/ズーム/画面幅/言語で1行あたりの文字数は大きく変動。結果として表示上の制限が800を超過/過少になり得る。",
+    "suggestion": "line-clamp は視覚の行制御に限定し、実際の800文字制限はJS/サーバで厳密に担保。表示用には明示的な省略記号（…）とツールチップ/ラベルで省略を知らせる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S30MeProfile.css .s30-ai-memo-body（-webkit-line-clamp 依存）",
+    "issue": "Firefox/印刷/一部組織環境で -webkit-line-clamp の互換挙動に差があり、期待の行数で止まらない・全量表示/不自然な切れが起こる可能性がある。",
+    "suggestion": "@supports(line-clamp: 1) で標準 line-clamp を優先し、非対応環境は max-height: calc(line-height * N) + overflow:hidden のフォールバックを用意。E2E で主要ブラウザと印刷を確認。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-105",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "S30MeProfile.css .s30-ai-memo-body（overflow hidden + 視覚クランプ）",
+    "issue": "視覚的には���略されるが、スクリーンリーダーはDOM全量を読み上げる可能性があり、視覚と音声で内容が不一致（>800文字が読まれる）となる。アクセシビリティ上の混乱を招く。",
+    "suggestion": "仕様通りDOM自体を800文字に切り詰める（視覚/音声で一致）。将来“全文表示”が必要な場合はボタンで別コンテンツを開く明示的導線を提供する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "S30MeProfile.jsx（データ取得/表示 周辺）",
+    "issue": "AIメモが null/undefined/空文字の場合の空状態UIが記載なし。無表示や余白のみになる恐れ。",
+    "suggestion": "空/ロード中/エラーの3状態を明示。空は“AIメモはまだありません”等のプレースホルダと生成導線/リトライを表示。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S30MeProfile.css .s30-ai-memo-body",
+    "issue": "長大な単語/URL/連続ASCII等の改行不可テキストで横方向に溢れ、overflow:hidden でコンテンツが不自然に欠落する可能性。",
+    "suggestion": "overflow-wrap:anywhere; word-break:break-word を追加し、どの文字列でもレイアウトを壊さず折り返せるようにする。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": ".s30-info-button / .s30-mbti-manual（フォーカス状態）",
+    "issue": "フォーカス可視スタイルの明示がなく、グローバルCSS次第で outline が消えている環境ではWCAG 2.4.7に抵触する恐れ。",
+    "suggestion": ":focus-visible にカスタムアウトライン（例 outline: 2px solid currentColor; outline-offset: 2px）を明示実装し、ホバー/アクティブ状態も併記。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": ".s30-info-button（margin: -10px -12px でのヒット領域調整）",
+    "issue": "負マージンでヒット領域を拡張すると、隣接要素と重なり誤タップやフォーカス順序の直感不一致が起きやすい。特に200%+ズームや狭小幅で顕著。",
+    "suggestion": "負マージンは避け、ラッパー要素でパディング拡張 or ::before の絶対配置でヒットエリアを拡張しつつ視覚整列を維持。ヒット領域の重なりを e2e で確認。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": ".s30-info-button / .s30-mbti-manual（--tap-target-min 依存）",
+    "issue": "CSS変数 --tap-target-min が未定義の環境で min-* が無効化され、44px要件を満たせないリスク。",
+    "suggestion": "min-height: var(--tap-target-min, 44px); min-width: var(--tap-target-min, 44px) とフォールバックを指定。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-111",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": ".s30-mbti-manual（ボタンセマンティクス）",
+    "issue": "“マニュアル”が外部ドキュメント遷移なら <button> より <a> が適切。現在のスタイルはリンク風だが要素型が不明でセマンティクス不一致の懸念。",
+    "suggestion": "外部/別画面遷移は <a href target rel=noopener>、同一画面でダイアログ表示は <button type=\"button\"> と役割を明確化し、SR向けに aria-label も付与。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-112",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "S30MeProfile.jsx（データ取得フロー想定）",
+    "issue": "オフライン/タイムアウト/ネットワーク遅延時のロード・エラー・リトライUIやバックオフ/中断（AbortController���が明記されていない。遅延で空白に見える/再試行不能の恐れ。",
+    "suggestion": "SWR/React Query 等で retry(指数バックオフ)＋手動リトライ、読み込みスケルトン、明示的なタイムアウト（AbortController）を実装。navigator.onLine でオフライン検知し“接続を確認”ガイダンスを表示。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-113",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "CRITICAL-4（lazy import ErrorBoundary 欠如）",
+    "issue": "ルート/画面の lazy チャンク取得失敗時に白画面化し復旧導線が無い。Phase B 繰延の方針は妥当だが、現状として可用性リスクは残存。",
+    "suggestion": "ルート境界に ErrorBoundary + 再試行ボタン + 失敗時の軽量代替（最小ナビ/ホーム復帰）を追加。Phase B ミッション化と並行し、最小限の boundary を LP-012 へ暫定実装も検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-114",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "S30MeProfile.css .s30-ai-memo-body（コピー/共有時）",
+    "issue": "視覚クランプで省略されても DOM に全文が残ると、コピー時に想定以上の長文が共有されユーザー驚きを招く。",
+    "suggestion": "DOM も800文字に整合させるか、“全文コピー”明示ボタンを提供して利用者コントロールを確保。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-115",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": ".s30-info-button / .s30-mbti-manual",
+    "issue": "type 属性未指定だとフォーム内で暗黙の submit になりうる。",
+    "suggestion": "<button type=\"button\"> を明示し、不要なフォーム送信を防止。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-116",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": ".s30-info-button（アクセシブルネーム）",
+    "issue": "アイコン/短文ボタンの場合、視覚ラベルが不十分だとスクリーンリーダー利用者に機能が伝わりにくい可能性。",
+    "suggestion": "aria-label/aria-describedby で機能を明示（例 aria-label=\"このセクションの説明\"）。ツールチップの説明は hover/focus 両対応で提供。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

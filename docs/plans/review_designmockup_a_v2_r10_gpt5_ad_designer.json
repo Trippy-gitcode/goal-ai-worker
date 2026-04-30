@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "ロゴ直下のタグライン周辺",
+    "issue": "初見で「何ができるアプリか」が3秒以内に伝わりにくい（抽象的なコピーのみで機能像＝AIコーチ/タスク・ゴール管理が不明）",
+    "suggestion": "タグラインの下に短い価値訴求を追加（例: 「AIコーチとタスク管理で、目標達成をサポート」）。主要ベネフィットを1行サブコピーかバッジ3点で補足（「タスク化」「目標達成」「会話で計画」）。主要CTA「はじめる」に「無料ではじめる」を併記して踏み出しを促進",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayリスト先頭の完了タスクカード（緑の塗り背景）",
+    "issue": "完了済みタスクが濃色の成功色で面積強調され、視線が「次にやること」よりも「終わったこと」に強く引き寄せられている",
+    "suggestion": "完了済みは面積を抑えたsubtle表現（枠線/アイコンのみ or --success-subtleの小面積）に縮退し、未完了行の可視性を優先。完了済みはセクション末尾へ折りたたみ/小さく表示するなど視線誘導を「次の行動」へ集約",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Todayブロックの直下（Goalsセクションとの間）",
+    "issue": "セクション間余白が28px（style: margin-bottom:28px）で、DS §4.2の基準「セクション間≧32px」を満たしていない",
+    "suggestion": "Today→Goals間の余白を32–40pxへ拡張し、セクションの区切りを明確化。視線のリズムを整えCTA（+ゴールを作成）への気付きも向上",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Today末尾の「＋タスクを追加」テキストリンク",
+    "issue": "主要CTAがテキストのみで視覚的優先度が低く、スクロール時に見逃しやすい",
+    "suggestion": "「＋タスクを追加」をアクセントsubtleのピル or ボタン化（--accent-subtle + アイコン）し、Today見出し直下かリスト末尾に一貫配置。ヒーロー圧縮時に見失わないよう、Todayヘッダー行右側に小ボタンを併設する案も検討",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "ALL",
+    "location": "プライマリーボタンの角丸スタイル（例: s20_talk内=ピル、s00/s01/s12/s15=角丸12px）",
+    "issue": "同じプライマリアクションでも画面により角丸スタイルが「ピル(999px)」と「角丸12px」で混在し、ブランドの一貫性が弱まっている",
+    "suggestion": "プライマリーボタンの角丸トークンを画面横断で統一（全体を--radius-lg:12pxに統一 or 会話文脈のみピルを『会話系パターン』として定義）。パターン差別化をDSに明文化して意図的な一貫性を担保",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "「AI理解メモ」見出し（ラベル行）",
+    "issue": "日本語ラベルに英字ラベル用トラッキング（letter-spacing:1.5px）が適用され、DS §3.4（日本語は --letter-spacing-ja:-0.02em）と不整合で読み感が間延び",
+    "suggestion": "日本語ラベルには --letter-spacing-ja（-0.02em）を適用し、見出しは --line-height-ja-heading を使用。英字ラベル用の全大文字+1.5pxは英字UIラベル（PROFILE等）のみに限定",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s12_task_add",
+    "location": "入力フィールド背景（テキスト/セレクト/メモ）",
+    "issue": "同系モーダルの入力背景が #0D1117（bg-primary）で、s01_signinの入力背景 #161B22（bg-surface）と不一致。レイヤー感が画面間で揺れている",
+    "suggestion": "シート内のフォーム背景は一貫して --bg-surface（#161B22）系に統一（またはフォーム用のsurface/elevatedトークンを明示）。s01とs12のフォーム基調を揃え、学習コストを低減",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内（タイトル/CTA行）",
+    "issue": "カード内情報と隣接バブルの視覚密度が高く、CTA3つが横並びで視線が分散。主要CTAの『登録する』は目立つが、全体のスキャン性がやや落ちる",
+    "suggestion": "カード上部/下部の余白を+4〜8px拡張し、CTAはPrimaryを大きく、Secondaryはテキストボタン風か縦積み（狭小幅時）にして優先順位を明確化。左ボーダーは維持しつつ、カード外側に8pxの外余白を追加してバブル群か���独立",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s20_talk",
+    "location": "ヘッダー中央タイトル『Talk』",
+    "issue": "タブラベルは大文字（TALK）で統一されている一方、ヘッダーはTitle Caseで大小混在し、ラベル体系の一貫性が弱い",
+    "suggestion": "ヘッダーの文言スタイルをタブラベルと意図的に揃えるか、逆に『会話画面はTitle Case』と規定して役割差を明文化。DSにスタイルガイドを追記",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

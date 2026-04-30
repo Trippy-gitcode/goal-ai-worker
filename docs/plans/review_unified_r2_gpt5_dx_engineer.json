@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md ヘッダー / lais_project_v1.md ヘッダー / 本チケット前提のv3.2記述",
+    "issue": "dev-systemの実ファイルヘッダーがversion: 3.0のまま。一方、本検証前提ではv3.2（§13.10-14, §19.6遡及チェック, §19.8追加）。さらにlais_project_v1.mdの依存宣言は「dev_system_spec.md v3.1」。3者間で版数が不整合。",
+    "suggestion": "正とする版をv3.2に統一し、dev_system_spec.mdヘッダーのversion/status/updated/変更履歴を更新。lais_project_v1.mdの依存ヘッダーも「dev_system_spec.md v3.2」に更新。spec_changelogにも連鎖更新を記録。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md ヘッダー",
+    "issue": "uxが依存として「lais_project_v1.md v1.3」を参照しているが、現行projectはv1.4（しかも内部矛盾解消を含む）。依存バージョンが古く、§19.6の上流→下流整合に違反。",
+    "suggestion": "lais_ux_v1.mdの依存ヘッダーを「lais_project_v1.md v1.4」に更新。更新後、project v1.4で追加/修正された内容（特にEXP/Stripe/アバター演出）との突合を再実施し、差分があればUX側該当箇所を追随。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §19.6（上流変更時の下流遡及チェック）",
+    "issue": "「下流遡及チェック」をADV責任で求めているが、機械可検証（§1.1）を満たす具体的な自動検証スクリプトが存在しない。手作業だと版ズレが温存されやすい。",
+    "suggestion": "scripts/spec_ref_lint.sh（新規）を追加し、各docs/*.mdヘッダーの「依存: {path} v{X.Y}」をパース。該当ファイルの実ヘッダー版と照合して不一致をFAILにする。canopy（G6前後）で実行し、非準拠をブロック。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "lais_project_v1.md §7（見出し重複）",
+    "issue": "§7.3が二重定義（「新規追加」と「アーキテクチャ原則」）。他節（例: §3.2.6の「§7.3 Canvas/PNG方式」参照）からの参照が曖昧になる。",
+    "suggestion": "見出し番号を一意に再採番。推奨: 現行§7.3「新規追加」を§7.3のまま維持し、「アーキテクチャ原則」を§7.6に移動（§7.4/§7.5は現状維持）。本文中の「§7.3参照」リンクも再確認・一括置換。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_project_v1.md §6.5 と lais_ux_v1.md §13.4",
+    "issue": "退会時のStripeキャンセル挙動が両仕様で不一致。projectは「申請時にcancel_at_period_end: true→72時間後に即時キャンセル」、UXは「申請時は72時間後のスケジュールキャンセル（取り消し可能）」。請求停止タイミングが食い違い、課金/返金・利用継続に影響。",
+    "suggestion": "単一方針に統一: 退会リクエスト時は即キャンセルせず「72時間後に即時キャンセルをスケジュール」。クーリングオフ中は予約取消で元通り。72時間経過時点で即キャンセル実行（proration/返金方針も明記）。project/UXの両方を同内容に修正し、workflows（Cron/Stripe Webhook）の時刻基準を図示。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §13.7 と dev_system_spec.md 冒頭ステータス",
+    "issue": "§13.7に「最低10ラウンド繰り返す」とある一方、dev-system本体���「8ラウンドレビュー完了でFINAL」と記載。自己規定と実績が矛盾。",
+    "suggestion": "どちらかに整合: a) FINAL要件を『CRITICAL 0かつ8ラウンド以上』へ変更、または b) dev-systemの実績を10ラウンドに更新。変更履歴に理由を追記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §16（プラットフォーム互換性）",
+    "issue": "dev-system §19.8は「チェックリストの全項目を環境ごとに対応方針/対象外で埋める」ことを要求。現状A項目はE1〜E4のみの表で、B〜Gは総論的な方針記述。環境別の網羅表現（最低E1〜E4必須）が不足。",
+    "suggestion": "A〜G各カテゴリについて、E1〜E4（必須）×項目ごとの表（方針/対象外/備考）を追加。E5〜E7は「対象外」を明記。例: B項目（B1〜B4）を行、E1〜E4を列にしたマトリクス化。該当箇所にproject参照がある場合は併記してリンク。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "lais_project_v1.md §8.1（MVP表）",
+    "issue": "備考に「ゴール達成→大量EXP」と曖昧表現。§4.2で+50EXPと定義済みだ���、MVP表だけ読むと具体値不明。",
+    "suggestion": "表記を『ゴール達成→+50 EXP（1日1回）』に置換し、§4.2への参照を添える。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md §19.6（依存チェーン図）",
+    "issue": "依存チェーンのASCII図でdesign_system.mdが二重に現れており、視覚的に冗長で読み手が戸惑う恐れ。",
+    "suggestion": "図を簡素化し、design_system.mdは一箇所に集約表現（design_spec_v1.mdへの矢印のみ）にする。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

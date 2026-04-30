@@ -1,0 +1,172 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2.2",
+    "issue": "NotFound で /terms|/privacy を window.location.assign してから、配信側404時に SPA に route('/', true) で戻す実装は、ブラウザの「戻る」で再び /terms に戻るたびに再試行→再フォールバックが起き、ユーザーが「戻る」操作で永続的にピンポン状態になる",
+    "suggestion": "初回のフルナビゲーションは location.replace を使って履歴を残さない、または一度でも失敗した path は同セッション内で二度とフルナビしない（sessionStorage に結果を保存）などの履歴制御を行う。例: if (guard === path || sessionStorage.getItem(`${path}:failed`) === '1') { route('/', true); } else { sessionStorage.setItem(`${path}:failed`, '1'); location.replace(path); }",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "SPA トップへのフォールバック route('/', true) は、ルーティング定義の不備（'/' が NotFound にもマッチする等）の場合に、NotFound マウント→route('/')→NotFound…のリダイレクトループを引き起こしうる",
+    "suggestion": "現在の location.pathname が既に '/' の場合は route を呼ばない等の再入防止を追加する。また、最大リトライ回数（例: 1 回）を設けて、それを超えたら静的にエラーメッセージを表示するセーフガードを導入する",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "2.2",
+    "issue": "window.location.assign('/terms') のようにルート相対を前提にしており、サブパス配信（例: https://example.com/app/）時に意図せずオリジン直下へ遷移してしまう",
+    "suggestion": "ベースパスを設定ファイルから取得して結合する、または <base href> を尊重して相対遷移にする。例えば const base = import.meta.env.BASE_URL || '/'; location.assign(new URL(path, base).toString()) といった形で環境依存を排除する",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "sessionStorage へのアクセスが直接的で、ブラウザ設定やプライバシーモードで DOMException を投げた場合のフェイルセーフがない",
+    "suggestion": "sessionStorage の getItem/setItem/removeItem を try/catch でラップし、失敗時はガード機能を無効化して即座に SPA トップへフォールバックする等のデグレードを実装する",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "STATIC_PATHS が '/terms' と '/privacy' のみで末尾スラッシュやロケール付（/terms/、/en/terms）を許容しないため、意図せぬフォールバックが発生しうる",
+    "suggestion": "正規化（末尾スラッシュの除去）やプレフィックス判定（/terms または /terms/ で一致）に変更するか、許容パターンを正規表現で表現する",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.1",
+    "issue": "Supabase auth で flowType:'pkce' を指定しているが、メール確認/マジックリンク（トークン断片）と OAuth（code）の双方に対する URL パラメータ掃除責務がコード上では明示されていない",
+    "suggestion": "ドキュメントリンクとともに、detectSessionInUrl:true が発火した後に URL のフラグメント/クエリが確実に除去されることをコメントで明示し、回収に失敗した場合のフォールバック（例: 明示的に history.replaceState('','',cleanUrl)）を追加する",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5",
+    "issue": "/auth/callback 受け口が未実装のまま本番導線に入ると、プロバイダや配信設定によっては code/access_token のクエリ/ハッシュが URL に残留し、リファラ漏えい・共有時の誤動作リスクがある",
+    "suggestion": "最小実装で構わないので /auth/callback ルートを先行実装し、マウント時に Supabase のセッション回収を待ってから clean URL（history.replaceState）へ遷移するハンドラを追加する",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.3",
+    "issue": "aria-disabled で見た目無効化しているが、クリック/Space でのアクティブ化は可能なため、支援技術では「無効」と読み上げられる一方でアクションが発火し、認知的不一致を招く恐れがある",
+    "suggestion": "aria-disabled のときは onClick/onKeyDown(Enter, Space) で e.preventDefault() と e.stopPropagation() を行い、role とフォーカス移動は維持しつつ実動作のみ抑止する。視覚的には pointer-events:none を併用するのも有効",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "inFlight 時の多重送信防止が onMouseDown のみでカバーされており、Enter キー送信やプログラム的 submit には効かない可能性がある",
+    "suggestion": "handleSubmit の先頭で inFlightRef/submitting をチェックして即 return し、かつ onClick/onKeyDown（Space/Enter）でも二重起動を抑止する。視覚的な抑止に加え、ロジックレベルでも冪等化する（例: 最初の Promise を共有）",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.3",
+    "issue": "email/password/同意チェックの未充足時にフォーカス誘導はあるが、エラー原因のライブアナウンス（role=alert/aria-live）や input への明確な関連付け（aria-errormessage）が未記載",
+    "suggestion": "エラーメッセージコンテナに role=\"alert\" あるいは aria-live=\"assertive\" を付与し、各 input に aria-invalid と aria-errormessage（メッセージ要素の id）を設定して、原因が直ちに読み上げられるようにする",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.3",
+    "issue": "email/password フィールドのオートコンプリート/入力ヒントが未提示の可能性（スニペット上不明）。UX と入力精度に影響",
+    "suggestion": "mode に応じて適切な属性を付加する。email: type=\"email\" autocomplete=\"email\" inputMode=\"email\" spellCheck={false}、password: signup→autocomplete=\"new-password\"、login→\"current-password\" を明示",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "LOGIN_MIN_PASSWORD=1 は“チェックをほぼ無効化する”意図だが、数値の意味が直観的ではない（魔法の数字）",
+    "suggestion": "LOGIN_CLIENT_MIN_LENGTH=1 のように命名を明確化し、コメントで「サーバー検証へ委譲するためクライアント最小長は実質無効（空文字は誘導のため弾く）」と意図を記述する",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2.4",
+    "issue": ".s01-cta-inactive と [aria-disabled=\"true\"] の二重指定で「無効状態」の表現が重複し、将来のスタイル差分��不整合を生みやすい",
+    "suggestion": "単一のソース・オブ・トゥルースに集約する。例: 視覚クラス .s01-cta--disabled に統一し、コンポーネント側で aria-disabled の有無に関わらず必ず同クラスを付与する",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2.5",
+    "issue": "--danger-subtle のアルファ値がテーマごとにばらつき、テキスト色とのコントラストが WCAG の閾値を下回る可能性がある",
+    "suggestion": "実測でコントラスト比（背景と境界/文字）を確認し、必要に応じてアルファ値や彩度を調整する。特に Harajuku 系は淡色背景で情報密度が下がりやすいため注意",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "全体（2.x）",
+    "issue": "型安全性がなく（純 JS）、イベントハンドラや ref の null 取り扱いで将来的な回 regressions を検知しづらい",
+    "suggestion": "S-01 周辺のみでも段階的に TypeScript 化（.tsx）し、Supabase クライアント型、フォーム state 型、ref の型（MutableRefObject<HTMLInputElement|null>）を明示する。最低限 JSDoc で型注釈を付与",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2.1 / 2.2",
+    "issue": "ストレージキー 'lais.auth' と 'lais.static-nav-guard' が散在し、将来的なリネームや衝突検出が困難",
+    "suggestion": "keys.ts のような集中定義に移し、接頭辞を共通化（例: APP_KEY.AUTH='lais.auth', APP_KEY.NAV_GUARD='lais.static-nav-guard'）。テストでも同一ソースを参照",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.1 / 既知の残存 (Phase B)",
+    "issue": "persistSession=true でトークンを Web ストレージに保存しており、現状 CSP 未設定（Phase B）だと XSS 成功時にセッション乗っ取りリスクが高い",
+    "suggestion": "CSP の導入を前倒しできない場合でも、短期対策として DOMPurify 等の徹底、危険なインラインスクリプト禁止、SRI、ビルド時 nonce 埋め込み、またはセッションストレージへの切替とトークン寿命短縮を検討する",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

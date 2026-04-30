@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "画面中央のサブコピー「あなたの人生を、あなたらしく」",
+    "issue": "コピーが抽象的すぎて、初めて画面を見た人が3秒以内に「AIと育つタスク管理アプリ」というコア価値・機能を理解できない。",
+    "suggestion": "アプリの具体的な便益（例：「AIと歩む、新しいタスク管理」など）を端的に表すコピーに変更し、第一印象での期待値を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部の「サインアッ���」ボタン",
+    "issue": "未同意状態での非活性ボタン（背景 #1C2128、文字 #484F58）のコントラスト比が低すぎ、視認性が著しく損なわれている。",
+    "suggestion": "非活性状態でも文字が読めるようコントラスト比を調整するか、ボタンを常に活性化させ、未同意でタップした際にエラーメッセージを出す仕様に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクション下部の「+ タスクを追加」",
+    "issue": "画面内で最も頻繁に使われる主要CTAだが、通常のテキストリンクと同等の視覚的重みしかなく、視線が自然に誘導されない。",
+    "suggestion": "アイコン付きのボタン形状（Pill型など）にするか、アクセントカラーの薄い背景色を敷いて、タップ可能な主要アクションとして際立たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスクリスト",
+    "issue": "左端に時刻、中央にタスク名、右端に完了チェックマークが配置されており��タスクを確認して完了させるまでの視線移動距離が長く散漫になる。",
+    "suggestion": "チェックマークをタスク名の左側（時刻のすぐ右）に配置し、情報確認とアクションのための視線を左側に集約する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s15_goal_create",
+    "location": "カテゴリ選択のチップ群",
+    "issue": "仕様上は「複数選択可」だが、UIが単一選択のラジオボタン（Pill型）のように見え、ユーザーが複数選べることに直感的に気づけない。",
+    "suggestion": "ラベルに「カテゴリ（複数選択可）」と明記するか、選択されたチップにチェックアイコンを表示して複数選択のメンタルモデルを提示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "所要時間の横スクロールチップ",
+    "issue": "右端のチップが画面端で途切れているが、スクロール可能であることを示す視覚的アフォーダンス（フェードアウト効果など）が不足している。",
+    "suggestion": "スクロール領域���右端に背景色へのグラデーションマスクをかけるか、次のチップが意図的に半分だけ見えるように初期位置の余白を調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "画面下部の「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "完了済みタスクのため非活性化されていると思われるが、文字色（#484F58）と背景色（#1C2128）のコントラストが極端に低く読めない。",
+    "suggestion": "非活性状態のコントラストを改善する。または、完了済みでも「振り返り」としてAI相談ができるよう活性状態を維持する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の「✕」ボタン",
+    "issue": "ボタンの枠線と文字色（#7A8593）が暗い背景に沈んでおり、タスク登録をキャンセルする導線が見落とされやすい。",
+    "suggestion": "「✕」ボタンの明度を少し上げるか、キャンセルアクションとして認識しやすいよう余白や配置を微調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE, DISCOVER...）",
+    "issue": "アクティブなタブ（PROFILE）を示す青い下線と文字色が細く暗いため、パッと見で現在地を把握しにくい。",
+    "suggestion": "アクティブタブのテキストを太字（font-weight: 600）にする、または下線の太さを増してコントラストを強調する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "全体のビジュアルトーン",
+    "issue": "「洗練」に重きを置きすぎているため、ゲーミフィケーション要素（レベルやEXP）の「高揚感・達成感」がUIから伝わりづらく、単なるタスク管理アプリに見えやすい。",
+    "suggestion": "EXPバーのグラデーションや、レベル表記周辺のアクセントカラーの彩度をわずかに上げ、静けさの中にも「成長の喜び」を感じさせる視覚的メリハリをつける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  }
+]

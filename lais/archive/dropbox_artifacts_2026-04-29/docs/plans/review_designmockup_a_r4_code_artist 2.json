@@ -1,0 +1,57 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "ALL",
+    "location": "全体構造",
+    "issue": "中央寄せタイトル + 縦積みフォーム + ボトムタブ + Primary の SaaS テンプレ構造が残存。3 パターンで差別化軸を作る段階。",
+    "suggestion": "3 パターン作成時 非対称構図案 / 縦ガイドライン強調案 / ミニマル余白案。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "星屑の密度",
+    "issue": "r4 でロゴは太字化済み。星屑は依然 6 点で詩情が立っていない。",
+    "suggestion": "100〜200 点ポアソンディスク + 月/薄雲グラデーション。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "タイムライン等間隔",
+    "issue": "縦線 + ドット + タスクが機械的等間隔で呼吸がない。",
+    "suggestion": "時間帯ギャップ実寸比例化、午前/午後境界 divider。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "チャット + 提案カードの言語混在",
+    "issue": "iMessage 言語 + SaaS カード言語の同居。",
+    "suggestion": "提案カードを吹き出しの延長としてネスト表現。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択 3 円",
+    "issue": "r3 で衣装トーンは落ち着いたが、円 3 個均等配置は既視感が強い。",
+    "suggestion": "横カード（タロット風）配置 or z 軸オーバーラップ。",
+    "model": "Code",
+    "persona": "artist"
+  }
+]

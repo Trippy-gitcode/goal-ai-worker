@@ -1,0 +1,312 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "7.2 認証設計",
+    "issue": "PWAクライアントでのJWT保管場所とセッション継続戦略が未定義（localStorage想定だとXSSでトークン窃取リスクが高い）",
+    "suggestion": "リフレッシュトークンはSecure/HttpOnly/SameSite=strictのクッキーで配布し、アクセストークンはメモリ保持＋短命（≤5分）＋自動ローテーション。CSP(unsafe-eval/inline禁止)、DOMPurify等でXSS面を最小化。Supabase Authのrefreshトークンは“rotating refresh token”を有効化し、ログアウト/パスワード変更/退会時に全デバイスのリフレッシュトークン失効を必須化。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "7.2 認証設計",
+    "issue": "セッション失効・デバイス管理（強制ログアウト、トークン失効、ログイン履歴）が未記載",
+    "suggestion": "“アクティブセッション一覧”UIを提供（端末名・最終利用時刻）し、個別/全端末サインアウトを実装。リフレッシュトークンはローテーション＋ワンタイム化、リプレイ検知���は全セッション失効。高リスク操作（メール変更、退会）は直前再認証を必須化。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "7.1 基盤",
+    "issue": "通信時/保管時の暗号化要件（TLS/HSTS、DB暗号化、バックアップ暗号化、鍵管理）が明記されていない",
+    "suggestion": "TLS1.2+強制、HSTS(preload)有効化。Supabaseの暗号化（ストレージ/バックアップ）とKMS管理を明記。Cloudflare Workers間通信もHTTPSのみ。秘密情報はWorkers Secrets/Cloudflare KVに保存。キーのローテーション手順を運用に追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "5.4 プライバシー設計",
+    "issue": "QRコードの一時トークンが24時間有効だが単回利用/失効条件が不明で、公開スクリーンショット等から大量スパム申請の踏み台になる恐れ",
+    "suggestion": "トークンは短寿命（推奨10〜30分）、単回利用、スコープ限定（profilesの最小公開項目のみ閲覧）にする。jtiで使い回しをDB拒否。表示操作毎に新規発行、明示的失効APIを用意。スキャン回数/IP・端末指紋で��ート制限を実装。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "5.4 プライバシー設計 / 7.2 RLS",
+    "issue": "QR/シェアリンク用トークンのフォーマット・署名方式・監査項目（aud/sub/期限/jti）の仕様が未定義",
+    "suggestion": "サーバ署名のJWT（HS256/EdDSA）。クレーム: sub=対象ユーザーUUID, aud=profiles_read_min, exp≦30分, nbf, jti（DBでワンタイム検証）。RLSはaudとjtiの検証関数を使用。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "5.1 友達登録 / 5.3 簡易メッセージ/応援",
+    "issue": "友達リクエストやメッセージ送信のレート制限・スパム対策が不足（100文字制限のみ）",
+    "suggestion": "送信者あたり/相手ペアあたりのクォータ（例: リクエスト/日: 20、同一相手: 1/7日、メッセージ: 5/分・50/時）。同一IP/デバイス指紋のしきい値導入。ブロック済み相手への送信禁止。新規アカウントのウォームアップ制限を追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "5.3 簡易メッセージ/応援",
+    "issue": "ハラスメント対策が通報依存で事後的。自動検知・即時保護（ミュート/一時停止）がない",
+    "suggestion": "NGワード/脅迫/差別検知（軽量テキスト分類）で自動ミュート/レビュー行き。URL自動除去/短縮URL拒否。被害者側にスレッド単位ミュート、初回メッセージは相互承認まで非通知にする“メッセージリクエスト”モードを検討。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5.3 通知配信",
+    "issue": "Web Pushにメッセージ本文を含めるかのポリシーが未定義で、ロック画面での意図せぬ露出リスク",
+    "suggestion": "“プライバシー配慮通知”設定を既定ON（本文非表示、差出人と種別のみ）。ユーザーが明示的に切替可能。通知の既定TTL短縮とサーバ側で最小限のペイロードに限定。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "6.4 AIデータプライバシー",
+    "issue": "GDPR上の役割分担（管理者/処理者）・法的根拠（契約履行/同意/正当利益）が未定義。サブプロセッサ（OpenAI等）の明細とDPA言及が不���",
+    "suggestion": "プライバシーポリシーとDPAで役割・法的根拠を明記。サブプロセッサ一覧/目的/所在地/移転根拠を公開。利用規約にAI送信の同意条項を追加し、同意撤回のUIを用意。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "7.1 基盤 / 6.4 AIデータプライバシー",
+    "issue": "EU居住者向けのデータ所在/越境移転の取り扱いが未定義（Supabase/Cloudflare/AIプロバイダのリージョン）",
+    "suggestion": "EUデータレジデンシ（例: Supabase eu-west）を選択し、Cloudflare EU地域優先ルーティングを設定。越境移転はSCC/EU GDPR標準契約条項を採用し、プロバイダごとのデータ保持期間を明記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "6.5 退会・データ削除 / 6.4 AIデータプライバシー",
+    "issue": "第三者AIプロバイダに送信済みデータの削除/保持期間（ゼロ保持設定等）が未定義で、消去権に対応不可の恐れ",
+    "suggestion": "OpenAI/Anthropic/Googleでゼロ保持/30日未満保持の契約・設定を選択し、保持期間を文書化。可能ならAzure OpenAI等���ゼロ保持プランに統一。退会時は送信停止＋将来送信防止を保証。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "6.5 退会・データ削除",
+    "issue": "バックアップ/レプリカからの削除方針が未記載（論理削除と世代交代時期が不明）",
+    "suggestion": "バックアップ保持期間（例: 30日）と、世代交代時に当該データが不可逆的に消去される旨を明記。DPO監査用に削除ジョブの証跡（削除対象件数/完了時刻/jti）を保存。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "6.3 AI理解メモ / 6.4 AIデータプライバシー",
+    "issue": "AIによる性格・価値観の推定（プロファイリング）に関する透明性・異議申立て・オプトアウトが未定義",
+    "suggestion": "プロファイリングの目的/影響をUI/ポリシーに明記し、オプトアウト設定を提供。影響最小化（表示のみ、意思決定に直接利用しない）を宣言し、Art.22配慮の説明/人手関与の窓口を用意。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "6.4 AIデータプライバシー",
+    "issue": "AI対話履歴の保存期間（90日）が固定で、保存しない“エフェメラルモード”がない",
+    "suggestion": "“履歴を保存しない”設定を実装（返答生成後に即時破棄、メタだけ保持）。既定保持を短縮（例: 60日）し、ユーザー単位で選択可能化。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "7.1 基盤 / 6.4 AIデータプライバシー",
+    "issue": "Cloudflare Workers/ログにAI対話やPIIが記録されるリスクへの対策未定義",
+    "suggestion": "アプリケーションログから本文・PIIを常時マスキング。request/response bodyのログ禁止。構造化ログ＋サンプル率制御。ログ保持期間を短期（≤14日）にし、DLPルールで露出防止。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "7.2 RLS",
+    "issue": "ブロック時の一貫した強制（メッセージ/応援/プロフィール最小露出）を担保するRLS/DBモデルが未定義",
+    "suggestion": "blocked_usersテーブル（blocker_id, blocked_id, created_at）を導入し、friends/messages/profiles SELECT/INSERTを全てdeny if exists(block)。承認待ちリクエストの自動失効/削除も合わせて実装。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "6.5 退会・データ削除 / 7.2 認証設計",
+    "issue": "退会直後のセッション/Push購読の失効が明記されていない（72時間の保留中に通知/アクセス継続の恐れ）",
+    "suggestion": "退会リクエスト受付時点で全リフレッシュトークン失効＋即時ログアウト＋Pushサブスクリプション削除。クーリングオフ中は再ログイン時のみ一時復活（再発行）。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "7.2 認証設計",
+    "issue": "Magic LinkのTTL/単回利用/リダイレクト制限が未定義で、リンク転送・フィッシングのリスク",
+    "suggestion": "Magic Linkは10–15分TTL・単回利用・PKCE/nonce付与・リダイレクトURIはホワイトリスト固定。リンク使用時は全既存セッションへ通知/再認証要求を行う。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "7.2 認証設計",
+    "issue": "パスワードポリ���ーが緩く漏えいパスワード検知が無い",
+    "suggestion": "最小12文字推奨＋辞書攻撃耐性（HBIPチェック/API k-anonymity）。paste禁止ではなく���固なパスフレーズを推奨。パスワード変更時に全セッション失効。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "7.2 認証設計",
+    "issue": "2FA（TOTP/WebAuthn/FIDO2）が未計画で、アカウント乗っ取りリスクが相対的に高い",
+    "suggestion": "MVP+1でTOTPまたはWebAuthnパスキーを導入。高リスク操作（メール/パス変更、課金）では2FA必須化。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "7.1 基盤",
+    "issue": "CSP/セキュリティヘッダの方針が未定義でXSS/クリックジャッキング耐性が不明",
+    "suggestion": "厳格CSP（script-src 'self' 'strict-dynamic'; object-src 'none'; base-uri 'self'）、X-Frame-Options DENY、Referrer-Policy strict-origin-when-cross-origin、Permissions-Policyでカメラ/通知の最小権限化を設定。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "7.1 基盤（Workers API）",
+    "issue": "CORS/Origin制限が未定義で、悪性オリジンからのAPI呼び出しが可能になる恐れ",
+    "suggestion": "Access-Control-Allow-Originを自社��メインのみに固定し、認証必須エンドポイントはAuthorizationヘッダ前提でプリフライト検証。CORS+RateLimit（IP/ユーザー）をミドルウェアで徹底。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "7.3 新規追加（QRスキャン）",
+    "issue": "スキャン結果のURLホワイトリスト検証が未記述で、悪性QRからのオープンリダイレクト誘導リスク",
+    "suggestion": "“lais.app/qr?token=”形式のみ受理し、それ以外は破棄。ユーザーへ確認プロンプトを出さない（自動ブロック）。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "5.1 友達登録（シェアリンク）",
+    "issue": "シェアリンクのトークン長・エントロピー・失効戦略が未定義（推測/総当たりのリスク）",
+    "suggestion": "最低128ビットの乱数をBase64URLで符号化。短寿命（≤30分）＋単回利用。検証失敗3回でサーバ側スロットル。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5.3 簡易メッセージ/応援",
+    "issue": "ブロック/解除時のPush��読トークンやリアルタイム購読の失効処理が未定義",
+    "suggestion": "関係断絶（ブロック/解除/フレンド削除）時にサーバで対象ペアのPushサブスクリプション/Realtimeチャネルを強制解除。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-026",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "7.3 PWA/Service Worker",
+    "issue": "オフラインキャッシュに個人データが混入するリスクへの対策が明確でない",
+    "suggestion": "APIレスポンスはCache-Control: no-store。SWは静的アセットのみキャッシュ。ログアウト時にIndexedDB/Cache Storageを完全消去。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-027",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5.3 簡易メッセージ/応援",
+    "issue": "メッセージの保存期間・削除権（送信/受信者）・通報時のエビデンス保持期間が未定義",
+    "suggestion": "通常メッセージは既定180日ローテーション、ユーザー削除可（相手側表示は“削除済み”に置換）。通報対象は調査終了+法的要件後に削除。ポリシーをUI/ポリシーに明記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-028",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "7.1 基盤（全API）",
+    "issue": "総合的なレートリミット/ボット対策（QR検証、認証、友達リクエスト、メッセージ送信）が記載不足",
+    "suggestion": "Cloudflare Rate Limiting/Turnstileを導入。エンドポイント別にIP+ユーザー+デバイス指紋で多層レート制御。しきい値超過時は指数バックオフ/一時BAN。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-029",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "5.3 通知配信",
+    "issue": "通知許諾の取得/撤回（オプトイン/オプトアウト）フローの明文化がない",
+    "suggestion": "通知は明示オプトイン。設定から即時撤回可能にし、撤回時はサーバ側のPush購読も削除。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-030",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "6.4 AIデータプライバシー",
+    "issue": "AI送信前PIIマスキングが正規表現のみで不完全（日本語固有表現や文脈依存に弱い）",
+    "suggestion": "NERベースのPII検出を段階導入し、ユーザー選択で“高マスキング”モードを提供。UIで“個人情報を含めない”注意喚起と入力時インライン警告を追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-031",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5.4 プライバシー設計",
+    "issue": "公開プロフィール項目の既定値が不明で、実名等が誤って公開されるリスク",
+    "suggestion": "display_nameは既定でランダムハンドル（変更可）。公開項目のプレビュー/確認ダイアログを友達申請前に表示。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  }
+]

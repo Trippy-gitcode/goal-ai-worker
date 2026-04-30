@@ -1,0 +1,57 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s10_grow",
+    "location": "ヘッダー〜TODAY セクション間",
+    "issue": "アバター・レベル・EXP バー・TODAY 日付が連続配置され、画面上半分の情報密度が高い。ブランドトーン『深呼吸できる』静けさとギャップ。",
+    "suggestion": "アバター下の余白を +24px、TODAY 見出し上にもう 1 セクション分余白を追加。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "ボタン行 (編集 / 削除 / 進め方を聞く / 詰まりを相談)",
+    "issue": "4 つのボタンが 2×2 グリッドで同等重み。削除 (破壊的) と 進め方を聞く (AI対話) を同視覚階層で並置するのは誤タップリスク。",
+    "suggestion": "進め方を聞く / 詰まりを相談 を Primary 行に、削除 は … メニュー経由に降格。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s15_goal_create",
+    "location": "カテゴリチップ行",
+    "issue": "チップ 6 個のうち『その他』のみ 2 行目に 1 つ折り返し。余白リズムが半端。",
+    "suggestion": "4 + 4 の 2 行固定、または横スクロール化。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "60% 数値",
+    "issue": "60% が過大 (48pt 相当)、ジャーナル UI のトーンから外れ広告的に見える。",
+    "suggestion": "32pt 程度に縮小、達成感はプログレスバーで補完。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s12_task_add",
+    "location": "ボトムシート上の背景",
+    "issue": "シート上部に残る背景黒帯に『12』らしき数字が薄く見え、モーダル起動時の遷移感が半端。",
+    "suggestion": "シート展開時に背景を完全 scrim (黒 70%) にして元画面要素を隠す。",
+    "model": "Code",
+    "persona": "web_designer"
+  }
+]

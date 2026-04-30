@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "1.4, 7.3",
+    "issue": "戻りナビゲーションのスワイプ方向がiOS HIGおよび一般的なモバイルUXの標準と逆になっている。「右端から左スワイプ」で前画面に戻ると定義されているが、これは進む・ドロワー展開のジェスチャーであり、実装するとユーザーの直感に反し激しい混乱を招く。",
+    "suggestion": "1.4および7.3のフルスクリーン詳細・設定階層の戻りスワイプ操作を「左端から右スワイプ（Edge swipe）」に修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1.1, 4.2",
+    "issue": "project_v1.md §8.1にて「PremierのMVP特典として限定アバターフレームはME > PROFILE > アバター設定から装備可能」と定義されているが、ux_v1.mdにS-41（アバター設定）の画面構成や操作フローが一切記載されておらず、実装が不可能です。",
+    "suggestion": "S-41 アバター設定画面のレイアウト（現在のアバタープレビュー、所持フレーム一覧グリッド、装備/外すのトグル操作など）と操作フローを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2.3, 6.1",
+    "issue": "S-12（タスク追加）やS-15（ゴール作成）などの入力フォームを持つハーフモーダルにおいて、下スワイプやbackdropタップで即座に閉じる仕様になっています。入力途中で誤操作した場合、入力内容が警告なしに破棄されデータロスト（ユーザーのフラストレーション）に繋がります。",
+    "suggestion": "入力フィールドに変更がある（dirty状態の）場合、下スワイプやbackdropタップ時に「編集内容を破棄しますか？」という確認ダイアログ（Action Sheet等）を表示���、誤破棄を防ぐ仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1.1, 14.2",
+    "issue": "S-02 ログイン画面から、パスワードを忘れたユーザーがアカウントを復旧するための「パスワードリセット」の画面遷移および操作フローが定義されていません。既存ユーザーがログイン不能になるリスクがあります。",
+    "suggestion": "S-02に「パスワードを忘れた場合」のリンクを追加し、メールアドレス入力 → リセットリンク送信 → 新パスワード設定のフロー（S-04等）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "8.2, 8.3",
+    "issue": "タスク完了により「レベルアップ」と「ゴール達成」が同時に発生した場合、両方の演出（紙吹雪、画面上部/中央のバナー）が同時に発火し、UIが重なって視認性が低下します。演出の優先順位やキューイングが未定義です。",
+    "suggestion": "演出のキューイングシステムを定義してください。（例: ゴール達成演出を先に再生し、完了後にレベルアップ���出を連続して再生する、または同時発生用の統合演出を用意するなど）",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "BEST_PRACTICE",
+    "category": "STRUCTURE",
+    "location": "1.2, 4.1",
+    "issue": "ボトムタブ（GROW / TALK / ME）を切り替えた際、各タブのスクロール位置、TALKの入力途中テキスト、MEの開いているサブタブなどの状態が保持されるか（KeepAlive）が明記されていません。毎回初期化されるとモバイルUXとして著しく劣ります。",
+    "suggestion": "タブ切り替え時は各タブのDOM/Stateを保持し、再表示時にスクロール位置や入力状態を復元する仕様（Preactでの状態保持ルーティング）を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "AMBIGUITY",
+    "category": "AMBIGUITY",
+    "location": "2.3, 6.2",
+    "issue": "タスクを連続で複数完了した場合のUndoスナックバーの挙動が不明確です。6.2の「新しいトーストが古いものを押し上げる」仕様に従うと、画面上に複数のUndoが並ぶのか、最新の1つで上書きされるのか曖昧です。",
+    "suggestion": "Undoスナックバーは常に1つのみ表示し、連続完了時は最新のタスクに対するUndoに更新される（過去のものは確定する）仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "2.3, 2.4",
+    "issue": "S-13（タスク編集）およびS-16（ゴールタスク追加）への遷移は定義されていますが、画面構成の差分が明記されていません。S-12（タスク追加）を再利用すると思われますが、S-16における「ゴール紐付け」フィールドの扱いなどが不明です。",
+    "suggestion": "S-13はS-12に初期値がセットされた状態であること、S-16はS-12の「ゴール紐付け」が親ゴールに固定（または非表示）された状態であることを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "3.2",
+    "issue": "project_v1.mdで画像添付のサイズ上限（10MB）や対応フォーマットが定義されていますが、TALK画面でこれらに違反するファイルを選択した場合のエラーフィードバック（クライアント側のバリデーション）が定義されていません。",
+    "suggestion": "ファイル選択直後にクライアント側でサイズとMIMEタイプを検証し、違反時はトーストで「10MB以下の画像を選択してください」等を表示する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "4.4",
+    "issue": "S-36（QRスキャン）で初回カメラアクセスを拒否された場合、またはハードウェア的にカメラが使用できない場合の画面状態や、OS設定アプリへの誘導が定義されておらず、行き止まりになります。",
+    "suggestion": "カメラアクセス拒否時は、スキャン枠の代わりに「カメラへのアクセスが許可されていません。設定から許可してください」というメッセージと、OS設定を開く手順（またはボタン）を表示するフォールバックを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

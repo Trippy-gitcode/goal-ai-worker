@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md 行 3399-3409",
+    "issue": "/tmp/section17.txt や /tmp/c0c6_spec.txt などの固定ファイル名を使用しているため、スクリプトが並行実行された場合にファイルが上書きされ、競合状態（Race Condition）が発生します。また、シンボリックリンク攻撃の対象となる脆弱性もあります。",
+    "suggestion": "mktemp を使用して一意な一時ファイル名を生成してください。例: tmp_spec=$(mktemp)。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais/verify/dev_system_v34_package.md 行 3407",
+    "issue": "diff コマンドは差分が存在する場合に終了コード 1 を返します。スクリプトが set -e 環境で実行されている場合、ここでスクリプトが異常終了し、後続の rm -f が実行されず一時ファイルが残留します。",
+    "suggestion": "diff の終了コードをハンドリングする（例: diff ... || true）か、スクリプトの先頭で trap 'rm -f /tmp/c0c6_*.txt' EXIT を設定して確実にクリーンアップしてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/verify/dev_system_v34_package.md 行 3400-3402",
+    "issue": "プロセス置換 <() を避けるために一時ファイル /tmp/section17.txt を作成していますが、sed の出力を直接 grep にパイプで渡すだけで要件を満たせます。一時ファイルの使用は不要なI/Oオーバーヘッドと状態管理の複雑さを生みます。",
+    "suggestion": "一時ファイルを廃止し、標準のパイプラインを使用してください。例: sed -n '/^## §17\\. §6\\.10/,/^## §18/p' lais/verify/dev_system_v34_package.md | grep -cE \"^[0-9]+\\.\"",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais/verify/dev_system_v34_package.md 行 858, 1062",
+    "issue": "awk ... > \"$tmp\" && mv \"$tmp\" file というパターンを使用していますが、awk がメモリ不足等でクラッシュしつつも空のファイルを出力した場合、元のファイルが空ファイルで上書きされデータが消失するリスクがあります。",
+    "suggestion": "mv を実行する前に、一時ファイルのサイズが0でないことを確認するガード条件を追加してください。例: [ -s \"$tmp\" ] && mv \"$tmp\" instructions/session_progress.md",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais/verify/dev_system_v34_package.md 行 849, 1053",
+    "issue": "if ($0 ~ \"^### \" mid \":\") において、シェル変数 MISSION_ID (mid) が正規表現として評価されます。もし MISSION_ID に . や * などの正規表現メタ文字が含まれていた場合、意図しない行にマッチするバグを引き起こします。",
+    "suggestion": "正規表現マッチングではなく、文字列関数を使用するか、完全一致で判定してください。例: if (index($0, \"### \" mid \":\") == 1)",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais/verify/dev_system_v34_package.md 行 845, 1049",
+    "issue": "tmp=$(mktemp) で作成した一時ファイルが、awk コマンドの実行前にスクリプトが中断された場合や、awk が失敗して mv が実行されなかった場合に削除されず、/tmp ディレクトリに残留し続けます。",
+    "suggestion": "一時ファイル作成直後に trap 'rm -f \"$tmp\"' EXIT を設定し、スクリプトの終了状態に関わらず確実にクリーンアップされるようにしてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0407,
+    "input_tokens": 28148,
+    "output_tokens": 1096,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

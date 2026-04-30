@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4(ux_v1.md), §19.6, §17, sub_adv_protocol.md §10",
+    "issue": "UX仕様書のファイル名がセクション間で不一致（ux_v1.md vs ux_redesign_v*.md）。依存チェーンや参照例で混在しており、新規作成時にどちらを正とすべきか不明瞭。",
+    "suggestion": "UX仕様書の正規ファイル名を1つに統一する（例: docs/ux_v1.md）。§17の一覧、§18の依存マップ、sub_adv_protocol.md §10の一覧、§19.6の依存チェーンを全て同一名称に更新。既存プロジェクト向けに移行ガイド（旧→新ファイル名のマッピング）を追記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.5（ヘッダー: dev-system準拠）",
+    "issue": "ヘッダー例の「dev-system準拠: docs/plans/dev_system_spec.md §19」が実際の配置（リポジトリ直下のdev_system_spec.md）と不一致。アプリ側に同パスは存在しないため参照切れになる可能性。",
+    "suggestion": "dev-system準拠の表記をリポジトリURL+コミット（もしくはタグ）+セクションに変更（例: https://github.com/org/dev-system/blob/v3.0/dev_system_spec.md §19）。アプリ仕様書テンプレートにこの表記ルールを明記し、init_app.shで自動埋め込みできるようにする。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5（ヘッダー標準）",
+    "issue": "ヘッダーの依存情報・ステータスが手書きであり、機械可検証の原則（§1.1「機械可検証」）に対する自動検証手段の定義がない。",
+    "suggestion": "ヘッダーをYAML Front Matter（---で囲む）に統一し、spec_header_lint.shを追加して以下を機械検証: 必須フィールド存在、ステータス値の正当性、依存ファイルの存在/バージョン形式（semver）、循環参照の有無（§19.6準拠）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5（依存: 上流ファイルのパス+バージョン）",
+    "issue": "依存のバージョン指定は必須だが、互換性方針（exact pinか範囲指定か）、上流のminor/patch更新時の追随基準が未定義。",
+    "suggestion": "依存のバージョン運用を明文化。例: semverでの^/~/=の許容、上流のminor更���時は下流は要確認（spec_changelog.mdへの記録必須）、patchは自動許容など。spec_header_lint.shで許容範囲外の指定をFAILに。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.6（連鎖更新でspec_changelog.md記録）, §19.2（spec_changelog.mdは任意）",
+    "issue": "連鎖更新時にspec_changelog.mdへの記録を要求している一方、同ファイルは任意扱いで初期から存在しない可能性がある。",
+    "suggestion": "spec_changelog.mdを「初回変更が発生した時点で必須（未作成なら即作成）」と明記し、init_app.shで空雛形を配置。canopyに「変更検出時にspec_changelog.md更新があるか」を追加検証。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7（実施タイミング/完了基準/出力フォーマット）",
+    "issue": "要件は「直接競合5社+間接競合3社」だが、マトリクスの列は競合A〜Eの5列のみ。完了基準も直接5社しか要求しておらず、間接3社の扱いが不整合。",
+    "suggestion": "マトリクスの列拡張（競合A〜H）または直接/間接で表を分割。完了基準を「直接5社かつ間接3社の調査完了」に統一。テンプレに間接競合用の第二表を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.7（調査対象テーブル）",
+    "issue": "ベンチマークの再現性確保に必要な情報源（URL/スクショ/取得元ストア地域/期間）が出力フォーマットに含まれていない。",
+    "suggestion": "調査対象テーブルに以下の列を追加: 参照URL/スクショパス/ストア地域（JP/US等）/評価期間（取得日レンジ）。最低1枚の証跡スクショ保存を必須化し、screenshot格納先規約を追記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7（出力フォーマット）",
+    "issue": "Markdownのみで自由記述のため機械検証が難しい。Lais方針列の未記入検出や競合件数の不足を自動で拾えない。",
+    "suggestion": "ベンチマーク結果の機械可検証用にJSON/YAML生データ（apps_benchmark.json）を併置。項目: competitors[], type(direct/indirect), features[], ux_patterns[], ratings。lint（benchmark_lint.sh）で「直接≥5/間接≥3」「全行Lais方針埋め」「差別化≥3」���自動検証。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（project_v1.md テンプレ）",
+    "issue": "法務・規約・プライバシー・データ保持・規制準拠（GDPR/CCPA等）に関する章がない。実装/運用の重大論点が仕様上カバーされない恐れ。",
+    "suggestion": "§11 法務/規約/プライバシー（ToS/PP/データ保持期間/削除SLA/規制準拠）を追加。§7 技術アーキテクチャと相互参照し、データライフサイクルと整合を明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（design_system.md テンプレ）",
+    "issue": "コンポーネントの状態（hover/focus/active/disabled/error/success等）・バリアント（サイズ/密度）の明示的セクションがない。",
+    "suggestion": "§9 コンポーネント状態/バリアントを追加し、各トークンとの対応（例: focus-ring, disabled-opacity）を表で定義。アクセシビリティ対応（コントラスト比/フォーカス可視化）も同章に統合。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§19.4（design_spec_v1.md テンプレ）",
+    "issue": "モックアップ原本（Single Source of Truth）のファイルパス/バージョン参照がテンプレに含まれていない（§2のモックアップ原本ルールと連携不足）。",
+    "suggestion": "§0 モックアップ原本参照（docs/mockups/*.htmlのパス/コミットハッシュ/更新履歴リンク）を追加。画面ごとに「参照モックアップID/バージョン」を必須化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（reference_v1.md テンプレ）",
+    "issue": "APIのレート制限/スロットリング、リトライ/バックオフ、APIバージョニング/後方互換、環境変数一覧/秘密情報取り扱い、監視/メトリクスの記述欄がない。",
+    "suggestion": "以下の章を追加: §7 レート制限/リトライ方針、§8 APIバージョニング/互換性ポリシー、§9 環境変数/シークレット管理、§10 監視/メトリクス（SLO/アラート）。§5 セキュリティ（RLS）と合わせて運用面を強化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§19.4（system_map.md テンプレ）",
+    "issue": "失敗/���イムアウト/リトライの分岐（非機能系の挙動）が明文化されていないため、実装時のばらつきが生じうる。",
+    "suggestion": "§5 失敗/タイムアウト/リトライ方針を追加（各主要処理のIF FAIL分岐/ユーザー通知/再試行間隔/中断からの復帰）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.5（依存）",
+    "issue": "依存の書式が単一行の自由記述であり、複数依存の表現・パースが困難。下流の自動連鎖更新検出（§19.6）に活用しにくい。",
+    "suggestion": "依存は配列としてYAML Front Matterに定義（例: depends_on: [{file: docs/project_v1.md, version: 1.3}, ...]）。spec_header_lint.shで配列スキーマを検証し、spec_graph_check.shでDAG整合性と循環検出を実装。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.6（参照表記法）",
+    "issue": "「ファイル名 + セクション番号」参照は、後の章入れ替えでリンクが不安定になりやすい。恒久ID/アンカー規約が未定義。",
+    "suggestion": "各仕様書セクションに安定ID（例: DS-TOKENS-005）を付与し、��照表記は「file §X.Y（ID）」の二重化にする。将来の章再構成でもIDで追跡可能に。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.1/§19.4/テンプレ全体",
+    "issue": "§19で定義した各仕様書テンプレートの実体ファイル（雛形）がtemplates/に存在せず、init_app.shでもスキャフォールドされないため、新規開発者が着手時に迷いやすい。",
+    "suggestion": "templates/にproject_v1.md/ux_v1.md/design_system.md/design_spec_v1.md/reference_v1.md/e2e_fullflow_test.mdの雛形を追加し、init_app.shでdocs/に配置する。ヘッダー（§19.5）を雛形に含め、依存/ステータスの初期値も自動生成。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5（ヘッダー標準）",
+    "issue": "ヘッダーに「作成: 日付」はあるが「更新: 日付」「作成者/最終編集者」などの変更追跡情報がない。",
+    "suggestion": "ヘッダー必須項目に updated（最終更新日）/ author / last_editor を追加。spec_header_lint.shで空欄をWARN。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.4（節番号の付け方）",
+    "issue": "テンプレごとに§0から始まるものと§1から始まるものが混在し、参照時に混乱���恐れ。",
+    "suggestion": "全テンプレの節番号ポリシーを統一（例: ベンチマークを§0に固定、以降は§1〜）。§19.4の各テンプレ先頭で番号ポリシーを明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

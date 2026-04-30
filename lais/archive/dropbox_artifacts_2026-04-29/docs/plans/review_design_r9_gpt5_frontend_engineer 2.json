@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": "@supports not ブロックのフォールバック（不透明背景）が、直後の .glass-surface { background: var(--card-bg) } によって上書きされ、非対応ブラウザで半透明のままになる。記述上は「フォールバック: 不透明単色」としているのに、カスケード順のため実現されない。",
+    "suggestion": "ルール順序を入れ替え、最終的な勝ちルールが意図通りになるようにする。例:\n1) 先に .glass-surface の標準背景/ボーダーを宣言\n2) その後 @supports (backdrop-filter… or -webkit-backdrop-filter…) ブロックでフィルタを付与\n3) 最後に @supports not (…) で background/border を上書き（ここを最終位置に）\nまたは、フォールバック側に .glass-surface.glass-fallback のような補助クラスを付けて特異性で確実に勝たせる。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0 テーマ切替",
+    "issue": "html.theme-switching * への一括 transition 適用は、DOM全体で再計算/再描画を誘���し、モバイルSafariでフレームドロップや一時的な入力遅延を起こしやすい（特に長文リストやTALKログ表示時）。",
+    "suggestion": "トランジション適用範囲を限定する。例: body, .surface, .card, .button など主要コンポーネントに限定、または [data-animate-theme] を付けた要素のみに適用。さらに transition-property を color, background-color, border-color のみ（既に指定済）に保ち、will-change は使わない。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0 テーマ切替",
+    "issue": "themeSwitching クラスの除去を setTimeout(400ms) に依存。--duration-* を変更した場合や prefers-reduced-motion: reduce（1msに短縮）時に実時間とズレが生じ、想定外に長い/短い遷移ウィンドウが発生する。",
+    "suggestion": "transitionend をルートで1回だけ待つ（タイムアウトはバックアップとしてduration計算値+50ms）。durationは getComputedStyle(root).getPropertyValue('--duration-normal') を読み取り、msに正規化して使用。reduced-motion 時は即時（setTimeout 0）でクラス除去。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§8.1 ボタン / §8.3 チップ / §8.7 タブ",
+    "issue": "「ライト系=--text-primary／ダーク系=--accent」といった文言分岐は、CSSトークンだけでは表現できず、コンポーネントCSSがテーマ名に依存した分岐を持つことになる（トークン指向の原則に反する）。",
+    "suggestion": "テーマ横断の役割トークンを追加する。例: --subtle-fg（= subtle背景上のテキスト色）, --tab-active-label, --chip-fg など。各テーマの :root[data-theme] でそれらに適切な値を割り当て、コンポーネントは常に役割トークンのみ参照する。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": "Safariで @supports の -webkit-backdrop-filter 判定が不安定な環境があり（古いiOS/一部WebView）、意図した分岐に入らずフィルタが無効化される可能性がある。",
+    "suggestion": "より寛容な検出にするか、supports分岐に依らずプロパティ自体は常時併記し、非対応時は無視される前提にする。\n例: .glass-surface { -webkit-backdrop-filter: var(--card-backdrop); backdrop-filter: var(--card-backdrop); }\nその上で @supports not (backdrop-filter: blur(1px)) { .glass-surface { background: var(--bg-surface); } } を最終位置に配置。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0 テーマ切替（FOUC対策・永続化）",
+    "issue": "glassトグルのJS setterが未提示。localStorageキー（lais.glass）は定義済みだが、setTheme同様の setGlass(next) 実装方針やアニメーション有無が不明。",
+    "suggestion": "setGlass(next) を追加し、documentElement.dataset.glass の更新＋localStorage保存を行う。視覚ノイズ回避のため、glass切替時はトランジション無効（または短縮）を推奨。reduced-motion: reduce の場合は常に off へ強制も許容。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0 テーマ切替（meta連動）",
+    "issue": "<meta name=\"theme-color\"> を --bg-primary と同期するとあるが、実装サンプルがなく、PWA/iOSの制約（Safariは limited値のみ、即時反映にラグなど）への対応方針が不足。",
+    "suggestion": "テーマ切替時に <meta name=\"theme-color\"> を更新する実コードを提示。iOS PWAは apple-mobile-web-app-status-bar-style（default/black/black-translucent のみ）制約を明記し、ダーク系は black-translucent、ライト系は default に固定する等の運用指針を追記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§2.2 リンク色 / 全体ベーススタイル",
+    "issue": "UA部品やフォームのデフォルト描画がOSダーク/ライトと食い違う可能性（特にiOS Safari）。color-scheme が未定義だと、フォームコントロールやスクロールバーの配色がテーマと不整合になることがある。",
+    "suggestion": "各テーマごとに html { color-scheme: dark; }（Night Sky/Harajuku Dark）/ html { color-scheme: light; }（Dawn/Harajuku Light）を付与。UI全体の一貫性とアクセシビリティを向上。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0 テーマ切替（FOUC）",
+    "issue": "FOUC最小化はhead内スクリプトで対応しているが、初回描画直前の背景/テキストのクリティカルCSSが未提示。遅い回線でCSSロード前に白背景が一瞬見える恐れ。",
+    "suggestion": "headにインラインの最小限クリティカルCSSを追加（例: html{background:#0D1117;color:#E6EDF3} を初期テーマに合わせて出力）。Dawn/Harajuku系を初期選択する可能性がある導線があるなら、その色もインライン生成ロジックに含める。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 イージングトークン",
+    "issue": "spring系ベジェ（y>1）自体はCSS的に合法だが、誤用（translate系やheight/left等のレイアウトプロパティに適用）でビューポート外への『飛び出し』や再レイアウトコスト増が起きやすい。",
+    "suggestion": "lint/ガイドで『spring-* は transform: scale/opacity のみに使用可』『layoutプロパティには --ease-* のみ』を明文化。stylelint の禁止リストやコンポーネントREADMEに適用範囲を記述して逸脱を防止。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§7.5/§8.1 フォーカス",
+    "issue": "--focus-ring トークン（box-shadow想定）が残存している一方、実装方針は outline への完全統一。混在で実装者が迷う恐れ。",
+    "suggestion": "--focus-ring は将来互換目的の参考扱いである旨を明記、もしくは廃止を検討。outlineスタイル用の役割トークン（--focus-outline-color, --focus-outline-width, --focus-outline-offset）に置換し、全箇所で統一。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.6 prefers-reduced-motion",
+    "issue": "全要素の transition-duration を 1ms !important にするため、テーマ切替中やUI状態遷移で一瞬の色ブレ/チラつきが発生する可能性（特にリスト大量要素）。",
+    "suggestion": "reduceモードではテーマ切替アニメーション自体を無効化（.theme-switching を付与しない）、または body など親要素のみ最小限に適用して階層下への一括適用を避ける。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2.2 リンク色",
+    "issue": "visited状態の色定義がなく、長文テキスト中のリンク履歴が視認しにくい（UX的に再訪問の手掛かり欠如）。",
+    "suggestion": ":visited の色トークン（--accent-visited）を追加し、コントラストを保ちつつ未訪問と可視区別できるようにする。下線は維持。テーマごとに安全な差分色を割り当てる。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": "backdrop-filter はGPUコストが高く、iOS Safari でスクロール中のジャンクが起きやすい。『同時30要素以内』は方針として明記済みだが、実装ガードがない。",
+    "suggestion": "実装ガイドに『.glass-surface はレイアウトツリーで最大N個まで』『タイムラインの個別行は禁止。コンテナ1枚に限定』『パフォーマンス計測（FPS/Long Task）でしきい値超過時に data-glass を自動 off』等の運用ルールを追記。必要に応じて .glass-surface { contain: paint; } で無駄な再描画範囲を抑制。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  }
+]

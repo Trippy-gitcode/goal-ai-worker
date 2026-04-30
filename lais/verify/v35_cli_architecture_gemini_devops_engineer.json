@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "プロンプトで指定された品質ゲート（G1-G13）、デプロイフロー（C2）、canopy検証の発火保証に関する記述がドキュメント内に一切存在しない。これにより、Orchestratorがどのタイミングでどのゲートを自動実行・検証するのか設計・実装が不可能であり、CI/CDパイプラインとして成立しない。",
+    "suggestion": "Orchestratorの自動レビューフローにおいて、G1-G13の各ゲートのトリガー条件、C2デプロイフローのステップ間依存関係、およびcanopy検証の自動発火メカニズムを明記したセク��ョンを追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "検討中の 3 案 (案A, 案B)",
+    "issue": "Orchestratorがdaemonとして別プロセスで稼働する構成となっているが、CLI（ADV/ENG）とのプロセス間通信（IPC）や状態共有（ロック制御、イベント通知）の方式が不明。CI/CDの自動化基盤として各プロセスの完了を待たずにゲートが進行するリスクがある。",
+    "suggestion": "OrchestratorがCLIプロセス群の実行状態を監視し、品質ゲートを自動発火させるための通信プロトコル（例: ローカルソケット、ファイルベースのイベントキュー）と排他制御の仕様を定義すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "検討中の 3 案",
+    "issue": "複数プロセス（App, ADV, ENG, Orchestrator）が協調動作する案A/Bにおいて、APIキーや認証情報などのシークレットを各プロセスにどう安全に渡すか（環境変数管理）が定義されていない。セキュリティ検証の抜けやシークレット漏洩に繋がる。",
+    "suggestion": "各プロ��スが参照する環境変数のスコープを定義し、シークレットマネージャーやセキュアなローカルキーストアを介して認証情報をプロセスに注入する仕組み（.envの暗号化管理など）を明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "検討中の 3 案 (案A, 案B)",
+    "issue": "Orchestratorをdaemonとして稼働させる場合、macOS（launchd）とLinux（systemd）でデーモン化の仕組みが異なる。プラットフォーム互換性を考慮した起動・停止スクリプトの設計が示されておらず、自動化不可能な手順が発生する懸念がある。",
+    "suggestion": "Orchestratorのデーモン管理について、macOS/Linux両対応のラッパースクリプトを用意するか、Docker等のコンテナ技術を用いて実行環境を抽象化する方針を追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "前提条件（判断材料） 4. dev-system 設計原則",
+    "issue": "複数のAIプロセス（ADV, ENG）が同時にファイルシステム上のコードや仕様書を更新・参照する場合、Single Source of Truth（SSoT）の原則が崩れ、競合や不整合が発生する。CI/CDパイプラインの入力が不安定になり、品質ゲートの判定が信頼できなくなる。",
+    "suggestion": "ファイルアクセスに対する排他制御（ファイルロック）の導入、またはOrchestratorをファイル監視（inotify/fsevents）と連動させ、変更検知・ロック解放時にのみ品質ゲートを走らせるイベント駆動型アーキテクチャを明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "検討中の 3 案 (案C)",
+    "issue": "案C（全役兼任）を採用した場合、「Bug O事例（同一セッションself-critique限界）」により、AIが自らの生成したコードの欠陥を見逃す。これは品質ゲート（特にセキュリティやテスト検証）が機能せず、欠陥を含んだままデプロイが通過してしまう致命的な矛盾を引き起こす。",
+    "suggestion": "案Cは品質最優先の原則に反しCI/CDの品質ゲートを形骸化させるため棄却し、レビューと実装のセッションを物理的・論理的に分離する案Aまたは案Bをベースにパイプラインを構築すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "devops_engineer"
+  }
+]

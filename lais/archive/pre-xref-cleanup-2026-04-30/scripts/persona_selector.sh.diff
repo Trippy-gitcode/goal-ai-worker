@@ -1,0 +1,11 @@
+--- /Users/futoshi/Desktop/goal-ai-worker/lais/archive/pre-xref-cleanup-2026-04-30/scripts/persona_selector.sh	2026-04-30 21:22:52
++++ /Users/futoshi/Desktop/goal-ai-worker/scripts/persona_selector.sh	2026-04-30 21:25:21
+@@ -19,7 +19,7 @@
+ #     ts | response_id | rounds | personas_csv | severity_summary | trigger_tags
+ #
+ # 根拠:
+-#   - lais/verify/dev_system_v34_package.md §2.25.14.2 必須 3 / §2.25.14.3 追加候補
++#   - core_spec.md §11.2 必須 3 / §11.3 追加候補 (legacy v34 spec §2.25.14.2 / §2.25.14.3, archived 2026-04-30)
+ #   - docs/po-decisions.md PD-111
+ 
+ set -eu

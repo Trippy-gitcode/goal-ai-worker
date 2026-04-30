@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S10Grow.jsx（TodayRow/OverdueRow テキスト出力）",
+    "issue": "タスク名・メタ情報をそのまま JSX にバインドして表示しているが、現状は dangerouslySetInnerHTML/innerHTML を使用しておらず React/Preact の自動エスケープにより DOM XSS リスクは確認できない。",
+    "suggestion": "この方針を維持し、将来 HTML を挿入する要件が出た場合も dangerouslySetInnerHTML の利用は極力避ける。やむを得ず使用する際は DOMPurify などでサニタイズし、Trusted Types + 厳格 CSP を併用する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S10Grow.jsx（OverdueRow defer ボタン aria-label）",
+    "issue": "aria-label にテンプレート文字列で task.name を埋め込んでいるが、JSX により属性値はエスケープされるため Attribute XSS は現状発生しない。",
+    "suggestion": "今後サーバ受領データをそのまま属性へ埋め込む場合に備え、文字長制限・制御文字/双方向制御文字の正規化など軽量バリデーションを追加し、ロギングや分析基盤にも同様の正規化を適用する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "将来の /api 連携（onToggle/onDefer のサーバ反映時）",
+    "issue": "現状はローカル state 更新のみで CSRF 攻撃面は存在しないが、今後 state-changing API を呼ぶ際に CSRF 対策が必要。",
+    "suggestion": "クッキー運用時は SameSite=Lax/Strict とし、さらに CSRF トークン（ダブルサブミット/同期トークン）を実装。Fetch は same-origin/credentials モードとし、サーバ側で Origin/Referer 検証を行う。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "将来の認可レイヤ（/api/me など接続時）",
+    "issue": "現状 UI 単体のため認証/認可の抜けは確認できないが、サーバ接続時に認可不備（認証バイパス）やテナント隔離不備のリスクが生じうる。",
+    "suggestion": "すべての state-changing/読み取り API でサーバ側認証を必須化し、エンドポイントごとに権限チェックを実装。DB には行レベルセキュリティ（RLS）を有効化し、ユーザ/テナント境界をポリシで強制する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "将来の API 層（CORS）",
+    "issue": "このパッケージには fetch 等がなく CORS の緩さは確認できないが、API 実装時にワイルドカード許可などが入るとリスクとなる。",
+    "suggestion": "サーバ側の CORS を厳格化（許可オリジンは明示リスト、資格情報付き��必要最小限、プレフライト検証を行い不要メソッド/ヘッダは拒否）し、クライアントは same-origin を前提とする。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "パッケージ全体（grep レベル確認）",
+    "issue": "API キーやシークレット、アクセストークン等のハードコードは本パッケージからは検出されなかった。",
+    "suggestion": "継続的な漏えい防止として CI に秘密情報スキャン（git-secrets/truffleHog/gitleaks）を導入し、環境変数はビルド時埋め込みを回避（公開不可な値はクライアントへ配布しない設計）する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "デプロイ設定（CSP/ヘッダ）",
+    "issue": "フロントコードからは確認不能だが、CSP や frame-ancestors 等のセキュリティヘッダ未設定は DOM XSS/クリックジャッキングの受動的防御を欠く可能性がある。",
+    "suggestion": "本番環境で CSP（default-src 'self'; script-src 'self' 'nonce-...'; object-src 'none'; base-uri 'none'; frame-ancestors 'none' 等）を有効化し、Referrer-Policy, Permissions-Policy, X-Content-Type-Options, Strict-Transport-Security も設定。可能なら Trusted Types を併用。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ナビゲーション/遷移（BottomTabBar.jsx）",
+    "issue": "Open Redirect の実装は存在せずリスクは確認されないが、今後外部リンク/動的遷移先を扱う場合にオープンリダイレクト化の懸念がある。",
+    "suggestion": "外部遷移は固定許可リストで検証し、ユーザ入力やクエリ文字列をそのまま遷移先に用いない。window.location へ渡す前にスキーム・ホストを検証する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S10Grow.jsx（console.log ベースの未実装ハンドラ）",
+    "issue": "スコープ外機能の代替として console.log を使用しており、機密度の高い識別子がログに出る運用は好ましくない可能性がある。",
+    "suggestion": "本番ビルドではログを無効化/削除するか、デバッグフラグでガードする。ブラウザログに PII/機微情報を出力しない運用ルールを定める。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

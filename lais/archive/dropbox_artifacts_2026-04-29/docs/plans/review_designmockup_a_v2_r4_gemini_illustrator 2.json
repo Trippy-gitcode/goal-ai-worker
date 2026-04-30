@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "「+ タスクを追加」「+ ゴールを作成」などのインラインテキストリンク",
+    "issue": "テキスト色がアクセントカラー（#79C0FF）になっているが、下線（text-decoration: underline）が付与されていない。デザインシステム仕様書 §2.2 の「インラインテキストリンクは必ず underline を併用（WCAG 1.4.1 カラーのみ伝達禁止）」に違反している。",
+    "suggestion": "該当するインラインテキストリンクに text-decoration: underline を追加し、色に依存しないインタラクションの手掛かりを提供する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "12:00のタスク「ジムで筋トレ」の左ボーダー",
+    "issue": "左ボーダーの色に #E8A855 がハードコードされている。デザインシステム仕様書の --warning トークン既定値は #D29922 であり、テーマ定義外のカラーが使用されている。",
+    "suggestion": "ハードコードされた色値を削除し、デザインシステムのセマンティックカラートークン（var(--warning)）を参照するように修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "ALL",
+    "location": "「はじめる」「作成」などのプライマリボタン（#1A5FC8）",
+    "issue": "Night Skyテーマの深い夜空の背景（#0D1117）に対して、ボタンの青（#1A5FC8）の彩度が高く、デジタル的で強い緊張感を与えている。「実世界との地続き感」「静けさ」というブランドDNA（§1.2）の感情的トーンと矛盾している。",
+    "suggestion": "ボタンの背景色を、夜空のトーンに馴染むようにもう少し明度・彩度を抑えた色（例：#214B87など）に調整し、静かな安心感を持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow",
+    "location": "09:00の完了済みタスク「企画書を仕上げる」",
+    "issue": "完了したタスクのテキストに取り消し線が引かれ、色がグレー（#7890A8）に沈んでいる。「タスクを消去した」ようなネガティブな印象を与え、ゲーミフィケーションの「達成感・高揚感（§1.4）」を視覚的に阻害している。",
+    "suggestion": "取り消し線を廃止し、テキスト色は維持したまま、左ボーダーや背景の微かなハイライト（success-subtle）のみで「達成された状態」を肯定的に表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "COLOR",
+    "screen": "s20_talk",
+    "location": "AIメッセージバブルとユーザーメッセージバブル",
+    "issue": "AIの左ボーダー（rgba(121,192,255,0.25)）とユーザーの背景（rgba(121,192,255,0.08)）が同じアクセントカラー（#79C0FF系）に依存している。対話における「相手」と「自分」の感情的な境界が曖昧になり、視覚的なメリハリに欠ける。",
+    "suggestion": "AI側���装飾にセマンティックカラーの --info 系を使用するか、ユーザー側の背景色をわずかに異なるトーン（例：--bg-elevated ＋ 薄いボーダー）に変更し、発話者の区別を直感的にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s14_goal_detail",
+    "location": "画面上部の進捗表示（「60%」の巨大テキストとプログレスバー）",
+    "issue": "進捗の数字とバーが画面内で過剰な視覚的重みを持っており、データ志向のダッシュボードのような印象を与えている。Laisの「静かな情報設計（§1.2）」や自然体なトーンから逸脱している。",
+    "suggestion": "数字のフォントサイズを1〜2段階下げ、プログレスバーの太さを細くする（例：4px程度）ことで、圧迫感を減らし静かなトーンに合わせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン",
+    "issue": "ボタンの背景色（#1C2128）とテキスト色（#7A8593）のコントラストが低く、かつ周囲の入力フィールド（#161B22）と明度差がほとんどないため、主要なCTAとしての視線誘導（Visual Flow）が機能していない。",
+    "suggestion": "非アクティブ状態であっても、ボタンとしての形状が明確に伝わるよう、背景色を --bg-secondary など一段明るい色にするか、薄いボーダーを追加してアフォーダンスを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の「登録する」ボタン",
+    "issue": "チャットのタイムライン内で、青く塗りつぶされたプライマリボタン（#1A5FC8）が極端に目立ちすぎている。会話を読む視線の流れを強制的に奪い、静かな対話体験を阻害している。",
+    "suggestion": "インラインの提案カード内のボタンは、塗りつぶしではなくアウトライン（border: 1px solid var(--accent)）や、subtle背景（var(--accent-subtle)）に変更し、タイムラインに馴染ませる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダル背面のオーバーレイ（Scrim）",
+    "issue": "背景がすでに非常に暗い #0D1117 であ���ため、rgba(0,0,0,0.6) の黒オーバーレイを重ねると画面全体が純黒に近く沈み込み、Night Skyの「空間的な広がり」が失われて閉塞感が出ている。",
+    "suggestion": "ダークテーマ時の --scrim の不透明度を下げる（例：0.4）か、黒ではなく深いネイビー系の色味を持たせた半透明色を使用し、空間の奥行きを保つ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s12_task_add",
+    "location": "所要時間の選択チップ（非アクティブ状態）",
+    "issue": "非アクティブなチップのボーダー（#6E7681）とテキスト（#7A8593）が、背景（#161B22）に対して暗く沈んでおり、タップ可能な選択肢としての存在感が弱い。",
+    "suggestion": "チップのボーダー色を --border-strong より少し明るくするか、テキスト色を --text-secondary（#9BA7B4）に引き上げ、インタラクティブ要素としての視認性を向上させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  }
+]

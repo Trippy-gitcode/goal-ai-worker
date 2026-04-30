@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1/§19.4/§19.6 vs §6/§16.3/§18",
+    "issue": "UX仕様書のファイル名が§19ではux_v1.md、他セクションではux_redesign_v*.mdと表記が分裂しているため、依存チェーンや承認ルール参照先が不統一になる。",
+    "suggestion": "UX仕様書の正式名称を単一化する（例: ux_v*.md）。§6・§16.3・§18の参照を新名称に更新し、旧名称（ux_redesign_v*.md）は非推奨エイリアスとして移行ガイドを追記。§19.6の依存チェーン図も同名に統一。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー項目「dev-system準拠」のパス例がdocs/plans/dev_system_spec.mdとなっており、実体構成と不一致。さらにdev-systemのバージョンを明記する規定がないため、準拠バージョンが不明確。",
+    "suggestion": "表記を「dev-system準拠: dev_system_spec.md §19 (dev-system v{.dev-system.version})」のように修正し、準拠バージョンはアプリリポジトリの .dev-system.version と一致させる旨を明記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存: {上流ファイルのパス + バージョン}」が単一行・自由記述で、複数依存や機械検証に不向き。依存整合性の自動チェック（機械可検証）に乏しい。",
+    "suggestion": "依存宣言をYAMLフロントマター等の構造化形式に変更（例: depends_on: [{file: docs/project_v1.md, version: v1.3}, {file: docs/design_system.md, version: v1.0}]）。併せてspec_dep_lint.shを追加し、存在/バージョン/重複/未定義をcanopyで検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.6",
+    "issue": "禁止事項として循環参照が定義されているが、循環/不達を自動検出する仕組みが未定義。誤った依存更新時の暴走防止がドキュメント運用に依存している。",
+    "suggestion": "§19.6の参照ルールに基づき、ヘッダーdepends_onをDAGとして解析するspec_dep_lint.shを新設。循環/不明参照/バージョン欠落をFAILにし、canopyから実行。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.6",
+    "issue": "依存チェーン図でe2e_fullflow_test.mdがproject_v1.md配下にのみ示され、§18にあるdesign_system.md/ux_v*.md/design_spec_v*.mdからの影響が図示されていない。",
+    "suggestion": "e2e_fullflow_test.mdがux_v*.md/design_system.md/design_spec_v*.md/reference_v*.mdを参照する旨を§19.6の依存チェーンに明示し、§18の連鎖更新マップと整合を取る。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-106",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.5（間接影響: §13.6, sub_infrastructure §2.1/2.14）",
+    "issue": "AIレビュー成果物の保存場所が§13.6でdocs/plans/配下と定義されているが、init_app.shは同ディレクトリを作成せず、review_gate.shは該当ファイル非存在時に素通りするため、承認ゲートが事実上バイパスされ得る。",
+    "suggestion": "init_app.shでdocs/plans/を作成しREADMEを配置。review_gate.shは(1) CONFIRMED/REVIEWステータスの仕様書が存在する場合、対応するreview_*.jsonが最低1件あることを必須化、(2) デフォルト検索パスをdocs/とdocs/plans/の両方に対応、(3) 空集合時はFAILに変更。§19.5ヘッダーにreview_refs: [ids]を追加し相互参照を検証する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-107",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7 vs §13.4",
+    "issue": "Phase 0完了基準で「8ペルソナ×2モデル」とあるが���標準ペルソナは§13.4に5件のみ定義。追加3件の定義がなく要件が不整合。",
+    "suggestion": "要件を「最低5ペルソナ（§13.4）×2モデル」に修正、または追加3ペルソナ（名称・観点）を§13.4に正式追記。§19.7には「標準5＋拡張3（任意/必須）」のいずれかを明記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力がMarkdown表のみで、情報ソースのURL/証跡が必須ではなく、機械検証しづらい。Lais方針の未記入検出や件数基準の自動判定が困難。",
+    "suggestion": "出力表にsource_url列を追加し、可能なら主要指標のスクショパス列も追加。併せて各ベンチマーク末尾にYAMLまたはJSONブロック（meta: {direct_competitors: 5, indirect: 3, policies_filled: true, differentiation_points: N}）を付与。benchmark_lint.shで(1) 競合件数,(2) Lais方針の全行埋め,(3) 差別化≥3件,(4) URL形式妥当性をcanopyで検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.5",
+    "issue": "責務分離・承認ゲートの実効性確保の観点で、ヘッダーに作成責任者/承認者/承認日/承認方式（🟢/🟡/🔴）の明記がない。",
+    "suggestion": "ヘッダーにowner, approver, approved_at, approval_level（🟢/🟡/🔴）を追加。CONFIRMEDに遷移する際はapprover/approved_atが必須であることをreview_gate.shで検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md §3（AI活用設計）",
+    "issue": "AI誤判定時のリカバリ手順（サーキットブレーカー/モデル個別Kill Switch/ルーティング凍結条件/自動降格/手動オーバーライド）がテンプレートとして明示されていない。",
+    "suggestion": "reference_v1.md §3に「フェイルセーフ設計」を追加し、(a) routing.enabled/モデル別disableフラグ,(b) エラー閾値/SLO逸脱時の自動切替,(c) 手動切替手順と承認要件,(d) 影響計測/復帰条件,(e) incident_runbook連携を雛形として必須化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-111",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "依存宣言におけるバージョン指定がタグ/セマンティックバージョンのみに留まり、厳密な再現性（コミットハッシュ固定）が��保されにくい。",
+    "suggestion": "ヘッダーdepends_onの各要素にoptionalでcommit（またはtag）フィールドを追加（例: {file, version, commit}）。spec_dep_lint.shでtag→commit解決またはcommit存在検証をWARN/推奨にする。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

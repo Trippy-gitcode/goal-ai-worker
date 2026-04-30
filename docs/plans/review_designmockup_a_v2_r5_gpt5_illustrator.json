@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」リンク",
+    "issue": "インラインテキストリンクが色（アクセントブルー）だけで可視化されており、下線がない。WCAG 1.4.1（色のみに依存しない）に反する恐れ",
+    "suggestion": "インラインリンクには必ず text-decoration: underline を付与し、hover/active では下線の濃度を変える。CSS例: a.inline-link { color: var(--accent); text-decoration: underline; }",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Todayリスト「12:00 ジムで筋トレ」カードの左ボーダー（黄系）",
+    "issue": "注意・期限接近で使うべきwarning系（アンバー）に近い色が通常タスクの装飾として使用され、意味的に緊張感を連想させる。セマンティックカラーの役割と混同されやすい",
+    "suggestion": "通常タス���のアクセントは中立トーン（--border-strong）またはゴール識別は小さなドットに限定。warning色（--warning）は「期限接近」時のみ使用し、併せて「残りN分」などのテキスト/アイコンを追加して非色依存化",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Todayリストの未完了タスク（例: 「英語のリスニング」「読書メモまとめ」）のタスク名テキスト",
+    "issue": "未完了タスク名が text-secondary（灰色）で表示され、完了や無効と誤認しやすい。緊張ではなく“待機”状態なのに活力が下がって見える",
+    "suggestion": "未完了の主テキストは --text-primary、補助情報（所要時間/日付）は --text-secondary。完了済みのみ打ち消し線+--text-hint/secondaryに落とす",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "メインCTA「はじめる」ボタン",
+    "issue": "ボタン色(#1A5FC8)の彩度が高く、Night Skyの“月明かりの静けさ”よりも“プロダクト然としたテック感”が前に出る",
+    "suggestion": "初回ラン��ィングのみ彩度をわずかに落としたトーン（例: #1557B3）や、hover/pressedで--accent方向へ寄せる。背景にごく薄い月光のラディアル（--accent-subtle 8〜10%）を敷き、静けさを強化",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s02_onboarding",
+    "location": "アバター選択「タイプB」ハイライトの外周グロー",
+    "issue": "選択リングのグロー（外側の淡い発光）がやや派手に見え、Night Skyの落ち着きから少し外れる",
+    "suggestion": "外周グローを削減し、2pxの--accentボーダー+内側に--accent-subtle(14〜18%)の薄い塗りで“しっとり”と選択状態を示す",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "メッセージリスト（AIバブル＝左、ユーザーバブル＝右）",
+    "issue": "AIメッセージの識別が左ボーダーの色味にほぼ依存し、暗所/低輝度ではスキャン性がやや低い",
+    "suggestion": "AI側のみ背景を--bg-surfaceに1段明るく、左上に小さ��AIアイコン/イニシャルチップを添える。ユーザー側は現状のブルーティント維持で十分差別化可能",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s12_task_add",
+    "location": "タスク名入力フィールドのフォーカススタイル（濃い--accentボーダー+3pxアウトライン）",
+    "issue": "フォーカス時の発色が強く、モーダル全体の静けさを崩して緊張度が上がる",
+    "suggestion": "フォーカス時は border:1px → 2pxに増厚+背景を--accent-subtle(14〜18%)で薄くトーンアップし、外側3pxアウトラインは撤去。テキストキャレットのみ--accentで十分可視",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "下部アクション列（編集／削除／AI連携2ボタン）",
+    "issue": "削除（赤）の視覚的プライオリティが最も高く、推奨アクション（振り返り/次につなげる）が埋もれる。達成後のポジティブ体験に対して情緒が逆行",
+    "suggestion": "削除をグレーのアウトラインに格下げ（ホバー/押下時のみ赤へ）。振り返り/次へを—片���は--button-primary、もう片方は--accent-subtleのピルにして心理的誘導を最適化",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "タスクリストのチェックサークル（青リング=未完了/進行中、灰リング=未着手）",
+    "issue": "リングの状態差が色味頼りで、形状/記号差が乏しい。色覚多様性や低視力環境で区別しにくい可能性",
+    "suggestion": "進行中は内点（filled dot）や太さ変更、完了はチェック、未着手は細リングなど“形での差”を追加。テキスト側も小さなステータスラベル併記で非色依存化",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "ヒーロー領域のEXPバー（名前・称号直下）",
+    "issue": "バーの彩度が高く、プロフィール名より先に視線を引きやすい。自己紹介セクションとしては主従が逆転気味",
+    "suggestion": "MEではEXPバー色を--accent-subtle主体（バー充填を#79C0FF→#79C0FFの不透明度70〜80%へ）+高さを1px下げ、名前/称号を主役に",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "ALL",
+    "location": "アクセントの同時出現箇所（ヒーローEXP/リンク/タブPill/カード左ボーダー/CTA）",
+    "issue": "Night Sky内でアクセントブルーの露出がやや多く、画面によっては“青の面”が広がり単調さと軽い緊張感が出る",
+    "suggestion": "アクセント密度を画面単位で制御。優先度の低い要素は--accent-subtle（背景/ボーダー）へ、テキストリンク以外は--text-secondaryに置換。CTAと1〜2の強調にアクセントを集中させ、感情の起伏を設計",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

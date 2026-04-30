@@ -1,0 +1,70 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "callGPT5 関数 および JSON_INSTRUCTION",
+    "issue": "プロンプトで「必ずJSON配列のみを出力してください。最初の文字は [」と指示している一方で、GPT-5呼び出し時に `response_format: { type: 'json_object' }` を指定しています。OpenAIの `json_object` はルートがオブジェクトであることを強制するため、APIが400エラーを返すか、モデルが指示に反してオブジェクトでラップした出力を返し、パース処理が破綻します。",
+    "suggestion": "プロンプトの指示を「JSONオブジェクト（例: `{\"items\": [...]}`）を出力してください」に変更し、`extractJson` で配列を取り出すようにするか、`callGPT5` から `response_format` の指定を削除してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "extractJson 関数",
+    "issue": "JSON抽出の正規表現 `/```(?:json)?\\s*(\\[[\\s\\S]*\\])\\s*```/` が貪欲マッチ（`[\\s\\S]*`）になっています。LLMが解説文を含めて複数のコードブロックを出力した場合、最初の ````json` から最後の ````` まで全てキャプチャされ、間に含まれるテキストが混入して確実に `JSON.parse` が失敗します。",
+    "suggestion": "正規表現を非貪欲マッチ `[\\s\\S]*?` に修正してください。例: `/```(?:json)?\\s*(\\[[\\s\\S]*?\\])\\s*```/`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "resolveFiles 関数 および readSpecs 関数",
+    "issue": "`--input` でディレクトリパス（例: `docs/plans`）が指定された場合、`resolveFiles` は `fs.existsSync` のみで判定して配列に追加します。その後 `readSpecs` で `fs.readFileSync` が呼ばれると、対象がディレクトリであるため `EISDIR` エラーが発生し、スクリプトがクラッシュします。",
+    "suggestion": "`resolveFiles` 内でファイルパスを配列に追加する前に、`fs.statSync(trimmed).isFile()` を呼び出してファイルであることを確認するように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "loadEnv 関数",
+    "issue": "`.dev.vars` のパース処理において、値がクォートで囲まれている場合（例: `OPENAI_API_KEY=\"sk-...\"`）、クォートがそのまま値として読み込まれます。これによりAPIリクエスト時に認証エラーが確実に発生します。",
+    "suggestion": "値のパース時に前後のクォートを除去する処理を追加してください。例: `v.join('=').trim().replace(/^[\"']|[\"']$/g, '')`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "resolveFiles 関数",
+    "issue": "globパターンの解決で `base.replace(/\\*/g, '.*')` を使用して正規表現を作成していますが、`.`（ドット）がエスケープされていません。そのため、`sub_*.md` というパターンが `sub_A_md` のような意図しないファイル名にもマッチしてしまいます。",
+    "suggestion": "`*` を置換する前に `.` をエスケープしてください。例: `base.replace(/\\./g, '\\\\.').replace(/\\*/g, '.*')`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "main 関数内の集計ループ",
+    "issue": "`results.push({ id: '_metadata', ... })` でメタデータを配列に追加した直後に `for (const item of results)` で集計を行っているため、`totalItems` が1件多くカウントされ、`sevs['?']` としてログに出力されるなど、集計結果にズレが生じます。",
+    "suggestion": "集計ループを回した後に `_metadata` を `push` するか、ループ内で `if (item.id === '_metadata') continue;` を追加して集計から除外してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0211,
+    "input_tokens": 12509,
+    "output_tokens": 1088,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

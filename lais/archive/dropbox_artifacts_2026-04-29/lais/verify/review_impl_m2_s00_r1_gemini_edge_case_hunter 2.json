@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "design_spec §4.1 S00-3, lais/src/components/screens/S00Splash.css",
+    "issue": "CTAボタンの位置が仕様と明確に矛盾しています。仕様では『S00-3 CTA「はじめる」 | 画面下端から上 140px』と規定されていますが、実測値およびCSSの実装(`.s00-cta { bottom: 140px; }`)では、CTAスタック全体の下端、つまり「ログイン」ボタン(S00-4)の下辺が画面下端から140pxの位置に配置されています。",
+    "suggestion": "仕様が正しい場合、CSSを修正し「はじめる」ボタンの下辺が画面下端から140pxの位置に来るように調整してください。例えば、`.s00-cta` の `bottom` を `calc(140px + 52px + 12px)` のように変更します。もし現状の実装が意図したデザインである場合は、仕様書のS00-3の記述を『CTAスタックの下端が画面下端から140px上に配置される』のように修正し、矛盾を解消してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "画面の高さが低いviewport（例: PCでのウィンドウリサイズ、スマートフォンの横向き表示）でレイアウトが崩壊します。中央のロゴ・タグライン要素と、画面下部に絶対配置されたCTAスタックが重なり、操作不能になる可能性があります。基準の375x812以外のviewportサイズが考慮されていません。",
+    "suggestion": "メディアクエリを使用して、特定の高さ（例: `@media (max-height: 550px)`）以下の場合のスタイルを定義してください。対策として、ロゴの垂直位置のオフセット(`-60px`)を減らす、CTAスタックの`bottom`値を調整する、あるいは`position: absolute`に依存しない、より堅牢なFlexboxレイアウト（例: `justify-content: space-around`）への変更を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "CTAボタンのテキストが将来的に長くなった場合（例: 多言語対応）、テキストが改行されてボタンの固定高`52px`を超え、レイアウトが崩れる可能性があります。現状の実装では、ボタン内のテキストの折り返しが制御されていません。",
+    "suggestion": "ボタン内のテキストが意図せず改行されることを防ぐため、`.s00-cta-primary, .s00-cta-secondary` に `white-space: nowrap;` を追加することを推奨します。あるいは、複数行を許容するデザインの場合は、`height` を `min-height` に変更し、`padding` で上下の余白を確保する設計に切り替えることを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "スプラッシュ画面はスクロールが意図されていませんが、コンテナに `overflow: hidden` の指定がありません。ブラウザのUI（例: モバイルブラウザのアドレスバーの表示/非表示）や、ブラウザズームなどによってコンテンツ全体の高さがviewportの高さを超えた場合に、意図しないスクロールバーが表示される可能性があります。",
+    "suggestion": "画面がスクロール不可能であることを保証するため、ルートコンテナである `.s00` に `height: 100vh;` (またはモダンブラウザ対応であれば `100dvh;`) と `overflow: hidden;` を設定することを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "design_spec §4.1, lais/src/components/screens/S00Splash.css",
+    "issue": "仕様ではCTAタップ時のインタラクションに『ease-out』のイージングが指定されていますが、実装ではタップフィードバックのアニメーションに `var(--spring-default)` (`cubic-bezier(0.175, 0.885, 0.32, 1.1)`) が使用されています。これはバウンス効果を伴うイージングであり、`ease-out`とは挙動が異なります。",
+    "suggestion": "仕様の意図を確認してください。もし`ease-out`が厳密な要件であれば、`transition-timing-function`を`ease-out`に変更してください。現在のスプリング効果が意図したものであれば、仕様書の記述を実装に合わせて更新してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "design_spec §4.1 S00-1",
+    "issue": "仕様書の『ロゴ `Lais` | 画面中央から上に 60px』という記述に曖昧さがあります。実測値とCSSの実装を分析すると、この指定はロゴ単体の中心ではなく、「ロゴとステートメントをグループ化した要素(.s00-center)の中心」を指していると解釈できます。この曖昧さは、将来のメンテナンス時に誤解を招く可能性があります。",
+    "suggestion": "仕様書の記述をより明確にすることを推奨します。例えば、『ロゴとステートメントをグループ化した要素の中心が、画面の垂直中央から60px上に配置される』のように、基準となる要素を正確に記述してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/App.jsx",
+    "issue": "ルート要素である`<div class=\"app-root\">`に`aria-label`が使用されています。`role`属性を持たない汎用的な`div`要素に`aria-label`を指定することは、ARIAの仕様として推奨されておらず、スクリーンリーダーによっては無視される可能性があります。",
+    "suggestion": "アプリケーション全体を識別させる目的であれば、HTMLの`<head>`内で`<title>Lais</title>`を設���するのが標準的で堅牢な方法です。`<div class=\"app-root\">`から`aria-label=\"Lais\"`を削除することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  }
+]

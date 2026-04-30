@@ -1,0 +1,282 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§13.2 プラン管理（Stripe Checkout遷移）",
+    "issue": "Checkout中断/失敗時の戻りパスとUIが未定義。外部決済画面でキャンセルや失敗が起きた場合の画面遷移・トースト・状態復元が記載されていない。",
+    "suggestion": "Stripeからのreturn_url/cancel_urlそれぞれに遷移先とUIを定義: 成功→S-38に復帰しトースト「プランを更新しました」/ 失敗・キャンセル→S-38に戻し「手続きがキャンセルされました」トースト。決済中はS-38にローディング状態を表示して二重操作を防止。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§2.3 Today並び替え + project §3.2（時刻順ソート）",
+    "issue": "Todayの並び順が「開始時刻で自動ソート」と「ロングプレスで手動並び替え（手動順は保存）」の2ルールで競合。どちらが優先か、時刻変更時の再ソート有無が不明。",
+    "suggestion": "優先順位を明記: 例) デフォルトは時刻順。手動でドラッグしたタスクは「手動固定」フラグを持ち、未��刻タスクのみ手動並び替え可。手動固定はメニューから解除可。開始時刻を設定/変更した瞬間に手動固定を解除して時刻順に回帰、など一意に定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.2/§6.5（ヒーロー縮小とPull-to-refresh）",
+    "issue": "ヒーロー領域の縮小トランジションとPull-to-refreshのジェスチャー優先順位が未定義。先頭付近での下方向スワイプが競合する可能性。",
+    "suggestion": "発火条件を厳密化: scrollY==0 かつヒーロー完全展開時のみPull-to-refresh許可。縮小中/縮小後はリストスクロールにハンドオーバー。しきい値（例: 60px）とインジケータの出現条件を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§1.1 画面一覧/ボトムタブ全般",
+    "issue": "ボトムタブのアイコンとラベル仕様が未定義。HIG/Materialではアイコン＋ラベル常時表示が推奨。選択状態の視覚（色/太さ）も未定義。",
+    "suggestion": "各タブに適切なSF Symbols/Material Iconsを割当（例: GROW=target, TALK=chat, ME=person）。選択時は��イコン/ラベルをアクセント色、非選択はセカンダリ色。タップ領域は高さ56px以上＋safe-area対応を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§1.2 遷移マトリクス（タブ切替）",
+    "issue": "タブ間の状態保存（スクロール位置/入力途中状態）が明示されていない。プラットフォーム標準ではタブ切替で前回状態を保持するのが望ましい。",
+    "suggestion": "各タブごとに独立ナビゲーションスタック/スクロール位置を保持。タブ再表示時は前回位置に復元。フォーム入力中はunmountしないか、一時保存（IndexedDB/メモリ）で復元を保証。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.1 TALKヘッダー",
+    "issue": "ヘッダーに「☰（ドロワー）」「🕐（履歴）」の2経路が併存しており役割が重複。操作が分散しやすい。",
+    "suggestion": "履歴アクセスを1経路に統一。例: ☰を廃止して「🕐 履歴」ボタンでドロワーを開く、または☰のみ残して🕐は削除。ラベル付きアイコンで可用性を向上。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§4.4 QRスキャン(3)",
+    "issue": "「振動フィードバック（Vibration API）」はiOS Safari/PWA非対応。iOSでハプティクスが発火しない可能性が高い。",
+    "suggestion": "プラットフォーム分岐を明記: Androidのみ短振動(10–20ms)。iOSは視覚フィードバック（スキャン枠の色/アニメーション）とサウンド（ユーザー操作に付随するクリック音）を代替。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "全体（タスク完了/レベルアップ/ゴール達成）",
+    "issue": "主要操作（タスク完了/ゴール達成など）のハプティクス方針が未定義。モバイルでは適度なハプティクスが操作確認に有効。",
+    "suggestion": "プラットフォーム別に定義: Android=Vibration API（軽微: 10–15ms/成功: 30–40ms）、iOS=PWAでは不可のため視覚強化のみ。将来ネイティブラッパー化時はUIImpactFeedbackGenerator(impact/light/medium)を適用する設計注記を追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§10 アクセシビリティ",
+    "issue": "動的文字サイズ（OSのフォントスケール/アクセシビリティ文字サイズ）対応の記載がない。",
+    "suggestion": "相対単位(rem)とコンテナクエリでレイアウト崩れを回避。iOS/AndroidのLarge Textに相当する1.3x/1.6xまで検証し、折返し・省略ルールを定義。タブ/ボタンは拡大時も最低44pxを維持。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "全画面（ボトムタブ/スナックバー/モーダル）",
+    "issue": "ノッチ/ホームインジケーター等のsafe-area考慮が明示されていない。スナックバーやボトムタブが重なる恐れ。",
+    "suggestion": "CSS env(safe-area-inset-*)を採用し、ボトムタブ/スナックバー/モーダルのpaddingを調整。最小マージン16px＋safe-areaを加算。スクロール末尾のコンテンツもsafe-area分の余白を持たせる。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§6.2 トースト + §2.3 Undoスナックバー",
+    "issue": "Undoスナックバーと通常トーストの同時出現時のZ-index/配置衝突が未定義。重なりや誤タップの恐れ。",
+    "suggestion": "優先順位を定義: Undoスナックバー > トースト。Undoはボトムタブ上、トーストはその上/下のいずれかで衝突しないレイヤーを固定��最大同時表示数と退避アニメーションを明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§10.4 スクリーンリーダー",
+    "issue": "Undoスナックバー/レベルアップ/EXP獲得の読み上げ粒度が未定義。通知が多重になる/伝わらない恐れ。",
+    "suggestion": "Undoスナックバー: role=\"status\" aria-live=\"polite\"、フォーカス移動なし。レベルアップ: aria-live=\"assertive\"で簡潔に（例「レベル12に上がりました」）。EXP獲得はまとめてバッチ化して読み上げ頻度を制御。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.4 ゴール詳細",
+    "issue": "project §4.2の「ゴール達成ボーナスは作成から7日後」ガードのUI状態が未定義（ボタンの無効化/残日表示/完了待ちの見え方）。",
+    "suggestion": "S-14に状態を追加: 進捗100%未満=通常。進捗100%到達かつ作成7日未満=「完了待ち」バッジ＋「あとN日」テキスト、完了ボタンはdisabled。7日経過後に自動完了/ボーナス付与→演出発火。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§13.3 通知設定",
+    "issue": "通知許可リクエストが設定画面トグル依存のみ。Just-in-time許可（行為に紐づく許可依頼）が未定義。",
+    "suggestion": "初のタスクリマインダー設定時/初の応援受信時に、軽量の事前説明→OS許可プロンプトのJIT表示を追加。拒否時の代替（アプリ内バッジのみ）も併記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§6.4 スケルトン/§2.2 ヒーロー領域",
+    "issue": "ヒーロー領域（アバター/EXPバー）のローディング時スケルトンが未定義。初回起動でチラつく可能性。",
+    "suggestion": "アバター円形プレースホルダー＋レベル/バーのスケルトン（shimmer）を定義。キャッシュ完了でクロスフェード。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§1.3 遷移アニメーション",
+    "issue": "タブ切替アニメーションが単一（クロスフェード200ms）。AndroidではMaterialのFade through推奨、iOSは最小遷移が標準的。",
+    "suggestion": "プラットフォーム分岐: Android=Material Fade through（~300ms）、iOS=最小/クロスフェード短め（~150–200ms）。動作統一より各OSの規範に合わせる。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.3 DISCOVER（横スクロールチップ）× §4.1/§7.3 サブタブ横スワイプ",
+    "issue": "コンテンツ内の横スクロール（チップ）とサブタブ横スワイプが競合し、誤切替が起きうる。",
+    "suggestion": "サブタブスワイプ判定はエッジスワイプ（左右端24px開始）に限定し、中央では子要素（チップリスト）が優先。パンの傾き比率（±30°以内）で誤判定を抑制。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§1.4 戻りナビ（ルート時）",
+    "issue": "Android物理戻るでルート（タブ根）にいる時の挙動（アプリ終了/確認ダイアログ）が未定義。",
+    "suggestion": "ルートでの戻るはアプリ終了（前ページがなければ閉じる）。終了確認ダイアログは不要（Material推奨に合わせる）。必要なら「もう一度戻るで終了」トーストの軽量ガードを検討。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.2 メッセージ送信フロー",
+    "issue": "AIストリーミングの「生成停止/中断」操作が未定義。長文応答時の制御ができない。",
+    "suggestion": "ストリーミング中は送信ボタンを「停止」に変化。タップでストリーム中断→バブル確定。中断後は「続き要約」などのクイックアクションを提案。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.2 入力バー",
+    "issue": "ハードウェア/外付けキーボード利用時のReturnキー動作が未最適化。送信をキーボードから行いたい要望がある。",
+    "suggestion": "設定で「Enterで送信」トグルを用意（デフォルトOFF）。ON時はEnter=送信、Shift+Enter=改行に切替。モバイルは従来通り。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§15 通知タップ時の遷移",
+    "issue": "通知をOFFにしている場合の代替経路（アプリ内リマインドやバッジ導線）は記載あるが、初回リマインダー設定時のローカルアラート代替は未定義（PWAで��OSアラーム不可）。",
+    "suggestion": "通知OFF時はGROW上部に「本日の予定」カードを常設し、直近N件を強調。リマインド代替としてアプリ内バナー/バッジを時間帯で点灯。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§7.4 データ上限（UX反映）",
+    "issue": "project §7.4のデータ上限（タスク10,000/ゴール100/友達500）到達時のUXが未定義。",
+    "suggestion": "作成時にインラインエラー（上限到達メッセージ）＋代替提案（古いデータのアーカイブ/削除導線）。達する前に「残りN」バナーで事前警告。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.6 演出キュー",
+    "issue": "Undo可能時間内にタスク→ゴール達成→レベルアップが連鎖しUndoした場合の演出巻き戻し順序が未定義。",
+    "suggestion": "Undo時の巻き戻し優先度を定義: レベルアップ表示を解除→ゴール達成演出取り消し→タスク完了演出巻き戻し→EXPバー逆再生。サーバー確定前（30秒）に限り全て可逆。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.5/§10.5（Reduced Motion時）",
+    "issue": "Reduced Motion時もEXPバー伸長アニメを維持としているが、感受性の高い利用者には負担の可能性。",
+    "suggestion": "Reduced Motion時はEXPバーを瞬時更新＋「+10 EXP」テキストのみ表示に切替。設定で個別無効化トグルを提供しても良い。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.5 チャット履歴ドロワー",
+    "issue": "開く操作は☰のみだが、閉じ操作で「左スワイプ」「backdropタップ」の他にAndroid戻るボタン時の挙動が明示されていない。",
+    "suggestion": "ドロワー表示中のpopstate/Android戻るはドロワーを閉じる（pushState済み）。閉じられない場合はバグ扱いとする旨を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.3 Overdue/延期",
+    "issue": "色分け中心の可視化は色覚多様性で識別困難になりうる。",
+    "suggestion": "Overdueは赤系に加えアイコン（!）と明確なラベル「期限切れ」を併記。延期操作には時計/矢印アイコ���を付与し意味を強化。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-027",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "project §4.4 vs §4.5（Lv1→2必要EXP）",
+    "issue": "レベル計算式と解説文が矛盾（100EXP vs 1,000EXP）。ux_v1.md側で注記されているが未解消。",
+    "suggestion": "project側を正値（式/テーブル）に統一し、初日Lv2到達の設計意図と整合を取る。UX側の注記は改訂後に削除。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-028",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§6.1 ハーフモーダル（キーボード時）",
+    "issue": "iOS PWAのvisualViewport対策は記載済みだが、フォーム送信時の自動スクロール/フォーカス戻しの詳細が未定義。",
+    "suggestion": "送信成功時は最上部にスクロールしてモーダルを閉じ、失敗時はエラーのあるフィールドへscrollIntoView({block:'center'})＋aria-describedbyでエラー紐付け。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

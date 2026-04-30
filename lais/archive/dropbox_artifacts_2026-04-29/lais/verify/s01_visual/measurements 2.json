@@ -1,0 +1,287 @@
+{
+  "m1": {
+    "url": "http://localhost:5175/auth?mode=signup",
+    "logo": {
+      "rect": {
+        "x": 24,
+        "y": 60,
+        "w": 327,
+        "h": 28
+      },
+      "color": "rgb(121, 192, 255)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(121, 192, 255)",
+      "fontSize": "28px",
+      "fontWeight": "600",
+      "visible": true,
+      "ariaDisabled": null
+    },
+    "title": {
+      "rect": {
+        "x": 24,
+        "y": 120,
+        "w": 327,
+        "h": 27
+      },
+      "color": "rgb(230, 237, 243)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(230, 237, 243)",
+      "fontSize": "20px",
+      "fontWeight": "400",
+      "visible": true,
+      "ariaDisabled": null
+    },
+    "emailInput": {
+      "rect": {
+        "x": 24,
+        "y": 198,
+        "w": 327,
+        "h": 48
+      },
+      "color": "rgb(230, 237, 243)",
+      "bg": "rgb(22, 27, 34)",
+      "borderColor": "rgb(110, 118, 129)",
+      "fontSize": "14px",
+      "fontWeight": "400",
+      "visible": true,
+      "disabled": false,
+      "ariaDisabled": null
+    },
+    "passwordInput": {
+      "rect": {
+        "x": 24,
+        "y": 289,
+        "w": 327,
+        "h": 48
+      },
+      "color": "rgb(230, 237, 243)",
+      "bg": "rgb(22, 27, 34)",
+      "borderColor": "rgb(110, 118, 129)",
+      "fontSize": "14px",
+      "fontWeight": "400",
+      "visible": true,
+      "disabled": false,
+      "ariaDisabled": null
+    },
+    "checkbox": {
+      "rect": {
+        "x": 24,
+        "y": 386,
+        "w": 20,
+        "h": 20
+      },
+      "color": "rgb(230, 237, 243)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(110, 118, 129)",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "visible": true,
+      "disabled": false,
+      "ariaDisabled": null
+    },
+    "cta": {
+      "rect": {
+        "x": 24,
+        "y": 499.390625,
+        "w": 327,
+        "h": 52
+      },
+      "color": "rgb(110, 118, 129)",
+      "bg": "rgb(31, 41, 55)",
+      "borderColor": "rgb(42, 52, 65)",
+      "fontSize": "16px",
+      "fontWeight": "600",
+      "visible": true,
+      "disabled": false,
+      "ariaDisabled": "true"
+    },
+    "footer": {
+      "rect": {
+        "x": 116.1875,
+        "y": 567.390625,
+        "w": 142.609375,
+        "h": 44
+      },
+      "color": "rgb(121, 192, 255)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(121, 192, 255)",
+      "fontSize": "14px",
+      "fontWeight": "400",
+      "visible": true,
+      "ariaDisabled": "false"
+    }
+  },
+  "m3": {
+    "emailError": {
+      "rect": {
+        "x": 24,
+        "y": 250,
+        "w": 327,
+        "h": 11
+      },
+      "color": "rgb(248, 81, 73)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(248, 81, 73)",
+      "fontSize": "11px",
+      "fontWeight": "400",
+      "visible": true,
+      "ariaDisabled": null
+    },
+    "emailInput": {
+      "rect": {
+        "x": 24,
+        "y": 198,
+        "w": 327,
+        "h": 48
+      },
+      "color": "rgb(230, 237, 243)",
+      "bg": "rgb(22, 27, 34)",
+      "borderColor": "rgb(248, 81, 73)",
+      "fontSize": "14px",
+      "fontWeight": "400",
+      "visible": true,
+      "disabled": false,
+      "ariaDisabled": null
+    }
+  },
+  "m4": {
+    "cta": {
+      "rect": {
+        "x": 24,
+        "y": 499.390625,
+        "w": 327,
+        "h": 52
+      },
+      "color": "rgb(110, 118, 129)",
+      "bg": "rgb(31, 41, 55)",
+      "borderColor": "rgb(42, 52, 65)",
+      "fontSize": "16px",
+      "fontWeight": "600",
+      "visible": true,
+      "disabled": false,
+      "ariaDisabled": "true"
+    }
+  },
+  "m5": {
+    "cta": {
+      "rect": {
+        "x": 24,
+        "y": 499.390625,
+        "w": 327,
+        "h": 52
+      },
+      "color": "rgb(255, 255, 255)",
+      "bg": "rgb(26, 95, 200)",
+      "borderColor": "rgb(255, 255, 255)",
+      "fontSize": "16px",
+      "fontWeight": "600",
+      "visible": true,
+      "disabled": false,
+      "ariaDisabled": "false"
+    },
+    "checkbox": {
+      "rect": {
+        "x": 24,
+        "y": 386,
+        "w": 20,
+        "h": 20
+      },
+      "color": "rgb(230, 237, 243)",
+      "bg": "rgb(121, 192, 255)",
+      "borderColor": "rgb(121, 192, 255)",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "visible": true,
+      "disabled": false,
+      "ariaDisabled": null
+    }
+  },
+  "m6": {
+    "url": "http://localhost:5175/auth?mode=login",
+    "title": {
+      "rect": {
+        "x": 24,
+        "y": 120,
+        "w": 327,
+        "h": 27
+      },
+      "color": "rgb(230, 237, 243)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(230, 237, 243)",
+      "fontSize": "20px",
+      "fontWeight": "400",
+      "visible": true,
+      "ariaDisabled": null
+    },
+    "checkboxVisible": false,
+    "cta": {
+      "rect": {
+        "x": 24,
+        "y": 369,
+        "w": 327,
+        "h": 52
+      },
+      "color": "rgb(255, 255, 255)",
+      "bg": "rgb(26, 95, 200)",
+      "borderColor": "rgb(255, 255, 255)",
+      "fontSize": "16px",
+      "fontWeight": "600",
+      "visible": true,
+      "disabled": false,
+      "ariaDisabled": "false"
+    },
+    "footer": {
+      "rect": {
+        "x": 115.5,
+        "y": 437,
+        "w": 144,
+        "h": 44
+      },
+      "color": "rgb(121, 192, 255)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(121, 192, 255)",
+      "fontSize": "14px",
+      "fontWeight": "400",
+      "visible": true,
+      "ariaDisabled": "false"
+    }
+  },
+  "m7": {
+    "cta": {
+      "rect": {
+        "x": 24,
+        "y": 369,
+        "w": 327,
+        "h": 52
+      },
+      "color": "rgb(255, 255, 255)",
+      "bg": "rgb(26, 95, 200)",
+      "borderColor": "rgb(255, 255, 255)",
+      "fontSize": "16px",
+      "fontWeight": "600",
+      "visible": true,
+      "disabled": false,
+      "ariaDisabled": "false"
+    }
+  },
+  "m8": {
+    "url": "http://localhost:5175/auth?mode=signup",
+    "title": {
+      "rect": {
+        "x": 24,
+        "y": 120,
+        "w": 327,
+        "h": 27
+      },
+      "color": "rgb(230, 237, 243)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(230, 237, 243)",
+      "fontSize": "20px",
+      "fontWeight": "400",
+      "visible": true,
+      "ariaDisabled": null
+    },
+    "checkboxVisible": true
+  },
+  "consoleErrors": []
+}

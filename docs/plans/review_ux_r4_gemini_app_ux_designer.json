@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §1.2, §2.3",
+    "issue": "ハーフモーダル（S-11 タスク詳細）からフルスクリーン（S-14 ゴール詳細）への遷移時、元のハーフモーダルの状態管理が未定義。戻りナビゲーション時にS-11が残っているのか閉じているのか不明で、実装時にスタックの不整合や表示バグが発生する。",
+    "suggestion": "S-11からS-14へ遷移する際、「遷移開始と同時にS-11のハーフモーダルを閉じる（dismiss）」仕様を明記する。S-14から戻った際はS-10（GROW画面）に戻るのがモバイルUXとして自然。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.4, project_v1.md §3.2.6",
+    "issue": "ゴール達成のトリガーに矛盾がある。project_v1.mdでは「全タスク完了→ゴール完了演出」と自動達成される仕様だが、ux_v1.mdでは「全タスク完了済みの場合は[ゴール完了にする]ボタンが自動表示」とあり、手動アクションが必要かのように読める。",
+    "suggestion": "全タスク完了時は即座に自動でゴール達成演出を発火させる仕様に統一し、[ゴール完了にする]ボタンは「紐づくタスクが0件のゴール」のみに表示するよう記述を修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §13.3, project_v1.md §5.3",
+    "issue": "iOSではPWAをホーム画面に追加（スタンドアロンモード）しないとWeb Push APIが機能しない。通知設定（S-39）でトグルをONにした際、iOS Safari（ブラウザモード）ではOSの通知許可プロンプトが出ず、ユーザーが設定できない理由が分からずデッドロックに陥る。",
+    "suggestion": "通知トグルをONにした際、iOSかつスタンドアロンモードでない場合���トグルをONにさせず、「通知を有効にするには、アプリをホーム画面に追加してください」というカスタムモーダル（§11.4のインストールバナー）を表示する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.2",
+    "issue": "最大10MBの画像アップロード時の非同期処理とUIブロック状態が未定義。モバイル回線では数秒〜十数秒かかる可能性があり、その間のテキスト入力可否やローディング表示がないと、ユーザーがフリーズしたと誤認する。",
+    "suggestion": "画像選択後、入力バーのサムネイル上にローディングスピナーを表示し、バックグラウンドでアップロードを行う。アップロード完了までは送信ボタン（➤）を無効化するか、送信時にメッセージバブル内で「送信中」プログレスを表示する非同期フローを定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3",
+    "issue": "Undoスナックバーの「30秒間表示」は長すぎる。画面下部を30秒間ブロックし続けると、TALK画面の入力��ーやリスト最下部の操作の邪魔になる。連続完了時に常に表示され続けるのはUX上の大きなストレス。",
+    "suggestion": "スナックバーの表示自体は5秒程度でフェードアウトさせ、30秒のUndo猶予期間中はタスク一覧上の該当タスクを「完了状態（Undoボタン付き）」として残し、30秒経過後にリストから消去（または非表示領域へ移動）するインラインUndoパターンに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §10, §2.2, §2.3",
+    "issue": "アクセシビリティ要件としてDynamic Type（OSの文字サイズ拡大）への対応が未定義。GROW画面のヒーロー領域の1行圧縮（Lv + EXP）や、要素が多いタスク行は、文字サイズ拡大時に確実にレイアウトが破綻（オーバーフロー）する。",
+    "suggestion": "文字サイズ拡大時は、ヒーロー領域の1行圧縮を解除して複数行にする、タスク行の要素を縦積み（時刻と所要時間をタスク名の下に配置）にするなど、アダプティブな折り返し・Truncationルールを定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §7, §8",
+    "issue": "QRスキャン時以外のハプティクス（触覚フィードバック）が定義されていない。「ポケモンのような気持ちよさ」を標榜するUXにおいて、タスク完了時やレベルアップ時のハプティクスがないのは体験価値を大きく損なう。",
+    "suggestion": "navigator.vibrateを使用し、タスク完了（⭕タップ）時に軽い振動（例: 50ms）、レベルアップ・ゴール達成時にリッチな振動パターン（例: [100, 50, 100, 50, 200]）を追加する（iOS非対応環境のフォールバックも考慮）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.4",
+    "issue": "タスクの並び替えが「ロングプレス→上下ドラッグ」となっているが、視覚的な手がかりがないため発見可能性（Discoverability）が低い。モバイル標準のリストUIから外れている。",
+    "suggestion": "タスク行の右端（または左端）にドラッグハンドル（≡アイコン）を配置し、ハンドル部分のタッチで即座にドラッグ開始できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.1",
+    "issue": "ME画面のサブタブ（PROFILE等）を縦スクロールした際の、ヒーロー領域とタブバーの挙動が未定義。GROW画面同様にヒーロー領域が縮小するのか、タブバーが固定されるのか不明。",
+    "suggestion": "サブタブコンテンツの縦スクロール時に、ヒーロー領域を縮小し、サブタブのタブバー（PROFILE|DISCOVER...）を画面上部（ヒーロー領域の下）に `position: sticky` で固定する挙動を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.4, §8.6",
+    "issue": "TALK画面で冒険EXPを獲得し、同時にレベルアップ条件を満たした場合の演出キューが未定義（§8.6はGROW画面前提の記載になっている）。",
+    "suggestion": "TALK画面では、冒険EXPカードの出現アニメーションが完了した後に、レベルアップバナー（+紙吹雪）を表示する直列キューを定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

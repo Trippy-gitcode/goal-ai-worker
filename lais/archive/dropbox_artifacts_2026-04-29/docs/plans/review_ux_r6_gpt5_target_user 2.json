@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.4（ゴール詳細） / project_v1.md §4.2",
+    "issue": "project側で定義された「ゴール達成ボーナスは作成から7日経過後（それ未満は完了待ち）」のUXが未定義。完了条件を満たしても7日未満の場合の表示・操作（完了待ちバナー・残日数表示・ボタンの挙動）が設計されていない。",
+    "suggestion": "S-14に「完了待ち」状態を追加し、進捗バー100%時に「あとN日で完了！」バナー＋説明テキストを表示。完了ボタンは無効化または「完了待ち」表示に切替。N日経過後の自動完了時の演出・バナーも定義する。通知（週次/日次）への反映も追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §8（アニメーション）/ §2.3（タスク完了）/ project_v1.md §4.5",
+    "issue": "1日のEXP上限（300）到達時のタスク完了UXが未定義。完了操作時にEXP付与が行われない場合のUI（フロートテキスト、バー伸長、トースト等）の挙動が不明。",
+    "suggestion": "上限到達時は通常���チェック完了は維持しつつ、EXP関連演出を抑止し「本日のEXP上限に達しました（ゴール達成ボーナスは別枠）」のトーストを表示。ヒーロー領域に「本日: 300/300」など上限インジケータを追加し、達成済み時はバー脇に上限アイコンを表示する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.4（TALK 冒険EXP演出）/ project_v1.md §4.5",
+    "issue": "冒険EXPカード（+50 EXP）の表示が、日次EXP上限到達後のケースでどうなるか未定義。+50表記のまま付与されないとユーザー混乱を招く。",
+    "suggestion": "冒険EXP検出時にサーバー判定結果を受け、上限未達なら「+50 EXP」カード、上限到達後は「冒険を検出！今日はEXP上限のため記録のみ」と表示し、EXP数値は非表示。翌日以降の扱いは付与しない旨を明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.3（会話→タスク化）/ project_v1.md §3.2.1",
+    "issue": "TALKのタスク提案カードが「期限」を使う一方、GROWでは「（単発）実行予定日」を使う。期限と予定日���概念が混在し、Overdue判定やToday表示ロジックと齟齬が生じる恐れ。",
+    "suggestion": "UI文言とフィールドを統一。タスクの一次軸は「実行予定日」に寄せる。期限も必要なら二次フィールドとして追加し、TALK提案カードは「実行予定日」と「期限」を明示分離。GROWの詳細パネルにも期限表示を追加し、Overdueは予定日ベースであることを説明する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.1（TALKヘッダー）/ §3.5（チャット履歴）",
+    "issue": "TALKヘッダーに☰=履歴ドロワー、🕐=履歴の2つの履歴起動アイコンが併存。どちらで何が開くかが重複しており、操作の一貫性を損なう。",
+    "suggestion": "履歴起動はどちらか一方に統一（推奨: ☰でドロワー、🕐は削除 or 別機能に割当）。ヘッダーアイコンの役割を明記し、S-21への到達手段を1つにする。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2（プラン管理）",
+    "issue": "Stripe Checkoutのキャンセル/失敗時の戻りUXが未定義。ユーザーが外部決済画面を閉じた場合のフィードバックや状態復帰が分からない。",
+    "suggestion": "キャンセル時はS-38に復帰しトースト「購入をキャンセルしました」を表示。失敗時は「決済に失敗しました。時間をおいて再試行してください」トースト。成功/失敗/キャンセルの3分岐を明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2（メッセージ送信/画像添付）",
+    "issue": "画像添付のサイズ上限超過/非対応形式/アップロード失敗時のインラインエラーや再試行UXが未定義。",
+    "suggestion": "選択時にクライアントバリデーション（10MB超はブロック）。非対応形式は即エラー。アップロード失敗はサムネに「！」バッジ＋[再試行]/[削除]。サーバー側リサイズ失敗時のトーストも定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.4（ドラッグ&ドロップ）/ §2.3（Today表示）",
+    "issue": "Todayの手動並び替えが開始時刻ソートを「上書き保存」とあるが、後から開始時刻を編集した場合や新規タス���追加時の挿入規則が不明。",
+    "suggestion": "優先順位を定義: 手動順 > 時刻順。新規タスクは既定で時刻順の位置に挿入、ただし手動順が有効な場合は末尾に追加。S-10に「並び順を時刻順にリセット」アクションを追加し、ユーザーが容易に秩序を回復できるようにする。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.3（DISCOVER 強み/弱みの横スクロール）/ §7.3（スワイプ）",
+    "issue": "MEサブタブの横スワイプ切替と、DISCOVER内の横スクロールチップがジェスチャー競合する可能性がある（チップ上の水平スワイプがサブタブ切替に誤認）。",
+    "suggestion": "水平方向スクロール要素上ではサブタブスワイプを無効化（gesture exclusion）。ドラッグ開始角度しきい値（±20°以内で横スクロール優先）を設け、誤作動を排除。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（📝新規チャット）/ §3.5（チャット履歴）",
+    "issue": "「新しいチャット」の概念（スレッド分割の基準、AIコンテキス��の引き継ぎ可否、既定で常に単一スレッドなのか）が明確でない。",
+    "suggestion": "チャットは「スレッド」単位で管理と明記。📝タップで新スレッド作成→タイトル自動生成（最初のユーザーメッセージ先頭）。S-21にスレッド一覧、長押しで改名/削除。AIはスレッド内履歴のみ参照する旨を説明。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（Today）/ project_v1.md §3.2.3",
+    "issue": "project側にある「週N回習慣をTodayに手動追加する『今日やる』ボタン」がUXに記載されていない。",
+    "suggestion": "習慣行（Upcoming内の習慣グループ含む）に「今日やる」アクションを追加し、Today表示へ即時昇格。押下時のトーストと元の判定ロジックへの自動復帰（翌日）は仕様化する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（FRIENDS お知らせ）/ §15",
+    "issue": "「お知らせ」一覧の既読/未読の区別、個別既読化、全既読、バッジの減算条件が未定義。",
+    "suggestion": "お知らせ一覧に未読バッジを付���、タップで既読化。右上に「すべて既読」追加。タブの未読バッジは未読0で消去するルールを明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §9.1（復帰時の演出再生）/ §8.6（演出キュー）",
+    "issue": "オフライン中に多数の完了を同期した場合の「まとめて再生」と8秒上限の関係が未定義（どの演出を省略/圧縮するか不明）。",
+    "suggestion": "再生ポリシーを定義: 直近3件のみフル演出、以降はEXPバー数値のみ即時反映。レベルアップ/ゴール達成は常に優先。上限超過時はスキップの旨をトーストで通知。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.5（チャット履歴）/ project_v1.md §6.4",
+    "issue": "AI対話履歴の90日保存制限がTALK画面のどこにも明示されていないため、過去ログ消失がサプライズになり得る（Finchのような“待ち/制限”嫌いユーザーは不信感を持つ）。",
+    "suggestion": "S-21上部に「過去90日分を表示」と注記を追加。90日超過前に週次レポートで「間もなく自動削除」通知を行う。設定>データに「エクスポート（v0.2.0予定）」注記を追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5 / §4.5 / ux_v1.md §9.3",
+    "issue": "日次リセット時刻がJST固定（04:00）で、海外滞在や深夜活動時に直感とズレる可能性。Freeプランの対話上限リセットもJST基準のため、混乱しやすい。",
+    "suggestion": "TALKの上限到達バナー/ヒントに明示（例: 「JST 04:00にリセット」）。将来のローカルタイム対応方針とマイタイムゾーン表示（設定で表示のみ切替）を追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1 / ux_v1.md §4.3（ヒアリング）",
+    "issue": "Free 20回/日の上限で、ヒアリング5問が1日分の会話を圧迫しやすい。Finchで「12時間待機」に不満を持った層は、別の“隠れ制限”と受け取りうる。",
+    "suggestion": "ヒアリングは1セッション中のAI応答を1カウントにバンドルする、またはFreeはヒアリングのみカウント1/2扱いにする等の緩和を検討。最低限、開始前警告に「Freeでは〜」の明示と、途中保存/翌日再開の導線を強調。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（Today/習慣）/ project_v1.md §3.2.3",
+    "issue": "週N回習慣の進捗可視化（今週の達成数/必要数）がToday/Upcomingに明示されていないため、表示/非表示ロジックの理解が難しい。",
+    "suggestion": "習慣行に「今週 1/3」などの小バッジを追加。Todayに出ない日でもUpcomingの習慣グループ内で進捗を明示し、「今日やる」導線と組み合わせて自律性を担保。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §7（PWA）/ ux_v1.md §11.4（PWAインストール）",
+    "issue": "iOSでPWAインストール前はPush不可のため、タスクリマインダー等の価値が伝わりにくい。Habitifyのような“通知が来ない”不満に繋がる恐れ。",
+    "suggestion": "GROW初回表示時に非侵襲のティップで「ホーム画面に追加で通知が届きます」を案内し、S-39にもiOS固有のガイダンスリンクを追加。重要通知（リマインダー）を有効化したのにOS未許可の���合の検知と再案内を実装。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.3（複数タスク提案）",
+    "issue": "会話→複数タスクの一括登録時の重複検出（同名/同日タスクが既に存在するケース）が未定義。ダブり登録によるToday汚染の恐れ。",
+    "suggestion": "登録前に軽量な重複チェック（同名±1日の予定日一致）を行い、ヒットはデフォルトでチェックを外す or マージ提案（予定時刻だけ補完）にする。インライン注意文を表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2 / ux_v1.md §8.1",
+    "issue": "タスクEXPが一律+10のため、長時間タスクと短時間タスクの報酬差がなく、細切れ化の動機付けが生まれる懸念（Habiticaで“作業ゲー化”に飽きたユーザーが再燃しうる）。",
+    "suggestion": "UX内の文言で「EXPは経験の記録であり、量より継続」と思想を明示。将来的に「所要時間バーの達成演出」など量的満足を補う非EXP演出を検討。最低限、同一ゴール配下での短時間タスク乱造に対する注意（同名近接検出）を拡張。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

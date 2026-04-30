@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.1, §8.1",
+    "issue": "Night SkyテーマにおけるPrimary Buttonのコントラスト比がWCAG AA基準（4.5:1）を満たしていない。背景色 `--accent` (#58A6FF) に対してテキスト色 `#FFFFFF` を指定しているが、コントラスト比の実測値は 2.5:1 であり、大文字基準（3:1）すら満たさず視認性が著しく低い。",
+    "suggestion": "Primary Buttonのテキスト色を `--bg-primary` (#0D1117) などの暗色に変更するか、ボタン背景専用のより暗いアクセントカラートークン（例: `--accent-solid`）を新設してコントラスト比 4.5:1 以上を確保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.1, §5.2, §5.3",
+    "issue": "全テーマにおいて `--text-hint` のコントラスト比がWCAG AA基準を満たしていない。Night Sky (#484F58 on #161B22 = 1.8:1)、Dawn (#A89E94 on #FFFFFF = 2.5:1)、Adventure (#A09080 on #FFFFFF = 3.0:1) となっており、プレースホルダーや補助テキストとして読めないレベルである。",
+    "suggestion": "`--text-hint` のカラーコードを再調整し、各テーマの `--bg-surface` に対して最低 4.5:1 のコントラスト比を持つ色を指定してください。（例: Night Skyは #768390、Dawnは #766C63 など）",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.2, §9",
+    "issue": "入力フィールドのフォーカス状態が「ボーダーが --accent になる」と色のみの変化で定義されており、色覚多様性のユーザーに伝わらない。また、キーボードナビゲーション用のグローバルなフォーカスリング（outline）のトークンが定義されていない。",
+    "suggestion": "§9のCSSトークンに `--focus-ring: 2px solid var(--accent); outline-offset: 2px;` を追加し、全インタ���クティブ要素の `:focus-visible` に対して適用するルールを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§8.4",
+    "issue": "タイムラインのドット状態（NOW/DONE/NEXT）を色のみ（--accent / --success / --border）で区別しており、「カラーのみで情報伝達してはならない」というWCAGの基本原則に違反している。",
+    "suggestion": "色に加えて形状やアイコンで状態を区別するよう定義を変更してください。例: DONEは内部にチェックマークアイコン、NOWは二重丸（border + center dot）、NEXTは塗りつぶしなしの白抜き円にするなど。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§7, §9",
+    "issue": "UX仕様書で `prefers-reduced-motion` への対応が言及されているが、デザインシステム側にアニメーションを無効化・短縮するためのCSSトークンやメディアクエリブロックが存在せず、AIが実装時に参照できない。",
+    "suggestion": "§9のCSSブロック末尾に `@media (prefers-reduced-motion: reduce) { :root { --duration-fast: 0ms; --duration-normal: 0ms; --duration-slow: 0ms; --duration-celebration: 0ms; --spring-default: none; --spring-gentle: none; --spring-bouncy: none; } }` を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§6.1, §8.3",
+    "issue": "UX仕様書でタップターゲット最小サイズ（44x44px）が規定されているが、デザインシステムのチップ（高さ約22px）やアイコン単体ボタン（20〜32px）において、視覚的サイズを変えずにタップ領域を44pxに拡張するCSS仕様（paddingや透過border等）が定義されていない。",
+    "suggestion": "インタラクティブな小サイズ要素に対して、`min-width: 44px; min-height: 44px;` や `padding` を用いてタップ領域を確保する「タッチターゲットトークン」または実装ガイドラインをコンポーネント定義に追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§9",
+    "issue": "視覚的には隠すがスクリーンリーダーには読み上げさせるためのユーティリティクラス（`sr-only` 等）が定義されていない。タブの非Active状態（アイコンのみ表示）などでアクセシビリティが損な��れる。",
+    "suggestion": "§9のCSSブロックにスクリーンリーダー専用のクラス `.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }` を追加し、AIが利用できるようにしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§5.3",
+    "issue": "Adventureテーマの `--adventure-yellow` (#F5B731) は白背景 (#FFFFFF) に対してコントラスト比 1.6:1 であり、テキストや細いアイコンに使用すると視認できない。",
+    "suggestion": "`--adventure-yellow` をテキストや重要なアイコンのストロークに使用しないようガイドラインに明記するか、背景色として使用する場合の専用テキスト色（黒系）をセットで定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§5.4",
+    "issue": "グラスモーフィズムON時、背景の画像やスクロールコンテンツの色によっては、上に乗るテキストのコントラスト比が4.5:1を下回るリスクがある。",
+    "suggestion": "グラスモーフィズム適用時のテキスト視認性を保証するため、テキストに薄い `text-shadow` を適用するトークンを追加するか、背景の不透明度（現在0.06や0.65）を動的に調整するフォールバック設計を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§8.1",
+    "issue": "Windows High Contrast Mode (Forced Colors Mode) に対する配慮が定義されていない。特にGhostボタン（背景transparent、ボーダーなし）は強制カラーモード時に境界が見えなくなり操作不能になる。",
+    "suggestion": "Ghostボタン等の境界線がないインタラクティブ要素に対し、`border: 1px solid transparent` を設定し、強制カラーモード時にOSのハイコントラストボーダーが自動的に可視化されるベストプラクティスを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "a11y_expert"
+  }
+]

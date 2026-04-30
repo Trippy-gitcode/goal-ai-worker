@@ -1,0 +1,242 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §7.2 認証設計 / project §7.4 データライフサイクル / ux §15 注記(内部矛盾#3)",
+    "issue": "AI対話メッセージとソーシャルメッセージのテーブル命名が「messages」「social_messages」と混在。RLSの説明はmessagesを参照しており、誤ってAI対話を友達に公開する/ソーシャルを非公開化しない等のRLS適用ミスが発生し得る。",
+    "suggestion": "スキーマを厳密に分離し命名を固定: ai_messages（TALK用）, social_messages（FRIENDS用）。RLS方針をテーブルごとに明記（ai_messagesはrow.owner=auth.uid()のみSELECT、social_messagesはsender=auth.uid() OR recipient=auth.uid()のみ）。既出箇所の命名を全て統一し、reference_v1.mdにRLSサンプルSQLを掲載してE2Eテストを追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project §5.3 簡易メッセージ/応援（友達リクエスト記述） / project §3.4 FRIENDS（QR承認リクエスト有効期限）",
+    "issue": "「承認待ちリクエストは送信者にもステータス表示」と「期限切れ��送信者にもフィードバックなし」が矛盾。ストーカー防止方針と通知UXが衝突。",
+    "suggestion": "方針を一本化: 送信者には「保留中/承認済み/取消済み/期限切れ」を自分側のみで表示（相手の既読・拒否は非表示）。期限切れ時も自分画面では“期限切れ”と表示するが相手への通知は行わない。UX文言・RLS・通知仕様を整合させる。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §5.3/§5.5 ソーシャル機能 / ux §4.4 FRIENDS",
+    "issue": "メッセージ/応援/友達リクエストにレートリミットやクールダウン、スパム検知の具体値が未定義。短文でも大量送信で通知スパムが可能。",
+    "suggestion": "数値を定義: 例) メッセージ: 10件/分・100件/日/ユーザー上限、応援: 3件/分・30件/日/相手上限、友達リクエスト送信: 20件/日・同一相手再送は7日不可。連投時は自動サイレンス（24h）＋再犯は一時停止。Pushは同一送信者からの連続通知をバッチ化（5分間で1本に集約）。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §7 ���術スタック/認証設計/非機能",
+    "issue": "通信の暗号化方針・データ暗号化（保存時）・トークン保管方式（localStorage vs httpOnly Cookie）・CSPが未定義。PWAでXSS→JWT窃取のリスクが高い。",
+    "suggestion": "HTTPS強制+HSTS有効化。Supabase JWTはhttpOnly/SameSite=Lax/Secure Cookieに移行（カスタムAuthエンドポイントでSet-Cookie）。CSPを厳格化（default-src 'self'; connect-src API/WS許可ドメインのみ; script-src 'self' + nonce/Trusted Types）。依存CDNをSRI付きで最小化。静的リソースのIntegrity・Referrer-Policyも設定。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project §5.4 プライバシー設計（QRコード）",
+    "issue": "QRコードにユーザーUUIDを含める設計は、トークン有効期限切れ後もUUIDが第三者に残存し、将来的な照合やリンク可能性を高める懸念がある。",
+    "suggestion": "QR/リンクは完全に不透明な高エントロピー一時トークンのみを埋め込む（UUID含めない）。API側でトークン→ユーザー解決を行い、トークンは24h or もっと短いTTL（例: 10分）＋単回使用のjtiで失効。QRは30〜60秒ごとに自動ローテーション。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §3.3 TALK画像添付 / §7.4 データライフサイクル",
+    "issue": "画像添付のSupabase Storageバケットの公開/非公開・署名URLTTL・アクセス権限が未定義。誤ってpublic運用だとURL推測や外部参照で漏えいリスク。",
+    "suggestion": "Storageはprivateバケット必須。取得は短寿命署名URL（5〜10分）で配布。URLのRefererチェックは不可のため、署名失効とパスは推測困難に。画像はウイルス/不適切コンテンツスキャンを検討。メッセージ削除/退会時はオブジェクトも削除（ガーベジコレクションJob）。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §5.1/§5.4（QR・シェアリンクの一時トークン） / ux §4.4（受信者フロー）",
+    "issue": "一時トークンの特性（長さ/エントロピー/単回利用/失効処理/リプレイ防止）が未定義。ボットや総当たりによるプロフィール窃用やリクエストスパムの恐れ。",
+    "suggestion": "128bit以上のランダムトークン+jti発行、単回使用で即失効、IP/UA指紋の緩いバインド、5xx連続失敗や多リクエストで自動失効。Cloudflare Turnstile/hCaptchaを友達リクエスト送信に導入。サーバーでIP/ユーザー単位レートリミット（token bucket）。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §5.5 悪用防止 / §7.2 RLS",
+    "issue": "ブロックのサーバー強制がRLSに十分に反映されているか不明。UIでブロックしても、直接API呼び出しやRealtime経由で送信/受信される可能性がある。",
+    "suggestion": "blocklistテーブルを導入し、RLS/DB制約でsocial_messages INSERT/SELECT・friends作成・通知購読を拒否。送信処理ではブロックチェックを必須に。ブロック時は既存Realtimeサブスクリプションもサーバー側でフィルタ。E2EでAPI直叩きも遮断を検証。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "project §5.4 プライバシー設計（QRスキャン後の閲覧権限） / ux §4.4（受信者フロー）",
+    "issue": "QRスキャン後の「公開プロフィール一時閲覧」が認証不要なのか不明。匿名閲覧を許すとトークン漏えい時の可視範���が拡大する。",
+    "suggestion": "閲覧は要ログインを原則化（受信者未ログイン時はサインイン誘導）。例外として“ごく限定のプレビュー”を許す場合もフィールド最小化・1分TTL・単発参照に制限。RLSのprofiles公開フィールドSELECTに必ず一時トークンまたは友達/保留関係を要求。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §6.4 AIデータプライバシー / §7.4 データライフサイクル / 設定（ux §13.1）",
+    "issue": "GDPRのデータ主体権（アクセス/ポータビリティ/訂正/処理制限）の具体的提供手段・SLAが未定義。エクスポートはv0.2以降“検討”のまま。",
+    "suggestion": "設定に「データのエクスポート（JSON/CSV）」機能を追加（チャット/タスク/ゴール/EXP/プロフィール）。対応SLA（例: 30日以内）。訂正/削除/処理制限の窓口（アプリ内フォーム）とポリシー明記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §7 技術スタック / §6.4 プライバシー",
+    "issue": "データ所在地・越境移転・サブプロセッサ一覧���DPA/DTIAの整備が未記載。Supabase/Cloudflare/AIベンダーへの移転法的根拠が明確でない。",
+    "suggestion": "リージョン選択を明示（例: Supabase: 東京 or EU-Central, Cloudflare: Durable Objects/EU優先ルーティング）。サブプロセッサ一覧とDPAへのリンク、越境移転の法的根拠（SCC等）をプライバシーポリシーに掲載。DTIAを作成しリスクを評価・公表。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §6.2 冒険EXP検出（ログ保存）",
+    "issue": "冒険分類結果のログ保存期間・削除方法が未定義。チャット本文の派生データであり個人データに該当する可能性が高い。",
+    "suggestion": "分類ログの保持期間をAI対話と同一の90日に統一し、自動削除を実装。ユーザーの「対話履歴を削除」で当該ログも削除対象とすることを明記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §7.3 PWA/Service Worker",
+    "issue": "Service Workerのキャッシュ範囲/期間/除外が未定義。認証付きAPIレスポンスや個人データがエッジ/ブラウザキャッシュに残留��るリスク。",
+    "suggestion": "API応答はCache-Control: no-store/ privateを徹底。SWは静的アセットのみキャッシュし、/api/*は常にネットワーク（失敗時はリトライ/フォールバック設計済みのGROWだけローカルDB使用）。Cloudflare CDNのキャッシュキーにAuthorizationを含めず、キャッシュしないルートをWorkersで明示。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §7.2 認証設計 / project §6.5 退会・データ削除",
+    "issue": "リフレッシュトークンのローテーション/不正検知、deleted_pending遷移時の全端末セッション失効が未定義。乗っ取り時に削除取消や継続利用が可能になる恐れ。",
+    "suggestion": "リフレッシュトークンはローテーション+リプレイ検知（古いトークン使用検出で全セッション失効）。退会リクエスト時点で全端末のアクセストークンを即時無効化し、ログインを強制。deleted_pending解除時のみ新規セッション発行。デバイス管理UI（有効セッション一覧+手動失効）をv0.2で追加。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project §2.5 通知設計 / ux §13.3 通知設定",
+    "issue": "通知本文に送信者名が含まれる設計はロックスクリーン表示で第三者閲覧の恐れがあるが、隠すオプションがない。",
+    "suggestion": "「プライバシー通知モード」を追加: ロック画面では「新しい応援/メッセージがあります」のみ表示（Web Pushのdataに機微情報を入れず、アプリ復帰後に内容取得）。ユーザー設定で切替可能に。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §7.4 データ量上限（友達最大500人） / ux §4.4 FRIENDS",
+    "issue": "友達上限到達時のUX/サーバー挙動が未定義。超過時にどう失敗するか不明。",
+    "suggestion": "上限到達時は友達追加ボタンを無効化+ツールチップ表示。サーバー側でもINSERT前に上限チェックを行い、明確なエラーメッセージを返す。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-017",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project §7.4 データライフサイクル（メッセージ=友達解除で即時削除） / ux §4.4 通報（証拠保全）",
+    "issue": "友達解除時にメッ���ージ即時削除と、通報済みメッセージの証拠保全が衝突。未通報のまま相手が解除すると証拠が消える懸念も。",
+    "suggestion": "運用ポリシーを明確化: 友達解除/ブロック時はソーシャルメッセージ本体は双方非表示化（ソフトデリート）し、30日間はバックエンドで保全（法的根拠: Legitimate Interests/紛争解決）。通報があれば保全期間を延長。GDPRの例外と保持期間をポリシーに明記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project §1.4 ターゲット / サインアップUX（ux §5.0）",
+    "issue": "未成年利用の扱い（年齢下限・保護者同意）が未定義。GDPR-Kや各地域の年少者保護に配慮が必要。",
+    "suggestion": "利用規約に年齢下限（例: 16歳以上）を明記し、年齢確認UI（自己申告）をサインアップに追加。未成年の可能性がある場合の保護者同意フローはv0.2で検討。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project §6.4 AIデータプライバシー / 設定（ux §13.1）",
+    "issue": "AI対話を常時90日保存だが、保存しない/短縮する選択ができない。最小化原則の観点で柔軟性に欠ける。",
+    "suggestion": "「履歴を保存しない（エフェメラル）」設定と「保存期間を30/60/90日から選択」オプションを提供。保存しない場合はモデルコンテキストも最小限（セッション内のみ保持）に。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §7 技術スタック（Cloudflare Workers）/ §7.5 非機能",
+    "issue": "サーバ/エッジのアクセスログに個人データが含まれる可能性（URL/ヘッダ/本文の一部）。ログ保持期間・マスキング方針が未定義。",
+    "suggestion": "Workersのアプリログから個人データを出力しない（本文/クエリ/Authorizationをログ禁止）。アクセスログは最小化し、保持30日以下。エラー時もPIIを含まないサマリのみを記録。ログポリシーをプライバシーポリシーに明記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-021",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project §7.4 バックアップ",
+    "issue": "Supabaseの日次バックアップの保持期間と、削除リクエスト時のバックアップからの��質的な削除/復元時の再通知方針が未定義。",
+    "suggestion": "バックアップ保持期間（例: 30日）を明記。復元時に削除済みユーザーのデータが復活しないようリストア後に削除マーカー適用。ポリシーに「バックアップはローテーションで消去、手動復元時は権利・同意を再確認」を追記。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project §6.4 AIデータプライバシー",
+    "issue": "PII自動マスキングが正規表現ベースのみで高リスクPII（氏名/住所等）には不十分。ユーザー教育だけではカバーしきれない。",
+    "suggestion": "クライアント/サーバ側でNERベースのPII検出（軽量モデル）を導入し、送信前に確認ダイアログ（“個人情報が含まれている可能性があります”）。設定で“高敏感度モード”を提供し、特定カテゴリ（健康/財務/位置情報）検出時は既定で送信ブロック。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-023",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §6.5 退会・データ削除",
+    "issue": "退会クーリングオフ中（deleted_pending）における通知/ソーシャル可視性はUX側で規定あるが、サーバー側の強制（通知停止・RLSブロック）とAIベンダー側キャッシュ削除依頼の扱いが未定義。",
+    "suggestion": "deleted_pending中は全通知停止・全ソーシャルI/OをRLSで拒否。AIベンダーにはリアルタイムAPIでキャッシュ/ジョブ中断を要求（ベンダー仕様に沿う）。72時間経過後の物理削除時、ストレージ/ログ/バックアップポリシーと整合させる。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-024",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §5.4 プライバシー設計（profiles公開フィールドRLS）",
+    "issue": "公開フィールドのRLS例外（友達/保留/24hトークン）で返す項目の最小化やフィールド固定が未定義。将来のプロパティ追加で過剰開示のリスク。",
+    "suggestion": "ビューprofiles_publicを作成し、返却カラムを固定（avatar, level, title, display_nameのみ）。RLSはビューに対して実装。将来のprofiles拡張が即公開に波及しないようにする。",
+    "model": "GPT-5",
+    "persona": "security_expert"
+  }
+]

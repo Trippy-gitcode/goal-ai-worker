@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§18, §19.1, §19.4",
+    "issue": "ファイル命名規則の不一致。§18の依存関係マップでは `ux_redesign_v*.md` となっているが、§19.1および§19.4では `ux_v1.md` と定義されている。また、§12のID付番の例でも `ux_redesign_v2.md` が使われている。",
+    "suggestion": "新規アプリ立ち上げの汎用ルールとして `ux_v*.md` に統一し、§18および§12の参照ファイル名を修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7, §13.4",
+    "issue": "AIレビューのペルソナ数・モデル数の矛���。§19.7の完了基準に「8ペルソナ×2モデルのAIレビュー」とあるが、§13.4で定義されている標準ペルソナは5つであり、モデル数についての規定も曖昧。",
+    "suggestion": "§19.7の記述を「§13で定義された標準ペルソナによるAIレビューでCRITICAL 0を達成」と修正するか、§13.4に8ペルソナの定義を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "競合ベンチマークの実行可能性（ハルシネーションリスク）。ADV（Claude.ai）単独では最新のApp Storeレビューや競合アプリの最新UIを閲覧できないため、「★1-2離脱要因」などの調査で推測やハルシネーションが発生する。",
+    "suggestion": "ベンチマーク調査の前提として「POが最新のスクショやレビュー情報を提供する」または「ADVは学習データ内の既知の競合情報に基づきベースラインを作成する」という役割分担を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§18, §19.6",
+    "issue": "依存関係マップの二重管理。仕様書の依存関係が§18（修��時の連鎖更新マップ）と§19.6（依存チェーン）で二重に定義されており、内容に微細なズレがある（例: §18ではdesign_specとdesign_systemが相互参照的だが、§19.6では一方向）。",
+    "suggestion": "§19.6の依存チェーン図を§18に統合し、§19.6は「§18の依存関係マップに従う」と参照するのみにとどめ、Single Source of Truthを維持する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダーの依存バージョン手動管理による形骸化リスク。`依存: docs/plans/lais_project_v1.md v1.3` のようにバージョン番号をハードコードすると、上流ファイル更新時に下流のヘッダー更新が漏れやすい。",
+    "suggestion": "バージョン番号のハードコードを避け、ファイルパスのみ（例: `依存: docs/project_v1.md`）にするか、バージョン不一致を自動検証する仕組みがない旨を注記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4, sub_system_map.md",
+    "issue": "system_map.md テンプレートの二重管理。§19.4の必須セクション定義と、別ファ���ル `sub_system_map.md` の両方に構造定義が存在している。",
+    "suggestion": "§19.4の `system_map.md` の項目には「詳細は templates/system_map_template.md を参照」と記載し、構造定義を一本化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§19.4, §12",
+    "issue": "仕様書ID（SPEC-XXX）の付与場所が未定義。§12でSPEC-IDの付番ルールがあるが、§19.4のどの仕様書（ux_v1.mdかproject_v1.mdか）のどのセクションでIDを定義すべきかがテンプレートに含まれていない。",
+    "suggestion": "§19.4の `ux_v1.md` または `design_spec_v1.md` のテンプレートに「各機能・画面にSPEC-IDを付与すること」を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4, §19.7",
+    "issue": "特定のプロジェクト名（Lais）の残留。テンプレート内に「Lais方針」「Laisの対応方針」という固有名称がハードコードされており、汎用テンプレートとして不適切。",
+    "suggestion": "「{アプリ名}方針」「自社アプリの対応方針」などのプレースホルダーに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  }
+]

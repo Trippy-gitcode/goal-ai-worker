@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.7",
+    "issue": "ベンチマーク表の出力フォーマットに情報源（URL/出典）や取得元ストア/地域/取得方式の列がなく、§19.7「情報源を明記」「推測記載禁止」の要件を満たす構造になっていない。",
+    "suggestion": "各表に「情報源URL」「情報源種別（PO提供/WebFetch/比較記事等）」「ストア/地域」「取得日」を列として追加。レビュー引用には出典URL/日時/抜粋元を必須化。例: 調査対象表に『情報源URL』『ストア/地域』列、マトリクス各行に『出典』列を追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.7",
+    "issue": "「実施タイミング」ではproject_v1.mdで直接競合5社+間接競合3社と定義している一方、「ベンチマーク完了基準」では直接競合5社以上のみとなっており要件が不一致。",
+    "suggestion": "完了基準に『直接5+間接3』を明記するか、間接競合を任意とする等、両者を統一。統一後、canopyで件数検証できるメタ（direct_count, indirect_count）をJSONサイドカーに出力し自動検証可能にする。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダー『依存: {上流ファイルのパス + バージョン}』の表記が単数形で、複数上流（例: design_spec_v1.mdはux_v1.mdとdesign_system.md双方に依存）を想定した記法が不明確。",
+    "suggestion": "依存は配列で列挙可能である旨を明記（例: 依存: [\"docs/ux_v1.md v1.2\",\"docs/design_system.md v2.0\"]）。機械読取性向上のためYAMLフロントマター化を推奨。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§19.5",
+    "issue": "『dev-system準拠: docs/plans/dev_system_spec.md §19』という参照パスがアプリ側には存在しない可能性が高く（dev-systemは別リポジトリ）、正規参照の指し方が曖昧。",
+    "suggestion": "『dev-system準拠: dev-system v{X.Y.Z} §19』のようにバージョンを明記し、パスではなくリポジトリ名+バージョン+セクションを標準化。必要ならコミットSHAも併記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.6",
+    "issue": "『バージョンなしの依存宣言禁止』『循環参照禁止』等のルールに対し、機械的検証手段（ゲート/リンタ）が未定義で、遵守が人手依存になっている。",
+    "suggestion": "spec_dep_lint.sh（新規）を追加し、各仕様書ヘッダーの依存配列を解析して(1)バージョン有無(2)存在確認(3)循環検出(4)dev-systemバージョン整合を検証。canopyに組み込み（FAILで停止）。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレ）",
+    "issue": "テスト分離に関する必須記載（データ汚染防止、セットアップ/テアダウン手順、ユニークデータ規約）がテンプレート内に明文化されていない。",
+    "suggestion": "§0に『テスト分離ポリシー』を追加し、(a)各テストの自己完結(b)ユニークID命名規則(c)作成データのクリーンアップ/リセット(d)共有状態禁止(e)beforeAll/afterAllの制約を必須化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレ）",
+    "issue": "仕様↔テストのトレーサビリティの必須化が弱く、SPEC-ID（§12）およびtests/test_map.yamlとの対応がテンプレに含まれていない。",
+    "suggestion": "各テストケース見出しに『[SPEC-XXXX]』必須、末尾に『対応テストID（grepキー）』を追加。e2e_fullflow_test.md更新時にtests/test_map.yaml/test_meta.json更新をチェックする項をテンプレに追記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.6",
+    "issue": "依存チェーンにtests/test_map.yamlやtests/test_meta.jsonが含まれておらず、仕様変更→テストマッピング/メタ更新の連鎖が明文化されていない。",
+    "suggestion": "19.6の下流に『e2e_fullflow_test.md → tests/e2e/specs/ および tests/test_map.yaml, tests/test_meta.json』を追加。§18の連鎖更新マップにも同様の行を追記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（reference_v1.md テンプレ）",
+    "issue": "API仕様の必須観点としてバージョニング方針、冪等性、レート制限/スロットリング、リトライ/バックオフ、エラーハンドリングのUIマッピングが明記されていない。",
+    "suggestion": "reference_v1.mdに『§1.x API運用ルール』を追加し、(a)バージョン付与方式(b)Idempotency-Keyポリシー(c)レート制限値/HTTPヘッダ(d)リトライ/バックオフ戦略(e)エラーコード→UXの対応表を必須化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7",
+    "issue": "ベンチマーク成果がMarkdown表のみで機械検証に弱く、§1.1『機械可検証』にやや不整合。",
+    "suggestion": "Markdownに加えJSONサイドカー（bench_{scope}.json）出力を標準化（対象アプリ、指標、情報源URL、取得日、Lais方針分類、差別化タグ等）。canopyで件数/必須列充足/差別化≥3を自動検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "依存管理の厳密性を高めるためのコミットSHA/タグの指定が任意で、上流の実体を一意に特定しにくい。",
+    "suggestion": "ヘッダーに『依存SHA（任意→推奨）』フィールドを追加（例: upstream_commit: abcdef1）。将来的にspec_dep_lint.shで存在確認/一致検証を行う。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.6",
+    "issue": "ux_v1.mdとdesign_system.mdの定義が衝突した場合の優先順位（解決原則）が未定義で、レビュー時の判断が揺らぐ恐れ。",
+    "suggestion": "優先順位ルールを明記（例: トークン値/design_systemが原則優先、ただしUXアクセシビリティ要件が安全性を理由に上書き可等）。衝突時はspec_changelog.mdに明示記録。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4（design_system.md テンプレ）",
+    "issue": "アクセシビリティの定量基準（コントラスト比/最小サイズ等）がdesign_system側のトークン/ガイドラインとして明示されていない。",
+    "suggestion": "『§9 アクセシビリティトークン/基準』を追加し、WCAG準拠のコントラスト最小値、フォーカスリング仕様、ヒットターゲット最小サイズを定義。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーメタデータがMarkdown行ベースで、機械抽出の規格が曖昧。将来的な自動リンタ/ゲート導入時にパース不整合が起きやすい。",
+    "suggestion": "全仕様書ヘッダーをYAMLフロントマター（--- 〜 ---）に統一し、keysを固定（title/version/status/deps[]/scope/dev_system/version/commit等）。canopyにheader_lintを追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7（Phase 0 完了基準） vs §13.4",
+    "issue": "Phase 0完了基準で『8ペルソナ×2モデル』とあるが、§13.4の標準は5ペルソナ。モデル数/上限（§13.2 コスト制御: 10呼び出し上限）とも整合しない。",
+    "suggestion": "標準を統一（例: 5ペルソナ×2モデル or 8ペルソナへ拡張するなら§13.4/§13.2も同時改訂）。review_gate.shの想定呼び出し数/コスト上限も更新。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレ）",
+    "issue": "『パフォーマンステスト』の測定手法/指標（例: P95, Largest Contentful Paint, API応答P95, 許容閾値）や収集方法が未定義で、実行可能性が低い。",
+    "suggestion": "『§N+2 パフォーマンステスト』にSLO/SLI（指標名/計測点/閾値/失敗判定）と取得方法（Playwright Tracing/Navigation Timing/API計測）を明記。出力JSONのスキーマを定義しcanopyでFAIL判定可能にする。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

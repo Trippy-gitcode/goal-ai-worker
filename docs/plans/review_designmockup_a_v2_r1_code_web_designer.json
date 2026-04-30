@@ -1,0 +1,57 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s10_grow",
+    "location": "TODAY タスクリスト",
+    "issue": "v2 で時刻左・タスクカード式に変更され視認性は大幅改善。ただし完了タスク（企画書を仕上げる）のグレーアウトがほぼ背景に沈んでおり、『積み重ね』の記録としての機能が弱い。",
+    "suggestion": "完了タスクの文字色を #7890A8 程度まで持ち上げ、打ち消し線で完了を示す。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "進捗 62% の数値位置",
+    "issue": "EXPバー右端に小さく 62% が置かれており、バーの進行表現と数値が視線上で分離している。また Lv.12 EXPLORER の下に来る構造で情報階層が薄い。",
+    "suggestion": "62% をバー直下の右端 or バー中央のラベルに移動。Lv.12 との上下関係を余白で明確化。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "提案カード内の『+』ボタン",
+    "issue": "『タスクにしますか？』見出し左に + ボタン（新規タスク作成？）があるが、意味が曖昧。ラベルなしアイコンで機能が読み取れない。",
+    "suggestion": "アイコンの意味を明示（ツールチップ or ラベル『新規タスク』）、または削除して提案カード全体タップで登録確認に統一。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s13_task_detail",
+    "location": "ボタン 2×2 グリッド（v1 のまま）",
+    "issue": "未完了時は 4 ボタン同等重みで、削除と AI対話が同階層に並ぶ構造が残存（Phase 3.3 の PO選択対象外だった可能性）。",
+    "suggestion": "削除を … メニュー降格、2 段目 AI 対話 CTA 集中。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "進行中タスクの黄色縦線",
+    "issue": "『ジムで筋トレ』左端の黄色縦線が進行中を示しているが、UX仕様との整合性が未確認。進行中/予定/完了の3状態表現として明確な legend がない。",
+    "suggestion": "3 状態の視覚ルール（完了=✓ / 進行中=黄縦線 / 予定=なし）を design_spec_v1.md に明記。",
+    "model": "Code",
+    "persona": "web_designer"
+  }
+]

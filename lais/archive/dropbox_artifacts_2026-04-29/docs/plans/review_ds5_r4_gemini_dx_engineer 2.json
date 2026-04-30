@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "依存チェーンにおいて `e2e_fullflow_test.md` が `project_v1.md` にのみ依存する構造になっているが、§18の連鎖更新マップでは `ux_redesign_v*.md`, `design_spec_v*.md`, `design_system.md` 等の変更時にもテストを更新すると定義されている。この矛盾により、UXやデザイン変更時にテスト仕様書の更新が漏れ、G4（テスト全PASS）が壊れる原因となる。",
+    "suggestion": "§19.6の依存チェーンを修正し、`e2e_fullflow_test.md` が `ux_v1.md`, `design_spec_v1.md`, `reference_v1.md` などの下流仕様書にも依存する（または全仕様書の最下���に位置する）ように図を更新する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§19.7",
+    "issue": "Phase 0の完了基準として「8ペルソナ×2モデルのAIレビューでCRITICAL 0を達成」と記載されているが、§13.4で定義されている標準ペルソナは5つのみである。残り3つのペルソナが未定義のため、新規アプリ立ち上げ時に完了基準を満たせずプロセスがブロックされる。",
+    "suggestion": "完了基準を「5ペルソナ×2モデル」に修正するか、§13.4に不足している3ペルソナ（例: セキュリティエンジニア、ビジネスアナリスト等）を標準として追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "`e2e_fullflow_test.md` のテンプレート内に、§19.1で必須とされている `test_map.yaml` や `test_meta.json` との同期に関するセクションが存在しない。テスト仕様書更新時にメタデータの更新を忘れると、G3ゲート（テスト項目数）やL2影響範囲テストが正常に機能しなくなる。",
+    "suggestion": "`e2e_fullflow_test.md` のテンプレートに「§N+3 テストメタデータ更新（test_map.yaml / test_meta.json の更新確認）」のセクションまたはチェックリストを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4",
+    "issue": "§18の依存関係マップで定義されているファイル名（`ux_redesign_v*.md`）と、§19で定義されているファイル名（`ux_v1.md`）が一致していない。AIが§18のマップに従って連鎖更新を行う際に対象ファイルを見落とすリスクがある。",
+    "suggestion": "ファイル名の命名規則を統一する（例: 全て `ux_v1.md` に統一し、§18の記述もそれに合わせて修正する）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4",
+    "issue": "`ux_v1.md` の§1「画面遷移」と `system_map.md` の§3「画面遷移図」が重複している。「対応する」と記載されているが、実質的な二重管理となり、§1.1の「Single Source of Truth」の原則に反する。",
+    "suggestion": "`system_map.md` の§3を「状態遷移図（State Machine）」や「コンポーネントマッピング」など、UXの画面遷移とは異なる実装レベルの構造定義に特化させるか、`ux_v1.md` への参照リンクのみにとどめる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーのステータス定義が `DRAFT / REVIEW / CONFIRMED` のみであり、CONFIRMED（確定）後に仕様変更や機能追加が発生した際のステータス（改訂中であることを示す状態）が定義されていない。",
+    "suggestion": "ステータス定義に「UPDATING（確定後の改訂中）」を追加し、運用フェーズにおける仕様変更時のライフサイクルを明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7",
+    "issue": "ベンチマークの出力フォーマットの表頭に「Lais方針」「Laisの対応方針」と特定のプロジェクト名がハードコードされており、汎用的なアプリ固有テンプレートとして不適切である。",
+    "suggestion": "テンプレート内の特定プロジェクト名を「{アプリ名}方針」「{アプリ名}の対応方針」のように変数化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の依存パス例が `docs/plans/lais_project_v1.md` や `docs/plans/dev_system_spec.md` となっているが、`sub_infrastructure.md` §1.2の標準ディレクトリ構成には `docs/plans/` というディレクトリが存在しない。",
+    "suggestion": "パスの例を実際の標準ディレクトリ構成に合わせて `docs/project_v1.md` や `dev-system/dev_system_spec.md` に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  }
+]

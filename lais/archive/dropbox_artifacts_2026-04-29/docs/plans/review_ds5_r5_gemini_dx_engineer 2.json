@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6 / §18",
+    "issue": "§19.6の依存チェーン図ではe2e_fullflow_test.mdがproject_v1.mdのみに依存しているように描かれているが、§18の連鎖更新マップではux_redesign_v*.mdやdesign_spec_v*.md等の変更時にも更新すると定義されており、依存関係の定義が矛盾している。",
+    "suggestion": "§19.6の依存チェーン図を修正し、e2e_fullflow_test.mdがux_v1.md、design_spec_v1.md、reference_v1.md等の下流仕様書にも依存する（検証層として全仕様書から依存される）構造に統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存」メタデータに上流ファイルのバージョン番号（例: v1.3）を記載するルールだが、上流ファイル更新時に下流ファイルのヘッダーを自動同期する仕組みがないため、手動管理となり確実に実態と乖離する。",
+    "suggestion": "依存メタデータからバージョン番号を外してファイルパスのみの指定とするか、§18の依存関係マップに基づきヘッダーのバージョンを自動同期するスクリプトを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.1 / §18 / §16.3",
+    "issue": "§19.1ではUX仕様書のファイル名が「docs/ux_v1.md」と定義されているが、§18や§16.3では「ux_redesign_v*.md」と記載されており、ファイル命名規則が不一致となっている。",
+    "suggestion": "全体でファイル名を統一する（例: 新規アプリ向けテンプレートに合わせて「ux_v*.md」に統一し、§16.3や§18の記述も修正する）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "project_v1.mdのベンチマーク要件で「App Storeレビュー分析」を要求しているが、ADV（Claude.ai）はリアルタイムのApp Storeスクレイピング機能を持たない可能性が高く、自律的な実行が困難。",
+    "suggestion": "「POが提供するApp Storeレビューのテキストデータを基に分析する」といった前提条件を追記するか、AIが自律的にアクセス可能なWeb上の競合情報にスコープを限定する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4",
+    "issue": "project_v1.md §3（画面構成）、ux_v1.md §1（画面遷移）、system_map.md §3（画面遷移図）で画面一覧や遷移の定義が重複しており、§1.1のSingle Source of Truthの原則に反するリスクがある。",
+    "suggestion": "各仕様書の責務を明確化し、画面一覧の正本を1つのファイル（例: ux_v1.md）に限定し、他のファイルからは参照（リンク）する形にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの例で「docs/plans/lais_project_v1.md」と記載されているが、§19.1やディレクトリ構成では仕様書は「docs/」直下に配置される。また「lais」という特定プロジェクト名が残っている。",
+    "suggestion": "例示を「docs/project_v1.md」に修正し、特定プロジェクト名をプレースホルダー（例: {app_name}_project_v1.md）に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力フォーマットの表ヘッダーに「Lais方針」「Laisの対応方針」と特定のプロジェクト名がハードコードされており、他アプリへの汎用性が低い。",
+    "suggestion": "「Lais方針」を「自社方針」または「{アプリ名}方針」といった汎用的なプレースホルダーに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  }
+]

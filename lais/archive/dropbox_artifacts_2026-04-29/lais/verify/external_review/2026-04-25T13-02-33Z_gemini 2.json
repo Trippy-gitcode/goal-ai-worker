@@ -1,0 +1,60 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "resolveFiles, readSpecs",
+    "issue": "resolveFiles関数でパスがディレクトリであるかの判定を行っていないため、入力にディレクトリが含まれる（または `*` がディレクトリにマッチする）と、readSpecs内の `fs.readFileSync` で `EISDIR` エラーが発生しスクリプトが確実にクラッシュします。",
+    "suggestion": "fs.statSync(path).isFile() を使用して、ファイルのみを files 配列に追加するようにフィルタリング処理を追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "runPrecommitMode",
+    "issue": "仕様上 `--async` は「非同期モード（fire-and-forget）」と定義されていますが、実装では `await Promise.all(...)` でAPI応答を同期的に待機しています。これにより pre-commit hook が毎回API完了まで数分間ブロックされ、開発フローが完全に破綻します。",
+    "suggestion": "opts.async が true の場合は、child_process.spawn を用いて別プロセスとして自身をデタッチ起動（標準入出力を切り離し unref()）し、現在のプロセスは即座に process.exit(0) するよう修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "main",
+    "issue": "results.push({ id: '_metadata', ... }) でメタデータを配列に追加した直後に for (const item of results) で集計を行っているため、totalItems がジョブごとに1つ水増しされ、存在しない severity '?' がカウントされてしまいます。",
+    "suggestion": "集計ループを回し終わった後にメタデータを push するか、ループ内で if (item.id === '_metadata') continue; を追加してメタデータを集計対象から除外してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "resolveFiles",
+    "issue": "簡易 glob の正規表現生成 `new RegExp('^' + base.replace(/\\*/g, '.*') + '$')` において、`.` などの正規表現メタ文字がエスケープされていません。これにより `sub_*.md` が `sub_1_md` のような意図しないファイル名にもマッチするリスクがあります。",
+    "suggestion": "base の文字列に対して `*` 以外の正規表現メタ文字（`.` など）をエスケープする処理を追加してください。例: base.replace(/\\./g, '\\\\.').replace(/\\*/g, '.*')",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ファイル先頭の import 宣言",
+    "issue": "`const { glob } = require('path');` と記述されていますが、Node.js の path モジュールに glob 関数は存在しません。これは常に undefined となる Dead code であり、開発者の混乱を招きます。",
+    "suggestion": "コード内で glob は使用されていないため、この不要な require 行を削除してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0196,
+    "input_tokens": 12509,
+    "output_tokens": 786,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

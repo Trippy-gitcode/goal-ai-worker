@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s01_signin",
+    "location": "画面上部タイトル「Lais」",
+    "issue": "ロゴタイプがfont-weight:200で表示されており、デザインシステム1.3の暫定ロゴ定義（system-ui、font-weight 600、letter-spacing -0.5px）に反しています。",
+    "suggestion": "タイトル「Lais」をブランド暫定ロゴタイプに統一（font-weight:600、letter-spacing:-0.5px）。h1見出しではなくロゴ扱いで余白もロゴ高さの50%以上を確保。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s01_signin",
+    "location": "同意チェックボックス（利用規約・プライバシーポリシー横）",
+    "issue": "チェックボックスの見た目が20×20pxで、デザインシステム4.5の最小タップ領域44×44px要件に未達。",
+    "suggestion": "チェックボックスとラベル全体に44×44px以上のタップ領域を設定（paddingまたは::beforeで透明ヒットエリアを拡張）。ラベルクリッ���でもトグル可能に。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "「所要時間」チップ群（5分〜120分）",
+    "issue": "各チップの高さが約28px（padding:6px 14px）で、4.5最小タップ領域44pxに未達。主要操作での誤タップリスクが高い。",
+    "suggestion": "チップのmin-heightを44px以上にし、行間を確保。視覚高さを変えたくない場合はhit-areaを拡張（::beforeで高さ44px）してタップ領域のみ広げる。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s15_goal_create",
+    "location": "「カテゴリ」チップ群（仕事/健康/学習/趣味/人間関係/その他）",
+    "issue": "チップの視覚高さが約32pxで、4.5の44px要件に未達。頻出操作での操作性が低下。",
+    "suggestion": "チップのmin-heightを44px以上に引き上げ、横方向はwrapで改行。あるいは透明ヒットエリアで44pxを満たす。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内のCTA群（登録する／編集して登録／✕）",
+    "issue": "3つのボタンの視覚的ヒエラルキーが近く、主CTAへの視線誘導が弱い。Z→Nフローの中で迷いが生じる。",
+    "suggestion": "主CTA「登録する」を塗りボタン（--button-primary-bg）で強調、副次はアウトライン/テキストで階層化。ボタン間隔を8→12pxに拡大し誤タップも防止。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "「+ タスクを追加」テキストリンク",
+    "issue": "色と「+」記号のみで可視化されており、インラインリンクの下線必須（2.2 §2.2 リンク色の役割分離: underline併用）に未準拠の恐れ。",
+    "suggestion": "下線（text-decoration: underline）を追加するか、ボタンスタイル（枠線/アイコン）で色以外の手掛かりを明確化。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "タスク行の区切り線（rgba(72,79,88,0.3)）",
+    "issue": "区切り線コントラストが低く、bg-primary上で非テキスト3:1（WCAG 1.4.11）を満たしていない可能性。情報上のグルーピング要素としては弱い。",
+    "suggestion": "情報を分ける区切り線には--border-strong（#6E7681相当）へ切り替え、もしくは線を減らし--space-xlでグル���ピングを表現。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s02_onboarding",
+    "location": "見出しブロックとアバター選択の間（48px+64pxの大きな間）",
+    "issue": "見出しと候補コンポーネントの距離が広く、視線が一度途切れる。Zの折り返しで空白が“間”ではなく“空白”として感じられる。",
+    "suggestion": "見出し下余白を48→32px、アバター群の上余白を64→40pxへ圧縮。選択中ラベルを見出し直下に小さく表示し、連続性を補強。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s30_me",
+    "location": "基本情報セクション内の連続ボーダー",
+    "issue": "各行をボーダーで連続分割しており、Open Air（4.2）の“余白で区切る”原則からやや外れて硬い印象。視線の呼吸が浅い。",
+    "suggestion": "1行ごとのボーダーを削減し、行間paddingを14→18px、セクション間は--space-xl（40px）でリズム形成。重要行のみ薄い区切りを残す。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域のEXP数値（1,240 / 2,000、11px）",
+    "issue": "EXPの数値が11pxでやや小ぶり。ダーク背景で可読性は基準を満たすが、機能上の重要度に対し視覚的優先度が低い。",
+    "suggestion": "数値を--font-size-sm（14px）に引き上げるか、色を--text-secondaryへ統一して読み取りやすさを向上。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "下部の無効ボタン（進め方を聞く／詰まりを相談）",
+    "issue": "無効状態のボタンが有効ボタンと形状が同一で、色差も小さめ。視線上、アクティブ/非アクティブの判断に一拍遅れが生じる。",
+    "suggestion": "無効ボタンはtext色を--text-disabled、枠線を透明、背景を--bg-disabledへ下げ、アフォーダンス差を明確化。アイコンに斜線を重ねる案も検討。",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

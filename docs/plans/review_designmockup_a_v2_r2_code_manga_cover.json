@@ -1,0 +1,46 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STORYTELLING",
+    "screen": "s10_grow",
+    "location": "タスクタイムライン全体",
+    "issue": "『積み重ねの物語』を語る視覚言語が薄い。時刻+タスクが単なるリストで、成長の物語性が出ていない。",
+    "suggestion": "縦ラインに微妙な変化（進行中=光る/完了=星印）等の物語装飾。Phase B 対応候補。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "ICON_LANGUAGE",
+    "screen": "s20_talk",
+    "location": "ヘッダー 🕐 / 📝 + 左下 📎",
+    "issue": "B群v2 3アイコン（履歴/新規/添付）は仕様通り配置 ✅。ただし絵文字風で視覚統一感弱い。",
+    "suggestion": "SVG アイコン化し、全画面で一貫したストローク幅・サイズに揃える。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "COMPOSITION",
+    "screen": "s14_goal_detail",
+    "location": "60% 巨大数字 + プログレスバー",
+    "issue": "LOCK #11 で Phase B/C 吸収予定。現時点は design_system NG『ヒーローメトリクス』該当だが既決定。",
+    "suggestion": "(対応不要・情報提示のみ)",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "EMOTION",
+    "screen": "s30_me",
+    "location": "AI理解メモ本文",
+    "issue": "line-height が §3.4 日本語本文 1.7 相当で呼吸感あり。",
+    "suggestion": "(問題なし)",
+    "model": "Code",
+    "persona": "manga_cover"
+  }
+]

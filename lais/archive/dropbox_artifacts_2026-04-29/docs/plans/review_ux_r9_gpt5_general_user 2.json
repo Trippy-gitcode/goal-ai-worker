@@ -1,0 +1,222 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5 / ux_v1.md §8, §2.3",
+    "issue": "1日のEXP上限（300EXP）に到達した際のUXが未定義。タスク完了時の演出・トースト・その後の挙動（EXPが増えない/増える）やガイダンスがない",
+    "suggestion": "上限到達後の動作を統一定義: ①タスク完了は可能だがEXPは付与しない ②トースト「本日のEXP上限に達しました。明日4:00にリセット」表示 ③EXPフロートテキストは非表示、チェックは付く ④初回到達時はGROW上部に一時バナー ⑤翌日リセット時の再開ガイダンス（バナー/トースト）",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.3",
+    "issue": "TALKのタスク提案で「単一タスクはモーダル編集（S-12）」「複数タスクはチャット内インライン（アコーディオン）編集」と記載が分かれ、ジェスチャー/編集様式が不一致。変更履歴には『モーダル化』とあるが本文と不整合",
+    "suggestion": "編集様式を単一/複数ともにS-12ハーフモーダルへ統一し、���文を修正。複数の場合はタスク毎にS-12を連続表示（完了/スキップで次へ）。インライン編集案は削除して一貫性確保",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 と §4.5（内部矛盾）",
+    "issue": "レベル計算が「Lv1→2=100EXP」（§4.4）と「Lv1→2=1,000EXP」（§4.5記述）で矛盾。初回体験（初日にLv2到達）とも整合しない可能性",
+    "suggestion": "正値を§4.4の100EXPに確定し、§4.5の誤記を削除/修正。関連する設計意図やテーブルの数値も再確認。UX側（バナー文言等）と整合を取る",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.4（ゴール詳細）/ project_v1.md §3.2（ゴール進捗）",
+    "issue": "ゴールに紐づくタスクを『削除』した場合の進捗バーの分母/分子更新ルール（完了済みタスクを削除した時の進捗巻き戻し可否など）が未定義",
+    "suggestion": "進捗再計算ルールを明記: 例) 未完了タスク削除→分母減少（%維持/上昇し得る）。完了済み削除→履歴確保のため削除不可かアーカイブに限定（���捗は維持）。UI: 完了済みに削除ボタン非表示 or 確認ダイアログで影響説明",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §5.1（オンボーディング）",
+    "issue": "オンボーディングは5ステップでスキップ不可（Step3-5は空で次へ可）。自己成長に強い関心がないユーザーには最初の摩擦が高い",
+    "suggestion": "全ステップに『スキップ』を明示（Step1は後から編集できる旨を併記）。完了後に簡単なツアー/空状態CTAで自然に補完し、初回はGROWで「+タスク追加」か「AIに相談」へ1タップ導線を強調",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §1.1 S-00 / project_v1.md §1.1-1.3",
+    "issue": "初見で『何のアプリか』は概ね伝わるが、ゲーム用語（EXP/称号/進化/Phase）が多く、非ゲーマーには抽象的。具体的な“何ができる”が1スクリーンで掴みにくい",
+    "suggestion": "S-00に1行の平易なコアバリューメッセージと3点の具体例を追加（例:『今日やることをAIと決めて、終わらせるたびに“成長”が見える』/『タスク管理』『AI相談』『友達と励まし合い』）。用語ツールチップや初回ツアーで“EXP=経験の見える化”を説明",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2（プラン管理）",
+    "issue": "Stripe外部画面からの復帰で『キャンセル/失敗』時の戻り先・トースト・状態復元が未定義",
+    "suggestion": "復帰ハンドリングを明記: 成功→トースト『変更しました』/即時反映。キャンセル→S-38へ戻し『キャンセルされました』。失敗→S-38へ戻し『処理に失敗』+再試行。外部復帰用return_urlとstate保持を仕様に追記",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2 / §7.4",
+    "issue": "AI対話とソーシャルメッセージのテーブル命名が混在（messages / social_messages）。RLSの誤適用によりAI対話が友達に漏洩するリスク",
+    "suggestion": "テーブルを明確分離（ai_messagesとsocial_messages等）し、RLSポリシー例を両者で明記。ux_v1.mdの関連箇所も用語統一。データエクスポート/削除時の対象範囲も再確認",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘッダー）",
+    "issue": "ヘッダーに☰（履歴ドロワー）と🕐（履歴?）が並列で存在し役割が重複・不明瞭",
+    "suggestion": "履歴入口は1つに統一（☰=ドロワー）。🕐は削除 or 別機能（会話固定/ピン等）に割当。ヘッダーアイコンの意味をUIガイドに明記",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（Overdue）",
+    "issue": "Overdueの『明日に延期』は即時適用だが取り消しUIはトーストのアクションのみ。誤操作時に見逃すと戻しにくい",
+    "suggestion": "『明日に延期』実行後に30秒Undoスナックバー（タスク完了と同様）を統一適用。S-11詳細にも『元の日付に戻す』を一時表示",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（ドラッグ並び替え）",
+    "issue": "Today内のドラッグ並び替えが『開始時刻による自動ソートを手動で上書き』とあるが、手動順と時刻順の衝突条件（再編集で時刻変更時の��序ルール）が不明",
+    "suggestion": "ソート優先度を明記: 手動順優先/時刻更新時に自動順へ復帰/『手動順をリセット』ボタン提供など、再現性あるルールを定義",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §5.3（オンボ完了後）/ project_v1.md §3.5",
+    "issue": "初回体験として『AIが初回タスク自動提案』は良いが、“なぜそれが選ばれたか”が分からず押し付け感が出る恐れ",
+    "suggestion": "初回提案カードに『あなたが選んだジャンルからの提案です』など根拠ラベルを表示。編集前提で“自分事化”させるコピーを追加",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（FRIENDS）/ project_v1.md §7.4（友達上限）",
+    "issue": "友達の上限（500人）到達時のUX（エラー/案内/既存整理導線）が未定義",
+    "suggestion": "上限到達時は『上限に達しました』ダイアログ＋ブロックリストや解除導線を提示。上限残数をS-33ヘッダーに小さく表示（任意）",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §15（通知ディープリンク）",
+    "issue": "通知からのディープリンク時、未ログイン/アカウント削除クーリングオフ中の分岐はあるが、対象エンティティが削除/非公開になった場合の画面（404/権限なし）が未定義",
+    "suggestion": "『見つかりません/権限がありません』プレースホルダーを追加。戻り導線（GROWへ）と再通知抑止（同ID通知の無効化）を仕様化",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.2, §8.2, §3.4",
+    "issue": "『EXP/称号/進化/Phase』などゲーミフィケーション用語がアプリ内での意味説明なし。非ゲーマーには“意味がわからない”可能性",
+    "suggestion": "初回のみヒーロー領域に『i』ツールチップを表示し、用語の短い説明（EXP=経験の見える化/称号=現在の段階 等）を提示。ME > PROFILEにも『用語集』リンクを設置",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §9.1（オフライン）",
+    "issue": "オフライン時QR『リンクで追加する』は良いが、相手プロフィール取得不可のままリクエストを送ると期待不一致になりやすい",
+    "suggestion": "オフライン時は『リンクで追加する』を非表示 or 押下時に『オンラインで再試行してください』ダイアログを表示。送信キュー投入の有無も明記",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.2（遷移マトリクス）/ §1.1（画面一覧）",
+    "issue": "S-42（メール変更）/S-43（パスワード変更）/S-44（ブロックリスト）は画面一覧にあるが、1.2の主要パス図に明示がなく、遷移起点が初見で追いづらい",
+    "suggestion": "1.2の遷移マトリクスにS-42/S-43/S-44への分岐を明記（S-37→S-42/S-43/S-44）し、行き止まりのないことを視覚的に保証",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.4（TALK内レベルアップ）/ §8.2",
+    "issue": "TALK内でのレベルアップ時、GROWに戻った際の“再生フラグ”管理は記載あるが、連続で複数レベルアップが起きた場合の再生回数/省略ルールが未定義",
+    "suggestion": "レベルアップ演出は最��1回/画面復帰で再生、複数到達はまとめて最終レベルのみ演出再生（到達レベルをバナーで通知）。演出キューに明記",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §5.0（サインアップ）/ §5.0.1（認証待ち）",
+    "issue": "メール認証フローは丁寧だが、LINE/Apple/Googleログイン未対応のため初手離脱リスク（ターゲット層の一般ユーザーにとって面倒に感じる）",
+    "suggestion": "v0.1.0でも『後日対応予定』の案内と、Magic Link（パスワードレス）をデフォルト推奨に。iOS/Androidの共有シートからMagic Link開封時の自動復帰も明記",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（タスク完了Undo）/ §8.6（演出キュー）",
+    "issue": "Undoスナックバーが『直近1件のみ』に限定される設計は明記済みだが、複数タスクを高速に連打完了後に『誤完了の復元パス』がタスク詳細でしか見つからない可能性",
+    "suggestion": "Todayセクションに『最近完了したタスク』簡易リスト（当日5件まで/30分以内）を追加し、そこから未完了に戻せる導線を提供。もしくは検索/フィルタで“完了のみ”を素早く切替",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "HIGH",
+    "category": "PROJECT_VS_UX",
+    "location": "ux_v1.md §0.3（ベンチマーク対応）/ 全体",
+    "issue": "競合課題の回避方針は言及されているが、『Free版の価値毀損』と『長いオンボの離脱』へのUX側ガードが十分に具体化されていない（Freeの価値提示/オンボ短縮体験の定量KPI未設定）",
+    "suggestion": "UX指標を追記: 初回セッション完了までの平均タップ数、オンボ離脱率<20%、Freeユーザーの“最初の成功体験（タスク完了/AI相談）”達成率>70%など。空状態CTAのABテスト計画も明記",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（Upcoming）",
+    "issue": "Upcomingに表示されたタスクの期限変更/日付変更時、Todayへの自動反映タイミング（保存即時/日次バッチ）が未定義",
+    "suggestion": "保存即時でToday/Upcomingの所属をリアルタイム更新と明記。日付を“今日”にするとTodayトップ（Overdueの下）へスクロールイン",
+    "model": "GPT-5",
+    "persona": "general_user"
+  }
+]

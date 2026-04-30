@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "§4.6.1 / §4.20.1",
+    "issue": "必須Readとして「§C0〜C6」が指定されているが、dev_system_spec.mdは§1〜§20の構成であり、§C0〜C6という章が存在しない。物理的に参照不可能。",
+    "suggestion": "実際のdev_system_spec.mdの章番号（§1〜§20）にマッピングするか、§C0〜C6の定義と配置場所を明確に記載する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.7.2 / §6.9",
+    "issue": "§4.7.2で完了コマンドを3区分（cmd-unit/cmd-e2e/cmd-realworld）で要求しているが、mission_template_v3.mdには`cmd1`しかなく3区分を記載する枠がない。ENGがフォーマット違反を起こす。",
+    "suggestion": "templates/mission_template_v3.mdの完了コマンド欄を`cmd-unit:`, `cmd-e2e:`, `cmd-realworld:`の3行構成に修正する指示を§6.9に追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.8.1 / §4.8.2",
+    "issue": "提案ログの滞留日数を「proposal_log_lint.shが更新」と定義しているが、スクリプトは標準出力にWARNを出すだけでファイル書き換えロジックがない。手動更新はソロ開発の運用負荷を上回る。",
+    "suggestion": "proposal_log_lint.shにsedやawkを用いてsession_progress.mdの滞留日数テキストをインプレース更新する処理を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "EDGE_CASE",
+    "location": "§4.5.1",
+    "issue": "hflow_trigger_check.shの`git diff --name-only \"$base\"...HEAD`において、ソロ開発でmainブランチに直接コミット・プッシュする運用の場合、origin/mainとHEADが同一になりdiffが空になる。結果、Hフローが絶対に発火しない。",
+    "suggestion": "pre-push時はpushされるコミッ��範囲を標準入力から受け取ってdiffを取るか、直近のコミット（HEAD~1..HEAD等）をフォールバックとして正しく処理する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.12.1 / §5.4",
+    "issue": "playwright.realworld.config.tsのreporter出力先が`logs/realworld/latest/realworld-proof.json`に固定されているが、G17スクリプトは`logs/realworld/$MISSION_ID/realworld-proof.json`を参照するため、常にファイルが見つからずFAILする。",
+    "suggestion": "Playwright実行時に環境変数でMISSION_IDを渡し、config側で`logs/realworld/${process.env.MISSION_ID}/realworld-proof.json`に出力するように修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§5.4 / sub_infrastructure.md §2.8",
+    "issue": "G17スクリプトが`logs/deploy.log`のタイムスタンプを参照しているが、deploy.shに`logs/deploy.log`を生成・追記する処理が存在しないため、G17が誤動作する。",
+    "suggestion": "deploy.shの完了時に`date -u +%Y-%m-%dT%H:%M:%SZ > logs/deploy.log`を出力する処理を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§4.10.1",
+    "issue": "pre-commit-subの呼び出しで`for SUBDIR_ROOT in lais goal-ai-worker; do`と特定のプロジェクト名がハードコードされている。共通基盤（PD-008）であるdev-systemのスクリプトとして他プロジェクトで流用できない。",
+    "suggestion": "ハードコードを避け、`find . -mindepth 2 -name pre-commit-sub.sh`で動的に探索するか、app_config.yamlでサブディレクトリを定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.19.1 / §4.7.5",
+    "issue": "§4.7.5で「READY_FOR_DEPLOY → IN_PROGRESS 再戻し時の session_progress.md 更新主体が deploy.sh 自動」と謳っているが、append_deploy_fail.shに元のミッションのSTATUSを書き換える処理がない。",
+    "suggestion": "append_deploy_fail.sh内で、対象の$MISSION_IDのSTATUSをREADY_FOR_DEPLOYからIN_PROGRESSにsed等で書き換える処理を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§4.14.1",
+    "issue": "「SKIP=DONE不可」の厳格化により、1つの些細なテストをSKIPしただけで、他の���装済み機能を含むミッション全体がデプロイできなくなる。ソロ開発のスピードを著しく阻害する。",
+    "suggestion": "低/中リスクミッションにおいては、SKIPを許容しつつDONE可能（次ミッションでSKIP-RETRYを強制）とするか、ミッションの分割を許可する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "ROBUSTNESS",
+    "location": "§5.2",
+    "issue": "G15のgrepパターン`before-[a-z]+\\.json`では、dev_system_spec.md内に残存する可能性のある古い`before.json`を検出できず、仕様と実装の乖離を見逃す。",
+    "suggestion": "grepパターンを`before(-[a-z]+)?\\.json`のように拡張し、古い命名規則も検出してFAILさせるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  }
+]

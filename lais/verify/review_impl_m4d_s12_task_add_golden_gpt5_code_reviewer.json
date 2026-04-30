@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "S12TaskAdd.css .s12-modal / design_spec §4.5 画面高",
+    "issue": "モーダルの高さが spec の「画面高 60%」ではなく max-height: 85vh で実装されており、内容量に依存して高さがバラつく。検証可能なスクショ事実（約60%）とも齟齬。",
+    "suggestion": "ベースを高さ: 60vh（min-height: 60vh）とし、内部を overflow-y: auto にする。モバイル環境でのキーボード対応が必要なら、@supports(env) などで安全域を加味した calc(min(60vh, 85vh)) や、小画面ブレークポイントでのみ max-height を 85vh にフォールバックする等、意図をコメントで明示。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "design_spec §4.5 S12-9 予定日",
+    "issue": "予定日（単発時）の右側 14px カレンダーアイコンが未実装。",
+    "suggestion": "S12-9 の readonly 表示にカレンダー SVG（14px、stroke: --text-muted）を右寄せで追加し、S12-10 と同様のレイアウトユニット（justify-content: space-between / flex-shrink: 0）で整える。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "S12TaskAdd.jsx S12-3 ✕ ボタン",
+    "issue": "✕ アイコンが 16×16 で実装され、spec の 20×20 から逸脱。",
+    "suggestion": "SVG のサイズを 20×20 に変更し、stroke-width 等は視認性に応じて再調整。タップ領域 44×44 は CSS で既に確保済みのためアイコンサイズのみ修正。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "S12TaskAdd.jsx S12-5/S12-8 radiogroup",
+    "issue": "role=\"radiogroup\" を宣言しているが、ロービング tabindex と矢印キー操作が未実装で、Tab 停止点が要素数分に増えアクセシビリティの一貫性が損なわれる。",
+    "suggestion": "選択中のラジオのみに tabindex=0、他は -1 を付与してロービング tabindex を実装。radiogroup で ArrowLeft/Right（または Up/Down）をハンドリングし、選択を移動（Space/Enter で確定）。aria-activedescendant を使う実装も可。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx focus trap useEffect",
+    "issue": "Tab トラップが境界での循環のみ��扱っており、フォーカスが何らかの理由でモーダル外へ移動した場合に強制的に戻す仕組みがない（focusin 監視なし）。",
+    "suggestion": "document への keydown だけでなく、capture フェーズの focusin リスナーを追加し、event.target がダイアログ外の場合は最初のフォーカス可能要素に強制移動する。もしくはフォーカストラップ専用ライブラリの導入を検討。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx useEffect(ESC キー) 依存配列",
+    "issue": "ESC ハンドラ useEffect の依存配列が [open] のみで、handleClose/onClose/returnFocusRef の更新を捕捉しないため、理論上は古いクロージャを参照する可能性がある（eslint 無効化済み）。",
+    "suggestion": "依存配列に handleClose を含めるか、handleClose を useRef に保持して最新を参照する。eslint 無効化は削除し、Hook ルールに従う。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx ラベルと入力の関連付け",
+    "issue": "id が固定文字列（例: s12-name-input）で複数インスタンス表示時に衝突のリスク。設計上は単一想定でも将来の再利用でバグ温床になりがち。",
+    "suggestion": "useId() を用いて各 input/textarea の id をユニーク生���し、label の htmlFor（現状の for）と連動させる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx label 要素",
+    "issue": "JSX で label 属性に for を使用（Preact では動作するが、型付け/移植性の観点では htmlFor が望ましい）。",
+    "suggestion": "for を htmlFor に置換し、各入力の id と一致させる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "S12TaskAdd.jsx S12-9/S12-10 readonly 表示",
+    "issue": "div に aria-readonly=\"true\" を付与しているが、非インタラクティブ要素では意味を持たず支援技術にノイズとなり得る。",
+    "suggestion": "aria-readonly は削除。将来的に選択 UI を実装する場合は button[aria-haspopup] など適切なロールを付与し、現状は単なるテキスト表示とする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx body scroll lock useEffect",
+    "issue": "document.body.style.overflow を直接上書きしており、他コンポーネントも同様のロックを行う場合に競合・取りこぼし���解除順序問題）を起こしやすい。",
+    "suggestion": "body にクラス付与（例: .no-scroll）で管理し、参照カウント方式で入れ子モーダルや同時ロックに耐える実装にする。理想は inert 属性/aria-hidden の併用で画面外操作も遮断。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx handleSubmit",
+    "issue": "本番ビルドに console.log が残る。",
+    "suggestion": "NODE_ENV を条件に除去するか、デバッグロガー経由に変更。リリース前にツールでストリップする運用でも可。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S12TaskAdd.jsx radiogroup のラベル付け",
+    "issue": "radiogroup に aria-label を付与しているが、legend と aria-labelledby を併用した方が翻訳・再利用に強く、支援技術の読み上げも安定する。",
+    "suggestion": "legend 要素に id を付与し、radiogroup 側に aria-labelledby で関連付ける（aria-label は削除）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

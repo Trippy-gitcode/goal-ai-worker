@@ -1,0 +1,22 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.1 S00-2",
+    "issue": "ステートメント（.s00-tagline）に、仕様書に記載のない `letter-spacing` と `line-height` が適用されています。仕様書では S00-2 要素のタイポグラフィとして `font-size` と `font-weight` のみが定義されていますが、実装には `letter-spacing: var(--letter-spacing-ja);` と `line-height: var(--line-height-ja-body);` が追加されています。",
+    "suggestion": "これらのスタイルがデザインシステム全体で適用される共通ルールであり意図したものであれば、仕様書 §4.1 の S00-2 要素仕様に追記することを推奨します。もしこの画面固有のスタイルで意図しないものであれば、該当のCSSプロパティを削除してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.1 S00-3, S00-4",
+    "issue": "両CTAボタン（.s00-cta-primary, .s00-cta-secondary）のテキストに、仕様書に記載のない `letter-spacing: var(--letter-spacing-ja);` が適用されています。仕様書では S00-3, S00-4 要素のタイポグラフィとして `font-size` と `font-weight` のみが定義されています。",
+    "suggestion": "このスタイルがボタンコンポーネントの共通スタイルとして意図したものであれば、仕様書 §4.1 の S00-3 および S00-4 の要素仕様に追記することを推奨します。意図しない場合は、該当のCSSプロパティを削除してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "spec_compliance"
+  }
+]

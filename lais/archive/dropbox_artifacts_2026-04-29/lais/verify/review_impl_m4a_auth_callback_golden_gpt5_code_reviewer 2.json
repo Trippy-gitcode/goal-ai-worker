@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "2",
+    "issue": "detectSessionInUrl による自動 code 交換の進行中/直後に AuthCallback が明示 exchange → 即時 getSession 判定を行うため、セッション確立前タイミングで false negative（エラー扱い→/auth リダイレクト）になるレースが起こり得る。",
+    "suggestion": "セッション確立の最終判定をもう少し待つ仕組みにする。例: (1) まず getSession で既存セッションがあれば即成功、(2) URL に code があれば exchangeCodeForSession を await（used/invalid は無視）、(3) 上記後も session が null の場合は onAuthStateChange を一時購読 or 短時間（例 2〜3 秒、指数バックオフ）で getSession をポーリングし、セッションが入ったら成功扱い、タイムアウト時のみエラー遷移、(4) 購読とタイマーは必ずクリーンアップ。これで detectSessionInUrl との競合・非決定性を解消できる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "手動 exchange 実行後やセッション確立後に URL の ?code=（および hash のエラーパラメータ等）を消していないため、リロードや戻る操作で再交換が走ったり、余計なエラーを誘発する可能性がある。",
+    "suggestion": "セッション確立（または exchange 試行）直後に history.replaceState で /auth/callback のクリーン URL に置き換える。例: window.history.replaceState({}, '', '/auth/callback');",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "error_description を URLSearchParams で取得後に decodeURIComponent を再実行しているため二重デコードの可能性がある。値に不正な % が含まれるケースで URIError を投げ、元エラー文言が失われる恐れ（catch で握りつぶされ汎用メッセージになる）。",
+    "suggestion": "URLSearchParams はデコード済みの値を返すため、基本はそのまま使用する。どうしても +→space の補正が必要なら decode は行わず replace のみに留めるか、decode は try/catch で失敗時は生値を使う。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "WELCOME_HOLD_MS=900 がハードコードで design_system の --duration-celebration(800ms) とズレており、トークン変更時にコードとの不整合が発生する。",
+    "suggestion": "CSS カスタムプロパティから実測して JS 側のホールド時間を算出する（getComputedStyle(document.documentElement).getPropertyValue('--duration-celebration') をパース）。reduced-motion 時は 1ms へ縮退するため、この値に追従すれば JS 側の特別扱いも簡素化できる��",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2",
+    "issue": "エラー時の 2000ms 待機がマジックナンバー。ユーザーによっては待ち時間が長く感じられる一方、SR 利用者には再読上書きの懸念もある。デザイン・モーションのトークンとも非連動。",
+    "suggestion": "トークン（--duration-slow 等）に合わせるか、即時遷移 + ログイン画面でエラー表示へ切り替える。あるいは「今すぐログインへ」アクションを提供して待機スキップを可能にする。reduced-motion では待機をスキップするなど配慮を。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "2",
+    "issue": "SSR/prerender 将来対応の観点で bootstrapAuth はクライアント副作用に移動済みだが、AuthCallback 自体が supabase クライアントをトップレベル import しており、ビルド設定/環境変数次第で SSR 時に createClient が評価・失敗するリスクが残る。",
+    "suggestion": "supabase クライアントの生成を遅延化（factory 関数や dynamic import）し、クライアント環境のみで初期化する。あるいは SSR 環境ではモックを返す抽象化レイヤーを用意する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "AuthRoute/NotFound で preact-router の url プロップに依存してクエリを解析しているが、将来のライブラリアップデートで互換性が変わる可能性がある。",
+    "suggestion": "ルータの公式な API（onChange ハンドラや location 取得ユーティリティ）を使うか、window.location を直接参照する軽量実装に切り替える。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2",
+    "issue": "import '../../lib/supabase.js' のような相対パスの多段参照は可読性・保守性を下げる。",
+    "suggestion": "Vite の resolve.alias を使い、@lib/supabase のようなエイリアスに統一する。import パスの揺れを防ぎ、リファクタリング容易性を高める。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2",
+    "issue": "role=\"status\" と aria-live は適切だが、フォーカス管理が無く SR ユーザーが状態更新に気づきにくい可能��がある。",
+    "suggestion": "ステータス要素に tabIndex=\"-1\" を付け、マウント時に focus() してアナウンスを確実に行う。loading 中は aria-busy=\"true\" を付与するとなお良い。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "AuthCallback の catch でエラーをユーザー表示に変換しているが、開発・運用時のトラブルシュート用にロギングが不足している。",
+    "suggestion": "console.error もしくは監視基盤（Sentry 等）に e と関連コンテキスト（URL、code の有無、prefersReducedMotion など）を送る。ユーザー表示は安全なテキストのままで問題ない。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

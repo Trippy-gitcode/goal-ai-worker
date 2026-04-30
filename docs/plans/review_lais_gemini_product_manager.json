@@ -1,0 +1,106 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "3.3, 7.1",
+    "issue": "TALK画面での「画像添付」機能について、画像の保存先（Supabase Storage等）、ファイルサイズ上限、対応フォーマット、保存期間、およびVision API（画像認識）へのAIルーティング仕様が完全に欠落しています。",
+    "suggestion": "7.1技術スタックにSupabase Storageを追記し、画像サイズ上限（例: 5MB）、フォーマット（JPEG/PNG/WebP）、保存期間（対話履歴と同じ90日）、および画像添付時のAIモデル（GPT-4o mini等のVision対応モデルへの強制ルーティング）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "3.2",
+    "issue": "タスクの実行予定日が「過去」になった未完了タスク（Overdueタスク）の扱いが未定義です。Todayセクションに残り続けるのか、消えるのか、翌日の習慣タスクとどう区別するかが不明なため、日次更新ロジックが実装できません。",
+    "suggestion": "「実行予定日が過去の未完了単発タスクはTodayセクションの上部に『期限切れ(Overdue)』として表示し続ける」「習慣タスクの未完了分は翌日4:00にリセット（前日分は未完了として履歴のみ残る）」などのルールを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager",
+    "dismissed": true,
+    "dismiss_reason": "project_v1.mdはWHAT（何を作るか）に集中する文書。実装詳細のHOW（UIの具体挙動、エッジケースのタイミング、描画ロジック等）はux_v1.mdおよびreference_v1.mdで定義する（§10.2で明記済み）"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2.1, 4.5",
+    "issue": "Freeプラン（20回/日）でも冒険EXP上限（2回/日）を容易に達成可能です。MVPではショップ（装飾）がなく、アバター進化等のゲーミフィケーションを目的とするユーザーにとって、Basic/Proへ課金するインセンティブが極めて弱く、収益モデルの持続可能性に懸念があります。",
+    "suggestion": "MVP段階での課金価値を高めるため、「Basic以上ではAIがより詳細なタスク分解を提案する」「Pro以上ではDISCOVERのディープ分析結果が解放される」など、AIの質向上に伴う具体的な機能的メリットを2.1に追記することを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "4.4, 3.5",
+    "issue": "オンボーディングで初期アバターを3種から選択しますが、レベルアップ時（Phase 2, 3）のバリエーション（各3種）がどのように決定されるか（初期選択の系統をそのまま引き継ぐのか、AIが性格から分岐させるのか）が未定義です。",
+    "suggestion": "「アバターの進化バリエーションは、オンボーディングで選択した初期アバターの系統（属性）をそのまま引き継ぐ」または「対話傾向からAIが進化先を決定する」のいずれかを4.4に明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "4.2",
+    "issue": "ゴールが7日未満で全タスク完了し「完了待ち」状態になった際、ユーザーがそのゴールを削除または編集（タスク追加）できるか、その場合のEXPボーナスの扱いが未定義です。状態遷移のバグを引き起こす可能性があります。",
+    "suggestion": "「完了待ち状態のゴールは編集不可・削除のみ可能。削除した場合はゴール達成ボーナスは付与されない」等の制約を4.2に追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "SECURITY",
+    "location": "6.4",
+    "issue": "PII（個人情報）の正規表現マスキングを、クライアント側とサーバー側（Cloudflare Workers）のどちらで実行するかが未定義です。クライアント側のみの場合、改ざんや漏洩のリスクがあります。",
+    "suggestion": "「PIIの正規表現マスキングは、外部AI APIへリクエストを送信する直前にサーバー側（Cloudflare Workers）で必ず実行する」と明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "3.4",
+    "issue": "ME画面に4つのサブタブ（PROFILE, DISCOVER, FRIENDS, SHOP）がありますが、MEタブを開いた際のデフォルト表示タブや、サブタブ間のナビゲーションUI（上部タブバー、スワイプ等）が未定義です。",
+    "suggestion": "「MEタブ遷移時のデ���ォルトはPROFILEタブとする」「画面上部にスクロール可能なサブタブバーを配置する」などのUI構造を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "3.2, 4.5",
+    "issue": "習慣タスクの「翌日にリセット」のタイミングが明記されていません。EXPやAI対話回数のリセット（午前4:00 JST）と連動するのか、0:00なのか曖昧です。",
+    "suggestion": "3.2の習慣タスクの説明に「リセットタイミングはEXP等と同様に毎日午前4:00（JST）とする」と追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5.3",
+    "issue": "Web Push通知（応援やメッセージ）をタップしてアプリを起動した際、どの画面に遷移するかのディープリンク（ルーティング）仕様が未定義です。",
+    "suggestion": "「通知タップ時はアプリを起動し、ME > FRIENDS 画面の『お知らせ』一覧モーダルを自動的に開く」などの遷移仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "6.5",
+    "issue": "退会時の72時間クーリングオフ期間中、ユーザーが誤ってアプリをアンインストールしてしまった場合、ログインしてキャンセルする手段がWeb版（PWA）にアクセスするしかなく、案内が不十分になる可能性があります。",
+    "suggestion": "退会処理完了時に送信する確認メール内に、「72時間以内であれば以下のリンク（Web版URL）からログインすることで退会をキャンセルできます」という案内を含める仕様を追記することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

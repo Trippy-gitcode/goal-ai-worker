@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.1 Night Sky vs §9 CSS Tokens",
+    "issue": "Night Skyの--button-primary-bgの値が§5.1では#1A5FC8だが、§9のコピー用トークンでは#1F6FEBのまま。AA余裕化（R6対応）と矛盾。",
+    "suggestion": "§9のデフォルトTokensをv0.7の最終値に更新（--button-primary-bg: #1A5FC8 他差分も再確認）。コピー用ブロックは常に最新版の単一情報源にする。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.3 タイポ例と §9 CSS Tokens",
+    "issue": "§3.3の推奨例で--line-height-xl等のサイズ別トークンを参照しているが、§9では--line-height-display/heading/bodyのみでサイズ別line-heightトークンが未定義。例をそのまま実装するとvar()解決不能→font宣言が無効化されうる。",
+    "suggestion": "どちらかに統一。推奨はサイズ別line-heightトークンに揃える。§9に--line-height-xs/sm/base/lg/xl/2xl/3xlを追加し、既存display/heading/bodyは互換用エイリアスとして残す。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§8.1 ボタン（Danger subtle行の注記）",
+    "issue": "「rgba(*danger*, 0.18)→ --danger-subtle-hover」との表記は、実装者がrgba(var(--danger), 0.18)のような非互換実装を試みる誘因になる（多くの環境で失敗）。",
+    "suggestion": "「rgba(*danger*, …) は説明用。実装は--danger-subtle / --danger-subtle-hover / --danger-subtle-pressedのみを使用」と明記し、誤用例を明示的に禁止する。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "PERFORMANCE",
+    "location": "§5.0 テーマ切替アニメーション（.theme-switching）",
+    "issue": "html.theme-switching * にcolor/background/borderのtransitionを一括付与すると、DOMが大きい画面で再計算・ペイント負荷が高く、iOS Safariでフリーズ感が出る恐れ。",
+    "suggestion": "影響範囲を縮小。例: 主要ラッパー（body直下コンテナ）に限定、または[data-transitionable]にopt-in。プロパティもcolor/background-color中心に絞り、border-colorは必要要素のみに。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": "backdrop-filterはiOS Safariで高コストかつスクロール時にタイル再合成が発生しやすい。上限30要素のガイドはあるが、具体的なスタイル最適化指針が不足。",
+    "suggestion": "glass-surfaceに追加ベストプラクティスを明記: contain: paint; isolation: isolate; background-clip: padding-box; （必要に応じ）border-radiusと同じクリップで再合成域を最小化。ぼかし半径は12–16px上限、同時適用は「1画面あたりN要素まで」を具体値で。性能計測手順（Safari/Timeline）も追記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0 テーマ永続化・FOUC対策",
+    "issue": "meta name=\"theme-color\"の動的同期は要件のみでコード不在。初回描画前に反映されないとステータスバー色が一瞬ズレる（特にAndroid/PWA）。",
+    "suggestion": "head内インラインで現在テーマの--bg-primaryを計算しmetaを即時更新するsnippetを追加。setTheme()内でも同metaを更新。iOS PWAのstatus-bar-style（default/black/black-translucent）切替方針も併記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5 テーマ定義（共通）",
+    "issue": "color-schemeが未指定のため、ダーク系テーマでもUA標準コントロール（フォーム/スクロールバー等）がライト調になる可能性（iOS Safariで顕著）。",
+    "suggestion": "html[data-theme=\"night-sky\"], html[data-theme=\"harajuku-dark\"] { color-scheme: dark; } / html[data-theme=\"dawn\"], html[data-theme=\"harajuku-light\"] { color-scheme: light; } を追加。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.3 タイポグラフィの推奨実装例",
+    "issue": "font shorthandを多用するとletter-spacing等が初期化されやすく、意図せず字間設定が消えるリスク。",
+    "suggestion": "font-size/line-height/weight/familyを個別指定するガイドを併記し、shorthand使用時は直後にletter-spacingを再設定することを明示。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0 テーマ永続化スクリプト",
+    "issue": "iOS Safari（非PWA）では7日未使用でlocalStorageが消去され、テーマが既定に戻る可能性。UX §16.5-D2に一般論はあるがテーマ保存のフォールバック未記載。",
+    "suggestion": "テーマのみはCookie（二重化）にも保存し、head早期スクリプトでCookie→dataset復元を追加。キーはls/cookieで同名（lais.theme/lais.glass）を推奨。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§5.5 グラスON（ライト系）",
+    "issue": "ライト系Glass ONの--card-borderがrgba(0,0,0,0.08)で、非テキストUI境界の3:1確保要件（WCAG 1.4.11）に届かない場面があり得る。",
+    "suggestion": "ライト系も境界が機能的役割を持つ場合は不透明度を引き上げ（例: 0.12–0.16）またはshadow併用を明記し、3:1が必要なコンポーネントをリスト化。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§9 CSS Tokens",
+    "issue": "line-heightトークン体系が§3.3と不一致（display/heading/body vs サイズ別）。実装者がどちらを採用すべきか迷う。",
+    "suggestion": "トークンの正準体系を冒頭に宣言し、もう一方はエイリアスとして明示的にマッピング例を記載（例: --line-height-xl: var(--line-height-heading)など）。移行指針も添える。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0 setTheme()",
+    "issue": "テーマ切替時にfetchでユーザー設定同期を毎回送ると連打時に無駄なPATCHが増える（レースは回���済みだが回数最適化余地）。",
+    "suggestion": "直近の送信テーマと同一なら送信スキップ、または300msのdebounceを導入。CORS/オフライン時はQueue（IndexedDB）に積んでまとめ送信も検討。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  }
+]

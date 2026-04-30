@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.2.2",
+    "issue": "証跡ファイル表で「L1-unit」「L2-e2e」「L3-realworld」という用語が定義されているが、現行の3層テスト戦略（L1=スモーク, L2=影響範囲, L3=フル）の概念と完全に衝突している。層の名称と役割が上書きされ、テスト戦略が崩壊する。",
+    "suggestion": "用語の衝突を避けるため、層のプレフィックスを外して「unit証跡」「e2e証跡」「realworld証跡」とするか、現行のL1/L2/L3の定義に合わせて名称を整理すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§5.4",
+    "issue": "G17 (realworld_proof_check.sh) のスクショ要件が「launch, primary1, primary2, reload」の4操作にハードコードされている。PD-105で高リスク指定された「認証・決済・外部API」のデプロイ後確認が必須要件から漏れてしまう。",
+    "suggestion": "固定の4操作に加えて、ミッションリスクがhighの場合は「auth」「payment」等の該当機能のスクショ、またはミッション定義で指定されたカスタムスクショを要求する仕組みを追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§4.2.3",
+    "issue": "G8 (canopy_common.sh::check_tdd) の実装で、`before-e2e.json` と `after-e2e.json` が両方存在しない場合にスキップされる仕様になっている。中・高リスクミッションでは cmd-e2e が必須（§4.4.3）であるため、e2eテストをサボって証跡を生成しなくても G8 が PASS してしまう重大な抜け穴がある。",
+    "suggestion": "ミッションリスク（または完了コマンドの必須要件）を判定し、e2eが必須のミッションにおいて証跡ファイルが存在しない場合は FAIL にするロジックを追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§5.1",
+    "issue": "G14 (spec_first_lint.sh) の参照先判定正規表現が `(docs\\/plans\\/|lais\\/verify\\/)` に限定されている。通常のアプリ開発では `docs/ux_v1.md` や `docs/project_v1.md` などを参照するため、全アプリ開発ミッションで誤検知 FAIL となり進行不能になる。",
+    "suggestion": "正規表現を `docs\\/.*\\.md` のように緩和し、アプリ固有の仕様書ディレクトリも許容するように修正すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "location": "§5.4",
+    "issue": "G17 (realworld_proof_check.sh) 内の `[ \"$proof_ts\" \\< \"$deploy_ts\" ]` は POSIX sh 互換ではない。`<` がリダイレクトとして解釈され、ファイルが意図せず作成される等のバグを引き起こし、品質ゲートが機能しない。",
+    "suggestion": "文字列の大小比較は `awk -v p=\"$proof_ts\" -v d=\"$deploy_ts\" 'BEGIN { if (p < d) exit 0; else exit 1 }'` 等の POSIX 互換な方法に書き換えること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.14.1",
+    "issue": "SKIPの定義「次ミッションで必ず再実行し PASS/FAIL に到達させる」が、現行の sub_testing.md §4.5 の「SKIP-RETRYリトライ上限: 最大2回」と矛盾する。次ミッションで必ず決着させるならリトライは1回しかできない。",
+    "suggestion": "SKIPの定義を「リトライ上限（最大2回）に達するまでに PASS/FAIL に到達させる」に修正し、現行仕様と整合させること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "PERFORMANCE",
+    "location": "§4.17.4",
+    "issue": "G13 (verify_hooks.sh) の awk スクリプト内で、ログの全行に対して外部コマンド `date` を呼び出している。ログが肥大化すると pre-commit の実行時間が著しく増大し、開発体験を損なう。",
+    "suggestion": "ログを `tail -r` や `tac` で末尾から読み込み、条件に合致する最新の1件を見つけた時点で exit するか、シェル側で抽出してから日付計算を行うように最適化すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  }
+]

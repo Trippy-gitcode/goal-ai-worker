@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "sub_testing.md §5 affected-tests.sh",
+    "issue": "テストファイル自体が変更された場合、ファイル名（拡張子抜き）をPlaywrightの `--grep` 引数に渡しているが、`--grep` はテストのタイトルにマッチする仕様である。テストタイトルにファイル名が含まれていない場合、変更されたテストが1件も実行されず、回帰バグが本番環境に流出する（影響範囲テストの根本的破綻）。",
+    "suggestion": "テストファイルが変更された場合は `--grep` に渡すのではなく、ファイルパス自体をPlaywrightの引数として直接渡すロジックに変更するか、全テストタイトルにファイル名を含める命名規則を強制する仕組みを導入する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "sub_infrastructure.md §2.6 canopy_common.sh",
+    "issue": "G8（TDD証跡チェック）のGREEN判定において、`after.json` の `unexpected == 0` のみを検証している。このロジックでは、テストが全件SKIPされた場合や対象テストが0件だった場合でも `unexpected` は0となるため、テストが実行されていなくてもGREENとして品質ゲートを通過してしまう。",
+    "suggestion": "GREEN判定の条件に「少なくとも1件以上のテストが実行されたこと」を追加する。例: `jq '.stats.expected > 0 and .stats.unexpected == 0'` を満たす場合のみPASSとする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "sub_infrastructure.md §2.11 screenshot_lint.sh / dev_system_spec.md §4.3",
+    "issue": "仕様書§4.3でスクショファイル名を「操作前（タイムスタンプ付き）」（例: before_AT-1_123456.png）と規定しているが、`screenshot_lint.sh` では `sed 's/after_/before_/'` という単純置換で���較対象を探している。タイムスタンプが存在する場合ファイル名が一致せず、同一画像の使い回し（バイナリ一致）を検知するG9の不正チェックが常にスキップされる。",
+    "suggestion": "タイムスタンプ付きの命名規則を廃止して `before_AT-1.png` と `after_AT-1.png` の完全一致ペアにするか、`screenshot_lint.sh` の検索ロジックを `ls \"$DIR\"/before_${BASE_NAME}*.png` のようにワイルドカードで動的に検索するよう修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "sub_testing.md §1.2 test-guards.config.ts",
+    "issue": "`process.env.CI === 'true'` の場合に無条件でCORSエラーを許容している。CI環境からStagingや本番環境に対してE2Eテストを実行した場合、実際の本番環境におけるCORS設定漏れや通信障害を検知できず、障害を見逃すリスクが高い。",
+    "suggestion": "`isLocal` の判定から `process.env.CI === 'true'` を除外し、テスト対象のURL（`BASE_URL`）が `localhost` または `127.0.0.1` の場合のみCORSエラーを許容するよう厳格化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md §2 test_lint.sh",
+    "issue": "テストアンチパターンの検出を `grep` コマンドで行っているため、複数行にまたがる空catch（例: `catch (e) {\\n}`）やタイムアウト握りつぶしを検出できない。また、アンチパターン集に記載されている「アサーションなし（AP-9）」の自動検出が実装されていない。",
+    "suggestion": "AST（抽象構文木）ベースの静的解析ツール（ESLintのカスタムルールなど）を導入するか、複数行マッチが可能な `pcregrep` や `awk` スクリプトに置き換える。併せて、テストブロック内に `expect` が存在しないことを検知するルールを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md §2.14 review_gate.sh",
+    "issue": "AIが生成したレビュー結果のJSONファイルが、Markdownのコードブロック（```json ... ```）で囲まれて出力された場合、Pythonの `json.load()` がJSONDecodeErrorでクラッシュし、品質ゲートの実行が停止する。",
+    "suggestion": "Pythonスクリプト内でJSONをパースする前に、文字列の前後に存在するMarkdownのコードブロック記法を取り除く前処理（正規表現での抽出など）を追加し、AIの出力揺れに対する堅牢性を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "sub_infrastructure.md §2.8 deploy.sh",
+    "issue": "デプロイ直後に `curl` で1回だけHTTPステータスを確認しているが、CDNのキャッシュパージ遅延やWorkerのデプロイ反映ラグにより、一時的にエラー（404や502など）が返る可能性があり、正常なデプロイでもパイプラインがFAILする不安定さがある。",
+    "suggestion": "`curl` による疎通確認にリトライ機構（例：5秒間隔で最大6回リトライ）を実装し、一時的なデプロイ反映ラグを許容する設計に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "sub_infrastructure.md §2.9 rollback.sh",
+    "issue": "`git revert --no-edit --no-commit $COMMITS_TO_REVERT` を実行しているが、対象コミット群の中にマージコミットが含まれている場合、`-m` オプションが指定されていないためrevertが失敗し、ロールバック処理が途中で中断する。",
+    "suggestion": "マージコミットをrevert対象から除外するフィルタリングを追加するか、環境の運用ルールが許すのであれば `git reset --hard $LAST_TAG` と `git push --force` の組み合わせによる確実な状態復元に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

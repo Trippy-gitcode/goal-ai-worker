@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§4.3 S02-5 アバター選択肢",
+    "issue": "グリッドが固定3列（100px×3 + gap 24px×2 + パディング左右 24px×2 = 396px）で、320px幅環境や200%ズーム時に水平方向スクロール／欠けが発生する可能性が高い。WCAG 2.2 AA 1.4.10 Reflow（横スクロール不要）に抵触。",
+    "suggestion": "幅に応じて折り返すレスポンシブ指定に変更する。例: grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); を用いて1〜3列に自動調整、またはメディアクエリで狭幅時は2列→1列へ段階的に切替える。必要なら .s02-avatar は width: 100%; aspect-ratio: 1 / 1 に変更して最小サイズ 100px を維持しつつ拡縮させる。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.3 S02-2 進捗バー",
+    "issue": "進捗状態（2/5完了）がバーの色の違いのみに依存しており、視覚的手掛かりが色のみ。WCAG 2.2 AA 1.4.1 Use of Color に抵触。",
+    "suggestion": "視覚的に判別可能な手掛かりを追加する。例: 進捗バー右側に「2/5」等のテキストを常時���示、各バーの下にステップ番号を表示、または未完了バーをアウトライン（枠のみ）・完了バーを塗りつぶしにする等、形状/テクスチャ/太さの違いを併用する。併せて aria-valuetext=\"2/5 完了\" を付与すると支援技術へも明確になる。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§4.3 S02-5 アバター選択肢",
+    "issue": "role=\"radiogroup\"/role=\"radio\"を用いているが、ラジオボタンのキーボード操作（矢印キーでの選択移動、ロービングtabindex）が未実装。多くのスクリーンリーダーはラジオに矢印キー操作を期待するため、操作性と予測可能性が低下。",
+    "suggestion": "2案のいずれかを実装: (A) ネイティブ input type=\"radio\" + fieldset/legend を用いる（推奨）。(B) WAI-ARIA Authoring Practicesのラジオパターンを実装（1つだけ tabindex=0、他は -1、ArrowLeft/Right/Home/End で選択変更、Spaceで確定、aria-checked の更新をキーボードでも反映）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.3 S02-2 進捗バー",
+    "issue": "stepインジ���ータに role=\"progressbar\" を用いており離散ステップの表現としては意味づけがやや不適切。連続量よりも「現在のステップ」を示す用途であれば、他のセマンティクスの方が支援技術の期待に合致する。",
+    "suggestion": "離散ステップの表現には ol/li + aria-current=\"step\"（または role=\"list\" + aria-current）や、role=\"img\" + aria-label/aria-describedby で説明文を付ける方式を検討。progressbar を維持する場合は aria-valuetext=\"2/5 完了\" を追加し、テキスト表示（R-002）と併用して視覚/非視覚双方に明確化。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.3 S02-5 アバター選択肢",
+    "issue": "radiogroup のラベル付けがページ見出し（h1）に委ねられており、支援技術で重複読み上げになりやすい。グループ固有の短いラベルがあると理解しやすい。",
+    "suggestion": "fieldset/legend でグループ見出��を付ける、または radiogroup に aria-labelledby で専用の要素（例: 視覚的に非表示の説明文）を関連付ける。必要に応じて subtitle を aria-describedby で補助説明として関連付ける。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.3 S02-2 進捗バー + LP-004 コントラスト実測",
+    "issue": "未完了バー（--border #30363D）と背景（#0D1117）のコントラスト 1.6:1 は、WCAG 1.4.11 非テキストコントラストの趣旨（UIの状態理解に必要なグラフィックは3:1）に照らすと不足の可能性がある。一方で「装飾」とみなす運用も見られ、解釈にゆらぎがある。",
+    "suggestion": "未完了バー（トラック）を少なくとも 3:1 以上（例: --border-strong #6E7681 で約3.6:1）に上げる、またはアウトラインやパターンで明確にし、R-002の可視テキストを併用して解釈の差異に依存しない合格性を確保する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "App.jsx Suspense fallback",
+    "issue": "fallback の role=\"status\" に aria-label=\"読み込み中\" を付与しているが、コンテン��が空のため一部の支援技術でアナウンスされない場合がある。",
+    "suggestion": "視覚/音声双方に確実な告知のため、fallback 内にテキストノード（例: 「読み込み中…」）を入れる。必要に応じて aria-live=\"polite\" を維持し、アイコン等は aria-hidden。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.3 S02-6 「次へ」CTA",
+    "issue": "「次へ」が無効化されている理由が視覚的には推測できるが、明示説明があると初見ユーザーに親切。支援技術にも理由を提示できる。",
+    "suggestion": "補助テキスト（例: 「アバターを選ぶと『次へ』が有効になります」）を追加し、.s02-next に aria-describedby で関連付ける。無効時のみ説明を関連付ける実装にすれば読み上げの冗長さも抑えられる。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

@@ -1,0 +1,13 @@
+[
+  {
+    "id": "R-001-RESOLVED",
+    "severity": "RESOLVED",
+    "category": "実行権限・ワークフロー",
+    "screen": "改訂案⑦ §D / CLAUDE.md 契約セクション",
+    "location": "review_package §1.1 行83-84 + 改訂案① §G 行1019-1049 + 改訂案⑦ §D 行3155-3165",
+    "issue": "R1で指摘したCLAUDE.md契約セクション変更のワークフローブロッカーが修正済み",
+    "spec_reference": "CLAUDE.md「🔒 契約セクション（Code変更禁止）」+ §16.5 項目2",
+    "actual": "Code実行可能な変更（鉄則削除、Compact/絶対禁止縮退）とClaude.ai経由必須の変更（ふとしの方針メモ2項目削除）が3箇所で一貫して区別されている。ソロ開発者としてCode自律実行フローが中断なく完走可能になった",
+    "suggestion": "修正十分。CRITICALクリア"
+  }
+]

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§8.1, §8.8, §8.13, §5.1-5.4",
+    "issue": "フォーカス可視化が「outline方式に統一」と明記された一方で、複数箇所にbox-shadowベース（--focus-ring）記述が残存。ボタン（§8.1）はoutlineだが、トグル（§8.8）や共通ステート表（§8.13）はbox-shadow指定で不一致。テーマトークンにも--focus-ring（box-shadow値）が残っており、実装で混在が発生する。",
+    "suggestion": "フォーカス指標を完全にoutlineへ統一するため、(1) 共通トークンを--focus-outline-color / --focus-outline-width / --focus-outline-offsetに再定義、(2) §8.7/§8.8/§8.13のfocus-visible記述をoutlineに置換、(3) §5.1-5.4の--focus-ringトークンを上記outline系トークンに差し替え、(4) forced-colors対応（§7.5）と文言を整合させる。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5（テーマ定義全般）, §7（アニメーショントークン）",
+    "issue": "テーマ間の性格差が主に色（＋わずかな濃度差）とマイクロコピーに限定されており、ブランドDNA���「洗練＋親しみ」「大人のポップ/静かな集中」の体感差が、動き・質感・密度などの他トークンに十分落ちていない。",
+    "suggestion": "色以外のトークンにもテーマ差を展開する。例: ①アニメーション係数のテーマ別上書き（Harajuku系は--spring-bouncyや--duration-celebrationを+10〜15%、Night Skyは--spring-gentle優先など）、②シャドウの拡散/彩度をテーマ別に微調整（Dawnは広め・薄め、Harajuku Darkはやや強め）、③アクティブpill/hoverの不透明度レンジをテーマ別に調整。テーマ別overrideセクション（§5.x末尾）にサンプルCSSを追加。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.1, §4.2",
+    "issue": "Open Air原則で「タスク間余白: 20px以上」と規定しているが、スペーシングスケールは16px/24pxのみで20pxのトークンが存在しないため、実装でハードコードが発生しやすい。",
+    "suggestion": "スペーシングスケールに--space-lg-minus（20px）を追加する、もしくはコンテキスト固有トークン--space-task-gap: 20pxを新設して、§8.4タイムラインやタスクリスト実装での参照先を明示する。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§8.2",
+    "issue": "入力フィールドのフォーカス時スタイルが「--accent + --focus-ring」と記述のまま。R8方針（outline統一）に対して、【枠線をaccentにするのか】【outline色/幅/オフセットをどう適用するか】が明確でない。",
+    "suggestion": "入力のfocus-visible仕様を明文化: border-color: var(--accent) + outline（--focus-outline-color/width/offset）を適用、またはoutlineのみで統一。該当トークン参照例を追記し、box-shadow言及を削除。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.7",
+    "issue": "ボトムタブのキーボード/デスクトップ操作時のfocus-visibleスタイルが未定義。共通ステート表（§8.13）はbox-shadow参照でR8方針と不整合のまま。",
+    "suggestion": "タブ項目にfocus-visibleのoutline仕様を追加（例: outline: 2px solid var(--accent); outline-offset: 2px）。ARIAと合わせてアクセシビリティの実装指針を補足し、§8.13の表記もoutlineに更新。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§6.1",
+    "issue": "アイコンのスタイル（stroke-width:1.5px/サイズ3種）が文章定義のみで、テーマ/コンポーネント横断のトークン化がされていない。将来的な密度変更や表示倍率最適化で分散修正のリスク。",
+    "suggestion": "アイコントークンを追加: --icon-stroke-width, --icon-size-sm(20px)/--icon-size-md(24px)/--icon-size-lg(32px)。コ��ポーネント実装はCSS変数参照に統一。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.4, §8.4",
+    "issue": "Overdue左バー幅（3px）が繰り返し個別指定でトークン化されていない。将来の可読性/調整性に影響。",
+    "suggestion": "状態インジケータ用の共通トークンを新設（例: --status-indicator-width: 3px, --status-indicator-overdue-color: var(--danger)）。タイムライン/リスト系で共通参照させる。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§7.3, §8.3, §8.12, §8.12a",
+    "issue": "「構造的ゲーミフィケーション」を体感で補強する“お祝い/強調”表現の一貫ルール（チップ/バナー/スナックバー/トーストの色・角丸・影・アニメーション差分）が分散記述で、ブランドサインとしての一貫シグネチャが弱い。",
+    "suggestion": "祝福系UIの共通プリセットを定義（例: --celebration-bg, --celebration-shadow, --celebration-animate: var(--spring-bouncy)）。トースト/スナックバー/達成バナーで統一適用し、テーマ別に色味だけを上書き。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§6.3a",
+    "issue": "アバターパレットはplaceholderのままで、各テーマ背景/セマンティック色との視認性・コントラスト検証や「実世界/文化」モチーフとの整合が未記述。",
+    "suggestion": "LAIS-BRAND-02にて各テーマ背景上での視認性チェック（AA目標）と、文化/自然モチーフ連携の色域ガイドを策定。アバター輪郭/装飾の最小コントラスト閾値（例: 3:1）をルール化し、--avatar-border-color/tokenを追加して動的適用可能にする。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  }
+]

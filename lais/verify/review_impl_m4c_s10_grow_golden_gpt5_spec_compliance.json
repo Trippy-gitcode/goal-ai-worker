@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.4 状態・インタラクション（タスク行タップ → S-13 詳細パネル）",
+    "issue": "Today/Overdue のタスク行タップ時に S-13 へ遷移せず、console.log のみ。仕様の画面遷移が未実装。",
+    "suggestion": "S10Grow.jsx の TodayRow/OverdueRow で onOpen を実際の遷移に接続し、route('/task/:id') 等の遷移先を用意（ダミーでも可）。Overdue も同構造のためカード自体のタップで S-13 を開けるよう button.s10-task-card に統一。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.4 状態・インタラクション（Goal 行タップ → S-14 フルスクリーン右スライド）",
+    "issue": "Goals 行タップ時に S-14 遷移が行われず、console.log のみ。",
+    "suggestion": "S10Grow.jsx の handleOpenGoal を route('/goal/:id') 等の S-14 画面に接続。トランジション（右スライド）は CSS トランジション/ルーターのトランジション層で実装し、prefers-reduced-motion 時は縮退。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.4 状態・インタラクション（チェックタップ：spring-default scale(0.9→1.1→1)）",
+    "issue": "チェックタップ時のスプリングアニメーションが実装されていない。transform に対する transition 定義はあるが、scale の変化が付与されないため発火しない。",
+    "suggestion": "チェック押下時に一時的に .is-bouncing クラスを付与し、@keyframes で scale(0.9)→1.1→1 を --duration-fast / var(--spring-default) で再生（reduced-motion 時は付与しない）。トグル完了時にクラスを除去。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.4 状態・インタラクション（チェックタップ：EXP バー --duration-slow 伸長）",
+    "issue": "チェック完了に連動した EXP 加算とバー伸長が行われない。HERO_PROFILE が固定値のため幅は常に 62% のまま。",
+    "suggestion": "HERO_PROFILE を state 管理し、完了遷移時に expCurrent を加算（ダミー加算でも可）→ .s10-hero-bar-fill の width を更新。CSS では既に width の transition が設定済みのため、値更新で伸長アニメが走る。Undo 発生時は減算して元に戻す。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.4 状態・インタラクション（Undo 30s）",
+    "issue": "チェック完了��よび Overdue『明日に延期』の双方で要求される Undo 30s が未実装（console.log のみ）。",
+    "suggestion": "スナックバー（30s タイマー）を実装し、直前操作（完了/延期）をロールバック可能にする。LP-001 に基づきアニメは reduced-motion で縮退。Phase 外の扱いでも、仕様遵守のため最小機能の Undo を用意。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.4 S10-3 Today ヘッダ",
+    "issue": "カウンタ行（“1 / 4 completed”）の下マージンが --space-xs 指定に対し、実装は margin-bottom: var(--space-md) と乖離。縦スペースが過大。",
+    "suggestion": ".s10-today-counter の margin-bottom を var(--space-xs) に修正し、セクション間の間延びを防ぐ。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.4 S10-1 / S10-3 / S10-7（見出し・ラベルの書式）",
+    "issue": "EXPLORER（ヒーロー右 1行目のラベル）、TODAY、GOALS に font-weight: 600 が付与されているが、仕様に太字指定はない（OVERDUE のみ 600 指定）。",
+    "suggestion": ".s10-hero-label, .s10-today-label, .s10-goals-label ���ら不要な font-weight: 600 を削除し、仕様通り（サイズ・レタスペ・大文字のみ）に整合させる。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.4 S10-2 Overdue（Today タスク行と同構造 + 左ボーダー 2px）",
+    "issue": "Overdue 行のカードが div でクリック不可かつ padding-left: 12px が追加され、Today 行と同構造から逸脱。タップで S-13 を開けない。",
+    "suggestion": "Overdue も button.s10-task-card を使用（クリックで S-13）。.s10-task-card-overdue は border-left: 2px solid var(--danger) のみに留め、余計なインデント（padding-left: 12px）は外して Today と整列させる。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§4.4 S10-6 Upcoming",
+    "issue": "展開時に 2 日分のみ表示。仕様は 7 日分の日付グループ表示を要求。",
+    "suggestion": "UPCOMING_MOCK を 7 グループに拡張し、UI が 7 日分にスケールすることを確認（ダミーデータで可）。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§4.4 S10-1（キーボード表示時: display: none）",
+    "issue": "max-height: 400px による近似でヒーロー非表示を行っているが、実際のキーボード表示検知要件を満たさない可能性がある（端末差・向きで誤判定）。",
+    "suggestion": "VisualViewport API でのキーボード高さ検知、または UA/OS が提供する安全領域・キーボード環境変数を用いた正確な非表示制御に置換する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§4.4 S10-10 BottomTabBar（Active ラベル）",
+    "issue": "Active ラベルに letter-spacing: 0.5px が追加されているが、仕様に記載がない。",
+    "suggestion": "仕様にないタイポグラフィ拡張は避け、.bottom-tab-bar-label の letter-spacing を削除するか、仕様側に明記して整合を取る。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.4 S10-4（カテゴリドット色指定）",
+    "issue": "カテゴリドットでデザイントークンにフォールバック hex (#79C0FF ほか) を併記。テーマ変更時に不一致発生のリスク。",
+    "suggestion": "design_system.md の --cat-work/--cat-health/--cat-learn トークンを唯一の出典とし、フォールバック hex は削除。トークン未定義テーマでは明示的に定義を追加。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

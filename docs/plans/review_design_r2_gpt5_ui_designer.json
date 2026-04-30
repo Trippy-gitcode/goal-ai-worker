@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.2, §5.1〜5.4, §6.1",
+    "issue": "リンク色の定義が「info（リンク/情報）」と「accent（ブランド/リンク）」で二重化し矛盾。どちらをリンク色として使うかが仕様から決め切れない。",
+    "suggestion": "テキストリンク専用トークンを新設し、使用先を一本化: --link, --link-hover, --link-visited, --link-pressed。各テーマで --link を accent もしくは info に明示マップし、§5.*に値を記載。§6.1のアイコン状態色はそのままaccentで運用、テキストリンクは常に --link を参照するようガイドラインを追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.5, §4.4, §5.5",
+    "issue": "モーダル/ボトムシート/ドロワーのスクラム（オーバーレイ）色がトークン化されておらず、コンポーネント毎に生RGBAで指定。テーマ間での整合・透明度調整が困難。",
+    "suggestion": "オーバーレイトークンを追加: --scrim, --scrim-strong（例: ダーク=rgba(0,0,0,0.5)/0.6, ライト=rgba(0,0,0,0.35)/0.45）。§8.5の「オ���バーレイ: rgba(0,0,0,0.4)」は --scrim に置換。ドロワー/モーダルも同トークンを参照するルールを§8.7に明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.7 状態マトリクス, §5.1〜5.4",
+    "issue": "状態マトリクスで“hover/pressedは背景トークン or opacity +0.04”と記載があるが、共通のhover/pressed用トークンが未定義。実装者ごとにばらつくリスク。",
+    "suggestion": "共通ステートトークンを新設し各テーマで値を定義: --surface-hover, --surface-pressed, --accent-hover（既存）, --accent-pressed, --accent-subtle-hover, --accent-subtle-pressed, --danger-hover, --danger-pressed。ボタン/チップ/行ハイライトにこれらを使用する指針を§8.1/§8.3/§8.7に追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§8.1 ボタン（Danger塗りつぶし行）",
+    "issue": "hover/pressed色を color-mix で算出しており、ブラウザ実装差異・将来仕様変更リスクがある。さらにテキスト色が #FFFFFF で固定されており、将来的なテーマ追加や色調変更に追従しづらい。",
+    "suggestion": "Dangerボ���ン専用トークンを定義: --button-danger-bg, --button-danger-fg, --button-danger-bg-hover, --button-danger-bg-pressed。各テーマで明示値を設定し、color-mix 依存を排除（またはビルド時に静的展開）。テキスト色も --button-danger-fg を参照するよう統一。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§8.1 ボタン（Secondary/Ghost）",
+    "issue": "Secondary/Ghostのhover/pressedが「--accent-subtle (opacity 0.18/0.24)」と記載されているが、ベースのalphaに対する加算か置換かが不明確で、最終RGBAが確定できない。",
+    "suggestion": "最終色としてのトークンを追加し曖昧さを解消: --button-secondary-bg, --button-secondary-bg-hover, --button-secondary-bg-pressed, --button-ghost-bg-hover 等をテーマごとにRGBAで明示。あるいは“置換”であることを明文化。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§5.0, §9",
+    "issue": "§9で:rootにNight Skyの値を直書きしており、JSでdata-theme適用前の初期ペイントがNight SkyになるFOUCリスクが残る。",
+    "suggestion": "テーマ値は全て[data-theme]セレクタに移し、:rootは最小限（非可視色）に留める。さらにサーバーサイドで<html data-theme=...>を出力するか、CSS読み込み前にインラインスクリプトでdata-themeを設定。代替として“last-chosen theme”のミニマルCSSを<noscript>内にインラインしFOUCを抑止。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.4, §8（ツールチップ/ドロップダウン言及のみ）",
+    "issue": "ツールチップ/ドロップダウンのスタイルトークン（背景/文字/角丸/影/パディング/矢印色）が未定義。z-indexのみで視覚仕様が不足。",
+    "suggestion": "以下を追加: Tooltip= --tooltip-bg, --tooltip-fg, --tooltip-radius, --tooltip-shadow, --tooltip-padding。Dropdown= --menu-bg, --menu-fg, --menu-radius, --menu-shadow, --menu-item-hover/pressed。各テーマに値を設定し、§8.xに最小仕様表を追加。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.2 タブアイコン, §4.3 グリッド",
+    "issue": "ボトムタブバー自体のトークン（高さ/背景/境界線/セーフエリア余白/アクティブラベル色/インジケータ）が未定義。実装ごとに差異���出やすい。",
+    "suggestion": "タブバー用トークンを追加: --tabbar-height, --tabbar-bg, --tabbar-border-top, --tabbar-inactive-fg, --tabbar-active-fg, --tabbar-pill-bg（既述の--accent-subtleでOKなら関連付けを明記）, --tabbar-safe-inset。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§6.1 アイコンスタイル",
+    "issue": "アイコンのサイズ/ストローク幅が数値で記述されているが、トークン化されていないため全体変更が困難。",
+    "suggestion": "アイコントークンを追加: --icon-size-sm:20px, --icon-size-md:24px, --icon-size-lg:32px, --icon-stroke-width:1.5px。状態色は既存の--accent/--text-secondary/--text-disabledを参照する指針を明記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§8.1 ボタン, §8.2 入力フィールド",
+    "issue": "コントロール高さが数値のみ（48px）で、スモール/ラージのバリエーションや将来変更に対応しづらい。",
+    "suggestion": "コントロール高さトークンを新設: --control-height-sm, --control-height-md(=48px), --control-height-lg。ボタン/入力/チップの最小タップ領域と連��させるガイドを追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§2.2, §8.2 入力フィールド",
+    "issue": "ボーダー幅のトークン未定義。1pxで固定され、高DPRデバイスでのhairline最適化や境界強度調整が困難。",
+    "suggestion": "ボーダー幅トークンを追加: --border-width:1px, --border-width-strong:1px（将来0.5px/hairlineに切替可能に）。各コンポーネントは幅トークン＋色トークンを併用する指針に。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.1 ボタン（disabled記述）, §8.2 入力フィールド（disabled記述）",
+    "issue": "disabledで“背景/文字のdisabled色＋opacity:0.6”を併用。コントラストが過剰に下がり、可読性を損なう可能性。",
+    "suggestion": "disabled外観は「色トークンのみ」で統一し、opacityの併用は避けるか --disabled-opacity をトークン化（=1.0推奨）。AA確保の閾値チェックを§10.2に準拠して追記。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.7 状態マトリクス（loading）",
+    "issue": "スケルトンの色指定が“--bg-disabled ⇆ --bg-elevated”のみで、テーマによってはコントラスト差が不十分になる恐れ。",
+    "suggestion": "スケルトン専用トークンを追加: --skeleton-base, --skeleton-highlight（各テーマで明度差を10〜15%確保）。shimmerアニメは§7.5のreduced-motion時に停止する旨を§8.7にも明文化。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.1 フォーカス状態, §8.2 入力フィールド",
+    "issue": "フォーカスリングはボタン中心の記載で、他のインタラクティブ（チップ/アイコンボタン/タブ/タスク行）への適用範囲が明確でない。",
+    "suggestion": "“全インタラクティブ要素は:focus-visibleで --focus-ring を適用”を明文化し、例外（ドラッグハンドルなど）を列挙。必要に応じて --focus-ring-inset を追加し、インセット適用が望ましい要素（入力/チップ）を指定。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§6.1 アイコンスタイル, §8.1 ボタン",
+    "issue": "アクセントのpressed状態トークン（--accent-pressed��が未定義。アイコン押下で --accent-hover を流用しており、hoverとpressedの差異が表現できない。",
+    "suggestion": "アクセント系の押下トークン --accent-pressed を追加し、各テーマで値を定義。アイコン押下/リンク押下/チップ押下は --accent-pressed を参照するよう統一。",
+    "model": "GPT-5",
+    "persona": "ui_designer"
+  }
+]

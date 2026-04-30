@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "全体",
+    "issue": "design_spec_v1.md のセクション番号に基づく仕様書引用が本文に見当たらず、実装と仕様のトレーサビリティが不十分",
+    "suggestion": "各修正項目（C1/H1…）や主要差分に対応する design_spec_v1.md の該当セクション（例: §4.1, §5.2 など）を併記し、色/タイポグラフィ/余白/状態/遷移のマッピング表を追加",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.1 supabase.js / §4 C1",
+    "issue": "auth.flowType='pkce' + detectSessionInUrl=true は同一デバイス・同一ブラウザ復帰を前提とするため、メールクライアント→別ブラウザ復帰などクロスデバイス時に code_verifier が一致せずセッション確立に失敗するリスクがある",
+    "suggestion": "仕様側でサポート前提（同一端末限定/クロスデバイス許容）を明記し、クロスデバイス時の失敗ハンドリング（明示エラーUI）、または OTP/メール確認のみ implicit を許容する等の方針を決定・実装。/auth/callback 実装時に code_verifier 欠如エラー検知と導線提示を追加",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§2.2 NotFound / §5 既知項目",
+    "issue": "/auth/callback の専用受け口が未実装のため、コールバックURLが SPA 未定義ルートに到達した場合、NotFound が即座にリダイレクトし detectSessionInUrl の処理完了前に遷移してしまう競合リスクがある",
+    "suggestion": "明示的に /auth/callback ルートを実装し、detectSessionInUrl または auth.exchangeCodeForSession の完了/失敗まで待機してから遷移。NotFound では URL に code/access_token/redirect_type 等がある場合はリダイレクトを保留する条件分岐を追加",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§2.3 S01Auth.jsx",
+    "issue": "二重送信ガードが onMouseDown に限定されており、Enter キー等のキーボード操作で in-flight 中に再送信が発生する可能性がある",
+    "suggestion": "handleSubmit の冒頭で inFlightRef を参照して即時 return するガードを追加。送信中は aria-disabled=\"true\" と .s01-cta-inactive を一時的に付与し pointer-events: none も適用",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§2.4 S01Auth.css / §2.5 themes.css",
+    "issue": "無効ボタンの視覚トー���ン（--button-disabled-bg/text/border）が各テーマで定義済みか本パッケージからは確認できない",
+    "suggestion": "themes.css で全テーマに同名トークンが存在することを確認し、なければ追加。フォールバック値をコンポーネント側に持たない方針なら定義漏れを CI で検出する仕組みを導入",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§2.4 S01Auth.css",
+    "issue": ".s01-server-message-error の前景色（--danger）と背景色（--danger-subtle）のコントラストがテーマによって WCAG AA を満たさない可能性がある（背景にアルファ合成を用いているため母体背景次第で低下し得る）",
+    "suggestion": "各テーマで実測コントラスト比を検証し、必要に応じて --danger-subtle を濃くするか、テキスト色を --on-danger-surface 等の専用トークンに切替。design_spec のアクセシビリティ要件（該当§）への適合証跡を残す",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.4 S01Auth.css",
+    "issue": "フォントサイズ/行間、余白（padding/margin）の離散スケール/トークン適用の記載がなく、design_spec のタイポグラフィ/スペーシングスケール準拠が確認できない",
+    "suggestion": "ボタン/入力/見出し/補助文に対して --font-size-*, --line-height-*, --space-* などのトークンを明示適用し、design_spec の離散スケール（該当§）との対応表を提示",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.4 S01Auth.css",
+    "issue": "フォーカス可視スタイル（:focus-visible）が未定義で、デフォルト依存。design_spec で規定のフォーカスリングがある場合に不一致となる可能性",
+    "suggestion": "ボタン/入力に :focus-visible のスタイルを追加し、--focus-ring-color/width/offset 等のトークンで実装。reduced-motion/ハイコントラスト環境の考慮も行う",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§2.5 themes.css",
+    "issue": "新設トークン名 --danger-subtle が design_spec の命名規則（例: color.danger.surface/subtle）と整合しているか不明",
+    "suggestion": "design_spec のトークン命名規則（該当§）に合わせて命名/エイリアスを整理し、既存トークン体��（--danger, --on-danger など）との関係をドキュメント化",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§2.2 NotFound",
+    "issue": "STATIC_PATHS（/terms, /privacy）がハードコードで i18n や将来の静的ページ拡張に追随しづらい",
+    "suggestion": "静的許可リストを設定ファイル/ENV で管理し、ロケール別パスも取り込める形に。監視/テレメトリでループ検知の記録を残す",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§2.3 S01Auth.jsx",
+    "issue": "CTA の aria-describedby が常時付与される場合、参照先 ID が未描画だと ARIA 参照不整合の恐れ",
+    "suggestion": "エラー/補助要素が存在する時のみ aria-describedby を付与するか、常在の不可視要素（aria-live=polite）に集約する",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.4 S01Auth.css",
+    "issue": "ボタンの :active で transform: scale を用いており、reduced motion 環境やコンテナのレイアウトシフト懸念への配慮が不足",
+    "suggestion": "prefers-reduced-motion を考慮して transform を無効化/軽減し、必要なら box-shadow ベースの押下表現に切替",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx / ビルド結果",
+    "issue": "初期バンドルに S00Splash・S01Auth・AuthCallback を同期 import しており、初回表示に不要な画面まで読み込まれているため、メイン JS が 238.80 kB (gzip) と肥大化している。",
+    "suggestion": "これらのルートも lazy import + <Suspense> で分割し、初期表示に必要な最小限だけを読み込む。例: const S00Splash = lazy(() => import('./screens/S00Splash.jsx')); 同様に S01Auth, AuthCallback も遅延読込。あわせて vendor/chunk 分割や route-based preloading の導入を検討。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx",
+    "issue": "lazy/Suspense のために preact/compat を参照しており、互換レイヤーがメインバンドルに寄与している可能性がある。",
+    "suggestion": "compat のコストを計測し（bundle visualizer など）、必要最小の箇所にだけ隔離。例: ルート定義自体を遅延ロードして compat 依存を別チャンク化、または preact-router の非同期コン���ーネント読み込みパターンで compat 抜きの遅延を検討。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3. lais/src/components/screens/S02Onboarding.css (.s02-avatar-selected)",
+    "issue": "選択時にボーダー幅が 1px→2px に変化し、クリック直後に微小なレイアウトシフト（LS）を誘発する可能性がある。",
+    "suggestion": "常時 2px の透明ボーダーを維持し、選択時は色のみ変更するか、box-shadow/outline/擬似要素で外周リングだけを変更してレイアウトを不変化に保つ。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S02Onboarding.css (.s02-avatar)",
+    "issue": "transform を transition 対象にしつつ、同時に keyframes で transform をアニメーションしており、競合により不要なスタイル計算が発生する可能性がある。",
+    "suggestion": "transition から transform を外し、transform は keyframes アニメーション側のみに限定する（hover/focus での transform が不要であれば完全に削除）。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S02Onboarding.jsx（AVATAR ボタン onClick）",
+    "issue": "map 内で無名関数 onClick を毎レンダー生成しており、規模は小さいが不要な割り当てが発生している。",
+    "suggestion": "data-id を使った単一ハンドラに統一するか、AvatarItem を分離して memo 化し、useCallback で安定参照を渡す。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S02Onboarding.jsx（prefersReducedMotion）",
+    "issue": "matchMedia による prefers-reduced-motion 判定をタップ毎に実行している。",
+    "suggestion": "モジュールスコープで一度だけ評価してキャッシュ、または useRef/useMemo で結果を保持して再評価を回避する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S02Onboarding.jsx（tapping アニメーションの終了処理）",
+    "issue": "setTimeout で tapping クラスを解除しており、連打時にタイマの再設定/クリアが発生。タブ非アクティブやスロットリング時にタイミングずれの体感劣化を招く可能性がある。",
+    "suggestion": "CSS アニメーションの onAnimationEnd（または animationend イベント）で tappingId をクリアする方式に変更し、タイマ依存を排除。reduced-motion 時は tapping クラスを付けない現状ロジックを維持すれば整合する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S02Onboarding.css (.s02-avatar-tapping)",
+    "issue": "合成レイヤー促進のヒントがなく、低スペック端末でアニメ中のフレーム落ちが起こる可能性がある。",
+    "suggestion": ".s02-avatar-tapping に will-change: transform を付与（アニメ中のみ）。常時付与はレイヤー増で逆効果になるため避ける。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ビルド結果",
+    "issue": "メイン JS が 238.80 kB (gzip) と大きく、初期実行時間・パース時間に確実な影響がある。",
+    "suggestion": "bundle 可視化で内訳を特定し、(1) ルート単位のさらなるコード分割、(2) 大型依存の代替/部分 import（lodash-es の個別 import、date-fns/dayjs などの tree-shake 確認）、(3) dev-only 依存の除外（preact/devtools 等）、(4) 画像/SVG は必要に応じて動的 import に変更、を段階的に実施。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "1. lais/src/components/App.jsx（<Suspense> fallback）",
+    "issue": "fallback が高さゼロに近いプレースホルダのため、低速回線ではチャンク解決時にCLSが発生しうる。",
+    "suggestion": "ナビ/進捗/CTA相当の最小スケルトン（min-heightや余白）を fallback に持たせ、レイアウトを安定化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3. lais/src/components/screens/S02Onboarding.css（.s02-avatars grid）",
+    "issue": "3×100px 固定列は超小型端末で横スクロールや縮小 reflow の原因になり得る。",
+    "suggestion": "grid-template-columns: repeat(3, minmax(72px, 100px)) などで最大3列を保ちつつ縮退、または repeat(auto-fit, minmax(90px, 1fr)) + max(3列) 制御でオーバーフローを回避し、不要なレイアウト再計算を抑制。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ルーティング戦略",
+    "issue": "次の画面がほぼ確実に続くにもかかわらず事前プリフェッチがないため、ルート遷移時の待ち時間が発生する。",
+    "suggestion": "/auth 表示後の idle タイミングで import('./screens/S02Onboarding.jsx') を prefetch（<link rel=\"prefetch\"> もしくは router のフックで事前読み込み）して、遷移体感を改善。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2. lais/src/components/screens/S02Onboarding.jsx（AVATARS の svg プロパティ）",
+    "issue": "VNode をモジュールスコープに永続保持しており、レンダー間で同一要素参照を再利用する形。Preact では動作するが、一般にはデータのみ保持し要素はレンダー時生成の方が GC/差分計算面で安定。",
+    "suggestion": "svg は関数化（() => <svg/>）するか、パス/属性データのみを保持してレンダーで生成。もしくはアバター SVG を独立コンポーネント化し memo 最適化を可能にする。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S02Onboarding.jsx（.s02-progress の生成）",
+    "issue": "Array.from で毎レンダー 5 要素を都度生成しており、微小ながら不要な VDOM 生成がある。",
+    "suggestion": "TOTAL_STEPS が固定のため、外部定���配列を使うか useMemo で配列をキャッシュして生成コストを削減。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

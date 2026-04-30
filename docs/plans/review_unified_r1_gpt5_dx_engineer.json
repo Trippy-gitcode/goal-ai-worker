@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ヘッダー相互参照（dev_system_spec.md 冒頭 / lais_project_v1.md 冒頭 / lais_ux_v1.md 冒頭）",
+    "issue": "相互参照するバージョンが不一致。dev_system_spec.mdは内容的に§13.10-14と§19.8を含むがヘッダーはv3.0のまま。一方、lais_project_v1.mdは依存にdev_system_spec.md v3.1を指定。さらにlais_ux_v1.mdは依存をlais_project_v1.md v1.3としており、現行はv1.4。",
+    "suggestion": "依存ヘッダーを最新に同期し、spec_changelog.mdに連鎖更新を記録する。推奨: dev_system_spec.mdのヘッダーをv3.2に更新（§13.10-14/§19.8追加を履歴に追記）。lais_project_v1.mdの依存は dev_system_spec.md v3.2 に、lais_ux_v1.mdの依存は lais_project_v1.md v1.4 に更新。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §19.6（上流変更時の下流遡及チェック/依存順序ゲート）",
+    "issue": "依存順序ゲートと遡及チェックが手作業前提で自動検証がないため、今回のような参照バージョン不一致を検出できない。",
+    "suggestion": "review_gate.shに依存ヘッダー検証を追加（例: dep_lint.sh新設）。検証内容: 1) 全docs/*.mdヘッダーの依存ファイルの存在とバージョン表記の有無 2) 依存先のステータスがCONFIRMEDであること 3) 依存先の実ファイルのヘッダーバージョンと一致。FAIL時はcanopy停止。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md 冒頭（version/変更履歴）",
+    "issue": "本文に§13.10-§13.14および§19.8が存在するのにヘッダーはv3.0のまま。変更履歴にも本追加が未反映。",
+    "suggestion": "dev_system_spec.mdのヘッダーをv3.2へ更新し、変更履歴に「§13.10-14 レビュープロセス改善、§19.6 依存順序ゲート/遡及チェック、§19.8 PWA互換性チェックリスト追加」を明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais_project_v1.md §6.5 vs lais_ux_v1.md §13.4 / §14.3",
+    "issue": "退会時のStripe解約方針が矛盾。project: 申請時はcancel_at_period_end:true→72時間後に即時キャンセル。ux: 申請時に「72時間後のスケジュール解約」を設定し、取消時はそれを取り消す。一方ux §14.3では取消後に「プランは解約済み（Freeで利用）」と表示方針になっており、projectの「取消時にサブスク継続（cancel_at_period_end解除）」と食い違う。",
+    "suggestion": "正本（project）を確定させ、uxを合わせる。推奨: ①退会申請時=サブスクは継続（cancel_at_period_endは設定しない）②72時間後に退会確定時に即時キャンセル③取消時は現契約をそのまま継続（UIも『解約済み』ではなく『現プラン継続』に修正）。Stripe仕様に沿うなら、スケジュール解約を使う場合も取消時は必ず解除し、UI文言を統一。いずれの方式でも統一案をprojectに確定→ux文言/フローを更新。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §16（プラットフォーム互換性）",
+    "issue": "dev-system §19.8の「対象環境マトリクス（全行を埋めること）」要件に対し、A項目はE1-E4のみの表でE5-E7の明示がない。B〜G項目は環境別の表形式ではなく記述で方針が混在し、環境ごとの可否/対象外が一目で追えない。",
+    "suggestion": "A項目の表にE5〜E7列を追加し『任意/対象外』を明記。B〜G項目は簡易マトリクス（行=項目、列=E1〜E7、セル=実装/フォールバック/対象外）を追加して環境差分を明示。対象外でも『対象外』を明記して“全行埋め”��満たす。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §13.10-§13.11",
+    "issue": "「grepに頼らずReadで原文確認」「既知矛盾除外リスト」の運用がプロセス記述のみで、レビューワーへの具体的な受け渡しチャネル/ファイル仕様が未定義。review_gate.shも既知矛盾リストを参照しない。",
+    "suggestion": "docs/plans/review_context.yaml（またはJSON）を定義し、既知矛盾リスト/参照リンク/上流バージョンを明記。AIレビュー実行時に常に同ファイルを前段で渡す手順を§13.2に追記。review_gate.shでdismissed以外にreview_contextのknown_issuesも参照し、CRITICAL集計から除外する実装に拡張。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais_project_v1.md §7（番号重複）",
+    "issue": "§7.3が2箇所（「新規追加」「アーキテクチャ原則」）に存在し、他セクションからの参照（例: §3.2.6(7)の『§7.3のCanvas/PNG方式』）が将来の編集で曖昧化する恐れがある。",
+    "suggestion": "後者を§7.4以降に繰り下げ（例: アーキテクチャ原則=§7.4、��ータライフサイクル=§7.5...）し、本文内の該当参照を一括置換。spec_changelog.mdに番号再割当を記録。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md §19.6（依存チェーン図）",
+    "issue": "依存チェーン内にdesign_system.mdが重複記載（project配下と末尾）。構造把握時のノイズとなる。",
+    "suggestion": "design_system.mdの記載を一箇所に統一（project配下の『→ design_system.md（HOW: ビジュアル基盤）』のみにするなど）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md §12 / lais_project_v1.md / lais_ux_v1.md",
+    "issue": "SPEC-ID（SPEC-XXXX）による仕様↔テストのトレーサビリティがLais側ドキュメントに未導入。affected-testsやG3/G7の運用効率が落ちる恐れ。",
+    "suggestion": "lais_project_v1.mdの主要機能ブロックおよびlais_ux_v1.mdの各フロー先頭にSPEC-IDを付番し、tests/e2e/specs内のtest()タイトルに同IDを埋め込む。dev-system §12のcanopy例に沿って件数検証の一貫性を確保。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "dev_system_spec.md §19.8 / lais_ux_v1.md §16（テストへの落とし込み）",
+    "issue": "dev-system §19.8はE1〜E4の環境別テスト定義をe2e_fullflow_test.mdで求めているが、Lais側で当該テスト仕様ファイルの環境別テストケース定義が未提示。",
+    "suggestion": "docs/plans/lais_e2e_test.md（またはe2e_fullflow_test.md）にE1〜E4（任意でE5〜E7）の環境別テストケースを追加し、SKIPには // @allowed-skip: platform を付与。affected-tests.shのgrepキーと整合させる。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §16.2（A2 スプラッシュスクリーン）",
+    "issue": "iOS PWAのスプラッシュ挙動の記述が曖昧（『apple-launch-imageは非推奨のためmanifest準拠』）。iOSでは自動生成/挙動差があり、実装指針が読み取りにくい。",
+    "suggestion": "iOS 16.4+の自動スプラッシュ生成方針を明記（manifestのbackground_color/iconに依存）。apple-touch-startup-imageは採用しない旨と、端末・向き差の残課題を注記。検証端末/OSバージョンも§15のテストに紐付ける。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §13.14 / §19.6",
+    "issue": "『上流未確定のまま下流レビュー開始禁止』のルールはあるが、実際に下流（ux）が上流（project）の旧版に依存したまま進んでおり、プロセス上の逸脱を自動で止められない。",
+    "suggestion": "review_gate.shに『依存先のステータス=CONFIRMED かつ 依存先のバージョンが最新』チェックを追加。最新判定はリポジトリ内の当該ファイルの最大vX.Yをgrepで取得して比較。不一致/未確定はFAILとし、§13.14のフローに即時移行。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

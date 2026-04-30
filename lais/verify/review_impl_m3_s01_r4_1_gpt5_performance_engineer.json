@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "5",
+    "issue": "H5/H6（コード分割・supabase-js 分離）が先送りのままのため、初期バンドルに認証 SDK が同梱されるリスクが高く、LCP/TTI を確実に押し下げる。",
+    "suggestion": "S-01（Auth画面）および Supabase クライアント初期化を dynamic import で別チャンク化し、S-00（Splash）滞在中の idle/低優先度で prefetch。auth 機能のみなら @supabase/gotrue-js 等への置換も検討。Bundle Analyzer で実測し、予算（例: initial ≤ 70KB gzip）を設定・CIでゲートする。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "15秒タイムアウト後も認証 Promise が解決すると後続処理（ナビゲーション等）が実行され得るため、タイムアウト表示後に無駄な再レンダリング/遷移が発生しうる。",
+    "suggestion": "submit 毎に requestId（連番）を発行してローカルに閉じ込め、await 後・catch・finally の各箇所で最新の requestId と一致しない場合は以降の setState/route を全て無視する。Promise.race でタ��ムアウト用トークンを扱うか、inFlightRef と併用して厳密にガードする。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "5",
+    "issue": "外部エンドポイント（Supabase など）への初回接続で preconnect/dns-prefetch が未定義のため、コールドスタート時に TCP/TLS ハンドシェイク遅延が上乗せされる。",
+    "suggestion": "index.html に <link rel=\"preconnect\" href=\"https://{project}.supabase.co\" crossorigin> と <link rel=\"dns-prefetch\" href=\"//{project}.supabase.co\"> を追加。S-00 表示中の idle 時に軽量な HEAD/heartbeat を実行して接続を暖気する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "オートフィル同期 useEffect が初期 state をクロージャで保持しているため、100ms 後の再同期で同値 setState が再度発火し、不要な state 更新試行が発生する可能性がある。",
+    "suggestion": "最後に同期した値を useRef で保持し、DOM 値との差分が無い場合は早期 return。初回同期で値が反映されたら遅延タイマーを clear するか、関数型 setState で同値更新を回避する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.1",
+    "issue": "safeSessionStorage が NotFound 効果起動毎に sessionStorage へ書き込み/削除の同期待ちを行うため、微小ながらメインスレッドをブロックする。",
+    "suggestion": "モジュールスコープに可用性フラグをキャッシュ（初回のみ try/catch で判定）し、以降は参照のみにする。書き込み系プローブは一度だけに抑制する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5",
+    "issue": "location.replace で遷移する /terms, /privacy に対するキャッシュ戦略の記載がなく、毎回フルフェッチになる恐れがある。",
+    "suggestion": "静的配信側で Cache-Control: max-age=31536000, immutable（ハッシュ付パス）を付与し、アプリ側はビューポート進入時に <link rel=\"prefetch\"> を挿入。ガードで SPA フォールバックする場合は軽量な HTML スナップショットを in-memory でキャッシュする。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5",
+    "issue": "フォントロード戦略が不明で、Auth 画面でのテキストレンダリング遅延（FOIT/FOUT）により LCP 劣化のリスクがある。",
+    "suggestion": "S-00/S-01 はシステムフォント優先、もしくは font-display: swap/optional を指定。必要最小のサブセットを preload（1ウェイト）し、追加ウェイトは idle 後に遅延読込。size-adjust を指定してリフローを低減する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "非同期コールバック（timeout/catch/finally）内で複数の setState が個別発火し、環境によってはバッチされず再レンダリング回数が増える可能性がある。",
+    "suggestion": "useReducer で関連フラグを一括更新、もしくは単一の setState コールバックでまとめて更新する。React 18 環境であれば unstable_batchedUpdates/startTransition の活用も検討。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "tap ターゲット拡張を padding + 負マージンで実現しており、インライン文脈が密な場合に塗り直し領域が広がりやすい。",
+    "suggestion": "相対配置した inline-block 上に ::before 擬似要素でヒットエリアを拡張（position:absolute）するか、テキストを小さなブロックラッパで囲んでヒットエリアのみを拡張。Chrome の paint flashing で無駄な再描画が無いか確認する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

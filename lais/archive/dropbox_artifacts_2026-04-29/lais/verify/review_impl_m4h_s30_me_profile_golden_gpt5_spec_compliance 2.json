@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.10 S30-5",
+    "issue": "MBTI カードの「外部テスト結果を入力」が仕様の“リンク（14px, --accent, underline）”条件を満たしていない。実装は <button class=\"s30-mbti-manual\"> で、CSS に .s30-mbti-manual 用の色・サイズ・下線指定が存在しないため、デフォルトの text-primary 相当かつ下線なしで表示される可能性が高い。",
+    "suggestion": "スタイルを明示実装する（例: .s30-mbti-manual { font-size: var(--font-size-sm); color: var(--accent); text-decoration: underline; background: transparent; border: 0; }）。将来的にページ遷移する想定なら <a>（リンク）へ変更し、:focus-visible の可視リングも付与する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.10 S30-4",
+    "issue": "AI 理解メモの「最終更新」は 11px・--text-muted 指定が仕様だが、.s30-ai-memo-updated のスタイル定義が CSS に見当たらないため、既定の文字色・サイズで表示され仕様と不一致となる。",
+    "suggestion": ".s30-ai-memo-updated を追加し、font-size: var(--font-size-xs); color: var(--text-muted); margin-top: var(--space-xs) などを明示する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.10 S30-6",
+    "issue": "リンク行の右側 chevron-right アイコンは 14px・--text-muted 指定が仕様だが、実装では右側 <svg> に対するサイズ・色指定がなく、行全体の --text-secondary を継承してしまう可能性がある。",
+    "suggestion": ".s30-link-row > svg:last-child { width: 14px; height: 14px; color: var(--text-muted); flex: 0 0 auto; } を追加。左アイコン + ラベル側は .s30-link-label 内の <svg> にも width/height: 14px を付与して整合性を取る。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.10 S30-4",
+    "issue": "AI 理解メモ本文の「最大 800 文字」が実装で担保されていない（文字数制限・clamp 等の表現制御が見当たらない）。仕様にある要件が欠落しており、長文投入時に表示崩れ・意図しない UX となる恐れがある。",
+    "suggestion": "表示側でのガードを実装（レンダ前に 800 文字で truncate + 末尾に省略記号、もしくは CSS の line-clamp と組み合わせ）。同時にデータ層でも 800 文字制限を設定し二重化するのが安全。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.10（タイポグラフィ全般）",
+    "issue": "フォントサイズ・レタースペーシングがトークン（--font-size-xs/sm/lg, --letter-spacing-ja/label）参照のみで、仕様の明示値（名��� 20px/-0.02em、ラベル 11px/1.5px、本文 14px/-0.02em、行間 1.7）との対応がドキュメント化されていない。トークン値次第で仕様逸脱のリスクがある。",
+    "suggestion": "トークンと仕様値のマッピングを設計書に明記（例: --font-size-xs=11px, --font-size-sm=14px, --font-size-lg=20px, --letter-spacing-ja=-0.02em, --letter-spacing-label=1.5px, --line-height-ja-body=1.7）。もしくは仕様で値が固定の箇所のみ CSS で明示指定する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.10 S30-6",
+    "issue": "リンク行の最小高さは仕様で 44px 指定だが、実装は --tap-target-min トークンに委譲している。トークン値が 44px と一致する保証が本文書内にない。",
+    "suggestion": "デザイントークン定義に --tap-target-min: 44px を明記するか、.s30-link-row に min-height: 44px を直接指定する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.10 S30-6",
+    "issue": "リンク行の最終行に border-bottom を追加（.s30-link-row:last-child { border-bottom: 1px solid var(--border); }）。仕様は各行「border-top 1px」のみで、下罫線追加は仕様外要素。",
+    "suggestion": "最後の行の border-bottom を削除し、仕様通り border-top のみとする。もし下罫線が必要であれば仕様 §4.10 の更新合意を取り反映する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§4.10 S30-1",
+    "issue": "アバターに背景色 --bg-surface を付与しているが、仕様では「56×56、1.5px アクセント枠、半径 50%」のみで背景指定はない。見た目差異がテーマによっては強調される可能性がある。",
+    "suggestion": "背景指定の是非をデザインと合意。不要であれば background を削除し、必要であれば仕様へ追記（テーマ別のコントラスト検証も併記）。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

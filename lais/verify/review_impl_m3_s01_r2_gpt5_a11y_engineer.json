@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "design_spec §7 A-1 / 3.3 S01Auth.jsx (email/password input placeholder)",
+    "issue": "プレースホルダーのコントラストが 2.93:1 と記載のまま（>= 4.5:1 必要）。WCAG 2.1/2.2 SC 1.4.3 (AA) に非準拠。",
+    "suggestion": "プレースホルダー色を本文と十分に区別しつつ、少なくとも 4.5:1 を満たす色に変更するか、プレースホルダー依存を避ける（例: プレースホルダー削減＋常時表示ヒント/説明文に移行）。実測をツール（axe DevTools, WAVE, color contrast analyzer）で確認し、値を仕様に明記。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3.3 S01Auth.jsx handleSubmit / email 検証",
+    "issue": "メールが不正でも blur しないまま Enter 送信すると、canSubmit=false のため送信は止まるが、エラーは表示・アナウンスされない（emailTouched が onBlur でしか true にならない）。キーボード/スクリーンリーダーユーザーに原因が伝わらない。",
+    "suggestion": "onSubmit で canSubmit=false の場合は、全必須フィールドを『touched』扱いにし、直ちにエラーメッセージを表示＋最初のエラーへフォーカス移動（またはエラー要素を aria-live/role=alert で告知）。具体例: setEmailTouched(true); password 未充足時のメッセージ表示、agree 未同意時のメッセージ表示を追加。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3.3 S01Auth.jsx signup 時の同意チェック",
+    "issue": "同意チェック未選択時は CTA が disabled のみで、未選択の理由が明示されない。色や状態変化に依存した伝達になりやすく、支援技術利用者に要件が伝わりにくい。",
+    "suggestion": "checkbox に required/aria-required=\"true\" を付与し、未同意で送信試行時に『同意が必要です』等のテキスト（role=alert ないし aria-live=polite）を checkbox 直下に表示。checkbox に aria-describedby でそのテキストを関連付け、エラー発生時は checkbox へフォーカス移動。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "3.4 S01Auth.css（全文未掲示）",
+    "issue": "フォーカスインジケータ（focus ring）の有無・視認性（コントラスト/太��/面積）が未確認。WCAG 2.2 AA: 2.4.7/2.4.11 準拠可否が不明。",
+    "suggestion": "全インタラクティブ要素（input, checkbox, button, a）に :focus-visible で 2px 以上・背景��� 3:1 以上の高コントラストなアウトライン（例 outline: 2px solid #005FCC; outline-offset: 2px）を明示。UA デフォルト outline を消さない/上書き時は上記基準を満たす。実測値を記録。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "3.4 S01Auth.css（prefers-reduced-motion 節）",
+    "issue": "prefers-reduced-motion 対応の詳細が未提示のため、全てのアニメーション/トランジションが適切に無効化されるか検証不能。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) で animation, transition, transform を包括的に無効化（duration: 0ms/none）。フォーカス/ホバーのトランジションも対象に含め、実機で OS 設定と連動することを確認。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "3.4 S01Auth.css（色設計全般）",
+    "issue": "本文/リンク/ヒント（--text-muted）/エラーテキスト（--danger）/ボタンと背景のコントラスト実測値が未提示。エラー枠線やフォーカスリングなど非テキスト指標の 3:1 も未確認。",
+    "suggestion": "各状態の実測値を提示し、本文/リンク/エラー等のテキストは 4.5:1 以上、非テキスト（枠線・フォーカスインジケータ）は 3:1 以上を満たすことを確認。必要に応じてカラートークン（--text-muted/--danger/--focus-ring 等）を再調整。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 S01Auth.jsx（規約/ポリシーリンク）",
+    "issue": "外部リンク（target=\"_blank\"）が新規タブで開くことの周知がない。WCAG 要件では必須ではないが、予期せぬ文脈変化として戸惑いが生じうる。",
+    "suggestion": "視覚的/スクリーンリーダー向けに『（新しいタブで開きます）』を付記（sr-only 可）または aria-label で明示。ツールチップ/アイコン併用も可。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "3.3 S01Auth.jsx <main> 見出し構造",
+    "issue": "h1=ロゴ、h2=ページ見出しの構造は技術的には許容されるが、ページ主題が h1 でないため見出しアウトラインの意味づけが弱い。",
+    "suggestion": "ページ主題（『アカウントを作成』/『ログイン』）を h1 とし、ロゴは p/span（aria-hidden=\"true\" も���）に変更するか、ロゴをサイト全体の h1 とする設計方針を仕様化。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 S01Auth.jsx（serverError/confirmNotice 表示）",
+    "issue": "serverError は role=\"alert\"、confirmNotice は role=\"status\" で通知されるが、フォーカス移動がないため一部環境で読み上げが弱い/見落としが起こり得る。",
+    "suggestion": "メッセージ出現時に当該要素へプログラム的にフォーカス（tabIndex=\"-1\" + ref.current.focus()）するか、フォーム領域に aria-live=\"polite\" を設けて確実に周知。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 S01Auth.jsx（必須フィールドの明示）",
+    "issue": "email/password/agree は実質必須だが、HTML の required/aria-required によるプログラム的明示がない（フォームは noValidate）。支援技術が必須性を把握しづらい。",
+    "suggestion": "email/password/agree に required（および必要に応じて aria-required=\"true\"）を付与。カスタム検証のままでも属性は必須性のメタ情報として有益。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 S01Auth.jsx（password フィールド）",
+    "issue": "signup 時、最小長未満でも aria-invalid の設定がなく、エラー文も表示されないため、状態がプログラム的に伝わりにくい。",
+    "suggestion": "password.length>0 && password.length<minPw のとき aria-invalid を true にし、『8文字以上必要です』等のエラー文（aria-live=polite/role=alert）を表示。既存のヒントは継続しつつ、未充足時のみエラーを追加表示。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "3.4 S01Auth.css（checkbox ヒット領域）",
+    "issue": "label の縦方向 44px は明記されているが、左右方向の余白や display（block/inline-flex）が不明。実機で 44×44 以上のタップ領域が常に確保されるか確証がない。",
+    "suggestion": ".s01-agree-label に display:inline-flex（または block）を明示し、左右 padding も付与（例 padding: 8px 12px; min-height:44px;）。Chrome DevTools の『タップターゲット』検証やヒット領域オーバーレイで実測確認を記録。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

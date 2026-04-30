@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4 design_spec_v1.md",
+    "issue": "コンポーネントの状態バリエーション（hover/active/focus/disabled/error/success）やブレークポイント別・入力エラー時の仕様が必須セクションとして定義されていないため、G9スクショ判定時に受入基準が曖昧になりやすい",
+    "suggestion": "design_spec_v1.mdに「§N+3 コンポーネント状態バリエーション（各UI要素の状態別スタイルと視覚フィードバック）」を追加し、各状態の寸法・色・アニメーション・アクセシビリティ要件を明文化する。スクショ撮影ポイントもATと対応付ける",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4 reference_v1.md",
+    "issue": "APIの運用保護と失敗時挙動（レート制限、スロットリング、リトライ/バックオフ、冪等性キー、エラー分類/リカバリ手順）の必須セクションがない。AIが誤判断した場合の再送や補償設計が仕様で未定義",
+    "suggestion": "reference_v1.mdに以下を追加: §7 レート制限/スロットリング（429��のUI/リトライ規則）、§8 リトライ/バックオフ/冪等性（POSTのidempotency-key設計）、§9 エラー分類とハンドリング（4xx/5xx/ネットワーク別のUI動作と再試行方針）、§10 失敗時の補償トランザクション（DB/外部APIの整合復旧）",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4 system_map.md",
+    "issue": "主要フローの失敗パス、リトライ、タイムアウト、補償フロー、データ回復（再同期/再計算）がテンプレートに含まれておらず、AI自律実行時の暴走防止と誤判断からの回復手順が明確でない",
+    "suggestion": "system_map.mdに「§5 失敗パス/リカバリ設計（各フローのIF FAIL→リトライ/フォールバック/補償/監査ログ）」「§6 可観測性/監視（主要メトリクス/SLI・しきい値/アラート）」「§7 データ整合回復（再同期/再計算/再送キュー）」を追加する",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4 e2e_fullflow_test.md",
+    "issue": "テスト設計テンプレートにSPEC-ID/AT-ID→証跡（evidenceディレクトリ）のマッピングとスクショ命名規約の明記がなく、G8/G9との機械的突合の手戻りが増える",
+    "suggestion": "e2e_fullflow_test.md 冒頭に「出力連携」節を追加し、SPEC-ID/AT-IDを必須列にする。スクショは before_{AT-ID}.png / after_{AT-ID}.png と規定し、テストごとにevidence/MISSION-ID/への出力要件を明記する",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-105",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5 仕様書ヘッダー標準",
+    "issue": "「依存」が単一文字列の例示のみで、複数上流（例: design_spec_v1.mdはux_v1.mdとdesign_system.mdの両方に依存）を機械可検証な形式で表現できない。バージョン付き依存必須（§19.6）と実表現が乖離",
+    "suggestion": "ヘッダーをYAMLフロントマター化し、deps配列で複数依存を宣言可能にする。例: ---\\ntitle: ...\\nversion: 1.0\\nstatus: REVIEW\\ndepts:\\n  - file: docs/ux_v1.md\\n    version: 1.2\\n    sections: [\"§2\", \"§3.1\"]\\n  - file: docs/design_system.md\\n    version: 1.1\\n---。併せて spec_header_lint.sh を追加し、未記載/バージョン欠落/重複をFAILにする",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.5 仕���書ヘッダー標準",
+    "issue": "「dev-system準拠: docs/plans/dev_system_spec.md §19」はアプリ側リポジトリに当該パスが存在しないため参照切れになりうる",
+    "suggestion": "文字列参照ではなく「dev_system: {version:\"3.0\", repo:\"https://.../dev-system\", commit:\"<sha>\"}」のメタデータ化を推奨。リンクは外部URLにする",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.6 ファイル間参照ルール",
+    "issue": "「バージョンなしの依存宣言禁止」とあるが、これを自動検出するゲートが存在せず運用依存。依存ドリフトや連鎖更新漏れの検知が困難",
+    "suggestion": "canopyに spec_depcheck.sh を追加し、全docs/*.mdのヘッダからdepsを収集→実ファイルのversionと照合→不一致/未記載/循環をFAIL化。spec_changelog.mdに更新IDがあるかも同時検証する",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-108",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.4/§19.6 と §6/§17/§18",
+    "issue": "UX仕様ファイルの命名が「ux_v1.md」（§19.1/§19.4/§19.6）と「ux_redesign_v*.md」（§6 承認ルール、§17、§18）で不一致。���認条件や連鎖更新マップの参照先が混在し実務で混乱を招く",
+    "suggestion": "ファイル命名を統一（例: docs/ux_v*.md）。§6/§17/§18の全参照を一括置換し、init_app.shテンプレート生成物名も合わせる。過去資産のマイグレーション指針もspec_changelog.mdに記載",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7 競合ベンチマーク要件",
+    "issue": "App Storeレビュー分析を前提とするが、B2B Web/SaaSや未公開サービスでは入手不可な場合がある。必須化するとPhase 0の完了不能リスク",
+    "suggestion": "調査ソースの代替ルールを明記（G2: G2/Capterra/Gartner/公開事例/公式Changelog/コミュニティForum等）。App Storeが該当しない場合のN/A許容と代替エビデンス要件（URL/スクショ/日付）を追加",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7 競合ベンチマーク要件",
+    "issue": "ベンチマーク出力がMarkdown表のみで機械可読性が低く、差分検出や自動集計が難しい。AIレビュー/ゲート連携が弱い",
+    "suggestion": "Markdownに加えYAML/JSONの��械可読ブロックを必須化。例: ```yaml\\nbenchmark:{scope:\"UX\",date:\"2026-04-11\",targets:[{name:\"A\",category:\"...\",url:\"...\",rating:4.5,source:\"AppStore\"},...],matrix:[{item:\"Onboarding\",A:true,...,lais:\"差別化\"}],diff:[{issue:\"レビュー: ログイン不可\",policy:\"匿名起動可\" ,ref:\"ux_v1.md §N\"}]}\\n```。canopyにbenchmark_lintを追加し件数/『Lais方針』列の充足を検証",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-111",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7（Phase 0完了基準） vs §13.4（標準ペルソナ数）",
+    "issue": "Phase 0で「8ペルソナ×2モデルのAIレビュー」とあるが、§13.4の標準ペルソナは5のみ。追加3ペルソナの定義や必須性が未記載で整合しない",
+    "suggestion": "どちらかに統一。8を維持するなら追加3ペルソナ（例: セキュリティ監査、プロダクトマーケ、アクセシビリティ専門家）を§13.4に正式追記し、Phase 0要件から参照する。もしくは『5標準+必要に応じて最大3追加（PO承認）』に修正",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-112",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.6 参照表記法",
+    "issue": "セクション番号（§3.2）参照は版重ねで番号が変動しやすく参照腐敗が起きる。AI/ENGが相互参照を辿る際に不整合が生じる",
+    "suggestion": "見出しスラッグ/アンカーID併記（例: §3.2 [id: ux-flow-main]）。ヘッダーdeps.sectionsはID優先で管理し、PDF/HTML出力時もリンク解決可能にする",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-113",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 design_system.md",
+    "issue": "トークン命名規則（prefix/scale/semantic-alias）、トークンの非推奨/置換ポリシー、バージョニング規則が未定義で、AI自律生成時の一貫性担保と段階的移行が難しい",
+    "suggestion": "design_system.mdに「§9 トークン命名/別名規則」「§10 非推奨管理（deprecation/alias/期限）」「§11 バージョニング（breaking/minor）」を追加。G9でのAIっぽさ検出チェックリストとも紐付ける",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-114",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.5 仕様書ヘッダー標準",
+    "issue": "責務分離/承認ゲートの観点で、各仕様書の責任者・承認者・自律実行可否（ホットフィックス可否条件）がメタ���ータ化されていない",
+    "suggestion": "ヘッダーに owner（担当/役割）、approver（PO/ADV）、risk_profile（🟢/🟡/🔴）、autonomy_flags（hotfix_safe: true/false, tests_required: true）を追加。canopyで『🟢かつhotfix_safe=true』のみENG自律実行可と検証",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-115",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.6 依存チェーン",
+    "issue": "e2e_fullflow_test.mdがproject_v1.mdの下流としてのみ配置されており、UX/design_specの変更が直接テストへ波及する依存が図示されていない。実態と乖離し、連鎖更新判断を誤る恐れ",
+    "suggestion": "依存図を修正し、e2e_fullflow_test.mdを『project_v1.md →（ux_v1.md, design_spec_v1.md, reference_v1.md）→ e2e_fullflow_test.md』の多重下流として表現。ヘッダーdepsにも3ファイルを必須化",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

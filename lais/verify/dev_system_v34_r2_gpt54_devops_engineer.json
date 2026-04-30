@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.2.1 / §4.2.5 / §4.4.3",
+    "issue": "C2フローのStep 8で新バージョン反映確認にコミットハッシュの応答本文grepを要求しているが、現行dev-systemおよび提示差分にはデプロイ成果物やHTTP応答にコミットハッシュを埋め込む仕組みが定義されていない。一方で高リスク系ミッションはStep12 cmd-realworld PASSまでDONE不可とされており、Step8で必ず停止するとStep12に到達できずデプロイ完了判定がデッドロックする。",
+    "suggestion": "app_config.yamlにhealth/version endpointまたはbuild metadata埋め込み方式をSSOTとして追加し、version_sync/build時に確実に公開レスポンスへ反映する仕様を先に定義する。代替としてapp.versionを返す専用ヘルスエンドポイントを必須化し、Step8はその値で判定する。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.3.4 / §4.3.5 / §3.3",
+    "issue": "mission_risk_classifier.sh と hflow_trigger_check.sh が共通ライブラリ scripts/lib/risk_patterns.sh の Bash 配列 RISK_PATHS を source する設計だが、R2全体ではmacOS/bash 3.2互換を強く要求しつつ、Step0系以外の新設スクリプトに対してPOSIX互換要件が徹底されていない。さらに patternを grep にそのまま渡す方式では 'src/auth/' 等の部分一致に依存し、§3.2.1の『git diff ファイルパスで機械判定』の完全一致要件とも不一致。",
+    "suggestion": "risk_patternsは配列でなく改行区切り定数ファイルにし、両スクリプトは POSIX sh 互換で1行ずつ読み込む。判定仕様も『prefix match』か『exact path + prefix list』のどちらかに統一して明文化する。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.8 / dev_system_spec現行§4.1 / development_rules.md連鎖更新",
+    "issue": "R2ではG1-G13完全版ゲート一覧を再構築するとしながら、G10を『仕様書ファースト / scripts/spec_first_lint.sh』へ再定義している。一方、現行確定仕様とCLAUDE/dev_systemではG10はシークレットスキャンであり、ユーザーからの重点観点にも環境変数管理とシークレット保護が含まれる。番号再利用によりセキュリティゲートが表から消え、development_rules更新次第ではデ���ロイが通過してしまう危険がある。",
+    "suggestion": "G10は既存どおりシークレットスキャンのまま維持し、新ゲートはG11以降へ順送りするか、spec_first_lintは別番号を採番する。G1-G13表にシークレット保護ゲートを明示し、pre-commit/canopyとの対応も再掲する。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.5.4 / §4.8 G13",
+    "issue": "G13の検証内容が『最近N日以内に [pre-commit] または [deploy.sh] タグが存在』となっているが、N日が未定義で自動判定不能。また『hook経由発火の保証』が目的なのに deploy.sh タグでも合格できるため、フック未発火でもゲートを満たせてしまう。",
+    "suggestion": "Nを固定値で明記し、G13を目的別に分離する。例えば『hook配線存在/最新hook発火』と『deploy時canopy実行』を別条件にし、hook保証には [pre-commit] のみを使用する。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.7 / §4.5.1 / §4.5.4",
+    "issue": "クラスターGでは pre-commit-sub を通常ファイル化し親 pre-commit から実行するとした一方、発火ログには [pre-push] も記録対象に含めている。しかし pre-push フックの配置・生成・接続方法がR2差分内に定義されておらず、ログ種別だけが先行している。",
+    "suggestion": "pre-push を正式にサポートするなら init/update で .git/hooks/pre-push 生成仕様まで追加する。不要ならログタグ一覧から削除し、pre-commit と deploy.sh のみを対象に絞る。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.2.4",
+    "issue": "deploy.sh失敗時に session_progress.md へ DEPLOY-FAIL追記、次ミッション先頭へ DEPLOY-RECOVER挿入とあるが、実行主体が scripts/deploy.sh なのにMarkdownキュー更新の機械手順が未定義。自動前提の記述だが、既存仕様では session_progress.md の構造編集は主にADV/ENGの文脈判断を要する。",
+    "suggestion": "deploy.sh自身は失敗ログファイル出力までに留め、キュー更新は別の専用スクリプト/テンプレート適用手順として定義する。もしくは session_progress.md 更新を自動対象から外し『ENGが定型テンプレで追記』に下げる。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§3.1.4 / §4.3.4 / §3.2.1",
+    "issue": "高リスク判定のパス定義が箇所ごとに揺れている。PD-105本文では外部API呼び出し一般、§3.1.4では src/services/external/**、PD-106では supabase.ts を含むが mission_risk_classifier.sh の例では worker側supabase相当や他の外部連携経路が抜けうる。高リスク分類とHフロー発火条件を共通化すると言いながら定義範囲がまだ不安定。",
+    "suggestion": "risk pathのSSOTを1表に固定し、『高リスク分類』『Hフロー発火』『外部サービス証跡厳格化』の3用途で完全共有すると明記する。例外パスも列挙する。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.9.1 / §4.8 / セキュリティ観点全体",
+    "issue": "development_rules.md連鎖更新でG1-G13完全版へ置換するとあるが、シークレット管理に関する更新内容が記載されていない。特に .env/.dev.vars の取り扱い、G10の継続、denyリスト確認、.env.example必須など現行セキュリティ要件をどう保持するかが差分に見えない。",
+    "suggestion": "development_rules.md更新項目にシークレット保護節を明記し、G10維持・.env* .gitignore・exampleファイル・ログ出力禁止の各要件を再掲する。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.1.2 / §4.1.6",
+    "issue": "§4.1.2のENG/ADV必須Readは『§C0-C6 全文』となっている一方、§2.6と§4.1.6では『毎回必須は §C0、§C1-C6全文は条件付き再読』としている。表の書き方だと毎回フルReadにも読め、Read量削減の採用方針と噛み合っていない。",
+    "suggestion": "表を『毎回必須』『条件付き再読』で完全に分け、§C0のみ毎回・§C1-C6全文は条件付きと明示する。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.3.4",
+    "issue": "mission_risk_classifier.sh の例では awk '/^対象ファイル:/,/^$/' | tail -n +2 で対象ファイルを抽出しているが、ミッション定義テンプレート上の『対象ファイル: src/xxx.js（変更してよいファイルを列挙）』は1行形式で、空行区切り前提の複数行ブロックとは一致しない。例示どおり実装すると高リスク検出が空振りする可能性が高い。",
+    "suggestion": "ミッションテンプレートの対象ファイル���法を機械可読な箇条書きまたはYAMLライクな複数行へ統一し、その形式に合わせてclassifier/linterを設計する。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.2.3 / §3.2.3",
+    "issue": "Hフロー非発火時でも『L1-realworld 4基本操作は全デプロイで実行』としている一方、3層戦略ではL1-realworldは cmd-realworld と結び付けられ、高リスク以外では3区分省略可としている。結果として低リスクミッションでもC2ではrealworld必須、ミッション定義上は省略可という二重基準が残る。",
+    "suggestion": "全デプロイ共通のrealworld smokeを『C2共通デプロイ検証』としてミッション完了コマンドとは別枠に定義するか、低リスクでもdeploy時cmd-realworld-lite必須と明示して整合を取る。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.2.1",
+    "issue": "Step8のポーリング例が seq に依存しており、macOSでは通常利用可能だがPOSIX厳密互換ではない。R2全体でPOSIX互換を強調しているため、細部で基準がぶれる。",
+    "suggestion": "whileループとカウ��タで実装する例に統一し、互換性ポリシーを一貫させる。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.3.2",
+    "issue": "verify_external_services.sh で unexpected type を sys.exit(2) とし『WARN扱い』と書いているが、シェル側で終了コード2をWARNへ変換する処理が示されていない。通常は非ゼロでFAILになりうる。",
+    "suggestion": "終了コードと判定の対応表を明記し、WARNにしたいケースはシェル側で捕捉してメッセージ出力後 exit 0 に変換する仕様を書く。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.8",
+    "issue": "G一覧の『スクリプト』列に canopy_common.sh::check_version のような関数名形式と scripts/*.sh のファイル形式が混在しており、実装状態や呼び出し単位の粒度が不統一。",
+    "suggestion": "『実行主体(canopy/deploy/pre-commit)』『実装ファイル』『主要関数』を列分離して表現を揃える。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.5.1 / §4.5.7",
+    "issue": "subdir対応で親 .git/hooks/pre-commit を利用する前提だが、既存フックとの共存方針が未定義。上書き・追記・チェーン実行のどれか不明。",
+    "suggestion": "init_app/update_app時に既存pre-commitを保全して末尾チェーンするのか、テンプレート管理下に置くのかを明文化する。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.9.2",
+    "issue": "templates/mission_template_v2.md → v3昇格とあるが、現行sub_infrastructureでは mission_template_v3.md が既に存在する。ファイル名・世代管理の説明がずれており、どのテンプレートを更新するのか不明瞭。",
+    "suggestion": "既存テンプレート名に合わせて『mission_template_v3.mdを更新』に統一するか、旧v2が別途存在するなら移行関係を明記する。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.2.1, §4.5",
+    "issue": "S-41(アバター設定)で未所持アイテムをタップすると「SHOPで購入」確認を経てS-34(SHOP)へ遷移する仕様になっているが、MVP(v0.1.0)ではSHOPは「Coming Soon」プレースホルダー(§4.5)であるため、ユーザーは何も購入できずUXが破綻する。",
+    "suggestion": "MVP(v0.1.0)の段階では、未所持アイテムをタップ不可（グレーアウト＋鍵アイコン）にするか、タップ時に「ショップ機能はv0.2.0で公開予定です」というトーストを表示し、S-34への遷移フローを無効化するよう修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.3",
+    "issue": "project_v1.md §3.2.1ではタスクの「所要時間」は「任意」と定義されているが、UX仕様書のS-12(タスク追加)では「5/10/15... デフォルト: 30分ハイライト」となっており、UI上で「未設定（空）」を選択する方法が存在しない。",
+    "suggestion": "所要時間の横スクロールチップの先頭に「未設定」または「--」を追加し、任意項目として空のままタスクを登録できるUIフローを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§2.3, §4.3",
+    "issue": "S-14(ゴール詳細)からS-20(TALK)への遷移は「タブ切替として遷移」と明記されている(§2.4)が、S-11(タスク詳細)やS-32(DISCOVERのヒアリング)からTALKへの遷移が、タブ切替なのかフルスクリーン遷移(スタック追加)なのか定義されていないため、戻りナビゲーションが不明確になる。",
+    "suggestion": "S-11やS-32からのTALK遷移も「ボトムタブの切替」として扱い、コンテキスト（タスク名やヒアリング開始フラグ）をTALK画面に���す仕様であることを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3.5, §7.3",
+    "issue": "§3.5ではチャット履歴の削除操作を「会話を左スワイプ → [削除] ボタン露出」としているが、§7.3のジェスチャー表では「左→右 チャット履歴の会話行 削除ボタン露出」となっており、スワイプの方向が矛盾している。",
+    "suggestion": "§7.3の表を「右→左（左スワイプ）」に修正し、iOS/Androidの標準的なリストアイテム削除ジェスチャーと方向を統一してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.2.1",
+    "issue": "アバター設定(S-41)で[保存]をタップした際、リスト表示用のPNGキャッシュを生成（Canvas経由でSVGをラスタライズ）する重い処理が発生するが、その間のローディングUXが未定義。モバイル端末ではUIがフリーズしたように見える懸念がある。",
+    "suggestion": "[保存]ボタンタップ時にボタンをローディング状態（スピナー表示＋非活性）にし、PNG生成とサーバー同期が完了してからトースト表示＋画面遷移を行うようフローを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§3.2",
+    "issue": "project_v1.md §3.3で画像添付のサイズ上限が10MBと定義されているが、UX仕様書において10MBを超過する画像を選択した際のエラーフィードバックフローが定義されていない。",
+    "suggestion": "画像選択直後にクライアント側でファイルサイズを検証し、10MB超過時は添付をキャンセルして「画像サイズは10MB以下にしてください」というエラートーストを表示する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§6, §10",
+    "issue": "「洗練」というブランドメッセージを実現するための、タイポグラフィの階層（見出し・本文のウェイト）、角丸（border-radius）のルール、アイコンのスタイル（アウトラインか塗りつぶしか）に関する要件がUX仕様書からdesign_system.mdへ引き継がれる形として定義されていない。",
+    "suggestion": "§6（共通UIパターン）に「デザインシステムへの要件��を追記し、フォント階層、角丸の基本ルール、アイコン体系（例: 24x24px、線幅1.5pxのアウトラインアイコン）のプレースホルダー定義を含めてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§9.1",
+    "issue": "オフラインバナーが「黄色背景」とハードコードされているが、ダークテーマ（Night Sky, Harajuku Dark）において純粋な黄色はコントラストが強すぎ、「洗練されたデザイン」を損なう可能性がある。",
+    "suggestion": "「黄色背景」という固定色指定を避け、「design_system.mdで定義される warning-surface 色（ダークテーマ時は彩度を抑えた色）を使用する」という指定に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

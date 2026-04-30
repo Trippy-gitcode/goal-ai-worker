@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§3 S02Onboarding.css (S02-6)",
+    "issue": "「次へ」CTA の横幅と下端オフセットが仕様と乖離。main に左右 padding があるにも関わらず .s02-next に左右 margin を追加しており、実質的に左右 --space-lg が二重適用されて幅が狭くなる。また下端 100px 指定のところ、実装は var(--space-2xl)=64px 固定。",
+    "suggestion": "main の左右 padding を生かし、.s02-next の左右 margin は 0 にする。下端は 100px（＋安全領域）に固定する。\n例:\n.s02-next { margin: auto 0 calc(100px + env(safe-area-inset-bottom, 0px)); align-self: stretch; }\n// main 側 padding-left/right: var(--space-lg) はそのまま活用",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§3 S02Onboarding.css (S02-5)",
+    "issue": "アバターの 3 列が 100px 固定＋gap 24px のため、320px 幅端末で横幅が 348px を超え、水平スクロールが発生しやすい。小画面でレイアウトが破綻する。",
+    "suggestion": "小画面ブレークポイントを追加し、幅・gap を縮めるか折り返しを許可する。\n例:\n@media (max-width: 360px){ .s02-avatars{ grid-template-columns: repeat(3, min(92px, 28vw)); gap: var(--space-md); } }\n// もしくは wrap 案:\n@media (max-width: 340px){ .s02-avatars{ grid-template-columns: repeat(2, 1fr); max-width: 320px; } }",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§2 S02Onboarding.jsx handleBack",
+    "issue": "history.back() を無条件で使うため、外部オリジンや想定外の前画面へ戻る可能性がある（深い直リンクやリロード後）。UX 的にアプリ外へ離脱するリスク。",
+    "suggestion": "同一オリジンかつ履歴が有効な場合のみ back、それ以外は安全なアプリ内既定ルートへ遷移。\n例:\nconst sameOrigin = document.referrer && new URL(document.referrer).origin === location.origin;\nif (sameOrigin && history.length > 1) history.back(); else route('/', true);",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§2 S02Onboarding.jsx radiogroup",
+    "issue": "role=\"radiogroup\"/\"radio\" を使用しているが、矢印キーで選択移動する標準のキーボード操作（roving tabindex）が未実装。Tab 移動のみで使えるが、ARIA ラ��オの期待操作に未準拠。",
+    "suggestion": "roving tabindex を実装して ArrowLeft/Right/Up/Down で前後の項目に selection＋focus を移すか、ネイティブ input type=radio＋label に置き換える。onKeyDown で選択変更し、aria-checked と focus を同期。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3 S02Onboarding.css (全体レイアウト)",
+    "issue": "iOS のホームインジケータ領域等のセーフエリア考慮がなく、下部固定の CTA が OS UI に近接・一部重なりうる。",
+    "suggestion": "セーフエリアを考慮した余白を追加する。\n例:\n.s02-onboarding { padding-bottom: calc(env(safe-area-inset-bottom, 0px)); }\n.s02-next { margin-bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§1 App.jsx OnboardingRoute Suspense fallback",
+    "issue": "fallback の live region が aria-label のみでテキストがないため、スクリーンリーダーによっては読み上げが発火しない可能性がある。",
+    "suggestion": "fallback に実テキストノード（視覚的には sr-only）を含める。例: <span class=\"sr-only\">読み込み中…</span> を role=\"status\"/aria-live=\"polite\" の中に配置。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2 S02Onboarding.jsx handleSelect",
+    "issue": "アニメーション終了の判定を setTimeout(400ms) に依存しており、CSS トークン変更時にズレる恐れ。将来 --duration-normal を変更すると tappingId の解除タイミングが不一致に。",
+    "suggestion": "アニメーション終了イベントで解除する。各アバターに onAnimationEnd を付与して tappingId をクリアするか、--duration-normal を JS から取得して同期（getComputedStyle で --duration-normal を読み取り）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2 S02Onboarding.jsx 進捗バー",
+    "issue": "stepper に role=\"progressbar\" を付与しているが、離散ステップの表現としては aria-valuetext など補助説明がないと理解しづらい場合がある。",
+    "suggestion": "aria-valuetext=\"ステップ 2/5\" を追加、または各バーを list として aria-current=\"step\" を併用するなど、離散進捗であることを明示。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "パッケージ全体（テスト/モニタリング）",
+    "issue": "デ���レ検知のための自動テスト・可視ログが不足。特に「選択なしで次へが無効」「進捗 2/5」「reduced-motion 時のアニメ無効」「小画面での折返し/非折返し」などが未検証。",
+    "suggestion": "E2E/ビジュアル回帰テストを追加（Playwright/Percy）。シナリオ: 1) 初期状態で次へが disabled、2) アバター選択で enabled、3) CURRENT_STEP_INDEX=1 で 2 本塗り、4) prefers-reduced-motion=reduce でアニメ無効、5) 320px 幅でレイアウトが横スクロールしない。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.3 vs design_system.md §2",
+    "issue": "--space-2xl の値が spec 40px、design_system 64px で矛盾。実装は design_system を優先しており、スクリーンショット検証時に差分となる可能性。",
+    "suggestion": "ADV 合意の上でいずれかに統一。実装側はトークン値に依存しつつ、spec には『S02 は --space-2xl 準拠』と追記。差異が残る場合は S02 専用トークン（--s02-title-offset など）を設ける。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3 S02Onboarding.css .s02-avatar",
+    "issue": "transform に対して transition と keyframes の両方を適用しており、実装やブラウザ差でわずかなチラつきが起きる可能性がある。",
+    "suggestion": "tap 時の transform は keyframes のみに統一し、.s02-avatar の transition 対象から transform を除外する（border-color/box-shadow のみ残す）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3 S02Onboarding.css 画面高",
+    "issue": "min-height: 100dvh のみ指定。100dvh 非対応環境で高さ不足になる可能性。",
+    "suggestion": "フォールバックを用意する。\n例:\n.s02-onboarding { min-height: 100vh; }\n@supports (min-height: 100dvh) { .s02-onboarding { min-height: 100dvh; } }",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

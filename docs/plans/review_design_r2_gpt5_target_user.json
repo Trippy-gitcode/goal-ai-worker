@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§8.1 ボタン（Danger/塗りつぶし）",
+    "issue": "Dangerボタンの前景色が常に白(#FFFFFF)で固定。各テーマの--danger色とのコントラストがWCAG AA 4.5:1を満たす保証がない（小サイズ本文相当）。Primaryについては数値根拠が明記されているが、Dangerは未検証。",
+    "suggestion": "各テーマで--dangerと--button-danger-fgのコントラスト比≥4.5:1を満たすことを要件化し、--button-danger-fgトークンを新設（例: dark系=白、light系=濃色）。併せて「Danger(塗りつぶし)」のコントラスト実測値を記載。満たさない場合は--dangerを暗くするか文字色を濃色に切替。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§8.1 ボタン（Danger hover/pressed）",
+    "issue": "hover/pressed色にcolor-mix(in srgb, ...)を使用。iOS/Safariの一部バージョンや古いAndroidで未サポートの可能性があり、ホバー状態の視覚変化が無効化されるリスクがある。",
+    "suggestion": "color-mix依存をやめ、--button-danger-bg-hover / --button-danger-bg-pressedのトークンを各テーマで静的に定義。どうしてもcolor-mixを使う場合は@supports(color: color-mix(in srgb, black 50%, white))でフォールバック色を指定。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.4 z-index階層トークン",
+    "issue": "モーダル(510) < ボトムシート(520) < ドロワー(530)の序列だが、同時表示時の優先順位・相互排他が未定義。設計次第でモーダルの上にドロワーが重なるUI破綻の恐れ。",
+    "suggestion": "コンポーネント組み合わせポリシーを明記: 例) ドロワーとモーダル/ボトムシートは同時表示不可、同時に必要な場合は表示優先順位と背面要素の操作不可ルールを定義。状態遷移シーケンス（閉じる→開く）も指定。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§5.0 テーマ切替の永続化・FOUC対策",
+    "issue": "<meta name=\"theme-color\">を--bg-primaryと同期とあるが、実装例のコードが未提示。モバイルでステータスバー色が初回描画時に不一致になる恐れ。",
+    "suggestion": "head直下でtheme-colorを書き換える具体コ��ドを追記（DOMContentLoaded前に実行）。例: const m=document.querySelector('meta[name=theme-color]'); m && (m.content=getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim());",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.2 Dawn（ライト）",
+    "issue": "--borderが白背景で約2.0:1と明記されており、非テキストコントラスト3:1を満たさない。Open Air方針で「薄いborderで区切る」との整合に注意が必要。",
+    "suggestion": "「構造線に使うborderは--border-strongを既定にし、--borderは装飾/ホバー用に限定」の運用指針を明記。あるいは--divider等の用途別トークンを分離して3:1基準を満たすことを要件化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.7 状態マトリクス／§7.1 フォーカスリング",
+    "issue": "フォーカスリングのコントラスト最小値（推奨3:1）が明文化されていない。Glass ON時やHarajuku系の彩度が高い背景で可読性低下の恐れ。",
+    "suggestion": "focus-visibleリングは背景対比≥3:1を満たすことを明記し、--focus-ring-color（色）と--focus-ring-width（太さ）を分離したトークンを追加。Glass ON上でも視認できる色指定例を各テーマに追記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§5.5 グラスモーフィズムトグル",
+    "issue": "@supportsでbackdrop-filter対応時のみglass-surfaceにfilterを適用しているが、非対応時フォールバックは背景のみ。枠線/影のフォールバック一貫性が未定義。",
+    "suggestion": "非対応フォールバック時も--card-border/--shadow-md等を適用するCSS例を追記（.glass-surface { background: var(--bg-surface); border: var(--card-border); box-shadow: var(--shadow-sm);}）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§3.2 サイズスケール + §1.4 NGリスト",
+    "issue": "「ヒーローメトリクスレイアウト（大数字+小ラベル）」をNGとしつつ、--font-size-2xl/3xlで「大数字（EXP、レベル）」用途を想定。どの構成がNGで、どの構成がOKか判断が難しい。",
+    "suggestion": "NG具体例（レイアウト図）とOKパターン例を1つずつ掲載し、EXP/レベル表示はOKだが「巨大数+微小ラベル+装飾線の組み���わせ」はNG等、判定基準を明文化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§6.2 タブアイコン（GROW/TALK/ME）",
+    "issue": "非アクティブ時はラベル非表示とある。初回利用やリテラシー低いユーザーには意味が伝わりづらい可能性。アクセシビリティ的にも音声読み上げ以外での補助が不足。",
+    "suggestion": "設定で「タブラベル常時表示」をONにできる指針、または最初の数セッションのみラベル表示する導入期間のガイダンスをUXと整合して明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§5 テーマ定義（総論）",
+    "issue": "ユーザー視点: 4テーマの「性格差」は魅力だが、実用上どれを選ぶとどんな気分/場面に合うかがUIから直感しづらい。Harajuku系が自分にはポップ過ぎるかの判断が難しい。",
+    "suggestion": "テーマ選択カードに「おすすめシーン」やミニプレビュー（ヒーロー/タスク/ボタンの抜粋）を並置。オンボーディング時に「後で自由に変えられます」を明示し選択ストレスを緩和。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§5.5 グラスモーフィズムトグル",
+    "issue": "ユーザー視点: Glass ON/OFFの違いが具体的にどの画面・要素に効くかが直感しづらい。ONにしたのに一部画面で変化が見えず「壊れている？」と誤解しそう。",
+    "suggestion": "設定画面に「Glassはカード/モーダル/ボトムシート/ドロップダウンに適用。リスト行など反復要素には適用しません（高速化のため）」の説明文とサンプル画像を追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.3 Overdueトークン + §8.4 タイムライン",
+    "issue": "Overdueを色以外でも判別（左3pxバー/!アイコン）とあるが、視認性の最小サイズ要件や色弱シミュレーションの検証基準が未定義。",
+    "suggestion": "左バー最小高さ・コントラスト（3:1以上）・アイコンサイズ（>=16px）を要件化。デザイン検証で色弱シミュレーションを通す旨を明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§9 CSSトークンブロック",
+    "issue": "AI実装向けのNight Skyデフォルトは充実しているが、テーマ切替時の推奨CSSスニペット（例: [data-theme]セレクタの最小例）やコンポーネントが参照すべき最小セットが記載されていない。",
+    "suggestion": "「実装最小例」を追記：:rootにデフォルト→:root[data-theme=\"...\"]で上書きの雛形と、ボタン/入力/カードが依存するコアトークン一覧（必須/任意）を明示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§1.2 デザイン原則 / §0.3 差別化マッピング",
+    "issue": "ユーザー視点（過去の競合不満）: Habitifyの“Free制限きつい”不満はプロダクト側で解決しているが、デザイン面では「データ志向の見やすさ」も評価点だった。Laisの“Open Air”は気持ちいいが、数値/グラフの視認性要件がデザインシステムに見当たらない。",
+    "suggestion": "数値/プログレスの視認性指針（サイズ、最小コントラスト、余白、単位/ラベルの配置ガイド）を追加し、データが主役になる画面でも“静かな情報設計”を維持できるよう基準を明文化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§6.1 アイコンスタイル",
+    "issue": "SF Symbols風とあるが、実配布アイコンセット（命名規則、バリアント有無、RTL対応方針）が未定義。AI/実装者が別アイコンを混在させる恐れ。",
+    "suggestion": "アイコン命名規約（例: action.add, nav.grow など）、サイズバリアントの提供範囲、RTL時の反転ポリシーを追記。最小セットのスプライト/フォント化方針も明示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§7.5 prefers-reduced-motion",
+    "issue": "ユーザー視点: reduce時に全transition/animationを1ms強制は安心だが、フォーカス移動やモーダル開閉が“瞬間移動”に感じて位置把握が難しい可能性。",
+    "suggestion": "情報伝達に必要な最小限のフェード/スライド（100–150ms）を許容する例外リストを提示（モーダル開閉/フォーカスリングなど）。単純な装飾のみ完全停止とする。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

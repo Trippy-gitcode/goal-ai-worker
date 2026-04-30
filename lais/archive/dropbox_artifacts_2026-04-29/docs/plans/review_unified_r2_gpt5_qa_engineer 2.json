@@ -1,0 +1,132 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md ヘッダー / lais_project_v1.md ヘッダー",
+    "issue": "dev_system_spec.mdのヘッダーはv3.0だが本文には§13.10-14と§19.8（v3.2での追加/改訂）が含まれる。一方、lais_project_v1.mdは依存としてdev_system_spec.md v3.1を参照しており、3ファイル間でバージョン参照が不整合。",
+    "suggestion": "3ファイルの依存メタデータを同期する。具体的には: 1) dev_system_spec.mdのversionを実体（§13.10-14/§19.8を含む）に合わせてv3.2へ更新＋変更履歴追記 2) lais_project_v1.mdの依存をdev_system_spec.md v3.2へ更新 3) review_gate.sh または新規spec_ref_lint.shで「依存: {path} v{X.Y}」が実在し一致することをcanopyで自動検証",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md ヘッダー",
+    "issue": "lais_ux_v1.mdのヘッダーはv1.0・依存=lais_project_v1.md v1.3のまま。一方、本文の変更履歴はv1.14まで存在し、依存先projectはv1.4が提供されているため、ヘッダー情報と実体が不一致。",
+    "suggestion": "lais_ux_v1.mdヘッダーを最新に更新（version: v1.14、依存: lais_project_v1.md v1.4）。併せてdev-system §19.5ヘッダールールの静的チェッカー（spec_ref_lint.sh）を追加し、ヘッダーのversion/依存バージョンの不一致をcanopyでFAILにする",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais_project_v1.md §6.5 / lais_ux_v1.md §13.4",
+    "issue": "退会（72時間クーリングオフ）時のStripe処理が矛盾。project §6.5は「申請時はcancel_at_period_end:true、72時間後に即時キャンセル」に対し、ux §13.4は「72時間後にキャンセル予約（schedule cancellation）、復帰時は予約取消でプラン維持」。このまま実装すると二重課金/早期解約・払い戻し不整合のリスクが高く、実装判断不能。",
+    "suggestion": "どちらの方式を正とするかを即決し、両仕様を統一。推奨はux §13.4案（72時間後のschedule cancellation+復帰時に予約取消）。理由: ユーザー体験の一貫性と決済の整合性が高い。統一後、具体フロー（Webhook/cron/取消条件）をreference_v1.mdにAPI/状態遷移として明文化。canopyに「退会処理フロー整合ゲート（ヘッダーvとフロー一致）」の���量チェックを追加",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md §13.7 / ヘッダー",
+    "issue": "§13.7で「最低10ラウンド繰り返す」と規定している一方、dev_system_spec.md自体はヘッダーで「FINAL（8ラウンドレビュー完了）」を宣言しており、規定と実績が不一致。",
+    "suggestion": "適用対象を明確化。「本規定は今後の仕様書レビューに適用（本ファイルの確定判断は過去規定に基づく）」等の注記を§13.7に追記。もしくはヘッダーに免責文（本ファイルは旧ルール準拠で確定）を追加",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §19.6（上流→下流 連鎖更新・遡及チェック）",
+    "issue": "上流変更時の下流遡及チェック/依存順序（上から順にレビュー）の運用は規定されているが、ゲート/スクリプトでの自動検証が未実装。現状は手運用のため抜け漏れリスクが高い。",
+    "suggestion": "spec_ref_lint.sh（新規）をcanopyに組み込み: 1) 各docsのヘッダーから依存グラフを構築 2) 依存先のversion存在・一致を検証 3) 上流のステータスがCONFIRMEDでない場合、下流のREVIEW/CONFIRMEDをFAIL 4) 上流変更日>下流更新日の場合はWARN/FAIL（要ポリシー） 5) spec_changelog.mdの該当追記有無を確認",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md §2（test_lint.sh）/ §3（アンチパターン集）",
+    "issue": "アンチパターン集は10項目だが、test_lint.shで自動検出しているのは5項目のみ（AP-1,2,3,4,5）。serial依存やwaitForTimeout、アサーション欠落、共有データ汚染等は未検出で取りこぼしがある。",
+    "suggestion": "test_lint.shを拡張: 1) serial実行検出: grep 'test\\.describe\\.serial' → FAIL 2) タイミング依存: grep 'waitForTimeout\\(|setTimeout\\(' → FAIL（ホワイトリスト除外可） 3) アサーションなし: テスト本体にexpect/locator断言が無いspecを検出（簡易でも可） 4) 共有データ汚染: beforeAllで同一ユーザー/固定IDを使い回すパターン検出（ヒューリスティックでもWARN化）",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §4.5 / sub_testing.md §2",
+    "issue": "SKIPルールは『// @allowed-skip: platform』のみ許容と定義されているが、test_lint.shは単に'@allowed-skip'の存在しか見ておらず、理由='platform'の厳密検証がないため恣意的にバイパス可能。",
+    "suggestion": "test_lint.shで'@allowed-skip: platform'の完全一致を検出条件に変更し、他理由はFAIL。さらにSKIP件数集計を出力し、canopyで直近セッションのSKIP-RETRYキューへの追記有無を検証",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "dev_system_spec.md §4.3/§5 / scripts/screenshot_lint.sh",
+    "issue": "G9は「各ATに最低before/after1枚」と定義しているが、screenshot_lint.shはAT数との対応を検証していない（単にbefore_*.png/after_*.pngの存在のみ）。AT不足の証跡でもPASSしてしまう恐れ。",
+    "suggestion": "screenshot_lint.shを拡張して: 1) session_progress.md内の該当MISSIONブロックからAT件数を抽出 2) evidence/MISSION/のbefore_AT-{n}.png/after_AT-{n}.pngの対数一致を必須化 3) 欠番（AT-2が欠落等）もFAILにする",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "dev_system_spec.md §7（L2���響範囲）/ sub_infrastructure.sh affected-tests.sh",
+    "issue": "L2はtest_map.yamlとgrepキーに依存するが、テストタイトルにgrepキーを含めること自体をcanopyで強制していないため、命名逸脱時に影響テストの抽出が空振りするリスクがある。",
+    "suggestion": "tests/e2e/specs配下を走査し、各test()タイトルに所定のgrepキー（test_map.yamlのtests値 or '[GREP-KEY]'形式）が含まれることを検証するtest_title_lint.shを追加。canopyでFAIL化",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/changed-files-allowlist.sh",
+    "issue": "対象ファイル抽出が「対象ファイル:」行の1行取り切り＋カンマ区切り想定。テンプレートどおりであれば問題ないが、複数行（改行区切り）記述やコードブロック化に弱い。",
+    "suggestion": "MISSIONテンプレートの『対象ファイル』記載フォーマットを厳格化（1行カンマ区切りと明記）し、linterで複数行・記法逸脱を検出。将来的にはYAMLブロック対応に拡張（```yaml ... ```内のtargets: [] をパース）",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "lais_project_v1.md §3.2（ヒーローEXP表示）/ §4.4（レベル計算式）",
+    "issue": "UI例のEXPバー表記「1,240 / 2,000 EXP」が§4.4の計算式（次レベル必要=100+(L-1)*50）と数値感が乖離。例示であれば問題は小さいが、実装側に「分母=次Lv必要EXPか累計か」の判断が委ねられる。",
+    "suggestion": "EXPバーの分母定義を明文化（例: 分母=次レベル必要EXP、または分母=称号帯の最大値等）。UI例の数値も整合する範囲に更新",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "lais_ux_v1.md §16 プラットフォーム互換性",
+    "issue": "dev-system §19.8はE1〜E7全環境で各チェック項目の方針記載を要求。現状、A項目はE1〜E4マトリクスだが、E5〜E7（任意/対象外）を含む全行埋めや、B〜G項目の環境別差分を網羅する表形式が不足。",
+    "suggestion": "A〜G各カテゴリについて、E1〜E7を行にもつマトリクスを追加し、各セルに「実装/フォールバック/対象外」を明記。E6/E7は『対象外』と明示して空欄を排除。e2e_fullflow_test.mdへE1〜E4の最低限テストIDも追記",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md §1.1-1.2 / dev_system_spec.md §7",
+    "issue": "テスト分離の方針は記載されているが、実務上のデータ分離（テストユーザー/セッション/KVプラン切替の相互汚染回避）を強制する仕組みが不足。並列実行やリトライ時に前テストの副作用が残る懸念。",
+    "suggestion": "PlaywrightのbeforeEachで『一時ユーザー作成→テスト終了時削除』のヘルパーを標準化し、共有ユーザー使用を禁止（linterでdetect）。KVプラン切替はテスト固有prefixキーを使用。test-guardsに『残存ログイン状態/残存ローカルデータ』検出を追加（初回起動時にlocalStorage/IDBのクリーン化を強制）",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

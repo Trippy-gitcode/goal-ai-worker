@@ -1,0 +1,46 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "背景の星屑",
+    "issue": "v2_r1 で LOCK #20 Phase B 独自性吸収対象。Night Sky Journal の DNA を語る独自言語が未確立のまま。",
+    "suggestion": "Phase B で星座/月光/ジャーナル罫線等の独自モチーフを策定。現時点は仕様通り。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "COMPOSITION",
+    "screen": "s10_grow",
+    "location": "タスクカードのリズム",
+    "issue": "タスク間余白 8px は v2_r1 の 4px から改善。ただし息のある縦リズムとしてはまだ詰まり気味。Open Air 原則と視覚的に合致しない。",
+    "suggestion": "余白を 12〜16px に再調整、またはタスク行 padding を増やして呼吸感を出す。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "AESTHETIC",
+    "screen": "s02_onboarding",
+    "location": "アバター3種のトーン",
+    "issue": "muted 化済みで v1 よりは整合。ただし衣装トーンの明度差がまだ残り、3体の統一感は中程度。",
+    "suggestion": "明度レンジを更に揃える（±5% 以内）。",
+    "model": "Code",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s00_splash",
+    "location": "ロゴ『Lais』",
+    "issue": "font-weight:600 で存在感あり。letter-spacing -0.5px 適用で仕様通り。",
+    "suggestion": "(問題なし)",
+    "model": "Code",
+    "persona": "artist"
+  }
+]

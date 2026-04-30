@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "`.s00-cta`の`bottom: 76px;`という値が「魔法の数字」になっています。この値は仕様書の複数の値（プライマリCTAの下辺140px、セカンダリCTAの高さ52px、ボタン間のギャップ12px）から計算されたものであり、CSSコードだけを読んでもその算出根拠が不明瞭です。コメントで補足されていますが、コード自体が自己説明的であること���保守性の観点から強く推奨されます。",
+    "suggestion": "CSSカスタムプロパティ（変数）を使用して、計算の意図をコード内に残すことを推奨します。例えば、`--cta-primary-bottom: 140px; --cta-secondary-height: 52px; --cta-gap: 12px;` のような変数を定義し、`bottom: calc(var(--cta-primary-bottom) - var(--cta-secondary-height) - var(--cta-gap));` のように記述することで、可読性と保守性が大幅に向上します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/App.jsx, lais/src/components/screens/S00Splash.jsx",
+    "issue": "JSX内で`className`属性の代わりに`class`属性が使用されています。これは標準的なReactの慣習から外れており、Reactエコシステムに慣れた開発者がコードを読む際に混乱を招く可能性があります。ビルドツールが対応しているため動作はしますが、エコシステムの標準に従うことが望ましいです。",
+    "suggestion": "プロジェクト全体で`class`属性��`className`属性に統一してください。これにより、Reactの標準的なプラクティスとの一貫性が保たれ、予期せぬ問題を回避できます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "lais/src/components/App.jsx",
+    "issue": "`role`属性を持たない汎用的な`div`要素に`aria-label=\"Lais\"`が設定されています。これはWAI-ARIAの仕様上、非推奨な使い方です。スクリーンリーダーがこのラベルを読み上げる保証はなく、アクセシビリティツリーに不要な情報が追加される可能性があります。内包されている`S00Splash`コンポーネントの`<main>`要素に既に適切なラベル (`aria-label=\"Lais スプラッシュ\"`) が付与されているため、このラベルは不要です。",
+    "suggestion": "`App.jsx`の`<div class=\"app-root\">`から`aria-label=\"Lais\"`を削除してください。アクセシビリティラベルは、ランドマーク要素やインタラクティブ要素など、意味を持つ要素に限定して使用すべきです。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/App.jsx",
+    "issue": "`handleStart`および`handleLogin`関数は、`App`コンポーネントが再レンダリングされるたびに再生成されます。現在の実装では`App`コンポーネントに状態がなく再レンダリングは発生しませんが、将来的に状態が追加された場合、`S00Splash`コンポーネントに不要な再レンダリングを引き起こす可能性があります。",
+    "suggestion": "将来的なパフォーマンス最適化のため、`useCallback`フックを使用してこれらの関数をメモ化することを検討してください。例: `const handleStart = useCallback(() => { ... }, []);`",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "`.s00-cta-primary:disabled`と`.s00-cta-primary[aria-disabled=\"true\"]`のCSSルールが定義されていますが、現��の`S00Splash.jsx`コンポーネントではボタンが無効化されるロジックが存在しないため、これらのスタイルは適用されません。現時点ではデッドコード（未使用コード）です。",
+    "suggestion": "これが将来の機能（例: ローディング状態）のために意図的に追加されたスタイルである場合、その旨をCSSコメントで明記すると、他の開発者がコードの意図を理解しやすくなります。あるいは、該当機能が実装されるタイミングでスタイルを追加することも検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "lais/src/components/App.jsx",
+    "issue": "コンポーネントのインポートに相対パス (`./screens/S00Splash.jsx`) が使用されています。小規模なプロジェクトでは問題ありませんが、プロジェクトがスケールし、ディレクトリ構造が深くなると、`../../../../`のようなパスが出現し、可読性と保守性が低下する可能性があります。",
+    "suggestion": "プロジェクトの初期段階で、ビルドツール（Vite, Webpackなど）の設定を利用してパスエイリアス（例: `@/components/screens/S00Splash.jsx`）を導入することを検討してください。これにより、ファイルの移動に対する耐性が向上し、コードの可読性が保たれます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "code_reviewer"
+  }
+]

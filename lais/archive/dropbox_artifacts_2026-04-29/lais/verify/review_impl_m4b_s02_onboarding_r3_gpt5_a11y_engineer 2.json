@@ -1,0 +1,32 @@
+[
+  {
+    "id": "R-201",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "S02Onboarding.css .s02-onboarding（design_spec_v1 §4.3）",
+    "issue": "コンテナに outline: none が指定されている一方、JSX 側で tabIndex={-1} を付与しフォーカス移動している旨の記述があるため、プログラム的にフォーカスを受けた際にフォーカスインジケータが表示されない可能性が高い。これは WCAG 2.2 AA 2.4.7（Focus Visible）および 2.4.11（Focus Appearance（Minimum））に抵触するリスクがある。",
+    "suggestion": "コンテナに対しフォーカス可視化を提供するか、コンテナへフォーカスを移動しない方針に改める。例: 1) .s02-onboarding:focus-visible { outline: 2px solid var(--focus-color); outline-offset: 4px; } を追加し、背景とのコントラスト3:1以上を満たす。2) もしくはコンテナへのフォーカス移動を廃止し、代わりに見出しや最初のインタラクティブ要素へフォーカスを移す。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-202",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "S02Onboarding.css .s02-next:focus-visible",
+    "issue": "フォーカスリングの色 var(--accent) とボタン背景（var(--button-primary-bg) など）とのコントラスト比が不明。WCAG 2.2 AA 2.4.11（Focus Appearance（Minimum））では、周辺色に対して少なくとも 3:1 のコントラストが必要。",
+    "suggestion": "実測で var(--accent) と通常/hover/disabled 各背景の対比を計測し、3:1 未満の場合はアクセント色または背景色トークンを見直す。計測は DevTools のカラーコントラスト機能や axe DevTools 等で行い、値（例: 3.4:1）を記録する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-203",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02Onboarding.css .s02-next（transition 定義）",
+    "issue": "背景色・不透明度のトランジションに対して prefers-reduced-motion の配慮がない。AA 必須ではないが、動作を減らしたい利用者への配慮として望ましい。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) { .s02-next { transition: none; } } を追加し、必要に応じて他要素のアニメーション/トランジションも抑制する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

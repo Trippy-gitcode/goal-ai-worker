@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "1",
+    "issue": "タイムアウト後に Supabase 側の認証が遅延成功した場合、UI は『タイムアウト』のままでも SDK はセッションをローカルに保持してしまう可能性がある（UIと実セッション状態の乖離）。",
+    "suggestion": "可能ならリクエストを中断（AbortController 等、SDK が signal を受け取れる場合は付与）。SDK で中断不可な場合は onAuthStateChange を購読し、タイムアウト後に遅延成功を検出したら『サインインが完了しました』等のバナー表示と即時遷移で整合性を回復する。別案として persistSession=false のクライアントを用意して isCurrent 成功時のみ明示的にセッション確定（要 API 検証）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "finally 節で clearTimeout を isCurrent ガード下に置いているため、『古い操作』の Promise 解決後でもタイマーが残存し、後で無駄にコールバック実行（即 return）され得る。",
+    "suggestion": "clearTimeout(timeoutId) は isCurrent に関わらず常に実行する。さらにコンポーネント unmount 時の cleanup でも保有中の timeoutId を必ず clear する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "1",
+    "issue": "inFlightRef と setSubmitting の二重状態管理は DRY 違反になりやすく、不整合（どちらか片方のみ false など）を生みやすい。",
+    "suggestion": "単一の情報源に統一する（例: inFlight は useState のみ or Ref のみ）。UI 表示用には useState、ロジックガード用にはその派生値を使用するなど責務を分離。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "5",
+    "issue": "R5.1 では『opId をリセットせず単調増加』に変更済みにも関わらず、『timeout 経由で opId=0』という表現が残存しておりドキュメントが現実装と食い違っている。",
+    "suggestion": "セクション5の記述を現実装（単調増加・リセットなし）に合わせて更新し、ABA 回避戦略を一貫して明記する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "1",
+    "issue": "handleSubmit 冒頭での e.preventDefault() の実行が記載からは明確でない。未実装だと二重送信やページ遷移が発生し得る。",
+    "suggestion": "handleSubmit の最初で���ず e.preventDefault() を実行することを明記・実装。型的にも e: React.FormEvent<HTMLFormElement> を受け取ると誤用防止になる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "エラーメッセージに err?.message をそのまま表示しており、SDK 内部の生文字列が露出する可能性がある（i18n と一貫性の欠如、情報露出）。",
+    "suggestion": "Supabase のエラーコード/分類に基づくユーザー向けメッセージマッピングを用意し、ログには原文、UI には翻訳・正規化済み文言を表示する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "1",
+    "issue": "opId 管理・タイムアウト・UI 更新が handleSubmit 内に密集し、可読性と再利用性が下がっている。",
+    "suggestion": "useExclusiveOperation や useOpGate のようなカスタムフックに抽出し、isCurrent/timeout/cleanup をカプセル化。単体テストもしやすくなる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "SUBMIT_TIMEOUT_MS=15s は定数化さ��ているが、遅延ネットワーク/低速端末では短すぎる可能性がある（UX 観点の魔法の数字）。",
+    "suggestion": "環境変数または設定値として外出し（例: 15–30s のレンジ）、E2E で閾値を検証。タイムアウト文言にも再試行ガイダンスや『処理は継続している可能性』の注記を加える。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "safeSetState/mountedRef の役割がコード片からは不明で、将来の変更で誤用されるリスクがある。",
+    "suggestion": "safeSetState の仕様（mount 判定・バッチング保証の有無）を JSDoc で明示。可能なら React 18 の自動バッチング前提で setState 群は一箇所にまとめる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "1",
+    "issue": "opId の単調増加は正解だが、超長期稼働で MAX_SAFE_INTEGER 近傍に到達した場合の扱いが未定義。",
+    "suggestion": "防御的に上限チェックを入れ、到達時は Symbol ベース ID への切替や BigInt、もしくはアプリ再初期化を行う（現実的にはテレメトリで監視のみで十���）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "1",
+    "issue": "タイムアウト発火時に opIdRef.current++ で無効化しているが、次回送信時の ++ と合わせて ID が 2 増分になるケースがあり、デバッグ時に読み取りづらい。",
+    "suggestion": "無効化トークンは別フラグに切り出すか、タイムアウトで『現在の op を invalidate する専用 API』にまとめて意図を明確化（機能的な不具合ではない）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "2",
+    "issue": "aria-disabled 方針は合理性があるが、キーボード送信時にサーバー呼び出しが走らないこと（canSubmit ガード）が UX の鍵となる。仕様上の前提がコードから直接は確認できない。",
+    "suggestion": "handleSubmit の先頭で attempted フラグ更新・フォーカス誘導・canSubmit 早期 return を必ず実行することをコメントとテストで固定化。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "リクエストのキャンセルや超過後処理��� SDK 任せで、ネットワーク資源の無駄やリトライ時の重複負荷が残る可能性。",
+    "suggestion": "サポートされていれば各リクエストに AbortController を渡し、タイムアウトや新規送信時に abort()。未対応ならバックオフ付きリトライや指数リトライの採用を検討。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4",
+    "issue": "opId の race 修正は良好だが、境界ケース（15s 付近の同時解決、タイムアウト直後の遅延成功など）の自動テストが未整備。",
+    "suggestion": "単体テストで『timeout 直前/直後に解決』『連続タイムアウト後の成功』『連続送信による旧タイマー発火』をシミュレーションし、不変条件（isCurrent のみが副作用許可）を検証する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

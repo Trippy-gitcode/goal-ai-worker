@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ROBUSTNESS",
+    "section": "§4.2.4",
+    "issue": "デプロイ失敗時のリカバリミッションが無限増殖し、修正試行3回制限をすり抜けるリスクがある。ミッションIDが変化することでストライクカウントがリセットされ、POエスカレーションの承認ゲートをすり抜けて自律実行が無限ループする恐れがある。",
+    "suggestion": "リカバリミッションのIDは元の `{MISSION-ID}` を維持し（例: `{MISSION-ID}-RECOVER-1`）、リカバリの失敗もストライクカウントに含め、3回失敗で確実にHOLD（自律実行停止・POエスカレーション）するよう明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "section": "§4.2.2",
+    "issue": "外部APIのWARN時「手動証跡（session_progress.md 追記必須）」の定義が曖昧であり、ENGが自律実行中に主観的なテキストを追記するだけで承認ゲートを突破（エスケープ）できてしまうリスクがある。",
+    "suggestion": "WARN時の「手動証跡」を「POによる確認コメントの引用」または「curl等の疎通確認コマンドの実行結果ログパス」に限定し、ENGの主観的なテキスト追記のみでのPASS扱いを禁止する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "section": "§4.3.3",
+    "issue": "proposal_log_lint.sh が「提案セッションID（例: G_42）」との差分を動的計算して滞留警告を出すとしているが、スクリプトが「現在のセッションID」をどこから取得するのか未定義のため、セッションIDベースの差分計算が実装不能。",
+    "suggestion": "現在のセッションIDの取得元（例: 環境変数や特定のファイル）を定義するか、スクリプトでの動的計算は「提案日（YYYY-MM-DD）」と現在日時の差分のみに一本化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "section": "§4.1.4",
+    "issue": "「ADV」という用語が外部AI（Claude.ai）とENG内の自律判定ペルソナ（ADVペルソナ）で混同されるリスクがある。ENG内のADVペルソナが「コードを書かない」「PO指示を待つ」と誤解釈すると、自律実行がデッドロックする。",
+    "suggestion": "ENGの自律判定におけるADVを「ADVペルソナ」と呼称区別し、§4.1.4や§4.1.5の制限は外部AIとしてのADVにのみ適用されることを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "section": "§4.6.1",
+    "issue": "HFLOW_FORCE: true のENGからの自律追加を禁止しているが、機械的な防止ゲートが明示されていないため、ENGがハルシネーションでミッション定義に追記した場合にそのまま発火してしまう。",
+    "suggestion": "mission_linter.sh にて HFLOW_FORCE フラグの不正追加を検知するか、ENGによるミッション定義の追記禁止ルール（§16.5）によって担保されている旨を注記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

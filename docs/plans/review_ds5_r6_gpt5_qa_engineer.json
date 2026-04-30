@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1/§19.4（対 §6, §12, §18）",
+    "issue": "UX仕様書ファイル名が§19では「ux_v1.md」だが、他セクション（§6の承認ルール、§12のSPEC集計例、§18の依存関係マップ、sub_adv_protocol.md §10）では「ux_redesign_v*.md」を前提としており命名が不一致",
+    "suggestion": "UX仕様書の正式名称を一意に統一（例: docs/ux_v*.md）し、§6・§12・§18・sub_adv_protocol.md内の全参照を同名に更新。canopyに軽量チェック（存在ファイル名の統一検証）を追加して乖離を自動検出",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の「依存」が単数前提で定義されており、実際には複数上流（例: design_specはux_v1.mdとdesign_system.mdの双方）に依存するため依存管理として不十分",
+    "suggestion": "「依存」を配列に変更（例: 依存: [{path:\"docs/ux_v1.md\", version:\"v1.2\"},{path:\"docs/design_system.md\", version:\"v1.1\"}]）。将来の機械検証に備えYAML/JSONブロック表記を許可し、依���解決リンタ（spec_dep_lint.sh）で存在・バージョン有無をcanopyにて検証",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.6",
+    "issue": "依存チェーン図がe2e_fullflow_test.mdの上流を「project_v1.md」配下にのみ配置しており、ux/design_system/design_spec/reference/system_map等からの実質的依存が表現されていない（連鎖更新の漏れリスク）",
+    "suggestion": "e2e_fullflow_test.mdをproject_v1.md配下の独立ノードとしつつ、ux/design_system/design_spec/reference/system_mapそれぞれからの依存エッジを明記。§18の連鎖更新マップと整合するようチェーン図を更新",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.6",
+    "issue": "「バージョンなしの依存宣言禁止」の運用規定はあるが、ヘッダーの依存記述を機械検証する仕組みが未定義",
+    "suggestion": "spec_dep_lint.sh（新規）を追加し、各docs/*のヘッダーから依存配列をパース→バージョン有無/存在/循環を検出。canopy_common.shに統合してFAIL化（循環/バージョン欠落）・WARN化（未解決参照）",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの「dev-system準拠: docs/plans/dev_system_spec.md §19」が、実リポジトリ構成（dev_system_spec.mdはルート配置）と乖離し参照パスが曖昧",
+    "suggestion": "「dev-system準拠」はパスではなくバージョン参照に変更（例: dev-system v3.0 §19）し、必要ならURL/タグを追記（https://repo/dev-system@v3.0）。canopyでアプリ側.pin（.dev-system.version）と一致検証",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7",
+    "issue": "project_v1.mdのベンチマーク要件は「直接競合5社+間接3社（計8）」だが、出力マトリクスの列は競合A〜E（5列）のみで構造が一致しない",
+    "suggestion": "マトリクスを8列（A〜H）に拡張、または「直接5/間接3」を別テーブルに分割。フォーマット定義に列数制約を明記し、ベンチマークリンタ（benchmark_lint.sh）で列数・件数・Lais方針列の有無を検証",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.7（対 §13.4）",
+    "issue": "Phase 0完了基準が「8ペルソナ×2モデルのAIレビュー」と記載されているが、§13.4の標準は5ペルソナのみで不一致",
+    "suggestion": "「標準5ペルソナ+アプリ固有3ペルソナ」の定義と選定基準を§13.4に追記し、§19.7の表現をそれに一致させる。review_gate.shに対象ファイルのreview_*.json内訳の件数検証（5+3ペルソナ×2モデル×CRITICAL=0）を任意WARNとして追加",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力がMarkdown表のみで機械可検証が困難。dev-systemの原則「機械可検証」と不整合で、完了判定の自動化ができない",
+    "suggestion": "Markdown表に加え、同一内容のJSON/YAML出力（competitors[], features[], policies[]）を付与。benchmark_lint.shを追加し、件数・必須列（Lais方針/対応セクション/分類）・差別化≥3件を検証してcanopyに統合",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md）",
+    "issue": "各テストケースと§12のSPEC-ID（SPEC-XXXX）を結びつける必須項目がテンプレートにないため、仕様���テストの追跡性が担保されない",
+    "suggestion": "e2e_fullflow_test.mdの各ケースに「SPEC-ID: SPEC-XXXX」を必須化。canopyにSPEC↔テスト参照整合チェック（§12のgrep例を正式化）を追加し、未参照/未定義IDをFAIL",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4（design_spec_v1.md）",
+    "issue": "画面仕様における色/余白/タイポ/アニメーション指定がdesign_system.mdのトークン参照であることが必須化されていない（ハードコード記述の混入リスク）",
+    "suggestion": "design_spec_v1.mdに「全スタイル指定はトークン名で表記（例: color=--color-primary-600）」を必須ルールとして追記。CSS/HTMLから生HEX/px直書きを検出するlint（デザイン・トークンリンタ）をcanopyにWARNとして追加",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（reference_v1.md）",
+    "issue": "API/業務/外部連携の詳細に、レート制限・リトライ/タイムアウト・標準エラー型（UI文言対応）の必須セクションが欠落しているため、異常系テスト設計の一貫性が損なわれる",
+    "suggestion": "reference_v1.mdに「§7 通信制御（RateLimit/Retry/Timeout）」「§8 エラー・例外仕様（コード→UI文言/テストタグ対応）」を追加。e2e_fullflow_test.mdの異常系に対応タグ必須化",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "依存のバージョン表記が自由記述（v1.3等）で、具体的コミット/タグに紐付かず再現性が弱い",
+    "suggestion": "依存は path@ref 形式（ref=タグ/コミットSHA）を許容し、spec_dep_lint.shでrefの形式と到達性（git ls-remote等）を検証。ドキュメント版番号（ヘッダーのvX.Y）と併記",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.6",
+    "issue": "参照表記法がセクション番号依存のみのため、見出し追加・並べ替えで番号が変動すると参照が陳腐化しやすい",
+    "suggestion": "各セクション見出しに安定ID（例: {#ux-flow-main}）を付与し、「project_v1.md §3.2（#screen-flow）」のように番号+ID併記を標準化。リンタで存在確認",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4（system_map.md）",
+    "issue": "「ファイル変更チェックリスト」が自由記述で、L2影響範囲テスト（tests/test_map.yaml）への自動連携ができない",
+    "suggestion": "system_map.md内にYAMLブロック（sources→testsの対応表）を必須化し、init/update時にtests/test_map.yamlへ同期するスクリプトを追加（またはaffected-tests.shでsystem_mapのYAMLも読むよう拡張）",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md）",
+    "issue": "「パフォーマンステスト」に数値目標（SLO/しきい値）や測定指標（P95/P99/TTI/CLS等）の必須定義がなく、テストが判定不能",
+    "suggestion": "e2e_fullflow_test.mdにパフォーマンス項目の閾値（例: 初期描画P95<2.5s, API P95<400ms, 画像LCP P95<2.5s等）を必須化。測定方法（Playwright Tracing/NavigationTiming/Lighthouse CI）と出力JSONの項目を規定し、canopyで閾値超過をFAIL",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md）",
+    "issue": "テスト分離の観点で、各ケースのデータセットアッ���/クリーンアップ手順・テストユーザーID命名規則の必須記述がない（順序依存・データ汚染リスク）",
+    "suggestion": "各テストケースに「前提: セットアップ」「後処理: クリーンアップ」を必須化。テストユーザー/データの命名規則（例: e2e_{feature}_{uuid}）をテンプレに追記し、前提未記載をmission_linter.shでFAIL化",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§19.5（対 §13.6）",
+    "issue": "ヘッダーの「ステータス: CONFIRMED」とreview_gate.sh（CRITICAL=0）の整合を機械検証する仕組みがない",
+    "suggestion": "spec_status_lint.shを追加し、ヘッダーがCONFIRMEDのdocs/*について対応するreview_*.jsonに未解消CRITICALがないことを検証。canopyにWARN（将来的にFAIL）として統合",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "差別化マッピングの「対応セクション」が自由記述で、リンク解決や自動追跡が困難",
+    "suggestion": "対応セクションは『{file} §{番号}（#{安定ID}）』の構造を必須化。benchmark_lint.shで存在確認し、未解決リンクをFAIL（またはWARN）にする",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

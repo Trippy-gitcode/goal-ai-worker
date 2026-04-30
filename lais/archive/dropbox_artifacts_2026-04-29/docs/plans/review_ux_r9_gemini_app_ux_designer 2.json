@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.4",
+    "issue": "ボトムタブ切り替え時の状態保持（スクロール位置やナビゲーションスタック）が定義されていません。タブを切り替えて戻った際に初期状態にリセットされると、ユーザーの作業コンテキストが失われます。",
+    "suggestion": "各タブのスクロール位置（scrollY）とUI状態（開いているハーフモーダル等）はタブ切り替え時にメモリに保持し、戻ってきた際に復元する仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7.1",
+    "issue": "アクティブなボトムタブを再度タップした際の挙動が定義されていません。モバイルUXの標準では、リストの最上部に戻る（Scroll to top）ことが期待されます。",
+    "suggestion": "アクティブなタブのアイコンを再タップした際、画面の最上部にスムーズスクロールする挙動を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALK画面での画像添付（最大10MB）において、アップロード中のプログレス表示やキャンセル操作が未定義です。10MBのアップロードには数秒かかるため、ユーザーがフリーズしたと誤認したり、複数回送信するリスクがあります。",
+    "suggestion": "画像選択後、入力バーのサムネイル上にローディングスピナー（またはプログレスバー）を表示し、アップロード完了まで送信ボタンを無効化する仕様を追加してください。また、アップロード中のキャンセル（✕ボタン）も可能にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §9",
+    "issue": "画像添付時、10MB超過や非対応フォーマット（PDFなど）が選択された場合のエラーハンドリングが未定義です。",
+    "suggestion": "クライアント側でファイルサイズとMIMEタイプをチェックし、違反時はエラートースト（例：「画像は10MB以下のJPEG/PNG/GIF/WebPにしてください」）を表示して添付をキャンセルする仕様を§9.4等に追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §6.1",
+    "issue": "ハーフモーダル表示時に背面のコンテンツ（body）のスクロールロックが定義されていません。iOS PWAではモーダル内をスクロールしようとして背景が動いてしまう問題（スクロールチェーン）が頻発します。",
+    "suggestion": "モーダル開閉時に `body` に対して `overflow: hidden` または `position: fixed` を切り替える（body scroll lock）仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "ACCESSIBILITY",
+    "location": "ux_v1.md §10",
+    "issue": "OSのアクセシビリティ設定による文字サイズ拡大（Dynamic Type）へ���対応方針が未定義です。文字が拡大された際、タスク行（1行制約）やヒーロー領域のレイアウトが破綻するリスクがあります。",
+    "suggestion": "文字サイズ拡大時は、タスク行の要素（時刻、タスク名、所要時間）を縦積みにフォールバックする、ヒーロー領域の固定高さを解除してコンテンツに合わせるなどのレスポンシブなテキストレイアウト方針を§10に追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §7",
+    "issue": "QRスキャン時以外のハプティクス（触覚フィードバック）が定義されていません。タスク完了などの重要なアクションで触覚フィードバックがないと、ゲーミフィケーションの爽快感が半減します。",
+    "suggestion": "タスク完了（⭕タップ時）、ゴール達成、エラー発生時（インラインエラーやトースト表示時）に適切なハプティクス（`navigator.vibrate`）を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §2.4",
+    "issue": "ゴール詳細(S-14)からTALK(S-20)へ遷移する際、S-14の履歴を消去してGROW(S-10)に書き換えているため、TALKで相談した後にゴール詳細に直接戻る手段がありません。ユーザーが迷子になります。",
+    "suggestion": "タブ間遷移でコンテキストを渡す場合、TALK画面の上部に「← ゴール詳細に戻る」という一時的な戻るボタン（またはバナー）を表示し、タップでGROWタブのS-14を再展開する導線を設けてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §15",
+    "issue": "アプリを起動中（フォアグラウンド）にプッシュ通知（応援やメッセージ受信など）を受け取った場合のUIフィードバックが未定義です。",
+    "suggestion": "アプリ起動中の受信時は、OSの通知バナーではなく、アプリ内のIn-Appトースト（画面上部からのスライドイン等）で通知を表示し、タップで該当画面へ遷移する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §7.4",
+    "issue": "タスクの並び替え（ドラッグ＆ドロップ）時、リストが画面外に���く場合の自動スクロール（エッジスクロール）が定義されていません。",
+    "suggestion": "ドラッグ中の要素が画面の上端/下端に近づいた際、リストが自動的にスクロールする挙動を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "app_ux_designer"
+  }
+]

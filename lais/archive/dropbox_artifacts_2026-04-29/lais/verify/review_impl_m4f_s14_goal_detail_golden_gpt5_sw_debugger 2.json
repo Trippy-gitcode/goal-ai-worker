@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "3.S14GoalDetail.jsx",
+    "issue": "id プロップ変更時にゴールが更新されない。useState 初期化に GOALS_MOCK[id] を使用しているため、同一ルート内で :id だけが変化しても state が固定され前のゴールを表示し続ける。",
+    "suggestion": "state に保持せず都度参照か、id 依存で更新する。例: const goal = useMemo(() => GOALS_MOCK[id] ?? null, [id]); もしくは <S14GoalDetail key={id} id={id}/> で再マウントを強制。E2E で /goal/g-1 → /goal/g-2 遷移時の表示一致を追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3.S14GoalDetail.jsx",
+    "issue": "未知の goal id 時に DEFAULT_GOAL(g-1) を黙って表示し、URL と内容が不一致になる。将来的に編集/削除が実装された場合、誤対象操作の重大リスクにつながる。",
+    "suggestion": "一致するゴールが無い場合は明示的な Not Found UI を表示して [戻る] 提示、または /grow へリダイレクト。console.warn などで診断ログを出す。アクションボタンは無効化。404 表示のスクリーンリーダー文言を用意。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "4.S14GoalDetail.css .s14-title",
+    "issue": "プロパティ名のタイポ『padting-top』により S14-2 の上パディングが適用されない。spec の spacing 逸脱。",
+    "suggestion": "padding-top に修正。UI の回帰を防ぐためにビジュアルスナップショットテスト（ゴールタイトルの上下余白）を追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.S14GoalDetail.jsx S14-3/4",
+    "issue": "progress 値を 0–100 にクランプしていないため、負値や 100 超でバー幅がはみ出す・ARIA 値が不正になる可能性。",
+    "suggestion": "const pct = clamp(Number(goal.progress) || 0, 0, 100); を導入し、aria-valuenow と width の双方に適用。境界値（-10, 0, 100, 150, NaN）テストを追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.S14GoalDetail.jsx S14-8",
+    "issue": "goal.tasks が null/undefined の場合に map() で実行時エラーが発生する。",
+    "suggestion": "(goal.tasks ?? []).map(...) に変更し、防御的に空配列を既定とする。将来の API 連携前に型（TS/PropTypes）で tasks?: Task[] を明示。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "3.S14GoalDetail.jsx useId",
+    "issue": "useId は Preact 10.11+ が前提。バージョンが古いと実行時にフック未定義で落ちるリスク。",
+    "suggestion": "使用バージョンを確認し lock（^10.11 以上）するか、フォールバックとして手動 ID 生成（useRef + 増分 ID）を用意。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1.App.jsx Suspense fallback",
+    "issue": "ローディングプレースホルダに <main> を使用し aria-label のみで可視テキストが無い。環境によりアナウンスされない可能性や main の重複セマンティクス懸念。",
+    "suggestion": "<div role=\"status\" aria-live=\"polite\">読み込み中…</div> のように可視テキストを入れ、main ではなく汎用コンテナを使用。あるいは親 main に aria-busy を付与。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "4.S14GoalDetail.css .s14-cat-tag",
+    "issue": "カテゴリタグに text-transform: uppercase を付与しており、spec S14-6 に大文字化の明記が無い。表記ゆれの可能性。",
+    "suggestion": "デザインと合意を取り、必要なければ text-transform を外す。スナップショットで『Learn/Health』の表記確認テストを追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "E2E/Tests",
+    "issue": "新規フルスクリーン/ルート追加に対する自動テストが不足。回帰検出が困難。",
+    "suggestion": "Playwright で以下を追加: 1) /goal/g-1 直リンク描画とフォーカス遷移, 2) 不正 id での NotFound/リダイレクト, 3) 進捗バー ARIA/幅整合, 4) タスクリスト空/多数/長文での折返し, 5) prefers-reduced-motion 時アニメ抑制, 6) キーボード操作（Tab 移動/Enter 実行）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3.S14GoalDetail.jsx",
+    "issue": "アクションのログは console.log のみで、診断性が低い。不正 id フォールバック時の警告ログも無い。",
+    "suggestion": "共通ロガーを導入し、info/warn/error レベルで記録。未知 id 検出時は warn 出力とブレッドクラム追加。将来の削除/編集に備え、操作対象 id を必ずログに含める。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.S14GoalDetail.jsx onClick={() => handleOpenTask(task.id)}",
+    "issue": "リスト内でインライン関数が都度生成される。LP-003 方針（インライン handler 最小化）に反する。",
+    "suggestion": "data 属性経由で単一ハンドラに集約（onClick={onTaskClick} で e.currentTarget.dataset.tid 参照）または useCallback で事前バインド（メモ化）を検討。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4.S14GoalDetail.css @media (prefers-reduced-motion: reduce)",
+    "issue": "transition-duration: 1ms は厳密にはアニメーションを残す。感受性の高いユーザーに影響する可能性。",
+    "suggestion": "reduce 環境では transition を完全に無効化（transition: none）または duration: 0ms にする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4.S14GoalDetail.css .s14-goal",
+    "issue": "min-height: 100dvh のみだと古いブラウザで未対応。画面全体を満たさないレイアウト崩れの可能性。",
+    "suggestion": "フォールバックとして min-height: 100vh を併記し、対応環境��は 100dvh が上書きされる順序に配置。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "4.S14GoalDetail.css フォントサイズ",
+    "issue": "S14-2/3 の 28px/48px/20px 指定をトークン（--font-size-xl/3xl/lg）に委ねており、トークン値と spec の厳密一致が未証明。微妙なデグレの温床。",
+    "suggestion": "トークン値が 28/48/20 と一致することをスタイルガイドで明示し、回帰テストで computedStyle の px を検証。ズレがある場合は本画面のみ固定 px を許容。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

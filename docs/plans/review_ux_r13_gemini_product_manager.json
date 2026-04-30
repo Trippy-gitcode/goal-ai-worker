@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "4.1 画面構成 / 13.1 設定トップ",
+    "issue": "支払い失敗、プラン変更完了、運営からのお知らせ等の「システム通知」を後から確認する画面（受信箱）が存在しません。FRIENDSの「お知らせ」はソーシャル専用となっており、通知をスワイプで消去した後に重要なシステム通知を再確認できません。",
+    "suggestion": "ME画面のPROFILEタブ、または設定画面（S-37）内に「システム通知（お知らせ）」の項目と一覧画面を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "3.2 メッセージ送信フロー",
+    "issue": "project_v1.mdで定義されている画像サイズ上限（10MB）を超過した場合や、非対応フォーマットを選択した場合のエラーフィードバック（UI上の挙動）が定義されていません。",
+    "suggestion": "「10MB超過時または非対応フォーマット選択時は、プレビューを表示せずエラートースト『画像は10MB以下のJPEG/PNG/GIF/WebPのみ対応しています』を表示する」と追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3.1 画面構成",
+    "issue": "Basic以上のプランではマルチAIルーティングが行われますが、TALK画面上で現在どのAIモデル（GPT-5, Claude, Gemini）が応答しているか確認できません。ユーザーが課金による「高品質なAI」の価値を視覚的に実感しにくくなっています。",
+    "suggestion": "AI応答バブルの近傍（タイムスタンプの横など）に、使用されたAIモデルの小さなアイコンまたはテキスト（例: \"✨ Claude\"）を表示するUIを追加し、課金価値を可視化してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "9.4 不正操作",
+    "issue": "「同名タスク5分以内再完了」の際、「EXP付与なし。トースト表示」とありますが、タスク自体は「完了」状態（チェックマークがつく）になるのか、それとも完了操作自体がキャンセルされて未完了に戻るのかが不明確です。",
+    "suggestion": "「タスクは『完了』状態になるが、EXPは加算されない（楽観的UIのチェックマークは維持し、EXP演出のみスキップする）」など、タスクの最終ステータスを明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "2.3 Today セクション操作",
+    "issue": "習慣タスクの繰り返し周期で「カスタム曜日」を選択した際の具体的な入力UI（月〜日の複数選択トグルなど）が定義されていません。",
+    "suggestion": "「カスタム曜日選択時: その直下に月〜日の7つの円形トグルボタン（複数選択可）を展開表示する」など、具体的なUIコンポーネントを追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2.4 Goals セクション操作",
+    "issue": "ゴール作成時の「最初のタスク追加」において、「『タスクを追加』リンクタップでインライン入力欄が増える」とありますが、ここで入力できる項目がタスク名のみなのか、所要時間や開始時刻も入力できるのか曖昧です。",
+    "suggestion": "「インライン入力欄では『タスク名』のみ入力可能とし、開始時刻や所要時間はデフォルト値（未設定/30分）を適用する。詳細設定は作成後にS-11から行う」と明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "8.6 演出キュー",
+    "issue": "TALK画面で冒険EXPを獲得し、その後GROW画面に戻った際の「非同期のEXPバー伸長」が、他の演出（ログインボーナス等）とどうキューイングされるか定義されていません。",
+    "suggestion": "演出キューの優先順位表に「0. ログインボーナス」「1. 非同期の冒険EXP反映」を追加し、GROW画面表示時の自動再生順序を明確にしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "2.3 Today セ��ション操作",
+    "issue": "タスク追加の所要時間について、project_v1.mdでは「5分刻み（5〜120分）」と定義されていますが、UX仕様の「横スクロールチップ」で24個の選択肢を全て提示するのは操作性が悪く、目的の時間を探しにくくなります。",
+    "suggestion": "頻出するプリセット（5/10/15/30/45/60/90/120分）のみをチップ表示し、それ以外は「カスタム」として数値入力またはピッカーで選択させるUIに変更することを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2.3 Today セクション操作",
+    "issue": "Undoスナックバーが「ボトムタブの上16pxで固定表示」とありますが、iOSのセーフエリア（ホームインジケータ）の考慮が明記されていません。",
+    "suggestion": "「iOSの env(safe-area-inset-bottom) を考慮したマージンを設定する」と明記し、ホームインジケータとの被りを防止してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "1.2 遷移マトリクス",
+    "issue": "S-42 (メール変更), S-43 (パスワード変更), S-44 (ブロックリスト), S-06 (新パスワード設定) への遷移パスがマトリクス図に記載されていません。",
+    "suggestion": "遷移マトリクスに `S-37 -> S-42, S-43, S-44` および `S-05 -> メールリンク -> S-06 -> S-02` のパスを追記し、完全性を確保してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

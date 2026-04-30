@@ -1,0 +1,4 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"CONTRADICTION","location":"§8.1 / §8.13","issue":"R8時点で§8.1は outline 方式だが §8.13 状態マトリクスは box-shadow のまま。a11y視点から見るとどちらが本当にフォーカス可視化として機能するか分からない。","suggestion":"§8.13 の focus-visible 行を `outline: 3px solid var(--accent); outline-offset: 2px;` に統一。","model":"Claude Opus 4.6","persona":"a11y_expert"},
+  {"id":"R-002","severity":"LOW","category":"MISSING","location":"§8.12a Undoスナックバー","issue":"Undoスナックバーに role=\"status\" + aria-live=\"polite\" を付けているが、aria-live=\"polite\" はスクリーンリーダーの他の発話完了後に読まれる。Undo のタイミング（5秒以内）を考えると、ユーザーに間に合わない可能性。","suggestion":"§8.12a に『Undo の緊急性を考慮し、aria-live=\"assertive\" を検討』を注記。","model":"Claude Opus 4.6","persona":"a11y_expert"}
+]

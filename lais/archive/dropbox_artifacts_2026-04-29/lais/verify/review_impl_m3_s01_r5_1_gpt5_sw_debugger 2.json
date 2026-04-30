@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1. Group A+B コード",
+    "issue": "SUBMIT_TIMEOUT_MS の値検証が見当たらない。未定義/NaN/0/負数の場合、setTimeout が即時発火または極端な遅延となり、常時タイムアウトやハングなど環境依存の不具合を誘発する可能性がある（設定漏れ時に“動いているように見えるが即終了/無限待ち”になり得る）。",
+    "suggestion": "SUBMIT_TIMEOUT_MS を使用前に Number.isFinite かつ >0 を検証し、異常時は安全なデフォルト（例: 15000ms）へフォールバックして warn ログを出す。0/NaN/負数/巨大値の単体テストを追加してガードが効くことを検証する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. Group A+B コード",
+    "issue": "アンマウントやルート遷移後も旧オペレーションの setTimeout が残存し、後で発火して ref を書き換える（safeSetState は抑止されるが無駄な処理とわずかなメモリ保持が発生）。",
+    "suggestion": "最新の timeoutId を useRef で保持し、useEffect のクリーンアップ（アンマ��ント時）で clearTimeout する。finally では isCurrent 判定に関係なく clearTimeout(timeoutId) を常に呼ぶ（no-op でも可）ことで不要なタイマー発火を抑制する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "1. Group A+B コード",
+    "issue": "catch 節で err.message をそのまま UI に表示しており、英語メッセージ/技術的詳細/一過性エラーが直接露出する可能性がある（情報漏えい・非一貫な文言）。",
+    "suggestion": "Supabase エラーコード/型に基づくメッセージマッピングを導入し、ユーザー向けはローカライズ済み定型文に限定。詳細はコンソール/監視（Sentry など）へ。未知エラーは汎用文言＋requestId/opId を内部ログに残す。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "4. Playwright 実測",
+    "issue": "opId による race 防止の単体テストが未整備（“別途検証予定”のまま）。将来のリファクタや微修正で再発しても検知しづらい。",
+    "suggestion": "fakeTimers を用いた単体テストを追加: 1) 遅延成功>タイムアウト>late 応答で UI/route が発��しない 2) タイムアウト後の再送中に旧タイマーが発火しても無害 3) 複数連打で古いコールバックが一切副作用しない。CI で必須化。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "5. R5 レビュー観点",
+    "issue": "本文で「timeout 経由で opId=0 になっている場合」とあるが、R5.1 方針は opId を単調増加でリセットしない。ドキュメントと実装の整合が取れていない。",
+    "suggestion": "セクション5の記述を更新し、リセットしない設計（単調増加・無効化はインクリメント）に統一した旨を明記する。コメントも同様に修正。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. Group A+B コード",
+    "issue": "opId を数値で単調増加させ続けるため、理論上は長時間稼働で MAX_SAFE_INTEGER 近傍に到達する可能性がゼロではない（現実的には極めて低い）。",
+    "suggestion": "実装を単純化するなら現状維持で十分だが、より堅牢にする場合は Symbol() や UUID をトークンとして用いるか、数値 opId に wrap-around 検知と“世代ソルト”を併���して ABA を避ける。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. Group A+B コード",
+    "issue": "無効化された/タイムアウトしたリクエストをネットワーク的に中止していないため、帯域消費とサーバ負荷が残る（UI 副作用は抑止できているが無駄な I/O が続く）。",
+    "suggestion": "AbortController を導入し、opId 無効化やアンマウント時に abort()。Supabase 側が signal を受け付けるかラッパー（signIn/Up）で対応する。タイムアウト時は abort→エラー無視（isCurrent で抑止）の順で扱う。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "1. Group A+B コード",
+    "issue": "canSubmit/inFlight ガードの具体実装が抜粋に見えず、ダブルクリック/Enter 連打直後の再入時に inFlightRef 設定より前の処理が競合する可能性があるか判断しづらい。",
+    "suggestion": "handleSubmit の冒頭で e.preventDefault() を最初に実行し、続けて同期的に inFlightRef.current を確認して二重起動を即時 return。UI では aria-disabled に加え pointer-events: none などで多重入力も抑止���",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. Group A+B コード",
+    "issue": "新規送信開始時に旧送信のタイマーを明示的に解放していないため、連打シナリオで多数の no-op タイマーが後で一斉に発火する（副作用は抑止されるが無駄な wakeup）。",
+    "suggestion": "最新の timeoutId を ref に保持し、handleSubmit 開始直後に既存タイマーがあれば clearTimeout してから新たに setTimeout を設定する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "1. Group A+B コード",
+    "issue": "Supabase API ラッパー（signInWithEmail/signUpWithEmail）が throw ベースなのか、{ data, error } 戻りなのかが不明。後者の場合、catch に入らず成功扱いで route する危険がある（“特定条件で壊れる”）。",
+    "suggestion": "ラッパーで必ずエラー時は throw する契約に統一し、単体テストで { error } 戻りをモックして throw に正規化されることを検証。併せて data?.session 判定の分岐を見直し（signup 成功/要確認メール/失敗の3態）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "1. Group A+B コード",
+    "issue": "観測性が不足。opId/遅延時間/タイムアウト発生率/再送の有無などが記録されず、将来のデグレ検知や現場再現が難しい。",
+    "suggestion": "計測と構造化ログを追加（dev: console.debug、prod: telemetry）。項目例: opId, startAt, endAt, durationMs, path (signin/signup), result (success/timeout/abort/error), errorCode。閾値を越えるタイムアウトで警告を上げる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "4. Playwright 実測",
+    "issue": "E2E でネットワーク遅延/オフライン/サーバ遅延（>timeout）などのプロファイル試験が未整備。現状は consoleErrors=0 のみで回帰検知が弱い。",
+    "suggestion": "Playwright で slow 3G/オフライン/高レイテンシをシミュレートし、1) タイムアウト時にエラー表示が残り route されない 2) タイムアウト後の再送で成功する 3) 旧応答到着で副作用が一切起きない、を検証するシナリオを追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

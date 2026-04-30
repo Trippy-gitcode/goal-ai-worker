@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "はい、承知いたしました。AI Ops設計の専門家として、ご提示いただいた「AIレビューフロー設計 v2ドラフト」をレビューしました。\n\nAIと人間の責務分離、AIの自律範囲と承認ゲートのバランス、暴走防止メカニズムの観点から、特に責務境界、自律実行範囲、承認ルールの実効性、リカバリ手順に注目して評価しました。\n\n以下にレビュー結果をJSON配列形式で示します。\n\n```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"UNDEFINED\",\n    \"location\": \"指摘の妥当性判定クライテリア（7段階フィルター） > Filter 7: 修正の影響範囲\",\n    \"issue\": \"AI(Code)が「この修正は上位仕様の変更を���要とするか？」を判断するための具体的なロジックが未定義です。この判定は非常に高度であり、AIが誤って「変更不要」と判断し自律修正を行った場合、Phase Aで問題となった「機械修正による上位仕様の破壊」が再発し、レビュープロセスが収束しなくなる根",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

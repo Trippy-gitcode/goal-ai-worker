@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「すでにアカウントをお持ちですか？ ログイン」行の「ログイン」リンク",
+    "issue": "インラインリンクが色のみで強調され、下線がない。WCAG 1.4.1（色のみに依存した情報伝達の禁止）およびデザインシステム§2.2「インラインテキストリンクは必ずunderline」に不適合。",
+    "suggestion": "「ログイン」に text-decoration: underline を付与し、hover/pressed/focus-visibleの状態も可視化。例: a.inline-link{color:var(--accent);text-decoration:underline;} a.inline-link:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクション末尾「+ タスクを追加」",
+    "issue": "テキストのみのCTAで下線もボタン化もされていない。デザインシステム§2.2の『インラインテキストリンクはunderline必須』に反��、タップ領域44pxの保証も不明瞭。",
+    "suggestion": "CTAをアクセント系ボタン（--accent-subtle背景＋ラベル）に昇格し、最小タップ領域44pxを確保。もしくはFAB（--z-fab, --button-primary-bg）を右下に配置。テキストリンクのままにする場合は必ず下線＋上下パディングで44pxを確保。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s00_splash",
+    "location": "ロゴ直下サブコピー周辺",
+    "issue": "「あなたの人生を、あなたらしく」は抽象的で、初見3秒以内に“何ができるアプリか”が伝わりにくい。",
+    "suggestion": "価値提案を明文化した1行を追加（例:「タスクとAIコーチで、毎日を整える」）。補助として小さな3点アイコン（タスク追加/AI相談/ゴール管理）をCTA上に横並びで配置し、機能の即時理解を促進。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクションの各タスク行・左側の丸アイコン/縦ライン",
+    "issue": "塗り/枠の丸アイコンが“完了トグル”なのか“タイムラインの位置表示”なのか判別しづらく、完了操作のアフォーダンスが弱い。",
+    "suggestion": "左は明確な完了トグル（⭕→✅）に統一し、右端にゴール色ドットを配置（仕様§2.3）。完了トグルは44pxヒットエリア、押下時のspringアニメを付与して操作対象を明確化。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "入力バー右端の送信ボタン（矢印アイコン）",
+    "issue": "無入力時のアイコンが低コントラストで“無効に見える”。次のアクション（送信）が視覚的に弱い。",
+    "suggestion": "入力フォーカス時はアイコン色を--text-secondaryから--accentへ、文字入力>0でボタン背景を--button-primary-bgのソリッドに切替（白矢印）。初回はマイクロコピーで送信方法のヒントを表示。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "AIのタスク提案カード内ボタン群（登録する／編集して登録／✕）",
+    "issue": "プライマリ（登録する）とセカンダリ（編集して登録）の視覚的優先度が近く、即���登録の誘導が弱い。",
+    "suggestion": "「登録する」を--button-primary-bgのソリッドに、｢編集して登録｣はアウトラインに統一。余白とボタンサイズでプライマリを先頭かつ大きめに配置して視線誘導を最適化。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "フッター付近の[進め方を聞く][詰まりを相談]（グレーアウト）",
+    "issue": "TALKへの導線が無効化されており（視覚的に押せない）、UX仕様§2.3にあるタスク詳細→TALKの主導線と齟齬。",
+    "suggestion": "完了済みでも有効のままにして、TALKへコンテキスト付き遷移を許可。必要ならラベルを「振り返りを相談」に切替えるなど、状態に応じた文言最適化を行う。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "ボタン行の[削除]（赤テキスト＋薄い枠）",
+    "issue": "危険操作のボタンが輪郭のみで目立たず、押下ターゲットとしての視認性が弱い。",
+    "suggestion": "デザインシステムの--button-danger-bg/--button-danger-fgを使用したソリッドボタンにし、確認ダイアログの2段構えを維持。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー下のEXP最小値/最大値（1,240 / 2,000）ラベル",
+    "issue": "11px相当のキャプションで可読性がやや低い場面が想定される（長時間の閲覧や視力差を考慮）。",
+    "suggestion": "—font-size-sm(14px)へ引き上げ、行間を--line-height-smに。あるいは文字間-0.02emを保ちつつ色を--text-secondaryにしてコントラストを確保。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧下の「+ タスクを追加」",
+    "issue": "テキストリンクのみで視認性とタップ領域が弱い。下線もなく、主要CTAとしての視覚的優先度が不足。",
+    "suggestion": "アクセントサブトルのボタン化（アイコン＋ラベル、44pxヒット）か、テキストリンクに下線＋上下パディングを付けて操作しやすさを担保。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "画面下部「← 戻る」",
+    "issue": "テキスト表現のみでボタンらしさとタップ領域が弱い。",
+    "suggestion": "左下固定の戻るボタン（chevron icon＋ラベル、44px）に変更し、ヒットエリアを明示。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "VISUAL_FLOW",
+    "screen": "s01_signin",
+    "location": "利用規約・プライバシーポリシー同意チェックボックス周辺",
+    "issue": "初見でなぜ［サインアップ］が無効なのかが直感的に伝わりにくい（チェックの重要性が視覚的に弱い）。",
+    "suggestion": "チェック未選択時はボタン直下に小さな注意テキストを表示、チェックボックスの枠色を--accentに近づけて注目度を上げる。選択時はチェックアイコンをアクセント色でアニメ表示し、アフォーダンスを高める。",
+    "model": "GPT-5",
+    "persona": "ad_designer"
+  }
+]

@@ -1,0 +1,210 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §4.1 ゲート一覧（G1） / sub_infrastructure.md → canopy_common.sh",
+    "issue": "G1（バージョン同期）は仕様上『canopyで検証』とあるが、canopy_common.sh にはコメントのみで実装がないため自動検証が機能しない。",
+    "suggestion": "canopy_common.sh に check_versions 関数を追加し、app_config.yaml（.app.version）、package.json（.version）、src/version.ts（APP_VERSION定数）、CLAUDE.md（バージョン表記）を比較。yq/jq/grepで抽出し、いずれか不一致なら FAIL=1。フロントがないアプリはsrc/version.tsチェックをスキップ（存在検出で分岐）。"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §4.1 / sub_infrastructure.md → canopy_common.sh（コメント）",
+    "issue": "version.ts のパスと存在を前提とする文言（frontend/src/version.ts）が固定で、フロントエンド未導入や別構成のアプリでは不整合・誤FAILの原因になる。",
+    "suggestion": "version.ts のパスは app_config.yaml に optional で定義（build.version_ts_path）し、存在時のみチェックする分岐を実装。未定義/未存在ならG1対象を3箇所（app_config.yaml, package.json, CLAUDE.md）に自動縮退する。"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → update_app.sh / canopy_common.sh",
+    "issue": "dev-system の参照パスが $HOME/Desktop/dev-system にハードコードされており、環境依存で動作不能になりやすい。",
+    "suggestion": "init_app.sh 実行時に realpath \"$DEV_SYSTEM\" を .dev-system.path に保存。update_app.sh と canopy_common.sh は .dev-system.path があればそれを最優先で使用（なければ引数→相対→最後のフォールバック）。.dev-system.path 不在時はエラーで明示。"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §10.2 バージョンpin方式 / sub_infrastructure.md → canopy_common.sh",
+    "issue": "『不一致はWARN（3セッション放置でFAIL）』とあるが、WARNカウントを保持・昇格する実装が存在しない。",
+    "suggestion": "canopy_common.sh に .dev-system.version_mismatch.count（instructions/results/配下）を用意して WARN のたびにカウントアップ。3以上で FAIL=1 に昇格し、修正後はカウントファイル削除。"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §10.1 シンボリックリンク優先",
+    "issue": "シンボリックリンク運用はWindowsや一部CIで権限・挙動差があり、実運用で失敗するリスクが高いが、代替フローや前提条件が未定義。",
+    "suggestion": "前提条件（POSIX互換シェル、ln -s 権限）を明記し、Windows/非対応CI向けに『相対パスでリポ内に dev-system を vendor/ 配下へ同梱→相対symlink』『fallback: ファイルコピー運用』の手順を sub_infrastructure.md に追記。"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "sub_system_map.md → 全体（§2-§4）",
+    "issue": "共通基盤のサブ仕様にアプリ固有の処理・データ・画面フロー詳細がそのまま記載され、CommonとApp固有の境界が曖昧。新規アプリに不適合・誤誘導の恐れ。",
+    "suggestion": "sub_system_map.md はテンプレ骨格（見出し・項目例・TODO）に限定し、現行のアプリ固有フローは各アプリの docs/system_map.md に移動。dev_system_spec.md §17 にも『本ファイルはテンプレでありアプリ毎に差し替える』と明示。"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "sub_infrastructure.md → §1.1 canopy_app_template.sh（最小10行） / sub_infrastructure.md → canopy_common.sh（最小5行チェック）",
+    "issue": "canopy_app.sh の最小行数要件が『テンプレ最小10行』と『実チェック5行以上』で矛盾している。",
+    "suggestion": "要件を10行に統一。canopy_common.sh の閾値を10へ修正し、エラーメッセージも『min 10』に合わせる。テンプレのコメントにも同値を反映。"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §4.1（G7） / sub_infrastructure.md → canopy_common.sh",
+    "issue": "G7『仕様↔完了コマンド対応＝mission_linter.sh』が共通canopyで実行されていないため、テンプレ違反を自動検知できない。",
+    "suggestion": "canopy_common.sh に mission_linter 実行を追加（bash scripts/mission_linter.sh || FAIL=1）。SPパスがカスタムの場合のため、環境変数 SESSION_PROGRESS_PATH による上書きも許容。"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → mission_linter.sh",
+    "issue": "bashコマンド検出が単純なgrep（'cmdN'や'npx','grep','awk','wc'）で偽陽性/偽陰性が発生しやすい。『仕様↔完了コマンド1:1』も未検証。",
+    "suggestion": "『完了コマンド:』ブロック必須＋行頭に『cmdN: 』形式を強制し、cmdNの個数>0を検証。さらに```bashフェンス内のコマンド抽出に対応。各cmdに '|| exit 1' が含まれるかもチェック。"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → mission_linter.sh",
+    "issue": "ATに『前提:』の有無をブロック全体で一度しか確認しておらず、複数ATがある場合にAT毎の『前提:』欠落を見逃す。",
+    "suggestion": "AT見出し（^AT-[0-9]+）毎にサブブロックを切り出し、『前提:』の存在を個別チェック。欠落ATを列挙してFAILにする。"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md → §1.2 test-guards.config.ts",
+    "issue": "モジュールスコープで 'typeof page !== \"undefined\" && page.url()...' を参照しており、TypeScriptの型チェックで『pageが未定義』エラーやCI実行時の型不整合を誘発する。",
+    "suggestion": "page 参照を完全排除し、ローカル判定は process.env.BASE_URL や Playwright configの use.baseURL、または process.env.CI のみで分岐する（例: isLocal = process.env.CI !== 'true' && /localhost/.test(process.env.BASE_URL||'')）。"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → canopy_common.sh",
+    "issue": "GUARD_COUNT の算出が単純grep（先頭シングルクォート行）で、配列外の文字列リテラルやコメント行もカウントされ、誤判定の恐れ。",
+    "suggestion": "test-guards.config.ts の IGNORED_ERRORS 配列ブロックを sed -n '/export const IGNORED_ERRORS/,/];/p' で抽出し、クォート括りの行のみを厳密カウント（正規表現で '^[[:space:]]*\\'[^']+\\',' を対象）。"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md → §2 test_lint.sh",
+    "issue": "条件付きskip検出が単純な grep 除外（platform 文字列）で脆弱。正当なプラットフォーム除外以外もすり抜け/誤検知の可能性。",
+    "suggestion": "許可パターンを明示（例: '/* allow-skip: platform-non-support */' のコメント必須）。grep は test\\.skip\\(|describe\\.skip\\( を検出し、許可コメント併記行のみ除外。違反はFAILに。"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "sub_testing.md → §5 affected-tests.sh / dev_system_spec.md → §7",
+    "issue": "L2影響範囲テストのスクリプトが dev-system のディレクトリ構成や init/update のシンボリックリンク一覧に含まれておらず、標準フローに組み込まれていない。さらに HEAD~1 が初回コミットで失敗する可能性がある。",
+    "suggestion": "affected-tests.sh を dev-system/scripts 配下に追加し、init_app.sh で scripts/affected-tests.sh をsymlink。C2フローに 'bash scripts/affected-tests.sh || exit 1' を追加。HEAD~1 が無い場合は L1（smoke）にフェイルオーバーする分岐を実装。"
+  },
+  {
+    "id": "R-015",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §8 C2デプロイフロー / sub_infrastructure.md → canopy_common.sh",
+    "issue": "build/deploy コマンドは app_config.yaml に定義があるが、canopy/フローはそれを読み取らず固定コマンドを前提。ビルド/デプロイ検証（G6）も未実装。",
+    "suggestion": "canopy_common.sh に yq を用いて build.cmd, build.out_dir, deploy.frontend_cmd, deploy.backend_cmd を取得し実行前の整合性（out_dir がデプロイコマンドに含まれる等）を検証（不一致はFAIL）。C2フローも app_config.yaml をソースに動的実行する deploy.sh を追加して置換。"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → app_config_template.yaml（routing.models） / canopy_common.sh",
+    "issue": "routing.models の ratio 合計100チェックは仕様上『canopyで検証』とあるが、実装が存在しない。",
+    "suggestion": "canopy_common.sh に check_routing_ratio 関数を追加し、yq で models.*.ratio を合算、100以外はFAIL。routing.enabled=false の場合はスキップ。"
+  },
+  {
+    "id": "R-017",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §4.3 / §7 / sub_testing.md 全般",
+    "issue": "Playwright 実行が '--project=mobile' を前提にしているが、テンプレに Playwright 設定（mobileプロジェクト定義）が含まれていないため、初期状態で全テストが失敗する可能性が高い。",
+    "suggestion": "dev-system/templates に playwright.config.ts（'mobile' プロジェクト、ビューポート/UA/デバイス設定含む）テンプレを追加し、init_app.sh でコピー。最低限の smoke テスト雛形も同梱して初回からG4が動作するようにする。"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §4.1（G3 テスト項目数）",
+    "issue": "『grep -cでテスト数の期待値検証』の期待値の定義場所が未定義で、自動化できない。",
+    "suggestion": "app_config.yaml に tests.expected_total と tests.allowed_delta を追加し、canopy_common.sh で 'grep -rc \"^test\\(\" tests/e2e/specs' から件数を集計して許容範囲外はFAILにする。"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_infrastructure.md → init_app.sh",
+    "issue": "既存リポジトリに対し上書きコピーや git init を無条件実行するため、誤破壊リスクがある。",
+    "suggestion": "既存ファイルがある場合はバックアップ（*.bak）生成 or 上書き確認プロンプトを追加。'.git' が存在する場合は git init をスキップ。--force オプションで無確認上書きを許容。"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "sub_infrastructure.md → session_archiver.sh",
+    "issue": "『## 完了済み』見出し依存のため、テンプレから逸脱した場合はアーカイブ不能で停止する。",
+    "suggestion": "見出し未検出時は自動で '## 完了済み' セクションを末尾に付与してリトライ、または閾値超過行の下部ブロックを instructions/results/session_history.md に退避するフォールバックを実装。"
+  },
+  {
+    "id": "R-021",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "sub_infrastructure.md → init_app.sh（development_rules_common.md のコピー）",
+    "issue": "Single Source of Truth に反し、共通ルール（development_rules_common.md）をアプリ側へコピーしている。以後の更新が反映されず二重管理になる。",
+    "suggestion": "共通ルールのコピーを廃止。build_rules.sh は常に DEV_SYSTEM/rules/development_rules_common.md を参照する前提に統一。既存アプリに残存するローカルコピーは update_app.sh 実行時に検出してWARN表示・自動削除（バックアップ保存）を実装。"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → 全体 / sub_infrastructure.md → 依存ツール",
+    "issue": "仕様・スクリプトが yq, jq, wrangler, Playwright, Node, bash など複数の外部依存を暗黙に前提としているが、要件・インストール手順が未定義。",
+    "suggestion": "dev-system/README.md に『前提ツール・バージョン・インストール方法』セクションを新設。canopy_common.sh 冒頭で依存コマンドの存在チェックを行い、未インストールの場合は明示エラーを出す。"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → init_app.sh（canopy.sh 生成） / app-repo 構成",
+    "issue": "instructions/results/canopy_latest.txt がディレクトリ構成に含まれるが、出力の保存（tee）が未実装で、直近のcanopy結果がファイルで追跡できない。",
+    "suggestion": "tests/smoke/canopy.sh の最後に '...) | tee instructions/results/canopy_latest.txt' を追加し、直近実行結果を自動保存。CI でもアーティファクト化できるようにする。"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "dev_system_spec.md → §8 C2デプロイフロー（G6） / sub_infrastructure.md → canopy_common.sh",
+    "issue": "G6『ビルド同期（build.out_dirとデプロイコマンドの整合性）』がコメントのみで検証コードがない。",
+    "suggestion": "canopy_common.sh に check_build_sync 関数を追加し、yq で build.out_dir と deploy.frontend_cmd を取得、コマンド文字列に out_dir が含まれるかを検査。不一致は FAIL。"
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md → §8 C2デプロイフロー（デプロイ確認）",
+    "issue": "デプロイ確認が 'curl -s $URL | grep version' と曖昧で、アプリに version を露出する実装がなければ検証不能。",
+    "suggestion": "共通のヘルスエンドポイント '/__health' を規定し、JSONで {\"version\":\"X.Y.Z\"} を返すWorker実装テンプレを dev-system に追加。canopy ではこのエンドポイントを叩いて G1 のバージョンと一致を検証。"
+  },
+  {
+    "id": "R-026",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "sub_infrastructure.md → init_app.sh（テンプレ展開） / dev_system_spec.md → §4.3",
+    "issue": "Playwright 自体と最低限のテスト雛形がテンプレに含まれず、G4の『npx playwright test』が初回から失敗しうる。",
+    "suggestion": "templates に package.json（devDependencies に @playwright/test、ts-node など）、playwright.config.ts、tests/e2e/specs/smoke.spec.ts（起動確認）を同梱。init_app.sh で '--with-tests' をデフォルトONにしてコピー、'npx playwright install --with-deps' を実行。"
+  }
+]

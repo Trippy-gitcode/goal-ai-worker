@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "1. lais/src/components/App.jsx, 2. lais/src/components/screens/S00Splash.jsx",
+    "issue": "JSX内でclass属性を使用しており、フレームワーク前提（Solid/Preact ではOK、React では警告/不整合）が明示されていない。チームやビルド環境でReact前提に切り替わると不具合や警告の原因になりうる。",
+    "suggestion": "プロジェクトのJSXランタイム（例: Solid, Preact, React）をREADMEやtsconfig/babel設定で明示する。Reactを想定する場合はclassNameへ統一。Solid/Preact前提を固定する場合はESLint/型設定でclass使用を許可し、誤用を検知できるルールを導入する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "3. lais/src/components/screens/S00Splash.css",
+    "issue": ".s00 に指定された flex: 1 は親にdisplay: flexが無い限り効果がなく、現在のAppルートでは無効。将来のレイアウト変更時に誤解を招く可能性がある。",
+    "suggestion": "親コンテナをflexにしない限り不要なので削除するか、親でapp-rootをflexレイアウトにする意図があるならその旨をコメント化する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S00Splash.css",
+    "issue": "CTA配置の76pxなど、仕様依存の“魔法の数値”がハードコードされている。コメントで根拠が示されている点は良いが、将来のトークン変更（ボタン高さ/ギャップ）で同期ズレが起こりやすい。",
+    "suggestion": "calcを用いて関係を式で表現する（例: bottom: calc(140px - 52px - 12px)）か、--cta-bottom, --cta-gap, --cta-height などのカスタムプロパティに分解して組み立てる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3. lais/src/components/screens/S00Splash.css",
+    "issue": "iOS等のセーフエリア（ホームインジケータ）を考慮していないため、デバイスやブラウザによってはCTAスタックが物理的に近すぎたり、稀に干渉する可能性がある。",
+    "suggestion": "bottomをenv(safe-area-inset-bottom)考慮に変更（例: bottom: calc(env(safe-area-inset-bottom, 0px) + 76px)）。横向きや小型端末での衝突有無も併せてスナップショッ��検証を追加。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx",
+    "issue": "相対importで.jsx拡張子を明記しており、ツールチェーンによっては設定差異で解決に失敗することがある（他ファイルとの一貫性にも影響）。",
+    "suggestion": "バンドラーの推奨に合わせて拡張子を省略するか、プロジェクト全体で拡張子明記/省略をスタイルガイド化して統一する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/S00Splash.jsx",
+    "issue": "型安全性/契約が明示されておらず、onStart/onLoginの未指定・型不一致がレビューや将来の改修時に見落とされやすい。",
+    "suggestion": "TypeScript化してS00Splashのprops型を定義するか、JSDoc/PropTypesで関数必須を明示する。最低限、デフォルトno-opを用意し防御的に扱う（例: const noop=()=>{}; onClick={onStart||noop}）。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx, 2. lais/src/components/screens/S00Splash.jsx",
+    "issue": "div.app-root と main に aria-label を付与しており、スクリーンリーダーで冗長なランドマーク名の重複読み上げやノイズとなる可能性がある。",
+    "suggestion": "意味を持たないラッパーのaria-labelは削除し、mainの見出し（h1）で文脈が十分ならmainのaria-labelも省略する。ラベルが必要な場合はaria-labelledbyで可視テキストと連携させる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "3. lais/src/components/screens/S00Splash.css",
+    "issue": "ロゴのY座標が仕様「画面中央から上に60px（Y≈340）」に対して実測≈326でやや上振れ。ロゴ直下のタグラインを含むグループを基準にオフセットしているため、ロゴ自体の基準とズレている。",
+    "suggestion": "オフセット対象をロゴ単体に合わせる（例: ロゴ要素にmargin-top:-60px相当を与え、中央はグループではなくロゴ基準にする、もしくはグループ中央=50%からタグラインの高さ/余白の半分を加味して調整）。スクショ検証に±しきい値を設定し自動検出可能にする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S00Splash.css",
+    "issue": "CTAのmin-width: 44px は現状のレイアウト（横方向はstretchで327px）では実効性がなく、可読性を下げる可能性がある。",
+    "suggestion": "タップ領域要件はheightで既に満たしているためmin-widthは削除するか、将来のレイアウト変更に備える意図をコメントで補足する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/App.jsx",
+    "issue": "本番ビルドでもconsole.logが残ると情報漏えいやパフォーマンス低下の原因になりうる（本M2では意図的だが将来の取りこぼしが起きやすい）。",
+    "suggestion": "NODE_ENV等でガードするヘルパーloggerを用意し、開発時のみ出力する。M3+で遷移実装時にログ削除をタスクリスト化しておく。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3. lais/src/components/screens/S00Splash.css",
+    "issue": "ギャップ12pxはトークン化されておらず、他箇所と整合しづらい。将来のデザインスケール変更時に一貫性が損なわれる可能性がある。",
+    "suggestion": "スペーシングトークンに--space-sm:12px等を追加し、gapや関連マージンに適用してDRY化する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2-3. S00Splash.jsx/S00Splash.css",
+    "issue": "375x812以外（小型端末や横向き）で、中央グループの固定オフセットとCTA固定下寄せの組み合わせにより、上下要素の衝突/視認性低下が起こるリスクがある。",
+    "suggestion": "最小高さやレスポンシブ条件を追加し、縦寸が閾値より小さい場合はCTAのbottomやロゴのオフセットを縮める。例: @media (max-height: 700px)でbottomやtranslateYの係数を減らす、もしくはclamp()で動的制御する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

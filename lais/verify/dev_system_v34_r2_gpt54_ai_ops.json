@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.1.2 / §2.4 / §6.2 PD-104",
+    "issue": "PD-104の原文ではENG/ADVの必須Readは「§C1-C6全文」だが、R2差分では§C0-C6を必須Readに拡張している。§C0は要約版であり無害だが、PO承認済み前提との差分として未説明の拡張になっているため、責務境界の確定仕様とR2差分が厳密一致していない。",
+    "suggestion": "PD-104の扱いを明確化し、「§C0は追加の補助要約であり、承認済みの§C1-C6必須Readを置き換えない」と明記するか、PD-104引用部を§C0-C6に更新して整合させる。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.1.3 / §4.1.4 / §2.4",
+    "issue": "§4.1.3ではENGの補助コマンド一覧に「提案ログ更新（ADV委託時）」を含めている一方、§4.1.4ではsession_progress.mdはADVが書ける例外的許可として整理している。提案ログ更新をENGが補助コマンドとして実行可能にすると、クラスターDで解消しようとしているADV/ENGの書き込み境界が再び曖昧になる。",
+    "suggestion": "提案ロ���更新の責任者をADVに固定するか、ENGが書けるのは『完了記録・失敗記録・定型ステータス更新のみ』で、提案ログ新規起票/方針判断は不可と明示して責務を分離する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§4.3.4 mission_risk_classifier.sh / §3.1.4 / §3.3",
+    "issue": "mission_risk_classifier.sh のサンプル実装が bash 3.2 非互換。`source scripts/lib/risk_patterns.sh` の RISK_PATHS 配列を `for pattern in \"${RISK_PATHS[@]}\"` で扱っており、クラスターAでPOSIX+bash3.2互換化を必須にした方針と整合していない。新設スクリプト群の一部が再びbash配列依存になっており、macOS標準環境で実装不能リスクが残る。",
+    "suggestion": "risk_patterns.sh を配列ではなく改行区切り文字列定義に変更し、`printf '%s\n' \"$RISK_PATHS\" | while read -r pattern` 方式などbash 3.2/POSIX互換の記法へ統一する。hflow_trigger_check.sh も同じ実装方針に揃える。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§3.2.2 / §4.3.5 / §4.5.6",
+    "issue": "hflow_trigger_check.sh は「git diff --cached --name-only --relative」を前提としているが、deploy.sh の実行文脈ではインデックスが空のことがあり、デプロイ時の変更検知に失敗する可能性が高い。pre-commitでは成立しても、deploy時のHフロー発火判定としては実効性が弱い。",
+    "suggestion": "判定対象を明確に分ける。pre-commit用は`--cached`、deploy用は`git diff --name-only $(git merge-base origin/main HEAD)...HEAD`等にし、hflow_trigger_check.sh に mode 引数（pre-commit/deploy）を追加する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§3.1.4 / §3.2.1 / §3.3",
+    "issue": "PD-105の高リスク判定パスとPD-106のHフロー発火パスは『同一パターンを使う』とあるが、本文では高リスク条件に「既存DBスキーマ変更を含むミッション」が追加されている一方、共通化された risk_patterns.sh にはDBスキーマ変更パスが含まれていない。高リスク判定とHフロー発火条件の共通部分と差分部分が未定義。",
+    "suggestion": "risk_patternsを`COMMON_RISK_PATHS`と`MISSION_ONLY_RISK_PATHS`に分離し、DBスキーマ変更はmission_risk_classifier側のみ追加適用する、といった形でルールを明文化する���",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.2.4 / §2.9",
+    "issue": "deploy.sh失敗時にsession_progress.mdへDEPLOY-FAILを追記し、次ミッション先頭へDEPLOY-RECOVERを挿入するとしているが、その書き込み主体が未定義。クラスターDではsession_progressの責務境界が厳密化されているため、失敗時の自動記録を誰がどの範囲まで行うかが不明だと運用で止まる。",
+    "suggestion": "『ENGは定型失敗記録のみ追記可、復旧方針の文章化はADV担当』など、デプロイ失敗時の書き込み権限とテンプレートを明示する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.2.3 / §4.4.3 / §3.1.3",
+    "issue": "高リスク系ミッションはcmd-realworld PASSまでDONE不可としつつ、§4.2.3ではdeploy失敗時に次ミッションとしてDEPLOY-RECOVERを挿入するとしている。元ミッションがIN_PROGRESSのまま継続されるのか、DEPLOY-RECOVERが別ミッションとして割り込むのかが不明で、キュー先頭主義とDONE判定の整合が崩れる。",
+    "suggestion": "高リスク系では『元ミッションはBLOCKED/IN_PROGRESS維持、DEPLOY-RECOVERはサブミッションとして紐付ける』など、状態遷移を明示する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.8 / dev_system_spec §4.1 参照前提",
+    "issue": "G10が本R2差分で『仕様書ファースト』に再定義されているが、現行ベースラインではG10はシークレットスキャン。R2は差分パッケージなので旧定義との入れ替え理由が本文中で説明されておらず、G10の意味変更が大きい。",
+    "suggestion": "G10の再定義理由と旧G10（シークレットスキャン）の扱いを注記し、番号を維持するなら旧機能の移設先も明示する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.8 / 現行 dev_system_spec.md §4.1",
+    "issue": "§4.8のG1-G13完全版一覧では現行G10の『シークレットスキャン』が消えており、G10が別機能に置換されている。これは採番破綻を直す目的に対し、既存品質ゲートの欠落を生むため、ゲート体系の整合修復ではなく別の破壊的変更になっている。",
+    "suggestion": "既存G10シークレットスキャンを維持した上で新規ゲートをG11-G13に割り当てるか、番号再編が必要なら全関連箇所を含む移行表を明示して既存検証が失われないようにする。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.9.1 development_rules.md / §4.8",
+    "issue": "development_rules.mdをG1-G13完全版へ更新するとあるが、現行のdevelopment_rules.mdはアプリ個別の運用文脈を含む索引ファイルである。R2ではdev-system共通の新ゲート定義をどうアプリ個別ルールへ配布・差し込むかの移行手順が不足しているため、連鎖更新の実効性が担保されていない。",
+    "suggestion": "development_rules_common.md 側に入れる変更とアプリ側個別追記の境界、build_rules.sh再生成のタイミング、既存アプリのupdate_app.sh適用手順をセットで定義する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.1.7",
+    "issue": "22フローStep 0の統一文言で『その他: §C0のみ』としているが、§C0は要約であり規範本文ではない。『遵守対象』が§C0だけだと要約のみ読んで本文を読まなくてよいとも読めるた��、クラスターFの軽量化と規範遵守の線引きが曖昧。",
+    "suggestion": "『その他フローは起動時に読了済みの§C1-C6を前提に、Step 0では§C0を参照する』と書き換え、§C0単独遵守と読めないようにする。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§4.2.1",
+    "issue": "Step8ポーリングは『curl応答にコミットハッシュが含まれること』を前提にしているが、アプリがHTML/JSON/Worker応答のどこにもコミットハッシュを露出していない場合は常にFAILする。クラスターKの対策としては有効だが、前提条件が仕様に追加されていない。",
+    "suggestion": "app_config.yaml に `deploy.healthcheck_marker_cmd` などの正規ソースを追加し、コミットハッシュ露出方法を仕様化するか、既存version endpointを使う形に修正する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.7 / §4.5.4",
+    "issue": "クラスターGではG13を『最近N日以内にhook経由の発火ログが存在する』へ変更するとしているが、§4.5.4の実装では `[deploy.sh]` タグも有効判定に含めている���これは『hook経由発火の保証』というR1の問題設定を緩めており、目的と検証条件が一致していない。",
+    "suggestion": "G13を二段階に分ける。hook配線確認とdeploy経路強制確認を別チェックにするか、少なくともhook保証とdeploy経由保証を別フィールドで検証する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§4.5.1 / §4.5.7",
+    "issue": "subdir対応で親 `.git/hooks/pre-commit` から各サブアプリの pre-commit-sub.sh を呼ぶ設計になっているが、既存リポジトリの pre-commit がすでに別ロジックを持っている場合のマージ方針が未定義。init_app.sh が上書きするのか追記するのか不明。",
+    "suggestion": "親 pre-commit はテンプレート断片をappendする方式にするか、`# DEV-SYSTEM SUBDIR HOOK` ブロックを idempotent に挿入する仕様を追加する。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.4",
+    "issue": "Filter 1-7 の説明が sub_review_flow.md §2 の正式名称とずれている。R2本文では『Filter 1: 既存仕様との照合』『Filter 2: PO決定事項との整合』等に言���換えており、正式手順との差異が新たな解釈ブレを生む可能性がある。",
+    "suggestion": "sub_review_flow.md §2 の文言をそのまま引用する���、『R2向け読み替え』として正式Filterとの対応表を付ける。",
+    "model": "GPT-5.4",
+    "persona": "ai_ops"
+  }
+]

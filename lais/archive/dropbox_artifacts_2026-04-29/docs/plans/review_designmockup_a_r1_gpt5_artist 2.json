@@ -1,0 +1,134 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部の「すでにアカウントをお持ちですか？ ログイン」の『ログイン』リンク",
+    "issue": "リンクが青色のみで示され、下線やアイコン等の非色依存の手掛かりがない（WCAG 1.4.1）。本文中リンクとしては判別が弱い",
+    "suggestion": "インラインリンクに常時 text-decoration: underline を付与し、フォーカス時の下線強調も追加。もしくは右向き矢印アイコンを併記して色以外の手掛かりを与える",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "チェックボックス行の『利用規約』『プライバシーポリシー』リンク",
+    "issue": "青色のみでリンク性を表現しており、下線等の非色依存の手掛かりがない（WCAG 1.4.1）。文中に2つ並ぶため見落としやすい",
+    "suggestion": "両リンクに下線を常時付与し、外部遷移であれば↗︎アイコ���を追加。タップ領域は最低44pxを確保する",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayタスクリスト右端の小さな色ドット（青/緑）",
+    "issue": "ゴール紐付けの区別が色ドットのみで示されており、色以外の手掛かりがない（WCAG 1.4.1）。テキストや形状差が見当たらない",
+    "suggestion": "各行にゴール名のテキストラベルまたはチップを併記し、もしくは左側に3pxの縦バー＋アイコン（形状差）で示す。スクリーンリーダー向けにもaria-labelでゴール名を付与",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "ヘッダー右側アイコン",
+    "issue": "UX仕様書 §3.1の記載（☰ TALK 🕐 📝）に対し、右側に新規チャット（＋）のみで履歴（🕐）が見当たらない。履歴アクセスの明示導線が仕様と不整合",
+    "suggestion": "右側に🕐（履歴）アイコンを追加するか、左の☰を『履歴』と明示する文言/アイコン変更で意図を統一。仕様かUIのどちらかを更新して整合を取る",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "画面全体（ロゴと2ボタンの中央配置）",
+    "issue": "汎用的なスプラッシュ構成（ワードマーク＋CTA二段）で、Lais特有の視覚的個性や物語性が弱い。上部の星粒も微弱で印象に残りにくい",
+    "suggestion": "Night Skyの物語性を強める微細な星のパララックス/弧光、ブランドアクセントの薄い環状グロー、ロゴタイプの字間-0.5px強調など、静かな演出で『設計された沈黙』に芯を与える",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択（タイプA/B/Cの丸顔アイコン）",
+    "issue": "汎用のスマイリー風スタイルでブランド独自のアバター体系（成長/称号と連動する人格）が視覚化されていない。初回の感情的接続が弱い",
+    "suggestion": "ブランドのフラットベクター基調で、肩〜胸部のシルエットや服色パレット、微細なアクセサリで個性を付与。選択中はアクセントのリング＋ごく短いspringで『一緒に育つ』感覚を演出",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスク行間と���GOALS』見出し前後",
+    "issue": "行間が詰まり、タイムラインの縦軸/ドット/補助行（時刻・所要時間）が重なって見える。Open Air（タスク間20px、セクション間40px）が体感できない",
+    "suggestion": "各タスク行の縦間隔を20px以上に拡張し、セクション前後に40pxの間を確保。縦ラインのコントラストを下げ、補助行は14px/セカンダリ色で視覚層を1段落とす",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "チャットバブル（AI/ユーザー）配色の差",
+    "issue": "両者とも暗い面＋近似トーンで、会話の主客入れ替わりが一瞥で切り替わりにくい。視線のリズムが平坦",
+    "suggestion": "AI側をaccent-subtle寄りに少し明るく、ユーザー側はsurface寄りに落とす等でコントラストを拡げる。アバター/送信者名の明度差や角丸差分も併用すると効果的",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "画面下部（入力バーとボトムタブの二段帯）",
+    "issue": "入力バーとタブバーが積層し、��端が重く見える。『設計された沈黙』が失われ、縦方向の逃げがない",
+    "suggestion": "両者の間に8–12pxの余白を挿入し、境界線のコントラストを下げる。スクロール最下部では入力バーの上端だけを強調し、タブバーは面積感を抑える（背景トーンを一段沈める）",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "進捗見出し『60%』とゴール名のブロック",
+    "issue": "数値（60%）が大きく、タイトルより前景化して情報の主従が逆転気味。視線が数値で止まり、続くリストへの遷移が弱い",
+    "suggestion": "数値のサイズを1段階下げ（--font-size-xl相当）、ラベルと同一ブロックにまとめるか右寄せ配置にして、タイトル→進捗→リストの自然なZフローを作る",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s12_task_add",
+    "location": "ハーフモーダル内のフィールド群（所要時間チップ〜メモまで）",
+    "issue": "縦の密度が高く、グルーピング（時間系/ゴール/メモ）の切れ目が曖昧。入力中の視線移動に小さな躓きがある",
+    "suggestion": "グループ間に24–40pxのセパレーションを入れ、補助ラベルは--font-size-sm/セカンダリ色で層差を明確化。チップ列の上下に余白16–20pxを追加して呼吸感を出す",
+    "model": "GPT-5",
+    "persona": "artist"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "s30_me",
+    "location": "基本情報リスト全体（区切り線と項目並び）",
+    "issue": "強い区切り線と均一行が設定アプリ的で、Laisの『洗練＋親しみ』『Open Air』の空気感が薄い。個性より実務感が前面に出ている",
+    "suggestion": "区切り線をborder-subtleに下げ、行間を+4〜8px拡張。各項目にアイコンのニュアンスや小さなチップを添え、見出し/値のウェイト差で柔らかい階層を作る",
+    "model": "GPT-5",
+    "persona": "artist"
+  }
+]

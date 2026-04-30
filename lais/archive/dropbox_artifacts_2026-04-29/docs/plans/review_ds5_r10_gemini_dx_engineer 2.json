@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§19.6 / §18",
+    "issue": "§19.6の依存チェーン図において、`e2e_fullflow_test.md`が`project_v1.md`のみに依存しているように描かれているが、§18の連鎖更新マップでは`ux_v1.md`、`design_spec_v1.md`、`design_system.md`の変更時にもテスト仕様書を更新すると定義されている。この矛盾により、下流仕様書の変更時にテスト仕様書の更新が漏れ、CI/CDパイプライン（G4ゲート）で確実にテストの偽陽性・偽陰性障害が発生する。",
+    "suggestion": "§19.6の依存チェーン図を修正し、`e2e_fullflow_test.md`が`ux_v1.md`、`design_spec_v1.md`、`reference_v1.md`などの全ての実装仕様書から依存（参照）される最下流の検証レイヤーであることを正確に反映させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7 / §13.4",
+    "issue": "§19.7のPhase 0完了基準に「8ペルソナ×2モデルのAIレビューでCRITICAL 0を達成」と記載されているが、§13.4で定義されている標準ペルソナは5つである。要求されるペルソナ数が矛盾しており、ENGが完了条件を満たせずプロセスがデッドロックする可能性がある。",
+    "suggestion": "§19.7の記述を「§13.4で定義された標準5ペルソナ（必要に応じてカスタム追加）によるAIレビュー」に修正するか、§13.4のペルソナ定義を8つに拡張して整合性を取る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4 (ux_v1.md)",
+    "issue": "`ux_v1.md`の必須セクションテンプレートに、モバイルおよびモダンWebアプリで不可欠な「権限リクエスト（カメラ、位置情報、通知など）のUXフロー」が欠落している。実装時に権限拒否時のフォールバックや要求タイミングが未定���となり、ENGが自律判断に迷う。",
+    "suggestion": "`ux_v1.md`のテンプレートに「§N+X 権限リクエスト・フォールバックUX」を追加し、許可・拒否・再要求のフローを網羅させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4 (design_spec_v1.md)",
+    "issue": "`design_spec_v1.md`の必須セクションに、UIの「状態（State）」に関するデザイン（ローディング状態、空状態/Empty State、エラー状態）の指定が欠落している。正常系以外のデザインが定義されない場合、ENGがAI生成の汎用UIを補完実装してしまい、§4.7の「AIっぽさ排除基準」に違反するリスクが高い。",
+    "suggestion": "`design_spec_v1.md`のテンプレートに「§N+X 状態別デザイン（ローディング/空状態/エラー）」を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§19.5",
+    "issue": "仕様書ヘッダーに「依存: {上流ファイルのパス + バージョン}」を記載するルールがあるが、上流ファイルが更新されてバージョンが上がった際に、下流ファイルのヘッダーをどう同期・検証するかの仕組みが定義されていない。手動管理では形骸化し、§1.1の「機械可検証」の原則に反する。",
+    "suggestion": "上流ファイルのバージョン変更時に下流ファイルのヘッダー依存バージョンを自動検証する仕組み（例: `canopy`のゲート追加、または`version_sync.sh`の拡張）を導入するか、手動更新の義務を§18の連鎖更新マップに明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5 / §19.1",
+    "issue": "§19.5のヘッダー例で依存パスが`docs/plans/lais_project_v1.md`となっているが、§19.1の必須ファイル一覧や`sub_infrastructure.md`のディレクトリ構成では`docs/project_v1.md`となっており、`plans/`ディレクトリの有無にブレがある。",
+    "suggestion": "§19.5の例示パスを`docs/project_v1.md`に統一し、ディレクトリ構成の記述のブレを解消する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.4 (project_v1.md / ux_v1.md)",
+    "issue": "`project_v1.md`と`ux_v1.md`の両方のテンプレートに「AIレビュー計画」セクションが存在する。プロジェクト全体で1つの計画を持つのか、仕様書ごとに個別の計画を立てるのかが曖昧であり、情報の二重管理（Single Source of Truth違反）を招く恐れがある。",
+    "suggestion": "AIレビュー計画はプロジェクト全体の方針として`project_v1.md`に集約し、`ux_v1.md`等からは削除するか、「各仕様書固有の追加レビュー観点」であることを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7",
+    "issue": "ベンチマークの差別化マッピングにおいて、「同等」「未対応」「差別化」の3分類を必須としているが、競合の機能に対して「意図的に実装しない（Not Doing）」という戦略的判断の分類がない。",
+    "suggestion": "差別化マッピングの分類に「意図的非対応（Not Doing）」を追加し、スコープ外とする機能の明確化を促進する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  }
+]

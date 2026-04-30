@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「すでにアカウントをお持ちですか？」行の「ログイン」インラインリンク",
+    "issue": "インラインリンクが色差のみで示され、下線がない。デザイン仕様 §2.2（下線併用）およびWCAG 1.4.1「色のみに依存」に不適合",
+    "suggestion": "「ログイン」に text-decoration: underline を付与し、フォーカス可視化もoutlineで担保。ホバー/フォーカス時は下線と色の双方で状態変化を示す",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayリスト「ジムで筋トレ」行のカード左端 2pxカラーライン",
+    "issue": "UX仕様 §2.3のタスク行構成は［ゴール色ドット］で示す設計。左端ラインはOverdue専用（§2.4）であり矛盾",
+    "suggestion": "左端ラインを廃止し、行末またはタイトル右に8pxのゴール色ドットで表現。Overdueのみ左3pxバーを使用（色以外にラベルも併記）",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s20_talk",
+    "location": "タスク提案カード上部ラベル「タスクにしますか？」（カード先頭行）",
+    "issue": "ラベルが11px相当で本文15pxとの階層差が大きく、日本語での可読性がやや低い（見出しとして弱く埋もれる）",
+    "suggestion": "ラベルを14px/--line-height-sm + --letter-spacing-heading（-0.5px）へ。視認性を上げつつ本文とのコントラスト階層を明確化",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード（AIバブル直下）の左インデント",
+    "issue": "カード左端がAIメッセージの左インデントと揃っておらず、視線が段差で引っかかる（縦リズムが途切れる）",
+    "suggestion": "カード全体の左端をAIメッセージのテキスト列に揃える（同一グリッド）。もしくはAIバブルとセットで左ボーダー+同一余白を適用",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s15_goal_create",
+    "location": "カテゴリ選択チップ（選択状態）と下部プライマリCTA「作成」",
+    "issue": "選択チップがアクセント強めでCTAと競合し、主行動の視認性がやや低下",
+    "suggestion": "選択チップは --accent-subtle 背景+アウトライン（テキストは--accent）に抑え、フル塗りはCTAのみとし主従関係を明確化",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "Todayセクションサブ行「1 / 4 completed」",
+    "issue": "ラベルが英語で本文は日本語主体。日本語UI内で読点が途切れ、視線のリズムが崩れる",
+    "suggestion": "「1/4 完了」など日本語に統一（または「完了 1/4」）。サイズは14px/--line-height-ja-bodyで本文感を維持し、色はtext-hintで主情報との差を付ける",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "ALL",
+    "location": "ヒーロー領域のEXP表記（GROW=バー行右寄せ、ME=バー直下右寄せ）",
+    "issue": "画面間でEXP数値の配置が揃っておらず、学習された視線パターンが途切れる",
+    "suggestion": "EXP数値��全画面で「バー直下・右寄せ」に統一（または常にバー行右端）し、固定ポジションで視線負荷を下げる",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域「EXPLORER」（大文字ラベル）",
+    "issue": "letter-spacing: 1px。デザインシステムの英字ラベル推奨は1.5pxで、わずかに締まりが強く見える",
+    "suggestion": "英字ラベルに --letter-spacing-label: 1.5px を適用し、ラベルらしい品格と読みやすさを確保",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s00_splash",
+    "location": "CTAボタン2段（「はじめる」と「ログイン」）の間隔",
+    "issue": "ボタン間ギャップが約12pxで詰まって見え、Open Airの呼吸感がやや損なわれる",
+    "suggestion": "ボタン間隔を--space-md(16px)〜--space-lg(24px)へ拡大し、意図的な「間」を作る。下余白も画面下端と16px以上確保",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "完了タスク行「企画書を仕上げる」の本文色と緑���tint背景",
+    "issue": "本文色(#9BA7B4)が緑系tint背景上でやや沈み、主要文言の可読性と主従関係が弱まる",
+    "suggestion": "完了行は本文をtext-primaryに戻すか、tint濃度を下げる/境界線を強めるなどで文字と地のコントラストを再調整",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "ヘッダー（左:ハンバーガー／中央:TALK／右:履歴・新規の2アイコン）",
+    "issue": "3つのアイコンが同一ウェイトで並び、タイトルと競合して視線が分散",
+    "suggestion": "右側アイコンの片方をオーバーフロー（⋯）に集約するか、ストロークを--text-hintに落として主見出しの優先度を上げる",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

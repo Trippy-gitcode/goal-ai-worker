@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.4, §project_v1.md §4.2, ux_v1.md §「project_v1.md 内部矛盾」",
+    "issue": "ゴール達成の「作成から7日経過が必要」ルールについて、project_v1.mdには明記がある一方、ux_v1.mdでは「存在しない」と記載しつつUIフローにも“完了待ち/あとN日”状態が定義されていないため、仕様が食い違っている。",
+    "suggestion": "ux_v1.md側で「完了待ち」状態のUXを追加（S-14に『100%（あとN日で完了）』表示、達成演出は7日経過時に発火、当日手動完了は『完了待ち』に遷移）。内部矛盾の注記は削除し、project_v1.md §4.2と整合させる。通知（週次/日次）への文言も『完了待ち→完了』に対応。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §2.1, ux_v1.md §9.3, §13.2",
+    "issue": "Premierの「無制限（フェアユース上限1,000回/日）」に対するUX定義がない。上限表示/到達時メッセージ/残回数の見せ方が未定義。",
+    "suggestion": "各プランの上限値をTALKヘッダーないし入力バー近傍に常時表示（例: 残り 245/1000）。到達時の文言をプラン別に定義（Premierは『フェアユース上限に達しました』）。S-38プラン管理にも上限値を明記。サーバ側レート制御と整合させる。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘッダー）/ §3.5（S-21）",
+    "issue": "TALKヘッダーに☰と🕐の2つの履歴関連アイコンが描かれているが、どちらが何を開くかの役割が重複・未定義。S-21は☰でドロワーを開くと定義している一方で🕐の挙動が不明。",
+    "suggestion": "履歴起動は1アイコンに統一。☰=ドロワー開閉に固定し、🕐は削除または別機能（例: 新規スレッド）に再割当。ヘッダーアイコンの役割定義を明文化。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.3",
+    "issue": "単一タスク提案はS-12モーダルで編集と記載する一方、複数タスク提案の『個別に編集』はチャット内アコーディオンのインライン編集としており、画面内で方針が矛盾している（『インラインは不採用』��いう設計理由とも衝突）。",
+    "suggestion": "複数タスクの『個別に編集』もS-12モーダルを逐次表示（または一括編集モーダル）に統一。インライン編集案は廃止。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5, ux_v1.md §2.3, §8.1",
+    "issue": "日次EXP上限（300EXP）到達後の挙動がUI未定義。タスク完了時にEXPが付与されない場合のフィードバックがないと混乱を招く。",
+    "suggestion": "上限到達後はタスク完了チェックは成立するが、EXPフロート/バー演出を抑制しトースト『今日のEXP上限に達しました（上限: 300）。明日04:00にリセット』を表示。GROWヒーロー領域に『本日分のEXP上限到達』バッジを追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.2, ux_v1.md §2.4, §8.3",
+    "issue": "ゴール達成ボーナス（+50EXP, 1日1回）超過時のUXが未定義。2件目以降の達成でボーナス不付与となるが、ユーザーへの明示がない。",
+    "suggestion": "2件目以降の達成時はバナー『本日のゴール達成ボーナス上限��達しています（+0 EXP）』を表示。進捗/達成演出は簡略化し、翌日04:00の再付与可否を案内。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（Undoスナックバー）",
+    "issue": "『残り秒数カウントダウン表示』のフォーマットと更新頻度が未定義（mm:ssか整数秒か）。アクセシビリティ観点での読み上げも未定義。",
+    "suggestion": "残り秒数は整数秒で毎秒デクリメント表示（例: 30,29...）。aria-live=politeで『取り消し可能 残りN秒』を読み上げ、0で自動消去。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3（画像10MB制限）, ux_v1.md §3.2",
+    "issue": "画像添付のサイズ超過/非対応形式時のエラー表示・再試行UXが未定義。",
+    "suggestion": "添付時にクライアントバリデーションし、超過は『10MB以下のJPEG/PNG/GIF/WebPのみ対応』トースト+再選択導線。サーバ変換失敗時も同様の再試行UIを定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §7.4（友達最大500人）, ux_v1.md §4.4",
+    "issue": "友達数上限到達時（500人）の追加フローが未定義（QR/リンク追加のブロック、文言）。",
+    "suggestion": "上限到達時はQR/リンク追加ボタンを無効化し、『友達数の上限（500人）に達しています。解除すると追加できます』を表示。承認待ちも同様に抑止。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3（Today内の並び替え）",
+    "issue": "開始時刻での自動ソートと手動並び順の優先度・相互作用が不明。新規タスク追加時の挿入位置、開始時刻変更時の再ソート条件も未定義。",
+    "suggestion": "優先順位を明示（手動順が最優先/開始時刻は同順位内ソート等）。新規タスクは自動で論理末尾に挿入→ユーザー操作で手動順に組み込める設計に統一。『手動順をリセット』アクションも用意。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2（メッセージ送信）",
+    "issue": "チャット入力の文字数上限・超過時のエラー表示が未定義（AI API/コスト対策上も必���）。",
+    "suggestion": "入力上限（例: 4,000文字）を定義し、超過時はカウンタとエラーメッセージでガイド。送信時もサーバ側で拒否→インラインエラーを返す。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1, ux_v1.md §13.2",
+    "issue": "価格設計の訴求点がUI上で弱い（AI回数/質以外の差分が見えづらい）。Premierの価値（限定フレーム/優先サポート/将来チケット）がプラン管理画面に十分表現されていない。",
+    "suggestion": "S-38に『このプランでできること』比較（モデル/回数/限定フレーム/優先サポート/将来チケット遡及）を明示。レベルアップ/アバター設定/TALK上限到達時にコンテキストCTAでアップグレード導線を追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2（プラン管理）, project_v1.md §2.1-2.2",
+    "issue": "Premierの『チケットComing Soon』がプラン選択時にも明示されていない（SHOP側の注記のみ）。購入直後の期待値齟齬リスク。",
+    "suggestion": "S-38のPremierカードに『アイテムチケットはショップ開始時に配布（遡及保証）』のバッジ/注記を常時表示。決済前の確認ダイアログにも追記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.5, ux_v1.md §9.3, §11.1",
+    "issue": "JST 04:00リセットをUIでローカルタイムと混同する恐れ。海外ユーザーや端末の現地時刻と不一致時の説明/表記ルールが未定義。",
+    "suggestion": "『リセット: 明日 04:00 JST』のようにタイムゾーンを明記。端末ロケールと異なる場合は情報アイコンで説明。v0.2.0でローカルTZに対応予定であることも注記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.2, §9.3",
+    "issue": "TALK画面で当日残り対話回数が常時可視化されないと、到達直前のフラストレーションが生じる可能性。",
+    "suggestion": "TALKヘッダーまたは入力バー上に残回数ミニ表示（例: 『残り 12回』）。長押しでプラン上限詳細ツールチップ表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.1（S-42/43）",
+    "issue": "メール変更（S-42）/パスワード変更（S-43）の画面レイアウト・バリデーション・エラーメッセージ・成功後の戻り先が最小限の記述のみで、具体UI（入力エラー、強度メーター、成功遷移）が不足。",
+    "suggestion": "各画面にフィールドエラー（形式/重複/弱いパスワード）、パスワード強度インジケータ、成功後の遷移（S-37へ戻る）とトースト、失敗時のインラインエラーを明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8.6, §3.4",
+    "issue": "演出キューはGROW中心で定義済みだが、TALK内で冒険EXPカードとレベルアップバナーが同時発生した場合の優先順/重なり抑制の詳細が薄い。",
+    "suggestion": "TALK内は『冒険EXPカード→レベルアップバナー→（必要なら）紙吹雪』の順に直列実行。バナーはカードの出現アニメ終了を待って表示する旨を明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2（プラン/収益）, ux_v1.md 全体",
+    "issue": "ゲーミフ��ケーションと課金動機の結節が弱い（MVPでSHOP未実装）。アバター装飾の魅力訴求/露出が少なく、AI回数/質以外のアップセル誘因が不足。",
+    "suggestion": "MVPでも『限定フレーム』の露出を増やす（レベルアップ時/アバター設定でプレビュー比較）。将来のSHOP実装を見越し、GROWのレベルアップ演出後に『限定装飾をチェック（Premier特典）』軽量プレースホルダーを表示し、期待値を形成。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  }
+]

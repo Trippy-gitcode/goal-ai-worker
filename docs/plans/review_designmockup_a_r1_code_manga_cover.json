@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "日本語/英字混在タイポグラフィ",
+    "issue": "『12 EXPLORER』『TODAY』『GOALS』『PROFILE』『GROW』など英字大文字と日本語本文が同じ letter-spacing・line-height で混在しており、日本語側の重さが英字に引きずられて粗く見える。漫画表紙で言えば『タイトル欧文と本文和文のカーニング分離』が行われていない状態。",
+    "suggestion": "英字大文字セクションには letter-spacing +0.1em、日本語本文には letter-spacing +0.02em、line-height 1.75 を個別適用する。design_system §3.4 に規定済みのはずなので実装を確認。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "タイトル配置",
+    "issue": "『Lais』が画面中央に水平垂直ともに配置され、視線が一点集中したまま『はじめる』ボタンまで飛び降りる。漫画表紙の原則『視線を Z / N で誘導』が全く効いていない。",
+    "suggestion": "タイトルを左上 1/3 へ寄せ、右下に小さな月 or 星座のシンボル、中央にタグラインを配置して視線を Z 字に動かす構図へ再設計。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "縦ラインと余白のリズム",
+    "issue": "縦ライン + ドット + タスク本文の並びが均等リズムになっており、漫画でいうコマ割りの単調さに相当する。『間 (ま)』の演出がない。",
+    "suggestion": "タスク間の余白を 16 / 24 / 16 / 32 などランダム不等間隔にし、午前・午後の境目に 1 本の薄い水平線 or 小さな時刻ラベル (AFTERNOON 等) を入れて呼吸を作る。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "『60%』の巨大数字",
+    "issue": "巨大な 60% は漫画表紙なら主タイトルに相当する大きさだが、その脇に『副業で月10万円』という本当の主タイトルがあり、主従関係が逆転している。",
+    "suggestion": "『副業で月10万円』を 28-32pt で主タイトル、60% を副情報 20pt へ縮小、上下に余白 16pt を追加。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "タスクタイトル『企画書を仕上げる』",
+    "issue": "タイトルの右隣に緑のチェック丸がわずかに浮き、左上に寄せられているためタイトルの存在感が削がれている。『完了済み』テキストも控えめすぎて状態が伝わらない。",
+    "suggestion": "タイトル行を画面幅いっぱいの 22pt、右端のチェックマークを大型化 (32pt)。『完了済み』はチェックアイコンの下に小さく置き、タイトル周辺の余白を増やす。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "チャットバブルの間隔",
+    "issue": "AI / ユーザーのバブル間隔が均一で、対話のリズム (問いの後に『間』が来る) が視覚化されていない。",
+    "suggestion": "AI の質問とユーザー返答の間を詰め (8px)、話題が変わる直前は余白を広げる (32px)。提案カード手前に 1 本の薄い divider を入れる。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "見出し『最初のパートナーを選びましょう』",
+    "issue": "見出しが 2 行に折り返されているが、改行位置が『最初のパートナーを / 選びましょう』と文節境界を割っており不自然。",
+    "suggestion": "見出しを 1 行に収まるフォントサイズに調整するか、改行位置を『最初のパートナーを選びましょう』全 1 行 + 小さめサブテキストに再構成。",
+    "model": "Code",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s01_signin",
+    "location": "インラインリンクの色",
+    "issue": "『利用規約』『プライバシーポリシー』『ログイン』のリンクが鮮やかな青で、モノクロ基調の漫画表紙的な静けさを破壊するノイズになっている。",
+    "suggestion": "リンク色を夜空に調和する淡い青グレー (#6A8CC8) にトーンダウンし、下線は維持。",
+    "model": "Code",
+    "persona": "manga_cover"
+  }
+]

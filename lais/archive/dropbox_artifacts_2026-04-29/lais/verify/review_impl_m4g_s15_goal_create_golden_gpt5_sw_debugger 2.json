@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "1.S15GoalCreate.jsx（S15-8 handleSubmit）",
+    "issue": "onCreate の結果を待たずに即時で state リセット＋クローズしており、将来 onCreate が非同期になった場合や例外発生時に、入力内容が失われたままモーダルが閉じる。ユーザーは失敗理由も分からない。",
+    "suggestion": "onCreate の戻り値が Promise の場合は await し、成功時のみクローズ・リセットする。失敗時はエラーメッセージを表示し、入力内容は保持する。例: const ret = onCreate?.(payload); if (ret?.then) { setSubmitting(true); try { await ret; handleClose(); reset(); } catch(e){ showError(...); } finally { setSubmitting(false); } } else { handleClose(); reset(); }",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1.S15GoalCreate.jsx（body scroll lock useEffect）",
+    "issue": "body の overflow を直接上書きしており、複数モーダルが同時/連続で開閉された際にロック解除の順序でスクロールが誤って解放される競合（reference counting 不在）。",
+    "suggestion": "グローバ��な scroll-lock マネージャを導入してリファレンスカウントで管理し、0 になったときのみ解除。iOS 向けに overscroll-behavior / touch-action や body 固定（position: fixed）なども併用。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1.S15GoalCreate.jsx（S15-8 CTA ボタン）",
+    "issue": "CTA の無効化を aria-disabled のみで表現しており、要素自体はフォーカス/クリック可能。支援技術やキーボード利用者にとって“押せるが反応しない”状態になりやすい。",
+    "suggestion": "無効時は disabled 属性も併用し（見た目には aria-disabled も維持可）、フォーカス移動対象から除外する。handleSubmit も isValid を再確認。スタイルは .s15-submit[disabled], .s15-submit[aria-disabled='true'] 双方をサポート。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1.S15GoalCreate.jsx（フォーカストラップ onTab）",
+    "issue": "トラップ対象の抽出が [disabled] のみで、[aria-disabled='true']・[inert]・[hidden]・CSS 非表示要素を除外していないため、実質操作不能な要素へフォーカスが当た���可能性がある。",
+    "suggestion": "enabled 抽出時に [aria-disabled='true']、[inert]、[hidden] を除外し、かつ要素の offsetParent や getClientRects() で可視性を判定。例: const enabled = [...focusables].filter(el => !el.disabled && el.getAttribute('aria-disabled')!=='true' && !el.hasAttribute('inert') && !el.hidden && el.offsetParent !== null);",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "1.S15GoalCreate.jsx（handleClose フォーカス復帰）",
+    "issue": "setTimeout(0) で呼出元へフォーカス復帰するため、連打や即時再オープン時に旧タイマーが新しいモーダルの初期フォーカスを奪うレースが起こりうる。",
+    "suggestion": "クローズ完了後（アニメ完了 or 状態確認）に復帰するか、前回の復帰タイマーをキャンセル。親側で onCloseComplete を用意し、その完了イベントでフォーカス復帰するなど、1 つの経路に統一。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "1.S15GoalCreate.jsx（aria-labelledby / useId）",
+    "issue": "Preact の useId 実装/バージョンによっては SSR 環境での ID 安定性に差があり、���にハイドレーション警告が出る可能性がある。",
+    "suggestion": "SSR を行う場合は Preact の対応バージョンを確認し、必要なら props で安定 ID を受け取る・またはクライアント側のみで useId を用いる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1.S15GoalCreate.jsx（S15-4 input の id）",
+    "issue": "id=\"s15-name-input\" が固定文字列のため、将来的に同コンポーネントの多重マウントで ID 衝突のリスクがある。",
+    "suggestion": "useId でユニーク ID を払い出し、label の for と input id を紐づける（例: const nameId = useId(); <label for={nameId} ...><input id={nameId} .../>）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1.S15GoalCreate.jsx（S15-5 期限表示）",
+    "issue": "非インタラクティブな div に aria-readonly を付与しているが、意味的に適用されない場合がある。支援技術にとっては単なる静的テキストとして扱われる可能性が高い。",
+    "suggestion": "単なる表示であれば属性を外す。将来的にピッカーを開くなら button[disabled] 相当へ移行���、role／state を正しく反映する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "1.S15GoalCreate.jsx（overlay onClick クローズ）",
+    "issue": "素早いクリックや端末依存のイベント順序によって、クローズ直後に背面要素へ“クリックスルー”する可能性がわずかにある（特にモバイル Safari）。",
+    "suggestion": "pointerdown/up ベースで処理し、クローズ直後 1tick は背面クリックを無効化するガードを導入。あるいはクローズ中は overlay に pointer-events を維持してアニメ完了後に unmount。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "2.S15GoalCreate.css（z-index トークン）",
+    "issue": "z-index に var(--z-overlay), var(--z-modal) を使用しているが、テーマ抜粋には未定義。未定義の場合は初期値（auto）となり、スタッキングが崩れる恐れ。",
+    "suggestion": "グローバルで --z-overlay, --z-modal を定義するか、フォールバックを設定（例: z-index: var(--z-overlay, 300)）。S-12 など既存の定義有無も確認。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1.S15GoalCreate.jsx（document keydown リスナー）",
+    "issue": "Escape/Tab のリスナーを document に直接アタッチ。将来的にモーダルが多重で開く場合やネストで干渉する可能性がある。",
+    "suggestion": "最前面モーダルのみがハンドルするモーダルマネージャを導入、もしくはリスナーをコンテナ要素にバインドして event.target の包含関係でガード。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "全体（ログ）",
+    "issue": "console.log はあるが、open/close の理由（overlay/X/Escape）、カテゴリ選択の遷移、フォーカス移動などのデグレ検出に有用なログが不足。",
+    "suggestion": "開発ビルド限定で構造化ログを追加（例: {event:'open'|'close', reason, selections, isValid}）。将来は計測フラグで抑制可能に。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-013",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "E2E/UT（テスト）",
+    "issue": "E2E が未整備。フォーカストラップ、Escape/overlay/✕ クローズ、フォーカス復帰、aria-disabled gating、複数カテゴリ選択、スクロー��ロック等の退行検出が困難。",
+    "suggestion": "E2E 追加: 1) open→初期フォーカス input、2) Shift+Tab/Tab がモーダル内でループ、3) 無効時 CTA にフォーカスしない/submit されない、4) Escape/overlay/✕ で閉じる＋フォーカス復帰、5) 複数カテゴリ選択の保持、6) 連続開閉で body のスクロールロックが崩れない、7) 急速再オープンでフォーカスが奪われない。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1.S15GoalCreate.jsx（dueLabel state）",
+    "issue": "不変の表示値を useState で保持しており、不要な state。読みやすさとパフォーマンスの観点で冗長。",
+    "suggestion": "単純な const へ変更（例: const dueLabel = '期限なし';）。将来的に変更が必要になった時点で state 化する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1.S15GoalCreate.jsx（S15-6 fieldset + role=group）",
+    "issue": "fieldset/legend でグルーピングしているのに内部 div に role=\"group\" を重ねており、冗長。支援技術に重複したグループとして解釈される可能性がある。",
+    "suggestion": "role=\"group\" は削除し、fieldset/legend のみで意味付けする。必要なら aria-describedby で補足説明を付与。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

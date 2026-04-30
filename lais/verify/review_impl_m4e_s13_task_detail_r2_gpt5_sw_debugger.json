@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx",
+    "issue": "render時に task が未定義/null の場合、<section aria-label={`タスク詳細: ${task.name}`}> および <h2>{task.name}</h2> で即座に実行時エラー（Cannot read properties of undefined）が発生する可能性がある。useEffect では !task を考慮している一方で、描画側は無防備。",
+    "suggestion": "描画を task の存在でガード（例: if (!open || !task) return null）するか、aria-label と表示タイトルに安全なフォールバックを適用（例: const safeName = task?.name ?? '名称未設定'; aria-label=`タスク詳細: ${safeName}`）。親側契約があるなら PropTypes/TS で明示し、E2Eで open=true, task=null のケースを禁止/検証。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx",
+    "issue": "open/task 変更の useEffect が常に setMode('view') とドラフト再初期化を行うため、編集中に task が外部更新されるとユーザーの未保存変更が予告なく破棄される（race condition / データ消���）。",
+    "suggestion": "useEffect での初期化は「open が false→true になった時のみ」「mode==='view' の時のみ」に限定する。例: useEffect(() => { if (!open || !task || mode==='edit') return; ... }, [open, task, mode]); もしくは dirty フラグを導入し、dirty=true の場合は task 更新時にモーダルヘッダーで競合通知/手動リロードを促す。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx",
+    "issue": "memo フィールドのみ空文字を null に正規化せず保存しており、既存データが null の場合でも編集→保存で '' に上書きされる（未設定セマンティクスの破壊・サイレントなデータ変換）。R1 CRITICAL-1 と同根だが memo だけ未対応。",
+    "suggestion": "保存時に memo も空文字を null に正規化（例: memo: draftMemo.trim() === '' ? null : draftMemo.trim()）。初期化/キャンセルも他フィールドと同様に ?? '' を用い、UIの未設定表示と整合を取る。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx",
+    "issue": "ダイアログのアクセシブルネームが task.name 直参照のため、name が undefined/null/空文字だと「タスク詳細: undefined/null/」等の不適切な名称になる。編集中に名称を変更してもダイアログ名は draftName を反映せず視覚と音声の乖離が生じうる。",
+    "suggestion": "安全なフォールバック（例: 名称未設定）を適用し、可能なら aria-labelledby に常在の非表示見出し（<h2 id=titleId class=sr-only>）を使って編集中も一貫したラベルを提供するか、aria-label を draftName 優先（draftName || task?.name || '名称未設定'）で更新。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx",
+    "issue": "タスク名（name）にバリデーションがなく、trim 後の空文字でも保存される。要件として名称必須である場合、空名称タスクが発生し一覧やアクセシビリティ上の退行を招く。",
+    "suggestion": "名称の必須��件を定義し、UIでのバリデーション（空/空白のみ禁止、最大長、エラーメッセージ表示、保存ボタンの無効化）を実装。任意の場合は空時の表示/読み上げポリシー（既定名の自動付与など）を仕様化。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx",
+    "issue": "time の形式バリデーションがなく、不正な値（例: '25:77'）でもそのまま保存される可能性がある。後段処理や並び替え、通知ロジックで障害化する潜在リスク。",
+    "suggestion": "UI側で入力形式検証（HH:mm 24時間制、ゼロパディング）を実施し、保存前バリデーションで弾く。バックエンドでもスキーマ/型検証を併用し、エラーメッセージをユーザーに提示。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx",
+    "issue": "JSX 属性に class を使用しており、ランタイムが React か Preact かの前提が不明。React DOM を前提とする場合は className が正であり、ビルド/型で検出しにくい退行リスクにな��。",
+    "suggestion": "ランタイム前提をドキュメント化。React（非-compat）なら className へ統一。Preact/compat でも linter ルールで明示し、将来の React への切替時に機械変換可能な状態を維持。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "lais/src/components/screens/S13TaskDetail.jsx",
+    "issue": "titleId は見出しに付与されているが、aria-labelledby からは参照されておらず、edit 時には見出し自体が非表示になるため意図が不明。メンテナンス性を下げる。",
+    "suggestion": "役割を再定義。常在の見出しを用いて aria-labelledby に回帰するか、不要なら titleId と関連コードを削除。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "S-13 Task Detail 全体（テスト/QA）",
+    "issue": "R1 CRITICAL の再発防止と R2 変更の安全性を担保する自動テストが不足。特に未設定→編集→保存の経路や a11y 名称の維持はデグレしやすい。",
+    "suggestion": "以下の回帰テストを追加: 1) time/duration/memo が null のタスクを編集→未変更で保存しても null のまま 2) duration 選���の '未設定' で null が保存される 3) name 空白保存時の挙動（許容/拒否）検証 4) 編集中に task が更新されてもドラフトが破棄されない（またはユーザー通知） 5) ダイアログのアクセシブルネームが view/edit 両モードで有効かつ適切（未設定時フォールバックを含む）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

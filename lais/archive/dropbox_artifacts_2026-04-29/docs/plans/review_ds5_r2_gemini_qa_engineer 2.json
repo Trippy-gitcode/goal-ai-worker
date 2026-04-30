@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ADVは静的解析のみ可能で実機確認手段を持たない（§9.3）にもかかわらず、競合アプリの「画面遷移/アニメーション」の調査を必須要件およびPhase 0完了基準としている。ADV単独では実行不能であり、仕様策定プロセスが確実にデッドロックする。",
+    "suggestion": "ベンチマークのインプット（競合アプリのスクショ、動画、レビュー情報）はPOが提供することを前提とするか、ADVがWeb検索で取得可能な範囲（機能比較や公開情報）に要件を限定するよう明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.6",
+    "issue": "§19.1および§19.6で定義されているファイル名（`ux_v1.md`）が、§18の依存関係マップ（`ux_redesign_v*.md`）と一致していない。また、§19.1の必須ファイルである`system_map.md`が§18のマップに存在しないため、連鎖更新の対象から漏れる。",
+    "suggestion": "ファイル名を統一（例: `ux_v1.md`に統一）し、§18の依存関係マップに`system_map.md`を追加して連鎖更新のトリガーと影響範囲を定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "依存チェーンにおいて、`e2e_fullflow_test.md`が`project_v1.md`にのみ依存している。しかし§18ではUX、デザイン、詳細設計の変更時にもテスト仕様書を更新すると定義されており、矛盾している。このままではテストの更新漏れが発生する。",
+    "suggestion": "`e2e_fullflow_test.md`が`ux_v1.md`、`design_spec_v1.md`、`reference_v1.md`の全てに依存する（最下流の検証レイヤーである）ことを依存チェーン図に明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "`design_spec_v1.md`のテンプレートに、UIコンポーネントの状態（Hover, Active, Disabled, Error, Loadingなど）の定義セクションが欠落している。未定義の場合、ENGが汎用的なスタイルを推測で実装し、AIっぽさ排除基準（§4.7）に抵触するリスクが高い。",
+    "suggestion": "`design_spec_v1.md`のテンプレートに「§N+3 状態別デザイン（Hover/Active/Disabled/Error/Loading）」を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の「依存:」メタデータについて、複数の上流ファイルに依存する場合（例: `system_map.md`が`ux_v1.md`と`reference_v1.md`に依存）の記述フォーマットが未定義。",
+    "suggestion": "複数ファイルに依存する場合はカンマ区切りで列挙する、または複数行で記述するなどのフォーマットルールを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.7",
+    "issue": "ベンチマークの出力フォーマットで「対応セクション��を紐付けるよう指示しているが、ベンチマークは仕様書作成「前」に実施するため、この時点ではセクション番号が未確定である。",
+    "suggestion": "「対応セクション」を「対応予定の機能名」に変更するか、仕様書ドラフト作成後にベンチマーク結果の該当列を更新するフローを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "`ux_v1.md`および`system_map.md`のテンプレートに、オフライン時の挙動やフロントエンドの状態管理（State Management）に関する設計セクションが欠落している。",
+    "suggestion": "`ux_v1.md`に「オフライン・同期UX」、`system_map.md`に「フロントエンド状態管理設計」のセクションを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

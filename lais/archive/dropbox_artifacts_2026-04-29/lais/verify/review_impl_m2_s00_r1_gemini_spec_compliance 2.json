@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "design_spec_v1.md §4.1 S00-3",
+    "issue": "仕様書ではCTA「はじめる」(S00-3)の位置を「画面下端から上 140px」と定義していますが、Playwrightによる実測値では、このボタンの下辺は画面下端から204pxの位置にあります。これは仕様の記述と明確に矛盾します。実装はCTAスタック全体(.s00-cta)の`bottom`を`140px`に設定しており、これはレイアウト原則「下 140px にCTAスタック」とは��致しますが、要素仕様の表(S00-3)の記述とは食い違っています。",
+    "suggestion": "仕様の意図を明確にするため、どちらかが正しい状態か確認してください。もし実装が正しい場合、仕様書S00-3の「位置」の記述を「CTAスタックの下端が画面下端から140px上」のように、実装と整合性が取れる形に修正してください。もし仕様書の表が正しい場合、実装をS00-3の下辺が140pxになるようにCSSを修正してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.1 S00-2",
+    "issue": "ステートメント(S00-2)の実装(.s00-tagline)に、仕様書に記載のない `letter-spacing: var(--letter-spacing-ja)` と `line-height: var(--line-height-ja-body)` が適用されています。これは仕様外の追加要素です。",
+    "suggestion": "これらのスタイルが意図したデザインであれば、design_specのS00-2のタイポグラフィ仕様に追記してください。意図しないものであれば、CSSから削除してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.1 S00-3, S00-4",
+    "issue": "両CTAボタン(.s00-cta-primary, .s00-cta-secondary)の実装に、仕様書に記載のない `letter-spacing: var(--letter-spacing-ja)` が適用されています。これは仕様外の追加要素です。",
+    "suggestion": "このスタイルが意図したデザインであれば、design_specのS00-3およびS00-4のタイポグラフィ仕様に追記してください。意図しないものであれば、CSSから削除してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.1 S00-3",
+    "issue": "プライマリCTAボタン(.s00-cta-primary)に、仕様書で定義されていない`:disabled`および`[aria-disabled=\"true\"]`の状態スタイルが実装されています。これは仕様外の追加要素です。",
+    "suggestion": "この状態が将来的に必要になる場合、そのデザイン仕様（適用��件、色、インタラクション）をdesign_specに追記してください。現時点で不要な場合は、コードの複雑性を減らすために削除を検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "design_spec_v1.md §4.1 状態・インタラクション",
+    "issue": "CTAのタップフィードバック(`:active`時の`transform: scale(0.98)`)の`transition`に、仕様書に記載のないイージング関数 `var(--spring-default)` が使用されています。仕様書では画面遷移のイージング(`ease-out`)は定義されていますが、タップフィードバック自体のイージングは未定義です。",
+    "suggestion": "このイージングカーブが意図したものであれば、design_specの「状態・インタラクション」セクションに、タップフィードバックのアニメーションに関する詳細（イージング関数など）を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "spec_compliance"
+  }
+]

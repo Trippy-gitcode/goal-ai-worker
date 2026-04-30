@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-201",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S02Onboarding.css — .s02-onboarding と .s02-next の @supports ブロック",
+    "issue": "@supports の条件が箇所ごとに異なる（padding-bottom 用と bottom 用で別々）。多くの環境では同等に評価されるが、エンジン差や将来の実装差で一方のみ true/false になると、CTA の位置とコンテンツ余白の加算が不一致になるリスクがある（見た目は動くが特定環境でズレる）。",
+    "suggestion": "判定条件を1つに統一し、同一の @supports ブロック内で .s02-onboarding の padding-bottom と .s02-next の bottom を同時に上書きする。例: @supports (padding-bottom: env(safe-area-inset-bottom)) { .s02-onboarding{...} .s02-next{...} }",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-202",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "S02Onboarding.css — .s02-onboarding padding / .s02-next left/right（トークン依存）",
+    "issue": "var(--space-lg) / var(--space-md) 等のデザイントークンが未定義または読込順のレースにより未適用の場合、padding のショートハンド宣言が全体無効になり、下部余白が失われる。結果として CTA がコンテンツに被る事象が初回描画タイミングなど限定条件下で発生し得る。",
+    "suggestion": "重要トークンにはフォールバック値を付与（例: var(--space-lg, 16px), var(--space-md, 8px)）。併せてトークン定義 CSS を preloaded/module preload し読込順序を保証、または @layer で設計層を固定。E2E でトークン欠落時のフォールバック動作も確認する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-203",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "S02Onboarding.css — safe-area 加算の前提条件",
+    "issue": "iOS Safari で meta viewport の viewport-fit=cover が未設定の場合、env(safe-area-inset-bottom) は常に 0 になり、想定通りの物理スクリーン端基準での配置にならない。さらに iOS 11 系では constant() が必要（env 非対応）。対象 OS/ブラウザ方針次第では“動いてはいるが一部端末で期待とズレる”状態になり得る。",
+    "suggestion": "サポート対象を明示し、iOS Safari で viewport-fit=cover を必須要件としてドキュメント化。もし iOS 11 を含むなら、@supports (bottom: constant(safe-area-inset-bottom)) ブロックでのフォールバックも併記（最終的に env が勝��順序に配置）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-204",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "テスト/CI — safe-area 回りの回帰検知",
+    "issue": "env() 第2引数削除というクリティカル修正の回帰検知が自動化されていない。特に「@supports は通るが env 変数が 0/未定義」の環境（Firefox/デスクトップなど）や、ノッチ有無・縦横回転での見え方を網羅するテストが不足している。",
+    "suggestion": "BrowserStack/Playwright 等で以下を自動化: 1) iOS Safari（ノッチ有/無・縦横）での computed style 検証（.s02-next: bottom、.s02-onboarding: padding-bottom が base+safe-area になること）。2) Firefox/デスクトップで @supports 通過時に env 未定義でも base 値が維持されること。3) env() の第2引数を使用した場合に当該宣言が無効化されることを再現するネガテスト（仕様上の禁止ではないが、実装差による破綻を再発防止）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-205",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02Onboarding.css — 100px / 52px の重複ハードコード（.s02-onboarding と .s02-next）",
+    "issue": "同一マジックナンバー（100px, 52px）が���数箇所に重複。将来的なデザイン変更時に一方のみ更新されると、CTA 位置と内容領域の余白に不整合が生じる（見た目は壊れるがコード上は気づきにくいデグレ）。",
+    "suggestion": "カスタムプロパティへ集約（例: --cta-offset: 100px; --cta-min-height: 52px）し、calc に流用。あるいは PostCSS/CSS-in-JS 側でトークン化。単一変更で両箇所が同期更新されるようにする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

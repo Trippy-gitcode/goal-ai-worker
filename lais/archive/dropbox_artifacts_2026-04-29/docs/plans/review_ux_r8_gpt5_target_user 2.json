@@ -1,0 +1,222 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 / §4.5",
+    "issue": "レベルアップ必要EXPの定義が矛盾（式ではLv1→2=100EXP、解説文では1,000EXPと記載）。育成カーブの実装が確定できない",
+    "suggestion": "正値を単一ソースで確定し、式・表・解説文を同期。UX側（ux_v1.mdで採用した100EXP）に合わせるなら§4.5の1,000を削除し、計算式・テーブル・初日体験の数値を一貫させる",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2 / §7.4 / §5.4",
+    "issue": "AI対話とソーシャルメッセージのテーブル命名が混在（messages / social_messages）。RLS誤適用でAI対話が友達に漏洩するリスク",
+    "suggestion": "データモデル命名を単一化し、RLSを明文化。例: ai_messages（AI対話）, social_messages（友達メッセージ）。RLS例も同名で再提示して誤適用を防ぐ",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3 / §7.4, project_v1.md §3.2",
+    "issue": "Todayの��び順が「開始時刻で自動ソート」と「手動ドラッグで上書き保存」の両方を持つが、優先順位・混在時の規則が未定義。新規タスク追加や時刻変更時の挙動が不明",
+    "suggestion": "優先順位ルールを明記: 例) 初期は時刻ソート。ユーザーがドラッグしたら当日だけ手動順を優先。新規タスクは該当時刻近辺に挿入（手動順末尾に仮置き→次回手動で調整可能）。「並びを時刻順に戻す」アクションも提供",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5 / ux_v1.md §2.3, §8",
+    "issue": "日次EXP上限（300）到達時のUXが未定義。タスク完了時にEXP付与が拒否された場合のUI（トースト/バナー/アニメーション抑制）が規定されていない",
+    "suggestion": "完了処理に『上限チェックNG』の分岐を追加。UI: チェックマークは付くがEXP演出はスキップ＋トースト「今日のEXP上限に達しました」。ヒーローに薄いインジケータ（“MAX”）を表示し当日中継続",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.2 / ux_v1.md ��2.4, §8.3",
+    "issue": "ゴール達成ボーナス（1日1回）に上限到達時のUXが未定義。2つ目以降の達成で何が起きるかが分からない",
+    "suggestion": "2件目以降は進捗100%と達成ステータスは維持しつつ、バナーを『今日はボーナス上限に達しています』へ切替。EXP演出はスキップ。日次リセット後に通常表示へ",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5 / ux_v1.md §3.4",
+    "issue": "冒険EXPの1日上限（100/2回）を超えた場合のTALK画面での挙動が未定義。カード非表示か、上限到達の明示かが分からない",
+    "suggestion": "冒険カード表示条件に上限チェックを追加。上限到達時は小バナー『今日は冒険EXPの上限に達しました』をAIバブル直後に表示。検出ログは保存しつつ演出は省略",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘッダー）/ §3.5",
+    "issue": "TALKヘッダーに☰（履歴ドロワー）と🕐（履歴）が併存。各アイコンの役割が重複・不明瞭",
+    "suggestion": "履歴は1入口に統一。例: ☰=メニューを廃止し🕐=履歴ドロワー起動に一本化、または☰=メニュー（設定等）/🕐=履歴（ドロワー or 別画面）を明記",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §1.2（遷移マトリクス）/ §4.4 / §13.1",
+    "issue": "S-44（ブロックリスト）への遷移が主要パス図に未記載。文中には記述があるが、遷移マトリクスに反映されていない",
+    "suggestion": "1.2の遷移マトリクスに『S-37 設定 → S-44 ブロックリスト』を追加し、戻り先も明記",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.4（S-36 QRスキャン）",
+    "issue": "QRスキャン後に表示する『相手プロフィール確認UI』の画面種別（ハーフモーダル/フル/インライン）の定義と戻り挙動が未定義",
+    "suggestion": "S-36配下のハーフモーダルとしてIDを付与（例:S-36a）。[送信]/[キャンセル]/backdrop/戻るの各操作での戻り先（S-36 or S-33）を明記",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.3.1 / project_v1.md §4.5",
+    "issue": "会話→タスク化で同名タスクの短時間連投を防ぐ仕組みはEXP付与側にあるが、登録自体の重複防止UXがない",
+    "suggestion": "タスク提案時に同名・同期限の既存タスクがある場合は『類似タスクが存在します』警告を表示。重複でも登録可能だがユーザーに選択させる",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（Upcoming）",
+    "issue": "週N回習慣の『今日非表示分』をUpcomingに含める仕様はあるが、手動で『今日やる』に昇格させた後の戻し方（Today→Upcomingへ戻す）が未定義",
+    "suggestion": "Today行に『今日やめる』アクション（3点メニュー）を追加し、当日のToday表示フラグを解除してUpcomingへ戻すルールを明記",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §1.4（history.pushStateポリシー）",
+    "issue": "ブラウザバックのモーダル閉じとフル遷移戻りは定義済みだが、複数モーダルを跨ぐ場合のpopstateスタック整理（例: 連続でハーフモーダル→ドロワー）が未記載",
+    "suggestion": "モーダル/ドロワー層ごとにpopstateハンドラ優先度を定義（最前面→背面の順で閉じる）。push時にstate.depthを持たせ、戻りでdepthを減算する実装指針を追記",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §8.6（演出キュー）/ §10.5（Reduced Motion）",
+    "issue": "演出合計8秒上限は定義されているが、ユーザー任意で『演出短縮モード』をONにする明示的設定がない",
+    "suggestion": "設定に『演出を簡素化』トグルを追加。ON時はパーティクル常時OFF、バナー表示時間短縮、EXPバー伸長を瞬時に切替",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5 / §4.5",
+    "issue": "日次リセットがJST固定。海外滞在や夜型ユーザーには直感的でなく、翌日にまたがる作業のEXP/上限リセットタイミングが分かりにくい",
+    "suggestion": "MVPのJST固定は維持しつつ、設定に『ローカルタイムゾーンに合わせる（準備中）』の表記と、各所に『リセット: 明日04:00 JST（現地: 〜）』の二重表記を追加",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §6.4 / ux_v1.md §13.1",
+    "issue": "AI対話履歴と画像添付が90日で自動削除されるが、ユーザーが事前に気づきにくい。重要な会話が消える懸念",
+    "suggestion": "設定>データに保持期間の明示と『エクスポート（v0.2.0予定）』表記を追加。TALK画面に(“90日で自動削除”)ツールチップを常設。会話スレッドに『固定/保存』フラグ（将来）も検討",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3（Undo）, §9.1（オフライン）",
+    "issue": "オフラインで完了→アプリ終了→再起動のケースでは『30秒Undo』の心理的モデルが伝わりにくい（サーバー同期時に最終状態のみ送信するが、ユーザーは“もう戻せないのか”と不安）",
+    "suggestion": "オフライン完了時のスナックバー文言を『同期待ち（この間は取り消し可能）』に変更。再起動後も“同期待ち”バッジから取消操作への導線を用意",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.2（AI理解メモ/MBTI）",
+    "issue": "AI理解メモ上書きとMBTI推定の“確からしさ”表示がないため、誤推定時にユーザーが不安に感じる可能性",
+    "suggestion": "AI理解メモに『最新更新：日時 / 生成AIモデル名』、MBTIに『推定（信頼度N%）/手動入力優先中』バッジを表示。手動入力とAI推定の切替UIを明示",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.3（複数タスク提案）",
+    "issue": "『個別に編集』での編集順が“順に表示”のみ。大量（上限5件でも）だと負荷が高い",
+    "suggestion": "編集一覧の一括モーダル化（S-12を連続で開閉せず、1画面で5件を編集→一括登録）を検討。最低でも“次へ/前へ”ナビゲーションを追加",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "全体（価値/継続/課金の観点）",
+    "issue": "ユーザー視点レビュー: 自分が使いたい/続けられる/課金したい/友達に勧めるか — 競合不満の解決度は高いが、いくつか不安点あり",
+    "suggestion": "評価（25歳/自己成長好き/過去: Habitica3ヶ月・Finch半年・Habitify離脱）: 1) 使いたい: Yes。Freeでコア全開放＋罰なし＋AI対話が魅力（project §2.1, §4, ux §3）。2) 続け��れる: 概ねYes。EXPの3層設計とアバター進化で飽きづらい（project §4.2, §4.4）。ただしJST固定や日次上限UI未定義は混乱要因（R-004/014/005/006）。3) 課金したい: Basic ¥580は妥当。差分価値（AI質/回数）が明確。プランカードに“何がどれだけ良くなるか”の比較をもう一段噛み砕いて明示すると安心（例: 具体的使用例3つ）。4) 友達に勧める: Yes（Finchの“待ち”がなく、HabitifyのFree制限不満を解消）。QR/リンクで始めやすい（ux §4.4）。総評: 競合で感じた不満（Freeの制限/罰/待機/煩雑UI）は概ね解消。上限到達時のUXやタイムゾーン表記、履歴保持90日など“使い始めてから困りそう”な点を事前に可視化すれば、継続・課金意欲はさらに高まる",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §15（通知遷移）",
+    "issue": "通知ディープリンクの未ログイン時遷移は定義済みだが、メール認証未完了の新規ユーザーがリンクを踏んだ場合の最終戻り先が長く、迷子になりやすい",
+    "suggestion": "セッション中継地点（“目的地: ◯◯へ戻ります”バナー）を表示し、認証/オンボーディング完了後に自動で目的地に遷移する旨を明示。タイムアウト時のフォールバックも提示",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（Overdue）",
+    "issue": "Overdue→『明日に延期』は即時だが、誤タップ時の取り消しはトーストのアクションのみで、視認性に個人差がある",
+    "suggestion": "『明日に延期』実行後、当該タスクの行末に一時的な『元に戻す（3秒）』リンクを表示し、トーストの見落としを補完",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §6.1（ハーフモーダル）",
+    "issue": "iOS PWAのキーボード回避はvisualViewportで定義済みだが、Android端末の各種IMEによる再レイアウト崩れ（特にGboardの候補バー）について記載なし",
+    "suggestion": "Androidでもkeyboard insets対応（env(safe-area-inset-bottom)/window.innerHeight変化監視）と最低入力域確保（min-height）を設ける旨を追記",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

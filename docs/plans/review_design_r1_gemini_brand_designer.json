@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§1.4, §5.2, §5.3",
+    "issue": "§1.4のNGリストで「純白 #FFFFFF をそのまま使用」を禁止しているが、§5.2 Dawnおよび§5.3 Adventureテーマの `--bg-surface` と `--bg-elevated` に `#FFFFFF` が指定されており、ブランド原則と実際のトークン定義が完全に矛盾している。",
+    "suggestion": "DawnとAdventureのsurface/elevatedカラーを、純白ではなくテーマの性格に合わせた極めて薄いオフホワイト（例: `#FCFAF8` や `#FEFCFA`）に変更し、NGリストの原則を遵守する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§5.2, §5.3, §8.1",
+    "issue": "§8.1でPrimaryボタンのテキスト色を `#FFFFFF` に固定しているが、Dawnのアクセント色 `#D47B3E` やAdventureの `#E85D3A` を背景にした場合、コントラスト比が約3.0:1となり、UX仕様書（§10.2）が要求するWCAG AA（4.5:1）を満たせずアクセシビリティ要件に違反する。",
+    "suggestion": "ボタンテキスト色を固定せず、テーマごとにコントラスト比を満たす色を指定するための `--on-accent` トークンを新設し、DawnやAdventureでは視認性の高い濃い色（またはアクセント色を少し暗く調整したもの）を定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§9",
+    "issue": "CSSトークンブロックの途中にMarkdownのコードブロック閉じ（```）が混入しており、CSSの定義が分断されている。AIがこのブロックをコピーして実装する際、確実にシンタックスエラーを引き起こす。",
+    "suggestion": "途中の ``` を削除し、1つの連続したCSSコードブロックとして正しくフォーマットする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§1.4, §7.1",
+    "issue": "§1.4で「ease-in-out禁止（spring系のみ許可）」としているが、画面遷移やフェードなどのUIステート変化にspringを使用すると不自然なバウンスが発生する。実際、UX仕様書（§1.3）ではease-out等が指定されており、デザインシステムとUX仕様が矛盾している。",
+    "suggestion": "物理ベースを基本としつつも、不透明度の変化や単純なスライド遷移用に、バウンスしない標準的なUIイージング（例: `--ease-standard: cubic-bezier(0.32, 0.72, 0, 1)`）を許可リストおよびトークンに追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5",
+    "issue": "3つのテーマ（Night Sky, Dawn, Adventure）の性格が大きく異なるにもかかわらず、CSSトークンで切り替わるのが「色」のみ。角丸、フォント、アニメーションが全テーマ共通のため、「Adventureのポップさ」などが視覚的に表現しきれない。",
+    "suggestion": "テーマ定義に `--radius-base` や `--anim-bounce` などのトークンを含め、Adventureテーマでは角丸を大きくする、弾むアニメーションを強調する等、色以���のトークンでも性格の差別化を図る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§6.3",
+    "issue": "アプリのコア体験であり競合との差別化要因である「アバター」について、具体的なイラストのスタイル（フラットか、アウトラインの有無、トーン＆マナー）が定義されていない。「洗練」をどうビジュアル化するかの基準がない。",
+    "suggestion": "アバターのビジュアルスタイルガイドライン（例: 「ベクターベースのフラットデザイン、主線なし、テーマカラーに馴染む低彩度トーン」等）を追記し、ブランドDNAとの整合性を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.2, §5.4",
+    "issue": "§4.2で「カードで囲まない。余白と薄いborderで区切る」と原則化しているが、§5.4のGlass OFF時（デフォルト）に `--card-bg: var(--bg-surface);` が定義されており、背景色を敷くのか敷かないのか（透明なのか）が曖昧。",
+    "suggestion": "Glass OFF時の `--card-bg` を `transparent` にするか、§4.2の原則を「基本は余白で区切���が、elevatedな要素（モーダル等）はsurface色を使用する」と明確化し、トークンと原則の整合性をとる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.2, §5",
+    "issue": "§2.2でセマンティックカラーを「ライト系/ダーク系」で定義しているが、§5の各テーマのCSSトークン（:root）内にセマンティックカラーの変数が含まれていない。実装時にテーマを切り替えた際、セマンティックカラーが正しく追従しない恐れがある。",
+    "suggestion": "§5の各テーマのCSS定義ブロック内に、§2.2で定義した `--success`, `--danger`, `--warning`, `--info` のカラーコードを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "brand_designer"
+  }
+]

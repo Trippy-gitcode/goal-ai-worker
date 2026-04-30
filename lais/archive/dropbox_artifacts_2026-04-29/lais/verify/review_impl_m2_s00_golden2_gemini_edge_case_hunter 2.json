@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "横向き(landscape)や低身長のviewport（例: 画面分割時）で、中央のロゴ・ステートメントと下部のCTAが衝突し、レイアウトが崩壊する可能性があります。",
+    "suggestion": "`.s00-center`は`top: 50%`から、`.s00-cta`は`bottom`から絶対配置されているため、高さが一定以下になると重なります。コンテナ全体を`display: flex; flex-direction: column; justify-content: space-between;`のような柔軟なレイアウトに変更し、絶対配置への依存を減らすことを推奨します。または、`@media (max-height: 500px)`のよ���なメディアクエリで、衝突を回避する代替レイアウト（例: ロゴを小さくする、マージンを詰める）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais/src/components/screens/S00Splash.css (.s00-cta)",
+    "issue": "CTAボタン群の位置が`bottom: 76px`という固定値で指定されており、iPhoneのホームインジケータやAndroidのジェスチャーナビゲーションバーなどのセーフエリアを考慮していません。これにより、ボタンがシステムUIと重なり、操作性が著しく低下する恐れがあります。",
+    "suggestion": "CSSの`env(safe-area-inset-bottom)`を使用して、セーフエリアを確保してください。例えば、`.s00`コンテナに`padding-bottom: calc(76px + env(safe-area-inset-bottom));` を適用し、`.s00-cta`の`bottom`指定を`padding-bottom`に連動させる形（例: `bottom: env(safe-area-inset-bottom);`として親のpaddingで位置調整）に変更します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S00Splash.css (.s00-cta-primary, .s00-cta-secondary)",
+    "issue": "CTAボタンに`height: 52px`が固定で設定されているため、国際化対応でテキストが長くなった場合や、ユーザーがアクセシビリティ設定でフォントサイズを拡大した場合に、テキストが2行に折り返され、ボタンからはみ出すか隠れてしまいます。",
+    "suggestion": "`height: 52px`を`min-height: 52px`に変更し、`padding`（例: `padding: 0.75rem 1.5rem;`）で上下の余白を確保するスタイルに切り替えることを推奨します。これにより、コンテンツの量に応じてボタンの高さが柔軟に変化し、レイアウトの崩壊を防げます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "ユーザーがブラウザのズーム機能（200%以上など）を使用した場合、絶対配置とpx単位のレイアウトが原因で、要素が重なったり、テキストがコンテナからはみ出したりする可能性があります。これはWCAG 2.1の達成基準 1.4.4 (リサイズ可能なテキスト) に関連する懸念です。",
+    "suggestion": "レイアウトの主要な単位を`rem`に切り替えることを検討してください。これにより、ユーザーのフォントサイズ設��に連動してレイアウトがスケールしやすくなります。また、固定の高さや絶対配置への依存を減らし、FlexboxやGridを主体とした柔軟なレイアウト構成にすることで、ズーム時の堅牢性が向上します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "プライマリCTAには`:disabled`状態のスタイルが定義されていますが、セカンダリCTA (`.s00-cta-secondary`) には定義されていません。将来的にログインボタンを無効化する要件が発生した場合、スタイルが適用されず、UIの一貫性が損なわれます。",
+    "suggestion": "`.s00-cta-secondary:disabled`および`.s00-cta-secondary[aria-disabled=\"true\"]`セレクタに対するスタイルを定義してください。例えば、文字色やボーダー色を`--button-disabled-text`や`--border-strong`の淡い色に変更し、`pointer-events: none;`と`cursor: not-allowed;`を追加します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S00Splash.css (.s00-cta)",
+    "issue": "非常に幅の広いviewport（デスクトップやタブレットの横向き）では、CTAボタンが画面幅いっぱいにまで伸びてしまい、デザイン的に不格好になります。",
+    "suggestion": "`.s00-cta`コンテナに`max-width`（例: `max-width: 480px;`）を設定し、`margin-left: auto; margin-right: auto;`を追加して、コンテナ自体を中央に配置することを推奨します。これにより、広い画面でもCTAの幅が適切なサイズに保たれます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "`.s00-cta`の直前にあるCSSコメントが、実装と直接対応しておらず、可読性を下げています。コメントはプライマリCTAの下辺が140pxであることを説明していますが、実装されている`bottom: 76px`はセカンダリCTAの下辺を基準としており、この計算ロジックがコメントから直感的に理解できません。",
+    "suggestion": "コメントを実装と一致させ、より明確にしてください。例: `/* CTAスタックの下辺を画面下から76pxに配置。これにより、プライマリCTAの下辺が仕様通り140px (76px + 52px + 12px) の位置に来る */`",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/App.jsx, lais/src/components/screens/S00Splash.jsx",
+    "issue": "`app-root`に`aria-label=\"Lais\"`が、`main`要素に`aria-label=\"Lais スプラッシュ\"`が設定されており、冗長です。スクリーンリーダーが「Lais, landmark, Lais スプラッシュ」のように読み上げる可能性があり、ユーザー体験を損なう恐れがあります。",
+    "suggestion": "画面の主題は`h1`要素が示しているため、`main`要素の`aria-label`は削除することを推奨します。ランドマーク要素に不要なラベルを付けると、かえって冗長な読み上げの原因となります。`app-root`のラベルも、アプリケーションのタイトルが`<title>`タグで適切に設定されていれば、通常は不要です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "edge_case_hunter"
+  }
+]

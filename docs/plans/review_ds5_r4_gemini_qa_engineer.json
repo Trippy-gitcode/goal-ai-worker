@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ADV（Claude）に最新のApp Storeレビュー分析や他社アプリの画面構成・アニメーションの調査を求めているが、ADVは実機操作や最新ストアの動的スクレイピングができないため、ハルシネーション（架空の仕様の捏造）が発生するリスクが高い。",
+    "suggestion": "「ADVの知識ベースにない最新情報や実機UIの確認が必要な場合、POがスクショやレビューテキストをプロンプトで提供する」という前提条件と、「推測で架空のアプリ仕様を捏造しない」ルールを追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.6",
+    "issue": "依存チェーン図で e2e_fullflow_test.md が project_v1.md からのみ派生しているように描かれている。実際にはUX、デザイン、機能仕様のすべてを検証するため、これら下流仕様書にも依存するはずであり、§18のマップとも整合しない。",
+    "suggestion": "依存チェーン図を修正し、e2e_fullflow_test.md が ux_v1.md, design_spec_v1.md, reference_v1.md の下流に位置する（これら全てに依存する）ことを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §18",
+    "issue": "§18の依存関係マップではUX仕様書が ux_redesign_v*.md となっているが、§19.1および§19.4では ux_v1.md となっている。ファイル命名規則に揺れがある。",
+    "suggestion": "ファイル名を ux_v*.md に統一するか、「新規作成時は ux_v1.md、既存改修時は ux_redesign_v*.md とする」といった運用ルールを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "project_v1.md のアーキテクチャには「オフライン」が含まれているが、ux_v1.md のテンプレートにはオフライン時や通信遅延時のUX（キャッシュ表示、同期中インジケーター、操作制限など）を定義するセクションがない。",
+    "suggestion": "ux_v1.md の必須セクションに「オフライン・通信遅延時のUX」を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "reference_v1.md にAPIやデータモデルはあるが、連続記録のリセットや通知送信などの「バッチ処理・定期実行ジョブ（cron）」を定義するセクションがない。",
+    "suggestion": "reference_v1.md に「バッチ処理・定期実行ジョブ（cron）」のセクションを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の「依存」フィールドについて、単一ファイルの例しか示されていないが、system_map.md や e2e_fullflow_test.md は複数の上流ファイルに依存する。",
+    "suggestion": "依存フィールドにカンマ区切り等で複数のファイルとバージョンを指定できる記法例（例: docs/ux_v1.md v1.0, docs/reference_v1.md v1.2）を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.4",
+    "issue": "project_v1.md と ux_v1.md の両方に「AIレビュー計画」セクションが存在し、役割分担（全体方針か個別方針か）が不明確。",
+    "suggestion": "project_v1.md にプロジェクト全体のAIレビュー方針を記載し、各仕様書にはその仕様書特有の重点レビュー観点のみを記載するよう役割を明確化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

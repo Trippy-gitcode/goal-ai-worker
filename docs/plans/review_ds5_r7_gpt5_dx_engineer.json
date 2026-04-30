@@ -1,0 +1,152 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.6（および§18, sub_adv_protocol §10）",
+    "issue": "UX仕様書のファイル名が「ux_v1.md」と「ux_redesign_v*.md」で不一致。§18/ sub_adv_protocolではux_redesign_v*.md、§19ではux_v1.mdを前提としている。",
+    "suggestion": "ファイル命名を1つに統一（推奨: ux_v*.md または ux_redesign_v*.md）。統一後、§18の依存マップ、§19.1の必須一覧、§19.6の依存チェーン、sub_adv_protocol §10の一覧を一括更新。過去資産移行ルール（旧名→新名）も明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.5（ヘッダー例）+ §13.5/§13.6 + sub_infrastructure.sh（review_gate.sh）",
+    "issue": "ヘッダー例の依存パスが「docs/plans/〜」だが、§19.1の必須構成はdocs直下。さらに「dev-system準拠: docs/plans/dev_system_spec.md §19」はアプリ側では存在しないパス。review_gate.shもdocs/plans/review_*.jsonを前提にしており、アプリ側の実配置と齟齬が出る。",
+    "suggestion": "アプリ仕様書の標準パスを「docs/」に統一し、ヘッダー例・review_gate.shの走査パスもdocs/配下に合わせる（例: docs/reviews/review_*.json）。dev-system参照は相対パスではなく『dev-system v{X.Y} §19』+ リンク/URL表記を推奨。§19.1にフォルダ規約（docs/reviews/ 等）を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6（依存チェーン） vs §18（連鎖更新マップ）",
+    "issue": "§19.6ではe2e_fullflow_test.mdの上流がproject_v1.mdのみのように読めるが、§18ではdesign_spec_v*.mdやux仕様変更でもe2e_fullflow_test.mdを更新対象としている。",
+    "suggestion": "§19.6の依存チェーンにe2e_fullflow_test.mdの上流としてux_*.mdとdesign_spec_v*.mdを明記。ヘッダー「依存」にも両者のパス+バージョンを必須化する旨を追記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-104",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.2, §19.6",
+    "issue": "§19.6で『更新範囲はspec_changelog.mdに記録』と義務化している一方、§19.2ではdocs/spec_changelog.mdを任意扱いとしている。",
+    "suggestion": "spec_changelog.mdを必須ファイルに昇格（§19.1へ移動）するか、§19.6の表現を『存在する場���は記録』に緩和。推奨は必須化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-105",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7（Phase 0 完了基準） vs §13.4, §13.2",
+    "issue": "Phase 0完了基準に『8ペルソナ×2モデル』とあるが、§13.4の標準は5ペルソナ。さらに§13.2の1セッション10呼び出し上限と整合しない（8×2=16）。",
+    "suggestion": "ペルソナ数を§13.4の標準5に合わせる、または『8ペルソナ』を正とするなら§13.4を更新。コール上限は『Phase 0は複数セッションに分割』等の運用を明記して整合。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（全テンプレート）",
+    "issue": "各仕様テンプレートに『前提・制約・リスク・非対象（Out of Scope）』がなく、境界とトレードオフの明示が不足する。",
+    "suggestion": "各テンプレートの末尾に共通セクション『前提/仮定・制約・リスク・非対象』を追加（簡易箇条書きで可）。特にproject_v1.md/ux_*.md/reference_v1.mdでの明記を必須化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.7（ベンチマーク出力フォーマット）",
+    "issue": "マトリクス列の『競合A〜E』が『調査対象』表のアプリ名と明確に結びつかず、対応が曖昧になり得る。",
+    "suggestion": "『調査対象』にID列（A/B/C…）を追加し、以降の表はそのIDを用いる。順序固定・同一ID再利用を規約化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.5, §19.6",
+    "issue": "ヘッダー『依存』を更新トリガーにする設計だが、依存抜けや循環参照を検出する自動検証が定義されていない。",
+    "suggestion": "docs配下を走査しヘッダーメタ（依存: パス+バージョン）を収集→DAG検証（循環検出/未定義参照/存在しないパス/バージョン不一致）を行うlinterを追加（canopyに統合）。必須上流の存在チェック（例: e2e_fullflow_test.mdはux/design_specを必須等）もルール化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "ヘッダーにドキュメントオーナー・承認者・レビューIDの明示がないため、責任と監査性が弱い。",
+    "suggestion": "ヘッダーに『作成者/更新者』『承認者（PO）』『AIレビューID（ファイル名）』を追加。承認日とリンク（commit hash）も任意で許容。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "見出しのv{バージョン}とファイル名のvNサフィックスが併存し、将来ドリフトの恐れがある。",
+    "suggestion": "『ファイル名のvN（メジャー変更）』『ヘッダーの細目版vX.Y（マイナ/パッチ）』の役割を明示し、両者整合をlinterで検証（例: design_spec_v1.mdのヘッダーは1.Y形式を許可）。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-111",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（design_spec_v1.md）",
+    "issue": "画面仕様と§12のSPEC-IDの対応がテンプレートに規定されていないため、テストとのトレーサビリティが弱い。",
+    "suggestion": "各画面セクションの先頭に対応するSPEC-ID列挙欄を追加（例: 『対応SPEC: SPEC-TODAY-003, SPEC-TALK-002』）。モックアップ参照はフルパス必須に。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-112",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md）",
+    "issue": "テストケースとSPEC-ID/テストタグ（test_library.md）の紐づけ項目がテンプレートにない。",
+    "suggestion": "各テストケース見出し末尾に『[SPEC-XXXX][#tag]』の表記を必須化。集計用にテーブル列（SPEC-ID/タグ）追加を推奨。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-113",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ベンチマークの再現性・検証性を担保する証跡（URL/取得日/地域・期間/レビュー件数・抽出方法/スクショ保存先）が定義されていない。",
+    "suggestion": "出力フォーマットに『情報源URL』『取得日』『対象地域/期間』『レビュー件数・抽出手順』『evidence/benchmarks/へのスクショ格納規約』を追加。分類（同等/未対応/差別化）は固定語彙のみ許容。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-114",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.6（参照表記法）",
+    "issue": "『dev-system §4.7準拠』が非バージョン参照のため将来的に意味が変動し得る。",
+    "suggestion": "『dev-system v{X.Y} §4.7』のようにバージョン固定参照に統一。可能ならURL/commit hashを併記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-115",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7（差別化マッピング）",
+    "issue": "『対応セクション』の紐付け先がproject_v1.md/ux_v1.mdに偏っており、design_system.mdやdesign_spec_v1.md起点の差別化ポイントの参照先が未定義。",
+    "suggestion": "『対応セクション』は対象領域に応じてproject/ux/design_system/design_specいずれにもリンク可とし、参照表記法（ファイル名 §番号）で統一。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

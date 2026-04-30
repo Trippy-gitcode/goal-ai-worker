@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Lais — S-01 Auth (案 A_v2: Apple+トトロ)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="screen s01 komorebi-bg">
+
+    <!-- 背景の浮遊する葉っぱ -->
+    <div class="leaf" style="top: 80px; right: 18px; transform: rotate(35deg); opacity: 0.20;">
+      <svg width="42" height="42" viewBox="0 0 64 64" fill="none">
+        <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="#a8c895"/>
+        <path d="M32 6 C32 22, 30 40, 28 58" stroke="#7a9c5f" stroke-width="1.2" fill="none" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="leaf" style="bottom: 120px; left: 14px; transform: rotate(-65deg); opacity: 0.18;">
+      <svg width="38" height="38" viewBox="0 0 64 64" fill="none">
+        <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="#d4e5cd"/>
+      </svg>
+    </div>
+
+    <!-- StatusBar -->
+    <div class="statusbar">
+      <span>9:41</span>
+      <div class="island"></div>
+      <div class="icons">
+        <span>●●●</span>
+        <span>◴</span>
+        <span>▮▮</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="auth-title">
+        ようこそ
+        <span style="font-size: 24px;">🌳</span>
+      </div>
+      <div class="auth-subtitle">きょうも、ご自分の灯りを<br>もういちど ともしましょう。</div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label class="input-label">メールアドレス</label>
+        <input class="input" type="email" value="futoshi@example.com" placeholder="">
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label class="input-label">パスワード</label>
+        <input class="input" type="password" value="●●●●●●●●●●" placeholder="">
+      </div>
+
+      <div class="auxiliary">
+        <button class="btn-text">パスワードを忘れた</button>
+      </div>
+
+      <!-- Primary -->
+      <button class="btn btn-primary btn-block">ログイン</button>
+
+      <!-- Divider -->
+      <div class="divider-or">または</div>
+
+      <!-- Alt Buttons -->
+      <div class="alt-buttons">
+        <button class="btn btn-passkey btn-block">
+          <span style="font-size: 17px;">🔑</span>
+          パスキーでログイン (Face ID)
+        </button>
+        <button class="btn btn-apple btn-block">
+          <span style="font-size: 17px;"></span>
+          Sign in with Apple
+        </button>
+      </div>
+
+      <!-- Sign up link -->
+      <div class="signup-link">
+        はじめての方<a href="#">登録する</a>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

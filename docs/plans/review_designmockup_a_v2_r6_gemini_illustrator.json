@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "「完了済み」テキスト・アイコン、および「削除」ボタン",
+    "issue": "完了ステータスの色が `#56D364`、削除ボタンが `#FF7B72` となっており、デザインシステムで定義されたセマンティックカラー（`--success: #3FB950`, `--danger: #F85149`）と矛盾している。ブランドの感情シグナル（安心/警告）の統一性が損なわれている。",
+    "suggestion": "仕様書で定義された `--success` と `--danger` のトークン値を正確に使用し、アプリ全体で感情的な色の意味を統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "タスクリスト内の完了済みタスク",
+    "issue": "完了済みタスクが「取り消し線＋グレーアウト」で表現されている。GROW画面（s10）では「取り消し線なし＋微かな緑背景」で表現されており、同じ「タスク完了」というポジティブな感情体験のUI表現が画面間で矛盾している。",
+    "suggestion": "GROW画面（s10）の完了表現に統一し、達成の喜びを削ぐネガティブなメタファー（取り消し線）を避ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "画面下部の「+ タスクを追加」テキスト",
+    "issue": "リンクテキストが青色（`#79C0FF`）のみで表現されており、下線がない。仕様書§2.2の「インラインテキストリンクは必ず text-decoration: underline を併用」およびWCAG 1.4.1（色のみの伝達禁止）に違反している。",
+    "suggestion": "テキストに `text-decoration: underline` を追加し、色覚特性に依存せずインタラクティブ要素であることを明示する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow",
+    "location": "タスクリスト右端のカテゴリドット",
+    "issue": "カテゴリドットに紫（`#A371F7`）など仕様外の色が使われている。仕様書の「アクセント色の同時使用は1画面につきプライマリ1色＋セマンティック4色まで」に反しており、Night Skyテーマの「静かな夜空」という洗練されたブランドトーンを阻害して視覚的に騒がしい。",
+    "suggestion": "カテゴリ色はテーマのアクセント色（`#79C0FF`）の不透明度違いで表現するか、セマンティックカラーの範囲内に収めて画面内の色数を制限する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の「登録する」ボタン",
+    "issue": "「登録する」ボタンがPrimary色（`#1A5FC8`）で塗りつぶされており非常に目立つ。AIとの静かな対話が主役の画面において、アクションボタンの彩度が高すぎて視線を奪い、自然体なトーンを阻害している。",
+    "suggestion": "チャットインラインのボタンは、アクセント��subtle背景（`rgba(121, 192, 255, 0.14)`）＋アクセント色テキストにするなど、会話の邪魔にならないGhost/Tonalスタイルに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s01_signin",
+    "location": "画面下部の「サインアップ」ボタン",
+    "issue": "入力前のため無効状態（背景 `#1C2128`）になっているが、テキスト色が `--text-secondary` (`#9BA7B4`) になっている。仕様書の無効状態テキスト色（`--text-disabled: #484F58`）と一致していない。",
+    "suggestion": "無効状態のボタンテキストには `--text-disabled` (`#484F58`) を使用し、現在操作できないという状態（感情的な「停止」）を正確に伝える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "所要時間の横スクロールチップ（「30分」）",
+    "issue": "選択中の「30分」チップが、上部の「単発タスク」トグルと全く同じ視覚的重み（subtle背景＋アクセント色テキスト）を持っている。異なる階層のUI要素が同じ強調表現になっており、視覚的な優先順位が曖昧になっている。",
+    "suggestion": "選択状態のチップは、ボーダーのみをアクセント色にする、あるいはテキストのみをアクセント色にするなど、トグルボタンより一段階弱い視覚表現に落とす。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "背景の星の表現",
+    "issue": "背景の星が単調な不透明度のドットのみで構成されており、Night Skyテーマが意図する「深呼吸したくなる静けさ・夜空の没入感」を生むにはやや平坦で機械的な印象を与える。",
+    "suggestion": "星のサイズや不透明度に自然な揺らぎを持たせ、より有機的で深みのある空間表現を検討する（※装飾目的のblurはNGリストにあるため、純粋な色とサイズのバリエーションで調整）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  }
+]

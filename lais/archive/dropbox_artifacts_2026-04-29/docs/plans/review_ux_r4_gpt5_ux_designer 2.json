@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.3（PWAオフライン挙動） vs ux_v1.md §9.1（ネットワーク断時のGROW挙動）",
+    "issue": "オフライン時のタスク完了に伴うEXP表示方針が矛盾。projectでは「クライアント側ではEXP付与を表示しない（同期待ちバッジ）」、uxでは「通常どおり楽観的にEXP演出を表示し、後で補正」と定義が相反している。",
+    "suggestion": "単一方針に統一する。推奨: サーバー権威モデルに合わせて「同期待ち」表示に統一し、EXPバーは変化させない（小バッジとトーストのみ）。もしくは全面的に楽観表示に切替えるなら、巻き戻し時のUI補正手順（数値の差分アニメーション／レベルダウン演出は行わない／当該完了に紐づくゴール達成やレベルアップの保留フラグ処理）を明記する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §1.4（戻りナビゲーション）",
+    "issue": "「ブラウザバック: ボトムタブ間: 前タブ」というルールが一般的なSPAの履歴期待と��なり、ユーザー/実装の両面で挙動が不明確。タブ切替が履歴に積まれるのか、詳細画面→タブ切替→戻るでどこに戻るのかが一意に定義されていない。",
+    "suggestion": "履歴モデルを明確化する。推奨: ①タブは各自の独立スタックを持ち、タブ切替は履歴に積まない（戻る=タブ内の前画面/モーダルを閉じる）。②URLルーティングで各画面を明示し、popstate時は該当スタックをポップ。③ディープリンク遷移後の戻りも同一ルールに統一。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2（Todayソート） vs ux_v1.md §7.4（ドラッグ&ドロップ）",
+    "issue": "Todayの並び順が「開始時刻順（未設定は末尾）」と定義される一方、UXではドラッグで手動順を保存し自動ソートを上書き可能とある。両者の優先順位やリセット条件が未定義。",
+    "suggestion": "ソート優先を統一する。推奨: デフォルトは時刻順。ユーザーが並べ替えた場合は「手動順」タグをTodayヘッダーに表示し、[自動に戻す]で時刻順へ復帰。新規タスク追加時の挿入位置（手動順末尾or時刻順に従う）も明記する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.4（ゴール詳細）/ project_v1.md §4.2（ゴール達成ボーナス7日ルール）",
+    "issue": "projectで定義された「ゴール作成から7日未満は完了ボーナス保留（完了待ち）」のUIがUXに未定義。ユーザーが達成したのにEXPが入らない理由が分からない恐れ。",
+    "suggestion": "S-14に「完了待ち」状態を明示（進捗100%のまま「あとN日で完了！」バッジ/ツールチップ）。Today/Goalsリストにも同バッジを表示。保留中のゴールに対するUndo/再達成時の扱いもUXに追記する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（FRIENDS > QRスキャン S-36）",
+    "issue": "カメラアクセス拒否/権限なし時のエラー・代替導線が未定義。初回許可拒否やブラウザ設定で権限不可の環境でフローが行き止まりになる。",
+    "suggestion": "権限拒否時はガイダンスモーダルを表示（権限の再許可手順/ブラウザ設定リンク）。代替導線として「シェアリンク入力」や「相手のQR��像アップロード読み取り」を提示。QRの有効期限切れ時の再試行UIも明確化する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §5.0.2（パスワードリセット Step 2）",
+    "issue": "新パスワード設定画面に画面IDが割り当てられていない（S-05内のサブステップなのか別IDなのか不明）。テストケースや遷移図と紐付かない。",
+    "suggestion": "画面IDを明確化（例: S-05A=メール入力、S-05B=新パスワード設定）し、§1.1 画面一覧/§1.2 遷移マトリクスにも追記する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §2.1/§4.4/§3.5（リスト表示全般）",
+    "issue": "大量データ時のパフォーマンス配慮が不十分。タスク最大10,000件/友達最大500人の上限に対し、Today/Upcoming/FRIENDSグリッドの仮想化・ページング仕様が未定義。",
+    "suggestion": "リストはバーチャルスクロールを前提に設計（プレースホルダ高固定）。FRIENDSは無限スクロール/ページングを導入。検索/フィルタ（例: カテゴリ/達成状況）も将来フックとしてUIに用意する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘッダー）",
+    "issue": "ヘッダーに☰（ドロワー）と🕐（履歴）の2つの履歴誘導が併存し、役割が曖昧。ユーザーがどちらを使えばよいか迷う可能性。",
+    "suggestion": "履歴導線を1つに統合（☰を履歴ドロワーとして明示、📝は新規チャットのみ）。アイコンのaria-label/ツールチップで機能を明示する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5（冒険EXP上限）/ ux_v1.md §3.4（冒険EXP演出）",
+    "issue": "冒険EXPが1日上限に達した後のUIが未定義（3回目以降の検出や上限ギリギリの端数処理時）。カードを出さないのか、上限到達の明示をするのか不明。",
+    "suggestion": "上限到達時は「今日はここまで！」カード/トーストを表示（理由と次回リセット時刻を併記）。検出済みでも付与されない場合はカード非表示＋AIバブル末尾に控えめなインライン通知を検討。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4/§4.5（レベル計算・到達目安）",
+    "issue": "「次Lv必要EXP=100+(Lv-1)×50」と「Lv1→2=1,000EXP」の記述が矛盾（ux_v1.md §“内部矛盾”で指摘済）。実装時の混乱要因。",
+    "suggestion": "正とする式/値をproject側で確定し、テーブル/説明を全て整合させる（推奨: 初日Lv2到達の体験を活かす100EXP説に統一）。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §4.5（SHOPサブタブ）",
+    "issue": "MVPで「Coming Soon」のサブタブを常設すると、サブタブ混雑と落胆を招く。サブタブの使いやすさを損なう懸念。",
+    "suggestion": "SHOPは非表示（Feature Flag）またはPROFILEカード内の小さな告知に変更。Premier限定特典導線はS-41（アバター設定）から案内する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.1/§11.2（MEサブタブ）",
+    "issue": "サブタブ横スワイプと、横スクロール要素（DISCOVERのチップ等）のジェスチャー競合時の優先度が未定義。誤作動でタブが切り替わる可能性。",
+    "suggestion": "水平方向スワイプは「横スクロール要素上では無効」にするか、スワイプ開始閾値（開始点が画面端/移動量>24px）を導入。タブ切替インジケータに触覚/視覚フィードバックを付与し、意図しない切替を抑制。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3（画像添付仕様）/ ux_v1.md §3.2（送信フロー）",
+    "issue": "画像添付のサイズ超過/非対応形式時のエラーUI、アップロード進行表示（キャンセル可否）が未定義。大容量や遅回線でのユーザー不安を招く。",
+    "suggestion": "添付後はプログレスバー/キャンセルボタンを表示。10MB超過時は即時インラインエラー。送信前リサイズ/圧縮の進行表示と失敗時の再試行導線を設計する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2.6（Undo 3秒記載） vs ux_v1.md §2.3（Undo 30秒）",
+    "issue": "Undoスナックバー表示時間がドキュメント間で不一致（ux側で30秒に統一の注記はあるが、project側が残存）。実装時にどちらを参照すべきか曖昧。",
+    "suggestion": "project_v1.mdを30秒に更新し、全ドキュメントの表記を統一。UI文言にも残り時間カウント表示の仕様（フォーマット/ロケール）を追記する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5/§4.5（JST 4:00リセット）/ ux_v1.md §9.3",
+    "issue": "日次リセットがJST固定で、UI上の周知が限定的。海外ユーザー/夜型ユーザーに混乱の恐れ。",
+    "suggestion": "EXP/上限関連UI（TALK上限バナー、GROWヒーロー近辺）に「リセット: 04:00 JST」をツールチップ/補助テキストで明示。将来のTZ設定（v0.2）予定を設定画面に「（近日対応）」として案内。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（タスク追加/編集 S-12/S-13）/ §4.2.1（アバター設定）",
+    "issue": "フォームのキーボード操作（Enter/Doneキーでの送信、最後のフィールドからのフォーカスアウト時自動保存など）が未定義。片手操作性/アクセシビリティで若干の摩擦。",
+    "suggestion": "Enter=次フィールド/モバイルのDone=保存（タスク作成/編集/アバター保存）。未保存離脱時の確認は戻る/スワイプでも発火。フォーカス順序と初期フォーカス位置も明記する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.2（ヒーロー縮小時の表示）",
+    "issue": "小型端末/縮小ヒーローで「Lv.12 ███ 1,240/2,000」の情報密度が高く可読性低下の懸念。",
+    "suggestion": "縮小時は「Lv.12・称号」＋「次Lvまで残り760」など短縮表示に切替（詳細はタップで展開ツールチップ）。数値表記の桁区切り/フォント最小サイズもdesign_systemで固定化する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.3（PWA edge swipe実装注記）/ §3.5（TALKドロワー）",
+    "issue": "左端スワイプが「戻る」（フルスクリーン詳細）と「ドロワー展開」（TALK）で異なる意味を持つ。実装注記はあるが、どの画面でどちらを優先するかユーザー観点で明示されていない。",
+    "suggestion": "画面タイプ別の優先度を明文化。推奨: フルスクリーン詳細=戻��優先、基底タブ画面（TALK/GROW/ME）=ドロワー/なし。ヘッダー左端に戻るアイコンを常置して学習コストを下げる。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3（Overdue/延期/Undo周り）",
+    "issue": "「Overdueを明日に延期」直後にUndo（取り消す）を実行した場合の整合（期限復元/Today表示への即時反映/EXP非付与の確認）が未定義。連続操作時の一貫性にリスク。",
+    "suggestion": "「延期」はサーバー書き込み完了後にトースト＋[取り消す]を提供し、Undoで元の期限/表示位置に復元することを明示。延期はEXP対象外である点もトーストに補足する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.1（画面一覧）/ §1.2（遷移マトリクス）",
+    "issue": "S-34 SHOPはComing Soonだが、S-38（プラン管理）からSHOP連動の導線（未所持アイテム購入等）やS-41からの「SHOPへ」遷移が記述されており、MVPで行き止まりや死リンクの恐れ。",
+    "suggestion": "MVPでは全てのSHOP遷移を無効化（ボタン非活性＋ツールチップ）ま��はS-34のComing Soonに明示遷移し一貫した文言を表示。テストケースにも「MVPでは購入不可」を明記する。",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

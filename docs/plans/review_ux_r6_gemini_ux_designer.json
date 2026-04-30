@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §2.3 / project_v1.md §3.2",
+    "issue": "Undoスナックバーの連続完了時の挙動が矛盾している。ux_v1.md §2.3では「別タスクを完了した場合、前のUndoスナックバーは即時確定し、新しいスナックバーに置換される」とあるが、これはproject_v1.md §3.2の「30秒間の取り消しを保証」と矛盾する。連続でタスクを完了した場合、前のタスクが30秒未満で確定してしまい、誤操作時に取り消せなくなる（データ損失・操作不能）。",
+    "suggestion": "Undoスナックバーを複数スタック可能にする（画面下部にリスト状に��む）か、仕様を「直前の操作のみ取り消し可能（新しい操作を行うと前回の操作は即時確定）」に変更し、project_v1.mdの「30秒保証」の文言を「次の操作を行うか、30秒経過するまで」と修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §4.1 / §2.2",
+    "issue": "ME画面のヒーロー領域のスクロール挙動が未定義。§4.1でME画面のヒーロー領域は「GROW同一」とされているが、§2.2のスクロール縮小挙動がME画面のサブタブコンテンツ（PROFILE等）のスクロール時にも適用されるか明記されていない。固定のままだと、縦長コンテンツの閲覧領域が極端に狭くなりユーザビリティを損なう。",
+    "suggestion": "ME画面でも、各サブタブのコンテンツを下スクロールした際に、GROW画面と同様にヒーロー領域が縮小（アバター縮小・1行圧縮）する仕様を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.3",
+    "issue": "ヒアリング完了後の画面遷移導線がなく、ユーザーが迷子になるリスクがある。DISCOVERタブから「ヒアリングを始める」でTALK画面に遷移するが、5問の質問が完了した後にDISCOVER画面に戻るための明確なUI（ボタン等）が定義されていないため、ユーザーは手動でタブを切り替える必要がある。",
+    "suggestion": "ヒアリング完了時のAI最後の応答に「ヒアリングが完了しました。[分析結果を見る]」というインラインボタン（タスク提案カードと同等のUI）を表示し、タップでME > DISCOVERタブに自動遷移させるフローを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4 / project_v1.md §7.4",
+    "issue": "友達リスト（最大500人）の検索・ソート機能が欠如している。project_v1.mdで友達は最大500人と定義されているが、FRIENDS画面にはカードグリッド表示しかなく、特定の友達を探して応援やメッセージを送るのが非現実的になる。",
+    "suggestion": "FRIENDS画面のヘッダー下部に名前検索バーを追加するか、ソート機能（追加順、レベル順、最近やり取りした順など）を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALK画面で送信済みの画像を拡大表示（ライトボックス）する機能が定義されていない。画像添付とプレビューは定義されているが、チャット履歴（S-21）やTALK画面内で画像バブルをタップした際の挙動が不明。",
+    "suggestion": "送信済み画像バブルのタップで、フルスクリーンでの画像拡大表示（ピンチズーム対応、下スワイプまたは✕ボタンで閉じる）ができる仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3",
+    "issue": "Upcomingタスクセクションの空状態が未定義。明日以降のタスクが1件もない場合、このセクションを非表示にするのか、「予定なし」と表示するのかが定義されていない。",
+    "suggestion": "明日以降の予定タスクが0件の場合は、Upcomingセクション自体を非表示にする旨を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.3",
+    "issue": "タスク提案カードの「✕」タップ後の状態が曖昧。「✕」をタップするとカードが非表示になるとあるが、チャット履歴を上にスクロールして過去の会話を見た際に、このカードが再表示されるのか、完全に消去されるのかが不明確。",
+    "suggestion": "「✕」タップ時はカードを「タスク提案を非表示にしました」というコンパクトな状態に折りたたむか、チャット履歴の永続データからも当該提案を削除して二度と表示しないかを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ux_designer"
+  }
+]

@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2 / §7.4, ux_v1.md §15（内部矛盾#3）",
+    "issue": "AI対話メッセージのテーブル命名が「messages」と「social_messages」で混在し、RLSの適用先が曖昧。誤実装時にAI対話が友達に漏洩するリスクがある。",
+    "suggestion": "AI対話は ai_messages、ソーシャルは social_messages など、テーブル名を明確に分離。RLSポリシーを表で明記（SELECT/INSERT主体と主体/許可関係）し、両者に交差がないことをE2Eテストケースにも追加。マイグレーション手順と命名規約もreference_v1.mdに追記する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 / §4.5, ux_v1.md §15（内部矛盾#1）",
+    "issue": "レベル計算式と説明が矛盾（Lv.1→2が100EXPと1,000EXPの記述が同居）。実装や数値チューニング時に破綻する。",
+    "suggestion": "正とする式（§4.4の式・表）を採用し、§4.5の誤記を修正。全ドキュメントで数値を統一し、UX側の演出（初回Lv2体験等）との整合をリグレッションチェックに追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.5, ux_v1.md §2.3/§8/§9",
+    "issue": "「1日の獲得EXP上限300」到達時のUXが未定義。タスク完了は可能だがEXP/演出がどう抑制されるか、ユーザーへの明示がない。",
+    "suggestion": "GROWヒーローに「本日のEXP 280/300」カウンタを常時表示。上限到達時はEXPバー横にバッジ「本日上限に達しました」、完了時トーストを「完了（EXPは本日上限のため加算なし）」へ分岐。TALKの冒険EXPカードも同様に抑制表示を定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1, §3.5",
+    "issue": "TALKヘッダーに「☰（履歴ドロワー）」と「🕐（履歴）」が併存。どちらも履歴を示し、機能重複/混乱の恐れ。",
+    "suggestion": "アイコンの役割を統一。例: ☰=ドロワー（中に履歴リスト/新規チャットを集約）、🕐は削除。または🕐=最近の会話クイックスイッチ、☰=設定メニューに役割分離し、それぞれの押下結果を明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.3, ux_v1.md §2.3",
+    "issue": "「週N回習慣をTodayに手動で追加（今日やる）できる」方針がUI上どこで操作できるか未定義。",
+    "suggestion": "習慣行の「…」メニューに『今日やる』トグルを追加（ONでTodayに強制表示）。タップ結果（表示/解除）とTodayセクションへの即時反映、解除時の表示ルール（翌日自動リセット）を記載。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.2（ゴール達成ボーナスの7日ペンディング）, ux_v1.md §2.4",
+    "issue": "「ゴール作成から7日未満は完了ボーナス保留（完了待ち）」のUIがS-14に未定義。ユーザーが混乱する。",
+    "suggestion": "S-14に『完了待ち』状態を明記（進捗=100%の右に時計アイコン+「あとN日で完了」）。Today/Goals一覧にも小さなロックバッジ表示。解除時の自動通知バナー/演出も定義。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.2（遷移マトリクス）/ §13.1",
+    "issue": "S-42（メ���ル変更）/S-43（パスワード変更）が主要遷移マトリクスに未掲載。全画面網羅性の観点で抜けがある。",
+    "suggestion": "§1.2の遷移マトリクスにS-37→S-42/S-43の分岐を追加（戻り先含む）。画面一覧のカバレッジ可視化を強化。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project_v1.md §7.4（上限値）, ux_v1.md 全般",
+    "issue": "データ上限（タスク10,000/ゴール100/友達500）到達時のUXが未定義。追加時にサイレント失敗や不明エラーの恐れ。",
+    "suggestion": "各追加モーダルに上限チェックを実装し、到達時はインラインエラー『上限に達しました（上限:100件）』を表示。FRIENDSはQR/リンク招待ボタンをグレーアウトしツールチップで理由を説明。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3（Today並び順/ドラッグ&ドロップ）",
+    "issue": "開始時刻ソートと手動並び替えの優先関係や、開始時刻を後で編集した場合の順序維持ルールが不明。",
+    "suggestion": "ルールを定義: 1) 既定は開始時刻順→未設定は��尾。2) 手動並び替えONのタスクは『手動順を優先』フラグを付与。3) タスク編集で開始時刻を変更しても手動フラグがある場合は相対順を維持。4) リセット操作（『自動並びに戻す』）を提供。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2/§9.3",
+    "issue": "AI対話上限到達の境界ケース（応答ストリーミング中に上限到達、同時送信競合）の挙動が未定義。",
+    "suggestion": "ルール化: 現在ストリーミング中の応答は完了までカウントOK（中断しない）。到達検知後は新規送信をブロック。複数同時送信は先着順でカウント、超過分はキュー拒否＋エラー表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §3.4",
+    "issue": "冒険EXPの判定基準がUIに説明されず、何が+50になるのか分かりにくい。誤検出時の不満に繋がる恐れ。",
+    "suggestion": "TALK画面に『冒険EXPとは？』ツールチップ/ヘルプを設置（例文/上限/誤検出時の方針を簡潔に説明）。初回付与時にインフォバナーを表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4.2",
+    "issue": "タスクEXPが一律+10で所要時間と無関係。短時間の細切れタスクが有利になり、現実の努力量との乖離を感じる可能性。",
+    "suggestion": "MVPは固定+10を維持しつつ、将来のA/B候補として『所要時間に応じた微調整（例: +8〜+12）』や『1日同名系タスクの重複減衰』の設計メモを追加。UIにはEXP設計の意図を明記して期待値調整。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2（習慣はゴール紐付け不可）",
+    "issue": "習慣をゴール進捗に反映できない設計は『週3回運動』のような目標管理で不満になり得る（Habitifyからの乗り換え組は特に）。",
+    "suggestion": "MVPは現行のままにしつつ、v0.2.0以降の拡張として『期間内達成回数をゴールに加点する“習慣ゴール”』を検討リストに追記。UXにはなぜ紐付け不可かの意図をS-15に注記（“有限ステップのゴール設計”）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §7.3（PWA edge swipe対策）",
+    "issue": "iOS PWAでのedge swipe抑制/独自戻るはOSバージョン差で挙動が不安定になり得る。",
+    "suggestion": "デバイス検出でフォールバックを定義（標準履歴ナビに委譲できる画面は委譲）。E2Eに『戻るジェスチャー』の手動回帰テストを追加し、問題時はジェスチャー無効化+明確な戻るボタンで代替。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §9.1（TALKオフライン時）",
+    "issue": "オフライン中は入力欄自体が無効で下書き不可。移動中ユーザーの利用体験を損なう可能性。",
+    "suggestion": "入力自体は許可（送信は不可）。未送信ドラフトとしてローカル保持し、オンライン復帰時に送信確認。入力欄プレースホルダに『オフライン。送信は復帰後に可能』を表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5",
+    "issue": "日次リセットがJST固定。海外出張や海外ユーザーには直感的でない可能性（FreeでもAI回数/ログインボーナス/冒険上限の体感がズレる）。",
+    "suggestion": "MVPはJST維持でOKだが、設定に『ローカルタイムでのリセット（将来提供予定）』注記を追加。ヘルプに“現在はJST4:00基準”と明示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2.6(3) / ux_v1.md §2.3",
+    "issue": "Undoスナックバー表示時間がプロジェクト側3秒、UX側30秒で一致していない（UXでは統一済みだが、上位仕様としては未修正）。",
+    "suggestion": "project_v1.mdの該当箇所を30秒に修正。全ドキュメントでUndo行動の時間を単一値に統一。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "project_v1.md §7.4, ux_v1.md（該当なし）",
+    "issue": "単発タスク完了の90日アーカイブ後、過去の完了一覧をどこで参照できるかUIが未定義。",
+    "suggestion": "S-14（ゴール詳細）に『完了済みを表示』トグル、またはGROWに『履歴』簡易ビューを追加。MVPはリンクのみでも可（新画面は後続）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.2（キーボード表示時ヒーロー非表示）",
+    "issue": "キーボード表示/非表示の境界で、Undoスナックバーやボトムタブとの重なり優先順位が端末差で不明瞭。",
+    "suggestion": "z-index/安全領域（safe-area-inset）/visualViewport連動の優先度テーブルを追加（入力バー > Undoスナックバー > ボトムタブ > ヒーロー）。主要機種での表示確認をE2Eに追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "総評（persona視点）",
+    "issue": "使いたい/続けられる/課金/友達に勧める観点: Freeで核心機能が使え、Habitifyの不満（無料制限の強さ）は解消。Habiticaの罰もなく安心。Finchの“待機”も無しで好印象。一方で、(1) EXP上限や冒険判定の可視化不足、(2) 習慣がゴールに紐づかない、(3) 所要時間がEXPに反映されない点が、長期継続や課金動機の弱さに繋がりそう。",
+    "suggestion": "早期に(1)上限/判定の見える化（R-003/R-011）、(2)習慣ゴールの将来ロードマップ明示（R-013）、(3)EXP意図のアプリ内説明や微調整計画（R-012）を提示。友達に勧めやすく、Pro/Premier��価値理解も進む。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

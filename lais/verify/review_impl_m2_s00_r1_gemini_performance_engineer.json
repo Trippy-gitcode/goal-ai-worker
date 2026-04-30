@@ -1,0 +1,42 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "design_spec §4.1 S00-3, lais/src/components/screens/S00Splash.css",
+    "issue": "CTA「はじめる」ボタンの位置がデザイン仕様の表と実装で異なっています。仕様書の表(S00-3)では『画面下端から上 140px』と記載されていますが、実装および実測値ではCTAスタック全体の下辺（「ログイン」ボタンの下辺）が140pxに配置されています。その結果、「はじめる」ボタンの下辺は画面下端から��204pxの位置に来ており、仕様と64pxの乖離があります。",
+    "suggestion": "デザイン仕様の意図を再確認してください。もし『CTAスタック全体の下辺を画面下端から140pxに配置する』というレイアウト原則が正であれば、仕様書の表(S00-3)の記述を実態に合わせて修正してください。もし『「はじめる」ボタンの下辺を140pxに合わせる』のが意図であれば、CSSの `.s00-cta` の `bottom` プロパティの値を調整する必要があります。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S00Splash.css",
+    "issue": "現在のレイアウトは `position: absolute` と固定の `bottom` 値、`transform` に依存しており、画面の高さが低いデバイス（例: 横向き表示、小型端末、ソフトウェアキーボード表示時）では、中央のロゴ・ステートメントと下部のCTAが重なり、レイアウトが崩れる可能性があります。",
+    "suggestion": "レイアウトの堅牢性を高めるため、コンテナに `min-height` を設定するか、`@media (max-height: 550px)` のようなメディアクエリを使用して、低解像度スクリーン向けにマージンや配置（例: `justify-content: flex-start` に変更、ロゴの `transform` 値を調整）を動的に変更するフォールバックスタイルを追加することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S00Splash.jsx",
+    "issue": "`main` 要素に `aria-label=\"Lais スプラッシュ\"` が設定されていますが、その子要素である `h1` にも「Lais」というテキストが存在します。これにより、スクリーンリーダーが「Lais スプラッシュ、ランドマーク、見出しレベル1、Lais」のように冗長な情報を読み上げる可能性があります。",
+    "suggestion": "情報の重複を避けるため、`main` 要素の `aria-label` を削除することを推奨します。`main` ランドマークはそれ自体が主要コンテンツ領域を示し、`h1` がその内容を説明するため、多くの場合、明示的なラベルは不要です。もしランドマークに明確な名前を付けたい場合は、`<h1 id=\"s00-heading\">Lais</h1>` のようにIDを付与し、`<main aria-labelledby=\"s00-heading\">` とすることで、よりセマンティックに紐付けることができます。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "Application-wide (Font Loading Strategy)",
+    "issue": "提供されたコードからはWebフォントの読み込み戦略が確認できません。もしカスタムフォントを使用している場合、`font-display` プロパティの指定がないと、フォント読み込み中のテキスト非表示期間（FOIT）が長くなり、体感パフォーマンスを損なう可能性があります。また、フォントのメトリクスがフォールバックフォントと大きく異なる場合、CLS（Cumulative Layout Shift）の発生原因にもなります。",
+    "suggestion": "アプリケーション全体で使用するWebフ���ントの `@font-face` ルールに `font-display: swap;` を追加し、FOITを避けFOUT（Flash of Unstyled Text）に切り替えることを推奨します。また、LCP（Largest Contentful Paint）に影響する主要なフォントファイルについては、HTMLの `<head>` 内で `<link rel=\"preload\" href=\"...\" as=\"font\" type=\"font/woff2\" crossorigin>` を使用して早期に読み込みを開始することを検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "performance_engineer"
+  }
+]

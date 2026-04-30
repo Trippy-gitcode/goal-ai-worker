@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "3.5 テーマ選択 / 8.1 MVP / 10.1 design_system.md",
+    "issue": "4テーマ（Night Sky / Dawn / Harajuku Light / Harajuku Dark）の存在は示されているが、色のセマンティックトークン（背景/テキスト/境界/アクセント/状態色）と各テーマへのマッピングが未定義。洗練とゲーミフィケーションの両立の要となる色設計が仕様化されていない。",
+    "suggestion": "design_system.mdにセマンティックカラーを定義（例: color.bg.default, bg.elevated, text.primary/secondary/inverse, border.default, focus.ring, accent.primary/secondary, state.success/warning/info, surface.success/warning）。各テーマごとに値をマップし、状態の明度差（hover/pressed/disabled）も派生定義する。Harajuku系はアクセント中心・サーフェスは落ち着いた無彩色に抑えるガードレールを明記して「洗練」を担保。WCAG AA達成を必須条件に。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "3.5 テーマ選択 / 全体",
+    "issue": "ダーク/ライト対応の記載はあるが、コントラス���要件（WCAG 2.1 AA 4.5:1/3:1）やテーマ間でのコントラスト検証プロセスが未定義。Harajuku Light/Darkは高彩度になりがちで可読性低下リスクが高い。",
+    "suggestion": "各テーマの主要コンポーネント（本文、サブテキスト、リンク、ボタン、バッジ、タブ、プログレスバー）についてAA基準のコントラスト表をdesign_system.mdに掲載。テーマ作成時に自動テスト（Storybook + axe/pa11y）で検証。Harajuku系は彩度はアクセントに限定し、本文背景はL* 94±に、ダークはL* 8±に固定するなどの規範を設定。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "10.1 design_system.md",
+    "issue": "タイポグラフィの選定・スケール・行間・日本語向けフォントスタック/フォールバック/数値字形の規範が未定義。数値・ラベルが多いUIで一貫性が担保されない。",
+    "suggestion": "和文中心のフォントスタックを定義（例: system-ui, -apple-system, BlinkMacSystemFont, \"Hiragino Sans\", \"Noto Sans JP\", Roboto, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif）。見出し/本文/キャプションのスケール（例: 28/36, 20/28, 16/24, 13/20）、ウェイト（700/600/400）、字間、禁則処理を明記。数値UI（Lv, EXP, バーラベル）にはタブラー数字（font-variant-numeric: tabular-nums）を必須化。WebフォントはMVPでは未採用 or 事前サブセット配信でCLS/パフォーマンス対策。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.2 GROW ヒーロー",
+    "issue": "レベル/EXPなどの数値表示がUIの核だが、桁ズレ・瞬間的な幅変化（レイアウトシフト）対策が未定義。",
+    "suggestion": "EXP/レベルのテキストは等幅数字（tabular-nums）を使用し、最大片桁を想定した最小幅を予約。進捗バーはラベルをバー外に固定配置し、桁増加時もレイアウトが崩れないようにする。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "10.1 design_system.md",
+    "issue": "余白スケール（スペーシング）の定義がないため、画面間で密度感がばらつくリスク。",
+    "suggestion": "4ptグリッドのスケールを定義（例: 2,4,8,12,16,24,32,40,56）。コンポーネント別に使用範囲を指定（カード内: 12/16、セクション間: 24/32、スクリ���ンパディング: 16/20）。縦リズムは8/12/16の倍数に制限して一貫性を担保。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "4 EXP演出 / 3.2 タスク完了アニメーション",
+    "issue": "EXP付与/レベルアップ/マイルストーン等のアニメーション原則（時間・イージング・最大並行数・視覚強度）が未定義。ゲーミフィケーションが過剰になると「洗練」を損なう恐れ。",
+    "suggestion": "モーションガイドを定義。デフォルト180–220ms、イージングはcubic-bezier(0.2, 0.0, 0.2, 1)（標準）/ (0.4, 0, 0.2, 1)（エミュレーション）。EXP付与は小さな放射状パーティクル＋プログレスバーのイージング更新のみ、レベルアップ時のみ+1段強い演出（最大600ms）。同時演出は1件に制限し、reduce motion対応を必須化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "全体（アニメーション/トランジション）",
+    "issue": "prefers-reduced-motionへの配慮やアニメーション無効時の代替表現が未定義。",
+    "suggestion": "CSSで@media (prefers-reduced-motion: reduce)を実装し、時間・距離・パーティクル数を0〜最小限に。演出は色・スケールの最短トランジションで代替し、達成時は静的バッジアイコンで示す。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3.1 ボトムタブ / 全体アイコン",
+    "issue": "アイコン体系（アウトライン/塗り・ストローク太さ・24dpグリッド・角R・命名規則）が未定義。タブ/ボタン/チップ間で統一感を欠く恐れ。",
+    "suggestion": "24pxグリッド・2pxストローク・角R=2のアウトライン基準を採用。ボトムタブは線幅一定、選択時のみ塗り+ラベルのカラー反転。命名規則（category/action/state）とエクスポート形式（単一色のSVGスプライト）を定義。Harajuku系テーマでもアイコンは無彩色+アクセントのみに制限。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "7.3 アバターシステム（レイヤー順）",
+    "issue": "レイヤー順が「frame → aura」のため、オーラがフレームの上に被さる設計。一般的な期待（オーラは背面の発光/放射、フレームは最前面の縁飾り）と逆で視認性が崩れる可能性。",
+    "suggestion": "オーラを用途で2分類：back_aura（背景発光、frameの下）／front_fx（前景の粒子・きらめき、frameの上）。標準はback_auraを採用。推奨Z順: background → back_aura → body → hair → face → accessory → frame → front_fx。各アセットにlayerタグをメタデータとして付与し、自動整列する。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "7.3 アバターシステム（SVG→PNGキャッシュ）",
+    "issue": "リスト表示でCanvas経由のラスタライズを行う方針は良いが、メインスレッドでの都度合成・変換はスクロール時にjankを招く。SafariのOffscreenCanvas/Worker対応も端末差がある。",
+    "suggestion": "合成・ラスタライズは可能ならWorker+OffscreenCanvas（SafariはcreateImageBitmap+従来Canvasにフォールバック）。requestIdleCallbackで事前生成し、IndexedDB/CacheStorageへdppx別（1x/2x/3x）に保存。キーはavatarSignature（phase+hair+face+accessory+frame+auras+theme+ver）+ dppx。IntersectionObserverで遅延読込み、未生成時はプレースホルダーを先出し。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "7.3 アバターシステム",
+    "issue": "64x64 PNGキャッシュの記載はあるが、高DPR端末への対応（2x/3x srcset）とアセット更新時の無効化戦略が未定義。",
+    "suggestion": "srcsetを実装（64,128,192px）。キャッシュキーにdppxとassetVersionを含め、デプロイごとに破棄可能に。PNGの色空間はsRGBを統一、エッジはプレマルチアルファでフリンジを防止。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "4.4 アバター進化 / 7.3 アバター配色",
+    "issue": "レベルに応じたアバターの配色変化が「洗練」とテーマ整合をどう保つか未定義。パーツSVGの着色方法（固定色 vs CSS変数）も不明。",
+    "suggestion": "パーツ内の主要色をCSSカスタムプロパティ化（--skin, --hair, --accent 等）。テーマ×Phaseごとに推奨パレットを定義し、Harajuku系はアクセント彩度のみ段階的に上げる。進化時は色のクロスフェード（200ms）とアウトライン強調（+10%）程度に留め、形状変化は段階境界でのみ行う。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.5 テーマ / PWA全体",
+    "issue": "OSの外観設定連動（prefers-color-scheme）、PWAのmeta theme-colorやiOSステータスバー外観が未定義。ライト/ダーク切替時のブラウザUIの不整合が起き得る。",
+    "suggestion": "data-theme属性+CSS変数でテーマを切替え、未選択時はprefers-color-schemeに追従。<meta name=\"theme-color\">を各テーマで上書き、iOSはapple-mobile-web-app-status-bar-styleをdark/blackに設定。切替時はlocalStorageへ永続化し初回ロード時にFOUCを防ぐインラインスニペットを追加。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "3.1 ボトムタブ / PWA（iOS）",
+    "issue": "iOS PWAのセーフエリア（ホームバー）の下にタブが掛かるとタップ不能・意図しないジェスチャー誤爆が発生するが、UIパディング規則が未定義。",
+    "suggestion": "タブバーの下余白はpadding-bottom: calc(12px + env(safe-area-inset-bottom))を必須化。タップ領域は最小44px、アイコンとラベルは上下の余白を固定。スクロール時にタブバーを隠さない設計でジェスチャー干渉を最小化。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1.3 デザイン思想 / 3.5 テーマ",
+    "issue": "「洗練」と「ゲーミフィケーション」の���覚的バランスのガードレールが不明確。Harajukuテーマは楽しさを強調できるが、常在UIが派手になると日常利用の疲労を招く。",
+    "suggestion": "“Core surfaces are calm, joy is momentary”の原則を定義。常在UIのサーフェス/タイポはミニマル（無彩色+1アクセント）に固定し、歓喜の瞬間（EXP/バッジ/進化）にのみ彩度・動きを解放。テーマ別に『常在:落ち着く/瞬間:映える』の対比比率（例: 彩度の高い面積<8%）を数値化して明記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "3.2 GROW ヒーロー縮小/非表示",
+    "issue": "スクロール/キーボードに応じたヒーロー領域の縮小・非表示のトランジション仕様（しきい値・時間・イージング）が未定義。レイアウトジャンプの懸念あり。",
+    "suggestion": "stickyヘッダー+CSS clampで高さを滑らかに制御。縮小は180ms、Easing標準。キーボード表示時は一瞬で非表示（0ms）にしてレイアウトスナップを避ける。縮小中はアバターをtransform: scaleで処理し、reflowを起こさない。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "7.1 PWA / 8.1 MVP",
+    "issue": "PWAマニフェスト/アイコン（maskable, monochrome, dark/ light適合）、スプラッシュ背景色のデザイン仕様が未定義。ブランドの一貫性と起動画面での体験が担保されない。",
+    "suggestion": "manifest.jsonにmaskable 512/192pxを用意し、背景塗り潰し色は各テーマのbg.defaultに連動。単色版ロゴ（monochrome）を定義し、ダーク/ライトの反転規則を明記。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.2 GROW / 3.3 TALK",
+    "issue": "ローディング・スケルトン/ストリーミング中の視覚状態が未定義。体感速度や安定感に影響。",
+    "suggestion": "カード/リストにはパルス型スケルトンを採用（シマーはreduce motion時は無効化）。TALKはタイプインジケータ（3ドット）＋行末カーソルを表示。最大待機時間を超えたら静的プレースホルダに切替。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "5.2 図鑑（友だち一覧）",
+    "issue": "多数のアバターカードを並べる画面での仮想スクロール/遅延���ンダリング規範が未定義。SVG→PNG合成コストと合わせてスクロール性能が懸念。",
+    "suggestion": "リストは仮想化（windowing）を前提にし、1画面表示分+1ビューポート分だけDOMを保持。IntersectionObserverでサムネイル遅延読込み、ビューフォーカス外は画像をunload（loading=\"lazy\"+decode async）。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "8.1 MVP（Premier限定フレーム装備UI）",
+    "issue": "装備/未開放/ロック状態の視覚規範（ラベル、透過、鍵アイコン、ツールチップ）が未定義。経済要素の初体験で混乱を招く可能性。",
+    "suggestion": "装備中=枠強調+CHECKバッジ、装備可=ホバー/タップで『装備』CTA、未開放=30%白被せ+鍵アイコン+『SHOPで入手（Coming Soon）』注記。セマンティックカラー（state.success/info）に準拠した色のみ使用してトーンを統一。",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

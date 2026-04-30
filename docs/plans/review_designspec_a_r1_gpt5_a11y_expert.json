@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5 共通コンポーネント（全体） / §6.5 アクセシビリティ",
+    "issue": "キーボード/スイッチ操作時のフォーカス可視化が入力フィールド以外に未定義。ボタン、リンク、ピル、タブ、アイコンボタン等の:focus-visibleスタイル用のトークン（focus-ring）が存在せず、実装ばらつきや可視フォーカス欠落のリスクがある。",
+    "suggestion": "DSにアクセシビリティトークンを追加し共通適用する。例: --focus-ring-color: #79C0FF; --focus-ring-offset: 2px; --focus-ring-width: 2px; --focus-ring-style: outline（or box-shadow）。全インタラクティブ要素に:focus-visibleで2px以上のアウトライン（背景とのコントラスト3:1以上）を適用。:focus-visibleは:focusと併用し、タッチ専用環境では表示抑制。tap-highlight-color透明化時もキーボードアウトラインは必ず残す。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§6.5 アクセシビリティ / §3.1 カラー",
+    "issue": "ハイコントラスト環境（Windows 高コントラスト/forced-colors、CSS prefers-contrast）への対応方針・トークンが未定義。",
+    "suggestion": "媒体照会に対応するトークン/レイヤを定義する。例: @media (forced-colors: active) でボーダー/アイコン/アウトラインに currentColor を用い、@media (prefers-contrast: more) では --border を --border-strong 相当に引き上げ、--accent-subtle を濃度アップ。必要に応じて high-contrast 用の派生テーマトークン（--hc-bg, --hc-text, --hc-accent など）を追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§3.6 最小タップ領域 / §4 各画面のテキストリンク箇所（例: S01-10, S10-2, S10-5, S10-9, S14-9, S20-5 ボタン行のテキスト系）",
+    "issue": "全体規定で44×44を要求しているが、行内のインラインリンク（例: 「明日に延期」「ログインはこちら」等）に最小タップ領域の担保方法が明示されていない。行高が44pxでもリンク自体のmin-widthが44px未満となる可能性がある。",
+    "suggestion": "テキストリンク用の共通クラスを定義し、display: inline-flex; min-height: 44px; min-width: 44px; padding: 10px 12px; としてヒット範囲を拡張。もしくは親行全体をアクション領域として実装し、リンクテキストは同一操作にマップする。A/Bテスト不要な単機能リンクはボタン化（ピル）を優先。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.5 S-12 / §4.6 S-13（ハーフモーダル）",
+    "issue": "モーダルのスクリーンリーダー/キーボード対応（初期フォーカス、フォーカストラップ、Escクローズ、閉鎖後のフォーカス復帰、aria-modal/role）が未定義。",
+    "suggestion": "モーダルのコンテナに role=\"dialog\"（もしくは適切にrole=\"form\"等）+ aria-modal=\"true\" + aria-labelledby を付与。開時にヘッダタイトルへ初期フォーカス、Tab/Shift+Tabで内部トラップ、Escで閉鎖、閉鎖後はトリガー要素へフォーカス復帰。背景要素は inert/aria-hidden で無効化。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4 各画面のアイコンボタン（例: S02-1 戻る, S12-3 ✕, S20-1 ヘッダ右アイコン, S20-9 送信, S14-1 戻る）",
+    "issue": "アイコンのみのコントロールに対するプログラムラベル（aria-label）/名称規約が未定義。音声読み上げで機能が不明瞭となる恐れ。",
+    "suggestion": "全アイコンボタンに明示的なaria-labelを付与（例: 戻る, 閉じる, 添付, 送信）。SVGは装飾なら aria-hidden=\"true\"、ボタンにラベルを持たせる。ラベルの多言語化はDSのi18n辞書に紐付け。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§5.1 ボトムタブバー / §4.10 S-30 サブタブ",
+    "issue": "タブ/サブタブのARIAセマンティクス（role=tablist/tab、aria-selected、キーボード操作基準）が未規定。",
+    "suggestion": "ボトムタブ/サブタブはrole=tablist/role=tabを用い、選択中はaria-selected=\"true\"、非選択は\"false\"。左右矢印/ホーム/End対応、フォーカス移動とアクティベーションの挙動を定義。もしくはボトムはrole=navigation + aria-current=\"page\"も可。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.4 S-10（EXPバー/ゴール進捗）・§4.7 S-14（大プログレスバー）・§5.8",
+    "issue": "プログレスUIのスクリーンリーダー対応（role=progressbar or meter、aria-valuenow/min/max/label）が未定義。",
+    "suggestion": "EXP/進捗バーにrole=\"progressbar\"（進行中）またはrole=\"meter\"（静的評価）を適切に付与し、aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"62\" 等と対応ラベル（例: aria-label=\"経験値\"）を設定。視覚のみの%表示はaria-valuetextでも提供。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.3 S-02（アバター選択）・§4.5 S-12（種別ピル）・§4.8 S-15（カテゴリ複数選択）",
+    "issue": "選択コンポーネントのロール/状態が未定義。色や枠線の変化だけに依存する場面があり、支援技術に選択状態が十分伝わらない恐れ。",
+    "suggestion": "単一選択はrole=\"radiogroup\"+role=\"radio\"+aria-checked、複数選択はrole=\"group\"+checkboxパターン（aria-checked）。アバター選択は選択項目にaria-checked=\"true\"と選択済アイコン（✓）等の非色手掛かりを併用。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.9 S-20（AIストリーミング/トースト/スナックバー）・§5.9・§5.10",
+    "issue": "ライブリージョンと通知のロール設計が一部未定義。AIタイピング/ストリーミングはaria-live=politeのみ言及だが、トースト/スナックバーのannounce手段（role=status/alert）やUndo操作のフォーカス戦略���未規定。",
+    "suggestion": "AI出力領域にrole=\"status\" aria-live=\"polite\"を付与し、タイピングインジケータはPRM時は抑制。成功トーストはrole=\"status\"、エラートーストはrole=\"alert\"。Undoはbutton要素でキーボード操作可能にし、フォーカスは移動させない（操作可能時間30sは読み上げ内で明示）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§6.2 要素フィードバック / §6.5 アクセシビリティ / §4.9 S-20 タイピングインジケータ",
+    "issue": "prefers-reduced-motion: reduce 時の挙動規定は概ね良好だが、S-20のタイピングインジケータ（translateY 反復）など微小ながら反復運動が残る可能性がある。",
+    "suggestion": "PRM有効時は移動系アニメーションを全廃（opacityフェードのみ）し、タイピングインジケータは静的テキスト（例: \"AIが入力中\"）に置換。EXP伸長もPRM時はインスタント更新（duration=0）+ 直後に静的%読み上げを推奨。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.1 カラー / §5 非テキストコントラスト",
+    "issue": "Night Skyテーマ主要トークンのAA実測（問題なしの確認）。以下は実測コントラスト: --text-primary(#E6EDF3) on --bg-primary(#0D1117)=16.0:1、同 on --bg-surface(#161B22)=14.7:1、--text-secondary(#9BA7B4) on --bg-primary=7.72:1、同 on --bg-surface=7.07:1、--accent(#79C0FF) on --bg-primary=9.71:1、--accent（文字）on アクティブピル背景(--accent-subtle/暗色合成)=約7.52:1、#FFFFFF on --button-primary-bg(#1A5FC8)=6.0:1、#FFFFFF on --danger-solid(#DA3633)=4.61:1、--border-strong(#6E7681) vs --bg-primary=4.10:1（非テキスト要件 3:1 以上）。",
+    "suggestion": "上記はAA準拠を満たすことの確認記録としてDSに添付し、ビジュアル回帰で自動検証（axe/pa11y＋独自CI）できるようトークン監視テストを追加。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§7 A 群（A-1, A-5 の数値記載）",
+    "issue": "本書のA群に記された一部コントラスト実測値が、定義トークン値（§3.1）から算出した結果と一致しない可能性がある（例: --text-muted #7A8593 on --bg-primary #0D1117 は実測約5.0:1だが、3.47:1と記載）。",
+    "suggestion": "§7の参照値を最新トークンで再計算し更新。以降は人手計算ではなく、色トークン→自動計測→ドキュメント埋め込みのパイプライン化で乖離を防止。既知課題の優先度や対処方針（トークン新設自体）はそのまま維持可。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.9 S-20 入力バー / §4.5 S-12 所要時間チップ（横スクロール）",
+    "issue": "横スクロール可能なチップ/入力のキーボード操作と見出し/告知が未定義。キーボードのみだと隠れた選択肢に到達困難となる恐れ。",
+    "suggestion": "左右キーでのスクロール/フォーカス移動を定義し、スクロールコンテナにaria-label（例: 所要時間の選択）を付与。先頭/末尾での見切れ時に視覚的ヒント（フェード/アイコン）を表示。ボタンは自然なTab順で全項目に到達できるよう自動スクロールを実装。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.1〜§4.10 各画面のフォーム要素（例: S01-4/S01-6, S12-6〜S12-11, S15-4〜S15-6）",
+    "issue": "エラーテキストのプログラム関連付け（aria-describedby）、バリデーション発火タイミング、Escでのエラー解除など、フォームのSR連携要件が未定義。",
+    "suggestion": "各入力に固有id、label forで結合し、エラー発生時はaria-invalid=\"true\"とエラーテキスト要素idをaria-describedbyに付与。ライブバリデーションはaria-liveで過度読み上げを避けpolite運用。成功時はエラー属性の確実な解除。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§6.2 要素フィードバック",
+    "issue": "tap-highlight-colorを透明化すると、環境によってはフォーカス/タップ手掛かりが過度に減る可能性がある。",
+    "suggestion": "tap強調の無効化はpointer: coarse環境に限定し、キーボードフォーカスのアウトラインは常時維持。タッチ環境でも押下時の視覚的手掛かり（背景色の明度変化など）は残す。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§2.4 デザイン原則 / §3.1 カラー（他テーマへの言及）",
+    "issue": "Night Sky以外のテーマ（Dawn / Harajuku Light / Harajuku Dark）のAA準拠の担保方法が本書では未定義（��書の範囲外とあるが、実装時の自動検証フローが不明）。",
+    "suggestion": "Phase 4開始前にDS v0.13で全テーマの対比表を追加し、主要ペア（本文/見出し/ラベル/リンク/ボタン/境界）のコントラスト自動テストをCIに組み込む。少なくとも本文は4.5:1、ラージテキストとUI境界は3:1を閾値に。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  }
+]

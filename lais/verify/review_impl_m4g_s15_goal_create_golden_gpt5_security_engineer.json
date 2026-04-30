@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. S15GoalCreate.jsx",
+    "issue": "CTAボタンがaria-disabledのみで、disabled属性が未設定。JSハンドラで送信を抑止しているが、ネイティブの無効化が行われていないため、自動操作や一部AT環境での誤作動余地が残る。",
+    "suggestion": "isValidに応じてbutton要素にdisabled属性も付与し、視覚・挙動ともに無効状態をネイティブに担保する。例: <button type=\"submit\" disabled={!isValid} aria-disabled={!isValid} ...>。onSubmit側のisValidチェックは継続して多重防御とする。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. S15GoalCreate.jsx",
+    "issue": "ユーザー入力を含むpayloadをconsole.logで出力しており、運用環境で個人情報や行動データがブラウザログに残るリスクがある。",
+    "suggestion": "本番ビルドではログを出力しない（ビルド時除去、またはloggerのレベル管理でproductionでは無効化）。デバッグが必要な場合はスタブ化しNODE_ENVや専用フラグで制御する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "スコープ外（後続）/ Supabase 書き込み",
+    "issue": "将来のSupabase書き込み時にRLSが未設定/不十分だと、クライアント露出のanonキー経由で他ユーザーのデータ読み書きが可能になる（認可バイパス）。",
+    "suggestion": "対象テーブル（goals等）にRLSを有効化し、デフォルト拒否ポリシーを設定。INSERT/SELECT/UPDATE/DELETEはuser_id = auth.uid()の行に限定。user_idはクライアントから受け取らずDB側のデフォルト/トリガでauth.uid()を設定。ポリシー適用をSQLレベルのテストで検証する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "3. S10Grow.jsx 差分（onCreateフローの将来拡張）",
+    "issue": "状態変更系エンドポイント実装時のCSRF対策方針が未定義。Cookieベース認証を採用した場合、CSRFにより意図しないゴール作成・更新が発生し得る。",
+    "suggestion": "CookieベースならCSRFトークン（SameSite=Lax/Strict、Origin/Referer検証、Double Submit Cookie等）を実装。トークンはヘッダ送信・サーバ検証を必須化。トークン/セッション再発��時のローテーションも設計。Bearer/JWTヘッダ方式ならクレデンシャル付きCORSを避け、トークン保存先はHttpOnlyではなく、XSS軽減策（CSP/適切なエスケープ）���強化。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1. S15GoalCreate.jsx（入力）＋ バックエンド受け口",
+    "issue": "クライアント側で最小限の検証（非空判定/最大120文字）のみ。バックエンド側のスキーマ検証やカテゴリ値の許容セット検証が未定義だと、不正値や過大入力、想定外カテゴリーの保存につながる可能性がある。",
+    "suggestion": "サーバ側でスキーマバリデーション（例: nameの長さ・禁止文字、categoriesはホワイトリストに含まれるID配列のみ、dueはnull/ISO8601）を必須化。DBレベルではCHECK制約/ENUM化で堅牢化。UIはZod等で同一スキーマを共有しUX向上、ただし最終防衛はサーバで行う。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "バックエンド（API/CORS設定、将来統合時）",
+    "issue": "CORSポリシーの方針が未定義。将来のAPI統合時にOriginワイルドカードや過剰許可を行うと、悪性サイトからの不正リクエストが成立しやすくなる。",
+    "suggestion": "許可Originを明示的に限定（環境ごとに厳密指定）。許可メソッド/ヘッダは最小化し、認証クッキーを使う場合はAccess-Control-Allow-Credentials=trueかつOriginはワイルドカード禁止。不要なエンドポイントは明示拒否し、プリフライト応答とキャッシュを適切設定。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "アプリ全体（配信ヘッダ/HTMLテンプレート）",
+    "issue": "CSP/クリックジャッキング対策の記述が本パッケージからは確認できない。将来的なXSSやUIリダイレクト攻撃の影響を低減するヘッダが未定義。",
+    "suggestion": "厳格なCSPを導入（default-src 'self'; script-src 'self' 'nonce-…' など、unsafe-inline回避）。またframe-ancestors 'none'（または特定許可）/X-Frame-Options: DENY、Referrer-Policy、Permissions-Policy、X-Content-Type-Options: nosniff等のセキュリティヘッダを設定。インラインスクリプトはnonce/hashesで管理。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全ファイル（リポジトリ運用）",
+    "issue": "本パッケージ内にハードコードされたAPIキー/シークレットは見当たらないが、秘��情報の混入を防ぐ自動スキャン体制の記述がない。",
+    "suggestion": "gitleaksやGitHub Secret Scanning等をCI/PRゲートに導入。フロントエンドにはサービスロール鍵を置かない方針を徹底し、公開が前提のキー（Supabase anonなど）もRLS/ポリシーで権限を厳格に制限。環境変数管理（.env）とシークレットローテーション手順を定義する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

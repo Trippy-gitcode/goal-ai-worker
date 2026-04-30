@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §4.4, §5.0.1",
+    "issue": "シェアリンク経由で未ログインユーザーがアクセスした場合、リダイレクトURL（トークン含む）を `sessionStorage` に保持してメール認証に遷移する仕様だが、メール認証リンクを別ブラウザや別タブ（例: メールアプリ内ブラウザ）で開いた場合、`sessionStorage` が引き継がれず、認証完了後に友達追加画面に復帰できない（行き止まりになる）。",
+    "suggestion": "リダイレクト先URLやトークンは `sessionStorage` ではなく、Supabase Authの `redirectTo` パラメータに含めてサーバーサイドで引き回すか、マジックリンクの `data` メタデータとして保持する設計に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §6.5, ux_v1.md §13.4",
+    "issue": "退会手続き時にStripeサブスクを「即時キャンセル」すると、ユーザーは即座にFreeプランに降格する。72時間のクーリングオフ期間中に退会をキャンセルして復帰した場合、支払い済みの期間（月末まで）のPro/Premierの権利が失われており、金銭的損失によるクレームが確実に発生する。",
+    "suggestion": "退会予約時（クーリングオフ開始時）はStripeサブスクをキャンセルせず、72時間経過後の物理削除バッチ処理内でStripeのキャンセル（または `cancel_at_period_end = true`）を実行する仕様に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "project_v1.md §5.4, ux_v1.md §4.4",
+    "issue": "シェアリンクのトークンが「24時間有効」とだけ定義されており、使用回数の上限がない。このリンクをSNS等に公開された場合、24時間以内であれば無制限に友達リクエストが送信可能となり、受信者の承認待ちリストがスパムで溢れかえる（DoS状態になる）。",
+    "suggestion": "シェアリンク用のトークンは「1回使い切り」にするか、「最大N回（例: 5回）まで使用可能」といった上限を設けてください。または、受信側の承認待ちリストに上限（例: 最大50件）を設け、超過時はリクエストを自動拒否する仕組みを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §5.4",
+    "issue": "QRコードに「ユーザーUUID」が含まれている。UUIDが不変の識別子である場合、QRコードのスクリーンショットが漏洩すると、トークンの期限が切れてもユーザーの内部IDが永続的に第三者に知られるプライバシーリスクがある。",
+    "suggestion": "QRコードには「一時トークン」のみを含め、サーバー側で `token -> user_id` を解決する設計に変更してください。不変のUUIDをクライアント間で直接やり取りさせない設計を推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "友達リクエストを拒否した場合、「リクエスト削除（相手に通知なし）」となるが、相手が再度QRスキャンやリンク経由でリクエストを再送信できるかどうかの制限がない。悪意のあるユーザーがリクエストを連投するストーカー行為が可能になっている。",
+    "suggestion": "リクエストを拒否した場合、その送信者からの新規リクエストを一定期間（例: 7日間）サイレントに無視する（送信側には成功UIを出すが、受信側には届かない）クールダウン期間を設けてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §13.1, §4.3",
+    "issue": "「対話履歴を削除」を実行するとAI理解メモはリセットされるが、DISCOVERタブの「強み/弱みチップ」「自己分析カード」「MBTI」もAI対話から生成されたプロファイリングデータであるにもかかわらず、これらが削除されるか定義されていない。GDPRの観点から元データを削除したのにプロファイリング結果が残るのは問題。",
+    "suggestion": "対話履歴削除時に、DISCOVERのAI生成データ（強み/弱���、自己分析カード、MBTI）も一括削除する仕様とするか、削除確認ダイアログで「自己分析データも一緒に削除する」チェックボックスを提供してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4",
+    "issue": "メッセージ送信（100文字以内）に対する送信頻度制限（レートリミット）が定義されていない。短文の連投によるスパムやハラスメント、サーバー負荷のリスクがある。",
+    "suggestion": "クライアントおよびサーバー側でメッセージ送信のクールダウン（例: 3秒に1回、1分間に最大10回など）を定義し、超過時はエラートーストを表示する仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §3.3",
+    "issue": "画像添付機能において、サイズ上限と拡張子の指定はあるが、悪意のあるファイル（拡張子を偽装したスクリプト等）のアップロードを防ぐ無害化処理が明記されていない。",
+    "suggestion": "サーバー側での画像保存時に、MIMEタイプの検証だけでなく、画像処理ライブラリを用いた再エンコード（リサイズ処理に含める形）による無害化を必須要件として明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §7.2",
+    "issue": "セキュリティ設計において、通信経路の暗号化やデータベース保存時のデータ暗号化（特に機微な情報を含むAI対話履歴や自己分析データ）に関する方針が明記されていない。",
+    "suggestion": "全ての通信をHTTPS/TLSで強制すること、およびSupabaseのデフォルト機能である保存時暗号化（TDE: Transparent Data Encryption）を利用している旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

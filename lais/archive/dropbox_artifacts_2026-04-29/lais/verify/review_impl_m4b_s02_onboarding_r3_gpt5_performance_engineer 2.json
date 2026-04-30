@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-201",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§3 S02Onboarding.css — .s02-onboarding (min-height: 100dvh)",
+    "issue": "100dvh はモバイルのアドレスバー出入りや UI 変動に追随して再計算されるため、スクロールや表示切替時に余分なレイアウト/ペイントを誘発する可能性がある。",
+    "suggestion": "段階的フォールバックに変更する。例: 先に min-height: 100vh を宣言し、直後に @supports (height: 100dvh) で min-height: 100dvh に上書き。もしくは min-height: min(100lvh, 100dvh)（対応ブラウザで）や、html, body, #root に高さ 100% を設定してコンテンツ側は min-height: 100% を採用するなど、アドレスバー変動時のレイアウト揺れを抑える。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-202",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3 S02Onboarding.css — @supports (padding-bottom: env(...)) と @supports (bottom: env(...))",
+    "issue": "safe-area 対応の @supports が 2 箇所に分散しており、CSS 重複と保守コストがわずかに増えている（実行時コストは微小だが、将来的な変更時に片方の更新漏れリスク）。",
+    "suggestion": ":root に --sa-b: 0px を定義し、単一の @supports (top: env(safe-area-inset-top)) ブロックで --sa-b: env(safe-area-inset-bottom) を設定。利用側は padding-bottom/bottom を calc(var(--sa-b) + ...) に統一する。これにより @supports ブロックは 1 箇所で済み、記述・評価が簡素化される。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-203",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§3 S02Onboarding.css — @supports ブロック配置",
+    "issue": "現在はベース宣言直後に @supports を置いておりカスケードは正しいが、将来のビルド最適化（例: 一部の CSS 最適化プラグインのルール並べ替え）が入ると順序が変わり上書きが効かなくなるリスクがある。",
+    "suggestion": "ビルド設定でルール再配置を行わない（例: cssnano の一部最適化を無効）ことを確認し、stylelint などで『ベース宣言直後に対応する @supports を置く』ルールを導入。コンポーネント単位の CSS を 1 ファイルに閉じ込め、import 順も固定する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-204",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3 S02Onboarding.css — .s02-next（position: fixed）",
+    "issue": "固定要素は端末や GPU 実装によってはスクロール時に再描画コストがかかる場合がある。背景色/不透明度トランジション時に下地の再ペイントが目立つ端末ではスクロールの滑らかさに影響し得る。",
+    "suggestion": "実機計測でボトルネックが観測される場合に限り、.s02-next に will-change: opacity; または transform: translateZ(0); を付与して独立合成レイヤー化を検討（メモリ増を伴うため常用は避け、feature flag などで限定投入）。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-205",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3 S02Onboarding.css — .s02-next（transition）",
+    "issue": "背景色/不透明度のトランジションは軽量だが、環境によっては無駄なコンポジット/ペイントを避けたいケースがある（省電力・アクセシビリティ配慮）。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) { .s02-next { transition: none; } } を追加し、モーション低減設定でトランジションを無効化。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

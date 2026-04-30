@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」のインラインリンクおよび画面下の「ログイン」リンク",
+    "issue": "インラインテキストリンクが下線なしの色分けのみで示されている。WCAG 1.4.1（色のみに依存しない）とデザインシステム§2.2「インラインテキストリンクは必ず下線」を満たしていない恐れ",
+    "suggestion": "リンクテキストにtext-decoration: underlineを常時適用し、ホバー/フォーカス時は下線太さまたは色の強調を追加。フォーカス可視化はoutline方式（§8.1）も併用",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "タイトル直下の大きな「60%」数値表示",
+    "issue": "大数字を主役に据えるヒーローメトリクス風レイアウト（NGリスト「ヒーローメトリクスレイアウト」）に該当し、ブランドの静けさと情報階層を崩している",
+    "suggestion": "進捗は標準サイズ（--font-size-lg以下）+バーで表現。数値はバー右端や下に16pxで配置し、タイトルを主役に。全体を左揃えにしてN字の視線導線を確保",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "ALL",
+    "location": "s00_splashの「はじめる」／s12_task_add・s15_goal_createの「作成」／s20_talkの「登録する」などPrimaryボタン",
+    "issue": "Night SkyテーマでPrimaryボタンが淡い水色+濃色テキストに見え、デザインシステムのボタン用トークン（濃色BG+白文字、AA 4.5:1確保）と不整合",
+    "suggestion": "Primaryは--button-primary-bg（#1A5FC8系）+ --button-primary-fg（#FFF）へ統一。hover/pressedもトークン準拠に。高さ48px/角丸8px/アウトラインfocusを適用",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "下部のアクション群（編集／削除／進め方を聞く／詰まりを相談）",
+    "issue": "4ボタンがほぼ同等の視覚ウェイトで並び、主次の判断が難しい。視線が分散し意思決定に時��がかかる",
+    "suggestion": "主CTA=「編集」をPrimary、危険操作=「削除」をDanger subtle（または単独行）に。AI関連2つを同一行のSecondary/ghostでグルーピングし��余白24pxでブロック分離",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s20_talk",
+    "location": "チャットバブル内本文（日本語テキスト）",
+    "issue": "行間が詰まり気味で漢字が密集して見える。日本語本文の行間規定（--line-height-ja-body: 1.7）が未適用の可能性",
+    "suggestion": "バブル本文にletter-spacing: var(--letter-spacing-ja)とline-height: var(--line-height-ja-body)を適用。段落間は+4〜8pxで可読なリズムを付与",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow / s30_me",
+    "location": "「EXPLORER」ラベル、およびMEのサブタブ（PROFILE/DISCOVER/FRIENDS/SHOP）",
+    "issue": "英字のオールキャップスに字間の拡張が見られず、詰まって読みにくい。ブランドの品位がやや損なわれる",
+    "suggestion": "該当ラベルにletter-spacing: var(--letter-spacing-label)（+1.5px）を適用し、視認性と上品さを両立",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタスク行（各行の上��）",
+    "issue": "タスク行の垂直間隔が20px未満に見え、一覧がやや密。Open Airの「呼吸するリズム」が弱い",
+    "suggestion": "各行の上下マージンを20px以上、セクション間は40pxへ。タイムラインの節目には+8pxの余白を挿入して塊感を明確化",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "タイムラインの縦ルール・ステータスドット",
+    "issue": "非テキスト要素のコントラストが背景と近く、3:1（WCAG 1.4.11）を下回る恐れ。視覚的な道筋が弱い",
+    "suggestion": "縦ルールは--border-strongを使用し、ドットは面積を拡大または内側を塗りつぶしでコントラストを確保。期限切れは左3pxバー（§2.4）で形状でも区別",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow / s14_goal_detail",
+    "location": "「+ タスクを追加」テキストリンク",
+    "issue": "色のみでリンク性を伝達しており、下線が無い。周囲にアイコンはあるが、テキスト単体では識別が弱い",
+    "suggestion": "text-decoration: underlineを適用（常時）。���イコン+下線の二重手掛かりで可用性とAA要件（§2.2）を担保",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "ヒーロー領域（アバター／レベル数値／EXPバー）",
+    "issue": "中央揃えのブロックから左揃えのリストへ切り替わるため、Z→N字の視線が一度途切れる",
+    "suggestion": "ヒーロー要素を左揃えに統一し、TODAY見出しへの移行を自然に。スクロール時の縮小レイアウトも左寄せで連続性を確保",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "WCAG",
+    "screen": "s01_signin / s12_task_add",
+    "location": "規約同意チェックボックス、所要時間チップ・トグル（タップ領域）",
+    "issue": "視覚サイズが小さく見え、44×44px（WCAG 2.5.5/Apple HIG）の最小タップ領域を満たしていない可能性",
+    "suggestion": "見た目のサイズは維持しつつ、paddingや::beforeで透明ヒットエリアを拡張。隣接要素との間隔も8px以上確保",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

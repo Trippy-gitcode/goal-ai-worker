@@ -1,0 +1,80 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "scripts/ai_review.js (callGPT5, PERSONA_BASE)",
+    "issue": "gpt-5呼び出し時に`response_format: { type: 'json_object' }`を指定しているが、プロンプトでは「必ずJSON配列のみを出力」と指示している。OpenAI APIはjson_object指定時にルートが配列であることを許容しないため、確実に400エラーになるかパース不能な出力となる。",
+    "suggestion": "プロンプトの指示を「`{\"items\": [...]}` の形式のJSONオブジェクトを出力」に変更し、パース側で `parsed.items` を抽出するように修正するか、`json_object`の指定を削除する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "scripts/vote_dispatcher.sh, scripts/ai_review.js",
+    "issue": "提案テキスト(`$PROPOSAL`)をコマンドライン引数(`--proposal`)として引き回している。提案テキストが数KB〜数十KBに及ぶ場合、OSの`ARG_MAX`制限に抵触し、`Argument list too long`エラーでスクリプトが確実にクラッシュする。",
+    "suggestion": "長文のテキストはコマンドライン引数ではなく、標準入力(stdin)から読み込むか、一時ファイルに書き出してそのファイルパスを引数として渡す設計に変更する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/vote_dispatcher.sh, scripts/persona_selector.sh",
+    "issue": "ログローテーション時に `gzip -c \"$LOG_FILE\" > \"$ROT\"` と `: > \"$LOG_FILE\"` を実行しているが、排他制御がない。gzip処理中に別プロセスがログに書き込んだ場合、直後の切り詰めでそのデータが完全に消失する競合状態(Race Condition)が存在する。",
+    "suggestion": "`flock` コマンドを使用してログファイルへの書き込みとローテーション処理全体を排他��御するか、`mv \"$LOG_FILE\" \"$ROT.tmp\" && gzip \"$ROT.tmp\"` のようにアトミックなファイル移動を利用する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/vote_dispatcher.sh",
+    "issue": "外部AI呼び出し時に `2>/dev/null` で標準エラー出力を捨てている。APIキーの無効化、ネットワークタイムアウト、トークン超過などの致命的なエラーが発生してもログに残らず、すべて無言で `ABSTAIN` 扱いとなり障害検知が不可能になる。",
+    "suggestion": "標準エラー出力を捨てるのではなく、専用のエラーログファイル（例: `logs/vote_error.log`）にリダイレクトするか、呼び出し元の標準エラー出力にそのまま流すように修正する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "scripts/ai_review.js (extractJson)",
+    "issue": "JSON配列を抽出する正規表現 `\\[[\\s\\S]*\\]` が貪欲マッチになっている。LLMの出力テキスト内に解説として別の配列記号が含まれていた場合、最初の `[` から最後の `]` までを全て含んでしまい、JSONのパースに確実に���敗する。",
+    "suggestion": "正規表現を非貪欲マッチ `\\[[\\s\\S]*?\\]` に変更するか、より堅牢なJSON抽出ロジック（括弧のネストレベルをカウントするパーサーなど）を実装する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "scripts/persona_vote.sh",
+    "issue": "`printf '%s' \"$PROPOSAL\" | grep ...` としているが、`PROPOSAL` の末尾に改行がない場合、POSIX準拠の `grep` 実装によっては最終行が正しく処理されない（未定義動作）。",
+    "suggestion": "`printf '%s\\n' \"$PROPOSAL\" | grep ...` とし、確実に入力ストリームが改行で終わるように修正する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "scripts/ai_review.js (resolveFiles)",
+    "issue": "globパターンの解決で `base.replace(/\\*/g, '.*')` としているが、`.` がエスケープされていない。`sub_*.md` が `sub_.*.md` となり、`sub_1cmd` のような拡張子が `.md` でない意図しないファイルにもマッチしてしまう。",
+    "suggestion": "`base.replace(/\\./g, '\\\\.').replace(/\\*/g, '.*')` のように、ドットを正規表現のメタ文字として解釈されないようエスケープする処理を追加する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0468,
+    "input_tokens": 32418,
+    "output_tokens": 1252,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

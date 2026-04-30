@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1",
+    "issue": "タイムアウトや op 無効化後もリクエスト自体は継続し、サーバ側の副作用（例: サインアップ確認メールの重複送信）や帯域消費が発生する。中断手段（AbortController 等）の実装/規定がない。",
+    "suggestion": "各送信ごとに AbortController を生成し、a) 新規送信開始時（旧 op 無効化時）、b) タイムアウト発生時、c) アンマウント時に abort() を呼ぶ。Supabase クライアントが signal 非対応なら fetch ラッパーを用意し、少なくとも再送/タイムアウト時に旧 in-flight をサーバに到達させない。並行して、重複送信による副作用（確認メール多重送信等）を抑止するサーバ側の冪等化/レート制限も検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "clearTimeout が finally 内で isCurrent() の時にしか呼ばれず、無効化済みの旧オペレーションのタイマーが発火まで生き残る。連打・再送で未発火タイマーが積み上がる可能性。",
+    "suggestion": "finally では isCurrent() に関わらず常に clearTimeout(timeoutId) を呼ぶ（発火済みなら no-op）。加えて、モード切替・新規送信・アンマウントの各タイミングで保持中の旧タイマーを確実にクリアするユーティリティを導入する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "1",
+    "issue": "送信中にユーザーが「ログイン/サインアップ」モードを切り替えた場合、opId は無効化されず、その送信が「現在のオペレーション」として UI を更新し得る。ログイン UI 上にサインアップの確認メッセージが出る等の状態不整合が起こり得る。",
+    "suggestion": "モード切替・ルート遷移・フォーム離脱時に opIdRef.current をさらに増分して現行オペレーションを必ず無効化し、関連タイマー/AbortController も即破棄する。モード切替時は一時的に送信 UI をロックして競合を避ける。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "1",
+    "issue": "「…オフライン検知…」とあるが、具体挙動（navigator.onLine 以外の確認、SW 介入時、機内モード復帰時のリトライ誘導、UI の非活性化範囲）が未定義。",
+    "suggestion": "オフライン判定ポリシーを仕様化。提案: a) 送信直前に onLine を確認し即エラー＋最初の��ラー要素へフォーカス、b) offline/online イベントでボタン状態とヘルプ文言を更新、c) 復帰時は明示的な「再試行」CTA、d) Service Worker があっても認証エンドポイントは常にネット直行にピン留め（no-store, bypass cache）。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "1",
+    "issue": "err.message をそのまま表示しており、長文・英語・非ASCII・PII（メール等）が漏えい・表示崩れ・読み上げノイズを誘発する恐れ。",
+    "suggestion": "エラーはコードにマッピングしてローカライズ（例: E_USER_EXISTS → 「このメールは既に登録済みです」）。表示は最大長を制限し、PII をサニタイズ。aria-live=\"polite\" で読み上げ制御し、長文/非ASCII での折返し・溢れを UI テストで検証。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "1",
+    "issue": "入力の上限制約が未定義。極端に長いメール/パスワード（数十KB〜MB）でバリデーション・描画・ログ出力が高負荷となり、DoS 的挙動になり得る。",
+    "suggestion": "クライアントで email ≤ 320、password ≤ 128 等の上限を設け、超過は即座にバリデーションエラー。サーバ側も同等の上限を適用し、統一したエラーメッセージを返す。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "1",
+    "issue": "opId は Number の単調増加で、理論上は 2^53-1 超過で比較の信頼性が失われる。長時間稼働/自動負荷試験で到達し得る。",
+    "suggestion": "opId を UUID/BigInt など非数値トークンへ変更、もしくは 32bit 巡回＋epoch 併用で「一致のみ」を見る方式に。しきい値到達時は安全なリセット（コンポーネント再マウント）手順を用意。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "4",
+    "issue": "E2E 実測が機能パス中心で、遅延・ロス・連打など現実的な悪条件における帯域/CPU/メモリ挙動の検証が不足。UI 側で無効化しても、ネットワーク上は旧リクエストが大量並走し得る。",
+    "suggestion": "ネットワークシェイピング（高遅延・1～5% ロス・帯域制限）＋10〜20連打のシナリオを追加し、同時 in-flight 上限、バックオフ、連打レ��トリミットを検証。AbortController 実装後に「同時 in-flight=1」を保証するテストを追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "国際化メール（IDN、結合文字、全角記号）の正規化/許容が未定義。trim のみでは視覚的同形異義や NFC/NFKC 差でログイン不能が起こり得る。",
+    "suggestion": "入力を NFC 正規化し、email はローカル部は保持・ドメイン部は UTS #46 で punycode 変換。禁止文字ルールを仕様化し、該当時は明確なエラーメッセージを返す。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "prefers-reduced-motion への配慮が未記載。送信中スピナーやエラートランジションが motion-sensitive ユーザーに負担となる可能性。",
+    "suggestion": "CSS の @media (prefers-reduced-motion) でスピナーを非回転に、フェード/トランジションを 0ms にフォールバック。E2E に reduced-motion 有効時の視覚回帰を追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-111",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "5",
+    "issue": "「finally の isCurrent ガード: timeout 経由で opId=0…」の記述が、R5.1 の「opId はリセットせず単調増加」と矛盾している。",
+    "suggestion": "R5.1 方針に合わせてセクション5の記述を更新し、opId リセットは過去の経緯として明示。現行仕様は「無効化＝さらに増分」で統一と明記する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-112",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "1",
+    "issue": "serverError/confirmNotice が長文・多言語の場合、モバイル縦横回転やブラウザズーム 200% でレイアウト崩れ（ボタン押下不能、フォーカス外れ）が起こり得る対策が未記載。",
+    "suggestion": "メッセージ領域に max-height と overflow-wrap/word-break を適用し、ボタン行は sticky 固定で操作不能を防止。ズーム 200%・横向きでの E2E スクリーンショット比較と視差スクロール時のフォーカス保持テストを追加。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

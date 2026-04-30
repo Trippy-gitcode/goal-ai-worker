@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Lais — S-20 Talk (案 A_v2: Apple+トトロ)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="screen s20">
+
+    <!-- 背景の浮遊する葉っぱ -->
+    <div class="leaf" style="top: 200px; left: 18px; transform: rotate(-30deg); opacity: 0.10;">
+      <svg width="38" height="38" viewBox="0 0 64 64" fill="none">
+        <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="#a8c895"/>
+      </svg>
+    </div>
+    <div class="leaf" style="top: 480px; right: 12px; transform: rotate(40deg); opacity: 0.10;">
+      <svg width="34" height="34" viewBox="0 0 64 64" fill="none">
+        <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="#a8c895"/>
+      </svg>
+    </div>
+
+    <!-- StatusBar -->
+    <div class="statusbar">
+      <span>9:41</span>
+      <div class="island"></div>
+      <div class="icons">
+        <span>●●●</span>
+        <span>◴</span>
+        <span>▮▮</span>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="talk-header">
+      <div class="talk-back">‹</div>
+      <div class="talk-title">
+        <div class="talk-avatar-header">
+          <div class="avatar-box">籟</div>
+          <svg class="avatar-leaf" viewBox="0 0 64 64" fill="none">
+            <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="talk-title-text">
+          <h2>籟 (lais)</h2>
+          <div class="sub">🌿 Sonnet 4.6 ‧ オンライン</div>
+        </div>
+      </div>
+      <div class="talk-menu">⋯</div>
+    </div>
+
+    <!-- 対話 area -->
+    <div class="talk-area">
+
+      <div class="talk-day-sep">4月28日 朝</div>
+
+      <!-- AI 応答 -->
+      <div class="bubble-row">
+        <div class="bubble-avatar">
+          <div class="avatar-seal">籟</div>
+          <svg class="avatar-leaf" viewBox="0 0 64 64" fill="none">
+            <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <div class="bubble ai">
+            おはようございます。<br>
+            きのうは「事業計画を進められなかった」と書いていましたね。<br>
+            けさは、どんな気分でしょう。
+          </div>
+          <div class="bubble-meta">9:23</div>
+        </div>
+      </div>
+
+      <!-- ユーザ吹き出し -->
+      <div class="bubble-row user-row">
+        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+          <div class="bubble user">
+            正直、まだ気が重いです。<br>
+            でも、書きはじめる、という最初の一歩は決めました。
+          </div>
+          <div class="bubble-meta">9:25</div>
+        </div>
+      </div>
+
+      <!-- AI 応答 + DeepCheck chip -->
+      <div class="bubble-row">
+        <div class="bubble-avatar">
+          <div class="avatar-seal">籟</div>
+          <svg class="avatar-leaf" viewBox="0 0 64 64" fill="none">
+            <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <div class="bubble ai">
+            「最初の一歩を決めた」 — それだけで、もう始まっていますね。<br>
+            <br>
+            重さの正体は、書く内容そのものでしょうか。<br>
+            それとも「うまく書けるか」という別のなにかでしょうか。
+            <div class="deepcheck-chip">
+              <span style="font-size: 12px;">🌿</span>
+              二度の問答 ‧ 提案3 → 採2 ‧ 検証3.4秒
+            </div>
+          </div>
+          <div class="bubble-meta">9:26</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 入力バー -->
+    <div class="talk-input-bar">
+
+      <!-- DeepCheck row -->
+      <div class="talk-deepcheck-row">
+        <div class="deepcheck-toggle active">
+          <div class="seal-mini">
+            <div class="seal-mini-box">深</div>
+            <svg class="seal-mini-leaf" viewBox="0 0 64 64" fill="none">
+              <path d="M32 6 C18 6, 8 18, 8 34 C8 46, 16 56, 28 58 C32 50, 38 42, 48 38 C56 32, 60 22, 56 12 C50 8, 42 6, 32 6 Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <span>深く確かめる ‧ 二者の問答</span>
+        </div>
+        <div class="toggle-switch">
+          <div class="knob"></div>
+        </div>
+      </div>
+
+      <!-- 入力 row -->
+      <div class="talk-input-row">
+        <button class="talk-attach">+</button>
+        <textarea class="talk-input deepcheck-on" rows="1" placeholder="ここに、こころのまま">書きはじめてみたら、案外</textarea>
+        <button class="talk-send">↑</button>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

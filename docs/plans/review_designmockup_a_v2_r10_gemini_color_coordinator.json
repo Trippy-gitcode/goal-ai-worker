@@ -1,0 +1,14 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "OTHER",
+    "screen": "ALL",
+    "location": "N/A",
+    "issue": "JSON parse failed",
+    "suggestion": "Re-run",
+    "raw": "```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"UX_CONTRADICTION\",\n    \"screen\": \"s10_grow\",\n    \"location\": \"ヒーロー領域のアバター画像\",\n    \"issue\": \"アバターのサイズが 48px で実装されている。UX仕様書 §2.2 では「通常状態: 80px」「スクロール中: 32px」と定義されており、仕様と明確に矛盾している。\",\n    \"suggestion\": \"アバターのサイズをUX仕様書に準拠して 80px に修正し、レイアウトを調整する。\"\n  },\n  {\n    \"id\": \"R-002\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"UX_CONTRADICTION\",\n    \"screen\": \"s30_me\",\n    \"location\": \"ヒーロー領域のアバター画像\",\n    \"issue\": \"アバターのサイズが 56px で実装されている。UX仕様書 §4.1 では「ヒーロー領域（GROW同一）」と定義されており、通常状態の 80px と矛盾している。\",\n    \"suggestion\": \"アバターのサイズを GROW 画面と同一の 80px に統一する。\"\n  },\n  {\n    \"id\": \"R-003\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"UX_CONTRADICTION\",\n    \"screen\": \"s10_grow\",\n    \"location\": \"Todayセクション末尾\",\n    \"issue\": \"UX仕様書 §2.3 で定義さ",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  }
+]

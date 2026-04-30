@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 と §4.5",
+    "issue": "レベル計算が矛盾（次レベル必要EXP式ではLv1→2=100だが、§4.5で「Lv.1→2=1,000EXP」と記載）",
+    "suggestion": "正を1つに統一（推奨: §4.4の式に合わせてLv1→2=100）。表・到達目安・差分説明（初日でLv2）を全て再計算し更新。UX側の演出タイミングも最終値に合わせて再確認",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2.6 と lais_ux_v1.md §2.3",
+    "issue": "Undoスナックバー表示時間が3秒と30秒で不一致（UXでは30秒に統一済み）",
+    "suggestion": "project_v1.md側を30秒に修正し、Undoの仕様（直近1件のみ/タブ跨ぎで継続/新規完了で置換）も追記して整合を取る",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §7.2（RLS） と §7.4（データライフサイクル）",
+    "issue": "AI対話メッセージのテーブル命名がmessages/social_messagesで混在。RLS適用先の誤解で機微��ータ漏洩リスク",
+    "suggestion": "テーブル命名を厳密に統一（例: ai_messages, social_messages）。RLSのSELECT/INSERT許可対象を各テーブルで明記し、参照例も修正",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §2.3, §8.1, §9.1 と project_v1.md §4.5",
+    "issue": "日次EXP上限（300）到達時のUI定義がない。タスク完了してもEXPが増えない理由が不明瞭になる",
+    "suggestion": "上限到達時はEXPバー演出を抑止し、トースト「本日のEXP上限に達しました（ゴール達成ボーナスは別枠）」を表示。ヒーロー領域に当日残り/上限の表示（例: 300/300）またはインフォアイコンのヘルプを追加",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.4 と project_v1.md §4.5",
+    "issue": "冒険EXP（+50/日2回）上限到達時のTALK内フィードバックが未定義。カードが常に+50表示だと誤解を招く",
+    "suggestion": "上限到達時は冒険カードを「本日の冒険EXPは上限に達しました（または明日04:00にリセット）」の情報カードに差し替え。EXP数値の表記を外し、GROWでの反映も抑止",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §3.2.3（週N回） と lais_ux_v1.md §2.3（Today/Upcoming）",
+    "issue": "週N回習慣を「今日やる」に手動追加するUIがUX仕様に未記載（projectでは可能と明記）",
+    "suggestion": "Upcoming内の習慣行に「今日やる」ボタン（トグル）を追加し、Todayに一時的に表示するルールを定義（当日0時/4時リセットで解除）。取り消し動作も明記",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §7.4（ドラッグ&ドロップ） と §2.3（Todayソート）",
+    "issue": "Todayの手動並び替えと開始時刻ソートの優先順位が不明。編集で開始時刻変更時の再ソート条件も未定義",
+    "suggestion": "優先順位を明示（例: 手動順が当日中は最優先、翌日の4:00で自動解除して時刻順に戻す）。「時刻順に戻す」アクションをメニューに追加",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md §4.1（MEサブタブ横スワイプ） と §4.3（チップ横スクロール）",
+    "issue": "MEサブタブの横スワイプとDISCOVER内チップの横スクロールが競合し、意図しないタブ切替が起きる可能性",
+    "suggestion": "サブタブ切替は「サブタブバー上のスワイプのみ」か「子スクロールが端まで到達した時のみ」有効にする。gesture-handlerでイベント伝搬を制御",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §2.3（タスク/Upcoming）, §2.4（ゴール一覧/詳細）, §4.3（発見カード）, §4.4（友達グリッド）",
+    "issue": "大量データ（タスク最大1万、友達500）の表示/スクロール最適化（仮想リスト/ページング）が未定義。jankやバッテリー消費の懸念",
+    "suggestion": "主要リストにwindowing（仮想リスト）を採用。友達/発見カードはページング or 無限スクロール＋プレースホルダー。Pull-to-refreshと競合しないスレッショルドも定義",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §3.1（TALKヘッダー）",
+    "issue": "TALKヘッダーに☰（履歴ドロワー）と🕐（履歴）が併存し役割が重複。初見で混乱の恐れ",
+    "suggestion": "履歴入口を1つに統一（☰ or 🕐）。☰はグローバルメニュー用途に限定するか廃止。履歴は🕐（���準慣例）に集約を推奨",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §9.1（オフライン同期） と §8.6（演出キュー）",
+    "issue": "オフラインで多数のタスク完了後、復帰時に演出をどう集約再生するか未定義（長時間連続演出のリスク）",
+    "suggestion": "同期時は「X件の完了を反映 +Y EXP」バナー＋EXPバーを合算1回伸長。レベルアップは最大1回のみ演出。個別フロートテキストは省略。合計演出時間上限を適用",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "lais_ux_v1.md §3.4（TALKでのEXP/レベル変化）",
+    "issue": "TALKではEXPバーが見えず、冒険EXP以外の獲得が直感的に伝わりにくい",
+    "suggestion": "TALKヘッダーに小型のEXPピル（Lv/次Lvまで）をオプション表示し、EXP増加時に軽いパルスで通知。Reduced Motion時はテキスト更新のみ",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §15（通知タップ遷移）",
+    "issue": "タスクリマインダー通知から遷移時、対��がTodayに存在しない（Upcoming/過去/アーカイブ）の場合のフォールバック未定義",
+    "suggestion": "存在判定の分岐を定義：Todayに無ければUpcoming該当日へ自動スクロール→S-11開く。アーカイブ済みは「見つかりません」ダイアログ＋関連ゴール提示",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §4.4（QRスキャン カメラ拒否時）",
+    "issue": "iOS PWAでは「設定を開く」ディープリンクが動作しない場合がある。案内のみだと離脱リスク",
+    "suggestion": "OS別の現実的導線を記載（iOS PWA: 手順チートシート表示/クリップボード監視でシェアリンク貼付支援）。[リンクで追加]を主要導線に昇格",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.2（画像添付）",
+    "issue": "非対応形式/10MB超の添付時のUIフィードバック未定義",
+    "suggestion": "クライアント側で即時バリデーションし、インラインエラー「10MB以下のJPEG/PNG/GIF/WebPのみ対応」。圧縮失敗時の再試行/破棄も定義",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.2, §9.3",
+    "issue": "AI対話上限に到達する瞬間の扱い（送信直後/ストリーミング中）が未定義",
+    "suggestion": "送信受理済みは1回として許可し応答完了まで継続→完了後に入力欄を無効化。超過で拒否されるケースはエラー気泡「上限に達しました（明日04:00リセット）」を返す",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project_v1.md §4.2（ゴール達成ボーナス7日ルール） と lais_ux_v1.md §2.4（ゴール詳細）",
+    "issue": "「作成から7日未満は完了待ち」のUI/文言/進行表示（あとN日）がUX側に未定義",
+    "suggestion": "S-14に「完了待ち」状態とカウントダウン表示（例: バッジ＋「あとN日で完了」）。早期達成時は達成演出を抑止し、7日到達時に自動演出＋通知",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §5.1（オンボーディング完了後） と project_v1.md §3.5",
+    "issue": "オンボーディング完了時の「AIが自動提案する初回タスク」の挿入位置/確定タイミング/失敗時の代替が未定義",
+    "suggestion": "完了直後にToday先頭へ挿入（時刻未設定/当日）。生成失敗時はテンプレートタスクで代替。トーストで説明＋取り消し導線を用意",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §11.2（小型端末調整）",
+    "issue": "MEサブタブの省略ラベル（DISCなど）は意味が伝わりにくい可能性",
+    "suggestion": "アイコン＋短縮ラベルの併用、またはツールチップ/長押しでフルラベル表示。折り返し許容やスクロールタブも検討",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md 全般（§7.1, §6.2 など）",
+    "issue": "「全操作100ms以内のフィードバック」要件が各コンポーネントで暗黙。グローバル基準として明文化されていない",
+    "suggestion": "共通ポリシーとして「タップ時の即時ビジュアル反応（active state/リップル/ハイライト）を100ms以内に表示」を明記し、コンポーネントに適用リストを付与",
+    "model": "GPT-5",
+    "persona": "ux_designer"
+  }
+]

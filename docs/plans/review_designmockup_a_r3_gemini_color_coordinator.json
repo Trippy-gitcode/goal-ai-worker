@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "非選択チップ、チェックボックス、タスクの未完了リングの枠線",
+    "issue": "枠線色 #484F58 が背景 #0D1117 や #161B22 に対してコントラスト比約2.1:1となり、WCAG 1.4.11（非テキストコントラスト 3:1）を満たしていない。",
+    "suggestion": "インタラクティブ要素の境界線には、仕様書で定義されている --border-strong (#6E7681, 3.6:1) を使用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail, s14_goal_detail",
+    "location": "「削除」ボタンのテキスト",
+    "issue": "テキスト色 #F85149 が背景 #161B22 に対してコントラスト比約4.1:1となり、WCAG 1.4.3（通常テキスト 4.5:1）を満たしていない。",
+    "suggestion": "テキスト用のDangerカラーを明るくする（例: #FF7B72）か、フォントウェイトを太くして大文字（3:1要件）として扱う。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin, s12_task_add",
+    "location": "入力フィールド内のプレースホルダーおよび入力済みテキスト",
+    "issue": "テキスト色 #7A8593 が背景 #161B22 上でコントラスト比約4.4:1となり、WCAG 1.4.3（4.5:1）をわずかに下回る。",
+    "suggestion": "--bg-surface 上で使用するヒントテキストは、もう一段階明るい色（例: #8B949E）を使用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "入力フィールド「買い物リストを作る」のフォーカス状態",
+    "issue": "outlineに rgba(121,192,255,0.2) を使用しており、背景とのコントラストが極めて低くフォーカス状態が視認できない（WCAG 2.4.13違反）。",
+    "suggestion": "不透��度の高いアクセントカラー（例: rgba(121,192,255,0.8) または #79C0FF）をoutlineに使用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayセクションの各タスク右端のドット",
+    "issue": "タスクのゴール紐付けが色（青、黄）のみで表現されており、色覚多様性のユーザーに情報が伝わらない（WCAG 1.4.1違反）。",
+    "suggestion": "ドットの横に短いテキストラベル（例: 「副業」）を併記するか、カテゴリごとに形状（四角、星など）を変える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクション",
+    "issue": "UX仕様書 §2.3 に定義されている「期限切れ（Overdue）タスクの赤系強調と[明日に延期]ボタン」が画面上に存在しない。",
+    "suggestion": "仕様通り、期限切れタスクには --danger 系の視覚的強調と「明日に延期」アクションを配置する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s01_signin",
+    "location": "「サイ��アップ」ボタン（disabled状態）",
+    "issue": "背景 #1C2128 にテキスト #484F58 でコントラストが1.9:1と極端に低く、洗練さよりも「壊れている」印象を与える。",
+    "suggestion": "disabled状態でも最低限の可読性を保つため、テキスト色を --text-hint 程度に引き上げるか、全体のopacityで無効状態を表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add, s13_task_detail, s15_goal_create",
+    "location": "ハーフモーダル上部のドラッグハンドル",
+    "issue": "ハンドルの色（#484F58）が背景に沈んでおり、スワイプで閉じられるアフォーダンスが弱い。",
+    "suggestion": "ハンドルの色を --border-strong または --text-hint に変更し、視認性を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "進捗パーセント表示「60%」",
+    "issue": "「%」記号がベースライン揃えになっているが、巨大な数字（48px）とのバランスが悪く、視覚的に浮いて見える。",
+    "suggestion": "「%」のfont-weightを少し上げるか、ベ��スラインを調整して数字との一体感を持たせる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "「完了済み」テキスト",
+    "issue": "テキストに #3FB950 が使われているが、ダーク背景では彩度が高くネオンのように見え、「自然体」のブランドDNAからやや浮いている。",
+    "suggestion": "アイコンのみを緑色にし、テキストは --text-primary にするか、テキストには彩度を抑えた --success-subtle を使用する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "color_coordinator"
+  }
+]

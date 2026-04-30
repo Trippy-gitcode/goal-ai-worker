@@ -1,0 +1,11 @@
+--- /Users/futoshi/Desktop/goal-ai-worker/lais/archive/pre-xref-cleanup-2026-04-30/scripts/vote_dispatcher.sh	2026-04-30 21:22:52
++++ /Users/futoshi/Desktop/goal-ai-worker/scripts/vote_dispatcher.sh	2026-04-30 21:25:21
+@@ -20,7 +20,7 @@
+ #   logs/vote_log.log: TAB 区切り 8 列（ts / vote_id / mode / score_for / score_against / score_abstain / margin / verdict）
+ #
+ # 根拠:
+-#   - lais/verify/dev_system_v34_package.md §2.25.23.1〜.8
++#   - core_spec.md §8 14 票投票機構 (legacy v34 spec §2.25.23.1〜.8, archived 2026-04-30)
+ #   - docs/po-decisions.md PD-112
+ 
+ set -eu

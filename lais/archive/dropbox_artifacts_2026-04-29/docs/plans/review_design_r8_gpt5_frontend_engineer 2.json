@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§8.1, §8.8, §8.13, §5.1, §7.5",
+    "issue": "フォーカス可視化を「outline方式に統一」と明記しているが、各所で依然としてbox-shadowベースの`--focus-ring`（例: §8.8の`focus-visible: box-shadow: var(--focus-ring)`や§8.13の状態マトリクス）が残存。トークン自体（§5.1の`--focus-ring`）もbox-shadow前提の値で定義されており、実装が分岐・混在する恐れがある。",
+    "suggestion": "outline統一の方針に合わせて仕様を一本化する。(1) `--focus-ring`を非推奨にし、`--focus-outline-color`/`--focus-outline-width`/`--focus-outline-offset`トークンを新設。(2) §8.1/§8.8/§8.13の記述・サンプルを`outline: var(--focus-outline-width) solid var(--focus-outline-color); outline-offset: var(--focus-outline-offset);`に差し替え。(3) §7.5のforced-colorsは現行のoutline指定を維持し、全コンポーネントでbox-shadow使用を撤廃。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "PERFORMANCE",
+    "location": "§5.0（テーマ切替アニメーションCSS）",
+    "issue": "`html.theme-switching * { transition: background-color,color,border-color ... }`で全DOMを一時的にトランジション対象にしており、ツリーが大きい画面（タイムライン等）で塗り替えコスト・スタイル計算がスパイクするリスクがある。",
+    "suggestion": "トランジション適用範囲を縮小する。(1) `html, body, .app-root, .surface`など上位コンテナのみに限定。(2) 大量リストには`.no-theme-transition`を付け、切替時に`transition: none !important`で除外。(3) できれば色の変化は上位のカスケード（CSS変数）で一括させ、個別要素のtransition指定を廃し再描画の負荷を抑制。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0（FOUC対策・meta theme-color同期）",
+    "issue": "「`<meta name=\"theme-color\">`は`--bg-primary`と同期」とあるが、実装スニペットがなく、実装者ごとにばらつく恐れがある。またiOS PWAでは`theme-color`が反映されない制約の注意喚起が不足。",
+    "suggestion": "同期の最小実装を提示: `const m=document.querySelector('meta[name=theme-color]'); const c=getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim(); if(m) m.setAttribute('content', c);` をテーマ��定直後に実行。併せて「iOS PWA（display:standalone）では`theme-color`が効かず、`apple-mobile-web-app-status-bar-style`は色指定不可（default/black/black-translucentのみ）」の��約を明記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.5/§5.0（グラスモーフィズム・設定保存）",
+    "issue": "`data-glass`については読み出し（localStorage -> data属性反映）のみ提示されており、テーマと同等の切替関数/保存ガイドがない。UIからの切替時に実装者が独自実装しがちで不整合が出る。",
+    "suggestion": "テーマと対称な`setGlass(next)`実装例を追加（`document.documentElement.dataset.glass = next; localStorage.setItem('lais.glass', next);`）。`html.theme-switching`の再利用の有無（ガラス切替時もフェードさせるか）を方針化し、必要なら`glass-switching`クラスの導入をガイド。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5.1〜§5.4（各テーマ定義）",
+    "issue": "UAコントロールやフォーム部品の配色統一のための`color-scheme`指定がない。ダーク系テーマで未指定だとiOS Safariのフォーム部品がライト外観のままになりやすい。",
+    "suggestion": "テーマごとに`color-scheme`を明示: ダーク系（Night Sky/Harajuku Dark）には`html[data-theme=\"…\"] { color-scheme: dark; }`、ライト系（Dawn/Harajuku Light）には`color-scheme: light;`を追加。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "PERFORMANCE",
+    "location": "§5.5（グラスモーフィズム/backdrop-filter）",
+    "issue": "iOS Safariで`backdrop-filter: blur(16px) saturate(180%)`はGPUコストが高く、スクロールやアニメーションと重なるとフレーム落ちしやすい。30要素上限は明記済みだが、劣化戦略（強度を軽減/縮退）までは定義されていない。",
+    "suggestion": "モバイル向けの劣化指針を追記。(1) iOS検出時は`--card-backdrop: blur(8px) saturate(140%)`に自動ダウングレード。(2) スクロールの多い画面はコンテナ1枚のみに適用（既記載を強調）し、モーダル・ドロップダウン優先。(3) `.glass-surface { will-change: backdrop-filter; }`は多用せず、必要箇所のみに限定。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1（spring系cubic-bezierの使用ルール）",
+    "issue": "`--spring-bouncy`（cubic-bezier(0.34, 1.56, 0.64, 1)）はy>1のオーバーシュートで、誤ってopacityやtranslateに適用すると不自然/破綻挙動���なり得る。テキストで「scale専用」とあるが、実装側で誤用される余地がある。",
+    "suggestion": "ユーティリティクラス/ミックスインで適用先を型安全化（例: `.spring-scale { transition-property: transform; transition-timing-function: var(--spring-bouncy); }`）。設計ガイドに「spring系はtransform: scale/rotate限定、opacity/translate禁止」を太字で追記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0（setTheme実装）",
+    "issue": "setThemeのクリーンアップが固定値`400ms`で、`prefers-reduced-motion`適用中（1ms）でもクラスが長く残留する。副作用は小さいが、連続切替時に不要なトランジション付与時間が延びる可能性。",
+    "suggestion": "タイムアウト値を可変化するか、`transitionend`（rootのみ監視）併用に変更。例: `const d = parseFloat(getComputedStyle(root).getPropertyValue('--duration-normal'))||350; setTimeout(..., Math.max(1, d)+50);`",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  }
+]

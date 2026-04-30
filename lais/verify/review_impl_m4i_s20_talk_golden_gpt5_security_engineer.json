@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "4. lais/src/components/screens/S20Talk.jsx（LP-003 コメント）",
+    "issue": "画面側の実装は XSS シンク（dangerouslySetInnerHTML/innerHTML）不使用で良好だが、CSP（Content Security Policy）の導入が「Phase B」となっており現時点で未定義。CSP未整備の本番デプロイは XSS 耐性が下がる。",
+    "suggestion": "本番環境で強いCSPを早期に適用する。例: default-src 'self'; script-src 'self' 'strict-dynamic' 'nonce-<RANDOM>'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob:; connect-src 'self' https://<API/Supabase>; style-src 'self'（可能なら unsafe-inline を避ける）; upgrade-insecure-requests。アプリ内でインライン style 依存を減らす（R-010 参照）。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "4. lais/src/components/screens/S20Talk.jsx（S20-3 AI バブル）",
+    "issue": "将来のAIストリーミング/Markdown表示がスコープ外だが、テキスト以外（リンク/HTML/Markdown）をそのまま描画すると反射型/格納型XSSのリスクが高い。",
+    "suggestion": "リッチテキスト導入時は必ずサニタイズ層を挟む。DOMPurify 等でホワイトリスト方式、危険なURIスキーム（javascript:, data:）を拒否、リンクは rel=\"noopener noreferrer\" 付与、target は必要時のみ。MarkdownはHTML埋込を無効化するかサニタイズ後に描画。dangerouslySetInnerHTML/innerHTML は禁止。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "4. lais/src/components/screens/S20Talk.jsx（TaskProposalCard/送信フォーム）",
+    "issue": "将来の「登録する」等のサーバ状態変更エンドポイントに対するCSRF対策方針が未定。Cookieベース認証を想定する場合、CSRF脆弱性に繋がる恐れ。",
+    "suggestion": "状態変更APIは POST/PUT/DELETE のみ、SameSite=Lax/Strict + CSRFトークン（二重送信/セッションバインド/Origin+Referer検証）、GETでの状態変更禁止。fetchは常にsame-originヘッダを検証、CORS経由の認可Cookie送信は必要最小限に限定。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "スコープ外（後続）: Supabase 連携",
+    "issue": "Supabase（チャット履歴等）連携のRLS（Row Level Security���設計/ポリシが未定義。RLS未設定で公開すると他ユーザーのデータ閲覧・改変が可能になる重大リスク。",
+    "suggestion": "テーブル作成時に必ず RLS を���効化し、JWTのuser_id/tenant_id に基づくアクセス制御ポリシーを定義。クライアントは anon key のみ、service_role key をクライアントに配布しない。ストレージもバケット毎にパブリック/プライベートを分離し、プライベートは署名付きURLで限定共有。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "バックエンド/インフラ（CORS 設定）",
+    "issue": "CORSポリシの定義が未記載。将来API/Supabaseへの認証付きリクエストで Access-Control-Allow-Origin をワイルドカードにすると、意図せぬオリジンからのリクエスト許容に繋がる。",
+    "suggestion": "本番は許可オリジンを厳格にホワイトリスト化（*は禁止）。認証Cookie/Authorizationヘッダ使用時は credentials=true とし、Allow-Origin は単一オリジン指定。不要なメソッド/ヘッダは許可しない。Vary: Origin を設定。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "将来のナビゲーション（App.jsx/新規チャット等）",
+    "issue": "現在は固定パスへの遷移のみで安全だが、将来 returnTo/redirect クエリ等を導���した場合に Open Redirect となる恐れがある。",
+    "suggestion": "リダイレクト先はアプリ内の許可パスのみをホワイトリスト検証。絶対URLやプロトコル指定を拒否し、外部遷移は中継確認画面を挟む。URLは decode 後に startsWith('/') かつ許可一覧に一致するかを検証。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "デプロイ設定（セキュリティヘッダ）",
+    "issue": "クリックジャッキングや情報漏えい対策のHTTPヘッダ方針が未記載。",
+    "suggestion": "frame-ancestors 'none'（または許可オリジン限定）/X-Frame-Options DENY、Referrer-Policy: strict-origin-when-cross-origin、Permissions-Policy（カメラ/マイク等を明示的に無効）、X-Content-Type-Options: nosniff、Strict-Transport-Security の適用。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "4. lais/src/components/screens/S20Talk.jsx（resizeTextarea）",
+    "issue": "textarea の高さを element.style で直接変更しており、厳格な CSP（style-src で 'unsafe-inline' を許可しない）だとブロックされる可能性がある。",
+    "suggestion": "CSS���ラス/カスタムプロパティで高さを制御し、JSは data-attr や CSS変数へ反映する方式に変更（ただし一部ブラウザで依然 inline style と見做される点に注意）。CSPで 'unsafe-inline' を許容しない方針なら、JSでの style 直接操作の使用箇所を最小化。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "4. lais/src/components/screens/S20Talk.jsx（送信/入力）",
+    "issue": "入力値の最大長やメッセージ件数上限が未設定。極端に長い文字列連投でクライアントのメモリ/パフォーマンスが劣化する可能性。",
+    "suggestion": "フロントで1メッセージの最大長（例: 4000文字）と履歴件数上限（例: 200件）を設け、超過時はトリミング/古いものを破棄。サーバ側APIでも同じバリデーションを必ず実施。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "将来機能: 📎 画像添付（S20-9）",
+    "issue": "画像アップロードの検証/保護方針が未定義。SVG/Polyglotファイルや過大サイズ、EXIF内個人情報などのリスクがある。",
+    "suggestion": "許可MIMEを画像のみに限定（サーバ側で Content-Type とマジックナンバー検証）、最大サイズ/寸法制限、EXIF除去、SVGは受け付けないかサーバでサニタイズ/ラスタライズ、ウイルススキャン、プライベートバケット + 署名URL配布、Content-Disposition/Type の適切化、CORS は必要最小限。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "4. lais/src/components/screens/S20Talk.jsx（AIメッセージのリンク化を将来実装する場合）",
+    "issue": "URL自動リンク化やアンカー描画時に javascript: や data: スキームを許すと XSS/フィッシングに繋がる恐れ。",
+    "suggestion": "URLはパースして http(s) のみ許容、相対URLはアプリ内のみに制限。aタグには rel=\"noopener noreferrer\" を必ず付与。テキスト→リンク変換は信頼できるライブラリで行い、生成前にサニタイズ。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（秘密情報の確認）",
+    "issue": "grepレベル確認では APIキー/シークレットのハードコードは検出されなかったが、自動化された秘密情報スキャンの導入が未記載。",
+    "suggestion": "開発フローに git-secrets/TruffleHog/gitleaks 等のプリコミット/CIスキャンを導入。ビルド時に公開可能な環境変数（例: VITE_ 前置き）だけをクライアントに埋め込む運用を徹底。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

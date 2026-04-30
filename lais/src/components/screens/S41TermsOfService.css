@@ -1,0 +1,84 @@
+/*
+ * S-41 TermsOfService — design tokens via theme variables (Stage 7-3)
+ */
+
+.s41-terms {
+  flex: 1;
+  background: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-bottom: var(--space-2xl);
+}
+
+.s41-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-md);
+  background: var(--theme-color-bg-elevated);
+  border-bottom: 1px solid var(--theme-color-border);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+.s41-back {
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  color: var(--theme-color-text);
+  cursor: pointer;
+  border-radius: var(--theme-radius-md);
+}
+
+.s41-back:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s41-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-display);
+}
+
+.s41-content {
+  padding: var(--space-lg) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.s41-meta {
+  font-size: var(--font-size-sm);
+  color: var(--theme-color-text-secondary);
+  font-style: italic;
+}
+
+.s41-section-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-accent);
+  margin-bottom: var(--space-sm);
+  font-family: var(--theme-font-display);
+}
+
+.s41-content p {
+  font-size: var(--font-size-base);
+  color: var(--theme-color-text);
+  line-height: var(--theme-font-line-height-body);
+  letter-spacing: var(--theme-font-letter-spacing-normal);
+}
+
+@media (min-width: 768px) {
+  .s41-content {
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}

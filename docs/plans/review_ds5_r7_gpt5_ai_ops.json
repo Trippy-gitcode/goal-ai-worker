@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.4 vs §6, §16.3, §18",
+    "issue": "UX仕様書のファイル名が§19.4では「ux_v1.md」だが、他セクションでは「ux_redesign_v*.md」と記述されており命名が不一致。連鎖更新マップ（§18）もux_redesign_v*.mdを前提にしているため、更新時の参照・運用が混乱する。",
+    "suggestion": "UX仕様書の正本ファイル名を1つに統一（推奨: docs/ux_v1.md もしくは docs/ux_redesign_v1.md）。§6/§16.3/§18の全参照を統一名へ置換し、将来版は v* によるバージョニングで一貫運用。既存プロジェクト向けには移行ガイドとエイリアス（旧名→新名）周知を追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の「dev-system準拠: docs/plans/dev_system_spec.md §19」は、アプリ側リポジトリに当該パスが存在しない可能性が高く、また依存宣言にバージョンが含まれていない。§19.6の「バージョンなしの依存宣言禁止」に抵触。",
+    "suggestion": "ヘッダーのdev-system準拠表記を「dev-system v{.dev-system.version}（§19, repo+commit）」に変更（例: dev-system v3.0 @ https://github.com/.../commit/xxxx §19）。パスではなくリポジトリURL+コミットIDを正とし、.dev-system.versionと整合をcanopyで検証するdoc_header_lint.shを追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5-§19.6",
+    "issue": "ヘッダー標準で定義する依存（上流パス+バージョン）やステータス/責務の必須化に対し、機械検証ゲートが未定義。依存不整合・循環・未更新が発生しても検知できない。",
+    "suggestion": "docs配下の全仕様書を走査するdoc_header_lint.shを追加しcanopyに組込み：1) 必須メタ項目（タイトル/作成日/ステータス/依存/責務/dev-system準拠）の存在検証、2) 依存のバージョン有無/実在性/循環検出（DAG検証）、3) 上流がDRAFT/REVIEWの場合に下流をCONFIRMEDとしない制約、4) 依存ファイル更新時の下流未追随をWARN/FAIL化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.2 vs §18",
+    "issue": "spec_changelog.mdが§19.2では任意扱いだが、§18の連鎖更新マッ��では更新必須として前提化されている。仕様の前提が不一致。",
+    "suggestion": "spec_changelog.mdを§19.1の必須ファイルに昇格し、ヘッダーに現在版と前版��差分要約リンクを推奨。canopyに「docs/spec_changelog.md存在+直近日付の更新エントリ必須（当日または直近日付）」の軽量チェックを追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.7 vs §13.4",
+    "issue": "Phase 0完了基準で「8ペルソナ×2モデルのAIレビュー」とあるが、§13.4の標準ペルソナは5つ。要件が食い違っている。",
+    "suggestion": "どちらを正とするか決定し統一（例: 標準5ペルソナ×2モデル or 8ペルソナ定義を§13.4に拡張）。確定後、両セクションの表記を同期しreview_gate.shで期待ペルソナ数×モデル数を検証（review_*.json内のpersona/modelキーを機械検証）。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダー例の依存パスが「docs/plans/lais_project_v1.md」となっており、§19.1の必須ファイル配置（docs/project_v1.md）と不整合。実ファイル構成と齟齬を生む恐れ。",
+    "suggestion": "ヘッダー例を実配置に合わせて修正（例: 依存: docs/project_v1.md v1.3）。あわせて「依存」は複数列挙可（カンマ区切り or YAMLブロック）である旨を明記し、doc_header_lint.shで複数依存のパースと検証に対応。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 (project_v1.md, reference_v1.md)",
+    "issue": "プライバシー/コンプライアンス（データ保持期間、削除SLA、PII取り扱い、同意管理、リージョン/法域）に関する最低限の項目がテンプレートに明示されていない。",
+    "suggestion": "project_v1.md §7に「プライバシー/コンプライアンス（データ保持・削除SLA・PII・同意/年齢確認・法域）」小節を追加。reference_v1.md §5に「データ保持/削除API/監査ログ/ポリシー版本管理」を追記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4 (e2e_fullflow_test.md) × §7",
+    "issue": "e2e_fullflow_test.mdに「パフォーマンステスト」枠はあるが、測定指標・しきい値・出力形式（JSON等）の規定がないため、§7のL3計測を品質ゲート化できない。",
+    "suggestion": "e2e_fullflow_test.mdに性能KPI（TTI/初回描画/90pレスポンス等）と合否しきい値を定義し、Playwright Tracing/JSON出��の収集規約を追加。canopyにperf_gate.shを追加して直近ベースライン比の回帰を検出。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5",
+    "issue": "AI⇔人間のガバナンス強化の観点で、ヘッダーに承認情報（承認者/承認日）が無く、CONFIRMED文書の編集時ガードも未定義。",
+    "suggestion": "ヘッダーに「承認: {氏名}」「承認日: {YYYY-MM-DD}」を追加。doc_header_lint.shでCONFIRMEDの再編集時にバージョンbump+ステータスをDRAFTへ戻すルールを検証。PO承認なくCONFIRMED→編集を禁止。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "「App Storeレビュー分析」や「直接5社+間接3社」の要件はB2B/クローズドβ/ウェブ特化アプリ等で非適用となるケースがあるが、例外規定がないため実務でブロッカーになりうる。",
+    "suggestion": "非適用時の代替（公開レビューなし→ユーザーインタビューN件/業界レポート引用等）と、例外運用（『N/A—理由と代替エビデンス』明記+PO承認）を§19.7に追記。ベンチマーク完了基��も代替エビデンスを満たせばPASS扱いに。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力がMarkdown表のみに依存しており、機械検証の導入が難しい。『Lais方針』列の未記入や競合数不足が検出不能。",
+    "suggestion": "各ベンチマーク節末にYAML/JSONブロックを必須化（targets数、direct/indirect内訳、matrix行数、Lais方針未記入件数、差別化>=3の充足）を出力。bench_lint.shを追加して規定充足をcanopyで自動検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4-§19.6",
+    "issue": "AI（ADV/ENG）が誤った判断をした場合のドキュメント側リカバリ手順（誤記修正→依存更新→通知→再レビュー）の明文化がない。運用での取りこぼしリスク。",
+    "suggestion": "各仕様書に『Errata/修正手順』小節を追加：1) spec_changelog.mdにERRATA追記、2) ヘッダーバージョンbump、3) 依存先（§19.6の下流）へ自動通知/タスクリンク、4) 必要ならAIレビュー再実行、5) affected-tests.sh再走。doc_header_lint.shでERRATA未反映をWARN���",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§19.4 (design_spec_v1.md)",
+    "issue": "デザイン仕様にモックアップ原本（SoT）への参照・版管理の必須化がないため、G9スクショ判定の基準差異が生じる恐れ。",
+    "suggestion": "design_spec_v1.mdに『モックアップ原本の場所（docs/mockups/*.html or Figma URL）と版（日付/リビジョン）』を必須セクションとして追加し、変更時はspec_changelogで追跡。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダー『依存』の複数記載方法（区切り記号・改行/YAML化）が不明瞭。人により表記揺れが出る可能性。",
+    "suggestion": "『依存』はYAML配列形式を推奨（例: 依存: ['docs/project_v1.md v1.3','docs/design_system.md v1.0']）。doc_header_lint.shで配列/CSVの両方を許容しつつ正規化。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.6",
+    "issue": "「参照表記法」で§番号を用いるが、再構成で番号が変わるとリンク切れになる。安定識別子の規定���ない。",
+    "suggestion": "各セクション見出しに安定ID（例: [DS-UX-TRANSITIONS]）を付与し、参照は『file §N.N（ID: XXX）』の併記を推奨。doc_link_lint.shでID存在を検証。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.4 (system_map.md × scripts)",
+    "issue": "system_map.md §4『ファイル変更チェックリスト』とchanged-files-allowlist.shの連携が手動。乖離が起こり得る。",
+    "suggestion": "system_map.mdの当該セクションをYAML化（allowlist配列）し、scripts/changed-files-allowlist.shが自動読込する拡張を提案。SoT一元化で乖離を防止。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

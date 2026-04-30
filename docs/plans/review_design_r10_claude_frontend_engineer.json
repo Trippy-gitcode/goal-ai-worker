@@ -1,0 +1,4 @@
+[
+  {"id":"R-001","severity":"LOW","category":"BEST_PRACTICE","location":"§5.0 theme-switching","issue":"オプトインの `.lais-theme-surface` クラスは実装者が付け忘れると遷移が起きない。どの要素に付けるべきか標準リストがほしい。","suggestion":"§5.0 に『付与推奨要素: body / 画面ルートコンテナ / カード / ボトムタブバー / ヘッダー』を列挙。","model":"Claude Opus 4.6","persona":"frontend_engineer"},
+  {"id":"R-002","severity":"LOW","category":"MISSING","location":"§5.5 @supports","issue":"プログレッシブエンハンスメント方式に再構成したが、`.glass-surface` クラス名を実装者が使う前提。クラス名を使わず :root 変数だけで完結したほうが汎用性が高い。","suggestion":"v1.0 で `.glass-surface` クラスをやめ、`--card-bg` / `--card-backdrop` トークンに @supports 分岐を組み込む方向を検討。","model":"Claude Opus 4.6","persona":"frontend_engineer"}
+]

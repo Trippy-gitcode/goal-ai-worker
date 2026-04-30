@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md §14.3 vs lais_project_v1.md §6.5",
+    "issue": "退会クーリングオフ中の挙動が矛盾。projectでは「退会キャンセル時はStripeのcancel_at_period_end予約も取り消し＝プラン維持」と定義。一方UX §14.3は退会キャンセル後に「プランは解約済み。Freeとして利用」バナー表示としており、取消後も解約扱いになっている。",
+    "suggestion": "上流（project）を正とし、UX §14.3のバナー文言を「退会手続きはキャンセルされました。ご契約プランは継続されます」に修正。退会キャンセル時の分岐（有料/Free）UIをprojectの定義に一致させる。変更履歴に紐付けて明記し、E2Eに退会→取消→プラン維持の検証を追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §19.6（上流変更→下流遡及チェック）",
+    "issue": "「上流変更時の下流遡及チェック」を手順として規定しているが、canopy/スクリプトでの自動検証が未実装。依存ヘッダーのバージョン差異や未更新を検出できないため、実効性が不足。",
+    "suggestion": "spec_ref_check.shを追加し、各docs/*のヘッダー「依存: {ファイル} v{版}」をパースして存在・版一致を検証。上流（project/ dev-system）更新コミットを検出したら、依存ファイルの版が当該版に追随しているかFAILで強制。canopy_common.shから呼び出し（G系いずれかに組み込み）。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md ヘッダー",
+    "issue": "依存が lais_project_v1.md v1.3のまま。現行projectはv1.4で確定しており、依存バージョンが不整合。",
+    "suggestion": "ヘッダーの依存を「docs/plans/lais_project_v1.md v1.4」に更新。更新に併せてdev-system §19.6の「上流変更時の下流遡及チェック」実施記録をspec_changelogに追記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md / lais_project_v1.md ヘッダー",
+    "issue": "dev-systemファイルのversion表記（v3.0）と各所の参照（依存: v3.1や課題指示のv3.2）が不一致。上流版ズレはレビュー/ゲートを通過しても後工程で齟齬を生���。",
+    "suggestion": "dev-systemのヘッダーversionを実体（13.10-14/19.6/19.8が入った版）に同期し、lais_project_v1.mdの依存も同一版に合わせる。canopyに「dev-system版宣言↔実ファイル内『変更履歴』の最新版番号一致」チェックを追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md §2（test_lint.sh）/ dev_system_spec.md §9.4",
+    "issue": "テストアンチパターン検出に『waitForTimeout使用』の検出がない。方針ではCondition-Based Waitingを要求しており、固定待機はフレークの主要因。",
+    "suggestion": "test_lint.shに`grep -rn \"waitForTimeout\\(\"`のFAIL検出を追加（例外は明示コメント`// @allowed-wait: reason`のみWARN）。さらに`page.waitForSelector/Response`の推奨をテストレビューチェックに追記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "sub_testing.md §7（プラン別挙動テスト）",
+    "issue": "KV直接更新でプランを切替える方式はテスト並列実行時に相互干渉（グローバル状態破壊）を招く。Playwrightはデフォルトでワーカー並列のため、L2��競合しうる。",
+    "suggestion": "プラン切替を行うspecにはPlaywrightの`--workers=1`を適用（spec単位直列化）し、affected-tests.sh側で`#subscription`タグ検出時に直列実行へ切替。もしくはテスト専用ユーザーにユーザー属性オーバーライドでプランを上書きする仕組みを導入し、KVはグローバル既定値としてのみ使用。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "scripts/affected-tests.sh（L2影響範囲）",
+    "issue": "source→testsマップに未定義の変更（docs/やapp_config.yaml等）が入るとL1のみ実行で終了する。UX/設定変更はUI/認証/起動動作に影響しうるため、L1だけでは検知漏れの恐れ。",
+    "suggestion": "docs/配下やapp_config.yamlに変更がある場合はデフォルトで#allタグの広めの回帰セット（例: 起動/認証/ナビ/主要画面表示のスモーク+α）を追加実行。test_map.yamlにdocs/と設定ファイルの包括マッピング（正規表現）を追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/screenshot_lint.sh / dev_system_spec.md §4.3-4.7",
+    "issue": "G9のス��ショ検証は枚数とbefore/after同一性のみ。ATごとの対応（AT-1〜Nに各1対）が未検証のため、AT抜けや命名不整合を検出できない。",
+    "suggestion": "missionブロックからAT番号一覧を抽出し、`before_AT-{n}.png`と`after_AT-{n}.png`のペア存在を厳密検証するロジックに拡張。余剰ファイル/欠損をFAILに。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "canopy_common.sh（G3 テスト項目数）",
+    "issue": "実テスト数の算出を`grep -c \"test(\"`に依存しており、`it()`記法や動的生成、describe.each等のバリエーションで誤差が出る可能性。",
+    "suggestion": "Playwrightの`npx playwright list --reporter=json`で総テスト数を取得し、expected_totalと照合する方式に変更。フォールバックとしてgrepはWARN扱いに。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "scripts/changed-files-allowlist.sh",
+    "issue": "対象ファイル抽出が「対象ファイル:」行の単行パース前提。改行区切りや複数行列挙、コードブロック表記などでパース漏れし、誤FAIL/WARNを生む可能性。",
+    "suggestion": "MISSIONテンプレをYAMLブロック（targets: 配列）に拡張し、yqで厳密に取得。現行フォーマットも後方互換でサポートしつつ、テンプレ更新とcanopyの検証を同期。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "lais_ux_v1.md §16.4 C3（Badging API）",
+    "issue": "「iOS PWA: Badging API対応（iOS 16.4+）」の記載は現状のSafari実装状況と乖離している可能性が高い（Badging APIはChrome系中心で、iOS Safari未対応が通説）。誤実装リスク。",
+    "suggestion": "C3を「iOS PWA: Badging APIは未対応。バッジはアプリ内UIのみで代替。AndroidはsetAppBadge対応」で明記。サポート状況の出典（MDN/Can I use）を注記。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md（全般）",
+    "issue": "テスト分離の実効策（ユーザー/データの一意化）がガイド記載中心で、自動検証・仕組みが不足。SupabaseやKVを共有すると並列・順序で汚染しうる。",
+    "suggestion": "PlaywrightのglobalSetupでRUN_ID（日時+乱数）を発行し、テストユーザー/レコードにRUN_IDサフィックスを付与。afterAllでクリーンアップAPIを実行。`AP-2: serial依存チェーン`に「固有RUN_IDが使われているか」の静的lintを追加（`grep RUN_ID`欠如をWARN）。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "lais_project_v1.md §7.2（RLSの箇条番号）",
+    "issue": "RLS例外ルールの番号が③→⑤→④のように前後しており可読性を損ねる。内容は整合しているがドキュメント品質上の粗。",
+    "suggestion": "番号を昇順に整理（①〜⑤）し、ai_messages / social_messages のCRUD/SELECT条件を表で再掲。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md §19.1/§19.6（テストID命名とL2抽出）",
+    "issue": "「テストID命名（[GREP-KEY]）」の厳密検証が未実装。L2の--grep抽出は命名逸脱で静かに対象外となり、影響範囲テストの取りこぼしにつながる。",
+    "suggestion": "test_id_lint.shを追加し、`tests/e2e/specs`内の全test()タイトルに`\\[.+-.+\\]`形式のGREP-KEYが含まれるかを検証。欠落をFAILに（除外対象は明示タグ`@no-grep-key`でWARN）。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md §13.10-14",
+    "issue": "新規レビュー手順（棄却検証/既知矛盾除外/収束ルール/上流矛盾検出）は既存鉄則と整合しているが、ヘッダーやテンプレへの参照リンク（どのテンプレをどう更新するか）の導線が弱い。",
+    "suggestion": "sub_adv_protocol.md §2/§4に13.10-14の要点（Read必須/3ラウンド反復時の承認要件/upstream_issueフラグ運用）を抜粋で追記し、ミッションテンプレに`upstream_issue: true|false`フィールドを追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §19.8 / lais_ux_v1.md §16（クロスファイル整合）",
+    "issue": "UX §16はdev-system §19.8に準拠しているが、e2e_fullflow_test.md側の「環境別テスト（E1-E4必須）」の定義/参照がまだないため、運用で抜ける恐れ。",
+    "suggestion": "アプリ側docs/e2e_fullflow_test.mdにE1-E4×A〜Gの最小テストセットを追加（例えばA1/A3/B1/D2/E1/F1/G2）。affected-tests.shで`platform:`タグをサポートし、該当変更時に環境別テストを起動。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

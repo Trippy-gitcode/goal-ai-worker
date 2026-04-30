@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R3I-TW-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§3.2 STATUS 表 / §2.6 check_test_pass / §C3.2 STATUS 表",
+    "issue": "STATUS 5状態の遷移条件が §3.2 本文と §2.6 実装サンプルと §C3.2 要約で3箇所に記述され、READY_FOR_DEPLOY の条件定義が微妙に異なる。§3.2 は『cmd-unit + cmd-e2e PASS』（AND）、§2.6 check_test_pass コメントは『最低 1 種類の証跡が PASS であれば遷移』（OR）、§C3.2 は『cmd PASS』（曖昧）。同一概念の 3 箇所記述が同期していない = 相互参照破損のテクニカルライター視点 CRITICAL。",
+    "spec_reference": "R2.2 §3.2 L186-187 / §2.6 L841-843 コメント / §C3.2 L1809-1811",
+    "suggestion": "§3.2 を正本として §C3.2 は参照記述に縮退（『§3.2 STATUS 5状態モデルを参照』）、§2.6 実装サンプルのコメント・ロジック両方を §3.2 に整合。正本 - 要約 - 実装の 3 層を『同一日本語文を逐語的に使用しない、参照関係を一意に』のテクニカルライター規約で統一。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R3I-TW-002",
+    "severity": "CRITICAL",
+    "category": "AMBIGUITY",
+    "location": "§4 全体 / §C0-C6 内部見出し",
+    "issue": "『鉄則』『規範』『ルール』『原則』『方針』の用語が混在。§C1 は『設計原則 & 鉄則』、§4.2 は『鉄則15個の1行要約』、§C1.2 は『鉄則15個』、§C1.3 は『曖昧用語禁止リスト』、§3 は『鉄則一覧』。ADV/ENG/PO/レビュアーが同一概念に異なる用語で言及し、ミッション記述・patches 記述で指示語が分散する。PD-107『§C0 必須 + §C1-C6 条件付き再読』の要約/正本関係が用語レベルで曖昧。",
+    "spec_reference": "R2.2 §4.2 L1704 / §C1 L1707 / §C1.2 L1715 / §C1.3 L1735 / §4.1 §C0.2 L1651",
+    "suggestion": "用語 SSOT を §0.X または §21.C0 に追加: 『鉄則 = 設計原則の一個条（15個）』『規範 = 鉄則 + 曖昧用語禁止 + フロー等の総称』『ルール = 機械検証可能な規範の実装』『原則 = 設計の上位方針（§1.1 の 4 項）』『方針 = PO が決定する経営/プロダクト判断』。全章で用語統一、§C1 見出しも『§C1 設計原則 & 鉄則』→『§C1 規範集（原則 + 鉄則 + 曖昧用語）』等に整合。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R3I-TW-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§3 横断 SSOT / §4 §C0-C6 / §6 連鎖更新",
+    "issue": "SSOT（Single Source of Truth）が 3 層で重複掲載されている: (1) §3.X = 横断 SSOT 本文、(2) §C3.2/C3.4/C4.1/C4.5 = §C0-C6 内の要約版、(3) §6 連鎖更新指示で dev_system_spec §N.M に反映。同一情報が 3 回書かれ、1 箇所の修正で 3 箇所更新が必要。ドキュメント保守性に影響。",
+    "spec_reference": "R2.2 §3.1-§3.7 / §4.4 §C3.2-§C3.6 / §4.5 §C4.1/§C4.2/§C4.5 / §6.1-§6.12",
+    "suggestion": "正本は §3 / §5 / §6（機械的な連鎖更新）、§C0-C6 は各 §X の『1 行要約 + 『詳細は §X 参照』リンクのみ』に徹底。§C0-C6 が独自の説明を書かない方針を §4.0 に明記し、本修正で §C3.2 STATUS 表・§C3.4 L1/L2/L3 表などを参照形式に書き換え。テクニカルライター観点で同期コストを 1 箇所に限定。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R3I-TW-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§2.17 PD疑義1 / §2.18 PD疑義2 / §2.19 PD疑義3 / §2.20 PD疑義4 / §2.21 PD疑義5 / §2.22 PD疑義6-7",
+    "issue": "『PD疑義1〜7』という節名が曖昧。Golden R2 で PO 判定を求めた疑義番号（#12-#16, #20, #33）に対応する修正クラスターだが、節名だけでは何の論点か判別不能。読み手は §2.22 内の参照先を確認しないと文脈不明。",
+    "spec_reference": "R2.2 §2.17 L1495 / §2.18 L1515 / §2.19 L1553 / §2.20 L1577 / §2.21 L1598 / §2.22 L1612",
+    "suggestion": "節名を『§2.17 PD疑義1 — 低リスクで cmd-e2e/realworld N/A 必須は過剰』のように主題を併記（一部は既に併記済、全クラスターで統一）。さらに冒頭に 1 行『PD疑義N = Golden R2 #M に対応、<論点>の棄却/採用判定』を追加。表形式の PD疑義サマリー表を §2 冒頭に追加するのも選択肢。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R3I-TW-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.1 §C0 起動時要約 / §4.0 読み方",
+    "issue": "§C0 起動時要約は『毎セッション必須Read』と謳うが、実際の起動時に ENG が読むべき順序が未定義。CLAUDE.md → session_progress.md → §C0 → 必要時 §C1-C6 の読み順が本文にない。PD-107『§C0 必須 + §C1-C6 条件付き再読』の条件（どの変更種別で §C1 を読むか、どの深さで §C3 を読むか）が判断表として存在しない。ソロ開発者は推測で読了範囲を決めることになる。",
+    "spec_reference": "R2.2 §4.0 L1631 / §4.1 L1640-1702 / PD-107",
+    "suggestion": "§4.0 に『セッション起動時の Read 順序と条件』サブセクション追加。表形式で: (a) 起動時必須 = CLAUDE.md + session_progress.md + §C0、(b) デプロイセッション = + §C4、(c) dev-system改訂セッション = + §C0-C6 全文 + Golden triage、(d) レビューセッション = + §C5 + sub_review_flow §1-§4。『今回の変更は何か』の判定 1 行で読了範囲が機械的に決まる形にする。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R3I-TW-006",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§0.6 / §7.4 既棄却テーマ",
+    "issue": "§0.6 棄却強化テーマと §7.4 既棄却テーマが同一内容を 2 箇所に記載（L56-64 と L2347-2354）。§0.6 は序文向け、§7.4 はレビュアー指示向けだが、文言が同期していない（§0.6 は 8 項目、§7.4 は 6 項目）。同期漏れでレビュアーが片方しか読まなかった場合に判定基準が揺れる。",
+    "spec_reference": "R2.2 §0.6 L56-64 / §7.4 L2347-2354",
+    "suggestion": "§7.4 を『§0.6 と同一、本節で再掲』と明記し、両リストを機械的同期。将来は §7.4 を『§0.6 参照』のみにして重複排除（tech_writer 視点）。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R3I-TW-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2 各クラスター / §6 連鎖更新",
+    "issue": "『他クラスター整合』節が各 §2.X 末尾にあるが、記述の粒度が揃っていない。§2.2 ρcrit は 6 箇所列挙、§2.10 αcrit' は 1 行のみ。依存関係が複雑なクラスターほど整合節が貧弱で、Code G_47 実装時の参照が不足。",
+    "spec_reference": "R2.2 §2.2 L528-534 / §2.10 L1245 / §2.3 L572-575 / §2.21 L1610",
+    "suggestion": "各クラスター『他クラスター整合』に最小 3 項目（依存する他クラスター・依存される他クラスター・SSOT 節）を必須化。§2 冒頭の各節構成説明に追加（L365-370）。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "tech_writer"
+  },
+  {
+    "id": "R3I-TW-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§1.2 22クラスター集約表",
+    "issue": "クラスター記号（πcrit/ρcrit/.../αcrit'/.../PD疑義1〜7）の命名規則が混在。Golden R2 由来は『ギリシャ文字 + crit(')』、PD疑義は『数字のみ』。レビュアー・ADV・ENG が同一概念に異なる記号で言及する可能性。",
+    "spec_reference": "R2.2 §1.2 L96-122",
+    "suggestion": "統一案: (a) PD疑義も『θcrit/ιcrit/...』のようにギリシャ文字化、(b) または Golden R2 由来も『#34-crit / #3-crit / ...』の番号化。既存 patches との互換性があるため v3.4 確定後の v3.5 で統一検討（LP-028 候補追加）。",
+    "model": "Claude Opus 4.6 (Internal)",
+    "persona": "tech_writer"
+  }
+]

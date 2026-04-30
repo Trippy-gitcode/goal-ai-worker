@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "§2.3 Today セクション操作 (タスク編集)",
+    "issue": "習慣タスクを編集（S-13）した際の更新スコープ（マスターデータか、当日分のみか）が未定義。実装時にデータ不整合が発生する。",
+    "suggestion": "習慣タスクの「開始時刻」「所要時間」「メモ」をToday画面から編集した際、それが`habits`テーブル（以降の全予定）を更新するのか、今日生成された`tasks`テーブルのインスタンスのみを上書きするのかを明記してください。（ユーザーとしては「今日だけ時間をずらしたい」ケースと「基本設定を変えた��」ケースの両方があります）",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§2.3 Today セクション操作",
+    "issue": "登録済みの「習慣」全体を一覧で確認・管理する画面が存在しない。Habitify等の競合から移行したユーザーにとって、習慣の全体像が把握できないのは強いストレスになる。",
+    "suggestion": "Upcomingセクションに混ぜるだけでなく、GROW画面のGoalsの下、またはME画面に「Habits（習慣管理）」セクションを新設し、登録済みの全習慣（今日非表示のもの含む）を一覧・編集できる導線を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2.3 Today セクション操作",
+    "issue": "project_v1.md §3.2.3で定義されている「今日やる」ボタン（週N回の習慣を前倒しで今日実行する機能）のUI定義がux_v1.mdから漏れている。",
+    "suggestion": "Upcomingセクション内の習慣タスク行、または新設する習慣管理画面の各行に「今日やる（Todayに追加）」ボタンを配置する仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "エッジケース",
+    "location": "§2.3 Today セクション操作 (タスク完了)",
+    "issue": "タスクを連続で完了した際、30秒間消えないUndoスナックバーがどのように表示されるか（スタックするのか、上書きされるのか）不明。複数重なると画面下部の操作をブロックする。",
+    "suggestion": "「連続でタスクを完了した場合、スナックバーは最新の1件のみを表示し（古いUndo権限は即時確定またはスナックバー内でキュー管理）、画面下部を埋め尽くさないようにする」という仕様を明記してください。Habiticaのように連続で気持ちよく完了できる体験が重要です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.4 FRIENDS サブタブ",
+    "issue": "「お知らせ（未読あり時）」のバナーしか定義されておらず、既読になった過去の応援やメッセージを見返す導線が存在しない。",
+    "suggestion": "FRIENDS画面のヘッダー付近に「メッセージ履歴」または「ベルアイコン」を常設し、未読の有無に関わらず過去の受信一覧を開けるようにしてください���",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§7.3 スワイプ",
+    "issue": "TALK画面での「左端から右スワイプ（ドロワー展開）」が、iOS標準および他画面での「戻る」ジェスチャーと同じ操作であり、ユーザーのメンタルモデルと競合して誤操作を招く。",
+    "suggestion": "TALK画面の履歴ドロワー展開は、左端からのスワイプではなく、ヘッダーの「☰」ボタンタップのみに限定するか、画面中央からの右スワイプ（エッジスワイプと区別）に変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§2.3 Today セクション操作 (タスクタップ)",
+    "issue": "タスク詳細から「進め方を聞く」でTALKタブに遷移すると、AIの回答を見ながらタスクのメモを編集することができず、タブの行き来が発生して面倒。",
+    "suggestion": "タスクコンテキストでのAI相談時は、TALKタブに完全遷移するのではなく、GROW画面上でTALKのハーフモーダルを開くか、AIの回答をタスクのメモにワンタップで転記できる機能の追加を検討し��ください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.4 Goals セクション操作",
+    "issue": "ゴール達成をUndoした際、1日1回制限の「ゴール達成ボーナス獲得済みフラグ」がサーバー側で正しくロールバックされるか明記されていない。",
+    "suggestion": "「Undo実行時は、サーバー側の『本日ゴール達成ボーナス獲得済み』フラグも未獲得状態にロールバックされ、同日中に別のゴールを達成した際に再度ボーナスを獲得できる」旨を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.4 FRIENDS サブタブ (QRコード表示)",
+    "issue": "QRコード表示モーダルを開いたまま24時間経過（または翌日バックグラウンドから復帰）した場合、一時トークンの有効期限が切れてスキャンエラーになる可能性がある。",
+    "suggestion": "QRコード表示モーダルが開かれている間、またはアプリがフォアグラウンドに復帰した際に、トークンの有効期限をチェックし、必要に応じてQRコードを自動再描画する仕様を追記して���ださい。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§1.2 遷移マトリクス",
+    "issue": "S-42（メール変更）およびS-43（パスワード変更）への遷移パスがマトリクス図から漏れている。",
+    "suggestion": "1.2の遷移マトリクス内の「S-37 設定」のツリーに、S-42およびS-43への遷移を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  }
+]

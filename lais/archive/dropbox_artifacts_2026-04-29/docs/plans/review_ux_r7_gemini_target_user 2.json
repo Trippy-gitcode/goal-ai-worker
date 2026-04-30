@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "§2.3",
+    "issue": "タスク詳細パネル（S-11）から「進め方を聞く」等でTALK（S-20）へ遷移する際、元のハーフモーダル（S-11）の開閉状態と、GROWタブに戻った時の状態が定義されておらず、画面スタックと表示状態が破綻する。",
+    "suggestion": "「TALKへ遷移する際、S-11ハーフモーダルは自動的に閉じ、ボトムタブをTALKに切り替える。GROWタブに戻った際はS-10の通常状態（モーダルなし）となる」と明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "§9.1",
+    "issue": "オフライン状態で日次リセット時刻（午前4:00 JST）を跨いだ場合、EXP上限やAI対話回数のリセットがクライアント側でどう処理されるか未定義。オフラインのまま操作を続けると、同期時にサーバー側と不整合が生じるリスクがある。",
+    "suggestion": "オフライン時の日次リセットはクライアントのローカル時計で仮リセット（UI上の上限解除・習慣タスクの未完了化）を行い、オンライン復帰時の同期でサーバーのJST基準で再計算・マージする仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§2.3",
+    "issue": "習慣タスクを当日のTodayから消す（今日だけスキップする）方法がない。未完了のまま放置すると罪悪感を生み（競合アプリの不満点再発）、削除するとマスターデータが消えてしまうため、ユーザーがストレスを感じる。",
+    "suggestion": "タスク詳細パネル（S-11）に「今日はお休み（スキップ）」ボタンを追加し、タップするとTodayから非表示（またはグレーアウト完了扱い・EXPなし）にする機能を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.1 / §2.3",
+    "issue": "project_v1.mdで「1日の獲得EXP上限300 EXP」と定義されているが、上限到達後にタスクを完了した際のUX（EXPバーが伸びないことへのフォロー）が定義されていない。ユーザーはバグだと誤認し、モチベーションを損なう。",
+    "suggestion": "上限到達後のタスク完了時は、EXPフロートテキストの代わりに「本日の上限到達！」や「MAX✨」などの専用テキストを表示し、EXPバーは動かさない仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.3",
+    "issue": "DISCOVER画面から開始するヒアリング（5問）について、ユーザーが途中で離脱した場合（別タブへの遷移やアプリ終了）の再開フローが定義されていない。",
+    "suggestion": "ヒアリング未完了状態でDISCOVER画面に戻った場合、ボタンを「ヒアリングを再開する (3/5)」に変更し、タップで該当のTALKセッションに復帰する仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§2.4",
+    "issue": "ゴール達成のUndo時、「同日中に再度ゴール完了条件を満たした場合: ボーナスEXPは再付与される」とあるが、同日に別のゴールで既に1日1回のボーナスを獲得していた場合の考慮が漏れている（project_v1.mdの1日1回制限との矛盾）。",
+    "suggestion": "「ただし、同日中に別のゴールで既にボーナスを獲得していた場合は、1日1回制限により再付与されない」旨の条件を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§3.3",
+    "issue": "TALK画面でのタスク提案カードで「登録する」をタップして即時登録した場合、開始時刻や所要時間、ゴール紐付けのデフォルト値がどうなるか明記されていない。",
+    "suggestion": "即時登録時は「開始時刻: 未設定、所要時間: 30分（デフォルト）、ゴール紐付け: なし」として登録される旨を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.3",
+    "issue": "Undoスナックバーが「ボトムタブの上16px」と「TALK画面では入力バーの上」と定義され��いるが、画面遷移時にスナックバーがどう追従するか（アニメーションの有無やZ-index）が不明確。",
+    "suggestion": "スナックバーのZ-indexを最前面（ハーフモーダルより下、キーボードより上）に定義し、タブ切替時の位置変更はアニメーションなし（instant）で追従するよう明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.3",
+    "issue": "Overdueタスクに「明日に延期」ボタンはあるが、「今日やる」ボタンがないため、そのまま完了させることはできても、視覚的にTodayの通常タスク群に混ぜることができない。",
+    "suggestion": "Overdueタスクをドラッグ＆ドロップでTodayの通常タスクエリアに移動（＝予定日を今日に変更）できる仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§13.1",
+    "issue": "パスワード変更（S-43）後、「他のデバイスはログアウトされます」とトーストが出るが、操作中の現在のデバイスのセッションが維持されるのか再ログインが必要なのか明記されていない。",
+    "suggestion": "「現在のデバイスのセッションは維持され、再ログインは不要」であることを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "target_user"
+  }
+]

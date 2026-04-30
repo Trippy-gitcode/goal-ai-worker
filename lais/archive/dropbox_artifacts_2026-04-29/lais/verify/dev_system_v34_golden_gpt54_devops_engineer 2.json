@@ -1,0 +1,12 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§4.2.1, §5.4, dev_system_spec.md §4.6 / sub_infrastructure.md 2.6 canopy_common.sh",
+    "issue": "G8の証跡パス定義が既存実装と不整合のままです。R2.1では証跡を `logs/<mission>/before-unit.json` / `after-e2e.json` に移していますが、現行canopy実装も元仕様も `evidence/<MISSION-ID>/before.json` 系です。§6.10でも更新対象を `scripts/lib/canopy_common.sh` としていますが、実際の現行ファイルは `tests/smoke/canopy_common.sh` のシンボリックリンク運用であり、配置も名称もズレています。このままだとG8/G15/G17が別々のディレクトリ前提で動き、自動検証が確実に失敗します。",
+    "suggestion": "TDD/realworld証跡のSSOTパスを1箇所に固定してください。例: `evidence/<mission>/before-unit.json`, `after-e2e.json`, `realworld-proof.json` に統一し、dev_system_spec / sub_testing / canopy_common.sh / G15 / G17 / templates を同じパスに揃える。併せて §6.10 の更新対象も現実の配置 (`canopy/canopy_common.sh` → app側 `tests/smoke/canopy_common.sh`) に修正する。",
+    "model": "GPT-5.4",
+    "persona": "devops_engineer"
+  }
+]

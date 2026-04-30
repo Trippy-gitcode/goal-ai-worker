@@ -1,0 +1,80 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "main() / runPrecommitMode()",
+    "issue": "--async オプションが定義され「fire-and-forget」と仕様に明記されているが、実装では await runPrecommitMode() でAPI応答を同期的に待機している。これにより pre-commit フックが数分間ブロックされ、開発者のコミット操作を著しく阻害する。",
+    "suggestion": "opts.async が true の場合、child_process.spawn を用いて detached モードで別プロセスとして自身を再実行し、親プロセスは即座に process.exit(0) するよう実装を変更する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "callGPT5() / JSON_INSTRUCTION",
+    "issue": "callGPT5 で response_format: { type: 'json_object' } を指定しているが、プロンプトでは「必ずJSON配列のみを出力」「最初の文字は [」と強要している。OpenAI API仕様上、json_object指定時はオブジェクト {} の出力が必須であり、400エラーが発生するか出力が破綻する。",
+    "suggestion": "プロンプトの指示を「{ \"reviews\": [...] } の形式のJSONオブジェクトを出力せよ」に変更するか、GPT-5呼び出し時の response_format 指定を削除して標準のテキスト出力として配列を受け取るようにする。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "extractJson()",
+    "issue": "raw.lastIndexOf('},') を用いた不完全JSONの修復ロジックは、レビュー本文（issue や suggestion）の文字列内に '},' が含まれていた場合、そこで誤って文字列を切り詰めてしまう。これにより正常なJSONが破壊され、レビュー結果の後半が確実に欠落する。",
+    "suggestion": "単純な文字列探索による修復を廃止し、不完全なJSONの修復には専用のパーサーライブラリを使用するか、修復を諦めてエラーとして扱いリトライさせる設計にする。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "runJob() / runPrecommitMode()",
+    "issue": "results.push({ id: '_metadata', ... }) でメタデータを配列に直接追加しているため、直後の for (const item of results) ループでメタデータもレビュー項目としてカウントされ、totalItems が水増しされる。また severity が未定義のため '?' として集計される。",
+    "suggestion": "メタデータを results 配列に混ぜるのではなく、出力用オブジェクトを { metadata: {...}, items: results } の構造に変更するか、集計ループ内で if (item.id === '_metadata') continue; を追加してスキップする。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "resolveFiles()",
+    "issue": "base.replace(/\\*/g, '.*') でファイル名パターンを正規表現に変換しているが、ドット '.' がエスケープされていない。そのため sub_*.md が sub_.*.md となり、sub_Acmd のような拡張子が .md でない無関係なファイルまで誤って読み込んでしまう。",
+    "suggestion": "正規表現への変換前にドットをエスケープする処理を追加する。base.replace(/\\./g, '\\\\.').replace(/\\*/g, '.*') と修正し、正確な拡張子マッチングを保証する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "extractJson()",
+    "issue": "text.match(/```(?:json)?\\s*(\\[[\\s\\S]*\\])\\s*```/) において、[\\s\\S]* が貪欲マッチとなっている。LLMの出力が長く、かつ閉じタグがないなどの不正なフォーマットだった場合、壊滅的なバックトラックが発生しプロセスがフリーズする（ReDoS脆弱性）。",
+    "suggestion": "貪欲マッチ * を非貪欲マッチ *? に変更する（\\[[\\s\\S]*?\\]）。または、正規表現に頼らず text.indexOf('[') と text.lastIndexOf(']') を用いて部分文字列を抽出する安全なロジックに変更する。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "main()",
+    "issue": "vote モードで --provider=gpt5 を指定した場合でも、初期化時の loadEnv() 直後で GEMINI_API_KEY と OPENAI_API_KEY の両方の存在を必須としている。片方のAPIしか使わない環境やCIで実行した場合にエラ���で強制終了する。",
+    "suggestion": "APIキーの必須チェックをグローバルで行うのではなく、実際に呼び出されるプロバイダ（opts.models や opts.provider）に応じて、必要なキーのみを検証するようにチェック処理を遅延させる。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0231,
+    "input_tokens": 13475,
+    "output_tokens": 1249,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

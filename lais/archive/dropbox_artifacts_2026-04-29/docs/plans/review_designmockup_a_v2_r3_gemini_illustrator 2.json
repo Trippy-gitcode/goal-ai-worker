@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン",
+    "issue": "背景色 #1C2128 に対してテキスト色 #484F58 が使われており、コントラスト比が著しく低く視認性が確保されていない。",
+    "suggestion": "disabled状態であっても、テキスト色を --text-hint (#7A8593) 程度に明るくし、最低限のコントラストを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクション「企画書を仕上げる」の完了チェックマーク",
+    "issue": "完了状態が青色���#79C0FF）で表現されているが、s13やs14では完了に緑色（#3FB950）が使われている。達成感を示す感情的カラーが一貫していない。",
+    "suggestion": "タスク一覧の完了チェックマークもセマンティックカラーの緑（var(--success)）に統一し、達成の報酬感を一貫させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s10_grow",
+    "location": "Todayセクション「ジムで筋トレ」の左ボーダー",
+    "issue": "指定外のカラーコード #E8A855 がハードコードされており、Night Skyテーマの自然界ベースのカラーパレットから逸脱している。",
+    "suggestion": "仕様書で定義されたセマンティックカラー（var(--warning) の #D29922 など）を使用し、ブランドの調和を保つ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "ALL",
+    "location": "プライマリーボタン（はじめる、次へ、作成など）",
+    "issue": "ボタン背景の #1A5FC8 の彩度が高く、Night Skyの「静かな夜空・洗練」というトーンの中でややシステム的で強い覚醒感を与えて浮いて見える。",
+    "suggestion": "アクセントカラー（#79C0FF）をベースにするか、周囲の暗いトーンに馴染むよう明度・彩度を微調整して静けさを阻害しないようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "チャットメッセージのバブル",
+    "issue": "AI（左ボーダー）とユーザー（背景）の両方に同じ青系アクセントカラーが使われており、パッと見で発言の主体が区別しづらく視線が迷う。",
+    "suggestion": "ユーザーのバブル背景をニュートラルな色（--bg-elevated等）にするか、AI側に別のセマンティックカラーを割り当てて直感的な区別をつける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "ゴール紐付けのドットアイコン",
+    "issue": "ドットに #58A6FF（info色）が使われているが、s14のゴール詳細ではアクセント色（#79C0FF）が主役となっており、ゴールを示す色がブレている。",
+    "suggestion": "ゴールを表す要素の色をアクセント色（#79C0FF）に統一し、ユーザーが「青＝ゴール」と��感的に結びつけられるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "下部の「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "背景 #1C2128 に対してテキストが #484F58 で描画されており、disabled（操作不可）に見えるため、AI相談への重要な導線として機能していない。",
+    "suggestion": "テキスト色を --text-primary または --accent に変更し、タップ可能なアクションであることを明確に示す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧の未完了タスクの丸アイコン",
+    "issue": "日付によって丸の色が青（#79C0FF）とグレー（#484F58）に分かれているが、グレーのものは操作不可に見える恐れがある。",
+    "suggestion": "未完了状態のチェックボックスは日付に関わらず統一した色（--border-strong等）にし、チェック可能な状態であることを一貫して伝える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  }
+]

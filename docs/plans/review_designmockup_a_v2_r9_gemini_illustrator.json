@@ -1,0 +1,79 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s00_splash, s01_signin",
+    "location": "画面中央および上部のロゴテキスト「Lais」",
+    "issue": "累積コンテキストで font-weight: 600 に修正済みとされたロゴが font-weight: 200 に退行している。",
+    "suggestion": "font-weight: 600 に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s02_onboarding, s30_me",
+    "location": "s02の「次へ」ボタン、s30の「PROFILE」アクティブタブ",
+    "issue": "テキストに font-weight: 500 が指定されているが、デザインシステムのタイポグラフィトークン（200, 400, 600）に存在しない値の直指定である。",
+    "suggestion": "font-weight: 600 (semibold) に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "画面下部の「進め方を聞く」「詰まりを相談」ボタン",
+    "issue": "完了済みタスクの詳細画面において、AI相談ボタンがアクティブな色（#79C0FF）で表示されており、UX仕様（disabled化）と矛盾している。",
+    "suggestion": "背景色に #1C2128 (--bg-disabled)、テキスト色に #484F58 (--text-disabled) を使用して非活性状態を視覚的に表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow",
+    "location": "09:00タスクの完了チェックアイコン背景",
+    "issue": "完了アイコンの背景色にhover用の値 rgba(63,185,80,0.18) が指定されている。静的表示では通常状態のトークンを使用すべき。",
+    "suggestion": "--success-subtle の値である rgba(63,185,80,0.12) に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "TEXT_CONTRAST",
+    "screen": "s14_goal_detail",
+    "location": "画面下部の「削除」ボタン",
+    "issue": "削除ボタンのテキスト色 #F85149 と背景色 #161B22 のコントラスト比が 4.19:1 であり、WCAG AA基準（4.5:1）を満たしていない。",
+    "suggestion": "s13_task_detail と同様に、solidスタイル（background: #DA3633; color: #FFFFFF）に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s15_goal_create",
+    "location": "カテゴリチップ「仕事」「学習」",
+    "issue": "選択状態のチップに border: 1px solid #79C0FF が指定されているが、s12_task_addのチップ選択状態にはボーダーがなく、コンポーネントの視覚的ルールに一貫性がない。",
+    "suggestion": "選択状態のボーダーを削除し、背景色とテキスト色のみで表現する（s12と統一）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s12_task_add, s15_goal_create",
+    "location": "ハーフモーダルタイトル「タスクを追加」「ゴールを作成」",
+    "issue": "モーダルタイトル（20px）の letter-spacing に本文用の -0.02em が指定されている。見出し��の -0.5px を使用すべき。",
+    "suggestion": "letter-spacing: -0.5px に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "illustrator"
+  }
+]

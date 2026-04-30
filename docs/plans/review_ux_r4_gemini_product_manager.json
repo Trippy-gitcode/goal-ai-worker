@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "§5.0.1",
+    "issue": "「メール認証完了（ブラウザから戻ってきた時 or 同タブで認証成功） → S-03 オンボーディングに自動遷移」とあるが、別端末（スマホで登録し、PCでメールを開く等）で認証した場合、元の端末の画面を自動遷移させるにはポーリングやRealtime通信が必要だが、技術スタックや仕様にその記載がない。このままでは別端末認証時に元の画面がスタックする。",
+    "suggestion": "別端末での認証を考慮し、S-04画面に「認証を完了した場合はここをタップ」のような手動リロード/確認ボタンを追加するか、Supabase Realtimeによるセッション状態のポーリング仕様を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§1.4",
+    "issue": "「ブラウザバック: ボトムタブ間: 前タブ。history.pushState管理」とあるが、タブ切り替えのたびに履歴を積むと、戻るボタンでアプリを終了（バックグラウンド化）できず、タブ間の移動履歴を延々と遡ることになりUXが著しく悪化する（SPAのアンチパターン）。",
+    "suggestion": "ボトムタブの切り替えは `history.replaceState` を使用して履歴を積まないようにするか、ブラウザバック時は常にメインタブ（GROW）に戻り、GROWにいる場合はOSのデフォルト挙動（アプリを抜ける）に従うよう変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.1",
+    "issue": "課金プランの主な違いは「AIモデルの質（GPT-5等）」だが、TALK画面上に現在使用しているAIモデルの表示がない。ユーザーが課金によるアップグレードの価値を視覚的に実感しにくい。",
+    "suggestion": "TALK画面のヘッダー（またはAIバブルのアイコン付近）に、現在応答しているAIモデル（例: 「✨ GPT-5」）を小さく表示するUIを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§4.4, §15",
+    "issue": "応援やメッセージはFRIENDS画面の「お知らせ」に入るが、支払い失敗やシステムからの重要なお知らせ（週次レポート等）をアプリ内で後から確認する「通知センター」画面が存在しない。Push通知を見逃すと情報にアクセスできない。",
+    "suggestion": "ME画面のヘッダー右上などにベルアイコン（通知センター）を設け、システム通知とソーシャル通知を統合して履歴を確認できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2",
+    "issue": "project_v1.mdで「画像添付サイズ上限: 10MB」と定義されているが、10MBを超過した画像を選択した際のエラーハンドリング（UI挙動）が定義されていない。",
+    "suggestion": "10MB超過時は選択をキャンセルし、トーストで「画像サイズは10MB以下にしてください」と表示する仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.3",
+    "issue": "project_v1.md §3.2.1ではタスク所要時間が「5分刻み（5/10/15/.../120分）のプリセット選択」とあるが、ux_v1.md §2.3では「横スクロールチップ: 5/10/15/30/45/60/90/120分」となっており、20分や25分などが選択できず矛盾している。",
+    "suggestion": "チップ選択ではなく、ドラムロール式のピッカー（5分刻み）にするか、project_v1.mdの仕様をチップの選択肢に合わせて修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§6.1",
+    "issue": "ハーフモーダルについて「下スワイプ（50px以上）で閉じる」とあるが、モーダル内のコンテンツ（タスク一覧や長文メモ）を上部にスクロールしようとする操作（指を下へ動かす）と競合する。",
+    "suggestion": "「モーダル内のスクロール位置がトップ（scrollTop === 0）の時のみ、下スワイプでのクローズを許可する」という条件を明記する（overscrollハンドリング）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.2",
+    "issue": "MBTIには「50セッション中 N セッション完了」というプログレス表示があるが、AI理解メモ（5セッションごとに更新）には次の更新までの目安表示がないため、いつ更新されるかユーザーが把握できずモチベーションに繋がりにくい。",
+    "suggestion": "AI理解メモのカード内にも「次の更新まであとNセッション」というプログレス表示を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§9.1, §13.1",
+    "issue": "ログアウト時の未同期データ警告はあるが、オフライン時にタスクを完了し、同期される前にブラウザのタブを閉じる（またはリロードする）場合の警告が定義されていない。PWAではログアウトせずに離脱することが多い。",
+    "suggestion": "未同期データが存在する場合、`beforeunload` イベントをフックしてブラウザ標準の離脱確認ダイアログを表示する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§2.3",
+    "issue": "Undoスナックバーは「画面下部��ボトムタブの上16pxで固定表示」されるが、TALK画面等でソフトウェアキーボードが表示された際、スナックバーがキーボードの上に押し上げられるのか、隠れるのかが定義されていない。",
+    "suggestion": "キーボード表示時（visualViewportの高さ変化時）は、Undoスナックバーをキーボードの直上に配置するか、一時的に非表示にするかの挙動を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§13.2",
+    "issue": "project_v1.md §2.1で定義されているPremierプランの強力な課金動機「ショップ開始時のチケット遡及配布を保証」が、プラン管理画面（S-38）のプランカードに記載されていない。",
+    "suggestion": "S-38のPremierプランの説明に「※ショップ公開時に過去月分のチケットを遡及して付与します」という注記を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.2.1",
+    "issue": "MVP（v0.1.0）ではSHOP機能が未実装（Coming Soon）だが、アバター設定画面（S-41）で未所持アイテムをタップすると「SHOPで購入」の確認ダイアログが出てS-34へ遷移する。遷移先がComing Soon画面になるため、ユーザーの期待を裏切る。",
+    "suggestion": "MVP期間中は、未所持アイテムのタップ時にダイアログを出さず、アイテム名に「（v0.2.0で追加予定）」と併記して非アクティブ（タップ不可）にする方がUXが良い。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

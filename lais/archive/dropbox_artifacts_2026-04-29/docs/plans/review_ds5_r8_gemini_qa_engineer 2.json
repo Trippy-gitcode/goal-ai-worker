@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "依存チェーン図において、`e2e_fullflow_test.md` が `project_v1.md` の直下に配置されており、他の設計仕様書（ux_v1.md, design_system.md, reference_v1.mdなど）との依存関係が表現されていない。これは§18の依存関係マップ（各設計仕様書の変更時にe2eテストを更新する義務）と矛盾している。",
+    "suggestion": "§19.6の依存チェーン図を修正し、`e2e_fullflow_test.md` を全ての設計仕様書（HOW）に依存する最下流のノードとして再配置する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "Phase 0の完了基準として「競合5社の画面構成/遷移パターン/オンボーディング等の調査完了」を求めているが、ADV（AI）は競合アプリをインストールして内部画面を直接操作・閲覧する能力を持たないため、ハルシネーション（推測による捏造）が発生するリスクが極めて高い。",
+    "suggestion": "ベンチマーク実施プロセスにおいて、「POが実機スクショやストアレビューのテキストをADVに提供する」または「ADVはWeb検索可能な範囲で調査し、アプリ内部のUX/UIについてはPOのインプットを前提とする」という役割分担と制約を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4",
+    "issue": "必須ファイル一覧およびテンプレート名が `ux_v1.md` となっているが、§18の依存関係マップや既存のルールでは `ux_redesign_v*.md` と定義されており、ファイル命名規則に矛盾がある。",
+    "suggestion": "§18と§19でファイル名を統一する（例: 新規作成時は `ux_v1.md` とし、改修時に `ux_redesign_v*.md` とするルールを明記するか、全��� `ux_v*.md` に統一する）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.5",
+    "issue": "ヘッダー標準で「依存: {上流ファイルのパス + バージョン}」を定義しているが、上流ファイルがバージョンアップした際に、下流ファイルのヘッダーの依存バージョンを同期・検証する仕組み（スクリプトやcanopyゲート）が存在しないため、手動管理では確実に形骸化する。",
+    "suggestion": "仕様書間の依存バージョン不整合を検知するLinter（例: `review_gate.sh` の拡張）を追加するか、手動管理の限界を考慮してバージョン番号のハードコードを避け「最新版に依存」とする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.4",
+    "issue": "`ux_v1.md` の「§1 画面遷移」と `system_map.md` の「§3 画面遷移図」の責務境界が曖昧。両方に画面遷移が定義されると、Single Source of Truth（§1.1）の原則に反し、二重管理による矛盾が生じるリスクがある。",
+    "suggestion": "`ux_v1.md` は「ユーザー視点の操作フローと画面の繋がり」、`system_map.md` は���システム視点のルーティングと状態遷移（パラメータ渡し等）」と明確に定義し、図自体の正本はどちらか一方に限定する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力フォーマットのテーブルヘッダーに「Lais方針」という特定のプロジェクト名がハードコードされている。全プロジェクト共通のdev-systemテンプレートとして不適切。",
+    "suggestion": "「Lais方針」を「{アプリ名}方針」に変更し、テンプレートとして汎用化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.4",
+    "issue": "`project_v1.md` と `ux_v1.md` には「AIレビュー計画」のセクションがあるが、`design_system.md` や `reference_v1.md` には存在しない。§13.8の「全仕様書を同じ基準でレビューする」という方針に対して記載場所に一貫性がない。",
+    "suggestion": "全仕様書のテンプレートに「AIレビュー計画（またはレビュー結果）」セクションを追加するか、`project_v1.md` の§10で全仕様書のレビュー計画を統合管理するよう��記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

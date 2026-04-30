@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-101",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S02-6 .s02-next",
+    "issue": "position: fixed の CTA はブラウザ実装によっては独立コンポジットレイヤーに昇格せず、スクロールのたびに再描画コストが発生しうる（特に iOS Safari の一部環境）。",
+    "suggestion": "CTA を常時アニメーションさせない前提で、限定的にレイヤー化を促す。例: @supports (-webkit-overflow-scrolling: touch) { .s02-next { will-change: transform; } } または .s02-next { transform: translateZ(0); } を A/B 測定した上で導入。レイヤー増加のメモリコストも計測してバランスを取る。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-102",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02-0 .s02-onboarding",
+    "issue": "min-height: 100dvh はモバイルの URL バー表示/非表示に追随して頻繁に再レイアウト・再ペイントが発生しうる（動的ビューポート単位）。",
+    "suggestion": "安定優先の場面では 100svh を優先し、必要に応じて dφοh にフォールバックするパターンを検討。例: min-height: 100svh; @supports (height: 100dvh) { .s02-onboarding { min-height: 100dvh; } } もしくは min-height: min(100svh, 100dvh) を採用し、実機でスクロールパフォーマンスを比較計測。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-103",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02-5 .s02-avatars",
+    "issue": "gap: clamp(12px, 4vw, ...) はモバイルでツールバーの出入りに伴う vw 変化に反応し、スクロール時に不要な再レイアウトを誘発する可能性がある。",
+    "suggestion": "コンテナクエリ単位（cqw）が使える環境では 4cqw を優先し、フォールバックとして vw を使用。例: @supports (width: 1cqw) { gap: clamp(12px, 4cqw, var(--space-lg)); } または段階的メディアクエリでステップ変更にしてスクロール連動の連続再計算を避ける。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S02-5 .s02-avatar",
+    "issue": "box-shadow のトランジションは GPU 合成できず、選択状態の切替時に広い領域の再ペイントを引き起こす可能性がある（低速端末で顕著）。",
+    "suggestion": "ハイライトを擬似要素に分離し、opacity/transform でアニメーションしてコンポジタに載せる。例: .s02-avatar::after にリングを描画し、.s02-avatar-selected で opacity をトランジション。もしくは box-shadow へのトランジションを撤去し即時切替にする。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-105",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02-2 .s02-progress / .s02-progress-bar",
+    "issue": "進捗バーの border-color/background-color トランジションは変化時にペイントを伴う。ステップ数が将来的に増えると微小ながら影響が積み上がる。",
+    "suggestion": "ステップ数が固定少数（例: <= 5）のままなら現状維持で十分。増加の可能性がある場合は CSS グラデーションと 1 要素構成（擬似要素）で描画し、DOM とペイント対象を削減する案を検討。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "S02-6 .s02-next",
+    "issue": "calc(env(safe-area-inset-bottom, 0px) + 100px) は env() のフォールバック引数を未実装なブラウザで宣言全体が無効化され、bottom が適用されないリスクがある（互換性起因のレイアウト崩れ）。",
+    "suggestion": "フォールバックを段階指定にする。例: .s02-next { bottom: 100px; } .s02-next { bottom: calc(env(safe-area-inset-bottom) + 100px); } の順で記述し、env 非対応環境でも 100px 固定を担保。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S02-0 .s02-onboarding padding-bottom",
+    "issue": "padding-bottom に 52px（CTA 高さ）のマジックナンバーが直書きされており、UI スケール変更（OS のフォントサイズ拡大等）で実寸と乖離すると不要な再レイアウトやオーバードローを引き起こしうる。",
+    "suggestion": "CTA の計測に依存しない安全余白に変更するか、CSS カスタムプロパティで高さを 1 箇所定義し共通参照する（--s02-cta-height: 52px）。将来的に JS で実測して反映する場合は rAF/throttle で更新頻度を制御。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "S02-6 .s02-next",
+    "issue": "モバイルのソフトキーボード表示時、position: fixed の CTA が可視ビューポート外に押し出される/重なる環境があり、レイアウトの再計算が頻発して体感カクつきにつながる可能性がある。",
+    "suggestion": "VisualViewport API が利用可能な場合に限り、keyboard 開閉で bottom を動的に調整（requestAnimationFrame で同期）し、最小 16px の余白を確保。未対応環境は現状維持のフォールバックとする。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.5 グラスモーフィズム",
+    "issue": "グラス有効時のベース指定が不足。@supports内ではbackdrop-filterのみを設定しており、.glass-surface に background/border の指定がない。対応ブラウザでは背景が未設定のままになり、視認性や一貫性が崩れる恐れがある（fallback側にはbackground指定があるが、対応環境側に欠落）。",
+    "suggestion": ".glass-surface { background: var(--card-bg); border: var(--card-border); } を@supportsの内外どちらでも有効になる共通ルールとして定義し、@supports内ではbackdrop-filter系のみを追加する構成に統一する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.4 z-indexトークン",
+    "issue": "コメントで「トーストは最前面」と明記されている一方、数値では --z-toast:600, --z-tooltip:700 とツールチップの方が上になっている。実装時に重なり順が逆転し、トーストの可読性・操作性を損なう可能性がある。",
+    "suggestion": "ポリシーに合わせて数値を見直す（例: --z-toast: 700, --z-tooltip: 600）。もしくは「トーストは最前面」の文言を修正し、意図する前面要素を明確化する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§1.4 NGリスト（フォント） / §3.1 フォントファミリー",
+    "issue": "NGリストで「system-uiのみ」を強調しつつ、フォントスタックに 'SF Pro Text' / 'SF Pro Display' を明示指定している。ローカルフォント指定を許容するのか不明瞭で、実装判断が割れる恐れがある。",
+    "suggestion": "許容方針を明文化する。「カスタムWebフォントは禁止。ローカルに存在するプラットフォーム標準フォント名（SF Proなど）の明示指定は可」とするか、完全に system-ui のみのスタックへ簡素化する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-104",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§8.1 ボタン",
+    "issue": "Secondary/Danger(subtle)のhover/pressed表現がトークンと直接数値（opacity 0.18/0.24, 「強」など）が混在。accent用には --accent-subtle-hover/pressed があるが、semantic色（success/danger/warning/info）のsubtle版にhover/pressedトークンが未定義で、一貫し���実装が困難。",
+    "suggestion": "semantic用にも --{semantic}-subtle-hover / --{semantic}-subtle-pressed を追加し、表全体をトークン参照に統一する（数値・曖昧語「強」の記述は廃止）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§5.0 FOUC対策 / §9 CSSトークンブロック",
+    "issue": "FOUC対策で「CSSは html[data-theme=\"...\"] を :root 同等に」と明記されている一方、§9のデフォルトトークンは :root で定義。読み込み順によっては :root が data-theme の上書きになる等、意図しない優先度になるリスクがある。",
+    "suggestion": "読み込み順ポリシーを明文化（例: 1) :root=安全な初期値 2) html[data-theme=...] が必ず後勝ち）。もしくは Night Sky も含め全テーマを html[data-theme=...] で定義し、:root は最小限のダミー値に留める。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§2.3 セマンティックカラー既定値",
+    "issue": "本文で「既定値はダーク系テーマ用」と記しつつ、表では「ダーク系 既定 / ライト系 既定」の2列を提示しており、どちらを��定とするかが曖昧。",
+    "suggestion": "表現を「参照値（ダーク系/ライト系の推奨初期値）」等に改め、実際の適用は§5各テーマで必ず上書きする旨を明示する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.5 ボトムシート",
+    "issue": "オーバーレイにハードコード rgba(0,0,0,0.4) を使用しており、§5で導入した --scrim トークンが活用されていない。テーマ間での一貫性や視認性調整が難しくなる。",
+    "suggestion": "overlayは background: var(--scrim) に統一し、必要に応じてテーマ側で --scrim を調整できるようにする。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0 FOUC対策（theme-color）",
+    "issue": "meta name=\"theme-color\" をJSで同期する方針のみで、初回ペイント時にステータスバー色が一瞬ズレる可能性がある（特にモバイル）。",
+    "suggestion": "初期描画テーマに合わせた <meta name=\"theme-color\"> を静的に埋め込み、JSでの動的更新はテーマ変更時の追随用途に限定。必要ならテーマ別<meta>をサーバーレン��で出し分ける。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§8.1 ボタン",
+    "issue": "Danger(塗りつぶし)のhover/pressedに color-mix() を使用。2026年時点で主要ブラウザ対応は概ねあるが、古いWebViewや企業端末で互換性問題が残る可能性がある。",
+    "suggestion": "ビルド時に静的カラーを生成して --button-danger-bg-hover / --button-danger-bg-pressed に格納し、color-mix()は使用しない（または@supportsでフォールバックを用意）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§8.1 ボタン（Secondary）/ §5.2, §5.3 ライト系テーマ",
+    "issue": "ライト系テーマ（Dawn/Harajuku Light）でSecondaryボタンが「accent-subtle 背景 + accent テキスト」のみだと、周囲のsurfaceと視覚差が弱く「どれが押せるか」が直感的に分かりづらい場面がある（Habitifyで感じた“地味すぎて操作しづらい”不満の再発懸念）。",
+    "suggestion": "ライト系テーマではSecondaryに 1px border: var(--border-strong) を追加 or subtleアルファ値をやや強める（トークン化）など、可視的な affordance を一段強くするルールを追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-111",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.6 prefers-reduced-motion",
+    "issue": "全要素のtransition/animationを1ms!importantで一律短縮しており、フォーカスリングのフェード等、操作性に関わる最小限のトランジションまで“瞬断”になってしまう恐れがある（逆に気持ち悪さを感じる可能性）。",
+    "suggestion": "reduce時もUI理解に必要な最小限のトランジション（フォーカス/開閉など）には 80–120ms 程度を許容する例外ルールを設ける（クラスやdata属性で除外）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-112",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§6.1 アイコンスタイル",
+    "issue": "「SF Symbols風」と記載のみで、具体の入手元・配布形態・命名規則・ライセンス方針が未定義。実装側でアイコンセットをどう調達/拡張するか判断できない。",
+    "suggestion": "アイコンのソース（自作/OSS/購入）、配布形式（SVGスプライト/個別SVG）、命名規則（24pxベース/スネークケース等）、ライセンス遵守方針を簡潔に定義し、拡張時のガイドライン（新規アイコン追加のレビュープロセス）を追記する。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

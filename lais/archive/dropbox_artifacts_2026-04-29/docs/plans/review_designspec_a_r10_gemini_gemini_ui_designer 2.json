@@ -1,0 +1,13 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "はい、承知いたしました。モバイルアプリ専門のUIデザイナーとして、ご提示いただいたデザインシステム仕様書をレビューします。トークン体系の網羅性、命名規則の一貫性、コンポーネント定義の過不足、各状態のカバー、テーマ切替時の破綻リスクなどに注目し、定義すべきだが未定義のトークン、曖昧な記述、矛盾する指定を指摘します。\n\n以下にレビュー結果をJSON配列形式で示します。\n\n```json\n[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"CONTRADICTION\",\n    \"location\": \"5.0\",\n    \"issue\": \"Disabled状態の統一規定内の記述が自己矛盾しています。スタイル定義では色トークン（`--button-disabled-bg`等）による色差し替えを指示していますが、直後の禁止事項で「真の disabled を opacity 以外（グレースケール / 色差し替え）で表現すること」と記載されており、規定が破綻しています。\",\n    \"suggestion\":",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ui_designer"
+  }
+]

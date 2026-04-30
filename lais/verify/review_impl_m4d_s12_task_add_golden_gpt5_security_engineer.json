@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "アプリ全体のCSP（Content-Security-Policy）が未定義／後続対応と明記されており、XSS発生時の被害を限定できない恐れがある",
+    "suggestion": "Phase B-4に先行してCSPを定義・有効化する。例: default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; style-src 'self';（必要な場合のみ 'unsafe-inline' や nonce/strict-dynamic を検討）。inline event attributesは引き続き不使用。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "全体",
+    "issue": "Supabase 連携時のRLS（Row Level Security）要件・ポリシーが未記載。RLS未設定のまま公開すると他ユーザーのデータ読み書きが可能になる重大リスク",
+    "suggestion": "タスク用テーブルは必ずRLSを有効化し、\"owner_id = auth.uid()\" でSELECT/INSERT/UPDATE/DELETEを制限するポリシーを定義。サーバーサイドでの管理操作以外でservice_roleキーは使用せず、クライアントはanonキー＋RLS前���運用に統一する。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "全体",
+    "issue": "APIキー／シークレット露出防止の運用方針が明文化されていない（現状の実装内に露出は無しだが、将来のSupabase連携時に誤配置の恐れ）",
+    "suggestion": "clientバンドルにservice_role等の機密キーを絶対に含めない。anonキーは最小権限で使用。ビルド時にクライアントへ注入される環境変数を監査（例: Vite/Nextの公開接頭辞のみ）。CIでsecret scanを実行し、PR時にブロックする。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "全体",
+    "issue": "将来のタスク作成API（state-changing）に対するCSRF対策方針が未定義。Cookieベース認証の場合に脆弱となる可能性",
+    "suggestion": "Cookieセッション採用時はSameSite=Lax/Strict＋CSRFトークン（ダブルサブミットまたはサーバ検証）＋Origin/Referer検証を導入。Bearerトークン運用時も、XSS対策（CSP/エスケープ）を強化しトークン抽出リスクを低減。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "入力値（name/time/duration/memo）のサーバ側バリデーション・正規化方針が未記載。将来の永続化時に不正値混入やストアドXSSの温床になり得る",
+    "suggestion": "サーバ側で必須項目検証、長さ上限、許容集合（durationは定義済み配列のいずれか）、時刻の正規化（HH:MM, TZ考慮）、制御文字の除去等を実施。表示時は常にテキストノードとしてエスケープし、rich textを許容する場合はDOMPurify等でサニタイズ（サーバでも二重化）。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "XSSシンクの使用は現状なし（dangerouslySetInnerHTML/innerHTML未使用）。今後の機能追加で誤用されるリスクは残る",
+    "suggestion": "eslintルール（react/no-danger, security関連プラグイン）を追加し、dangerouslySetInnerHTML/Element.innerHTML/insertAdjacentHTMLの使用をCIでブロック。ユーザー生成コンテンツは必ずプレーンテキストとして描画する方針をコーディング規約に明記。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "handleSubmit内のconsole.logにユーザー入力（name/memo等）が含まれる。運用環境でPIIがログに残る可能性",
+    "suggestion": "ログは開発環境限定にする（NODE_ENVでガード、ビルド時にストリップ、あるいは専用loggerでレベル制御）。本番ではユーザー入力の生値を直接出力しない。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "全体",
+    "issue": "将来の独自APIやゲートウェイ利用時のCORS方針が未記載。ワイルドカード許可やcredentials併用の誤設定は情報漏えいに直結",
+    "suggestion": "Access-Control-Allow-Originは厳密なオリジン固定（複数環境は明示列挙）、Allow-Methods/Headersは最小化、credentials使用時はワイルドカード禁止、Vary: Originを付与。プリフライトのキャッシュも短めに設定し、定期的に監査。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "全体",
+    "issue": "grepレベルのシークレット露出確認結果: APIキー／トークン／認証情報のハードコードは検出されず良好",
+    "suggestion": "この状態を維持。pre-commit/CIでsecret scan（trufflehog/gitleaks等）を常時実行し、誤コミットをブロックする。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "プロフィール > セクション見出し「AI理解メモ」ラベル（11px, letter-spacing:1.5px）",
+    "issue": "日本語ラベルに英字用ラベル字間（+1.5px）を適用しており、文字間が空きすぎて読みのリズムと品位を損ねている。DS §3.4では日本語には letter-spacing:-0.02em を適用する規定",
+    "suggestion": "「AI理解メモ」を font-size:11px/line-height:var(--line-height-ja-heading) かつ letter-spacing:var(--letter-spacing-ja)（-0.02em）に変更。text-transformは不要、weightは400または600で明瞭に",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "「タスク」見出し（11px, letter-spacing:1.5px, text-transform:uppercase）",
+    "issue": "日本語見出しに英字用ラベル字間と大文字化スタイルを流用しており、行間・字間が日本語の可読性に合っていない（DS §3.4違反）",
+    "suggestion": "letter-spacing を var(--letter-spacing-ja)（-0.02em）へ、line-height を var(--line-height-ja-heading) へ。text-transform は撤去。必要なら font-weight:600 で階層を明確化",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s10_grow / s14_goal_detail / s15_goal_create",
+    "location": "行内テキストCTA「+ タスクを追加」「+ 最初のタスクを追加」",
+    "issue": "インラインテキストリンクが下線無しで色のみで可視化されている。DS §2.2ではインラインリンクは必ず下線併用の規定",
+    "suggestion": "text-decoration: underline を付与するか、二次ボタン（アウトライン/ピル）に昇格させ、色依存を避けつつ視認性と一貫性を確保",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "星屑の装飾カラー（#79C0FF / #58A6FF / #9BA7B4 / #E6EDF3 の混在）",
+    "issue": "ブランドの初見画面でアクセント(#79C0FF)とinfo系(#58A6FF)が混在し、主軸色が分散している。Night Skyの“静かな一色”の印象が弱まる",
+    "suggestion": "星屑は #79C0FF と #A5D6FF（accent系）＋ニュートラルのみで統一���、info色(#58A6FF)は不使用。ロゴ色との一体感を強め主役色を明確化",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "ヘッダー下ボーダー（color:#6E7681）",
+    "issue": "強ボーダー(--border-strong)相当で視線を強く止め、本文のリズムを阻害している。装飾線は --border が原則（DS §5.1色階層）",
+    "suggestion": "border-bottom を #484F58(--border)へトーンダウン。本文セパレータと競合しない軽さに調整",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s01_signin",
+    "location": "フォームラベル「メールアドレス」「パスワード」（14px, letter-spacing:未指定）",
+    "issue": "日本語の字間調整が未適用で、英字基準の0によりわずかに間延びする。DS §3.4では本文系日本語に -0.02em を推奨",
+    "suggestion": "各ラベルを letter-spacing: var(--letter-spacing-ja)（-0.02em）に。行間は var(--line-height-sm) で見出し/入力との間を整える",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "提案カード見出し行「タスクにしますか？」（11px, 灰色ラベル + アイコン）",
+    "issue": "見出しが小さく軽量で、直下の本文14pxとCTA群に埋もれて視線のアンカーが弱い。Z字の起点が曖昧",
+    "suggestion": "見出しを font-weight:600 かつ 12〜14pxへ引き上げ、アイコンの主張を-1段階下げる（opacityやサイズ）。色は灰色のまま、階層は太さで付与",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "完了タスク行（緑サブトーン背景 + 緑チェック + 緑メタ情報）",
+    "issue": "同一色相の多重強調で視線が過剰に吸われ、未完了タスクよりも目立ってしまう。完了は既知情報のため主役化は不要",
+    "suggestion": "カード背景を中立（surface）に戻し、左チェックとメタ情報のみ success色で示す、または success-subtle のアルファを1段弱める（例: 0.08）",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "ヘッダータイトル表記「TALK」vs ボトムタブ「TALK」",
+    "issue": "見出しの大文字/��文字ルールが画面間で揺れており（コード上は Talk、モックは TALK）、英字ラベルの統一感が弱い",
+    "suggestion": "英字UIラベルは大文字+ --letter-spacing-label(1.5px) に統一（または日本語「トーク」に統一）。タブとヘッダーで整合を取る",
+    "model": "GPT-5",
+    "persona": "manga_cover"
+  }
+]

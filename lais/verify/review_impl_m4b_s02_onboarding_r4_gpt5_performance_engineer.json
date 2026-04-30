@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-401",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "修正後の該当 CSS（変更ブロックのみ）",
+    "issue": "min-height: 100dvh はモバイルでアドレスバーの表示/非表示に追従して頻繁にレイアウト再計算・再描画が発生し、スクロール時のジッターやフレーム落ちにつながる可能性がある",
+    "suggestion": "レイアウト安定を重視する画面では 100svh を優先し、必要に応じて dvh をフォールバックする。例: .s02-onboarding{min-height:100svh;} @supports not (height:100svh){.s02-onboarding{min-height:100dvh;}} もしくは min(100svh, 100dvh) を用いて安定側を採用。実機でスクロール時の計測を行い選択する",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-402",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "修正後の該当 CSS（変更ブロックのみ）",
+    "issue": "フォーカス時にビューポートサイズの要素へ 3px の outline を描画するため、フォーカス遷移時に広域のペイント無効化が発生しうる（頻度は低いが低速端末で一瞬のチラつき要因）",
+    "suggestion": "体感で問題が出る場合のみ最適化を検討。例: ��ォーカスリングを内側の小さめラッパに限定、outline 幅を 2px に調整、あるいは focus-visible のみ維持しつつ paint プロファイルで無効化領域を検証して必要最小限にする",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-403",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ビルド結果",
+    "issue": "ルート分割された CSS (dist/assets/S02Onboarding-*.css) の配信キャッシュ/事前取得方針が資料から不明で、初回遷移時にウォーターフォールが発生する可能性",
+    "suggestion": "ハッシュ付きファイルに加えて Cache-Control: public, max-age=31536000, immutable を付与。次画面遷移が予測できる場合はルーターのヒントで <link rel=prefetch> や（即時必要なら）<link rel=preload as=style> を付与し往復回数を削減する",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-404",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "R4 レビュー観点（programmatic focus）",
+    "issue": "SPA 遷移直後の programmatic focus() がレンダーや再マウントごとに複数回走ると不要なスタイル再計算やスクロールジャンプを誘発する恐れがある",
+    "suggestion": "focus() 実行をルート変更時の一度に限定す���。React なら useLayoutEffect(() => { mainRef.current?.focus(); }, [location.key]) のように依存を限定し、二重実行（StrictMode など）を避けるガードを入れる",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-405",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "全体",
+    "issue": "フォントロード戦略（font-display、サブセット、preload）の記載がなく、初回表示での FOIT/FOUT や CLS、ネットワーク無駄取得のリスクが評価不能",
+    "suggestion": "Web フォント使用時は @font-face に font-display: swap/optional を指定、必要ウェイトのみを unicode-range でサブセット化し、クリティカルなフォントは <link rel=preload as=font type=\"font/woff2\" crossorigin> を付与。ルート単位で必要なフォントに限定して配信",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-406",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "全体",
+    "issue": "アバターグリッド等の画像最適化（適切な解像度・形式・遅延読込）の方針が資料から不明で、帯域/デコードコストの増大リスクを評価不能",
+    "suggestion": "img に loading=\"lazy\"、decoding=\"async\"、必要に応じて fetchpriority=\"low\" を付与。srcset/sizes で解像度可変配信、AVIF/WebP を優先。ヒーロー/ファーストビューに不要な画像は遅延読み込みに回す",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

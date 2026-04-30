@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "画面中央のコピー領域",
+    "issue": "「あなたの人生を、あなたらしく」という抽象的なコピーのみで構成されており、初めて見たユーザーが3秒以内に「AIタスク管理アプリ」であることを理解できない。第一印象での訴求力が欠如している。",
+    "suggestion": "ロゴの下に「AIと歩む、新しいタスク管理」など具体的な機能的価値を示すサブコピーを追加するか、背景にAIとの対話やタスク完了を連想させる抽象的なグラフィックを配置する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s01_signin",
+    "location": "画面下部「サインアップ」ボタン",
+    "issue": "主要CTAである「サインアップ」ボタンが非アクティブ時に背景色（#1C2128）に沈みすぎており、フォーム入力後の次のアクション位置への視線誘導が弱い。",
+    "suggestion": "非アクティブ状態でもボタンの存在感がわかるよう、わずかに明るいボーダーを追加するか、テキストのコントラストを上げてCTAのプレースホルダーとして機能させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s02_onboarding",
+    "location": "画面中央のアバター選択領域",
+    "issue": "アバターが暗い背景に沈んでおり、「一緒に成長するパートナー」としての魅力やワクワク感（ブランドDNA）が伝わらない。選択状態の表現も控えめすぎる。",
+    "suggestion": "選択中のアバターを少し大きく表示し、背景に柔らかなグロー効果（アクセント色）を追加して、パートナー決定の特別感と高揚感を演出する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスクリスト",
+    "issue": "未完了タスクに完了アクションのトリガー（チェックボックス等）が視覚的に存在しない。仕様書の「[完了⭕] [時刻]...」というレイアウトと矛盾しており、どう操作すればタスクが完了するのか直感的に不明。",
+    "suggestion": "全てのタスク行の左端にタップ可能なチェックボックス（未完了時は空の円）を常時表示し、アクションの可否と操作方法を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "画面上部のヒーロー領域",
+    "issue": "アバターサイズが48px（仕様80px）、EXPバーの高さが4px（仕様8px）となっておりUX仕様と矛盾している。結果としてゲーミフィケーションの訴求力が低下している。",
+    "suggestion": "仕様書通りにアバターを80x80px、EXPバーの高さを8pxに修正し、ユーザーの成長を実感させる視覚的ウェイトを確保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "「所要時間」の選択チップリスト",
+    "issue": "所要時間チップのリストが画面右端で唐突に切れており、横スクロール可能であるというアフォーダンス（視覚的ヒント）が欠如しているため視線が迷う。",
+    "suggestion": "リストの右端にグラデーションマスクをかけるか、最後のチップが半分だけ見えるように初期スクロール位置と余白を調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s14_goal_detail",
+    "location": "タスクリストのチェックアイコン",
+    "issue": "s10_growではタスクのチェックアイコンが右側（完了のみ）だったが、この画面では左側に配置されており、アプリ内でタスク操作のメンタルモデルが統一されていない。",
+    "suggestion": "アプリ全体でタスクのチェックボックス位置（左側推奨）と未完了時の表示スタイルを統一し、ユーザーの学習負荷を下げる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s15_goal_create",
+    "location": "画面下部「最初のタスクを追加」",
+    "issue": "「最初のタスクを追加」の導線が単なるテキストと小さなアイコンのみで構成されており、タップ可能領域が狭くCTAとしての視認性が低い。",
+    "suggestion": "テキストリンクではなく、破線のボーダーを持つフルウィズのボタン（「+ タスクを追加」）にするなど、タップ領域とアクションの存在を明確にする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内のボタン",
+    "issue": "チャットストリーム内において、タスク提案カードの「登録する」ボタンの視覚的重み（青ベタ塗り）が強すぎ、会話の縦の視線移動を阻害している。",
+    "suggestion": "カード内のボタンサイズを少し縮小するか、背景色をトーンダウン（例：アクセント色の透過背景）し、チャットUIの文脈に馴染むよう調整する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s30_me",
+    "location": "「AI理解メモ」セクション",
+    "issue": "「AI理解メモ」の文章がプレーンテキストの塊として配置されており、視覚的なメリハリがなく情報過密に感じる。スキャナビリティが低い。",
+    "suggestion": "重要なキーワード（「計画的」「午前中に集中力」など）をハイライトするか、箇条書きや要約バッジを用いて、パッと見で内容が把握できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  }
+]

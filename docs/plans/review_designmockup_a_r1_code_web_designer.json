@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash,s02_onboarding,s12_task_add,s15_goal_create",
+    "location": "Primary CTA ボタン (はじめる / 次へ / 作成)",
+    "issue": "Primary ボタンの背景が明るいスカイブルー（#7FBFF0 相当）+黒文字で描画されている。design_system.md §5.1 Night Sky テーマの --button-primary-bg は #1A5FC8 (濃青) + #FFFFFF (白文字) を規定しており、ブランドDNA「月明かりの下の静かさ」に反する昼間カラー指定になっている。",
+    "suggestion": "全 Primary ボタンを背景 #1A5FC8、文字 #FFFFFF に統一し、Night Sky テーマ指定と一致させる。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "AI 理解メモセクション",
+    "issue": "AI理解メモが角丸ボックスで明示的に囲まれている。CLAUDE.md および design_system.md のレイアウト原則「Open air / カードで囲まない / 余白で区切る」と矛盾する。",
+    "suggestion": "ボックス枠線を削除し、上下の余白 + 薄い divider 1本で区切るタイポグラフィ分離に変更する。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "ヘッダー左右アイコン",
+    "issue": "左がハンバーガー (≡)、右が (+) として描画されており、lais_ux_v1.md §3.1 TALK 画面で規定された「左=履歴アイコン (時計/リスト)、右=新規チャット」のアイコン語彙と一致しない。ハンバーガーはグローバルメニューを連想させ、履歴として誤認される。",
+    "suggestion": "左アイコンを時計 or 履歴リストのアイコンに置き換え、UX 仕様と一致させる。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s10_grow",
+    "location": "ヘッダー〜TODAY セクション間",
+    "issue": "アバター・レベル・EXP バー・TODAY 日付が連続して配置され、画面上半分の情報密度が高い。ブランドトーン「深呼吸できる」静けさとのギャップが大きい。",
+    "suggestion": "アバター下の余白を +24px、TODAY 見出し上にもう 1 セクション分余白を追加。EXP数値 (1,240/2,000) を折りたたみ or ME 画面へ移動する。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "ボタン行 (編集 / 削除 / 進め方を聞く / 詰まりを相談)",
+    "issue": "4 つのボタンが 2×2 グリッドで同等の重みに見え、主要アクションが不明。削除 (破壊的) と 進め方を聞く (AI 対話) を同じ視覚階層で並置するのは危険。",
+    "suggestion": "主: 進め方を聞く / 詰まりを相談 を Primary 行に。副: 編集 を ghost、削除は右上角のアイコン or 長押しメニュー経由に降格。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow,s20_talk,s30_me",
+    "location": "ボトムタブ",
+    "issue": "s10 では GROW のみピル化・他 2 つはアイコンのみだが、s20 では左 (マイク) / 中央 TALK ピル / 右 (person)、s30 では左 (lightbulb) / 中央 (chat) / 右 ME ピルと、非アクティブタブのアイコン語彙が画面ごとに異なる (マイク vs lightbulb)。デザインシステムの一貫性が崩れている。",
+    "suggestion": "非アクティブタブのアイコンを固定 (例: GROW=ろうそく/新芽, TALK=吹き出し, ME=人物)。全画面で同じ SVG を参照する。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s15_goal_create",
+    "location": "カテゴリチップ行",
+    "issue": "チップが 6 個あり、「その他」が 2 行目に 1 つだけ折り返して配置される。視覚的に半端で余白リズムを崩す。",
+    "suggestion": "4 個 + 4 個の 2 行レイアウト (例: 仕事/健康/学習/趣味 + 人間関係/その他/_/_) に固定、または横スクロールチップ列に変更。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "60% の大型数値",
+    "issue": "60% が画面幅に対して過大 (48pt 相当) で、ブランド原則「静かな安心感」とコントラストが強すぎる。達成率を誇示する広告的表現になり、ジャーナル UI のトーンから外れる。",
+    "suggestion": "数値サイズを 32pt 程度に落とし、数字色を accent ではなく foreground primary に。達成感はプログレスバーで補完。",
+    "model": "Code",
+    "persona": "web_designer"
+  }
+]

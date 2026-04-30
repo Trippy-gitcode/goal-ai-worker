@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_project_v1.md ヘッダー / dev_system_spec.md ヘッダー",
+    "issue": "依存バージョンが不整合。projectは dev_system_spec.md v3.1へ依存と記載だが、本ファイルのヘッダーはv3.0。変更点（§13.10-14, §19.6, §19.8）の適用可否が曖昧になる",
+    "suggestion": "依存元（lais_project_v1.md）のヘッダーを実体に合わせて更新（dev-system v3.2など正しい最新版を明記）。dev-system側もヘッダーversionを修正・確定。spec_changelog.mdに連鎖更新を記録し、§19.6の遡及チェックで全下流の依存表記を自動検証するスクリプトを導入",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md ヘッダー",
+    "issue": "UX仕様の依存先が lais_project_v1.md v1.3 だが、同梱のprojectはv1.4。Undo/7日ルール/退会フロー等の差分で参照ズレが発生し得る",
+    "suggestion": "lais_ux_v1.mdの依存表記をv1.4へ更新。更新に伴い本文中の『project §x.y参照』の差分が無いかgrepでチェックし、差分があれば該当箇所を修正。更新履歴��依存バージョン更新を明記",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §19.6（上流変更時の下流遡及チェック）",
+    "issue": "遡及チェックの運用責任（ADV）と手続きは定義されているが、自動検証の実装（スクリプト/ゲート）が存在せず、ヒューマン運用に依存して抜け漏れのリスクが残る",
+    "suggestion": "canopyに新ゲート（G10相当）を追加: dep_ref_check.shを実装し、(1) 全仕様書ヘッダーの依存ファイル+バージョンの実在/一致、(2) 上流のバージョン更新時に下流の依存表記が更新済みか、(3) §18の依存マップに列挙された必須ファイルの存在/命名の整合、を自動検証してFAIL化する",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §13.10（棄却検証ステップ）",
+    "issue": "『grep結果のみで棄却しない/Readで原文確認』は妥当だが、実施証跡の取り方が未定義のため、運用で形骸化しうる",
+    "suggestion": "review_gate.shに『棄却時は引用スニペット（±5行）とセクションアンカーを記録』の���須化を追加し、docs/plans/review_*.jsonにdismissed項目がある場合は\"evidence_excerpt\"と\"section_ref\"の有無も検証して不足時FAILにする",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §7（L2 影響範囲）/ §19（テストID命名）/ sub_testing.md §5（affected-tests.sh）",
+    "issue": "L2はtest_map.yamlのgrepキーに依存するが、テストタイトルに必須のgrepキー埋め込み（[GREP-KEY] ...）を自動検証するゲートがないため、キー欠落時に影響テストが実行されず誤ったALL PASSになる恐れ",
+    "suggestion": "title_lint.shを追加し、tests/e2e/specs配下のtest()タイトルにtest_map.yamlのキーが含まれるかを静的検証。欠落テストはFAIL。affected-tests.sh側でも抽出対象が空の時は、変更ファイルとtest_map.yamlのキーの相互整合を再チェックして不足をFAILにする",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md §2（test_lint.sh）/ dev_system_spec.md §9.4",
+    "issue": "テストアンチパターン検出に『waitForTimeoutの使用禁止』の自動検出が未実装。タイミング依存テストが温存され、フレークの温床になり得る",
+    "suggestion": "test_lint.shにAP-6として`waitForTimeout\\(|setTimeout\\(`検出を追加しFAIL化。代替としてwaitForSelector/waitForResponseの利用をガイドに追記し、違反箇所の自動リファクタ提案を出力",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md §4.2, §4.7 / sub_testing.md §2",
+    "issue": "G9（受入）はスクショ判定のみを根拠としDOM APIを禁止しているが、テストコード内でDOM属性（class/aria）だけに依存したパス判定を行っていても検出できない",
+    "suggestion": "test_lint.shに『受入判定に利用するspec（命名規則: *.acceptance.spec.* 等）では、`locator.getAttribute|evaluate`の過剰使用（しきい値: 総assertのX%超）をWARN→手動確認』の静的検査を追加。G9の完了報告にはスクショファイルと対応AT-IDの並記を必須化（mission_linter拡張）",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §4.1（G3 テスト項目数）/ sub_infrastructure.md canopy_common.sh",
+    "issue": "G3は`grep \"test(\"`で件数を算出しており、it()別名やパラメタライズ、describe.each等の構成で誤差が出る可能性",
+    "suggestion": "Playwright JSONレポーター結果（results.json）から��行テスト件数を取得する方式に変更し、期待値比較を行う。差分しきい値は±20%維持",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "COMPLETENESS",
+    "location": "lais_ux_v1.md §16（プラットフォーム互換性）",
+    "issue": "E5（デスクトップChrome/Edge）を『任意』としているが、各A〜G項目の対応方針がE1〜E4のみで具体化されており、E5の扱い（対象外/最小対応）の明記が不足。dev-system §19.8の『全項目に対応方針または対象外を明記』要件に対し粒度が粗い",
+    "suggestion": "各小項目（A1〜G3）に対しE5の列（もしくは注記）を追加し、『対象外』/『最小対応（例: 通知=ブラウザOS依存でOK、PWAは任意）』を明記。e2e_fullflow_test（アプリ側ファイル名に合わせて）へもE5の最小スモークを1-2件追加",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "dev_system_spec.md §19.1 / lais_project_v1.md §10.1",
+    "issue": "dev-systemの必須ファイル命名（例: docs/e2e_fullflow_test.md）と、Laisの実ファイル命名（docs/plans/lais_e2e_test.md）が乖離。§18の依存マップ/連鎖更新の自動化前提がファイル名ベタ指定のため、機械可検証性に影響",
+    "suggestion": "dev-system側を『命名パターン（正規表現）』基準に拡張（例: e2e.*test.*\\.md）。dep_ref_check.shで命名パターンの整合を検証。もしくはLais側のファイル名をテンプレ準拠に統一",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "sub_testing.md §1, §3（テスト分離/アンチパターン）",
+    "issue": "『各テスト自己完結』『データ汚染防止』は方針記述のみで、実効的な自動検知（同一テストユーザー/共通fixtureの不適切共有など）がない",
+    "suggestion": "test_lint.shに『テストデータ固定子の共有検出（例: 固定ユーザーID/メールの多用を検出）』『beforeAll内でのクロススペック共有state検出（単純静的スキャン）』をWARN追加。加えて、CIでテスト並列実行（--workers>1）を標準化し、データ競合の顕在化を促進",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "lais_project_v1.md §7.2（RLSルール列挙）",
+    "issue": "ナンバリングと記述順が一部入れ替わっており（③,⑤,④の順に見��る）、可読性が低下している",
+    "suggestion": "RLSの項番と箇条の順序を整列（①〜⑤の昇順）。参照整合のため§7.4のデータライフサイクル表の関連列にも同番号を付与",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

@@ -1,0 +1,11 @@
+--- /Users/futoshi/Desktop/goal-ai-worker/lais/archive/pre-xref-cleanup-2026-04-30/scripts/ios_smoke_runner.sh	2026-04-30 21:22:52
++++ /Users/futoshi/Desktop/goal-ai-worker/scripts/ios_smoke_runner.sh	2026-04-30 21:25:21
+@@ -26,7 +26,7 @@
+ #   exit   : playwright exit code (0 = PASS / non-0 = FAIL)
+ #
+ # Spec:
+-#   - lais/verify/dev_system_v34_package.md §2.25.21.4 (PATCH-LAIS-IOS-SMOKE-MANDATORY)
++#   - core_spec.md §7.3 cmd-realworld (legacy v34 spec §2.25.21.4, archived 2026-04-30)
+ #   - lais/playwright.ios.config.ts
+ #   - lais/tests/realmachine/ios-modal.spec.ts
+ 

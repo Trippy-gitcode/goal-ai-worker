@@ -1,0 +1,11 @@
+--- /Users/futoshi/Desktop/goal-ai-worker/lais/archive/pre-xref-cleanup-2026-04-30/scripts/test_assertion_validator.sh	2026-04-30 21:22:52
++++ /Users/futoshi/Desktop/goal-ai-worker/scripts/test_assertion_validator.sh	2026-04-30 21:25:21
+@@ -29,7 +29,7 @@
+ #   - 不足時は VIOLATIONS_CRITICAL に追記して BLOCK
+ #
+ # 仕様根拠:
+-#   - lais/verify/dev_system_v34_package.md §2.25.21.4 / §2.25.21.6（PATCH-TEST-GAP-LOGIN-REDIRECT-IMPL）
++#   - core_spec.md §7.3 cmd-realworld (legacy v34 spec §2.25.21.4 / §2.25.21.6, archived 2026-04-30)
+ #   - lais/verify/test_gap_login_redirect_review_2026-04-26.md（T1/T3/T4 採択）
+ 
+ set -eu

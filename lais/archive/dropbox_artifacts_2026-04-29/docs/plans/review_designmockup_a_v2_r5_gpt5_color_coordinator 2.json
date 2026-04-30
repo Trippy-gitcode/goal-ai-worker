@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部の文「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」リンク",
+    "issue": "インラインテキストリンクが色だけで示されており下線などの非色情報がない（WCAG 1.4.1 達成基準違反）。",
+    "suggestion": "インラインリンクには必ず text-decoration: underline を付与（design_system §2.2）。あるいは右端に矢印アイコンを追加して非色情報を併用。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "入力バーのプレースホルダー「メッセージを入力…」（背景 #161B22, 文字 #7A8593）",
+    "issue": "プレースホルダーが実質的なラベル役だがコントラスト比が約3.9:1と推定され、通常テキスト4.5:1を満たさない可能性が高い（WCAG 1.4.3）。",
+    "suggestion": "文字色を #9BA7B4 以上の明度に上げる、または上部に常時表示のラベル��設置。プレースホルダーは補助に留める。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayリスト各行の完了トグル（直径22pxの⭕）",
+    "issue": "タップターゲット最小サイズ44×44px未満（22×22px）。UX仕様でも⭕タップで完了としているため、ターゲット不足は誤タップ・操作不能の原因（WCAG 2.5.5）。",
+    "suggestion": "⭕の見た目は維持しつつ、透明パディングや::beforeを用いて実効タップ領域を44×44px以上に拡張（design_system §4.5）。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "左上の戻る矢印（SVG 20×20, クリック領域の明示なし）",
+    "issue": "タップターゲットが44×44px未満の可能性（コード上20px）。戻る操作の主要経路であるため可用性・到達可能性に影響（WCAG 2.5.5）。",
+    "suggestion": "アイコンを44×44pxのヒットボックスでラップし、視覚的には20pxのままでもOK。:focus-visible時のアウトラインも付与。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayリストの左ボーダー色（例:「ジムで筋トレ」= #E8A855）でのゴール/カテゴリ識別",
+    "issue": "ゴール/カテゴリの情報が色のみで伝達されている。色覚多様性や強制ハイコントラスト環境で識別困難（WCAG 1.4.1）。",
+    "suggestion": "行内にゴール名の小チップ/テキスト（例: 「・副業」）を併記、またはアイコン＋ラベルを併用。forced-colors時はラベル表示を強制。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "上部の5分割進捗インジケータ（バーの塗り分けのみ）",
+    "issue": "現在ステップが色の濃淡のみで表現されており、非色依存の手掛かりがない（WCAG 1.4.1）。",
+    "suggestion": "「2/5」の数値テキストを併記、または現在ステップを丸形・サイズ変更・ラベル付きにして色以外でも判別可能にする。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "タイトル直下のステータス「完了済み」（#3FB950, 背景 #161B22）",
+    "issue": "緑テキストのコントラストが約3.6:1と推定され、通常テキスト4.5:1を下回る（WCAG 1.4.3）。",
+    "suggestion": "ステータスは中立色(#E6EDF3)＋緑アイコン/バッジで表現、もしくは緑バッジ背景＋白文字（十分なコントラスト）に切替える。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "「削除」アウトラインボタンのテキスト（#F85149, 背景 #161B22）",
+    "issue": "赤テキストのコントラストが約3.5:1と推定され、4.5:1を満たさない（WCAG 1.4.3）。重要操作の可読性が不足。",
+    "suggestion": "--button-danger-bg（#DA3633）＋白文字の塗りボタンに変更、または赤テキストをより暗い赤に置換し4.5:1を確保。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "完了済みカード内のサブテキスト「達成・45分」（緑文字 #3FB950, 緑系tint背景 rgba(63,185,80,0.06)）",
+    "issue": "同系色（緑on緑tint）で局���的コントラストが低下。色弱環境で読みにくく、4.5:1未満のリスク（WCAG 1.4.3/色覚配慮）。",
+    "suggestion": "本文は中立色(#E6EDF3/#9BA7B4)で表示し、達成はチェックアイコンやラベルの形状で表す。色を使う場合は背景と十分な明度差を確保。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "小さな補助テキスト（例: s10_growの「1 / 4 completed」「1,240 / 2,000」、s20_talkのタイムスタンプ 11px）",
+    "issue": "日本語環境で11pxは可読性が低く、暗色背景では視認性がさらに低下（design_system §3.4の推奨行間は満たすがサイズが限界値）。",
+    "suggestion": "補助情報でも最小12–14pxを基準に引き上げ。どうしても縮める場合はコントラストを上げる（#9BA7B4以上）か余白で読みやすさを担保。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

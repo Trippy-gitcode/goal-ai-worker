@@ -1,0 +1,6 @@
+[
+  {"id":"R-001","severity":"HIGH","category":"HOOK","screen":"s10_grow","location":"ヒーロー領域","issue":"アバターが汎用シルエットで心を掴む要素弱い。","suggestion":"Phase B でキャラクター化候補。","model":"Code","persona":"ad_designer"},
+  {"id":"R-002","severity":"MEDIUM","category":"CONVERSION","screen":"s01_signin","location":"サインアップボタン disabled","issue":"初期 disabled 状態が明示的でなく離脱リスク。","suggestion":"同意後の色変化を視覚的補強。","model":"Code","persona":"ad_designer"},
+  {"id":"R-003","severity":"LOW","category":"MODAL","screen":"s12_task_add","location":"✕ボタン","issue":"B\"'群 #3 修正 ✅。右上配置で s13/s15 と一貫。","suggestion":"(問題なし)","model":"Code","persona":"ad_designer"},
+  {"id":"R-004","severity":"LOW","category":"CTA","screen":"s20_talk","location":"編集して登録","issue":"B\"'群 #5 修正 ✅。文言が意図明確化。","suggestion":"(問題なし)","model":"Code","persona":"ad_designer"}
+]

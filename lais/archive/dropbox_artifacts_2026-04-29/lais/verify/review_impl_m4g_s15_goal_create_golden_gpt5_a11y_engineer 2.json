@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "S15-5 期限ピッカー（S15GoalCreate.jsx .s15-readonly-with-icon）",
+    "issue": "div に aria-readonly=\"true\" を付与しており、WAI-ARIA で当該ロール（なし）に許可されていない state/property を使用。SC 4.1.2 (Name, Role, Value) 違反の恐れ。",
+    "suggestion": "aria-readonly を削除。将来的にインタラクティブにする場合は、button 要素で開閉する日付ピッカーにし、role/aria 属性を適正化する。静的表示のままなら、ラベルとの関連付け（aria-labelledby）だけを行い、余分な ARIA 属性は付与しない。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "S15-8 作成ボタン（S15GoalCreate.jsx/.css）",
+    "issue": "無効時に aria-disabled のみで disabled 属性を付与していないため、フォーカス可能のままで支援技術のアナウンスやフォーカス移動が不整合になる可能性。",
+    "suggestion": "isValid が false のときは disabled 属性も併用（<button disabled aria-disabled=\"true\">）。CSS は [disabled] セレクタにも対応。フォーカストラップの対象からも除外されるため、キーボード操作の一貫性も向上する。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "モーダル表示中の背景コンテンツ（全体構造）",
+    "issue": "aria-modal=\"true\" は付与されているが、背景側に inert や aria-hidden を付与していないため、特定のスクリーンリーダー環境で仮想カーソル移動により背景コンテンツを読み取れてしまう可能性。",
+    "suggestion": "モーダルオープン中は、モーダル以外のアプリルート（例: #app-main など）に inert と aria-hidden=\"true\" を付与し、クローズ時に戻す。これにより実装互換性が上がり、モーダルの隔離が強固になる。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "S15-6 カテゴリ群（fieldset/legend と .s15-category-row[role=group]）",
+    "issue": "fieldset/legend によるグルーピングと、子要素に role=\"group\" + aria-label の二重指定で、スクリーンリーダーに重複アナウンスされる可能性。",
+    "suggestion": "fieldset/legend があるため .s15-category-row から role=\"group\" と aria-label を削除。必要な補足説明は legend のテキスト（例: 「カテゴリ（複数選択可）」）側で完結させる。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "S15-5 期限ピッカー表示（S15GoalCreate.jsx）",
+    "issue": "「期限」ラベル（.s15-label）と値（.s15-date）のプログラム的関連付けがなく、視覚的な対応関係が支援技術に十分伝わらない可能性。",
+    "suggestion": "label 相当の要素に id を付与し、値側（.s15-date）に aria-labelledby で関連付ける、または dl/dt/dd 構造に置き換える。将来ボタン化する場合は button にし、aria-describedby で現在の値を関連付ける。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "全フォーカスリング（.s15-modal/.s15-close/.s15-input/.s15-category/.s15-add-task/.s15-submit）",
+    "issue": "フォーカスリングは実装済みだが、SC 2.4.11 Focus Appearance (Minimum, WCAG 2.2 AA) の要件（少なくとも 2 CSS px 相当の太さ、かつ 3:1 以上のコントラスト）を満たす数値根拠が仕様に未記載。",
+    "suggestion": "トークンで --focus-ring-width: 2px 以上を保証し、--focus-ring-color のコントラストを背景/隣接色に対して 3:1 以上となるよう計測値を仕様に追記。可能ならコントラスト実測表にフォーカス指標も追加。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "タップターゲット共通（.s15-close/.s15-category/.s15-add-task）",
+    "issue": "var(--tap-target-min) への依存があるが、本パッケージ抜粋に定義が見当たらない。未定義時はプロパティ無効化により 44×44 を下回るリスク。",
+    "suggestion": "CSS でフォールバックを付与（width: var(--tap-target-min, 44px); height/min-height: var(--tap-target-min, 44px)）。トークン側にも --tap-target-min: 44px を明示定義して安全網を二重化。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "フォーカストラップ（S15GoalCreate.jsx useEffect onTab）",
+    "issue": "タブ移動対象のフィルタが [disabled] のみを除外。無効ボタンを aria-disabled で表現している間はタブ対象に含まれてしまうため、ユーザーが“無効”要素へ移動できてしまう。",
+    "suggestion": "enabled フィルタに [aria-disabled='true'] も除外条件として追加し、実装を disabled 属性付与と合わせて二重にガード。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S10-9 トリガーボタン（S10Grow.jsx）",
+    "issue": "aria-haspopup=\"dialog\" は適切だが、aria-expanded はインライン展開領域ではないダイアログでは必須ではなく、支援技術の期待値とずれる可能性がある。",
+    "suggestion": "トリガーの状態通知が必要な特別な要件がなければ aria-expanded は削除し、aria-haspopup=\"dialog\" のみに簡素化。状態を伝えたい場合は、expanded を残すなら ARIA オーサリングプラクティスに従って一貫した運用を明記。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

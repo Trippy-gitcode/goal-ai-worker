@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §2.3 / project_v1.md §3.2.6",
+    "issue": "タスク完了の30秒UndoがUI上は保証されているが、サーバー側の確定/取り消し処理フローが未定義。完了は即サーバーに送信→EXP付与確定とあるため、Undo時にEXP/レベル/ゴール達成の巻き戻しをどう整合させるか不明で、競合や二重反映の危険がある。",
+    "suggestion": "タスク完了イベントをサーバーでpending(30秒)→commitに2段階化し、UndoはpendingをcancelにするAPIを定義。30秒経過で自動commit。ゴール達成も同じトランザクションに束ね、Undo時はボーナスEXPも取り消す。冪等IDで重複排除、最終状態のみ反映。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "ux_v1.md §1.2 遷移マトリクス",
+    "issue": "画面一覧にS-42（メール変更）/S-43（パスワード変更）があるが、主要遷移マトリクスに遷移パスが記載されていない。",
+    "suggestion": "S-37 設定からS-42/S-43への矢印を遷移マトリクスに追加し、戻り先と戻りアニメーションも��記する。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §3.1/§3.5（TALKヘッダー）",
+    "issue": "TALKヘッダーに☰（履歴ドロワー）と🕐（履歴）の2つの履歴導線があり、どちらが何を開くかが重複・曖昧。ドロワーの起動は☰ボタン限定とあるが、🕐の挙動が定義されていない。",
+    "suggestion": "履歴導線を1つに統一するか、役割を明確化する（例: ☰=設定/その他、🕐=履歴モーダル）。現仕様では🕐を削除し、☰のみで履歴ドロワーを開く設計に統一する。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §3.2.3 / ux_v1.md §2.3",
+    "issue": "projectで定義された習慣の「今日やる」ボタン（手動でTodayに追加）がUX仕様に存在せず、操作場所やUIが未定義。",
+    "suggestion": "Todayセクションの習慣行に「今日やる」アクションを追加（溢れメニューやチップ）。S-11詳細パネルにも同等のアクションを設置してToday表示フラグを切り替え可能にする。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4（S-36 QRスキャン）",
+    "issue": "カメラアクセス拒否/OS権限未許可時の代替パスとエラーメッセージが未定��。QR必須機能が実質利用不能になる恐れ。",
+    "suggestion": "初回拒否時は理由付きモーダルを表示し[再試行]/[設定で許可]導線を提示。代替としてシェアリンク入力/タップで友達追加へ誘導。権限がない場合はQRスキャンボタンにツールチップも付与。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §5.3 / ux_v1.md §4.4",
+    "issue": "projectでは「送信済みリクエストのステータスも表示」とあるが、UXでは受信側の承認待ちのみ定義で、送信済みリクエスト一覧や状態変更（キャンセル）が未定義。",
+    "suggestion": "FRIENDS画面に「送信済み」タブ/折りたたみを追加し、相手名/送信日/有効期限/キャンセルボタンを表示。期限切れの扱い（自動消去）とUI更新も明記する。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.1/§3.2（画像添付）",
+    "issue": "画像添付のサイズ上限(10MB)超過やアップロード失敗時のUXが未定義。失敗時の再試行やクライアント圧縮の有無が不明。",
+    "suggestion": "10MB超過時は���ライアントで自動リサイズ提案（長辺1200px）または明示エラーを表示し再選択を促す。アップロード進捗/失敗時の[再試行]ボタン、キャンセルUXも定義する。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（📝新規チャット）/§3.5",
+    "issue": "新規チャットの開始概念（スレッド化）の説明が不足。現在の会話と新規会話の違い、未送信テキストがある状態での挙動が未定義。",
+    "suggestion": "会話はスレッド単位で管理と明記。📝タップで空スレッドを作成→入力欄へフォーカス。未送信テキストがある場合は確認ダイアログで下書き保存/破棄を選択可能にする。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.4（タスク並び替え）",
+    "issue": "Today内の手動並び替えが開始時刻ソートを上書きするとあるが、日またぎやタスク属性変更時の優先度、永続化の粒度（当日限り/恒久）が不明。",
+    "suggestion": "並び順は「当日ビュー限定」で保存し、翌日リセットと明記。開始時刻の変更やOverdueの出現時は自動ソートを再適用し、ユーザーが再度手動上書きできる仕様にする。保存先（サーバー/ローカル）も定義。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §13.2（プラン管理）",
+    "issue": "Stripe Checkoutキャンセル/失敗時や戻りURL不達時のUXが未定義。ユーザーは変更が反映されたか判断しづらい。",
+    "suggestion": "Checkoutからの戻りでsuccess/canceledを検知し、success→トースト+即時反映、canceled→「変更は行われませんでした」バナー表示。失敗時の再試行導線も明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §5.1（オンボーディング）",
+    "issue": "5ステップ全必須でスキップ不可は、自己成長に関心が薄い初見ユーザーには心理的ハードルになりうる。",
+    "suggestion": "Step2〜5に「後で」を明示し、最短で開始できるオプションを用意。初回GROW到達時に1分チュートリアル（コーチマーク）で要点のみ案内する。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §4 / ux_v1.md 全般",
+    "issue": "「EXP/冒険EXP/称号/Phase/ヒアリング/DISCOVER」など、一般ユーザーには意味が取りづらい用語が多い。",
+    "suggestion": "初回表示時に各用語へiアイコン/ツールチップで一言説明を付与（例: 冒険EXP=新しい挑戦に対するごほうび）。設定で「用語ヘルプを常に表示」トグルを用意。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §0 / §1〜§3",
+    "issue": "UXベンチマークの知見は方針に反映されているが、各判断に紐づく根拠リンク（どの課題をどう回避したか）のトレーサビリティが画面仕様に埋め込まれていない。",
+    "suggestion": "主要判断点（オンボーディング長さ、罰なし設計、タブ最小構成など）に「Benchmark Ref:#」を注記し、§0.3の対応番号へ逆引きできるようにする。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §5.3 / ux_v1.md §11.4",
+    "issue": "iOSで通知を使うにはPWAインストールが必須だが、一般ユーザー視点では理由が分かり���くい。",
+    "suggestion": "通知有効化フロー内に「iOSではホーム画面追加が必要な理由」の簡潔な説明と成功チェック（テスト通知送信）を組み込み、未インストール時はリマインドを出す。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  }
+]

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "ux_v1.md §5.0.2",
+    "issue": "パスワードリセットのリンクをメールで送信する画面（S-05）は定義されているが、メール内のリンクをタップした後に遷移する「新しいパスワードを入力・設定する画面」が定義されていない。このままではパスワードの再設定フローが完結せず、実装不能。",
+    "suggestion": "画面一覧に「S-06 パスワード再設定（フルスクリーン）」を追加し、メールリンクからの遷移フロー、新パスワード入力、保存処理、およびログイン画面（S-02）への遷移フローを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §13.1",
+    "issue": "project_v1.md §6.4で「ユーザーは設定画面から『対話履歴を削除』を実行可能」とプライバシー要件が定義されているが、ux_v1.mdの設定画面（S-37）のメニュー一覧に該当項目が存在しない。GDPR等のデータ削除要件を満たせなくなる。",
+    "suggestion": "S-37の[アカウント]または[プライバシー]セクションに「AI対話履歴を削除」を追加し、タップ時の確認ダイアログと削除実行フロー（Supabaseからの物理削除）を定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §7.3",
+    "issue": "TALK画面の履歴ドロワー展開に「左端から右スワイプ」を割り当てているが、iOSのPWA（およびSafari）では画面左端からのスワイプはOSレベルで「ブラウザバック」として処理されるため、ドロワー展開と競合して誤動作（意図せぬ画面遷移）を引き起こす可能性が極めて高い。",
+    "suggestion": "ドロワー展開のスワイプトリガーを「画面左端」ではなく「画面中���付近からの右スワイプ」にするか、エッジスワイプでの展開を廃止してヘッダーの「☰」ボタンタップのみに限定してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §5.0.3",
+    "issue": "project_v1.md §7.2で「Magic Link（パスワードレス）」をサポートすると定義されているが、ログイン画面（S-02）にマジックリンクを要求するボタンやフローが存在しない。",
+    "suggestion": "ログイン画面（S-02）に「パスワードなしでログイン（マジックリンク）」ボタンを追加し、メールアドレスのみを入力して認証リンクを送信するフローを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §4.4 / §15",
+    "issue": "「リンクをシェア」で生成されたURL（シェアリンク）を相手がタップした際の挙動が未定義。アプリ未インストール時のフォールバックや、アプリ起動時のディープリンク処理（友達リクエスト確認画面の表示）がないと、リモートでの友達追加が機能しない。",
+    "suggestion": "ディー���リンク（例: /add-friend?token=...）のルーティング先として「友達リクエスト確認画面（S-35相当）」を定義し、未ログイン/未インストール時のWebフォールバック画面（ストア/PWAインストール誘導）の仕様を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §3.3 / ux_v1.md §3.2",
+    "issue": "画像のEXIF（位置情報など）削除をサーバー側で行う設計になっているが、通信経路上にPII（個人を特定できる情報）が流れるリスクやサーバー負荷を考慮すると、プライバシー・バイ・デザインの観点から不十分。",
+    "suggestion": "PWAのクライアント側（Canvas API等）で画像のリサイズとEXIF情報のストリップを行ってから、サーバー（Supabase Storage）に送信するよう仕様を変更してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.4",
+    "issue": "友達に送信したメッセージを自分の意志で削除・取り消す機能がない。誤送信した場合のプライバシーリスクやUX上の不安が残る。",
+    "suggestion": "メッセージ行のロングプレスメニューに、自分のメッセージの場合は「削除する」を追加し、論理削除または物理削除するフローを定義してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "SECURITY",
+    "location": "project_v1.md §5.4 / ux_v1.md §4.4",
+    "issue": "シェアリンクがSNS等で拡散された場合、24時間以内であれば無数の承認待ちリクエストが届き、FRIENDS画面がスパムで埋め尽くされるリスクがある。",
+    "suggestion": "トークンを「1回使い切り（またはスキャン回数上限付き）」にするか、承認待ち一覧に「すべて拒否」ボタンを追加してスパムリクエストを一括処理できるようにしてください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §4.2",
+    "issue": "PROFILE画面の基本情報が「フォーカスアウト時にAPI送信」となっているが、モバイル端末のソフトウェアキーボードでは「フォーカスアウト」の概念が直感的でなく、ユーザーが「保存されたか」不安になりやすい。",
+    "suggestion": "キーボードの「完了(Return)」キー押下��にも保存処理を走らせることを明記し、入力フィールドの横にチェックマーク等の視覚的な保存完了インジケータを一時表示する設計を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_expert"
+  }
+]

@@ -1,0 +1,123 @@
+# app_config.yaml テンプレート（dev-system v3.4 確定 + v3.5 案 D' 対応）
+#
+# 新設: 2026-04-24（CHAIN-UPDATE-DISPATCH PART3 ADV 領域分）
+# 親仕様:
+#   - dev_system_spec.md §6.4 / §21 §C4.5 / §17 仕様書構成
+#   - sub_hflow_protocol.md §5 オプトアウト（PD-110）
+#   - sub_external_review_protocol.md §7 ユーザープラン別設定（LP-032）
+# 使い方: `init_app.sh` で各 Lais プロジェクト側の app_config.yaml として雛形コピー
+# 実値は各プロジェクトのポリシーに合わせて上書き
+
+# --- バージョン管理 ---
+app:
+  name: "Lais"                     # アプリ識別子（例: Lais / goal-ai 等）
+  version: "0.0.0"                 # セマンティックバージョニング（G1 バージョン同期対象）
+  env: "dev"                       # "dev" | "staging" | "prod"
+
+# --- ビルド / デプロイ ---
+build:
+  cmd: "npx vite build"            # deploy.sh Step 1 で eval 実行（§21 §C4.1）
+  out_dir: "dist"                  # ビルド成果物ディレクトリ
+deploy:
+  frontend_cmd: "npx wrangler pages deploy dist"
+  backend_cmd: ""                  # 該当なしは空文字
+  url: "https://lais-dev.pages.dev"
+
+# --- Hフロー承認ゲート（PD-110、sub_hflow_protocol.md §5）---
+hflow:
+  enabled: true                    # true=発火時に承認ファイル必須 / false=全体スキップ（ソロ開発向け）
+  disabled_notice: "Hフロー承認ゲート無効。ソロ開発専用設定、本番デプロイ前に true 戻し推奨"
+  enabled_for_tests: false         # 将来拡張候補（v3.5+）、auth テストファイル追加時 opt-in
+
+# --- 外部レビュープロトコル（v3.5 案 D'、sub_external_review_protocol.md §7）---
+review:
+  # モデル階層の運用モード切替（LP-032、Max プラン vs 従量課金）
+  model_tier: "opus_unified"       # "opus_unified"（Max 推奨）| "cost_optimized"（従量）
+                                   # opus_unified: 全 subagent で Opus 4.7 統一、品質上限
+                                   # cost_optimized: Haiku/Sonnet/Opus 階層化で API コスト 50-70% 削減
+
+  # pre-commit 外部 API クロスチェック（sub_external_review_protocol.md §3）
+  pre_commit:
+    enabled: true
+    diff_size_small_threshold: 30        # 行数、これ未満は skip
+    diff_size_large_threshold: 300       # 行数、これ以上は同期ブロック
+    # RISK_PATHS（sub_hflow_protocol.md §1 と共有 SSOT、該当時は常に同期）
+    risk_paths_sync_required: true
+
+  # ガードレール（sub_external_review_protocol.md §3.3）
+  guardrail:
+    monthly_limit_usd: 30              # 月次上限、超過で commit ブロック
+    daily_limit_usd: 5                 # 日次上限、超過で skip 移行
+    consecutive_failure_threshold: 3   # 連続失敗数、到達で 1h 自動停止
+    pause_duration_sec: 3600           # 自動停止継続時間（秒）
+    state_file: "~/.dev-system/guardrail_state.json"
+
+  # post-commit 監査ログ（sub_external_review_protocol.md §5）
+  post_commit:
+    enabled: true
+    feed_dir: "lais/review_feed"       # 日別 YYYY-MM-DD.md に追記
+    archive_after_days: 30             # 月末 _archive/YYYY-MM/ にローテ
+    critical_summary_file: "_critical.md"
+
+# --- テスト戦略（§21 §C3.4 L1/L2/L3 SSOT 参照）---
+test:
+  l1_smoke_timeout_sec: 120            # L1 スモーク 2 分
+  l2_affected_timeout_sec: 600         # L2 影響範囲 5-10 分
+  l3_full_timeout_sec: 1800            # L3 フル 30 分（週次）
+  playwright_project: "mobile"         # 既定プロジェクト
+
+# --- canopy 設定 ---
+canopy:
+  gates_required:                      # 必須ゲート（§21 §C3.1）
+    - G1
+    - G2
+    - G3
+    - G4
+    - G5
+    - G6
+    - G7
+    - G8
+    - G9
+    - G10
+    - G11
+    - G12
+    - G13
+    - G14
+    - G15
+    - G16
+    - G17
+  # G18（chain_update_audit）は v3.5 以降で追加、初期は未有効化
+
+# --- シークレット管理（§C6.3）---
+secrets:
+  env_file: ".dev.vars"                # 本番は .env.prod 等と分離
+  gitignore_required_patterns:
+    - ".env*"
+    - "*.key"
+    - "*.pem"
+    - "credentials.json"
+  # G10 で正規表現検出: sk-*, AIza*, ghp_*, BEGIN PRIVATE KEY
+
+# --- ランタイム依存（§3.7 runtime_preflight、PATCH-15）---
+runtime:
+  required:
+    - "python3"
+    - "jq"
+    - "yq"
+  preflight_script: "scripts/lib/runtime_preflight.sh"
+
+# --- ブランド（プロジェクト固有、上書き必須）---
+brand:
+  primary_color: "#..."                # Lais: 各画面 design_spec 参照
+  typography: "..."                    # design_system.md 準拠
+  # ブランド DNA 変更は PO 承認必須（§2.25.3）
+
+# --- 連絡先 / エスカレーション ---
+escalation:
+  po_contact: "futoshi"
+  adv_domains:                         # approval_git_author 検証（PATCH-14 + PATCH-19 Bug H）
+    - "*claude_ai*"
+    - "*claude@*"
+    - "*anthropic*"
+    - "*noreply@anthropic.com"
+    - "*noreply@github.com"

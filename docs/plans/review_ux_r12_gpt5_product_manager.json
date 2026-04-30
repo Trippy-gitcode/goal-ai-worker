@@ -1,0 +1,302 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §9.1（オフライン） + project_v1.md §7.3（PWA同期）",
+    "issue": "オフラインでタスク完了を多数記録→翌日以降に同期した場合の「日次EXP上限（JST 4:00リセット）」への割当て基準が未定義。クライアント側の完了時刻（ローカル時刻）をどのタイムゾーンでサーバーが解釈し、どの日の上限に算入するかが明記されておらず、EXPの過少/過多付与や想定外の上限超過抑止が発生し得る。",
+    "suggestion": "クライアントは各完了イベントにUTCタイムスタンプ（ms精度）とクライアントTZオフセットを付与。サーバーはUTC→JSTで日付バケットに正規化し、各バケットごとに日次上限300EXPを適用。同期時はイベントIDの冪等制御に加え、日付を跨ぐ場合の割当優先順位（古い日付から充当）と最大バックデート許容期間（例: 72時間）を明記。UX上は同期後のEXP反映トーストに「◯/◯分を反映」等の簡易サマリーを表示して齟齬感を抑制。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md §1.1（S-13定義） vs §2.3（タスク編集UI）",
+    "issue": "S-13は「タスク編集（ハーフモーダル）」として画面IDが定義されている一方、§2.3ではS-11詳細パネル内のインライン編集に変更されており、S-13の存在意義と遷移が矛盾している。",
+    "suggestion": "どちらかに統一。推奨: MVPはS-11内インライン編集に統一し、S-13を画面一覧から削除（将来の独立編集モードはv0.2.0以降で再導入）。併せて遷移マトリクス（§1.2）と戻りナビ（§1.4）のS-13参照を削除/更新。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md §3.3（タスク提案カード）",
+    "issue": "単一タスク提案では「編集はS-12モーダル（チャット内インライン編集は不採用）」と明記している一方、複数タスク提案の「個別に編集」はカード内アコーディオン展開（インライン編集）になっており、編集パターンが矛盾。",
+    "suggestion": "編集UIを統一。推奨: 複数タスクの「個別に編集」も各タスクを順にS-12モーダルで編集（ウィザード表示）。または単一/複数ともにカード内簡易編集に統一（ただしフィールド数とモバイル視認性の再検証が必要）。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §3.1（TALKヘッダー）/ §3.5（S-21）",
+    "issue": "TALKヘッダーに「☰（履歴ドロワー）」と「🕐（履歴）」の2つの履歴導線が併記されており、どちらがS-21を開くのか曖昧。§7.3では左端スワイプ無効・☰で開くと記載。",
+    "suggestion": "履歴導線は1つに統一。推奨: ☰をメニューではなく『履歴』アイコンに置換（時計アイコン）し、ラベル付きにして可視性を上げる。S-21は必ずそのアイコンから開く旨を明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §2.3（週N回習慣 UI）/ project_v1.md §3.2.3",
+    "issue": "「週N回」のNの許容範囲・既定値・入力UI（ステッパーかプリセットか）が未定義。N=0/7などの端値や、週リセット直前に未達の扱い（連日強制表示の上限）も明確でない。",
+    "suggestion": "Nの範囲は1〜6（週7は毎日に統合）に制限。UIはプリセット（1/2/3/4/5/6）＋説明文。残り必要回数>残日数時は毎日表示で固定。Today強制表示が何連続まで続くかの定義（週末まで）を用語例とともに明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §3.2.5（日次リセット）/ lais_ux_v1.md §2.3（開始時刻/予定日）",
+    "issue": "サーバーはJST一律で日次リセットだが、UIに表示する時刻（開始時刻/リマインド/日次サマリー/通知時刻）がローカル時刻かJSTかの定義が明確でない。海外ユーザーやTZ跨ぎで認知的不一致が発生する恐れ。",
+    "suggestion": "UI表示・ユーザー入力は常にローカル時刻、日次リセット・集計はJSTで行う方針を明記。リセット時刻はUI上で『リセット: 明日 04:00 JST』とTZ付き表示。将来のTZ対応方針（v0.2.0でユーザーTZ設定）も追記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §7.4（ドラッグ&ドロップ）",
+    "issue": "Todayの手動並び替えを導入しているが、開始時刻による自動ソートへ戻す手段、手動順の保存スコープ（当日限定か、予定日を���いで保持か）、オーバーライド優先順位が未定義。",
+    "suggestion": "Todayヘッダーに『並び替え: 時刻順 / 手動』トグル＋『手動順をリセット』を追加。保存スコープは『日付単位』（当日のみ）に限定を明記。開始時刻更新時は時刻順モードのみソート反映、手動モードでは反映しないと定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §3.2（メッセージ送信）",
+    "issue": "テキストメッセージの最大文字数・改行上限、連投制御（スパム防止）が未定義。入力欄の自動伸長は4行だが送信可能な上限がないと崩れやバッファ過多の恐れ。",
+    "suggestion": "テキスト上限を4,000字（UTF-8基準）に設定、改行は最大100行相当で警告。一定時間内の送信レート制限（例: 10秒で最大3通、超過でクールダウン表示）をUXに明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §3.3（画像添付）/ lais_ux_v1.md §3.2",
+    "issue": "1メッセージあたりの添付枚数（単数限定か複数可か）が未定義。複数可の場合のUI（サムネイル並び/削除/順序）や合計サイズ上限も不明。",
+    "suggestion": "MVPは1メッセージ=1枚に制限を明記（10MB上限）。将来拡張時は最大3枚、合計20MB、サムネ並び横スクロール＋長押し削除を定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §2.3（開始時刻ピッカー）",
+    "issue": "時刻ピッカーの形式（24時間/AM-PM）、分刻みの既定（5分刻みは所要時間のみ定義済）が未定義。",
+    "suggestion": "開始時刻は24時間表記、分刻みは5分に統一。ロケール依存はv0.2.0以降。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1（プラン）/ §2.2（ショップ未実装）/ lais_ux_v1.md §13.2（プラン管理）",
+    "issue": "MVPでショップ未実装のためPremierの実利が弱く、アップグレード動機が薄い。UX上もPremierの価値訴求（限定フレーム装備・優先サポート・チケット遡及）がS-38に十分表現されていない。",
+    "suggestion": "S-38のPremierカードに『今すぐ使える特典（限定フレーム/優先サポート）』を大きく���記し、購入確認ダイアログにも『チケットはショップ開始時に遡及配布』注意書きを入れる。GROW/TALKで対話上限付近時のアップセルはPremierよりProを主訴求（PremierはComing Soon要素を伴うため）。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §2.1, §6.1",
+    "issue": "AI原価と価格設計の整合性が不透明。Basic/Pro/Premierで高度モデル（GPT-5/Claude/Gemini）を日次100/300/1000回まで提示するが、トークン単価・平均使用長・画像解析コスト（Vision）・マルチモデルルーティングの配分前提が明記されていない。",
+    "suggestion": "app_config.yamlにプラン別の想定原価モデル（平均トークン/回、画像添付率、ルーティング比率）と損益分岐（MAU×ARPU前提）を記載。UXには上限到達前の警告（90%でバナー）と長文送信時の『要約送信』サジェストで原価圧縮の導線を追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1, §4.5",
+    "issue": "Pay-to-Win回避のため全プランで冒険EXP上限を同一にしているが、Freeでも育成���核心が十分体験できるため、課金動機がAI回数/質のみに依存。ゲーミフィケーションが収益に繋がりにくい懸念。",
+    "suggestion": "非Pay-to-Winを維持したまま、装飾・称号・限定アニメーション等の『見た目の上位体験』を早期にMVPへ部分導入（例: Pro以上でアバター演出の追加演出、限定称号フレーム）。S-41に『上位プラン限定』の外観項目スロットを用意し、将来のSHOPと接続。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §8.6（演出キュー）/ §3.4（TALKでのレベルアップ）",
+    "issue": "GROW内の演出優先度は定義済だが、TALK内で冒険EXP→同時に他画面でゴール達成/レベルアップが重なるケースのグローバル優先順位が未定義（画面跨ぎ発火のデデュープ/再生順）。",
+    "suggestion": "グローバル演出キューを導入し、優先度: タスク完了 > ゴール達成 > レベルアップ > 冒険検出 > ログインボーナス として直列化。画面外で発火した演出は『次回該当画面表示時に1回だけ再生』のフラグ管理を明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §13.2（Stripe戻り）",
+    "issue": "Stripe Checkoutの復帰時にUIローディングは定義済だが���CTAタップ時の即時フィードバック（押下状態/スピナー）や二重タップ防止が未記載。",
+    "suggestion": "『このプランに変更』押下で即時ボタンをローディング化＋disabled。cancel戻り時もボタン状態を解除する明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §1.3（遷移アニメーション）/ §1.4（戻り）",
+    "issue": "ブラウザのハードリロード（F5/URL直打ち）でモーダル表示中やS-14詳細中に再読み込みした場合の復元方針（state再構築 or 安全なデフォルト復帰）が未定義。",
+    "suggestion": "常に安全側に倒す方針を明記：リロード時はハーフモーダル/ドロワーは閉じた状態で親画面に復帰。タスク/ゴールの一時編集データはlocalStorageに10分保持して復元ダイアログを表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §4.4（FRIENDS お知らせ）/ §5.3（通知）",
+    "issue": "FRIENDSの『お知らせ』に表示する未読件数の内訳（応援/メッセージ/リクエスト）や既読化の条件（一覧表示時/個別タップ時）が未定義。",
+    "suggestion": "未読カウントは種別合算、一覧を開いた時点で既読化。個別既読制御が必要なら各行タップで既読、スクロールのみでは未読維持と明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §13.3（通知設定）",
+    "issue": "『プッシュ通知を許可』トグルON時のOS権限拒否後の再試行動線（再度許可ダイアログを出せない旨の説明/設定アプリ誘導）が簡略で、具体手順・再チェック処理が未記載。",
+    "suggestion": "拒否時は『設定アプリで許可が必要』の詳細手順に加え、『権限状態を再チェック』ボタンを設置。iOS PWA時はホーム追加ガイドへの導線を常時表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §10（アクセシビリティ）/ §7.4（ドラッグ&ドロップ）",
+    "issue": "Today並び替えのキーボード/スクリーンリーダー代替操作（ドラッグ不可環境向け『上へ/下へ』移動など）が未定義。",
+    "suggestion": "各タスク行に『上へ』『下へ』隠しボタン（tabフォーカス時に表示、aria-label付与）を追加。ボタン押下で順序を1つ入れ替えられるよう定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "lais_ux_v1.md §2.4（ゴール作成/カテゴリ）",
+    "issue": "ゴールカテゴリの色/アイコン規則、複数選択時の表示優先順位が未定義。",
+    "suggestion": "design_system.mdにカテゴリごとの色/アイコンを定義し、複数選択時は先頭選択カテゴリの色を採用する旨を明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §3.5（チャットスレッド）",
+    "issue": "スレッド自動命名の衝突時（同名多数）や、上限100超で自動アーカイブする際のユーザー通知/復元導線が未定義。",
+    "suggestion": "同名は末尾に連番付与。自動アーカイブ時は初回のみ『古いスレッドを自動アーカイブしました』トーストを表示。復元は『アーカイブ』一覧（簡易画面）から戻せる設計を追記（MVPは削除でも可と明記）。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-022",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais_ux_v1.md §1.1（画面一覧）/ §1.2（遷移マトリクス）",
+    "issue": "画面IDはS-00〜S-44まで定義済だが、遷移マトリクス図でS-42/43/44への分岐が『設定（S-37）』からのテキスト記載に留まり、図的な遷移線・戻り動作の記述が簡略で視覚的一貫性が弱い。",
+    "suggestion": "S-37配下にS-38/39/40/42/43/44の右スライド遷移を図式で追記。各詳細画面の戻り先=常にS-37であることを明記し、history.popの挙動も合わせて補足。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §0（UXベンチマーク）→ §2/3/4",
+    "issue": "ベンチマークで指摘した『機能過多→主目的阻害（TickTick）』への対策は3タブ最小化で反映されているが、GROW内の情報密度（Today＋Goals＋Upcoming）が端末最小幅時に密集化するリスクへの具体レイアウト指針が不足。",
+    "suggestion": "小型端末時（≤374px）はTodayとGoalsのセクション折りたたみをデフォルトON、Upcomingはアイコンのみのヘッダーに省略。ヒーロー領域のさらなる圧縮（レベル/EXPを1行テキスト化）ルールを追記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §6.1（マルチAI）/ lais_ux_v1.md §9.3（AI対話上限）",
+    "issue": "Premierのフェアユース上限（1,000回/日）到達時のUI（文言・復帰案内・サポート誘導）が未定義。",
+    "suggestion": "上限到達時はPro相当の説明文に差し替えた専用バナー（『フェアユース上限に達しました。リセット 04:00 JST』）を表示し、継続的に上限到達するユーザー向けに『長文を要約して送信』チップを提案。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §15（通知遷移）",
+    "issue": "通知タップで遷移した先で該当要素（タスク/メッセージ）をスクロールで表示する仕様はあるが、対象が既に削除/期限切れ・アーカイブ済みの場合のフォールバックが未定義。",
+    "suggestion": "対象が見つからない場合は親画面（GROW/FRIENDS）に着地し、上部に『対象は見つかりませんでした（削除/期限切れの可能性）』の情報バナーを3秒表示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.5（通知設計）/ lais_ux_v1.md §13.3",
+    "issue": "デフォルト通知ONが多く、初期体験で通知過多に感じる可能性。Finchの『待っていてくれる安心感』は担保しつつ、過干渉感の回避が必要。",
+    "suggestion": "オンボーディングStep5完了後に簡易通知チューニング（タスクリマインダー/日次サマリーのみ初期ON、それ以外はONボタンにソフト提案）を検討。『通知のおすすめ設定』1タップ適用も有効。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais_ux_v1.md §8.1（タスク完了演出）/ §8.2（レベルアップ）",
+    "issue": "Reduced Motion配慮はあるが、音声/バイブのフィードバック方針（有無/設定）が未定義。習慣アプリ利用シーンでは無音志向のユーザーも多い。",
+    "suggestion": "設定に『触覚/サウンドフィードバック』トグルを追加（初期OFF）。完了時は短い触覚（Vibration API）を任意で有効化できるよう明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-028",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §1.4（ターゲット）/ §2（ビジネスモデル）",
+    "issue": "価格訴求のコピー/根拠（他社比較・価値訴求）がUX側に反映されていない。Plan管理画面での比較優位（AI品質・上限・特典）が瞬時に理解しづらい。",
+    "suggestion": "S-38に『Free/Basic/Pro/Premier比較表（3行）』の簡易UIを追加（AIモデル/回数/特典の3軸）。各カードにも『このプランに最適な人』の1行コピーを追記して、自己選択の助けにする。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-029",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "lais_ux_v1.md §2.3（Overdue）",
+    "issue": "「明日に延期」を誤タップした場合の取り消しはトーストのアクションのみだが、グローバルUndo設計に統一されていない。",
+    "suggestion": "『明日に延期』もUndoスナックバー（30秒）に統一。タスク完了Undoと排他かスタックかの優先順位を明記（推奨: 直近操作のみ）。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-030",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4 vs §4.5（注記はux_v1.md §15 末尾で指摘済）",
+    "issue": "レベル計算式の内部矛盾（Lv1→2が100 vs 1,000）はUX側で注記されているが、現状のままだと実装時に誤実装リスクが高い。",
+    "suggestion": "project_v1.md §4.5の誤記を修正（Lv1→2=100）。UX/設計/DBの初期値・テストケースも100基準に統一。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  }
+]

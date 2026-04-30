@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§1.1, §2.3, §2.4, §4.2",
+    "issue": "S-13(タスク編集)、S-16(ゴールタスク追加)、S-41(アバター設定)の画面IDが定義されているが、具体的な画面構成と操作フローが欠落している。特にS-41はMVPのPremier特典（フレーム装備）を提供するために必須だが、UIが定義されていないため実装不能。",
+    "suggestion": "S-13とS-16はS-12(タスク追加)のUIを流用する旨を明記し、初期値のセットと保存アクションを定義する。S-41はME > PROFILEからの遷移後の画面構成（プレビュー領域＋所持フレーム一覧＋装備/外すボタン）を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§2.3, §8.1",
+    "issue": "project_v1.mdで定義された「EXP日次上限（300EXP）」に到達した状態でタスクを完了した際のUXフィードバックが未定義。EXPバーが伸びないだけでは、ユーザーがバグと誤認し不満に繋がる。",
+    "suggestion": "上限到達時のタスク完了では、EXPフロートテキストを「本日上限」等のグレーアウト表示にし、トーストで「本日のEXP獲得上限（300）に達しました。明日また冒険しましょう！」と表示する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§2.3, §2.4, §6.1",
+    "issue": "S-12(タスク追加)やS-15(ゴール作成)などのハーフモーダルで、テキスト入力中にbackdropの誤タップや下スワイプで閉じてしまうと、入力データがロストする。",
+    "suggestion": "入力フィールドに変更がある状態でモーダルを閉じようとした場合、確認ダイアログ（「編集内容を破棄しますか？」）を表示し、誤操作によるデータロストを防止する仕様を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§4.4",
+    "issue": "「お知らせ（未読あり時）」がFRIENDSサブタブ内に配置されている。ソーシャル以外のシステム通知（運営からのお知らせ、支払い失敗等）を表示する場所がなく、友達がいないユーザーは通知に気づきにくい。",
+    "suggestion": "お知らせ（通知センター）をFRIENDSタブから分離し、ME画面のヘッダー右上（⚙️アイコンの隣）にベルアイコンとして配置するか、GROW画面のヘッダーに配置する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§6.1, §7.3",
+    "issue": "ハーフモーダルの下スワイプ閉じと、モーダル内コンテンツのスクロール操作が競合する可能性がある。リストを上部へスクロールしようとしてモーダルが閉じてしまう誤爆リスクがある。",
+    "suggestion": "下スワイプで閉じる条件を「ドラッグハンドル部分でのスワイプ」または「コンテンツのスクロール位置がトップ(scrollTop === 0)の時の下スワイプ」に限定する旨を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§8.6",
+    "issue": "演出キュー（同時発火時の優先順位）に「冒険EXP」が含まれていない。TALK画面で冒険EXPが発生し、同時にレベルアップ条件を満たした場合のアニメーション順序と待機条件が不明。",
+    "suggestion": "§8.6の演出キュー表に「冒険EXP」を追加し、TALK画面内での冒険EXP演出完了後にGROW画面でのレベルアップ演出が発火する（または非同期で処理される）ロジックを定義する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§3.2",
+    "issue": "TALK画面の画像添付について、複数枚の同時添付が可能かどうかが未定義。また、複数枚の場合のプレビューUIが不明。",
+    "suggestion": "「画像添付は1メッセージにつき1枚まで（MVP）」と制約を明記するか、複数枚対応の場合はプレビュー領域の横スクロール等のUI仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§2.3",
+    "issue": "タスク完了時のUndoスナックバーが消える条件として「別���作でスナックバーが消えた場合」とあるが、「別操作」の具体的な定義が曖昧。",
+    "suggestion": "「別操作」を具体的に定義する。例：「画面遷移（タブ切替含む）」「別のタスクの完了（新しいスナックバーによる上書き）」。単なる画面スクロールでは消えないことを明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

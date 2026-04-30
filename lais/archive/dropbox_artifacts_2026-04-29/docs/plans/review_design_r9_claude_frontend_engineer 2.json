@@ -1,0 +1,4 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"FEASIBILITY","location":"§8.1/§8.3/§8.7 テキスト色のテーマ分岐","issue":"『ダーク系=--accent / ライト系=--text-primary』という記述は、CSS では if 分岐できず、`:root[data-theme=...]` セレクタで個別に上書きする必要がある。実装者が CSS で書く際の具体的な方法が未定義。","suggestion":"§8.1 Secondary に『実装時は各テーマで `--on-accent-subtle` トークンを定義し、Secondary テキストは `var(--on-accent-subtle)` を参照する』と追記。各テーマに `--on-accent-subtle` トークンを定義。","model":"Claude Opus 4.6","persona":"frontend_engineer"},
+  {"id":"R-002","severity":"LOW","category":"BEST_PRACTICE","location":"§5 全テーマ","issue":"`--focus-ring` トークン（box-shadow 値）が各テーマに残存しているが、v0.9 で outline 方式に統一したため未使用。","suggestion":"§5 各テーマから `--focus-ring` 定義を削除するか、コメントで『廃止予定 v1.0』と注記。","model":"Claude Opus 4.6","persona":"frontend_engineer"}
+]

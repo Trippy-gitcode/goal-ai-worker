@@ -1,0 +1,32 @@
+[
+  {
+    "id": "R-001",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/App.jsx",
+    "issue": "ランドマークではない `div` 要素に `aria-label` が使用されています。`role` 属性を持たない汎用的な `div` に付けられた `aria-label` は、多くのスクリーンリーダーで読み上げられず、アクセシビリティ上の意図が伝わらない可能性があります。",
+    "suggestion": "この `div` がアプリケーション全体を表現するコンテナである場合、`role=\"application\"` を付与することを検討してください。ただし、`role=\"application\"` はキーボード操作の挙動を大きく変更するため、アプリケーションの性質を考慮した上で慎重に導入する必要があります。現状の静的な画面では、この `aria-label` は削除しても影響は軽微です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "lais/src/components/screens/S00Splash.jsx",
+    "issue": "`<main>` 要素に `aria-label` が設定されています。`<main>` はそれ自体がランドマークであり、通常ページに一つしか存在しないため、アクセシブルネーム（`aria-label`による名前付け）は不要です。スクリーンリーダーが「メイン、Lais スプラッシュ」のように冗長に読み上げる可能性があります。",
+    "suggestion": "画面の目的は `<h1>Lais</h1>` によって十分に伝わるため、`<main>` 要素の `aria-label=\"Lais スプラッシュ\"` 属性は削除することを推奨します。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "Web Server Configuration (General)",
+    "issue": "HTTPレスポンスヘッダーにクリックジャッキング対策（例: `X-Frame-Options` や `Content-Security-Policy: frame-ancestors`）が設定されていない場合、悪意のあるサイトの `iframe` 内にアプリケーションが埋め込まれ、ユーザーが意図しない操作をさせられる可能性があります。",
+    "suggestion": "本コンポ���ネントは状態を変更しないため直接的なリスクは低いですが、アプリケーション全体のセキュリティを向上させるため、Webサーバーまたはリバースプロキシの設定で `X-Frame-Options: DENY` または `Content-Security-Policy: frame-ancestors 'none';` といったHTTPヘッダーを送信し、意図しない埋め込みを禁止することを強く推奨します。これはフロントエンドのコードではなく、インフラ側の設定項目です。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "security_engineer"
+  }
+]

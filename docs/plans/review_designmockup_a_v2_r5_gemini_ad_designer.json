@@ -1,0 +1,79 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "画面中央のテキスト群",
+    "issue": "「あなたの人生を、あなたらしく」という抽象的なコピーとロゴのみで構成されており、初めて見た人が3秒以内に「AIと成長するタスク管理アプリ」というコアバリューを全く理解できない。汎用的なツールに見えてしまう。",
+    "suggestion": "サブタイトルを具体的なベネフィット（例：「AIと歩む、新しいタスク管理」）に変更するか、背景にアバターや成長を示す抽象的なグラフィックを配置して第一印象の訴求力を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "下部の「サインアップ」ボタン",
+    "issue": "ボタン背景色（#1C2128）とテキスト色（#7A8593）のコントラスト比が低く（約2.3:1）、WCAG AA基準（4.5:1）を満たしていない。また、視覚的に非アクティブ（Disabled）状態に見え、主要CTAとしての機能を果たしていない。",
+    "suggestion": "ボタン背景をプライマリアクセントカラー（#1A5FC8など）に変更し、テキストを白（#FFFFFF）にして視認性とCTAとしてのクリック意欲を向上させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "中央のアバター選択エリア",
+    "issue": "「一緒に成長するアバターです」と感情的な繋がりを求めているにもかかわらず、アバターのイラストが小さく（100x100pxの枠内に余白が多い）、キャラクターへの愛着やワクワク感が湧きにくい。",
+    "suggestion": "選択中のアバターを画面上部に大きくプレビュー表示するエリアを設けるか、選択肢のアイコンサイズ自体を拡大してキャラクタ��の表情やディテールを強調する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクション下部の「+ タスクを追加」",
+    "issue": "画面内で最も頻繁に行う主要アクション（CTA）であるはずの「タスク追加」が、細いテキストリンクのみで表現されており、視線が誘導されず迷子になりやすい。",
+    "suggestion": "テキストだけでなく、左側に「+」アイコンを丸い背景色付きで配置する、あるいはリスト下部にPill形状のボタンとして独立させるなど、CTAとしての視覚的ウェイトを上げる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "「所要時間」の選択チップ群",
+    "issue": "横スクロール可能なUI要素だが、右端のチップが画面内に綺麗に収まっているように見え（見切れがない）、直感的に横スクロール可能であること（アフォーダンス）が伝わりにくい。",
+    "suggestion": "右端にグラデーションのフェードアウト効果をかけるか、初期表示で右端のチップが意図���に半分見切れるレイアウト幅に調整してスクロールを促す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s13_task_detail",
+    "location": "下部のアクションボタン群",
+    "issue": "競合アプリにはない本アプリのコア価値であるAI機能（「振り返りを聞く」「次につなげる」）が、汎用的な「編集」「削除」ボタンの下に同等の視覚的ウェイトで配置されており、独自性が埋もれている。",
+    "suggestion": "AI関連のアクションボタンにキラキラアイコン（✨）を追加し、背景色やグラデーション（ブランドガイドラインの範囲内）で強調して、プライマリCTAとして視線を誘導する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "「AI理解メモ」セクション",
+    "issue": "ユーザーにとって最も興味を惹くはずの「AIが自分をどう見ているか」というパーソナライズされた情報が、単なるプレーンテキストのベタ打ちになっており、読むモチベーションを喚起しない。",
+    "suggestion": "テキストを薄いアクセントカラーの背景を持つカードで囲む、またはAIアイコンや引用符の装飾を添えて、「特別なインサイト」としての視覚的価値を高める。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ad_designer"
+  }
+]

@@ -1,0 +1,252 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §3.2（TALK メッセージ送信）/ project §3.3（画像添付仕様）",
+    "issue": "画像添付のサイズ上限/対応フォーマットのUI上のバリデーション・エラー表示・アップロード進捗が未定義。>10MBや非対応MIME時の挙動が不明。",
+    "suggestion": "添付時に即時バリデーション（拡張子+MIME）→失敗時はフィールド下にインラインエラー（「10MB以下のJPEG/PNG/GIF/WebPのみ」）。アップロード中はサムネイル上にプログレスリング+キャンセル（✕）。リサイズ/EXIF削除失敗時の再試行/中止UIも追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux §3.1（TALK ヘッダー）",
+    "issue": "ヘッダーで☰=履歴ドロワー、🕐=履歴と二重に「履歴」を示しており役割が重複。ユーザーがどちらを使うべきか不明確。",
+    "suggestion": "役割を分離：☰=ドロワー（会話一覧/S-21）、🕐=「最近の提案プロンプト」など別機能に変更、または🕐を削除。ツールチップ/aria-labelで機能を明示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project §4.5（EXP上限）/ ux §2.3（タスク完了）/ §9.2（API失敗）",
+    "issue": "日次EXP上限到達時のタスク完了処理が未定義。API失敗と同一扱いだと完了がロールバックされる恐れがある（タスクは完了すべきで、EXPのみ付与なしが正）。",
+    "suggestion": "サーバー応答を3種に定義：①完了+EXP付与 ②完了+EXP付与なし（上限到達/重複防止）③失敗。②のときはチェック状態維持+トースト「本日のEXP上限に達しました。タスクは完了として記録されました」。UIロールバックは③のみ。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §2.4（S-14 ゴール詳細）",
+    "issue": "ゴール削除時の子タスク（紐づく単発タスク）の扱い（連鎖削除/紐付け解除/アーカイブ）が未定義。誤って子タスクが消失するリスク。",
+    "suggestion": "確認ダイアログに影響範囲を明記。「このゴールを削除します。紐づくタスクは[削除/紐付け解除]します」オプションを提供。デフォルトは紐付け解除推奨。結果の戻し不可も明示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §3.2.3（週N回ロジック）/ ux §2.3（Today操作）",
+    "issue": "projectで定義の「週N回習慣をTodayに手動追加（『今日やる』）」のUIがuxに未反映。",
+    "suggestion": "Upcomingの習慣グループ各行に［今日やる］ボタンを追加し、Todayに一時表示。キャンセル操作も用意。表示ルールと優先度（自動表示との競合）を明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §7.4（並び替え）/ §2.3（Today表示）",
+    "issue": "手動並び替えと開始時刻による自動ソートの優先順位・新規タスク挿入位置のルールが未定義。",
+    "suggestion": "優先順位を明示：手動並び替え適用中は固定。新規タスクはリスト末尾に追加し「時間順に戻す」アクションで自動ソートへ復帰。手動順のリセットUIも追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux §3.5（チャット履歴/S-21）/ §13.1（対話履歴削除）",
+    "issue": "会���単位の削除と「対話履歴を削除（全削除）」の関係/影響範囲が不明。AI理解メモ再計算や保存期間（90日）との関係も不明確。",
+    "suggestion": "会話削除=当該スレッドのみ論理削除/非表示（AI理解メモには影響なし）などスコープを明示。全削除はAI理解メモをリセット。各操作の説明文をUIに併記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §5.3（送信済みリクエスト表示）/ ux §4.4（FRIENDS）",
+    "issue": "送信済み（自分発）友達リクエスト一覧/状態（保留/期限切れ/キャンセル）のUIが欠落。",
+    "suggestion": "FRIENDSに「送信済み」折りたたみセクションを追加し、各項目に［キャンセル］を実装。期限切れ時の自動消滅/再送導線を定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §4.4（S-36 QRスキャン）",
+    "issue": "カメラ権限拒否時の代替フローが未定義（設定アプリでの許可誘導/シェアリンク入力等）。",
+    "suggestion": "権限拒否時は説明モーダル+［設定で許可］リンク（iOSは案内テキスト���。代替として「シェアリンクをペーストして追加」を用意。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "project §2.1（Premier フェアユース）/ ux §13.2（プラン管理）",
+    "issue": "Premierの「無制限」に対しフェアユース上限（1,000回/日）の表示がプラン管理UIに無いと誤認を招く。",
+    "suggestion": "Premierカードに「無制限（公正利用の目安: 1,000回/日）」と明記。注釈ツールチップで詳細説明を追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "project §2.4（日割り/予約）/ ux §13.2（プラン管理）",
+    "issue": "アップ/ダウングレードの料金調整（proration）・適用タイミングの説明がUIに不足し、課金トラブルの原因になりうる。",
+    "suggestion": "「アップグレードは即時適用。残日数分は自動差引」「ダウングレードは月末適用」を各カード下の注記/確認ダイアログに明記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project §2（収益モデル）/ ux 全体",
+    "issue": "���ーミフィケーション（EXP/アバター進化）が課金動機に弱く、AI質/回数の差だけではアップグレード動機が限定的になりうる（MVP時Premier特典も限定）。",
+    "suggestion": "非ペイ・トゥ・ウィンのQoL特典を追加：DISCOVERのディープ分析更新頻度アップ、TALKでの画像添付枚数上限/履歴保持期間拡張、アバター装飾の先行アクセス、ME>PROFILEでの高度レポートなど。文脈内アップセル（対話上限付近/高難度相談時）も設計。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project §2.1（AI回数と原価）",
+    "issue": "Free 20回/日の設定は魅力的だが、長文/画像投下時のAPI原価リスクが未管理。サステナビリティ懸念。",
+    "suggestion": "メッセージ長/画像数/解像度に上限（例: 2,000文字/1枚/長辺1200px）とトークンバジェットを設け、短文用軽量モデルの自動ルーティング比率最適化。過剰利用時は「明日以降に」ソフト制限を明示。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux §4.3（ヒアリングセッション）",
+    "issue": "ヒアリング中断/再開（TALK離脱→復帰）の状態保持が未定義。セッションが失われると不満に繋がる。",
+    "suggestion": "進行状況を会話コンテキストに保存し、再訪時に「ヒアリングを再開（3/5）」ボタンを提示。明示的な［中断する］アクションも追加。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux §9.1（オフライン時のME/FRIENDS）",
+    "issue": "ソーシャルメッセージ送信のオフライン挙動が未定義（送信キュー/無効化/警告）。",
+    "suggestion": "オフライン時は送信ボタンを無効化しバナー表示（「オンラインで送信できます」）。将来は送信キュー+再送リトライを検討。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §4.4（QRスキャン）/ §10（アクセシビリティ）",
+    "issue": "QR検出時のバイブレーション（Vibration API）の配慮が未定���。感覚過敏ユーザー向けの無効化手段がない。",
+    "suggestion": "設定に「触覚フィードバックを減らす」を追加し、prefers-reduced-motionと連動してバイブを抑制。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §8.6（演出キュー）/ §3.4（TALK内レベルアップ）",
+    "issue": "画面横断（TALKで冒険EXP→GROWで演出再生）時のグローバル演出キューの競合ルールが未定義（通知→画面遷移→演出の順序）。",
+    "suggestion": "グローバル演出キューを実装し、発火順（タスク→ゴール→レベル→冒険）と画面優先（現在画面で簡易演出/次回GROWでフル演出）を一元管理。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §15（通知タップ時の遷移先）",
+    "issue": "未ログイン→ログイン後のリダイレクト保持をsessionStorage依存にしており、iOS PWA終了やプライベートモードで失われる可能性。",
+    "suggestion": "リダイレクトURLをクエリ文字列に保持し、ログイン完了時に安全に消費。失敗時はフォールバック（対象タブのトッ���）を定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §3.2（TALK 入力/添付UI）",
+    "issue": "画像アップロードのネットワーク遅延/失敗時の再送・キャンセル、並列添付（複数枚）の可否や上限が未定義。",
+    "suggestion": "1メッセージあたり添付はFree=1枚/Basic=3/Pro=5/Premier=5など上限を定義。各添付に個別の再試行/削除ボタンと進捗を実装。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux §2.3（Undoスナックバー）/ §6.2（トースト）",
+    "issue": "Undoスナックバーとトースト同時表示時のZオーダー/レイアウト競合の定義がない（重なり/誤タップの恐れ）。",
+    "suggestion": "Undoを最前面固定（ボトムタブ上16px）。新規トーストはUndoの上に重ならないよう上方向へスタック。タブ跨ぎ時も座標を固定。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project §3.2.5（JST 4:00リセット）/ ux §9.3（対話上限表示）",
+    "issue": "JST基準のリセット時刻が海外ユーザーに混乱を与���る恐れ。UIでタイムゾーンの明示が不足。",
+    "suggestion": "「リセット: 明日 04:00（JST）」と明記。将来のローカルタイム対応（v0.2.0）まで暫定表記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-022",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §4.2（ゴール完了ボーナス7日ルール）/ ux §2.4（S-14）",
+    "issue": "projectの「ゴール作成から7日未満は『完了待ち』」仕様がS-14のUIに未反映。ユーザーが完了操作後に即時反映されない理由が分からない。",
+    "suggestion": "S-14に『完了待ち（あとN日）』状態を追加。完了ボタン押下時はバナーで説明し、進捗バー100%+カウントダウン表示。ルール説明ツールチップも用意。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §3.1（TALK ヘッダー📝）/ §3.5（チャット履歴）",
+    "issue": "📝新規チャットの挙動が未定義（現在の会話を保持して新規スレッド開始？システムプロンプトの初期化？）。",
+    "suggestion": "📝=新規スレッド作成→S-21の最上位に空スレッドを作成して遷移。現スレは保持。タイトルの付与ル��ル/自動要約も定義。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §4.3（DISCOVER 強み/弱み）",
+    "issue": "projectで最大各10個の上限が定義されているが、UX側に上限/超過時の挙動が未記載。",
+    "suggestion": "強み/弱みチップに各10個の上限を実装し、超過時はトースト「上限に達しました。編集で削除してください」を表示。件数カウンタも併記。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-025",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §3.2（TALK 入力）",
+    "issue": "メッセージの最大文字数/改行可否の上限が未定義で、送信不可や高コストに繋がる恐れ。",
+    "suggestion": "最大文字数（例: 2,000文字）と改行上限（4行）を定義。カウンタと超過時の無効化/エラーを実装。",
+    "model": "GPT-5",
+    "persona": "product_manager"
+  }
+]

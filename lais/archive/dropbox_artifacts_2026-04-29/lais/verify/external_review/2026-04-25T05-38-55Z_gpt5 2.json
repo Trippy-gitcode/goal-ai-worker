@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "docs/plans/dev_system_spec.md §17 / docs/plans/sub_review_flow.md ヘッダ・§9 / docs/plans/sub_external_review_protocol.md",
+    "issue": "仕様書構成と参照関係が破綻しています。dev_system_spec.md §17 のレビュー送信ルールではメイン+サブ仕様書3本または4本という旧構成のままで、sub_review_flow.md と新設 sub_external_review_protocol.md が正式なサブ仕様書一覧に整合していません。一方 sub_review_flow.md は親仕様として dev_system_spec.md §19.10 を参照しており、相互参照の版・本数・責務定義が食い違うため、実装時にどの文書をSSOTとして送信・レビューすべきか判断不能になります。",
+    "suggestion": "仕様書構成のSSOTを1箇所に再統一してください。dev_system_spec.md §17 のサブ仕様書一覧・本数・レビュー送信ルールを、sub_review_flow.md と sub_external_review_protocol.md を含む最新構成へ更新し、各ファイルのヘッダ依存先バージョンも同期させるべきです。あわせて『どのレビューでどのファイル群を必須送信するか』を表で明示し、旧3本/4本表現���削除して参照の二重化を解消してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "instructions/session_progress.md ヘッダ / docs/plans/dev_system_spec.md ヘッダ・各節",
+    "issue": "session_progress.md は dev-system を v3.3 と記載している一方、同ファイル内の5行サマリーでは v3.4確定・v3.5確定まで宣言しており、参照基準が自己矛盾しています。運用時に ENG/ADV が起動時にどの版を読むべきか曖昧になり、古いルールセットで実装やレビューを進める温床になります。これは起動時必須Readを定義する仕様と直接衝突しており、後日必ず取り違えバグを生みます。",
+    "suggestion": "session_progress.md ヘッダの dev-system 参照版を最新SSOTへ即時更新し、5行サマリー・本文の確定宣言と一致させてください。単に版番号を直すだけでなく、『現行参照は v3.5 確定版（または v3.4 + v3.5差分）』のように運用上の読む順序も明記すると誤読を防げます。過渡期の版が混在するなら、旧版参照箇所を列挙して明示的に deprecated 扱いにしてください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "docs/learned-patterns.md 全体（特に LP-030〜033 以降）",
+    "issue": "learned-patterns.md に同一テーマの運用実例節が重複しており、Phase 3 運用定着セクションが2回出現しています。LP-030/031/032 の記述も『適用実例』が複数箇所に散在し、どちらが最新追記か判別しづらい状態です。学習パターンは再利用される運用知識のSSOTであるため、重複は将来の参照漏れ・誤転記・適用漏れを高確率で招きます。",
+    "suggestion": "LPファイルはパターン定義部と運用実例部を厳密に分離し、各 LP ごとに『定義』『適用実例』『関連バグ』の固定テンプレートへ正規化してください。Phase 3 実例は1箇所に統合し、重複した節は削除または履歴セクションへ退避するべきです。あわせて見出しIDの一意性を機械検証する lint を追加し、同一LPへの運用記録追記先が1つしか存在しないことを保証すると保守性が上がります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "docs/plans/sub_external_review_protocol.md §3.3 / §7 / instructions/session_progress.md 5行サマリー・Open issues",
+    "issue": "外部レビューのガードレールとコスト算出の責務分担が中途半端で、仕様と運用記録が食い違っています。Phase 3で ai_review.js に cost_usd を追加した一方、postcommit.sh の $0.15 ハードコードは維持、さらに session_progress では v3.5確定を宣言しています。実コスト計測が未接続のまま確定扱いになると、予算上限が正しく発火しない運用バグを将来必ず生みます。",
+    "suggestion": "『v3.5確定』の条件からコスト連携未完了を除外できるのかを仕様書上で明文化するか、未完了なら確定宣言を取り下げてください。実装面では postcommit.sh が `_metadata.cost_usd` を読んで record_api_cost に反映するまでを同一機能の完了条件に再定義するのが安全です。最低でも Phase 3 完了・v3.5確定・v3.5.x残課題の境界を roadmap と session_progress で同じ文言に統一してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "docs/plans/sub_external_review_protocol.md §3.2 / §3.3 / scripts 記述参照全般",
+    "issue": "RISK_PATHS や diff 閾値、ガードレール金額などの重要な運用値が仕様本��中に複数回ハードコードされており、今後の変更で高確率にドキュメント不整合を起こします。すでに 9項目→10項目化や $0.15 固定のように、実装と仕様のズレが実際に発生しています。魔法の数字・重複定義が多く、保守時に片側だけ更新される構造です。",
+    "suggestion": "RISK_PATHS・diff 閾値・日次/月次上限・モデル価格などは『設定SSOT表』を1箇所に集約し、他節では参照のみへ変更してください。理想は app_config.yaml または dedicated config spec に定義し、仕様書本文では『この値は設定SSOT参照』とする構造です。数値を変えるたびに複数節・複数ファイルを書き換える現状をやめることで、将来の chain update 漏れを大きく減らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "docs/plans/sub_review_flow.md §1.2 / docs/plans/dev_system_spec.md §13.3 / developer 指示の出力フォーマット",
+    "issue": "レビューJSONの正式スキーマが文書間で揺れています。sub_review_flow.md では screen/spec_reference/actual を含む形式、dev_system_spec.md §13.3 ではより簡略な形式、今回のレビュー要求ではさらに category/location/issue/suggestion の固定フィールドだけが必須です。実装者が ai_review.js や集約スクリプトでどのスキーマを前提にすべきか曖昧で、後日パース失敗や欠落項目バグを必ず誘発します。",
+    "suggestion": "レビューJSONの正式スキーマを1つに固定し、拡張フィールドは optional として schema 定義ファイルに切り出してください。sub_review_flow §1.2、dev_system_spec §13.3、外部レビュー要求テンプレをすべてその schema にリンクさせ、必須/任意項目を明示するべきです。さらに `review_schema_version` を加えると、今後のフォーマット変更時にも後方互換の判断がしやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "instructions/session_progress.md 全体",
+    "issue": "session_progress.md が役割を超えて多くの運用履歴・提案ログ・完了記録・将来構想を抱え込み、現在の実行キューSSOTとしての責務が肥大化しています。LOCK、5行サマリー、Phase B優先順位、過去ミッション詳細、提案ログ、引き継ぎサマリーが同居しており、起動時に本当に読むべき情報が埋もれています��これは起動時の誤実行や stale task 参照を生みやすい構造です。",
+    "suggestion": "session_progress.md は『現在のキューと直近意思決定』に責務を絞り、長期提案・完了済み詳細・運用履歴は専用ファイルへ分割してください。少なくとも『今すぐ実行対象』『保留』『履歴』『将来構想』をトップレベルで明確分離し、5行サマリーと次ミッションだけで現状把握できる構造にするべきです。行数上限ルールがある以上、履歴の抱え込みは継続的にノイズと stale 情報の温床になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "docs/plans/dev_system_spec.md §21.5 / docs/plans/sub_external_review_protocol.md §5.2 / learned-patterns 関連記述",
+    "issue": "同一概念に対する命名が少しずつ揺れており、検索性を下げています。たとえば『fresh context』『別セッション』『subagent』『Pre-Review』『Stage 2』が似た意味で複数節に出現し、運用実例では表現が一定ではありません。今は読めますが、運用が長期化すると grep での追跡漏れや learned pattern の再利用漏れに繋がります。",
+    "suggestion": "主要運用語の用語集を追加し、『fresh context = 別プロセス起動による独立レビュー』『Stage 2 = fresh context 論理層レビュー』のように固定語へ寄せてください。特に learned-patterns と protocol 文書では同一語を優先使用し、同義語を減らすと追跡しやすくなります。命名揺れは低優先度ですが、ドキュメント群が大規模化しているため今のうちに揃える価値があります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.3068,
+    "input_tokens": 223735,
+    "output_tokens": 2716,
+    "model_id": "gpt-5.4"
+  }
+]

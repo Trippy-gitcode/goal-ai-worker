@@ -1,0 +1,80 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "docs/plans/dev_system_spec.md §17, docs/plans/sub_external_review_protocol.md §12",
+    "issue": "親仕様書のサブ仕様書一覧と参照先が食い違っています。dev_system_spec.md の冒頭や §17 は「サブ仕様書3本 + sub_system_map.md」を前提にしている一方、今回 sub_review_flow.md と sub_external_review_protocol.md を新設しており、しかも sub_system_map.md はテンプレート扱いです。この不整合のままではレビュー送信対象や必須読込対象を自動化するスクリプトが誤判定し、必要な仕様がレビュー対象から漏れる確実な温床になります。",
+    "suggestion": "dev_system_spec.md のヘッダ、§17 の構成表、参照ルール、レビュー送信ルールを今回の実体に合わせて一括更新してください。少なくとも sub_review_flow.md と sub_external_review_protocol.md を正式なサブ仕様書として列挙し、sub_system_map.md をテンプレートとして明示分離する必要があります。単独箇所だけでなく、冒頭メタデータ・行数目安・レビュー時送信対象まで連鎖更新して SSOT を1つに揃えるべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "docs/plans/dev_system_v35_roadmap.md §2, instructions/session_progress.md 5行サマリー/方針",
+    "issue": "v3.5 の到達状態表記が自己矛盾しています。roadmap §2 では「v3.5 確定」は『Phase 3 完遂 + 再 Stage 2 CRITICAL 0』が条件なのに、session_progress では『v3.5 確定』と『ADV 再 Stage 2 レビュー未実施』が同時に書かれています。版跨ぎ判定をこの文書群が SSOT として使う前提なら、未達条件のまま確定扱いされ、次フェーズ着手や完了判定を誤らせる明白な運用バグになります。",
+    "suggestion": "version 状態は roadmap §2 の条件を唯一の正本に固定し、session_progress 側は『Phase 3 実装完了・再 Stage 2 待ち』のような中間状態に修正してください。逆に本当に確定済みなら、再 Stage 2 未実施の記述を削除し、証跡ファイル名と確認日時を明記して整合を取るべきです。版状態は自動化や次ミッション判定に直結するため、複数文書で異なる文言を許容しない運用ルールに揃える必要があります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "docs/plans/dev_system_spec.md §13.13, docs/plans/sub_review_flow.md §1.4, docs/plans/sub_external_review_protocol.md §3/§5",
+    "issue": "レ���ューモデル定義が複数箇所でズレています。dev_system_spec.md では GPT-5.4/Gemini 3.1 Pro や『Claude系レビュー不可』が書かれる一方、sub_review_flow.md は GPT-5 + Gemini 2.5 Pro を前提にしています。さらに sub_external_review_protocol.md では GPT-5.4 + Gemini と記載されています。このままでは ai_review.js 実装、コスト計算、レビュー期待件数、合意度の前提が文書ごとに変わり、どのモデルで何本流すのが正なのか判断不能です。",
+    "suggestion": "モデル体系は1つの正本節に集約し、他文書は参照のみにしてください。少なくとも『通常レビュー』『ゴールデンレビュー』『pre-commit 外部レビュー』『内部 subagent』ごとに使用モデルと許容フォールバックを表で固定し、旧表現の GPT-5/Gemini 2.5 Pro は更新または明示的に旧版注記へ退避するべきです。合わせて ai_review.js の出力メタデータと cost_usd 計算対象モデル名も同一表記に統一してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "docs/learned-patterns.md 全体",
+    "issue": "learned-patterns.md に同一テーマの重複節と順序逆転があり、SSOT ���して不安定です。LP-014/015 の並びが崩れているだけでなく、『Phase 3 運用定着』節がほぼ同内容で2回出現し、LP-030/031/032 の適用実例が重複記述されています。人間には読めても、後続で grep や見出し抽出を使う自動処理では「どちらが正式か」判定できず、将来の更新漏れや誤参照を確実に生みます。",
+    "suggestion": "LP 本体と運用実例を分離し、各 LP は1見出し1エントリに正規化してください。Phase 3 の実例は『運用実例』節を1つだけ残し、各 LP へのアンカー参照にまとめるのが安全です。あわせて LP 番号順に並べ直し、同一 LP の追記は同一見出し配下に集約するルールを追加すると、自動抽出・将来メンテの双方で破綻しにくくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "instructions/session_progress.md 全体",
+    "issue": "session_progress.md の冒頭メタ情報が現在の仕様と整合しておらず、しかも 900 行近い肥大化で『300行以内を維持』という自ルールにも反しています。旧 Goal AI の長大な履歴と現行 Lais/dev-system のキューが混在し、同一ファイルを唯一��情報源とする前提を壊しています。この状態ではミッション解決スクリプトや人間の読取が古い記述を誤参照し、次に実行すべき作業や前提条件を取り違える可能性が高いです。",
+    "suggestion": "session_progress.md は現行の稼働キューと最小サマリーだけに圧縮し、履歴や完了済みの長文説明は session_history や別の archive に完全退避してください。特に旧 Goal AI セクションや完了済み詳細引用を削り、LOCK・5行サマリー・現行キュー・提案ログだけに絞るべきです。行数制限を破ったまま『唯一の情報源』を名乗るのは運用上危険なので、archiver 実行を前提条件にした方が安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "docs/plans/dev_system_spec.md §13.13, §13.15, docs/plans/sub_review_flow.md §1.4",
+    "issue": "『ENG と同一プロバイダーのレビューは禁止』という原則と、『Claude Code 自身が毎ラウンド全ペルソナを回す』という運用が同居しています。文脈上は“外部APIとして同一プロバイダーを使うな”という意図に見えますが、現状の文面では Code 自身による Pre-Review まで禁止対象に読めます。禁止範囲が曖昧なままだと、将来の実装者が過剰に制限したり逆にルール違反を見逃したりします。",
+    "suggestion": "『同一プロバイダー禁止』の対象を明確に切り分けてください。例えば「外部APIレビューにおいて同一プロバイダー禁止。ただしローカル実行の Code 自身による Pre-Review は別枠で許容」のように例外を明文化すると解釈ぶれがなくなります。あわせて sub_review_flow 側にも同じ例外文言を参照で入れ、モデル選定ルールと Pre-Review 運用を衝突しない形で一本化するとよいです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "docs/plans/sub_external_review_protocol.md §3.3, §5.2, PATCH-24〜26 記述",
+    "issue": "コストや合意度の扱いが暫定値と将来修正前提で残っており、運用文書としては不安定です。record_api_cost の $0.15 fallback 維持、_critical.md の分母固定 /2、cost_usd は ai_review.js に追加済みだが postcommit 側未読込、など“今は暫定”が複数箇所に散っています。この状態だと数値が正しいのか暫定なのか読手が毎回推論する必要があり���誤ったコスト監視や合意度解釈につながります。",
+    "suggestion": "暫定仕様は1箇所に集約し、『現行運用値』『既知の制限』『解消予定フェーズ』を表にしてください。例えば cost / agreement / guardrail の3列で、実際に使われている値と将来の置換先を明示すると混乱が減ります。PATCH本文に散在する“次 ADV で反映”の記述は仕様書へ正式反映するまで一時節にまとめ、実運用の SSOT と将来計画を混在させない方が保守しやすいです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.3041,
+    "input_tokens": 223846,
+    "output_tokens": 2431,
+    "model_id": "gpt-5.4"
+  }
+]

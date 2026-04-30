@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "入力バー右端の送信ボタン（円形）と紙飛行機アイコン",
+    "issue": "UIコンポーネントの非テキストコントラストが不足。円形背景 #1C2128 と画面背景 #0D1117 のコントラストが約1.2:1、アイコン #484F58 と円形背景のコントラストも約1.5:1で、WCAG 1.4.11(3:1)未満。",
+    "suggestion": "送信ボタンに 1–2px のボーダーを --border-strong(#6E7681)で付与、または背景色を#222B36程度まで上げて3:1を確保。アイコン色は --text-secondary 以上に引き上げ、必要なら太さを上げて視認性を確保。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "規約同意のチェックボックス（左下）",
+    "issue": "チェックボックスの枠線 #484F58 と背景 #0D1117 のコントラストが約1.9:1で、UIコンポーネントの境界として3:1を満たしていない（WCAG 1.4.11）。",
+    "suggestion": "枠線に --border-strong(#6E7681)を使用、または2pxに太くする。フォーカス時はアクセントのアウトラインを併用して視認性を上げる。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s14_goal_detail",
+    "location": "タスク一覧の未完了サークル（グレーの円形トグル）",
+    "issue": "サークルの枠線 #484F58 と背景 #0D1117 のコントラストが約1.9:1で不十分（WCAG 1.4.11 3:1未満）。",
+    "suggestion": "未完了サークルの枠線を --border-strong(#6E7681)に変更、もしくは2pxへ増量。ホバー/フォーカス/アクティブにはアクセントのアウトラインを追加して状態差を強化。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s00_splash",
+    "location": "「ログイン」アウトラインボタン",
+    "issue": "ボタンの境界 #484F58 と背景 #0D1117 のコントラストが約1.9:1で、UIコンポーネント識別の要件(3:1)を満たしていない（WCAG 1.4.11）。",
+    "suggestion": "境界線を --border-strong(#6E7681)かつ2pxにする、もしくは --bg-surface 系で薄く塗りを入れたセカンダリボタンに変更して3:1以上を確��。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "メールアドレス入力欄内の例示テキスト「you@example.com」（#7A8593 on #161B22）",
+    "issue": "通常テキストのコントラストが約2.3:1で、最小4.5:1を満たしていない（WCAG 1.4.3）。",
+    "suggestion": "入力中の文字/例示テキストの色を --text-primary(#E6EDF3)か、少なくとも4.5:1を満たす明度に引き上げる。代替として入力欄の背景を #0D1117 に下げ、現行色でも4.5:1を満たすように調整。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "モーダル内のフィールドラベル（例: 「開始時刻」「予定日」など、#7A8593 on #161B22）",
+    "issue": "ラベルのコントラストが4.5:1未満の可能性が高く、可読性に不足（WCAG 1.4.3）。実際の配色はヒント色(#7A8593)をsurface上で使用しており閾値を割る。",
+    "suggestion": "ラベル色を --text-secondary 以上へ引き上げ、必要に応じて --text-primary を使用。もしくはモーダル背景を #0D1117 寄りに下げ、ラベルは最低4.5:1を満たすことを確認。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "フッター文「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」リンク",
+    "issue": "リンクが色変化（#79C0FF）だけで示され、下線やアイコン等の非色手掛かりがない。WCAG 1.4.1（色の使用）とデザインシステム§2.2「インラインリンクは必ず下線」に不一致。",
+    "suggestion": "「ログイン」に text-decoration: underline を付与（常時）。もしくはリンクアイコン/太字/ボタン化など色以外の手掛かりを追加。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "AIタスク提案カード内「編集」セカンダリボタン（枠線#484F58、文字#9BA7B4、背景#161B22）",
+    "issue": "ボタン境界の非テキストコントラストが約1.5:1で3:1未満（1.4.11）。文字色も背景に対して4.5:1未満の可能性が高い（1.4.3）。",
+    "suggestion": "セカンダリを塗りつぶし（--bg-surface系）+文字を--text-primaryに、または枠線を--border-strong(#6E7681)へ強化しフォント色も4.5:1以上に。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s12_task_add",
+    "location": "所要時間の未選択チップ（枠線#484F58、背景#161B22）",
+    "issue": "インタラクティブチップの境界コントラストが約1.5:1で、UIコンポーネント識別(3:1)を満たしていない（WCAG 1.4.11）。",
+    "suggestion": "未選択時の枠線を --border-strong(#6E7681)に、または微小な塗り（--bg-surfaceより明度差を持つ）を与えて3:1を担保。:focus-visible時はアウトライン追加で可視化。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "アバター選択（中央のタイプBが青リング、他はグレーリング）",
+    "issue": "選択状態が主に色の差（青リング/発光）で表現されており、色覚多様性ユーザーにとって判別が弱い可能性。",
+    "suggestion": "選択中のアバターにチェックアイコンや「選択中」ラベルを重ねる、または非選択を薄線・選択を太線+内側塗りで形状差を明確化。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-011",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s13_task_detail",
+    "location": "モーダル下部の「削除」ボタン（赤文字#F85149 on #161B22、枠線rgba(248,81,73,0.3)）",
+    "issue": "テキストコントラストが4.5:1未満の可能性が高く（1.4.3）、枠線も3:1未満（1.4.11）。破壊的操作で視認性が不足。",
+    "suggestion": "危険ボタンはトークン --button-danger-bg(#DA3633) + 白文字で塗りつぶしにし、AAを満たす。少なくとも枠線を--dangerにし太さを上げて3:1を確保。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

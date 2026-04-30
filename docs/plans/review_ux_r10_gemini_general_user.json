@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5.1",
+    "issue": "オンボーディング完了後、GROW画面に遷移した直後の「使い方（チュートリアル）」が定義されていない。普段LINEやInstagramしか使わない一般ユーザーにとって、タスクの⭕️をタップして完了することや、TALKタブでAIに話しかけるという基本操作が初見で直感的に分からない。",
+    "suggestion": "初回GROW画面表示時に、最初のタスク（AIが自動提案したもの）の⭕️を指差すツールチップや、TALKタブへの誘導ハイライトなど、最小限の操作チュートリアル（コーチマーク）を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§2.3",
+    "issue": "タスク追加（S-12）時の「所要時間」がデフォルト30分ハイライトとなっているが、未設定（なし）にする操作方法が定義されていない。面倒くさがりなユーザーにとって、毎回所要時間を気にさせられるのは入力の摩擦（面倒くささ）になる。",
+    "suggestion": "所要時間の横スクロールチップに「なし（未設定）」を追加し、デフォルトを「なし」にするか、選択中のチップを再度タップすることで選択解除できるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§2.3",
+    "issue": "タスク完了時のUndoスナックバーが「全タブに跨って表示を維持する」とあるが、S-14（ゴール詳細）やS-37（設定）などのフルスクリーン画面に遷移した場合の挙動が定義されていない。フルスクリーン画面の下部UI（ボタン等）とスナックバーが被る可能性がある。",
+    "suggestion": "フルスクリーン画面に遷移した場合はUndoスナックバーを非表示にして即時確定させるか、フルスクリーン画面でも被らないようz-indexとbottomマージンを動的に調整する仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§2.4",
+    "issue": "ゴール詳細（S-14）から「AI相談」をタップしてTALK画面に遷移する際、「S-14のpushState履歴をreplaceStateでGROW状態に書き換え」とあるが、LINE等の一般的なアプリのメンタルモデルでは、詳細画面から別画面に飛んで戻るボタンを押した際は「元の詳細画面（S-14）」に戻ることを期待する。GROW画面に戻されると迷子になったように感じる。",
+    "suggestion": "replaceStateでS-14を消去せず、TALK画面への遷移を通常のpushStateとして扱い、ブラウザバックでS-14（ゴール詳細）に戻れるようにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3.6",
+    "issue": "TALK空状態の会話のきっかけチップが「今日の予定を相談」「目標について話す」など意識が高いものばかりで、自己成長に興味がないユーザーにとっては何を話せばいいか分からず、TALK機能を使うハードルが高い（続け���理由がなくなる）。",
+    "suggestion": "「今日あったことを話す」「ただの愚痴を聞いて」「暇つぶしに付き合って」など、意識が低くても気軽にタップできる日常会話向けのきっかけチップを追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§4.3",
+    "issue": "DISCOVER画面の空状態で「自分を知る対話を始める（ヒアリング）」ボタンがあるが、自己成長に興味がないユーザーはこのような重いアクションを自発的に起こさない可能性が高く、DISCOVER画面がずっと空のまま放置される。",
+    "suggestion": "TALKでの何気ない日常会話が一定回数を超えたら、AI側から「あなたの強みが見えてきたよ、DISCOVER画面を見てみて！」と誘導するような、受動的なユーザー向けの導線（TALK画面内でのサジェスト等）を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§5.1",
+    "issue": "オンボーディングのStep 4で「最初の目標（ゴール）」を設定するが、自己成長に興味がないユーザーにとって「ゴール」と日々の「��スク」の概念の違いや連動性が初見で分かりにくい。",
+    "suggestion": "Step 4の画面に「ゴール（大きな目標）を達成するために、日々のタスク（小さな行動）を積み重ねます」といった、両者の関係性を簡潔に説明するテキストを添える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§4.2",
+    "issue": "PROFILE画面に「MBTI/性格タイプ」という項目があるが、「MBTI」という用語を知らない一般ユーザーには何のことか意味がわからない。",
+    "suggestion": "UI上の表示は「性格タイプ（16タイプ診断等）」のように一般的な表現を主とし、MBTIを知らないユーザーでも「自分の性格傾向がわかる機能」と直感的に理解できるテキストにする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§5.0.2",
+    "issue": "パスワード変更成功後にS-02ログイン画面に遷移する際、直前に入力したメールアドレスが自動入力（保持）されるか定義されていない。再度メールアドレスを手入力させるのは面倒くさい。",
+    "suggestion": "パスワード変更���のログイン画面遷移時は、リセット対象のメールアドレスを初期値としてフィールドに自動セットする仕様を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "general_user"
+  }
+]

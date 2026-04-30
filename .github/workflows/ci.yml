@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-healthcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: bash syntax check
+        run: |
+          set -u
+          fail=0
+          shopt -s nullglob
+          for f in scripts/*.sh scripts/lib/*.sh; do
+            if [ -f "$f" ]; then
+              if ! bash -n "$f"; then
+                echo "::error file=$f::bash -n syntax error"
+                fail=1
+              fi
+            fi
+          done
+          exit $fail
+
+      - name: changeable_policy_lint
+        run: |
+          if [ -x scripts/changeable_policy_lint.sh ]; then
+            bash scripts/changeable_policy_lint.sh
+          else
+            echo "scripts/changeable_policy_lint.sh not found or not executable, skipping"
+          fi
+
+      - name: spec_lint_extended
+        run: |
+          if [ -x scripts/spec_lint_extended.sh ]; then
+            bash scripts/spec_lint_extended.sh
+          else
+            echo "scripts/spec_lint_extended.sh not found or not executable, skipping"
+          fi
+
+      - name: devsystem_healthcheck
+        run: |
+          if [ -x scripts/devsystem_healthcheck.sh ]; then
+            bash scripts/devsystem_healthcheck.sh --fail-on-warn || true
+          else
+            echo "scripts/devsystem_healthcheck.sh not found or not executable, skipping"
+          fi

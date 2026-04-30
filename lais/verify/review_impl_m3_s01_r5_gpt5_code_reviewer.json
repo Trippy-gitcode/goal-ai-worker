@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "1",
+    "issue": "opId を timeout/finally で 0 に戻す実装により、ABA 問題が発生する。タイムアウト後に再送信して opId=1 を再利用した場合、古いリクエスト(同じ myOpId=1)の遅延成功応答が isCurrent() を通過して副作用(route 等)が実行される可能性がある。",
+    "suggestion": "opId は単調増加で再利用しないこと。0 にリセットしない。開始時に const myOpId = ++opIdRef.current とし、isCurrent は opIdRef.current === myOpId のみ判定に使う。タイムアウト時/完了時に現行を無効化したい場合は opIdRef.current++ で“退位”させるか、もしくはタイムアウトでは opId を変更せず UI 状態だけ解除し、次の送信開始時に ++ する。これで古い応答は常に isCurrent=false となり副作用は実行されない。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "新規送信開始時や finally での clearTimeout が徹底されていない。現行でない操作に紐づくタイマーが生き残り、後から無駄に発火して isCurrent() で no-op になるが、不要な wakeup が続く。",
+    "suggestion": "timeoutId を useRef で保持し、送信開始時に既存の timeout を必ず clear、finally では isCurrent ガード外でも clearTimeout(timeoutId) を呼ぶ（clear 済み/発火済みでも安全）。これでタイマー生存期間を最小化できる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "コンポーネント unmount 時のクリーンアップが見当たらず、保留中の setTimeout が最長 SUBMIT_TIMEOUT_MS 残留する。safeSetState で setState 後のクラッシュは防げるが、不要なタイマーや副作用関数が保持され続ける。",
+    "suggestion": "useEffect のクリーンアップで保留中の timeout を clear。併せて unmount 時に opIdRef.current++（または新しいトークン発行）で以後の遅延応答をすべて無効化する。SDK が対応していれば AbortController でリクエスト自体も中断する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "1",
+    "issue": "inFlightRef と React state(submitting) の二重管理があり、同期漏れや将来の改修での齟齬リスクがある（UI は submitting、ガードは inFlightRef を参照）。",
+    "suggestion": "単一の真実の源泉に統一する。例: submitting を唯一の UI/ガード指標とし、ハンド���内でも最新値を参照できるように useRef(submitting) を同期して使う、あるいは useReducer で状態遷移を一元化する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "1",
+    "issue": "route('/', true) の第2引数が何を意味するか不明瞭で可読性が低い（魔法の boolean）。",
+    "suggestion": "明示的なオプションオブジェクトに変更（例: route('/', { replace: true }))、もしくは定数名を付与したユーティリティ経由で呼び出す。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "1",
+    "issue": "エラーメッセージ等の文字列がコード内にハードコードされており、i18n/翻訳、表現統一、A/B テストが困難。",
+    "suggestion": "国際化対応（i18n）ファイルやメッセージ辞書に抽出し、キー参照に切り替える。タイムアウト文言も同様に管理する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "SUBMIT_TIMEOUT_MS の由来/妥当性が不明で、環境差分や要件変更に弱い（魔法の数）。",
+    "suggestion": "環境変数や設定モジュールから供給し、仕様として根拠をコメント化。E2E/単体テストで値に依存しないよう DI 可能にする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "safeSetState 内で複数の setState を逐次呼び出しており、環境によっては不要レンダーや順序依存の読みにくさを招く。",
+    "suggestion": "React 18 の自動バッチングに依存せず、単一の setState/Reducer にまとめるか、同一バッチで更新することを明示。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "タイムアウト/再送時にサーバー側のリクエストは継続するため、ネットワーク逼迫時に不要負荷や順序の錯綜を招く可能性がある。",
+    "suggestion": "可能であれば SDK/fetch に AbortSignal を渡し、タイムアウトや新規送信開始時に前リクエストを中断する。非対応なら、少なくとも計測用の requestId をログ/トレースに残す。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "5",
+    "issue": "finally での clearTimeout を isCurrent ガードの内側に置くかの議論が残っているが、ガード外で常に clear しても安全で、コードの意図が明確になる。",
+    "suggestion": "finally では無条件で clearTimeout(timeoutId) を実行し、その上で opId の扱い（退位/維持）は別途明示する。コメントで方針を固定することで将来の回帰を防止する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

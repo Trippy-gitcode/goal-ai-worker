@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s00_splash",
+    "location": "中央キャッチコピー「あなたの人生を、あなたらしく」",
+    "issue": "読点「、」の後に全角スペース相当の不自然なアキがあり、文字組みのテンションが抜けている。表紙の帯文において、この「間抜け」な余白は作品の品格を著しく損なう。",
+    "suggestion": "読点後の余白を詰め（プロポーショナルメトリクス適用）、一行の文字列として美しく緊張感のあるシルエットを形成すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "TodayセクションとGoalsセクションの間",
+    "issue": "セクション間の余白が24pxしかなく、仕様書の「≧32px」に違反している。漫画のコマ割りと同様、セクション間の「大ゴマの余白」がないため、画面全体が息苦しく、情報の優先度がフラットになっている。",
+    "suggestion": "セクション間のマージンを40pxに広げ、読者の視線が一度止まって呼吸できる「間」を意図的に設計すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "「時刻」「所要時間」「ゴール」の日本語ラベル",
+    "issue": "日本語ラベルに11pxが使用されており、仕様書の「11pxの日本語使用禁止」に違反している。画数の多い漢字が潰れ、グレー文字の明度も相まって可読性が著しく低い。",
+    "suggestion": "ラベルのフォントサイズを13pxに上げ、文字のウェイトや色でコントラストをつけ、小さくてもパキッと読めるようにすること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Todayセクションのタスクリスト",
+    "issue": "左側の時刻と右側のタスクカードの間に明確な縦の軸線がなく、視線がZ字に散漫に動いてしまう。また、完了と未完了の時刻テキストの明度差が曖昧で、白黒のコントラストによる状態変化の演出が弱い。",
+    "suggestion": "タイムラインの縦軸を細い線で繋いで視線を上から下へ誘導し、完了状態の時刻は背景に沈める暗いグレー、未完了は明るいグレーにして明暗のメリハリをつけること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内のアクションボタン",
+    "issue": "「登録する」「編集して登録」「✕」の3つのボタンが横並びで詰め込まれており、余白のリズムが完全に崩れている。情報過密でタップの迷いを生む。",
+    "suggestion": "ボタンを縦積みにするか、「✕」をカード右上の独立した位置に配置し、周囲に十分な「抜き（余白）」を作って主要アクションへの視線誘導を強化すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "画面上部の見出し「最初のパートナーを / 選びましょう」",
+    "issue": "見出しが助詞の「を」で改行されており、日本語のフレーズとしてのシルエットが美しくない。タイトルロゴ配置において、意味の分断は視線のスムーズな流れを阻害する。",
+    "suggestion": "「最初のパートナーを」を1行に収めるか、意味のまとまりで改行位置を調整し、文字のブロックとしての塊感を美しく整えること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s14_goal_detail",
+    "location": "ヒーロー領域の「60%」とプログレスバー",
+    "issue": "黒背景（#0D1117）に対して青（#79C0FF）の巨大な数字とバーが配置されているが、明暗のコントラストが強すぎてネオンサインのように浮いており、仕様書の「ネオン/サイバーパンク禁止」というブランドDNAに違反している。",
+    "suggestion": "数字のウェイトをThinのまま維持しつつ、色の彩度を少し落とすか、バーの太さを細くして、暗闇の中に静かに浮かび上がるような上品なコン���ラストに調整すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE, DISCOVER...）",
+    "issue": "アクティブタブを示す青い下線インジケータがテキスト幅に対して短く、かつ非アクティブタブの文字色との明度差が弱いため、現在位置への視線誘導が弱い。",
+    "suggestion": "下線インジケータをテキスト幅いっぱいに広げ、アクティブタブの文字色をより明るい白にするなど、黒と白のコントラストを強めてフォーカスを明確にすること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s12_task_add",
+    "location": "所要時間の横スクロールチップ",
+    "issue": "所要時間の横スクロールチップが画面右端で唐突に切れており、横に続くことの視覚的な示唆がない。漫画の断ち切りのように意図的な「外への広がり」を感じさせず、単なるレイアウト崩れに見える。",
+    "suggestion": "右端に背景色へのグラデーションマスクを重ねるか、最後のチップが意図的に半分だけ見切れるように��ージンを計算し、横への視線誘導（スワイプの促し）を作ること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s15_goal_create",
+    "location": "カテゴリ選択のチップ群",
+    "issue": "カテゴリ選択のチップが複数行に折り返されているが、上下の行間が左右の余白と同じか狭く見え、要素がベタッと張り付いた塊になっている。余白による「間」のリズムがない。",
+    "suggestion": "行間を左右の余白よりも広く取り、各行が独立したラインとして認識できるようにして、視線がZ字にスムーズに流れるようにすること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "manga_cover"
+  }
+]

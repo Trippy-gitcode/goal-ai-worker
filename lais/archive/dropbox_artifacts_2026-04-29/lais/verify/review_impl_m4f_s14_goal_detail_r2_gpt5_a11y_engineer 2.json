@@ -1,0 +1,132 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "S14-8 タスク行 JSX (.s14-task-card)",
+    "issue": "aria-label をボタンに付与しているため、内部の可視テキスト（タスク名・日付/時刻）がスクリーンリーダーの読み上げから除外される可能性が高い。重要情報（日時）がラベル外となり、目的の特定が困難になり得る（WCAG 1.3.1/2.5.3 影響）。",
+    "suggestion": "aria-label ではなく aria-labelledby/aria-describedby を使用して、可視ラベルをそのまま名前に含める。例: <span id=\"tstatus-{id}\" class=\"sr-only\">進行中</span><span id=\"tname-{id}\">タスク名</span><time id=\"tdate-{id}\" datetime=\"2026-04-15T09:00\">4/15 9:00</time> とし、button に aria-labelledby=\"tname-{id}\" aria-describedby=\"tstatus-{id} tdate-{id}\" を付与。またはアクセシブルネームの先頭を可視テキストと同一順序に保つ（2.5.3 Label in Name 配慮）。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "R2 対応説明 vs 実装差分",
+    "issue": "説明では「visually-hidden な状態テキスト + aria-label」と��るが、提示コードには視覚非表示テキストが存在せず、aria-label のみで状態を付加している。",
+    "suggestion": "状態名は視覚的アイコンに加えてスクリーンリーダー向けに sr-only テキストとして DOM に配置し、aria-labelledby/aria-describedby で関連付ける。これにより実装と説明が一致し、将来の翻訳やテキスト変更にも堅牢になる。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "S14-8 CSS（未提示）— フォーカスインジケータ",
+    "issue": "フォーカスリングの有無・見え方（太さ・コントラスト・非隠蔽）が仕様/スタイルとして未提示。WCAG 2.2 AA 2.4.11（Focus Appearance 最低限）および 2.4.12（Focus Not Obscured 最低限）の充足が不明。",
+    "suggestion": ":focus-visible に 2px 以上のアウトライン（または 1px + 2px オフセット等）を指定し、背景・隣接色に対してコントラスト比 ≥ 3:1 を実測で確認。例: .s14-task-card:focus-visible{outline:2px solid var(--focus); outline-offset:2px;} Forced Colors 環境も考慮（@media (forced-colors: active) { outline: 2px solid CanvasText; })。スクロール領域では scroll-margin-top 等で見切れ���止。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "S14-8 タスクボタンのタップターゲット",
+    "issue": "ボタンの実寸（高さ・幅）が不明で、44×44 CSS px（WCAG 2.5.5 は AAA だが、社内ガイド/要件で CRITICAL 指定対象）の充足が確認不可。",
+    "suggestion": ".s14-task-card を display:block; min-height:44px; padding: 8–12px; とし、行全体（左アイコン領域含む）をクリック可能にするため、.s14-check をボタン内に移動またはボタンを li 幅いっぱいに拡張。ヒット領域の余白も含め 44×44 を満たすことを実測確認。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "S14-8 色コントラスト（テキスト/アイコン/枠線）",
+    "issue": "デザイントークンや色指定が未提示のため、テキスト（タスク名・日付/時刻）4.5:1、UI部品/グラフィック（チェック/ドット/枠線）3:1 の達成が未確認。",
+    "suggestion": "実測値を提示して確認すること。例: #111/#FFF → 15.9:1（合格）、#6B7280/#FFF → 4.6:1（小テキスト合格）、枠線やアイコンは背景に対して ≥3:1 を担保。��活性や補助テキストの色も基準内に。可能であれば自動テスト（axe + Design Tokens CI）で継続検証を導入。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S14-8 アニメーション/遷移",
+    "issue": "prefers-reduced-motion への配慮が未提示。AA要件ではないが、動作軽減の利用者配慮が不足。",
+    "suggestion": "@media (prefers-reduced-motion: reduce){ *{animation-duration:0.01ms; animation-iteration-count:1; transition-duration:0.01ms;} } をベースに、インタラクション起因アニメはフェード/距離0などに短縮。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "S14-8 日付/時刻のマークアップ",
+    "issue": "日付/時刻が span のみでセマンティクスが不足。",
+    "suggestion": "<time datetime=\"YYYY-MM-DDThh:mm\">可視テキスト</time> を用いて機械可読化。スクリーンリーダー説明を補足する場合は aria-describedby に time の id を関連付ける。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "handleOpenTask() 遷移先のフォーカス管理",
+    "issue": "遷移/モーダル（S-13 統合はスコープ外）時の初期フォーカス設定・フォーカストラップ・戻りフォーカスが未記載。",
+    "suggestion": "遷移先で h1/h2 へフォーカス（tabindex=\"-1\" + focus()）またはダイアログのコンテナに初期フォーカス。閉鎖時は発火元ボタンへ戻す。モーダル採用時は <dialog role=\"dialog\" aria-modal=\"true\"> とし、フォーカストラップを実装。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "S14-8 行のクリック領域",
+    "issue": "左側の状態アイコン .s14-check がボタン外にあり、可視上の行全体がクリック可能に見えても実際のヒット領域が狭くなる恐れがある（運動障害のある利用者に不利）。",
+    "suggestion": ".s14-check をボタン内部に含めて行全体を操作対象にするか、ボタンを li のフル幅に拡張。必要に応じて .s14-check { pointer-events:none; } を指定して誤ヒットを防止。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S14-8 ボタンのアクセシブルネーム順序",
+    "issue": "アクセシブルネームが「進行中: タスク名 …」の順で、可視ラベル（タスク名）と先頭が一致しない。2.5.3（Label in Name）は“含む”で要件は満たすが、音声操作の命名一致性が下がる。",
+    "suggestion": "可視テキストを先頭にし、状態は aria-describedby へ退避。例: aria-labelledby=\"tname-{id}\" aria-describedby=\"tstatus-{id} tdate-{id}\" とし、sr-only の状態テキストは describedby 側で提供。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ドキュメントルート（未提示）",
+    "issue": "lang 属性の指定が不明。読み上げ言語の誤判定リスク。",
+    "suggestion": "HTML ルートに lang=\"ja\" を設定。英数字や英語 UI が混在する場合は必要に応じて lang 属性を局所付与。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "S14-8 非テキストコントラスト（状態アイコン）",
+    "issue": "チェック/ドット SVG は currentColor 依存。背景/隣接色の組み合わせによっては 3:1 を下回る可能性があるが、カラートークンの提示がなく未確認。",
+    "suggestion": "アイコン色は背景に対してコントラスト比 ≥ 3:1 を満たすトークンを割り当て、ライト/ダーク/HC モードで実測。必要に応じてアイコンサイズを 12–14px 程度に拡大し視認性を確保。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S14-8 フォーカス非隠蔽（スクロール領域がある場合）",
+    "issue": "スクロール内リストでのキーボード移動時、固定ヘッダー等でフォーカスが隠れる可能性に対する配慮が未記載（WCAG 2.4.12 AA）。",
+    "suggestion": "フォーカス対象要素に scroll-margin-top を設定し、固定ヘッダー高 + 8px 程度の余白で自動スクロール時に見切れないよう調整。",
+    "model": "GPT-5",
+    "persona": "a11y_engineer"
+  }
+]

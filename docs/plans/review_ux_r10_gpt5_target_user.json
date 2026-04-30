@@ -1,0 +1,252 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project_v1.md §4.4/§4.5",
+    "issue": "レベル計算の数値が矛盾。「次レベルに必要なEXP=100+(現在Lv-1)×50」でLv1→2は100EXPだが、別所で「Lv.1→2=1,000EXP」と記載。",
+    "suggestion": "§4.5の「1,000EXP」記述を削除し、§4.4の式とテーブルに統一。E2Eテストにも同式を反映して回帰を防止。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §15（project_v1.md 内部矛盾の注記）/ project_v1.md §4.2",
+    "issue": "UX側が「ゴール達成ボーナスの7日待機ルールはprojectに存在しない」と注記しているが、実際はproject §4.2に定義済み。",
+    "suggestion": "ux_v1.mdの注記を削除し、S-14（ゴール詳細）に「完了待ち（残りN日）」のUI/演出/Undo挙動を明記。両ファイルで同一用語（完了待ち）に統一。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "project_v1.md §7.2 / §7.4 / §5.4",
+    "issue": "AI対話テーブルとソーシャルメッセージの命名��混在（messages / social_messages）。RLSの参照先誤りでAI対話が友達に漏洩する危険。",
+    "suggestion": "テーブル名を明確に分離（ai_messages, social_messages等）し、RLS例とデータライフサイクル表を一致させる。RLSテストケースをe2e_testに追加。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §3.1（TALKヘッダー）/ §3.5",
+    "issue": "TALKヘッダーに☰（ドロワー）と🕐（履歴）の2つの履歴導線が併存。各アイコンの機能差が不明で操作が分散。",
+    "suggestion": "履歴導線を1つに集約（☰=履歴ドロワーのみ）。🕐は削除か別機能（例: 最近にジャンプ）に再割当。ツールチップとアクセシビリティラベルを明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "ux_v1.md §4.4（ブロック）/ §9.4（不正操作）",
+    "issue": "ブロック時は友達関係解除・UI非表示のはずだが、「ブロック済みユーザーへのアクション＝サイレント失敗（UIは通常表示）」という挙動が併記され矛盾。",
+    "suggestion": "ブロック時は送受信UI自体を無���・非表示に統一。攻撃者通知を避けつつも送信側UIには「送信できません（ブロックまたは関係なし）」等の一般化メッセージを表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（Today並び替え）/ project_v1.md §3.2",
+    "issue": "Todayの手動並び替えと「開始時刻で自動ソート」の優先順位・解除方法が未定義。翌日以降や予定日変更時にどちらが勝つか不明。",
+    "suggestion": "優先順位を明文化（例: 当日表示は手動順優先、翌日は時刻順に自動リセット）。UIに「並び替えをリセット」メニューを追加。サーバー保存スキーマに手動順の有効期限を持たせる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（週N回のToday表示）",
+    "issue": "週N回習慣の「今日やる」手動追加が可能とあるが、具体的なUIの設置場所と操作が未定義。",
+    "suggestion": "習慣カード右端に「今日やる」ボタン（または三点メニュー内）を定義。押下時のToday内表示位置・バッジ表示も明記。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "project_v1.md §7.3（PWAオフライン同期）/ ux_v1.md §9.1",
+    "issue": "オフライン中に多数の完了→日付跨ぎ（JST 4:00）で同期した場合の「どの日に記録されるか」「日次上限超過の振る舞い」のUIが不明。ユーザーは何が付与されたか把握しづらい。",
+    "suggestion": "同期結果サマリーをトースト/モーダルで提示（例: 同期: 6件中4件に+10EXP、2件は当日上限によりEXPなし）。当日/前日どちらに計上されたかも明記し、履歴画面（簡易ログ）を用意。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §5.1（QR承認期限）/ ux_v1.md §4.4",
+    "issue": "友達リクエストの7日失効が送信者に無通知。普通の利用でも「既読スルー」と混同し不安・混乱を招く恐れ。",
+    "suggestion": "送信済みリクエスト一覧に状態表示（承認待ち/拒否/期限切れ）を追加。相手へは通知せず、送信者だけに静的フィードバックを提供しストーカー対策と両立。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "ux_v1.md §7.3（PWA edge swipe対策）",
+    "issue": "iOS PWAの左端スワイプ抑止・独自戻りジェスチャーは実装難度が高く、Safariの挙動差で安定しない可能性。",
+    "suggestion": "最小実装としてedgeスワイプは全面抑止（overscroll-behavior）し、戻るは明示ボタンとブラウザ戻るに限定。端末種別でフォールバックを定義し、E2Eで挙動差を検証。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2 / ux_v1.md §8.1",
+    "issue": "タスクEXPが所要時間や難易度に無関係で一律+10のため、長時間タスクで達成感が薄いと感じる可能性（Habiticaで感じた「作業ゲー化」懸念が再燃）。",
+    "suggestion": "UIで明示（なぜ一律かの思想説明ツールチップ）。将来拡張として「挑戦タグ」やAI難易度推定によるボーナスEXPを検討し、MVPでは説明で期待値調整。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.4（S-14→S-20 遷移）",
+    "issue": "ゴール詳細からAI相談でTALKへ遷移時、履歴をreplaceし戻るとGROWに戻���仕様は一貫しているが、ユーザーはS-14に戻れると期待しやすい。",
+    "suggestion": "TALK画面上部に「← ゴール詳細に戻る」breadcrumbを一時表示するか、遷移時にトーストで戻り先を案内。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "project_v1.md §6.4",
+    "issue": "PIIマスキングが正規表現中心で氏名・住所に十分でない旨は記載あるが、TALK入力欄でのユーザー教育が不足。",
+    "suggestion": "TALK初回起動時に「個人情報を含めない」ガイダンスを明示し、画像添付同様にチェックボックス「今後表示しない」を提供。設定に再表示スイッチも用意。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.3（複数タスク提案→個別編集）",
+    "issue": "「個別に編集」の具体UIが「順に表示」とあるのみで、編集確定ごとの戻り先・未編集タスクの扱いが不明。",
+    "suggestion": "編集ウィザード化（1件ずつ編集→[次へ]/[スキップ]）。最後に確認サマリーを出し、未編集は提案デフォルトで登録or除外を選択可能に��",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §2.1 / ux_v1.md §13.2",
+    "issue": "Premierは「チケットComing Soon」主体で即時価値が薄く、長期的に不満や返金要求を招く懸念（Finchの課金不満と同型リスク）。",
+    "suggestion": "MVP時点で即時特典を明確化（限定フレームに加え、月1回の特別AIセッションやバッジ等）。プラン管理画面・Checkoutにも明記し誤解を防止。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2.5",
+    "issue": "日次リセットがJST固定のため、海外出張や夜型のユーザーでは「日付感覚」と乖離し混乱しやすい。",
+    "suggestion": "設定に「日次リセット時刻（将来対応予定）」の注記を表示し、FAQ/ヘルプでJST固定の理由と今後の対応予定を説明。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §2.3（Overdue→明日に延期）",
+    "issue": "「明日に延期」のUndo時、元の予定日に戻るのか、今日に戻るのかの定義が曖昧。",
+    "suggestion": "Undoは直前状態に完全復元（予定日・表示位置・ラベル）。トースト文言に「元の期限（4/10）に戻しました」と具体日付を表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §2.3（Undo 30秒/直近1件のみ）",
+    "issue": "直近1件のみUndoで、それ以前は詳細パネルからステータス変更という仕様は直感的に気づきにくい。",
+    "suggestion": "Undoスナックバーに「過去のタスクは詳細から変更可」を注記。S-11に「未完了に戻す」ボタンを分かりやすく配置。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "project_v1.md §3.2（ゴールに習慣紐付け不可）",
+    "issue": "「ゴールに習慣を紐付け不可」は合理的だが、ユーザー視点では理由が分かりにくい。",
+    "suggestion": "S-15/S-16で情報アイコンを設け「ゴール=有限の達成、習慣=無限の継続。混同しないための設計」とヘルプを表示。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §3.4 / project_v1.md §4.3",
+    "issue": "冒険EXPの誤検出時にユーザーからのフィードバック経路がない（是正申請や学習用のシグナル不足）。",
+    "suggestion": "冒険カードに［違う/正しい］の2択を追加（ワンタップ）。否認時は即返却・学習に反映。過去の冒険ログ画面（簡易一覧）も将来検討。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §3.5（チャットスレッド上限/自動アーカイブ）",
+    "issue": "スレッド自動アーカイブのユーザー通知・復元方法が未定義。突然消えたように見える恐れ。",
+    "suggestion": "上限到達時に「古い会話をアーカイブしました」通知。ドロワー末尾に「アーカイブを見る」導線を追加（MVPで非表示ならヘルプに記載）。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §4.4（退会クーリングオフ中の可視性）",
+    "issue": "「友達の図鑑から非表示」と「友達一覧に『退会手続き中』表示」の両立が分かりにくい（同時に成立しない表現）。",
+    "suggestion": "可視性を一貫化。推奨: 一覧にグレー表示は出すがプロフィール詳細は不可視。文言を「退会手続き中（詳細は非表示）」に統一。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-023",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §2.3（ドラッグ&ドロップ）",
+    "issue": "モバイルD&Dは誤発火しやすい。Todayで頻繁に起こるとストレス（Habiticaの「UIが煩雑」不満に通じる）。",
+    "suggestion": "D&D開始閾値を十分に（500msロングプレス+5px以上移動）。オプションでD&D無効設定を提供。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-024",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux_v1.md §13.2（プラン管理）/ project_v1.md §2.1",
+    "issue": "Basic/Pro/PremierのAI品質差がUI上で体感しにくいと、課金動機が弱くなる（Finchの「有料が装飾のみ」不満の逆学習が薄い）。",
+    "suggestion": "各プランの返信例デモ（比較カード）をS-38に表示。Free→Basicでの変化が一目で分かるように。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-025",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "総評（ターゲットユーザー視点）",
+    "issue": "自分はHabiticaで「罰/複雑UI」、Finchで「本格タスク不足」、Habitifyで「Free制限」に不満だったが、Laisは罰なし・タスク/ゴール充実・Free開放で解消。ただし日次JST固定・プレミア即時価値の弱さ・履歴導線の重複は継続に影響しうる。",
+    "suggestion": "短期: TALKヘッダー整理/プレミア即時特典強化/日次JSTの説明強化。中期: 冒険ログと難易度ボーナス導入で「作業ゲー化」を防ぎ飽きを緩和。友達リクエストの状態可視化で安心感を上げる。",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

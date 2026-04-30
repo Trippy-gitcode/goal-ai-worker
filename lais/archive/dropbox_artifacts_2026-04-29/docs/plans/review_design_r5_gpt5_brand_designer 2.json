@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.2, §2.3, §5.1",
+    "issue": "役割分離の定義（--accent=ブランド/リンク、--info=情報クローム）に対し、Night Skyテーマでは --accent と --info が同一系統色(#58A6FF)で事実上の視覚差がなく、UI上で役割が曖昧化する恐れがある",
+    "suggestion": "Night Skyの --info を --accent と異なる青系に再設計（例: --info: #4493F8、--info-hover: #1B76E8、--info-pressed: #105CCB、subtle系も同系で再計算）。リンクは --accent、情報系バナー/チップは --info で明確に分離されることを色差で保証する",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5（テーマ定義 概説）, §7.1-§7.3, §7.4",
+    "issue": "テーマの“性格差”が主に色（＋わずかなコピー）に依存し、モーション/触覚/ダイナミクスの表現が全テーマ共通のまま。ブランド原則の「文化/自然モチーフの個性」をトークン全体で体現できていない",
+    "suggestion": "テーマ別モーション/触覚プロファイルを追加。例: --motion-profile: calm|bright を導入し��calm（Night Sky/Dawn）= --spring-gentle 優先/overshoot禁止/--duration-normalを-50ms短縮、bright（Harajuku系）= --spring-bouncy許可/--duration-fastを+50ms/タブpill移動のovershoot許可。触覚もテーマ別にバリエーション（Harajuku= vibrate [20,40,20]、Night/Dawn= 30ms単発）を --haptic-success / --haptic-error トークン化して切替可能にする",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.1",
+    "issue": "スペーシングスケールがpx固定。§3.2でタイポをrem基底に統一している一方、余白はユーザーの既定文字サイズ変更に追従せず、アクセシビリティ観点（大きな文字設定）で“Open Air/呼吸するリズム”が崩れる可能性",
+    "suggestion": "スペーシングをrem基底に再定義（例: --space-sm: 0.5rem, --space-md: 1rem, --space-lg: 1.5rem, --space-xl: 2.5rem, --space-2xl: 4rem）。タスク間20px要件はrem換算の最小値ガード（min(1.25rem, 20px)ではなく、min-clampではなくclampで意図を固定）で担保し、文字サイズ拡大時も比率維持",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§1.5, §6, §8.4",
+    "issue": "��ロゴを隠してもどのアプリか分かるか？」のブランドチェックに対し、色以外の“Laisらしさ”を担保するシグネチャ要素がトークン化されていない（タイムラインのドット形状/ライン位置/タブpillの比率などが規範化されていない）",
+    "suggestion": "“Brand Motif”トークン群を追加: 例) --timeline-dot-size, --timeline-line-offset, --tab-pill-height, --tab-pill-radius, --avatar-ring-width（=常に--accent）等を規範化し、主要画面に横断適用。モックの有無に依らず実装で再現可能な“形の言語”を固定する",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§1.4",
+    "issue": "Harajukuテーマ時のトーン（通知/トーストを柔らかめに）の運用が記述レベルに留まり、実装/検出条件/文体差分のガイドや辞書がないため揺らぎやすい",
+    "suggestion": "マイクロコピー運用ガイドを追加し、Harajuku時にのみ適用する“語彙・言い回しのホワイトリスト/ブラックリスト”と例文集を定義（通知/トースト限定）。UI側には data-voice=\"soft\" をテーマ切替時に付与し、コピー抽出時に参照できるようにする（デザインシステム内に最小辞書を付録として持つ）",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1, §5.1-§5.4, §7.5",
+    "issue": "フォーカス可視化はbox-shadowベース（--focus-ring）だが、全テーマでWCAG 2.4.11（3:1相当）の実効コントラストが保証されているのはライト系の注記のみ。ダーク系での見え方（特に--accent-subtle上）に不確実性",
+    "suggestion": "ダーク系に --focus-ring-strong（例: 0 0 0 3px rgba(88,166,255,0.7)）を追加し、input/button上の状態で自動的にstrongに昇格するルールを明記。visited/hover/focusの積層時の優先順位も表に追記。forced-colors以外の通常環境でも必要に応じて outline: 2px solid var(--accent) を選択できる代替指針を併記",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§1.6（NGリスト）, §2.1",
+    "issue": "「アクセント色の同時使用は1画面につきプライマリ1色＋セマンティック4色まで」の運用範囲が曖昧。モジュール分割された画面（モーダル/トースト/ドロップダウンの同時表示）やグラスON時のカード内クロームが上限に含まれるか不明",
+    "suggestion": "“同一ビュー階層内”の定義を追記（例: 現在アクティブなルート+オーバーレイ群を1画面と見なす）。デザイナ���向けチェックリストに「アクセントのヒエラルキー優先度（Primary > Semantic > Info）」を追加し、競合時の優先採用ルールを明確化",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§6.3（アバター）, §0.2, §1.2-§1.5",
+    "issue": "空状態/イラストのカラーパレット/陰影規則がテーマごとに未定義。ブランドの“自然/文化モチーフ”をイラストでも一貫表現するためのガイドが不足",
+    "suggestion": "“Illustration Palette”トークン群を各テーマに追加（--illust-primary, --illust-muted, --illust-shadow など）し、線なしフラット＋1段濃淡の具体例色を指定。空状態イラストの比率/余白/最大サイズ（例: 横幅の60%）も規範化",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§3.3, §8.7",
+    "issue": "ラベル用字間（--letter-spacing-label: 1.5px）が定義されているが、テキストケース（大文字化の是非）や適用範囲（英字UIのみ/日本語非対象）が未定義。タブやチップでの表記ゆれが発生し得る",
+    "suggestion": "“Label casing規範”を追加。推奨: 日本語=通常���（大文字化なし）、英字ラベル=uppercase + --letter-spacing-label 適用。--label-text-transform トークンを追加し、英字UI時のみ uppercase を適用できるようにする",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.2",
+    "issue": "インラインテキストリンクの下線ルールは明記されているが、visited状態の視覚差分が未定義。長文（TALKログ等）で情報アーキテクチャの手掛かりが弱くなる可能性",
+    "suggestion": "リンクvisited用トークンを追加（--link-visited: color-mix(accent, text-secondary, 20%) 等の固定色）し、下線スタイル（実線/点線/太さ）も --link-underline-style として定義。WCAG達成の範囲で“既読”の手掛かりを提供",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "FEASIBILITY",
+    "location": "§5.5",
+    "issue": "グラスONは“同時30要素以内”とあるが、実装時に超過検知/抑止の仕組みがトークン/ガイド内にないため、ハイパフォーマンス維持が運用依存になっている",
+    "suggestion": "ガイドに“glass-surfaceはページあたり最大Xクラスまで”のLint指標を追加し、主要レ��アウトで glass を付与する推奨箇所一覧（OK: 大枠カード/モーダル、NG: リストアイテム）を図示。E2Eの性能ゲート（Lighthouse/CLS/FID閾値）にglass要素数チェックを組み込む提案を追記",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§8.10（状態マトリクス）",
+    "issue": "“loading= skeleton shimmer”のカラー/コントラストがテーマ別トークンに未紐付け（説明文のみ）。Harajuku Darkなど高彩度ダークでのshimmerコントラストが不足するリスク",
+    "suggestion": "各テーマに --skeleton-base / --skeleton-shimmer トークンを追加（bg-secondaryとelevatedの中間値を明示色で指定）。prefers-reduced-motion時のshimmer停止は維持しつつ、静的グラデの2色指定で視覚差を担保",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  }
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CHARACTER",
+    "screen": "s02_onboarding",
+    "location": "アバター3種",
+    "issue": "muted 化済みで DNA 逸脱は解消。ただしイラスト表現が汎用 SVG 風で個性に欠ける。Phase B で独自キャラ化推奨。",
+    "suggestion": "Phase B 対応候補。現時点は仕様通り。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "ICON_CONSISTENCY",
+    "screen": "s20_talk",
+    "location": "ヘッダー 🕐 + 📝 / 左下 📎",
+    "issue": "B群v2 全て反映 ✅。ただし絵文字グリフはブラウザ/OS 依存で描画差が出る。",
+    "suggestion": "SVG 化し stroke:1.5px / size:20px で統一。",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "WHITESPACE",
+    "screen": "s12_task_add",
+    "location": "所要時間チップ",
+    "issue": "横スクロール化 ✅ (5/10/15/30/45 可視、右端切れ)。残り 60/90/120 は想定通り。",
+    "suggestion": "(問題なし)",
+    "model": "Code",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "ICON",
+    "screen": "s10_grow",
+    "location": "ボトムタブ",
+    "issue": "GROW タブ active で pill + icon + label。非 active は icon のみ。仕様通り ✅。",
+    "suggestion": "(問題なし)",
+    "model": "Code",
+    "persona": "illustrator"
+  }
+]

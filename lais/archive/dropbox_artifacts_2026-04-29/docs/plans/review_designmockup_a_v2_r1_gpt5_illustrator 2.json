@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面最下部の「すでにアカウントをお持ちですか？ ログイン」の『ログイン』テキスト",
+    "issue": "インラインリンクが下線なしで色のみで識別されている。WCAG 1.4.1（色のみに依存しない）および仕様§2.2「インラインテキストリンクは必ずunderline」違反の可能性",
+    "suggestion": "『ログイン』に text-decoration: underline を付与（hover/pressedで濃度強化）。もしくは小型ボタン化して形状でも可視化する",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "ダーク面のフォーム境界線（#484F58）: s01_signin 入力欄, s12_task_add 入力/セレクト, s15_goal_create 入力/チップ, s20_talk 入力バーのテキストフィールド, s30_me セクション境界の操作系",
+    "issue": "インタラクティブ要素の境界色 #484F58 が背景(#0D1117/ #161B22)に対してコントラスト≒2.3:1程度で、WCAG 1.4.11（Non-text Contrast 3:1）未満の可能性",
+    "suggestion": "操作境界は --border-strong（例 #6E7681）へ引き上げるか、境界線を2pxへ増やす/塗り面をやや持たせるなどで3:1以上を担保。フォーカス時はすでに実装のアウトラインで明確化し、非フォーカス時も最小3:1を満たす",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Today一覧 09:00『企画書を仕上げる』行（完了表示のチェック/青系ティント）",
+    "issue": "完了状態の表示がアクセント青で示されており、s14_goal_detailの完了チェック（緑）とセマンティックが不一致。完了=success（緑）というブランドの意味づけが揺らぐ",
+    "suggestion": "完了アイコン/完了行の強調は success系（#3FB950）へ統一。アクセント青は選択/ナビ用に限定し、完了は全画面で緑に揃える",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "Today一覧 12:00『ジムで筋トレ』の左ボーダー（#D29922）",
+    "issue": "警告色（warning/アンバー）が期限接近等の説明なく使用され、注意喚起と誤読されやすい",
+    "suggestion": "warning色は締切接近/注意のみに限定。通常タスクの区切りは中立ボーダー(#484F58)またはゴール色ドットで示す",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "Today一覧 09:00の完了タスクカード（背景に青系の塗りが入っているブロック）",
+    "issue": "完了タスクの背景塗りとチェックで視覚的ウェイトが大きく、未了タスクよりも目立ってしまい当日の優先視線が分散する",
+    "suggestion": "完了行の塗りは削除/さらに薄く（accent-subtle 0.04程度）し、文字色をtext-secondary+打消しに留める。未了タスクの方を相対的に強め、視線を今日の行動へ集中させる",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s20_talk",
+    "location": "各メッセージ下のタイムスタンプ（14:02/14:03）",
+    "issue": "フォントサイズが約10pxで細かく、仕様§3.2の最小スケール(--font-size-xs 11px=キャプション/時刻)を下回っているため可読性が弱い",
+    "suggestion": "タイムスタンプを11–12pxへ引き上げ。行間も1.35–1.4に調整して視認性を担保",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーローEXP部 右側の数値『1,240 / 2,000』",
+    "issue": "数値ラベルが約10pxで極小。情報の重要度に対して視認性が低い（仕様§3.2ではキャプション最小11px推奨）",
+    "suggestion": "数値を11–12pxに拡大し、字間を微調整(--letter-spacing-body=0)で密度を整える",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "アクション行の『削除』ボタン（赤文字+薄い赤ボーダーのアウトライン）",
+    "issue": "ダーク面での境界コントラストが弱く、破壊的操作の視認/識別が甘い。Non-textコントラスト（境界）も不足の懸念",
+    "suggestion": "危険操作は --button-danger-bg（#DA3633）で塗りボタン化し白字で明瞭に。代替としてボーダーを--dangerにし境界3:1を満たす＋アイコン併記",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BRAND_DNA",
+    "screen": "s20_talk",
+    "location": "タスク提案カード内の『登録する』プライマリボタン（濃い青塗り）",
+    "issue": "チャットの流れの中で彩度の高い青塗りが強く、Night Skyの静けさに対してやや視��的主張が勝ち気味",
+    "suggestion": "チャット内インラインカードでは accent-subtle背景＋アクセント文字のピルを既定にし、必要時のみ塗りボタンを使用。もしくはボタンの角丸/余白は維持しつつ彩度を一段落として会話本文のリズムを優先",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "メタ情報『ゴール』の左ドット（青 #58A6FF）",
+    "issue": "info系青（情報バナー用）をカテゴリー色ドットに流用しており、色の役割分離（§2.2）が曖昧になる",
+    "suggestion": "カテゴリーは専用のカテゴリーパレットまたは中立グレーで表示し、info青は情報/リンク系に限定。ドットは形状とラベルで十分に識別させる",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "ORIGINALITY",
+    "screen": "s00_splash",
+    "location": "ロゴ上部の星粒（小点群）",
+    "issue": "星の明度/色が単調で奥行きが弱く、Night Skyの『月明かり』ニュアンスがやや平板に見える",
+    "suggestion": "星粒に2–3段の明度/色相差（#A5D6FF, #79C0FF, #E6EDF3の微差）を混ぜ、サ��ズ1–3px+ごく弱いブラーで遠近を作る。ロゴ前景は維持しつつ奥行きを演出",
+    "model": "GPT-5",
+    "persona": "illustrator"
+  }
+]

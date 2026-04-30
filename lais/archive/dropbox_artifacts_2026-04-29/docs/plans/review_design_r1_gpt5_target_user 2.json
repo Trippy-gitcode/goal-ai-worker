@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "STRUCTURE",
+    "location": "§9 AI実装向けCSSトークンブロック",
+    "issue": "CSSトークンのコードブロックが途中で```で誤って閉じられており、その後もCSSが続いているため、指示どおりにコピーすると無効なCSSになる",
+    "suggestion": "コードブロックを1つに統一し、:root { ... } の開始から終了までを連続したCSSとして掲載する。lintに通した完全版を貼り付け、末尾の閉じカッコと```の位置を修正する",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§5 テーマ定義（依存: ux_v1 §5.2 Step5, project_v1 §3.5）",
+    "issue": "design_systemはNight Sky/Dawn/Adventureの3テーマのみだが、オンボーディングではHarajuku Light/Darkを含む4テーマ前提。実装時にテーマトークンが欠落して破綻する",
+    "suggestion": "どちらかに統一する。推奨: Harajuku Light/Darkのトークンセット（--bg-*, --text-*, --accent 等）を§5に追加して4テーマを確定し、全テーマのアクセシビリティ検証を合わせて追記",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§1.4 NGリスト（色）と §5.2 Dawn / §5.3 Adventure",
+    "issue": "NGで「純白 #FFFFFF / 純黒 #000000 を使用禁止」としているが、Dawn/Adventureで--bg-surfaceや--bg-elevatedに#FFFFFFを採用しており方針矛盾",
+    "suggestion": "NGルールを「広い面積での純白/純黒は避け、近似のオフ系を推奨」に緩和するか、Dawn/Adventureの#FFFFFFを#FFFDF8等のオフホワイトに置換して一貫性を担保",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§1.4 NGリスト（エフェクト）/ §7.1 基本イージング vs ux_v1 §1.3, §8.1, §8.3",
+    "issue": "design_systemはease-in/out系禁止・spring系のみ許可だが、UX仕様では各所でease-in/ease-out/ease-in-outを指定しており矛盾",
+    "suggestion": "許可イージングをトークン化（--ease-default, --ease-in, --ease-out など）し、UX側の記述を全てトークン参照に統一。NGは「独自ease乱用禁止」に再定義",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2 カラーシステム（依存: project_v1 §3.2.4）",
+    "issue": "project_v1で要求されているOverdue（期限切れ）用のアクセント/背景カラーがdesign_systemに未定義",
+    "suggestion": "全テーマ共通のセマンティックとして--overdue, --overdue-bg, --overdue-border, --overdue-subtleを追加し、ライト/ダーク別の推奨値を表で定義する",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§2 カラーシステム",
+    "issue": "アクセシビリティ要件（コントラスト比）の閾値や各テーマでの達成可否が未定義。ux_v1 §10.2ではdesign_system側で定義する前提",
+    "suggestion": "各テーマの主要組合せ（text-primary/secondary × bg-surface/elevated/カード、accent×subtle背景など）のコントラスト比表とWCAG AA/AAA準拠可否を追加。必要に応じて色値を微調整",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.2 セマンティックカラー / §8.3 チップ/バッジ / §8.1 ボタン",
+    "issue": "コンポーネント仕様で「subtle」バリアントに言及があるが、--danger-subtle / --success-subtle 等のトークンが未定義",
+    "suggestion": "各セマンティックに-subtle/-hover/-activeの派生トークンを追加（例: --danger-subtle: rgba(danger,0.1), --danger-hover: #C93B36 等）し、使用ルールを表にまとめる",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.3 グリッド（依存: ux_v1 §4.4 FRIENDS）",
+    "issue": "デザイン原則で「モバイル: 1カラム」とある一方、FRIENDSは2列グリッド想定。どの画面が1カラム原則例外か不明瞭",
+    "suggestion": "「一覧は1カラム、カードギャラリーは最大2列」などの例外ルールを明記。ブレークポイントごとの列数（1/2/3）をコンポーネントトークンとして定義",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§7.4 触覚フィードバック",
+    "issue": "navigator.vibrateはiOSで非対応。主要ユーザー層（日本のiOS比率高）では触覚が発火しない",
+    "suggestion": "プラットフォーム検出でAndroidのみvibrate。iOSは微小なscale/opacityの視覚フィードバックで代替。--haptics-enabled等のフラグをトークン化して条件分岐可能にする",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§3.3 ウェイト・行間",
+    "issue": "font-weight 200はプラットフォーム標準フォントで未実装の場合があり、可読性と一貫性にリスク",
+    "suggestion": "大数字の推奨ウェイトを300/400に再設計、もしくは「200→代替300」などフォールバックを明示。--font-weight-display等のトークンを追加してOS別最適化を許容",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§6.2 タブアイコン",
+    "issue": "非アクティブ時はラベル非表示のため、初見ユーザーにとって「GROW/TALK/ME」の意味が分かりづらい可能性がある（特にAdventureの遊び心ある配色時）",
+    "suggestion": "全タブで常時ラベル表示、または初回数日間はラベルON→慣れたら自動で簡略表示に切替えるオプションを追加。最小限でもアクセシビリティ設定で常時ラベルONを提供",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8 コンポーネントトークン",
+    "issue": "フォーカス/ホバー/押下/無効状態の色やアウトラインが未定義。キーボード操作やアクセシビリティ時の一貫性が担保しづらい",
+    "suggestion": "buttons/inputs/chips等に対して --focus-ring, --focus-ring-offset, --pressed-bg, --disabled-bg/fg などの状態トークンを追加し、OSごと��フォーカス可視性要件を満たす",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§4.2 余白・角丸",
+    "issue": "角丸の数値ルールはあるがトークン化されていないため、実装でバラつく恐れ",
+    "suggestion": "--radius-sm:4px / --radius-md:8px / --radius-lg:12px / --radius-pill:999px をトークンとして追加し、全コンポーネントで参照させる",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§4.2 余白（タスク間20px以上）/ §4.1 スペーシングスケール",
+    "issue": "ガイドラインで20px以上と指定する一方、スケールに20px相当トークンがない",
+    "suggestion": "--space-ml: 20px を追加（もしくは--space-lg:24pxを推奨値に変更）し、タスク行の標準ギャップを明文化",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§1.4 NG（エフェクト） vs ux_v1 §6.2 トースト",
+    "issue": "NGでdrop-shadow装飾禁止だが、UXではトーストにshadowを要求。装飾/機能の線引きが不明瞭で実装が迷う",
+    "suggestion": "「意味を持つelevation影は���可」と明記し、--shadow-sm/md/lgの標準トークンを追加。トースト/モーダル/シートに限定して使用を許可する",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§2.2 セマンティックカラー",
+    "issue": "info（リンク/情報）とaccentが実質同値で、用途の切替やテーマ変更時に混乱が生じやすい",
+    "suggestion": "リンク・情報色（--info）と主要操作色（--accent）を役割分離。必要に応じて--link, --link-hoverトークンを別定義し、用法を表で整理",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3.2 サイズスケール",
+    "issue": "キャプション11pxは可読性に不安（特にAndroid/小型端末）。長時間利用時の疲労や可読性低下で離脱要因になりうる",
+    "suggestion": "最小文字サイズを12px以上に引き上げるか、環境に応じて倍率を上げるスケール（Dynamic Type/OSの文字サイズ設定）に追従する指針を追記",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§6 アイコン・イラスト体系",
+    "issue": "「SF Symbols風」とあるが、実素材の出自/ライセンス/生成方針が未定義。Web配信時の著作権や一貫性にリスク",
+    "suggestion": "アイコンのソース（自作/OSSパック/ライセンス種別）とビルドパイプライン（SVG最適化、ストローク幅統一、色の継承方針）を明記。代替としてMaterial Symbols Outlined等の採用可否も検討",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§3.3 ウェイト・行間 / §9 トークン",
+    "issue": "line-heightやletter-spacingは数値方針のみでCSSトークン未提供。実装時に画面ごとにブレが出る恐れ",
+    "suggestion": "--line-height-body, --line-height-heading, --ls-heading, --ls-label などのタイポグラフィ関連トークンを§9に追加し、参照を統一",
+    "model": "GPT-5",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§5.4 グラスモーフィズムトグル",
+    "issue": "Glass ON時のblur/saturateが低スペック端末でカクつく可能性。ユーザー観点では「重い/電池消費」の不満につながりうる",
+    "suggestion": "設定に「軽量表示」や「パフォーマンス優先」トグルを追加し、Glass ON時でも閾値以下の端末では自動でGlass OFFにフォールバック。説明文もUI内に明示",
+    "model": "GPT-5",
+    "persona": "target_user"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "R-001",
+    "verdict": "WAIVE_IMPL",
+    "reason": "SVGアイコン単体に対する透明タップ領域の確保は、レイアウト崩れを防ぐためPhase 4実装時に::before疑似要素等で対応するという方針を承認する。",
+    "harsh_comment": "「実装時に対応する」という言い訳は聞き飽きたが、方針として合意済みなら今回は見逃す。Phase 4で確実に44x44pxを確保しろよ。絶対に忘れるな。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "verdict": "STAND",
+    "reason": "タブの高さ調整（padding増加やmin-height設定）は静的HTML/CSSで極めて容易に修正可能であり、実装フェーズに先送りする正当な理由が一切ない。",
+    "harsh_comment": "CSS��数行いじるだけの修正すら「実装時対応」に逃げようとする怠慢は許さない。Phase 3のモックアップ段階で確実に44x44pxを確保しろ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "verdict": "WAIVE_INTENT",
+    "reason": "コントラスト比向上のための意図的なカラー変更（#F85149 → #FF7B72）であるという背景事情を理解し、設計判断として承認する。",
+    "harsh_comment": "意図は認めるが、インラインでハードコードして放置するのは三流の仕事だ。デザインシステムの --danger トークン自体を #FF7B72 に更新するのが筋だろうが。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "verdict": "STAND",
+    "reason": "テキストリンクのタップ領域拡大もR-002と同様、静的モックアップのCSSで完全に表現可能。物理的に表現不能な項目ではないため、Phase 3で修正必須。",
+    "harsh_comment": "これもR-002と同じだ。簡単なCSS修正を実装フェーズに押し付けるな。ユーザーがタップしづらいUIをモックアップとして放置する神経が信じられない。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "verdict": "WAIVE_INTENT",
+    "reason": "プログレスバーのfillとtrack間のコントラスト比（4:1）を確保��るための意図的なカラー設定であるというPO/ADVの設計判断を尊重し、承認する。",
+    "harsh_comment": "fillとの対比を優先した判断は認める。だが、背景の黒に溶け込んでバーの全長がユーザーに伝わらないリスクは残っている。実装後の実機テストで必ず視認性を検証しろ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

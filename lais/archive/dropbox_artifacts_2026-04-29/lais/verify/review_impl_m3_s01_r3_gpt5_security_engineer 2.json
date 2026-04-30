@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1 (Phase B: H9), 5",
+    "issue": "明示的な CSP/Trusted Types が未設定のまま、Supabase のアクセストークン/リフレッシュトークンを localStorage に永続化しているため、XSS 一発で恒久的なアカウント乗っ取りに直結するリスクが高い",
+    "suggestion": "配信インフラで厳格な CSP を設定し、inline/script 動的挿入を禁止する。例: default-src 'self'; script-src 'self' 'nonce-<generated>' 'strict-dynamic'; connect-src 'self' https://<project>.supabase.co wss://<project>.supabase.co; img-src 'self' data:; style-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'。あわせて require-trusted-types-for 'script' と trusted-types (例: trusted-types default dompurify) を適用し、アプリ側では Trusted Types と DOMPurify を用意。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1 (Phase B: H7), 5",
+    "issue": "Supabase の RLS 設定状況が未検証のまま。RLS が有効化されていないテーブル/ストレージが存在すると anon キーで全件読み書き可能となり、重大なデータ漏えいに至る",
+    "suggestion": "全テーブル/ビュー/ストレージに対して RLS を有効化した上で、最小権限のポリシーを定義・検証する。例: ALTER TABLE <t> ENABLE ROW LEVEL SECURITY; CREATE POLICY user_isolation ON <t> USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id); ストレージは storage.objects に対する read/write ポリシーをバケット単位で定義。CI にスキーマ検査を入れ、RLS 無効テーブルをビルド失敗にする。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1 (Phase B: H8), 2.1",
+    "issue": "service_role キーが誤ってクライアントに混入することを防ぐ自動ガードが未整備。混入すると RLS を迂回して全権操作が可能となる",
+    "suggestion": "CI/CD に gitleaks/TruffleHog を導入し PR/リリースで強制。環境変数の許可リストを導入 (例: VITE_SUPABASE_URL と VITE_SUPABASE_ANON_KEY のみビルドへ露出)。起動時にキーを検査し、JWT としてデコード可能な場合は payload.role==='anon' 以外を即時停止。監査用に service_role は別プロジェクト/別保管に分離。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "2.1 (lais/src/lib/supabase.js) および 5",
+    "issue": "OAuth/マジックリンク後のリダイレクト先 (redirectTo/site_url) の許可リスト設定が記載されていない。誤設定時に Open Redirect やセッション固定/トークン窃取につながる",
+    "suggestion": "Supabase Auth 側で SITE_URL を本番のオリジンに固定し、Additional Redirect URLs を最小限の自社ドメインみに限定。フロントから signIn/signUp を呼ぶ際は redirectTo を固定値で渡し、ユーザー入力からは組み立てない。アプリ内の post-login リダイレクト next パラメータは new URL(next, location.origin).origin===location.origin かつ next.startsWith('/') のみ許可。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "2.1 (lais/src/lib/supabase.js)",
+    "issue": "detectSessionInUrl:true によるセッション取込後、URL から code/access_token/refresh_token/state 等のクエリ・フラグメントが確実に消去される保証が実装からは確認できない。残留すると Referer 経由で外部に漏洩する恐れ",
+    "suggestion": "supabase-js が自動で URL をクリーンアップしているかを E2E で確認。必要に応じて初期化後に history.replaceState で auth クエリを除去するフックを追加。ヘッダで Referrer-Policy: no-referrer (少なくとも strict-origin-when-cross-origin) を設定。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2 (実装差分全体)",
+    "issue": "XSS シンク (dangerouslySetInnerHTML/innerHTML 等) の禁止やサニタイズ方針が明文化・自動検査化されていない。localStorage にセッショントークンを保持しているため影響が増大",
+    "suggestion": "ESLint で no-unsanitized/method・no-unsanitized/property・react/no-danger (Preact でも有効化) を導入し CI で強制。外部由来 HTML を扱う場合は DOMPurify + Trusted Types を必須化。レビューのチェックリストに innerHTML/dangerouslySetInnerHTML 禁止を追加。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "1 (Phase B: H9), 5",
+    "issue": "CSP 以外の標準セキュリティヘッダの要件定義がない（クリックジャッキング/情報漏えい/ブラウザ機能乱用の余地）",
+    "suggestion": "配信レイヤで以下を設定: Frame-Options/Content-Security-Policy: frame-ancestors 'none'; Referrer-Policy: strict-origin-when-cross-origin (または no-referrer); Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), etc.; Cross-Origin-Opener-Policy: same-origin; Cross-Origin-Resource-Policy: same-origin。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "4 (スコープ外再確認), 5",
+    "issue": "現在はトークンベースで CSRF 耐性は高いが、将来的にクッキー型の自前 API/エッジ関数を併用する場合の CSRF 方針が未定義",
+    "suggestion": "クッキー認証を導入する場合は SameSite=Strict/Lax, Secure, HttpOnly を付与し、状態変更 API には CSRF トークン（Synchronizer Token/Double Submit）を実装。SPA からの送信時は 'X-CSRF-Token' 等のカスタムヘッダで送信し、サーバで検証。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2.1〜2.5 (抜粋全体)",
+    "issue": "grep レベルの確認ではハードコードされたシークレットは検出されず、'publishableKey' はクライアント公開前提のキーとして扱われている",
+    "suggestion": "この状態を維持しつつ、CI に gitleaks/SecretLint を常時稼働させる。ローカルでも pre-commit でシークレットスキャンを実行し、誤コミットを防止。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

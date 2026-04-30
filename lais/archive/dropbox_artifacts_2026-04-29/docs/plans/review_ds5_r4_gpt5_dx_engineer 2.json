@@ -1,0 +1,142 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§6, §10（sub_adv_protocol）, §18, §19.1-19.6",
+    "issue": "UX仕様書のファイル名が箇所により不一致。§6/§10/§18では docs/ux_redesign_v*.md を参照する一方、§19.1/§19.4/§19.6 では docs/ux_v1.md を前提としているため、新規作成時にどちらを使うか判断が割れる。",
+    "suggestion": "UX仕様書の正規ファイル名を一意に確定（例: docs/ux_v*.md に統一）。全セクションの表記を検索置換で統一し、init_app.sh のテンプレート名も合わせる。§18の依存関係マップと§19.6の依存チェーン図も同名に修正。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.5, §19.6",
+    "issue": "ヘッダー標準の「依存」項目が単一行・自由記述で定義されており、複数上流ファイルを持つ文書（例: design_spec_v1.md ← ux_v1.md + design_system.md）で機械可検証が困難。§19.6はこのメタデータを前提に連鎖更新を求めているが、現行書式では自動検証・抽出が安定しない。",
+    "suggestion": "ヘッダーをYAMLフロントマタ��化し、機械可読な配列で依存を列挙する（例: depends_on: [{file: docs/ux_v1.md, version: v1.2, section: \"§2\"}, ...]）。合わせて spec_dep_lint.sh（新規）を追加し、(1) 存在確認,(2) バージョン有無,(3) 循環参照検出,(4) 変更差分時の下流ToDo出力 をcanopyに組み込む。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.2, §19.6",
+    "issue": "§19.6で「更新範囲は spec_changelog.md に記録」と必須運用を課している一方、§19.2では docs/spec_changelog.md を任意ファイルとしている。トレーサビリティの要否が矛盾。",
+    "suggestion": "spec_changelog.md を必須化（§19.1に昇格）するか、各仕様書の「変更履歴」セクションを唯一の正本と定義し直す。前者を選ぶ場合はinit_app.shで必ず生成し、canopyで存在と更新を検証する。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダーの「dev-system準拠: docs/plans/dev_system_spec.md §19」というパス表記がアプリ側に実在しない可能性が高く、参照の正本が曖昧（dev-systemリポジトリ上のファイルと整��しない）。",
+    "suggestion": "ヘッダーに dev_system: {version: v3.0, repo: https://github.com/... , commit: <sha>} を追加し、正本URL/コミットを固定。ローカルパスは避け、常にdev-system側の正規位置にリンクする。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.6",
+    "issue": "参照表記を「§3.2」などの節番号ベースで規定しているが、挿入・削除で番号が変動すると参照が壊れる。新規参加者が追跡しづらい。",
+    "suggestion": "各見出しに安定ID（アンカー）を付与し、表記を「project_v1.md §ux-flow（固定ID）参照」の形式に変更。IDは英数スネークケースで自動生成し、ヘッダーYAMLにも section: ux_flow のように記録可能とする。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.6",
+    "issue": "循環参照やバージョンなし依存の禁止を定めているが、これを検出する自動ゲートが存在しない。運用のみだと逸脱検知が遅れる。",
+    "suggestion": "R-102の spec_dep_lint.sh に、(1) 依存DAG構築とサイクル検出,(2) 依存のバージョン未記載検��,(3) 変更検知時に下流リストを出力 の機能を追加し、canopyに組み込む。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（design_spec_v1.md テンプレ）",
+    "issue": "画面デザイン仕様に状態別UI（hover/focus/active/disabled/error/loading）や相互作用のステート図が必須化されていない。G9の視覚判定観点が不足する恐れ。",
+    "suggestion": "design_spec_v1.md に「§N+3 コンポーネント状態仕様（状態一覧・視覚差分・禁止状態）」「§N+4 相互作用・モーション適用（design_system §7トークン参照）」を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレ）",
+    "issue": "各テストケースに§12のSPEC-ID（SPEC-XXXX-YYY）への明示的な紐付け欄がない。仕様↔テストのトレーサビリティが手作業に依存。",
+    "suggestion": "各テストケース見出しに [SPEC-ID] フィールドを必須化（例: \"### T-001: 起動 → メイン [SPEC-TODAY-001]\"）。canopyにSPEC-IDの相互参照チェックを追加し、§12の簡易スクリプトをスモークに昇格させる��",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（reference_v1.md テンプレ）",
+    "issue": "API/機能詳細にレート制限・スロットリング・バックオフ方針、エラーレスポンス共通スキーマ、APIバージョニング/互換性ポリシーの必須記載がない。",
+    "suggestion": "reference_v1.md に「§7 レート制限・再試行方針」「§8 エラーレスポンス標準（エンベロープ/コード/トレーサビリティID）」「§9 APIバージョニング/互換性」を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-110",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力がMarkdown表のみで機械検証が難しい。「Lais方針」未記入や対象社数不足の自動検出ができない。",
+    "suggestion": "各ベンチマークに sidecarのJSON（benchmarks/{scope}.json）を必須化し、調査対象・マトリクス・分類（同等/未対応/差別化）を構造化。canopyに JSON妥当性 + 件数（直接≥5, 間接≥3）+ 全行『Lais方針』有無の検証を追加。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-111",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.7（テンプレ）",
+    "issue": "要求している「App Storeレビュー分析（★1-2離脱要因/★4-5継続要因）」の記載欄がテンプレに存在しない（差別化マッピングはあるがレビュー分析の切り分けは無い）。",
+    "suggestion": "テンプレに「#### レビュー分析（★1-2: 離脱要因 / ★4-5: 継続要因）」セクションを追加し、各要因を列挙→差別化マッピングの根拠リンクを必須化。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-112",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§19.7",
+    "issue": "「実施タイミング」では project_v1.mdに直接5社+間接3社を要求しているが、「ベンチマーク完了基準」では直接5社以上のみを条件化しており、間接競合の完了条件が欠落。",
+    "suggestion": "完了基準に『間接競合3社以上の調査完了』を追記し、両者を一致させる。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-113",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§13.4, §19.7（Phase 0 完了基準）",
+    "issue": "標準ペルソナは§13.4で5名だが、§19.7のPhase 0完了基準は『8ペルソナ×2モデルのAIレビューでCRITICAL 0』と規定し増加根拠が未��義。新規開発者が追加3ペルソナの定義位置/内容で迷う。",
+    "suggestion": "追加3ペルソナをテンプレート化（例: セキュリティ監査/アクセシビリティ/プロダクトマーケ）し、sub_adv_protocol.mdに『追加ペルソナ定義の正本』を追記。もしくは要件を『標準5 + 任意3（アプリ固有定義）』と明記。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-114",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーに更新日の明確なトラッキング（更新: 日付/差分ID/承認者）がなく、承認フロー・追跡性が弱い。新規参加者が最新版の確からしさを測りにくい。",
+    "suggestion": "ヘッダーYAMLに updated, approved_by, review_ids（docs/plans/review_*.jsonのID）を追加し、CONFIRMED遷移時に自動で更新するスクリプト（spec_header_sync.sh）を導入。",
+    "model": "GPT-5",
+    "persona": "dx_engineer"
+  }
+]

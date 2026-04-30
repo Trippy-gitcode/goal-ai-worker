@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-101",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5 テーマ定義, §7 アニメーショントークン",
+    "issue": "テーマの性格差が主に色（＋accent-subtle濃度）で表現されており、モーション/エレベーション/形状など他トークンによる体験の差が弱い。ブランドDNAの「夜の静けさ（Night Sky）」と「文化的ポップ（Harajuku）」の気分差が操作感に十分反映されていない。",
+    "suggestion": "任意のテーマ別モーション・エレベーション差分トークンを追加し、Reduced Motionを尊重しつつ体験差を強める。例: 1) --motion-brand-enter: Night Sky/Dawn=var(--spring-gentle), Harajuku系=var(--spring-default) 2) --duration-ui-fast: Night Sky/Dawn=180ms, Harajuku系=220ms（視覚の余韻） 3) --shadow-contrast: Night Sky/Harajuku Dark=強, Dawn/Harajuku Light=中。既存の--spring-*や--shadow-*をラップするテーマ別エイリアストークンで実装。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-102",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§5.4 Harajuku Dark",
+    "issue": "Harajuku Darkのアクセントがパステル寄り（#F5A9BF）で、プライマリボタンも���色塗りのため『ベルベット/ルビー/プラム＝大人のポップ』よりも可愛さ（キャンディ感）に寄る恐れ。ブランド記述との情緒ギャップが生じうる。",
+    "suggestion": "Harajuku Darkを二軸アクセントに分解し、装飾/ピルは現行パステル、主要アクションは深みのあるルビー系に。例: --accent: #F5A9BF（現行）＋--accent-strong: #E1537A（または #D96A8C）。--button-primary-bgを--accent-strongへ差し替え、hover/pressedも再計算（AA維持）。見出しや強調ラベルにも--accent-strongを限定使用するルールを追加。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-103",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§1.4 トーンオブボイス, §5 テーマ定義",
+    "issue": "「Harajuku系のみ通知/トーストの語尾を柔らかく」という言語方針は定義されているが、テーマに連動した文面切替の実装フック（キー設計/辞書分岐）がデザインシステム側に提示されていない。",
+    "suggestion": "デザインシステムに軽量なコピー分岐ガイドを追加。例: 文面キーを tone 次元で定義（toast.done.{neutral|pop}）し、FEは data-theme が harajuku-* のとき pop を選択する規約を明記。範囲は��知/トーストのみに限定し、他UIは中立トーン固定とする。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§1.5 ブランドチェックリスト, §6 アイコン・イラスト体系",
+    "issue": "「ロゴを隠してもLaisと分かるか？」に対し、色・余白・system-uiのみでは汎用的に見えやすく、指紋となるモチーフ/シェイプが不足。競合との差別化がビジュアルの造形面で弱い。",
+    "suggestion": "控えめなシグネチャーモチーフを定義（例: 三日月カットの角R、種芽のピル末端形状、時間軸ドットの独自外周リング等）。トークン化: --brand-corner-cut: 6px, --brand-pill-tail: 12px など。適用範囲（タブpill/強調チップ/タイムライン要素）とNG（入力/可読性に影響する要素）を併記。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-105",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§1.6 NGリスト",
+    "issue": "NG項目（ネオングラデ/純白背景/装飾アニメ等）は原則として妥当だが、実装で逸脱を検出/抑止する仕組み（ユーティリティ/リンティング）が未提示。将来の拡張でドリフトしやすい。",
+    "suggestion": "スタイルガードを追加: 1) text-linkユーティリティ（accent+underline強制） 2) gradient-text, decorative-shadowの禁止をStylelintで検出 3) CIにNGキーワード監��を組み込む（linear-gradient on text, box-shadow on focus等）。使うべきトークンのユーティリティを同時に用意し、逸脱の“手間＞準拠”にする。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§5.3 Harajuku Light, §2.2-2.4",
+    "issue": "Harajuku Lightのaccent（#C43361）とdanger（#C93000）は色相をずらしてあるが、バッジ/小UIでは知覚上近接して見える場面があり、色弱ユーザーや強発色背景で混同リスクがある。",
+    "suggestion": "「色＋形」の二重表現を強化し、危険系は常に形状/アイコンを伴うルールに昇格（例: 危険バッジは“!”内包 + 角丸率を下げる）。加えて Harajuku Light のdanger色相をさらに+15〜20°オレンジ側にシフト（例: #B04A00）する代替案をトークンで検証。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-107",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "§6.3a アバターパレット, §5 テーマ定義",
+    "issue": "アバター配色ガイドは暫定で、テーマとの整合（各テーマで推奨される服/アクセ色、枠線やフレームの扱い）が未定義。テーマの気分とアバターの見え方が衝突する余���がある。",
+    "suggestion": "テーマ×アバターの対応表を追加。例: --avatar-border を各テーマで定義（現状の --accent 流用を明文化）、服/アクセ推奨スウォッチを --avatar-swatch-{n} としてテーマ別に2-3色提示。Glass ON時のフレーム透過度も指針化。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0 テーマ切替の永続化・FOUC対策",
+    "issue": "meta theme-color をJSで同期とあるが、JS無効/初回早期描画ではブラウザUI色と背景の不一致が起こりうる。『実世界に溶け込む』精度で僅かな違和感が残る。",
+    "suggestion": "CSSのみの初期フォールバックも用意。例: 初期<meta name=\"theme-color\">はNight Sky色を設定し、harajuku/dawn用の<noscript>フォールバックやmedia属性付きmeta（prefers-color-schemeヒント）を併用。最小インラインスクリプトでの即時更新は維持しつつ“最悪でも不一致が目立たない”設計に。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§1.6 NGリスト, §7.3 許可アニメーション, §8 コンポーネント",
+    "issue": "装飾アニメ禁止と許可リストは明記されているが、コンポーネント単位の“使ってよいアニメ種別”のひも付けが一部記述的で、拡張時に解釈の幅が残る。",
+    "suggestion": "各コンポーネントに data-anim 許容値を付与する設計を追加（例: .btn[data-anim=\"scale-spring|opacity-transition\"]）。設計リストをDSに掲載し、--spring-bouncyは「チェック/バッジ」への限定など粒度で明確化。テーマ別に--motion-brand-enterを参照する形で一貫性と差別化を両立。",
+    "model": "GPT-5",
+    "persona": "brand_designer"
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md",
+    "issue": "Markdown内のシェルスクリプトコードブロックで改行が消失し、`[` が `\\[` にエスケープされるなどの副次破損が発生しています。このドキュメントからコマンドを抽出して実行する運用において、確実に構文エラーとなりシステムがクラッシュします。",
+    "suggestion": "破損したコードブロック（`status=$(awk...` や `sed -i.bak...` など）の改行とエスケープを元の正しいシェルスクリプトの構文に復元してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "scripts/adv_hot_summary.sh",
+    "issue": "`python3 - <<'PYEOF' \"$TRIMMED\"` という構文は、`dash` などの POSIX shell では引数 `\"$TRIMMED\"` が Python に渡されず無視されます。結果として `sys.argv[1]` へのアクセスで `IndexError` が発生し、スクリプトが確実にクラッシュします。",
+    "suggestion": "ヒアドキュメントと引数の混在を避け、環境変数経由で値を渡すように修正してください。例: `BODY=\"$TRIMMED\" python3 -c 'import json, os; print(json.dumps({\"additionalContext\": os.environ.get(\"BODY\", \"\")}, ensure_ascii=False))'`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "scripts/persona_selector.sh",
+    "issue": "ログファイルが1MBを超えた際のローテーションファイル名が `$(date -u +%Y%m%d).gz` と日単位になっています。同日中に複数回1MBを超えた場合、`>` で上書きされるため、以前のローテーションログが完全に消失します（データ損失）。",
+    "suggestion": "ローテーションファイル名に時刻を含める（例: `$(date -u +%Y%m%d_%H%M%S).gz`）か、リダイレクトを追記モード��`>>`）に変更してデータ損失を防いでください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "`tail -c 16384` でログの末尾を切り出す際、マルチバイト文字の途中で切断されると不正なバイト列となります。これを `grep` に渡すとバイナリファイルと誤認され、テキスト検索が機能せず意図した判定（直前ターンの矛盾検出）が失敗します。",
+    "suggestion": "`grep` コマンドに `-a` または `--text` オプションを追加し、不正なバイト列が含まれていても強制的にテキストとして処理させるように修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "`mktemp -t adv_gate_parsed.XXXXXX` は GNU coreutils (Linux) では非推奨であり、環境によってはエラーになるか意図しないディレクトリに作成されます。macOS と Linux で挙動が異なるため移植性と保守性が低いです。",
+    "suggestion": "`-t` オプションを外し、明示的に `/tmp/adv_gate_parsed.XXXXXX` のようにパス��指定するか、`mktemp` の引数仕様を POSIX 準拠の形に修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "`DEDUP_KEY=\"${SID}_${SHA}\"` において、JSON パースエラー等で `SID` や `SHA` が空文字になった場合、キーが `_` になり、異なる空セッション同士が衝突して誤ってスキップ（ブロック漏れ）される可能性があります。",
+    "suggestion": "`SID` と `SHA` が両方空の場合は dedupe 処理をスキップするか、ランダムな UUID をフォールバックとして割り当てる処理を追加してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "scripts/adv_response_gate.sh",
+    "issue": "`grep -qE \"(貼付|起動|判断仰ぎ|タイミング)\"` という条件は、「テストを起動しました」などの一般的な報告にもマッチしてしまい、誤爆（False Positive）が多発する可能性が高いです。",
+    "suggestion": "マッチ条件をより具体的なフレーズ（例: `POに.*起動` や `判断を仰ぎ`）にするか、ADV のプロンプトで特定のフォーマットを強制し、そのフォーマットのみを検査するように変更してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.0989,
+    "input_tokens": 74154,
+    "output_tokens": 1246,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

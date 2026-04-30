@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "1.App.jsx / 3.S30MeProfile.jsx（/me ルート全体）",
+    "issue": "/me ルートに認証・認可ガードが存在せず、将来サーバーデータ連携時に未認証ユーザーでも個人情報が描画されるリスクがある。クライアント側のみの制御は迂回可能。",
+    "suggestion": "ルート入場時に必ず認証状態を確認し、未認証は/ login等へリダイレクト。サーバー側APIでアクセストークン検証を行い、ユーザーID一致データのみ返却（ABAC/RBAC）。クライアントはガード＋ローディング/スケルトン、サーバーは未認証/権限不正は401/403で遮断。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "S30-4（実AIメモのSupabase連携・後続スコープ）",
+    "issue": "RLS（Row Level Security）に関する要件/設定が未記載。RLS未設定のまま公開すると他ユーザーのメモ/プロフィールが横取り可能。",
+    "suggestion": "Supabaseは必ずRLSを有効化し、policiesで`user_id = auth.uid()`を厳格化。読み書きともに本人のみ許可。Service Role Keyはサーバー専用に限定し、クライアントにはAnonキーのみ。テーブル/ビュー単位で最小権限を適用。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.S30MeProfile.jsx（S30-3 基本情報 / S30-4 AIメモ）",
+    "issue": "将来、ユーザー入力やAI生成テキストをそのまま描画する際の格納型/反射型XSSリスク（dangerouslySetInnerHTML/innerHTMLの導入やHTML混入が発生し得る）。",
+    "suggestion": "テキストは常にエスケープして描画し、dangerouslySetInnerHTML/innerHTMLは不使用を維持。HTMLを許容する要件が出た場合はサニタイズ（DOMPurify等）とサーバー側バリデーションを併用。CSP（script-src）を有効化し、インラインスクリプトを禁止することで多層防御。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.S30MeProfile.jsx（S30-1/S30-5 の progress bar: style={{ width: ... }})",
+    "issue": "インラインstyle属性によるwidth指定は、厳格なCSP（style-srcで'unsafe-inline'を禁止）と相性が悪い。将来的にCSPを強化する際の阻害要因。",
+    "suggestion": "可能であればクラス駆動（例: w-0..w-100のユーティリティクラス）に置換、またはCSS変数を事前定義しクラス切替で反映。CSPを強化する計画がなければドキュメント化の上でstyle-srcに'unsafe-inline'（styleのみに限定）を許容するなど、ポリシー方針を明確化。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.S30MeProfile.jsx（S30-6 アバター設定/設定の将来アクション）",
+    "issue": "設定更新などサーバーの状態変更API導入時のCSRFリスク（Cookieベース認証の場合）。",
+    "suggestion": "SameSite=Lax/StrictやCSRFトークン（同期トークン/二重送信/Originチェック）を実装。可能ならCookieに依存せずAuthorizationヘッダ（Bearer）で認証し、サーバーで`credentials`要否とCORSを厳密化。状態変更はGET禁止でPOST/PUT/PATCH/DELETEに限定。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.S30MeProfile.jsx（S30-5 「外部テスト結果を入力」導線の今後実装）",
+    "issue": "外部サイト誘導や外部URL入力機能を実装する際のオープンリダイレクト/タブナッピングリスク。",
+    "suggestion": "���部遷移は許可ドメインのホワイトリストで検証し、target=_blank使用時はrel=\"noopener noreferrer\"を付与。戻りURL（returnTo等）を扱う場合は固定パス化または厳格ホワイトリスト検証。ユーザー入力URLは正規表現/URLパーサで検証しスキームも限定（https）。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "バックエンド/API層（今後のSupabase/自前API連携）",
+    "issue": "CORSの緩い設定（Access-Control-Allow-Origin: * + Credentials許可等）によるトークン/セッションの漏えいリスク。",
+    "suggestion": "本番はAllow-Originを厳密にオリジン固定、Allow-Credentialsは必要時のみ、Allowed-Headers/Methodsも最小化。Vary: Originを適切に付与。プリフライトのキャッシュ制御を設定して不要な露出を避ける。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "提供ファイル一式（grepレベル確認）",
+    "issue": "ハードコードされたAPIキー/シークレットは検出されなかった。",
+    "suggestion": "現状維持。今後もクライアントに秘匿値（Service Role Key等）を埋め込ま��い。公開可能なAnonキーのみを使用し、環境変数/Secrets Managerで管理。ビルド成果物に秘密情報が混入しないかCIで自動スキャンを組み込む。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.S10Grow.jsx / 3.S30MeProfile.jsx（console.log）",
+    "issue": "本番環境での過度なログはPIIや内部構造の漏えいに繋がる可能性。",
+    "suggestion": "環境フラグでログを抑制し、必要なものはレベル分離（info/debug/error）とマスキングを実施。ユーザー入力値やトークン/IDは出力しない。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "配信設定/インフラ（全体方針）",
+    "issue": "CSPやクリックジャッキング対策、その他セキュリティヘッダの方針が未提示。",
+    "suggestion": "HTTPヘッダでCSP（default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self' 等）を設定。X-Frame-Options同等のframe-ancestors、Strict-Transport-Security、Referrer-Policy、Permissions-Policy、X-Content-Type-Optionsを有効化。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "S30-3（後続インライン編集の入力処理）",
+    "issue": "将来のインライン編集で入力バリデーション/サニタイズ要件が未定義。",
+    "suggestion": "クライアントで基本検証（型/長さ/文字種）＋サーバー側で必須検証・正規化・許容リストによるサニタイズを実施。スキーマバリデーション（zod/valibot等）とレート制限を併用。保存時は監査ログを残す。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.S30MeProfile.jsx（全体）",
+    "issue": "dangerouslySetInnerHTML/innerHTMLの使用は現状なし。XSS直結のシンク不在は良好だが、今後導入される可能性に注意が必要。",
+    "suggestion": "現状維持（direct HTML挿入は不可）。どうしても必要な場合は厳格サニタイズ＋CSP強化を前提に限定利用し、レビューゲートを設ける。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

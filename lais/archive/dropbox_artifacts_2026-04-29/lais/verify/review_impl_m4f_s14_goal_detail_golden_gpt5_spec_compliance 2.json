@@ -1,0 +1,162 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.7 画面タイプ / 状態・インタラクション（[← GROW]）",
+    "issue": "右スライド遷移（ease-out 350ms）が未実装。route() で画面遷移はしているが、規定のアニメーションがない。",
+    "suggestion": "Router レベルまたは画面コンテナで 350ms ease-out の右スライド遷移を実装（enter/leave 双方）。例: ページラッパに transition + translateX を適用し、/grow 戻り時にも同アニメを適用。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.7 S14-8 / 状態・インタラクション",
+    "issue": "タスク行タップ → S-13 ハーフモーダルが未実装（console.log のみ）。",
+    "suggestion": "s14-task-card の onClick で S-13 を実際に起動（ハーフモーダル表示 or /task/:id への遷移）し、仕様どおりの詳細表示に接続。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.7 S14-8 / 状態・インタラクション",
+    "issue": "チェックタップ → S10-4 と同じスプリングアニメ + Undo が未実装。チェック要素は aria-hidden で非インタラクティブ。",
+    "suggestion": "チェックを button（または role=\"checkbox\"）として実装し、S10-4 と同等のスプリングアニメと取り消し（Undo）スナックバーを実装。視覚・キーボード操作・SR の各操作パスを整合。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.7 S14-10c / 状態・インタラクション",
+    "issue": "[削除] の確認ダイアログ → 実行 + Undo 30s が未実装（console.log のみ）。",
+    "suggestion": "削除ボタンで確認ダイアログを表示し、確定後に削除を実行。30 秒の Undo スナックバー（操作可能）を必ず提供。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§4.7 状態・インタラクション（7 日ルール）",
+    "issue": "7 日ルール（ux_v1.md §3.5）の演出が未実装。",
+    "suggestion": "該当条件での達成バナーや EXP 加算など、7 日ルールの演出・状態変化を本画面に反映。最低限、条件成立時の視覚的フィードバックを実装。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§4.7 S14-2",
+    "issue": "タイトルの padding-top 指定がタイポ（padting-top）により未適用。spec は padding-top: --space-md を要求。",
+    "suggestion": "S14GoalDetail.css の .s14-title で padding-top を正しく指定し、--space-md を反映。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.7 S14-6",
+    "issue": "カテゴリタグに border: 1px solid var(--accent) を追加（LP-015 候補）しており、仕様にないスタイルを付与。さらに text-transform: uppercase と font-weight: semibold も仕様外。",
+    "suggestion": "仕様にない追加スタイルは削除するか、デザイン側合意（LP-015 正式昇格）の明文化が必要。合意前は border/uppercase/semibold を外すか feature flag で切替。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§4.7 S14-10a",
+    "issue": "AI 相談ボタンに border: 1px solid var(--accent) を追加（LP-015 候補）。仕様にない輪郭強調が入っている。",
+    "suggestion": "仕様反映が確定するまでは border を削除。WCAG 1.4.11 目的で継続するなら仕様更新を申請し、公式スタイルに昇格させる。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.7 S14-5",
+    "issue": "残り日数のカレンダー SVG 色が --text-muted になっているが、仕様は 14px テキストと同系（--text-secondary）を示唆。",
+    "suggestion": "s14-days-left 内の SVG も --text-secondary（もしくはコンテナ継承）に合わせ、仕様のトーンに統一。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.7 S14-2",
+    "issue": "タイトルの font-size を var(--font-size-xl) で参照しており、28px である保証が実装パッケージ内にはない。",
+    "suggestion": "デザイントークンで --font-size-xl=28px を確認・明記するか、当該箇所のみ 28px を直指定。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.7 S14-3",
+    "issue": "進捗％（数値）の 48px/weight 200 をトークン（--font-size-3xl / --font-weight-thin）に委ねており、値の一致保証がない。",
+    "suggestion": "トークン実値が 48px/200 であることを設計に明記、またはここだけ固定値を使用。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.7 S14-3",
+    "issue": "単位 % の 20px 指定が var(--font-size-lg) 任せで、20px である保証がない。",
+    "suggestion": "トークン表で --font-size-lg=20px を確認・明記、あるいは 20px を直指定。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.7 S14-7",
+    "issue": "TASK ラベルの letter-spacing=1.5px がトークン（--letter-spacing-label）に依存。値一致が不明。",
+    "suggestion": "トークン値を 1.5px に揃えることを設計に明示、もしくは該当箇所に限り 1.5px を直指定。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.7 S14-1",
+    "issue": "戻るボタンのタップ領域 44×44 が var(--tap-target-min) 依存で、44px である保証がない。",
+    "suggestion": "デザイントークンで --tap-target-min=44px を保証・明記、または該当ボタンに限り 44px を直指定。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-015",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.7 S14-10",
+    "issue": "アクションボタンの高さ 44px が var(--tap-target-min) 依存で、44px である保証がない。",
+    "suggestion": "トークン定義で 44px を担保、または s14-action-* に height:44px を直指定。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.7 S14-9",
+    "issue": "『+ タスクを追加』は仕様上「リンク」だが、button 要素で実装。現状は console.log のみで遷移がないため意味上は問題ないが、将来ナビゲーションになる場合は a 要素の方が適切。",
+    "suggestion": "S-12 への画面遷移を実装する段で a 要素（または button + 明示的な route 遷移）に統一し、ロールとアクセシビリティ名を適正化。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

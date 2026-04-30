@@ -1,0 +1,68 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BRAND_DNA",
+    "screen": "s00_splash",
+    "location": "タグライン『あなたの人生を、あなたらしく』",
+    "issue": "初見ユーザーが 3 秒でアプリの機能を把握できない。ロゴは r3 で太字化されたが訴求軸が抽象のまま。",
+    "suggestion": "機能軸タグライン（例:『AIと一緒に、ゴールを育てるジャーナル』）に差し替え。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s10_grow",
+    "location": "ファーストビュー視線起点",
+    "issue": "アバター→12 EXPLORER→EXPバー→TODAY と 4 ジャンプしてようやくタスク行に到達。",
+    "suggestion": "レベル表示をスリムヘッダー（56pt）に集約し、TODAY を画面の 35% 以上で描画。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s20_talk",
+    "location": "提案カード CTA 行",
+    "issue": "r3 で ✕ 追加により 3 要素が並び、折り返しで主従が一層不明瞭に。",
+    "suggestion": "✕ をカード右上 absolute、下段 2 ボタン（登録 60% primary / 編集 40% ghost）に。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "UX_CONTRADICTION",
+    "screen": "s13_task_detail",
+    "location": "削除ボタン（赤文字）",
+    "issue": "未完了時の破壊的アクションが赤文字で目立ち、成長系アプリの動機線と矛盾。",
+    "suggestion": "削除を … メニュー/長押し降格、2 段目は AI 対話 CTA 集中。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s00_splash",
+    "location": "タグライン",
+    "issue": "タグラインの明度が低く、数秒のスプラッシュで読み取りにくい。",
+    "suggestion": "#A0B4CC 程度に引き上げ、タイトル遅延 fade-in 追加。",
+    "model": "Code",
+    "persona": "ad_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s02_onboarding",
+    "location": "進行インジケータ",
+    "issue": "5 セグメントのうち現在位置の色差が弱い。",
+    "suggestion": "濃青/淡青/グレー 3 階調 + 『2/5』数値ラベル併記。",
+    "model": "Code",
+    "persona": "ad_designer"
+  }
+]

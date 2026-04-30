@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§4.1",
+    "issue": "ロゴのY位置が仕様「画面中央から上に60px（Y ≈ 340）」から外れており、実測ではY=326。原因は.s00の高さが未定義のため、.s00-centerのtop:50%基準がビューポートではなく親要素の高さに依存している可能性が高い。",
+    "suggestion": ".s00にmin-height: 100dvh（フォールバックとして100vh）を与え、常にビューポート高を基準化する。例: .s00{min-height:100dvh; height:100vh;} 併せて現行の.top:50% + translateY(calc(-50% - 60px))のロジックを維持すれば、Y位置が安定して仕様どおりになる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§4.1",
+    "issue": "CTAスタックをbottom:140pxで固定しており、iOSノッチ/ホームインジケータ等のセーフエリアを考慮していない。実機では視覚的な下余白が140px未満になりうる。",
+    "suggestion": ".s00-ctaの下寄せにセーフエリアを加味する。例: .s00{padding-bottom: env(safe-area-inset-bottom);} .s00-cta{bottom: calc(140px + env(safe-area-inset-bottom, 0px));} これによりデバイス依存の食い込みを防げる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.1",
+    "issue": "JSXでclass属性を使用しており、React環境ではclassNameが正。開発時警告やSSR/水和時の不一致リスクがある（実行時クラッシュはしないが品質低下）。",
+    "suggestion": "App.jsx, S00Splash.jsx内のclassをclassNameへ置換する。例: <div className=\"app-root\">, <main className=\"s00\"> 等。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.1",
+    "issue": "prefers-reduced-motion: reduce 時にtransition-durationは0ms化されるが、:activeのtransform: scale(0.98)は依然として瞬時に適用される。動きに敏感な利用者には依然刺激となりうる。",
+    "suggestion": "@media (prefers-reduced-motion: reduce) でタップ時のスケール自体を無効化する。例: @media (prefers-reduced-motion: reduce){ .s00-cta-primary:active, .s00-cta-secondary:active{ transform: none; } }",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§4.1",
+    "issue": "短いビューポー��（横向き/小型端末）でCTAのbottom:140pxが固定のため、中央ブロックと衝突・オーバーラップするリスクがある。固定オフセットは可読域が減るほど影響が大きい。",
+    "suggestion": "下オフセットを可変にするか、レイアウトをフレックスで安定化する。例: .s00{min-height:100dvh; display:flex; flex-direction:column;} .s00-center{margin-top:auto; transform:translateY(-60px);} .s00-cta{margin-top:auto; margin-bottom: calc(140px + env(safe-area-inset-bottom, 0px)); position:static;} もしくは .s00-cta{bottom: clamp(24px, 18vh, 140px);} のようにvh連動へ。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§4.1",
+    "issue": "CTAの高さを固定（height:52px）にしており、将来の文言増（多言語/長文）やユーザーの文字サイズ拡大時にテキスト折返しが発生すると被覆・クリッピングのリスクがある。",
+    "suggestion": "固定高さではなくmin-heightで確保し、内側はpaddingで高さを出す。例: .s00-cta-*{min-height:52px; padding: 12px 16px; line-height:1.4; white-space:normal; } これにより複数行でも破綻しにくくなる。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.1",
+    "issue": "フォーカス可視化はoutline: 2px var(--accent)だが、プライマリCTA（濃い青）の縁近傍では視認性が相対的に低くなりうる。AAの必須違反とまでは言えないが、実利用で見落とし懸念。",
+    "suggestion": "プライマリCTAではoutline-offsetを3–4pxに拡げる、あるいはフォーカスリング色をボタン背景と十分にコントラストが出る色へ（例: --focus-ring-color: #B6E3FF 等）を検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§4.1",
+    "issue": "app-rootのdivにaria-label=\"Lais\"が付与されているがランドマークではないため支援技術に余分なノイズとなる可能性。mainに適切なラベルが既にある。",
+    "suggestion": "app-rootのaria-labelを削除し、ランドマーク（main）側のラベルのみを維持する。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

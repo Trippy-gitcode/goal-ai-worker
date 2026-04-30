@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-101",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "修正後CSS — .s02-next bottom / .s02-onboarding padding-bottom",
+    "issue": "env(safe-area-inset-bottom, 0px) のように env() にフォールバック引数を渡しており、仕様および主要ブラウザ実装では未対応。結果として calc(env(..., 0px) + 100px) が無効→ bottom/padding の宣言自体が無効化され、CTA の固定位置が崩れる・コンテナ padding 全体が落ちる（shorthandのため）可能性が高い。",
+    "suggestion": "env() のフォールバックは使わず、段階的フォールバックで上書きする。例:\n.s02-next { bottom: 100px; }\n@supports (bottom: env(safe-area-inset-bottom)) {\n  .s02-next { bottom: calc(env(safe-area-inset-bottom) + 100px); }\n}\nまた padding は shorthand を避けて分割し、まず safe-area なしの値を指定してから上書き:\n.s02-onboarding {\n  padding-block-start: var(--space-lg);\n  padding-inline: var(--space-lg);\n  padding-block-end: calc(100px + 52px + var(--space-md));\n}\n@supports (padding-bottom: env(safe-area-inset-bottom)) {\n  .s02-onboarding { padding-block-end: calc(env(safe-area-inset-bottom) + 100px + 52px + var(--space-md)); }\n}",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "修正後CSS — .s02-onboarding padding（shorthand）",
+    "issue": "padding を shorthand で一括指定しているため、末尾の calc(...) が無効化されると padding 全体（上・左右・下）が無効化されるリスクが高い。R-101 のような互換性問題時に影響がドミノ式に拡大。",
+    "suggestion": "padding は論理プロパティで分割指定（padding-block-start / padding-inline / padding-block-end）し、互換性のある値→enhanced 値の順にオーバーライドする。これにより一部が無効化されても他の辺の指定が巻き添えにならない。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "修正後CSS — .s02-onboarding padding-bottom と .s02-next",
+    "issue": "コンテナの下部余白が CTA の min-height=52px を前提に固定加算。OS のアクセシビリティ（文字サイズ拡大）、翻訳・改行、長文ラベル等で実高が 52px を超えると、末尾コンテンツが CTA の裏に隠れる（重なり）可能性がある。",
+    "suggestion": "CTA の実高に追従する仕組みにする。例: CSS カスタムプロパティ --s02-next-h を導入し、JS の ResizeObserver で .s02-next の offsetHeight を反映。padding-block-end: calc(env(safe-area-inset-bottom) + 100px + var(--s02-next-h, 52px) + var(--space-md)); とし、fallback 52px を残す。JS 不使用方針なら余白を十分に見込む + 2行表示を禁じず wrap 許可 + padding を多めに確保する等を検討。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "修正後CSS — .s02-onboarding min-height: 100dvh",
+    "issue": "100dvh は比較的新しい単位で、未対応ブラウザでは宣言が無効になり最小高さが保証されない（とくに古い iOS/Android）。",
+    "suggestion": "フォールバックを用意。例: .s02-onboarding { min-height: 100vh; } を先に書き、その後に @supports (height: 100dvh) { .s02-onboarding { min-height: 100dvh; } } で上書き。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "S02Onboarding.jsx（進捗バー）",
+    "issue": "aria-valuemin=1 だが CURRENT_STEP_INDEX が -1 で初期化される可能性がある場合、aria-valuenow=0 となり WAI-ARIA の範囲制約に違反。支援技術で不正な値として扱われうる。",
+    "suggestion": "初期値が 0 以上になるように保証するか、min を 0 に修正。例: aria-valuenow={Math.max(1, CURRENT_STEP_INDEX + 1)} もしくは aria-valuemin={0} に変更しロジックと整合。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "修正後CSS — .s02-avatars gap",
+    "issue": "gap: clamp(12px, 4vw, var(--space-lg)) は古い Safari 等で未対応時に宣言ごと無効化→gap が 0 になる可能性がある。",
+    "suggestion": "フォールバックを先に定義し、後から上書き: .s02-avatars { gap: 12px; } の後に gap: clamp(12px, 4vw, var(--space-lg)); を記述。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "全体（固定配置 CTA と IME/ソフトキーボード）",
+    "issue": "position: fixed の CTA はモバイルでソフトキーボード展開時に視覚ビューポート外へ押し出される／重なることがある（特に Android Chrome）。現状下端 100px 固定ではキーボード存在を考慮していない。",
+    "suggestion": "visualViewport API でキーボード出現を検知し、--kb-inset を更新して bottom: calc(env(safe-area-inset-bottom) + max(100px, var(--kb-inset, 0px))); とする等の対策を検討。もしくは CTA を入力が存在する画面では fixed ではなくコンテンツ内配置 + position: sticky 切替など。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "S02Onboarding.jsx（進捗バー抜粋）",
+    "issue": "JSX 内で HTML クラス指定に class 属性を使用（className ではない）。採用フレームワークが React の場合は警告や意図せぬ挙動の原因になりうる（Preact 等では問題ない）。",
+    "suggestion": "フレームワークを明示し、React を用いている場合は className に修正。ビルド設定で JSX トランスフォームが class→className を補完しないかも要確認。",
+    "model": "GPT-5",
+    "persona": "edge_case_hunter"
+  }
+]

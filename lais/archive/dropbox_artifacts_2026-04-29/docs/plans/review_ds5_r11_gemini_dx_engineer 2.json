@@ -1,0 +1,52 @@
+[
+  {
+    "id": "R-1901",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.4",
+    "issue": "ux_v1.mdの§1「画面遷移」とsystem_map.mdの§3「画面遷移図」が重複しており、§1.1の「Single Source of Truth」原則に違反し、二重管理による乖離が発生するリスクがある。",
+    "suggestion": "system_map.mdの§3を「画面遷移図（ux_v1.md §1への参照）」として実体を持たせないか、ux_v1.md側を「ユーザー視点の画面フロー」、system_map.md側を「実装レベルの状態遷移・ルーティング」と明確に責務を分離する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-1902",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§19.4",
+    "issue": "e2e_fullflow_test.mdのテストID命名ルールで「test_map.yamlのgrepキーを必ず埋め込む」と指定されているが、§12の仕様書ID付番（SPEC-SCREEN-NNN）との関係が不明確。テスト名にSPEC-IDとgrepキーの両方を埋め込むべきか、同一のものとして扱うべきか判断できない。",
+    "suggestion": "「grepキーとして§12で定義する仕様書ID（SPEC-SCREEN-NNN）を使用する」と明記し、test_map.yamlのキーとSPEC-IDを完全に統合して一元管理する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-1903",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.6",
+    "issue": "依存チェーンのツリー構造において、「design_system.md」がproject_v1.mdの直下に2回（「HOW: ビジュアル基盤」と「デザイン基盤」）重複して出現している。",
+    "suggestion": "末尾の重複している「└→ design_system.md（デザイン基盤）」の行を削除し、ツリー構造を正す。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-1904",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の「依存」メタデータに上流ファイルのバージョンを記載する仕様だが、上流ファイルが更新された際に、下流ファイルの依存バージョンをどのタイミングでどう同期・更新するかの運用ルールが定義されていない。",
+    "suggestion": "§19.6の「上流変更時の連鎖更新」ルール内に、「下流ファイルを連鎖更新する際、ヘッダーの依存バージョンも最新の上流バージョンに書き換える」旨を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-1905",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の依存パスの例が「docs/plans/lais_project_v1.md」となっているが、§19.1の必須ファイル一覧では「docs/project_v1.md」となっており、plans/ディレクトリの有無が矛盾している。",
+    "suggestion": "例示のパスを「docs/project_v1.md」に修正し、§19.1で定義されたディレクトリ構成と一致させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  }
+]

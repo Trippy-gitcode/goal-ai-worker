@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-201",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0 テーマ切替の永続化・FOUC対策",
+    "issue": "data-theme/data-glass を設定するJSを「CSS読み込み直後」に実行としており、永続化テーマがNight Sky以外の場合に初回ペイントがNight Sky→選択テーマへと切り替わるFOUT/FOUCが発生するリスクが残る。glass=onも1フレーム遅延でOFFの見た目が出る可能性。",
+    "suggestion": "インラインスクリプトを<link rel=\"stylesheet\">より前に配置して最初のスタイル計算前にdata-*を設定する。例: 初期化スクリプトを<head>先頭に置く。併せてOS設定を初期値に使う場合は`matchMedia('(prefers-color-scheme: dark)')`で初回のみデフォルトを選択。必要なら短時間`html{visibility:hidden}`→dataset適用後に解除で完全FOUC防止。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-202",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§5.0 テーマ切替の永続化・FOUC対策",
+    "issue": "meta theme-colorを--bg-primaryに同期とあるが、実装手順（取得・監視・iOS PWAでの挙動差分）が未定義。iOSは`apple-mobile-web-app-status-bar-style`の値が限定的で動的色反映に制約がある。",
+    "suggestion": "実装ガイドを明記: 1) `getComputedStyle(document.documentElement).getPropertyValue('--bg-primary')`で色取得→`<meta name=\"theme-color\">`を書き換え。2) テーマ変更時に都度同期（カスタムイベント or MutationObserver）。3) iOS PWAは`apple-mobile-web-app-status-bar-style`を`default`/`black-translucent`に切替し、完全な任意色は不可である旨注記。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-203",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§5 テーマ定義（全般）",
+    "issue": "ブラウザ組込みUI（フォームコントロール/選択UI/スクロールバー等）の配色連動に必要な`color-scheme`指定がテーマごとに未定義。ライト/ダークのOS部品がテーマと不一致になる可能性。",
+    "suggestion": "テーマごとに`color-scheme`を設定: `:root[data-theme=\"night-sky\"], :root[data-theme=\"harajuku-dark\"] { color-scheme: dark; }` と `:root[data-theme=\"dawn\"], :root[data-theme=\"harajuku-light\"] { color-scheme: light; }`。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-204",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§8.1 ボタン",
+    "issue": "Danger(塗りつ��し)のhover/pressedに`color-mix()`を使用しているがフォールバックが未定義。古いWebViewや企業端末で`color-mix()`未対応の可能性があり、状態色が変化しないリス���。",
+    "suggestion": "ビルド時に静的に混色した値を事前計算してトークン化（`--danger-bg-hover`/`--danger-bg-pressed`）し、対応環境では`color-mix()`を使用、非対応環境は事前計算値を使用する二重指定でフォールバックを提供。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-205",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§8.1 ボタン",
+    "issue": "Secondary/Ghost/Danger(subtle)で「accent-subtle (opacity 0.18/0.24)」「subtle(強)」など表現が曖昧で、実装者がどの値を使うか不定。トークンに落ちていないため一貫性が担保できない。",
+    "suggestion": "状態別トークンを追加: `--accent-subtle`, `--accent-subtle-hover`, `--accent-subtle-pressed` などを全テーマで定義。`--danger-subtle-*`も同様に用意し、表の数値（0.18/0.24等）をトークンの不透明度で明示。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-206",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§5.5 グラスモーフィズムトグル",
+    "issue": "backdrop-filterの半径16px+saturate(180%)はiOS Safari/PWAでGPUコストが高く、スクロール中のジャンクや電池消費を招きやすい。要素30個上限ルールはあるが、重いレイアウ���（sticky/transform重ね）と併用時にパフォーマンス劣化のリスクが残る。",
+    "suggestion": "運用ガイドを追加: 1) blur半径を端末性能で段階的に下げる（8/12/16px）。2) スクロール中は`backdrop-filter`を一時無効化（`will-change`/`contain: paint`や`prefers-reduced-motion`以外にも`reduce-effects`的設定を用意）。3) filter適用は1画面1-2レイヤまで、`overflow: hidden`や`border-radius`との組み合わせを最小化。4) スクロール大量リスト内は禁止（既出ルールの強調）。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-207",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §6.4 スケルトンスクリーン",
+    "issue": "UX仕様で「テーマの background-secondary」を使用とあるが、design_system.md側に`--background-secondary`や同等のトークンが存在しない。実装時に未定義参照となる。",
+    "suggestion": "デザインシステムに`--bg-secondary`（例: surfaceとelevatedの中間/用途はプレースホルダー）および`--skeleton-shimmer`系トークン（ベース色/ハイライト色）を追加し、全テーマで値を定義。UX仕様の用語もトークン名に合わせて統一。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-208",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§3.2/§3.3/§8.* タイポとコンポーネント寸法",
+    "issue": "フォントサイズ/スペーシングがpx固定のため、OSの文字サイズ拡大（iOSアクセシビリティ）に追随しない。可読性・到達基準に影響する可能性。",
+    "suggestion": "フォントサイズ/余白の主要トークンをremに置換（例: 1rem=16px基準）。最低でも本文/見出し/ボタンのサイズはrem化し、iOSの「文字を大きく」による拡大を許容。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-209",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§7.1 イージングトークン",
+    "issue": "spring系cubic-bezierのオーバーシュートはscale専用と明記されているが、誤用を防ぐ仕組み（lint/ユーティリティクラス）が未提示。誤ってtranslateに適用するとコンテンツがはみ出すリスク。",
+    "suggestion": "ユーティリティクラス設計を追記（例: `.ease-spring-scale { transition-timing-function: var(--spring-bouncy) }`をscale用途のクラスに限定）し、コードレビュー基準に「translate系にspring禁止」を追加。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-210",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§5.5 グラスモーフィズムトグル",
+    "issue": "`.glass-surface`の@supports内でbackdrop-filterのみ指定されており、背景色/枠線の適用は各コンポーネント頼み。実装者が`.glass-surface`を付与しただけで期待の`background: var(--card-bg); border: var(--card-border);`が出ないケースが起こり得る。",
+    "suggestion": "`.glass-surface`の共通スタイルとして`background: var(--card-bg); border: var(--card-border);`を基本指定し、@supports内でbackdrop-filterを追加する形に統一。コンポーネント側は原則`.glass-surface`を付けるだけで完結するようにする。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  },
+  {
+    "id": "R-211",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§5.0 テーマ切替の永続化・FOUC対策",
+    "issue": "iOS SafariのITPによりブラウザモードでは7日未使用でlocalStorageが消去され、テーマ/グラス設定が初期化される可能性がある（PWAでは緩和）。",
+    "suggestion": "テーマ/グラスの永続化はlocalStorageに加え`<meta name=\"color-scheme-hint\">`相当のCookieや、初回起動時にサーバー側ユーザープロファイルへ保存して復元するガイドを追記。Safariブラウザ利用��のリセットは仕様とし、PWAインストールを推奨する注記もUIに追加。",
+    "model": "GPT-5",
+    "persona": "frontend_engineer"
+  }
+]

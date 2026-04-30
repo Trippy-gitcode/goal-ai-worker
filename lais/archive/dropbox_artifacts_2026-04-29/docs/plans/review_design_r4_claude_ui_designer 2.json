@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§8.1 ボタン (Danger subtle行)",
+    "issue": "Danger (subtle) 行の hover/pressed 列に『rgba(*danger*, 0.18)→ --danger-subtle-hover』という過渡的な表記が残っている。最終的にどのトークンを参照すべきか実装者が迷う。",
+    "suggestion": "過渡表記を削除し、`--danger-subtle-hover` `--danger-subtle-pressed` のみの参照に統一。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§5 全テーマ / §9",
+    "issue": "§8.1 表では Danger (subtle) が `--danger-subtle-hover` `--danger-subtle-pressed` を参照するが、§5 各テーマには `--danger-subtle-hover/pressed` が定義されていない（Night Sky のみ §9 で追加）。Dawn/Harajuku Light/Harajuku Dark で未定義変数参照になる。",
+    "suggestion": "§5.2〜5.4 の各テーマに --danger-subtle-hover / --danger-subtle-pressed を追加（各テーマのdangerに基づくrgba値）。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.2 入力フィールド",
+    "issue": "入力フィールドの max-width/min-width、マルチライン（textarea）の高さルール、数値入力のスピナー表示有無、パスワード入力の表示切替ボタンなどが未定義。",
+    "suggestion": "§8.2 に type別（text/email/password/textarea/number）の微細な挙動差を追記。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.9 プログレスバー",
+    "issue": "進捗が増えた時の視覚フィードバック（グリッター/パーティクル等の演出）や、100%到達時の完了演出が未定義。UX §9 ではEXP獲得時の演出が明記されているが、デザインシステム側のトークンがない。",
+    "suggestion": "§8.9 に『進捗増加時のフラッシュ（accent opacity 0.3→0 を duration-normal で）』等のミクロ演出を追記。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.7 ボトムタブバー",
+    "issue": "タブに通知バッジ（未読数など）を表示する場合のデザイン（位置、色、サイズ、9+表記）が未定義。Lais は TALK タブに未読表示の可能性がある。",
+    "suggestion": "§8.7 にバッジサブセクションを追加。右上 offset、直径16px、--danger 背景、白文字。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§9 CSS トークンブロック",
+    "issue": "Night Sky 単独のトークンのみ §9 に記載。他 3 テーマ（Dawn/Harajuku Light/Harajuku Dark）のコピペ可能なブロックも別途まとめた方が実装者が楽。",
+    "suggestion": "§9 を Night Sky と 4 テーマ全体で分け、全テーマの :root[data-theme=...] ブロックをまとめて掲載。",
+    "model": "Claude Opus 4.6",
+    "persona": "ui_designer"
+  }
+]

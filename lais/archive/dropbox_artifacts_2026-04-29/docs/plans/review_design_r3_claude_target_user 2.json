@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§5 テーマ定義 全体",
+    "issue": "ユーザー視点で「4 テーマもある中で Night Sky/Dawn はトーンが似通って（落ち着き寄り）、Harajuku Light/Dark もペアで1つ」に見える。本質的に 2 軸（シック vs ポップ × ライト vs ダーク）の 4 象限で、Habitify のような明快な「選択の楽しさ」が薄い。Streaks の 78 テーマのような『着せ替え感』がない。",
+    "suggestion": "4 テーマの「選ぶ理由」を §5 冒頭にペルソナ例付きで明記（朝型/夜型/シック/ポップの象限マップ）。",
+    "model": "Claude Opus 4.6",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§5.5 グラスモーフィズム / 設定画面",
+    "issue": "グラスモーフィズムトグルの ON/OFF が『実際に何が変わるか』のプレビューが仕様書から読み取れない。設定 UI での説明文（例: 「カードが半透明になります」）やプレビューモックが未定義。ユーザーは ON にして困惑する可能性。",
+    "suggestion": "設定画面でのグラスモーフィズムトグルの説明文・プレビュー要件を §5.5 または §8 に追加。",
+    "model": "Claude Opus 4.6",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "§3.3 ウェイト / §9",
+    "issue": "Habitify で Free 版の制限で離脱した経験から言うと、最初にアプリを開いて一番気になるのは『文字の読みやすさ』。--font-size-xs 11px は屋外の直射日光下や、シニア寄りの友人に貸した時、読めないケースがあった。",
+    "suggestion": "本文の最小サイズは 14px (--font-size-sm) を推奨し、11px は時刻・キャプションのみに限定する制約を §3.2 に明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§5 テーマ切替",
+    "issue": "テーマ切替のアニメーション（トランジション）挙動が未定義。Habitica で急に色が変わると酔うので、Lais では『1ボタンでテーマ切替→スムーズに切り替わる』体験を期待する。",
+    "suggestion": "§5.0 または §7.3 にテーマ切替時の遷移方法（瞬時か 200ms フェードか）を明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§8.4 タイムライン",
+    "issue": "OVERDUE（期限超過）の視覚表現が赤+感嘆符で『怒られている感』があり、Finch のような優しさ系を期待するユーザーには強すぎる。Habitica の RPG 的な『罰則感』を連想する。",
+    "suggestion": "OVERDUE の視覚表現を warning 系（アンバー）寄りに調整するオプション、または『優しいモード』の切替を検討。ただし視認性との両立が課題。",
+    "model": "Claude Opus 4.6",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "§6.3 アバター",
+    "issue": "アバターが PNG クロスフェードで進化する、とあるが、ユーザーとして『自分で着せ替え』ができるか不明。Finch のペット育成のように『新しい装備を選ぶ楽しみ』があるかが、続けるモチベーションに直結する。仕様書からは判断できない。",
+    "suggestion": "§6.3 にアバターカスタマイズの有無（着せ替え/肌色選択/髪型選択）を明記。ux_v1 §4.2.1 への参照を追加。",
+    "model": "Claude Opus 4.6",
+    "persona": "target_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§1.1 ブランドDNA",
+    "issue": "「洗練して生きよう。憧れの姿になるように。」は美しいが、やや重い。Habitify 離脱経験から言うと、最初に開いて『気軽さ』を感じないと続かない。特に朝の Dawn テーマでこのコピーが表示されるとプレッシャーになる。",
+    "suggestion": "ブランドコピーはキャッチコピーとして保持しつつ、アプリ内では別の軽めのメッセージ（例: 「今日も一歩」）を併用する方針を §1 または §11 に明記。",
+    "model": "Claude Opus 4.6",
+    "persona": "target_user"
+  }
+]

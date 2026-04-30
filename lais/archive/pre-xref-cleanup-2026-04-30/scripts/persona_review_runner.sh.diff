@@ -1,0 +1,11 @@
+--- /Users/futoshi/Desktop/goal-ai-worker/lais/archive/pre-xref-cleanup-2026-04-30/scripts/persona_review_runner.sh	2026-04-30 21:22:52
++++ /Users/futoshi/Desktop/goal-ai-worker/scripts/persona_review_runner.sh	2026-04-30 21:25:21
+@@ -30,7 +30,7 @@
+ #   - 改善提案は最大 3 行で集約（REVISE/REJECT 時のみ stdout に追加出力）
+ #
+ # 根拠:
+-#   - lais/verify/dev_system_v34_package.md §2.25.14（全応答ペルソナレビュー）
++#   - core_spec.md §11 ペルソナレビュー (legacy v34 spec §2.25.14, archived 2026-04-30)
+ #   - §2.25.14.2 必須 3 ペルソナ + §2.25.14.3 追加候補（既存 6 ペルソナ網羅）
+ #   - 違反 #12（adv_violation_log.md L262-）+ PATCH-VIO12-PERSONA-MECH
+ 

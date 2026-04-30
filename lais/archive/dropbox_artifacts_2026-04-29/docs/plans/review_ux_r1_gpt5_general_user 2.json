@@ -1,0 +1,302 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "project §4.5（EXP上限・不正対策）/ §4.4（レベルシステム）",
+    "issue": "「Lv.1→2=1,000EXPなので最速でも約3日」との記述が、§4.4の計算式・意図（初日に100EXPでLv2到達可能）と矛盾している。",
+    "suggestion": "どちらを正とするか決め、数値と文言を統一する。意図どおりなら§4.5の説明を「Lv.1→2=100EXP」に修正し、初日レベルアップ体験の根拠を明記。テーブル・演出仕様（UX）とも突き合わせて整合を確認。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project §3.2（GROW Today項）/ §3.2.6（完了→EXP→演出）/ ux §2.3（タスク完了）",
+    "issue": "タスク完了のUndo時間が「30秒以内」（project §3.2）と「3秒のスナックバー表示」（project §3.2.6, ux §2.3）で不一致。",
+    "suggestion": "Undo猶予を1つに統一（例: 10秒）。UIはスナックバー表示時間（10秒）+ 進行バー表示。テキストと全フローから矛盾箇所を一括修正。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "project §3.2（Today=開始時刻順に表示）/ ux §7.4（タスクのドラッグ並び替え）",
+    "issue": "Today内の並び順が「開始時刻順」と「手動並び替えが保存される」で矛盾。どちらが優先か不明。",
+    "suggestion": "優先ルールを定義する。例: デフォルトは開始時刻順。ユーザーがドラッグした行には“手動順フラグ”を付与し当日内は固定。翌日4:00リセット時に自動順に回帰、など。仕様を両ファイルに明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §4.5（日次EXP上限）/ ux §8（演出）・§9（エラー系）",
+    "issue": "本日のEXP上限到達後にタスク完了・冒険検出が起きた場合のUIフィードバックが未定義（完了記録はどうなるか、どの演出を抑制するか）。",
+    "suggestion": "到達時は完了ステータスは保持、EXP演出のみ抑制し、スナックバーで「本日のEXP上限に達しました（明日04:00にリセット）」を表示。GROWヒーロー下に当日中は薄い注意バナーを常時表示する等を定義。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §1.1（S-16）/ §2.4（ゴール詳細）",
+    "issue": "S-16（ゴールタスク追加）の入力項目・バリデーション・保存動作が未定義。",
+    "suggestion": "S-12（タスク追加）と同等のフィールドを定義（ただしゴール紐付けは固定/編集不可）。予定日のデフォルト、所要時間プリセット、エラー表示、保存後の戻り先とスクロール挙動を追記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §1.1（S-13）/ §2.3（タスク編集）",
+    "issue": "S-13（タスク編集）のフィールド構成や「単発/習慣」編集制約、開始時刻や予定日を過去に変更した場合の扱いなどが未定義。",
+    "suggestion": "編集可能項目と制約を明記（例: 種別は変更不可、習慣→繰り返し条件のみ編集可）。過去日設定時のOverdue化ロジック、保存時のToday反映、破壊的変更の確認ダイアログを定義。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §1.1（S-41）/ §4（ME）",
+    "issue": "S-41（アバター設定）の具体UI（プ���ビュー、装飾ON/OFF、Premier限定フレーム装備、保存/即時反映、アクセシビリティ）が未定義。",
+    "suggestion": "フレーム/オーラ/背景のプレビューグリッド、装備トグル、現在装備の表示、即時反映と戻る時の保存確認、スクリーンリーダーラベルを定義。Premier特典導線も明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux §3.1（TALKヘッダー）",
+    "issue": "ヘッダーに「☰=履歴ドロワー」「🕐=履歴」と履歴を開くボタンが重複。役割が曖昧。",
+    "suggestion": "履歴入口は1つに集約。例: ☰=履歴ドロワー、🕐は「最近の会話へスクロール」など別機能に変更。アイコンの意味を画面内チップで案内。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §3.2（メッセージ送信）/ project §3.3（画像添付仕様）",
+    "issue": "画像添付のUI制約・エラー時挙動が未定義（10MB超・非対応拡張子・複数枚・アップロード進行状況・キャンセル・リトライ）。",
+    "suggestion": "選択時に即バリデーション（>10MB/非対応はインラ��ンエラー）。アップロード進行バー、✕でキャンセル、失敗時[再試行]を定義。複数枚はMVPの可否を明示（不可ならUIで1枚のみ）。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §9.1（オフライン）",
+    "issue": "オフライン中に完了/追加したタスクの「同期待ち」視覚表示や、EXPが未反映である旨の行内インジケータが未定義。",
+    "suggestion": "該当行に“同期待ち”バッジ（灰色）を表示。オンライン復帰時に同期スピナー→完了。EXPは復帰後に演出か、当日上限超過ならトーストで明示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §4.4（S-36 QRスキャン）",
+    "issue": "カメラ許可拒否/OS側ブロック時の代替導線が未定義。",
+    "suggestion": "許可拒否時は説明モーダル+「設定を開く」リンク、または「シェアリンクを貼り付け」入力欄にフォールバック。静止画QRのアップロード読み取りも検討。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-012",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "project §4.2（ゴール7日��ール）/ ux §2.4（ゴール詳細）",
+    "issue": "ゴール作成から7日未満で全タスク完了した場合の「完了待ち」UI（カウントダウン/状態遷移）がUXに未反映。",
+    "suggestion": "S-14に“完了待ち（あとN日）”バッジを表示し、完了ボタンは無効化。N=0到達時の自動完了+EXP演出の遷移を定義。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §2.4（ゴール編集/削除）",
+    "issue": "ゴール削除時、紐づくタスクの扱い（削除/紐付け解除/保持）が未定義。",
+    "suggestion": "確認ダイアログに選択肢を提示。デフォルトは「タスクは保持し紐付けのみ解除」。結果のToday/Goals反映を明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §6.1（ハーフモーダル）/ §2.3（タスク追加）",
+    "issue": "iOS PWAのキーボード表示時の半モーダル内スクロール・フォーカス復帰の詳細が未定義。",
+    "suggestion": "visualViewport連動でモーダル高さ再計算、focus対象を常に可視領域へscrollIntoView。閉じたらトリガー要素へフォーカス返却を明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux §5（オンボーディング）",
+    "issue": "自己成長に関心が薄いユーザー視点では5ステップはやや長く感じる可能性がある。",
+    "suggestion": "Step 1/2はデフォルト選択で即[次へ]可能である旨を画面内で強調。最上部に残り所要時間の目安を表示。初回ゴールはスキップ強調。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux §1.4（戻りナビゲーション：ブラウザバック）",
+    "issue": "「ボトムタブ間: 前タブへ戻る」というブラウザバックの挙動はWeb慣習と異なり混乱の恐れ。",
+    "suggestion": "各タブで個別の履歴スタックを持ち、ブラウザバックは“直前の画面”に戻るのが無難。タブ切替はhistoryに積まず、モーダルはpopで閉じる実装に修正。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "project §3.3.1（[不要]で再提案抑止）/ ux §3.3（カードの✕は非表示のみ）",
+    "issue": "プロジェクト側は「不要」選択で類��提案の頻度を下げる設計だが、UXは✕=カード非表示のみで学習/抑止の意味が不明。",
+    "suggestion": "ボタン文言を「今回は不要（今後減らす）」に変更し、抑止ロジックに接続。ツールチップで意味説明を追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-018",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux §3.1/§3.5（新規チャット/履歴）",
+    "issue": "📝新規チャットの定義（スレッド分割、命名規則、デフォルトの続行/新規の判断）が未定義。",
+    "suggestion": "「新規チャット」押下で新スレ作成、タイトルは最初のユーザーメッセージ先頭20文字など命名。通常送信は“最後に開いたスレ”に投稿。ドロワーから切替可能と明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-019",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §13.2（プラン管理）",
+    "issue": "Stripe Checkout往復の待機中フィードバック（復帰検知/失敗時の戻り先）が未定義。",
+    "suggestion": "遷移前にローディング表示。復帰時に結果ポーリング→成功トースト/失敗時はエラーバナー+再試行ボタン。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-020",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §7.3（スワイプ）",
+    "issue": "右端スワイプ戻るとMEサブタブ左右スワイプの競合リスクがある端末がある。",
+    "suggestion": "戻るジェスチャーは画面“端の16px”のみ検出、サブタブ切替は端以外に限定する旨を明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-021",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §4.5（SHOP Coming Soon）",
+    "issue": "Premier特典の限定フレーム装備への導線がSHOP空状態にない。",
+    "suggestion": "SHOP空状態に「アバター設定で限定フレームを装備」CTA（→S-41）を表示し、Premierとの差別化を明示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-022",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "ux §9.3（AI対話上限表示）/ project §4.5（日次リセットJST）",
+    "issue": "「リセット: 明日 04:00」の時刻がJST固定で海外利用者に直観的でない可���性。",
+    "suggestion": "設定に「リセット基準時刻（JST）」の注記を追加し、将来のローカルタイム対応予定を記す。UIでは“あとN時間”相対表現も併記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-023",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux §3.4（冒険EXP演出）/ project §4.3（冒険EXP定義）",
+    "issue": "「冒険EXP」「冒険を検出」の語感が一般ユーザーにはやや分かりにくい。",
+    "suggestion": "初回に情報チップ「新しい挑戦や初体験をすると特別なEXPがもらえます」を表示。表現を「特別な経験（冒険）」等に調整。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-024",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "ux §4.3（DISCOVER/ヒアリング）",
+    "issue": "「DISCOVER」「ヒアリング」の用語が抽象的で初見で意味が取りにくい。",
+    "suggestion": "タブラベルを「自己理解（DISCOVER）」に、日本語の補助テキスト「5つの質問に答えるとあなたの強みがわかります」を追加。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-025",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux §8.1-8.4（演出）/ §3.4（冒険EXP）",
+    "issue": "同時発火時の演出優先順位が未定義（例: タスク完了でレベルアップとゴール達成が同時発生、さらに冒険検出が重なる）。",
+    "suggestion": "優先順位キューを定義: 1) クリティカル=レベルアップ 2) ゴール達成 3) 冒険EXPカード 4) 通常+10EXPフロート。各演出は直列化し、バナー重なりは待機列で順次表示。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-026",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §2.3（タスク追加）",
+    "issue": "タスク名の文字数上限（project: 1-100文字）がUX側に未記載。",
+    "suggestion": "プレースホルダー下に100文字上限のガイドと超過時のインラインエラーを明記。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-027",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "ux §2.3（Today操作）/ project §3.2.3（週N回）",
+    "issue": "週N回習慣の「今日やる」手動追加ボタン（project記載）がUX画面仕様に未反映。",
+    "suggestion": "Todayの週N回習慣行に「今日やる」スイッチを追加し、押下で当日リストに展開する動作を記述。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-028",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §1.1（S-00 ランディング）",
+    "issue": "初見で「何のアプリか」「何ができるか」を即理解させる要素（3ポイントの価値訴求/スクリーンショット/開始CTA）が未定義。",
+    "suggestion": "S-00にヒーロー見出し+サブコピー+3つの価値（AIコーチ/タスクとゴール/成長可視化）+主要画面のモック画像+「無料で始める」CTAを定義。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-029",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux §2.3（タスク削除）/ §6.2（トースト）",
+    "issue": "タスク削除のUndo（操作ミス対策）が未定義。",
+    "suggestion": "削除時は即時削除+「元に戻す」トースト（5秒）を表示。復元時は元の位置に戻す。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  },
+  {
+    "id": "R-030",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux §3.5（チャット履歴）",
+    "issue": "履歴リストの空状態/上限/検索の有無、長リスト時の負荷対策が未定義。",
+    "suggestion": "空状態メッセージ、最大保持件数/ページング方針、簡易検索の有無を明記。MVPでは上限明記のみでも可。",
+    "model": "GPT-5",
+    "persona": "general_user"
+  }
+]

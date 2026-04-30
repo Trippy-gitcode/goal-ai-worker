@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§4.2 S01-9b",
+    "issue": "仕様では S01-9b は `.s01-server-error`（role=\"alert\"）として定義されているが、実装は成功通知用に `.s01-server-notice`（role=\"status\"）を追加しており、仕様にない要素・クラスが増えている。",
+    "suggestion": "仕様を S01-9b（サーバメッセージ領域）として整理し、バリアントを明文化する（例: `.s01-message` + `.is-error`(role=\"alert\") / `.is-notice`(role=\"status\") など）。もしくは実装側で `.s01-server-error` を包括クラスとし、モディファイアで状態を出し分けるように統一。アクセシビリティ上のロール差異も仕様に記述すること。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§4.2 S01-7",
+    "issue": "チェックボックスのヒット領域 44×44 以上の担保方法が CSS 断片では不明確。`.s01-agree-label { padding: var(--space-sm) 0; min-height: 44px; }` だけだと label がインラインのままの場合、min-height は非置換インライン要素に効かず、実測で 44px を満たさないリスクがある。",
+    "suggestion": "`.s01-agree-label` に `display: flex`（または inline-flex）と `align-items: center`、`min-height: 44px`、`padding-block` を明示し、確実に 44px 以上のタップ領域を満たすようにする。E2E（pointer/touch）でヒット領域計測を追加。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.2 S01-9",
+    "issue": "CTA の min-height 52px への変更（固定から伸縮許可）について、CSS 全文が未提示のため実装準拠が検証不能。",
+    "suggestion": "`.s01-cta { min-height: 52px; }` を仕様どおり明記していることを CSS で確認可能にし、デザイントークン（ラインハイト/パディング）との整合をコメントかトークン参照で示す。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§4.2 S01-10",
+    "issue": "フッターリンク（モード切替）の最小タップ領域 44px の仕様に対し、`.s01-footer-link` の min-height やパディング値が CSS 未提示で検証不能。",
+    "suggestion": "`a.s01-footer-link { display: inline-flex; align-items: center; min-height: 44px; }` 等で 44px を保証し、トークン化されたスペーシングを併用していることを明示する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§4.2 S01-6b",
+    "issue": "仕様の文言は「8文字以上」だが、実装のヒント文言は「8文字以上で設定してください」としており、コピーが厳密一致していない。",
+    "suggestion": "仕様に合わせて文言を「8文字以上」に統一するか、仕様側に許容文言（例: 丁寧表現）を追記して文言差分を許容範囲として明示する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§4.2 S01-6b",
+    "issue": "パスワードヒントのスタイル（下マージン `--space-xs`、font 11px / weight 400 / color `--text-muted`）が CSS 未提示のためトークン準拠・フォントサイズスケール準拠が検証不能。",
+    "suggestion": "`.s01-hint` に仕様どおりのフォントサイズ・カラー・スペーシングをデザイントークンで定義し、トークン名をコメントまたは変数名で明示する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§4.2（全体）",
+    "issue": "色値のトークン準拠（例: エラー境界色 `--danger`、リンク色、本文色）が CSS 未提示のため検証不能。",
+    "suggestion": "すべての色指定がトークン（��: `--text-default`, `--text-muted`, `--danger`, `--link`）経由で行われていることを CSS で確認可能にし、状態別（エラー/通知/無効）のコントラスト比を記載する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§4.2（状態: prefers-reduced-motion）",
+    "issue": "`@media (prefers-reduced-motion: reduce)` の実装が CSS 未提示のため、トランジション/トランスフォーム無効化の準拠が検証不能。",
+    "suggestion": "対象セレクタ（フォーカス、ホバー、CTA、遷移アニメ等）で transition/animation を無効化していることを CSS に明示し、対象一覧をコメントで残す。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§4.2 S01-7",
+    "issue": "チェックボックスの視覚サイズ 20×20（仕様）について、`.s01-checkbox` の寸法指定が CSS 未提示のため検証不能。",
+    "suggestion": "`.s01-checkbox` に `width/height: 20px;` を定義し、拡大ヒット領域は `.s01-agree-label` 側で確保する分離方針を CSS コメントに明示する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "lib/auth.js（onAuthStateChange）",
+    "issue": "onAuthStateChange の購読解除がモジュールスコープで未実装。HMR/再評価で重複購読・リークの懸念がある（R2 既知事項とのことだが未解決）。",
+    "suggestion": "戻り値の `subscription.unsubscribe()` を保持し、HMR フックまたはアプリ初期化ガードで二重登録を防止する。例えば単一インスタンスガード（`window.__laisAuthSub`）やアプリマウント時に購読・アンマウント時に解除する構成へ変更する。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§7 Phase 4 A-1（参考）",
+    "issue": "プレースホルダーのコントラスト不足（2.93:1）は既知として未対応だが、現状のままでも可読性低下のユーザー影響がある。",
+    "suggestion": "Phase 4 対応までの暫定策として、placeholder ではなく常設ヒント/ラベルの視認性を高める、あるいは placeholder 色を一時的に `--text-muted` より濃いトークンに調整する検討を推奨（計画との整合要確認）。",
+    "model": "GPT-5",
+    "persona": "spec_compliance"
+  }
+]

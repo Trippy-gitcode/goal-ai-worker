@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "section": "§4.1.2",
+    "issue": "§2.6では「毎回必須は§C0のみ、§C1-C6は条件付き再読」としているが、§4.1.2の表ではENGの「必須Read」列に「§C0-C6 全文」が含まれている。このままでは毎回全仕様をReadすることになり、APIコストとコンテキストが爆発する。",
+    "suggestion": "§4.1.2の表のENGの必須Readを「§C0 + CLAUDE.md + development_rules.md + session_progress.md」に修正し、条件付き再読列に「§C1-C6 全文」を移動する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "section": "§4.2.1",
+    "issue": "`curl -s \"$URL\" | grep -q \"$COMMIT_HASH\"` としているが、Vite等でビルドされたSPAのHTML内にコミットハッシュが自動で埋め込まれる仕組み（Viteプラグイン等）が定義されていない。そのためgrepは常に失敗し、デプロイが必ずFAILする。",
+    "suggestion": "`version_sync.sh` でHTMLのmetaタグ等にコミットハッシュを埋め込む処理を追加するか、ポーリングの確認対象を `app_config.yaml` の `version`（HTMLに埋め込まれている前提）に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "section": "§4.3.4",
+    "issue": "`awk '/^対象ファイル:/,/^$/'` で抽出しているが、ミッションテンプレートv3（dev_system_spec.md §5）のフォーマットは `> 対象ファイル: src/xxx.js` であり、行頭が `>` である。また複数行ではなく1行カンマ区切りの場合があるため、このawkコマンドでは抽出できず常に低リスク判定となる。",
+    "suggestion": "`grep \"^> 対象ファイル:\" \"$MISSION_FILE\" | sed 's/> 対象ファイル://'` のように実際のテンプレートフォーマットに合わせた抽出ロジックに修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "section": "§4.5.1",
+    "issue": "`[ -x \"$HOOK\" ] && \"$HOOK\" || exit 1` の論理式では、フックファイルが存在しない（実行権限がない）場合に `false || exit 1` と評価され、エラー終了してコミットがブロックされる。また、サブディレクトリに `cd` せずに実行しているため、フック内の相対パス処理が壊れる。",
+    "suggestion": "フックが存在し実行可能な場合のみサブディレクトリに移動して実行するよう、`if [ -x \"$HOOK\" ]; then (cd \"$SUBDIR_ROOT\" && ./scripts/pre-commit-sub.sh) || exit 1; fi` に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "section": "§4.6.3",
+    "issue": "TDD証跡を `before-unit.json` 等に分離しているが、`canopy_common.sh` の G8 チェックは `before.json` と `after.json` をハードコードで探している。G8の修正差分が含まれていないため、G8が常にFAILする。",
+    "suggestion": "`canopy_common.sh` の G8 チェックロジックを更新し、`before-*.json` および `after-*.json` のワイルドカード検索に対応させる差分を §4.8 または §4.5 に追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "section": "§4.3.3",
+    "issue": "`proposal_log_lint.sh` が「セッションID（例: G_42）との差分を動的計算」するとあるが、bashスクリプトが現在のセッションIDをどこから取得するのか定義されていない。環境変数等で渡す仕組みがない限り、文字列の差分計算は実行不能。",
+    "suggestion": "セッションIDでの差分計算を廃止し、提案日（YYYY-MM-DD）と現在日時の差分（例: 3日以上）のみを警告閾値の判定基準とする。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "section": "§3.1.3",
+    "issue": "§3.1.3で「認証・決済・外部APIは3区分必須分類（エスケープ不可）」としているが、§4.4.2では「高リスク系ミッション: cmd-unit / cmd-e2e / cmd-realworld すべて定義必須。省略時は N/A理由必須」としている。エスケープ不可（省略自体が禁止）なのか、N/A理由を書けば省略可能なのか矛盾している。",
+    "suggestion": "「エスケープ不可」の定義を明確化する。例えば「コマンドの定義行自体を省略することは不可。ただし、物理的にテスト不可能な場合は `cmd-realworld: SKIP (理由)` のようにSKIPとして記述することは許容する」等。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "ROBUSTNESS",
+    "section": "§4.3.6",
+    "issue": "`mission_risk_classifier.sh` 等から `source scripts/lib/risk_patterns.sh` として読み込んでいるが、リポジトリルート以外（例：サブディレクトリ内）からスクリプトが実行された場合、相対パスが解決できずエラーになる。",
+    "suggestion": "`source \"$(dirname \"$0\")/lib/risk_patterns.sh\"` のように、スクリプト自身の位置を基準とした絶対パス/相対パスで source するよう修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "section": "§4.1.7",
+    "issue": "§3.1.1で「全フロー個別列挙廃止」と定めたにもかかわらず、§4.1.7では「全22フローの Step 0 を以下の文言に統一」とし、各フローに該当§C明示リストを記載するよう指示している。これでは集約されておらず、仕様書が肥大化する。",
+    "suggestion": "22フローの各Step 0には「起動時にReadした §C0-C6 を遵守する」のみを記載し、どのフローでどの§Cが強く適用されるかのマッピングリストは §C0 側に一元管理する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  },
+  {
+    "id": "R-010",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "section": "§4.2.4",
+    "issue": "`deploy.sh` 失敗時に `session_progress.md` に「DEPLOY-FAIL」を追記するとあるが、これを bash スクリプト（deploy.sh）が自動で行うのか、ENG（Code）が非ゼロ終了を検知して自律的に行う運用ルールなのかが曖昧。bashでMarkdownを安全に編集するのは困難。",
+    "suggestion": "「ENG（Code）が deploy.sh の失敗を検知した場合、自律的に session_progress.md に DEPLOY-FAIL 提案ログを追記する」という運用ルール（§C3 または development_rules.md）として明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "solo_dev"
+  }
+]

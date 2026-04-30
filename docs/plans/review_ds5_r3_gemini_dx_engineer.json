@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "§19.6の依存チェーンツリーで、`e2e_fullflow_test.md`が`project_v1.md`にのみ依存しているように描かれているが、§18の依存関係マップでは`ux_redesign_v*.md`や`design_spec_v*.md`の変更時にもテストを更新すると定義されている。ツリー図が実態と矛盾している。",
+    "suggestion": "§19.6の依存チェーン図を修正し、`e2e_fullflow_test.md`が`ux_v1.md`、`design_spec_v1.md`、`reference_v1.md`などの下流仕様書からも依存（参照）される構造を明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "ベンチマーク要件で「App Storeレビュー分析」や「DL数/評価」を求めているが、ADV（Claude）はリアルタイムのストアデータや外部サイトにアクセスできないため、ハルシネーション（架空のデータ生成）を誘発するリスクが高い。",
+    "suggestion": "「POが事前に提供したデータに基づく」という前提を追記するか、AIが静的知識から推論可能な範囲（一般的なUXパターンや公開されている機能比較）にベンチマーク要件を限定する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.4",
+    "issue": "`ux_v1.md`の「§1 画面遷移」と`system_map.md`の「§3 画面遷移図」が重複しており、§1.1の「Single Source of Truth（二重管理排除）」原則に違反している。",
+    "suggestion": "画面遷移の正規ソースをどちらか一方（例：`ux_v1.md`）に限定し、もう一方は「`ux_v1.md` §1を参照」とするか、ユーザー視点（UX）と実装視点（System）で明確にセクション名と責務を分ける。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の例示で`dev-system準拠: docs/plans/dev_system_spec.md §19`となっているが、インフラ構成（sub_infrastructure.md §1.1）によれば`dev_system_spec.md`は`dev-system/`直下に配置されるためパスが誤っている。",
+    "suggestion": "パスの例示を正しい配置場所（例: `dev-system/dev_system_spec.md`）に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.5",
+    "issue": "ステータス定義が「DRAFT / REVIEW / CONFIRMED」のみであり、一度CONFIRMEDになった仕様書を改訂する際の中間ステータス（REVISINGやUPDATINGなど）が定義されていない。",
+    "suggestion": "仕様変更時のステータスとして「REVISING（改訂中）」を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.1",
+    "issue": "必須ファイル一覧で`docs/ux_v1.md`と定義されているが、§18の依存関係マップでは`ux_redesign_v*.md`となっており、ファイル名の命名規則に不一致がある。",
+    "suggestion": "ファイル名を統一する（例：すべて`ux_v*.md`に統一し、§18の記述も合���せる）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7",
+    "issue": "ベンチマーク出力フォーマットの表ヘッダーに「Lais方針」という特定のプロジェクト名がハードコードされており、他アプリへの横展開時に混乱を招く。",
+    "suggestion": "「Lais方針」を「{アプリ名}方針」などのプレースホルダーに変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "§19.4",
+    "issue": "`project_v1.md`と`ux_v1.md`には「AIレビュー計画」セクションがあるが、`design_system.md`や`reference_v1.md`にはない。レビュー計画の記載場所が不揃い。",
+    "suggestion": "AIレビュー計画はプロジェクト全体で共通する可能性が高いため、`project_v1.md`に一元化するか、全仕様書の必須セクションとして統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "dx_engineer"
+  }
+]

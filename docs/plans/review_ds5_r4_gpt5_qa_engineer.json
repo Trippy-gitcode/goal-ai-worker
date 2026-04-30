@@ -1,0 +1,202 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4 vs §17, §18, sub_adv_protocol.md §10",
+    "issue": "UX仕様書のファイル名がセクション間で不一致（§19では docs/ux_v1.md、他セクションでは docs/ux_redesign_v*.md）。自動連鎖更新や参照が破綻する恐れ。",
+    "suggestion": "ファイル名を統一（推奨: docs/ux_v1.md → docs/ux_redesign_v1.md など semver一貫）。別名を使い続ける場合は、両者の正規名/エイリアスを明示し、§18の依存マップ・例示・テンプレを全て同一表記に更新。canopyに参照名整合チェックを追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.5（仕様書ヘッダー標準）",
+    "issue": "ヘッダーの「dev-system準拠: docs/plans/dev_system_spec.md §19」はアプリ側リポジトリに当該パスが存在しないためリンク切れになる可能性が高い。",
+    "suggestion": "準拠表記はパスではなくバージョンとリポジトリURLで表現（例: dev-system v3.0 @ https://github.com/.../tree/<tag> §19）。.dev-system.versionとの一致も併記。canopyで準拠バ��ジョン整合を自動検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "§19.5（仕様書ヘッダー標準）",
+    "issue": "「依存: {上流ファイルのパス + バージョン}」が単数形の例示で、多数の上流を持つ設計（例: design_spec_v1.mdはux_v1.mdとdesign_system.mdの双方に依存）に対する記法が不明確。機械可検証性が下がる。",
+    "suggestion": "フロントマター（YAML）で depends_on: の配列を必須化（例: depends_on: [{path: docs/ux_v1.md, version: 1.2}, {path: docs/design_system.md, version: 2.0}]）。canopyにdocs_header_lint.shを追加し、配列形式・バージョン必須・パス妥当性を検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.5, §19.6",
+    "issue": "ヘッダー準拠・依存宣言・循環禁止などのルールは定義されているが、これらを自動検証する品質ゲートが未定義。運用依存で逸脱が蓄積する恐れ。",
+    "suggestion": "canopyにdocs_header_lint.sh（新設）を追加し、(1) §19.1必須ファイルの存在、(2) 各ファイルのヘッダー必須メタ（バージョン/ステータス/depends_on配列）の有無、(3) 参照パスの存在確認、(4) 依存DAGの循環検出、(5) 参照バージョンと実ファイルのヘッダーバージョン一致、を自動検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.6（依存チェーン）",
+    "issue": "e2e_fullflow_test.mdの上流としてux_v1.mdやdesign_system.mdの関係が明示されておらず、UI/UX変更時にE2E仕様の連鎖更新漏れリスクがある。",
+    "suggestion": "依存チェーンに「ux_v1.md → e2e_fullflow_test.md」「design_system.md → e2e_fullflow_test.md」を追加。ヘッダーdepends_onにも両者を必須化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（design_spec_v1.md テンプレート）",
+    "issue": "インタラクティブ状態（hover/focus/active/disabled）、エラー表示状態、ローディング/スケルトン、フォーカス可視リングなどの状態仕様がテンプレに含まれていないため、スクショ判定（G9）と否定検証の記述が曖昧化しやすい。",
+    "suggestion": "design_spec_v1.mdに「状態仕様」セクションを追加（各コンポーネントのstate別の視覚定義/アニメ���ション/アクセシビリティの期待を明記）。否定検証観点（例: disabled時に押下できない）もテンプレ化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（design_system.md テンプレート）",
+    "issue": "アクセシビリティ系トークン（focus ring色/太さ、コントラスト閾値、reduce-motionポリシー等）がテンプレに含まれていない。",
+    "suggestion": "design_system.mdに「A11yトークン」を追加（例: --focus-ring-color/width、最小コントラスト比、prefers-reduced-motion時のアニメーション抑制規則）。G9で確認すべきチェックリストに紐付け。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（reference_v1.md テンプレート）",
+    "issue": "API版管理/後方互換、ページネーション/ソート規約、冪等性キー、リトライ/バックオフ、レートリミット（上限/エラーレスポンス/ヘッダー）、タイムアウト/再送設計、監視SLO/SLIがテンプレに欠落。異常系テストと回帰防止の基盤が弱い。",
+    "suggestion": "reference_v1.mdに以下の必須セクションを追加: APIバー���ョニング指針、Idempotency-Key運用、標準ページネーション仕様、429/5xx時のリトライ/バックオフ、レートリミット仕様（数値/ウィンドウ/ヘッダー）、タイムアウト値、可観測性（ログ/トレース/メトリクス）とSLO。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレート）",
+    "issue": "§12のSPEC-ID（SPEC-{SCREEN}-{NNN）とのトレーサビリティ要件がe2eテンプレに反映されていない。設計→テストの1:1紐付けが弱く、G3や影響範囲テストの信頼性に影響。",
+    "suggestion": "各テストケース見出しにSPEC-ID列（またはタグ）を必須化し、tests/e2e/specs側のコメント参照と相互参照可能にする。canopyでe2e_fullflow_test.mdのSPEC-ID総数とテストコード内の参照総数を突合。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレート）",
+    "issue": "プラン別挙動（§11・sub_testing §7）に対応する「プラン×機能マトリクス/テスト分岐」の明示欄がテンプレにないため、KV切替テストの網羅性にばら��きが出る。",
+    "suggestion": "e2e_fullflow_test.mdに「プラン別テスト行列」セクションを追加（各ケースに対象プラン列/切替手順/期待差分を明記）。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.7（ベンチマーク要件）",
+    "issue": "ベンチマーク出力がMarkdown表のみで機械可読ではないため、件数・『Lais方針』列の充足・差別化ポイント数の自動検証ができない。品質ゲートとしての実効性が低い。",
+    "suggestion": "benchmarks/{project|ux|design}_benchmark.jsonを必須化（スキーマ定義）。canopyにbenchmark_lint.shを追加し、(1) 直接競合≥5/間接≥3、(2) 全行にLais方針、(3) 差別化≥3、を自動検証。Markdownは人間向けレンダリングとし、JSONをSoTに。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.7（ベンチマーク要件）",
+    "issue": "「DL数/評価」のデータソース・観測期間・収集方法が未定義で比較可能性に揺らぎがある。",
+    "suggestion": "ヘッダー/付録に「データソース（URL/取得日時）」「観測期間」「収集方法（API/手動��」を必須化。JSONにもsource.url/collected_at/periodを持たせる。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.6（循環禁止）",
+    "issue": "循環参照禁止は規定されているが、検出方法が未定義。複数上流や再版（v2）導入時に無自覚なサイクルが混入しうる。",
+    "suggestion": "docs_header_lint.shでdepends_onグラフを構築し、トポロジカルソート不能時にFAIL。循環のパスをエラーメッセージに出力。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-014",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（e2e_fullflow_test.md テンプレート）",
+    "issue": "「テストデータ定義」はあるが、データ分離を担保する標準手順（一意プレフィックス、シード/テアダウンコマンド、汚染検知）がテンプレにない。テスト分離性が担保されにくい。",
+    "suggestion": "e2eテンプレに「データ分離ルール」を追加（例: TEST_RUN_IDプレフィックス、beforeAllでのseedコマンド、afterEach/afterAllでのcleanup、汚染検知用クエリ）。完了コマンドにseed/cleanupのbash行を含めることをG7で検証。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.5（仕様書ヘッダー標準）",
+    "issue": "ヘッダーにドキュメント固有の安定ID/スラッグ（例: DOC-PROJECT-v1）がなく、外部参照やツール連携時に表題変更でリンクが脆くなる。",
+    "suggestion": "ヘッダーに doc_id（例: DOC-PROJECT-001）を追加し、§12のSPEC-IDと同様に機械参照可能にする。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-016",
+    "severity": "LOW",
+    "category": "CONTRADICTION",
+    "location": "§19.2（任意ファイル）と§19.6（連鎖更新の記録）",
+    "issue": "spec_changelog.mdが任意扱いだが、§19.6では連鎖更新の記録先として必須のように読める。運用上の齟齬が出る可能性。",
+    "suggestion": "「変更が発生した場合はspec_changelog.md必須（存在しなければ作成）」と明文化し、canopyで直近n日内のdocバージョン更新検知時にspec_changelog追記を確認する軽量チェックを追加。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.5（依存の例示パス）",
+    "issue": "依存の例示に docs/plans/... とあるが、§19.1の必須ファイルは docs/ 配下。パスの例示が統一されておらず、テンプレ準拠で書いても『パスなし』WARN/FAIL誤判定の火種になる。",
+    "suggestion": "例示パスをdocs/配下に統一し、appsではdocs/plans配下を使わない方針を明記。既存の例示は全箇所修正。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-018",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "§19.5（ステータス定義）",
+    "issue": "仕様書ステータス（DRAFT/REVIEW/CONFIRMED）と「CRITICAL 0達成」の連動が運用規定のみで、自動ゲートが未整備。CONFIRMED未達のままリリースされるリスク。",
+    "suggestion": "canopyにdocs_status_gate.shを追加し、リリース対象バージョンの主要ドキュメント（§19.1）ステータスがCONFIRMEDで、かつdocs/plans/review_*.jsonのCRITICAL==0（review_gate.sh連携）を満たさない場合にFAILにする。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-019",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.7（差別化マッピング）",
+    "issue": "「対応セクション」がテキストのみでアンカー未定義のため、追跡/自動検証が困難。",
+    "suggestion": "対応セクションには file_path + セクションID（例: docs/project_v1.md#section-3-2）の形でアンカー必須化。ベンチマークJSONにも links: [{file, section_anchor}] を持たせ、存在確認をゲート化。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-020",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4（project_v1.md §7 技術アーキテクチャ）",
+    "issue": "可観測性/運用要件（ログ方針、トレース、メトリクス、アラート閾値）の具体化がテンプレに不足。L1/L2障害時の原因特定容易性・パフォーマンス劣化検知に影響。",
+    "suggestion": "project_v1.md §7にObservability小節（ログスキーマ、trace id伝播、主要メトリクスとSLO、アラート条件）を追加し、e2e_fullflow_test.mdのパフォーマンステスト項と整合させる。",
+    "model": "GPT-5",
+    "persona": "qa_engineer"
+  }
+]

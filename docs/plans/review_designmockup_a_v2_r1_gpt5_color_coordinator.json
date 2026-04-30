@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "ALL",
+    "location": "各画面のアウトライン/ボーダー系UI（テキスト入力枠・アウトラインボタン・未選択チップ/ラジオ/チェック・モーダル枠・入力バーなど）",
+    "issue": "非テキストコントラスト不足。#484F58 の1pxボーダーが #0D1117 / #161B22 上で約2.1〜2.3:1しか出ておらず、WCAG 2.2 AA 1.4.11（非テキストコントラスト3:1）未満。該当例: s00_splash「ログイン」ボタン枠、s01_signinの入力枠/チェックボックス、s12_task_addの各フィールド/未選択チップ、s20_talkの入力バー、s13_task_detailの「編集」ボタン枠、s14_goal_detailの未完了丸チェック、s15_goal_createの各フィールドなど。",
+    "suggestion": "ボーダー色を --border-strong (#6E7681 相当) 以上に引き上げる、または2pxに太らせる。重要操作は塗りボタン（--button-primary-bg 等）へ格上げ。未選択チップ/ラジオは枠色を #6E7681 以上に、入力は背景を #1C2128 + 枠 #6E7681 へ。例: input { border-color: var(--border-strong); } .btn-outline { border-width: 2px; border-color: var(--border-strong); }",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "画面下部「すでにアカウントをお持ちですか？ ログイン」内の「ログイン」リンク",
+    "issue": "インラインテキストリンクが色（--accent #79C0FF）だけで示され、下線なし。WCAG 1.4.1（色の使用）不適合。デザインシステム §2.2 でもインラインリンクは必ず下線と規定。",
+    "suggestion": "インラインリンクに text-decoration: underline を常時付与。ホバー/フォーカスで下線太さや背景サブトーン（--accent-subtle）を追加し、色だけに依存しない識別に。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s02_onboarding",
+    "location": "最上部のステップインジケーター（横棒5分割）",
+    "issue": "進捗（2/5）が色の違いのみで表現されており、形状/テキストの代替手掛かりがない。WCAG 1.4.1（色の使用）不適合リスク。",
+    "suggestion": "「2/5」などのテキスト併記、現在ステップのみ太さやアイコン（●/番号）差を付ける、ARIAで step[aria-current=\"step\"] を付与。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "規約同意のチェックボックス（メール/パスワードの下）",
+    "issue": "実寸20×20pxでタップターゲットが小さい。WCAG 2.2 AA 2.5.8（Target Size Min 24px）に未達（Apple推奨44pxも未満）。",
+    "suggestion": "見た目を維持する場合でも ::before などで透明なヒット領域を24px以上（推奨44px）に拡張。label全体クリック可に。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s20_talk",
+    "location": "入力バー右端の送信ボタン（丸背景に矢印アイコン）",
+    "issue": "アイコンのストローク #484F58 が背景 #1C2128 に対し約1.9:1で非テキスト3:1不達（1.4.11）。機能アイコンの視認性が不足。",
+    "suggestion": "アイコン色を #9BA7B4 以上に上げるか塗りつぶし/太線化でコントラスト>=3:1を確保。送信可能時は--button-primary-bgを適用してアイコ��を白に。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s02_onboarding",
+    "location": "画面下部中央の「← 戻る」",
+    "issue": "グローバル戻りパターン（UX仕様 §1.4: 左上「←」ボタン）と不一致。オンボーディングだけ例外位置/スタイルで、操作学習を阻害。",
+    "suggestion": "左上に標準の戻るボタンを配置（アイコン+ラベル）。下部のテキスト戻りは削除またはサブCTAへ格下げ。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "COLOR",
+    "screen": "s10_grow",
+    "location": "12:00「ジムで筋トレ」行の左ボーダー（#D29922）",
+    "issue": "注意/期限接近などの状態を色付き左ボーダーのみで示しているように見えるため、色弱環境で意味が失われるリスク。",
+    "suggestion": "小アイコン（⚠️/⏰）やテキストラベル（「注意」「まもなく」）を併記。forced-colors時はボーダーの代わりに記号表示にフォールバック。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "TYPOGRAPHY",
+    "screen": "s20_talk",
+    "location": "各メッセージのタイムスタンプ（10px, #7A8593）",
+    "issue": "文字サイズが10pxと小さく、長時間のチャット閲覧で読みにくい可能性（日本語UIでは12–14px推奨）。",
+    "suggestion": "タイムスタンプを12–13pxへ引き上げ、prefers-reduced-motion/大きな文字設定に追従（remベース）。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "COLOR",
+    "screen": "s13_task_detail",
+    "location": "ハーフモーダル上部のドラッグハンドル（#484F58 on #161B22）",
+    "issue": "ドラッグ可能の手掛かりが背景と同化しがち。操作可能性の視覚的サインが弱い。",
+    "suggestion": "ハンドル色を --border-strong (#6E7681) に、かつ高さ4px/幅拡大で視認性向上。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "ヒーロー配下のEXP/ゴール進捗バー（高さ3–4px）",
+    "issue": "バーが細く、低視力/屋外光下で進捗差が読み取りにくい可能性。",
+    "suggestion": "進捗バーの高さを4–6pxへ拡大。数値（%/分数）表記は現状維持し、多重手掛かりを担保。",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

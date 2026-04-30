@@ -1,0 +1,123 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "同意文内の「利用規約」「プライバシーポリシー」リンク",
+    "issue": "リンクが青色のみで下線が見えず、非リンクテキストとの区別が色依存になっている（WCAG 1.4.1／design_system §2.2の下線必須に不適合）",
+    "suggestion": "インラインリンクは --accent + text-decoration: underline を必ず適用。hover/pressedで色濃度のみを変え、下線は維持",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "タスク提案カード直上の「タスクにしますか？」テキスト",
+    "issue": "見出しが青＋下線で“リンク風”に見えるが実体は見出し。design_system §2.2（下線はリンク専用）と逆の使い方で認知負荷を生む",
+    "suggestion": "見出しは --text-primary／下線なしに変更。アクションはカード内のボタンに限定し、左ボーダー（--accent）で文脈を示す",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "所要時間チップ行",
+    "issue": "選択肢が5/15/30/60/90分のみで、UX仕様（5/10/15/30/45/60/90/120分）に不足",
+    "suggestion": "10/45/120分のチップを追加。横スクロール可能にし、デフォルトは30分をハイライト（design_system §8.3のチップ高さ/余白を遵守）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s01_signin",
+    "location": "「利用規約とプライバシーポリシーに同意します」チェックボックス一帯",
+    "issue": "チェックボックスが視覚的に小さく、周囲のタップ領域が44px未満に見える",
+    "suggestion": "label全体をクリック可能にし、高さ48px・左右16pxのパディングを確保。必要に応じて透明::beforeでヒットエリアを拡張（design_system §4.5）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s10_grow",
+    "location": "Todayリスト各行右端のカラードット",
+    "issue": "ゴール紐付けを色ドットのみで表現しており、色覚多様��に配慮した代替手掛かりが見えない（色のみに依存の恐れ）",
+    "suggestion": "色ドットに加えて短いテキストチップ（例: 「• 副業」）やアイコンラベルを併記。もしくは行内末尾にゴール名のサブテキストを表示",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UX_CONTRADICTION",
+    "screen": "s30_me",
+    "location": "基本情報（名前／年齢／職業の各行）",
+    "issue": "編集可能である手掛かりが弱い（「趣味」だけ『タップして入力』の文言があるが他項目に編集アイコン等がない）",
+    "suggestion": "各行右端にペンアイコンや『タップで編集』ヒント（初回のみ表示）を追加。編集フォーカス時は下線/背景subtleで状態を明示",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s20_talk",
+    "location": "タスク提案カードの「登録する」「編集して登録」ボタン",
+    "issue": "ボタン高さが約40px未満に見え、親指操作で押しづらい",
+    "suggestion": "ボタンは高さ48px・角丸8px・左右16px以上のパディングに。横並び時はボタン間16pxを確保、狭い場合は縦��みにする（design_system §8.1）",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s14_goal_detail",
+    "location": "タイトル〜進捗表示直下（ファーストビュー）",
+    "issue": "ゴール文脈からAIに相談する導線が見当たらず、提案→タスク化の文脈に乗りづらい",
+    "suggestion": "タイトル右にゴーストボタン『AI相談』を配置、または進捗バー直下にリンクボタンを設置してTALK遷移を明示",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s02_onboarding",
+    "location": "アバター選択（タイプA/B/Cのラベル）",
+    "issue": "名称が汎用的で個性が薄く、ブランドDNAの『自己表現』を訴求できていない",
+    "suggestion": "各タイプに性格/雰囲気のニックネームや短い説明を併記（例: 『タイプB — 落ち着き・夜空』）。選択時に一文の自己紹介を表示",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "WCAG",
+    "screen": "s00_splash",
+    "location": "「ログイン」アウトラインボタン",
+    "issue": "ボーダーの明度差が小さく見���、非テキストコントラスト（1.4.11）3:1を下回る恐れがある",
+    "suggestion": "ボーダーを --border-strong に変更するか、Secondary（--accent-subtle）ボタンに置換して視認性を確保",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s12_task_add, s15_goal_create",
+    "location": "ハーフモーダルのタイトル（「タスクを追加」「ゴールを作成」）",
+    "issue": "見出しサイズ/ウェイトが控えめで、モーダルの階層が弱く見える",
+    "suggestion": "タイトルを --font-size-lg(20px)以上＋semiboldに。タイトル直下に--space-lg以上の余白を取り、フォーム群との階層差を明確化",
+    "model": "GPT-5",
+    "persona": "web_designer"
+  }
+]

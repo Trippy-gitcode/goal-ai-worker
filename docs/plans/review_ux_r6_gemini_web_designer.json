@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "project_v1.md §7.3 / ux_v1.md §4.4",
+    "issue": "SVGアバターのクライアントサイドCanvasラスタライズによるパフォーマンス懸念。FRIENDS画面（図鑑）で多数のアバターをリスト表示する際、メインスレッドでCanvas描画を行うとスクロールのフリーズやUIの遅延（ジャンク）が発生する可能性が高い。",
+    "suggestion": "ラスタライズ処理をWeb Workerにオフロードするか、サーバーサイド（Cloudflare Workers等）でPNGを事前生成してCDNキャッシュから配信するアーキテクチャに変更することを推奨する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "ux_v1.md §3.2",
+    "issue": "TALK画面での画像添付（最大10MB）におけるアップロード中のUXと排他制御が未定義。通信環境によってはアップロードに時間がかかるが、プログレス表示、キャンセル機能、およびアップロード完了前にメッセージ送信ボタンを押せるかどうかの制御が書かれていない。",
+    "suggestion": "入力バー上のサムネイルプレビューに円形のプログレスインジケータを追加し、アップロード中は送信ボタン（➤）を無効化（グレーアウト）する仕様を追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §2.3 / §3.4",
+    "issue": "Undoスナックバーはタブを跨いで表示されるが、ME画面で「取り消す」を実行した場合のEXPバー巻き戻しアニメーションの挙動が矛盾している。§2.3では「EXPバーが逆方向に縮小」とあるが、§3.4では「ME画面のヒーロー領域は静的更新のみ（演出なし）」と定義されている。",
+    "suggestion": "ME画面でUndoが実行された場合、「ME画面のEXPバーも例外的に巻き戻しアニメーションを実行する」か、「静的更新のみ行い、アニメーションは省略する」かのどちらかに仕様を明確化すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "ux_v1.md §8.6",
+    "issue": "演出キュー（同時発火時の優先順位）に「ログインボーナス（§8.5）」が含まれていない。TALK画面でレベルアップ条件を満たし、翌日GROW画面を開いた際に「ログインボーナス」と「持ち越されたレベルアップ演出」が同時に発火した場合の順序が不明。",
+    "suggestion": "演出キューの優先順位にログインボーナスを追加すること。（例：1. ログインボーナス 2. タスク完了 3. ゴール達成 4. レベルアップ）",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md §5.2 / §13.1",
+    "issue": "テーマ選択において、OSのシステムテーマ（ライト/ダークモード）との自動連動オプションが定義されていない。モダンなアプリのベストプラクティスとして、手動選択だけでなくシステム追従が必要。",
+    "suggestion": "テーマ選択肢に「システム設定に従う（デフォルト）」を追加し、`prefers-color-scheme` に応じて Dawn / Night Sky を自動切替する仕様を追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "ux_v1.md 全般",
+    "issue": "「洗練」というブランドメッセージを実現するための、デザインシステムの基礎要件（アイコン体系、タイポグラフィ、角丸のルール）がUX仕様書内で言及されていない。design_system.mdに委譲するにしても、UXの観点から「一貫したウェイトのアイコンを使用する」などの制約が必要。",
+    "suggestion": "§6（共通UIパターン）に「ビジュアル制約」の項を追加し、システムフォントの利用方針、アイコンの線幅（ウェイト）の統一、角丸（border-radius）のテーマ間での一貫性についての要件を明記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "ux_v1.md §7.3",
+    "issue": "ハーフモーダル（S-11等）が表示されている状態で、画面左端から右スワイプ（edge swipe）を行った場合の挙動が未定義。モーダルが閉じるのか、親画面ごと���画面に戻ってしまうのかが不明。",
+    "suggestion": "「ハーフモーダル表示中の左端からの右スワイプは、モーダルを閉じる操作（下スワイプと同等）として扱う」または「スワイプバックを無効化する」旨を§7.3に追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "ux_v1.md §10",
+    "issue": "ダークテーマ（Night Sky, Harajuku Dark）におけるOLEDディスプレイのスマアリング（スクロール時の紫色の残像）対策が明記されていない。純黒（#000000）を背景にすると「洗練」されたスクロール体験が損なわれる。",
+    "suggestion": "アクセシビリティまたはデザイン要件のセクションに、「ダークテーマの背景色は純黒（#000000）を避け、濃いグレー（#121212等）を使用してOLEDスマアリングを防止する」というガイドラインを追記すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "web_designer"
+  }
+]

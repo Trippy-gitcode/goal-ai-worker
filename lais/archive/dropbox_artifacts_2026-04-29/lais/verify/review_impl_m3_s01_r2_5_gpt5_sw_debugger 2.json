@@ -1,0 +1,132 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "3.5",
+    "issue": "Supabase auth の detectSessionInUrl=false 設定により、メール確認リンクからの復帰時にセッションが取り込まれず自動サインインが完了しない。S01 画面では「リンクをクリックするとサインインできます」と案内しており挙動と文言が矛盾している。",
+    "suggestion": "supabase.createClient の auth.detectSessionInUrl を true に戻すか、専用のコールバックルートを実装して URL フラグメント/クエリからセッションを手動で取り込む。あわせて Playwright で確認メールリンク（Deep Link）の E2E を追加し、文言も実装に整合させる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "3.2",
+    "issue": "/terms と /privacy が実装/配信されていない環境で NotFound による window.location.assign がループし、無限リロードになる可能性が高い（多くの SPA 配信は未知パスで index.html を返すため、毎回 NotFound → assign の繰り返し）。S01 からは target=_blank でこれらに遷移するため、ユーザー���新規タブでハングする。",
+    "suggestion": "STATIC_PATHS 命中時の強制ナビゲーションをやめ、1) そのまま 404 を表示する、または 2) 一度だけクエリパラメータ（例: ?__extnav=1）を付加して assign し、再訪時は assign をスキップするガードを入れる。併せて配信設定/静的ページの存在確認テストを追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.3",
+    "issue": "auth.js の HMR dispose で購読を解除するが、モジュールがホットリプレースされた場合に再度 bootstrapAuth が自動実行されず、以後 onAuthStateChange が発火しなくなる（開発時にセッション更新が UI に反映されない）。",
+    "suggestion": "import.meta.hot.accept 内で再度 bootstrapAuth を呼ぶ、もしくは main.jsx 側で auth.js の更新を watch して再ブートストラップする。teardownAuth では authLoading も true に戻して整合性を保つ。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.4",
+    "issue": "同意未チェック時の CTA disabled 理由提示が attempted 依存のため、初回は支援技術/ユーザー���理由が伝わりにくい。disabled のままでは submit が発火せず attempted が立たず、エラーを出せない環境/ブラウザがある。",
+    "suggestion": "email と password ��閾値を満たしている状態で agree=false のときは attempted に関わらず『同意が必要』メッセージを表示し、CTA の aria-describedby に常時ひも付ける。可能なら disabled を外し、未同意時は submit でバリデーションエラーとして明示的に告知 + フォーカス誘導に統一する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4",
+    "issue": "入力ハンドラが onInput と onChange の二重バインドになっており、不要なステート更新/再描画が発生する可能性がある。",
+    "suggestion": "Preact では onInput で十分なため onChange を削除し、ハンドラを一意にする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.3, 3.4",
+    "issue": "サーバーエラー文言を err.message の生値で表示しており、日本語でない/技術的すぎる/詳細情報の露出など UX とセキュリティの両面で課題がある。",
+    "suggestion": "Supabase エラーコードに基づくメッセージマッピング（i18n）を実装し、ユーザー向けは簡潔な文言に統一。詳細は console.warn または送信ログにのみ残す。��知コードは汎用文言にフォールバック。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4",
+    "issue": "成功時に route('/') 実行直後も finally で setState を行っており、アンマウント後 setState の可能性がある（Preact では大半は無害だがデバッグログがノイジーになりうる）。",
+    "suggestion": "isMounted ref でマウント状態をガードして finally の setState を条件化、または route 完了後に副作用を行わない設計にする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "4, 5",
+    "issue": "Playwright 実測は正常系中心で、重要な退行検出シナリオ（確認メール Deep Link、/terms 無限リロード防止、ネットワークエラー/タイムアウト、HMR 再購読、二重送信競合、同意未チェックの告知挙動）が不足。",
+    "suggestion": "上記シナリオの E2E を追加。特に: 1) detectSessionInUrl=true で Deep Link からセッション確立, 2) STATIC_PATHS でリダイレクトループしないこと, 3) signUp/signIn エラーの UI/ログ検証, 4) 二重送信の不発確認。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.2",
+    "issue": "STATIC_PATHS マッチが完全一致のみのため、/terms/（末尾スラッシュ）や大文字/エイリアスに弱い。",
+    "suggestion": "path を正規化（小文字化・末尾スラッシュ除去）して比較、または正規表現/startsWith ベースにする。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.4",
+    "issue": "メール確認が必要なサインアップ時、confirmNotice 表示後もそのまま再送信でき、短時間でメールを連打送信できる恐れがある。",
+    "suggestion": "confirmNotice 表示後は CTA を一定時間無効化し『確認メールを再送』ボタンを別途用意（クールダウン/レート制限）。サーバー側レート制限と合わせて保護。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.3",
+    "issue": "teardownAuth が authLoading をリセットしないため、HMR 直後に購読がないのに authLoading=false のままになる不整合が起きうる（開発体験の劣化）。",
+    "suggestion": "teardownAuth で authLoading.value=true, session.value=null に戻す。再ブートストラップ時に正しい状態に遷移させる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.4",
+    "issue": "CTA の aria-describedby が複数の role=alert にひも付く可能性があり、一部スクリーンリーダーで冗長なアナウンスや読み上げ順序の揺らぎが起きる場合がある。",
+    "suggestion": "現在のブロッキング理由を集約する単一のライブリージョン（role=status/alert）に要約を出力し、CTA は常にその要約のみを参照する。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.5",
+    "issue": "環境変数未設定時にモジュール評価段階で throw してアプリ全体が真っ白になる。開発者には有益だが本番の誤設定時にユーザーへ説明がない。",
+    "suggestion": "初期化失敗を捕捉してユーザー向けのフェイルセーフ画面（設定不備の簡潔な案内）を表示し、詳細はコンソール/監視に送る。少なくとも開発/本番でエラーメッセージを切り替える。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

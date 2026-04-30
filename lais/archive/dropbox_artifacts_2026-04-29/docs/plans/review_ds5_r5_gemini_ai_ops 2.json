@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.6",
+    "issue": "§19.6の依存チェーン図において、`e2e_fullflow_test.md` が `project_v1.md` のみに依存しているように描かれているが、§18の連鎖更新マップでは `ux_redesign_v*.md` や `design_spec_v*.md`、`design_system.md` の変更時にも `e2e_fullflow_test.md` を更新するルールになっている。依存関係に矛盾がある。",
+    "suggestion": "§19.6の依存チェーンを§18の実態に合わせて修正し、`e2e_fullflow_test.md` が `ux_v1.md`, `design_spec_v1.md`, `reference_v1.md` の下流（検証層）として全てから依存を受ける構造にツリーを再構築する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "`reference_v1.md` の「§3 AI活用設計」に、AIが誤った判断・分類をした場合のフォールバック機構やリカバリ手順（人間へのエスカレーションパス）が定義されていない。AI Opsの観点から、暴走時や誤作動時のフェイルセーフが必須である。",
+    "suggestion": "`reference_v1.md` の§3に「AI誤判断時のリカバリ手順・フォールバック機構」を必須項目として追加し、AI⇔人間の責務分離を明確化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "`project_v1.md` のテンプレートにおいて、アプリ運用時におけるAIの自律実行範囲と承認ゲートのバランス（どの操作をAIに委ね、どこで人間の承認を挟むか）を定義するセクションが存在しない。",
+    "suggestion": "`project_v1.md` の必須セクションに「§11 AI自律範囲と承認ゲート設計（AI Ops）」を追加し、アプリ固有のAI権限レベルと人間の介入ポイントを定義させる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.7",
+    "issue": "競合ベンチマーク要件において、競合アプリの画面構成やApp Storeレビューの分析が求められているが、ADV/ENG（AI）単独では実機アプリのスクショ取得やストアのスクレイピングが困難な場合がある。AIの能力制約による実行ブロックのリスクがある。",
+    "suggestion": "ベンチマーク実施時のAIと人間の責務分担を明記する（例: 「POがスクショやレビューテキストを提供し、ADVが分析・マトリクス化を行う」など、データ収集フェーズでの人間の介入を許容する）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.5",
+    "issue": "ヘッダーの「依存」メタデータが単一ファイルを想定した記述例（`依存: docs/plans/lais_project_v1.md v1.3`）になっており、`system_map.md` のように複数ファイル（`ux_v1.md` と `reference_v1.md`）に依存する場合のフォーマットが未定義。",
+    "suggestion": "依存メタデータを配列形式またはカンマ区切りで複数指定可能であることを明記し、例を修正する（例: `依存: [docs/ux_v1.md v1.0, docs/reference_v1.md v1.0]`）。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§19.1, §19.5",
+    "issue": "§18と§19でファイル名とディレクトリパスに揺れがある。§18では `ux_redesign_v*.md` だが§19.1では `ux_v1.md`。また、§19.1では `docs/project_v1.md` だが、§19.5のヘッダー例では `docs/plans/lais_project_v1.md` となっている。",
+    "suggestion": "§18と§19間で仕様書のファイル命名規則（`ux_v1.md` に統一など）と配置ディレクトリ（`docs/` か `docs/plans/` か）を完全に統一し、混乱を防ぐ。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.6",
+    "issue": "ヘッダーで上流ファイルのバージョンへの依存を宣言しているが、上流ファイルが更新された際に、下流ファイルのヘッダーに記載された依存バージョンが古くなることを検知する機械的な仕組み（ゲート）がない。",
+    "suggestion": "将来的な拡張として、`review_gate.sh` または専用のLinterで、ヘッダーの依存バージョンと実際の上流ファイルのバージョンが一致しているか（または追従更新されているか）を検証する仕組���の導入を検討する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

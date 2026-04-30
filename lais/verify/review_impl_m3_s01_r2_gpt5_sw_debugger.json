@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "送信ボタン多重クリック／Enter連打のレースで handleSubmit 内の canSubmit が古いスナップショットのまま評価され、二重送信が発生しうる（DOM の disabled 反映前に 2 回目が発火）。サインアップでは確認メール多重送信などの副作用になり得る。",
+    "suggestion": "関数冒頭で同期ロックを行う。例: const inFlightRef = useRef(false); if (inFlightRef.current) return; inFlightRef.current = true; finally で inFlightRef.current=false を確実に戻す。併せて送信中は CTA に pointer-events:none を付与（CSS）し、onSubmit 側でも二重送信防止を二重化。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-002",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "confirmNotice（確認メール送信メッセージ）が入力変更で消えない。handleEmailInput/handlePasswordInput が serverError 存在時のみ resetTransientMessages() を呼ぶため、confirmNotice 単独表示時は残留する。",
+    "suggestion": "入力変更時は serverError または confirmNotice のいずれかが存在すれば常に resetTransientMessages() を呼ぶ（あるいは無条件で呼ぶ）。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "3.1/3.3 App.jsx/S01Auth.jsx",
+    "issue": "モード切替（signup⇔login）時にコンポーネントが再マウントされないため、serverError/confirmNotice や agree の状態が次モードに持ち越される。特定条件で関係のないエラーや通知が残って見える。",
+    "suggestion": "AuthRoute 側で <S01Auth key={mode} mode={mode}/> とし、モード変更時にステートをリセットする。もしくは S01Auth 内で useEffect(() => resetTransientMessages(); setEmailTouched(false); setSubmitting(false);, [mode]) を追加して一時状態をクリア。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "3.2 lib/auth.js",
+    "issue": "supabase.auth.onAuthStateChange の購読解除がなく、HMR/再評価で重複購読・メモリリークが起きる既知リスク（現状も発生しうる）。",
+    "suggestion": "const { data:{ subscription } } = supabase.auth.onAuthStateChange(...); を保持し、HMR 時は import.meta.hot?.dispose(() => subscription.unsubscribe()); を実装。プロダクションでも二重初期化防止ガードを入れる。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.2 lib/auth.js",
+    "issue": "getSession() はエラーでも reject ではなく { error } で解決されるが、then 句で error を参照していないため、失敗時のログや分岐が欠落しサイレントに進行する可能性がある。",
+    "suggestion": "getSession().then(({ data, error }) => { if (error) { console.error(..., error); session.value=null; } else { session.value=data?.session ?? null; } }).catch(...).finally(...); のように resolved error を明示処理。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "handleSubmit 内で route('/') 実行直後に finally で setSubmitting(false) を行っており、アンマウント後の setState 実行になる可能性（実装・環境によっては警告源）。",
+    "suggestion": "マウントフラグでガードする（const mounted=useRef(true); useEffect(()=>()=>{mounted.current=false;},[]); finally で mounted.current を確認）か、ルーティング前に setSubmitting(false) を行い画面遷移は最後に実行。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "email/password の maxLength 未設定。異常に長い入力で UX 劣化や上流バリデーションエラー誘発の余地がある。",
+    "suggestion": "メールは慣例 254、パスワードは 72〜128 程度で maxLength を設定。サーバ側仕様に合わせて UI も制限し、エラー文言を用意。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "送信中にモード切替リンクを aria-disabled + onClick で抑止しているが、中クリック等の補助操作では遷移できてしまう可能性がある（onClick が発火しないケース）。",
+    "suggestion": "送信中は Link の代わりに非インタラクティブ要素（span）を描画、または CSS で [aria-disabled=\"true\"] に pointer-events:none を適用し、onAuxClick/onMouseDown の抑止も追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "利用規約/プライバシーポリシーが未実装のため target=_blank で新規タブを開いても NotFound→'/' に即時リダイレクトされ、ユーザー視点ではリンクが機能しない挙動に見える。",
+    "suggestion": "暫定でプレースホルダーページを用意���るか、Phase B 完了まで target=_blank を外し同一タブ遷移にする、あるいはリンクの横に「近日公開」を明示。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "MISSING",
+    "location": "3.4 S01Auth.css",
+    "issue": "CSS がパッケージに同梱されておらず、44×44 ヒット領域や prefers-reduced-motion 無効化の実装を検証できない。",
+    "suggestion": "該当セレクタの抜粋（.s01-agree-label, .s01-footer-link の disabled 状態, @media (prefers-reduced-motion: reduce) 節）をパッケージに含める。加えて E2E で要素の bounding box を計測する自動テストを追加。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "4/5 Playwright 実測・レビュー観点",
+    "issue": "デグレ検出用の自動テストが不足。二重送信レース、送信中モード切替、エラーメッセージの持ち越し、HMR 時の onAuthStateChange 重複など「動いているように見えるが特定条件で壊れる」ケースの網羅がない。",
+    "suggestion": "Playwright で以下を追加: 1) CTA 連打でリクエストが 1 回に抑止される、2) 送信中にフッターリンクが操作不能、3) login↔signup 切替で serverError/confirmNotice がクリアされる、4) checkbox のクリック領域が 44px 以上、5) prefers-reduced-motion=reduce でトランジション無効。ユニットで auth.js の getSession エラー分岐もカバー。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3.3 S01Auth.jsx",
+    "issue": "EMAIL_RE は簡易実装で、一部の不正アドレスを許容/一部の有効な国際化ドメインを拒否する可能性がある（type=email と noValidate の併用によりブラウザの追加検証も抑制中）。",
+    "suggestion": "クライアントでは最低限（@ と . を含む等）の緩い検証に留め、厳密判定はサーバーに委譲するか、実績あるバリデータを利用。UI は「形式が正しくありません」程度の汎用エラーで十分。",
+    "model": "GPT-5",
+    "persona": "sw_debugger"
+  }
+]

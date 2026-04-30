@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "TYPOGRAPHY",
+    "screen": "s02_onboarding",
+    "location": "画面タイトル「最初のパートナーを選びましょう」",
+    "issue": "font-size:28px に font-weight:200（Thin）が指定されており、DS §3.3の「--font-weight-thin:200 は font-size-2xl(36px)以上限定」に違反",
+    "suggestion": "タイトルは 28px/1.35 + font-weight:600（見出し）に変更するか、Thinを使いたい場合は 36px(--font-size-2xl) にサイズアップして適正ラインハイト(--line-height-2xl)を適用",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "TEXT_CONTRAST",
+    "screen": "s13_task_detail",
+    "location": "ハーフモーダル下部ボタン行「削除」",
+    "issue": "文字色 #F85149（danger）× 背景 #161B22（panel）で通常テキストのコントラストがAA 4.5:1を下回る可能性が高い（細字14px）",
+    "suggestion": "アウトラインではなくDSトークンの塗りボタンを使用（--button-danger-bg:#DA3633 + 白文字）に変更するか、背景をより暗くし��つ文字は白にするなど、最低4.5:1を満たす組み合わせに修正",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "TYPOGRAPHY",
+    "screen": "ALL",
+    "location": "小ラベル/補助テキスト（例: s10 ヒーローの「Explorer」、s30 サブタブ、s14 タスク行の日付行など）",
+    "issue": "font-size:12px が広範に使用されており、DS §3.2 の離散スケール（11/14/16/20/28/36/48）から外れている",
+    "suggestion": "用途に応じて 11px（キャプション/時刻）または 14px（補助テキスト/ラベル）へリマップ。字面が大きい日本語は §3.4に従い letter-spacing/line-height を併用して可読性を確保",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s10_grow",
+    "location": "Today セクション末尾〜Goals 見出しの間",
+    "issue": "セクション間マージンが約28pxで、DS §4.2の「セクション間≧32px」を満たしていない",
+    "suggestion": "Todayブロックのmargin-bottomまたはGoals見出しのmargin-topを調整し、間隔を最小32px（標準40px推奨）に拡張",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s10_grow",
+    "location": "ヒーロー内 英字ラベル「Explorer」",
+    "issue": "letter-spacing:1px が指定されており、英字ラベル推奨値（--letter-spacing-label:1.5px）と不整合",
+    "suggestion": "英字ラベルには --letter-spacing-label:1.5px を適用し、視認性とラベルらしさを強化",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE / DISCOVER / FRIENDS / SHOP）",
+    "issue": "letter-spacing:0.5px が指定されており、英字タブラベルの既定（1.5px）から逸脱",
+    "suggestion": "サブタブの英字ラベルは --letter-spacing-label:1.5px を使用。合わせてフォントサイズは12pxではなく14pxスケールへの統一を検討",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "s20_talk",
+    "location": "ヘッダー下ボーダー（border-bottom:1px solid rgba(110,118,129,0.4)）",
+    "issue": "ボーダーに不定のrgba値を直指定しており、DS §5.1 Night Sky の --border / --border-strong トークン運用から逸脱",
+    "suggestion": "border色は var(--border) または var(--border-strong) ��使用。濃度差が必要な場合も、トークンの階調で統一（任意の透明度指定は避ける）",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "DESIGN_SYSTEM",
+    "screen": "ALL",
+    "location": "区切り線・下線（例: s14 タスク行の区切り: rgba(72,79,88,0.3) など）",
+    "issue": "複数箇所で rgba の独自濃度ボーダーが使用され、テーマ横断の一貫性と将来のテーマ差分管理性を損なう",
+    "suggestion": "区切り線は --border（装飾）/ --border-strong（構造）に統一。必要に応じてコンポーネント側で不透明度ではなくスペーシングと密度調整でコントラストを演出（Open Air原則）",
+    "model": "GPT-5",
+    "persona": "color_coordinator"
+  }
+]

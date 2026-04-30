@@ -1,0 +1,62 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§19.6 ファイル間参照ルール",
+    "issue": "依存チェーン図において、`e2e_fullflow_test.md`が`project_v1.md`のみに依存する構造になっており、§18の連鎖更新マップ（`ux_v1.md`や`design_spec_v1.md`変更時にテストを更新するルール）と完全に矛盾している。テスト仕様書がUXや詳細設計に依存しない構造では、仕様変更時のテスト更新漏れが確実に発生し、L2影響範囲テストが形骸化する。",
+    "suggestion": "§19.6の依存チェーンを修正し、`e2e_fullflow_test.md`を`ux_v1.md`、`design_spec_v1.md`、`reference_v1.md`、`system_map.md`の全てから��存を受ける最下流の検証レイヤーとして位置づけること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.5 仕様書ヘッダー標準",
+    "issue": "ヘッダーに「依存: {上流ファイルのパス + バージョン}」を記載するルールがあるが、上流ファイルが更新された際に下流のヘッダーバージョンが正しく追従しているかを機械的に検証するゲートが存在しない。手動管理では確実に形骸化し、仕様間のバージョン不整合を引き起こす。",
+    "suggestion": "`review_gate.sh`または新規のドキュメントLintスクリプトに、仕様書ヘッダーの依存バージョン表記と、実際の上流ファイルのバージョン（またはgitコミットハッシュ）の整合性を自動チェックするロジックを追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "§19.4 各仕様書の必須セクションテンプレート (system_map.md)",
+    "issue": "`system_map.md`の§4に「ファイル変更チェックリスト（機能変更時に影響するファイル一覧）」が定義されているが、これは`sub_testing.md`で定義された`test_map.yaml`（ソースファイル→テスト対応マッピング）と目的が完全に重複している。Single Source of Truthの原則（§1.1）に反し、二重管理によるL2テストの漏れを誘発する。",
+    "suggestion": "`system_map.md`の§4を削除するか、「`test_map.yaml`へのマッピング定義方針」として統合し、影響範囲の正規データソースを機械可読な`test_map.yaml`に一本化すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "COMPLETENESS",
+    "location": "§19.4 各仕様書の必須セクションテンプレート (e2e_fullflow_test.md)",
+    "issue": "テストアンチパターン10（エラーパス漏れ）を防ぐための構造的強制力が弱い。テンプレートの「§N+1 異常系テストケース」だけでは、APIエラー（500系）、オフライン状態、タイムアウトなどのインフラ起因の異常系が網羅されにくい。",
+    "suggestion": "`e2e_fullflow_test.md`の§N+1を「異常系・エッジケース（APIエラー、オフライン、境界値）」と具体化し、さらに§3-Nの各機能テストケース内にも「IF FAIL（失敗時の挙動）」の検証パスを必須項目として追加すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§19.1 必須ファイル / §19.4 テンプレート",
+    "issue": "Phase 3で`test_meta.json`を作成すると規定されているが、`e2e_fullflow_test.md`のテンプレート内にテストケース数を見積もって`expected_total`を算出・記録するプロセスが定義されていない。これにより、初期段階でG3ゲート（テスト項目数検証）が正しく機能しない恐れがある。",
+    "suggestion": "`e2e_fullflow_test.md`のテンプレート末尾に「§N+3 テストメタデータ定義（test_meta.jsonのexpected_total算出根拠と初期値）」を追加し、仕様設計とメタデータ作成を連動させること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7 競合ベンチマーク要件",
+    "issue": "ベンチマーク出力フォーマットのマトリクス列名や必須ルールに「Lais方針」という特定のプロジェクト名がハードコードされている。dev-systemは全アプリ共通基盤であるため、新アプリ立ち上げ時にテンプレートとして流用する際に混乱を招く。",
+    "suggestion": "フォーマット内の「Lais方針」を「{アプリ名}方���」または「自社対応方針」という汎用的な変数表現に修正すること。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_engineer"
+  }
+]

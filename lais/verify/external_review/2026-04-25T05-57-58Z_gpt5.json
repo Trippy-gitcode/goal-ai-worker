@@ -1,0 +1,21 @@
+[
+  {
+    "id": "PARSE-ERROR",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "N/A",
+    "issue": "Response could not be parsed as JSON",
+    "suggestion": "Re-run review",
+    "raw_response": "[\n  {\n    \"id\": \"R-001\",\n    \"severity\": \"CRITICAL\",\n    \"category\": \"CONTRADICTION\",\n    \"location\": \"lais/verify/dev_system_v34_package.md §2.ε'-1 / §C4.2\",\n    \"issue\": \"同一ファイル内で STRIKE>=3 の承認ファイルパスが `instructions/approvals/.strike_override.json` と `instructions/approvals/<MID>.strike_override.json` の2通りで記載されており、SSoT が崩れています。実装者が片方を採用すると再実行判定が恒久的に失敗または誤通過し、デプロイ復旧フローが停止する明確な運用バグになります。\",\n    \"suggestion\": \"承認ファイルの命名規則を1つに統一し、全セクション・検証コマンド・説明文を同時修正してください。ミッション単位の承認である以上 `<MISSION_ID>.strike_over",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0463,
+    "input_tokens": 19123,
+    "output_tokens": 2235,
+    "model_id": "gpt-5.4"
+  }
+]

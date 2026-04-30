@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "callGPT5",
+    "issue": "GPT-5 系呼び出しで response_format: { type: 'json_object' } を指定していますが、JSON_INSTRUCTION は JSON配列のみを厳格に要求しています。Chat Completions の json_object はトップレベル object を要求するため、配列応答とAPI制約が衝突し、400エラーまたはモデルが object で包んだ応答を返す原因になります。通常モードの gpt5 レビューはこのままでは安定動作しません。",
+    "suggestion": "配列を要求するなら response_format の json_object 指定を外すか、出力仕様を {\"items\":[...]} の object に統一してください。extractJson は既に object 内配列を吸収できるため、JSON_INSTRUCTION も object 形式へ合わせるのが最も安全です。precommit と通常実行で出力契約を統一し、API制約とプロンプトの矛盾を解消してください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "トップレベル import / resolveFiles",
+    "issue": "const { glob } = require('path'); となっており、path モジュールに glob は存在しません。現状では未使用のため即時クラッシュはしないものの、名前衝突を誘発する誤った import であり、将来 resolveFiles を改善して glob を使う修正を入れた際に誤動作の温床になります。可読性も下げています。",
+    "suggestion": "未使用かつ誤った import は削除してください。実際に glob を使うなら fast-glob や glob パッケージを明示的に追加し、const fg = require('fast-glob') のように責務が分かる命名へ変更すると安全です。path は path 操作のみに限定し、import 名と実体の一致を保ってください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "parseArgs",
+    "issue": "--max-tokens と --timeout の parseInt に NaN ガードがなく、引数欠落や不正値で opts に NaN が入ります。そのまま API payload や request timeout に渡されるため、外部APIから不正リクエストとして拒否される、または timeout 無効化のような予期せぬ挙動を招きます。CLI由来の入力検証不足です。",
+    "suggestion": "parseInt(value, 10) を使い、Number.isFinite かつ 0 より大きいことを検証してください。不正時は既定値へフ��ールバックするか、明示的なエラーメッセージを出して終了するのが安全です。数値引数の検証を helper に切り出せば DRY になり、今後のオプション追加��も同じバグを防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "runJob / totalItems,totalCritical,totalHigh / parallel 実行",
+    "issue": "parallel モードでは複数の runJob が同時に totalItems・totalCritical・totalHigh・allResults を更新しています。Node.js は単一スレッドでも非同期完了順が不定なため集計値の再現性が低く、失敗ジョブを summary が正しく反映しない可能性があります。共有可変状態に副作用を散らしている構造です。",
+    "suggestion": "runJob は集計結果を return し、Promise.all 後に reduce で totals を算出する構成へ変更してください。allResults も外側から破壊的更新せず、戻り値の配列から生成すると副作用が明確になります。非同期処理で共有ミュータブル状態を避けることで、ログ順や実行順に依存しない保守しやすい実装になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "runPrecommitMode / process.exit の多用",
+    "issue": "runPrecommitMode と main の両方で process.exit を直接呼んでおり、関数が値を返さずプロセス制御��で担っています。責務分離が弱く、将来このスクリプトを別モジュールから再利用したりテストしたりする際に扱いづらくなります。途中終了経路も増え、後処理追加時の漏れを生みやすい構造です。",
+    "suggestion": "各関数は終了コードや結果オブジェクトを返し、最終的な process.exit はエントリポイント 1 箇所に集約してください。I/O・レビュー実行・終了判定を分離すると単体テストしやすくなり、後でクリーンアップ処理やメトリクス送信を追加しても安全です。副作用の出口を狭めるのが保守性向上に有効です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "resolveFiles",
+    "issue": "glob 解決が \"ファイル名の * のみ\" という独自実装で、正規表現化時にもメタ文字エスケープがありません。例えば basename に . や + を含むパターンは意図せず広くマッチします。コメントと実装に制約は書かれているものの、CLI引数として汎用 glob を期待すると誤検出・取りこぼしが起きやすいです。",
+    "suggestion": "独自 glob 実装をやめ、実績ある glob ライブラリに置き換えてください。どうしても自前実装を維持するなら、正規表現エスケープ関数を追加し、対応範囲を --help に明記する必要があります。ユーザーが通常の glob と誤認しないよう、命名や説明も \"simple-pattern\" などに変えると事故を減らせます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "extractJson",
+    "issue": "JSON 抽出が text.match(/\\[[\\s\\S]*\\]/) の貪欲マッチに依存しており、本文中に複数の配列や説明文が混在した場合に最外の不要部分まで巻き込んで parse 失敗しやすいです。失敗時は PARSE-ERROR を HIGH で返すだけで、生レスポンス保存や再試行条件の細分化もありません。障害解析がしづらいです。",
+    "suggestion": "JSON モードを使う場合は出力契約を一つに絞り、抽出ロジックを簡素化してください。どうしても自然文混在を許すなら、コードブロック優先後にストリーミング対応の JSON パーサや bracket balancing を使うほうが堅牢です。また parse 失敗時は別ファイルへ raw response を保存し、再試行判定に使えるようにしてください。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "MODEL_PRICES / callGemini",
+    "issue": "モデルID・価格・maxOutputTokens・retry回数・待機秒数・32MB maxBuffer などの数値が各所に散在しており、魔法の数字が多いです。価格表もコメント依存で更新根拠がコードに閉じていないため、将来モデル名や単価が変わった際に修正漏れが起きやすく、保守コストを上げています。",
+    "suggestion": "定数は CONFIG オブジェクトへ集約し、用途ごとに名前を付けてください。例えば API_TIMEOUT_DEFAULT_MS、PRECOMMIT_DIFF_MAX_BUFFER、RETRY_BACKOFF_MS、MODEL_CONFIGS のように整理すると意図が明確になります。価格は少なくともバージョンと更新日を定数に持たせ、未知モデル時の警告ログも出すと運用しやすくなります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0367,
+    "input_tokens": 12853,
+    "output_tokens": 2060,
+    "model_id": "gpt-5.4"
+  }
+]

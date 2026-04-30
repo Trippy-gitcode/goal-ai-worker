@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "App.jsx で bootstrapAuth を静的 import しているため、@supabase/supabase-js を含む認証スタックが初期バンドルに同梱され、初回表示時に約 200KB 超の JS の parse/compile コストが発生する。",
+    "suggestion": "初回描画後に認証をブートストラップできるよう、useEffect 内で動的 import する（例: requestIdleCallback または setTimeout 0ms で import('../lib/auth.js').then(m => m.bootstrapAuth())）。あわせて supabase 関連を認証系ルート遷移時のみに読み込む設計に見直し、初期バンドルから外す。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "ルートレベルのコード分割が無く、S01Auth と AuthCallback を含む全画面が初期バンドルに含まれるため、初期ロードが重くなる。",
+    "suggestion": "S01Auth と AuthCallback を lazy(() => import(...)) + Suspense/フォールバックで遅延読込にし、初期表示は S00Splash だけを含むように分割。CSS もルート単位で分割（動的 import に紐づく）して初期 CSS を最小化する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "detectSessionInUrl による自動 exchange と、AuthCallback での明示的 exchangeCodeForSession が競合し、重複リクエストが発生する可能性がある（特にモバイル回線での無駄な往復）。",
+    "suggestion": "処理順を見直し、まず getSession() を確認し session が既に存在すれば exchange をスキップ。session が無く code がある場合のみ exchange を実行。さらに 1〜2 フレーム程度（setTimeout 0〜50ms）待って detectSessionInUrl の完了を先に許容する戦略も検討。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "6",
+    "issue": "Supabase への初回接続時に DNS/TLS ハンドシェイク遅延が発生しうるが、事前接続（preconnect）が設定されていない。",
+    "suggestion": "index.html に <link rel=\"preconnect\" href=\"VITE_SUPABASE_URL\" crossorigin> を追加（または /auth/callback 到達時に動的に追加）して、コード交換時の接続確立レイテンシを短縮する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "エラーパスで setErrorMessage と setStatus を連続呼び出ししており、非同期コンテキストではバッチされず 2 回の再レンダリングになる可能性がある。",
+    "suggestion": "単一の setState にまとめる（例: useReducer かステートをオブジェクト化して一括更新）か、setState の呼び出しを 1 ���に集約して再レンダリング回数を削減する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "3",
+    "issue": "ウェルカム演出の transform/opacity アニメーションは compositor-friendly だが、レイヤー昇格の明示がなく初回プロモーションのコストが発生する可能性がある。",
+    "suggestion": ".auth-callback-welcome に will-change: transform, opacity を付与（短時間演出のため影響は限定的）。または contain: content を付け、レイアウト影響範囲を局所化して無駄な再計算を抑制する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2",
+    "issue": "CSS の --duration-celebration は 800ms だが、JS の WELCOME_HOLD_MS は 900ms と固定で、設計トークン変更時に無駄な待機が発生しうる。",
+    "suggestion": "computedStyle から --duration-celebration を取得して JS 側の hold を同期させる、もしくは 800ms に厳密一致させる。reduce-motion 時は現行どおり JS 側でスキップ継続。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "NotFound の safeSessionStorage() が同期的に sessionStorage へ書き込み/削除を行うため、該当経路でメインスレッドをわずかにブロックする可能性がある。",
+    "suggestion": "ガード用の sessionStorage 書き込みは必要時のみに限定されているが、さらに頻度低減のためメモリ内フラグ併用や、try 記述前に path 不一致の早期 return 等で最小限に抑制する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "6",
+    "issue": "クライアントで必要なのは認証のみだが、@supabase/supabase-js は Postgrest/Realtime/Storage を含むため、バンドル負荷が相対的に大きい。",
+    "suggestion": "さらなる最適化案として、クライアント側は @supabase/gotrue-js の直接利用（Auth のみ）に切替えてバンドルを削減することを検討（影響範囲は大きいため段階的導入を推奨）。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1",
+    "issue": "App 内で onStart/onLogin のハンドラを毎レンダリングで新規生成しており、子コンポーネントのメモ化が効きづらい可能性がある��",
+    "suggestion": "useCallback で安定化するか、S00Splash 側でコールバックではなくリンク遷移（<a href=\"/auth?mode=...\">）に寄せて再レンダリングを抑制する。",
+    "model": "GPT-5",
+    "persona": "performance_engineer"
+  }
+]

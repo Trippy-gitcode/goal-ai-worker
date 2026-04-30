@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "5. lais/src/lib/auth.js signUpWithEmail()",
+    "issue": "メール確認リンクのリダイレクト先に window.location.origin を使用している。Supabase 側の Allowed Redirect URLs の許可範囲が広い（ワイルドカードや不要ドメインを含む）場合、メール内の one-time トークンが意図しないオリジンへ流出するリスクがある。",
+    "suggestion": "Supabase ダッシュボード > Authentication > URL Configuration で Site URL と Redirect URLs を本番・必要なプレビューのみに厳格に限定し、ワイルドカードを使わない。アプリ側も emailRedirectTo を環境変数（例: VITE_AUTH_REDIRECT_ORIGIN）で固定し、window.location.origin 依存を避ける（誤ったデプロイ先や埋め込み環境を排除）。HTTP は禁止し HTTPS のみ許可。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "6. lais/src/lib/supabase.js（および Supabase プロジェクト設定）",
+    "issue": "クライアントで anon/publishable key を使用しているため、バックエンド側で RLS（Row Level Security）が未設定だとデータが広く読み書き可能になる重大リスクがある。コードからは RLS 設定の有無が確認できない。",
+    "suggestion": "全テーブル・ビュー・ストレージに対して RLS を有効化（ALTER TABLE ... ENABLE ROW LEVEL SECURITY）し、必要最小限のポリシーを明示的に作成。サービスロールのみで許可したい操作は RPC/Edge Functions 経由に限定し、anon で到達可能なパスに広範な権限を付与しない。定期的に anon での手動/自動検証（psql/HTTP 経由）を実施。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "アプリ配信レイヤ（index.html/HTTP ヘッダ）",
+    "issue": "CSP（Content-Security-Policy）の提示が本パッケージからは確認できない。Supabase のセッショントークンは localStorage に保存されるため、XSS 発生時にトークン窃取へ直結する。",
+    "suggestion": "厳格な CSP を導入。例: default-src 'self'; script-src 'self' 'nonce-<rnd>'（unsafe-inline 不可、ビルドで nonce 付与）; connect-src 'self' <your-supabase-url> wss://<your-supabase-realtime>; img-src 'self' data:; style-src 'self' 'unsafe-inline'（可能ならハッシュ/nonce化）; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'。併せて Referrer-Policy: strict-origin-when-cross-origin、X-Frame-Options: DENY も付与。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/AuthCallback.jsx（エラー表示部）",
+    "issue": "error_description をユーザにそのまま表示している。Preact によりエスケープされ XSS にはならないが、外部メッセージをそのまま見せることで内部実装やエラー詳細の情報漏えい、フィッシング助長（誘導文言の挿入）のおそれがある。",
+    "suggestion": "ユーザ向けに安全なメッセージへマッピング（コード/種別ごとに定型文へ変換）し、原文はロギングのみ。表示する文字数・行数を制限（例: 最大200文字、改行/制御文字除去）。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2. lais/src/components/screens/AuthCallback.jsx（error_description の decode）",
+    "issue": "URLSearchParams.get() は既にデコード済み文字列を返すため、decodeURIComponent を重ねると例外や予期しない二重デコードになり得る。",
+    "suggestion": "二重デコードを避ける。例: const raw = params.get('error_description') ?? hashParams.get('error_description'); const safe = (raw || '').replace(/\\+/g, ' '); setErrorMessage(safe); のように処���し、URIError を回避。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "バックエンド設定（CORS）",
+    "issue": "CORS 設定の実態が不明。広範な Allow-Origin（* や多数の外部オリジン許可）は、誤った公開 API 化や誤構成に繋がるリスクがある（特に Functions/Storage）。",
+    "suggestion": "Supabase Edge Functions/Storage で Access-Control-Allow-Origin を必要最小限のオリジンに限定。プリフライト（Allow-Methods/Headers）も最小化。定期的に curl/ブラウザで CORS ヘッダを検証。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "reference_v1.md §5.1（/api/* 設計）",
+    "issue": "/api/* は Bearer 必須とあるが、同一オリジンで Cookie ベースの状態変更 API が混在する場合、CSRF 対策が必要。コードからは他 API の有無が判別不能。",
+    "suggestion": "すべての状態変更 API は Authorization: Bearer を必須にし、Cookie セッションを用いる場合は CSRF トークン（二重送信 or SameSite=strict/lax + カスタムヘッダ検証）を必須化。サーバ側で Origin/Referer 検証も併用。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "1. lais/src/components/App.jsx NotFound()",
+    "issue": "window.location.replace で静的ページへ遷移する実装は allowlist によって安全だが、将来的に STATIC_PATHS に外部 URL 風の値が混入した際の事故リスクがある。",
+    "suggestion": "STATIC_PATHS を常にアプリ内相対パスに限定し、投入時に new URL(path, location.origin).origin === location.origin を検証してから遷移するユーティリティでガード。STATIC_PATHS はテストで回帰防止。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "6. lais/src/lib/supabase.js",
+    "issue": "クライアントバンドルに含まれるキーは VITE_SUPABASE_PUBLISHABLE_KEY/ANON_KEY のみで現状問題はないが、誤って service_role を VITE_* で流用すると秘匿情報が露出する恐れがある。",
+    "suggestion": "ビルド時ガードを追加（例: if (import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY) throw ...）。CI に secret-scan（gitleaks/trufflehog）を導入し、PR で失敗させる。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "配信ヘッダ/index.html",
+    "issue": "PKCE の code パラメータはページ読込直後に存在し得る。現代ブラウザは既定で strict-origin-when-cross-origin だが、リファラーポリシーが緩いと外部リソースに code が送出される可能性がある。",
+    "suggestion": "Referrer-Policy: strict-origin-when-cross-origin（もしくは no-referrer）を明示設定。可能であれば exchange 成功後に URL から code を即座に除去（history.replaceState）する処理を追加（Supabase SDK が未除去の場合の保険）。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "5. lais/src/lib/auth.js bootstrapAuth()",
+    "issue": "getSession 失敗内容を console.error でそのまま出力している。PII や環境依存情報の露出リスクは低いが、運用ログ収集面での情報開示が過剰になる可能性がある。",
+    "suggestion": "本番ビルドでは要約メッセージのみを出力し、詳細はサーバサイドの監視基盤へ送るなどログ方針を明確化。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "全体（grep レベルの確認）",
+    "issue": "ハード��ードされたシークレット/API キーは本パッケージ内に見当たらない（VITE_* の anon/publishable のみ）。",
+    "suggestion": "この状態を維持するため、pre-commit/CI での secret scanning を継続（gitleaks ルールに SUPABASE_SERVICE_ROLE などを追加）。環境変数の露出監査も定期実施。",
+    "model": "GPT-5",
+    "persona": "security_engineer"
+  }
+]

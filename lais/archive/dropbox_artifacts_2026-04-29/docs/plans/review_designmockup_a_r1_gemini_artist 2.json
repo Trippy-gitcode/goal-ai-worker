@@ -1,0 +1,112 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s00_splash",
+    "location": "画面上部のドット群と余白",
+    "issue": "上部のドット配置が中途半端な散らばり方をしており、「設計された沈黙」としての余白の緊張感を生んでいない。単に「コンテンツがない空間」に見え、視線が迷子になる。",
+    "suggestion": "ドットをより幾何学的な星座のような配置にするか、完全に排除してロゴを黄金比の位置に配置し、真のミニマリズム（沈黙）を体現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "WCAG",
+    "screen": "s01_signin",
+    "location": "「サインアップ」ボタン（disabled状態）",
+    "issue": "disabled状態のボタン背景色とテキスト色のコントラストが極端に低く、また背景（bg-primary）との境界も曖昧。WCAGの非インタラクティブ要素の視認性基準を満たさない恐れがある。",
+    "suggestion": "disabled状態でもボタンの輪郭が認識できるよう、薄いborderを追加するか、テキストの明度をわずかに上げて存在を保証する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "BRAND_DNA",
+    "screen": "s02_onboarding",
+    "location": "アバターのイラスト（タイプA, B, C）",
+    "issue": "アバターの造形が「ありきたりなフラットベクター素材」のパターンに陥っており、ブランドDNAの「洗練して生きよう。憧れの姿になるように」という高級感・現代的な美意識と乖離している。",
+    "suggestion": "より抽象的・幾何学的なシルエットにするか、単色ベースでも線の細さやプロポーションで「大人の洗練」を感じさせる独自のアートスタイルに再設計する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s10_grow",
+    "location": "TODAYセクションのタスク行レイアウト",
+    "issue": "画像ではタスク名の下に時刻と所要時間が配置された2行構成になっているが、UX仕様書§2.3では「[完了⭕] [時刻] [タスク名] [所要時間] [ゴール色ドット]」の1行構成と定義されている。",
+    "suggestion": "仕様書通りに1行に収めるか、2行構成が視覚的に優れていると判断する場合はUX仕様書をアップデートして整合性を取る。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s20_talk",
+    "location": "ヘッダー右側のアイコンおよび入力バー左側のアイコン",
+    "issue": "ヘッダー右側が「+」アイコンになっているが、仕様書§3.1では「🕐(履歴) 📝(新規)」の2つ。入力バー左側が「+」だが、仕様書§3.2では「📎(画像添付)」。",
+    "suggestion": "仕様書で定義された機能（履歴、新規チャット、画像添付）に合致するアイコンに修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "ORIGINALITY",
+    "screen": "s20_talk",
+    "location": "チャット画面全体のレイアウト",
+    "issue": "一般的なメッセージアプリのUIをそのまま踏襲しており、AIが「人生のパートナー」であるというLais独自の感情的価値や世界観を視覚的に表現できていない。",
+    "suggestion": "背景にテーマカラーの微かなグラデーション（グラスモーフィズムの応用など）を敷く、あるいはAIのバブル形状を少し有機的にするなど、単なる「チャット」を超えた対話空間の演出を取り入れる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-007",
+    "severity": "CRITICAL",
+    "category": "UX_CONTRADICTION",
+    "screen": "s12_task_add",
+    "location": "「タスク名」入力フィールドのフォーカス状態",
+    "issue": "フォーカスリングが内側のボーダー発光（box-shadow的）として描画されている。デザインシステム§8.2および§7.5では、合成色問題を回避するため `outline: 3px solid var(--accent); outline-offset: 2px;` の使用が厳格に指定されている。",
+    "suggestion": "仕様通り、要素の外側にオフセットを持たせた明確な `outline` として描画し、アクセシビリティ（WCAG 2.4.11）を担保する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s13_task_detail",
+    "location": "下部の4つのアクションボタン（編集、削除、進め方を聞く、詰まりを相談）",
+    "issue": "狭いハーフモーダル内に同等の視覚的重みを持つボタンが4つ（2x2）敷き詰められており、情報過密でユーザーの瞬時の判断を妨げている。「設計された沈黙」が失われている。",
+    "suggestion": "「進め方を聞く」「詰まりを相談」をAIアクションとして視覚的にグループ化し、「削除」はテキストリンクやアイコンのみに降格させて視覚的ノイズを減らす。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "TYPOGRAPHY",
+    "screen": "s14_goal_detail",
+    "location": "進捗バーの「60%」のタイポグラフィ",
+    "issue": "「60」の数字に対して「%」の記号が同じベースラインで配置されているが、数字が大きすぎるため「%」が間延びして見え、視覚的な重心が崩れている。",
+    "suggestion": "「%」のフォントサイズを数字の半分程度に下げ、ベースラインを調整するか上付き文字のように配置して、タイポグラフィの塊としての美しさを整える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "VISUAL_FLOW",
+    "screen": "s30_me",
+    "location": "サブタブ（PROFILE, DISCOVER, FRIENDS, SHOP）",
+    "issue": "タブのテキストが等間隔で並んでいるが、文字数の違いにより余白のバランスが均等に見えず、視線がスムーズに流れない。",
+    "suggestion": "flexboxの等幅割り当てではなく、各テキストの幅に応じた自然なパディングを設定し、アクティブインジケータ（青線）の幅もテキスト幅に正確に合わせることで洗練度を上げる。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "artist"
+  }
+]

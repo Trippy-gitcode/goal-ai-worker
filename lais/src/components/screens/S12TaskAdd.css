@@ -1,0 +1,326 @@
+/*
+ * S-12 Task Add — design_spec_v1.md §4.5 準拠
+ * LP-001 / 011 / 013 / 014 事前適用
+ */
+
+/* Overlay（S12 全体背景） ----------------------------------------------- */
+.s12-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--theme-color-overlay-strong, var(--theme-color-modal-overlay));
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: s12-overlay-fade var(--duration-fast) var(--ease-out);
+}
+
+@keyframes s12-overlay-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Modal 本体 ------------------------------------------------------------- */
+.s12-modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-modal);
+  padding: 0 var(--space-lg) 30px;
+  overflow-y: auto;
+  animation: s12-modal-up var(--duration-normal) var(--ease-out);
+}
+
+@keyframes s12-modal-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* iOS safe-area: LP-013 段階的フォールバック */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .s12-modal {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 30px);
+  }
+}
+
+/* LP-014: programmatic focus と keyboard focus の分離 */
+.s12-modal:focus:not(:focus-visible) { outline: none; }
+.s12-modal:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* S12-1 ドラッグハンドル -------------------------------------------------- */
+.s12-drag-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+  margin: var(--space-sm) auto 0;
+}
+
+/* S12-2 / S12-3 ヘッダ --------------------------------------------------- */
+.s12-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.s12-title {
+  font-size: var(--font-size-lg); /* 20px */
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-ja);
+  color: var(--text-primary);
+  line-height: var(--line-height-ja-heading);
+  margin: 0;
+}
+
+.s12-close {
+  width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin: calc(var(--space-sm) * -1) calc(var(--space-sm) * -1) calc(var(--space-sm) * -1) 0;
+  border-radius: var(--radius-sm);
+}
+
+.s12-close:focus:not(:focus-visible) { outline: none; }
+.s12-close:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Form ------------------------------------------------------------------- */
+.s12-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.s12-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0; /* fieldset 内の flex 子要素縮退のため */
+}
+
+.s12-label {
+  font-size: var(--font-size-xs); /* 11px */
+  color: var(--text-muted);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  line-height: var(--line-height-label);
+  padding: 0;
+}
+
+/* S12-5 種別ピル --------------------------------------------------------- */
+.s12-type-row {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.s12-type-pill {
+  min-height: var(--tap-target-min);
+  padding: 12px 18px;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+/*
+ * R2 a11y fix R-001 (WCAG 1.4.11 Non-text Contrast 3:1):
+ * Active 状態を塗りのみで示すと、--accent-subtle は --bg-surface に対し
+ * ≈1.33:1 で WCAG 1.4.11 未達となるテーマがある。
+ * 可視 border を --accent で残すことで、4 テーマすべてで Non-text 3:1 を担保する
+ * (Stage 7-3: 色値は theme token --theme-color-accent / --theme-color-bg-elevated 経由)。
+ */
+.s12-type-pill-active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-weight: var(--font-weight-semibold);
+  border-color: var(--accent);
+}
+
+.s12-type-pill:focus:not(:focus-visible) { outline: none; }
+.s12-type-pill:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* 共通 input スタイル（S12-6 / 7 / 9 / 10 / 11） ------------------------- */
+.s12-input {
+  width: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  letter-spacing: var(--letter-spacing-ja);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.s12-input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.s12-name,
+.s12-time,
+.s12-readonly {
+  height: 48px;
+}
+
+.s12-memo {
+  min-height: 80px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  line-height: var(--line-height-ja-body);
+  resize: vertical;
+}
+
+.s12-input:focus {
+  border-color: var(--accent);
+}
+
+.s12-input:focus:not(:focus-visible) { outline: none; }
+.s12-input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-color: var(--accent);
+}
+
+/* readonly 擬似入力行（予定日 / ゴール紐付け） */
+.s12-readonly {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+}
+
+.s12-readonly-with-chevron {
+  justify-content: space-between;
+  color: var(--text-muted);
+}
+
+.s12-readonly-with-chevron svg {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* R2 spec fix R-001 (§4.5 S12-9): 予定日 右側 14px カレンダーアイコン */
+.s12-readonly-with-icon {
+  justify-content: space-between;
+}
+
+.s12-readonly-with-icon svg {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* S12-8 所要時間チップ --------------------------------------------------- */
+.s12-duration-row {
+  display: flex;
+  gap: var(--space-sm);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--space-xs);
+  scrollbar-width: thin;
+}
+
+.s12-duration-chip {
+  min-height: var(--tap-target-min);
+  padding: 12px 16px;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+/* R2 a11y fix R-001: 同上 WCAG 1.4.11 確保 */
+.s12-duration-chip-active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-weight: var(--font-weight-semibold);
+  border-color: var(--accent);
+}
+
+.s12-duration-chip:focus:not(:focus-visible) { outline: none; }
+.s12-duration-chip:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* S12-12 CTA ------------------------------------------------------------- */
+.s12-submit {
+  height: 52px;
+  width: 100%;
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  margin-top: var(--space-sm);
+  transition: opacity var(--duration-fast) var(--ease-out),
+              background var(--duration-fast) var(--ease-out);
+}
+
+.s12-submit[aria-disabled='true'] {
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
+  border: 1px solid var(--button-disabled-border);
+  cursor: not-allowed;
+}
+
+.s12-submit:focus:not(:focus-visible) { outline: none; }
+.s12-submit:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* LP-001: prefers-reduced-motion 縮退 ------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .s12-overlay,
+  .s12-modal {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .s12-type-pill,
+  .s12-duration-chip,
+  .s12-input,
+  .s12-submit {
+    transition-duration: 1ms !important;
+  }
+}

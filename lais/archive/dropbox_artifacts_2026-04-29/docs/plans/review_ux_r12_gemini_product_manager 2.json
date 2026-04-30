@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§1.1, §2.3",
+    "issue": "S-13 タスク編集の画面定義が矛盾しています。§1.1の画面一覧では「ハーフモーダル」と定義されていますが、§2.3のタスク編集フローでは「インラインモード遷移。新モーダルは開かない」と定義されており、実装方針が根本的に衝突しています。",
+    "suggestion": "実装方針を統一してください。インライン編集とする場合は§1.1のS-13の種別を修正（または独立した画面IDを削除）し、ハーフモーダルとする場合は§2.3の記述をS-12（タスク追加）と同様のモーダル展開に修正してく��さい。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "MISSING",
+    "location": "§5.0.2",
+    "issue": "パスワードリセット（S-06）完了時に、他のデバイスでログイン中のセッションを失効させる処理が定義されていません。§13.1の「パスワード変更」には記載がありますが、リセット時にこれがないとアカウント乗っ取り時に攻撃者を強制ログアウトさせることができず、重大なセキュリティリスクとなります。",
+    "suggestion": "§5.0.2のStep 2（新パスワード設定）完了時の処理に「サーバー側で他の全デバイスのリフレッシュトークンを失効させる」旨を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§3.2",
+    "issue": "最大10MBの画像を添付して送信した際、Supabase Storageへのアップロードにかかる数秒〜十数秒間のUI状態（プログレス表示、送信ボタンのスピナー化、キャンセル可否等）が未定義です。また、送信後のチャットバブル内での画像表示仕様（タップでフルスクリーン拡大等）も定義されていません。",
+    "suggestion": "���信中のプログレスインジケータ表示、エラー時の再送UI、および送信後バブル内の画像タップでフルスクリーンプレビュー（Lightbox）を開く仕様を追記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§3.4",
+    "issue": "TALK画面でレベルアップ条件を満たした場合「フルのレベルアップ演出は次回GROW画面表示時に自動再生」とありますが、GROW画面に遷移する前にアプリを終了（キル）した場合、クライアントのメモリ上のフラグが揮発し、次回起動時にフル演出がスキップされる（データ損失と同等の体験毀損）リスクがあります。",
+    "suggestion": "演出未再生フラグをサーバー側（またはIndexedDB等の永続ストレージ）に保存し、GROW画面での再生完了後にフラグをクリアする仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§13.2",
+    "issue": "ダウングレード予約中のバナーに「[キャンセル]」ボタンが配置されていますが、タップ時の具体的な挙動（確認ダイアログの有無、Stripe APIへのスケジュールキャンセル取消リクエスト、UIの即時反映とトースト通知）が定義されていません。",
+    "suggestion": "[キャンセル]タップ時のフロー（確認ダイアログ → Stripe予約取消 → バナー非表示 → トースト「ダウングレード予約をキャンセルしました」）を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§2.1, §2.3",
+    "issue": "project_v1.md §3.2ではタスクの所要時間を「タイムライン表示の幅計算に使用」と指定していますが、本UX仕様書のモック（§2.1）やタスク行の構成（§2.3）は単なるテキストリストであり、カレンダーのような時間ブロック（高さ/幅）表現になっておらず、上位仕様と視覚的表現が矛盾しています。",
+    "suggestion": "GROW画面のTodayセクションが単なるリストなのか、所要時間に応じた高さを持つタイムラインUIなのかを明確にし、design_spec_v1.mdへの橋渡しとなるレイアウト方針を記述してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§13.4, §5.0",
+    "issue": "退会（クーリングオフ72時間開始）直後に即時ログアウトされますが、その後同じメールアドレスで再度「サインアップ(S-01)」しようとした場合の挙動が未定義です。Supabase Auth上はまだユーザーが存在するためエラーになります。",
+    "suggestion": "サインアップ時に `deleted_pending` 状態を検知した場合、「退会手続き中のアカウントです。ログインして退会をキャンセルしますか？」という案内ダイアログを表示し、ログイン画面へ誘導するハンドリングを追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "§9.1",
+    "issue": "TALK画面でオフライン時に「送信中...」となるメッセージが、アプリ終了（キル）時にどうなるか未定義です。揮発する場合、ユーザーが入力した長文の相談内容が失われることになります。",
+    "suggestion": "オフライン時の送信キューをIndexedDB等に永続化し、次回起動時（オンライン復帰時）にバックグラウンドで再送する仕様を明記してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-009",
+    "severity": "LOW",
+    "category": "USER_CONCERN",
+    "location": "§4.4, §15",
+    "issue": "FRIENDSタブの「お知らせ」はメッセージと応援のみを対象としており、日次サマリーや週次レポートなどのシステム通知を後から一覧で確認する「通知センター」画面が存在しません。通知を見逃したユーザーが情報を再確認できません。",
+    "suggestion": "意図的なミニマル設計であれば許容範囲ですが、ユーザーの利便性を考慮し、ME画面等にシステム通知履歴への導線を設けるか検討してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§3.2",
+    "issue": "AIのストリーミング応答中にユーザーが過去の履歴を見ようと上方スクロールした場合、テキストの逐次追加によってスクロール位置がガタつく（Layout Shift）可能性があります。",
+    "suggestion": "上方スクロール中は `overflow-anchor: auto` を活用するか、JSによるスクロール位置補正を行い、閲覧中の位置がずれないようにする技術的注記を追加してください。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "product_manager"
+  }
+]

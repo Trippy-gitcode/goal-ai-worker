@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "USER_CONCERN",
+    "location": "2.2",
+    "issue": "クライアント側タイムアウト後も非同期認証処理の解決結果が反映され、15秒後にエラー表示→さらに遅延成功でルート遷移するレースが起こり得る。",
+    "suggestion": "handleSubmit 内でキャンセルフラグまたはリクエストトークンを導入し、タイムアウト発火時に abortedRef.current = true 等を設定。await 後・成功/失敗処理の直前に aborted を検査して以降の副作用（route、setState）を無視する。あるいは Promise.race([apiCall, timeoutPromise]) で timeout 時に強制的に throw し、そのエラー種別で以降の処理をスキップする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "オフライン判定分岐で resetTransientMessages を呼ぶ前に return しており、前回の一過性メッセージが残存した状態で新しい serverError を上書き混在させる可能性がある。",
+    "suggestion": "navigator.onLine === false の分岐前（inFlight 設定前）で resetTransientMessages() を呼んで表示状態をク��アしてからエラーメッセージを設定する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "オートフィル同期 useEffect([]) がマウント直後の email/password をクロージャで捕捉しており、ユーザーが即時入力した値を 100ms 後の同期で上書きするリスクがある（ESLint exhaustive-deps 的にも警告対象）。",
+    "suggestion": "同期は「未入力時のみ」「未タッチ時のみ」に限定する（dirty/touched フラグでガード）。または依存配列に email/password を入れつつ、DOM値が state と異なるかつ未タッチの場合のみ同期する。どうしても空配列にしたい場合は意図をコメントし、上書き抑止用の userDirtyRef を導入する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2.2",
+    "issue": "mountedRef の初期値が true のため、マウント前に safeSetState が許容される設計になっている。意図が読み取りづらく、将来的なリファクタ時に誤用されやすい。",
+    "suggestion": "mountedRef は初期値 false とし、useEffect マウント時に true、unmount クリーンアップで false にする。名前も isMountedRef 等のブール意図が分かる命名にする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "オートフィル同期の 100ms 遅延値がマジックナンバー化しており、根拠や再利用性が不明。",
+    "suggestion": "AUTOFILL_SYNC_DELAY_MS として定数化（コメントで根拠を明記）。必要に応じて複数回の再試行（rAF 2〜3回や setTimeout チェーン）と最大試行回数を導入し、端末依存の遅延ばらつきに耐性を持たせる。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "2.3",
+    "issue": ".s01-link のヒットエリア拡張（negative margin + inline-block）は、隣接するインタラクティブ要素と重なりうるため、ヒットテストの曖昧化やフォーカスリングの見かけ上の逸脱が発生するリスクがある。",
+    "suggestion": "隣接要素との重なりを回避するため、親コンテナ側で行間・パディングを確保しつつリンク自身の padding で 44px を満たす、もしくは ::after 疑似要素でのヒットエリア拡張を検討。極端な幅・改行パタ���ンでの E2E/ヒットテストを追加し、重なりがないことを自動検証する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.3",
+    "issue": "CSS に複数のマジックナンバー（padding: 15px 4px, margin: -15px -4px, line-height: 2.2）が散在し、デザイン変更時の一貫性維持が難しい。",
+    "suggestion": "トークン化（--tap-pad-y, --tap-pad-x, --agree-line-height 等）し、関連箇所から参照する。コメントで 44px 達成の根拠と相関するプロパティを明記する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.1",
+    "issue": "safeSessionStorage は毎回 setItem/removeItem による書き込みテストを実行しており、微小ながら無駄な I/O が発生する。",
+    "suggestion": "モジュールスコープで結果をメモ化し、初回判定以降はキャッシュを返す。テストキーも定数化して衝突回避を明確化する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "2.1",
+    "issue": "safeSessionStorage の事前テストに依存しているため getItem は try/catch ��保護されていない。特定の WebView/制限環境では getItem 自体が例外を投げる可能性が残る。",
+    "suggestion": "getItem 取得も try/catch で保護するヘルパ（safeGetItem/safeSetItem/safeRemoveItem）を用意し、NotFound 側はヘルパ越しにアクセスする。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-010",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "2.2",
+    "issue": "navigator.onLine はブラウザやネットワーク条件によって信頼性が低いケースがあり、ユーザーに誤検知メッセージを出す可能性がある。",
+    "suggestion": "fetch エラー（TypeError: Failed to fetch）など実エラーも捕捉してユーザーメッセージを調整するほか、online/offline イベントを購読して回復時にエラーを消す等の UX 改善を行う。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-011",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2.2",
+    "issue": "aria-describedby の ID 組み立てが分散したブール条件に依存しており、将来のリファクタで条件が乖離すると参照不整合が起こるリスクがある。",
+    "suggestion": "単一の validate()（または selector）からエラーメッセージ配列とその ID を返し、DOM 描画と aria-describedby の双方で同じ出力を参照する形に集約する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-012",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "2.2",
+    "issue": "safeSetState のインターフェースが関数受け取り固定で、setState 呼び出しをラップする二重関数パターンが冗長になっている。",
+    "suggestion": "safeSetState(setter, value) あるいは guardMounted(() => {/* side effect */}) のように意図別 API に分離し、読みやすさを向上。併せて TypeScript/型注釈や JSDoc で使用意図を明記する。",
+    "model": "GPT-5",
+    "persona": "code_reviewer"
+  }
+]

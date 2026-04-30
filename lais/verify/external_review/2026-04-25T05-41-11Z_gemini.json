@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "location": "§2.γ'-7",
+    "issue": "append_deploy_fail.sh の awk スクリプト内で、`$0 ~ \"^### \" mid \":\"` で in_block=1 にした直後に `in_block && /^### [A-Z0-9-]+:/ && NR>1 { in_block=0 }` が評価されるため、常に同じ行で in_block=0 に戻ってしまいます。結果として STATUS の自動書戻しが絶対に実行されません。",
+    "suggestion": "ブロック終了判定を先に行うか、現在の行が対象ミッションの開始行でないことを条件に加えるよう修正してください。例: `in_block && /^### [A-Z0-9-]+:/ && $0 !~ \"^### \" mid \":\" { in_block=0 }`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "location": "§2.δ'-2",
+    "issue": "`ls ...*.png 2>/dev/null | head -1 > /dev/null && { return 0; }` において、ls がファイルを見つけられずエラーになっても、head -1 は正常終了（終了コード0）するため、パイプライン全体が成功扱いになります。これにより、代替証跡が存在しなくても存在すると誤判定され、高リスクゲートが突破されます。",
+    "suggestion": "パイプラインの終了コードに依存せず、シェルのファイル展開を利用して判定するよう修正してください。例: `if [ -n \"$(ls \"evidence/$MISSION_ID/screenshots/\"*.png 2>/dev/null | head -1)\" ]; then return 0; fi`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "§2.ε'-1",
+    "issue": "deploy.sh の Hフロー発火判定において、`if [ \"$HFLOW_APPROVED\" != \"1\" ]; then` と環境変数のみで承認を判定しています。これは §C4.5 で定義された verify_approval_authenticity.sh による二重証跡（JSONファイル、git author、commit sha）の厳格な検証仕様と完全に矛盾しており、セキュリティゲートを容易にバイ���ス可能です。",
+    "suggestion": "環境変数による判定を削除し、§C4.5 の仕様通り scripts/verify_approval_authenticity.sh を呼び出して承認ファイルの正当性を検証するロジックに置き換えてください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "CRITICAL",
+    "category": "EDGE_CASE",
+    "location": "§2.ε'-3",
+    "issue": "初回コミット時など $base が存在しない場合のフォールバックとして `git diff --name-only HEAD` を使用していますが、これは「ワーキングツリーとHEADの差分」を出力します。pre-push 時にワーキングツリーがクリーンな場合、何も出力されず、初回コミットのファイル群が Hフローの検査対象から完全に漏れてしまいます。",
+    "suggestion": "初回コミットのファイル一覧を正しく取得するため、フォールバックのコマンドを `git ls-tree -r --name-only HEAD` または `git show --name-only --pretty=\"\" HEAD` に修正してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "CRITICAL",
+    "category": "ROBUSTNESS",
+    "location": "§2.ι'",
+    "issue": "`find ... | while ...; do ... || exit $?; done` の構造では、パイプライン右側の while ループがサブシ��ルで実行されるため、`exit $?` は親スクリプト（pre-commit）を終了させません。set -e がない場合、後続の処理が成功するとフック全体が成功となり、不正なコミットが許可されます。",
+    "suggestion": "パイプラインを避け、一時ファイルを使用するか、for ループとコマンド置換を使用する構造に修正してください。例: `for hook_sub in $(find ...); do ... || FAIL=1; done; [ \"$FAIL\" = \"1\" ] && exit 1`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.β'",
+    "issue": "POSIX 互換の修正を謳いながら、G15 実装の `grep -hoE` で `-h` オプションを使用しています。`-h` は GNU/BSD の拡張であり、POSIX 標準の grep には存在しないため、厳密な POSIX 環境ではエラーになりスクリプトが動作しません。",
+    "suggestion": "`-h` オプションへの依存を排除し、複数ファイルを cat コマンドで結合してから grep -oE に渡すよう修正してください。例: `cat \"$SPEC_FILE\" \"$SUB_TESTING\" 2>/dev/null | grep -oE ... | sort -u`",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.η'",
+    "issue": "STATUS の自動書換えに `sed -i.bak` を使用していますが、`-i` オプションは POSIX 標準ではなく、GNU sed と BSD sed で引数の扱い（スペースの有無）が異なるため、環境によって動作が壊れるリスクがあり、POSIX 互換の目的に反します。",
+    "suggestion": "POSIX 互換を確保するため、sed の出力を一時ファイルにリダイレクトし、その後 mv コマンドで元のファイルを上書きする方式に変更してください。他のスクリプト（append_deploy_fail.sh 等）と同様の安全な実装に統一すべきです。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§2.γ'-7",
+    "issue": "§17 のスクリプト一覧（No.1）では「DEPLOY-RECOVER 自動生成廃止」と明記されていますが、§2.γ'-7 の append_deploy_fail.sh の実装コードには templates/deploy_recover_template.md を読み込んで自動生成するロジックがそのまま残存しており、仕様と実装が矛盾しています。",
+    "suggestion": "仕様（自動生成廃止）に合わせて、append_deploy_fail.sh から DEPLOY-RECOVER の自動挿入ロジック（`if [ -f templates/deploy_recover_template.md ]; then ... fi` のブ��ック全体）を完全に削除してください。",
+    "model": "Gemini 3.1 Pro",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "Gemini 3.1 Pro",
+    "cost_usd": 0.076,
+    "input_tokens": 54328,
+    "output_tokens": 1616,
+    "model_id": "gemini-3.1-pro-preview"
+  }
+]

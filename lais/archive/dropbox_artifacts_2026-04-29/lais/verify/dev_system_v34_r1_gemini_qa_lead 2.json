@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "改訂案② D.4 および 改訂案④ B. §9.4",
+    "issue": "§9.4で「同じテストコードを両方で使い回せるように」と規定しているが、改訂案② D.4の playwright.realworld.config.ts では testDir: './tests/realworld' とハードコードされている。一方、統合E2Eテストは tests/e2e/integration/ に配置される（§9.3）。この構成では cmd-realworld 実行時にミッション固有のE2Eテストが探索されず、テストが0件でPASS扱いになり品質ゲートが破綻する。",
+    "suggestion": "playwright.realworld.config.ts の testDir をミッション固有のテストも包含するディレクトリ（例: './tests'）にするか、実行時にテストファイルのパスを明示的に渡す設計に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-002",
+    "severity": "CRITICAL",
+    "category": "FEASIBILITY",
+    "location": "改訂案① F (step0_lint.sh), 改訂案② D.1 (verify_env.sh), D.2 (verify_external_services.sh), 改訂案③ D (proposal_log_lint.sh)",
+    "issue": "複数の新設スクリプトで GNU 拡張コマンド（bashの declare -A, sed +20p, grep -oP）が使用されている。macOS 標準の bash (v3.2) および BSD ツールチェーンでは構文エラーとなり、ローカル開発環境で品質ゲート（canopy）が確実にクラッシュ・全FAILする。",
+    "suggestion": "連想配列を使用せず改行区切りの文字列リストを使用する。sed +20p は head と組み合わせる。grep -oP は awk や sed の標準構文、または grep -E に書き換える。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "AMBIGUITY",
+    "location": "改訂案④ G. サマリー",
+    "issue": "サマリーで「§7 3層テスト戦略: L1（cmd-realworld に相当）」と記載されているが、L1スモークは「システム全体の基本5操作（§7.1）」であり、cmd-realworldは「ミッション固有の実機検��（§5.2 --grep \"MISSION-ID\"）」である。これらを「相当」と定義すると、ミッション固有のrealworldテストがL1スモークのみに限定される、またはL1スモークがミッション完了条件から漏れる矛盾が生じる。",
+    "suggestion": "cmd-realworld は「L1相当」ではなく「ミッション固有の実機E2E」と定義し、L1スモークはデプロイゲート（§8 Step 12）で実行される全システム共通テストとして明確に分離する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-004",
+    "severity": "HIGH",
+    "category": "STRUCTURE",
+    "location": "改訂案④ A. §5.2 ミッション定義テンプレート v4 および G. サマリー",
+    "issue": "サマリーで「before.json / after.json が cmd-unit / cmd-e2e 両方で必須」としているが、§5.2のテンプレートのATセクションは1つしかなく、unitとe2eのどちらのRED/GREENを記録するのか、あるいは両方記録するフォーマットになっていない。G8の機械検証でファイル名（before.json等）が衝突・上書きされるリスクがある。",
+    "suggestion": "ATセクションを unit 用と e2e 用で分けるか、TDD証跡のファイル命名規則を before-unit.json, before-e2e.json のように分離する仕様を追記す���。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案② D.1 scripts/verify_env.sh",
+    "issue": "wrangler pages secret list を実行するには Cloudflare の認証（CLOUDFLARE_API_TOKEN または wrangler login）が必要だが、スクリプト内で認証状態の確認が行われていない。未認証環境（CIや新規ENG環境）で実行すると対話プロンプトで停止するか、エラー終了してデプロイフローがブロックされる。",
+    "suggestion": "CLOUDFLARE_API_TOKEN の存在チェックを追加するか、未認証時のフォールバック（WARN扱いでPO手動確認を促す等）を実装する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-006",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "改訂案⑥ A. sub_review_flow.md §4.H の Code Pre-Review",
+    "issue": "Code（Claude Code）に対して「認証フロー完走」「画面間遷移5パターン以上の完走」の事前検証を要求しているが、Codeはブラウザを直接操作できないため、これらを自律的に手動検証することは不可能。",
+    "suggestion": "「該当する統合E2Eテスト（cmd-e2e / cmd-realworld）を実行し、PASSすることを確認する」という���ストスクリプト経由での検証要件に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-007",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "改訂案② D.3 templates/test_realworld_template.ts",
+    "issue": "await expect(page).toHaveURL(/./) は正規表現 . にマッチするため、404ページやエラー画面など、あらゆるURL遷移でPASSしてしまう。起動成功の検証として不十分。",
+    "suggestion": "toHaveURL(new RegExp(DEPLOY_URL)) や、ホーム画面に特有の要素（例: page.waitForSelector('main')）の検証に変更する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "ROBUSTNESS",
+    "location": "改訂案⑤ B. init_app.sh --subdir",
+    "issue": "親リポジトリの .git/hooks ディレクトリが存在しない場合（git init直後など）、PARENT_HOOK への書き込みが失敗する可能性がある。",
+    "suggestion": "mkdir -p \"$(dirname \"$PARENT_HOOK\")\" を追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  },
+  {
+    "id": "R-009",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "改訂案⑥ D. sub_review_flow.md §8.4 および G. サマリー",
+    "issue": "§8.4の見出しでは end_user.md と記載されているが、サマリーでは end_user_integration.md となっており、ファイル名に不一致がある。既存のB/Fフロー用ペルソナと衝突するリスクがある。",
+    "suggestion": "§8.4の見出しを end_user_integration.md に統一する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "qa_lead"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §2.25.23.2 / §2.25.14.3 / scripts/vote_dispatcher.sh",
+    "issue": "仕様本文では内部 10 ペルソナの構成に SRE を含める一方、§2.25.14.3 追加候補表の拡張説明では「データガバナンス専門家を 7 番目として追加、全 10 ペルソナ表現可能」とあり、既存 9 名に SRE が含まれていない前提に読めます。persona_selector.sh では SRE とデータガバナンス専門家の双方を扱っており、ペルソナ総数のSSOTが文書間で揺れています。",
+    "suggestion": "§2.25.14.2/.3/.7 と §2.25.23.2 の全てで、必須・追加候補・総人数の定義を単一表に統合してください。特に「内部10ペルソナの内訳」と「追加候補の総数」を固定し、SRE を総数に含むのか候補外の注記なのかを明文化すべきです。スクリプト側もその表を元に生成または検証し、人数不整合を lint で検知できるようにすると再発防止になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais/verify/dev_system_v34_package.md §2.25.23.4 / lais/verify/dev_system_v34_patches.md「残課題」「波及ファイル」",
+    "issue": "仕様では adv_response_gate.sh が §2.25.3 該当を検出したら vote_dispatcher.sh を起動すると断定していますが、patches.md ではその結線は「別 PATCH 対象」「接続確認は別 PATCH」と明記されています。仕様上は有効なのに実装・接続が未完の状態で、運用開始すると票決を経ずに承認質問が送られる経路が残ります。",
+    "suggestion": "この差分だけでは機能が成立していないため、少なくとも §2.25.23 を「仕様追加のみ・hook 結線未実装」と明示するか、同一コミットで adv_response_gate.sh 側の call-out 実装とテストを含めてください。あわせて、§2.25.3 該当ケースで vote_dispatcher.sh が呼ばれなければ失敗する統合テストを追加し、仕様と実装のズレを CI で検知できるようにすべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/vote_dispatcher.sh",
+    "issue": "外部AIの呼び出し結果を `2>/dev/null || echo \"ABSTAIN\"` で握りつぶし、さらに ai_review.js 側も失敗時に ABSTAIN+exit 0 を返すため、API障害��認証不備・Node未導入・JSON破損がすべて「棄権」と同じ扱いになります。月次上限到達時 fallback と障害時 fallback の区別もログに残らず、誤った自律判定の原因追跡が困難です。",
+    "suggestion": "ABSTAIN と ERROR を分離し、外部レビュー不能時は mode に `14vote_error_fallback` などを残すべきです。少なくとも stderr を捨てず、provider ごとの結果・失敗理由・guardrail 発動理由をログへ記録してください。障害時は保守側で escalate に倒すか、一定条件でのみ fallback 許可にすることで、静かな誤判定を防げます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "scripts/ai_review.js",
+    "issue": "`const { glob } = require('path');` が存在しますが、実際には未使用であり、`path` モジュールに glob はありません。現状は参照していないため即時障害にはなっていないものの、将来この変数を使う前提でコードを足すと誤解を招きます。またファイル冒頭に責務の異なる機能が一極集中しており、precommit/vote/通常レビューの分岐も肥大化しています。",
+    "suggestion": "未使用 import は削除し、通常レビュー・precommit・vote を別モジュールへ分割してください。CLI 引数解析、API クライアント、JSON 抽出、モード実行を分離するだけで保守性が大きく上がります。とくに vote 専用の最小クライアントを切り出せば、将来の回帰やレビューコストを抑えられます。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-005",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/ai_review.js parseArgs / runVoteMode / scripts/vote_dispatcher.sh",
+    "issue": "CLI 仕様が `--provider=gpt5` と `--provider gpt5` の両方を許容する一方、他引数は混在実装で一貫しておらず、未知オプションは即終了です。さらに vote_dispatcher.sh は provider ごとの失敗をすべて ABSTAIN に変換するため、typo や呼び出し側変更があっても検知されにくい設計です。運用中の引数追加・変更で静かに挙動が変わるリスクがあります。",
+    "suggestion": "引数解析は共通ヘルパーに寄せ、許容形式を明示してバリデーション結果を一元管理してください。vote mode では `provider in {gpt5,gemini}`、proposal 非空、APIキー存在を満たさない場合は専用エラーコードと stderr を返し、vote_dispatcher.sh 側で明示的に fallback 理由を記録するようにすべきです。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/persona_vote.sh / scripts/persona_selector.sh",
+    "issue": "語彙ベース判定に同義語・表記揺れが多く、大小文字や和英混在への対応方針も揃っていません。例えば一部は `grep -qE`、一部は `grep -qiE` で、`SSoT` のように大文字小文字を含む語を複数箇所で重複定義しています。ルール追加時に挙動差が入り込みやすく、票決や選択結果の再現性が崩れます。",
+    "suggestion": "トリガ語彙をペルソナごとの設定表に切り出し、case-insensitive の方針を統一してください。共通の normalize 関数で全角半角・大小文字・改行を整形したうえで判定すれば、重複や漏れを減らせます。さらに、各ペルソナのヒット語をログに残すとチューニングや誤判定調査が容易になります。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "lais/verify/dev_system_v34_package.md §2.25.23.3 / scripts/vote_dispatcher.sh",
+    "issue": "仕様では ABSTAIN は分母に含めないとありますが、実装の score_abstain は単にログ列へ積むだけで、票が極端に少ない場合の最小有効投票数が定義されていません。例えば FOR 4 / AGAINST 0 / ABSTAIN 10 でも margin 4 で拮抗扱い、あるいは fallback では FOR 4 / AGAINST 0 / ABSTAIN 6 で自律に転ぶ境界が生じえます。合意強度の意味が曖昧です。",
+    "suggestion": "最低有効投票数または有効投票率の条件を追加してください。例として「FOR+AGAINST が 6 未満なら自動で escalate」などの下限を置くと、棄権多数による見かけの margin 誤用を防げます。仕様と実装の両方に境界ケース表を追加し、ABSTAIN 多数時の期待動作を固定化するのが安全です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "scripts/persona_selector.sh / scripts/vote_dispatcher.sh",
+    "issue": "1MB ローテーション閾値、28日保持、head -4、外部AI重み2、margin閾値 4/3 などの数値が各所にハードコードされています。仕様に由来するものもありますが、実装上は定数名がなく、将来の閾値変更で差分漏れが起きやすい構成です。特にログ運用値は複数スクリプトに散在しており DRY ではありません。",
+    "suggestion": "数値は定数として冒頭に集約し、仕様節番号をコメントで紐づけてください。可能なら `scripts/lib/constants.sh` のような共通ファイルへ切り出し、vote/persona/logging 系のスクリプトで再利用すると変更耐性が上がります。閾値変更時に一箇所の更新とテストだけで済む設計にしておくと保守が楽です。",
+    "model": "GPT-5.4",
+    "persona": "code_reviewer"
+  },
+  {
+    "id": "_metadata",
+    "model": "GPT-5.4",
+    "cost_usd": 0.0646,
+    "input_tokens": 32484,
+    "output_tokens": 2404,
+    "model_id": "gpt-5.4"
+  }
+]

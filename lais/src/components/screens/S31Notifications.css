@@ -1,0 +1,145 @@
+/*
+ * S-31 Notifications — design tokens via theme variables (Stage 7-3)
+ * 4 themes (apple / totoro / dq / cyberpunk) すべてで AA contrast 担保。
+ */
+
+.s31-notifications {
+  flex: 1;
+  background: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-base);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  min-height: 100dvh;
+}
+
+.s31-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-md);
+  background: var(--theme-color-bg-elevated);
+  border-bottom: 1px solid var(--theme-color-border);
+}
+
+.s31-back {
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  color: var(--theme-color-text);
+  cursor: pointer;
+  border-radius: var(--theme-radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.s31-back:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.s31-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-text);
+  font-family: var(--theme-font-display);
+  letter-spacing: var(--theme-font-letter-spacing-tight);
+}
+
+.s31-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-lg) var(--space-md);
+}
+
+.s31-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--theme-color-bg-card);
+  border: 1px solid var(--theme-color-border);
+  border-radius: var(--theme-radius-md);
+  cursor: pointer;
+  min-height: 64px;
+  transition: background var(--theme-motion-fast) var(--theme-motion-easing);
+}
+
+.s31-row:hover {
+  background: var(--theme-color-accent-subtle);
+}
+
+.s31-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1;
+}
+
+.s31-row-label {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--theme-color-text);
+}
+
+.s31-row-desc {
+  font-size: var(--font-size-sm);
+  color: var(--theme-color-text-secondary);
+}
+
+.s31-toggle {
+  width: 44px;
+  height: 24px;
+  appearance: none;
+  background: var(--theme-color-border-strong);
+  border-radius: var(--theme-radius-pill);
+  position: relative;
+  cursor: pointer;
+  transition: background var(--theme-motion-fast) var(--theme-motion-easing);
+  flex-shrink: 0;
+}
+
+.s31-toggle:checked {
+  background: var(--theme-color-accent);
+}
+
+.s31-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: var(--theme-color-button-text-inverse);
+  border-radius: var(--theme-radius-pill);
+  transition: transform var(--theme-motion-fast) var(--theme-motion-easing);
+}
+
+.s31-toggle:checked::after {
+  transform: translateX(20px);
+}
+
+.s31-toggle:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (max-width: 320px) {
+  .s31-list {
+    padding: var(--space-md) var(--space-sm);
+  }
+}
+
+@media (min-width: 768px) {
+  .s31-list {
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}

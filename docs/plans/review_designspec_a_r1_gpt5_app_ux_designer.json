@@ -1,0 +1,182 @@
+[
+  {
+    "id": "R-001",
+    "severity": "CRITICAL",
+    "category": "CONTRADICTION",
+    "location": "4.1 S-00 状態・インタラクション",
+    "issue": "CTA「ログイン」の遷移先が「S-02 ログイン」と記載されているが、本書の S-02 は Onboarding（アバター選択）であり、ログイン画面は定義されていない。",
+    "suggestion": "遷移先 ID を正しく定義・整合（例: S-03 Login を新設）し、4.2 S-01 の「ログインはこちら」も同一 ID へ統一。目次と各画面内の参照表記を一括更新して矛盾を解消する。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "5.1 ボトムタブバー / 4.4 S-10 S10-10 / 4.9 S-20 S20-10 / 4.10 S-30 S30-7",
+    "issue": "非アクティブタブがアイコンのみ（ラベル非表示）で、アクティブのみラベル表示という仕様は iOS HIG と Material Design 3 の推奨（全タブにラベル表示）から外れる。アクセシビリティ上も視認性が低下しやすい。",
+    "suggestion": "iOS: 全タブで常時ラベル表示（選択時は色強調）。Android: Material 3 の Bottom navigation（全タブラベル表示、選択時のトーン強調）を採用。現行の“pill 背景”は選択強調として残してもよいが、ラベルは常時表示へ変更。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "5.1 ボトムタブバー（キーボード時の挙動）",
+    "issue": "「visualViewport 連動で非表示」は Web 実装前提の表現で、ネイティブ iOS/Android のキーボードインセット処理と一致しない。実装方法が不明瞭。",
+    "suggestion": "ネイティブ前提で規定: iOS は UITabBar と safeAreaInsets/keyboard notifications で重なり回避（原則表示維持、必要に応じて隠す方針を明記）。Android は WindowInsetsCompat で IME inset を反映して BottomNavigationView の表示/非表示または位置調整を定義。画面ごと（特に S-20）に“キーボード表示時はタブバーを隠す/維持”の方針を明文化する。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "4.4 S-10（縦スクロール領域全体）",
+    "issue": "Pull-to-refresh（手動同期）の有無・挙動が未定義。リモートデータ同期やエラー再試行方法が不明で、実装時に画面間で挙動差が出る恐れがある。",
+    "suggestion": "S-10 に Pull-to-refresh を定義（iOS: UIRefreshControl、Android: SwipeRefreshLayout）。Haptics（軽い成功/失敗）とスピナー位置、同期待ちのスケルトン/シャマー可否、失敗時のトーストと再試行アクションを明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "4.9 S-20 チャットスクロール領域",
+    "issue": "履歴のページネーション（上方向の読み込み/ページ末尾での追加読み込み）や pull-to-load-older の仕様が未定義。オートスクロール制御はあるが、既読位置保持と新着メッセージ到着時のスクロール保持条件が曖昧。",
+    "suggestion": "上方向 Pull で過去メッセージ読み込み（スピナー表示、閾値）、既読位置の固定/復帰、ストリーミング中に新規到着したメッセージの自動スクロール条件（最下部近傍のみ自動）を定義。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "4.5 S-12 / 4.6 S-13 / 6.1 画面遷移",
+    "issue": "ハーフモーダルが固定 60% 高で、拡張/縮小の複数デテントやキーボード表示時の高さ調整が未定義。��力フォーカス時に CTA が隠れる可能性がある。",
+    "suggestion": "iOS: UISheetPresentationController の medium（約50%）/large（全画面）デテント採用＋preferredCornerRadius。Android: ModalBottomSheet で peekHeight と expand/collapse を定義。キーボード表示時は自動で large へ拡張、もしくはコンテンツをシート内でスクロールして CTA を常に可視に保つ仕様を追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-007",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "4.4 S-10 Today/Overdue タスク行",
+    "issue": "行スワイプ（左/右）によるクイックアクション（完了/延期/削除など）が未定義。リスト操作の効率性が損なわれる。",
+    "suggestion": "iOS: Trailing/leading swipe actions（完了・明日へ延期・削除）を定義（優先 2 件＋…で詳細）。Android: スワイプでのアクションは誤操作が多いため、長押しコンテキストメニュー（＋ハプティクス）を推奨。両 OS で Undo スナックバーと整合。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-008",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "6.2 要素フィードバック / 4.4 S-10 / 4.9 S-20",
+    "issue": "ハプティクス（触覚フィードバック）が未定義。完了・削除・エラー・レベルアップなどの重要操作で触覚が欠落する可能性がある。",
+    "suggestion": "iOS: UIImpactFeedbackGenerator（light/medium）、UINotificationFeedbackGenerator（success/warning/error）を文脈別に定義。Android: HapticFeedbackConstants（KEYBOARD_TAP、CONTEXT_CLICK、LONG_PRESS）と VibrationEffect（短パルス）を割当。完了チェック、破壊的操作、Undo、レベルアップで適用。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-009",
+    "severity": "HIGH",
+    "category": "BEST_PRACTICE",
+    "location": "6.5 アクセシビリティ",
+    "issue": "Dynamic Type/フォントスケール（iOS/Android）に対するレイアウト崩れ・折返しの扱いが未定義。固定行高やトランケーション条件がなく、拡大時の可読性担保が不明。",
+    "suggestion": "最大 200% までのフォントスケール対応方針を明記（行高自動増分、ラベルの改行許可、ピル内テキストの折返し/省略記号の基準、アイコンとテキストの最小間隔）。長文（S-20/S-30）は行間を拡張し、重要 CTA は複数行時でも 44×44px 最小タップ領域を維持。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-010",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "5 共通コンポーネント / 4.4 S-10 / 4.7 S-14 / 4.9 S-20",
+    "issue": "ローディング（スケルトン/プレースホルダ）、空状態（ゼロデータ）、エラー状態の画面内表現が Phase C 対象として未定義のまま。Phase A 実装でも初回起動やネット遅延で必要。",
+    "suggestion": "最小構成を本書に追記: S-10/S-14 はリストスケルトン（3〜5 行）＋空状態イラスト/コピーと“追加”ショートカット、S-20 は初回空状態（プロンプト例カード）と送信失敗時の再送 UI（バブルに失敗アイコン＋再送）。共通のネットワークエラー・再試行トーストを 5.10 に追加。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-011",
+    "severity": "MEDIUM",
+    "category": "USER_CONCERN",
+    "location": "5.9 スナックバー（Undo）",
+    "issue": "Undo スナックバーの表示 30 秒は長すぎ、画面下部の操作を恒常的に覆いユーザーの注意を奪う可能性がある。",
+    "suggestion": "6〜10 秒程度へ短縮し、タップ/スクロール中はタイマー一時停止、再表示はしない方針を明記。複数 Undo が連続する場合はキュー処理または直近アクションのみ表示へ制限。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-012",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "4.9 S-20 ヘッダ／履歴ドロワー",
+    "issue": "ハンバーガーで履歴ドロワー（80% 幅）を出すパターンは iOS のナビゲーション慣例と乖離。Android では許容されるが M3 はナビゲーションドロワーよりタブ/ボトムナビを推奨。",
+    "suggestion": "iOS: 履歴はモーダル（sheet）またはフルスクリーン push（右スライド）で表示。Android: Modal navigation drawer 可だが、スワイプ開閉と戻る挙動を OS 標準に合わせるか、履歴タブ/画面を明示する。プラットフォームごとに UI パターンを分岐。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-013",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "6.5 アクセシビリティ",
+    "issue": "「aria-live=\"polite\"」は Web 想定の表記で、ネイティブ iOS/Android の実装指針としては不十分。",
+    "suggestion": "iOS: UIAccessibility.post(notification: .announcement) 等のガイダンスを記載。Android: View#setAccessibilityLiveRegion(LIVE_REGION_POLITE) を使用。ストリーミング中は冗長読み上げを避け、応答確定時のみアナウンスする運用を併記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-014",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "5.1 ボトムタブバー",
+    "issue": "アクティブタブを再タップした際の挙動（スクロールトップへ戻る／スタックをルートへポップ）が未定義。",
+    "suggestion": "iOS/Android とも“同一タブを再タップでリスト先頭へスクロール、子画面があればルートへポップ”を規定。S-10/S-20 はスクロールトップ、S-30 はサブタブのルートへ復帰を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-015",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "6.1 画面遷移 / 各戻る操作",
+    "issue": "システム戻る（Android）／スクリーンエッジスワイプ（iOS）時の優先度（モーダル閉→子画面戻る→タブ遷移なし）が明文化されていない。",
+    "suggestion": "戻る階層の優先順位を定義: 1) 開いているハーフモーダルを閉じる、2) 子画面を 1 ステップ戻る、3) タブ切替はしない。iOS は interactive pop gesture を許可、Android はシステム戻るで同順序を保証。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-016",
+    "severity": "MEDIUM",
+    "category": "UNDEFINED",
+    "location": "全体（プッシュ通知）",
+    "issue": "プッシュ通知の設計（許諾タイミング、チャンネル/カテゴリ、ディープリンク、通知アクション、バッジ）が未定義。",
+    "suggestion": "iOS: プリパーミッション画面→ UNAuthorizationOptions、Provisional/Time-Sensitive の採用可否を定義。Android: Notification Channels（Task Due/AI Reply/Level Up 等）を定義。通知タップでの深い遷移（例: タスク詳細 S-13、TALK スレッド S-20）とアクション（スヌーズ/完了/既読）を明記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-017",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "4.5 S-12 時刻/日付ピッカー・4.8 S-15 期限ピッカー",
+    "issue": "OS ピッカー使用は明記されているが、12/24 時間表記、週の開始曜日、タイムゾーン/ローカライズ、日付の最小/最大（過去日可否）などの規則が未定義。",
+    "suggestion": "ロケール準拠（端末設定優先）、最小/最大（例: 期限は本日以降のみ）を定義。時間は端末の 12/24h を尊重、週開始曜日はロケールに追従。タイムゾーンは端末 TZ 固定かアカウント TZ かを決め、表示/保存の方針を追記。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  },
+  {
+    "id": "R-018",
+    "severity": "HIGH",
+    "category": "FEASIBILITY",
+    "location": "4.1 S-00 / 4.2 S-01 / 3.3 スペーシング（固定値の多用）",
+    "issue": "上マージンやコンポーネント位置を固定 px（例: padding-top:60px、下端から140px など）で規定しており、各種デバイスの safe area・動的フォントスケールで破綻する恐れがある。",
+    "suggestion": "safe area と相対トークン基準に置換（例: top = safeArea.top + space-xl、CTA スタックは safeArea.bottom + 定義済みスペーシング）。フォントスケール時の縦詰まり解消ルール（min 行間/余白）も併記し、基準 375×812 以外でも破綻しないレイアウト指針に更新。",
+    "model": "GPT-5",
+    "persona": "app_ux_designer"
+  }
+]

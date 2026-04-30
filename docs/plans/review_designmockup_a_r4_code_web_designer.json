@@ -1,0 +1,46 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "INFO_DENSITY",
+    "screen": "s10_grow",
+    "location": "ヘッダー〜TODAY セクション間",
+    "issue": "アバター・レベル・EXPバー・TODAY が連続配置で情報密度が高い。3 パターン作成時の差別化軸候補。",
+    "suggestion": "1 パターンはスリムヘッダー案（56pt）として TODAY を画面 35% 以上で描画。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "VISUAL_FLOW",
+    "screen": "s13_task_detail",
+    "location": "ボタン 2×2 グリッド",
+    "issue": "未完了時は 4 ボタン同等重みで、削除と AI対話が同階層に並ぶ。3 パターン吸収候補。",
+    "suggestion": "1 パターンは 削除を … メニュー降格、2 段目 AI 対話 CTA 集中案として比較。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-003",
+    "severity": "MEDIUM",
+    "category": "LAYOUT",
+    "screen": "s15_goal_create",
+    "location": "カテゴリチップ行",
+    "issue": "『その他』のみ 2 行目に 1 つ折り返し。余白リズム半端。",
+    "suggestion": "4+2 の 2 行固定 or 横スクロール化。",
+    "model": "Code",
+    "persona": "web_designer"
+  },
+  {
+    "id": "R-004",
+    "severity": "LOW",
+    "category": "LAYOUT",
+    "screen": "s12_task_add,s13_task_detail,s15_goal_create",
+    "location": "ボトムシート背景",
+    "issue": "シート上部に背景の黒帯が残りモーダル展開感が半端。",
+    "suggestion": "scrim 透過度を上げ元画面要素を完全に隠す。",
+    "model": "Code",
+    "persona": "web_designer"
+  }
+]

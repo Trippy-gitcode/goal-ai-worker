@@ -1,0 +1,82 @@
+[
+  {
+    "id": "R-001",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§19.1, §19.4, §19.6",
+    "issue": "仕様書ファイル名の不一致。§19では「ux_v1.md」と定義されているが、既存の§18（依存関係マップ）、§16.3（ホットフィックスパス）、sub_adv_protocol.md §10では「ux_redesign_v*.md」となっている。自動化スクリプトやAIの自律判断において、対象ファイルを見失う原因となる。",
+    "suggestion": "新規アプリ立ち上げの標準化に合わせて「ux_v1.md」に統一し、§18や§16.3などの既存セクションにある「ux_redesign_v*.md」を「ux_v*.md」に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-002",
+    "severity": "HIGH",
+    "category": "MISSING",
+    "location": "§19.4",
+    "issue": "AI Opsの観点において、AI機能が誤作動・ハルシネーションを起こした場合のフェイルセーフやリカバリ手順の設計セクションがテンプレートに欠落している。",
+    "suggestion": "reference_v1.mdの「§3 AI活用設計」に、「フォールバックロジック / ハルシネーション対策 / リカバリ手順 / 暴走時の遮断メカニズム」を必須項目として追加する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-003",
+    "severity": "HIGH",
+    "category": "UNDEFINED",
+    "location": "§19.6",
+    "issue": "上流仕様書（project_v1.mdなど）の変更が、§6の承認ルールのどのリスクレベルに該当するかが明記されていない。AIが影響範囲を過小評価し、🟢低リスク扱いで自律的に仕様を変更・実装してしまう暴走リスクがある。",
+    "suggestion": "§19.6または§6に「上流仕様書（project, ux, reference, design_system）の変更はアーキテクチャ変更と同等とみなし、常に🔴高リスク（個別承認必須）とする」旨を追記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-004",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "§19.7",
+    "issue": "Phase 0の完了基準として「8ペルソナ×2モデルのAIレビュー」と記載されているが、§13.4では「標準5ペルソナ」と定義されており、数字が矛盾している。",
+    "suggestion": "「標準5ペルソナ（必要に応じてカスタム追加）×複数モデル」など、§13.4の定義と整合する表現に修正する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-005",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "§19.6",
+    "issue": "依存チェーンのツリー図において、e2e_fullflow_test.mdがproject_v1.mdのみに依存しているように描画されているが、§18の定義通り、実際にはux, design, referenceの全HOW仕様書からも依存される多重依存構造である。",
+    "suggestion": "ツリー図の限界を補うため、「※e2e_fullflow_test.mdはux, design, reference等の全HOW仕様書からも依存される」という注記を追加するか、DAG（有向非巡回グラフ）形式で正確に表現する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-006",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "§19.5",
+    "issue": "ヘッダー標準で「依存: docs/project_v1.md v1.3」のようにバージョンをハードコードする仕様となっているが、上流ファイル更新時に下流のヘッダーを更新し忘れるリスクが高く、「機械可検証」の原則（§1.1）に反している。",
+    "suggestion": "上流ファイルのバージョン更新時に、下流ファイルの依存ヘッダーの陳腐化を自動検出するlinter（例: doc_dependency_lint.sh）を導入するか、手動更新の徹底をADVのトリガーアクション（sub_adv_protocol.md）に明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-007",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "§19.5",
+    "issue": "ヘッダー標準の例で「docs/plans/lais_project_v1.md」となっているが、§19.1の必須ファイル一覧では「docs/project_v1.md」となっている。DRAFT版（plans/）と確定版のディレクトリ配置の境界が曖昧。",
+    "suggestion": "ヘッダーの例を「docs/project_v1.md」に修正し、DRAFT版と確定版のディレクトリ構成ルールを§19.1に明記する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-008",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§19.7",
+    "issue": "ベンチマークの出力フォーマットテンプレート内に「Lais方針」という特定のプロジェクト名がハードコードされている。dev-systemは全プロジェクト共通基盤であるため、横展開時に混乱を招く。",
+    "suggestion": "「Lais方針」を「{アプリ名}方針」または「自社方針」に一般化する。",
+    "model": "Gemini 3.1 Pro Preview",
+    "persona": "ai_ops"
+  }
+]

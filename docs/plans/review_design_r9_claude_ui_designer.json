@@ -1,0 +1,4 @@
+[
+  {"id":"R-001","severity":"MEDIUM","category":"AMBIGUITY","location":"§8.1 Secondary / §8.3 / §8.7","issue":"ライト系テーマでテキスト色を --text-primary に変更したが、これは『Secondary=ブランド色』というデザイン言語を崩す。ユーザーには『ボタンのテキスト色がテーマによって違う』と見える。","suggestion":"v1.0 に向けて、ライト系でも AA を満たせる別アプローチ（subtle 背景を濃くする / アクセント色を濃くする等）を LAIS-BRAND-02 で再検討する旨を提案ログに記載。","model":"Claude Opus 4.6","persona":"ui_designer"},
+  {"id":"R-002","severity":"LOW","category":"MISSING","location":"§9","issue":"§9 トークンブロックはまだ Night Sky 単独のまま。他3テーマの主要トークン対比表が未追加。","suggestion":"§9 末尾に4テーマクイックリファレンス表を追加。","model":"Claude Opus 4.6","persona":"ui_designer"}
+]

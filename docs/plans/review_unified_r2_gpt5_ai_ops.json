@@ -1,0 +1,122 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md ヘッダー / lais_project_v1.md ヘッダー / lais_ux_v1.md §16参照",
+    "issue": "依存バージョンの不整合。lais_project は dev-system v3.1に依存と記載、dev_system_spec 自体はv3.0表記、一方で lais_ux は dev-system §19.8（v3.2で追加）準拠と記述しているため、依存チェーンのバージョンが一致していない。",
+    "suggestion": "dev_system_spec.md のバージョン表記と変更履歴を実体に合わせて v3.2 に更新（§13.10-14/§19.8を含む旨を追記）。lais_project_v1.md の依存も v3.2 に更新。lais_ux_v1.md も dev-system 依存バージョンを整合させる。更新後、§19.6の遡及チェックを実行し、spec_changelog.mdに記録する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md ヘッダー",
+    "issue": "依存: lais_project_v1.md v1.3 とあるが、現行の project は v1.4。UX本文もv1.4の7日ルール等を前提に記述されており、ヘッダーと本文が不一致。",
+    "suggestion": "ヘッダーの依存を v1.4 に更新し、§19.6『上流変��時の下流遡及チェック』を適用。影響点（7日ルール/Undo 30秒/退会・Stripe連携）を再確認し、spec_changelog.md に反映する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-103",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md ヘッダー/変更履歴",
+    "issue": "ヘッダーが v1.0 DRAFT のままなのに、本文と変更履歴は v1.14 までの内容を含む内部矛盾。",
+    "suggestion": "ヘッダーを実体に合わせて v1.14 に更新。ステータスはAIレビューの進捗に応じてREVIEWまたはCONFIRMEDに更新。§19.5ヘッダー標準に従い、更新日も反映する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-104",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_project_v1.md §3.2.6 / 変更履歴（内部矛盾: Undo時間） / lais_ux_v1.md §2.3",
+    "issue": "Undoスナックバー表示時間が project本文では3秒、変更履歴とUXでは30秒。統一修正が本文に未反映。",
+    "suggestion": "project本文§3.2.6の『3秒』を『30秒』に修正し、サーバー側の仮確定→本確定タイマーも30秒に揃える。E2Eに30秒のUndoウィンドウ検証を追加して回帰を防止。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-105",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "lais_ux_v1.md §16.1-16.8（特に§16.1, §16.2）",
+    "issue": "dev-system §19.8ではE5（デスクトップ Chrome/Edge）を必須��規定しているが、UXではE5を任意扱い。E5に関する対応方針の詳細も記載不足。",
+    "suggestion": "E5を『必須』に修正し、A〜G各項目でE5の対応/対象外理由を明記。さらに e2e_fullflow_test.md にE5向け最小スモーク（起動/タブ遷移/ログイン/通知ディープリンク代替動作）を追加。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-106",
+    "severity": "MEDIUM",
+    "category": "FEASIBILITY",
+    "location": "dev_system_spec.md §19.6（上流変更時の下流遡及チェック）",
+    "issue": "遡及チェックはADVの手作業に依存しており、ヘッダー依存バージョン不一致の取りこぼしリスクがある。自動検証フックがないため運用バラつきが生じ得る。",
+    "suggestion": "dependency_lint.shを追加し、各docs/**/v*.mdのヘッダー『依存: path vX.Y』を抽出→参照先ヘッダーの実バージョンと照合→不一致でFAIL。canopyに組み込み、spec_changelogの自動ドラフト生成も行う。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "CONTRADICTION",
+    "location": "dev_system_spec.md ヘッダー / §13.7",
+    "issue": "ヘッダーは『8ラウンドレビュー完了』と明記、一方で§13.7は『最低10ラ��ンド』を規定。自己適用の観点で矛盾。",
+    "suggestion": "ヘッダーに『10ラウンド基準導入前に完了（例外扱い）』等の注記を追記、または追加2ラウンドを実施して変更履歴に反映。以後は10ラウンドを厳守。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-108",
+    "severity": "MEDIUM",
+    "category": "STRUCTURE",
+    "location": "lais_project_v1.md §10.1 / dev_system_spec.md §19.1, §18",
+    "issue": "必須仕様書の名称・配置がdev-system標準と不一致（例: e2e_fullflow_test.md vs lais_e2e_test.md、docs/system_map.md vs docs/plans/lais_system_map.md）。自動参照や連鎖更新の前提と齟齬がある。",
+    "suggestion": "dev-system標準のファイル名・配置に合わせて更名/移動する。例外を許可する場合は、dev-system §18/§19.1に『別名/別パス許容』を明記し、canopyやスクリプトの参照先をapp_config.yaml経由で可変化する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-109",
+    "severity": "LOW",
+    "category": "STRUCTURE",
+    "location": "lais_project_v1.md §7.2（RLS例外ルール）",
+    "issue": "RLS例外の番号が①②③⑤④と入れ替わっており可読性に難。将来的な参照や差分レビューで誤認を招く恐れ。",
+    "suggestion": "①〜⑤の連番へ修正し、各ルールを1行1定義で整形。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "AMBIGUITY",
+    "location": "lais_ux_v1.md §16.2 A2 / dev_system_spec.md §19.8 A2",
+    "issue": "iOSスプラッシュでapple-launch-imageを『非推奨』とするUXの方針と、dev-systemチェックリスト表記が並存し、採用可否が曖昧。",
+    "suggestion": "Laisの最終方針を明記（例: 『apple-launch-imageは不採用。manifestのbackground_colorで統一』）。必要に応じてproject/referenceにもビルド設定を転記。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-111",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md §6（承認ルール）/ §16.3（ホットフィックスパス）",
+    "issue": "『UX仕様に影響しない変更』の自己判定が人手依存。自動検証はchanged-files-allowlist/affected-testsに限られ、UX影響の静的検出がないため誤判定リスクが残る。",
+    "suggestion": "ミッション定義に『UXインパクト: yes/no + 根拠（SPEC-ID/画面IDのgrepキー）』を必須化。canopyで該当SPEC-IDのE2E有無と差分の有無を検出し、UX影響=Yesなら🟡以上へ自動昇格し自律実行を抑止す���。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  },
+  {
+    "id": "R-112",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "dev_system_spec.md §13.10-13.12 / sub_infrastructure.md（incident_runbook.md）",
+    "issue": "AIレビュー指摘の棄却運用は明確だが、誤棄却が下流に反映済みだった場合の『取り消し・是正』手順がincident_runbookに定義されていない。",
+    "suggestion": "incident_runbook.mdに『AIレビュー誤棄却の是正』手順を追加（該当コミットのrevert→下流仕様書をPAUSE→spec_changelog追記→C2停止/再レビュー）。review_gate.shでupstream_issue:trueを検出した場合の自動PAUSE処理も検討する。",
+    "model": "GPT-5",
+    "persona": "ai_ops"
+  }
+]

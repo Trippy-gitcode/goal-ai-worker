@@ -1,0 +1,102 @@
+[
+  {
+    "id": "R-101",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§5.1, §8.1, §8.2, §9",
+    "issue": "フォーカス可視化方式が仕様内で不一致。v0.9でoutlineに完全統一と記載されている一方、テーマトークンに--focus-ring（box-shadow文字列）が残存し、§8.2 入力フィールドでは「border --accent + --focus-ring」を参照している。",
+    "suggestion": "focusをoutlineに統一する方針に沿い、--focus-ring（box-shadow）を廃止または再定義。推奨: フォーカス用の明示トークンを新設し、全コンポーネントで必ずこれを参照して一貫化する。\n例（新規トークン）:\n--focus-outline-color: var(--accent);\n--focus-outline-width: 3px;\n--focus-outline-offset: 2px;\n実装例:\n*:focus-visible { outline: var(--focus-outline-width) solid var(--focus-outline-color); outline-offset: var(--focus-outline-offset); }\n入力フィールド（§8.2）の記述も「border --accent + --focus-ring」から「outlineベース」に修正。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-102",
+    "severity": "HIGH",
+    "category": "CONTRADICTION",
+    "location": "§8.7（デザインシステム） と §10.4（UX仕様）",
+    "issue": "ボトム��ブのARIAセマンティクスが矛盾。§8.7はaria-current=\"page\"（ナビゲーション）を推奨、§10.4はrole=\"tablist\"/role=\"tab\"（タブパネル）を指定。",
+    "suggestion": "どちらを採用するか明確化し統一する。SPAでパネル切替（同一ページ内でtabpanelを切り替える）ならrole=tablist/tab/tabpanel+aria-controls/aria-selectedを採用。ルーティング遷移（各タブが別のページ/URL）なら<nav>+リンク+aria-current=\"page\"を採用。いずれの場合も不要なARIAの重複指定は避ける。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-103",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§2.3, §5.1-§5.4, §8.1-§8.3, §8.7-§8.9",
+    "issue": "テーマごとのコントラスト検証結果が部分的に注記（「約」）に留まり、全主要ペアのAA達成可否を俯瞰できる一覧が未整備。",
+    "suggestion": "各テーマの主要ペアについてコントラスト検証表を追加（SC 1.4.3/1.4.11観点）。下記は実測の代表値（相対輝度法、近似）—すべてAA達成。\nNight Sky (§5.1):\n- text-primary #E6EDF3 / bg-primary #0D1117 ≈ 12.7:1（OK）\n- text-secondary #9BA7B4 / bg-primary #0D1117 ≈ 5.7:1（OK）\n- text-hint #7A8593 / bg-primary #0D1117 ≈ 4.6:1（OK）\n- accent link #79C0FF / bg-primary #0D1117 ≈ 6.3:1（OK）\n- button primary #FFFFFF / #1A5FC8 ≈ 6.0:1（OK）\n- border-strong #6E7681 / bg-surface #161B22 ≈ 3.6:1（SC 1.4.11 OK）\n- chip（accent-subtle上）text=accent #79C0FF / bg≈rgba(121,192,255,0.14)合成 ≈ 4.9:1（OK）\nDawn (§5.2):\n- text-primary #2C2520 / #FBF8F4 ≈ 14:1（OK）\n- text-secondary #5C5045 / #FBF8F4 ≈ 7.4:1（OK）\n- text-hint #6A5E52 / #FBF8F4 ≈ 6.0:1（OK）\n- accent #8F4D1F / #FEFCF9 ≈ 6.4:1（OK）\n- button primary #FFFFFF / #8F4D1F ≈ 9+:1（OK）\n- border-strong #8A7A65 / #FEFCF9 ≈ 3.4:1（OK）\n- chip（accent-subtle上）text-primary #2C2520 / 合成bg ≈ 6.5:1（OK）\nHarajuku Light (§5.3):\n- text-primary #2A1A20 / #FDF6F7 ≈ 14+:1（OK）\n- accent #C43361 / #FFFAFB ≈ 5.3:1（OK）\n- border-strong #9A6070 / #FFFAFB ≈ 3.5:1（OK）\n- chip（accent-subtle上）text-primary #2A1A20 / 合成bg ≈ 6+:1（OK）\nHarajuku Dark (§5.4):\n- text-primary #F5E8EE / #140A10 ≈ 12+:1（OK）\n- text-hint #8C7480 / #140A10 ≈ 4.6:1（OK）\n- accent #F5A9BF / #140A10 ≈ 8.0:1（OK）\n- button primary fg #140A10 / bg #F5A9BF ≈ 10.3:1（OK）\n- border-strong #8A6978 / #1F1018 ≈ 3.8:1（OK）\n提案: 上記のような表を本文に追加し、将来のトークン変更時は表も更新する運用ルールを明記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-104",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "§8.4 タイムライン",
+    "issue": "��クリーンリーダー向けの状態名がOverdueのみaria-label定義。NOW/DONE/NEXTの状態は形状・色で区別されるが、音声では区別できない恐れ。",
+    "suggestion": "各行またはドットにsr-onlyテキスト/aria-labelを追加（例: aria-label=\"現在の項目\"/\"完了\"/\"次の予定\"）。行クリック可能領域にも状態を含むラベルを付与（例: aria-label=\"現在の項目: 企画書作成 9:00\"）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-105",
+    "severity": "MEDIUM",
+    "category": "BEST_PRACTICE",
+    "location": "§8.11 スケルトンローダー",
+    "issue": "スケルトン要素のスクリーンリーダー抑制が未記載。読み上げ対象になると実データと誤認される恐れ。",
+    "suggestion": "スケルトンコンテナにaria-hidden=\"true\"を付与し、必要に応じてinertを併用。ロード完了時はDOMからスケルトンを除去。例: <div class=\"lais-skeleton\" aria-hidden=\"true\"></div>",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-106",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.7 ボトムタブバー（通知バッジ）",
+    "issue": "通知バッジのフォントサイズが固定値10px。ユーザーの文字サイズ設定やズ���ムへの追従性が下がる可能性。",
+    "suggestion": "バッジ用にトークン化し、相対単位（rem）へ変更。例: --font-size-badge: 0.625rem（10px相当）を追加して参照。あわせてボタン/タブ自体にaria-labelで未読数を読み上げ（例: aria-label=\"ME、未読3件\"）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-107",
+    "severity": "MEDIUM",
+    "category": "MISSING",
+    "location": "全体（ナビゲーション/レイアウト）",
+    "issue": "繰り返しブロックのバイパス（WCAG 2.4.1）に関する実装指針が未記載。ランドマーク/スキップリンクの有無が不明。",
+    "suggestion": "<main>/<nav>/<header>/<footer>ランドマークの使用を明記し、ページ先頭にキーボードのみで到達可能な「メインコンテンツへスキップ」リンクを設置（視覚的にはフォーカス時のみ表示）。SPA遷移時はフォーカスを<main>の先頭に移動する運用を仕様に追記。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-108",
+    "severity": "LOW",
+    "category": "UNDEFINED",
+    "location": "§7.5, §5（テーマ横断トークン）",
+    "issue": "高コントラスト設定のうちforced-colorsには対応しているが、prefers-contrast（more/less）等の高コントラスト���向シグナルに対するトークン/挙動の定義がない。",
+    "suggestion": "将来拡張として高コントラスト用のトークンを用意（例: --border-strong-hc, --focus-outline-width-hc）。@media (prefers-contrast: more) でボーダー/下線/アウトラインの太さを強化し、hover/pressedとの差異を増幅。対応環境では自動適用、非対応ブラウザでは無害。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-109",
+    "severity": "MEDIUM",
+    "category": "AMBIGUITY",
+    "location": "§8.1 ボタン, §8.3 チップ, §8.7 タブ",
+    "issue": "accent-subtle背景上のfocus outlineが常に3:1を満たす旨の明記がない（特にライト系テーマでのアクセント色×subtle背景の近似色問題）。",
+    "suggestion": "「focus-visibleのアウトラインは常にコンポーネントの外側（outline-offset≧2px）に描画し、比較対象がbg-surface/bg-primaryになるようにする」と明文化。代表ケースの実測を追記（例: Harajuku Light: outline #C43361 vs bg-surface #FFFAFB ≈ 5.3:1、Dawn: #8F4D1F vs #FEFCF9 ≈ 6.4:1 いずれも≥3:1）。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  },
+  {
+    "id": "R-110",
+    "severity": "LOW",
+    "category": "BEST_PRACTICE",
+    "location": "§8.9 プログレスバー",
+    "issue": "プログレ��バーのフィル（accent）とトラック（bg-secondary）のコントラストが十分である旨の明記がない（SC 1.4.11のグラフィカルオブジェクト識別）。",
+    "suggestion": "主要テーマでの実測を仕様に追記（例: Night Sky: #79C0FF vs #1C2128 ≈ 5+:1、Dawn: #8F4D1F vs #F2EDE5 ≈ 8+:1、Harajuku Dark: #F5A9BF vs #2A1720 ≈ 5+:1）。将来のトークン変更時も≥3:1維持をガードレールとして明文化。",
+    "model": "GPT-5",
+    "persona": "a11y_expert"
+  }
+]
