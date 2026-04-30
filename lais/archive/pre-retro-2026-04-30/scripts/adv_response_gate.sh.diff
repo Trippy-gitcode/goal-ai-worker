@@ -1,0 +1,17 @@
+--- scripts/adv_response_gate.sh	2026-04-29 22:58:42
++++ /Users/futoshi/Desktop/lais-via-devsys/scripts/adv_response_gate.sh	2026-04-30 21:04:05
+@@ -1,4 +1,5 @@
+ #!/bin/sh
++# GENERATED: DO NOT MODIFY
+ # scripts/adv_response_gate.sh
+ # MISSION-G49-PKG Phase 2.2（PD-111 §2.25.9-.14 機械ゲート本体）
+ # PATCH-VIO13-GATE-PO-DISPLAY-FIX（2026-04-26）: PO 表示モード分離
+@@ -57,7 +58,7 @@
+ set -eu
+ 
+ # REPO_ROOT 解決（PATCH-VIO12-REPO-ROOT-FIX、2026-04-25）
+-# ADV メイン cwd が dev-system（git 管理外）の場合 git rev-parse 失敗 → pwd
++# ADV メイン cwd が dev-system-adv（git 管理外）の場合 git rev-parse 失敗 → pwd
+ # フォールバックで誤解決していたため、共通ヘルパーで goal-ai-worker を確実に特定。
+ . "$(dirname "$0")/lib/resolve_repo_root.sh"
+ if ! REPO_ROOT="$(resolve_repo_root)" || [ -z "${REPO_ROOT:-}" ] || [ ! -d "${REPO_ROOT}" ]; then
