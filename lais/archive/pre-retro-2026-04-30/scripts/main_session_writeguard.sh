@@ -1,14 +1,10 @@
 #!/bin/sh
-# GENERATED: DO NOT MODIFY
 # scripts/main_session_writeguard.sh
-#
-# derived-from: PRIOR-APP scripts/main_session_writeguard.sh (SUBAGENT-DEVSYS-SCRIPTS-PHASE2)
-# app-independence: APP_REPO_ROOT_ENV / APP_REPO_MARKER / APP_REPO_CANDIDATES
-# spec-ref: core_spec.md §2.2 (ADV 書込ホワイトリスト) / §5.1 (PreToolUse hook)
+# MISSION-G49-PKG-FINAL-V2 Phase 0（§2.25.16.2 書込禁止対象）
 #
 # 用途:
 #   ~/.claude/settings.json PreToolUse hook に結線。
-#   Edit / Write / MultiEdit / NotebookEdit の対象パスが書込禁止対象に合致したら
+#   Edit / Write の対象パスが §2.25.16.2 リストに合致したら
 #   {"decision":"block","reason":"..."} を出力して Tool 実行を block。
 #
 # 入力（stdin JSON、PreToolUse hook 仕様）:
@@ -22,56 +18,42 @@
 #   block 時: {"decision":"block","reason":"<msg>"} → Tool 実行 block
 #   PASS 時: 何も出力せず exit 0
 #
-# 例外（core_spec.md §2.2 ホワイトリスト 7 件 + フラグ・ログ系）:
+# 例外（§2.25.16.3）:
 #   - instructions/session_progress.md
+#   - lais/verify/adv_violation_log.md
+#   - docs/po-decisions.md
+#   - docs/learned-patterns.md
 #   - docs/decision_log.md
 #   - instructions/in_flight_topics.md
 #   - instructions/subagent_status.md
-#   - verify/adv_violation_log.md            （App 側のパスは可変）
-#   - docs/po-decisions.md
-#   - docs/learned-patterns.md
 #   - instructions/po_alerts.md
-#   - instructions/po_offline.flag           （night mode 系フラグ）
-#   - instructions/night_mode_consent.flag
-#   - instructions/gate_override.flag        （PO override フラグ）
-#   - logs/*                                  （履歴ログ）
-#
-# 環境変数（App 非依存化）:
-#   APP_REPO_ROOT_ENV / APP_REPO_MARKER / APP_REPO_CANDIDATES
-#   DEV_SYSTEM_SUBAGENT          1 で subagent コンテキストとして全 Edit/Write 通過
-#   APP_VIOLATION_LOG_PATH       App 側違反ログのパス（既定 verify/adv_violation_log.md）
-#
-# 設計指針:
-#   - Lais-style `verify/adv_violation_log.md` ハードコードを除去（APP_VIOLATION_LOG_PATH で可変）
-#   - REPO_ROOT 解決は resolve_repo_root.sh 経由
-#   - subagent コンテキストでは DEV_SYSTEM_SUBAGENT=1 を立ててこの hook を skip
+#   - logs/* （履歴ログ）
 #
 # 根拠:
-#   - core_spec.md §2.2 ADV 書込ホワイトリスト
-#   - core_spec.md §5.1 PreToolUse hook 群
+#   - lais/verify/dev_system_v34_package.md §2.25.16.2 / §2.25.16.3
 
 set -eu
 
-SELF_DIR="$(cd "$(dirname "$0")" && pwd)"
-if [ -f "${SELF_DIR}/lib/resolve_repo_root.sh" ]; then
-  # shellcheck disable=SC1091
-  . "${SELF_DIR}/lib/resolve_repo_root.sh" 2>/dev/null || true
-fi
-
-REPO_ROOT=""
-if command -v resolve_repo_root >/dev/null 2>&1; then
-  REPO_ROOT="$(resolve_repo_root 2>/dev/null || true)"
-fi
-if [ -z "${REPO_ROOT}" ]; then
-  REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-fi
-
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 LOG_FILE="${REPO_ROOT}/logs/main_session_writeguard.log"
 mkdir -p "${REPO_ROOT}/logs" 2>/dev/null || true
 
+# dev-system context delegation:
+# dev-system 配下で動作中（REPO_ROOT が dev-system 直下 or その配下）なら
+# 本 writeguard は適用しない。dev-system は core_spec.md §2.2 / §5.1 で別個の
+# ホワイトリスト + 自前 main_session_writeguard.sh を持つため。
+# dev-system 側 writeguard は REPO_ROOT 不一致 = outside-repo PASS で goal-ai-worker
+# 配下を干渉しない設計のため相互独立。
+case "$REPO_ROOT" in
+  */dev-system|*/dev-system/*)
+    printf '%s\t[PASS-DELEGATED-DEVSYS]\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$LOG_FILE" 2>/dev/null || true
+    exit 0
+    ;;
+esac
+
 # subagent コンテキスト判定: Task tool 経由で起動された subagent は
 # DEV_SYSTEM_SUBAGENT=1 環境変数を立てる運用を期待。立っていれば writeguard をスキップ。
-# 主セッションは環境変数を設定しないため、書込禁止が機能する。
+# 主セッションは環境変数を設定しないため、§2.25.16.2 BLOCK が機能する。
 if [ "${DEV_SYSTEM_SUBAGENT:-}" = "1" ]; then
   log() { printf '%s\t[PASS-SUBAGENT]\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$LOG_FILE" 2>/dev/null || true; }
   log
@@ -119,6 +101,7 @@ case "$FILE_PATH" in
 esac
 
 # realpath で `../` を解決（path traversal 防止）
+# realpath -m で存在しないパスも正規化（書込前なのでファイル不在の可能性あり）
 NORMALIZED_PATH=""
 if command -v realpath >/dev/null 2>&1; then
   NORMALIZED_PATH="$(realpath -m -- "$ABS_PATH" 2>/dev/null || true)"
@@ -141,24 +124,22 @@ REL_PATH="${ABS_PATH#${REPO_ROOT}/}"
 # `../` 残存検出（多重防衛、normalize 後は通常無いが念のため）
 case "$REL_PATH" in
   *..*)
-    REASON="BLOCK [§2.2] path traversal 検出: ${FILE_PATH}（正規化後 ${REL_PATH}）"
+    REASON="BLOCK [§2.25.16.2] path traversal 検出: ${FILE_PATH}（正規化後 ${REL_PATH}）"
     log "[BLOCK] traversal tool=$TOOL_NAME path=$FILE_PATH"
     printf '{"decision":"block","reason":"%s"}\n' "$REASON"
     exit 0
     ;;
 esac
 
-# App 側の違反ログパス（既定 verify/adv_violation_log.md、App 側で APP_VIOLATION_LOG_PATH 上書き可）
-VIOLATION_LOG_REL="${APP_VIOLATION_LOG_PATH:-verify/adv_violation_log.md}"
-
-# 例外（core_spec.md §2.2 ホワイトリスト 7 件 + フラグ・ログ系）
+# 例外（§2.25.16.3）リスト先判定
 case "$REL_PATH" in
   instructions/session_progress.md|\
+  lais/verify/adv_violation_log.md|\
+  docs/po-decisions.md|\
+  docs/learned-patterns.md|\
   docs/decision_log.md|\
   instructions/in_flight_topics.md|\
   instructions/subagent_status.md|\
-  docs/po-decisions.md|\
-  docs/learned-patterns.md|\
   instructions/po_alerts.md|\
   instructions/po_offline.flag|\
   instructions/night_mode_consent.flag|\
@@ -169,31 +150,21 @@ case "$REL_PATH" in
     ;;
 esac
 
-# App 側違反ログパスの動的マッチ（${VIOLATION_LOG_REL} 一致でホワイトリスト通過）
-if [ "$REL_PATH" = "$VIOLATION_LOG_REL" ]; then
-  log "[PASS] violation-log path=$REL_PATH tool=$TOOL_NAME"
-  exit 0
-fi
-
-# 書込禁止対象（core_spec.md §2.2 ホワイトリスト外、subagent 経由必須）判定
+# 書込禁止対象（§2.25.16.2）判定
 BLOCKED=0
 case "$REL_PATH" in
   docs/plans/*) BLOCKED=1 ;;
+  lais/verify/*) BLOCKED=1 ;;
   scripts/*) BLOCKED=1 ;;
   templates/*) BLOCKED=1 ;;
-  skills/*) BLOCKED=1 ;;
   .git/hooks/*) BLOCKED=1 ;;
-  core_spec.md) BLOCKED=1 ;;
   development_rules.md) BLOCKED=1 ;;
   bootstrap.md) BLOCKED=1 ;;
   app_config.yaml) BLOCKED=1 ;;
-  CLAUDE.md) BLOCKED=1 ;;
-  docs/architecture.md) BLOCKED=1 ;;
-  docs/changeable_policy.md) BLOCKED=1 ;;
 esac
 
 if [ "$BLOCKED" -eq 1 ]; then
-  REASON="BLOCK [§2.2] main session 直接書込禁止: ${REL_PATH}（subagent 経由必須）"
+  REASON="BLOCK [§2.25.16.2] main session 直接書込禁止: ${REL_PATH}（subagent 経由必須）"
   log "[BLOCK] tool=$TOOL_NAME path=$REL_PATH"
   printf '{"decision":"block","reason":"%s"}\n' "$REASON"
   exit 0
