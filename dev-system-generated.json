@@ -1,0 +1,23 @@
+{
+  "_generated": true,
+  "_comment": "dev-system が生成した App のメタデータ。改変禁止（マーカーとして scripts/lib/resolve_repo_root.sh が参照）。",
+  "generatedByVersion": "0.1.0",
+  "generatedDate": "2026-04-30T12:04:05Z",
+  "appName": "lais-via-devsys",
+  "appType": "preact-supabase-cloudflare",
+  "generator": "dev-system new",
+  "marker": "dev-system-generated.json",
+  "schema": {
+    "version": "1.0.0",
+    "fields": {
+      "_generated": "boolean - 常に true、メタデータマーカー",
+      "generatedByVersion": "string - dev-system のバージョン（SemVer 形式 X.Y.Z）",
+      "generatedDate": "string - 生成日時（ISO 8601 / UTC）",
+      "appName": "string - App 名（dev-system new <app-name> の引数）",
+      "appType": "string - App タイプ（preact-supabase-cloudflare / next-prisma-vercel / minimal 等）",
+      "generator": "string - 生成元コマンド（既定: dev-system new）",
+      "marker": "string - REPO_ROOT 解決時のマーカーファイル名（既定: dev-system-generated.json）"
+    }
+  },
+  "doNotModify": "本ファイルは scripts/lib/resolve_repo_root.sh が REPO_ROOT 解決マーカーとして参照する。改変するとマーカー失効、機械強制 hook 群が REPO_ROOT 解決失敗で fail-open する可能性あり。"
+}
