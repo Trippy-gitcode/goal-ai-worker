@@ -190,8 +190,37 @@ function initDragInContainer(container, pxPerHour, hourStart) {
   }, {passive:false});
 }
 
+// Phase 8.2 BUG-08 fix 2026-05-01: skeleton loading state
+function TodaySkeleton({ viewMode }) {
+  if (viewMode === 'timeline') {
+    return (
+      <div role="status" aria-live="polite" aria-label="読み込み中" style={{ padding: '8px 0' }}>
+        <span class="sr-only">タイムラインを読み込んでいます</span>
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} class="skel skel-card" style={{ height: '46px', marginLeft: '42px' }} aria-hidden="true" />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div role="status" aria-live="polite" aria-label="読み込み中" style={{ padding: '8px 0' }}>
+      <span class="sr-only">タスク一覧を読み込んでいます</span>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <div key={i} style={{ display: 'flex', gap: '8px', padding: '8px 0', borderBottom: '0.5px solid var(--border)' }} aria-hidden="true">
+          <div class="skel" style={{ width: '28px', height: '28px', borderRadius: '50%' }} />
+          <div style={{ flex: 1 }}>
+            <div class="skel skel-line medium" />
+            <div class="skel skel-line short" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function Today() {
   const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
   const initialMode = (typeof localStorage !== 'undefined' && localStorage.getItem('today_view_mode')) || 'timeline';
   const [viewMode, setViewMode] = useState(initialMode);
   const timelineRef = useRef(null);
@@ -200,11 +229,20 @@ export function Today() {
   const loadTasks = useCallback(() => {
     if (typeof window.getTodayTasks === 'function') {
       setTasks(window.getTodayTasks() || []);
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadTasks();
+    // 初回ロード: getTodayTasks がまだ未定義の場合は短時間待ってから再試行
+    if (typeof window.getTodayTasks === 'function') {
+      loadTasks();
+    } else {
+      const t = setTimeout(loadTasks, 200);
+      // フォールバック: 1.5 秒後にスケルトン解除
+      const fallback = setTimeout(() => setLoading(false), 1500);
+      return () => { clearTimeout(t); clearTimeout(fallback); };
+    }
     // Expose refresh for legacy code
     window._preactTodayRefresh = loadTasks;
     // view mode toggle: レガシー window._todayViewMode を監視
@@ -221,6 +259,7 @@ export function Today() {
 
   // タイムライン/リストHTML生成 + ドラッグ初期化
   useEffect(() => {
+    if (loading) return;
     const todayStr = new Date().toISOString().slice(0,10);
     if (viewMode === 'timeline' && timelineRef.current) {
       const { html, nowPx } = buildTimelineHTML(tasks, todayStr);
@@ -232,9 +271,16 @@ export function Today() {
     } else if (viewMode === 'list' && listRef.current) {
       listRef.current.innerHTML = buildListHTML(tasks, todayStr);
     }
-  }, [tasks, viewMode]);
+  }, [tasks, viewMode, loading]);
 
   // ARCH-02: 薄いコンポーネント。グリーティングはレガシーDOM側。Preactはタイムライン/リスト描画のみ。
+  if (loading) {
+    return (
+      <div id="preact-today-root" data-view-mode={viewMode}>
+        <TodaySkeleton viewMode={viewMode} />
+      </div>
+    );
+  }
   return (
     <div id="preact-today-root" data-view-mode={viewMode}>
       {viewMode === 'timeline' && (

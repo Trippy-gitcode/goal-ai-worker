@@ -4,9 +4,28 @@ import { useState, useEffect, useCallback } from 'preact/hooks';
 
 function esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
+// Phase 8.2 BUG-08 fix 2026-05-01: skeleton loading for GoalsList
+function GoalsListSkeleton() {
+  return h('div', {
+    role: 'status',
+    'aria-live': 'polite',
+    'aria-label': '読み込み中',
+    style: 'padding:0 12px;'
+  },
+    h('span', { class: 'sr-only' }, 'ゴール一覧を読み込んでいます'),
+    [0, 1, 2].map((i) => h('div', {
+      key: i,
+      'aria-hidden': 'true',
+      class: 'skel skel-card',
+      style: 'border-radius:8px;border:0.5px solid var(--border2);background:var(--bg2);padding:12px;margin-bottom:10px;height:64px;'
+    }))
+  );
+}
+
 export function GoalsList() {
   const [tab, setTab] = useState('goals');
   const [wishes, setWishes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [, forceUpdate] = useState(0);
 
   // Load wishes from localStorage
@@ -19,8 +38,24 @@ export function GoalsList() {
     window._preactGoalsListMounted = true;
     window.renderGoalsList = () => forceUpdate(n => n + 1);
     window.switchGoalsTab = (t) => setTab(t);
+    // Phase 8.2 BUG-08 fix: ALL_GOALS が後から hydrate される場合 skeleton を表示
+    if (Array.isArray(window.ALL_GOALS)) {
+      setLoading(false);
+    } else {
+      const t = setTimeout(() => setLoading(false), 200);
+      const fallback = setTimeout(() => setLoading(false), 1500);
+      return () => {
+        clearTimeout(t);
+        clearTimeout(fallback);
+        delete window._preactGoalsListMounted;
+      };
+    }
     return () => { delete window._preactGoalsListMounted; };
   }, []);
+
+  if (loading) {
+    return GoalsListSkeleton();
+  }
 
   const goals = (window.ALL_GOALS || []).filter(g => !g.archived);
 

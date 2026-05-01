@@ -135,10 +135,11 @@ function initSwipeToOpenSidebar(){
   }, {passive:true});
 }
 
-// A-11: popstateでタブ復元
+// A-11: popstateでタブ復元 (BUG-01 fix 2026-05-01: whitelist expansion to 9 pages)
+// goPage が分岐している全ページを許可リストに含めることで、戻る操作後のページ復元を可能にする
 window.addEventListener('popstate', (e) => {
   const pg = e.state?.page || 'today';
-  const validTabs = ['today','home','goal-hub','myself'];
+  const validTabs = ['today','home','goal-hub','myself','tasks','calendar','analytics','settings','welcome'];
   if(validTabs.includes(pg)) goPage(pg);
 });
 

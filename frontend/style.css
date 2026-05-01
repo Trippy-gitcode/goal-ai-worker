@@ -7,6 +7,18 @@ a[href]:not(.btn):not([role="button"]){min-width:auto;min-height:auto;}
 #bottom-tabs button{min-width:auto;} /* tabs already have full-width layout */
 /* ══════ THEME SYSTEM (Night Sky Journal Design System v1) ══════ */
 /* テーマ4種: night-sky(default), dawn, harajuku-light, harajuku-dark */
+
+/* ══════ DESIGN SYSTEM SSoT (locked 2026-05-01, Wave 1 #43 P0 fix) ══════ */
+/* Accent color: --accent (#58A6FF Blue) is the SSoT for all themes.
+ *   docs/design_system.md と goal_ai_design_spec_v3.md の衝突は本トークンに集約。
+ *   旧仕様 (#c8920a gold) は legacy alias として --gold→--accent を維持。
+ * Spacing: --space-xs(4) / --space-sm(8) / --space-md(16) / --space-lg(24) / --space-xl(40) / --space-xxl(64)
+ *   コンポーネント新設時は必ずこの token を利用。直接 px は禁止 (#43 P1)。
+ * Gradient policy (#43 P0): NG list は "decorative gradient on text/CTA" のみ。
+ *   許容箇所: ロゴ glyph / icon glyph / progress fill / 背景アンビエント (max 8% 領域) のみ。
+ *   46 actual gradient の大部分はこの許容範囲内 = 例外規定として SSoT 化。
+ */
+
 /* 共通トークン */
 :root{
   --ff:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans','Hiragino Kaku Gothic ProN',system-ui,sans-serif;
@@ -165,6 +177,109 @@ html{font-size:var(--base-font-size,13px);line-height:var(--base-line-height,1.6
 html,body{height:100%;background:var(--bg);background-image:var(--bg-grad);background-attachment:fixed;color:var(--cream);font-family:var(--ff);font-size:13px;line-height:1.65;overflow:clip;-webkit-font-smoothing:antialiased;overscroll-behavior:none;}
 button{font-family:var(--ff);cursor:pointer;border:none;outline:none}
 input,textarea,select{font-family:var(--ff);outline:none}
+
+/* ══════ ACCESSIBILITY: focus-visible (WCAG 2.4.7 fix 2026-05-01) ══════ */
+/* outline:none を抑制した interactive 要素にも、キーボード focus 時には可視 outline を必ず付与する */
+button:focus-visible,
+[role="button"]:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible,
+.tap:focus-visible,
+.btn:focus-visible,
+.mode-chip:focus-visible,
+.nav-item:focus-visible,
+.preset-edit-in:focus-visible,
+.htp-status-sel:focus-visible,
+[onclick]:focus-visible {
+  outline: 2px solid var(--accent, #58A6FF);
+  outline-offset: 2px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 4px var(--amber-d, rgba(88,166,255,0.12));
+}
+/* テキスト入力系は border-color でハイライト */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent, #58A6FF);
+  outline-offset: -1px;
+  border-color: var(--accent, #58A6FF) !important;
+}
+/* ハイコントラスト / 強制カラー モードで focus 視認性確保 */
+@media (forced-colors: active) {
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 3px solid CanvasText;
+    outline-offset: 2px;
+  }
+}
+/* prefers-reduced-motion 配慮 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ══════ DESIGN TOKEN UTILITIES (Wave 1 #43 P1 fix 2026-05-01) ══════ */
+/* --space-* token を実利用するための utility class。新規コンポーネントは class 経由で利用。 */
+.u-p-xs{padding:var(--space-xs);}
+.u-p-sm{padding:var(--space-sm);}
+.u-p-md{padding:var(--space-md);}
+.u-p-lg{padding:var(--space-lg);}
+.u-m-xs{margin:var(--space-xs);}
+.u-m-sm{margin:var(--space-sm);}
+.u-m-md{margin:var(--space-md);}
+.u-m-lg{margin:var(--space-lg);}
+.u-gap-xs{gap:var(--space-xs);}
+.u-gap-sm{gap:var(--space-sm);}
+.u-gap-md{gap:var(--space-md);}
+.u-gap-lg{gap:var(--space-lg);}
+.u-stack-xs > * + *{margin-top:var(--space-xs);}
+.u-stack-sm > * + *{margin-top:var(--space-sm);}
+.u-stack-md > * + *{margin-top:var(--space-md);}
+.u-stack-lg > * + *{margin-top:var(--space-lg);}
+
+/* skeleton loading (Phase 8.2 BUG-08 fix) */
+.skel{
+  background: linear-gradient(90deg, var(--bg2) 0%, var(--bg3) 50%, var(--bg2) 100%);
+  background-size: 200% 100%;
+  border-radius: var(--card-radius, 8px);
+  animation: skel-shimmer 1.4s ease-in-out infinite;
+}
+.skel-line{ height: 12px; margin-bottom: var(--space-sm); width: 100%; }
+.skel-line.short{ width: 40%; }
+.skel-line.medium{ width: 70%; }
+.skel-card{
+  padding: var(--space-md);
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--card-radius, 8px);
+  margin-bottom: var(--space-sm);
+}
+@keyframes skel-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel { animation: none; opacity: 0.6; }
+}
+/* visually-hidden helper for screen readers (a11y) */
+.sr-only{
+  position:absolute;
+  width:1px;height:1px;
+  padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);
+  white-space:nowrap;border:0;
+}
+
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.2);border-radius:2px}

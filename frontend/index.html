@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
 <meta property="og:title" content="GOAL AI - AIゴールコーチング">
 <meta property="og:description" content="ゴールだけ教えてくれればいい。3つのAIがあなたの目標達成をサポートします。">
 <meta property="og:type" content="website">
@@ -72,22 +72,27 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!-- skip link for keyboard users (WCAG 2.4.1 fix 2026-05-01) -->
+<a href="#main" class="sr-only" style="position:absolute;left:0;top:0;z-index:9999;padding:8px 12px;background:var(--bg2);color:var(--cream);" onfocus="this.style.position='fixed';this.classList.remove('sr-only')" onblur="this.classList.add('sr-only')">メインコンテンツへスキップ</a>
+<!-- visually-hidden h1 for heading hierarchy (#45 F-05 fix) -->
+<h1 class="sr-only">GOAL AI - AIゴールコーチング</h1>
 <div id="app">
 
-<div id="sb-overlay" onclick="toggleSidebar()"></div>
+<div id="sb-overlay" onclick="toggleSidebar()" aria-hidden="true"></div>
 
 <!-- ═══ SIDEBAR ═══ -->
-<div id="sb">
-  <div class="sb-logo" style="padding:0 12px 6px;border-bottom:0.5px solid var(--border);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
-    <svg width="22" height="22" viewBox="0 0 32 32"><defs><linearGradient id="logo-grad-sb" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="var(--accent,#58A6FF)"/><stop offset="100%" stop-color="var(--accent-hover,#388BFD)"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#logo-grad-sb)"/></svg>
+<aside id="sb" role="complementary" aria-label="ナビゲーションサイドバー">
+  <header class="sb-logo" style="padding:0 12px 6px;border-bottom:0.5px solid var(--border);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+    <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><defs><linearGradient id="logo-grad-sb" x1="6" y1="6" x2="26" y2="24"><stop offset="0%" stop-color="var(--accent,#58A6FF)"/><stop offset="100%" stop-color="var(--accent-hover,#388BFD)"/></linearGradient></defs><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="url(#logo-grad-sb)"/></svg>
     <span class="sb-logo-mark" style="font-size:13px;font-weight:500;">GOAL AI</span>
-    <span id="sb-logo-plan" class="logo-plan-badge" style="display:none;font-size:12px;padding:1px 5px;border-radius:4px;background:var(--amber-d);color:var(--accent);margin-left:auto;" onclick="event.stopPropagation();openPlanModal()"></span>
-  </div>
+    <span id="sb-logo-plan" class="logo-plan-badge" role="button" tabindex="0" aria-label="プラン情報を開く" style="display:none;font-size:12px;padding:1px 5px;border-radius:4px;background:var(--amber-d);color:var(--accent);margin-left:auto;" onclick="event.stopPropagation();openPlanModal()"></span>
+  </header>
 
   <!-- UX-01: Sidebar 4 items only -->
 
   <!-- 1. コーチングモード切替 -->
-  <div class="nav-section" style="padding:8px 16px 4px;font-size:12px;">コーチングモード</div>
+  <nav aria-label="コーチングモード">
+  <h2 class="nav-section" style="padding:8px 16px 4px;font-size:12px;font-weight:normal;">コーチングモード</h2>
   <!-- mbox-*: hidden, kept for JS compatibility -->
   <div id="mbox-normal" style="display:none;"></div>
   <div id="mbox-mencare" style="display:none;"></div>
@@ -95,109 +100,112 @@
   <div id="mbox-spartan" style="display:none;"></div>
   <div id="mbox-mencare-sub" style="display:none;"></div>
   <div class="mencare-timer" id="mencare-timer" style="display:none;"></div>
-  <div class="chip-row">
-    <span class="mode-chip on" data-mode="normal" onclick="handleModeClick('normal')">通常</span>
-    <span class="mode-chip" data-mode="mencare" onclick="handleModeClick('mencare')">メンケア</span>
-    <span class="mode-chip" data-mode="kabeuchi" onclick="handleModeClick('kabeuchi')">ソクラテス</span>
-    <span class="mode-chip" data-mode="spartan" onclick="handleModeClick('spartan')">スパルタ</span>
+  <div class="chip-row" role="tablist" aria-label="モード選択">
+    <span class="mode-chip on" data-mode="normal" role="tab" tabindex="0" aria-label="通常モードを選択" aria-selected="true" onclick="handleModeClick('normal')">通常</span>
+    <span class="mode-chip" data-mode="mencare" role="tab" tabindex="0" aria-label="メンタルケアモードを選択" aria-selected="false" onclick="handleModeClick('mencare')">メンケア</span>
+    <span class="mode-chip" data-mode="kabeuchi" role="tab" tabindex="0" aria-label="ソクラテスモードを選択" aria-selected="false" onclick="handleModeClick('kabeuchi')">ソクラテス</span>
+    <span class="mode-chip" data-mode="spartan" role="tab" tabindex="0" aria-label="スパルタモードを選択" aria-selected="false" onclick="handleModeClick('spartan')">スパルタ</span>
   </div>
+  </nav>
 
   <!-- 2. チャット履歴 -->
-  <div class="nav-section" style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+  <section aria-label="チャット履歴">
+  <h2 class="nav-section" style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;font-weight:normal;">
     チャット履歴
-    <span onclick="openChatHistory()" style="font-size:12px;color:var(--amber);cursor:pointer;">すべて見る →</span>
-  </div>
-  <div id="sb-chat-records"></div>
+    <span onclick="openChatHistory()" role="button" tabindex="0" aria-label="すべてのチャット履歴を見る" style="font-size:12px;color:var(--amber);cursor:pointer;">すべて見る →</span>
+  </h2>
+  <div id="sb-chat-records" role="list" aria-label="最近のチャット"></div>
+  </section>
 
   <!-- 3. 設定（下部に移動済み — sb-bottomのsettingsボタン） -->
 
   <!-- 4. プラン -->
-  <div id="sb-upgrade-nudge" class="upgrade-nudge" onclick="openPlanModal()" style="display:none;margin:8px 12px;">
-    <div style="font-size:12px;font-weight:500;color:var(--amber);"><svg width="13" height="13" class="svg-ic"><use href="#ic-zap"/></svg> Proにアップグレード</div>
+  <div id="sb-upgrade-nudge" class="upgrade-nudge" role="button" tabindex="0" aria-label="Proプランへのアップグレードを開く" onclick="openPlanModal()" style="display:none;margin:8px 12px;">
+    <div style="font-size:12px;font-weight:500;color:var(--amber);"><svg width="13" height="13" class="svg-ic" aria-hidden="true" focusable="false"><use href="#ic-zap"/></svg> Proにアップグレード</div>
     <div style="font-size:12px;color:var(--muted);margin-top:2px;" id="sb-nudge-sub">ゴール無制限・毎週レビュー</div>
   </div>
 
   <!-- Hidden: keep IDs for JS compatibility but don't display -->
-  <div id="sb-task-list" style="display:none;"></div>
-  <div id="sb-goals-section" style="display:none;"></div>
-  <div id="nav-home" style="display:none;"></div>
-  <div id="nav-tasks" style="display:none;"></div>
-  <div id="nav-calendar" style="display:none;"></div>
-  <div id="nav-analytics" style="display:none;"></div>
-  <div id="nav-settings" style="display:none;"></div>
+  <div id="sb-task-list" style="display:none;" aria-hidden="true"></div>
+  <div id="sb-goals-section" style="display:none;" aria-hidden="true"></div>
+  <div id="nav-home" style="display:none;" aria-hidden="true"></div>
+  <div id="nav-tasks" style="display:none;" aria-hidden="true"></div>
+  <div id="nav-calendar" style="display:none;" aria-hidden="true"></div>
+  <div id="nav-analytics" style="display:none;" aria-hidden="true"></div>
+  <div id="nav-settings" style="display:none;" aria-hidden="true"></div>
 
   <!-- Feedback -->
-  <div onclick="openFeedbackChat()" style="display:flex;align-items:center;gap:7px;padding:7px 16px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
-    <span style="opacity:.55;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg></span>
+  <div onclick="openFeedbackChat()" role="button" tabindex="0" aria-label="フィードバックを送る" style="display:flex;align-items:center;gap:7px;padding:7px 16px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+    <span style="opacity:.55;" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg></span>
     <span style="font-size:12px;color:var(--muted2);">ご意見・フィードバック</span>
   </div>
 
-  <div class="sb-bottom" style="padding:6px 12px 8px;">
+  <footer class="sb-bottom" style="padding:6px 12px 8px;">
     <!-- 1行: avatar · name · settings · help -->
-    <div class="prof-row" onclick="openProfileDirect()" style="gap:6px;padding:6px 8px;">
-      <div class="avatar" id="sb-avatar" style="width:22px;height:22px;font-size:12px;">?</div>
+    <div class="prof-row" role="button" tabindex="0" aria-label="プロフィールを開く" onclick="openProfileDirect()" style="gap:6px;padding:6px 8px;">
+      <div class="avatar" id="sb-avatar" aria-hidden="true" style="width:22px;height:22px;font-size:12px;">?</div>
       <div style="flex:1;min-width:0;overflow:hidden;">
         <div class="prof-name" id="sb-prof-name" style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
       </div>
-      <button onclick="event.stopPropagation();openSettingsPanel()" title="設定" class="sb-icon-btn" id="sb-settings-btn" style="flex-shrink:0;">
-        <svg width="15" height="15" class="svg-ic"><use href="#ic-settings"/></svg>
+      <button onclick="event.stopPropagation();openSettingsPanel()" title="設定" aria-label="設定を開く" class="sb-icon-btn" id="sb-settings-btn" style="flex-shrink:0;">
+        <svg width="15" height="15" class="svg-ic" aria-hidden="true" focusable="false"><use href="#ic-settings"/></svg>
       </button>
-      <button onclick="event.stopPropagation();showHelpGuide()" title="使い方ガイド" style="width:28px;height:28px;padding:0;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cream)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r="1" fill="var(--cream)" stroke="none"/></svg>
+      <button onclick="event.stopPropagation();showHelpGuide()" title="使い方ガイド" aria-label="使い方ガイドを表示" style="width:28px;height:28px;padding:0;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cream)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r="1" fill="var(--cream)" stroke="none"/></svg>
       </button>
     </div>
     <!-- plan badge (hidden, managed by JS renderMembershipUI) -->
-    <div style="display:none;">
+    <div style="display:none;" aria-hidden="true">
       <span id="sb-plan-badge" class="plan-badge-pro">▲ Pro</span>
       <span id="sb-trial-days" style="display:none;"></span>
     </div>
     <div class="sidebar-footer">
-      <a href="terms.html" target="_blank">利用規約</a>
-      <span style="color:var(--muted3);">|</span>
-      <a href="privacy.html" target="_blank">プライバシー</a>
-      <span style="color:var(--muted3);">|</span>
-      <span class="version" title="タップで更新確認" onclick="checkForUpdate()" style="cursor:pointer;">v4.0.43</span>
+      <a href="terms.html" target="_blank" rel="noopener noreferrer" aria-label="利用規約を新しいタブで開く">利用規約</a>
+      <span style="color:var(--muted3);" aria-hidden="true">|</span>
+      <a href="privacy.html" target="_blank" rel="noopener noreferrer" aria-label="プライバシーポリシーを新しいタブで開く">プライバシー</a>
+      <span style="color:var(--muted3);" aria-hidden="true">|</span>
+      <span class="version" title="タップで更新確認" role="button" tabindex="0" aria-label="バージョン v4.0.47。タップで更新確認" onclick="checkForUpdate()" style="cursor:pointer;">v4.0.47</span>
     </div>
-  </div>
-</div>
+  </footer>
+</aside>
 
 <!-- ═══ MAIN ═══ -->
-<div id="main">
+<main id="main" role="main" aria-label="メインコンテンツ">
 
   <!-- Topbar -->
-  <div id="topbar">
+  <header id="topbar" role="banner">
     <div class="tb-title" id="tb-title"></div>
 
     <!-- Progress comparison widget -->
-    <div class="prog-compare" id="prog-compare-widget">
-      <div class="prog-compare-title">進捗 — 今日の予定 vs 実績</div>
-      <div class="prog-compare-bars">
-        <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:var(--muted3);border-radius:3px;"></div>
-        <div style="position:absolute;top:0;left:0;height:100%;width:0%;background:var(--muted2);border-radius:3px;transition:width .6s;" id="prog-actual-bar"></div>
-        <div class="prog-bar-target-marker" id="prog-target-marker" style="left:0%"></div>
+    <section class="prog-compare" id="prog-compare-widget" aria-label="進捗状況">
+      <h2 class="prog-compare-title" style="font-size:12px;font-weight:normal;">進捗 — 今日の予定 vs 実績</h2>
+      <div class="prog-compare-bars" role="progressbar" aria-label="今日の進捗" aria-valuemin="0" aria-valuemax="100">
+        <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:var(--muted3);border-radius:3px;" aria-hidden="true"></div>
+        <div style="position:absolute;top:0;left:0;height:100%;width:0%;background:var(--muted2);border-radius:3px;transition:width .6s;" id="prog-actual-bar" aria-hidden="true"></div>
+        <div class="prog-bar-target-marker" id="prog-target-marker" style="left:0%" aria-hidden="true"></div>
       </div>
       <div class="prog-compare-labels">
-        <span class="prog-lbl"><span class="prog-dot" style="background:var(--muted2)"></span><span style="color:var(--muted2)" id="prog-actual-label">実績 0%</span></span>
-        <span class="prog-status-chip" style="background:var(--bg3);color:var(--muted2)" id="prog-status-chip">—</span>
-        <span class="prog-lbl"><span class="prog-dot" style="background:var(--amber)"></span><span style="color:var(--amber)" id="prog-target-label">予定 0%</span></span>
+        <span class="prog-lbl"><span class="prog-dot" style="background:var(--muted2)" aria-hidden="true"></span><span style="color:var(--muted2)" id="prog-actual-label">実績 0%</span></span>
+        <span class="prog-status-chip" style="background:var(--bg3);color:var(--muted2)" id="prog-status-chip" aria-label="進捗状態">—</span>
+        <span class="prog-lbl"><span class="prog-dot" style="background:var(--amber)" aria-hidden="true"></span><span style="color:var(--amber)" id="prog-target-label">予定 0%</span></span>
       </div>
-    </div>
+    </section>
 
-    <div class="tb-chip chip-deadline">□ 2026年6月末</div>
-    <div class="tb-chip chip-warn" id="tb-status-chip">⚠ 現ペース +4ヶ月遅延</div>
-    <button class="btn-review" onclick="startReview()">月次レビュー</button>
-  </div>
+    <div class="tb-chip chip-deadline" aria-label="期日: 2026年6月末">□ 2026年6月末</div>
+    <div class="tb-chip chip-warn" id="tb-status-chip" aria-label="ステータス警告">⚠ 現ペース +4ヶ月遅延</div>
+    <button class="btn-review" onclick="startReview()" aria-label="月次レビューを開始">月次レビュー</button>
+  </header>
 
   <!-- Pages -->
-  <div id="pages">
+  <div id="pages" role="region" aria-label="アプリページ">
 
     <!-- ─── TODAY (新ホーム) ─── -->
     <div class="page active" id="pg-today-wrap">
       <div id="pg-today" style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
         <!-- Top bar -->
         <div style="display:flex;align-items:center;padding:6px 14px;flex-shrink:0;">
-          <button onclick="toggleSidebar()" style="width:28px;height:28px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <button onclick="toggleSidebar()" aria-label="サイドバーを開閉" style="width:28px;height:28px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
           <div style="flex:1;"></div>
           <svg width="22" height="22" viewBox="0 0 32 32" style="opacity:0.3;"><path d="M5 24l4-11 3 5L16 6l4 12 3-5 4 11H5z" fill="var(--amber)"/></svg>
@@ -231,7 +239,7 @@
           <div style="margin-top:12px;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
               <div style="font-size:12px;font-weight:500;color:var(--muted2);letter-spacing:0.5px;text-transform:uppercase;">Timeline</div>
-              <button id="today-view-toggle" onclick="toggleTodayView()" style="font-size:11px;color:var(--muted);background:none;border:1px solid var(--border-card);border-radius:6px;padding:3px 8px;cursor:pointer;font-family:var(--ff);">リスト表示</button>
+              <button id="today-view-toggle" onclick="toggleTodayView()" aria-label="表示形式を切替" style="font-size:11px;color:var(--muted);background:none;border:1px solid var(--border-card);border-radius:6px;padding:3px 8px;cursor:pointer;font-family:var(--ff);">リスト表示</button>
             </div>
             <div id="today-timeline" style="position:relative;min-height:200px;"></div>
             <div id="today-task-list" style="display:none;"></div>
@@ -256,15 +264,15 @@
         <div style="padding:6px 14px;flex-shrink:0;border-top:0.5px solid var(--border);">
           <div id="today-comment-box" style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg2);">
             <input id="today-comment-in" placeholder="状況を伝える（例: 午後は外出）" style="flex:1;font-size:12px;color:var(--cream);background:none;border:none;outline:none;font-family:var(--ff);">
-            <button onclick="sendTodayComment()" style="background:none;border:none;cursor:pointer;color:var(--muted);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+            <button onclick="sendTodayComment()" aria-label="コメントを送信" style="background:none;border:none;cursor:pointer;color:var(--muted);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
           </div>
         </div>
         <!-- Calendar FAB (A-14) -->
-        <button onclick="goPage('calendar')" style="position:absolute;bottom:60px;left:16px;width:32px;height:32px;border-radius:50%;border:0.5px solid var(--border2);background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;">
+        <button onclick="goPage('calendar')" aria-label="カレンダーを開く" style="position:absolute;bottom:60px;left:16px;width:32px;height:32px;border-radius:50%;border:0.5px solid var(--border2);background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         </button>
         <!-- Add task FAB -->
-        <button id="today-add-fab" onclick="openTodayAddTask()" style="position:absolute;bottom:60px;right:16px;width:40px;height:40px;border-radius:50%;background:var(--send-btn-grad);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.2);z-index:10;">
+        <button id="today-add-fab" onclick="openTodayAddTask()" aria-label="新しいタスクを追加" style="position:absolute;bottom:60px;right:16px;width:40px;height:40px;border-radius:50%;background:var(--send-btn-grad);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.2);z-index:10;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <!-- UX-01-B3: 3ステップタスク追加ハーフモーダル -->
@@ -272,7 +280,7 @@
         <div id="task-add-sheet" style="display:none;position:absolute;bottom:0;left:0;right:0;z-index:300;background:var(--bg2);border-top:1px solid var(--border2);border-radius:16px 16px 0 0;max-height:70vh;flex-direction:column;box-shadow:0 -4px 24px rgba(0,0,0,.4);overflow-y:auto;">
           <div style="display:flex;align-items:center;padding:12px 16px;border-bottom:0.5px solid var(--border);">
             <div id="task-step-title" style="font-size:13px;font-weight:500;color:var(--cream);flex:1;">タスクを追加</div>
-            <button onclick="closeTodayAddTask()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 8px;">✕</button>
+            <button onclick="closeTodayAddTask()" aria-label="タスク追加画面を閉じる" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 8px;">✕</button>
           </div>
           <!-- Step 1: タスク名 + 期日 -->
           <div id="task-step-1" style="padding:16px;">
@@ -281,15 +289,15 @@
             <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">いつまで？（任意）</label>
             <div id="task-step1-deadline-btns" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;"></div>
             <input id="task-step1-date-picker" type="date" style="display:none;padding:8px 10px;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;color:var(--cream);font-family:var(--ff);font-size:12px;margin-bottom:16px;">
-            <button onclick="taskStepNext(1)" style="width:100%;padding:10px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">次へ →</button>
+            <button onclick="taskStepNext(1)" aria-label="次のステップへ進む" style="width:100%;padding:10px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">次へ →</button>
           </div>
           <!-- Step 2: ローカル推論 + 選択カード -->
           <div id="task-step-2" style="display:none;padding:16px;">
             <div id="task-step2-title" style="font-size:13px;color:var(--cream);margin-bottom:12px;font-weight:500;"></div>
             <div id="task-step2-cards" style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;"></div>
             <div style="display:flex;gap:8px;">
-              <button onclick="taskStepComplete()" style="flex:1;padding:10px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">これでOK</button>
-              <button onclick="taskStepNext(2)" style="flex:1;padding:10px;background:var(--bg3);color:var(--cream);border:1px solid var(--border-card);border-radius:10px;font-size:13px;cursor:pointer;">もう少し詳しく</button>
+              <button onclick="taskStepComplete()" aria-label="このタスクで確定" style="flex:1;padding:10px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">これでOK</button>
+              <button onclick="taskStepNext(2)" aria-label="さらに詳しく入力" style="flex:1;padding:10px;background:var(--bg3);color:var(--cream);border:1px solid var(--border-card);border-radius:10px;font-size:13px;cursor:pointer;">もう少し詳しく</button>
             </div>
           </div>
           <!-- Step 3: AI対話で詳細 -->
@@ -297,8 +305,8 @@
             <div id="task-add-chat" style="overflow-y:auto;padding:10px 16px;max-height:30vh;"></div>
             <div style="padding:8px 16px 12px;display:flex;gap:6px;align-items:center;">
               <input id="task-add-input" placeholder="詳細を入力..." style="flex:1;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;color:var(--cream);font-family:var(--ff);font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')sendTaskAddMsg()">
-              <button onclick="sendTaskAddMsg()" style="width:36px;height:36px;border-radius:50%;background:var(--amber);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              <button onclick="sendTaskAddMsg()" aria-label="タスク詳細メッセージを送信" style="width:36px;height:36px;border-radius:50%;background:var(--amber);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2" aria-hidden="true" focusable="false"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
               </button>
             </div>
           </div>
@@ -319,8 +327,8 @@
             <button id="hamburger-btn" onclick="toggleSidebar()" title="メニュー" aria-label="メニュー" style="width:28px;height:28px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
-            <button onclick="openChatHistory()" title="会話履歴" style="width:28px;height:28px;border-radius:50%;background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
-            <button onclick="toggleHomeSearch()" title="検索" style="width:28px;height:28px;border-radius:50%;background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+            <button onclick="openChatHistory()" title="会話履歴" aria-label="会話履歴を開く" style="width:28px;height:28px;border-radius:50%;background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
+            <button onclick="toggleHomeSearch()" title="検索" aria-label="検索を開く" style="width:28px;height:28px;border-radius:50%;background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
             <div id="model-usage-badge" style="display:none;"></div>
             <span id="kabeuchi-indicator" style="display:none;white-space:nowrap;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="12" r="3"/><circle cx="17" cy="12" r="3"/><path d="M10 12h4"/></svg></span>
             <span id="chat-role-badge" class="chat-role-badge" style="display:none;">
@@ -328,9 +336,9 @@
               <span class="role-text"></span>
             </span>
             <div style="flex:1;"></div>
-            <button id="goal-modal-btn" onclick="openGoalModal()" title="ゴール＆タスク" style="width:44px;height:44px;border-radius:50%;background:var(--amber-d);color:var(--amber);border:none;cursor:pointer;font-weight:700;font-size:12px;flex-shrink:0;">G</button>
-            <button id="task-toolbar-btn" onclick="goPage('tasks')" title="タスク" style="width:44px;height:44px;border-radius:50%;background:var(--amber-d);color:var(--amber);border:none;cursor:pointer;font-weight:700;font-size:12px;flex-shrink:0;">T</button>
-            <button id="home-new-chat-btn" onclick="newHomeChat()" title="新しい会話" style="width:44px;height:44px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            <button id="goal-modal-btn" onclick="openGoalModal()" title="ゴール＆タスク" aria-label="ゴールとタスクを表示" style="width:44px;height:44px;border-radius:50%;background:var(--amber-d);color:var(--amber);border:none;cursor:pointer;font-weight:700;font-size:12px;flex-shrink:0;">G</button>
+            <button id="task-toolbar-btn" onclick="goPage('tasks')" title="タスク" aria-label="タスク一覧" style="width:44px;height:44px;border-radius:50%;background:var(--amber-d);color:var(--amber);border:none;cursor:pointer;font-weight:700;font-size:12px;flex-shrink:0;">T</button>
+            <button id="home-new-chat-btn" onclick="newHomeChat()" title="新しい会話" aria-label="新しい会話を開始" style="width:44px;height:44px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" focusable="false"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
           </div>
           <div id="home-search-bar" style="display:none;padding:4px 16px 0;max-width:700px;margin:0 auto;width:100%;">
               <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;">
@@ -340,7 +348,7 @@
                   oninput="searchHomeChat(this.value)"
                   onkeydown="if(event.key==='Escape')clearHomeSearch()">
                 <span id="home-search-cnt" style="font-size:12px;color:var(--muted2);font-family:var(--fm);white-space:nowrap;"></span>
-                <button onclick="clearHomeSearch()" style="background:none;border:none;color:var(--muted2);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;">✕</button>
+                <button onclick="clearHomeSearch()" aria-label="検索をクリア" style="background:none;border:none;color:var(--muted2);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;">✕</button>
               </div>
             </div>
             <!-- UX-01: Three sages hero (replaces old AI name hero) -->
@@ -366,14 +374,14 @@
             <div id="home-chat-wrap" style="flex:1;overflow-y:auto;position:relative;display:none;">
             <div id="home-chat-inner" style="max-width:740px;margin:0 auto;padding:8px 20px 100px;"></div>
           </div>
-          <button id="scroll-latest-btn" onclick="scrollToLatest()" style="display:none;position:absolute;bottom:90px;right:24px;z-index:600;background:var(--amber);color:#fff;border:none;cursor:pointer;padding:8px 18px 8px 14px;border-radius:28px;font-size:13px;font-family:var(--fm);font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.4);align-items:center;gap:6px;opacity:0;transition:opacity .25s ease,transform .25s ease;transform:translateY(8px);">
+          <button id="scroll-latest-btn" onclick="scrollToLatest()" aria-label="最新のメッセージへスクロール" style="display:none;position:absolute;bottom:90px;right:24px;z-index:600;background:var(--amber);color:#fff;border:none;cursor:pointer;padding:8px 18px 8px 14px;border-radius:28px;font-size:13px;font-family:var(--fm);font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.4);align-items:center;gap:6px;opacity:0;transition:opacity .25s ease,transform .25s ease;transform:translateY(8px);">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
             最新へ
           </button>
           <div id="home-topic-tags" class="topic-tags" style="display:none;"></div>
           <!-- Task chip (above input, right-aligned) -->
           <div id="task-chip-wrap" class="task-chip-wrap" style="display:none;">
-            <button id="task-chip-btn" class="task-chip" onclick="openTaskFromChat()">
+            <button id="task-chip-btn" class="task-chip" onclick="openTaskFromChat()" aria-label="このメッセージからタスクを開く">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d4a012" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
               <span>タスク化</span>
             </button>
@@ -394,11 +402,11 @@
             <div style="background:var(--bg2);border:1px solid var(--border-card);border-radius:14px;padding:20px;width:90%;max-width:360px;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
                 <span style="font-size:13px;font-weight:500;color:var(--cream);">プリセットを編集</span>
-                <button onclick="closePresetEditor()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;">✕</button>
+                <button onclick="closePresetEditor()" aria-label="プリセットエディタを閉じる" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;">✕</button>
               </div>
               <div id="preset-edit-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;"></div>
-              <button onclick="addPresetItem()" style="width:100%;padding:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--ff);">＋ 追加</button>
-              <button onclick="savePresets()" style="width:100%;margin-top:8px;padding:10px;background:var(--amber);border:none;border-radius:10px;color:var(--text-on-accent);cursor:pointer;font-size:12px;font-weight:500;font-family:var(--ff);">保存</button>
+              <button onclick="addPresetItem()" aria-label="プリセット項目を追加" style="width:100%;padding:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--ff);">＋ 追加</button>
+              <button onclick="savePresets()" aria-label="プリセットを保存" style="width:100%;margin-top:8px;padding:10px;background:var(--amber);border:none;border-radius:10px;color:var(--text-on-accent);cursor:pointer;font-size:12px;font-weight:500;font-family:var(--ff);">保存</button>
             </div>
           </div>
           <!-- Bottom padding -->
@@ -407,9 +415,9 @@
           <!-- Chat history slide panel -->
           <div id="chat-history-panel" style="display:none;position:absolute;inset:0;z-index:60;background:var(--bg2);flex-direction:column;overflow:hidden;">
             <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
-              <button onclick="closeChatHistory()" style="width:32px;height:32px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:16px;">←</button>
+              <button onclick="closeChatHistory()" aria-label="チャット履歴を閉じる" style="width:32px;height:32px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:16px;">←</button>
               <div style="font-size:14px;font-weight:500;color:var(--cream);flex:1;">過去の会話</div>
-              <button onclick="toggleHistorySelectMode()" style="padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--ff);">選択</button>
+              <button onclick="toggleHistorySelectMode()" aria-label="複数選択モードを切替" style="padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--ff);">選択</button>
               <div style="position:relative;flex:1;max-width:200px;">
                 <input id="history-search-in" placeholder="検索…" style="width:100%;padding:6px 10px 6px 28px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-size:12px;font-family:var(--ff);outline:none;" oninput="filterChatHistory(this.value)">
                 <svg width="12" height="12" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--muted2)" class="svg-ic"><use href="#ic-search"/></svg>
@@ -418,9 +426,9 @@
             <div id="chat-history-list" style="flex:1;overflow-y:auto;padding:8px;"></div>
             <div id="history-select-footer" style="display:none;padding:10px 16px;padding-bottom:calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <span id="history-select-count" style="font-size:12px;color:var(--muted);flex:1;white-space:nowrap;">0件選択</span>
-              <button id="select-all-btn" onclick="toggleSelectAll()" style="padding:5px 10px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--ff);">すべて選択</button>
-              <button onclick="deleteSelectedSessions()" id="delete-selected-btn" style="padding:5px 10px;background:var(--red);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--ff);">削除</button>
-              <button onclick="toggleHistorySelectMode()" style="padding:5px 10px;background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--ff);">キャンセル</button>
+              <button id="select-all-btn" onclick="toggleSelectAll()" aria-label="すべて選択" style="padding:5px 10px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--ff);">すべて選択</button>
+              <button onclick="deleteSelectedSessions()" id="delete-selected-btn" aria-label="選択した会話を削除" style="padding:5px 10px;background:var(--red);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--ff);">削除</button>
+              <button onclick="toggleHistorySelectMode()" aria-label="選択をキャンセル" style="padding:5px 10px;background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--ff);">キャンセル</button>
             </div>
           </div>
 
@@ -463,7 +471,7 @@
               <div class="htp-input-wrap">
                 <textarea id="htp-msg-in" rows="1" placeholder="このタスクについて質問する…"
                   oninput="htpResize(this)" onkeydown="htpKey(event)"></textarea>
-                <button id="htp-send-btn" onclick="sendHtpMsg()">
+                <button id="htp-send-btn" onclick="sendHtpMsg()" aria-label="メッセージを送信">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--text-on-accent)"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
                 </button>
               </div>
@@ -484,14 +492,14 @@
           <div style="font-size:18px;font-weight:300;color:var(--cream);letter-spacing:0.5px;">Goals</div>
           <!-- Tab: ゴール / やりたいこと -->
           <div style="display:flex;gap:0;margin-top:10px;border-bottom:0.5px solid var(--border);">
-            <button id="goals-tab-goals" onclick="switchGoalsTab('goals')" style="flex:1;padding:8px 0;background:none;border:none;border-bottom:2px solid var(--amber);color:var(--amber);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff);">ゴール</button>
-            <button id="goals-tab-wishes" onclick="switchGoalsTab('wishes')" style="flex:1;padding:8px 0;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted2);font-size:12px;cursor:pointer;font-family:var(--ff);">やりたいこと</button>
+            <button id="goals-tab-goals" onclick="switchGoalsTab('goals')" aria-label="ゴールタブ" aria-selected="true" role="tab" style="flex:1;padding:8px 0;background:none;border:none;border-bottom:2px solid var(--amber);color:var(--amber);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff);">ゴール</button>
+            <button id="goals-tab-wishes" onclick="switchGoalsTab('wishes')" aria-label="やりたいことタブ" aria-selected="false" role="tab" style="flex:1;padding:8px 0;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted2);font-size:12px;cursor:pointer;font-family:var(--ff);">やりたいこと</button>
           </div>
         </div>
         <div id="goals-list-content" style="flex:1;overflow-y:auto;padding:10px 14px 80px;"></div>
         <div id="wishes-list-content" style="flex:1;overflow-y:auto;padding:10px 14px 80px;display:none;"></div>
         <!-- Add FAB -->
-        <button onclick="startGoalCreation()" style="position:absolute;bottom:60px;right:16px;width:40px;height:40px;border-radius:50%;background:var(--send-btn-grad);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.2);z-index:10;">
+        <button onclick="startGoalCreation()" aria-label="新しいゴールを作成" style="position:absolute;bottom:60px;right:16px;width:40px;height:40px;border-radius:50%;background:var(--send-btn-grad);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.2);z-index:10;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
       </div>
@@ -524,7 +532,7 @@
             <div class="hub-tab"        id="htab-analytics" onclick="switchHubTab('analytics')"><svg width="16" height="16" class="svg-ic"><use href="#ic-analytics"/></svg> 解析</div>
             <div class="hub-tab"        id="htab-memo"    onclick="switchHubTab('memo')"><svg width="16" height="16" class="svg-ic"><use href="#ic-memo"/></svg> メモ</div>
             <div class="hub-tab"        id="htab-settings" onclick="switchHubTab('settings')"><svg width="16" height="16" class="svg-ic"><use href="#ic-settings"/></svg> 設定</div>
-            <button onclick="openExportModal()" style="margin-left:auto;padding:6px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;font-size:12px;font-family:var(--ff);transition:color .15s;flex-shrink:0;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--muted)'"><svg width="13" height="13" class="svg-ic"><use href="#ic-export"/></svg>共有</button>
+            <button onclick="openExportModal()" aria-label="共有メニューを開く" style="margin-left:auto;padding:6px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;font-size:12px;font-family:var(--ff);transition:color .15s;flex-shrink:0;" onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--muted)'"><svg width="13" height="13" class="svg-ic" aria-hidden="true" focusable="false"><use href="#ic-export"/></svg>共有</button>
           </div>
         </div>
 
@@ -540,17 +548,17 @@
                   oninput="searchHubChat(this.value)"
                   onkeydown="if(event.key==='Escape')clearHubSearch()">
                 <span id="hub-search-cnt" style="font-size:12px;color:var(--muted2);font-family:var(--fm);white-space:nowrap;"></span>
-                <button onclick="clearHubSearch()" style="background:none;border:none;color:var(--muted2);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;">✕</button>
+                <button onclick="clearHubSearch()" aria-label="検索をクリア" style="background:none;border:none;color:var(--muted2);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;">✕</button>
               </div>
             </div>
             <div id="hub-chat-wrap"><div id="hub-chat-inner"></div></div>
             <div id="hub-chat-input-row" style="display:flex;align-items:center;gap:7px;">
-              <button onclick="toggleHubSearch()" title="チャット検索" style="width:32px;height:32px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,border-color .15s;" onmouseover="this.style.color='var(--amber)';this.style.borderColor='var(--border2)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'"><svg width="13" height="13" class="svg-ic"><use href="#ic-search"/></svg></button>
-              <button class="chat-voice-btn" onclick="startVoiceInput(document.getElementById('hub-msg-in'))" title="音声入力" style="width:32px;height:32px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">🎤</button>
+              <button onclick="toggleHubSearch()" title="チャット検索" aria-label="チャット内検索" style="width:32px;height:32px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,border-color .15s;" onmouseover="this.style.color='var(--amber)';this.style.borderColor='var(--border2)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'"><svg width="13" height="13" class="svg-ic" aria-hidden="true" focusable="false"><use href="#ic-search"/></svg></button>
+              <button class="chat-voice-btn" onclick="startVoiceInput(document.getElementById('hub-msg-in'))" title="音声入力" aria-label="音声入力を開始" style="width:32px;height:32px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">🎤</button>
               <div id="hub-chat-input-inner" style="flex:1;">
                 <textarea id="hub-msg-in" rows="1" placeholder="返信する"
                   oninput="hubMsgResize(this)" onkeydown="hubMsgKey(event)"></textarea>
-                <button id="hub-send-btn" onclick="sendHubMsg()">
+                <button id="hub-send-btn" onclick="sendHubMsg()" aria-label="メッセージを送信">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--text-on-accent)"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
                 </button>
               </div>
@@ -580,11 +588,11 @@
                   <div id="hub-ai-memo-accordion" style="padding:10px 14px;border-radius:8px;background:var(--amber-g);border:0.5px solid var(--border);margin-bottom:14px;"></div>
                 </div>
                 <div style="font-size:12px;font-weight:500;color:var(--cream);margin-bottom:6px;">自分のメモ</div>
-                <button class="memo-add-btn" onclick="openMemoEditor()">＋ メモを追加</button>
+                <button class="memo-add-btn" onclick="openMemoEditor()" aria-label="新しいメモを追加">＋ メモを追加</button>
                 <textarea id="hub-memo-editor" placeholder="気づき・メモ・考えたことを自由に…" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
                 <div class="memo-save-row" id="memo-save-row">
-                  <button onclick="closeMemoEditor()" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;color:var(--muted);cursor:pointer;font-family:var(--ff);font-size:12px;">キャンセル</button>
-                  <button onclick="saveMemo()" style="padding:6px 14px;background:var(--amber);border:none;border-radius:7px;color:var(--bg);cursor:pointer;font-family:var(--ff);font-size:12px;font-weight:500;">保存</button>
+                  <button onclick="closeMemoEditor()" aria-label="メモ編集をキャンセル" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;color:var(--muted);cursor:pointer;font-family:var(--ff);font-size:12px;">キャンセル</button>
+                  <button onclick="saveMemo()" aria-label="メモを保存" style="padding:6px 14px;background:var(--amber);border:none;border-radius:7px;color:var(--bg);cursor:pointer;font-family:var(--ff);font-size:12px;font-weight:500;">保存</button>
                 </div>
                 <div id="hub-memo-list"></div>
               </div>
@@ -603,7 +611,7 @@
                       <div class="field"><div class="field-lbl">完了目標日</div><input class="field-input" type="date" id="hub-goal-deadline-in"></div>
                       <div class="field"><div class="field-lbl">目標KPI</div><input class="field-input" id="hub-goal-kpi-in" placeholder="例: ¥1,000,000"></div>
                     </div>
-                    <button class="btn-save" onclick="saveHubGoalSettings()">保存</button>
+                    <button class="btn-save" onclick="saveHubGoalSettings()" aria-label="ゴール設定を保存">保存</button>
                   </div>
                 </div>
                 <div class="settings-card full" style="margin-bottom:16px;">
@@ -623,13 +631,13 @@
                   <div class="sc-body">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
                       <div id="hub-role-display" style="font-size:12px;color:var(--cream);">未設定</div>
-                      <button onclick="toggleHubRoleEdit()" style="font-size:12px;color:var(--amber);background:none;border:none;cursor:pointer;font-family:var(--ff);">変更する</button>
+                      <button onclick="toggleHubRoleEdit()" aria-label="役割設定を変更" style="font-size:12px;color:var(--amber);background:none;border:none;cursor:pointer;font-family:var(--ff);">変更する</button>
                     </div>
                     <div id="hub-role-edit" style="display:none;">
                       <input id="hub-role-input" placeholder="例: 厳しめのコーチ、優しい相談相手…" style="width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--cream);font-size:12px;font-family:var(--ff);outline:none;margin-bottom:8px;">
                       <div style="display:flex;gap:6px;">
-                        <button onclick="saveHubRole()" style="padding:6px 14px;background:var(--amber);border:none;border-radius:6px;color:var(--text-on-accent);cursor:pointer;font-size:12px;font-weight:500;">保存</button>
-                        <button onclick="toggleHubRoleEdit()" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;">キャンセル</button>
+                        <button onclick="saveHubRole()" aria-label="役割設定を保存" style="padding:6px 14px;background:var(--amber);border:none;border-radius:6px;color:var(--text-on-accent);cursor:pointer;font-size:12px;font-weight:500;">保存</button>
+                        <button onclick="toggleHubRoleEdit()" aria-label="役割設定編集をキャンセル" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;">キャンセル</button>
                       </div>
                     </div>
                   </div>
@@ -647,8 +655,8 @@
                   <div class="sc-hd"><span class="sc-hd-icon">📤</span><div class="sc-hd-title">エクスポート</div></div>
                   <div class="sc-body">
                     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                      <button onclick="exportHubMarkdown()" class="hub-export-btn">Markdown</button>
-                      <button onclick="exportHubICS()" class="hub-export-btn">ICS（カレンダー）</button>
+                      <button onclick="exportHubMarkdown()" class="hub-export-btn" aria-label="Markdown形式でエクスポート">Markdown</button>
+                      <button onclick="exportHubICS()" class="hub-export-btn" aria-label="ICSカレンダー形式でエクスポート">ICS（カレンダー）</button>
                     </div>
                   </div>
                 </div>
@@ -668,12 +676,12 @@
                     <div style="margin-bottom:14px;">
                       <div style="font-size:12px;color:var(--cream);font-weight:500;margin-bottom:4px;">ゴールを達成済みにする</div>
                       <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;">このゴールを「達成」としてアーカイブします。チャット履歴・タスク・データはすべて保持されます。</div>
-                      <button onclick="archiveGoal('done')" style="padding:7px 16px;background:var(--amber-d);border:1px solid var(--amber);border-radius:8px;color:var(--amber);font-size:12px;cursor:pointer;font-family:var(--ff);"><svg width="14" height="14" class="svg-ic"><use href="#ic-award"/></svg> 達成済みにする</button>
+                      <button onclick="archiveGoal('done')" aria-label="このゴールを達成済みにする" style="padding:7px 16px;background:var(--amber-d);border:1px solid var(--amber);border-radius:8px;color:var(--amber);font-size:12px;cursor:pointer;font-family:var(--ff);"><svg width="14" height="14" class="svg-ic" aria-hidden="true" focusable="false"><use href="#ic-award"/></svg> 達成済みにする</button>
                     </div>
                     <div style="padding-top:14px;border-top:1px solid var(--border);">
                       <div style="font-size:12px;color:var(--cream);font-weight:500;margin-bottom:4px;">ゴールを削除する</div>
                       <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;">このゴールと関連するすべてのデータ（タスク・チャット・メモ）を完全に削除します。<strong style="color:var(--red)">この操作は取り消せません。</strong></div>
-                      <button onclick="confirmDeleteGoal()" style="padding:7px 16px;background:var(--red-d);border:1px solid var(--red-d);border-radius:8px;color:var(--red);font-size:12px;cursor:pointer;font-family:var(--ff);"><svg width="14" height="14" class="svg-ic"><use href="#ic-trash"/></svg> このゴールを削除する</button>
+                      <button onclick="confirmDeleteGoal()" aria-label="このゴールを削除する" style="padding:7px 16px;background:var(--red-d);border:1px solid var(--red-d);border-radius:8px;color:var(--red);font-size:12px;cursor:pointer;font-family:var(--ff);"><svg width="14" height="14" class="svg-ic" aria-hidden="true" focusable="false"><use href="#ic-trash"/></svg> このゴールを削除する</button>
                     </div>
                   </div>
                 </div>
@@ -724,7 +732,7 @@
                     <div style="font-size:12px;font-weight:500;color:var(--know-purple)" id="know-status-title">セッション未完了</div>
                     <div style="font-size:12px;color:var(--muted);margin-top:2px" id="know-status-sub">AIとの対話で自分を言語化しましょう（約10〜15分）</div>
                   </div>
-                  <button id="know-start-btn" onclick="startKnowSession()"
+                  <button id="know-start-btn" onclick="startKnowSession()" aria-label="自己探求セッションを開始"
                     style="padding:7px 16px;background:var(--know-purple-bg);border:1px solid var(--know-purple-border);border-radius:8px;color:var(--know-purple);font-size:12px;cursor:pointer;font-family:var(--ff);white-space:nowrap;transition:all .15s;"
                     onmouseover="this.style.background='rgba(157,120,216,.35)'" onmouseout="this.style.background='var(--know-purple-bg)'">
                     セッションを始める
@@ -750,9 +758,9 @@
                     <textarea id="know-msg-in" rows="1" placeholder="ここに答えを書いてください…"
                       style="flex:1;padding:12px 16px;background:transparent;border:none;color:var(--cream);font-family:var(--ff);font-size:16px;resize:none;max-height:110px;min-height:44px;outline:none;line-height:1.5;"
                       oninput="knowResize(this)" onkeydown="knowKey(event)"></textarea>
-                    <button class="chat-voice-btn" onclick="startVoiceInput(document.getElementById('know-msg-in'))" title="音声入力"
+                    <button class="chat-voice-btn" onclick="startVoiceInput(document.getElementById('know-msg-in'))" title="音声入力" aria-label="音声入力を開始"
                       style="width:44px;height:44px;margin:0 0 0 4px;background:transparent;border:0.5px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:16px;">🎤</button>
-                    <button onclick="sendKnowMsg()"
+                    <button onclick="sendKnowMsg()" aria-label="メッセージを送信"
                       style="width:var(--send-btn-size);height:var(--send-btn-size);margin:8px;background:var(--send-btn-grad);border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;transition:opacity .15s;flex-shrink:0;"
                       onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--text-on-accent)"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
@@ -765,8 +773,8 @@
                   <div style="font-size:12px;color:var(--know-purple);letter-spacing:.15em;font-family:var(--fm);margin-bottom:12px;">AIによるデザインサマリー</div>
                   <div id="know-summary-content" style="background:rgba(157,120,216,.08);border:1px solid var(--know-purple-bg);border-radius:10px;padding:18px 20px;font-size:12.5px;color:var(--cream);line-height:1.85;white-space:pre-wrap;"></div>
                   <div style="display:flex;gap:8px;margin-top:12px;">
-                    <button onclick="applySummaryToProfile()" style="padding:8px 18px;background:var(--know-purple-bg);border:1px solid var(--know-purple-border);border-radius:8px;color:var(--know-purple);font-size:12px;cursor:pointer;font-family:var(--ff);transition:all .15s;" onmouseover="this.style.background='rgba(157,120,216,.35)'" onmouseout="this.style.background='var(--know-purple-bg)'">✓ プロフィールに反映する</button>
-                    <button onclick="startKnowSession()" style="padding:8px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--ff);">セッションをやり直す</button>
+                    <button onclick="applySummaryToProfile()" aria-label="サマリーをプロフィールに反映" style="padding:8px 18px;background:var(--know-purple-bg);border:1px solid var(--know-purple-border);border-radius:8px;color:var(--know-purple);font-size:12px;cursor:pointer;font-family:var(--ff);transition:all .15s;" onmouseover="this.style.background='rgba(157,120,216,.35)'" onmouseout="this.style.background='var(--know-purple-bg)'">✓ プロフィールに反映する</button>
+                    <button onclick="startKnowSession()" aria-label="セッションをやり直す" style="padding:8px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--ff);">セッションをやり直す</button>
                   </div>
                 </div>
               </div>
@@ -782,7 +790,7 @@
                 <div style="background:rgba(157,120,216,.08);border:1px solid var(--know-purple-bg);border-radius:12px;padding:20px 22px;">
                   <div style="font-size:12px;color:var(--know-purple);letter-spacing:.15em;font-family:var(--fm);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
                     ビジョンステートメント
-                    <button onclick="editVision()" style="font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--ff);">編集</button>
+                    <button onclick="editVision()" aria-label="ビジョンを編集" style="font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--ff);">編集</button>
                   </div>
                   <div id="vision-statement" style="font-size:14px;color:var(--cream);line-height:1.9;font-style:italic;">
                     <span style="color:var(--muted2)">ビジョンを設定すると表示されます</span>
@@ -1589,7 +1597,7 @@
     </div>
 
   </div><!-- /pages -->
-</div><!-- /main -->
+</main><!-- /main -->
 
 <!-- ═══ FEEDBACK MODAL ═══ -->
 <div id="feedback-modal" style="display:none;position:fixed;inset:0;z-index:2000;background:var(--bg);background-image:var(--bg-grad);flex-direction:column;">
@@ -2132,21 +2140,21 @@
 </div>
 
 <!-- ═══ BOTTOM TAB BAR ═══ -->
-<nav id="bottom-tabs" style="position:fixed;bottom:0;left:0;right:0;z-index:190;display:flex;height:52px;border-top:0.5px solid var(--border);background:var(--bg);padding-bottom:env(safe-area-inset-bottom);">
-  <button class="btab active" onclick="goPage('today')" id="btab-today" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 8 14"/></svg>
+<nav id="bottom-tabs" role="navigation" aria-label="メインナビゲーション" style="position:fixed;bottom:0;left:0;right:0;z-index:190;display:flex;height:52px;border-top:0.5px solid var(--border);background:var(--bg);padding-bottom:env(safe-area-inset-bottom);">
+  <button class="btab active" onclick="goPage('today')" id="btab-today" aria-label="今日の画面" aria-current="page" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 8 14"/></svg>
     <span style="font-size:12px;font-family:var(--ff);">TODAY</span>
   </button>
-  <button class="btab" onclick="goPage('home')" id="btab-talk" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+  <button class="btab" onclick="goPage('home')" id="btab-talk" aria-label="トーク画面" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     <span style="font-size:12px;font-family:var(--ff);">TALK</span>
   </button>
-  <button class="btab" onclick="goPage('goal-hub')" id="btab-goals" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+  <button class="btab" onclick="goPage('goal-hub')" id="btab-goals" aria-label="ゴール一覧" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
     <span style="font-size:12px;font-family:var(--ff);">GOALS</span>
   </button>
-  <button class="btab" onclick="goPage('myself')" id="btab-me" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  <button class="btab" onclick="goPage('myself')" id="btab-me" aria-label="自分について" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     <span style="font-size:12px;font-family:var(--ff);">ME</span>
   </button>
 </nav>

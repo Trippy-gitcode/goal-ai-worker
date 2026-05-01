@@ -10,6 +10,23 @@ mode = "smart"
 [dev]
 port = 8787
 
+# ── Observability (Cloudflare Workers Logs) ──
+# SUBAGENT-LAIS-COMPREHENSIVE-FIX-V1 (2026-05-01) Wave 1 #52 monitoring P0:
+#   observability layer 完全未配線 → enabled=true で Workers Logs 有効化。
+#   head_sampling_rate=1.0 で 100% sample (production traffic 規模なら問題なし)。
+#   tail_consumers は staging/log forward が必要になった時点で別 Worker を結線する想定。
+[observability]
+enabled = true
+head_sampling_rate = 1.0
+
+# ── Cron Triggers (scheduled handler 配線済み) ──
+# SUBAGENT-LAIS-COMPREHENSIVE-FIX-V1 (2026-05-01) Wave 1 #52 monitoring P1:
+#   Cron Triggers + scheduled handler 完全不在 → 5 min 周期 health check cron を追加。
+#   src/index.js の scheduled handler で /health 同等処理を実行、Cloudflare Workers
+#   Cron Triggers タブで成功/失敗を観測可能。hourly/daily の長期 batch は別途追加検討。
+[triggers]
+crons = ["*/5 * * * *"]
+
 # ── KV Namespace ──
 # 作成コマンド:
 #   wrangler kv namespace create TOKEN_KV
@@ -34,9 +51,19 @@ ALLOWED_ORIGINS = "https://goal-ai-frontend.pages.dev,https://delicate-bienensti
 name = "goal-ai-worker-staging"
 [env.staging.vars]
 ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:8080"
+[env.staging.observability]
+enabled = true
+head_sampling_rate = 1.0
+[env.staging.triggers]
+crons = ["*/5 * * * *"]
 
 # ── 本番環境 ──
 [env.production]
 name = "goal-ai-worker"
 [env.production.vars]
 ALLOWED_ORIGINS = "https://goal-ai-frontend.pages.dev,https://delicate-bienenstitch-b734d6.netlify.app"
+[env.production.observability]
+enabled = true
+head_sampling_rate = 1.0
+[env.production.triggers]
+crons = ["*/5 * * * *"]

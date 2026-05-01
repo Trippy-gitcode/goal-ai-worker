@@ -18,11 +18,24 @@ describe('corsResponse', () => {
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://app.example');
   });
 
-  it('should set "null" for unknown origin', () => {
+  it('should omit Access-Control-Allow-Origin for unknown origin (CVE-2018-19840 fix)', () => {
+    // SUBAGENT-LAIS-COMPREHENSIVE-FIX-V1 (2026-05-01) — Wave 1 #10/#35:
+    //   CVE-2018-19840 系 (sandboxed iframe / data: URI で `null` origin 偽装) 対策。
+    //   旧: 不正 origin → ACAO: 'null' (literal) を set
+    //   新: 不正 origin → ACAO header を set しない (fail-closed)
     const env = { ALLOWED_ORIGINS: 'https://app.example' };
     const req = makeReq('https://attacker.test');
     const res = corsResponse(env, new Response('', { status: 200 }), req);
-    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('null');
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBeNull();
+    // Vary: Origin は cache 汚染防止のため必ず set する
+    expect(res.headers.get('Vary')).toBe('Origin');
+  });
+
+  it('should also omit ACAO for literal "null" origin (sandboxed iframe attack)', () => {
+    const env = { ALLOWED_ORIGINS: 'https://app.example' };
+    const req = makeReq('null');
+    const res = corsResponse(env, new Response('', { status: 200 }), req);
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBeNull();
   });
 
   it('should default to first allowed origin when Origin missing', () => {

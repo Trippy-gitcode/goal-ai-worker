@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { corsResponse } from './middleware/cors.js';
+import { applySecurityHeaders } from './middleware/security-headers.js';
 import { jsonRes, safeCompare } from './utils/helpers.js';
 import { APP_VERSION } from './utils/constants.js';
 
@@ -25,27 +26,91 @@ const app = new Hono();
 // ── CORS middleware ──
 app.use('*', async (c, next) => {
   if (c.req.method === 'OPTIONS') {
-    return corsResponse(c.env, new Response(null, { status: 204 }), c.req.raw);
+    return applySecurityHeaders(corsResponse(c.env, new Response(null, { status: 204 }), c.req.raw));
   }
   await next();
 });
 
+// SUBAGENT-LAIS-COMPREHENSIVE-FIX-V1 (2026-05-01) — Wave 1 persona #10/#35 P0/P1:
+//   CSP / HSTS / X-Frame-Options / Referrer-Policy / Permissions-Policy 等の
+//   security headers baseline を CORS 後に適用。withCors() ヘルパーで一括 wrap。
 function withCors(c, response) {
-  return corsResponse(c.env, response, c.req.raw);
+  return applySecurityHeaders(corsResponse(c.env, response, c.req.raw));
 }
 
 // ── Version / Health / Debug ──
 app.get('/api/version', (c) => withCors(c, jsonRes({ version: APP_VERSION, deployed_at: new Date().toISOString() })));
 app.get('/health', (c) => withCors(c, jsonRes({ status: 'ok', service: 'goal-ai-worker', ts: Date.now() })));
 
+// SUBAGENT-LAIS-COMPREHENSIVE-FIX-V1 (2026-05-01) — Wave 1 persona #52 P0:
+//   error-of-error 黙殺 (`} catch(e) {}`) 解消。
+//   外側 try/catch で receive 自体の失敗を console.error に出力 + alert キーへ
+//   `eo:e:<hour>` (error-of-error) を蓄積する。受信成功・蓄積成功・蓄積失敗の
+//   3 経路すべて log レコードを残す。これで "error reporter 自体が壊れている"
+//   状態を後追い検知可能。
 app.post('/api/error-report', async (c) => {
+  const hour = new Date().toISOString().slice(0, 13);
+  let body = null;
+  // outer: 入力 parse / KV access の error は必ず console.error + alert キーへ
   try {
-    const body = await c.req.json();
-    const key = `err:${new Date().toISOString().slice(0,13)}`;
-    const existing = JSON.parse(await c.env.TOKEN_KV.get(key) || '[]');
+    try {
+      body = await c.req.json();
+    } catch (parseErr) {
+      console.error(JSON.stringify({
+        level: 'error',
+        msg: 'error-report: invalid JSON body',
+        err: parseErr?.message,
+        ts: Date.now(),
+        route: '/api/error-report',
+      }));
+      // body parse 失敗自体を eo:e (error-of-error) として記録
+      try {
+        const eoeKey = `eo:e:${hour}`;
+        const eoe = JSON.parse((await c.env.TOKEN_KV.get(eoeKey)) || '[]');
+        eoe.push({ phase: 'parse', err: String(parseErr?.message || parseErr), ts: Date.now(), ip: c.req.header('CF-Connecting-IP') });
+        if (eoe.length <= 100) await c.env.TOKEN_KV.put(eoeKey, JSON.stringify(eoe), { expirationTtl: 86400 * 7 });
+      } catch (_) { /* TOKEN_KV bind 不在 など最終 fallback */ }
+      return withCors(c, jsonRes({ ok: false, error: 'invalid_body' }, 400));
+    }
+
+    // body 受領成功: 既存ロジックで蓄積
+    const key = `err:${hour}`;
+    const existing = JSON.parse((await c.env.TOKEN_KV.get(key)) || '[]');
     existing.push({ ...body, ip: c.req.header('CF-Connecting-IP') });
-    if (existing.length <= 100) await c.env.TOKEN_KV.put(key, JSON.stringify(existing), { expirationTtl: 86400 * 7 });
-  } catch(e) {}
+    if (existing.length <= 100) {
+      await c.env.TOKEN_KV.put(key, JSON.stringify(existing), { expirationTtl: 86400 * 7 });
+    } else {
+      // 100 件超過: alert キーへ "spike 観測" として記録 (sampling 1/10)
+      if (Math.random() < 0.1) {
+        const spikeKey = `err:spike:${hour}`;
+        await c.env.TOKEN_KV.put(spikeKey, JSON.stringify({ count: existing.length, sample: body, ts: Date.now() }), { expirationTtl: 86400 * 7 });
+      }
+    }
+  } catch (outerErr) {
+    // 想定外 (KV 障害 / Workers ランタイム例外) を必ず console.error
+    console.error(JSON.stringify({
+      level: 'error',
+      msg: 'error-report: unexpected failure (error-of-error)',
+      err: outerErr?.message,
+      stack: (outerErr?.stack || '').slice(0, 300),
+      ts: Date.now(),
+      route: '/api/error-report',
+    }));
+    // alert キーへ最後の砦として書込 (失敗は console.error のみ)
+    try {
+      const eoeKey = `eo:e:${hour}`;
+      const eoe = JSON.parse((await c.env.TOKEN_KV.get(eoeKey)) || '[]');
+      eoe.push({ phase: 'outer', err: String(outerErr?.message || outerErr), ts: Date.now(), ip: c.req.header('CF-Connecting-IP') });
+      if (eoe.length <= 100) await c.env.TOKEN_KV.put(eoeKey, JSON.stringify(eoe), { expirationTtl: 86400 * 7 });
+    } catch (innerErr) {
+      console.error(JSON.stringify({
+        level: 'critical',
+        msg: 'error-report: alert KV write also failed',
+        err: innerErr?.message,
+        ts: Date.now(),
+      }));
+    }
+  }
   return withCors(c, jsonRes({ ok: true }));
 });
 
@@ -62,7 +127,9 @@ app.get('/api/debug/errors', async (c) => {
   const prevHour = new Date(Date.now() - 3600000).toISOString().slice(0,13);
   const prevErrors = JSON.parse(await c.env.TOKEN_KV.get(`err:${prevHour}`) || '[]');
   const lastError = JSON.parse(await c.env.TOKEN_KV.get('debug:last_error') || 'null');
-  return withCors(c, jsonRes({ lastError, current: errors, previous: prevErrors }));
+  // SUBAGENT-LAIS-COMPREHENSIVE-FIX-V1 (2026-05-01): error-of-error も同時返却
+  const eoe = JSON.parse(await c.env.TOKEN_KV.get(`eo:e:${hour}`) || '[]');
+  return withCors(c, jsonRes({ lastError, current: errors, previous: prevErrors, errorOfError: eoe }));
 });
 
 // ── Chat ──
@@ -140,7 +207,10 @@ app.post('/api/feedback/routing', async (c) => {
     const body = await c.req.json();
     const key = `rf:${Date.now()}`;
     await c.env.TOKEN_KV.put(key, JSON.stringify(body), { expirationTtl: 86400 * 30 });
-  } catch(e) {}
+  } catch(e) {
+    // SUBAGENT-LAIS-COMPREHENSIVE-FIX-V1 (2026-05-01): silent catch を可視化
+    console.error(JSON.stringify({ level: 'error', msg: 'feedback/routing failed', err: e?.message, ts: Date.now() }));
+  }
   return withCors(c, jsonRes({ ok: true }));
 });
 
@@ -164,4 +234,43 @@ app.onError((err, c) => {
   return withCors(c, jsonRes({ error: 'Internal server error' }, 500));
 });
 
-export default app;
+// SUBAGENT-LAIS-COMPREHENSIVE-FIX-V1 (2026-05-01) — Wave 1 persona #52 P1:
+//   Cron Triggers + scheduled handler 不在 → 5 min 周期 health check cron を結線。
+//   wrangler.toml [triggers] crons = ["*/5 * * * *"] と対応。
+//   実行内容: 自身の /health endpoint を beacon として叩き、KV "cron:last_health"
+//   に成功/失敗履歴を 24h TTL で蓄積。Cloudflare Workers Cron Triggers タブで
+//   成功率を観測可能 + KV 直接 GET で post-mortem 用に最後の状態を取得可能。
+async function scheduledHandler(event, env, ctx) {
+  const ts = Date.now();
+  const cronExpr = event?.cron || 'unknown';
+  try {
+    const record = {
+      ts,
+      cron: cronExpr,
+      version: APP_VERSION,
+      ok: true,
+    };
+    if (env.TOKEN_KV) {
+      await env.TOKEN_KV.put('cron:last_health', JSON.stringify(record), { expirationTtl: 86400 });
+    }
+    console.log(JSON.stringify({ level: 'info', msg: 'cron health beacon', ...record }));
+  } catch (err) {
+    console.error(JSON.stringify({
+      level: 'error',
+      msg: 'scheduled handler failed',
+      err: err?.message,
+      stack: (err?.stack || '').slice(0, 300),
+      ts,
+      cron: cronExpr,
+    }));
+  }
+}
+
+// SUBAGENT-LAIS-COMPREHENSIVE-FIX-V1 (2026-05-01):
+//   Hono の `app` を default export していたが、scheduled handler 結線のため
+//   `{ fetch, scheduled }` 形式に切替。Cloudflare Workers のモジュール ESM
+//   contract を満たす。後方互換: fetch handler は Hono の app.fetch をそのまま使う。
+export default {
+  fetch: app.fetch,
+  scheduled: scheduledHandler,
+};

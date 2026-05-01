@@ -256,10 +256,15 @@ function _cleanupSharedUI() {
     fbModal.style.display = 'none';
   }
 
-  // 6. チャット履歴モーダル閉じる
-  const chatHistory = document.getElementById('chat-history-modal');
+  // 6. チャット履歴モーダル閉じる (BUG-02 fix 2026-05-01: HTMLは chat-history-panel)
+  const chatHistory = document.getElementById('chat-history-panel');
   if (chatHistory && chatHistory.style.display !== 'none') {
     chatHistory.style.display = 'none';
+  }
+  // legacy fallback (旧IDが残っている可能性に備える)
+  const chatHistoryLegacy = document.getElementById('chat-history-modal');
+  if (chatHistoryLegacy && chatHistoryLegacy.style.display !== 'none') {
+    chatHistoryLegacy.style.display = 'none';
   }
 }
 
