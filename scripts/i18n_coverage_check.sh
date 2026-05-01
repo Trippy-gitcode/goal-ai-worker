@@ -24,15 +24,30 @@ set -eu
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
+# Round 25 R-001 fix (2026-05-01) — external review GPT-5.4 HIGH:
+#   旧: ja.json 不在 / python3 不在で `exit 0` → CI が緑通過、guard 喪失。
+#   新: 既定 fail-closed (exit 1)。手動実行時の skip は `SKIP_ALLOWED=1` で明示。
+SKIP_ALLOWED="${SKIP_ALLOWED:-0}"
+
 JA_JSON="frontend/i18n/ja.json"
 if [ ! -f "$JA_JSON" ]; then
-  echo "INFO: $JA_JSON not found, skipping i18n_coverage_check"
-  exit 0
+  if [ "$SKIP_ALLOWED" = "1" ]; then
+    echo "INFO: $JA_JSON not found, SKIP_ALLOWED=1 — skipping (manual run only)"
+    exit 0
+  fi
+  echo "::error::$JA_JSON missing — i18n coverage gate is fail-closed (Round 25 R-001)"
+  echo "  ファイル復元か、手動実行時のみ \`SKIP_ALLOWED=1 sh scripts/i18n_coverage_check.sh\` で skip 可。"
+  exit 1
 fi
 
 if ! command -v python3 >/dev/null 2>&1; then
-  echo "WARN: python3 not available, skipping i18n_coverage_check"
-  exit 0
+  if [ "$SKIP_ALLOWED" = "1" ]; then
+    echo "INFO: python3 not available, SKIP_ALLOWED=1 — skipping"
+    exit 0
+  fi
+  echo "::error::python3 not available — required for i18n_coverage_check (Round 25 R-001)"
+  echo "  CI runner に python3 を install するか、SKIP_ALLOWED=1 で local skip。"
+  exit 1
 fi
 
 python3 - <<'PY'

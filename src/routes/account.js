@@ -105,7 +105,16 @@ export async function handleAccountDelete(request, env) {
   const userHashAudit = hashIdSync(userId);
   const tokenFpAudit = fingerprintToken(tokenId);
   const totalTables = 7; // chat_messages / usage_tracking / goals / feedbacks / referrals_referrer / referrals_referred / users
+  // Round 25 R-007 fix (2026-05-01) — external review GPT-5.4 HIGH:
+  //   旧: partial deletion (途中失敗で 1-N tables 既削除 + 残未削除) で 500 を返すが、
+  //       client にはどこまで完了したか不明 → user 側で再実行不能、運用整合性不一致 risk。
+  //   新: completedTables[] を追跡し、500 response payload に partial_state として含める。
+  //       同時に retry queue (KV `account_delete_retry:<user_hash>`) に未完了 table 一覧を
+  //       7 日 TTL で蓄積、別 cron / 運用手順で再実行可能化。
+  //   完全な atomicity には Supabase RPC で 1 transaction 化が必要 (Phase 5 予約)。
+  const completedTables = [];
   const _logTable = (idx, table) => {
+    completedTables.push(table);
     safeLog('INFO', 'account.delete.table_done', {
       user_hash: userHashAudit,
       table,
@@ -156,9 +165,41 @@ export async function handleAccountDelete(request, env) {
     safeLog('WARN', 'account.deleted', {
       user_hash: userHashAudit,
       token_fp: tokenFpAudit,
-      total_tables_processed: totalTables,
+      total_tables_processed: completedTables.length,
+      total_tables: totalTables,
+      completed_tables: completedTables,
       status: 'failed',
     });
-    return jsonRes({ error: 'アカウント削除に失敗しました' }, 500);
+    // Round 25 R-007 fix: 未完了 table 一覧を retry queue に投入 (7 日 TTL)、
+    // 運用手順 / 別 cron で再実行可能にする。silent failure を避ける明示的記録。
+    const allTables = ['chat_messages', 'usage_tracking', 'goals', 'feedbacks', 'referrals_referrer', 'referrals_referred', 'users'];
+    const remainingTables = allTables.filter(t => !completedTables.includes(t));
+    try {
+      await env.TOKEN_KV.put(
+        `account_delete_retry:${userHashAudit}`,
+        JSON.stringify({
+          user_hash: userHashAudit,
+          token_fp: tokenFpAudit,
+          completed_tables: completedTables,
+          remaining_tables: remainingTables,
+          last_error: (e && e.message) ? e.message.slice(0, 500) : 'unknown',
+          ts: Date.now(),
+          retry_count: 0,
+        }),
+        { expirationTtl: 86400 * 7 }
+      );
+    } catch (kvErr) {
+      safeError('account.delete_retry_queue_failed', kvErr);
+    }
+    // partial deletion 状態を client に明示し、運用整合性問題を silent にしない
+    return jsonRes({
+      error: 'アカウント削除に失敗しました',
+      partial_state: {
+        completed_table_count: completedTables.length,
+        total_table_count: totalTables,
+        is_partial: completedTables.length > 0 && completedTables.length < totalTables,
+        retry_id: userHashAudit, // user_hash で運用追跡可能
+      },
+    }, 500);
   }
 }

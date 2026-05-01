@@ -35,20 +35,22 @@ sed -i '' "s/APP_VERSION = '${CURRENT}'/APP_VERSION = '${NEW}'/" "$ROOT/src/util
 # 3. frontend/public/sw.js
 sed -i '' "s/goal-ai-v${CURRENT}/goal-ai-v${NEW}/" "$ROOT/frontend/public/sw.js"
 
-# 4. frontend/index.html
-sed -i '' "s/v${CURRENT}/v${NEW}/" "$ROOT/frontend/index.html"
+# 4. frontend/index.html (Round 23 R-003 fix: data-app-version 属性 + v... テキスト両方更新)
+sed -i '' "s/v${CURRENT}/v${NEW}/g" "$ROOT/frontend/index.html"
+sed -i '' "s/data-app-version=\"${CURRENT}\"/data-app-version=\"${NEW}\"/" "$ROOT/frontend/index.html"
 
-# 検証
+# 検証 (data-app-version 属性 + 表示テキスト + 既存 3 ファイル)
 V1=$(grep -o "APP_VERSION = '[^']*'" "$ROOT/frontend/js/globals.js" | grep -o "'[^']*'" | tr -d "'")
 V2=$(grep -o "APP_VERSION = '[^']*'" "$ROOT/src/utils/constants.js" | grep -o "'[^']*'" | tr -d "'")
 V3=$(grep -o "goal-ai-v[^']*" "$ROOT/frontend/public/sw.js" | head -1 | sed 's/goal-ai-v//')
-V4=$(grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' "$ROOT/frontend/index.html" | head -1 | sed 's/v//')
+V4_attr=$(grep -oE 'data-app-version="[0-9.]+"' "$ROOT/frontend/index.html" | head -1 | sed -E 's/data-app-version="([0-9.]+)"/\1/')
+V4_text=$(grep -oE 'class="version"[^>]*>v[0-9.]+' "$ROOT/frontend/index.html" | head -1 | sed -E 's/.*>v([0-9.]+)/\1/')
 
-if [ "$V1" = "$NEW" ] && [ "$V2" = "$NEW" ] && [ "$V3" = "$NEW" ] && [ "$V4" = "$NEW" ]; then
+if [ "$V1" = "$NEW" ] && [ "$V2" = "$NEW" ] && [ "$V3" = "$NEW" ] && [ "$V4_attr" = "$NEW" ] && [ "$V4_text" = "$NEW" ]; then
   echo "OK: All 4 files updated to $NEW"
-  echo "  globals.js=$V1  constants.js=$V2  sw.js=$V3  index.html=$V4"
+  echo "  globals.js=$V1  constants.js=$V2  sw.js=$V3  index.html_attr=$V4_attr  index.html_text=$V4_text"
 else
   echo "FAIL: Version mismatch after update!"
-  echo "  globals.js=$V1  constants.js=$V2  sw.js=$V3  index.html=$V4"
+  echo "  globals.js=$V1  constants.js=$V2  sw.js=$V3  index.html_attr=$V4_attr  index.html_text=$V4_text"
   exit 1
 fi

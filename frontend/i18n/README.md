@@ -100,6 +100,24 @@ frontend/i18n/
 - **font-family** (Finding I-4): `<html lang>` ごとに `--ff` CSS variable swap、`Noto Sans JP` / `Noto Sans SC` / `Noto Sans KR` fallback を Phase 2 で配備
 - **Intl** (Finding I-5): 数値 / 日付 / 通貨 表記は `Intl.NumberFormat` / `Intl.DateTimeFormat` / `Intl.RelativeTimeFormat` 経由を Phase 1 完了後に application layer で適用
 
+### 5.0 既知の i18n 未接続例外 (Round 25 R-005 で明示化)
+
+> ⚠ **警告**: 以下のページ / コンポーネントは現状 `frontend/i18n/ja.json` と
+> 接続されておらず、文言を二重管理している。Phase 1 mission `SUBAGENT-LAIS-I18N-SSOT-PHASE1-V1`
+> で接続予定。
+
+| ファイル | 該当 i18n keys (seed) | 現状 | 接続予定 |
+|---|---|---|---|
+| `frontend/offline.html` | `offline.fallback.title` / `offline.fallback.body` / `offline.fallback.retry` | HTML 内ハードコード (`オフラインです` / `現在ネットワークに...` / `再読み込み`) | Phase 1 で `t(key)` 化 |
+| `frontend/index.html` (大半) | `auth.*` / `chat.*` / `goal.*` / `settings.*` 全般 | HTML 内ハードコード 609 hits | Phase 1 で macro 置換 |
+| `frontend/js/*.js` (toast / alert) | `error.*` / `streak.*` | JS 内文字列リテラル | Phase 1 で `t()` 経由 |
+
+**Round 25 改善 (本 commit)**: `offline.html` 内 JS の文言を `TXT` object に集約し、
+将来の `t()` 化を 1 行 swap で可能にした (Round 22 R-008 fix で実施済)。
+HTML 側 `<h1>` / `<p>` / button label は依然ハードコード。Phase 1 完了まで二重管理が継続することを README で明示し、bug 源として認識する。
+
+---
+
 ### 5.1 数値・通貨・日付の責務分離 (Round 22 R-006 で追加)
 
 > ⚠ **重要**: 辞書ファイルに **フォーマット済み文字列を直接格納しない** 設計に Phase 1 で移行する。

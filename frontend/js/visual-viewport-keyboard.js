@@ -47,7 +47,31 @@
   // 早期 guard を最上位に移動。window / document が undefined な場合は no-op で安全 return。
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
+  // Round 25 R-003 fix (2026-05-01) — external review GPT-5.4 HIGH:
+  //   旧: head で全ページ共通読込、副作用 (visualViewport resize/scroll listener) が
+  //       全画面で常時発火 → 不要ページでも処理走行、layout 競合 / debug 困難。
+  //   新: <html data-keyboard-aware> または <body data-keyboard-aware> 属性が存在する
+  //       ページでのみ自動 init。属性無しページでは LaisKeyboard API のみ公開し、
+  //       明示的 LaisKeyboard.init() 呼出時のみ発火する。
+  //   index.html は本属性を持つため後方互換 (Wave 0 振る舞いを維持)。
+  function _shouldAutoInit() {
+    var html = document.documentElement;
+    var body = document.body;
+    if (html && html.hasAttribute('data-keyboard-aware')) return true;
+    if (body && body.hasAttribute('data-keyboard-aware')) return true;
+    return false;
+  }
+
   // --- 内部 state (closure 内に閉じ込め、grobal 露出は LaisKeyboard namespace のみ) ---
+  // Round 25 R-008 fix (2026-05-01) — external review GPT-5.4 MEDIUM:
+  //   KEYBOARD_THRESHOLD_PX = 30 の根拠を明示:
+  //   1) iOS Safari アドレスバー収縮: ~50-60px 縮、これは下回らないため確実に keyboard 起動と判定可。
+  //   2) Android Chrome 戻るバー / 通知バー透過: ~24px 揺れ、threshold より下に収まる。
+  //   3) viewport zoom (pinch zoom): visualViewport.height = innerHeight の比率変化、
+  //      px diff は 30px 未満になりやすいため誤発火しない。
+  //   4) iPad Stage Manager / multi-window: ~100px+ 揺れだが keyboard 起動でも同等 → 誤判定なし。
+  //   5) 30px は WCAG tap target 最小 44px の 2/3、UI 影響域として実害最小値。
+  //   将来 device-specific 調整必要時は Math.max(visualViewport.offsetTop, diff) で複数指標化を検討。
   var KEYBOARD_THRESHOLD_PX = 30;
   var lastHeight = 0;
   var rafId = 0;
@@ -145,6 +169,13 @@
     _installed: true,
   };
 
-  // 自動 init (legacy 動作互換)
-  init();
+  // Round 25 R-003: 自動 init は data-keyboard-aware 属性ありページのみ。
+  // 属性無しページでも LaisKeyboard.init() 明示呼出は可能 (responsibility on caller)。
+  if (_shouldAutoInit()) {
+    init();
+  } else {
+    // 属性無しページは API のみ公開 (副作用 listener 登録なし)
+    // 明示 init 必要なら呼出側で `window.LaisKeyboard.init()` する。
+    document.documentElement.style.setProperty('--keyboard-h', '0px');
+  }
 })();

@@ -16,9 +16,15 @@
 #       baseline は減少した時のみ手動で更新する (漸減のみ許容、漸増は block)。
 #
 # 検出ルール:
-#   `src/` 配下で `safePgrestValue(` を grep し、同一ファイルでの
-#   `isSafePgrestValue` / `requireSafePgrestValue` 呼び出しがない行を unsafe とする。
-#   helpers.js (関数定義側) は除外。
+#   `src/` 配下で `safePgrestValue(` を grep (helpers.js / `isSafePgrestValue` /
+#   `requireSafePgrestValue` 呼び出しを除外)。
+#   現状の callsite 数 vs baseline で漸減のみ許容、漸増 = block。
+#
+# Round 25 R-002 fix (2026-05-01) — external review GPT-5.4 HIGH:
+#   grep ベース判定の限界 (複数行記述・別変数経由・コメント文字列で誤判定) を
+#   コメントで明示。上位レイヤー (lint / 新規コード policy) で
+#   `requireSafePgrestValue` 限定推奨を README + helpers.js JSDoc で重ねて promote 済。
+#   将来 AST ベース linter (ESLint custom rule) への移行を Phase 5 で予約。
 #
 # 使い方:
 #   sh scripts/pgrest_safety_check.sh
