@@ -1,5 +1,5 @@
 import { authenticateRequest, getUserIdFromToken } from '../middleware/auth.js';
-import { jsonRes, isValidUuid, safePgrestValue } from '../utils/helpers.js';
+import { jsonRes, isValidUuid, safePgrestValue, isSafePgrestValue } from '../utils/helpers.js';
 import { supabaseQuery } from '../utils/supabase.js';
 import { autoTagSession } from '../services/history.js';
 import { checkRateLimit } from '../utils/rate-limit.js';
@@ -80,6 +80,13 @@ export async function handleHistoryDelete(request, env) {
   if (!sessionId) return jsonRes({ error: 'sessionId required' }, 400);
   // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — D-02 PostgREST filter injection fix
   if (!/^[A-Za-z0-9_-]{1,64}$/.test(sessionId)) return jsonRes({ error: 'Invalid sessionId' }, 400);
-  await supabaseQuery(env, 'chat_messages', 'DELETE', { filters: `user_id=eq.${safePgrestValue(userId)}&session_id=eq.${safePgrestValue(sessionId)}` });
+  // SUBAGENT-DEVSYS-ROUND4-P0-FIX-V1 (2026-05-01) — Round 4 Mode A finding A-2:
+  //   DELETE filter の userId / sessionId が `safePgrestValue` で `''` 返却 されないことを検証。
+  const safeUid = safePgrestValue(userId);
+  const safeSid = safePgrestValue(sessionId);
+  if (!isSafePgrestValue(safeUid) || !isSafePgrestValue(safeSid)) {
+    return jsonRes({ error: 'Invalid id' }, 400);
+  }
+  await supabaseQuery(env, 'chat_messages', 'DELETE', { filters: `user_id=eq.${safeUid}&session_id=eq.${safeSid}` });
   return jsonRes({ deleted: true });
 }

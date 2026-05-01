@@ -97,7 +97,106 @@ export function getCurrentMonth() {
   return `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
-export const APP_VERSION = '4.0.55';
+export const APP_VERSION = '4.0.58';
+
+// ============================================================================
+// Stripe Webhook billing-critical event types
+// Round 23 R-004 fix (2026-05-01) — external review GPT-5.4 指摘対応
+//   旧: prefix regex `/^(charge|invoice|customer\.subscription|checkout\.session|payment_intent|setup_intent)/`
+//       で判定 → 列挙不完全、Stripe 側 API 進化で漏れ追加発生時に意図せず KV
+//       fallback (race) に流れて double-process 再発。
+//   新: 明示的 Set + 説明コメント。Stripe 公式 API ref で billing 影響のあるものを
+//       列挙、新 event 追加時は本ファイルを更新する単一ソースに集約。
+//
+// Reference (2026 時点):
+//   https://docs.stripe.com/api/events/types
+// ============================================================================
+export const STRIPE_BILLING_CRITICAL_EVENTS = new Set([
+  // checkout
+  'checkout.session.completed',
+  'checkout.session.async_payment_succeeded',
+  'checkout.session.async_payment_failed',
+  'checkout.session.expired',
+  // charge
+  'charge.succeeded',
+  'charge.failed',
+  'charge.refunded',
+  'charge.refund.updated',
+  'charge.dispute.created',
+  'charge.dispute.closed',
+  'charge.dispute.updated',
+  'charge.captured',
+  'charge.expired',
+  'charge.pending',
+  'charge.updated',
+  // invoice (subscription billing)
+  'invoice.created',
+  'invoice.finalized',
+  'invoice.paid',
+  'invoice.payment_succeeded',
+  'invoice.payment_failed',
+  'invoice.payment_action_required',
+  'invoice.upcoming',
+  'invoice.updated',
+  'invoice.voided',
+  'invoice.marked_uncollectable',
+  // customer.subscription
+  'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
+  'customer.subscription.paused',
+  'customer.subscription.resumed',
+  'customer.subscription.trial_will_end',
+  'customer.subscription.pending_update_applied',
+  'customer.subscription.pending_update_expired',
+  // payment_intent
+  'payment_intent.created',
+  'payment_intent.succeeded',
+  'payment_intent.payment_failed',
+  'payment_intent.canceled',
+  'payment_intent.requires_action',
+  'payment_intent.processing',
+  'payment_intent.amount_capturable_updated',
+  // setup_intent
+  'setup_intent.created',
+  'setup_intent.succeeded',
+  'setup_intent.setup_failed',
+  'setup_intent.canceled',
+  // refund (Stripe 2024+ direct refund namespace)
+  'refund.created',
+  'refund.updated',
+  // payout (Connect 等で利用、課金影響を考慮し含める)
+  'payout.created',
+  'payout.failed',
+  'payout.paid',
+  'payout.updated',
+]);
+
+// Stripe webhook event が billing-critical かを判定。
+// Round 23 R-004: prefix regex から explicit Set 判定 + safety fallback regex に変更。
+// allowlist 外でも `charge.` / `invoice.` / `customer.subscription.` / `payment_intent.` /
+// `setup_intent.` / `checkout.session.` / `refund.` / `payout.` で始まる新 event を
+// safety net で critical 判定し、未知の billing event を leak させない。
+export function isStripeBillingCriticalEvent(eventType) {
+  if (!eventType || typeof eventType !== 'string') return false;
+  if (STRIPE_BILLING_CRITICAL_EVENTS.has(eventType)) return true;
+  // Safety net: 既知 prefix の未列挙 event は保守的に critical 扱い (R-004 推奨)
+  // 例: Stripe が将来 `charge.application_fee.created` 等を追加した場合に対応
+  const SAFETY_PREFIXES = [
+    'charge.',
+    'invoice.',
+    'customer.subscription.',
+    'payment_intent.',
+    'setup_intent.',
+    'checkout.session.',
+    'refund.',
+    'payout.',
+  ];
+  for (const prefix of SAFETY_PREFIXES) {
+    if (eventType.startsWith(prefix)) return true;
+  }
+  return false;
+}
 export const COMMON_RULES = `【共通ルール】
 - ユーザーの質問にはまず答える。質問を聞き返す前にまず回答する。
 - 2〜3文で簡潔に。長文禁止。質問は1回まで。

@@ -51,3 +51,42 @@ jobs:
           else
             echo "scripts/devsystem_healthcheck.sh not found or not executable, skipping"
           fi
+
+      - name: version_drift_check
+        # external review GPT-5.4 R-002 (2026-05-01) — APP_VERSION の 5 箇所
+        # hardcode (constants.js / globals.js / sw.js / index.html data-attr / text)
+        # が drift していないか CI で検証する。drift 時は exit 1 で main / PR を block。
+        # Round 24 R-003 fix: 旧 silent-skip (script 不在で fail-open) を
+        # fail-on-missing に変更、guard 喪失を block。
+        run: |
+          if [ ! -f scripts/version_drift_check.sh ]; then
+            echo "::error::scripts/version_drift_check.sh missing — version drift gate has been silently disabled. Restore the script."
+            exit 1
+          fi
+          chmod +x scripts/version_drift_check.sh
+          sh scripts/version_drift_check.sh
+
+      - name: pgrest_safety_check
+        # external review GPT-5.4 R-007 (2026-05-01) — `safePgrestValue(` 単独利用
+        # (= 直後に isSafePgrestValue check / requireSafePgrestValue 利用なし) の
+        # 新規追加を block。baseline は verify/pgrest_safety_baseline.txt から読込。
+        # Round 24 R-003 fix: silent-skip → fail-on-missing に変更。
+        run: |
+          if [ ! -f scripts/pgrest_safety_check.sh ]; then
+            echo "::error::scripts/pgrest_safety_check.sh missing — PostgREST safety gate disabled. Restore the script."
+            exit 1
+          fi
+          chmod +x scripts/pgrest_safety_check.sh
+          sh scripts/pgrest_safety_check.sh
+
+      - name: i18n_coverage_check
+        # external review GPT-5.4 Round 23 R-002 (2026-05-01) — frontend/i18n/ja.json
+        # の _meta.coverage_keys_current が実ファイル key 数と drift していないか検証。
+        # Round 24 R-003 fix: silent-skip → fail-on-missing に変更。
+        run: |
+          if [ ! -f scripts/i18n_coverage_check.sh ]; then
+            echo "::error::scripts/i18n_coverage_check.sh missing — i18n coverage gate disabled. Restore the script."
+            exit 1
+          fi
+          chmod +x scripts/i18n_coverage_check.sh
+          sh scripts/i18n_coverage_check.sh

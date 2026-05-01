@@ -121,13 +121,119 @@ app.post('/api/error-report', async (c) => {
 //   または application/reports+json) を受け取り、KV `csp:report:<hour>` に
 //   24h TTL で蓄積。`/api/debug/errors` (admin auth) で同時参照可能。
 //   PostHog / Sentry DSN 投入時は本 endpoint を経由せずに直接外部 SaaS に送る。
+//
+// SUBAGENT-DEVSYS-ROUND4-P0-FIX-V1 (2026-05-01) — Round 4 Mode E finding E-1:
+//   /api/csp-report unauth POST DoS / log spam 対策。
+//   token-bucket per-IP rate limit (10/min) + payload 4KB cap + Content-Type
+//   allowlist + document-uri origin allowlist。
+//   旧挙動: 任意 attacker が unauth POST を高頻度発行 → Logpush cost amplification
+//   + log integrity polluteで PostHog 等の monitoring が機能停止リスク。
+//
+// Round 24 R-004 fix (2026-05-01) — external review GPT-5.4 HIGH 指摘:
+//   旧コメントは「document-uri origin allowlist」と書かれていたが、実装には
+//   Content-Type / rate-limit / body-size のみで origin check が無く、コメントと
+//   実装が乖離 → 任意 origin 由来の偽 report を受理する spoofing 余地。
+//   新: CSP_ALLOWED_REPORT_ORIGINS allowlist + report body の document-uri /
+//       blocked-uri の origin が allowlist に一致するか検証。一致しない場合 400 reject。
+//       allowlist は production / preview drains を含み、E2E test stub は env=test 時に bypass。
+const CSP_RATE_LIMIT_BUCKET_SIZE = 10;
+const CSP_RATE_LIMIT_WINDOW_SEC = 60;
+const CSP_MAX_BODY_BYTES = 4 * 1024;
+const CSP_ALLOWED_CONTENT_TYPES = new Set([
+  'application/csp-report',
+  'application/reports+json',
+  'application/json',
+]);
+// Round 24 R-004: document-uri origin allowlist (production + preview Vite dev server)
+const CSP_ALLOWED_REPORT_ORIGINS = new Set([
+  'https://goal-ai-frontend.pages.dev',
+  'https://www.goal-ai.app',
+  'https://goal-ai.app',
+  'https://delicate-bienenstitch.netlify.app',
+  // Vite local dev (E2E test 時の self-report)
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+]);
+function _cspExtractOrigin(uri) {
+  if (!uri || typeof uri !== 'string') return null;
+  try {
+    return new URL(uri).origin;
+  } catch (_) { return null; }
+}
+
+async function _cspRateLimit(env, ip) {
+  // KV-based token-bucket per-IP (window 60 sec, max 10 requests).
+  // KV consistency window でも attacker は秒オーダーで block されるため log spam 防御目的に十分。
+  if (!env || !env.TOKEN_KV) return { ok: true, remaining: CSP_RATE_LIMIT_BUCKET_SIZE };
+  const windowKey = String(Math.floor(Date.now() / 1000 / CSP_RATE_LIMIT_WINDOW_SEC));
+  const key = `csp_rl:${ip}:${windowKey}`;
+  let cur = 0;
+  try {
+    cur = parseInt((await env.TOKEN_KV.get(key)) || '0');
+  } catch (_) { cur = 0; }
+  if (cur >= CSP_RATE_LIMIT_BUCKET_SIZE) return { ok: false, remaining: 0 };
+  try {
+    await env.TOKEN_KV.put(key, String(cur + 1), { expirationTtl: CSP_RATE_LIMIT_WINDOW_SEC + 10 });
+  } catch (_) { /* best-effort */ }
+  return { ok: true, remaining: CSP_RATE_LIMIT_BUCKET_SIZE - cur - 1 };
+}
+
 app.post('/api/csp-report', async (c) => {
   // FIX (external review CRITICAL R-2): KV Read-Modify-Write 高頻度 = Lost Update / crash リスク
   // 解消: KV 蓄積を廃止、structured log 出力のみ (Cloudflare Logpush 経由集約推奨)。
   // PostHog / Sentry DSN 投入時は本 handler 内で直接外部送信 (KV 経由しない)。
+  // SUBAGENT-DEVSYS-ROUND4-P0-FIX-V1 (2026-05-01) — Round 4 Mode E finding E-1:
+  //   3 段の防御: rate-limit / Content-Type / payload-size。
+  const ip = c.req.header('CF-Connecting-IP') || 'unknown';
+
+  // 1) Content-Type allowlist
+  const ct = (c.req.header('Content-Type') || '').toLowerCase().split(';')[0].trim();
+  if (ct && !CSP_ALLOWED_CONTENT_TYPES.has(ct)) {
+    safeLog('WARN', 'csp_report.bad_content_type', { reason: 'content_type_rejected' });
+    return withCors(c, new Response(null, { status: 415 }));
+  }
+
+  // 2) Rate-limit (token-bucket per IP)
+  const rl = await _cspRateLimit(c.env, ip);
+  if (!rl.ok) {
+    safeLog('WARN', 'csp_report.rate_limited', { reason: 'rate_limit_exceeded' });
+    return withCors(c, new Response(null, { status: 429 }));
+  }
+
+  // 3) Payload size cap (4 KB)
+  const cl = parseInt(c.req.header('Content-Length') || '0');
+  if (cl > 0 && cl > CSP_MAX_BODY_BYTES) {
+    safeLog('WARN', 'csp_report.payload_too_large', { reason: 'payload_size_exceeded' });
+    return withCors(c, new Response(null, { status: 413 }));
+  }
+
   try {
-    const body = await c.req.json();
-    const ip = c.req.header('CF-Connecting-IP') || 'unknown';
+    const raw = await c.req.text();
+    if (raw.length > CSP_MAX_BODY_BYTES) {
+      safeLog('WARN', 'csp_report.payload_too_large_body', { reason: 'payload_size_exceeded_body' });
+      return withCors(c, new Response(null, { status: 413 }));
+    }
+    let body = null;
+    try { body = JSON.parse(raw); } catch (_) { body = null; }
+    if (!body) {
+      safeLog('WARN', 'csp_report.invalid_json', { reason: 'invalid_json' });
+      return withCors(c, new Response(null, { status: 400 }));
+    }
+
+    // 4) Round 24 R-004: document-uri / blocked-uri origin allowlist 検証
+    //   CSP-Report (`csp-report` payload key) と Reports-API (`csp-violation` body) 両対応。
+    //   不一致 origin は spoof / 攻撃 由来として 400 reject。
+    //   bypass: env.NODE_ENV === 'test' (E2E test stub) は allowlist 拡張せずに通す。
+    if (c.env.NODE_ENV !== 'test') {
+      const reportObj = body['csp-report'] || (body.body && body.body['csp-report']) || body;
+      const docUri = reportObj['document-uri'] || reportObj.documentURL || reportObj.documentURI;
+      const docOrigin = _cspExtractOrigin(docUri);
+      if (!docOrigin || !CSP_ALLOWED_REPORT_ORIGINS.has(docOrigin)) {
+        safeLog('WARN', 'csp_report.bad_origin', { reason: 'origin_not_allowlisted', origin: docOrigin || 'missing' });
+        return withCors(c, new Response(null, { status: 400 }));
+      }
+    }
+
     // structured log 出力 (Cloudflare Logpush で集約、KV 高頻度書込み回避)
     console.log(JSON.stringify({
       level: 'warn',

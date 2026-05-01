@@ -1,6 +1,6 @@
 import { authenticateRequest } from '../middleware/auth.js';
 import { jsonRes, safeCompare } from '../utils/helpers.js';
-import { STRIPE_PRICE_IDS, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL } from '../utils/constants.js';
+import { STRIPE_PRICE_IDS, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, isStripeBillingCriticalEvent } from '../utils/constants.js';
 import { syncUserToSupabase } from '../utils/supabase.js';
 import { safeLog, safeError, fingerprintToken, hashIdSync } from '../utils/safeLog.js';
 
@@ -101,12 +101,147 @@ export async function handleStripeWebhook(request, env, ctx) {
   const age = Math.floor(Date.now() / 1000) - parseInt(timestamp);
   if (Math.abs(age) > 300) return jsonRes({ error: 'Webhook timestamp too old' }, 400);
 
-  const event = JSON.parse(payload);
-  const eventKey = `stripe_event:${event.id}`;
-  const processed = await env.TOKEN_KV.get(eventKey);
-  if (processed) return new Response('Already processed', { status: 200 });
-  await env.TOKEN_KV.put(eventKey, '1', { expirationTtl: 86400 });
+  // SUBAGENT-DEVSYS-ROUND4-P0-FIX-V1 (2026-05-01) — Round 4 Mode C finding C-1 +
+  //   Mode G finding G-1 共合 fix:
+  //   (G-1) JSON.parse uncaught throw → 400 早期返却で Stripe retry loop 防止。
+  //   (C-1) idempotency race: KV check-then-put は non-atomic で並列 webhook
+  //         (Stripe at-least-once delivery で同 event.id 並列到達) が両方処理続行。
+  //         対処: Supabase に `stripe_processed_events(event_id PRIMARY KEY)` 行を
+  //         `INSERT ... ON CONFLICT DO NOTHING` で atomic check-and-set。
+  //         Supabase 不在時は KV check-then-put fallback (旧挙動) + safeError 観測。
+  let event;
+  try {
+    event = JSON.parse(payload);
+  } catch (e) {
+    safeError('webhook.malformed_payload', e);
+    return new Response('Invalid payload', { status: 400 });
+  }
+  if (!event || typeof event !== 'object' || typeof event.id !== 'string') {
+    safeError('webhook.malformed_event', new Error('event.id missing or not string'));
+    return new Response('Invalid event', { status: 400 });
+  }
 
+  const eventKey = `stripe_event:${event.id}`;
+  // 1) Atomic dedup via Supabase (idempotency_key = event.id PRIMARY KEY)
+  let dedupClaimed = false;
+  if (env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY) {
+    try {
+      const dedupRes = await fetch(`${env.SUPABASE_URL}/rest/v1/stripe_processed_events`, {
+        method: 'POST',
+        headers: {
+          'apikey': env.SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation,resolution=ignore-duplicates',
+        },
+        body: JSON.stringify({ event_id: event.id, event_type: event.type || 'unknown', processed_at: new Date().toISOString() }),
+      });
+      // FIX (external review CRITICAL R-15/R-16): PostgREST `ignore-duplicates`
+      //   は 201/204/200 多変動 + 空 body 時の意味曖昧。 旧実装 (parse 失敗 = "Already processed")
+      //   は 一時的 API error 等で webhook event lost のリスク。
+      //   対処: status 201 + parse 成功 + rows 1件以上 → 新規 claim、それ以外は
+      //   defensive にKV fallback path に降格 (event lost を防ぐ、 双重処理は KV 側で再検出)。
+      if (dedupRes.status === 201) {
+        const text = await dedupRes.text();
+        let rows = null;
+        try { rows = text ? JSON.parse(text) : null; } catch (_) { rows = null; }
+        if (Array.isArray(rows) && rows.length > 0) {
+          dedupClaimed = true;
+        } else {
+          // 201 + empty/non-JSON → ambiguous: KV fallback で安全側 (skip ではなく重複検査再実行)
+          safeError('webhook.dedup_supabase_ambiguous_201', new Error('201 Created but rows empty/non-JSON'), { event_id: event.id });
+        }
+      } else if (dedupRes.status === 200 || dedupRes.status === 204) {
+        // 200/204 + body 空 = upsert 結果不明 → KV fallback で defensive 降格
+        safeError('webhook.dedup_supabase_ambiguous_2xx', new Error(`status=${dedupRes.status}`), { status: dedupRes.status });
+      } else if (dedupRes.status === 409) {
+        // 409 Conflict (PRIMARY KEY 重複) = 確実に既存 claim
+        return new Response('Already processed', { status: 200 });
+      } else {
+        // 4xx/5xx → KV fallback、event lost を防ぐため safeError でトレース
+        safeError('webhook.dedup_supabase_failed', new Error(`status=${dedupRes.status}`), { status: dedupRes.status });
+      }
+    } catch (e) {
+      safeError('webhook.dedup_supabase_error', e);
+    }
+  }
+
+  if (!dedupClaimed) {
+    // FIX (external review CRITICAL R-001 / GPT-5.4 round 22 2026-05-01):
+    //   旧実装: Supabase 主経路の曖昧 2xx / 失敗時に常に KV check-then-put fallback
+    //   へ降格 → Cloudflare KV eventual consistency により同一 event 並列到達で
+    //   double-process リスク (charge / subscription / checkout.session で課金二重実行)。
+    //   GPT-5.4 推奨: 課金系イベントは「原子的 dedup claim が取れた場合のみ処理」、
+    //   それ以外は 503 で明示的 Stripe retry に倒す (at-least-once → eventually exactly-once)。
+    //
+    //   新実装 (本 commit):
+    //     - billing-critical event (charge.* / invoice.* / customer.subscription.* /
+    //       checkout.session.* / payment_intent.* / setup_intent.*) → Supabase 失敗時
+    //       即 503 + Retry-After 30s。Stripe は up to 3 days exponential backoff で再試行、
+    //       Supabase 復旧後に必ず exactly-once で処理される。KV race 完全排除。
+    //     - 非 critical (account.* / customer.created 等の informational) → KV best-effort
+    //       fallback 維持 (event lost より double-log のほうが軽微)。
+    //   完全な race-free for ALL events には Durable Objects / D1 移行必要
+    //   (Phase 5+ deferred、ticket: SUBAGENT-LAIS-DURABLE-OBJECT-MIGRATE-V1)。
+    // Round 23 R-004: prefix regex を `isStripeBillingCriticalEvent` (allowlist Set + safety
+    // prefix net) に置換。明示的 event 列挙で Stripe API 進化時の漏れを SSoT (constants.js) に集約。
+    const isBillingCritical = isStripeBillingCriticalEvent(event.type);
+    if (isBillingCritical) {
+      // 課金系: Supabase 不在/失敗 = 強整合 dedup 取れず → 503 で Stripe retry 強制
+      safeError('webhook.dedup_billing_critical_503', new Error('billing-critical event but no atomic dedup claim → 503 retry'), { event_id: event.id, event_type: event.type });
+      return new Response('Idempotency store temporarily unavailable for billing event', {
+        status: 503,
+        headers: { 'Retry-After': '30' },
+      });
+    }
+    // 非課金系: KV best-effort fallback (legacy 挙動維持、event lost > double-log)
+    safeError('webhook.dedup_kv_fallback_noncritical', new Error('non-critical event KV best-effort fallback'), { event_id: event.id, event_type: event.type });
+    if (!env || !env.TOKEN_KV) {
+      safeError('webhook.dedup_kv_binding_missing', new Error('TOKEN_KV binding 不在、Supabase + KV 両方利用不能'), { event_id: event.id });
+      return new Response('Idempotency store unavailable', { status: 503, headers: { 'Retry-After': '60' } });
+    }
+    try {
+      const processed = await env.TOKEN_KV.get(eventKey);
+      if (processed) return new Response('Already processed', { status: 200 });
+      await env.TOKEN_KV.put(eventKey, '1', { expirationTtl: 86400 });
+    } catch (kvErr) {
+      safeError('webhook.dedup_kv_op_failed', kvErr, { event_id: event.id });
+      return new Response('Idempotency store error', { status: 503, headers: { 'Retry-After': '60' } });
+    }
+  } else {
+    // 主経路 (Supabase) 成功時も KV に hint を残し downstream cron (`stripe_sync_fail:*`) で参照可能化
+    try { await env.TOKEN_KV.put(eventKey, '1', { expirationTtl: 86400 }); } catch (_) {}
+  }
+
+  // Round 24 R-001 fix (2026-05-01) — external review GPT-5.4 CRITICAL:
+  //   旧: Supabase claim 後に business logic 失敗で「event_id 確定済み + 業務未完了」状態 →
+  //       Stripe 再送が Already processed として skip → 課金状態同期が永久欠落バグ。
+  //   新: business logic を try/catch で包み、失敗時は claim row を DELETE して
+  //       次回 Stripe retry が再 claim → 再処理可能にする。 KV fallback path も
+  //       同様に DELETE。delete 失敗時は元 error を優先して 503 返す (Stripe retry 強制)。
+  let _businessFailed = false;
+  let _businessError = null;
+  const _rollbackClaim = async (reason) => {
+    safeError('webhook.business_logic_failed_rolling_back_claim', new Error(`business logic failed (${reason}), rolling back dedup claim to allow Stripe retry`), { event_id: event.id, event_type: event.type });
+    if (dedupClaimed && env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY) {
+      try {
+        await fetch(`${env.SUPABASE_URL}/rest/v1/stripe_processed_events?event_id=eq.${encodeURIComponent(event.id)}`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': env.SUPABASE_SERVICE_KEY,
+            'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+            'Prefer': 'return=minimal',
+          },
+        });
+      } catch (delErr) {
+        safeError('webhook.dedup_supabase_rollback_failed', delErr, { event_id: event.id });
+      }
+    }
+    // KV side hint も削除 (best-effort)
+    try { await env.TOKEN_KV.delete(eventKey); } catch (_) {}
+  };
+
+  try {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const tokenId = session.metadata?.tokenId;
@@ -221,6 +356,22 @@ export async function handleStripeWebhook(request, env, ctx) {
         }
       }
     }
+  }
+
+  } catch (businessErr) {
+    // Round 24 R-001: business logic で uncaught throw → claim を rollback して
+    //   Stripe retry を可能にする。 503 + Retry-After で Stripe に明示。
+    _businessFailed = true;
+    _businessError = businessErr;
+    safeError('webhook.business_logic_uncaught_throw', businessErr, { event_id: event.id, event_type: event.type });
+  }
+
+  if (_businessFailed) {
+    await _rollbackClaim(_businessError ? (_businessError.message || 'unknown') : 'unknown');
+    return new Response('Processing failed, please retry', {
+      status: 503,
+      headers: { 'Retry-After': '30' },
+    });
   }
 
   return new Response('OK', { status: 200 });

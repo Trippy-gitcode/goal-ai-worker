@@ -29,14 +29,38 @@ export function getDayKey() {
   return now.toISOString().slice(0, 10);
 }
 
+// SUBAGENT-DEVSYS-ROUND4-P0-FIX-V1 (2026-05-01) — Round 4 P0 #1 fix:
+//   safeCompare timing oracle for TOKEN_SECRET presence (Mode A finding A-1).
+//   Round 4 adversarial finding: empty `a` or `b` を early-return false すると
+//   importKey/sign を呑み込み、`crypto.subtle` の cost を skip するため、
+//   `env.TOKEN_SECRET` 設定有無を timing で leak する経路。fallback として
+//   32-byte zero-key で同 cost の dummy importKey + sign を実行してから false
+//   を返し、early-return path も constant-time に揃える。
+const _DUMMY_KEY_BYTES = new Uint8Array(32);
+async function _dummyConstantTimePass() {
+  try {
+    const k = await crypto.subtle.importKey('raw', _DUMMY_KEY_BYTES, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    await crypto.subtle.sign('HMAC', k, _DUMMY_KEY_BYTES);
+  } catch (_) { /* dummy path; never observable */ }
+}
+
 export async function safeCompare(a, b) {
   // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #35 D-05 fix:
   //   try/catch ガードで empty string 引数や TypeError 時に false を返す。
   //   下流の auth handler で `!await safeCompare(...)` パターンが
   //   throw 時に 500 になる挙動を 401/403 reject に statefully 統一。
+  // SUBAGENT-DEVSYS-ROUND4-P0-FIX-V1 (2026-05-01) — Round 4 Mode A finding A-1
+  //   timing oracle 対策: type / empty / mismatch path 全てで dummy importKey
+  //   + sign を 1 回実行してから false を返し、constant-time semantic を維持。
   try {
-    if (typeof a !== 'string' || typeof b !== 'string') return false;
-    if (a.length === 0 || b.length === 0) return false;
+    if (typeof a !== 'string' || typeof b !== 'string') {
+      await _dummyConstantTimePass();
+      return false;
+    }
+    if (a.length === 0 || b.length === 0) {
+      await _dummyConstantTimePass();
+      return false;
+    }
     const encoder = new TextEncoder();
     const keyA = await crypto.subtle.importKey('raw', encoder.encode(a), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
     const sigA = await crypto.subtle.sign('HMAC', keyA, encoder.encode('compare'));
@@ -49,6 +73,8 @@ export async function safeCompare(a, b) {
     for (let i = 0; i < bufA.length; i++) diff |= bufA[i] ^ bufB[i];
     return diff === 0;
   } catch (_) {
+    // 例外 path も constant-time fallback を発火させてから false 返却
+    await _dummyConstantTimePass();
     return false;
   }
 }
@@ -73,9 +99,29 @@ export function isValidUuid(s) {
 
 /**
  * safePgrestValue — PostgREST filter value のエスケープヘルパー。
+ *
+ *   @deprecated Round 22 R-007 (2026-05-01) — external review GPT-5.4:
+ *     新規コードでは `requireSafePgrestValue` (strict throw) を必ず使うこと。
+ *     本関数は `''` を返却 → caller が忘れると filter injection / 0 件 fail へ。
+ *     既存 43 callsite は段階的 migration 中、CI script `scripts/pgrest_safety_check.sh`
+ *     で `safePgrestValue(` 単独利用 (= 直後に isSafePgrestValue check なし) を
+ *     grep ベースで検出し、新規追加を block する。
+ *
  *   PostgREST は `&` を AND-separator、`,` を OR-separator として扱うため、
  *   user-controlled input を生で `eq.${value}` に concat すると filter
  *   injection になる (D-02)。本関数で encodeURIComponent + 制御文字 reject。
+ *
+ *   SUBAGENT-DEVSYS-ROUND4-P0-FIX-V1 (2026-05-01) — Round 4 Mode A finding A-2:
+ *     `''` 返却 semantic gap を解消。`''` は PostgREST URL に concat されると
+ *     `?user_id=eq.` (右辺空) → uuid column では type error (HTTP 400)、
+ *     text column では `WHERE user_id = ''` で 0 件 fail-close。だが、
+ *     **caller が return value を check しないと**、空 right-hand side が
+ *     後続 filter (`&order=...`) と連鎖して **意図しない PostgREST query**
+ *     を構築する。
+ *     対処: 本関数は引き続き `''` を返すが、`isSafePgrestValue` で
+ *     null check を促進。callers (43 callsite) は `if (!safePgrestValue(...)) return jsonRes({error:'Invalid id'},400)` を遵守する規約。
+ *     さらに、後置 sentinel `__INVALID__` を opts.sentinel=true で取得可能、
+ *     新規 callsite はこれを採用すること推奨。
  */
 export function safePgrestValue(v, opts = {}) {
   if (v == null) return '';
@@ -97,6 +143,32 @@ export function safePgrestValue(v, opts = {}) {
   if (!allowedPattern.test(s)) return '';
   // double-encode で defence-in-depth (% も reject されているので冗長だが安全側)
   return encodeURIComponent(s);
+}
+
+/**
+ * isSafePgrestValue — `safePgrestValue` の戻り値が空文字 `''` かどうかを判定。
+ *   SUBAGENT-DEVSYS-ROUND4-P0-FIX-V1 (2026-05-01) — Round 4 Mode A finding A-2:
+ *     callsite で safePgrestValue 戻り値 check を促進する helper。
+ *     `if (!isSafePgrestValue(safe)) return jsonRes({error:'Invalid id'},400);`
+ *     使用例。43 callsite の段階的 migration を可能にする。
+ */
+export function isSafePgrestValue(encoded) {
+  return typeof encoded === 'string' && encoded.length > 0;
+}
+
+/**
+ * requireSafePgrestValue — strict validator。`null/undefined/whitelist 違反`
+ *   を一律 throw する。新規 callsite で payload validation 即時失敗を強制。
+ *   SUBAGENT-DEVSYS-ROUND4-P0-FIX-V1 (2026-05-01) — Round 4 Mode A finding A-2.
+ */
+export function requireSafePgrestValue(v, opts = {}) {
+  const encoded = safePgrestValue(v, opts);
+  if (!encoded) {
+    const err = new Error(opts.errorMessage || 'Invalid id for PostgREST filter');
+    err.code = 'INVALID_PGREST_VALUE';
+    throw err;
+  }
+  return encoded;
 }
 
 /**

@@ -2,7 +2,19 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+<!--
+  Round 6 P0 #M-1 fix (2026-05-01) — Mission: SUBAGENT-DEVSYS-ROUND6-P0-FIX-V1
+  6 persona vote: 6/6 YES (frontend-architect / pwa-engineer / mobile-ux / security-auditor / i18n / cross-browser-qa)
+  - `interactive-widget=resizes-content` is iOS Safari 18+ only (~25% iOS support 推定)。
+    iOS Safari 17- では無視されてキーボード pop-up 時に textarea が隠れる。
+  - 代替: `viewport-fit=cover` (notch safe-area-inset 有効化)、JS 側で
+    `window.visualViewport` API 監視 (`js/visual-viewport-keyboard.js` で配備) して
+    keyboard show/hide event を listen し layout を CSS variable で動的調整。
+  - `@supports (interactive-widget: resizes-content)` 同等の feature detection も
+    visualViewport 経由で graceful degrade (Safari iOS 13+ で動作)。
+-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script src="js/visual-viewport-keyboard.js" defer></script>
 <meta property="og:title" content="GOAL AI - AIゴールコーチング">
 <meta property="og:description" content="ゴールだけ教えてくれればいい。3つのAIがあなたの目標達成をサポートします。">
 <meta property="og:type" content="website">
@@ -193,7 +205,9 @@
       <span style="color:var(--muted3);" aria-hidden="true">|</span>
       <a href="privacy.html" target="_blank" rel="noopener noreferrer" aria-label="プライバシーポリシーを新しいタブで開く">プライバシー</a>
       <span style="color:var(--muted3);" aria-hidden="true">|</span>
-      <span class="version" title="タップで更新確認" role="button" tabindex="0" aria-label="バージョン v4.0.55。タップで更新確認" onclick="checkForUpdate()" style="cursor:pointer;">v4.0.55</span>
+      <a href="tokushoho.html" target="_blank" rel="noopener noreferrer" aria-label="特定商取引法に基づく表記を新しいタブで開く">特商法</a>
+      <span style="color:var(--muted3);" aria-hidden="true">|</span>
+      <span class="version" data-app-version="4.0.58" title="タップで更新確認" role="button" tabindex="0" aria-label="バージョン v4.0.58。タップで更新確認" onclick="checkForUpdate()" style="cursor:pointer;">v4.0.58</span>
     </div>
   </footer>
 </aside>
@@ -400,8 +414,8 @@
             </div>
             <!-- B-20: Presets removed (TODAY replaced them) -->
             <div id="home-presets" style="display:none;"></div>
-            <div id="home-chat-wrap" style="flex:1;overflow-y:auto;position:relative;display:none;">
-            <div id="home-chat-inner" style="max-width:740px;margin:0 auto;padding:8px 20px 100px;"></div>
+            <div id="home-chat-wrap" style="flex:1;overflow-y:auto;position:relative;display:none;" role="log" aria-live="polite" aria-relevant="additions text" aria-atomic="false" aria-label="AIコーチングチャット履歴">
+            <div id="home-chat-inner" style="max-width:740px;margin:0 auto;padding:8px 20px 100px;" aria-busy="false"></div>
           </div>
           <button id="scroll-latest-btn" onclick="scrollToLatest()" aria-label="最新のメッセージへスクロール" style="display:none;position:absolute;bottom:90px;right:24px;z-index:600;background:var(--amber);color:#fff;border:none;cursor:pointer;padding:8px 18px 8px 14px;border-radius:28px;font-size:13px;font-family:var(--fm);font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.4);align-items:center;gap:6px;opacity:0;transition:opacity .25s ease,transform .25s ease;transform:translateY(8px);">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>

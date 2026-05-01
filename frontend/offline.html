@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<!--
+  Round 6 P0 #O-1 fix (2026-05-01) — Mission: SUBAGENT-DEVSYS-ROUND6-P0-FIX-V1
+  6 persona vote: 6/6 YES (frontend-architect / pwa-engineer / mobile-ux / security-auditor / i18n / cross-browser-qa)
+  PWA core requirement: sw.js が `mode === 'navigate'` 時のキャッシュ miss でこの fallback を返す。
+-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0c0e14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="robots" content="noindex">
+<title>オフライン — GOAL AI</title>
+<style>
+  /* インライン CSS only — オフライン時 style.css も来ない可能性 */
+  /* Round 22 R-008 fix (2026-05-01) — external review GPT-5.4 指摘:
+     旧: 1500ms / 88px / 24px / 14px 等 magic number と色値が style 内に散在 →
+         変更時の影響範囲追跡が困難。将来の i18n / デザイン更新で漏れリスク。
+     新: 全 magic number / 色 / 余白 / タイマー値を :root の CSS variable に集約。
+         JS 側 retry timeout も const として冒頭に配置 (line 130 周辺)。 */
+  :root {
+    color-scheme: dark;
+    /* === colors === */
+    --bg: #0c0e14;
+    --fg: #e6edf3;
+    --fg-muted: rgba(230, 237, 243, 0.72);
+    --accent: #58A6FF;
+    --accent-2: #388BFD;
+    --muted: #6b7280;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.10);
+    --shadow-icon: 0 16px 40px rgba(88, 166, 255, 0.20);
+    --shadow-btn-hover: 0 8px 24px rgba(88,166,255,0.30);
+    /* === sizes === */
+    --icon-size: 88px;
+    --icon-svg-size: 48px;
+    --tap-target-min: 44px; /* WCAG 2.5.5 + iOS HIG 44pt */
+    --btn-min-width: 120px;
+    --gap-sm: 8px;
+    --gap-md: 12px;
+    --gap-lg: 16px;
+    --gap-xl: 24px;
+    --gap-2xl: 32px;
+    --pad-card: 20px;
+    --radius-card: 16px;
+    --radius-btn: 10px;
+    --max-card-width: 420px;
+    --max-text-width: 360px;
+    /* === font sizes === */
+    --fs-h1: 22px;
+    --fs-card-h2: 14px;
+    --fs-body: 14px;
+    --fs-card-li: 13px;
+    --fs-meta: 11px;
+    /* === transition === */
+    --transition-btn: transform .15s ease, box-shadow .15s ease;
+    --ff: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: var(--ff);
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100dvh;
+  }
+  body {
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: max(var(--gap-xl), env(safe-area-inset-top)) var(--gap-xl) max(var(--gap-xl), env(safe-area-inset-bottom));
+    text-align: center;
+  }
+  .icon {
+    width: var(--icon-size); height: var(--icon-size);
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    display: inline-flex; justify-content: center; align-items: center;
+    margin-bottom: var(--gap-xl);
+    box-shadow: var(--shadow-icon);
+  }
+  .icon svg { width: var(--icon-svg-size); height: var(--icon-svg-size); stroke: var(--bg); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  h1 { font-size: var(--fs-h1); margin: 0 0 var(--gap-md); font-weight: 600; letter-spacing: 0.02em; }
+  p {
+    color: var(--fg-muted);
+    font-size: var(--fs-body); line-height: 1.6;
+    max-width: var(--max-text-width);
+    margin: 0 auto var(--gap-2xl);
+  }
+  .card {
+    width: 100%; max-width: var(--max-card-width);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-card);
+    padding: var(--pad-card);
+    margin-bottom: var(--gap-lg);
+    text-align: left;
+  }
+  .card h2 { font-size: var(--fs-card-h2); margin: 0 0 var(--gap-sm); color: var(--accent); font-weight: 600; }
+  .card ul { font-size: var(--fs-card-li); line-height: 1.7; color: var(--fg-muted); margin: 0; padding-left: 20px; }
+  .card li { margin-bottom: 4px; }
+  .actions { display: flex; gap: var(--gap-md); flex-wrap: wrap; justify-content: center; margin-top: var(--gap-sm); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--gap-sm);
+    padding: var(--gap-md) var(--gap-xl);
+    min-height: var(--tap-target-min); min-width: var(--btn-min-width);
+    border-radius: var(--radius-btn);
+    border: 1px solid var(--card-border);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    color: var(--bg);
+    font-family: inherit;
+    font-size: var(--fs-body);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: var(--transition-btn);
+  }
+  .btn:hover, .btn:focus { outline: none; transform: translateY(-1px); box-shadow: var(--shadow-btn-hover); }
+  .btn:active { transform: translateY(0); }
+  .btn.secondary {
+    background: transparent;
+    color: var(--fg);
+  }
+  .meta { font-size: var(--fs-meta); color: var(--muted); margin-top: var(--gap-2xl); }
+  .meta code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .btn { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <main role="main" aria-labelledby="offline-title">
+    <span class="icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+    </span>
+    <h1 id="offline-title">オフラインです</h1>
+    <p>現在ネットワークに接続できません。<br>接続が回復したら自動で再接続を試みます。</p>
+
+    <div class="card" role="region" aria-label="確認事項">
+      <h2>こんな時に表示されます</h2>
+      <ul>
+        <li>地下鉄や飛行機内など、通信圏外にいる</li>
+        <li>Wi-Fi / モバイルデータがオフになっている</li>
+        <li>機内モードが有効になっている</li>
+      </ul>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="retry-btn" type="button" aria-label="再読み込みする">再読み込み</button>
+      <a class="btn secondary" href="/" aria-label="ホームへ戻る">ホームへ</a>
+    </div>
+
+    <p class="meta">
+      <span aria-hidden="true">▲</span>
+      GOAL AI offline fallback (Round 6 P0 #O-1)
+    </p>
+  </main>
+
+  <script>
+    // 再読み込みボタン: navigator.onLine 監視で自動 reload も併用
+    // Round 22 R-008 fix: 旧 1500ms magic number を const 化、文言も dictionary 化準備
+    (function () {
+      // === constants (R-008 magic number 集約) ===
+      var RETRY_BUTTON_RESET_MS = 1500; // ボタンテキストを「再読み込み」へ戻すまでの猶予
+      var ONLINE_RECOVERY_MS = 1500;    // online event 後、完全復帰を待つ猶予
+      var TXT = {
+        // 将来の i18n 移行で `t('offline.fallback.retry')` に差し替え予定
+        retry: '再読み込み',
+        still_offline: 'まだオフラインです',
+      };
+      var btn = document.getElementById('retry-btn');
+      if (btn) {
+        btn.addEventListener('click', function () {
+          // network 復帰時のみ reload、未復帰時は user に通知
+          if (navigator.onLine) {
+            location.reload();
+          } else {
+            btn.textContent = TXT.still_offline;
+            setTimeout(function () { btn.textContent = TXT.retry; }, RETRY_BUTTON_RESET_MS);
+          }
+        });
+      }
+      // online event で自動 reload (offline-first 補完、Finding O-5 も同時 mitigation)
+      window.addEventListener('online', function () {
+        // 完全復帰確認後 reload
+        setTimeout(function () {
+          if (navigator.onLine) location.reload();
+        }, ONLINE_RECOVERY_MS);
+      });
+    })();
+  </script>
+</body>
+</html>
