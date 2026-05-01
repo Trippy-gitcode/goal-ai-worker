@@ -1,3 +1,8 @@
+// SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #52 P1 finding #7:
+//   unstructured console.error を safeError (PII-aware structured) に置換。
+//   request_id / route 等の context が落ちないよう、event 名を明示。
+import { safeError } from './safeLog.js';
+
 export function supabaseHeaders(env) {
   return {
     'apikey': env.SUPABASE_SERVICE_KEY,
@@ -26,7 +31,7 @@ export async function supabaseQuery(env, table, method, { filters, body, select,
   const res = await fetch(url, opts);
   if (!res.ok) {
     const err = await res.text();
-    console.error(`Supabase ${method} ${table} error:`, err);
+    safeError('supabase.query_error', new Error(err), { route: `${method} ${table}` });
     return null;
   }
   const text = await res.text();
@@ -53,7 +58,7 @@ export async function syncUserToSupabase(env, tokenData) {
       filters: 'on_conflict=token_id',
     });
   } catch (e) {
-    console.error('syncUserToSupabase error:', e);
+    safeError('supabase.sync_user_failed', e);
   }
 }
 
@@ -71,7 +76,7 @@ export async function saveChatMessage(env, tokenId, role, content, aiModel, goal
         ai_model: aiModel || null, message_type: messageType || 'chat',
       },
     });
-  } catch (e) { console.error('saveChatMessage error:', e); }
+  } catch (e) { safeError('supabase.save_chat_message_failed', e); }
 }
 
 export async function syncUsageToSupabase(env, tokenId, month, deepCount, chatCount) {
@@ -85,7 +90,7 @@ export async function syncUsageToSupabase(env, tokenId, month, deepCount, chatCo
       body: { user_id: users[0].id, month, deep_count: deepCount, chat_count: chatCount },
       filters: 'on_conflict=user_id,month',
     });
-  } catch (e) { console.error('syncUsageToSupabase error:', e); }
+  } catch (e) { safeError('supabase.sync_usage_failed', e); }
 }
 
 export async function saveDeepAnalysis(env, tokenId, analysisType, data) {
@@ -107,5 +112,5 @@ export async function saveDeepAnalysis(env, tokenId, analysisType, data) {
         final_result: data.final || null,
       },
     });
-  } catch (e) { console.error('saveDeepAnalysis error:', e); }
+  } catch (e) { safeError('supabase.save_deep_analysis_failed', e); }
 }

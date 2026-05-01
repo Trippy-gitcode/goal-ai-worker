@@ -6,6 +6,9 @@ import {
   getMonthEndTtl,
   getDayKey,
   safeCompare,
+  isValidUuid,
+  safePgrestValue,
+  pgrestFilter,
 } from '../../src/utils/helpers.js';
 
 // ════════════════════════════════════════════════════════════════
@@ -204,14 +207,23 @@ describe('safeCompare', () => {
     expect(await safeCompare('a', 'aaa')).toBe(false);
   });
 
-  it('should throw DataError when comparing two empty strings (HMAC zero-length key)', async () => {
-    // Documents that safeCompare propagates the underlying crypto.subtle DataError
-    // when called with zero-length input. Callers must not pass empty strings.
-    await expect(safeCompare('', '')).rejects.toThrow();
+  it('should return false for two empty strings (Wave 1 #35 D-05 fix: no throw)', async () => {
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #35 D-05 fix:
+    //   safeCompare は empty string で crypto.subtle DataError を throw する
+    //   旧挙動を try/catch + 早期 return false に修正。env.SECRET 未設定時に
+    //   500 になる挙動を 401/403 reject に統一する規律改善。
+    expect(await safeCompare('', '')).toBe(false);
   });
 
-  it('should throw DataError when one side is empty (HMAC zero-length key)', async () => {
-    await expect(safeCompare('', 'x')).rejects.toThrow();
+  it('should return false when one side is empty (Wave 1 #35 D-05 fix)', async () => {
+    expect(await safeCompare('', 'x')).toBe(false);
+    expect(await safeCompare('x', '')).toBe(false);
+  });
+
+  it('should return false for non-string types (defense-in-depth)', async () => {
+    expect(await safeCompare(null, 'x')).toBe(false);
+    expect(await safeCompare(undefined, 'x')).toBe(false);
+    expect(await safeCompare(123, 'x')).toBe(false);
   });
 
   it('should handle unicode without throwing', async () => {
@@ -223,5 +235,75 @@ describe('safeCompare', () => {
     const a = await safeCompare('xx', 'yy');
     const b = await safeCompare('xx', 'yy');
     expect(a).toBe(b);
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// isValidUuid / safePgrestValue / pgrestFilter
+// SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — Wave 1 #35 D-02 fix tests
+// ════════════════════════════════════════════════════════════════
+
+describe('isValidUuid', () => {
+  it('should accept valid UUID v4', () => {
+    expect(isValidUuid('550e8400-e29b-41d4-a716-446655440000')).toBe(true);
+    expect(isValidUuid('00000000-0000-0000-0000-000000000000')).toBe(true);
+  });
+
+  it('should accept UUID without hyphens', () => {
+    expect(isValidUuid('550e8400e29b41d4a716446655440000')).toBe(true);
+  });
+
+  it('should reject non-UUID input', () => {
+    expect(isValidUuid('not-a-uuid')).toBe(false);
+    expect(isValidUuid('abc')).toBe(false);
+    expect(isValidUuid('')).toBe(false);
+    expect(isValidUuid(null)).toBe(false);
+    expect(isValidUuid(undefined)).toBe(false);
+  });
+
+  it('should reject UUID injection attempts', () => {
+    expect(isValidUuid('550e8400-e29b-41d4-a716-446655440000&user_id=eq.X')).toBe(false);
+    expect(isValidUuid('foo,bar')).toBe(false);
+  });
+});
+
+describe('safePgrestValue', () => {
+  it('should encode safe characters', () => {
+    expect(safePgrestValue('abc-123')).toBe('abc-123');
+  });
+
+  it('should encode special PostgREST separator chars', () => {
+    expect(safePgrestValue('a&b')).toBe('a%26b');
+    expect(safePgrestValue('a,b')).toBe('a%2Cb');
+  });
+
+  it('should reject control characters', () => {
+    expect(safePgrestValue('a\x00b')).toBe('');
+    expect(safePgrestValue('a\nb')).toBe('');
+  });
+
+  it('should reject overly long values', () => {
+    const longStr = 'x'.repeat(300);
+    expect(safePgrestValue(longStr)).toBe('');
+    expect(safePgrestValue(longStr, { maxLength: 500 })).not.toBe('');
+  });
+
+  it('should handle null/undefined', () => {
+    expect(safePgrestValue(null)).toBe('');
+    expect(safePgrestValue(undefined)).toBe('');
+  });
+});
+
+describe('pgrestFilter', () => {
+  it('should construct valid filter strings', () => {
+    expect(pgrestFilter('user_id', 'eq', 'u123')).toBe('user_id=eq.u123');
+  });
+
+  it('should reject disallowed operators', () => {
+    expect(pgrestFilter('user_id', 'evil', 'u123')).toBe('');
+  });
+
+  it('should reject non-identifier field names', () => {
+    expect(pgrestFilter('user_id&injected', 'eq', 'u123')).toBe('');
   });
 });

@@ -22,6 +22,11 @@
 // §1. baseline CSP (Content-Security-Policy)
 //     API-only worker は default-src 'none' で十分、HTML を返す場合は CSP を
 //     呼び出し側で override 可。
+//
+//     SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #52 P1 fix:
+//       CSP report-uri を Lais worker の `/api/csp-report` endpoint に向ける。
+//       browser から CSP violation report を receive し、安全な KV bucket に蓄積。
+//       Sentry / PostHog free tier の DSN 投入時は report-uri を override する。
 // ─────────────────────────────────────────────────────────────────────────────
 export const BASELINE_CSP = [
   "default-src 'none'",
@@ -34,6 +39,7 @@ export const BASELINE_CSP = [
   "base-uri 'self'",
   "frame-ancestors 'none'",
   "form-action 'self'",
+  "report-uri /api/csp-report",
 ].join('; ');
 
 // ─────────────────────────────────────────────────────────────────────────────

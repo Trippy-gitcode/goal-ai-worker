@@ -1,7 +1,9 @@
 import { authenticateRequest, getUserIdFromToken } from '../middleware/auth.js';
-import { jsonRes } from '../utils/helpers.js';
+import { jsonRes, safePgrestValue } from '../utils/helpers.js';
 import { supabaseQuery } from '../utils/supabase.js';
 import { QOL_PROPOSAL_PROMPT } from '../services/prompt.js';
+import { checkRateLimit } from '../utils/rate-limit.js';
+import { safeError } from '../utils/safeLog.js';
 
 const DEFAULT_IDENTITY = {
   vision: null,
@@ -21,11 +23,15 @@ const DEFAULT_IDENTITY = {
 export async function handleIdentityGet(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1: H-07 rate-limit roll-out
+  const rl = await checkRateLimit(env, auth.userId);
+  if (!rl.ok) return jsonRes({ error: 'Rate limit exceeded' }, 429);
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
 
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — D-02 PostgREST filter injection fix
   const rows = await supabaseQuery(env, 'user_identity', 'GET', {
-    filters: `user_id=eq.${userId}`,
+    filters: `user_id=eq.${safePgrestValue(userId)}`,
   });
 
   if (rows && rows[0]) {
@@ -45,8 +51,9 @@ export async function handleIdentityPut(request, env) {
   if (body.vision !== undefined) updates.vision = body.vision;
   // BUG-03: identityはマージ（profile追加時に既存のstrengths/vision等を消さない）
   if (body.identity !== undefined) {
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — D-02 PostgREST filter injection fix
     const existing = await supabaseQuery(env, 'user_identity', 'GET', {
-      filters: `user_id=eq.${userId}`, select: 'identity',
+      filters: `user_id=eq.${safePgrestValue(userId)}`, select: 'identity',
     });
     const existingIdentity = existing?.[0]?.identity || {};
     updates.identity = { ...existingIdentity, ...body.identity };
@@ -71,16 +78,16 @@ export async function handleQOLGenerate(request, env) {
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
 
-  // Load user_identity
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — D-02 PostgREST filter injection fix
   const rows = await supabaseQuery(env, 'user_identity', 'GET', {
-    filters: `user_id=eq.${userId}`,
+    filters: `user_id=eq.${safePgrestValue(userId)}`,
   });
   const identity = rows?.[0]?.identity || {};
   const vision = rows?.[0]?.vision || '';
 
   // Load existing goals to avoid duplicates
   const goals = await supabaseQuery(env, 'goals', 'GET', {
-    filters: `user_id=eq.${userId}&status=neq.archived`,
+    filters: `user_id=eq.${safePgrestValue(userId)}&status=neq.archived`,
     select: 'title',
   });
   const goalTitles = (goals || []).map(g => g.title).filter(Boolean);
@@ -150,7 +157,9 @@ export async function handleQOLGenerate(request, env) {
 
     return jsonRes({ qol_proposals: proposals });
   } catch (e) {
-    console.error('QOL generate failed:', e.message);
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — Wave 1 #52 P1 finding #7 fix:
+    //   unstructured console.error を safeError (PII-aware structured) に置換
+    safeError('me.qol_generate_failed', e);
     return jsonRes({ error: 'QOL生成に失敗しました' }, 500);
   }
 }

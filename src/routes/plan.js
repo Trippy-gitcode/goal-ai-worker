@@ -1,10 +1,15 @@
 import { authenticateRequest } from '../middleware/auth.js';
-import { jsonRes } from '../utils/helpers.js';
+import { jsonRes, safePgrestValue } from '../utils/helpers.js';
 import { getPlanConfig, getCurrentMonth } from '../utils/constants.js';
+import { checkRateLimit } from '../utils/rate-limit.js';
+import { safeError } from '../utils/safeLog.js';
 
 export async function handlePlanStatus(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1: H-07 rate-limit roll-out
+  const rl = await checkRateLimit(env, auth.userId);
+  if (!rl.ok) return jsonRes({ error: 'Rate limit exceeded' }, 429);
 
   const config = getPlanConfig(auth.plan);
   const month = getCurrentMonth();
@@ -13,13 +18,17 @@ export async function handlePlanStatus(request, env) {
 
   let usage = { turns_used: 0, current_amount: 0, cap_reached: false };
   try {
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1: D-02 PostgREST filter injection fix
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${auth.userId}&month=eq.${month}&select=turns_used,current_amount,cap_reached`,
+      `${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${safePgrestValue(auth.userId)}&month=eq.${safePgrestValue(month)}&select=turns_used,current_amount,cap_reached`,
       { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
     );
     const data = await res.json();
     if (data?.[0]) usage = data[0];
-  } catch (e) { console.error('Plan status fetch error:', e.message); }
+  } catch (e) {
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — Wave 1 #52 P1 #7 unstructured log fix
+    safeError('plan.status_fetch_failed', e);
+  }
 
   const percent = config.cap > 0 ? Math.round((usage.current_amount / config.cap) * 100) : 0;
 

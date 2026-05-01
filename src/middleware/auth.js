@@ -1,4 +1,5 @@
 import { supabaseQuery } from '../utils/supabase.js';
+import { safeCompare } from '../utils/helpers.js';
 
 export async function authenticateRequest(request, env) {
   const auth = request.headers.get('Authorization') || '';
@@ -33,8 +34,12 @@ export async function authenticateRequest(request, env) {
       await env.TOKEN_KV.put(`token:${token}`, JSON.stringify(tokenData), { expirationTtl: 365 * 86400 });
     }
 
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #10 D-03 / #35 D-03 fix:
+    //   owner_key timing attack 対策。`===` を `safeCompare` (HMAC SHA-256
+    //   constant time) に置換。plan elevation という強権限 secret に対する
+    //   timing oracle を遮断。
     const ownerKey = request.headers.get('X-Owner-Key') || ((request.headers.get('Cookie') || '').match(/owner_key=([^;]+)/)?.[1] ? decodeURIComponent((request.headers.get('Cookie') || '').match(/owner_key=([^;]+)/)[1]) : null);
-    if (ownerKey && env.OWNER_SECRET && ownerKey === env.OWNER_SECRET) {
+    if (ownerKey && env.OWNER_SECRET && (await safeCompare(ownerKey, env.OWNER_SECRET))) {
       effectivePlan = 'max';
     }
 

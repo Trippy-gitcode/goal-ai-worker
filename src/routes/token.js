@@ -4,12 +4,18 @@ import { PROMO_CODES } from '../utils/constants.js';
 import { syncUserToSupabase, supabaseQuery } from '../utils/supabase.js';
 import { checkDeepUsage } from '../utils/rate-limit.js';
 import { safeCompare } from '../utils/helpers.js';
+import { safeError } from '../utils/safeLog.js';
 
 export async function handleTokenRegister(request, env, ctx) {
   try {
     const body = await request.json();
     const { deviceId } = body;
     if (!deviceId) return jsonRes({ error: 'deviceId is required' }, 400);
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — Wave 1 #35 M-03 fix:
+    //   deviceId に最低 entropy 検証 (16+ chars). prototype-pollution prevention で
+    //   `__proto__` / `constructor` 等の reserve key を reject。
+    if (typeof deviceId !== 'string' || deviceId.length < 8 || deviceId.length > 128) return jsonRes({ error: 'deviceId must be 8-128 chars' }, 400);
+    if (/[\x00-\x1f\x7f]/.test(deviceId) || ['__proto__', 'constructor', 'prototype'].includes(deviceId)) return jsonRes({ error: 'invalid deviceId' }, 400);
     const existingTokenId = await env.TOKEN_KV.get(`device:${deviceId}`);
     if (existingTokenId) {
       const existingData = await env.TOKEN_KV.get(`token:${existingTokenId}`, 'json');
@@ -26,14 +32,16 @@ export async function handleTokenRegister(request, env, ctx) {
     if (ctx && env.SUPABASE_URL) ctx.waitUntil(syncUserToSupabase(env, tokenData));
     return jsonRes({ token: tokenId, plan: 'free', existing: false }, 201);
   } catch (e) {
-    console.error('handleTokenRegister error:', e);
-    return jsonRes({ error: e.message || 'Registration error' }, 500);
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — structured logger rollout (#52 P1 #7)
+    safeError('token.register_error', e);
+    return jsonRes({ error: 'Registration error' }, 500);
   }
 }
 
 export async function handleTokenCreate(request, env, ctx) {
   const adminAuth = request.headers.get('X-Admin-Secret');
-  if (!adminAuth || !(await safeCompare(adminAuth, env.TOKEN_SECRET))) return jsonRes({ error: 'Unauthorized' }, 403);
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — admin auth status code 401 統一
+  if (!adminAuth || !(await safeCompare(adminAuth, env.TOKEN_SECRET))) return jsonRes({ error: 'Unauthorized' }, 401);
   const body = await request.json();
   const { promoCode, userId, note } = body;
   const promo = promoCode ? PROMO_CODES[promoCode.toUpperCase()] : null;
@@ -66,9 +74,12 @@ export async function handleTokenValidate(request, env) {
     if (testerUserId) await supabaseQuery(env, 'users', 'PATCH', { filters: `id=eq.${testerUserId}`, body: { plan: 'free', tester_tier: null, tester_code: null, tester_expires_at: null } });
   }
 
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #10 D-03 / #35 D-03 fix:
+  //   owner_key timing attack 対策。`===` を `safeCompare` (HMAC SHA-256
+  //   constant time) に置換。auth.js:37 と一括修正。
   let effectivePlan = tokenData.plan;
   const ownerKey2 = request.headers.get('X-Owner-Key') || ((request.headers.get('Cookie') || '').match(/owner_key=([^;]+)/)?.[1] ? decodeURIComponent((request.headers.get('Cookie') || '').match(/owner_key=([^;]+)/)[1]) : null);
-  if (ownerKey2 && env.OWNER_SECRET && ownerKey2 === env.OWNER_SECRET) effectivePlan = 'max';
+  if (ownerKey2 && env.OWNER_SECRET && (await safeCompare(ownerKey2, env.OWNER_SECRET))) effectivePlan = 'max';
 
   const usage = await checkDeepUsage(env, tokenData.userId, effectivePlan);
   return jsonRes({ valid: true, plan: effectivePlan, expiresAt: tokenData.expiresAt, promoDesc: tokenData.promoDesc, daysRemaining: Math.max(0, Math.ceil((new Date(tokenData.expiresAt) - new Date()) / 86400000)), deepUsage: usage, tester_tier: tokenData.tester_tier || null, tester_expires_at: tokenData.tester_expires_at || null });
@@ -78,6 +89,10 @@ export async function handleTokenRedeem(request, env, ctx) {
   const body = await request.json();
   const { promoCode, deviceId } = body;
   if (!promoCode) return jsonRes({ error: 'Promo code required' }, 400);
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — Wave 1 #10 #8 / #35 D-02 / M-04 fix:
+  //   promoCode 形式バリデーション (PostgREST filter injection 対策)
+  if (typeof promoCode !== 'string' || !/^[A-Z0-9_-]{1,32}$/i.test(promoCode)) return jsonRes({ error: 'Invalid promoCode' }, 400);
+  if (deviceId && (typeof deviceId !== 'string' || deviceId.length > 128 || /[\x00-\x1f\x7f]/.test(deviceId))) return jsonRes({ error: 'Invalid deviceId' }, 400);
   if (promoCode && env.SUPABASE_URL) {
     const ucRes = await fetch(`${env.SUPABASE_URL}/rest/v1/used_coupons?token_id=eq.${encodeURIComponent(deviceId || '')}&coupon_code=eq.${encodeURIComponent(promoCode.toUpperCase())}`, { headers: { 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}` } });
     const ucRows = await ucRes.json();

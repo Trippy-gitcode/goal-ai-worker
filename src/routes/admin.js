@@ -1,8 +1,13 @@
-import { jsonRes, safeCompare } from '../utils/helpers.js';
+import { jsonRes, safeCompare, safePgrestValue } from '../utils/helpers.js';
 import { authenticateRequest, getUserIdFromToken } from '../middleware/auth.js';
 import { TESTER_CODES, TESTER_TOTAL_LIMIT } from '../utils/constants.js';
 import { supabaseQuery } from '../utils/supabase.js';
 
+// SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #10 #6 / #35 L-02 fix:
+//   admin auth status code 401/403 を 401 (認証情報不足) に統一。
+//   admin secret 認証は「権限不足」概念がなく、401 = 認証必須が REST 慣行。
+//   401 vs 403 混在で攻撃者が status code から認証段階を推定できる side-channel
+//   を遮断する defense-in-depth。
 export async function handleAdminTesters(request, env) {
   const adminAuth = request.headers.get('Authorization')?.replace('Bearer ', '');
   if (!adminAuth || !(await safeCompare(adminAuth, env.TOKEN_SECRET))) return jsonRes({ error: 'Unauthorized' }, 401);
@@ -23,10 +28,12 @@ export async function handleFeedbackList(request, env) {
     if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
     const userId = await getUserIdFromToken(env, auth.tokenId);
     if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
-    const feedbacks = await supabaseQuery(env, 'feedbacks', 'GET', { filters: `user_id=eq.${userId}&order=created_at.desc` });
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1: PostgREST D-02 fix
+    const feedbacks = await supabaseQuery(env, 'feedbacks', 'GET', { filters: `user_id=eq.${safePgrestValue(userId)}&order=created_at.desc` });
     return jsonRes({ feedbacks: feedbacks || [] });
   }
-  if (!(await safeCompare(adminAuth, env.TOKEN_SECRET))) return jsonRes({ error: 'Unauthorized' }, 403);
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1: 401 統一 (旧 403)
+  if (!(await safeCompare(adminAuth, env.TOKEN_SECRET))) return jsonRes({ error: 'Unauthorized' }, 401);
   const feedbacks = await supabaseQuery(env, 'feedbacks', 'GET', { filters: 'order=created_at.desc&limit=200' });
   return jsonRes({ feedbacks: feedbacks || [] });
 }
