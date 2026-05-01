@@ -39,3 +39,45 @@ node_modules/
 .netlify/
 frontend/dist/
 frontend-dist/
+
+# ====================================================================
+# DropBox / iCloud sync artifacts (microfix-integrity-V1 適用 2026-05-01)
+# OS-level sync が `<file> 2.<ext>` / `<file> 3.<ext>` ペア生成、
+# 本リポジトリで 3857 件規模の検出実績、再発防止のため固定 ignore。
+# dev-system/.gitignore (line 36-48) と整合。
+# ====================================================================
+* 2.*
+* 2/
+* 3.*
+* 3/
+* 4.*
+* 4/
+*\ 2
+*\ 3
+*\ 4
+.dropbox
+.dropbox.attr
+.dropbox.cache
+.icloud
+*.icloud
+
+# ====================================================================
+# OS / Editor (microfix-integrity-V1)
+# ====================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ====================================================================
+# Logs (運用ログ、commit 不要)
+# ====================================================================
+logs/
+*.log
+
