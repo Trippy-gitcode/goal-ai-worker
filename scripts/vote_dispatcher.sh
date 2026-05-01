@@ -1,4 +1,5 @@
 #!/bin/sh
+# GENERATED: DO NOT MODIFY
 # scripts/vote_dispatcher.sh
 # MISSION-G49-PKG-FINAL-V2 Phase 2（PD-112 §2.25.23 14 票投票機構）
 #

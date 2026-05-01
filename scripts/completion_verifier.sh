@@ -1,4 +1,5 @@
 #!/bin/sh
+# GENERATED: DO NOT MODIFY
 # scripts/completion_verifier.sh
 # MISSION-G49-PKG-FINAL-V2 Phase 0（§2.25.21 完了条件検証と要約生成）
 #

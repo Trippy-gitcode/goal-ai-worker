@@ -1,4 +1,5 @@
 #!/bin/sh
+# GENERATED: DO NOT MODIFY
 # scripts/external_review_guardrail.sh
 # dev-system v3.5 Phase 1 MVP (案 D'、sub_external_review_protocol §3.3)
 # 外部 API クロスチェックのガードレール状態管理。

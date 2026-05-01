@@ -11,7 +11,8 @@
 # POSIX sh 互換（§3.7）。bash 拡張禁止。
 
 set -eu
-SPEC="${1:-lais/verify/dev_system_v34_package.md}"
+# 引数 1 > APP_SPEC_PATH 環境変数 > core_spec.md の順で resolve (legacy v34 spec は archive 退避済、archived 2026-04-30)
+SPEC="${1:-${APP_SPEC_PATH:-core_spec.md}}"
 [ -f "$SPEC" ] || { echo "FAIL: G18 $SPEC not found" >&2; exit 1; }
 
 # §2.X で言及されたスクリプト名を抽出（scripts/<name>.sh パターン）

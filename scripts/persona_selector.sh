@@ -1,4 +1,5 @@
 #!/bin/sh
+# GENERATED: DO NOT MODIFY
 # scripts/persona_selector.sh
 # MISSION-G49-PKG Phase 2.2（PD-111 §2.25.14 全応答ペルソナレビュー）
 #

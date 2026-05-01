@@ -1,4 +1,5 @@
 #!/bin/sh
+# GENERATED: DO NOT MODIFY
 # scripts/handoff_validator.sh
 # MISSION-G49-PKG-FINAL-V2 Phase 0（§2.25.16.5 SSOT 4 ファイル運用）
 #

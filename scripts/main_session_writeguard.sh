@@ -69,6 +69,16 @@ fi
 LOG_FILE="${REPO_ROOT}/logs/main_session_writeguard.log"
 mkdir -p "${REPO_ROOT}/logs" 2>/dev/null || true
 
+# dev-system context delegation (PD-006 / re-applied 2026-04-30 post lais-retro PD-019 overwrite):
+# dev-system 配下で動作中なら本 writeguard は適用しない。
+# dev-system 自身が独立 writeguard を持つため相互独立を担保。
+case "$REPO_ROOT" in
+  */dev-system|*/dev-system/*)
+    printf '%s\t[PASS-DELEGATED-DEVSYS]\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$LOG_FILE" 2>/dev/null || true
+    exit 0
+    ;;
+esac
+
 # subagent コンテキスト判定: Task tool 経由で起動された subagent は
 # DEV_SYSTEM_SUBAGENT=1 環境変数を立てる運用を期待。立っていれば writeguard をスキップ。
 # 主セッションは環境変数を設定しないため、書込禁止が機能する。

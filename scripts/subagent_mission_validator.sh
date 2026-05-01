@@ -1,4 +1,5 @@
 #!/bin/sh
+# GENERATED: DO NOT MODIFY
 # scripts/subagent_mission_validator.sh
 # §2.25.16.10 subagent ミッション目的整合性チェック必須化（PATCH-SUBAGENT-MISSION-PURPOSE-ALIGNMENT、2026-04-26）
 # §2.25.16.10 ミッションタイプ判定追加（PATCH-VALIDATOR-OVERFIRE-REDUCTION-V1、2026-04-27）

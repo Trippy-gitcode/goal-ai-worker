@@ -1,4 +1,5 @@
 #!/bin/sh
+# GENERATED: DO NOT MODIFY
 # scripts/persona_review_runner.sh
 # PATCH-VIO12-PERSONA-MECH（§2.25.14 全応答ペルソナレビュー機械化、2026-04-26）
 #

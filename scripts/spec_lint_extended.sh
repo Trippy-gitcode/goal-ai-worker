@@ -1,4 +1,5 @@
 #!/bin/sh
+# GENERATED: DO NOT MODIFY
 # scripts/spec_lint_extended.sh
 # MISSION-G49-PKG Phase 2.2（PD-111 機械ゲート補助）
 #
@@ -59,8 +60,10 @@ report_warn() {
 REQUIRED_SECTIONS="§2.25.1 §2.25.2 §2.25.3 §2.25.4 §2.25.5 §2.25.6 §2.25.7 §2.25.8 §2.25.9 §2.25.10 §2.25.11 §2.25.12 §2.25.13 §2.25.14 §C0 §C1 §C2 §C3 §C4 §C5 §C6 §15.1 §15.2 §15.3 §15.4 §15.5 §15.6 §15.7"
 
 # §2.25.X / §15.X / §C0-§C6 はファイル種別ごとに任意
+# 対象: legacy dev_system_spec.md style (legacy v34 spec は archived 2026-04-30 に退避済、対象外)
+# 新 SSoT core_spec.md は dev-system 構造 (§1-§10) のため §2.25/§C0/§15 検査対象外 (skip)
 case "$TARGET" in
-  *dev_system_v34_package.md|*dev_system_spec.md)
+  *dev_system_spec.md)
     for sec in $REQUIRED_SECTIONS; do
       # §2.25.10 等は §2.25.10 直接マッチ。§C0 は §C0 直接マッチ
       if ! grep -qE "${sec}([^0-9]|$)" "$TARGET"; then
@@ -68,8 +71,8 @@ case "$TARGET" in
       fi
     done
     ;;
-  *)
-    # 他ファイル: 必須セクションチェックは skip
+  *core_spec.md|*)
+    # core_spec.md (新 SSoT、dev-system 構造) + 他ファイル: 必須セクションチェックは skip
     PASS_REPORTS="${PASS_REPORTS}必須セクションチェック skip (target: $TARGET)\n"
     ;;
 esac
@@ -94,8 +97,10 @@ for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14; do
   fi
 done
 if [ -n "$MISSING_2_25" ]; then
+  # legacy v34 spec style (dev_system_spec.md) のみ §2.25 連続性 WARN を発行
+  # 新 SSoT core_spec.md は §3.8 ダイジェスト構造のため対象外
   case "$TARGET" in
-    *dev_system_v34_package.md|*dev_system_spec.md)
+    *dev_system_spec.md)
       report_warn "§2.25 連続性欠落: ${MISSING_2_25}"
       ;;
   esac

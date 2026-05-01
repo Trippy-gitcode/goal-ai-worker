@@ -28,7 +28,9 @@
 set -eu
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-PACKAGE_FILE="${REPO_ROOT}/lais/verify/dev_system_v34_package.md"
+# spec source: APP_SPEC_PATH 環境変数 > core_spec.md (legacy v34 spec は archive 退避済、archived 2026-04-30)
+# 注: 本 script のサマリ本文 (SUMMARY_2_25 / SUMMARY_C0) は hardcode 定数、PACKAGE_FILE は存在ガードのみ
+PACKAGE_FILE="${APP_SPEC_PATH:-${REPO_ROOT}/core_spec.md}"
 
 SECTION="all"
 RAW=0

@@ -1,4 +1,5 @@
 #!/bin/sh
+# GENERATED: DO NOT MODIFY
 # scripts/context_monitor.sh
 # MISSION-G49-PKG-FINAL-V2 Phase 0（§2.25.16.4 コンテキスト管理）
 #
