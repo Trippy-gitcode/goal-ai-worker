@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { corsResponse } from './middleware/cors.js';
-import { jsonRes } from './utils/helpers.js';
+import { jsonRes, safeCompare } from './utils/helpers.js';
 import { APP_VERSION } from './utils/constants.js';
 
 // Route handlers
@@ -50,6 +50,13 @@ app.post('/api/error-report', async (c) => {
 });
 
 app.get('/api/debug/errors', async (c) => {
+  // P0 FIX (LAIS-P0-FIX / GAP-CLOSURE-V1):
+  //   /api/debug/errors は内部エラーログを露出するため、admin auth (TOKEN_SECRET HMAC 一致) 必須化。
+  //   safeCompare 経由で timing attack 防御。Authorization: Bearer <TOKEN_SECRET> または X-Admin-Secret header 受付。
+  const adminAuth = (c.req.header('Authorization') || '').replace(/^Bearer\s+/i, '') || c.req.header('X-Admin-Secret');
+  if (!adminAuth || !c.env.TOKEN_SECRET || !(await safeCompare(adminAuth, c.env.TOKEN_SECRET))) {
+    return withCors(c, jsonRes({ error: 'Unauthorized' }, 401));
+  }
   const hour = new Date().toISOString().slice(0,13);
   const errors = JSON.parse(await c.env.TOKEN_KV.get(`err:${hour}`) || '[]');
   const prevHour = new Date(Date.now() - 3600000).toISOString().slice(0,13);

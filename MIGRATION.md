@@ -173,3 +173,69 @@ App 側で改変禁止ファイル (`docs/changeable_policy.md` §2 参照) を�
 - `dev-system-generated.json` — 生成メタデータ
 - `lais/archive/spec_v34_pre_reform/INDEX.md` — 旧 SSoT (`dev_system_v34_package.md`) archive INDEX
 - `lais/archive/pre-retro-2026-04-30/` — 本 retro merge 前の `[breaking]` archive snapshot
+
+---
+
+## 6. MIGRATION-0.1.0-propagation (2026-05-01) - PROPAGATION-V1 / GAP-CLOSURE-V1 取込
+
+> dev-system 5/1 PROPAGATION-V1 + GAP-CLOSURE-V1 で新設された 9 件 templates + 2 件 sub_*.md + post_gen_smoke 検査 [6-9/9] + generator Step 6.6 / 6.7 / 6.8 を Lais 側に opt-in 取込。
+> 連動: dev-system `verify/templates_propagation_log_2026-05-01.md` + `verify/completeness_audit_propagation_2026-05-01.md` + `verify/completeness_gap_closure_log_2026-05-01.md`
+
+### 6.1 [optional] templates 取込候補 (9 件、Lais 側既存温存)
+
+Lais 側で既に独自実装が存在するため、以下は **[optional]** 扱い (dev-system 本体改善取込時に手動 diff merge、既存 Lais コードを上書きしない方針)。
+
+| # | dev-system template | Lais 側既存 | 取扱い |
+|---|---|---|---|
+| 1 | `templates/safeLog.template.js` | `src/utils/safeLog.js` (M-05 で 201 行新設済) | [optional] - dev-system baseline と diff、PII pattern 拡張あれば手動 merge |
+| 2 | `templates/auth-safeCompare.template.js` | `src/utils/helpers.js` 内 `safeCompare` 関数 (HMAC ベース既存) | [optional] - 別 file 切出可、ただし helpers.js から既存 import 多数あり、Lais 側現状維持 |
+| 3 | `templates/security-headers.template.js` | (Lais 側 src/middleware/ に未配置) | [optional] - Lais は CSP / HSTS 適用 frontend 主導、Worker 側 baseline は将来取込候補 |
+| 4 | `templates/vitest.config.template.js` | `vitest.config.js` (M-06 で v8 + threshold + isolation 配置済) | [optional] - dev-system baseline と diff、threshold 引き上げ時手動 merge |
+| 5 | `templates/incident_playbook.template.md` | (Lais 側未配置、本 retro で配置候補) | [optional] - 取込時 `<lais>/docs/plans/sub_incident_response.md` (App 配備 baseline 165 行) として配置可 |
+| 6 | `templates/tests/unit/helpers.template.test.js` | `tests/unit/helpers.test.js` (M-06 で配置済) | [optional] - dev-system baseline と diff |
+| 7 | `templates/tests/unit/safeLog.template.test.js` | `tests/unit/safeLog.test.js` (M-06 で配置済) | [optional] - 既存実装が dev-system baseline より広範 |
+| 8 | `templates/tests/unit/auth.template.test.js` | `tests/unit/auth.test.js` (M-06 で配置済) | [optional] - 既存実装が dev-system baseline より広範 |
+| 9 | `templates/tests/unit/rate-limit.template.test.js` | `tests/unit/rate-limit.test.js` (M-06 で配置済) | [optional] - 既存実装が dev-system baseline より広範 |
+
+### 6.2 [required] dev-system 改修取込 (2 件、新規 sub_*.md)
+
+| # | dev-system file | Lais 側 path | 取扱い |
+|---|---|---|---|
+| 1 | `docs/plans/sub_writeguard_multilayer.md` | `docs/plans/sub_writeguard_multilayer.md` (新規追加) | [required] - 5 path multilayer + STRICT mode + bash injection BLOCK 6 pattern |
+| 2 | `docs/plans/sub_incident_response.md` (668 行 dev-system 本体) | `docs/plans/sub_incident_response.md` (新規追加) | [required] - 7 種別 incident matrix + escalation tree |
+
+### 6.3 [optional] generator Step 6.6 / 6.7 / 6.8 取込
+
+> 本セクションは **dev-system → Lais の uplift 経路** の opt-in 候補。Lais は既に script / wrangler / .dev.vars 管理が確立しているため、新規 App ほどの取込効果は低いが、PROPAGATION-V1 規律 (.dev.vars chmod 600 / safeLog wiring / safeCompare wiring / security-headers wiring) は Lais 側でも有効。
+
+| # | dev-system Step | Lais 側適用 |
+|---|---|---|
+| 6.6 | `.dev.vars` chmod 600 強制 (PROPAGATION-V1) | [required] Lais 既存 `.dev.vars` に手動 `chmod 600` 適用、`scripts/check_dev_vars_perm.sh` (新設候補) で監視 |
+| 6.7 | `incident_playbook.template.md` → `docs/plans/sub_incident_response.md` 配置 | [optional] - Lais は既に独自 incident response 運用、dev-system baseline 取込は future migration 候補 |
+| 6.8 | `safeLog / safeCompare / security-headers` wiring | [optional] - Lais 既存実装尊重、security-headers は Cloudflare Worker 側 baseline 取込候補 |
+
+### 6.4 [optional] post_gen_smoke 検査 [6-9/9] 取込
+
+dev-system `scripts/post_gen_smoke.sh` の検査 [6-9/9] (PROPAGATION-V1 / GAP-CLOSURE-V1):
+
+| # | 検査 | Lais 側適用判定 |
+|---|---|---|
+| [6/9] | `.dev.vars` permission 600 検査 | [required] - secret leak 防御、Lais 側でも有効 |
+| [7/9] | safeCompare 利用検査 (auth `===` 直接比較検出) | [required] - timing attack 防御、Lais 側でも有効 |
+| [8/9] | safeLog 利用検査 (PII 直接 console.log 検出) | [required] - PII 防御、Lais 側でも有効 |
+| [9/9] | CSP header 存在検査 | [optional] - Lais frontend 側で CSP 適用済、Worker 側 baseline は future 候補 |
+
+取込手順: dev-system `scripts/post_gen_smoke.sh` を Lais の `scripts/` 配下に diff merge (Lais 側 既存 smoke スクリプトと共存)。
+
+### 6.5 取込状況 checklist
+
+- [ ] [optional] templates 9 件 - dev-system baseline と Lais 既存の diff 比較レビュー
+- [ ] [required] `docs/plans/sub_writeguard_multilayer.md` 取込
+- [ ] [required] `docs/plans/sub_incident_response.md` 取込
+- [ ] [required] `.dev.vars` chmod 600 適用 (Step 6.6 相当、Lais 既存)
+- [ ] [required] post_gen_smoke 検査 [6-8/9] 適用 (Lais 側 smoke 統合)
+- [ ] [optional] post_gen_smoke 検査 [9/9] CSP 取込判断
+
+### 6.6 取込時の archive snapshot (E2-2 条件 (a))
+
+[required] 取込時は事前に Lais 側既存ファイルを `lais/archive/pre-propagation-2026-05-01/` に snapshot。merge 後 diff 結果を `docs/decision_log.md` に PD-NNN として記録。
