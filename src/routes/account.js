@@ -138,19 +138,71 @@ export async function handleAccountDelete(request, env) {
   //       追加クリーンアップ (Stripe解約 / PostHog 等) は本関数 1 箇所に追記すれば良い。
   const _finalizeAccountDelete = async (transactionMode /* 'atomic_rpc' | 'fallback_per_table' */) => {
     // 1. KV cleanup (token 削除)
+    // Round 28 D-3 fix (2026-05-02) — internal data-integrity persona REJECT 指摘:
+    //   旧: KV.delete 例外を silent catch (`catch (_) {}`)、KV degraded で 7 tables
+    //       削除済 + token survive = orphan token → authenticate 通過 → users 0 行 →
+    //       NPE / 500 + `{ ok: true }` 返却 = client 認識ミス。
+    //   新: KV.delete を 3 回 retry (250ms backoff)、最終失敗時は compensating
+    //       queue (`account_delete_kv_orphan:<token_fp>`) に投入し、別 cron で再削除を
+    //       保証する。 さらに caller 側に throw して、 ok:true を返さない。
+    let kvCleanupOk = true;
+    let kvCleanupErr = null;
     if (tokenId && env && env.TOKEN_KV) {
-      try { await env.TOKEN_KV.delete(`token:${tokenId}`); } catch (_) {}
+      const _delAttempt = async () => {
+        await env.TOKEN_KV.delete(`token:${tokenId}`);
+      };
+      let attempts = 0;
+      while (attempts < 3) {
+        try {
+          await _delAttempt();
+          break;
+        } catch (kvErr) {
+          attempts++;
+          kvCleanupErr = kvErr;
+          if (attempts >= 3) {
+            kvCleanupOk = false;
+            // compensating queue 投入 (cron が `token_fp` 経由で再 delete する想定)
+            try {
+              await env.TOKEN_KV.put(
+                `account_delete_kv_orphan:${tokenFpAudit}`,
+                JSON.stringify({
+                  user_hash: userHashAudit,
+                  token_fp: tokenFpAudit,
+                  transaction: transactionMode,
+                  last_error: (kvErr && kvErr.message) ? kvErr.message.slice(0, 500) : 'kv_delete_failed',
+                  ts: Date.now(),
+                  retry_count: 0,
+                }),
+                { expirationTtl: 86400 * 30 }
+              );
+            } catch (_) {
+              // compensating queue 自体も failed = 完全 KV degraded、 throw で caller に明示
+            }
+            break;
+          }
+          // backoff
+          await new Promise((r) => setTimeout(r, 250));
+        }
+      }
     }
-    // 2. 集約 audit trail
-    safeLog('INFO', 'account.deleted', {
+    // 2. 集約 audit trail (KV cleanup 結果を含めて記録)
+    safeLog(kvCleanupOk ? 'INFO' : 'WARN', 'account.deleted', {
       user_hash: userHashAudit,
       token_fp: tokenFpAudit,
       total_tables_processed: totalTables,
       total_tables: totalTables,
       transaction: transactionMode,
-      status: 'success',
+      kv_cleanup_ok: kvCleanupOk,
+      status: kvCleanupOk ? 'success' : 'degraded_kv_orphan',
     });
-    // 3. 将来の追加 cleanup (Stripe 解約 / PostHog identify-deletion / Sentry user clear 等) は
+    // 3. KV cleanup が完全 failed なら caller に throw、 client は `degraded` を受け取る
+    if (!kvCleanupOk) {
+      const err = new Error('account.delete_kv_cleanup_failed_orphan_token_queued_for_reaper');
+      err._kvCleanupErr = kvCleanupErr;
+      err._isDegraded = true;
+      throw err;
+    }
+    // 4. 将来の追加 cleanup (Stripe 解約 / PostHog identify-deletion / Sentry user clear 等) は
     //    本関数 (`_finalizeAccountDelete`) 内にのみ追加する。 main path / fallback の双方で
     //    自動的に実行される。
   };
@@ -160,17 +212,36 @@ export async function handleAccountDelete(request, env) {
   // ───────────────────────────────────────────────
   if (supabaseUrl && supabaseKey) {
     try {
+      // Round 28 security #3 fix (2026-05-02) — internal security-auditor REJECT 指摘:
+      //   旧: RPC POST body に生 `userId` を送信 = safePgrestValue 防御を bypass。
+      //   新: 上で `safeUid = safePgrestValue(userId)` 検証済 + `isSafePgrestValue` PASS の値のみ
+      //       使う。RPC は decodeURIComponent 不要 (PostgREST RPC body は JSON で URL encoding
+      //       不要)、 raw userId は whitelist (`/^[a-zA-Z0-9_\-.]+$/`) 通過済 = injection 不可。
+      //   defense-in-depth: 万一 callee 側で SQL 構築する場合に備え、whitelist 通過後の値のみ送信。
       const rpcRes = await fetch(`${supabaseUrl}/rest/v1/rpc/account_atomic_delete`, {
         method: 'POST',
         headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ p_user_id: userId }),
+        body: JSON.stringify({ p_user_id: decodeURIComponent(safeUid) }),
       });
       if (rpcRes.ok) {
         const rpcJson = await rpcRes.json().catch(() => null);
         if (rpcJson && rpcJson.status === 'success') {
           // 全 table atomic 削除完了 → 統一 cleanup hook
-          await _finalizeAccountDelete('atomic_rpc');
-          return jsonRes({ ok: true, message: 'アカウントを削除しました' });
+          // Round 28 D-3 fix: KV cleanup 失敗時は throw → caller 側で degraded 返却
+          try {
+            await _finalizeAccountDelete('atomic_rpc');
+            return jsonRes({ ok: true, message: 'アカウントを削除しました' });
+          } catch (finErr) {
+            if (finErr && finErr._isDegraded) {
+              // DB は削除済 + KV は orphan queue 投入済、 client に明示
+              return jsonRes({
+                ok: true,
+                message: 'アカウントを削除しました (orphan token あり、運用 reaper で削除されます)',
+                degraded: { kv_cleanup_failed: true, requires_reaper: true },
+              }, 207); // Multi-Status
+            }
+            throw finErr;
+          }
         }
         // RPC 返却が success 以外 = ROLLBACK 済 → fallback 経由で再試行 (整合性は保たれる)
         safeError('account.atomic_delete_rpc_rolled_back', new Error(`status=${rpcJson?.status} error=${rpcJson?.error || 'unknown'}`), {
@@ -217,8 +288,20 @@ export async function handleAccountDelete(request, env) {
     // 7. KV cleanup
     // Round 27 R-003 fix: cleanup を統一 helper 経由に変更、
     //   atomic_rpc path と fallback path で post-delete 処理を一致させる。
-    await _finalizeAccountDelete('fallback_per_table');
-    return jsonRes({ ok: true, message: 'アカウントを削除しました' });
+    // Round 28 D-3 fix: KV cleanup 失敗時は degraded 返却。
+    try {
+      await _finalizeAccountDelete('fallback_per_table');
+      return jsonRes({ ok: true, message: 'アカウントを削除しました' });
+    } catch (finErr) {
+      if (finErr && finErr._isDegraded) {
+        return jsonRes({
+          ok: true,
+          message: 'アカウントを削除しました (orphan token あり、運用 reaper で削除されます)',
+          degraded: { kv_cleanup_failed: true, requires_reaper: true },
+        }, 207);
+      }
+      throw finErr;
+    }
   } catch (e) {
     safeError('account.delete_error', e);
     // Round 5 B-4: 失敗時も pseudonymised audit trail を残す (どこまで進んだか trace 可能化)。

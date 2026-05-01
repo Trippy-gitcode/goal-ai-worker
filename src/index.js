@@ -257,10 +257,22 @@ app.post('/api/csp-report', async (c) => {
 
 app.get('/api/debug/errors', async (c) => {
   // P0 FIX (LAIS-P0-FIX / GAP-CLOSURE-V1):
-  //   /api/debug/errors は内部エラーログを露出するため、admin auth (TOKEN_SECRET HMAC 一致) 必須化。
-  //   safeCompare 経由で timing attack 防御。Authorization: Bearer <TOKEN_SECRET> または X-Admin-Secret header 受付。
+  //   /api/debug/errors は内部エラーログを露出するため、admin auth (HMAC 一致) 必須化。
+  //   safeCompare 経由で timing attack 防御。Authorization: Bearer <SECRET> または X-Admin-Secret header 受付。
+  //
+  // Round 28 security #6 fix (2026-05-02) — internal security-auditor REJECT 指摘:
+  //   旧: TOKEN_SECRET (token signing 用) を admin debug auth と兼用 → 一方の compromise で
+  //       両方が compromise する privilege confusion antipattern。
+  //   新: ADMIN_DEBUG_SECRET (専用) を新設。 後方互換のため、未設定時は TOKEN_SECRET にフォール
+  //       バック (deploy 直後の 1 回限り、SECRET 設定後に削除される一時 path)。
+  //       infrastructure 側 (wrangler secret put ADMIN_DEBUG_SECRET) で別値を設定すべき。
   const adminAuth = (c.req.header('Authorization') || '').replace(/^Bearer\s+/i, '') || c.req.header('X-Admin-Secret');
-  if (!adminAuth || !c.env.TOKEN_SECRET || !(await safeCompare(adminAuth, c.env.TOKEN_SECRET))) {
+  // 専用 secret を優先、未設定時のみ legacy fallback (deprecation warning)
+  const adminSecret = c.env.ADMIN_DEBUG_SECRET || c.env.TOKEN_SECRET;
+  if (!c.env.ADMIN_DEBUG_SECRET && c.env.TOKEN_SECRET) {
+    safeLog('WARN', 'admin.debug_using_legacy_token_secret', { recommendation: 'set ADMIN_DEBUG_SECRET for privilege isolation' });
+  }
+  if (!adminAuth || !adminSecret || !(await safeCompare(adminAuth, adminSecret))) {
     return withCors(c, jsonRes({ error: 'Unauthorized' }, 401));
   }
   const hour = new Date().toISOString().slice(0,13);

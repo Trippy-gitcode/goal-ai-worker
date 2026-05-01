@@ -221,20 +221,55 @@ export async function handleStripeWebhook(request, env, ctx) {
   //       同様に DELETE。delete 失敗時は元 error を優先して 503 返す (Stripe retry 強制)。
   let _businessFailed = false;
   let _businessError = null;
+  // Round 28 D-9 fix (2026-05-02) — internal data-integrity persona REJECT 指摘:
+  //   旧: rollbackClaim の Supabase DELETE 失敗を silent catch、 Stripe 再送 → 409 →
+  //       "Already processed" 返却 → business logic 永久未実行 = stuck event 確定。
+  //   新: DELETE 失敗時は 3 回 retry、 最終失敗で `stuck_claim:<event.id>` queue に
+  //       7 日 TTL で投入 + safeError CRITICAL alert。 別 cron で reaper 再 DELETE。
+  let _rollbackOk = true;
   const _rollbackClaim = async (reason) => {
     safeError('webhook.business_logic_failed_rolling_back_claim', new Error(`business logic failed (${reason}), rolling back dedup claim to allow Stripe retry`), { event_id: event.id, event_type: event.type });
     if (dedupClaimed && env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY) {
-      try {
-        await fetch(`${env.SUPABASE_URL}/rest/v1/stripe_processed_events?event_id=eq.${encodeURIComponent(event.id)}`, {
-          method: 'DELETE',
-          headers: {
-            'apikey': env.SUPABASE_SERVICE_KEY,
-            'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
-            'Prefer': 'return=minimal',
-          },
-        });
-      } catch (delErr) {
-        safeError('webhook.dedup_supabase_rollback_failed', delErr, { event_id: event.id });
+      let attempts = 0;
+      let lastErr = null;
+      while (attempts < 3) {
+        try {
+          const r = await fetch(`${env.SUPABASE_URL}/rest/v1/stripe_processed_events?event_id=eq.${encodeURIComponent(event.id)}`, {
+            method: 'DELETE',
+            headers: {
+              'apikey': env.SUPABASE_SERVICE_KEY,
+              'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+              'Prefer': 'return=minimal',
+            },
+          });
+          if (r.ok || r.status === 404) { lastErr = null; break; }
+          lastErr = new Error(`DELETE non-2xx status=${r.status}`);
+        } catch (delErr) {
+          lastErr = delErr;
+        }
+        attempts++;
+        if (attempts < 3) await new Promise((r) => setTimeout(r, 250));
+      }
+      if (lastErr) {
+        _rollbackOk = false;
+        safeError('webhook.dedup_supabase_rollback_failed_stuck', lastErr, { event_id: event.id, event_type: event.type, retries: attempts });
+        // stuck_claim queue 投入: reaper cron が `event_id` 経由で再 DELETE 試行
+        try {
+          if (env.TOKEN_KV) {
+            await env.TOKEN_KV.put(
+              `stuck_claim:${event.id}`,
+              JSON.stringify({
+                event_id: event.id,
+                event_type: event.type,
+                business_error: reason,
+                last_rollback_error: (lastErr && lastErr.message) ? lastErr.message.slice(0, 500) : 'unknown',
+                ts: Date.now(),
+                retry_count: 0,
+              }),
+              { expirationTtl: 86400 * 7 }
+            );
+          }
+        } catch (_) { /* compensating queue 自体も failed = full degraded */ }
       }
     }
     // KV side hint も削除 (best-effort)
@@ -368,9 +403,11 @@ export async function handleStripeWebhook(request, env, ctx) {
 
   if (_businessFailed) {
     await _rollbackClaim(_businessError ? (_businessError.message || 'unknown') : 'unknown');
-    return new Response('Processing failed, please retry', {
+    // Round 28 D-9 fix: rollback 失敗時は stuck_claim queue 投入済 + 503 retry。
+    // Stripe は再送 → reaper cron で claim DELETE 後に再処理可能。
+    return new Response(_rollbackOk ? 'Processing failed, please retry' : 'Processing failed; rollback queued for reaper', {
       status: 503,
-      headers: { 'Retry-After': '30' },
+      headers: { 'Retry-After': _rollbackOk ? '30' : '300' },
     });
   }
 

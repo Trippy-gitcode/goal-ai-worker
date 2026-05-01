@@ -28,7 +28,10 @@
     --fg-muted: rgba(230, 237, 243, 0.72);
     --accent: #58A6FF;
     --accent-2: #388BFD;
-    --muted: #6b7280;
+    /* Round 28 mobile-ux Q3 fix (2026-05-02) — internal mobile-ux REJECT 指摘:
+       #6b7280 on #0c0e14 = contrast 4.0:1 → WCAG AA fail (normal text 4.5:1 必要)。
+       #9ba3b0 = ~6.0:1 で AA PASS。 footer-meta は decorative なので AA で十分。 */
+    --muted: #9ba3b0;
     --card-bg: rgba(255,255,255,0.04);
     --card-border: rgba(255,255,255,0.10);
     --shadow-icon: 0 16px 40px rgba(88, 166, 255, 0.20);
@@ -117,7 +120,13 @@
     -webkit-tap-highlight-color: transparent;
     transition: var(--transition-btn);
   }
-  .btn:hover, .btn:focus { outline: none; transform: translateY(-1px); box-shadow: var(--shadow-btn-hover); }
+  /* Round 28 mobile-ux Q3 fix (2026-05-02) — internal mobile-ux REJECT 指摘:
+     旧: `.btn:hover, .btn:focus { outline: none; ... }` で focus indicator 不可視 (WCAG 2.4.7 fail)。
+     新: hover と focus を分離、focus は `outline: 2px solid var(--accent)` で可視化。
+     keyboard nav 時に offline page で迷子にならない。 */
+  .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-btn-hover); }
+  .btn:focus { outline: 2px solid var(--accent); outline-offset: 3px; transform: translateY(-1px); box-shadow: var(--shadow-btn-hover); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .btn:active { transform: translateY(0); }
   .btn.secondary {
     background: transparent;
