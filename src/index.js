@@ -144,16 +144,30 @@ const CSP_ALLOWED_CONTENT_TYPES = new Set([
   'application/reports+json',
   'application/json',
 ]);
-// Round 24 R-004: document-uri origin allowlist (production + preview Vite dev server)
-const CSP_ALLOWED_REPORT_ORIGINS = new Set([
+// Round 24 R-004 + Round 29 security #7 fix (2026-05-02) — internal security-auditor REJECT 指摘:
+//   旧: production allowlist に localhost:5173 / 127.0.0.1:5173 を含み、 NODE_ENV !== 'test'
+//       の bypass 1 段のみで分離 → CI / staging で NODE_ENV 設定漏れ時に偽 origin spoof で
+//       任意 page から report 送信可能 = log spam / log injection リスク。
+//   新: production allowlist と dev allowlist を分離。 dev origin は env.NODE_ENV === 'development'
+//       時のみ追加。 production deploy 時は localhost が混在しない。
+const CSP_ALLOWED_REPORT_ORIGINS_PROD = new Set([
   'https://goal-ai-frontend.pages.dev',
   'https://www.goal-ai.app',
   'https://goal-ai.app',
   'https://delicate-bienenstitch.netlify.app',
-  // Vite local dev (E2E test 時の self-report)
+  'https://delicate-bienenstitch-b734d6.netlify.app',
+]);
+const CSP_ALLOWED_REPORT_ORIGINS_DEV = new Set([
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ]);
+function _cspAllowlistFor(env) {
+  // production = prod のみ。 development = prod + dev。 test = bypass (上位 handler で skip)。
+  if (env && env.NODE_ENV === 'development') {
+    return new Set([...CSP_ALLOWED_REPORT_ORIGINS_PROD, ...CSP_ALLOWED_REPORT_ORIGINS_DEV]);
+  }
+  return CSP_ALLOWED_REPORT_ORIGINS_PROD;
+}
 function _cspExtractOrigin(uri) {
   if (!uri || typeof uri !== 'string') return null;
   try {
@@ -224,11 +238,13 @@ app.post('/api/csp-report', async (c) => {
     //   CSP-Report (`csp-report` payload key) と Reports-API (`csp-violation` body) 両対応。
     //   不一致 origin は spoof / 攻撃 由来として 400 reject。
     //   bypass: env.NODE_ENV === 'test' (E2E test stub) は allowlist 拡張せずに通す。
+    // Round 29 security #7 fix: env-aware allowlist. test = bypass、 development = prod+dev、 production = prod のみ。
     if (c.env.NODE_ENV !== 'test') {
       const reportObj = body['csp-report'] || (body.body && body.body['csp-report']) || body;
       const docUri = reportObj['document-uri'] || reportObj.documentURL || reportObj.documentURI;
       const docOrigin = _cspExtractOrigin(docUri);
-      if (!docOrigin || !CSP_ALLOWED_REPORT_ORIGINS.has(docOrigin)) {
+      const allowlist = _cspAllowlistFor(c.env);
+      if (!docOrigin || !allowlist.has(docOrigin)) {
         safeLog('WARN', 'csp_report.bad_origin', { reason: 'origin_not_allowlisted', origin: docOrigin || 'missing' });
         return withCors(c, new Response(null, { status: 400 }));
       }

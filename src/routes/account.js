@@ -161,7 +161,13 @@ export async function handleAccountDelete(request, env) {
           kvCleanupErr = kvErr;
           if (attempts >= 3) {
             kvCleanupOk = false;
-            // compensating queue 投入 (cron が `token_fp` 経由で再 delete する想定)
+            // Round 28 D-3 + Round 29 NEW-3 fix (2026-05-02) — internal security-auditor 指摘:
+            //   旧: compensating queue 投入失敗を silent catch、 orphan token 救済 chain
+            //       (KV.delete fail → queue 投入) で queue 投入自体の失敗を観測不能化、
+            //       orphan token を完全 sealed off できない (cron も発見不能)。
+            //   新: queue 投入失敗時は safeError で CRITICAL alert、
+            //       `_kvQueueFallback` フラグを true 化して caller 側で別経路 (audit trail
+            //       経由 reaper、 user_hash で人手 trace 可能) を確保。
             try {
               await env.TOKEN_KV.put(
                 `account_delete_kv_orphan:${tokenFpAudit}`,
@@ -175,8 +181,18 @@ export async function handleAccountDelete(request, env) {
                 }),
                 { expirationTtl: 86400 * 30 }
               );
-            } catch (_) {
-              // compensating queue 自体も failed = 完全 KV degraded、 throw で caller に明示
+            } catch (queueErr) {
+              // compensating queue 自体も failed = 完全 KV degraded
+              safeError('account.delete_kv_orphan_queue_failed_critical', queueErr, {
+                user_hash: userHashAudit,
+                token_fp: tokenFpAudit,
+                last_kv_delete_error: (kvErr && kvErr.message) ? kvErr.message.slice(0, 200) : 'unknown',
+                escalation: 'manual_reaper_via_audit_trail_user_hash_required',
+              });
+              // safeLog 'WARN' は下で発火、 audit trail (`account.deleted` status='degraded_kv_orphan')
+              // に user_hash が記録されるため、 運用 reaper は KV queue 不在でも user_hash 経由で
+              // 該当 token を発見可能 (token_fp は user_hash の派生、 別 KV `audit:user_hash:*`
+              // 経由で逆引き手順を Phase 5 mission `SUBAGENT-LAIS-CLAIM-REAPER-V1` で実装)。
             }
             break;
           }
@@ -212,16 +228,20 @@ export async function handleAccountDelete(request, env) {
   // ───────────────────────────────────────────────
   if (supabaseUrl && supabaseKey) {
     try {
-      // Round 28 security #3 fix (2026-05-02) — internal security-auditor REJECT 指摘:
-      //   旧: RPC POST body に生 `userId` を送信 = safePgrestValue 防御を bypass。
-      //   新: 上で `safeUid = safePgrestValue(userId)` 検証済 + `isSafePgrestValue` PASS の値のみ
-      //       使う。RPC は decodeURIComponent 不要 (PostgREST RPC body は JSON で URL encoding
-      //       不要)、 raw userId は whitelist (`/^[a-zA-Z0-9_\-.]+$/`) 通過済 = injection 不可。
-      //   defense-in-depth: 万一 callee 側で SQL 構築する場合に備え、whitelist 通過後の値のみ送信。
+      // Round 28 security #3 + Round 29 NEW-2 fix (2026-05-02) — internal security-auditor 指摘:
+      //   旧 (Round 28): RPC POST body に `decodeURIComponent(safeUid)` を送信。 `safeUid` は
+      //       whitelist `/^[a-zA-Z0-9_\-.]+$/` 通過後の `encodeURIComponent` 済値、 これは
+      //       no-op (whitelist 文字に encode 対象なし) のため decodeURIComponent も no-op =
+      //       無意味。 さらに将来 whitelist 拡張時に decode 経由で injection 復活 risk。
+      //   新 (Round 29): RPC body には**生 userId を送信** (PostgREST RPC body は JSON 内なので
+      //       URL encoding 不要)。 ただし上の `if (!isSafePgrestValue(safeUid))` で
+      //       whitelist validation 済を保証、 `userId` 生値は whitelist 通過済 = injection 不可。
+      //   migration 04 の RPC は SECURITY DEFINER + SET search_path = public, pg_temp で
+      //       defense-in-depth、 さらに RAISE EXCEPTION on invalid input で fail-closed。
       const rpcRes = await fetch(`${supabaseUrl}/rest/v1/rpc/account_atomic_delete`, {
         method: 'POST',
         headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ p_user_id: decodeURIComponent(safeUid) }),
+        body: JSON.stringify({ p_user_id: userId }),
       });
       if (rpcRes.ok) {
         const rpcJson = await rpcRes.json().catch(() => null);

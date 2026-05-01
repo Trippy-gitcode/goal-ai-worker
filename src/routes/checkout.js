@@ -76,8 +76,13 @@ async function verifyStripeSignature(payload, sigHeader, secret) {
     const timestamp = parts['t'];
     const signature = parts['v1'];
     if (!timestamp || !signature) return false;
+    // Round 29 security #5 fix (2026-05-02) — internal security-auditor REJECT 指摘:
+    //   旧: `if (age > 300) return false` のみ (Math.abs 無し) → server clock が Stripe clock より
+    //       先行しているとき age が負値、`-100 > 300` = false なので reject されない =
+    //       未来時刻 timestamp の replay forgery 受理リスク。
+    //   新: Math.abs で正負両方向の clock skew を排除。 Stripe 公式推奨 ±300sec window 厳守。
     const age = Math.floor(Date.now() / 1000) - parseInt(timestamp);
-    if (age > 300) return false;
+    if (Math.abs(age) > 300) return false;
     const signedPayload = `${timestamp}.${payload}`;
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
@@ -272,8 +277,49 @@ export async function handleStripeWebhook(request, env, ctx) {
         } catch (_) { /* compensating queue 自体も failed = full degraded */ }
       }
     }
-    // KV side hint も削除 (best-effort)
-    try { await env.TOKEN_KV.delete(eventKey); } catch (_) {}
+    // Round 29 security NEW-1 fix (2026-05-02) — internal security-auditor REJECT 指摘:
+    //   旧: KV side `eventKey` delete は silent catch (`catch (_) {}`)、Supabase 側に
+    //       retry+queue を追加した一方で KV path 側 rollback 失敗が観測不能化 = 対称性欠如。
+    //       非 critical event の KV fallback path で rollback 失敗時、 Stripe 再送 → KV.get
+    //       で processed 検出 → "Already processed" 返却 → business logic 永久未実行。
+    //   新: KV.delete も 3 retry、最終失敗で Supabase 側と同様 stuck_claim_kv:<event.id>
+    //       queue に 7 日 TTL 投入 + safeError CRITICAL alert。
+    if (env && env.TOKEN_KV) {
+      let kvAttempts = 0;
+      let kvLastErr = null;
+      while (kvAttempts < 3) {
+        try {
+          await env.TOKEN_KV.delete(eventKey);
+          kvLastErr = null;
+          break;
+        } catch (kErr) {
+          kvLastErr = kErr;
+          kvAttempts++;
+          if (kvAttempts < 3) await new Promise((r) => setTimeout(r, 250));
+        }
+      }
+      if (kvLastErr) {
+        safeError('webhook.dedup_kv_rollback_failed_stuck', kvLastErr, { event_id: event.id, event_type: event.type, retries: kvAttempts });
+        try {
+          await env.TOKEN_KV.put(
+            `stuck_claim_kv:${event.id}`,
+            JSON.stringify({
+              event_id: event.id,
+              event_type: event.type,
+              business_error: reason,
+              last_kv_rollback_error: (kvLastErr && kvLastErr.message) ? kvLastErr.message.slice(0, 500) : 'unknown',
+              ts: Date.now(),
+              retry_count: 0,
+            }),
+            { expirationTtl: 86400 * 7 }
+          );
+        } catch (qErr) {
+          // queue 投入も失敗 = 完全 KV degraded、 reaper は Supabase 側の stuck_claim:<id> 経由で発見可能
+          safeError('webhook.dedup_kv_rollback_queue_failed', qErr, { event_id: event.id });
+          _rollbackOk = false;
+        }
+      }
+    }
   };
 
   try {
@@ -281,6 +327,18 @@ export async function handleStripeWebhook(request, env, ctx) {
     const session = event.data.object;
     const tokenId = session.metadata?.tokenId;
     if (!tokenId) { safeLog('ERROR', 'webhook.token_missing_metadata', {}); return new Response('OK', { status: 200 }); }
+    // Round 29 security #10 fix (2026-05-02) — internal security-auditor REJECT 指摘:
+    //   旧: `stripe_customer:<customerId> → tokenId` mapping は line 357 (handler 末尾) で書込み、
+    //       同 invocation 内でも customer.subscription.deleted handler (line 329) が
+    //       先に走ると mapping 不在 = orphan customer。 さらに out-of-order delivery で
+    //       customer.subscription.updated → checkout.session.completed の順 = 永久 orphan。
+    //   新: tokenData / plan 書込み**より前**に mapping 書込み (consumer-before-mutation 原則)。
+    //       同 invocation 内での順序保証 + 並列 webhook で mapping を最も早く確定。
+    if (session.customer) {
+      try { await env.TOKEN_KV.put(`stripe_customer:${session.customer}`, tokenId); } catch (mapErr) {
+        safeError('webhook.stripe_customer_mapping_write_failed', mapErr, { token_fp: fingerprintToken(tokenId) });
+      }
+    }
     const plan = session.metadata?.plan || 'pro';
     const tokenData = await env.TOKEN_KV.get(`token:${tokenId}`, 'json');
     if (!tokenData) { safeLog('ERROR', 'webhook.token_not_in_kv', { token_fp: fingerprintToken(tokenId) }); return new Response('OK', { status: 200 }); }
@@ -347,10 +405,10 @@ export async function handleStripeWebhook(request, env, ctx) {
     }
   }
 
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    if (session.customer && session.metadata?.tokenId) await env.TOKEN_KV.put(`stripe_customer:${session.customer}`, session.metadata.tokenId);
-  }
+  // Round 29 security #10 fix: stripe_customer mapping write は上の checkout.session.completed
+  // block (line ~290) に移動済 (consumer-before-mutation)、 本 block は冗長で削除。
+  // 過去の history 互換性のため空 block を残す (もし migration 中に新コードと旧コードが混在
+  // しても無害)、 次回 cleanup で完全削除可能。
 
   if (event.type === 'invoice.paid') {
     const invoice = event.data.object;
