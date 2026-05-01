@@ -38,8 +38,8 @@ jobs:
 
       - name: spec_lint_extended
         run: |
-          if [ -x scripts/spec_lint_extended.sh ]; then
-            bash scripts/spec_lint_extended.sh
+          if [ -x scripts/spec_lint_extended.sh ] && [ -f core_spec.md ]; then
+            bash scripts/spec_lint_extended.sh core_spec.md
           else
             echo "scripts/spec_lint_extended.sh not found or not executable, skipping"
           fi
