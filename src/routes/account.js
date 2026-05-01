@@ -104,14 +104,22 @@ export async function handleAccountDelete(request, env) {
   // Round 5 B-4 audit-trail per-table emitter (pseudonymised user_hash only).
   const userHashAudit = hashIdSync(userId);
   const tokenFpAudit = fingerprintToken(tokenId);
-  const totalTables = 7; // chat_messages / usage_tracking / goals / feedbacks / referrals_referrer / referrals_referred / users
+  // Round 26 R-004 fix (2026-05-01) — external review GPT-5.4 MEDIUM:
+  //   旧: totalTables=7 と allTables=[...] が別管理 → drift 温床。
+  //   新: ALL_DELETE_TABLES を SSoT 化、totalTables は length 派生。
+  const ALL_DELETE_TABLES = ['chat_messages', 'usage_tracking', 'goals', 'feedbacks', 'referrals_referrer', 'referrals_referred', 'users'];
+  const totalTables = ALL_DELETE_TABLES.length;
   // Round 25 R-007 fix (2026-05-01) — external review GPT-5.4 HIGH:
   //   旧: partial deletion (途中失敗で 1-N tables 既削除 + 残未削除) で 500 を返すが、
   //       client にはどこまで完了したか不明 → user 側で再実行不能、運用整合性不一致 risk。
   //   新: completedTables[] を追跡し、500 response payload に partial_state として含める。
-  //       同時に retry queue (KV `account_delete_retry:<user_hash>`) に未完了 table 一覧を
-  //       7 日 TTL で蓄積、別 cron / 運用手順で再実行可能化。
-  //   完全な atomicity には Supabase RPC で 1 transaction 化が必要 (Phase 5 予約)。
+  // Round 26 R-001 fix (2026-05-01) — external review GPT-5.4 CRITICAL:
+  //   per-table fallback path に依存し、partial deletion は依然として確定する設計。
+  //   新主経路: Supabase RPC `account_atomic_delete` (migration
+  //   `20260501_004_account_atomic_delete.sql`) で 7 tables を 1 transaction 化、
+  //   1 件失敗 → ROLLBACK で全 DELETE 取り消し。GDPR Art.17 / 個人情報保護法 §35
+  //   transactional 整合性を構造的に保証。
+  //   per-table fallback は RPC 不在 (404) / 失敗時の二次経路 (best-effort、partial 状態残存可)。
   const completedTables = [];
   const _logTable = (idx, table) => {
     completedTables.push(table);
@@ -122,6 +130,68 @@ export async function handleAccountDelete(request, env) {
       total_tables: totalTables,
     });
   };
+
+  // Round 27 R-003 fix (2026-05-01) — external review GPT-5.4 HIGH:
+  //   旧: RPC 成功 path と fallback 成功 path で post-delete cleanup (KV / 監査ログ /
+  //       外部解約フック) が別実装 → 将来追加時に片方漏れリスク。
+  //   新: `_finalizeAccountDelete(transactionMode)` で統一、両 path から呼出。
+  //       追加クリーンアップ (Stripe解約 / PostHog 等) は本関数 1 箇所に追記すれば良い。
+  const _finalizeAccountDelete = async (transactionMode /* 'atomic_rpc' | 'fallback_per_table' */) => {
+    // 1. KV cleanup (token 削除)
+    if (tokenId && env && env.TOKEN_KV) {
+      try { await env.TOKEN_KV.delete(`token:${tokenId}`); } catch (_) {}
+    }
+    // 2. 集約 audit trail
+    safeLog('INFO', 'account.deleted', {
+      user_hash: userHashAudit,
+      token_fp: tokenFpAudit,
+      total_tables_processed: totalTables,
+      total_tables: totalTables,
+      transaction: transactionMode,
+      status: 'success',
+    });
+    // 3. 将来の追加 cleanup (Stripe 解約 / PostHog identify-deletion / Sentry user clear 等) は
+    //    本関数 (`_finalizeAccountDelete`) 内にのみ追加する。 main path / fallback の双方で
+    //    自動的に実行される。
+  };
+
+  // ───────────────────────────────────────────────
+  // Round 26 R-001 主経路: Supabase RPC で atomic DELETE
+  // ───────────────────────────────────────────────
+  if (supabaseUrl && supabaseKey) {
+    try {
+      const rpcRes = await fetch(`${supabaseUrl}/rest/v1/rpc/account_atomic_delete`, {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_user_id: userId }),
+      });
+      if (rpcRes.ok) {
+        const rpcJson = await rpcRes.json().catch(() => null);
+        if (rpcJson && rpcJson.status === 'success') {
+          // 全 table atomic 削除完了 → 統一 cleanup hook
+          await _finalizeAccountDelete('atomic_rpc');
+          return jsonRes({ ok: true, message: 'アカウントを削除しました' });
+        }
+        // RPC 返却が success 以外 = ROLLBACK 済 → fallback 経由で再試行 (整合性は保たれる)
+        safeError('account.atomic_delete_rpc_rolled_back', new Error(`status=${rpcJson?.status} error=${rpcJson?.error || 'unknown'}`), {
+          user_hash: userHashAudit,
+        });
+      } else if (rpcRes.status === 404) {
+        // RPC 未配置 (migration deploy 待ち) → 即時 alert + per-table fallback へ
+        safeError('account.atomic_delete_rpc_missing_critical', new Error('RPC account_atomic_delete 未配置 — migration 20260501_004_account_atomic_delete.sql の deploy 推奨。fallback path で進行 (atomicity 不保証)'), {
+          user_hash: userHashAudit,
+        });
+      } else {
+        safeError('account.atomic_delete_rpc_failed', new Error(`status=${rpcRes.status}`), { user_hash: userHashAudit, status: rpcRes.status });
+      }
+    } catch (rpcErr) {
+      safeError('account.atomic_delete_rpc_error', rpcErr, { user_hash: userHashAudit });
+    }
+  }
+
+  // ───────────────────────────────────────────────
+  // Fallback 経路: per-table DELETE (RPC 不在 / 失敗時、partial 残存可)
+  // ───────────────────────────────────────────────
   try {
     // 1. chat_messages
     await _doDel(`${supabaseUrl}/rest/v1/chat_messages?user_id=eq.${safeUid}`, 'chat_messages');
@@ -145,19 +215,9 @@ export async function handleAccountDelete(request, env) {
     _logTable(7, 'users');
 
     // 7. KV cleanup
-    if (tokenId) {
-      await env.TOKEN_KV.delete(`token:${tokenId}`);
-    }
-
-    // PII: subject-rights audit trail must not retain raw identifiers — emit
-    // hashed user fingerprint + token prefix only (Wave 1 #11/#41 P0 finding).
-    // Round 5 B-4: 集約 audit trail = table_done × 7 件後の status='success' 集計。
-    safeLog('INFO', 'account.deleted', {
-      user_hash: userHashAudit,
-      token_fp: tokenFpAudit,
-      total_tables_processed: totalTables,
-      status: 'success',
-    });
+    // Round 27 R-003 fix: cleanup を統一 helper 経由に変更、
+    //   atomic_rpc path と fallback path で post-delete 処理を一致させる。
+    await _finalizeAccountDelete('fallback_per_table');
     return jsonRes({ ok: true, message: 'アカウントを削除しました' });
   } catch (e) {
     safeError('account.delete_error', e);
@@ -170,35 +230,61 @@ export async function handleAccountDelete(request, env) {
       completed_tables: completedTables,
       status: 'failed',
     });
-    // Round 25 R-007 fix: 未完了 table 一覧を retry queue に投入 (7 日 TTL)、
-    // 運用手順 / 別 cron で再実行可能にする。silent failure を避ける明示的記録。
-    const allTables = ['chat_messages', 'usage_tracking', 'goals', 'feedbacks', 'referrals_referrer', 'referrals_referred', 'users'];
-    const remainingTables = allTables.filter(t => !completedTables.includes(t));
-    try {
-      await env.TOKEN_KV.put(
-        `account_delete_retry:${userHashAudit}`,
-        JSON.stringify({
-          user_hash: userHashAudit,
-          token_fp: tokenFpAudit,
-          completed_tables: completedTables,
-          remaining_tables: remainingTables,
-          last_error: (e && e.message) ? e.message.slice(0, 500) : 'unknown',
-          ts: Date.now(),
-          retry_count: 0,
-        }),
-        { expirationTtl: 86400 * 7 }
-      );
-    } catch (kvErr) {
-      safeError('account.delete_retry_queue_failed', kvErr);
+    // Round 25 R-007 + Round 26 R-002/R-003 fix: 未完了 table 一覧を retry queue
+    // に投入 (7 日 TTL)、運用手順 / 別 cron で再実行可能にする。silent failure を回避。
+    // R-002: TOKEN_KV 存在確認を追加 (env 契約破綻時の二次障害防止)。
+    // R-003: client に内部 audit hash を露出しない、 opaque retry token を別生成。
+    const remainingTables = ALL_DELETE_TABLES.filter(t => !completedTables.includes(t));
+    let opaqueRetryToken = null;
+    if (env && env.TOKEN_KV) {
+      try {
+        // Round 26 R-003 + Round 27 R-004 fix:
+        //   opaque retry token = crypto.getRandomValues(16 bytes) を hex 化、
+        //   user_hash と一対一対応せず、KV lookup なしでは復元不能。
+        //   旧実装 (Date.now() + Math.random()) は予測可能 / 衝突耐性弱、
+        //   暗号 API を使っているのにエントロピー源が弱い antipattern を解消。
+        const tokenBytes = new Uint8Array(16);
+        crypto.getRandomValues(tokenBytes);
+        opaqueRetryToken = Array.from(tokenBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        // 主 KV key: user_hash で運用追跡用 (server-side のみ)
+        await env.TOKEN_KV.put(
+          `account_delete_retry:${userHashAudit}`,
+          JSON.stringify({
+            user_hash: userHashAudit,
+            token_fp: tokenFpAudit,
+            opaque_token: opaqueRetryToken,
+            completed_tables: completedTables,
+            remaining_tables: remainingTables,
+            last_error: (e && e.message) ? e.message.slice(0, 500) : 'unknown',
+            ts: Date.now(),
+            retry_count: 0,
+          }),
+          { expirationTtl: 86400 * 7 }
+        );
+        // 副 KV key: opaque token → user_hash 引き当て用 (client から問合せ可)
+        await env.TOKEN_KV.put(
+          `account_delete_retry_token:${opaqueRetryToken}`,
+          JSON.stringify({ user_hash: userHashAudit, ts: Date.now() }),
+          { expirationTtl: 86400 * 7 }
+        );
+      } catch (kvErr) {
+        safeError('account.delete_retry_queue_failed', kvErr);
+      }
+    } else {
+      // R-002: TOKEN_KV binding 不在 (staging / 一部 worker config) → retry queue 不能
+      safeError('account.delete_retry_queue_kv_missing', new Error('TOKEN_KV binding 不在で retry queue 投入不能、運用 alert を別経路 (Logpush) で受信すべき'), {
+        user_hash: userHashAudit,
+      });
     }
-    // partial deletion 状態を client に明示し、運用整合性問題を silent にしない
+    // partial deletion 状態を client に明示し、運用整合性問題を silent にしない。
+    // R-003: client には opaque token のみ返却 (内部 audit hash は server-side のみ)。
     return jsonRes({
       error: 'アカウント削除に失敗しました',
       partial_state: {
         completed_table_count: completedTables.length,
         total_table_count: totalTables,
         is_partial: completedTables.length > 0 && completedTables.length < totalTables,
-        retry_id: userHashAudit, // user_hash で運用追跡可能
+        retry_token: opaqueRetryToken, // opaque (R-003 対応)、無効化可能
       },
     }, 500);
   }

@@ -100,17 +100,23 @@ frontend/i18n/
 - **font-family** (Finding I-4): `<html lang>` ごとに `--ff` CSS variable swap、`Noto Sans JP` / `Noto Sans SC` / `Noto Sans KR` fallback を Phase 2 で配備
 - **Intl** (Finding I-5): 数値 / 日付 / 通貨 表記は `Intl.NumberFormat` / `Intl.DateTimeFormat` / `Intl.RelativeTimeFormat` 経由を Phase 1 完了後に application layer で適用
 
-### 5.0 既知の i18n 未接続例外 (Round 25 R-005 で明示化)
+### 5.0 既知の i18n 未接続例外 (Round 25 R-005 + Round 26 R-008 で明示化)
 
 > ⚠ **警告**: 以下のページ / コンポーネントは現状 `frontend/i18n/ja.json` と
 > 接続されておらず、文言を二重管理している。Phase 1 mission `SUBAGENT-LAIS-I18N-SSOT-PHASE1-V1`
-> で接続予定。
+> で接続予定。本 README の「既知例外」記載は **正当化ではなく追跡 ticket** であり、
+> Phase 1 完了で本節は削除される (i.e., README と実装の二重管理状態を解消する)。
 
-| ファイル | 該当 i18n keys (seed) | 現状 | 接続予定 |
+> 📌 **Round 26 R-008 fix**: 本節は ticket `SUBAGENT-LAIS-I18N-SSOT-PHASE1-V1`
+> の完了で削除される予定。 削除条件 = `ja.json _meta.coverage = "complete"` かつ
+> 全 entry HTML / JS で `t(key)` 経由参照に置換済 (CI で残留ハードコード 0 件確認)。
+> ticket 完了前に README から本節だけ消すことは禁止 (改竄防止)。
+
+| ファイル | 該当 i18n keys (seed) | 現状 | 接続予定 mission |
 |---|---|---|---|
-| `frontend/offline.html` | `offline.fallback.title` / `offline.fallback.body` / `offline.fallback.retry` | HTML 内ハードコード (`オフラインです` / `現在ネットワークに...` / `再読み込み`) | Phase 1 で `t(key)` 化 |
-| `frontend/index.html` (大半) | `auth.*` / `chat.*` / `goal.*` / `settings.*` 全般 | HTML 内ハードコード 609 hits | Phase 1 で macro 置換 |
-| `frontend/js/*.js` (toast / alert) | `error.*` / `streak.*` | JS 内文字列リテラル | Phase 1 で `t()` 経由 |
+| `frontend/offline.html` | `offline.fallback.title` / `offline.fallback.body` / `offline.fallback.retry` | HTML 内ハードコード (`オフラインです` / `現在ネットワークに...` / `再読み込み`) | `SUBAGENT-LAIS-I18N-SSOT-PHASE1-V1` (Phase 1) |
+| `frontend/index.html` (大半) | `auth.*` / `chat.*` / `goal.*` / `settings.*` 全般 | HTML 内ハードコード 609 hits | 同上 |
+| `frontend/js/*.js` (toast / alert) | `error.*` / `streak.*` | JS 内文字列リテラル | 同上 |
 
 **Round 25 改善 (本 commit)**: `offline.html` 内 JS の文言を `TXT` object に集約し、
 将来の `t()` 化を 1 行 swap で可能にした (Round 22 R-008 fix で実施済)。

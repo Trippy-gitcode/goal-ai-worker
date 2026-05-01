@@ -148,7 +148,7 @@ function getDeviceId() {
 // Re-bumped 2026-05-01 (Round 6 P0 fix: viewport iOS Safari 17- visualViewport polyfill,
 //   sw.js navigate offline.html fallback, sw.js token leak redact, i18n SSoT structure).
 //   Mission: SUBAGENT-DEVSYS-ROUND6-P0-FIX-V1, 6 persona vote 6/6 YES.
-const APP_VERSION = '4.0.59';
+const APP_VERSION = '4.0.61';
 
 const FONT_SIZES = {
   xs: { label: '極小', base: '14px', lh: '1.55' },

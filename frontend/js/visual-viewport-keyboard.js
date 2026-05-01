@@ -169,13 +169,13 @@
     _installed: true,
   };
 
-  // Round 25 R-003: 自動 init は data-keyboard-aware 属性ありページのみ。
-  // 属性無しページでも LaisKeyboard.init() 明示呼出は可能 (responsibility on caller)。
+  // Round 25 R-003 + Round 26 R-005 fix: 自動 init は data-keyboard-aware 属性ありページのみ。
+  //   旧 (R-003): 属性無しページでも `--keyboard-h` を 0px に書込 → opt-in の意図に反して DOM 副作用残存。
+  //   新 (R-005): 属性無しページでは DOM 書換も行わない (`--keyboard-h` 未設定 = CSS 側 default 値を採用)。
+  //               CSS は `var(--keyboard-h, 0px)` のように fallback 値を持たせる慣習。
+  //   属性無しページでも LaisKeyboard.init() 明示呼出は可能 (responsibility on caller)。
   if (_shouldAutoInit()) {
     init();
-  } else {
-    // 属性無しページは API のみ公開 (副作用 listener 登録なし)
-    // 明示 init 必要なら呼出側で `window.LaisKeyboard.init()` する。
-    document.documentElement.style.setProperty('--keyboard-h', '0px');
   }
+  // 属性無しページは API のみ公開、DOM 書換ゼロ (R-005 fix)。
 })();

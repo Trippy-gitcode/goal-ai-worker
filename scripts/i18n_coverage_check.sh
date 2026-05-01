@@ -24,10 +24,19 @@ set -eu
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
-# Round 25 R-001 fix (2026-05-01) — external review GPT-5.4 HIGH:
+# Round 25 R-001 + Round 26 R-007 fix (2026-05-01) — external review GPT-5.4:
 #   旧: ja.json 不在 / python3 不在で `exit 0` → CI が緑通過、guard 喪失。
 #   新: 既定 fail-closed (exit 1)。手動実行時の skip は `SKIP_ALLOWED=1` で明示。
+#   R-007: CI 環境 (`CI=true` / `GITHUB_ACTIONS=true`) では SKIP_ALLOWED を無効化、
+#          CI 設定や一時デバッグ手順から環境変数が常設されても監査用 gate が無効化されない。
 SKIP_ALLOWED="${SKIP_ALLOWED:-0}"
+# CI 環境検知 (GitHub Actions / generic CI 双方カバー)
+if [ "${CI:-}" = "true" ] || [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+  if [ "$SKIP_ALLOWED" = "1" ]; then
+    echo "::warning::SKIP_ALLOWED=1 ignored in CI environment (Round 26 R-007 hardening)"
+  fi
+  SKIP_ALLOWED=0
+fi
 
 JA_JSON="frontend/i18n/ja.json"
 if [ ! -f "$JA_JSON" ]; then
