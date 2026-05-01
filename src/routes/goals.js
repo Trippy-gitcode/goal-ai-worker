@@ -1,13 +1,21 @@
 import { authenticateRequest, getUserIdFromToken } from '../middleware/auth.js';
-import { jsonRes } from '../utils/helpers.js';
+import { jsonRes, isValidUuid, safePgrestValue } from '../utils/helpers.js';
 import { supabaseQuery } from '../utils/supabase.js';
+import { checkRateLimit } from '../utils/rate-limit.js';
+// SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #35 H-07 fix:
+//   rate-limit が 3 routes (chat / voice) のみ。本ファイルでも auth 後に
+//   `checkRateLimit` を全 handler 入口で発火、IDOR + brute-force 防御。
 
 export async function handleGoalsList(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1: H-07 rate-limit roll-out
+  const rl = await checkRateLimit(env, auth.userId);
+  if (!rl.ok) return jsonRes({ error: 'Rate limit exceeded' }, 429);
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
-  const goals = await supabaseQuery(env, 'goals', 'GET', { filters: `user_id=eq.${userId}&order=created_at.desc` });
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1: PostgREST filter injection (D-02) 対策で safePgrestValue
+  const goals = await supabaseQuery(env, 'goals', 'GET', { filters: `user_id=eq.${safePgrestValue(userId)}&order=created_at.desc` });
   return jsonRes({ goals: goals || [] });
 }
 
@@ -31,8 +39,8 @@ export async function handleGoalUpdate(request, env, url) {
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
   const goalId = url.pathname.split('/').pop();
-  // #619 FIX: UUID形式検証
-  if (!goalId || !/^[0-9a-f-]{36}$/.test(goalId)) return jsonRes({ error: 'Invalid goalId' }, 400);
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1: UUID 検証を isValidUuid に統一 + safePgrestValue で encode
+  if (!isValidUuid(goalId)) return jsonRes({ error: 'Invalid goalId' }, 400);
   const body = await request.json();
   const updates = {};
   if (body.title !== undefined) updates.title = body.title;
@@ -42,7 +50,7 @@ export async function handleGoalUpdate(request, env, url) {
   if (body.targetDate !== undefined) updates.target_date = body.targetDate;
   if (body.lastMilestonePct !== undefined) updates.last_milestone_pct = body.lastMilestonePct;
   if (body.phases !== undefined) updates.phases = body.phases;
-  const result = await supabaseQuery(env, 'goals', 'PATCH', { filters: `id=eq.${goalId}&user_id=eq.${userId}`, body: updates });
+  const result = await supabaseQuery(env, 'goals', 'PATCH', { filters: `id=eq.${safePgrestValue(goalId)}&user_id=eq.${safePgrestValue(userId)}`, body: updates });
   // B4: ゴール変更時にprofile KVキャッシュをinvalidate
   await env.TOKEN_KV.delete(`profile:${auth.tokenId}`).catch(() => {});
   return jsonRes({ goal: result?.[0] || null });
@@ -54,7 +62,9 @@ export async function handleGoalDelete(request, env, url) {
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
   const goalId = url.pathname.split('/').pop();
-  await supabaseQuery(env, 'goals', 'DELETE', { filters: `id=eq.${goalId}&user_id=eq.${userId}` });
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1: UUID 検証 + safePgrestValue で encode
+  if (!isValidUuid(goalId)) return jsonRes({ error: 'Invalid goalId' }, 400);
+  await supabaseQuery(env, 'goals', 'DELETE', { filters: `id=eq.${safePgrestValue(goalId)}&user_id=eq.${safePgrestValue(userId)}` });
   // B4: ゴール変更時にprofile KVキャッシュをinvalidate
   await env.TOKEN_KV.delete(`profile:${auth.tokenId}`).catch(() => {});
   return jsonRes({ deleted: true });
@@ -115,6 +125,10 @@ export async function handleExtractGoals(request, env) {
 }
 
 // UX-01-A5: ゴール間リンク作成
+//
+// SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #35 H-06 fix:
+//   IDOR 対策。`goal_id_from` / `goal_id_to` が user の所有 goal か事前検証。
+//   non-owner goal で goal-graph poison を作る攻撃を遮断。UUID format も検証。
 export async function handleGoalLinkCreate(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
@@ -123,6 +137,12 @@ export async function handleGoalLinkCreate(request, env) {
   const body = await request.json();
   const { goal_id_from, goal_id_to, link_type, created_by } = body;
   if (!goal_id_from || !goal_id_to) return jsonRes({ error: 'goal_id_from and goal_id_to required' }, 400);
+  // Wave 1 #35 H-06: UUID 形式 + ownership 検証
+  if (!isValidUuid(goal_id_from) || !isValidUuid(goal_id_to)) return jsonRes({ error: 'Invalid goal id format' }, 400);
+  // 両 goal が user の所有か確認 (PostgREST poison check 込み)
+  const ownedFrom = await supabaseQuery(env, 'goals', 'GET', { filters: `id=eq.${safePgrestValue(goal_id_from)}&user_id=eq.${safePgrestValue(userId)}`, select: 'id' });
+  const ownedTo = await supabaseQuery(env, 'goals', 'GET', { filters: `id=eq.${safePgrestValue(goal_id_to)}&user_id=eq.${safePgrestValue(userId)}`, select: 'id' });
+  if (!ownedFrom?.length || !ownedTo?.length) return jsonRes({ error: 'goal_id_from and goal_id_to must be owned by you' }, 403);
   const result = await supabaseQuery(env, 'goal_links', 'POST', {
     body: { goal_id_from, goal_id_to, link_type: link_type || 'related', created_by: created_by || 'manual' },
   });
@@ -130,13 +150,24 @@ export async function handleGoalLinkCreate(request, env) {
 }
 
 // UX-01-A5: ゴールの関連ゴール取得
+//
+// SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #35 H-05 / D-02 fix:
+//   IDOR + PostgREST filter injection 対策。`goalId` を UUID 検証 + safe encode、
+//   かつ user 所有 goal でなければ早期 403 reject。tenant isolation を確立。
 export async function handleGoalLinksGet(request, env, url) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
+  const userId = await getUserIdFromToken(env, auth.tokenId);
+  if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
   const parts = url.pathname.split('/');
   const goalId = parts[parts.indexOf('goals') + 1];
+  // Wave 1 #35 H-05 / D-02: UUID 検証 + tenant ownership 確認
+  if (!isValidUuid(goalId)) return jsonRes({ error: 'Invalid goalId' }, 400);
+  const owned = await supabaseQuery(env, 'goals', 'GET', { filters: `id=eq.${safePgrestValue(goalId)}&user_id=eq.${safePgrestValue(userId)}`, select: 'id' });
+  if (!owned?.length) return jsonRes({ error: 'Goal not found or not owned' }, 403);
+  const safeGoalId = safePgrestValue(goalId);
   const links = await supabaseQuery(env, 'goal_links', 'GET', {
-    filters: `or=(goal_id_from.eq.${goalId},goal_id_to.eq.${goalId})`,
+    filters: `or=(goal_id_from.eq.${safeGoalId},goal_id_to.eq.${safeGoalId})`,
   });
   return jsonRes({ links: links || [] });
 }
