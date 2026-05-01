@@ -1,5 +1,6 @@
 import { authenticateRequest } from '../middleware/auth.js';
 import { jsonRes } from '../utils/helpers.js';
+import { safeLog, safeError, hashIdSync, fingerprintToken } from '../utils/safeLog.js';
 
 export async function handleAccountExport(request, env) {
   const auth = await authenticateRequest(request, env);
@@ -40,7 +41,7 @@ export async function handleAccountExport(request, env) {
       headers: { 'Content-Type': 'application/json', 'Content-Disposition': 'attachment; filename="goal-ai-export.json"' },
     });
   } catch (e) {
-    console.error('Account export error:', e.message);
+    safeError('account.export_error', e);
     return jsonRes({ error: 'データエクスポートに失敗しました' }, 500);
   }
 }
@@ -76,10 +77,12 @@ export async function handleAccountDelete(request, env) {
       await env.TOKEN_KV.delete(`token:${tokenId}`);
     }
 
-    console.log(`Account deleted: user_id=${userId} token_id=${tokenId}`);
+    // PII: subject-rights audit trail must not retain raw identifiers — emit
+    // hashed user fingerprint + token prefix only (Wave 1 #11/#41 P0 finding).
+    safeLog('INFO', 'account.deleted', { user_hash: hashIdSync(userId), token_fp: fingerprintToken(tokenId) });
     return jsonRes({ ok: true, message: 'アカウントを削除しました' });
   } catch (e) {
-    console.error('Account delete error:', e.message);
+    safeError('account.delete_error', e);
     return jsonRes({ error: 'アカウント削除に失敗しました' }, 500);
   }
 }

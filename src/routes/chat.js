@@ -14,6 +14,7 @@ import { getProfileWithCache } from '../services/profile.js';
 import { searchRelatedMessages, generateAndStoreEmbedding } from '../services/embedding.js';
 import { countRecentMessages, regenerateAiMemo } from '../services/memo.js';
 import { buildCompressedMessages, countSessionMessages, generateConversationSummary } from '../services/history.js';
+import { safeLog, hashIdSync } from '../utils/safeLog.js';
 
 export async function handleChat(request, env, ctx) {
   try {
@@ -45,9 +46,9 @@ export async function handleChat(request, env, ctx) {
     const aiContent = data.content?.[0]?.text || '';
     // UX-01-A1: INTENT/GOAL_PROPOSAL タグ検出ログ
     const intentMatch = aiContent.match(/\[INTENT:(\w+)\]/);
-    if (intentMatch) console.log(`[INTENT] user=${auth.userId} intent=${intentMatch[1]}`);
+    if (intentMatch) safeLog('INFO', 'chat.intent', { user_hash: hashIdSync(auth.userId), intent: intentMatch[1] });
     const hasGoalProposal = aiContent.includes('[GOAL_PROPOSAL]');
-    if (hasGoalProposal) console.log(`[GOAL_PROPOSAL] user=${auth.userId} detected in non-stream response`);
+    if (hasGoalProposal) safeLog('INFO', 'chat.goal_proposal', { user_hash: hashIdSync(auth.userId), context: 'non_stream' });
     ctx.waitUntil(Promise.all([
       saveChatMessage(env, auth.tokenId, lastUserMsg.role, lastUserMsg.content, null, goalId, 'chat'),
       saveChatMessage(env, auth.tokenId, 'assistant', aiContent, 'claude', goalId, 'chat'),
@@ -109,7 +110,7 @@ export async function handleChatStream(request, env, ctx) {
     // ═══ ターン記録（Step 4） ═══
     if (auth.plan !== 'free') {
       usageResult = await recordTurnUsage(env, auth.userId, auth.plan);
-      console.log(`[TURN] user=${auth.userId} plan=${auth.plan} turns=${usageResult.turns_used} amount=¥${usageResult.current_amount}`);
+      safeLog('INFO', 'chat.turn', { user_hash: hashIdSync(auth.userId), plan: auth.plan, turns_used: usageResult.turns_used, amount_jpy: usageResult.current_amount });
 
       // ═══ キャップ判定（Step 5） ═══
       if (usageResult.should_degrade) {

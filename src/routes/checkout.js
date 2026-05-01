@@ -2,6 +2,7 @@ import { authenticateRequest } from '../middleware/auth.js';
 import { jsonRes } from '../utils/helpers.js';
 import { STRIPE_PRICE_IDS, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL } from '../utils/constants.js';
 import { syncUserToSupabase } from '../utils/supabase.js';
+import { safeLog, safeError, fingerprintToken, hashIdSync } from '../utils/safeLog.js';
 
 export async function handleCheckoutCreate(request, env) {
   const auth = await authenticateRequest(request, env);
@@ -50,7 +51,7 @@ export async function handleCheckoutCreate(request, env) {
     body: params.toString()
   });
   const session = await res.json();
-  if (!res.ok) { console.error('Stripe Checkout error:', session); return jsonRes({ error: session.error?.message || 'Stripe error' }, res.status); }
+  if (!res.ok) { safeLog('ERROR', 'stripe.checkout_error', { status: res.status, message: session?.error?.message || 'unknown' }); return jsonRes({ error: session.error?.message || 'Stripe error' }, res.status); }
   return jsonRes({ url: session.url, sessionId: session.id });
 }
 
@@ -64,7 +65,7 @@ export async function handleCheckoutPortal(request, env) {
   params.append('return_url', STRIPE_SUCCESS_URL.replace('?checkout=success', ''));
   const res = await fetch('https://api.stripe.com/v1/billing_portal/sessions', { method: 'POST', headers: { 'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() });
   const session = await res.json();
-  if (!res.ok) { console.error('Stripe Portal error:', session); return jsonRes({ error: session.error?.message || 'Stripe error' }, res.status); }
+  if (!res.ok) { safeLog('ERROR', 'stripe.portal_error', { status: res.status, message: session?.error?.message || 'unknown' }); return jsonRes({ error: session.error?.message || 'Stripe error' }, res.status); }
   return jsonRes({ url: session.url });
 }
 
@@ -83,14 +84,14 @@ async function verifyStripeSignature(payload, sigHeader, secret) {
     const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(signedPayload));
     const expectedSig = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
     return expectedSig === signature;
-  } catch (e) { console.error('Signature verification error:', e); return false; }
+  } catch (e) { safeError('stripe.signature_verify_error', e); return false; }
 }
 
 export async function handleStripeWebhook(request, env, ctx) {
   const payload = await request.text();
   const sigHeader = request.headers.get('Stripe-Signature') || '';
   const isValid = await verifyStripeSignature(payload, sigHeader, env.STRIPE_WEBHOOK_SECRET);
-  if (!isValid) { console.error('Stripe webhook signature verification failed'); return new Response('Invalid signature', { status: 400 }); }
+  if (!isValid) { safeLog('ERROR', 'stripe.webhook_invalid_signature', {}); return new Response('Invalid signature', { status: 400 }); }
   const timestamp = request.headers.get('stripe-signature')?.match(/t=(\d+)/)?.[1];
   if (!timestamp) return jsonRes({ error: 'Missing timestamp' }, 400);
   const age = Math.floor(Date.now() / 1000) - parseInt(timestamp);
@@ -105,13 +106,13 @@ export async function handleStripeWebhook(request, env, ctx) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const tokenId = session.metadata?.tokenId;
-    if (!tokenId) { console.error('Webhook: tokenId not found in metadata'); return new Response('OK', { status: 200 }); }
+    if (!tokenId) { safeLog('ERROR', 'webhook.token_missing_metadata', {}); return new Response('OK', { status: 200 }); }
     const plan = session.metadata?.plan || 'pro';
     const tokenData = await env.TOKEN_KV.get(`token:${tokenId}`, 'json');
-    if (!tokenData) { console.error('Webhook: token not found in KV:', tokenId); return new Response('OK', { status: 200 }); }
+    if (!tokenData) { safeLog('ERROR', 'webhook.token_not_in_kv', { token_fp: fingerprintToken(tokenId) }); return new Response('OK', { status: 200 }); }
     tokenData.plan = plan; tokenData.expiresAt = null; tokenData.stripeCustomerId = session.customer; tokenData.stripeSubscriptionId = session.subscription; tokenData.paidPlan = plan; tokenData.paidAt = new Date().toISOString();
     await env.TOKEN_KV.put(`token:${tokenId}`, JSON.stringify(tokenData));
-    console.log(`Webhook: token ${tokenId} upgraded to ${plan}`);
+    safeLog('INFO', 'webhook.upgrade', { token_fp: fingerprintToken(tokenId), plan });
     if (ctx && env.SUPABASE_URL) ctx.waitUntil(syncUserToSupabase(env, tokenData));
     try {
       await fetch(`${env.SUPABASE_URL}/rest/v1/users?token_id=eq.${tokenId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Prefer': 'return=minimal' }, body: JSON.stringify({ plan, stripe_customer_id: session.customer, stripe_subscription_id: session.subscription, plan_updated_at: new Date().toISOString() }) });
@@ -130,9 +131,9 @@ export async function handleStripeWebhook(request, env, ctx) {
             headers: { 'Content-Type': 'application/json', 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Prefer': 'return=minimal' },
             body: JSON.stringify({ stripe_metered_subscription_item_id: meteredItem.id })
           });
-          console.log(`Webhook: saved metered item ${meteredItem.id} for ${tokenId}`);
+          safeLog('INFO', 'webhook.metered_item_saved', { token_fp: fingerprintToken(tokenId), metered_item_fp: fingerprintToken(meteredItem.id) });
         }
-      } catch (e) { console.error('Webhook: failed to save metered item ID:', e.message); }
+      } catch (e) { safeError('webhook.metered_item_save_failed', e, { token_fp: fingerprintToken(tokenId) }); }
     }
   }
 
@@ -145,7 +146,7 @@ export async function handleStripeWebhook(request, env, ctx) {
       if (tokenData) {
         tokenData.plan = 'free'; tokenData.paidPlan = null; tokenData.stripeSubscriptionId = null; tokenData.cancelledAt = new Date().toISOString();
         await env.TOKEN_KV.put(`token:${tokenId}`, JSON.stringify(tokenData));
-        console.log(`Webhook: subscription cancelled for ${tokenId}, downgraded to free`);
+        safeLog('INFO', 'webhook.subscription_cancelled', { token_fp: fingerprintToken(tokenId), plan: 'free' });
         if (ctx && env.SUPABASE_URL) ctx.waitUntil(syncUserToSupabase(env, tokenData));
         try { await fetch(`${env.SUPABASE_URL}/rest/v1/users?token_id=eq.${tokenId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Prefer': 'return=minimal' }, body: JSON.stringify({ plan: 'free', cancelled_at: new Date().toISOString(), plan_updated_at: new Date().toISOString() }) }); } catch(e) {}
       }
@@ -162,7 +163,7 @@ export async function handleStripeWebhook(request, env, ctx) {
     const customerId = invoice.customer;
     const tokenId = await env.TOKEN_KV.get(`stripe_customer:${customerId}`);
     if (tokenId) {
-      console.log(`Webhook: invoice.paid for ${tokenId}, amount: ${invoice.amount_paid}`);
+      safeLog('INFO', 'webhook.invoice_paid', { token_fp: fingerprintToken(tokenId), amount_jpy: invoice.amount_paid });
     }
   }
 
@@ -185,7 +186,7 @@ export async function handleStripeWebhook(request, env, ctx) {
               body: JSON.stringify({ plan: newPlan, plan_updated_at: new Date().toISOString() })
             });
           } catch (e) {}
-          console.log(`Webhook: plan changed to ${newPlan} for ${tokenId}`);
+          safeLog('INFO', 'webhook.plan_changed', { token_fp: fingerprintToken(tokenId), plan: newPlan });
         }
       }
     }
