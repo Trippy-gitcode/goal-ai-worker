@@ -145,7 +145,7 @@ function getDeviceId() {
 }
 
 // Bumped 2026-05-01 (design fix wave 1: a11y, focus-visible, sw cache sync, popstate, skeletons).
-const APP_VERSION = '4.0.49';
+const APP_VERSION = '4.0.53';
 
 const FONT_SIZES = {
   xs: { label: '極小', base: '14px', lh: '1.55' },

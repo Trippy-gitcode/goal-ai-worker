@@ -1,6 +1,9 @@
 import { PLAN_LIMITS, FAIR_USE, RATE_LIMIT_WINDOW, RATE_LIMIT_MAX, FREE_MODEL_LIMITS } from './constants.js';
 import { getDayKey, getMonthKey, getMonthEndTtl } from './helpers.js';
 import { supabaseHeaders } from './supabase.js';
+// SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #52 P1 finding #7:
+//   Supabase 障害時の KV fallback 発火 rate を structured log で可観測化。
+import { safeError, safeLog } from './safeLog.js';
 
 // ═══════ Supabase Counter Helpers ═══════
 // All writes go to Supabase. KV is used as read cache only (no puts).
@@ -22,7 +25,10 @@ async function sbIncrement(env, tokenId, counterType, counterKey) {
     // Fallback: direct upsert if RPC doesn't exist
     return sbIncrementDirect(env, tokenId, counterType, counterKey);
   } catch (e) {
-    console.error('sbIncrement error, falling back to KV:', e.message);
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — Wave 1 #52 P1 finding #11 fix:
+    //   structured logger で fallback 発火を必ず記録。Supabase 障害時の
+    //   silent KV underflow → metered usage 課金乖離を観測可能化。
+    safeError('rate_limit.sb_increment_fallback', e, { route: counterType });
     return kvFallbackIncrement(env, tokenId, counterType, counterKey);
   }
 }
@@ -67,7 +73,14 @@ async function sbGetCounter(env, tokenId, counterType, counterKey) {
 async function kvFallbackIncrement(env, tokenId, counterType, counterKey) {
   const key = `sb_fb:${tokenId}:${counterType}:${counterKey}`;
   const current = parseInt(await env.TOKEN_KV.get(key) || '0');
-  try { await env.TOKEN_KV.put(key, String(current + 1), { expirationTtl: 86400 }); } catch(_) {}
+  try {
+    await env.TOKEN_KV.put(key, String(current + 1), { expirationTtl: 86400 });
+  } catch (e) {
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — Wave 1 #52 P1 finding #11 fix:
+    //   Supabase 障害 + KV put 失敗の二重障害を必ず log。silent underflow
+    //   = 実質無制限になる risk を可観測化。
+    safeError('rate_limit.kv_fallback_put_failed', e, { route: counterType });
+  }
   return current + 1;
 }
 
@@ -79,6 +92,12 @@ async function kvFallbackGet(env, tokenId, counterType, counterKey) {
 // ═══════ Rate Limiting (was: KV put per request → now: Supabase) ═══════
 
 export async function checkRateLimit(env, userId) {
+  // FIX (external review CRITICAL R-1): userId が undefined / null の場合、
+  // 全ユーザーが同一 key で rate-limit 共有 = DoS リスクのため、defensive guard
+  if (!userId || typeof userId !== 'string' || userId.length < 4) {
+    // userId 不在は auth 失敗扱い、rate-limit 拒否で fail-closed
+    return { ok: false, remaining: 0, reason: 'invalid_user' };
+  }
   const windowKey = String(Math.floor(Date.now() / 1000 / RATE_LIMIT_WINDOW));
   // Increment via Supabase
   const current = await sbIncrement(env, userId, 'rate_limit', windowKey);

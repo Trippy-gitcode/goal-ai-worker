@@ -70,6 +70,35 @@
 </svg>
 <!-- CSS is bundled by Vite via js/main.js import. Dev fallback: -->
 <link rel="stylesheet" href="style.css">
+<!--
+  SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #52 P0 finding #4 fix:
+    Cloudflare Web Analytics beacon タグ wiring。pageview / Core Web Vitals
+    が ¥0 で取得可能 (¥500/mo escalation 不要)。data-cf-beacon の token は
+    Cloudflare Dashboard で設定後、ビルド時 env から差し替える想定 (実 token
+    投入は別 mission)。defer 属性で main thread を block しない。
+-->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon='{"token":"PLACEHOLDER_CF_WEB_ANALYTICS_TOKEN"}'></script>
+<!--
+  SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — PostHog free tier stub:
+    free tier 1M events/mo (¥0)。ph_token は PostHog Cloud Dashboard で取得後、
+    PUBLIC_POSTHOG_KEY env (Cloudflare Pages env var) で差し替える。導入なら
+    init('phc_xxxx') を経由して capture('pageview') を発火させる想定。実 wiring
+    は別 mission (本ファイルでは導入準備の placeholder のみ)。
+-->
+<script>
+  // PostHog stub: window.posthog 未定義時は noop。secret 投入時は CDN 経由 init。
+  window.__POSTHOG_PLACEHOLDER__ = true;
+</script>
+<!--
+  SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — Sentry free tier stub:
+    free tier 5k events/mo (¥0)。SENTRY_DSN を Cloudflare worker secret に投入後、
+    本 frontend からも Sentry.init({ dsn }) を発火させる想定。本ファイルでは
+    導入準備の placeholder のみ (実 wiring は別 mission)。
+-->
+<script>
+  window.__SENTRY_PLACEHOLDER__ = true;
+</script>
 </head>
 <body>
 <!-- skip link for keyboard users (WCAG 2.4.1 fix 2026-05-01) -->
@@ -164,7 +193,7 @@
       <span style="color:var(--muted3);" aria-hidden="true">|</span>
       <a href="privacy.html" target="_blank" rel="noopener noreferrer" aria-label="プライバシーポリシーを新しいタブで開く">プライバシー</a>
       <span style="color:var(--muted3);" aria-hidden="true">|</span>
-      <span class="version" title="タップで更新確認" role="button" tabindex="0" aria-label="バージョン v4.0.49。タップで更新確認" onclick="checkForUpdate()" style="cursor:pointer;">v4.0.49</span>
+      <span class="version" title="タップで更新確認" role="button" tabindex="0" aria-label="バージョン v4.0.53。タップで更新確認" onclick="checkForUpdate()" style="cursor:pointer;">v4.0.53</span>
     </div>
   </footer>
 </aside>

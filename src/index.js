@@ -3,6 +3,8 @@ import { corsResponse } from './middleware/cors.js';
 import { applySecurityHeaders } from './middleware/security-headers.js';
 import { jsonRes, safeCompare } from './utils/helpers.js';
 import { APP_VERSION } from './utils/constants.js';
+// SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — structured logger global rollout
+import { safeError, safeLog } from './utils/safeLog.js';
 
 // Route handlers
 import { handleChat, handleChatStream, handleGptSimple } from './routes/chat.js';
@@ -114,6 +116,39 @@ app.post('/api/error-report', async (c) => {
   return withCors(c, jsonRes({ ok: true }));
 });
 
+// SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — CSP report-uri endpoint:
+//   browser から CSP violation report (Content-Type: application/csp-report
+//   または application/reports+json) を受け取り、KV `csp:report:<hour>` に
+//   24h TTL で蓄積。`/api/debug/errors` (admin auth) で同時参照可能。
+//   PostHog / Sentry DSN 投入時は本 endpoint を経由せずに直接外部 SaaS に送る。
+app.post('/api/csp-report', async (c) => {
+  // FIX (external review CRITICAL R-2): KV Read-Modify-Write 高頻度 = Lost Update / crash リスク
+  // 解消: KV 蓄積を廃止、structured log 出力のみ (Cloudflare Logpush 経由集約推奨)。
+  // PostHog / Sentry DSN 投入時は本 handler 内で直接外部送信 (KV 経由しない)。
+  try {
+    const body = await c.req.json();
+    const ip = c.req.header('CF-Connecting-IP') || 'unknown';
+    // structured log 出力 (Cloudflare Logpush で集約、KV 高頻度書込み回避)
+    console.log(JSON.stringify({
+      level: 'warn',
+      msg: 'csp_violation',
+      report: body,
+      ip,
+      ts: Date.now()
+    }));
+    // 外部 SaaS DSN 投入時 stub (secret 未設定時は no-op)
+    if (c.env.SENTRY_DSN) {
+      console.log(JSON.stringify({ level: 'info', msg: 'csp report would forward to Sentry', dsn_set: true, ts: Date.now() }));
+    }
+    if (c.env.POSTHOG_API_KEY) {
+      console.log(JSON.stringify({ level: 'info', msg: 'csp report would forward to PostHog', dsn_set: true, ts: Date.now() }));
+    }
+  } catch (e) {
+    console.error(JSON.stringify({ level: 'error', msg: 'csp-report failed', err: e?.message, ts: Date.now() }));
+  }
+  return withCors(c, new Response(null, { status: 204 }));
+});
+
 app.get('/api/debug/errors', async (c) => {
   // P0 FIX (LAIS-P0-FIX / GAP-CLOSURE-V1):
   //   /api/debug/errors は内部エラーログを露出するため、admin auth (TOKEN_SECRET HMAC 一致) 必須化。
@@ -129,7 +164,24 @@ app.get('/api/debug/errors', async (c) => {
   const lastError = JSON.parse(await c.env.TOKEN_KV.get('debug:last_error') || 'null');
   // SUBAGENT-LAIS-COMPREHENSIVE-FIX-V1 (2026-05-01): error-of-error も同時返却
   const eoe = JSON.parse(await c.env.TOKEN_KV.get(`eo:e:${hour}`) || '[]');
-  return withCors(c, jsonRes({ lastError, current: errors, previous: prevErrors, errorOfError: eoe }));
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #35 H-04 fix:
+  //   stack trace を fingerprint hash で隠蔽。raw stack の代わりに sha-256
+  //   先頭 8 文字 hex を返却。stack trace 漏洩を遮断しつつ dedupe 可能。
+  let lastErrorRedacted = lastError;
+  if (lastError && typeof lastError === 'object' && lastError.stack) {
+    const enc = new TextEncoder().encode(String(lastError.stack));
+    try {
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      const arr = Array.from(new Uint8Array(buf));
+      const fp = arr.slice(0, 4).map(b => b.toString(16).padStart(2, '0')).join('');
+      lastErrorRedacted = { ...lastError, stack: `[redacted:fp=${fp}]` };
+    } catch (_) { lastErrorRedacted = { ...lastError, stack: '[redacted]' }; }
+  }
+  // FIX (external review CRITICAL R-7): /api/csp-report が KV 廃止 / structured log のみ化
+  // (R-2 fix) したため、KV `csp:report:<hour>` は常に空。本フィールドを「Cloudflare Logpush
+  // 経由参照を推奨」と明示、虚偽 empty array を返さず note を含める。
+  const cspReportsNote = 'csp_violation events are now structured-logged (Cloudflare Logpush). KV storage discontinued post R-2 fix.';
+  return withCors(c, jsonRes({ lastError: lastErrorRedacted, current: errors, previous: prevErrors, errorOfError: eoe, cspReports: [], cspReportsNote }));
 });
 
 // ── Chat ──
@@ -229,7 +281,11 @@ app.notFound((c) => withCors(c, jsonRes({ error: 'Not found' }, 404)));
 
 // ── Error ──
 app.onError((err, c) => {
-  console.error('Worker error:', err);
+  // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — Wave 1 #52 P1 finding #7 fix:
+  //   unstructured `console.error('Worker error:', err)` を safeError に置換。
+  //   route + status を context として残し、Cloudflare Workers Logs UI で
+  //   `level: 'error' route: '/api/...'` のようなクエリが効くように。
+  safeError('worker.uncaught', err, { route: c.req.path, status: 500 });
   if (err instanceof SyntaxError) return withCors(c, jsonRes({ error: 'Invalid JSON in request body' }, 400));
   return withCors(c, jsonRes({ error: 'Internal server error' }, 500));
 });

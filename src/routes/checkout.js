@@ -1,5 +1,5 @@
 import { authenticateRequest } from '../middleware/auth.js';
-import { jsonRes } from '../utils/helpers.js';
+import { jsonRes, safeCompare } from '../utils/helpers.js';
 import { STRIPE_PRICE_IDS, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL } from '../utils/constants.js';
 import { syncUserToSupabase } from '../utils/supabase.js';
 import { safeLog, safeError, fingerprintToken, hashIdSync } from '../utils/safeLog.js';
@@ -83,7 +83,11 @@ async function verifyStripeSignature(payload, sigHeader, secret) {
     const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
     const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(signedPayload));
     const expectedSig = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
-    return expectedSig === signature;
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #35 H-02 fix:
+    //   Stripe webhook signature `===` timing attack 対策。constant-time の
+    //   safeCompare (HMAC SHA-256) で hex encoded signature を比較。Stripe
+    //   公式ドキュメントの推奨に準拠。
+    return await safeCompare(expectedSig, signature);
   } catch (e) { safeError('stripe.signature_verify_error', e); return false; }
 }
 
@@ -115,8 +119,18 @@ export async function handleStripeWebhook(request, env, ctx) {
     safeLog('INFO', 'webhook.upgrade', { token_fp: fingerprintToken(tokenId), plan });
     if (ctx && env.SUPABASE_URL) ctx.waitUntil(syncUserToSupabase(env, tokenData));
     try {
-      await fetch(`${env.SUPABASE_URL}/rest/v1/users?token_id=eq.${tokenId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Prefer': 'return=minimal' }, body: JSON.stringify({ plan, stripe_customer_id: session.customer, stripe_subscription_id: session.subscription, plan_updated_at: new Date().toISOString() }) });
-    } catch(e) {}
+      const _r = await fetch(`${env.SUPABASE_URL}/rest/v1/users?token_id=eq.${tokenId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Prefer': 'return=minimal' }, body: JSON.stringify({ plan, stripe_customer_id: session.customer, stripe_subscription_id: session.subscription, plan_updated_at: new Date().toISOString() }) });
+      if (!_r.ok) { throw new Error(`supabase PATCH upgrade failed: status=${_r.status}`); }
+    } catch(e) {
+      // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #52 P1 finding #5 fix:
+      //   Stripe webhook の Supabase PATCH 失敗の silent catch 解消。
+      //   safeError で structured log + retry queue キーへ event を蓄積。
+      //   別 cron で `stripe_sync_fail:*` をリトライする想定。
+      safeError('webhook.checkout_completed_supabase_sync_failed', e, { token_fp: fingerprintToken(tokenId) });
+      try {
+        await env.TOKEN_KV.put(`stripe_sync_fail:${event.id}`, JSON.stringify({ tokenId, eventType: event.type, plan, customer: session.customer, subscription: session.subscription, ts: Date.now(), retry: 0 }), { expirationTtl: 86400 * 7 });
+      } catch (_) {}
+    }
     // metered subscription item ID を取得して保存（Step 6）
     if (session.subscription) {
       try {
@@ -148,7 +162,17 @@ export async function handleStripeWebhook(request, env, ctx) {
         await env.TOKEN_KV.put(`token:${tokenId}`, JSON.stringify(tokenData));
         safeLog('INFO', 'webhook.subscription_cancelled', { token_fp: fingerprintToken(tokenId), plan: 'free' });
         if (ctx && env.SUPABASE_URL) ctx.waitUntil(syncUserToSupabase(env, tokenData));
-        try { await fetch(`${env.SUPABASE_URL}/rest/v1/users?token_id=eq.${tokenId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Prefer': 'return=minimal' }, body: JSON.stringify({ plan: 'free', cancelled_at: new Date().toISOString(), plan_updated_at: new Date().toISOString() }) }); } catch(e) {}
+        try {
+          const _r2 = await fetch(`${env.SUPABASE_URL}/rest/v1/users?token_id=eq.${tokenId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Prefer': 'return=minimal' }, body: JSON.stringify({ plan: 'free', cancelled_at: new Date().toISOString(), plan_updated_at: new Date().toISOString() }) });
+          if (!_r2.ok) { throw new Error(`supabase PATCH cancel failed: status=${_r2.status}`); }
+        } catch(e) {
+          // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #52 P1 #5 fix:
+          //   subscription cancel の Supabase PATCH 失敗の silent catch 解消。
+          safeError('webhook.subscription_cancelled_supabase_sync_failed', e, { token_fp: fingerprintToken(tokenId) });
+          try {
+            await env.TOKEN_KV.put(`stripe_sync_fail:${event.id}`, JSON.stringify({ tokenId, eventType: event.type, plan: 'free', ts: Date.now(), retry: 0 }), { expirationTtl: 86400 * 7 });
+          } catch (_) {}
+        }
       }
     }
   }
@@ -185,7 +209,14 @@ export async function handleStripeWebhook(request, env, ctx) {
               headers: { 'Content-Type': 'application/json', 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Prefer': 'return=minimal' },
               body: JSON.stringify({ plan: newPlan, plan_updated_at: new Date().toISOString() })
             });
-          } catch (e) {}
+          } catch (e) {
+            // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #52 P1 #5 fix:
+            //   subscription updated の Supabase PATCH 失敗の silent catch 解消。
+            safeError('webhook.subscription_updated_supabase_sync_failed', e, { token_fp: fingerprintToken(tokenId) });
+            try {
+              await env.TOKEN_KV.put(`stripe_sync_fail:${event.id}`, JSON.stringify({ tokenId, eventType: event.type, plan: newPlan, ts: Date.now(), retry: 0 }), { expirationTtl: 86400 * 7 });
+            } catch (_) {}
+          }
           safeLog('INFO', 'webhook.plan_changed', { token_fp: fingerprintToken(tokenId), plan: newPlan });
         }
       }
