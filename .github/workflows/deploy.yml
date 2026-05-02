@@ -1,0 +1,58 @@
+name: deploy
+# SUBAGENT-LAIS-P4-SECURITY-DUAL-FIX-V1 (2026-05-02) — Round 31 honest audit P2#35 fix:
+#   旧: wrangler deploy step で actor / commit SHA / timestamp の audit log なし =
+#       「誰が / いつ / どの commit を production に deploy したか」 の record が欠如、
+#       compliance / incident response 時に追跡不能。
+#   新: deploy job 開始時に actor / sha / ref / ts / workflow_run_id / trigger を
+#       JSON で structured log + artifact upload (retention 90 日)、 audit trail 担保。
+#   manual dispatch (workflow_dispatch) のみで起動、 main push は ci.yml + 手動承認経由。
+
+on:
+  workflow_dispatch:
+    inputs:
+      env_name:
+        description: deploy 先環境 (production / staging)
+        required: true
+        default: production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: deploy_audit_log
+        # P2#35 fix (2026-05-02): production deploy の audit trail
+        run: |
+          cat <<EOF | tee deploy_audit_$(date -u +%Y%m%d).json
+          {
+            "actor": "${{ github.actor }}",
+            "sha": "${{ github.sha }}",
+            "ref": "${{ github.ref }}",
+            "ts": "$(date -u +%FT%TZ)",
+            "workflow_run_id": "${{ github.run_id }}",
+            "trigger": "${{ github.event_name }}"
+          }
+          EOF
+
+      - name: upload_audit_log
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-audit-${{ github.run_id }}
+          path: deploy_audit_*.json
+          retention-days: 90
+
+      - name: setup_node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: install_deps
+        run: npm ci --no-audit --no-fund --silent
+
+      - name: wrangler_deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx wrangler deploy --env "${{ github.event.inputs.env_name }}"

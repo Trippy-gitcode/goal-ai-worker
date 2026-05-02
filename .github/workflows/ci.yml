@@ -13,6 +13,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: slack_webhook_required_check
+        # P2#27 fix (2026-05-02): SLACK_WEBHOOK_URL secret 配備状態確認。
+        # 現在は WARN level (PO 設定 待ち、 CI block しない)、 secret 設定後は
+        # 自動的に hard requirement (echo OK only) に転換。
+        # 設定方法: GitHub Settings → Secrets and variables → Actions → New
+        run: |
+          if [ -z "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            echo "::warning::SLACK_WEBHOOK_URL 未設定 — synthetic-monitor alert path が silent skip。 PO action 待ち (PO-tomorrow)"
+            exit 0
+          fi
+          echo "✅ SLACK_WEBHOOK_URL 設定済"
+
       - name: bash syntax check
         run: |
           set -u

@@ -1,0 +1,17 @@
+name: incident-critical-reminder
+on:
+  schedule:
+    - cron: "0 */4 * * *"
+  workflow_dispatch:
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: comment_on_stale_incidents
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STALE=$(gh issue list --label "incident-critical" --state open --json number,updatedAt --jq '.[] | select((now - (.updatedAt | fromdate)) > 86400) | .number')
+          for n in $STALE; do
+            gh issue comment "$n" --body "⏰ incident reminder ($(date -u +%FT%TZ))"
+          done

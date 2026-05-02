@@ -284,6 +284,7 @@ app.post('/api/csp-report', async (c) => {
     }
 
     // structured log 出力 (Cloudflare Logpush で集約、KV 高頻度書込み回避)
+    safeError('csp_violation', new Error('csp_violation'), { report: body, ip });
     console.log(JSON.stringify({
       level: 'warn',
       msg: 'csp_violation',
@@ -297,6 +298,46 @@ app.post('/api/csp-report', async (c) => {
     }
     if (c.env.POSTHOG_API_KEY) {
       console.log(JSON.stringify({ level: 'info', msg: 'csp report would forward to PostHog', dsn_set: true, ts: Date.now() }));
+    }
+
+    // SUBAGENT-LAIS-P4-SECURITY-DUAL-FIX-V1 (2026-05-02) — Round 31 honest audit P4#41 fix:
+    //   旧: CSP violation report は受信 + structured log のみ、 蓄積 / alert 経路なし =
+    //       attack の連続発生 (XSS injection / 設定 mistake / supply-chain) を検知できない。
+    //   新: KV `csp_violation_count:${date}` に increment (TTL 30 日) で日次 violation count
+    //       を蓄積、 count > 50 / day で GitHub Issue auto-open (label
+    //       `incident-csp-violation-spike`) を ctx.waitUntil(fetch()) で trigger。
+    //       GITHUB_ALERT_WEBHOOK 未設定時は silent skip。
+    if (c.env.TOKEN_KV) {
+      const today = new Date().toISOString().slice(0, 10);
+      const countKey = `csp_violation_count:${today}`;
+      let dayCount = 0;
+      try { dayCount = parseInt((await c.env.TOKEN_KV.get(countKey)) || '0'); } catch (_) { dayCount = 0; }
+      const newCount = dayCount + 1;
+      try {
+        await c.env.TOKEN_KV.put(countKey, String(newCount), { expirationTtl: 86400 * 30 });
+      } catch (_) { /* best-effort */ }
+
+      // threshold trigger: 50/day を超えたら GitHub Issue auto-open
+      if (newCount > 50 && c.env.GITHUB_ALERT_WEBHOOK) {
+        const alertedKey = `csp_violation_alerted:${today}`;
+        let alreadyAlerted = false;
+        try { alreadyAlerted = !!(await c.env.TOKEN_KV.get(alertedKey)); } catch (_) { alreadyAlerted = false; }
+        if (!alreadyAlerted) {
+          try { await c.env.TOKEN_KV.put(alertedKey, '1', { expirationTtl: 86400 * 2 }); } catch (_) { /* best-effort */ }
+          const issueBody = JSON.stringify({
+            title: `[incident-csp-violation-spike] CSP violation count > 50 on ${today}`,
+            body: `CSP violation count: ${newCount} on ${today} (threshold 50/day exceeded).\n\nLatest report ip: ${ip}\nLatest report: \`\`\`\n${JSON.stringify(body).slice(0, 1000)}\n\`\`\``,
+            labels: ['incident-csp-violation-spike'],
+          });
+          c.executionCtx?.waitUntil?.(
+            fetch(c.env.GITHUB_ALERT_WEBHOOK, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: issueBody,
+            }).catch((e) => console.error(JSON.stringify({ level: 'error', msg: 'csp_violation_alert.post_failed', err: e?.message, ts: Date.now() })))
+          );
+        }
+      }
     }
   } catch (e) {
     console.error(JSON.stringify({ level: 'error', msg: 'csp-report failed', err: e?.message, ts: Date.now() }));
