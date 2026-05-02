@@ -6,7 +6,6 @@
 # task は ScheduleWakeup or sh scripts/adv_continuous_executor.sh で逐次実行。
 # 自動継続: while sh scripts/adv_continuous_executor.sh; do sleep 60; done
 
-ROUND31-CAT-C-SSRF-1-CHAT-SYSTEM-WHITELIST|fix|echo "TODO: chat.js body.system enum allowlist"
 ROUND31-CAT-C-SSRF-2-DEEP-CONTEXT-VERIFY|fix|echo "TODO: chat.js deep_context server-side store keyed by user"
 ROUND31-CAT-C-SSRF-3-MEMO-AUTHZ|fix|echo "TODO: memo.js goal_id ownership check"
 ROUND31-CAT-H-TOKEN-HMAC|fix|echo "TODO: HMAC signed token format goal_test_<payload>.<sig> migration"
