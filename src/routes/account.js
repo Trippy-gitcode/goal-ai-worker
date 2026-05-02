@@ -238,10 +238,14 @@ export async function handleAccountDelete(request, env) {
       //       whitelist validation 済を保証、 `userId` 生値は whitelist 通過済 = injection 不可。
       //   migration 04 の RPC は SECURITY DEFINER + SET search_path = public, pg_temp で
       //       defense-in-depth、 さらに RAISE EXCEPTION on invalid input で fail-closed。
+      // Round 30 fix (2026-05-02): RPC signature 変更 (text) → (text, text)。
+      //   referrals table は `referrer_token_id` / `referred_token_id` 参照で
+      //   user_id (uuid) と別軸 → token_id (text) も渡す必要がある。
+      //   旧 production code は `referrer_user_id` で DELETE 試行 → 列不在で 0 件 = 既存 bug。
       const rpcRes = await fetch(`${supabaseUrl}/rest/v1/rpc/account_atomic_delete`, {
         method: 'POST',
         headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ p_user_id: userId }),
+        body: JSON.stringify({ p_user_id: userId, p_token_id: tokenId }),
       });
       if (rpcRes.ok) {
         const rpcJson = await rpcRes.json().catch(() => null);
@@ -297,12 +301,23 @@ export async function handleAccountDelete(request, env) {
     await _doDel(`${supabaseUrl}/rest/v1/feedbacks?user_id=eq.${safeUid}`, 'feedbacks');
     _logTable(4, 'feedbacks');
     // 5. referrals (both as referrer and referred) — Round 5 B-4: 2 経路を別々に log
-    await _doDel(`${supabaseUrl}/rest/v1/referrals?referrer_user_id=eq.${safeUid}`, 'referrals_referrer');
-    _logTable(5, 'referrals_referrer');
-    await _doDel(`${supabaseUrl}/rest/v1/referrals?referred_user_id=eq.${safeUid}`, 'referrals_referred');
-    _logTable(6, 'referrals_referred');
+    // Round 30 fix (2026-05-02): column 名は referrer_token_id / referred_token_id (text)、
+    //   user_id ではない。 旧 code は 400 column not exist → 500 = latent bug。
+    //   referrals は token_id (text) 経由なので safeUid (uuid encode) ではなく tokenId 経由。
+    const safeTokenId = safePgrestValue(tokenId);
+    if (isSafePgrestValue(safeTokenId)) {
+      await _doDel(`${supabaseUrl}/rest/v1/referrals?referrer_token_id=eq.${safeTokenId}`, 'referrals_referrer');
+      _logTable(5, 'referrals_referrer');
+      await _doDel(`${supabaseUrl}/rest/v1/referrals?referred_token_id=eq.${safeTokenId}`, 'referrals_referred');
+      _logTable(6, 'referrals_referred');
+    } else {
+      // tokenId が whitelist 違反 (通常 ありえない、 auth 経由なので safe) → skip + log
+      safeError('account.delete_referrals_skip_invalid_token', new Error('tokenId failed safePgrestValue, referrals skipped'), { user_hash: userHashAudit });
+    }
     // 6. users table (last)
-    await _doDel(`${supabaseUrl}/rest/v1/users?user_id=eq.${safeUid}`, 'users');
+    // Round 30 fix (2026-05-02): production schema users.id (uuid)、 user_id 列なし → 400 column not exist。
+    //   旧 code は users delete で常に 500 を返していた (latent bug、 orphan check で実害ゼロ確認済)。
+    await _doDel(`${supabaseUrl}/rest/v1/users?id=eq.${safeUid}`, 'users');
     _logTable(7, 'users');
 
     // 7. KV cleanup
