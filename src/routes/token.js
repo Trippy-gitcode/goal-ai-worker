@@ -5,10 +5,14 @@ import { syncUserToSupabase, supabaseQuery } from '../utils/supabase.js';
 import { checkDeepUsage } from '../utils/rate-limit.js';
 import { safeCompare } from '../utils/helpers.js';
 import { safeError } from '../utils/safeLog.js';
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 
 export async function handleTokenRegister(request, env, ctx) {
   try {
-    const body = await request.json();
+    // Round 31 Cat-I P0 fix: 4 KB cap (deviceId のみで小さい)、 prototype pollution defence
+    const guard = await parseBodyGuarded(request, { maxBytes: 4 * 1024 });
+    if (!guard.ok) return jsonRes({ error: guard.error }, guard.status);
+    const body = guard.body;
     const { deviceId } = body;
     if (!deviceId) return jsonRes({ error: 'deviceId is required' }, 400);
     // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — Wave 1 #35 M-03 fix:

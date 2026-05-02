@@ -4,6 +4,7 @@ import { supabaseQuery } from '../utils/supabase.js';
 import { QOL_PROPOSAL_PROMPT } from '../services/prompt.js';
 import { checkRateLimit } from '../utils/rate-limit.js';
 import { safeError } from '../utils/safeLog.js';
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 
 const DEFAULT_IDENTITY = {
   vision: null,
@@ -46,7 +47,12 @@ export async function handleIdentityPut(request, env) {
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
 
-  const body = await request.json();
+  // Round 31 Cat-I P0 fix (2026-05-02): parseBodyGuarded で size cap + prototype pollution +
+  //   nested depth + dangerous key strip (__proto__) を防御。 識別 50KB cap (identity / routines /
+  //   qol_proposals が large 可能性、 但し 100KB 超は reject)。
+  const guard = await parseBodyGuarded(request, { maxBytes: 100 * 1024, maxKeys: 100, maxDepth: 8 });
+  if (!guard.ok) return jsonRes({ error: guard.error }, guard.status);
+  const body = guard.body;
   const updates = { user_id: userId };
   if (body.vision !== undefined) updates.vision = body.vision;
   // BUG-03: identityはマージ（profile追加時に既存のstrengths/vision等を消さない）

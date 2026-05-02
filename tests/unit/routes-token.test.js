@@ -105,11 +105,12 @@ describe('handleTokenRegister', () => {
     expect(res.status).toBe(201);
   });
 
-  it('should return 500 on json parse error', async () => {
+  it('should return 400 on json parse error (Round 31 Cat-I P0-8: parseBodyGuarded で 500→400 正常化)', async () => {
     const req = new Request('https://x.test/', { method: 'POST', body: 'not json' });
     const env = { TOKEN_KV: makeKV() };
     const res = await handleTokenRegister(req, env);
-    expect(res.status).toBe(500);
+    // RFC 7231: malformed JSON は client error = 400、 server-side bug ではない
+    expect(res.status).toBe(400);
   });
 });
 
