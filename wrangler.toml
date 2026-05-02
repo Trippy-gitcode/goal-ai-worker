@@ -64,10 +64,17 @@ head_sampling_rate = 1.0
 crons = ["*/5 * * * *"]
 
 # ── 本番環境 ──
+# Round 30 fix (2026-05-02): top-level kv_namespaces は env override 時に継承されない
+#   仕様 (wrangler 仕様)、 各 env block で明示的に bind 必須。 production deploy で
+#   /api/token/register が 'Registration error' になった root cause。
 [env.production]
 name = "goal-ai-worker"
 [env.production.vars]
 ALLOWED_ORIGINS = "https://goal-ai-frontend.pages.dev,https://delicate-bienenstitch-b734d6.netlify.app"
+[[env.production.kv_namespaces]]
+binding = "TOKEN_KV"
+id = "a5c45e6d1b454d27be42020a802e4cdd"
+preview_id = "f6f98222ca8a4d0fb1e9e1335725b37c"
 [env.production.observability]
 enabled = true
 head_sampling_rate = 1.0
