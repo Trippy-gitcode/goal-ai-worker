@@ -207,7 +207,7 @@
       <span style="color:var(--muted3);" aria-hidden="true">|</span>
       <a href="tokushoho.html" target="_blank" rel="noopener noreferrer" aria-label="特定商取引法に基づく表記を新しいタブで開く">特商法</a>
       <span style="color:var(--muted3);" aria-hidden="true">|</span>
-      <span class="version" data-app-version="4.0.81" title="タップで更新確認" role="button" tabindex="0" aria-label="バージョン v4.0.81。タップで更新確認" onclick="checkForUpdate()" style="cursor:pointer;">v4.0.81</span>
+      <span class="version" data-app-version="4.0.82" title="タップで更新確認" role="button" tabindex="0" aria-label="バージョン v4.0.82。タップで更新確認" onclick="checkForUpdate()" style="cursor:pointer;">v4.0.82</span>
     </div>
   </footer>
 </aside>
@@ -1767,6 +1767,25 @@
 
 
 <script type="module" src="/js/main.js"></script>
+
+<!-- Round 31 PO-E (age gate) + PO-F (越境移転 modal) wire-in (batch 16、 2026-05-02):
+     init は ensureAuth 完了後に呼出 (main.js 内で auth 後 init 呼出を 別 PR で配線、
+     現状は DOMContentLoaded で先 age_gate → 通過したら cross_border_consent_modal の順) -->
+<script src="js/age_gate.js" defer></script>
+<script src="js/cross_border_consent_modal.js" defer></script>
+<script>
+  // age_gate を先、 通過後に cross_border_consent_modal を呼ぶ chain
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof initAgeGate === 'function') initAgeGate();
+    // age gate 後に少し delay して 越境同意 modal (重なり防止)
+    setTimeout(() => {
+      if (typeof window.hasAgeGatePassed === 'function' && window.hasAgeGatePassed() &&
+          typeof initCrossBorderConsentModal === 'function') {
+        initCrossBorderConsentModal();
+      }
+    }, 300);
+  });
+</script>
 
 
 <!-- ══════════════════════════════════════
