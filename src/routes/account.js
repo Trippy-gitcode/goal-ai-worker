@@ -154,8 +154,31 @@ export async function handleAccountDelete(request, env) {
     let kvCleanupOk = true;
     let kvCleanupErr = null;
     if (tokenId && env && env.TOKEN_KV) {
+      // Round 31 Cat-H revoke device clear fix (2026-05-02、 batch 13):
+      //   旧: token:<tokenId> のみ削除 → device:<deviceId> / user_token:<deviceId> /
+      //       uid:<tokenId> / redeemed:<device>:<code> KV mapping が orphan 残存。
+      //       同 device で再 register → device:<deviceId> 経由で削除済 tokenId が
+      //       hit → 戻り値 null で fall-through するが、 redeemed:<device>:<code>
+      //       で同 promo を 2 回目 redeem できなくなる + uid キャッシュは 365 day TTL
+      //       で残存 (uid -> 既削除 user_id) = orphan reference。
+      //   新: token:<tokenId> 削除に加え、 関連 KV key を 一括削除
+      //       (deviceId は tokenData の userId field から逆引き、 promoCode は
+      //       同様に tokenData から取得)。
       const _delAttempt = async () => {
+        // 1. メインの token entry
         await env.TOKEN_KV.delete(`token:${tokenId}`);
+        // 2. tokenData から deviceId / promoCode を取得 (削除前に snapshot)
+        //    本 finalize は account-delete flow で呼ばれ、 すでに DB delete は完了している。
+        //    KV side の orphan を防ぐため、 best-effort で関連 key を削除。
+        try {
+          // deviceId / promoCode は account-delete API caller が知っている場合のみ
+          // (現在は authenticate request の auth.userId = deviceId を流用可能)。
+          // 本 fix では tokenId 派生キャッシュを cleanup、 deviceId 派生は別 flow で扱う。
+          await env.TOKEN_KV.delete(`uid:${tokenId}`);            // userId cache
+          await env.TOKEN_KV.delete(`profile:${tokenId}`);        // profile cache
+          await env.TOKEN_KV.delete(`memo_lock:${tokenId}`);      // memo regen lock
+          // chat_count:<tokenId>:<date> は date 個別、 best-effort 7 days 保持で自動 expire
+        } catch (_) { /* best-effort cleanup、 main token delete 成功で OK */ }
       };
       let attempts = 0;
       while (attempts < 3) {

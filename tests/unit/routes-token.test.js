@@ -214,56 +214,114 @@ describe('handleTokenValidate', () => {
 
 describe('handleTokenRedeem', () => {
   let originalFetch;
+  // Round 31 batch 13 (Cat-H promo multi-redeem fix): SUPABASE 必須化のため env mock 強化、
+  // fetch mock は SELECT (200 [], 既消費なし) → INSERT (201 created OK) を返す sequencer。
+  function makeFetchMock() {
+    let callIdx = 0;
+    return vi.fn(async (url, opts) => {
+      callIdx++;
+      const method = (opts && opts.method) || 'GET';
+      // INSERT (POST) は 201 Created (Supabase 既定)
+      if (method === 'POST') return new Response('', { status: 201 });
+      // SELECT (GET) は空配列 = 既消費なし
+      return new Response('[]', { status: 200 });
+    });
+  }
   beforeEach(() => {
     originalFetch = globalThis.fetch;
-    globalThis.fetch = vi.fn(async () => new Response('[]', { status: 200 }));
+    globalThis.fetch = makeFetchMock();
   });
   afterEach(() => {
     globalThis.fetch = originalFetch;
   });
 
+  // Round 31 batch 13: handleTokenRedeem は Supabase URL + KEY を必須化、 全 test で env に注入。
+  function envWith(kv = makeKV()) {
+    return { TOKEN_KV: kv, SUPABASE_URL: 'https://test.supabase.co', SUPABASE_SERVICE_KEY: 'EXAMPLE_test_service_key_gitleaks_safe' };
+  }
+
   it('should reject when promoCode missing', async () => {
-    const env = { TOKEN_KV: makeKV() };
-    const res = await handleTokenRedeem(makeReq({}), env);
+    const res = await handleTokenRedeem(makeReq({}), envWith());
     expect(res.status).toBe(400);
   });
 
   it('should reject malformed promoCode', async () => {
-    const env = { TOKEN_KV: makeKV() };
-    const res = await handleTokenRedeem(makeReq({ promoCode: 'bad code with space!' }), env);
+    const res = await handleTokenRedeem(makeReq({ promoCode: 'bad code with space!' }), envWith());
     expect(res.status).toBe(400);
   });
 
   it('should reject unknown promoCode', async () => {
-    const env = { TOKEN_KV: makeKV() };
-    const res = await handleTokenRedeem(makeReq({ promoCode: 'NONEXISTENT' }), env);
+    const res = await handleTokenRedeem(makeReq({ promoCode: 'NONEXISTENT' }), envWith());
     expect(res.status).toBe(400);
   });
 
   it('should issue token for valid promo (LAUNCH30)', async () => {
-    const env = { TOKEN_KV: makeKV() };
     const ctx = { waitUntil: () => {} };
-    const res = await handleTokenRedeem(makeReq({ promoCode: 'LAUNCH30', deviceId: 'devicex123' }), env, ctx);
+    const res = await handleTokenRedeem(makeReq({ promoCode: 'LAUNCH30', deviceId: 'devicex123' }), envWith(), ctx);
     const j = await res.json();
     expect(j.token).toMatch(/^goal_test_/);
     expect(j.plan).toBe('pro');
   });
 
-  it('should reject already redeemed promo for same device', async () => {
+  it('should reject already redeemed promo for same device (KV cache)', async () => {
     const kv = makeKV();
     await kv.put('redeemed:devy123:LAUNCH30', 'goal_test_oldredeem');
-    const env = { TOKEN_KV: kv };
     const ctx = { waitUntil: () => {} };
-    const res = await handleTokenRedeem(makeReq({ promoCode: 'LAUNCH30', deviceId: 'devy123' }), env, ctx);
+    const res = await handleTokenRedeem(makeReq({ promoCode: 'LAUNCH30', deviceId: 'devy123' }), envWith(kv), ctx);
     expect(res.status).toBe(409);
   });
 
   it('should reject deviceId with bad chars', async () => {
-    const env = { TOKEN_KV: makeKV() };
     const res = await handleTokenRedeem(
       makeReq({ promoCode: 'LAUNCH30', deviceId: 'd\x00ev' }),
-      env,
+      envWith(),
     );
     expect(res.status).toBe(400);
+  });
+
+  // Round 31 batch 13 新規 test: Cat-H promo multi-redeem fix
+  it('should fail-closed (503) when SUPABASE_URL unset (no fail-open silent skip)', async () => {
+    const res = await handleTokenRedeem(makeReq({ promoCode: 'LAUNCH30', deviceId: 'devy999' }), { TOKEN_KV: makeKV() }, { waitUntil: () => {} });
+    expect(res.status).toBe(503);
+  });
+
+  it('should fail-closed (503) when used_coupons SELECT returns 5xx', async () => {
+    globalThis.fetch = vi.fn(async () => new Response('boom', { status: 500 }));
+    const res = await handleTokenRedeem(makeReq({ promoCode: 'LAUNCH30', deviceId: 'devy888' }), envWith(), { waitUntil: () => {} });
+    expect(res.status).toBe(503);
+  });
+
+  it('should reject (400) when SELECT returns existing redeemed row (DB SSoT)', async () => {
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      const method = (opts && opts.method) || 'GET';
+      if (method === 'POST') return new Response('', { status: 201 });
+      return new Response(JSON.stringify([{ token_id: 'devy777', coupon_code: 'LAUNCH30' }]), { status: 200 });
+    });
+    const res = await handleTokenRedeem(makeReq({ promoCode: 'LAUNCH30', deviceId: 'devy777' }), envWith(), { waitUntil: () => {} });
+    const j = await res.json();
+    expect(res.status).toBe(400);
+    expect(j.error).toMatch(/使用済み/);
+  });
+
+  it('should reject (409) when INSERT returns 409 conflict (race detection)', async () => {
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      const method = (opts && opts.method) || 'GET';
+      if (method === 'POST') return new Response('', { status: 409 });  // race
+      return new Response('[]', { status: 200 });  // SELECT empty
+    });
+    const res = await handleTokenRedeem(makeReq({ promoCode: 'LAUNCH30', deviceId: 'devy666' }), envWith(), { waitUntil: () => {} });
+    const j = await res.json();
+    expect(res.status).toBe(409);
+    expect(j.error).toMatch(/race detected/);
+  });
+
+  it('should fail-closed (503) when INSERT returns 5xx', async () => {
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      const method = (opts && opts.method) || 'GET';
+      if (method === 'POST') return new Response('boom', { status: 500 });
+      return new Response('[]', { status: 200 });
+    });
+    const res = await handleTokenRedeem(makeReq({ promoCode: 'LAUNCH30', deviceId: 'devy555' }), envWith(), { waitUntil: () => {} });
+    expect(res.status).toBe(503);
   });
 });

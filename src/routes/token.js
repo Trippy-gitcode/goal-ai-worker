@@ -101,13 +101,32 @@ export async function handleTokenRedeem(request, env, ctx) {
   //   promoCode 形式バリデーション (PostgREST filter injection 対策)
   if (typeof promoCode !== 'string' || !/^[A-Z0-9_-]{1,32}$/i.test(promoCode)) return jsonRes({ error: 'Invalid promoCode' }, 400);
   if (deviceId && (typeof deviceId !== 'string' || deviceId.length > 128 || /[\x00-\x1f\x7f]/.test(deviceId))) return jsonRes({ error: 'Invalid deviceId' }, 400);
-  if (promoCode && env.SUPABASE_URL) {
-    const ucRes = await fetch(`${env.SUPABASE_URL}/rest/v1/used_coupons?token_id=eq.${encodeURIComponent(deviceId || '')}&coupon_code=eq.${encodeURIComponent(promoCode.toUpperCase())}`, { headers: { 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}` } });
-    const ucRows = await ucRes.json();
-    if (Array.isArray(ucRows) && ucRows.length > 0) return jsonRes({ error: 'このコードはすでに使用済みです' }, 400);
+  // Round 31 Cat-H promo multi-redeem fix (2026-05-02、 batch 13):
+  //   旧: used_coupons SELECT は env.SUPABASE_URL 設定時のみ、 INSERT は ctx.waitUntil で
+  //       fire-and-forget = 並列 redeem race で 1 promo を 2+ 回 redeem 可能。
+  //       さらに Supabase 接続失敗時も silent skip (fail-open) で multi-redeem 容認。
+  //   新: (a) Supabase URL 必須化 (fail-closed)、 未設定なら 500 reject。
+  //       (b) used_coupons SELECT を必ず await、 status 200 以外なら fail-closed 503。
+  //       (c) used_coupons INSERT も await + ON CONFLICT for atomic dedupe (Postgres
+  //           UNIQUE 制約 (token_id, coupon_code) を前提、 conflict 時は 409 で abort
+  //           + 既発 token を返却)。
+  //       (d) KV redeemed:<device>:<code> は best-effort cache (DB が SSoT)。
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_KEY) {
+    return jsonRes({ error: 'Service temporarily unavailable (promo backend offline)' }, 503);
   }
   const promo = PROMO_CODES[promoCode.toUpperCase()];
   if (!promo) return jsonRes({ error: '無効なプロモコードです' }, 400);
+  // (b) SELECT mandatory check
+  const dedupeKey = deviceId || 'NO_DEVICE';
+  const ucRes = await fetch(`${env.SUPABASE_URL}/rest/v1/used_coupons?token_id=eq.${encodeURIComponent(dedupeKey)}&coupon_code=eq.${encodeURIComponent(promoCode.toUpperCase())}`,
+    { headers: { 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}` } });
+  if (!ucRes.ok) {
+    // Supabase reachability lost = fail-closed (multi-redeem を防ぐ)
+    return jsonRes({ error: 'Promo verification temporarily unavailable' }, 503);
+  }
+  const ucRows = await ucRes.json();
+  if (Array.isArray(ucRows) && ucRows.length > 0) return jsonRes({ error: 'このコードはすでに使用済みです' }, 400);
+  // KV cache check (defense-in-depth)
   if (deviceId) {
     const existing = await env.TOKEN_KV.get(`redeemed:${deviceId}:${promoCode.toUpperCase()}`);
     if (existing) return jsonRes({ error: 'このコードは既に適用済みです', existingToken: existing }, 409);
@@ -118,11 +137,29 @@ export async function handleTokenRedeem(request, env, ctx) {
   const expiresAt = new Date(now.getTime() + promo.days * 86400000);
   const tokenData = { tokenId, plan: promo.plan, userId: deviceId || tokenId, promoCode: promoCode.toUpperCase(), promoDesc: promo.desc, createdAt: now.toISOString(), expiresAt: expiresAt.toISOString(), revoked: false };
   const ttl = promo.days * 86400 + 7 * 86400;
+  // (c) used_coupons INSERT を await + return=representation で conflict 検知。
+  //     UNIQUE 制約 (token_id, coupon_code) を前提、 conflict なら 409。
+  const insertRes = await fetch(`${env.SUPABASE_URL}/rest/v1/used_coupons`, {
+    method: 'POST',
+    headers: {
+      'apikey': env.SUPABASE_SERVICE_KEY,
+      'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal',
+    },
+    body: JSON.stringify({ token_id: dedupeKey, coupon_code: promoCode.toUpperCase() }),
+  });
+  if (insertRes.status === 409) {
+    // 並列 race で同 device + 同 code が他 request により先に INSERT 済 = multi-redeem 阻止
+    return jsonRes({ error: 'このコードはすでに使用済みです (race detected)' }, 409);
+  }
+  if (!insertRes.ok && insertRes.status !== 201) {
+    // INSERT 失敗 = SSoT 不整合 risk、 token も発行しない (fail-closed)
+    return jsonRes({ error: 'Promo redemption temporarily unavailable' }, 503);
+  }
+  // ここまで通過 = used_coupons INSERT 成功 = SSoT 確定。 token 発行 + KV cache 同期。
   await env.TOKEN_KV.put(`token:${tokenId}`, JSON.stringify(tokenData), { expirationTtl: ttl });
   if (deviceId) await env.TOKEN_KV.put(`redeemed:${deviceId}:${promoCode.toUpperCase()}`, tokenId, { expirationTtl: ttl });
-  if (ctx && env.SUPABASE_URL) ctx.waitUntil(syncUserToSupabase(env, tokenData));
-  if (promoCode && env.SUPABASE_URL) {
-    ctx.waitUntil(fetch(`${env.SUPABASE_URL}/rest/v1/used_coupons`, { method: 'POST', headers: { 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }, body: JSON.stringify({ token_id: deviceId || tokenId, coupon_code: promoCode.toUpperCase() }) }));
-  }
+  if (ctx) ctx.waitUntil(syncUserToSupabase(env, tokenData));
   return jsonRes({ token: tokenId, plan: promo.plan, desc: promo.desc, expiresAt: expiresAt.toISOString(), daysRemaining: promo.days });
 }
