@@ -47,10 +47,16 @@ ALLOWED_ORIGINS = "https://goal-ai-frontend.pages.dev,https://delicate-bienensti
 # wrangler secret put TOKEN_SECRET
 
 # ── ステージング環境 ──
+# Round 29 follow-up (2026-05-02): cosbiz2104 account に staging worker を deploy、
+#   PO action 待たずに real Worker 環境で E2E retest 可能化。
+#   KV namespace = TOKEN_KV_STAGING (cosbiz2104 own、 production isolated)。
 [env.staging]
 name = "goal-ai-worker-staging"
 [env.staging.vars]
-ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:8080"
+ALLOWED_ORIGINS = "https://delicate-bienenstitch-b734d6.netlify.app,http://localhost:3000,http://localhost:8080"
+[[env.staging.kv_namespaces]]
+binding = "TOKEN_KV"
+id = "61fb2a70b0534d268c9fe370349ad562"
 [env.staging.observability]
 enabled = true
 head_sampling_rate = 1.0
