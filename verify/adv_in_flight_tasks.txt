@@ -10,7 +10,6 @@ ROUND31-CAT-A-OWNER-KEY|fix|echo "TODO: server-side cookie 化、 GET /api/owner
 ROUND31-CAT-C-SSRF-1-CHAT-SYSTEM-WHITELIST|fix|echo "TODO: chat.js body.system enum allowlist"
 ROUND31-CAT-C-SSRF-2-DEEP-CONTEXT-VERIFY|fix|echo "TODO: chat.js deep_context server-side store keyed by user"
 ROUND31-CAT-C-SSRF-3-MEMO-AUTHZ|fix|echo "TODO: memo.js goal_id ownership check"
-ROUND31-CAT-C-SSRF-4-GEMINI-TOOL-DISABLE|fix|echo "TODO: ai-gemini.js google_search tool default off"
 ROUND31-CAT-H-TOKEN-HMAC|fix|echo "TODO: HMAC signed token format goal_test_<payload>.<sig> migration"
 ROUND31-CAT-H-PROMO-MULTI-REDEEM|fix|echo "TODO: used_coupons SSoT mandatory + transaction"
 ROUND31-CAT-H-REVOKE-DEVICE-CLEAR|fix|echo "TODO: revoke 時 device:<id> mapping 削除"
