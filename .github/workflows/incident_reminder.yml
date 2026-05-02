@@ -7,6 +7,10 @@ jobs:
   remind:
     runs-on: ubuntu-latest
     steps:
+      - name: checkout
+        # batch 24 fix (2026-05-02): gh issue list は git repo context 必須、 checkout 不在で
+        # 「fatal: not a git repository」 で fail していた regression を解消。
+        uses: actions/checkout@v4
       - name: comment_on_stale_incidents
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

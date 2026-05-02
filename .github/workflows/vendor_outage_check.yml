@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: checkout
+        # batch 24 fix: gh issue list は git repo context 必須
+        uses: actions/checkout@v4
       - name: poll_status_pages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

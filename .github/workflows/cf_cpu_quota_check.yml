@@ -7,6 +7,9 @@ jobs:
   check_cpu:
     runs-on: ubuntu-latest
     steps:
+      - name: checkout
+        # batch 24 fix: gh issue create は git repo context 必須
+        uses: actions/checkout@v4
       - name: query_cf_analytics
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}

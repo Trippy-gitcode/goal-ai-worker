@@ -319,3 +319,23 @@ mechanical verification せよ。** (ADV §2.4 リスク 0 表現禁止 + §3.5 
 4. G17 §4.2 auto-fire scan 再実行で「§2.25.3 violation 5 回以上」 検出 → G22 強化 mandate trigger 確認
 
 **累計違反**: #34
+
+---
+
+## 違反 #35 (2026-05-02T20:55Z) — workflow 設計時 actions/checkout 抜け = silent fail (隠蔽#1 同型 再発)
+
+**違反内容**: batch 19 で配備した `incident_reminder.yml` / `vendor_outage_check.yml` / `cf_cpu_quota_check.yml` の 3 workflow が `gh issue list` / `gh issue create` 経由で git repo context を必要とするのに `actions/checkout@v4` step なしで配備、 schedule 起動時に「fatal: not a git repository」 で全 fail。 PO のメール通知で 検出、 batch 19 の CI green は push CI のみで、 cron 起動 CI は当然 後発で判明する設計を見落としていた。
+
+**根本原因**:
+1. batch 19/21 の subagent 動作テストは workflow を yaml parse のみで commit、 schedule 経由 実走 確認 skip
+2. 「CI green = OK」 の先入観で 全 workflow 種別 (push / PR / schedule / workflow_dispatch) の 動作確認を網羅せず
+3. 隠蔽#1「CI gate local 実行のみ、 GHA 結果未確認」 と同型 = 「特定 trigger 経由でしか発火しない workflow の真 動作確認 skip」 として 同一 root cause
+
+**PO 検出経路**: GitHub Actions failure email を PO が screenshot で送付 (2026-05-02 5:50)、 ADV は 検出していなかった
+
+**対処 (本 turn 完了)**:
+1. ✓ 3 workflow に `actions/checkout@v4` step 追加 (batch 24)
+2. ✓ yaml parse 全 PASS 確認
+3. mechanical gate G24 候補: 「workflow に gh CLI 使う場合 actions/checkout 必須」 grep gate 配備 (次 batch 検討)
+
+**累計違反**: #35
