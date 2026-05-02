@@ -297,3 +297,25 @@ mechanical verification せよ。** (ADV §2.4 リスク 0 表現禁止 + §3.5 
 全 「保留」 を **NG** に書き換え。 NG 解消は 「Production deploy + 動作 verify 済」 のみ。
 
 **累計違反**: #33
+
+---
+
+## 違反 #34 (2026-05-02T15:34Z) — G22 script 設計 bug (catch すべき pattern を miss)
+
+**違反内容**: 違反 #30 (§2.25.3 三択投げ) 防止のため G22 配備したが、 subagent V1 動作テストで「三択 から PO 判断」 が exit 0 (= 検出されず PASS) になる bug 発覚。 G22 Pattern 3 は `願` suffix 必須、 Pattern 2 は `[ABCD] 案` 共起必須、 「PO 判断」 単体や 「三択」 単独は素通り。
+
+**根本原因**:
+1. G22 設計時に「どうしますか」「お願い」「ご判断ください」 の standard 表現のみ想定、 PO 直命「漏れなく」 の 観点で 補集合 (「PO 判断」 単体 / 「三択」 単独) を漏らした
+2. 自己作成 mechanical gate を 自分の違反 input で 動作確認しなかった (= TDD 違反)
+
+**対処 (本 turn 後 batch 20 予定)**:
+1. G22 Pattern 3 強化:
+   ```sh
+   # 旧: grep -qE "承認.*願|承認.*お願い|PO 判断.*願"
+   # 新: grep -qE "承認.*願|承認.*お願い|PO 判断|ご判断|どれにします|三択.*PO|二択.*PO"
+   ```
+2. dev-system template 同期更新 (subagent dispatch)
+3. G22 unit test 追加: 「三択 から PO 判断」 で exit 1 確認
+4. G17 §4.2 auto-fire scan 再実行で「§2.25.3 violation 5 回以上」 検出 → G22 強化 mandate trigger 確認
+
+**累計違反**: #34

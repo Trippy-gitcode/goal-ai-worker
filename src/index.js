@@ -509,9 +509,58 @@ app.onError((err, c) => {
 //   実行内容: 自身の /health endpoint を beacon として叩き、KV "cron:last_health"
 //   に成功/失敗履歴を 24h TTL で蓄積。Cloudflare Workers Cron Triggers タブで
 //   成功率を観測可能 + KV 直接 GET で post-mortem 用に最後の状態を取得可能。
+//
+// SUBAGENT-LAIS-AUDITLOG-CRON-TRIGGER-FIX-V2 (2026-05-02) — Cat-J P0 #1 follow-up:
+//   pg_cron 不在環境向けに "0 2 * * *" (日次 02:00 UTC) branch を追加。
+//   Supabase REST API `/rest/v1/rpc/delete_old_audit_log` を SERVICE_KEY 認可で
+//   POST、 audit_log 30 日 retention DELETE を CF Workers Cron Trigger 経由で実行。
+//   SUPABASE_URL / SUPABASE_SERVICE_KEY 未設定時 silent skip (test/preview 環境互換)。
 async function scheduledHandler(event, env, ctx) {
   const ts = Date.now();
   const cronExpr = event?.cron || 'unknown';
+
+  // 日次 02:00 UTC: audit_log 30 日 retention DELETE
+  if (cronExpr === '0 2 * * *') {
+    if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_KEY) {
+      console.log(JSON.stringify({
+        level: 'info',
+        msg: 'audit_log retention cron: SUPABASE not configured, skip',
+        cron: cronExpr,
+        ts,
+      }));
+      return;
+    }
+    try {
+      const res = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/delete_old_audit_log`, {
+        method: 'POST',
+        headers: {
+          'apikey': env.SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: '{}',
+      });
+      console.log(JSON.stringify({
+        level: 'info',
+        msg: 'audit_log retention cron',
+        status: res.status,
+        cron: cronExpr,
+        ts,
+      }));
+    } catch (e) {
+      console.error(JSON.stringify({
+        level: 'error',
+        msg: 'audit_log retention cron failed',
+        err: e?.message,
+        stack: (e?.stack || '').slice(0, 300),
+        cron: cronExpr,
+        ts,
+      }));
+    }
+    return;
+  }
+
+  // 既存 5 min 周期 health beacon
   try {
     const record = {
       ts,

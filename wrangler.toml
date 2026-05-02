@@ -24,8 +24,15 @@ head_sampling_rate = 1.0
 #   Cron Triggers + scheduled handler 完全不在 → 5 min 周期 health check cron を追加。
 #   src/index.js の scheduled handler で /health 同等処理を実行、Cloudflare Workers
 #   Cron Triggers タブで成功/失敗を観測可能。hourly/daily の長期 batch は別途追加検討。
+# SUBAGENT-LAIS-AUDITLOG-CRON-TRIGGER-FIX-V2 (2026-05-02) Cat-J P0 #1 follow-up:
+#   pg_cron 不在環境向けに 02:00 UTC 日次 cron を追加。 scheduled handler 内で
+#   event.cron === "0 2 * * *" branch が delete_old_audit_log RPC を Supabase REST 経由で
+#   呼出 → audit_log 30 日 retention DELETE が pg_cron 不在環境でも日次実行される。
 [triggers]
-crons = ["*/5 * * * *"]
+crons = [
+  "*/5 * * * *",
+  "0 2 * * *",
+]
 
 # ── KV Namespace ──
 # 作成コマンド:
@@ -61,7 +68,7 @@ id = "61fb2a70b0534d268c9fe370349ad562"
 enabled = true
 head_sampling_rate = 1.0
 [env.staging.triggers]
-crons = ["*/5 * * * *"]
+crons = ["*/5 * * * *", "0 2 * * *"]
 
 # ── 本番環境 ──
 # Round 30 fix (2026-05-02): top-level kv_namespaces は env override 時に継承されない
@@ -79,4 +86,4 @@ preview_id = "f6f98222ca8a4d0fb1e9e1335725b37c"
 enabled = true
 head_sampling_rate = 1.0
 [env.production.triggers]
-crons = ["*/5 * * * *"]
+crons = ["*/5 * * * *", "0 2 * * *"]
