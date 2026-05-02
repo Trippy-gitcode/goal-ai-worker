@@ -66,6 +66,18 @@ if eval "$TASK_PAYLOAD"; then
   END_TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   echo "$START_TS|$END_TS|$TASK_ID|OK" >> "$COMPLETED"
   echo "OK: $TASK_ID completed"
+  # PO 直命 (2026-05-02): 止めない仕組み に CI verification 必須化。
+  # task が git push を行った場合、 GitHub Actions CI 結果を確認、 failure なら ABORT。
+  # `gh run list --limit 1` で latest run の status を確認、 failure なら exit 1 で
+  # next task の自動 pop を中断する (silent CI red 蓄積を防止)。
+  if command -v gh >/dev/null 2>&1; then
+    LATEST=$(gh run list --limit 1 --json conclusion,status,headSha 2>/dev/null || echo "")
+    if echo "$LATEST" | grep -q '"conclusion":"failure"'; then
+      echo "ERROR: latest GitHub Actions CI run is failure → ABORT next task"
+      echo "$START_TS|$END_TS|$TASK_ID|CI_FAILED" >> "$FAILED"
+      exit 1
+    fi
+  fi
   exit 0
 else
   END_TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)

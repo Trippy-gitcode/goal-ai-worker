@@ -9,7 +9,7 @@
 #   - latency p50 > 2s: warn ログのみ (issue は raise しない)
 #
 # secrets:
-#   - WORKER_PROD_URL: production worker base URL (e.g. https://goal-ai-worker.example.workers.dev)
+#   - WORKER_PROD_URL: production worker base URL (e.g. https://goal-ai-worker.goalai-futoshi.workers.dev)
 #   - SLACK_WEBHOOK_URL (optional): Slack alert 送信用
 name: synthetic-monitor
 
@@ -28,7 +28,7 @@ jobs:
         id: ping_version
         run: |
           set -eo pipefail
-          URL="${WORKER_PROD_URL:-https://goal-ai-worker.example.workers.dev}/api/version"
+          URL="${WORKER_PROD_URL:-https://goal-ai-worker.goalai-futoshi.workers.dev}/api/version"
           echo "Pinging $URL"
           HTTP_CODE=$(curl -s -o /tmp/v.json -w "%{http_code}" "$URL")
           # FIX (Gemini CRITICAL): set -eo pipefail 下で head -c が早期終了 → cat SIGPIPE で
@@ -47,7 +47,7 @@ jobs:
         id: ping_health
         run: |
           set -eo pipefail
-          URL="${WORKER_PROD_URL:-https://goal-ai-worker.example.workers.dev}/health"
+          URL="${WORKER_PROD_URL:-https://goal-ai-worker.goalai-futoshi.workers.dev}/health"
           HTTP_CODE=$(curl -s -o /tmp/h.json -w "%{http_code}" "$URL")
           # FIX (Gemini CRITICAL): set -eo pipefail 下 SIGPIPE 救済
           BODY=$(head -c 500 /tmp/h.json 2>/dev/null || true)
