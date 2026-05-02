@@ -1,6 +1,6 @@
 // CACHE_NAME must stay in sync with APP_VERSION in js/globals.js (BUG-09 fix 2026-05-01).
 // Bump whenever APP_VERSION changes — drift causes stale assets across releases.
-const CACHE_NAME = 'goal-ai-v4.0.73';
+const CACHE_NAME = 'goal-ai-v4.0.74';
 
 // ネットワークファースト + 動的キャッシュ（Viteハッシュ付きファイル名と互換）
 

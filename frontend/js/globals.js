@@ -164,7 +164,7 @@ function getDeviceId() {
 // Re-bumped 2026-05-01 (Round 6 P0 fix: viewport iOS Safari 17- visualViewport polyfill,
 //   sw.js navigate offline.html fallback, sw.js token leak redact, i18n SSoT structure).
 //   Mission: SUBAGENT-DEVSYS-ROUND6-P0-FIX-V1, 6 persona vote 6/6 YES.
-const APP_VERSION = '4.0.73';
+const APP_VERSION = '4.0.74';
 
 const FONT_SIZES = {
   xs: { label: '極小', base: '14px', lh: '1.55' },
@@ -196,22 +196,33 @@ Object.defineProperty(window, 'currentSessionId', {
   configurable: true, enumerable: true
 });
 // ════════ OWNER BYPASS ════════
-function checkOwnerParam() {
+// Round 31 Cat-A bug 1 fix (2026-05-02): owner_key を HttpOnly cookie 化。
+//   旧: setCookie で JS-readable cookie 保存 → XSS 1 行で漏洩 = max plan 永久昇格。
+//   新: server-side endpoint POST /api/owner/redeem で validate + Set-Cookie HttpOnly。
+//       JS から読取不能 = XSS で document.cookie 経由抽出されない。
+//       request 時は browser が cookie を自動付与するため、 frontend で手動 header 設定 不要。
+async function checkOwnerParam() {
   const params = new URLSearchParams(window.location.search);
   const ownerKey = params.get('owner');
   if (!ownerKey) return;
+  // URL から即除去 (referer leak / history 漏洩 防止)
   window.history.replaceState({}, '', window.location.pathname);
-  setCookie('owner_key', ownerKey, 3650);
+  try {
+    const res = await fetch(`${WORKER_URL}/api/owner/redeem`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ owner_key: ownerKey }),
+    });
+    if (!res.ok) {
+      console.warn('owner redeem failed:', res.status);
+    }
+  } catch (e) { console.error('owner redeem error:', e); }
 }
 
-// オーナーキーをAPI呼び出し時にヘッダーに含める
-const _origGetAuthHeaders = getAuthHeaders;
-getAuthHeaders = function() {
-  const h = _origGetAuthHeaders();
-  const ok = getCookie('owner_key');
-  if (ok) h['X-Owner-Key'] = ok;
-  return h;
-};
+// X-Owner-Key header は廃止。 cookie は HttpOnly なので browser が自動付与し、
+// auth.js の既存 `Cookie` header parse で受信する (token.js も同様)。
+// 旧 _origGetAuthHeaders override 削除。 fetch には credentials:'include' 必須。
 
 // ════════ TESTER URL AUTO-APPLY ════════
 async function checkTesterParam() {

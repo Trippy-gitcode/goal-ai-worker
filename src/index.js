@@ -44,6 +44,39 @@ function withCors(c, response) {
 app.get('/api/version', (c) => withCors(c, jsonRes({ version: APP_VERSION, deployed_at: new Date().toISOString() })));
 app.get('/health', (c) => withCors(c, jsonRes({ status: 'ok', service: 'goal-ai-worker', ts: Date.now() })));
 
+// ── Owner Bypass (Round 31 Cat-A bug 1 fix, 2026-05-02): owner_key を HttpOnly cookie 化 ──
+//   旧: frontend JS が `?owner=<key>` を URL から読取 → `setCookie('owner_key', ..., 3650)` で
+//       JS-readable cookie 保存 → XSS 1 行で document.cookie 経由抽出 = max plan 永久昇格。
+//   新: POST /api/owner/redeem で server-side が validate + Set-Cookie HttpOnly Secure SameSite=Strict
+//       で発行。 JS から読取不能 = XSS で漏洩しない (CSP も同時に form-action 'self' で制限)。
+//       既存 cookie name は同 `owner_key` を維持 (auth.js / token.js の既存 lookup と互換)。
+app.post('/api/owner/redeem', async (c) => {
+  let body = null;
+  try {
+    body = await c.req.json();
+  } catch (_) { return withCors(c, jsonRes({ error: 'invalid_json' }, 400)); }
+  const ownerKey = body?.owner_key;
+  if (!ownerKey || typeof ownerKey !== 'string' || ownerKey.length > 256) {
+    return withCors(c, jsonRes({ error: 'invalid_owner_key' }, 400));
+  }
+  if (!c.env.OWNER_SECRET || !(await safeCompare(ownerKey, c.env.OWNER_SECRET))) {
+    return withCors(c, jsonRes({ error: 'unauthorized' }, 401));
+  }
+  // 認証成功 → HttpOnly cookie 発行 (10 年、 旧 JS cookie と同期間)
+  // Cloudflare Workers は Set-Cookie を Response init で渡す
+  const res = jsonRes({ ok: true, message: 'owner key redeemed' });
+  const response = new Response(res.body, res);
+  response.headers.set('Set-Cookie', `owner_key=${encodeURIComponent(ownerKey)}; Max-Age=315360000; Path=/; HttpOnly; Secure; SameSite=Strict`);
+  return withCors(c, response);
+});
+app.post('/api/owner/revoke', async (c) => {
+  // 任意 client が呼出可能、 cookie 削除のみ (server 側 secret は変えない)
+  const res = jsonRes({ ok: true, message: 'owner cookie revoked' });
+  const response = new Response(res.body, res);
+  response.headers.set('Set-Cookie', `owner_key=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Strict`);
+  return withCors(c, response);
+});
+
 // SUBAGENT-LAIS-COMPREHENSIVE-FIX-V1 (2026-05-01) — Wave 1 persona #52 P0:
 //   error-of-error 黙殺 (`} catch(e) {}`) 解消。
 //   外側 try/catch で receive 自体の失敗を console.error に出力 + alert キーへ
