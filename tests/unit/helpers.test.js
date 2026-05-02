@@ -272,9 +272,11 @@ describe('safePgrestValue', () => {
     expect(safePgrestValue('abc-123')).toBe('abc-123');
   });
 
-  it('should encode special PostgREST separator chars', () => {
-    expect(safePgrestValue('a&b')).toBe('a%26b');
-    expect(safePgrestValue('a,b')).toBe('a%2Cb');
+  it('should reject special PostgREST separator chars (whitelist enforcement)', () => {
+    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (R-3 fix): whitelist now rejects `&` `,` etc.
+    // even when URL-encoded, because PostgREST decodes back to operator separators.
+    expect(safePgrestValue('a&b')).toBe('');
+    expect(safePgrestValue('a,b')).toBe('');
   });
 
   it('should reject control characters', () => {

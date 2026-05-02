@@ -81,3 +81,15 @@ Thumbs.db
 logs/
 *.log
 
+
+# ====================================================================
+# 2026-05-02 追加: 自動生成 / 大量 review log は commit 不要
+# ====================================================================
+# vitest coverage report (npm run coverage で再生成可能)
+coverage/
+# external review JSON dump (Round 22-29 で大量、 lais/review_feed/ に集約済)
+lais/verify/external_review/*.json
+# Playwright auto-generated artifacts
+test-results/
+tests/e2e/screenshots/
+tests/e2e/playwright-report/
