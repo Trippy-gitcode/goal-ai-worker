@@ -212,13 +212,24 @@ export async function handleChatStream(request, env, ctx) {
     } catch(e) { console.error('buildServerSystemPrompt error:', e.message); }
   }
 
-  // M: ディープ分析結果をシステムプロンプトに注入
-  if (body.deep_context && body.deep_context.summary) {
-    const age = Date.now() - (body.deep_context.timestamp || 0);
-    if (age < 3600000) { // 1時間以内のみ有効
-      enhancedSystem += `\n\n【直近のディープ分析結果】\nユーザーの質問: ${body.deep_context.query}\n分析サマリー: ${body.deep_context.summary}\nこの分析結果を踏まえて回答してください。`;
-    }
+  // Round 31 Cat-C SSRF-2 fix (2026-05-02): deep_context server-side store + verify。
+  //   旧: body.deep_context.{query,summary,timestamp} を client から受信、 timestamp で freshness 判定。
+  //       attacker が client-supplied timestamp=Date.now() を常に渡せば永久 replay 可能、
+  //       さらに任意 summary を inject して LLM の system context override → exfil / forgery。
+  //   新: body.deep_context.session_id (uuid) のみ受信、 KV `deep_ctx:<userId>:<session_id>` から
+  //       server-side store した summary/query を取得。 KV TTL で freshness 自動保証 (1h)。
+  //       client は summary/query を渡せない = injection 不可。
+  if (body.deep_context && typeof body.deep_context.session_id === 'string' && /^[a-zA-Z0-9_-]{8,64}$/.test(body.deep_context.session_id) && env.TOKEN_KV) {
+    try {
+      const stored = await env.TOKEN_KV.get(`deep_ctx:${auth.userId}:${body.deep_context.session_id}`, 'json');
+      if (stored && stored.summary && stored.query) {
+        // server-side stored value を使用、 client supplied は無視
+        enhancedSystem += `\n\n【直近のディープ分析結果】\nユーザーの質問: ${stored.query}\n分析サマリー: ${stored.summary}\nこの分析結果を踏まえて回答してください。`;
+      }
+    } catch (e) { /* KV miss = no context、 silent OK */ }
   }
+  // legacy body.deep_context.{summary,query,timestamp} は server で破棄 (deep.js endpoint で
+  // server-side に store する設計に移行、 別 commit で deep.js も対応)。
 
   if (finalRoute !== 'claude') {
     let routeResponse = null;
