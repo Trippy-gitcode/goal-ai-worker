@@ -23,11 +23,12 @@ export default defineConfig({
       include: ['src/**/*.js'],
       exclude: ['src/**/*.test.js', 'src/index.js', 'src/worker.js.bak'],
       thresholds: {
-        // 初期 baseline (拡充後): unit test 30+ で 30-40% 帯から開始、段階的に引き上げる
-        lines: 15,
-        branches: 50,
-        functions: 30,
-        statements: 15,
+        // SUBAGENT-LAIS-UNIT-COVERAGE-70-V1 (2026-05-01): unit test 200+ 件
+        // で line 70%+ / branch 60%+ / function 70%+ 達成済。70% 閾値を恒久化。
+        lines: 70,
+        branches: 60,
+        functions: 70,
+        statements: 70,
       },
     },
   },
