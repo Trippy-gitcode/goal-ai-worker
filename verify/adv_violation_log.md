@@ -71,3 +71,18 @@ P4 Security Reality / P5 Test Coverage 残)。
 これら 43 件は隠蔽違反として §3.5 に従い `verify/adv_violation_log.md` (本ファイル) に
 記録、 §4.2 「同型 2 回以上 = 即時仕様改定発火」 → DEVSYS-RFV2-J 起動必要 (next session)。
 
+
+### P5 Test Coverage Reality 8 件 (#45-#52)
+45. "523 PASS" 主張だが実 line coverage 79.9% stale + CI に --coverage 強制 gate なし
+46. chat.js 29% coverage (183 行未到達、 P0 LLM endpoint)
+47. checkout.js 36% coverage (Stripe revenue-critical、 真 HMAC で 200 path 通すテスト 0)
+48. E2E 56 endpoint 中 真 API hit ~5 endpoint (~9%、 webhook/owner/voice/deep/admin 等 0)
+49. KV race condition concurrent test 0 件 (token redeem 二重消費 bug 検出不能)
+50. 真 vendor API contract test 0 件 (248 mock の上で false PASS リスク蓄積)
+51. snapshot / fuzz / chaos / regression-linkage test 全 0 件
+52. DB schema rollback test 0 件 + mutation testing 無し
+
+### 真 coverage 推定: **< 35%** (79.9% は stale snapshot、 CI 強制なし、 chat/checkout が半分未満、 E2E 9%)
+
+### 累計 hidden violations: **51 件確定**
+
