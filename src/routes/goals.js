@@ -2,6 +2,7 @@ import { authenticateRequest, getUserIdFromToken } from '../middleware/auth.js';
 import { jsonRes, isValidUuid, safePgrestValue } from '../utils/helpers.js';
 import { supabaseQuery } from '../utils/supabase.js';
 import { checkRateLimit } from '../utils/rate-limit.js';
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #35 H-07 fix:
 //   rate-limit が 3 routes (chat / voice) のみ。本ファイルでも auth 後に
 //   `checkRateLimit` を全 handler 入口で発火、IDOR + brute-force 防御。
@@ -24,7 +25,7 @@ export async function handleGoalCreate(request, env) {
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 50 * 1024, maxArrayLen: 200 }); if (!_g.ok) return jsonRes({ error: _g.error }, _g.status); const body = _g.body;
   const { title, description, targetDate } = body;
   if (!title) return jsonRes({ error: 'タイトルは必須です' }, 400);
   const goal = await supabaseQuery(env, 'goals', 'POST', { body: { user_id: userId, title, description: description || null, target_date: targetDate || null } });
@@ -41,7 +42,7 @@ export async function handleGoalUpdate(request, env, url) {
   const goalId = url.pathname.split('/').pop();
   // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1: UUID 検証を isValidUuid に統一 + safePgrestValue で encode
   if (!isValidUuid(goalId)) return jsonRes({ error: 'Invalid goalId' }, 400);
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 50 * 1024, maxArrayLen: 200 }); if (!_g.ok) return jsonRes({ error: _g.error }, _g.status); const body = _g.body;
   const updates = {};
   if (body.title !== undefined) updates.title = body.title;
   if (body.description !== undefined) updates.description = body.description;
@@ -73,7 +74,7 @@ export async function handleGoalDelete(request, env, url) {
 export async function handleSuggestTasks(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 50 * 1024, maxArrayLen: 200 }); if (!_g.ok) return jsonRes({ error: _g.error }, _g.status); const body = _g.body;
   const { goal_title, existing_tasks } = body;
   if (!goal_title) return jsonRes({ error: 'goal_title required' }, 400);
   try {
@@ -134,7 +135,7 @@ export async function handleGoalLinkCreate(request, env) {
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 50 * 1024, maxArrayLen: 200 }); if (!_g.ok) return jsonRes({ error: _g.error }, _g.status); const body = _g.body;
   const { goal_id_from, goal_id_to, link_type, created_by } = body;
   if (!goal_id_from || !goal_id_to) return jsonRes({ error: 'goal_id_from and goal_id_to required' }, 400);
   // Wave 1 #35 H-06: UUID 形式 + ownership 検証
@@ -175,7 +176,7 @@ export async function handleGoalLinksGet(request, env, url) {
 export async function handleSuggestRoles(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 50 * 1024, maxArrayLen: 200 }); if (!_g.ok) return jsonRes({ error: _g.error }, _g.status); const body = _g.body;
   const { goal_title, goal_why } = body;
   if (!goal_title) return jsonRes({ error: 'goal_title required' }, 400);
   try {

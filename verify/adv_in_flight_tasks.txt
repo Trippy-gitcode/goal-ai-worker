@@ -1,0 +1,22 @@
+# ADV continuous executor queue (Round 31 残 tasks)
+# Format: TASK_ID|TASK_TYPE|TASK_PAYLOAD
+# Comments (#) と blank line は無視。
+# 1 task / line、 完了は verify/adv_completed_tasks.log に append。
+#
+# task は ScheduleWakeup or sh scripts/adv_continuous_executor.sh で逐次実行。
+# 自動継続: while sh scripts/adv_continuous_executor.sh; do sleep 60; done
+
+ROUND31-CAT-A-OWNER-KEY|fix|echo "TODO: server-side cookie 化、 GET /api/owner/redeem 新設、 HttpOnly Set-Cookie 発行"
+ROUND31-CAT-C-SSRF-1-CHAT-SYSTEM-WHITELIST|fix|echo "TODO: chat.js body.system enum allowlist"
+ROUND31-CAT-C-SSRF-2-DEEP-CONTEXT-VERIFY|fix|echo "TODO: chat.js deep_context server-side store keyed by user"
+ROUND31-CAT-C-SSRF-3-MEMO-AUTHZ|fix|echo "TODO: memo.js goal_id ownership check"
+ROUND31-CAT-C-SSRF-4-GEMINI-TOOL-DISABLE|fix|echo "TODO: ai-gemini.js google_search tool default off"
+ROUND31-CAT-H-TOKEN-HMAC|fix|echo "TODO: HMAC signed token format goal_test_<payload>.<sig> migration"
+ROUND31-CAT-H-PROMO-MULTI-REDEEM|fix|echo "TODO: used_coupons SSoT mandatory + transaction"
+ROUND31-CAT-H-REVOKE-DEVICE-CLEAR|fix|echo "TODO: revoke 時 device:<id> mapping 削除"
+ROUND31-CAT-J-OBSERVABILITY|review|echo "TODO: dispatch 3-persona for observability/logging"
+ROUND31-CAT-K-PWA-SW|review|echo "TODO: dispatch 3-persona for PWA/SW lifecycle"
+ROUND31-CAT-L-TZ-LOCALE|review|echo "TODO: dispatch 3-persona for time/locale"
+ROUND31-CAT-M-DR-BACKUP|review|echo "TODO: dispatch 3-persona for DR/Backup"
+ROUND31-CAT-N-VENDOR-LIFECYCLE|review|echo "TODO: dispatch 3-persona for vendor SLA / sub-processor DPA"
+# ... 残 ~88 観点 (next session で展開)

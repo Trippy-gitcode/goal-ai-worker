@@ -1,4 +1,5 @@
 import { authenticateRequest } from '../middleware/auth.js';
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 import { jsonRes } from '../utils/helpers.js';
 import { getModel } from '../utils/constants.js';
 import { checkDeepUsage, incrementDeepUsage, canUseModel, incrementFreeModelUsage } from '../utils/rate-limit.js';
@@ -10,7 +11,7 @@ export async function handleDeepOpenAI(request, env) {
   const usage = await checkDeepUsage(env, auth.userId, auth.plan);
   if (usage.remaining <= 0) return jsonRes({ error: 'ディープ分析の月間上限に達しました', used: usage.used, limit: usage.limit, plan: auth.plan }, 429);
 
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 100 * 1024, maxArrayLen: 1000 }); if (!_g.ok) return jsonRes({ error: _g.error }, _g.status); const body = _g.body;
   const { messages, system, maxTokens = 1000 } = body;
   let openaiModel = getModel(auth.plan, 'openai');
 
@@ -43,7 +44,7 @@ export async function handleDeepGemini(request, env) {
   const usage = await checkDeepUsage(env, auth.userId, auth.plan);
   if (usage.remaining <= 0) return jsonRes({ error: 'ディープ分析の月間上限に達しました', used: usage.used, limit: usage.limit, plan: auth.plan }, 429);
 
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 100 * 1024, maxArrayLen: 1000 }); if (!_g.ok) return jsonRes({ error: _g.error }, _g.status); const body = _g.body;
   const { prompt, systemCtx, maxTokens = 1200 } = body;
 
   if (auth.plan === 'free') {
@@ -83,7 +84,7 @@ export async function handleDeepClaude(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
 
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 100 * 1024, maxArrayLen: 1000 }); if (!_g.ok) return jsonRes({ error: _g.error }, _g.status); const body = _g.body;
   const { system, messages, maxTokens = 1500, countUsage = false } = body;
 
   if (countUsage) {
@@ -109,7 +110,7 @@ export async function handleDeepClaudeStream(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
 
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 100 * 1024, maxArrayLen: 1000 }); if (!_g.ok) return jsonRes({ error: _g.error }, _g.status); const body = _g.body;
   const { system, messages, maxTokens = 1500 } = body;
   const claudeModel = getModel(auth.plan, 'claude');
 

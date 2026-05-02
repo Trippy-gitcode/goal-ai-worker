@@ -1,4 +1,5 @@
 import { authenticateRequest, getUserIdFromToken } from '../middleware/auth.js';
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 import { jsonRes, isValidUuid, safePgrestValue, isSafePgrestValue } from '../utils/helpers.js';
 import { supabaseQuery } from '../utils/supabase.js';
 import { autoTagSession } from '../services/history.js';
@@ -55,7 +56,7 @@ export async function handleHistorySave(request, env, ctx) {
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
 
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 100 * 1024, maxArrayLen: 1000 }); if (!_g.ok) return jsonRes({ error: _g.error }, _g.status); const body = _g.body;
   const { messages, sessionId } = body;
   if (!Array.isArray(messages) || messages.length === 0) return jsonRes({ error: 'messages配列が必要です' }, 400);
 
