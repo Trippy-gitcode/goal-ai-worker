@@ -79,11 +79,11 @@ if echo "$RESPONSE" | grep -qE "[ABCD] 案|【[ABCD]】|案 [ABCD]"; then
   fi
 fi
 
-# Pattern 3: 承認要求 without legitimate escalation
-if echo "$RESPONSE" | grep -qE "承認.*願|承認.*お願い|PO 判断.*願"; then
+# Pattern 3: 承認要求 + 判断要求 (違反 #34 fix で 「PO 判断」 単体 / 「三択」 単独 も catch)
+if echo "$RESPONSE" | grep -qE "承認.*願|承認.*お願い|PO 判断.*願|PO 判断|ご判断ください|ご指示ください|どれにします|三択.*PO|二択.*PO|N 択.*PO"; then
   # cost / strategy / TCC 等 legitimate keyword 併記なら OK
   if ! echo "$RESPONSE" | grep -qiE "cost|月額|円/月|strategy|戦略|TCC|System Settings|legal final|個人情報"; then
-    VIOLATIONS="${VIOLATIONS}\n  - 承認要求 (legitimate escalation 根拠 keyword なし、 §2.25.3 違反)"
+    VIOLATIONS="${VIOLATIONS}\n  - 承認要求 / PO 判断要求 (legitimate escalation 根拠 keyword なし、 §2.25.3 違反、 違反 #34 強化版)"
     HIT_COUNT=$((HIT_COUNT + 1))
   fi
 fi
