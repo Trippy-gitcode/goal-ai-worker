@@ -2,6 +2,11 @@ import { jsonRes, safeCompare, safePgrestValue } from '../utils/helpers.js';
 import { authenticateRequest, getUserIdFromToken } from '../middleware/auth.js';
 import { TESTER_CODES, TESTER_TOTAL_LIMIT } from '../utils/constants.js';
 import { supabaseQuery } from '../utils/supabase.js';
+// SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1 (2026-05-02、 Round 31 P4 #39 fix):
+//   admin.js は現状 body parse 無し (testers list / feedback list は GET)、 ただし
+//   parseBodyGuarded import を保持して将来 admin command endpoint 追加時の漏れを防ぐ。
+//   16 KB cap は admin command 想定の合理上限 (mission spec 準拠)。
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 
 // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #10 #6 / #35 L-02 fix:
 //   admin auth status code 401/403 を 401 (認証情報不足) に統一。

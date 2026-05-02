@@ -5,6 +5,10 @@ import { FREE_MODEL_LIMITS } from '../utils/constants.js';
 import { checkDeepUsage, getFreeModelUsage } from '../utils/rate-limit.js';
 import { checkRateLimit } from '../utils/rate-limit.js';
 import { syncUsageToSupabase, supabaseQuery } from '../utils/supabase.js';
+// SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1 (2026-05-02、 Round 31 P4 #39 fix):
+//   misc 系の body parse 全箇所に適用、 default 4 KB cap、 ただし avatar (base64 5MB image)
+//   は 8MB、 feedback (rawChat 履歴) は 64 KB、 diary save (5K char content) は 32 KB に拡大。
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 
 export async function handleUsageGet(request, env, ctx) {
   const auth = await authenticateRequest(request, env);
@@ -31,7 +35,10 @@ export async function handleAvatarUpload(request, env) {
   // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1: H-07 rate-limit roll-out
   const rl = await checkRateLimit(env, auth.userId);
   if (!rl.ok) return jsonRes({ error: 'Rate limit exceeded' }, 429);
-  const body = await request.json();
+  // SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1: avatar = base64 5MB cap → 8MB body cap
+  const _g = await parseBodyGuarded(request, { maxBytes: 8 * 1024 * 1024 });
+  if (!_g.ok) return jsonRes({ error: _g.error }, _g.status);
+  const body = _g.body;
   const { avatar_base64 } = body;
   if (!avatar_base64 || avatar_base64.length > 7_000_000) return jsonRes({ error: '画像サイズは5MB以下にしてください' }, 400);
   // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 — Wave 1 #35 M-02 fix:
@@ -55,7 +62,10 @@ export async function handleFeedbackSave(request, env) {
   if (!rl.ok) return jsonRes({ error: 'Rate limit exceeded' }, 429);
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'ユーザーが見つかりません' }, 404);
-  const body = await request.json();
+  // SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1: feedback save (rawChat 履歴含む) → 64 KB cap
+  const _g = await parseBodyGuarded(request, { maxBytes: 64 * 1024 });
+  if (!_g.ok) return jsonRes({ error: _g.error }, _g.status);
+  const body = _g.body;
   const { summary, rawChat } = body;
   if (!summary) return jsonRes({ error: 'summary is required' }, 400);
   let sentiment = 'neutral';
@@ -82,7 +92,10 @@ export async function handleDiarySave(request, env) {
   if (!auth.ok) return jsonRes({ error: auth.error }, 401);
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'user not found' }, 404);
-  const body = await request.json();
+  // SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1: diary save (5K char content) → 32 KB cap
+  const _g = await parseBodyGuarded(request, { maxBytes: 32 * 1024 });
+  if (!_g.ok) return jsonRes({ error: _g.error }, _g.status);
+  const body = _g.body;
   const date = body.date || new Date().toISOString().slice(0, 10);
   const content = (body.content || '').slice(0, 5000);
   const result = await supabaseQuery(env, 'diaries', 'POST', {

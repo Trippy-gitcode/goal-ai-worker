@@ -2,6 +2,11 @@ import { authenticateRequest } from '../middleware/auth.js';
 import { jsonRes, safePgrestValue, isSafePgrestValue } from '../utils/helpers.js';
 import { safeLog, safeError, hashIdSync, fingerprintToken } from '../utils/safeLog.js';
 import { checkRateLimit } from '../utils/rate-limit.js';
+// SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1 (2026-05-02、 Round 31 P4 #39 fix):
+//   account.js は現状 body parse 無し (export = GET 相当、 delete = DELETE method)、 ただし
+//   parseBodyGuarded import を保持して将来 body 受領 endpoint 追加時の漏れを防ぐ defensive import。
+//   8 KB cap は account info update 想定の合理上限 (mission spec 準拠)。
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 
 export async function handleAccountExport(request, env) {
   const auth = await authenticateRequest(request, env);
@@ -28,7 +33,8 @@ export async function handleAccountExport(request, env) {
 
   try {
     const [userRes, goalsRes, msgsRes, usageRes, feedbackRes] = await Promise.all([
-      fetch(`${supabaseUrl}/rest/v1/users?user_id=eq.${safeUid}&select=*`, { headers }),
+      // Round 30 schema audit fix: users.id (uuid) が PK、 user_id 列は不在 → ?id=eq に修正
+      fetch(`${supabaseUrl}/rest/v1/users?id=eq.${safeUid}&select=*`, { headers }),
       fetch(`${supabaseUrl}/rest/v1/goals?user_id=eq.${safeUid}&select=*&order=created_at.desc`, { headers }),
       fetch(`${supabaseUrl}/rest/v1/chat_messages?user_id=eq.${safeUid}&select=role,content,ai_model,created_at,session_id,goal_id&order=created_at.desc&limit=500`, { headers }),
       fetch(`${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${safeUid}&select=*`, { headers }),

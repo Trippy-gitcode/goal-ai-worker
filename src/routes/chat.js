@@ -15,6 +15,12 @@ import { searchRelatedMessages, generateAndStoreEmbedding } from '../services/em
 import { countRecentMessages, regenerateAiMemo } from '../services/memo.js';
 import { buildCompressedMessages, countSessionMessages, generateConversationSummary } from '../services/history.js';
 import { safeLog, hashIdSync } from '../utils/safeLog.js';
+// SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1 (2026-05-02、 Round 31 P4 #39 fix):
+//   chat 系 body parse 全 3 endpoint (handleChat / handleChatStream / handleGptSimple) に
+//   parseBodyGuarded を適用。 chat message + context は最大 64 KB cap (≒ 16K token)、
+//   本 cap 適用 + 既存の INPUT_CHAR_CAP (50K char) で多層防御。 maxArrayLen=200 で
+//   messages 配列の極端膨張も防止 (long-context attack の入口を絞る)。
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 
 export async function handleChat(request, env, ctx) {
   try {
@@ -29,7 +35,10 @@ export async function handleChat(request, env, ctx) {
   // Round 31 Cat-G P0 fix (2026-05-02): failClosed:true で counter freeze 防止 (free user 20/day cap破り対策)
   await incrementDailyChatUsage(env, auth.userId, { failClosed: true });
 
-  const body = await request.json();
+  // SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1: 64 KB cap + maxArrayLen 200 (messages 配列爆発防止)
+  const _g = await parseBodyGuarded(request, { maxBytes: 64 * 1024, maxArrayLen: 200 });
+  if (!_g.ok) return jsonRes({ error: _g.error }, _g.status);
+  const body = _g.body;
   const { system: rawSystem, messages, maxTokens = 1000, goalId } = body;
 
   // Round 31 Cat-C SSRF-1 fix (2026-05-02): chat.system enum allowlist。
@@ -111,7 +120,10 @@ export async function handleChatStream(request, env, ctx) {
   const rl = await checkRateLimit(env, auth.userId);
   if (!rl.ok) return jsonRes({ error: 'Rate limit exceeded' }, 429);
 
-  const body = await request.json();
+  // SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1: 64 KB cap + maxArrayLen 200 (messages 配列爆発防止)
+  const _g = await parseBodyGuarded(request, { maxBytes: 64 * 1024, maxArrayLen: 200 });
+  if (!_g.ok) return jsonRes({ error: _g.error }, _g.status);
+  const body = _g.body;
   const { system, messages, maxTokens = 600, free_no_count, context, location } = body;
 
   if (free_no_count && !['design', 'feedback'].includes(context)) {
@@ -346,7 +358,10 @@ export async function handleGptSimple(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
 
-  const body = await request.json();
+  // SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1: 32 KB cap (routing / simple GPT 用途、 messages 小)
+  const _g = await parseBodyGuarded(request, { maxBytes: 32 * 1024, maxArrayLen: 100 });
+  if (!_g.ok) return jsonRes({ error: _g.error }, _g.status);
+  const body = _g.body;
   const { messages, system, maxTokens = 150 } = body;
 
   const isRouting = system && system.includes('1単語のみ返せ');

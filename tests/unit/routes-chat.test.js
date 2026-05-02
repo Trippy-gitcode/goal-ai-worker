@@ -86,7 +86,12 @@ describe('handleChat', () => {
     expect(res.status).toBe(401);
   });
 
-  it('should return 500 on JSON parse error', async () => {
+  it('should return 400 on JSON parse error', async () => {
+    // SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1 (2026-05-02、 Round 31 P4 #39 fix):
+    //   旧: parseBodyGuarded 適用前は uncaught throw → catch → 500 で「server error」報告。
+    //   新: parseBodyGuarded で invalid JSON を 400 (client error) として明示返却。
+    //   400 が semantically 正確 (client が malformed payload を送った)、 攻撃者が
+    //   JSON parse 例外による server log noise を作る pattern も同時に潰す。
     const { env, token } = makeAuthEnv('pro');
     const req = new Request('https://x.test/', {
       method: 'POST',
@@ -94,7 +99,7 @@ describe('handleChat', () => {
       body: 'not json',
     });
     const res = await handleChat(req, env);
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(400);
   });
 
   it('should return 429 when daily chat usage exceeded for free', async () => {

@@ -1,11 +1,15 @@
 import { authenticateRequest, getUserIdFromToken } from '../middleware/auth.js';
 import { jsonRes } from '../utils/helpers.js';
 import { supabaseQuery } from '../utils/supabase.js';
+// SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1 (2026-05-02、 Round 31 P4 #39 fix): 16 KB cap (memo content)
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 
 export async function handleAIMemoGenerate(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 16 * 1024 });
+  if (!_g.ok) return jsonRes({ error: _g.error }, _g.status);
+  const body = _g.body;
   const { type, goal_id, trigger } = body;
   const userId = await getUserIdFromToken(env, auth.tokenId);
   if (!userId) return jsonRes({ error: 'User not found' }, 404);

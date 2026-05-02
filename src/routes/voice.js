@@ -1,13 +1,19 @@
 import { authenticateRequest } from '../middleware/auth.js';
 import { jsonRes, generateId } from '../utils/helpers.js';
 import { checkRateLimit } from '../utils/rate-limit.js';
+// SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1 (2026-05-02、 Round 31 P4 #39 fix):
+//   voice transcribe は base64-encoded audio を JSON body で受領、 audio binary 自体は別 endpoint。
+//   base64 エンコード済 audio 想定で 256 KB cap (raw audio ≒ 192 KB、 短い音声 transcription 用途)。
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 
 export async function handleVoiceTranscribe(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
   const rl = await checkRateLimit(env, auth.userId);
   if (!rl.ok) return jsonRes({ error: 'Rate limit exceeded' }, 429);
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 256 * 1024 });
+  if (!_g.ok) return jsonRes({ error: _g.error }, _g.status);
+  const body = _g.body;
   const { audio, mimeType } = body;
   if (!audio) return jsonRes({ error: 'audio (base64) is required' }, 400);
   const binaryStr = atob(audio);

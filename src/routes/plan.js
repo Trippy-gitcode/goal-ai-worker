@@ -3,6 +3,11 @@ import { jsonRes, safePgrestValue } from '../utils/helpers.js';
 import { getPlanConfig, getCurrentMonth } from '../utils/constants.js';
 import { checkRateLimit } from '../utils/rate-limit.js';
 import { safeError } from '../utils/safeLog.js';
+// SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1 (2026-05-02、 Round 31 P4 #39 fix):
+//   plan.js は現状 body parse 無し (status は GET)、 ただし parseBodyGuarded import を
+//   保持して将来 plan change endpoint 追加時の漏れを防ぐ defensive import。
+//   8 KB cap は plan change request 想定の合理上限 (mission spec 準拠)。
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 
 export async function handlePlanStatus(request, env) {
   const auth = await authenticateRequest(request, env);

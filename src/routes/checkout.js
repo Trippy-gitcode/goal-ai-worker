@@ -3,11 +3,20 @@ import { jsonRes, safeCompare } from '../utils/helpers.js';
 import { STRIPE_PRICE_IDS, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, STRIPE_API_VERSION, isStripeBillingCriticalEvent } from '../utils/constants.js';
 import { syncUserToSupabase } from '../utils/supabase.js';
 import { safeLog, safeError, fingerprintToken, hashIdSync } from '../utils/safeLog.js';
+// SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1 (2026-05-02、 Round 31 P4 #39 fix):
+//   handleCheckoutCreate は request.json() を parseBodyGuarded に置換 (8 KB cap)。
+//   handleStripeWebhook は raw payload 必須 (signature 検証で `${timestamp}.${payload}` を
+//   再構成するため bytes 完全一致が必要) → request.text() を維持、 ただし Content-Length
+//   の早期 cap で 100MB DoS 防止 (Stripe webhook payload 上限 256 KB に合わせる)。
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 
 export async function handleCheckoutCreate(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
-  const body = await request.json();
+  // SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1: 8 KB cap (checkout intent は plan + billing_period のみで小さい)
+  const _g = await parseBodyGuarded(request, { maxBytes: 8 * 1024 });
+  if (!_g.ok) return jsonRes({ error: _g.error }, _g.status);
+  const body = _g.body;
   const { plan, billing_period } = body; // billing_period: 'monthly' | 'annual'
   const isAnnual = billing_period === 'annual';
 
@@ -70,7 +79,27 @@ export async function handleCheckoutPortal(request, env) {
   return jsonRes({ url: session.url });
 }
 
-async function verifyStripeSignature(payload, sigHeader, secret) {
+// SUBAGENT-LAIS-STRIPE-WEBHOOK-DUAL-SECRET-V1 (2026-05-02) — Round 31 honest
+//   audit P4 #40 fix: Stripe webhook secret rotation 機構未実装、 dual-secret
+//   window 0 → rotation 時 in-flight 全失敗。
+//
+//   dual-secret window 設計:
+//     - 通常運用: env.STRIPE_WEBHOOK_SECRET (current) のみ参照、 1 secret 動作 = 後方互換。
+//     - rotation 運用:
+//       1. Stripe Dashboard で新 webhook endpoint secret 発行
+//       2. 旧 secret を env.STRIPE_WEBHOOK_SECRET_OLD に退避 (wrangler secret put)
+//       3. 新 secret を env.STRIPE_WEBHOOK_SECRET に上書き
+//       4. 7 日間 grace 期間: current → old の順で両 secret 試行、 in-flight Stripe
+//          側 cache (cross-region delivery / retry queue 残留分 / 開発者 manual
+//          replay 含む) で旧 secret 残留 event も accept。
+//       5. grace 切れ後 (=新 secret 完全浸透後): wrangler secret delete
+//          STRIPE_WEBHOOK_SECRET_OLD で env から外せば自動 invalidate。
+//     - 旧 secret が undefined / empty の場合は filter で skip = 1 secret のみで動作 (後方互換)。
+//
+//   security note: 同 payload に対し最大 2 回 HMAC + safeCompare。 safeCompare は
+//   既に constant-time (dummy_key fallback で early-exit timing leak 防止済)。
+//   attack surface は 2 secret = 2x、 grace 期間限定運用なので合理的 trade-off。
+async function verifyStripeSignature(payload, sigHeader, env) {
   try {
     const parts = {};
     sigHeader.split(',').forEach(item => { const [key, value] = item.split('='); parts[key.trim()] = value; });
@@ -86,21 +115,38 @@ async function verifyStripeSignature(payload, sigHeader, secret) {
     if (Math.abs(age) > 300) return false;
     const signedPayload = `${timestamp}.${payload}`;
     const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-    const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(signedPayload));
-    const expectedSig = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
-    // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #35 H-02 fix:
-    //   Stripe webhook signature `===` timing attack 対策。constant-time の
-    //   safeCompare (HMAC SHA-256) で hex encoded signature を比較。Stripe
-    //   公式ドキュメントの推奨に準拠。
-    return await safeCompare(expectedSig, signature);
+    // dual-secret window: current → old の順で試行、 filter(Boolean) で undefined/empty 除外。
+    const secrets = [env.STRIPE_WEBHOOK_SECRET, env.STRIPE_WEBHOOK_SECRET_OLD].filter(Boolean);
+    if (secrets.length === 0) return false;
+    for (const secret of secrets) {
+      const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+      const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(signedPayload));
+      const expectedSig = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+      // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — Wave 1 #35 H-02 fix:
+      //   Stripe webhook signature `===` timing attack 対策。constant-time の
+      //   safeCompare (HMAC SHA-256) で hex encoded signature を比較。Stripe
+      //   公式ドキュメントの推奨に準拠。
+      if (await safeCompare(expectedSig, signature)) return true;
+    }
+    return false;
   } catch (e) { safeError('stripe.signature_verify_error', e); return false; }
 }
 
 export async function handleStripeWebhook(request, env, ctx) {
+  // SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1 (2026-05-02、 Round 31 P4 #39 fix):
+  //   Stripe webhook は signature 検証で raw payload bytes を必要とするため request.text()
+  //   を直接呼出し継続、 ただし Content-Length 早期 cap で 100MB DoS を阻止 (Stripe 公式
+  //   payload 上限 256 KB に合わせる、 攻撃者が偽 webhook で worker DoS を狙う pattern 対策)。
+  const _wcl = parseInt(request.headers.get('Content-Length') || '0');
+  if (_wcl > 256 * 1024) {
+    return new Response('payload too large', { status: 413 });
+  }
   const payload = await request.text();
+  if (payload.length > 256 * 1024) {
+    return new Response('payload too large', { status: 413 });
+  }
   const sigHeader = request.headers.get('Stripe-Signature') || '';
-  const isValid = await verifyStripeSignature(payload, sigHeader, env.STRIPE_WEBHOOK_SECRET);
+  const isValid = await verifyStripeSignature(payload, sigHeader, env);
   if (!isValid) { safeLog('ERROR', 'stripe.webhook_invalid_signature', {}); return new Response('Invalid signature', { status: 400 }); }
   const timestamp = request.headers.get('stripe-signature')?.match(/t=(\d+)/)?.[1];
   if (!timestamp) return jsonRes({ error: 'Missing timestamp' }, 400);

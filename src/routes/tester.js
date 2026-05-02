@@ -2,11 +2,15 @@ import { authenticateRequest, getUserIdFromToken } from '../middleware/auth.js';
 import { jsonRes } from '../utils/helpers.js';
 import { TESTER_CODES, TESTER_TOTAL_LIMIT, TESTER_DURATION_HOURS } from '../utils/constants.js';
 import { supabaseQuery } from '../utils/supabase.js';
+// SUBAGENT-LAIS-INPUTGUARD-9ROUTES-V1 (2026-05-02、 Round 31 P4 #39 fix): 8 KB cap (tester_code のみで小さい)
+import { parseBodyGuarded } from '../middleware/input-guard.js';
 
 export async function handleTesterApply(request, env) {
   const auth = await authenticateRequest(request, env);
   if (!auth.ok) return jsonRes({ error: auth.error }, auth.status);
-  const body = await request.json();
+  const _g = await parseBodyGuarded(request, { maxBytes: 8 * 1024 });
+  if (!_g.ok) return jsonRes({ error: _g.error }, _g.status);
+  const body = _g.body;
   const { tester_code } = body;
   if (!tester_code || !TESTER_CODES[tester_code]) return jsonRes({ error: '無効なテスターコードです' }, 400);
   const config = TESTER_CODES[tester_code];
