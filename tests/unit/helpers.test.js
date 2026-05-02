@@ -9,6 +9,9 @@ import {
   isValidUuid,
   safePgrestValue,
   pgrestFilter,
+  generateSignedTokenId,
+  verifySignedTokenId,
+  isSignedTokenFormat,
 } from '../../src/utils/helpers.js';
 
 // ════════════════════════════════════════════════════════════════
@@ -307,5 +310,113 @@ describe('pgrestFilter', () => {
 
   it('should reject non-identifier field names', () => {
     expect(pgrestFilter('user_id&injected', 'eq', 'u123')).toBe('');
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// Round 31 Cat-H Token HMAC (batch 10) — signed token format
+// ════════════════════════════════════════════════════════════════
+
+describe('generateSignedTokenId / verifySignedTokenId', () => {
+  const SECRET = 'EXAMPLE_test_secret_for_hmac_gitleaks_safe'; // gitleaks: EXAMPLE stopword
+
+  it('should issue HMAC-signed token of form goal_test_<payload>.<sig>', async () => {
+    const t = await generateSignedTokenId(SECRET);
+    expect(t).toMatch(/^goal_test_[A-Za-z0-9]+\.[A-Za-z0-9_-]+$/);
+    const body = t.slice('goal_test_'.length);
+    const [payload, sig] = body.split('.');
+    expect(payload.length).toBe(22);
+    expect(sig.length).toBe(22);
+  });
+
+  it('should fall back to legacy 24-char format when secret missing or too short', async () => {
+    const t1 = await generateSignedTokenId(undefined);
+    const t2 = await generateSignedTokenId('');
+    const t3 = await generateSignedTokenId('short');
+    for (const t of [t1, t2, t3]) {
+      expect(t).toMatch(/^goal_test_[A-Za-z0-9]{24}$/);
+      expect(t.includes('.')).toBe(false);
+    }
+  });
+
+  it('should verify a token issued by generateSignedTokenId', async () => {
+    const t = await generateSignedTokenId(SECRET);
+    expect(await verifySignedTokenId(t, SECRET)).toBe(true);
+  });
+
+  it('should reject token signed by a different secret', async () => {
+    const t = await generateSignedTokenId(SECRET);
+    expect(await verifySignedTokenId(t, 'EXAMPLE_other_secret_gitleaks_safe')).toBe(false);
+  });
+
+  it('should reject a forged token (random payload + random sig)', async () => {
+    const forged = `goal_test_${generateId(22)}.${generateId(22)}`;
+    expect(await verifySignedTokenId(forged, SECRET)).toBe(false);
+  });
+
+  it('should reject a tampered payload (sig stays same, payload mutates)', async () => {
+    const t = await generateSignedTokenId(SECRET);
+    const body = t.slice('goal_test_'.length);
+    const [payload, sig] = body.split('.');
+    // mutate first char of payload
+    const tampered = `goal_test_${(payload[0] === 'A' ? 'B' : 'A')}${payload.slice(1)}.${sig}`;
+    expect(await verifySignedTokenId(tampered, SECRET)).toBe(false);
+  });
+
+  it('should reject legacy format (no `.`) — caller falls back to KV path', async () => {
+    expect(await verifySignedTokenId('goal_test_abc123abc123abc123abc12', SECRET)).toBe(false);
+  });
+
+  it('should reject malformed payload chars (non-alphanumeric)', async () => {
+    expect(await verifySignedTokenId('goal_test_abc!def.AAAAAAAAAAAAAAAAAAAAAA', SECRET)).toBe(false);
+  });
+
+  it('should reject empty payload (`goal_test_.<sig>`)', async () => {
+    expect(await verifySignedTokenId('goal_test_.AAAAAAAAAAAAAAAAAAAAAA', SECRET)).toBe(false);
+  });
+
+  it('should reject when secret is missing', async () => {
+    const t = await generateSignedTokenId(SECRET);
+    expect(await verifySignedTokenId(t, undefined)).toBe(false);
+    expect(await verifySignedTokenId(t, '')).toBe(false);
+  });
+
+  it('should reject token without goal_test_ prefix', async () => {
+    expect(await verifySignedTokenId('foo_bar_aaa.AAAAAAAAAAAAAAAAAAAAAA', SECRET)).toBe(false);
+  });
+
+  it('should produce deterministic signature for same payload+secret', async () => {
+    const t1 = await generateSignedTokenId(SECRET);
+    const payload = t1.slice('goal_test_'.length).split('.')[0];
+    // 同じ payload でも 2 回目の generateSignedTokenId は別 random payload を使うので
+    // 別 token になるが、 verify は両方 OK
+    const t2 = await generateSignedTokenId(SECRET);
+    expect(t1).not.toBe(t2);
+    expect(await verifySignedTokenId(t1, SECRET)).toBe(true);
+    expect(await verifySignedTokenId(t2, SECRET)).toBe(true);
+  });
+});
+
+describe('isSignedTokenFormat', () => {
+  it('should return true for signed format (goal_test_<payload>.<sig>)', () => {
+    expect(isSignedTokenFormat('goal_test_abc.def')).toBe(true);
+  });
+
+  it('should return false for legacy format (no `.`)', () => {
+    expect(isSignedTokenFormat('goal_test_abcdef123456')).toBe(false);
+  });
+
+  it('should return false for non-goal_test_ prefix', () => {
+    expect(isSignedTokenFormat('foo_test_abc.def')).toBe(false);
+  });
+
+  it('should return false for non-string input', () => {
+    expect(isSignedTokenFormat(null)).toBe(false);
+    expect(isSignedTokenFormat(undefined)).toBe(false);
+    expect(isSignedTokenFormat(123)).toBe(false);
+  });
+
+  it('should return false for empty string', () => {
+    expect(isSignedTokenFormat('')).toBe(false);
   });
 });

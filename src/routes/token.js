@@ -1,5 +1,5 @@
 import { authenticateRequest, getUserIdFromToken } from '../middleware/auth.js';
-import { jsonRes, generateId } from '../utils/helpers.js';
+import { jsonRes, generateId, generateSignedTokenId } from '../utils/helpers.js';
 import { PROMO_CODES } from '../utils/constants.js';
 import { syncUserToSupabase, supabaseQuery } from '../utils/supabase.js';
 import { checkDeepUsage } from '../utils/rate-limit.js';
@@ -25,7 +25,10 @@ export async function handleTokenRegister(request, env, ctx) {
       const existingData = await env.TOKEN_KV.get(`token:${existingTokenId}`, 'json');
       if (existingData && !existingData.revoked) return jsonRes({ token: existingTokenId, plan: existingData.plan, existing: true });
     }
-    const tokenId = `goal_test_${generateId(24)}`;
+    // Round 31 Cat-H Token HMAC fix (2026-05-02、 batch 10): generateSignedTokenId は
+    //   env.TOKEN_SECRET 設定時 HMAC signed `goal_test_<payload>.<sig>`、 未設定時は
+    //   legacy `goal_test_<24-random>` に fallback。 auth.js は両方受理。
+    const tokenId = await generateSignedTokenId(env.TOKEN_SECRET);
     const now = new Date();
     const trialEnd = new Date(now.getTime() + 14 * 86400000);
     const tokenData = { tokenId, plan: 'trial', userId: deviceId, promoCode: null, promoDesc: 'Pro体験トライアル（14日間）', note: 'auto-register-trial', createdAt: now.toISOString(), expiresAt: null, trialEnd: trialEnd.toISOString(), revoked: false };
@@ -51,7 +54,8 @@ export async function handleTokenCreate(request, env, ctx) {
   const promo = promoCode ? PROMO_CODES[promoCode.toUpperCase()] : null;
   const plan = promo?.plan || body.plan || 'trial';
   const days = promo?.days || body.days || 7;
-  const tokenId = `goal_test_${generateId(24)}`;
+  // Round 31 Cat-H Token HMAC fix (2026-05-02、 batch 10): HMAC signed token 発行
+  const tokenId = await generateSignedTokenId(env.TOKEN_SECRET);
   const now = new Date();
   const expiresAt = new Date(now.getTime() + days * 86400000);
   const tokenData = { tokenId, plan, userId: userId || tokenId, promoCode: promoCode || null, promoDesc: promo?.desc || null, note: note || null, createdAt: now.toISOString(), expiresAt: expiresAt.toISOString(), revoked: false };
@@ -108,7 +112,8 @@ export async function handleTokenRedeem(request, env, ctx) {
     const existing = await env.TOKEN_KV.get(`redeemed:${deviceId}:${promoCode.toUpperCase()}`);
     if (existing) return jsonRes({ error: 'このコードは既に適用済みです', existingToken: existing }, 409);
   }
-  const tokenId = `goal_test_${generateId(24)}`;
+  // Round 31 Cat-H Token HMAC fix (2026-05-02、 batch 10): HMAC signed token 発行
+  const tokenId = await generateSignedTokenId(env.TOKEN_SECRET);
   const now = new Date();
   const expiresAt = new Date(now.getTime() + promo.days * 86400000);
   const tokenData = { tokenId, plan: promo.plan, userId: deviceId || tokenId, promoCode: promoCode.toUpperCase(), promoDesc: promo.desc, createdAt: now.toISOString(), expiresAt: expiresAt.toISOString(), revoked: false };

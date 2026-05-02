@@ -1,5 +1,5 @@
 import { supabaseQuery } from '../utils/supabase.js';
-import { safeCompare } from '../utils/helpers.js';
+import { safeCompare, isSignedTokenFormat, verifySignedTokenId } from '../utils/helpers.js';
 
 export async function authenticateRequest(request, env) {
   const auth = request.headers.get('Authorization') || '';
@@ -10,6 +10,22 @@ export async function authenticateRequest(request, env) {
   }
 
   if (token.startsWith('goal_test_')) {
+    // Round 31 Cat-H Token HMAC fix (2026-05-02、 batch 10):
+    //   signed format (`goal_test_<payload>.<sig>`) は KV lookup 前に HMAC 検証。
+    //   forged token を early-reject、 KV cache poison 耐性を確保。
+    //   legacy format (`.` を含まない 24-char random) は backward compat で
+    //   従来通り KV existence check のみで受理 (forge 不能 entropy 担保済)。
+    if (isSignedTokenFormat(token)) {
+      if (!env.TOKEN_SECRET) {
+        // production で TOKEN_SECRET 未設定 = config 異常、 fail-closed
+        return { ok: false, error: 'Server misconfiguration', status: 401 };
+      }
+      const sigOk = await verifySignedTokenId(token, env.TOKEN_SECRET);
+      if (!sigOk) {
+        // signature mismatch = forged or rotated secret、 KV lookup skip
+        return { ok: false, error: 'Invalid token signature', status: 401 };
+      }
+    }
     const tokenData = await env.TOKEN_KV.get(`token:${token}`, 'json');
     if (!tokenData) {
       return { ok: false, error: 'Invalid token', status: 401 };

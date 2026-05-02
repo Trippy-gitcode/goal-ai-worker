@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { authenticateRequest } from '../../src/middleware/auth.js';
+import { generateSignedTokenId, generateId } from '../../src/utils/helpers.js';
 
 // In-memory KV fake (matches the surface area used by auth.js)
 function makeKV(initial = {}) {
@@ -183,5 +184,74 @@ describe('authenticateRequest', () => {
     );
     expect(res.ok).toBe(true);
     expect(res.plan).toBe('trial');
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// Round 31 Cat-H Token HMAC (batch 10) — signed token verification
+// ════════════════════════════════════════════════════════════════
+
+describe('authenticateRequest (signed HMAC token)', () => {
+  const SECRET = 'EXAMPLE_integration_secret_gitleaks_safe'; // gitleaks: EXAMPLE stopword
+  let env;
+  beforeEach(() => {
+    env = { TOKEN_KV: makeKV(), OWNER_SECRET: 'OWNER_KEY', TOKEN_SECRET: SECRET };
+  });
+
+  it('should accept a valid HMAC-signed token (sig OK + KV exists)', async () => {
+    const token = await generateSignedTokenId(SECRET);
+    expect(token).toMatch(/\./);
+    await env.TOKEN_KV.put(`token:${token}`, JSON.stringify({ plan: 'pro', userId: 'u-1' }));
+    const res = await authenticateRequest(makeReq({ Authorization: `Bearer ${token}` }), env);
+    expect(res.ok).toBe(true);
+    expect(res.plan).toBe('pro');
+  });
+
+  it('should reject forged signed token (random sig) before KV lookup', async () => {
+    const forged = `goal_test_${generateId(22)}.${generateId(22)}`;
+    // KV にも入れていない、 入れていたとしても sig 検証で先に reject されるべき
+    const res = await authenticateRequest(makeReq({ Authorization: `Bearer ${forged}` }), env);
+    expect(res.ok).toBe(false);
+    expect(res.error).toBe('Invalid token signature');
+  });
+
+  it('should reject signed token whose sig is mutated (replay/forgery)', async () => {
+    const token = await generateSignedTokenId(SECRET);
+    await env.TOKEN_KV.put(`token:${token}`, JSON.stringify({ plan: 'pro', userId: 'u-1' }));
+    // sig を 1 char 変える
+    const body = token.slice('goal_test_'.length);
+    const [payload, sig] = body.split('.');
+    const tamperedSig = (sig[0] === 'A' ? 'B' : 'A') + sig.slice(1);
+    const tampered = `goal_test_${payload}.${tamperedSig}`;
+    const res = await authenticateRequest(makeReq({ Authorization: `Bearer ${tampered}` }), env);
+    expect(res.ok).toBe(false);
+    expect(res.error).toBe('Invalid token signature');
+  });
+
+  it('should accept legacy format (no `.`) without HMAC verification', async () => {
+    // 既存 production 231 user の legacy token は backward compat 経路を通る
+    const legacy = `goal_test_${generateId(24)}`;
+    await env.TOKEN_KV.put(`token:${legacy}`, JSON.stringify({ plan: 'pro', userId: 'u-2' }));
+    const res = await authenticateRequest(makeReq({ Authorization: `Bearer ${legacy}` }), env);
+    expect(res.ok).toBe(true);
+    expect(res.plan).toBe('pro');
+  });
+
+  it('should reject signed token when TOKEN_SECRET unset (server misconfig fail-closed)', async () => {
+    const token = await generateSignedTokenId(SECRET);
+    await env.TOKEN_KV.put(`token:${token}`, JSON.stringify({ plan: 'pro', userId: 'u-1' }));
+    delete env.TOKEN_SECRET;
+    const res = await authenticateRequest(makeReq({ Authorization: `Bearer ${token}` }), env);
+    expect(res.ok).toBe(false);
+    expect(res.error).toBe('Server misconfiguration');
+  });
+
+  it('should reject signed token when secret rotated (sig invalid against new secret)', async () => {
+    const token = await generateSignedTokenId(SECRET);
+    await env.TOKEN_KV.put(`token:${token}`, JSON.stringify({ plan: 'pro', userId: 'u-1' }));
+    env.TOKEN_SECRET = 'EXAMPLE_rotated_secret_gitleaks_safe';
+    const res = await authenticateRequest(makeReq({ Authorization: `Bearer ${token}` }), env);
+    expect(res.ok).toBe(false);
+    expect(res.error).toBe('Invalid token signature');
   });
 });

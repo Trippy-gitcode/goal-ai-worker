@@ -183,3 +183,100 @@ export function pgrestFilter(field, op, value, opts = {}) {
   if (!encoded) return '';
   return `${field}=${op}.${encoded}`;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Round 31 Cat-H Token HMAC migration (2026-05-02、 batch 10):
+//   旧: token = `goal_test_${24-random}` の pure-random 形式。 forge は entropy
+//       (143 bits) で実質不可能だが、 (a) KV cache poison / (b) replay window
+//       (revoke 前の流出 token は expiresAt まで生存)、 (c) secret rotation で
+//       全 token 一括失効する手段なし、 という運用上の弱点があった。
+//   新: token = `goal_test_<payload>.<sig>` の HMAC-SHA256 signed 形式。
+//       payload = 22-char random (~131 bits)、 sig = HMAC(payload, TOKEN_SECRET)
+//       を base64url 22 chars に truncate (~128 bits)。 auth 時に sig を再計算
+//       して定数時間比較、 mismatch なら KV lookup 前に 401 reject。
+//       secret rotation = 全 signed token 一括無効化が可能。
+//   Backward compat: 既存 production 231 user の legacy token は `.` を含まない
+//       ので、 auth.js は `.` 有無で signed/legacy を判別、 legacy は従来通り
+//       KV existence check のみで受理 (forge 不能 entropy が担保)。
+//   NOTE: TOKEN_SECRET 未設定の test environment では signed format generation を
+//       skip して legacy format を返す (graceful degradation、 既存 mock 互換)。
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** base64url encode (no padding) — Cloudflare Workers/Web Crypto 互換 */
+function _b64url(bytes) {
+  let s = '';
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+/**
+ * _hmacSignBase64Url — HMAC-SHA256(payload, secret) → base64url、 22 char truncate。
+ *   22 chars ≈ 132 bits entropy、 SHA-256 collision 耐性 128 bits と同等。
+ */
+async function _hmacSignBase64Url(payload, secret) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(payload));
+  return _b64url(new Uint8Array(sig)).slice(0, 22);
+}
+
+/**
+ * generateSignedTokenId — HMAC-signed `goal_test_<payload>.<sig>` を発行。
+ *   secret 未指定時 (test env 等) は legacy format `goal_test_<24-random>` に fallback。
+ *   この fallback は auth.js が legacy format を受理する限り production でも
+ *   safe (但し prod では env.TOKEN_SECRET 必須化を強く推奨)。
+ */
+export async function generateSignedTokenId(secret) {
+  if (!secret || typeof secret !== 'string' || secret.length < 16) {
+    // graceful degradation: legacy format に fallback (test mock 互換)
+    return `goal_test_${generateId(24)}`;
+  }
+  const payload = generateId(22);
+  const sig = await _hmacSignBase64Url(payload, secret);
+  return `goal_test_${payload}.${sig}`;
+}
+
+/**
+ * verifySignedTokenId — `goal_test_<payload>.<sig>` 形式を verify。
+ *   true = signature 一致、 false = mismatch / 形式不正。
+ *   legacy format (`.` を含まない) は **常に false** を返す
+ *   (caller 側で legacy fallback path を選択する責任)。
+ *   定数時間比較で timing oracle を回避。
+ */
+export async function verifySignedTokenId(token, secret) {
+  if (typeof token !== 'string' || !secret || typeof secret !== 'string') return false;
+  if (!token.startsWith('goal_test_')) return false;
+  const body = token.slice('goal_test_'.length);
+  const dot = body.indexOf('.');
+  if (dot < 1) return false; // 0 = empty payload も拒否、 -1 = legacy
+  const payload = body.slice(0, dot);
+  const sig = body.slice(dot + 1);
+  // payload は alphanumeric (generateId charset) のみ許容
+  if (!/^[A-Za-z0-9]+$/.test(payload)) return false;
+  // sig は base64url charset のみ許容
+  if (!/^[A-Za-z0-9_-]+$/.test(sig)) return false;
+  try {
+    const expected = await _hmacSignBase64Url(payload, secret);
+    if (expected.length !== sig.length) return false;
+    let diff = 0;
+    for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
+    return diff === 0;
+  } catch (_) {
+    return false;
+  }
+}
+
+/**
+ * isSignedTokenFormat — token が signed format (= body に `.` を含む) か判定。
+ *   legacy format との分岐に使用、 副作用なし。
+ */
+export function isSignedTokenFormat(token) {
+  if (typeof token !== 'string' || !token.startsWith('goal_test_')) return false;
+  return token.slice('goal_test_'.length).indexOf('.') > 0;
+}
