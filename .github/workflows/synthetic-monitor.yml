@@ -75,7 +75,7 @@ jobs:
           #   validator matrix 側で `settings.json` 言及を確実に hit させる目的。
           echo "settings.json (outside this workflow scope, SKIPPED)"
 
-      - name: alert on failure
+      - name: alert on failure (Slack)
         # FIX (Gemini CRITICAL): step-level env は if 評価時に未ロード、また secrets context
         # は if condition で直接参照不可。 if は failure() のみ、secret 不在 check は run 内で行う。
         if: failure()
@@ -83,9 +83,42 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           if [ -z "${SLACK_WEBHOOK_URL:-}" ]; then
-            echo "SLACK_WEBHOOK_URL not set, skip alert (graceful)"
+            echo "::warning::SLACK_WEBHOOK_URL not set, skip Slack alert (GitHub Issue auto-open は次 step で fallback)"
             exit 0
           fi
           curl -X POST -H 'Content-Type: application/json' \
             --data "{\"text\":\":rotating_light: synthetic-monitor failed at $(date -u +%FT%TZ)\",\"channel\":\"#alerts\"}" \
             "${SLACK_WEBHOOK_URL}"
+
+      - name: open GitHub Issue on failure (P2#28 fix)
+        # Round 31 honest audit P2#28 fix (2026-05-02): 「synthetic-monitor failure 時
+        # GitHub Issue auto-open」 の主張は documentation のみで実装 0 だった silent
+        # regression を修正。 失敗時に重複 issue を避けるため fingerprint label で
+        # dedupe (`incident-synthetic-monitor` label が open 状態なら skip)。
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 既存 open issue 重複チェック (fingerprint label dedupe)
+          EXISTING=$(gh issue list --label "incident-synthetic-monitor" --state open --json number --jq 'length' 2>/dev/null || echo "0")
+          if [ "${EXISTING:-0}" -gt 0 ]; then
+            echo "既存 open issue ${EXISTING} 件、 重複 open skip (dedupe)"
+            exit 0
+          fi
+          TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          gh issue create \
+            --title "[synthetic-monitor] production /api/version or /health 失敗 — ${TS}" \
+            --label "incident-synthetic-monitor,incident-critical" \
+            --body "$(printf 'synthetic-monitor workflow が production endpoint への ping で失敗しました。\n\n**workflow run**: %s/actions/runs/%s\n**timestamp (UTC)**: %s\n**commit**: %s\n\n## 確認手順\n1. 直近の deploy が production に届いているか (wrangler deploy)\n2. /api/version + /health の HTTP code を手動 curl で再確認\n3. CF Workers dashboard で error rate / 50x spike を確認\n4. 復旧確認後、 本 issue を close\n\n## 自動 escalation\n- Slack alert: SLACK_WEBHOOK_URL 設定時のみ送信済\n- 5 連続失敗時の追加 escalation (PagerDuty 等) は未配備 (P2#29、 §4 escalation)\n' "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_RUN_ID}" "${TS}" "${GITHUB_SHA}")"
+
+      - name: latency p50 issue raise (P2#36 fix)
+        # Round 31 honest audit P2#36 fix (2026-05-02): latency 警告が warn ログのみで
+        # issue raise が無く SRE detection が機能していなかった。 step.outcome は前段
+        # 成否のみで latency 値を持たないため、 step ID 経由で BODY size + curl 計測
+        # 値を確認する placeholder を配備、 真 latency 計測は別 PR で完成。
+        if: success()
+        run: |
+          echo "::notice::latency p50 issue raise step は placeholder (本 PR で stub 配備、 真計測は P2#36 follow-up)"
+          # 実 latency 計測 example (CURL %{time_total} で取得 → threshold 比較 → issue raise):
+          #   p50=$(curl -o /dev/null -s -w "%{time_total}" "$URL")
+          #   if (( $(echo "$p50 > 2.0" | bc -l) )); then gh issue create ...; fi

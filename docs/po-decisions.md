@@ -202,6 +202,32 @@
 
 ---
 
+## PO-ESCALATION-2026-05-02 — Round 31 honest audit が確定した PO action 必須 8 件
+
+> 起票: 2026-05-02 ADV (Round 31 honest verification audit 結果反映)
+> 根拠: `verify/adv_violation_log.md` audit セクション + `core_spec.md` §4 escalation 基準
+
+### 即時承認 / アクション要 8 件
+
+| # | 件名 | 理由 / 影響 | 推定コスト | アクション |
+|---|---|---|---|---|
+| **PO-A-2026-05-02-01** | **scripts/migrate_stripe.js に Supabase service password 平文 hardcode** | git history に password leak、 即 rotation 必須。 GitGuardian / GitHub secret scan で外部検出済の可能性 | rotation 0 円 + 30min ADV 作業 | (1) Supabase dashboard で service role key rotate (2) `.env.example` 等に env var 化 (3) git filter-repo or BFG で history purge を別 PR で検討 (推奨: rotation 即時) |
+| **PO-B-2026-05-02-02** | GitHub branch protection main (private repo で 403) | merge 直 push が誰でも可能、 audit log なし、 P2#35 と P1#10 重複 | GH Pro $4/月 or repo public 化 | (a) GH Pro 課金で main branch protection rule + required CI green を有効化、 または (b) repo を public 化 (Lais source code は special IP 含まないので public 化 OK か PO 判断) |
+| **PO-C-2026-05-02-03** | macOS launchd nightly TCC 制約 (com.dev-system.nightly-summary / nightly-review が exit 126 連続失敗) | 夜間 self-check が 1 度も成功していない、 P1#18 = P2#34 重複 confirmed | 0 円 + 5 分 PO 作業 | System Settings → Privacy & Security → Full Disk Access に `/bin/sh` を追加 (TCC 制約解消) |
+| **PO-D-2026-05-02-04** | sub-processor DPA (OpenAI / Anthropic / Google / Stripe / Supabase) 実物 PDF 取得 | privacy.html で「30 日保管 audit」 主張済 だが実 DPA 0 件 = GDPR Art.28 違反 (売上 4% fine リスク) | vendor サポート対応 1-2 週間 + ¥0 (premium account なら自動取得) | 各 vendor の dashboard / support から DPA pdf 請求 → `docs/dpa/` 配置 → privacy.html に link |
+| **PO-E-2026-05-02-05** | 13-17 歳 VPC (verifiable parental consent) vendor 選定 | COPPA $51,744/件 fine + Apple §5.1.4 reject リスク、 §4 escalation (新プロセス) | VPC vendor (例: PRIVO / SuperAwesome) ¥30,000-100,000/月 | PO 判断: (a) 13 歳以上のみに service 制限 (signup 時 age gate) (b) VPC vendor 契約 |
+| **PO-F-2026-05-02-06** | 越境移転同意 modal UI 実装 | 個情法 §28 違反 (1 億円 fine リスク)、 全 user が同意なしで Anthropic / OpenAI 米国に PII 送信中。 privacy.html では「同意取得」 主張だが UI ゼロ | 0 円 + 2-3 日 (frontend 実装) | (a) PO 法務確認、 (b) ADV 自律で modal UI 実装 (signup time + 既存 user は次 visit 時 retroactive 同意要求) |
+| **PO-G-2026-05-02-07** | Cookie banner UI (EU/UK 配信時 ePrivacy + 改正電気通信事業法 §27-12) | €20M / 全世界売上 4% fine リスク | 0 円 + 1-2 日 (frontend) | (a) 配信地域決定 (EU/UK 配信しない選択肢含む)、 (b) 必要なら Cookiebot 等の SaaS (¥0-3,000/月) |
+| **PO-H-2026-05-02-08** | 特商法 §11 personal info disclosure | tokushoho.html「お問い合わせ後に書面で開示」 = 違法 + Apple §3.1.2 reject リスク | 0 円 + 5 分 (text edit) | PO 判断: 事業者名 / 住所 / 電話番号 / 代表者を即時公開 (or 法人化 / 住所貸サービス契約) |
+
+### 追加: ADV 自律進行可能 だが PO 判断 影響項目 (§4 reference)
+
+- **§4 escalation 該当**: 上記 PO-D / PO-E は新プロセス + コスト変動、 PO-F / PO-G は法的リスク → §4 escalation 必須
+- **§4 escalation 非該当 だが認知共有**: PO-A / PO-B / PO-C / PO-H は技術 only、 ADV 自律可能だが PO action が無いと完了不能のため起票
+
+---
+
 ## 抽出メタ情報
 - **初回抽出:** G_39セッション (2026-04-15)
 - **情報源:** session_progress.md G_38-39のPO判断記録 + session_history.md
+- **追記 (2026-05-02):** PO-ESCALATION 8 件、 Round 31 honest audit 起点

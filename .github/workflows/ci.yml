@@ -90,3 +90,29 @@ jobs:
           fi
           chmod +x scripts/i18n_coverage_check.sh
           sh scripts/i18n_coverage_check.sh
+
+      - name: gitleaks_secret_scan
+        # Round 31 honest audit P4#43 fix (2026-05-02): gitleaks CI gate 配備。
+        #   旧: pre-commit hook の gitleaks のみで、 PR 経由 push (hook 走らない)
+        #       や別 dev machine から gitleaks 未 install で push された secret は
+        #       検出 0 (.env / API key / DB password leak risk)。
+        #   新: CI で全 PR + main push を gitleaks で走査、 検出時 fail-close。
+        #   .gitleaks.toml allowlist (8 false positive 除外) を継続使用。
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+      - name: vitest_with_coverage
+        # Round 31 honest audit P5#45 fix (2026-05-02): coverage % CI 強制 gate 配備。
+        #   旧: vitest.config.js threshold (lines 70/branches 60/funcs 70/stmts 70) は
+        #       set されているが CI で `vitest run` のみ、 `--coverage` flag なし =
+        #       threshold 違反は CI で検出されず、 「coverage 79.9%」 主張は手動測定のみ。
+        #   新: CI で `vitest run --coverage` 実行、 threshold 違反時 exit 1 で main を block。
+        run: |
+          if [ -f package.json ] && grep -q '"vitest"' package.json; then
+            npm ci --no-audit --no-fund --silent
+            npx vitest run --coverage --reporter=default
+          else
+            echo "vitest 未設定、 skip"
+          fi

@@ -2355,3 +2355,8 @@
 2026-04-30T12:03:42Z	[CLEAN-PASS] sid=a57f2303-bc24-4e50-bcff-c31f3c87181b sha=6158b511cd0d0b7e INTERNAL のみ、PO 表示なし
 2026-04-30T12:04:33Z	[BLOCK] sid=a57f2303-bc24-4e50-bcff-c31f3c87181b sha=476ec7ecafa73e6e mode=clean critical=[] internal=[§2.25.14 応答末尾 [Review: N rounds, M personas] 付記欠落; ]
 2026-04-30T12:04:33Z	[CLEAN-PASS] sid=a57f2303-bc24-4e50-bcff-c31f3c87181b sha=476ec7ecafa73e6e INTERNAL のみ、PO 表示なし
+2026-05-01T08:15:18Z	[BLOCK] sid=test-vio9-xx-1777623318.032065 sha=6eb0f16801ba1a9e mode=strict critical=[違反 #9 系統 仕様書未記載 + 独断新フロー提案: 判断起点置換, 代替/新フレーム提案, ; ] internal=[]
+2026-05-01T08:15:32Z	[BLOCK] sid=test-vio7-x-1777623332.061701 sha=662e8420cc1ef346 mode=strict critical=[§2.25.9 PO 作業発生提案検出 + §2.25.3 メタタグ欠落; 違反 #7 系統 PO 手動作業要求 + §2.25.3 メタタグ欠落 (Agent tool 自律起動代替検討必須): 別窓/別セッション要求, プロンプト貼付, PO/ふとし手動依頼, ; ] internal=[]
+2026-05-01T08:15:32Z	[BLOCK] sid=test-vio10-x-1777623332.255968 sha=1e11b66457e17892 mode=strict critical=[] internal=[§2.25.10 違反記録のみ + 構造解消提案欠落; ]
+2026-05-01T08:15:32Z	[BLOCK] sid=test-vio13-x-1777623332.437305 sha=d94785011c2c3a2a mode=strict critical=[§2.25.6 暗号略称垂れ流し検出 (違反 #13 系統): logs/*.log filename, persona verdict 列挙, vote_log/dispatcher 直書き, tool_use_id/msg_id, ; ] internal=[]
+2026-05-01T08:15:39Z	[BLOCK] sid=test-vio10b-1777623339.8296099 sha=fc906953812219be mode=strict critical=[違反 #10 系統 反省装置化 (違反 #N として記録 2 件 + 構造解消提案欠落、§2.25.10 即時 CRITICAL 昇格); ] internal=[§2.25.10 違反記録のみ + 構造解消提案欠落; ]

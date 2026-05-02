@@ -50,3 +50,35 @@ theme-apple (Apple 純正)、ユーザが S-30 Settings で切替可
 ## 直近完了レポート (2026-04-28)
 - `lais/verify/stage7_2_emoji_svg_report_2026-04-28.md`
 - `lais/verify/stage7_3_theme_apply_report_2026-04-28.md`
+
+---
+
+## 2026-05-02 Update — Round 31 honest audit + Phase A 即時修正 (PO 直命「妥当指摘漏れなく即時」)
+
+### Round 31 batch 進捗 (本日終了時点 v4.0.78、 commit `d784e0b` まで CI green)
+| batch | 内容 | commit |
+|---|---|---|
+| 4-9 | input-guard / Gemini search / owner_key cookie / chat.system / deep_context / memo authz | 5c37f63〜3d7df66 |
+| **10** | **token HMAC signed format** (本日 batch、 18 new tests) | **d784e0b** |
+| 11 | post-commit canopy writer regression fix + Phase A 即時 | (本 commit) |
+
+### honest audit 結果 (verify/adv_violation_log.md 末尾)
+- 真に修正済 7 件 / 部分 3 件 / 依然 open 41 件
+- PO action 必須 8 件 → docs/po-decisions.md PO-ESCALATION-2026-05-02 に正式起票済
+- 真進捗: declared 51% (98/192) → 真 audit-grade 39.9% (97/243)
+
+### 走行中 subagent (2026-05-02)
+- なし (G13 canopy writer subagent 完了済、 Phase B subagent 5 並列を本 commit 後に dispatch)
+
+### 即時修正済 (Phase A、 本書込時点)
+- A1: Dropbox conflict files 160 件削除 (P1#17)
+- A2: gitleaks CI gate + vitest --coverage CI gate (P4#43 / P5#45)
+- A3: synthetic-monitor GitHub Issue auto-open + latency placeholder (P2#28 / P2#36)
+- A4: supabase/migrations/ + up/down baseline (P1#11)
+- A5: instructions/persona_review/ structure + README (P1#12)
+- A6: docs/ops/wrangler_rollback_runbook.md (P2#31)
+- A7: docs/po-decisions.md PO-ESCALATION-2026-05-02 8 件 (Phase C 兼用)
+- A8: SSoT 4-file mtime refresh (本書込)
+
+### 新規発見 P0 (Phase A 中)
+- **CRITICAL**: scripts/migrate_stripe.js:7 に Supabase service password 平文 hardcode = git history leak。 PO-A-2026-05-02-01 として po-decisions.md 起票済、 即時 rotation 推奨。
