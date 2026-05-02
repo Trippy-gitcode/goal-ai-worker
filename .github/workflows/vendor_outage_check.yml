@@ -1,0 +1,55 @@
+name: vendor-outage-check
+# Round 31 Cat-N P0 #4 fix (2026-05-02): vendor status page polling + GitHub Issue auto-open。
+# 7 vendor (OpenAI / Anthropic / Stripe / Supabase / Cloudflare / Netlify / GitHub) の
+# Atlassian Statuspage 公開 API (/api/v2/status.json) を 15 min 周期で polling、
+# indicator が major / critical で incident-vendor-outage Issue を auto-open (dedupe あり)。
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  check_vendors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: poll_status_pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          declare -A URLS=(
+            ["openai"]="https://status.openai.com/api/v2/status.json"
+            ["anthropic"]="https://status.anthropic.com/api/v2/status.json"
+            ["stripe"]="https://www.stripe-status.com/api/v2/status.json"
+            ["supabase"]="https://status.supabase.com/api/v2/status.json"
+            ["cloudflare"]="https://www.cloudflarestatus.com/api/v2/status.json"
+            ["netlify"]="https://www.netlifystatus.com/api/v2/status.json"
+            ["github"]="https://www.githubstatus.com/api/v2/status.json"
+          )
+          INCIDENTS=""
+          for v in "${!URLS[@]}"; do
+            url="${URLS[$v]}"
+            J=$(curl -sS --max-time 10 "$url" 2>/dev/null || echo '{}')
+            I=$(echo "$J" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status',{}).get('indicator','unknown'))" 2>/dev/null || echo "unknown")
+            D=$(echo "$J" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status',{}).get('description','?'))" 2>/dev/null || echo "?")
+            echo "$v: indicator=$I desc=$D"
+            if [ "$I" = "major" ] || [ "$I" = "critical" ]; then
+              INCIDENTS="${INCIDENTS}\n- $v: $I ($D)"
+            fi
+          done
+          if [ -n "$INCIDENTS" ]; then
+            EX=$(gh issue list --label "incident-vendor-outage" --state open --json number --jq 'length' 2>/dev/null || echo "0")
+            if [ "${EX:-0}" -eq 0 ]; then
+              TS=$(date -u +%FT%TZ)
+              gh issue create \
+                --title "[vendor-outage] vendor status: 1+ vendor major/critical at $TS" \
+                --label "incident-vendor-outage,incident-critical" \
+                --body "$(printf 'Vendor outage detected at %s\n\nAffected:%b\n\nWorkflow run: %s/actions/runs/%s\n' "$TS" "$INCIDENTS" "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_RUN_ID}")"
+              echo "Issue created"
+            else
+              echo "Existing open issue (count=$EX)、 dedupe skip"
+            fi
+          else
+            echo "✅ All 7 vendors normal"
+          fi

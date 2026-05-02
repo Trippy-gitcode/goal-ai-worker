@@ -1,6 +1,6 @@
 import { authenticateRequest } from '../middleware/auth.js';
 import { parseBodyGuarded } from '../middleware/input-guard.js';
-import { jsonRes } from '../utils/helpers.js';
+import { jsonRes, getGeminiApiVersion } from '../utils/helpers.js';
 import { getModel, VENDOR_API_VERSIONS } from '../utils/constants.js';
 import { checkDeepUsage, incrementDeepUsage, canUseModel, incrementFreeModelUsage } from '../utils/rate-limit.js';
 
@@ -65,7 +65,12 @@ export async function handleDeepGemini(request, env) {
 
   const geminiModel = getModel(auth.plan, 'gemini');
   const text = systemCtx ? `${systemCtx}\n\n${prompt}` : prompt;
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${env.GEMINI_API_KEY}`;
+  // Round 31 Cat-N P0 #3 fix (2026-05-02、 SUBAGENT-LAIS-CAT-N-GEMINI-V1-STABLE-MIGRATION-V1):
+  //   旧: preview API channel を hardcode → stable migration 不能。
+  //   新: getGeminiApiVersion(model) で自動判定 (preview suffix 検出時のみ preview channel に fallback)。
+  //   詳細は src/utils/helpers.js の getGeminiApiVersion + src/utils/constants.js の VENDOR_API_VERSIONS 参照。
+  const apiVer = getGeminiApiVersion(geminiModel);
+  const geminiUrl = `https://generativelanguage.googleapis.com/${apiVer}/models/${geminiModel}:generateContent?key=${env.GEMINI_API_KEY}`;
 
   const res = await fetch(geminiUrl, {
     method: 'POST',

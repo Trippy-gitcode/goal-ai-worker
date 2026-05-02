@@ -1,3 +1,20 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Round 31 Cat-N P0 #3 fix (2026-05-02、 SUBAGENT-LAIS-CAT-N-GEMINI-V1-STABLE-MIGRATION-V1):
+//   getGeminiApiVersion — Gemini model name から API version (`v1` / `v1beta`) を判定。
+//   stable model (gemini-1.5-* / gemini-2.0-* 等) は `v1` (default)、 preview / experimental /
+//   beta suffix を含む model name は `v1beta` に自動 fallback。
+//   default 'v1' (safe stable) を返す invariants:
+//     - 引数が string でない (null / undefined / number 等) → 'v1'
+//     - suffix `-preview` / `-experimental` / `-beta` (case-insensitive) を含まない → 'v1'
+//   呼出側 (src/routes/deep.js 等) は本 helper 経由で `${apiVer}/models/...` を構築する。
+//   constants.js の VENDOR_API_VERSIONS.gemini と整合。
+// ─────────────────────────────────────────────────────────────────────────────
+export function getGeminiApiVersion(model) {
+  if (typeof model !== 'string') return 'v1';  // default safe stable
+  if (/-(preview|experimental|beta)/i.test(model)) return 'v1beta';
+  return 'v1';
+}
+
 export function jsonRes(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,

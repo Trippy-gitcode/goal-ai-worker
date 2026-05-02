@@ -12,6 +12,7 @@ import {
   generateSignedTokenId,
   verifySignedTokenId,
   isSignedTokenFormat,
+  getGeminiApiVersion,
 } from '../../src/utils/helpers.js';
 
 // ════════════════════════════════════════════════════════════════
@@ -394,6 +395,28 @@ describe('generateSignedTokenId / verifySignedTokenId', () => {
     expect(t1).not.toBe(t2);
     expect(await verifySignedTokenId(t1, SECRET)).toBe(true);
     expect(await verifySignedTokenId(t2, SECRET)).toBe(true);
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// getGeminiApiVersion — Cat-N P0 #3 fix (2026-05-02)
+// SUBAGENT-LAIS-CAT-N-GEMINI-V1-STABLE-MIGRATION-V1
+// ════════════════════════════════════════════════════════════════
+
+describe('getGeminiApiVersion (Cat-N P0 #3 fix)', () => {
+  it('should return v1 for stable model gemini-1.5-flash', () => {
+    expect(getGeminiApiVersion('gemini-1.5-flash')).toBe('v1');
+  });
+  it('should return v1beta for preview model', () => {
+    expect(getGeminiApiVersion('gemini-3-flash-preview')).toBe('v1beta');
+  });
+  it('should return v1beta for experimental model', () => {
+    expect(getGeminiApiVersion('gemini-x-experimental')).toBe('v1beta');
+  });
+  it('should default to v1 for invalid input', () => {
+    expect(getGeminiApiVersion(null)).toBe('v1');
+    expect(getGeminiApiVersion(undefined)).toBe('v1');
+    expect(getGeminiApiVersion(123)).toBe('v1');
   });
 });
 

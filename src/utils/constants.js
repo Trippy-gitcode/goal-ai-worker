@@ -90,10 +90,20 @@ export const STRIPE_API_VERSION = '2024-11-20.acacia';
 //   旧: anthropic-version '2023-06-01' を src/routes/chat.js:79,301 + src/routes/deep.js:100,119 に
 //       4 hardcode → update 周期 SOP なし、 vendor breaking change 検知不能。
 //   新: VENDOR_API_VERSIONS で集約、 update 時は本 const + release note レビュー必須。
+//
+// Round 31 Cat-N P0 #3 fix (2026-05-02、 SUBAGENT-LAIS-CAT-N-GEMINI-V1-STABLE-MIGRATION-V1):
+//   旧: gemini: 'v1beta' を production 採用 → preview API channel に固定、 stable
+//       (`v1`) への migration path 未整備、 Google 側 v1beta deprecation 時に breaking。
+//   新: gemini: 'v1' (stable default) + gemini_preview: 'v1beta' (preview model 用)。
+//       model name suffix `-preview` / `-experimental` / `-beta` を `getGeminiApiVersion`
+//       (helpers.js) で検出し自動 fallback。 stable model 一覧 (gemini-1.5-* / gemini-2.0-*)
+//       は v1、 PLAN_CONFIG の `gemini-3-flash-preview` / `gemini-3.1-pro-preview` 等 preview
+//       model のみ v1beta を経由する。
 export const VENDOR_API_VERSIONS = {
   anthropic: '2023-06-01',
   openai: 'v1',
-  gemini: 'v1beta',
+  gemini: 'v1',
+  gemini_preview: 'v1beta',
   stripe: '2024-11-20.acacia',
 };
 
@@ -118,7 +128,7 @@ export function getCurrentMonth() {
   return `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
-export const APP_VERSION = '4.0.85';
+export const APP_VERSION = '4.0.86';
 
 // ============================================================================
 // Stripe Webhook billing-critical event types

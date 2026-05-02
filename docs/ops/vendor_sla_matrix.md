@@ -21,8 +21,15 @@
 |---|---|---|
 | anthropic | 2023-06-01 | https://docs.anthropic.com/en/api/versioning |
 | openai | v1 (URL path) | https://platform.openai.com/docs/api-reference |
-| gemini | v1beta | https://ai.google.dev/gemini-api/docs |
+| gemini | v1 (preview model のみ v1beta auto-fallback) | https://ai.google.dev/gemini-api/docs |
 | stripe | 2024-11-20.acacia | https://docs.stripe.com/api/versioning |
+
+> Round 31 Cat-N P0 #3 fix (2026-05-02、 SUBAGENT-LAIS-CAT-N-GEMINI-V1-STABLE-MIGRATION-V1):
+> Gemini API endpoint を `v1beta` (preview) → `v1` (stable) に切替。 model name suffix
+> `-preview` / `-experimental` / `-beta` を `getGeminiApiVersion(model)` (src/utils/helpers.js)
+> で検出し、 該当時のみ `v1beta` (= VENDOR_API_VERSIONS.gemini_preview) に自動 fallback。
+> 現 PLAN_CONFIG の `gemini-3-flash-preview` / `gemini-3.1-pro-preview` は引き続き v1beta、
+> stable model (gemini-1.5-flash / gemini-2.0-flash 等) 移行時は v1 を使用する。
 
 ## 更新 SOP
 
