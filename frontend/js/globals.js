@@ -137,18 +137,34 @@ function getAuthHeaders() {
   return h;
 }
 
+// Round 31 Cat-A P0 fix (2026-05-02): deviceId entropy 強化。
+//   旧: userAgent + screen + tz の 32-bit hash → entropy 約 30 bit、 衝突容易、
+//       同 device profile の他 user の deviceId を総当たりで再現可能 → token register で
+//       既存 token 返却 → 他 user token 乗っ取り。
+//   新: localStorage に永続化された crypto.randomUUID() を使用 (128 bit entropy)、
+//       初回生成時のみ fingerprint hash も併用 (旧 user の token recovery 用 fallback)。
 function getDeviceId() {
-  const raw = [navigator.userAgent, navigator.language, screen.width, screen.height, new Date().getTimezoneOffset()].join('|');
-  let hash = 0;
-  for (let i = 0; i < raw.length; i++) hash = ((hash << 5) - hash + raw.charCodeAt(i)) | 0;
-  return 'dev_' + Math.abs(hash).toString(36);
+  const KEY = 'goal_device_id_v2';
+  try {
+    const stored = localStorage.getItem(KEY);
+    if (stored && /^dev2_[0-9a-f-]{36}$/.test(stored)) return stored;
+    const newId = 'dev2_' + (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
+    localStorage.setItem(KEY, newId);
+    return newId;
+  } catch (e) {
+    // localStorage 不能 (private mode 等) → fingerprint hash fallback (旧挙動互換)
+    const raw = [navigator.userAgent, navigator.language, screen.width, screen.height, new Date().getTimezoneOffset()].join('|');
+    let hash = 0;
+    for (let i = 0; i < raw.length; i++) hash = ((hash << 5) - hash + raw.charCodeAt(i)) | 0;
+    return 'dev_' + Math.abs(hash).toString(36);
+  }
 }
 
 // Bumped 2026-05-01 (design fix wave 1: a11y, focus-visible, sw cache sync, popstate, skeletons).
 // Re-bumped 2026-05-01 (Round 6 P0 fix: viewport iOS Safari 17- visualViewport polyfill,
 //   sw.js navigate offline.html fallback, sw.js token leak redact, i18n SSoT structure).
 //   Mission: SUBAGENT-DEVSYS-ROUND6-P0-FIX-V1, 6 persona vote 6/6 YES.
-const APP_VERSION = '4.0.69';
+const APP_VERSION = '4.0.70';
 
 const FONT_SIZES = {
   xs: { label: '極小', base: '14px', lh: '1.55' },

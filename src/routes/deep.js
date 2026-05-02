@@ -31,7 +31,8 @@ export async function handleDeepOpenAI(request, env) {
 
   const data = await res.json();
   if (!res.ok) return jsonRes({ error: data.error?.message || 'OpenAI API error' }, res.status);
-  await incrementDeepUsage(env, auth.userId);
+  // Round 31 Cat-G P0 fix (2026-05-02): failClosed:true で Supabase RPC 不能時の counter freeze 防止
+  await incrementDeepUsage(env, auth.userId, { failClosed: true });
   return jsonRes(data, 200, { 'X-Model-Used': openaiModel });
 }
 
@@ -73,7 +74,8 @@ export async function handleDeepGemini(request, env) {
 
   const data = await res.json();
   if (!res.ok) return jsonRes({ error: data.error?.message || 'Gemini API error' }, res.status);
-  await incrementDeepUsage(env, auth.userId);
+  // Round 31 Cat-G P0 fix (2026-05-02): failClosed:true で Supabase RPC 不能時の counter freeze 防止
+  await incrementDeepUsage(env, auth.userId, { failClosed: true });
   return jsonRes(data, 200, { 'X-Model-Used': geminiModel });
 }
 
@@ -87,7 +89,8 @@ export async function handleDeepClaude(request, env) {
   if (countUsage) {
     const usage = await checkDeepUsage(env, auth.userId, auth.plan);
     if (usage.remaining <= 0) return jsonRes({ error: 'ディープ分析の月間上限に達しました', used: usage.used, limit: usage.limit, plan: auth.plan }, 429);
-    await incrementDeepUsage(env, auth.userId);
+    // Round 31 Cat-G P0 fix (2026-05-02): failClosed:true で Supabase RPC 不能時の counter freeze 防止
+  await incrementDeepUsage(env, auth.userId, { failClosed: true });
   }
 
   const claudeModel = getModel(auth.plan, 'claude');

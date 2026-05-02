@@ -26,16 +26,31 @@ export async function handleChat(request, env, ctx) {
 
   const chatUsage = await checkDailyChatUsage(env, auth.userId, auth.plan);
   if (!chatUsage.ok) return jsonRes({ error: '本日のチャット上限に達しました。明日またお試しください。', used: chatUsage.used, limit: chatUsage.limit, remaining: 0 }, 429);
-  await incrementDailyChatUsage(env, auth.userId);
+  // Round 31 Cat-G P0 fix (2026-05-02): failClosed:true で counter freeze 防止 (free user 20/day cap破り対策)
+  await incrementDailyChatUsage(env, auth.userId, { failClosed: true });
 
   const body = await request.json();
   const { system, messages, maxTokens = 1000, goalId } = body;
+
+  // Round 31 Cat-G A-1 fix (2026-05-02): input token cap で long-context attack 阻止。
+  //   旧: messages 配列長 / content 長 無制限 → free user が 200K char × 20 turn/day で
+  //       Claude Sonnet input cost ¥540/req × 1 day = ¥10,800/user/day = 攻撃理論最大 ¥2.5M/day。
+  //   新: input total char count を 50K char (≒ 12K token) で cap。 plan 別 cap (max/ultra は 200K)。
+  const INPUT_CHAR_CAP = ['max', 'ultra'].includes(auth.plan) ? 200000 : 50000;
+  const totalInputChars = (system || '').length + messages.reduce((acc, m) => acc + (m.content || '').length, 0);
+  if (totalInputChars > INPUT_CHAR_CAP) {
+    safeLog('WARN', 'chat.input_cap_exceeded', { plan: auth.plan, total_chars: totalInputChars, cap: INPUT_CHAR_CAP });
+    return jsonRes({ error: `入力が長すぎます (${totalInputChars} / ${INPUT_CHAR_CAP} 文字上限)`, total_chars: totalInputChars, cap: INPUT_CHAR_CAP }, 413);
+  }
+  // Also cap maxTokens (request-side)
+  const safeMaxTokens = Math.min(maxTokens, ['max', 'ultra'].includes(auth.plan) ? 4000 : 2000);
+
   const claudeModel = getModel(auth.plan, 'claude');
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({ model: claudeModel, max_tokens: Math.min(maxTokens, ['max', 'ultra'].includes(auth.plan) ? 4000 : 2000), system: system || undefined, messages }),
+    body: JSON.stringify({ model: claudeModel, max_tokens: safeMaxTokens, system: system || undefined, messages }),
   });
 
   const data = await res.json();
@@ -92,7 +107,8 @@ export async function handleChatStream(request, env, ctx) {
 
   if (!free_no_count) {
     const chatUsage = await checkDailyChatUsage(env, auth.userId, auth.plan);
-    await incrementDailyChatUsage(env, auth.userId);
+    // Round 31 Cat-G P0 fix (2026-05-02): failClosed:true で counter freeze 防止 (free user 20/day cap破り対策)
+  await incrementDailyChatUsage(env, auth.userId, { failClosed: true });
     // Free日次上限超過→nanoフォールバック（#5）
     if (!chatUsage.ok && auth.plan === 'free') {
       const nanoRes = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -352,7 +368,13 @@ async function recordTurnUsage(env, userId, plan) {
     const rpcRes = await fetch(`${supabaseUrl}/rest/v1/rpc/increment_turn_usage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
-      body: JSON.stringify({ p_user_id: userId, p_month: month, p_per_turn: config.per_turn, p_cap: config.cap })
+      // Round 30 schema audit fix: increment_turn_usage RPC signature は (p_user_id uuid, p_month text, p_per_turn integer)。
+      // 旧 code は p_cap も送信 → PostgREST 404 PGRST202 = function not found → silent fallback で
+      // {turns_used:0,current_amount:0} 返却 → usage_tracking 永久未更新 = metered billing revenue leak。
+      // production data: 2 paid users + 927 chats / 30d, total turns_used=0 で確認済。
+      // p_cap は本来 config.cap (plan 上限) を渡したかったと思われるが、 RPC 定義に存在しないため削除。
+      // 将来 cap_reached 判定を RPC 内で行いたい場合は migration で signature 拡張が必要 (Phase 5)。
+      body: JSON.stringify({ p_user_id: userId, p_month: month, p_per_turn: config.per_turn })
     });
     if (!rpcRes.ok) { console.error('increment_turn_usage RPC failed:', await rpcRes.text()); return { current_amount: 0, turns_used: 0, cap_reached: false, is_capped: false, should_degrade: false }; }
     const rpcData = await rpcRes.json();
@@ -386,7 +408,10 @@ async function maybeSendUsageRecord(env, userId, turnsUsed, plan) {
   if (unsent < USAGE_BATCH_SIZE) return;
   let meteredItemId;
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/users?user_id=eq.${userId}&select=stripe_metered_subscription_item_id`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
+    // Round 30 schema audit fix: users.id (uuid) が PK、 user_id 列は不在 → ?id=eq に修正。
+    // 旧 code は 400 column not exist → catch で console.error → return = metered item 取得不能 →
+    // metered billing 全く動かず = revenue leak (paid user 2 人 × 927 chats over 30d で確認)。
+    const res = await fetch(`${supabaseUrl}/rest/v1/users?id=eq.${userId}&select=stripe_metered_subscription_item_id`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
     const data = await res.json();
     meteredItemId = data?.[0]?.stripe_metered_subscription_item_id;
   } catch (e) { console.error('Failed to get metered item ID:', e.message); return; }
