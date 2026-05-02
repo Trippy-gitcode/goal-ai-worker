@@ -1,6 +1,6 @@
 import { authenticateRequest } from '../middleware/auth.js';
 import { jsonRes, safeCompare } from '../utils/helpers.js';
-import { STRIPE_PRICE_IDS, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, isStripeBillingCriticalEvent } from '../utils/constants.js';
+import { STRIPE_PRICE_IDS, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, STRIPE_API_VERSION, isStripeBillingCriticalEvent } from '../utils/constants.js';
 import { syncUserToSupabase } from '../utils/supabase.js';
 import { safeLog, safeError, fingerprintToken, hashIdSync } from '../utils/safeLog.js';
 
@@ -45,9 +45,10 @@ export async function handleCheckoutCreate(request, env) {
     params.append('subscription_data[trial_period_days]', '14');
   }
 
+  // Round 31 Cat-F S-1 fix (2026-05-02): Stripe-Version 明示 pin で uncontrolled rollout 阻止
   const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: { 'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded', 'Stripe-Version': STRIPE_API_VERSION },
     body: params.toString()
   });
   const session = await res.json();
@@ -63,7 +64,7 @@ export async function handleCheckoutPortal(request, env) {
   const params = new URLSearchParams();
   params.append('customer', tokenData.stripeCustomerId);
   params.append('return_url', STRIPE_SUCCESS_URL.replace('?checkout=success', ''));
-  const res = await fetch('https://api.stripe.com/v1/billing_portal/sessions', { method: 'POST', headers: { 'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() });
+  const res = await fetch('https://api.stripe.com/v1/billing_portal/sessions', { method: 'POST', headers: { 'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded', 'Stripe-Version': STRIPE_API_VERSION }, body: params.toString() });
   const session = await res.json();
   if (!res.ok) { safeLog('ERROR', 'stripe.portal_error', { status: res.status, message: session?.error?.message || 'unknown' }); return jsonRes({ error: session.error?.message || 'Stripe error' }, res.status); }
   return jsonRes({ url: session.url });
@@ -339,7 +340,20 @@ export async function handleStripeWebhook(request, env, ctx) {
         safeError('webhook.stripe_customer_mapping_write_failed', mapErr, { token_fp: fingerprintToken(tokenId) });
       }
     }
-    const plan = session.metadata?.plan || 'pro';
+    // Round 31 Cat-F S-5 fix (2026-05-02): malformed metadata で silent free→pro 昇格を阻止。
+    //   旧: `plan = session.metadata?.plan || 'pro'` で metadata 不在時に **デフォルト pro 付与**
+    //   = 不正 session で free user が pro 権限取得リスク。
+    //   新: metadata 不在は明示 error log + 200 (Stripe retry 不要、 ops 確認必要)。
+    const plan = session.metadata?.plan;
+    if (!plan) {
+      safeError('webhook.checkout_completed_no_plan_metadata_dlq', new Error('checkout.session.completed の metadata.plan 不在、 silent default 排除'), { event_id: event.id, token_fp: tokenId ? fingerprintToken(tokenId) : 'no_token' });
+      try {
+        if (env.TOKEN_KV) {
+          await env.TOKEN_KV.put(`stripe_unhandled_billing_event:${event.id}`, JSON.stringify({ event_id: event.id, event_type: event.type, reason: 'no_plan_metadata', ts: Date.now() }), { expirationTtl: 86400 * 30 });
+        }
+      } catch (_) {}
+      return new Response('OK (no plan metadata, ops review required)', { status: 200 });
+    }
     const tokenData = await env.TOKEN_KV.get(`token:${tokenId}`, 'json');
     if (!tokenData) { safeLog('ERROR', 'webhook.token_not_in_kv', { token_fp: fingerprintToken(tokenId) }); return new Response('OK', { status: 200 }); }
     tokenData.plan = plan; tokenData.expiresAt = null; tokenData.stripeCustomerId = session.customer; tokenData.stripeSubscriptionId = session.subscription; tokenData.paidPlan = plan; tokenData.paidAt = new Date().toISOString();
@@ -363,7 +377,7 @@ export async function handleStripeWebhook(request, env, ctx) {
     if (session.subscription) {
       try {
         const subRes = await fetch(`https://api.stripe.com/v1/subscriptions/${session.subscription}`, {
-          headers: { 'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}` }
+          headers: { 'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`, 'Stripe-Version': STRIPE_API_VERSION }
         });
         const sub = await subRes.json();
         const meteredItem = sub.items?.data?.find(item => item.price?.recurring?.usage_type === 'metered');
@@ -448,6 +462,59 @@ export async function handleStripeWebhook(request, env, ctx) {
           safeLog('INFO', 'webhook.plan_changed', { token_fp: fingerprintToken(tokenId), plan: newPlan });
         }
       }
+    }
+  }
+
+  // Round 31 Cat-F S-2 fix (2026-05-02) — internal Stripe Integration Architect 指摘:
+  //   billing-critical 判定で claim 取った 14 events のうち handler 不在は silent claim
+  //   = 二重 dedup row + 業務状態未更新 = 永久 silent failure。
+  //   全 critical event を minimum log + DLQ KV (stripe_unhandled_billing_event:<id>) に
+  //   persist して ops が後追い対応可能にする。 invoice.payment_failed / 3DS requires_action /
+  //   charge.dispute / trial_will_end は user 通知が必要な path も多いため warning 級 log。
+  const _unhandledCriticalEvents = [
+    'invoice.payment_failed',
+    'invoice.payment_action_required',
+    'invoice.upcoming',
+    'invoice.voided',
+    'invoice.marked_uncollectable',
+    'payment_intent.payment_failed',
+    'payment_intent.requires_action',
+    'payment_intent.canceled',
+    'charge.failed',
+    'charge.refunded',
+    'charge.dispute.created',
+    'charge.dispute.updated',
+    'charge.dispute.closed',
+    'customer.subscription.trial_will_end',
+    'customer.subscription.paused',
+    'customer.subscription.resumed',
+    'setup_intent.setup_failed',
+    'refund.created',
+    'refund.updated',
+    'payout.failed',
+  ];
+  if (_unhandledCriticalEvents.includes(event.type)) {
+    safeError('webhook.critical_event_no_handler_dlq', new Error(`event type ${event.type} は billing-critical だが handler 未実装、 ops 確認のため DLQ に保存`), {
+      event_id: event.id,
+      event_type: event.type,
+      ops_action_required: true,
+    });
+    try {
+      if (env && env.TOKEN_KV) {
+        await env.TOKEN_KV.put(
+          `stripe_unhandled_billing_event:${event.id}`,
+          JSON.stringify({
+            event_id: event.id,
+            event_type: event.type,
+            event_data_summary: event.data?.object?.id ? `object_id=${event.data.object.id}` : 'no_object_id',
+            ts: Date.now(),
+            retry_count: 0,
+          }),
+          { expirationTtl: 86400 * 30 } // 30 日 ops 対応猶予
+        );
+      }
+    } catch (dlqErr) {
+      safeError('webhook.unhandled_event_dlq_put_failed', dlqErr, { event_id: event.id });
     }
   }
 

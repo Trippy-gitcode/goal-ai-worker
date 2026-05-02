@@ -1,0 +1,30 @@
+# Netlify _headers (Round 30 audit fix B-C, 2026-05-02)
+# Round 22-30 で worker 側 (`/api/*`) には CSP/COOP/CORP/Permissions-Policy 等を
+# 配備したが、 frontend 側 (Netlify から配信される HTML/JS/CSS) は HSTS のみで
+# clickjacking / MIME sniff / referrer leak / device permission 漏洩リスクが残存していた。
+# 本ファイルで frontend 側にも同等の security headers を配備する。
+# Netlify 仕様: frontend/public/_headers が build 時に dist にコピーされ、 deploy 時に適用。
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), usb=(), payment=(self), magnetometer=(), accelerometer=(), gyroscope=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: unsafe-none
+  Cross-Origin-Resource-Policy: same-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://goal-ai-worker.goalai-futoshi.workers.dev https://api.stripe.com; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self' https://checkout.stripe.com; report-uri https://goal-ai-worker.goalai-futoshi.workers.dev/api/csp-report
+
+# Service Worker は SAME-ORIGIN な上 cache 配信なので CSP の例外指定 (script-src 'self' で OK)
+/sw.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /
+
+# 静的 asset は long-cache、 hash 付き build artifact 前提
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# i18n JSON は CDN cache 短め
+/i18n/*
+  Cache-Control: public, max-age=300

@@ -80,6 +80,12 @@ export const TESTER_DURATION_HOURS = 72;
 export const RATE_LIMIT_WINDOW = 60;
 export const RATE_LIMIT_MAX = 30;
 
+// Round 31 Cat-F S-1 fix (2026-05-02): Stripe API version pin。
+//   旧: outbound API call に Stripe-Version 未指定 → Stripe account default version 採用 →
+//       Stripe rollout 時に silent breaking change リスク。
+//   新: 明示 pin (2024-11-20.acacia)。 update 時は本 const + 関連 release note レビュー必須。
+export const STRIPE_API_VERSION = '2024-11-20.acacia';
+
 export const STRIPE_PRICE_IDS = {
   light: 'price_1TCzZj4084X0uakahTbAwTYK', light_metered: 'price_1TCzsw4084X0uakajD8aUGIm', light_annual: 'price_1TCztW4084X0uakaqwlf41QK',
   pro: 'price_1TCzv64084X0uakaeTSyND0a', pro_metered: 'price_1TCzwJ4084X0uakapKKWw6nV', pro_annual: 'price_1TCzwo4084X0uakatfRAkNFr',
@@ -87,8 +93,12 @@ export const STRIPE_PRICE_IDS = {
   ultra: 'price_1TD03i4084X0uakalPdCgNCJ', ultra_annual: 'price_1TD0414084X0uakaVSJtVFrd',
   addon_50: 'price_1TD3QJ4084X0uakaOlOzERwV', addon_120: 'price_1TD3QK4084X0uakauP63gUOn',
 };
-export const STRIPE_SUCCESS_URL = 'https://goal-ai-frontend.pages.dev?checkout=success';
-export const STRIPE_CANCEL_URL  = 'https://goal-ai-frontend.pages.dev?checkout=cancel';
+// Round 30 schema audit fix (2026-05-02): production frontend は Netlify
+//   (delicate-bienenstitch-b734d6.netlify.app) で v4.0.67 LIVE。
+//   旧 goal-ai-frontend.pages.dev は v4.0.42 で stale (Round 22-30 fix 未反映)。
+//   paid user 決済後の redirect 先を current production frontend に修正。
+export const STRIPE_SUCCESS_URL = 'https://delicate-bienenstitch-b734d6.netlify.app?checkout=success';
+export const STRIPE_CANCEL_URL  = 'https://delicate-bienenstitch-b734d6.netlify.app?checkout=cancel';
 
 export const USAGE_BATCH_SIZE = 1; // ローンチ直前に5に変更
 export function getCurrentMonth() {
@@ -97,7 +107,7 @@ export function getCurrentMonth() {
   return `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
-export const APP_VERSION = '4.0.66';
+export const APP_VERSION = '4.0.69';
 
 // ============================================================================
 // Stripe Webhook billing-critical event types
