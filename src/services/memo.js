@@ -38,6 +38,20 @@ export async function regenerateAiMemo(env, tokenId, goalId) {
     const userId = users?.[0]?.id;
     if (!userId) { await env.TOKEN_KV.delete(lockKey); return; }
 
+    // Round 31 Cat-C SSRF-3 fix (2026-05-02): goalId ownership check 必須化。
+    //   旧: goalId が caller (chat.js 経由 client) から来るが ownership 検証なし →
+    //       attacker が他 user の goalId 指定で goals?.id=eq.<victim_goal_id> から
+    //       他人の ai_memo / chat_messages を取得 + 上書き = cross-tenant data leak / forgery。
+    //   新: goalId 指定時は SELECT で owner 確認、 user_id != userId なら早期 return。
+    if (goalId) {
+      const ownerCheck = await supabaseQuery(env, 'goals', 'GET', { filters: `id=eq.${goalId}&user_id=eq.${userId}`, select: 'id' });
+      if (!ownerCheck || ownerCheck.length === 0) {
+        // attacker が他 user の goalId を指定した場合、 silent return で 情報漏洩なし
+        await env.TOKEN_KV.delete(lockKey);
+        return;
+      }
+    }
+
     // A13/B17: limit=20 — buildCompressedMessagesのwindowSize=10なので20件で十分
     let filters = `user_id=eq.${userId}&order=created_at.desc&limit=20`;
     if (goalId) filters += `&goal_id=eq.${goalId}`;
@@ -62,7 +76,8 @@ export async function regenerateAiMemo(env, tokenId, goalId) {
     // A5: 前回のai_memoがあればdiff更新（入力60%削減）
     let existingMemo = null;
     if (goalId) {
-      const goals = await supabaseQuery(env, 'goals', 'GET', { filters: `id=eq.${goalId}`, select: 'ai_memo' });
+      // Round 31 Cat-C SSRF-3 fix: defense-in-depth、 user_id filter 併用
+      const goals = await supabaseQuery(env, 'goals', 'GET', { filters: `id=eq.${goalId}&user_id=eq.${userId}`, select: 'ai_memo' });
       existingMemo = goals?.[0]?.ai_memo;
     } else {
       const userRows = await supabaseQuery(env, 'users', 'GET', { filters: `token_id=eq.${encodeURIComponent(tokenId)}`, select: 'ai_memo' });
@@ -88,7 +103,8 @@ export async function regenerateAiMemo(env, tokenId, goalId) {
     if (!memo) return;
 
     if (goalId) {
-      await supabaseQuery(env, 'goals', 'PATCH', { filters: `id=eq.${goalId}`, body: { ai_memo: memo, ai_memo_updated_at: new Date().toISOString() } });
+      // Round 31 Cat-C SSRF-3 fix: defense-in-depth、 user_id filter 併用 (cross-user PATCH 阻止)
+      await supabaseQuery(env, 'goals', 'PATCH', { filters: `id=eq.${goalId}&user_id=eq.${userId}`, body: { ai_memo: memo, ai_memo_updated_at: new Date().toISOString() } });
     } else {
       await supabaseQuery(env, 'users', 'PATCH', { filters: `token_id=eq.${encodeURIComponent(tokenId)}`, body: { ai_memo: memo, ai_memo_updated_at: new Date().toISOString() } });
     }
