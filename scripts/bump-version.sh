@@ -54,3 +54,16 @@ else
   echo "  globals.js=$V1  constants.js=$V2  sw.js=$V3  index.html_attr=$V4_attr  index.html_text=$V4_text"
   exit 1
 fi
+
+# Cat-K P0 #4 fix (2026-05-02): CACHE_NAME / APP_VERSION drift assert
+# globals.js の APP_VERSION (semver) と sw.js の CACHE_NAME 内 semver を抽出して
+# diff で機械検証 (silent stale users 防止)。 上記 V1=V3 検証と冗長だが strict double-check。
+# globals.js は APP_VERSION = 'X.Y.Z' / sw.js は goal-ai-vX.Y.Z 形式なので semver 部分のみ比較。
+DRIFT_GLOBALS=$(grep -oE "APP_VERSION = '[0-9]+\.[0-9]+\.[0-9]+'" "$ROOT/frontend/js/globals.js" | head -1 | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
+DRIFT_SW=$(grep -oE "goal-ai-v[0-9]+\.[0-9]+\.[0-9]+" "$ROOT/frontend/public/sw.js" | head -1 | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
+DRIFT=$(/usr/bin/diff <(echo "$DRIFT_GLOBALS") <(echo "$DRIFT_SW"))
+if [ -n "$DRIFT" ]; then
+  echo "ERROR: CACHE_NAME / APP_VERSION drift detected after bump、 manual fix required" >&2
+  echo "  globals.js APP_VERSION=$DRIFT_GLOBALS  sw.js CACHE_NAME semver=$DRIFT_SW" >&2
+  exit 1
+fi

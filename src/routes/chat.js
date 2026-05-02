@@ -1,6 +1,6 @@
 import { authenticateRequest } from '../middleware/auth.js';
 import { jsonRes } from '../utils/helpers.js';
-import { getModel, FREE_MODEL_LIMITS, getPlanConfig, getCurrentMonth, USAGE_BATCH_SIZE } from '../utils/constants.js';
+import { getModel, FREE_MODEL_LIMITS, getPlanConfig, getCurrentMonth, USAGE_BATCH_SIZE, VENDOR_API_VERSIONS } from '../utils/constants.js';
 import { checkRateLimit, checkDailyChatUsage, incrementDailyChatUsage, canUseModel, incrementFreeModelUsage, getEffectiveModel, incrementEmbeddingTurnCount } from '../utils/rate-limit.js';
 import { getDayKey } from '../utils/helpers.js';
 import { saveChatMessage } from '../utils/supabase.js';
@@ -76,7 +76,7 @@ export async function handleChat(request, env, ctx) {
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': VENDOR_API_VERSIONS.anthropic },
     body: JSON.stringify({ model: claudeModel, max_tokens: safeMaxTokens, system: system || undefined, messages }),
   });
 
@@ -298,7 +298,7 @@ export async function handleChatStream(request, env, ctx) {
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': VENDOR_API_VERSIONS.anthropic },
     body: JSON.stringify(apiBody),
     signal: controller.signal,
   });

@@ -21,6 +21,7 @@ import { handleAIMemoGenerate } from './routes/memo.js';
 import { handlePlanStatus } from './routes/plan.js';
 import { handleAdminTesters, handleFeedbackList } from './routes/admin.js';
 import { handleAccountDelete, handleAccountExport } from './routes/account.js';
+import { handleConsentCrossBorder, handleAgeGate } from './routes/consent.js';
 import { handleIdentityGet, handleIdentityPut, handleQOLGenerate } from './routes/me.js';
 
 const app = new Hono();
@@ -480,9 +481,13 @@ app.put('/api/me/identity', async (c) => withCors(c, await handleIdentityPut(c.r
 app.post('/api/me/qol-proposals/generate', async (c) => withCors(c, await handleQOLGenerate(c.req.raw, c.env)));
 
 // ── Account ──
-app.post('/api/account/delete', async (c) => withCors(c, await handleAccountDelete(c.req.raw, c.env)));
-app.get('/api/account/export', async (c) => withCors(c, await handleAccountExport(c.req.raw, c.env)));
-app.post('/api/account/export', async (c) => withCors(c, await handleAccountExport(c.req.raw, c.env)));
+app.post('/api/account/delete', async (c) => withCors(c, await handleAccountDelete(c.req.raw, c.env, c.executionCtx)));
+app.get('/api/account/export', async (c) => withCors(c, await handleAccountExport(c.req.raw, c.env, c.executionCtx)));
+app.post('/api/account/export', async (c) => withCors(c, await handleAccountExport(c.req.raw, c.env, c.executionCtx)));
+
+// ── Consent / Age-Gate (Cat-J P0 #2 fix、 audit_log accountability 配線) ──
+app.post('/api/account/consent/cross-border', async (c) => withCors(c, await handleConsentCrossBorder(c.req.raw, c.env, c.executionCtx)));
+app.post('/api/account/age-gate', async (c) => withCors(c, await handleAgeGate(c.req.raw, c.env, c.executionCtx)));
 
 // ── 404 ──
 app.notFound((c) => withCors(c, jsonRes({ error: 'Not found' }, 404)));

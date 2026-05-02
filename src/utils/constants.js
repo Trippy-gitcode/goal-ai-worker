@@ -86,6 +86,17 @@ export const RATE_LIMIT_MAX = 30;
 //   新: 明示 pin (2024-11-20.acacia)。 update 時は本 const + 関連 release note レビュー必須。
 export const STRIPE_API_VERSION = '2024-11-20.acacia';
 
+// Round 31 Cat-N P0 #2 fix (2026-05-02): vendor API version SSoT 集約。
+//   旧: anthropic-version '2023-06-01' を src/routes/chat.js:79,301 + src/routes/deep.js:100,119 に
+//       4 hardcode → update 周期 SOP なし、 vendor breaking change 検知不能。
+//   新: VENDOR_API_VERSIONS で集約、 update 時は本 const + release note レビュー必須。
+export const VENDOR_API_VERSIONS = {
+  anthropic: '2023-06-01',
+  openai: 'v1',
+  gemini: 'v1beta',
+  stripe: '2024-11-20.acacia',
+};
+
 export const STRIPE_PRICE_IDS = {
   light: 'price_1TCzZj4084X0uakahTbAwTYK', light_metered: 'price_1TCzsw4084X0uakajD8aUGIm', light_annual: 'price_1TCztW4084X0uakaqwlf41QK',
   pro: 'price_1TCzv64084X0uakaeTSyND0a', pro_metered: 'price_1TCzwJ4084X0uakapKKWw6nV', pro_annual: 'price_1TCzwo4084X0uakatfRAkNFr',
@@ -107,7 +118,7 @@ export function getCurrentMonth() {
   return `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
-export const APP_VERSION = '4.0.83';
+export const APP_VERSION = '4.0.84';
 
 // ============================================================================
 // Stripe Webhook billing-critical event types

@@ -1,7 +1,7 @@
 import { authenticateRequest } from '../middleware/auth.js';
 import { parseBodyGuarded } from '../middleware/input-guard.js';
 import { jsonRes } from '../utils/helpers.js';
-import { getModel } from '../utils/constants.js';
+import { getModel, VENDOR_API_VERSIONS } from '../utils/constants.js';
 import { checkDeepUsage, incrementDeepUsage, canUseModel, incrementFreeModelUsage } from '../utils/rate-limit.js';
 
 export async function handleDeepOpenAI(request, env) {
@@ -97,7 +97,7 @@ export async function handleDeepClaude(request, env) {
   const claudeModel = getModel(auth.plan, 'claude');
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': VENDOR_API_VERSIONS.anthropic },
     body: JSON.stringify({ model: claudeModel, max_tokens: Math.min(maxTokens, 4000), system: system || undefined, messages }),
   });
 
@@ -116,7 +116,7 @@ export async function handleDeepClaudeStream(request, env) {
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': VENDOR_API_VERSIONS.anthropic },
     body: JSON.stringify({ model: claudeModel, max_tokens: Math.min(maxTokens, 4000), stream: true, system: system || undefined, messages }),
   });
 
