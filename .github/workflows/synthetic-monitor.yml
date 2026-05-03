@@ -90,12 +90,46 @@ jobs:
             --data "{\"text\":\":rotating_light: synthetic-monitor failed at $(date -u +%FT%TZ)\",\"channel\":\"#alerts\"}" \
             "${SLACK_WEBHOOK_URL}"
 
-      - name: open GitHub Issue on failure (P2#28 fix)
-        # Round 31 honest audit P2#28 fix (2026-05-02): 「synthetic-monitor failure 時
-        # GitHub Issue auto-open」 の主張は documentation のみで実装 0 だった silent
-        # regression を修正。 失敗時に重複 issue を避けるため fingerprint label で
-        # dedupe (`incident-synthetic-monitor` label が open 状態なら skip)。
+      - name: check 5-consecutive-failure (Cat-J F-3 fix 2026-05-03)
+        # Cat-J P3 F-3 (P0、 5 persona consensus 残): 単発 fail で issue 発火 → 過剰警報。
+        #   5 連続失敗を直近 5 run の outcome から判定して critical incident を絞る。
+        # ロジック: gh run list で 直近 5 run (本 run 含む) の conclusion 取得、
+        #   「failure」 連続 5 件なら CRITICAL_FAIL=true 出力 → 次 step が issue create。
         if: failure()
+        id: consecutive_check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 直近 5 run (本 run 含む) の outcome 取得
+          RECENT=$(gh run list --workflow synthetic-monitor.yml --limit 5 --json conclusion 2>/dev/null | python3 -c "
+          import sys, json
+          d = json.load(sys.stdin)
+          recents = [r.get('conclusion','') for r in d]
+          # 本 run は in_progress/null の可能性、 fail とみなす (現在 failure step に居るため)
+          recents = [c if c else 'failure' for c in recents]
+          consecutive_fails = 0
+          for c in recents:
+            if c == 'failure':
+              consecutive_fails += 1
+            else:
+              break
+          print(consecutive_fails)
+          " 2>/dev/null || echo "1")
+          echo "consecutive_failure_count=${RECENT}"
+          echo "consecutive=${RECENT}" >> "$GITHUB_OUTPUT"
+          if [ "${RECENT:-1}" -ge 5 ]; then
+            echo "critical_5_consecutive=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::5 連続失敗 検出、 critical incident issue 起票へ"
+          else
+            echo "critical_5_consecutive=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::連続 ${RECENT} 件 (< 5) = 単発 / 散発、 critical 化 skip (warn log のみ)"
+          fi
+
+      - name: open GitHub Issue on 5-consecutive failure (Cat-J F-3 fix)
+        # Round 31 honest audit P2#28 fix + Cat-J F-3 強化 (2026-05-03):
+        #   旧: 単発 fail で issue 起票 = 過剰警報。
+        #   新: 5 連続失敗 検出 (consecutive_check step) 時のみ critical incident。
+        if: failure() && steps.consecutive_check.outputs.critical_5_consecutive == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -106,10 +140,11 @@ jobs:
             exit 0
           fi
           TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          CONSECUTIVE="${{ steps.consecutive_check.outputs.consecutive }}"
           gh issue create \
-            --title "[synthetic-monitor] production /api/version or /health 失敗 — ${TS}" \
+            --title "[synthetic-monitor] ${CONSECUTIVE} 連続失敗 (CRITICAL) — ${TS}" \
             --label "incident-synthetic-monitor,incident-critical" \
-            --body "$(printf 'synthetic-monitor workflow が production endpoint への ping で失敗しました。\n\n**workflow run**: %s/actions/runs/%s\n**timestamp (UTC)**: %s\n**commit**: %s\n\n## 確認手順\n1. 直近の deploy が production に届いているか (wrangler deploy)\n2. /api/version + /health の HTTP code を手動 curl で再確認\n3. CF Workers dashboard で error rate / 50x spike を確認\n4. 復旧確認後、 本 issue を close\n\n## 自動 escalation\n- Slack alert: SLACK_WEBHOOK_URL 設定時のみ送信済\n- 5 連続失敗時の追加 escalation (PagerDuty 等) は未配備 (P2#29、 §4 escalation)\n' "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_RUN_ID}" "${TS}" "${GITHUB_SHA}")"
+            --body "$(printf 'synthetic-monitor workflow が **%s 連続失敗** で critical 化。\n\n**workflow run**: %s/actions/runs/%s\n**timestamp (UTC)**: %s\n**commit**: %s\n\n## 確認手順\n1. 直近の deploy が production に届いているか (wrangler deploy + G50 三点照合)\n2. /api/version + /health の HTTP code を手動 curl で再確認\n3. CF Workers dashboard で error rate / 50x spike を確認\n4. 復旧確認後、 本 issue を close\n\n## Cat-J F-3 fix 経緯\n- 旧設計: 単発 fail で 即 issue 起票 = 過剰警報\n- 新設計: 直近 5 run consecutive failure で critical 起票 (本 issue)\n- 単発 / 散発 fail は warn log のみ (Slack alert は別 step)\n' "${CONSECUTIVE}" "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_RUN_ID}" "${TS}" "${GITHUB_SHA}")"
 
       - name: latency p50 issue raise (P2#36 fix)
         # Round 31 honest audit P2#36 fix (2026-05-02): latency 警告が warn ログのみで
