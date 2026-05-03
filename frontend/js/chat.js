@@ -1359,7 +1359,7 @@ async function homeSmartRoute(text, today, homeInner, homeWrap){
       // G5-A: ルーティング中テキスト（>1秒経過後のみ表示）
       const routeTimer = setTimeout(() => showTyping(), 1000);
       // S4: ルーティングとストリーム接続を並列化 — routeMessage中にWorkerへのTCP接続を確立
-      const warmup = fetch(`${WORKER_URL}/api/chat/stream`, { method:'OPTIONS', priority:'high' }).catch(()=>{});
+      const warmup = fetch(`${WORKER_URL}/api/chat/stream`, { method:'OPTIONS', priority:'high' }).catch(_e => console.warn("[silent-catch-fix]", _e));
       route = await routeMessage(text);
       clearTimeout(routeTimer);
       hideTyping(); // ルーティング完了 → タイピング非表示（ルート別バブルに切り替え）
@@ -1563,7 +1563,7 @@ function recordRoutingFeedback(text, original, chosen){
     fetch(`${WORKER_URL}/api/feedback/routing`, {
       method:'POST', headers:getAuthHeaders(),
       body:JSON.stringify({ message_hash:hash, original_route:original, chosen_route:chosen })
-    }).catch(()=>{});
+    }).catch(_e => console.warn("[silent-catch-fix]", _e));
   }catch(e){}
 }
 
@@ -2295,7 +2295,7 @@ function htpEditTitle(){
       htpTask.title = newTitle;
       for(const goal of ALL_GOALS){
         if(goal.supabaseId && goal.phases.some(p=>p.tasks.includes(htpTask))){
-          apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
+          apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(_e => console.warn("[silent-catch-fix]", _e));
           break;
         }
       }
@@ -3187,7 +3187,7 @@ function updateTaskTime(taskId, newStartMin){
       if(task){
         task.scheduled_time = timeStr;
         task.time_constraint = timeStr;
-        if(goal.supabaseId) apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
+        if(goal.supabaseId) apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(_e => console.warn("[silent-catch-fix]", _e));
         learnSchedulingPreference(task, newStartMin);
         toast(`${task.title} → ${timeStr}に移動`);
         return;
@@ -3214,7 +3214,7 @@ function learnSchedulingPreference(task, newStartMin){
     fetch(`${WORKER_URL}/api/me/identity`, {
       method: 'PUT', headers: getAuthHeaders(),
       body: JSON.stringify({ scheduling_preference: pref })
-    }).catch(() => {});
+    }).catch(_e => console.warn('[silent-catch-fix]', _e));
   }, 3000);
 }
 
@@ -3225,7 +3225,7 @@ function updateTaskDuration(taskId, newMinutes){
       const task = phase.tasks.find(t => String(t.id) === String(taskId));
       if(task){
         task.estimated_minutes = newMinutes;
-        if(goal.supabaseId) apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
+        if(goal.supabaseId) apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(_e => console.warn("[silent-catch-fix]", _e));
         const durLabel = newMinutes >= 60 ? `${Math.floor(newMinutes/60)}h${newMinutes%60?newMinutes%60+'m':''}` : `${newMinutes}分`;
         toast(`${task.title} → ${durLabel}`);
         return;
@@ -3556,7 +3556,7 @@ function saveTodayDiary(){
       fetch(`${WORKER_URL}/api/diary`, {
         method:'POST', headers:getAuthHeaders(),
         body:JSON.stringify({ date, content: el.value })
-      }).catch(()=>{});
+      }).catch(_e => console.warn("[silent-catch-fix]", _e));
     }
     if(!_diarySavedOnce){ _diarySavedOnce = true; toast('保存しました'); }
   }, 1000);
@@ -3616,7 +3616,7 @@ function loadTodayDiary(){
   if(AUTH_TOKEN){
     fetch(`${WORKER_URL}/api/diary?date=${date}`, { headers:getAuthHeaders() })
       .then(r=>r.json()).then(d=>{ if(d.diary?.content){ el.value = d.diary.content; localStorage.setItem(key, d.diary.content); } })
-      .catch(()=>{});
+      .catch(_e => console.warn("[silent-catch-fix]", _e));
   }
 }
 
@@ -3682,7 +3682,7 @@ function toggleTodayTask(taskId){
 function saveGoals(){
   for(const goal of ALL_GOALS){
     if(goal.supabaseId){
-      apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
+      apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(_e => console.warn("[silent-catch-fix]", _e));
     }
   }
   // localStorageバックアップ

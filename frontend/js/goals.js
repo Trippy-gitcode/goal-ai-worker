@@ -2082,7 +2082,7 @@ function checkMilestone(goal){
         fetch(`${WORKER_URL}/api/goals/${goal.supabaseId}`,{
           method:'PATCH', headers:getAuthHeaders(),
           body:JSON.stringify({lastMilestonePct:m})
-        }).catch(()=>{});
+        }).catch(_e => console.warn("[silent-catch-fix]", _e));
       }
       showMilestoneCard(goal, m);
       return;
@@ -2181,7 +2181,7 @@ function addVoiceTask(title, due){
   if(!goal.phases.length) goal.phases.push({name:'タスク',tasks:[]});
   goal.phases[0].tasks.push({id:crypto.randomUUID?crypto.randomUUID():'t_'+Date.now(),title,status:'todo',due:due||'',priority:'medium'});
   // ゴールをAPI経由で永続化
-  if(goal.supabaseId) apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(() => {});
+  if(goal.supabaseId) apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(_e => console.warn('[silent-catch-fix]', _e));
   toast('タスクを追加しました：'+title);
 }
 
