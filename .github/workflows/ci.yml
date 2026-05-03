@@ -128,3 +128,34 @@ jobs:
           else
             echo "vitest 未設定、 skip"
           fi
+
+      - name: install_playwright_browsers
+        # PO 指摘 (2026-05-03): 「E2E が ふとし さんの代わりに 触る 仕組み」 の
+        # 半分しか配備されていなかった (spec.ts 34 file 配置済 だが CI 自動実行 0)。
+        # 即修正: playwright browsers install + テスト 実行 step 追加。
+        run: |
+          if [ -f playwright.config.ts ] || [ -f playwright.config.js ]; then
+            npx playwright install --with-deps chromium
+          else
+            echo "playwright 未設定、 skip"
+          fi
+
+      - name: e2e_playwright_run
+        # PO 指摘 (2026-05-03、 #29 同型 verify-first 不徹底 構造的 fix):
+        #   E2E spec.ts 34 file 配置済 だが CI 自動実行 0 = 「ふとし さんの 代わり に
+        #   触る 仕組み」 半分配備のみ = 効果 0。
+        #   本 step で 自動実行 + 失敗時 main BLOCK で 構造的 close。
+        # 失敗時 fail-on-error: production smoke / regression は ferry hold。
+        env:
+          BASE_URL: https://goal-ai-worker.goalai-futoshi.workers.dev
+          FRONTEND_BASE: https://goal-ai-frontend.pages.dev
+        run: |
+          if [ -f playwright.config.ts ] || [ -f playwright.config.js ]; then
+            npx playwright test --reporter=list || {
+              echo "::error::E2E playwright test 失敗 — production regression 疑い、 PR / push BLOCK"
+              exit 1
+            }
+            echo "✅ E2E playwright test 全 PASS"
+          else
+            echo "::warning::playwright config 不在、 E2E skip (PO 指摘 残)"
+          fi
