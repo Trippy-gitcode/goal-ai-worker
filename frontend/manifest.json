@@ -1,15 +1,39 @@
 {
-  "name": "GOAL AI",
+  "name": "GOAL AI - AIゴールコーチング",
   "short_name": "GOAL AI",
-  "description": "3つのAIによるゴールコーチングSaaS",
-  "start_url": "/",
+  "description": "3つのAIによるゴールコーチングSaaS。 目標設定から達成まで、 AIがあなたの伴走者になります。",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0c0e14",
-  "theme_color": "#e8b84b",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "background_color": "#0D1117",
+  "theme_color": "#0D1117",
   "orientation": "portrait-primary",
+  "lang": "ja",
+  "dir": "ltr",
+  "categories": ["productivity", "lifestyle", "education"],
+  "prefer_related_applications": false,
   "icons": [
-    {"src":"/icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
-    {"src":"/apple-touch-icon.png","sizes":"180x180","type":"image/png"}
+    {"src":"/icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"/icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"maskable"},
+    {"src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+    {"src":"/apple-touch-icon.png","sizes":"180x180","type":"image/png","purpose":"any"}
+  ],
+  "shortcuts": [
+    {
+      "name": "ホーム",
+      "short_name": "ホーム",
+      "description": "ホーム画面でAIに相談",
+      "url": "/?action=home",
+      "icons": [{"src":"/icons/icon-192.png","sizes":"192x192"}]
+    },
+    {
+      "name": "新規ゴール",
+      "short_name": "新規ゴール",
+      "description": "新しいゴールを作成",
+      "url": "/?action=new-goal",
+      "icons": [{"src":"/icons/icon-192.png","sizes":"192x192"}]
+    }
   ]
 }

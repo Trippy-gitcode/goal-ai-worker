@@ -13,7 +13,8 @@
   - `@supports (interactive-widget: resizes-content)` 同等の feature detection も
     visualViewport 経由で graceful degrade (Safari iOS 13+ で動作)。
 -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- DQF-V3 (2026-05-03): user-scalable=yes / maximum-scale=5 で WCAG 1.4.4 zoom up to 200% 確保 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes, maximum-scale=5">
 <script src="js/visual-viewport-keyboard.js" defer></script>
 <meta property="og:title" content="GOAL AI - AIゴールコーチング">
 <meta property="og:description" content="ゴールだけ教えてくれればいい。3つのAIがあなたの目標達成をサポートします。">
@@ -25,12 +26,17 @@
 <!-- PWA -->
 <link rel="manifest" href="/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GOAL AI">
+<meta name="format-detection" content="telephone=no">
+<meta name="color-scheme" content="dark light">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
-<meta name="theme-color" content="#e8b84b">
+<!-- DQF-V3: theme-color light/dark で OS chrome 自動追従 -->
+<meta name="theme-color" content="#0D1117" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
 <script src="js/fontsize-init.js"></script>
 <!-- system fonts only — no external load needed -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
@@ -207,7 +213,7 @@
       <span style="color:var(--muted3);" aria-hidden="true">|</span>
       <a href="tokushoho.html" target="_blank" rel="noopener noreferrer" aria-label="特定商取引法に基づく表記を新しいタブで開く">特商法</a>
       <span style="color:var(--muted3);" aria-hidden="true">|</span>
-      <span class="version" data-app-version="4.0.90" title="タップで更新確認" role="button" tabindex="0" aria-label="バージョン v4.0.90。タップで更新確認" onclick="checkForUpdate()" style="cursor:pointer;">v4.0.90</span>
+      <span class="version" data-app-version="4.0.91" title="タップで更新確認" role="button" tabindex="0" aria-label="バージョン v4.0.91。タップで更新確認" onclick="checkForUpdate()" style="cursor:pointer;">v4.0.91</span>
     </div>
   </footer>
 </aside>
