@@ -398,13 +398,17 @@ function cycleStatus(e, taskId){
   }
 }
 
-function addTask(phaseNum){
-  const title = prompt('タスク名を入力してください:');
-  if(!title) return;
+// INTERACTION-V3 FIX-15: native prompt() 代替
+async function addTask(phaseNum){
+  const title = await (typeof promptModal === 'function'
+    ? promptModal('タスク名を入力してください:', '', { placeholder:'例: 提案資料のドラフト作成' })
+    : Promise.resolve(prompt('タスク名を入力してください:')));
+  if(!title || !title.trim()) return;
   const phases = getActiveGoalPhases();
   const phase = phases.find(p=>p.phase===phaseNum);
+  if(!phase){ toast('Phase が見つかりません'); return; }
   const newId = 't_' + Date.now();
-  phase.tasks.push({id:newId, title, status:'todo', due:'', priority:'mid', note:'', chatLog:[],
+  phase.tasks.push({id:newId, title:title.trim(), status:'todo', due:'', priority:'mid', note:'', chatLog:[],
     deadline:null, context:null, risk:null, worst_case:null, estimated_minutes:null,
     location:null, time_constraint:null, dependencies:[], energy_level:null, repeatable:null, priority_score:null
   });
@@ -1715,34 +1719,52 @@ function confirmDeleteGoal(){
 function closeDeleteModal(){
   document.getElementById('modal-delete-goal').style.display='none';
 }
-function executeDeleteGoal(){
-  const idx = hubGoalIdx;
-  const goal = ALL_GOALS[idx];
-  if(!goal){ closeDeleteModal(); return; }
+// INTERACTION-V3 FIX-1+5: 連打防止 + apiDeleteGoal の silent fail 撲滅
+let _executeDeleteGoalLock = false;
+async function executeDeleteGoal(){
+  if(_executeDeleteGoalLock) return;
+  _executeDeleteGoalLock = true;
+  const delBtn = document.querySelector('#modal-delete-goal [onclick*="executeDeleteGoal"]');
+  if(delBtn) delBtn.disabled = true;
+  try {
+    const idx = hubGoalIdx;
+    const goal = ALL_GOALS[idx];
+    if(!goal){ closeDeleteModal(); return; }
 
-  // Supabaseから削除
-  if (goal.supabaseId) {
-    apiDeleteGoal(goal.supabaseId);
+    // Supabaseから削除 — error 時は user 可視化 (削除自体は local では成功)
+    let serverDeleted = true;
+    if (goal.supabaseId) {
+      try {
+        await apiDeleteGoal(goal.supabaseId);
+      } catch(e){
+        serverDeleted = false;
+        console.error('[executeDeleteGoal sync]', e);
+      }
+    }
+
+    // Remove from array
+    ALL_GOALS.splice(idx, 1);
+
+    // Clean up associated state
+    delete hubChatHistories[goal.id];
+    delete hubChatMsgs[goal.id];
+    delete hubMemos[goal.id];
+
+    closeDeleteModal();
+
+    // Rebuild sidebar goal cards
+    renderSidebarGoals();
+
+    // Go back to home
+    goPage('home');
+    toast(serverDeleted ? `「${goal.title}」を削除しました` : `「${goal.title}」を削除しました（サーバー同期は次回再試行）`);
+  } finally {
+    _executeDeleteGoalLock = false;
+    if(delBtn) delBtn.disabled = false;
   }
-
-  // Remove from array
-  ALL_GOALS.splice(idx, 1);
-
-  // Clean up associated state
-  delete hubChatHistories[goal.id];
-  delete hubChatMsgs[goal.id];
-  delete hubMemos[goal.id];
-
-  closeDeleteModal();
-
-  // Rebuild sidebar goal cards
-  renderSidebarGoals();
-
-  // Go back to home
-  goPage('home');
-  toast(`「${goal.title}」を削除しました`);
 }
 
+// INTERACTION-V3 FIX-5: silent fail 撲滅 — archive sync 失敗時も user に notify
 function archiveGoal(reason){
   const goal = ALL_GOALS[hubGoalIdx];
   if(!goal) return;
@@ -1751,7 +1773,10 @@ function archiveGoal(reason){
   goal.archivedAt = new Date().toISOString();
   // Supabaseに同期
   if (goal.supabaseId) {
-    apiUpdateGoal(goal.supabaseId, { status: 'archived' });
+    apiUpdateGoal(goal.supabaseId, { status: 'archived' }).catch(e => {
+      console.error('[archiveGoal sync]', e);
+      toast('アーカイブはローカル保存しました（サーバー同期は次回再試行）');
+    });
   }
   renderSidebarGoals();
   renderArchiveList();  // update count badge
@@ -2085,14 +2110,29 @@ function showMilestoneCard(goal, pct){
   setTimeout(()=>{if(card.parentNode)card.remove();}, 15000);
 }
 
+// INTERACTION-V3 FIX-9: silent fail 撲滅 — share failure 時 toast + clipboard fallback
 function shareMilestone(title, pct, method){
   const text = `【GOAL AI】「${title}」${pct}%達成！\n#GOALAI #目標達成`;
   if(method==='twitter'){
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,'_blank');
+    const w = window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,'_blank');
+    if(!w){ toast('ポップアップがブロックされました'); }
   } else if(method==='copy'){
-    navigator.clipboard?.writeText(text).then(()=>toast('コピーしました'));
-  } else if(method==='native' && navigator.share){
-    navigator.share({title:'GOAL AI マイルストーン',text}).catch(()=>{});
+    navigator.clipboard?.writeText(text).then(()=>toast('コピーしました')).catch(e => {
+      console.error('[shareMilestone copy]', e);
+      toast('コピーに失敗しました');
+    });
+  } else if(method==='native'){
+    if(typeof safeShare === 'function'){
+      safeShare({title:'GOAL AI マイルストーン', text}, text);
+    } else if(navigator.share){
+      navigator.share({title:'GOAL AI マイルストーン',text}).catch(e => {
+        if(e?.name !== 'AbortError'){
+          navigator.clipboard?.writeText(text).then(()=>toast('共有メニューを開けませんでした。コピーしました'));
+        }
+      });
+    } else {
+      navigator.clipboard?.writeText(text).then(()=>toast('コピーしました'));
+    }
   } else {
     navigator.clipboard?.writeText(text).then(()=>toast('コピーしました'));
   }

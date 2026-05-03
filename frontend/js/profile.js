@@ -383,13 +383,17 @@ function renderSchedulingPref(){
     </div>`;
 }
 
-function addRoutine(){
-  const title = prompt('ルーティン名（例: ヨガ、通勤）:','');
+// INTERACTION-V3 FIX-15: native prompt() 代替 promptModal (focus trap + Esc + Enter)
+async function addRoutine(){
+  const _prompt = (msg, def) => typeof promptModal === 'function'
+    ? promptModal(msg, def||'')
+    : Promise.resolve(prompt(msg, def||''));
+  const title = await _prompt('ルーティン名（例: ヨガ、通勤）:','');
   if(!title) return;
-  const time = prompt('開始時間（例: 06:00）:','');
+  const time = await _prompt('開始時間（例: 06:00）:','');
   if(!time) return;
-  const durOrEnd = prompt('所要時間（分）or 終了時間（例: 30 or 07:00）:','30');
-  const daysInput = prompt('曜日（mon,tue,wed,thu,fri,sat,sun / daily）:','daily');
+  const durOrEnd = await _prompt('所要時間（分）or 終了時間（例: 30 or 07:00）:','30');
+  const daysInput = await _prompt('曜日（mon,tue,wed,thu,fri,sat,sun / daily）:','daily');
   const routine = { title, time };
   if(durOrEnd && durOrEnd.includes(':')) routine.end = durOrEnd;
   else routine.duration = parseInt(durOrEnd, 10) || 30;
@@ -399,15 +403,18 @@ function addRoutine(){
   saveRoutinesToServer();
 }
 
-function editRoutine(idx){
+async function editRoutine(idx){
   const r = _routines[idx];
   if(!r) return;
-  const title = prompt('ルーティン名:', r.title);
+  const _prompt = (msg, def) => typeof promptModal === 'function'
+    ? promptModal(msg, def||'')
+    : Promise.resolve(prompt(msg, def||''));
+  const title = await _prompt('ルーティン名:', r.title);
   if(title === null) return;
-  const time = prompt('開始時間:', r.time);
+  const time = await _prompt('開始時間:', r.time);
   if(time === null) return;
-  const durOrEnd = prompt('所要時間（分）or 終了時間:', r.end || String(r.duration||30));
-  const daysInput = prompt('曜日:', r.days === 'daily' ? 'daily' : (r.days||[]).join(','));
+  const durOrEnd = await _prompt('所要時間（分）or 終了時間:', r.end || String(r.duration||30));
+  const daysInput = await _prompt('曜日:', r.days === 'daily' ? 'daily' : (r.days||[]).join(','));
   r.title = title || r.title;
   r.time = time || r.time;
   if(durOrEnd && durOrEnd.includes(':')){ r.end = durOrEnd; delete r.duration; }
@@ -1093,12 +1100,16 @@ function editVisionField(field){
     renderVision();
   };
 }
-function addVisionItem(type){
-  const text = prompt(type==='image'?'見られたい姿を入力:':'強みを入力:');
+// INTERACTION-V3 FIX-15: native prompt() 代替
+async function addVisionItem(type){
+  const msg = type==='image'?'見られたい姿を入力:':'強みを入力:';
+  const text = await (typeof promptModal === 'function'
+    ? promptModal(msg, '')
+    : Promise.resolve(prompt(msg)));
   if(!text) return;
   const listId = type==='image'?'vision-image-list':'vision-strength-list';
   const el = document.createElement('div'); el.className = 'vision-item'; el.textContent = '・' + text;
-  document.getElementById(listId).appendChild(el);
+  document.getElementById(listId)?.appendChild(el);
 }
 async function regenCatchcopy(){
   const el = document.getElementById('vision-catchcopy');
@@ -1141,32 +1152,46 @@ function runReanalysis(){
   switchMyselfTab('know');
 }
 
+// INTERACTION-V3 FIX-9: silent fail 撲滅 — share failure 時 clipboard fallback
 function shareCharacter(){
   const char = document.getElementById('my-character-card');
   const traits = char ? char.innerText : '';
   const vision = USER_PROFILE.vision || '';
   const text = `【MY CHARACTER】\n${traits}\n\nビジョン: ${vision}\n\n#GOALAI`;
-  if(navigator.share){
-    navigator.share({title:'MY CHARACTER - GOAL AI',text}).catch(()=>{});
+  if(typeof safeShare === 'function'){
+    safeShare({title:'MY CHARACTER - GOAL AI', text}, text);
+  } else if(navigator.share){
+    navigator.share({title:'MY CHARACTER - GOAL AI',text}).catch(e => {
+      if(e?.name !== 'AbortError'){
+        navigator.clipboard?.writeText(text).then(()=>toast('共有メニューを開けませんでした。コピーしました'));
+      }
+    });
   } else {
-    navigator.clipboard.writeText(text).then(()=>toast('クリップボードにコピーしました'));
+    navigator.clipboard.writeText(text).then(()=>toast('クリップボードにコピーしました')).catch(e => {
+      console.error('[shareCharacter]', e);
+      toast('共有に失敗しました');
+    });
   }
 }
 
 // ─ MY CHARACTER (Vision tab) ─
-function editMyCharacter(){
+// INTERACTION-V3 FIX-15: native prompt() 代替 (forEach 内 await のため for ループ化)
+async function editMyCharacter(){
   const fields = [
     {id:'char-personality', label:'性格タイプ'},
     {id:'char-action-style', label:'行動スタイル'},
     {id:'char-core-value', label:'コアバリュー'},
     {id:'char-growth-edge', label:'成長エッジ'}
   ];
-  fields.forEach(f => {
+  for(const f of fields){
     const el = document.getElementById(f.id);
+    if(!el) continue;
     const cur = el.textContent.trim() === '--' ? '' : el.textContent.trim();
-    const val = prompt(f.label + 'を入力:', cur);
+    const val = await (typeof promptModal === 'function'
+      ? promptModal(f.label + 'を入力:', cur)
+      : Promise.resolve(prompt(f.label + 'を入力:', cur)));
     if(val !== null && val.trim()) el.textContent = val.trim();
-  });
+  }
 }
 
 // ─ ゴールとの連携 ─

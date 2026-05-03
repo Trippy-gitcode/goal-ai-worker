@@ -54,8 +54,18 @@ function startReview() {
 // ════════ WELCOME / NEW GOAL ════════
 function showWelcome(){goPage('welcome');}
 function setEx(t){document.getElementById('wlc-in').value=t;document.getElementById('wlc-in').focus();}
+// INTERACTION-V3 FIX-2: double-click prevention + error UI
+let _startGoalLock = false;
 async function startGoal(){
-  const v=document.getElementById('wlc-in').value.trim();if(!v)return;
+  const inp = document.getElementById('wlc-in');
+  const v = inp?.value.trim();
+  if(!v) return;
+  if(_startGoalLock) return; // FIX-1: 連打 BLOCK
+  _startGoalLock = true;
+
+  // FIX-6: 全 trigger button を disable + spinner cue
+  const triggerBtns = document.querySelectorAll('[onclick*="startGoal"]');
+  triggerBtns.forEach(b => { b.disabled = true; b.dataset.busy = '1'; });
 
   // Supabaseにゴール作成
   const colors = ['var(--amber)','var(--blue)','var(--green)','var(--purple)','var(--orange)'];
@@ -67,11 +77,19 @@ async function startGoal(){
   };
 
   if (AUTH_TOKEN) {
-    const saved = await apiCreateGoal(v);
-    if (saved) {
-      goalObj.id = saved.id;
-      goalObj.supabaseId = saved.id;
-      goalObj.deadline = saved.target_date || null;
+    try {
+      const saved = await apiCreateGoal(v);
+      if (saved) {
+        goalObj.id = saved.id;
+        goalObj.supabaseId = saved.id;
+        goalObj.deadline = saved.target_date || null;
+      } else {
+        // FIX-5: silent fail 撲滅 — apiCreateGoal failed = error toast 表示済 (api.js)
+        // ローカルゴールとして続行 (UX 中断回避)
+      }
+    } catch(e){
+      toast('ゴール作成に失敗しました。ローカル保存します');
+      console.error('[startGoal]', e);
     }
   }
 
@@ -121,11 +139,32 @@ async function startGoal(){
         if(goalObj.supabaseId) apiSaveMessages([{role:'assistant',content:t,goalId:goalObj.supabaseId,aiModel:'claude',messageType:'hub_chat'}]);
       }
     });
-  }catch(e){}finally{
+  }catch(e){
+    // FIX-5: silent fail 撲滅 — error UI を表示
+    const inner = document.getElementById('hub-chat-inner');
+    if(inner){
+      const errEl = document.createElement('div');
+      errEl.className = 'msg ai';
+      errEl.innerHTML = `<div class="msg-body"><div class="bubble" style="color:var(--red)">AI 応答の取得に失敗しました。もう一度お試しください。</div></div>`;
+      inner.appendChild(errEl);
+    } else {
+      toast('AI 応答の取得に失敗しました');
+    }
+    console.error('[startGoal stream]', e);
+  }finally{
     hubChatLoading = false;
+    // FIX-1: lock 解放 + button restore
+    _startGoalLock = false;
+    triggerBtns.forEach(b => { b.disabled = false; b.dataset.busy = ''; });
   }
 }
-document.getElementById('wlc-in').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&!_isComposing)startGoal();});
+// FIX-2: Enter キー時も lock check (連打防止)
+document.getElementById('wlc-in')?.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && !e.isComposing && !_isComposing && !_startGoalLock){
+    e.preventDefault();
+    startGoal();
+  }
+});
 
 
 // ════════ VOICE INPUT（ハイブリッド：Web Speech API + Whisper + 音量連動）════════
@@ -1084,22 +1123,35 @@ async function sendHomeMsg(){
   const homeWrap = document.getElementById('home-chat-wrap');
 
   // Deep analysis check
+  // INTERACTION-V3 FIX-6: try/catch wrap で deep path failure 時も button restore
   if(text && !homeImageData && isDeepAnalysisNeeded(text) && AUTH_TOKEN){
     showDeepConfirm('home-chat-inner', 'home-chat-wrap',
       async () => {
-        await runDeepAnalysis(text, 'home-chat-inner', 'home-chat-wrap', (results) => {
-          if(results){
-            renderDeepResult('home-chat-inner', 'home-chat-wrap', results, text);
-            homeMsgs.push({role:'ai', content:`【ディープ分析完了】${results.finalOutput.slice(0,200)}…`, time:now(), date:today});
-            homeHistory.push({role:'assistant', content:results.finalOutput});
-            saveHomeMsgs();
-          }
+        try {
+          await runDeepAnalysis(text, 'home-chat-inner', 'home-chat-wrap', (results) => {
+            if(results){
+              renderDeepResult('home-chat-inner', 'home-chat-wrap', results, text);
+              homeMsgs.push({role:'ai', content:`【ディープ分析完了】${results.finalOutput.slice(0,200)}…`, time:now(), date:today});
+              homeHistory.push({role:'assistant', content:results.finalOutput});
+              saveHomeMsgs();
+            }
+            homeLoading = false; homeSendRestore();
+          });
+        } catch(e){
+          toast('ディープ分析でエラーが発生しました');
+          console.error('[deepAnalysis]', e);
           homeLoading = false; homeSendRestore();
-        });
+        }
       },
       async () => {
-        await homeClaudeStream(today, homeInner, homeWrap);
-        homeLoading = false; homeSendRestore();
+        try {
+          await homeClaudeStream(today, homeInner, homeWrap);
+        } catch(e){
+          toast('通信エラーが発生しました');
+          console.error('[homeClaudeStream-fallback]', e);
+        } finally {
+          homeLoading = false; homeSendRestore();
+        }
       }
     );
     return;
@@ -1112,11 +1164,15 @@ async function sendHomeMsg(){
     // Phase 3: token到着→カーソル点滅(blink)→完了で消去
     await homeClaudeStream(today, homeInner, homeWrap);
   }catch(e){
+    // INTERACTION-V3 FIX-5+6: silent fail 撲滅 + retry button 提供
+    console.error('[sendHomeMsg]', e);
     const errBub = document.createElement('div');
     errBub.className = 'msg ai';
     errBub.style.marginBottom = '16px';
-    errBub.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="color:var(--red)">通信エラーが発生しました。もう一度お試しください。</div></div>`;
+    const retryEsc = (text||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    errBub.innerHTML = `<div class="msg-av ai">${getLogoSVG(14)}</div><div class="msg-body"><div class="bubble" style="color:var(--red)">通信エラーが発生しました。もう一度お試しください。<br><button onclick="document.getElementById('home-msg-in').value='${retryEsc}';sendHomeMsg();this.closest('.msg').remove();" style="margin-top:8px;padding:6px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--cream);cursor:pointer;font-size:12px;">再送信</button></div></div>`;
     homeInner.appendChild(errBub);
+    if(homeWrap) homeWrap.scrollTop = homeWrap.scrollHeight;
   }finally{
     homeLoading = false; homeSendRestore();
   }
@@ -1744,13 +1800,21 @@ function closeChatHistory(){
   const topicTags = document.getElementById('home-topic-tags');
   if(topicTags) topicTags.style.display = '';
 }
+// INTERACTION-V3 FIX-10: confirm 代替 + silent fail 撲滅
 async function deleteChatSession(sessionId){
-  if(!confirm('この会話を削除しますか？')) return;
-  try{ await fetch(`${WORKER_URL}/api/history?sessionId=${sessionId}`, {method:'DELETE',headers:getAuthHeaders()}); }catch(e){}
+  const ok = await (typeof confirmModal === 'function'
+    ? confirmModal('この会話を削除しますか？', { okText:'削除', danger:true })
+    : Promise.resolve(confirm('この会話を削除しますか？')));
+  if(!ok) return;
+  let serverDeleted = true;
+  try {
+    const res = await fetch(`${WORKER_URL}/api/history?sessionId=${sessionId}`, {method:'DELETE',headers:getAuthHeaders()});
+    if(!res.ok) serverDeleted = false;
+  } catch(e){ serverDeleted = false; console.error('[deleteChatSession]', e); }
   chatSessions = chatSessions.filter(s=>s.sessionId!==sessionId);
   renderChatHistoryList(chatSessions);
   renderSidebarChatRecords();
-  toast('会話を削除しました');
+  toast(serverDeleted ? '会話を削除しました' : '会話を削除しました（サーバー同期は次回再試行）');
 }
 function isJunkSession(s) {
   const p = (s.firstMsg || s.title || '').trim();
@@ -1788,7 +1852,11 @@ function filterChatHistory(q){
   const filtered = chatSessions.filter(s => (s.firstMsg||'').includes(q));
   renderChatHistoryList(filtered);
 }
+// INTERACTION-V3 FIX-9: race condition 防止 (連打 BLOCK) + error UI 強化
+let _loadChatSessionLock = null;
 async function loadChatSession(sessionId){
+  if(_loadChatSessionLock === sessionId) return; // 同 session 連打 BLOCK
+  _loadChatSessionLock = sessionId;
   closeSidebar();
   closeChatHistory();
   goPage('home');
@@ -1797,6 +1865,10 @@ async function loadChatSession(sessionId){
   if(inner) inner.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">読み込み中…</div>';
   try {
     const res = await fetch(`${WORKER_URL}/api/history?sessionId=${sessionId}&limit=200`, {headers: getAuthHeaders()});
+    if(!res.ok){
+      // FIX-5: silent fail 撲滅 — HTTP error status を可視化
+      throw new Error(`HTTP ${res.status}`);
+    }
     const data = await res.json();
     const messages = data.messages || []; // APIがcreated_at.ascで返す
     homeMsgs = [];
@@ -1815,7 +1887,16 @@ async function loadChatSession(sessionId){
       toast('この会話のメッセージを読み込めませんでした');
     }
     renderHomeMsgs();
-  } catch(e) { toast('会話の読み込みに失敗しました'); renderHomeMsgs(); }
+  } catch(e) {
+    toast('会話の読み込みに失敗しました');
+    console.error('[loadChatSession]', e);
+    if(inner){
+      inner.innerHTML = `<div style="text-align:center;padding:40px;color:var(--red);font-size:13px;">読み込みに失敗しました<br><button onclick="loadChatSession('${sessionId}')" style="margin-top:12px;padding:8px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--cream);cursor:pointer;">再試行</button></div>`;
+    }
+    renderHomeMsgs();
+  } finally {
+    _loadChatSessionLock = null;
+  }
 }
 
 // ═══ BATCH DELETE CHAT HISTORY ═══
@@ -1858,21 +1939,39 @@ function toggleSelectAll() {
   updateSelectFooter();
 }
 
+// INTERACTION-V3 FIX-10: confirm 代替 + silent fail 撲滅 + 連打防止
+let _deleteSessionsLock = false;
 async function deleteSelectedSessions() {
   if (selectedSessions.size === 0) return;
-  if (!confirm(`${selectedSessions.size}件の会話を削除しますか？`)) return;
-  for (const sid of selectedSessions) {
-    try { await fetch(`${WORKER_URL}/api/history?sessionId=${sid}`, {method:'DELETE', headers:getAuthHeaders()}); } catch(e) {}
+  if (_deleteSessionsLock) return;
+  _deleteSessionsLock = true;
+  const delBtn = document.getElementById('delete-selected-btn');
+  if(delBtn) delBtn.disabled = true;
+  try {
+    const ok = await (typeof confirmModal === 'function'
+      ? confirmModal(`${selectedSessions.size}件の会話を削除しますか？`, { okText:'削除', danger:true })
+      : Promise.resolve(confirm(`${selectedSessions.size}件の会話を削除しますか？`)));
+    if(!ok) return;
+    let failedCount = 0;
+    for (const sid of selectedSessions) {
+      try {
+        const res = await fetch(`${WORKER_URL}/api/history?sessionId=${sid}`, {method:'DELETE', headers:getAuthHeaders()});
+        if(!res.ok) failedCount++;
+      } catch(e) { failedCount++; console.error('[deleteSelectedSessions]', e); }
+    }
+    // ローカルのリストからも削除
+    chatSessions = chatSessions.filter(s => !selectedSessions.has(s.sessionId));
+    selectedSessions.clear();
+    historySelectMode = false;
+    renderChatHistoryList(chatSessions);
+    renderSidebarChatRecords();
+    const footer = document.getElementById('history-select-footer');
+    if (footer) footer.style.display = 'none';
+    toast(failedCount > 0 ? `削除しました（${failedCount}件は同期失敗）` : '会話を削除しました');
+  } finally {
+    _deleteSessionsLock = false;
+    if(delBtn) delBtn.disabled = false;
   }
-  // ローカルのリストからも削除
-  chatSessions = chatSessions.filter(s => !selectedSessions.has(s.sessionId));
-  selectedSessions.clear();
-  historySelectMode = false;
-  renderChatHistoryList(chatSessions);
-  renderSidebarChatRecords();
-  const footer = document.getElementById('history-select-footer');
-  if (footer) footer.style.display = 'none';
-  toast('会話を削除しました');
 }
 
 // ═══ FREE MODEL USAGE BADGE ═══
@@ -2146,16 +2245,25 @@ function openHomeTaskPanel(item){
 }
 
 // UX-02: タスク削除
-function htpDeleteTask(){
+// INTERACTION-V3 FIX-10: native confirm() 代替 modal、 silent fail 撲滅
+async function htpDeleteTask(){
   if(!htpTask) return;
-  if(!confirm(`「${htpTask.title}」を削除しますか？`)) return;
+  const ok = await (typeof confirmModal === 'function'
+    ? confirmModal(`「${htpTask.title}」を削除しますか？`, { okText:'削除', danger:true })
+    : Promise.resolve(confirm(`「${htpTask.title}」を削除しますか？`)));
+  if(!ok) return;
+  let savePromise = null;
   for(const goal of ALL_GOALS){
     for(const phase of (goal.phases||[])){
       const idx = phase.tasks.indexOf(htpTask);
       if(idx >= 0){
         phase.tasks.splice(idx, 1);
         if(goal.supabaseId){
-          apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(()=>{});
+          // FIX-5: silent fail 撲滅 — error 時 toast
+          savePromise = apiUpdateGoal(goal.supabaseId, { phases: goal.phases }).catch(e => {
+            console.error('[htpDeleteTask sync]', e);
+            toast('サーバー同期失敗。次回オンライン時に再試行されます');
+          });
         }
         break;
       }
@@ -2503,10 +2611,17 @@ function correctFeedback(){
   fbThemes = {good:null, bad:null, wish:null};
 }
 
+// INTERACTION-V3 FIX-1+5+6: 連打防止 + try/finally で button restore + HTTP error 検知
+let _submitFeedbackLock = false;
 async function submitFeedback(){
   if(!AUTH_TOKEN){ toast('ログインが必要です'); return; }
+  if(_submitFeedbackLock) return;
+  _submitFeedbackLock = true;
+  // 全 send button を disable (重複送信防止)
+  const sendBtns = document.querySelectorAll('[onclick*="submitFeedback"], #fb-send-btn');
+  sendBtns.forEach(b => { b.disabled = true; });
   try {
-    await fetch(`${WORKER_URL}/api/feedbacks`,{
+    const res = await fetch(`${WORKER_URL}/api/feedbacks`,{
       method:'POST', headers:getAuthHeaders(),
       body: JSON.stringify({
         summary: fbSummary,
@@ -2517,11 +2632,19 @@ async function submitFeedback(){
         tester_tier: MEMBERSHIP.tester_tier || null,
       })
     });
+    if(!res.ok){
+      // FIX-5: silent fail 撲滅 — HTTP error を可視化
+      throw new Error(`HTTP ${res.status}`);
+    }
     toast('フィードバックを送信しました ✓');
     document.getElementById('feedback-input-area').style.display = 'none';
     appendFbMsg('ai', 'ありがとうございます！改善に活かします 🙏');
   } catch(e){
-    toast('送信に失敗しました');
+    toast('送信に失敗しました。再試行してください');
+    console.error('[submitFeedback]', e);
+  } finally {
+    _submitFeedbackLock = false;
+    sendBtns.forEach(b => { b.disabled = false; });
   }
 }
 

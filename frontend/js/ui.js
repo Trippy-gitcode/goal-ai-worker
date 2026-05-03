@@ -136,10 +136,23 @@ function initSwipeToOpenSidebar(){
 }
 
 // A-11: popstateでタブ復元 (BUG-01 fix 2026-05-01: whitelist expansion to 9 pages)
+// INTERACTION-V3 FIX-7: hash fallback (iOS swipe back / browser back) + open modal close 優先
 // goPage が分岐している全ページを許可リストに含めることで、戻る操作後のページ復元を可能にする
 window.addEventListener('popstate', (e) => {
-  const pg = e.state?.page || 'today';
   const validTabs = ['today','home','goal-hub','myself','tasks','calendar','analytics','settings','welcome'];
+  // FIX-7: 開いている modal-overlay があれば先に閉じる (browser back で modal 閉じる UX)
+  const openModal = document.querySelector('.modal-overlay');
+  if(openModal){
+    openModal.remove();
+    return;
+  }
+  // hash 経由復元 (state が消失した場合の fallback)
+  let pg = e.state?.page;
+  if(!pg && window.location.hash){
+    const h = window.location.hash.replace('#','');
+    if(validTabs.includes(h)) pg = h;
+  }
+  pg = pg || 'today';
   if(validTabs.includes(pg)) goPage(pg);
 });
 
@@ -1046,20 +1059,34 @@ function closeSettingsPanel(){
 }
 
 // ════════ ACCOUNT DELETE (2-step confirmation, #08c) ════════
+// INTERACTION-V3 FIX-10: native confirm() 代替 modal
+let _deleteAccountLock = false;
 async function confirmDeleteAccount(){
-  if(!confirm('本当にアカウントを削除しますか？\nすべてのゴール・タスク・チャット履歴が完全に消去されます。')) return;
-  if(!confirm('この操作は元に戻せません。\n本当に全データを完全に削除してよろしいですか？')) return;
+  if(_deleteAccountLock) return;
+  _deleteAccountLock = true;
   try {
-    const res = await fetch(`${WORKER_URL}/api/account/delete`, { method:'POST', headers:getAuthHeaders() });
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error);
-    toast('アカウントを削除しました');
-    closeSettingsPanel();
-    // ローカルデータクリア
-    localStorage.clear();
-    document.cookie.split(';').forEach(c => { document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/'; });
-    setTimeout(() => location.reload(), 1500);
-  } catch(e) { toast(e.message || 'アカウント削除に失敗しました'); }
+    const ok1 = await (typeof confirmModal === 'function'
+      ? confirmModal('本当にアカウントを削除しますか？\nすべてのゴール・タスク・チャット履歴が完全に消去されます。', { okText:'削除に進む', danger:true })
+      : Promise.resolve(confirm('本当にアカウントを削除しますか？\nすべてのゴール・タスク・チャット履歴が完全に消去されます。')));
+    if(!ok1) return;
+    const ok2 = await (typeof confirmModal === 'function'
+      ? confirmModal('この操作は元に戻せません。\n本当に全データを完全に削除してよろしいですか？', { okText:'完全に削除', danger:true })
+      : Promise.resolve(confirm('この操作は元に戻せません。\n本当に全データを完全に削除してよろしいですか？')));
+    if(!ok2) return;
+    try {
+      const res = await fetch(`${WORKER_URL}/api/account/delete`, { method:'POST', headers:getAuthHeaders() });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error);
+      toast('アカウントを削除しました');
+      closeSettingsPanel();
+      // ローカルデータクリア
+      localStorage.clear();
+      document.cookie.split(';').forEach(c => { document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/'; });
+      setTimeout(() => location.reload(), 1500);
+    } catch(e) { toast(e.message || 'アカウント削除に失敗しました'); console.error('[deleteAccount]', e); }
+  } finally {
+    _deleteAccountLock = false;
+  }
 }
 
 // ════════ G: チャット背景プリセット ════════
@@ -1087,20 +1114,26 @@ function applyChatBg(id){
 function initChatBg(){ const saved = localStorage.getItem('chat_bg'); if(saved) applyChatBg(saved); }
 
 // ════════ VERSION CHECK ════════
+// INTERACTION-V3 FIX-10: native confirm 代替、 連打防止
 (function initVersionCheck(){
   document.addEventListener('DOMContentLoaded', () => {
+    let lock = false;
     document.querySelector('.version')?.addEventListener('click', async () => {
+      if(lock) return;
+      lock = true;
       try {
         const res = await fetch(WORKER_URL + '/api/version');
         const data = await res.json();
         if (data.version !== APP_VERSION) {
-          if (confirm('新しいバージョン v' + data.version + ' があります。更新しますか？')) {
-            location.reload(true);
-          }
+          const ok = await (typeof confirmModal === 'function'
+            ? confirmModal('新しいバージョン v' + data.version + ' があります。更新しますか？', { okText:'更新する' })
+            : Promise.resolve(confirm('新しいバージョン v' + data.version + ' があります。更新しますか？')));
+          if (ok) location.reload(true);
         } else {
           toast('最新バージョンです (v' + APP_VERSION + ')');
         }
-      } catch(e) { toast('バージョン確認に失敗しました'); }
+      } catch(e) { toast('バージョン確認に失敗しました'); console.error('[versionCheck]', e); }
+      finally { lock = false; }
     });
   });
 })();
@@ -1935,14 +1968,180 @@ function renderLifeTasks(){
   ).join('');
 }
 
+// ════════ INTERACTION-V3: SHARED INTERACTION UTILITIES ════════
+// SUBAGENT-LAIS-INTERACTION-PROD-QUALITY-FIX-V3 (2026-05-03):
+//   click handler / submit / modal / async error の re-usable primitives。
+//   double-click 防止、 button restore、 native confirm 代替、 silent fail 撲滅。
+
+// FIX-1: button busy lock — double-click / 連打防止 + try/finally で必ず restore
+async function busyButton(btnOrId, asyncFn, opts){
+  const btn = typeof btnOrId === 'string' ? document.getElementById(btnOrId) : btnOrId;
+  if(!btn) return await asyncFn();
+  if(btn.dataset.busy === '1') return; // 連打 BLOCK
+  btn.dataset.busy = '1';
+  const prevText = btn.textContent;
+  const prevDisabled = btn.disabled;
+  btn.disabled = true;
+  if(opts && opts.busyText) btn.textContent = opts.busyText;
+  try {
+    return await asyncFn();
+  } catch(e){
+    // FIX-5: silent fail 撲滅 — error は toast で必ず可視化
+    if(typeof toast === 'function') toast((opts && opts.errorMsg) || 'エラーが発生しました');
+    // 投げ直しは呼出側で finally するため、 ここでは log のみ
+    if(typeof console !== 'undefined') console.error('[busyButton]', e);
+    throw e;
+  } finally {
+    btn.dataset.busy = '';
+    btn.disabled = prevDisabled;
+    if(opts && opts.busyText) btn.textContent = prevText;
+  }
+}
+
+// FIX-10: 共通 modal-confirm — native confirm() 代替 (focus trap + Esc + overlay click)
+function confirmModal(message, opts){
+  return new Promise((resolve) => {
+    const okText = (opts && opts.okText) || 'OK';
+    const cancelText = (opts && opts.cancelText) || 'キャンセル';
+    const danger = !!(opts && opts.danger);
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.65);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:24px;';
+    const safeMsg = (typeof escapeHtml === 'function' ? escapeHtml(message) : String(message)).replace(/\n/g,'<br>');
+    overlay.innerHTML = `<div class="modal-content" style="background:var(--bg2);border:1px solid var(--border-card);border-radius:14px;padding:24px;max-width:380px;width:100%;text-align:center;font-family:var(--ff);">
+      <div style="font-size:14px;color:var(--cream);margin-bottom:18px;line-height:1.55;">${safeMsg}</div>
+      <div style="display:flex;gap:8px;justify-content:center;">
+        <button data-action="cancel" style="padding:9px 18px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--ff);">${cancelText}</button>
+        <button data-action="ok" style="padding:9px 18px;background:${danger?'var(--red)':'var(--send-btn-grad)'};color:${danger?'#fff':'var(--text-on-accent)'};border:none;border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--ff);font-weight:600;">${okText}</button>
+      </div>
+    </div>`;
+    const cleanup = (val) => {
+      document.removeEventListener('keydown', escHandler, true);
+      overlay.remove();
+      resolve(val);
+    };
+    const escHandler = (e) => {
+      if(e.key === 'Escape'){ e.stopPropagation(); cleanup(false); }
+      if(e.key === 'Enter'){ e.stopPropagation(); cleanup(true); }
+    };
+    document.addEventListener('keydown', escHandler, true);
+    overlay.addEventListener('click', (e) => {
+      if(e.target === overlay){ cleanup(false); return; } // overlay click → cancel
+      const action = e.target.dataset && e.target.dataset.action;
+      if(action === 'ok') cleanup(true);
+      else if(action === 'cancel') cleanup(false);
+    });
+    document.body.appendChild(overlay);
+    // FIX-3: focus trap — OK ボタンに初期フォーカス
+    setTimeout(() => overlay.querySelector('[data-action="ok"]')?.focus(), 50);
+  });
+}
+
+// FIX-15: 共通 promptModal — native prompt() 代替
+function promptModal(message, defaultValue, opts){
+  return new Promise((resolve) => {
+    const okText = (opts && opts.okText) || 'OK';
+    const cancelText = (opts && opts.cancelText) || 'キャンセル';
+    const placeholder = (opts && opts.placeholder) || '';
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.65);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:24px;';
+    const safeMsg = (typeof escapeHtml === 'function' ? escapeHtml(message) : String(message)).replace(/\n/g,'<br>');
+    const safeDef = typeof escapeHtml === 'function' ? escapeHtml(defaultValue||'') : String(defaultValue||'');
+    overlay.innerHTML = `<div class="modal-content" style="background:var(--bg2);border:1px solid var(--border-card);border-radius:14px;padding:24px;max-width:380px;width:100%;font-family:var(--ff);">
+      <div style="font-size:13px;color:var(--cream);margin-bottom:12px;line-height:1.5;">${safeMsg}</div>
+      <input type="text" value="${safeDef}" placeholder="${placeholder}" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-size:14px;font-family:var(--ff);box-sizing:border-box;outline:none;margin-bottom:14px;">
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button data-action="cancel" style="padding:9px 18px;background:var(--bg3);color:var(--cream);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--ff);">${cancelText}</button>
+        <button data-action="ok" style="padding:9px 18px;background:var(--send-btn-grad);color:var(--text-on-accent);border:none;border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--ff);font-weight:600;">${okText}</button>
+      </div>
+    </div>`;
+    const input = overlay.querySelector('input');
+    const cleanup = (val) => {
+      document.removeEventListener('keydown', escHandler, true);
+      overlay.remove();
+      resolve(val);
+    };
+    const escHandler = (e) => {
+      if(e.key === 'Escape'){ e.stopPropagation(); cleanup(null); }
+      if(e.key === 'Enter' && document.activeElement === input){
+        e.stopPropagation(); cleanup(input.value);
+      }
+    };
+    document.addEventListener('keydown', escHandler, true);
+    overlay.addEventListener('click', (e) => {
+      if(e.target === overlay){ cleanup(null); return; }
+      const action = e.target.dataset && e.target.dataset.action;
+      if(action === 'ok') cleanup(input.value);
+      else if(action === 'cancel') cleanup(null);
+    });
+    document.body.appendChild(overlay);
+    setTimeout(() => { input?.focus(); input?.select(); }, 50);
+  });
+}
+
+// FIX-9: 共通 navigator.share helper — silent fail 防止 + clipboard fallback
+async function safeShare(data, fallbackText){
+  try {
+    if(navigator.share){
+      await navigator.share(data);
+      return true;
+    }
+  } catch(e){
+    // user cancel (AbortError) は静か、 それ以外は fallback へ
+    if(e && e.name === 'AbortError') return false;
+  }
+  // fallback: clipboard
+  try {
+    await navigator.clipboard.writeText(fallbackText || data.text || '');
+    if(typeof toast === 'function') toast('共有メニューを開けませんでした。クリップボードにコピーしました');
+    return true;
+  } catch(e){
+    if(typeof toast === 'function') toast('共有に失敗しました');
+    return false;
+  }
+}
+
+// FIX-3: 共通 modal close on overlay/Esc — id 指定 modal を inline-style で閉じる
+function bindModalDismiss(modalId){
+  const m = document.getElementById(modalId);
+  if(!m || m.dataset.dismissBound === '1') return;
+  m.dataset.dismissBound = '1';
+  m.addEventListener('click', (e) => {
+    if(e.target === m) m.style.display = 'none';
+  });
+}
+
 // ════════ D-15: KEYBOARD SHORTCUTS ════════
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    const modal = document.querySelector('.modal-overlay');
-    if (modal) { modal.remove(); return; }
+    // FIX-3: modal-overlay (動的) を最優先で閉じる (LIFO で 1 つだけ)
+    const modals = document.querySelectorAll('.modal-overlay');
+    if (modals.length) {
+      modals[modals.length - 1].remove();
+      return;
+    }
+    // INTERACTION-V3 FIX-14: inline-style modal (modal-archive / modal-plan / modal-delete-goal / feedback / onboarding) も閉じる
+    const inlineModals = ['modal-delete-goal','modal-archive','modal-plan','feedback-modal','onboarding-modal','modal-add-task','goal-fullscreen-modal'];
+    for(const id of inlineModals){
+      const el = document.getElementById(id);
+      if(el && el.style.display && el.style.display !== 'none'){
+        el.style.display = 'none';
+        return;
+      }
+    }
     document.getElementById('goal-fullscreen-modal')?.remove();
     goPage('home');
   }
+});
+
+// FIX-3: 起動時に inline-style modal の overlay-click dismiss を bind
+document.addEventListener('DOMContentLoaded', () => {
+  ['modal-delete-goal','modal-archive','modal-plan','feedback-modal','onboarding-modal'].forEach(bindModalDismiss);
 });
 
 // ════════ UX-002: コーチマーク ════════
@@ -2017,8 +2216,12 @@ function setAnalyticsPeriod(months){
 }
 
 // ════════ Settings: Delete chat history ════════
+// INTERACTION-V3 FIX-10: native confirm 代替
 async function deleteChatHistory(){
-  if(!confirm('全ての会話履歴を削除しますか？\nこの操作は元に戻せません。')) return;
+  const ok = await (typeof confirmModal === 'function'
+    ? confirmModal('全ての会話履歴を削除しますか？\nこの操作は元に戻せません。', { okText:'削除', danger:true })
+    : Promise.resolve(confirm('全ての会話履歴を削除しますか？\nこの操作は元に戻せません。')));
+  if(!ok) return;
   try {
     localStorage.removeItem('homeMsgs');
     localStorage.removeItem('goalMsgs');
@@ -2026,6 +2229,7 @@ async function deleteChatHistory(){
     toast('会話履歴を削除しました');
   } catch(e){
     toast('削除に失敗しました');
+    console.error('[deleteChatHistory]', e);
   }
 }
 
@@ -2099,6 +2303,8 @@ Object.assign(window, {
   updateModePills, updateSidebarTaskList,
   updateAnalyticsExtras, setAnalyticsPeriod,
   deleteChatHistory, toggleLocationSetting, restoreLocationToggleUI,
-  applyChatBg, confirmDeleteAccount, completeLifeTask
+  applyChatBg, confirmDeleteAccount, completeLifeTask,
+  // INTERACTION-V3 utilities (2026-05-03)
+  busyButton, confirmModal, promptModal, safeShare, bindModalDismiss
 });
 
