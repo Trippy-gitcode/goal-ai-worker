@@ -82,3 +82,40 @@ theme-apple (Apple 純正)、ユーザが S-30 Settings で切替可
 
 ### 新規発見 P0 (Phase A 中)
 - **CRITICAL**: scripts/migrate_stripe.js:7 に Supabase service password 平文 hardcode = git history leak。 PO-A-2026-05-02-01 として po-decisions.md 起票済、 即時 rotation 推奨。
+
+---
+
+## 2026-05-03 Update — Round 31 batch 32-41 + 5 persona aggregate
+
+### 本日 配備済 mechanical gate (3 つ新設)
+
+| gate | 名前 | 役割 | 配置 |
+|---|---|---|---|
+| G48 v4 | 行動ベース ADV 自律性 | PO 委譲 keyword 検出時、 同 turn の自律探索 tool 履歴を verify、 探索 0 + 委譲 keyword あれば BLOCK | scripts/adv_action_based_autonomy_check.sh |
+| G49 v2 | 言行一致 | forward-action keyword (続行 / 自律 / 即実行 / 着手 / 順次) + 同 turn の真 fix tool (Edit / Write / commit / push / wrangler / sed / Agent dispatch) 0 件 → BLOCK | scripts/adv_word_action_consistency_check.sh |
+| G50 v1 | production / source / commit SHA 三点照合 | source APP_VERSION × prod /api/version × local HEAD × origin/main の 4 点 mismatch 検出 | scripts/g50_prod_source_triple_verify.sh |
+
+### 本日 4-part format 記録 した 違反 (3 件 新規 + 13 件 backfill)
+
+- 違反 #50 (本日 Production deploy 17 batches NOT EFFECTIVE = source-vs-prod gap silent)
+- 違反 #51 (PO action ラベル / 言語のみ gate)
+- 違反 #52 (言行不一致 / 報告で停止 = #44 同型再生産)
+- 違反 #37-#43 / #46-#48 stub 後追記 (会話 reconstruct 困難分の transparency 担保)
+- 違反 #44 / #45 / #49 詳細追記
+
+### 5 persona aggregate 結果 (instructions/persona_review/2026-05-03/PERSONA-AGGREGATE__results.md)
+
+5 persona (信頼性 / 安全性 / 行動心理 / 開発手順 / PO advocate) 全員 「対策不十分 NO」。 計 25 ticket 起票:
+- ✅ 解消済 (本日 batch 32-41): silent fail || true 除去 / silent .catch 11 件 完全撲滅 / 違反 backfill / G50 三点照合 / G48 G49 bypass 厳格化
+- 残 critical: dev-system templates G15-G49 sync (subagent 経由) / G51 forcing function / G53 gate 自己 unit test / synthetic-monitor 5-fail counter / Wave 89 ticket 物理化
+
+### 本日 production 反映状態
+
+- /api/version = 4.0.95 LIVE (commit 87b018d8)
+- attack 4 連続 PASS (5MB → 413 / 他人 goal_id → 404 / signin → 200 / smoke /health → 200)
+- design 22 fix + interaction 19 fix = 計 41 UX/UI fix 反映済
+- silent .catch 11 件 → 全件 console.warn 化 反映済
+
+### 構造的リスク 残 1 件
+
+- **deploy.yml 自動化 半完成**: GitHub Secret CLOUDFLARE_API_TOKEN 設定済 だが workflow_dispatch のみ (push 時 auto trigger 未配線)。 #50 同型再発 リスク継続中、 G50 三点照合 で機械検出 可能。
