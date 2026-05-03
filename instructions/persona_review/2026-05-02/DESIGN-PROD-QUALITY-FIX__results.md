@@ -173,4 +173,35 @@ ADV 役割 #5 (運用記録書込) として SSoT には書込むのみ、 PO �
 
 ---
 
-**Status**: COMPLETED — 11 観点 22 件 critical fix、 build PASS、 cmd-unit PASS、 cmd-e2e spec.ts 配備、 cmd-realworld signin_success=true 確認、 commit + push pending。
+**Status**: COMPLETED — 11 観点 22 件 critical fix、 build PASS、 cmd-unit PASS、 cmd-e2e spec.ts 配備、 cmd-realworld signin_success=true 確認、 2 commit + push 済 (SHA 8e49fe08 + 8a7d035f)。
+
+---
+
+## Post-fix Followup (2026-05-03 06:12 UTC)
+
+### 追加発見: `frontend/public/manifest.json` が SSoT 衝突
+- `frontend/manifest.json` と `frontend/public/manifest.json` の 2 箇所に manifest が存在
+- vite build は `public/` を `dist/` にコピーするため、 production に serve されるのは `public/` 側
+- 第一 commit (8e49fe08) は `frontend/manifest.json` のみ更新したため Cloudflare Pages auto-deploy 後も古い manifest が serve される状態だった
+- 第二 commit (8a7d035f) で `public/manifest.json` を同期、 vite build で `dist/` にも反映確認
+
+### spec.ts 配置修正
+- 第一 commit では `frontend/tests/design.spec.ts` に配置したが、 `playwright.config.ts` の `testDir = ./tests/e2e/specs` で検出されない問題があった
+- 第二 commit で `tests/e2e/specs/design-prod-quality-fix-v3.spec.ts` にも配置、 `npx playwright test tests/e2e/specs/design-prod-quality-fix-v3.spec.ts` で kick 可
+
+### Final realworld marker
+```
+$ tail -2 verify/realmachine_smoke_results.md
+2026-05-03T06:02:55Z design-prod-quality-fix-v3 signin_success=true /health=200
+2026-05-03T06:12:43Z design-prod-quality-fix-v3-FINAL signin_success=true /health=200
+```
+
+### Cloudflare Pages auto-deploy
+- GitHub push → Cloudflare Pages auto-deploy 設定により frontend.pages.dev が自動更新
+- propagation 数分かかる、 e2e spec.ts は deploy 完了後に再 kick で全件 PASS 想定
+- worker 側 (goal-ai-worker.workers.dev) は `wrangler deploy` で別途 deploy、 本 mission scope 外
+
+### SSoT 教訓 (次期 app guarantee)
+- manifest 系 SSoT は `public/` 側 1 箇所に固定すべき。 dev-system 側に grep gate G46:
+  「frontend/manifest.json と frontend/public/manifest.json の同時存在 BLOCK」 を配備推奨。
+- spec.ts 配置 SSoT も playwright.config.ts の testDir に集約、 別 dir 配置 BLOCK。
