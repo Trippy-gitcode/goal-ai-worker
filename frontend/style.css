@@ -803,7 +803,7 @@ select:focus-visible {
 .toggle.on{background:var(--red);border-color:var(--red)}
 .toggle::after{
   content:'';position:absolute;top:3px;left:3px;width:12px;height:12px;
-  background:#fff;border-radius:50%;transition:transform .2s;
+  background:var(--toggle-knob,#fff);border-radius:50%;transition:transform .2s;
 }
 .toggle.on::after{transform:translateX(18px)}
 
@@ -1385,12 +1385,12 @@ select:focus-visible {
 .tt.dn{text-decoration:line-through;color:var(--muted2)}
 /* Weight tags (mockup .tw) */
 .tw{font-size:12px;padding:1px 3px;border-radius:2px}
-.twr{background:rgba(226,75,74,0.1);color:#e24b4a}
-.twy{background:rgba(239,159,39,0.1);color:#ef9f27}
-.twg{background:rgba(29,158,117,0.1);color:#1d9e75}
+.twr{background:rgba(226,75,74,0.1);color:var(--warn-red,#e24b4a)}
+.twy{background:rgba(239,159,39,0.1);color:var(--warn-yellow,#ef9f27)}
+.twg{background:rgba(29,158,117,0.1);color:var(--warn-green,#1d9e75)}
 /* Due date (mockup .td) */
 .td{font-size:12px;color:var(--muted2);margin-left:auto;flex-shrink:0}
-.tdo{color:#e24b4a;font-weight:500}
+.tdo{color:var(--warn-red,#e24b4a);font-weight:500}
 /* AI badge */
 .tai{font-size:12px;color:var(--accent)}
 /* Recurrence */

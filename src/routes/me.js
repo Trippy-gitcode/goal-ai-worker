@@ -128,7 +128,7 @@ export async function handleQOLGenerate(request, env) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-mini',
         max_completion_tokens: 500,
         response_format: { type: 'json_object' },
         messages: [

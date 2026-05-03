@@ -128,7 +128,7 @@ export function getCurrentMonth() {
   return `${jst.getUTCFullYear()}-${String(jst.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
-export const APP_VERSION = '4.0.93';
+export const APP_VERSION = '4.0.94';
 
 // ============================================================================
 // Stripe Webhook billing-critical event types
