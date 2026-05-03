@@ -91,9 +91,25 @@ bypass_patterns = [
     # PO 引用: 「」 内 (PO 発言の引用は OK)
     r"PO 直命",
     r"PO 仰った",
+    # v3 (2026-05-03): self-reference bypass — gate 仕様議論 / 例文記述 を bypass
+    r"G4[7-9]\b",
+    r"G48\b",
+    r"adv_action_based_autonomy_check",
+    r"behavior gate",
+    r"autonomy gate",
+    r"行動ベース.*gate",
+    r"gate 仕様",
+    r"Test [1-9]",
+    r"シナリオ test",
+    r"keyword 例示",
+    r"keyword の例",
+    r"例文",
+    r"Stop hook feedback",
+    r"BLOCK 例",
+    r"BLOCK 条件",
 ]
 hits = sum(len(re.findall(p, t, re.IGNORECASE)) for p in bypass_patterns)
-# bypass: 違反 keyword が 3 件以上 = 違反 log 記録 中 と判定
+# bypass: 違反 keyword or self-reference が 3 件以上 = log 記録 / 仕様議論 中 と判定
 print(1 if hits >= 3 else 0)
 ' 2>/dev/null)
 
