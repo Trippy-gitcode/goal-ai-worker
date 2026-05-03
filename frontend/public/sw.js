@@ -1,6 +1,6 @@
 // CACHE_NAME must stay in sync with APP_VERSION in js/globals.js (BUG-09 fix 2026-05-01).
 // Bump whenever APP_VERSION changes — drift causes stale assets across releases.
-const CACHE_NAME = 'goal-ai-v4.0.89';
+const CACHE_NAME = 'goal-ai-v4.0.90';
 
 // Cat-K PWA-SW review (2026-05-02) P0 fixes:
 //   #1 (manifest 512 icon) — manifest.json 側で対応
