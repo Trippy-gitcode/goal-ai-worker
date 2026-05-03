@@ -54,20 +54,39 @@ if [ "${FORWARD_HITS:-0}" -eq 0 ]; then
 fi
 
 # (B) bypass: 探索専用 / 状況報告 / 違反 log / 仕様議論
+# v2 (2026-05-03、 P2 Security PoC 7/7 success 反映 + G48 v4 同 厳格化):
+#   bypass 条件を「strong markers (4-part 違反 entry / 公式仕様引用) を 重み 3」 で評価。
 IS_BYPASS=$(printf '%s' "$LAST_RESP" | python3 -c '
 import sys, re
 t = sys.stdin.read()
-bypass_patterns = [
-    r"探索 turn", r"verify only", r"verify-only", r"static report",
-    r"違反 #\d+", r"adv_violation_log", r"sub_po_delegation", r"§4 escalation",
-    r"few-shot 違反例", r"PO 直命",
-    r"G4[7-9]\b", r"G5[0-9]\b", r"behavior gate", r"autonomy gate",
-    r"言行一致", r"gate 仕様", r"Test [1-9]", r"シナリオ test", r"keyword 例示",
-    r"BLOCK 条件", r"Stop hook feedback", r"mechanical verify",
-    r"root cause", r"数値 evidence",
+strong_patterns = [
+    r"違反 #\d+ \(20\d\d-",
+    r"^## 違反 #\d+",
+    r"adv_violation_log\.md",
+    r"sub_po_delegation\.md",
+    r"§4 escalation rationale",
+    r"§2\.25\.3 PO 委譲禁止",
+    r"few-shot 違反例 として",
+    r"PO 直命「.{5,}」",
+    r"PO 仰った「.{5,}」",
 ]
-hits = sum(len(re.findall(p, t, re.IGNORECASE)) for p in bypass_patterns)
-print(1 if hits >= 3 else 0)
+weak_patterns = [
+    r"adv_word_action_consistency_check\.sh",
+    r"adv_action_based_autonomy_check\.sh",
+    r"G4[7-9] (v[12345]|v\d+|配備|test) ",
+    r"言行一致 gate v[123]",
+    r"behavior gate v[123]",
+    r"autonomy gate v[123]",
+    r"4 シナリオ test (PASS|BLOCK|verify)",
+    r"シナリオ test (1|2|3|4|5)",
+    r"探索 turn と明示",
+    r"verify-only mode",
+    r"static report block",
+]
+strong_hits = sum(len(re.findall(p, t, re.MULTILINE)) for p in strong_patterns)
+weak_hits = sum(len(re.findall(p, t, re.MULTILINE)) for p in weak_patterns)
+total = strong_hits * 3 + weak_hits
+print(1 if total >= 3 else 0)
 ' 2>/dev/null)
 
 if [ "${IS_BYPASS:-0}" -eq 1 ]; then

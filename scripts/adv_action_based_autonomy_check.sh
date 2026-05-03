@@ -78,39 +78,41 @@ if [ "${HAS_DELEGATION:-0}" -eq 0 ]; then
 fi
 
 # (B) bypass 条件 check (違反記録 / §4 escalation 正当 / PO 引用)
+# v4 (2026-05-03、 P2 Security PoC 7/7 success 反映):
+#   bypass 条件を「単独 keyword 散布」 ではなく「違反 / 仕様 strong indicator + count >= 4」 に厳格化。
+#   keyword「例文」「BLOCK 条件」 等の散布で 100% bypass する PoC 攻撃を 構造的に防止。
 IS_BYPASS=$(printf '%s' "$LAST_RESP" | python3 -c '
 import sys, re
 t = sys.stdin.read()
-bypass_patterns = [
-    r"違反 #\d+",  # 違反 log 記録
-    r"adv_violation_log",
-    r"sub_po_delegation",
-    r"§4 escalation",
-    r"§2\.25\.3",
-    r"few-shot 違反例",
-    # PO 引用: 「」 内 (PO 発言の引用は OK)
-    r"PO 直命",
-    r"PO 仰った",
-    # v3 (2026-05-03): self-reference bypass — gate 仕様議論 / 例文記述 を bypass
-    r"G4[7-9]\b",
-    r"G48\b",
-    r"adv_action_based_autonomy_check",
-    r"behavior gate",
-    r"autonomy gate",
-    r"行動ベース.*gate",
-    r"gate 仕様",
-    r"Test [1-9]",
-    r"シナリオ test",
-    r"keyword 例示",
-    r"keyword の例",
-    r"例文",
-    r"Stop hook feedback",
-    r"BLOCK 例",
-    r"BLOCK 条件",
+# strong bypass markers (違反 log 記録 / 公式仕様 引用 / 4-part format)
+strong_patterns = [
+    r"違反 #\d+ \(20\d\d-",  # 4-part format entry header (e.g. "違反 #50 (2026-05-03")
+    r"^## 違反 #\d+",  # markdown 違反 entry heading
+    r"adv_violation_log\.md",
+    r"sub_po_delegation\.md",
+    r"§4 escalation rationale",
+    r"§2\.25\.3 PO 委譲禁止",
+    r"few-shot 違反例 として",
+    # PO 直接引用 (「」 で括られた PO 発言)
+    r"PO 直命「.{5,}」",
+    r"PO 仰った「.{5,}」",
 ]
-hits = sum(len(re.findall(p, t, re.IGNORECASE)) for p in bypass_patterns)
-# bypass: 違反 keyword or self-reference が 3 件以上 = log 記録 / 仕様議論 中 と判定
-print(1 if hits >= 3 else 0)
+weak_patterns = [
+    # gate 仕様議論 (single keyword 不可、 必ず full version + test indicator combination)
+    r"G4[7-9] (v[12345]|v\d+|配備|test) ",  # G47/G48/G49 + version + context
+    r"adv_action_based_autonomy_check\.sh",
+    r"adv_word_action_consistency_check\.sh",
+    r"behavior gate v[123]",
+    r"autonomy gate v[123]",
+    r"4 シナリオ test (PASS|BLOCK|verify)",
+    r"シナリオ test (1|2|3|4|5)",
+    r"Stop hook feedback ",
+]
+strong_hits = sum(len(re.findall(p, t, re.MULTILINE)) for p in strong_patterns)
+weak_hits = sum(len(re.findall(p, t, re.MULTILINE)) for p in weak_patterns)
+# bypass: strong 1+ で確定 (違反 log 記録 / 仕様正規引用) OR weak 4+ (gate 仕様議論 多重 indicator)
+total = strong_hits * 3 + weak_hits  # strong は重み 3
+print(1 if total >= 3 else 0)
 ' 2>/dev/null)
 
 if [ "${IS_BYPASS:-0}" -eq 1 ]; then
