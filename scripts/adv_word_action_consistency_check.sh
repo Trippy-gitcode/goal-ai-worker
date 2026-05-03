@@ -104,12 +104,33 @@ except:
     print(0); sys.exit(0)
 
 # 最新 user message を探す
+# v3 fix (2026-05-04): Stop hook feedback / tool_result を「user prompt」 と誤認しない。
+#   旧: 単純に type==user で 最新 を取得 → Stop hook feedback (= 自身の BLOCK 出力) や
+#       tool_use_result (= Bash/Edit の戻り値) も user role で recorded → 誤認 → fix tool count 0 で false positive BLOCK
+#   新: text content に「Stop hook feedback」「tool_use_id」「tool_result」 を含む user message は skip、
+#       真の PO prompt のみ「最新 user message」 として認識
 last_user = -1
 for i in range(len(lines)-1, -1, -1):
     try:
         e = json.loads(lines[i])
-        if e.get("type") == "user" and not e.get("isSidechain"):
-            last_user = i; break
+        if e.get("type") != "user" or e.get("isSidechain"):
+            continue
+        # v3: Stop hook feedback / tool_result を skip
+        msg = e.get("message", {})
+        content = msg.get("content", "")
+        if isinstance(content, list):
+            # tool_use_result (= 配列の中に tool_use_id 含む)
+            if any(isinstance(c, dict) and ("tool_use_id" in c or c.get("type") == "tool_result") for c in content):
+                continue
+            text = " ".join(c.get("text", "") if isinstance(c, dict) else str(c) for c in content)
+        else:
+            text = str(content)
+        # Stop hook feedback message を skip (= 自身の BLOCK 出力)
+        if "Stop hook feedback" in text or "G48 行動ベース" in text or "G49 言行一致" in text:
+            continue
+        # 真の PO prompt 確定
+        last_user = i
+        break
     except: continue
 
 if last_user < 0:
