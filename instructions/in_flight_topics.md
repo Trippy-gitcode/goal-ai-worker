@@ -136,3 +136,21 @@
 - **デザイン 4 案実装対象**: A_v2 / C_v2 / E_v2 / theme-apple (PO 確定)
 - **D, B 除外**: 実装スコープ外、モック保管のみ
 
+---
+
+## TASK-BUG5-FUTURE-RLS-6TABLES: future feature 実装時 6 table CREATE + RLS 追加 TODO
+- **status**: pending
+- **owner**: ADV (future session)
+- **depends_on**: []
+- **created**: 2026-05-02
+- **updated**: 2026-05-02
+- **auto_eligible**: false
+- **note**: Bug #5 fix 案 A 実施済 (migration 003 scope 8 → 2 縮小、 used_coupons + fair_use_windows のみ)。下記 6 table は真 DB に存在しないため migration 003 から除外。 future feature 実装時に CREATE TABLE + RLS policy (SELECT/INSERT/UPDATE/DELETE own row) を必ず追加すること:
+  - `tasks` (タスク管理機能実装時)
+  - `task_events` (タスクイベントログ機能実装時)
+  - `chat_threads` (チャット履歴機能実装時)
+  - `prefs` (ユーザー設定機能実装時)
+  - `streak_logs` (ストリーク記録機能実装時)
+  - `bonus_grants` (ボーナス付与機能実装時)
+- **structural future fix**: G36 (migration_effective_check) 別 mission で配備推奨 (migration の IF EXISTS silent skip を検出する機構)
+

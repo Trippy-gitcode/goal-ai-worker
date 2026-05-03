@@ -49,13 +49,19 @@ export async function parseBodyGuarded(request, opts = {}) {
   const maxDepth = opts.maxDepth || DEFAULT_MAX_DEPTH;
   const maxArrayLen = opts.maxArrayLen || DEFAULT_MAX_ARRAY_LEN;
 
-  // 1. Content-Length cap (early reject before reading body)
-  const contentLength = parseInt(request.headers.get('Content-Length') || '0');
-  if (contentLength > maxBytes) {
+  // 1. Content-Length cap — SUBAGENT-LAIS-BATCH29-3BUG-FIX-V3 (2026-05-02、 Bug #1):
+  //   旧: parseInt(... || '0') で header 不在時に 0、 false で fall through、 大量 body 流入で
+  //       text() 中に worker memory 圧迫 (DoS)。 さらに malformed 値 (例: "abc") は NaN で
+  //       NaN > maxBytes = false の silent bypass。
+  //   新: parseInt 結果が finite number で maxBytes 超なら 413 即 reject、 entry 直後で
+  //       何 byte も読まずに早期 abort。 NaN / 不在は raw.length 後段 cap が捕捉。
+  const contentLengthRaw = request.headers.get('Content-Length');
+  const contentLength = parseInt(contentLengthRaw || '0', 10);
+  if (Number.isFinite(contentLength) && contentLength > maxBytes) {
     return { ok: false, error: `payload too large (${contentLength} > ${maxBytes} bytes)`, status: 413 };
   }
 
-  // 2. Read body with size cap
+  // 2. Read body with size cap (defense-in-depth、 spoofed Content-Length も捕捉)
   let raw;
   try {
     raw = await request.text();

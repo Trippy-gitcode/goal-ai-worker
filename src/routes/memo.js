@@ -19,7 +19,12 @@ export async function handleAIMemoGenerate(request, env) {
   let memoText = '';
 
   if (type === 'goal' && goal_id) {
-    const goals = await supabaseQuery(env, 'goals', 'GET', { params: `id=eq.${goal_id}&select=*` });
+    // SUBAGENT-LAIS-BATCH29-3BUG-FIX-V3 (2026-05-02、 Bug #4 IDOR): user_id ownership check 必須化。
+    //   旧: goal_id を client から受信、 goals?id=eq.<goal_id> で取得 → 他 user の goal が
+    //       hit すれば profile + goal を OpenAI に送信 = cross-tenant data leak / forgery。
+    //   新: id=eq.<goal_id>&user_id=eq.<userId> で filter、 attacker が他 user の goal_id 指定でも
+    //       0 件 → 404 で silent reject。 services/memo.js SSRF-3 fix と同 pattern。
+    const goals = await supabaseQuery(env, 'goals', 'GET', { params: `id=eq.${goal_id}&user_id=eq.${userId}&select=*` });
     const goal = goals?.[0];
     if (!goal) return jsonRes({ error: 'Goal not found' }, 404);
     try {
@@ -30,7 +35,8 @@ export async function handleAIMemoGenerate(request, env) {
       const data = await res.json();
       memoText = data.choices?.[0]?.message?.content || '';
     } catch(e) { memoText = ''; }
-    if (memoText) await supabaseQuery(env, 'goals', 'PATCH', { params: `id=eq.${goal_id}`, body: { ai_memo: memoText, ai_memo_updated_at: new Date().toISOString() } });
+    // Bug #4 fix: defense-in-depth、 PATCH も user_id filter 併用 (cross-user PATCH 阻止)
+    if (memoText) await supabaseQuery(env, 'goals', 'PATCH', { params: `id=eq.${goal_id}&user_id=eq.${userId}`, body: { ai_memo: memoText, ai_memo_updated_at: new Date().toISOString() } });
   } else if (type === 'home') {
     try {
       const goalsRes = await supabaseQuery(env, 'goals', 'GET', { params: `user_id=eq.${userId}&select=title,progress,target_date&archived=eq.false` });

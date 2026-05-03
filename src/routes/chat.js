@@ -124,7 +124,23 @@ export async function handleChatStream(request, env, ctx) {
   const _g = await parseBodyGuarded(request, { maxBytes: 64 * 1024, maxArrayLen: 200 });
   if (!_g.ok) return jsonRes({ error: _g.error }, _g.status);
   const body = _g.body;
-  const { system, messages, maxTokens = 600, free_no_count, context, location } = body;
+  // SUBAGENT-LAIS-BATCH29-3BUG-FIX-V3 (2026-05-02、 Bug #3): handleChat と同 pattern で
+  //   body.system を完全 ignore、 SAFE_SYSTEM_PROMPTS allowlist から再選択。
+  //   旧: handleChatStream は body.system を直接 destructure → enhancedSystem に concat →
+  //       Anthropic streaming endpoint に流し込み = SSRF-1 streaming version の漏れ。
+  //   新: server-side 4 mode allowlist のみ採用、 client-supplied system は破棄。
+  const STREAM_ALLOWED_MODES = new Set(['default', 'mental_care', 'socratic', 'spartan']);
+  const STREAM_SAFE_SYSTEM_PROMPTS = {
+    default: 'あなたは GOAL AI のコーチです。ユーザーの目標達成を支援してください。',
+    mental_care: 'あなたは GOAL AI のメンタルケアモードです。共感的に寄り添い、心理的安全性を最優先に応答してください。',
+    socratic: 'あなたは GOAL AI のソクラテスモードです。質問を通じてユーザーの内省を促してください。',
+    spartan: 'あなたは GOAL AI のスパルタモードです。厳しく率直に、行動を促してください。',
+  };
+  const streamMode = (typeof body.mode === 'string' && STREAM_ALLOWED_MODES.has(body.mode)) ? body.mode : 'default';
+  const safeSystem = STREAM_SAFE_SYSTEM_PROMPTS[streamMode];
+  const { messages, maxTokens = 600, free_no_count, context, location } = body;
+  // legacy body.system は server で破棄、 client が誤って送っても無視 (Bug #3 SSRF-1 streaming fix)
+  const system = safeSystem;
 
   if (free_no_count && !['design', 'feedback'].includes(context)) {
     return jsonRes({ error: 'Invalid context for free_no_count' }, 400);
@@ -144,7 +160,8 @@ export async function handleChatStream(request, env, ctx) {
       const nanoRes = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
-        body: JSON.stringify({ model: 'gpt-5-nano', max_completion_tokens: Math.min(maxTokens, 600), messages: [{ role: 'system', content: body.system || '' }, ...messages] }),
+        // Bug #3 fix: body.system → safeSystem (allowlist)
+        body: JSON.stringify({ model: 'gpt-5-nano', max_completion_tokens: Math.min(maxTokens, 600), messages: [{ role: 'system', content: safeSystem || '' }, ...messages] }),
       });
       const nanoData = await nanoRes.json();
       const text = nanoData.choices?.[0]?.message?.content || '';
@@ -212,7 +229,8 @@ export async function handleChatStream(request, env, ctx) {
   } catch(e) { console.error('compression failed:', e.message); }
 
   const aiMemo = profile?.ai_memo || null;
-  let enhancedSystem = body.system || '';
+  // Bug #3 fix: body.system → safeSystem (allowlist) で initial value
+  let enhancedSystem = safeSystem || '';
   let fixedPart = '', variablePart = '';
 
   if (body.profile_inject) {
@@ -362,9 +380,21 @@ export async function handleGptSimple(request, env) {
   const _g = await parseBodyGuarded(request, { maxBytes: 32 * 1024, maxArrayLen: 100 });
   if (!_g.ok) return jsonRes({ error: _g.error }, _g.status);
   const body = _g.body;
-  const { messages, system, maxTokens = 150 } = body;
+  // SUBAGENT-LAIS-BATCH29-3BUG-FIX-V3 (2026-05-02、 Bug #3): handleGptSimple にも
+  //   SAFE_SYSTEM_PROMPTS allowlist を適用、 client-supplied body.system を完全 ignore。
+  //   旧: body.system を直接 OpenAI に流し込み、 client が任意 prompt を inject 可能 = SSRF。
+  //   新: server-side allowlist (routing / simple) のみ採用、 client supplied は破棄。
+  //       routing flag は legacy `'1単語のみ返せ'` substring と新 body.routing===true の両方で判定
+  //       (backward compat 維持、 cache key も既存 routing call と同 pattern)。
+  const { messages, maxTokens = 150 } = body;
+  const SIMPLE_SAFE_SYSTEM_PROMPTS = {
+    routing: '次の質問を分類して、 gemini / gpt / gpt-simple / claude のどれか1単語のみ返せ。',
+    simple: 'あなたは GOAL AI のシンプル GPT です。 簡潔に応答してください。',
+  };
+  const isRouting = body.routing === true || (typeof body.system === 'string' && body.system.includes('1単語のみ返せ'));
+  const safeGptSystem = isRouting ? SIMPLE_SAFE_SYSTEM_PROMPTS.routing : SIMPLE_SAFE_SYSTEM_PROMPTS.simple;
+  // legacy body.system 自体の内容は完全破棄 (injection 阻止)、 上記 substring は flag 判定にのみ使用
 
-  const isRouting = system && system.includes('1単語のみ返せ');
   if (isRouting && messages?.[0]?.content) {
     const userText = messages[0].content;
     const cacheKey = `route:${userText.slice(0, 50)}`;
@@ -375,7 +405,8 @@ export async function handleGptSimple(request, env) {
   const model = isRouting ? getModel(auth.plan, 'router') : 'gpt-5-nano';
 
   const openaiMessages = [];
-  if (system) openaiMessages.push({ role: 'system', content: system });
+  // Bug #3 fix: server-side safe system prompt のみ採用
+  openaiMessages.push({ role: 'system', content: safeGptSystem });
   if (Array.isArray(messages)) openaiMessages.push(...messages);
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {

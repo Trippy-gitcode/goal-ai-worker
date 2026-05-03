@@ -1,6 +1,9 @@
 BEGIN;
 
--- 8 tables 共通の RLS pattern: ENABLE ROW LEVEL SECURITY + user_id = auth.uid() policy
+-- Bug #5 fix 案 A: scope 8 → 2 縮小 (used_coupons + fair_use_windows のみ)
+-- spec ↔ 真 DB 整合性回復: 真 DB に存在する 2 table のみを対象。
+-- 不在 6 table (tasks / task_events / chat_threads / prefs / streak_logs / bonus_grants) は
+-- future feature 実装時に CREATE + RLS 追加 (instructions/in_flight_topics.md 参照)。
 -- service_role bypass は Supabase 既定で全 RLS 無視 (worker はこの role で接続)
 -- table が user_id column を持たない場合は skip (RAISE NOTICE)
 
@@ -8,8 +11,7 @@ DO $$
 DECLARE
   t TEXT;
 BEGIN
-  FOREACH t IN ARRAY ARRAY['tasks', 'task_events', 'chat_threads', 'prefs',
-                            'used_coupons', 'fair_use_windows', 'streak_logs', 'bonus_grants']
+  FOREACH t IN ARRAY ARRAY['used_coupons', 'fair_use_windows']
   LOOP
     -- table 存在確認 (既存スキーマに無い場合は skip)
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = t AND table_schema = 'public') THEN
@@ -42,6 +44,6 @@ BEGIN
 END $$;
 
 INSERT INTO schema_migrations (version, description)
-  VALUES ('20260502_003', 'RLS for 8 remaining tables (P4#38 fix)')
+  VALUES ('20260502_003', 'RLS for 2 remaining tables (Bug #5 fix 案 A: scope 8→2)')
   ON CONFLICT (version) DO NOTHING;
 COMMIT;
