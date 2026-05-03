@@ -2759,4 +2759,5 @@ body,body *{transition:background-color .3s ease,color .3s ease,border-color .3s
 @media(max-width:768px){.page{padding-bottom:56px;}
   #pg-today,#pg-myself{padding-bottom:60px;box-sizing:border-box;}
 }
-@media(min-width:769px){#bottom-tabs{display:none!important;}}
+/* PC fix (2026-05-04): bottom-tabs を 全 viewport で 表示。 旧設計 (≥769px で hide) は PC で navigation 不能 = E2E 4 persona 並列で PC Chrome 全 ARCH spec 失敗 root cause。 sidebar (#sb) は chat 履歴用、 画面遷移 button 無し = bottom-tabs 必須。 後日 PC 専用 top nav 設計時 削除可。 */
+/* @media(min-width:769px){#bottom-tabs{display:none!important;}} */
