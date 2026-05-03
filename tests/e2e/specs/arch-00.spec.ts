@@ -38,10 +38,11 @@ test.describe('ARCH-00: Preact技術検証', () => {
     await loadApp(page);
     await goTab(page, 'today');
     await page.waitForTimeout(1500);
-    // Preactコンテナが存在
-    const preactRoot = await page.locator('#preact-today-container').count();
-    expect(preactRoot).toBeGreaterThan(0);
-    // Preact Todayコンポーネントがレンダリングされている
+    // ARCH-02: Preact Today は #today-timeline 要素に直接マウントされる
+    // (旧: #preact-today-container は ARCH-02 refactor で削除済、 mount target = #today-timeline)
+    const preactMountHost = await page.locator('#today-timeline').count();
+    expect(preactMountHost).toBeGreaterThan(0);
+    // Preact Todayコンポーネントがレンダリングされている (Today.jsx が wrapper として返す div)
     await expect(page.locator('#preact-today-root')).toBeVisible();
     // 否定検証: TALK画面のチャット入力欄が見えない
     const chatInput = page.locator('#home-msg-in');
