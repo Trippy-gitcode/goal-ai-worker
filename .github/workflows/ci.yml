@@ -141,17 +141,16 @@ jobs:
           fi
 
       - name: e2e_playwright_run
-        # PO 指摘 (2026-05-03、 #29 同型 verify-first 不徹底 構造的 fix): E2E spec.ts 34 file 配置済 だが CI 自動実行 0 = 効果 0。 本 step で 自動実行 + 失敗 list 取得。
-        # 2026-05-04 修正: 既存 spec 多数 divergence (test03/test04/test07 系) のため fail-on-error → warn-only に緩める。 既存 spec 1 件ずつ 真 fix 後に fail-on-error に 段階復帰。
+        # PO 指摘 (2026-05-03、 #29 同型 verify-first 不徹底 構造的 fix): E2E spec.ts 34 file 配置済 だが CI 自動実行 0 = 効果 0。 本 step で 自動実行 + 失敗時 main BLOCK で 構造的 close。
+        # 2026-05-04 PO 指摘 「なぜ 警告鳴りながら 修正しないの? やること 同じ」 = 完全に 正しい。 緩いモード 撤回、 厳しいモード 維持。 既存テスト 多数 fail で 「赤」 出続けるが、 透明性 優先 = 残作業 が 可視。 1 件ずつ 直して 全 PASS 達成 で 自然 緑 化。
         env:
           BASE_URL: https://goal-ai-worker.goalai-futoshi.workers.dev
           FRONTEND_BASE: https://goal-ai-frontend.pages.dev
-        continue-on-error: true
         run: |
           if [ -f playwright.config.ts ] || [ -f playwright.config.js ]; then
             npx playwright test --reporter=list || {
-              echo "::warning::E2E playwright test 失敗 — 既存 spec divergence (1 件ずつ fix 中)、 CI BLOCK しない (warn-only mode)"
-              exit 0
+              echo "::error::E2E playwright test 失敗 — 既存 spec divergence (1 件ずつ fix 中)、 透明性 優先 で CI BLOCK"
+              exit 1
             }
             echo "✅ E2E playwright test 全 PASS"
           else
