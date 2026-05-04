@@ -45,23 +45,11 @@ echo "  core_spec.md §3.14 + §2.25.21 / 5 step a-e 全 PASS まで push 不能
 echo "  TS: $TS"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# 緊急 skip 検出
-if [ "${ADV_PRE_PUSH_SKIP:-0}" = "1" ]; then
-  VLOG="${REPO_ROOT}/lais/verify/adv_violation_log.md"
-  if [ ! -f "$VLOG" ]; then VLOG="${REPO_ROOT}/verify/adv_violation_log.md"; fi
-  if [ -f "$VLOG" ]; then
-    {
-      echo ""
-      echo "### 違反 #ADV_PRE_PUSH_SKIP_$(date -u '+%Y%m%dT%H%M%SZ')"
-      echo "- 検出: $TS"
-      echo "- 内容: ADV_PRE_PUSH_SKIP=1 で adv_pre_push_quality_gate.sh skip"
-      echo "- 該当: §3.14 + §2.25.21.4 自己 quality gate skip"
-      echo "- 後追い: a-e 5 chain self-check 必須 (拡充 + 再走)"
-    } >> "$VLOG" 2>/dev/null || true
-  fi
-  echo "WARN: ADV_PRE_PUSH_SKIP=1 検出、 quality gate skip (違反記録済)"
-  exit 0
-fi
+# PO 直命 (2026-05-04) 反映: ADV_PRE_PUSH_SKIP=1 環境変数 機構 完全削除。
+# 旧 design = 「緊急時 skip + 違反 log 記録」 だが「緊急」 と「通常」 の機械判別 不能、
+# 結果 ADV / subagent が 通常 push で 連発使用 = bypass anti-pattern 構造化。
+# PO directive「機械的な仕組みを 入れ、感情的な要素で 背く pattern を 是正」 反映、
+# bypass path を 物理 削除 = 自社 gate FAIL → push 真 不能化。
 
 # ---------------------------------------------------------------
 # step a: vitest unit test 全 PASS (§3.14 (d))
@@ -69,7 +57,7 @@ fi
 echo ""
 echo "[step a] vitest unit test 全 PASS"
 echo "─────────────────────────────────"
-if [ "${SKIP_VITEST:-0}" = "1" ]; then
+if [ "DISABLED_BYPASS" = "1" ]; then
   echo "  SKIP (SKIP_VITEST=1)"
   SKIP_COUNT=$((SKIP_COUNT + 1))
 elif [ -f "${REPO_ROOT}/vitest.config.js" ] || [ -f "${REPO_ROOT}/vitest.config.ts" ]; then
@@ -92,7 +80,7 @@ fi
 echo ""
 echo "[step b] playwright e2e (4 persona × 全 spec) 全 PASS"
 echo "─────────────────────────────────"
-if [ "${SKIP_PLAYWRIGHT:-0}" = "1" ]; then
+if [ "DISABLED_BYPASS" = "1" ]; then
   echo "  SKIP (SKIP_PLAYWRIGHT=1)"
   SKIP_COUNT=$((SKIP_COUNT + 1))
 elif [ -f "${REPO_ROOT}/playwright.config.ts" ] || [ -f "${REPO_ROOT}/playwright.config.js" ]; then
@@ -140,7 +128,7 @@ fi
 echo ""
 echo "[step d] lint (bash -n + changeable_policy + spec_lint) + gitleaks"
 echo "─────────────────────────────────"
-if [ "${SKIP_LINT:-0}" = "1" ]; then
+if [ "DISABLED_BYPASS" = "1" ]; then
   echo "  SKIP (SKIP_LINT=1)"
   SKIP_COUNT=$((SKIP_COUNT + 1))
 else
@@ -206,12 +194,12 @@ fi
 echo ""
 echo "[step e] AI 視点 code review (5 persona 並列 review = 中身 仕組み)"
 echo "─────────────────────────────────"
-if [ "${SKIP_AI_REVIEW:-0}" = "1" ]; then
+if [ "DISABLED_BYPASS" = "1" ]; then
   echo "  SKIP (SKIP_AI_REVIEW=1)"
   SKIP_COUNT=$((SKIP_COUNT + 1))
-elif [ "${AI_REVIEW_OK:-0}" = "1" ]; then
-  echo "  PASS (AI_REVIEW_OK=1 marker present、 上流 review PASS 済 想定)"
-  PASS_COUNT=$((PASS_COUNT + 1))
+# PO 直命 (2026-05-04): AI_REVIEW_OK env marker bypass 物理削除。
+# 旧 design = env 1 で skip 可 = 自分で marker set して bypass = やったフリ default。
+# 新 design = adv_ai_review_runner.sh 自動 invoke のみ、 env override 経路 排除。
 elif [ -x "${REPO_ROOT}/scripts/adv_ai_review_runner.sh" ]; then
   echo "  AI_REVIEW_OK 不在、 adv_ai_review_runner.sh 自動 invoke (HEAD~1..HEAD review)"
   if (cd "$REPO_ROOT" && sh scripts/adv_ai_review_runner.sh 2>&1 | tail -30); then
@@ -238,7 +226,7 @@ fi
 echo ""
 echo "[step f] spec ↔ 実装 drift detector"
 echo "─────────────────────────────────"
-if [ "${SKIP_SPEC_IMPL_DRIFT:-0}" = "1" ]; then
+if [ "DISABLED_BYPASS" = "1" ]; then
   echo "  SKIP (SKIP_SPEC_IMPL_DRIFT=1)"
   SKIP_COUNT=$((SKIP_COUNT + 1))
 elif [ -x "${REPO_ROOT}/scripts/spec_impl_drift_check.sh" ]; then
@@ -256,6 +244,31 @@ else
 fi
 
 # ---------------------------------------------------------------
+# step j: docs ↔ 実装 drift detector (SUBAGENT-DOCS-IMPL-DRIFT-DETECTOR-V1)
+# ---------------------------------------------------------------
+# docs/*.md の bash code block / /api/<endpoint> / scripts/<name>.sh / npm run
+# 言及 が 真にコード反映済 か 機械検証、 ボード「資料 ↔ 実装 ずれ」 行 ✅ 化
+echo ""
+echo "[step j] docs ↔ 実装 drift detector (Lais docs/)"
+echo "─────────────────────────────────"
+if [ "DISABLED_BYPASS" = "1" ]; then
+  echo "  SKIP (SKIP_DOCS_IMPL_DRIFT=1)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+elif [ -x "${REPO_ROOT}/scripts/docs_impl_drift_check.sh" ]; then
+  # baseline 多数 件 drift 既存 (= docs 整理 別 mission)、 当面 DRIFT_REPORT_ONLY=1 で 結果 のみ 記録
+  if (cd "$REPO_ROOT" && DRIFT_REPORT_ONLY=1 bash scripts/docs_impl_drift_check.sh 2>&1 | tail -10); then
+    echo "  PASS (report mode)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: docs ↔ 実装 drift 検出 (継続、 別 mission で 解消)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (docs_impl_drift_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
 # step h: design 9 観点 機械 verify (SUBAGENT-DESIGN-9ROW-ADD-MECHANICAL-VERIFY-V1)
 # ---------------------------------------------------------------
 # WCAG / 44x44 / safe-area / dark mode / clamp / reduced-motion / CLS / visual / PWA
@@ -263,7 +276,7 @@ fi
 echo ""
 echo "[step h] design 9 観点 機械 verify (Lais frontend/)"
 echo "─────────────────────────────────"
-if [ "${SKIP_DESIGN_CHECK:-0}" = "1" ]; then
+if [ "DISABLED_BYPASS" = "1" ]; then
   echo "  SKIP (SKIP_DESIGN_CHECK=1)"
   SKIP_COUNT=$((SKIP_COUNT + 1))
 elif [ -x "${REPO_ROOT}/scripts/design_check_runner.sh" ]; then
