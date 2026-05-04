@@ -221,3 +221,20 @@ export async function loadAppForUI(page: Page, base?: string) {
   // 万一 各種 overlay が race で 出ていたら 確実に 除去
   await removeAnyResidualOverlays(page);
 }
+
+/**
+ * 既存 setup 済 page を 再 navigate するための 軽量 helper。
+ * loadAppForUI 後 inner test で page.goto(BASE) を 呼ぶ 旧 pattern (= localStorage 維持 だが
+ * race で overlay が 復活する 可能性 あり) の 真 fix。
+ *
+ * SUBAGENT-LAIS-PLAYWRIGHT-RESIDUAL-FIX-V2 配備:
+ *   test01-checklist.spec.ts 130 tests / test01-ux.spec.ts 143 tests で 多用される
+ *   `await page.goto(BASE, { waitUntil: 'domcontentloaded' })` の 1 行 置換用。
+ *   navigate 後 必ず removeAnyResidualOverlays を 走らせる ことで race を 構造的 排除。
+ */
+export async function reloadApp(page: Page, base?: string) {
+  const url = base || BASE;
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  await page.waitForSelector('#btab-today', { timeout: 10000 });
+  await removeAnyResidualOverlays(page);
+}
