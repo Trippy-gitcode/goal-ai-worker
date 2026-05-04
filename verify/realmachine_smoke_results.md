@@ -252,3 +252,31 @@
 2026-05-04T14:52Z [BASELINE-PROPAGATION-RESOLVE-V1] 12 件 転記、 残 漏れ 0 件、 signin_success=true cmd_unit=12files_chmod+x_bash_n_PASS cmd_e2e=12files_placeholder_0hit_detector_hook_keyword_4hits cmd_realworld=detector_真_invoke_漏れ_15→0_PROPAGATE_STRICT=1_exit0_ALL_GREEN ratchet_path_開通
 
 [P2-MECHANICAL-ENFORCEMENT-DEPLOY-V1] 2026-05-04T14:57Z 10 script 全 真 invoke、 violations=baseline (devs_three_layer_role=53 hardcode_baseline / 他 9 件 violation=0)、 signin_success=true cmd_unit=30files_chmod+x_bash_n_PASS_size≥87lines cmd_e2e=10dev-system+10template+10lais=30 hook_step_keyword_4+_hits §_keyword_3+_hits cmd_realworld=10dev-system_真_invoke_exit0_+10lais_真_invoke_exit0_=20件_全_PASS_strict_env_path_開通
+
+[F-TEST-SPEC-CODIFY-V1] 2026-05-04T22:08Z F1-F20 真 invoke (Lais 側)、 PASS=19 WARN=1 FAIL=0 (WARN: F4)、 signin_success=true cmd_realworld=Lais_f_test_runner_真_invoke_exit0_全_PASS dev-system §2.25.25 codify 整合
+
+## [MECHANICAL-ENFORCEMENT-RESIDUAL-DEPLOY-V1] 2026-05-04T22:14Z (Lais 転記)
+
+**ミッション**: SUBAGENT-DEVSYS-MECHANICAL-ENFORCEMENT-RESIDUAL-DEPLOY-V1 (= 残 漏れ 15 件 一括 配備、 dev-system → Lais 完全独立 + 転記)
+
+### cmd-realworld 結果 (15 script 真 invoke、 Lais 側)
+
+15 script 全 真 invoke = exit=0 (PASS or WARN-only):
+- `sh scripts/mission_id_check.sh` → exit=0 (✅ ALL GREEN: §2.1 mission_hit=1)
+- `sh scripts/lais_repo_root_check.sh` → exit=0 (✅ ALL GREEN: §3.12 hardcode=0)
+- `sh scripts/review_framework_v1_check.sh` → exit=0 (✅ ALL GREEN: §13.7 v1=0)
+- `sh scripts/changeable_policy_lint_check.sh` → exit=0 (✅ ALL GREEN: §1.2 lint OK)
+- `sh scripts/shellcheck_lint_check.sh` → exit=0 (✅ ALL GREEN: §3.14 lint OK)
+- `sh scripts/subagent_no_loop_check.sh` → exit=0 (✅ ALL GREEN: §5 dispatch=0)
+- `sh scripts/subagent_size_limit_check.sh` → exit=0 (✅ ALL GREEN: §5 oversize=0)
+- `sh scripts/subagent_completion_format_check.sh` → exit=0 (WARN: baseline)
+- `sh scripts/persona_pool_v2_check.sh` → exit=0 (✅ ALL GREEN: §11.7 persona=5)
+- `sh scripts/app_config_yaml_check.sh` → exit=0 (WARN: missing field baseline)
+- `sh scripts/lais_only_path_ban_check.sh` → exit=0 (✅ ALL GREEN: §1.1 lais_only=0)
+- `sh scripts/template_no_secret_check.sh` → exit=0 (✅ ALL GREEN: §5 secret=0)
+- `sh scripts/g13_post_commit_check.sh` → exit=0 (WARN: canopy=0 baseline)
+- `sh scripts/post_response_self_audit_check.sh` → exit=0 (✅ ALL GREEN: §3.13 OK)
+- `sh scripts/persona_review_quality_check.sh` → exit=0 (WARN: baseline)
+
+[MECHANICAL-ENFORCEMENT-RESIDUAL-DEPLOY-V1] 2026-05-04T22:14Z Lais 転記 15 件、 漏れ 0 件、 signin_success=true cmd_unit=15files_chmod+x_bash_n_PASS cmd_e2e=15dev-system_転記_完全独立_dispatch=0 cmd_realworld=15script_真_invoke_exit0
+

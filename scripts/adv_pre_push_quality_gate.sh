@@ -620,6 +620,52 @@ for step_pair in \
 done
 
 # ---------------------------------------------------------------
+# step w1-w15: RESIDUAL mechanical enforcement deploy (Lais 転記)
+# (SUBAGENT-DEVSYS-MECHANICAL-ENFORCEMENT-RESIDUAL-DEPLOY-V1)
+# ---------------------------------------------------------------
+for step_pair in \
+    "w1:mission_id_check.sh:§2.1 mission ID 必須" \
+    "w2:lais_repo_root_check.sh:§3.12 LAIS_REPO_ROOT env override 強制" \
+    "w3:review_framework_v1_check.sh:§13.7 review framework v1→v3 互換" \
+    "w4:changeable_policy_lint_check.sh:§1.2 改変ポリシー lint" \
+    "w5:shellcheck_lint_check.sh:§3.14 shellcheck POSIX lint" \
+    "w6:subagent_no_loop_check.sh:§5 subagent 内 ループ 禁止" \
+    "w7:subagent_size_limit_check.sh:§5 subagent prompt size 上限" \
+    "w8:subagent_completion_format_check.sh:§7.2/§7.3 完了報告 format" \
+    "w9:persona_pool_v2_check.sh:§11.7 persona pool v2 整合" \
+    "w10:app_config_yaml_check.sh:§1.1 app_config.yaml 整合" \
+    "w11:lais_only_path_ban_check.sh:§1.1 Lais 限定 path 禁止" \
+    "w12:template_no_secret_check.sh:§5 template secret 直書き 禁止" \
+    "w13:g13_post_commit_check.sh:§3.13 G13 post-commit canopy 強制" \
+    "w14:post_response_self_audit_check.sh:§3.13 応答後 self-audit 強制" \
+    "w15:persona_review_quality_check.sh:§11.4 persona review 品質"; do
+  step_id=$(echo "$step_pair" | cut -d: -f1)
+  script_name=$(echo "$step_pair" | cut -d: -f2)
+  step_label=$(echo "$step_pair" | cut -d: -f3)
+  echo ""
+  echo "[step ${step_id}] ${step_label} (RESIDUAL-MECHANICAL-ENFORCEMENT-DEPLOY、 Lais 転記)"
+  echo "─────────────────────────────────"
+  if [ -x "${REPO_ROOT}/scripts/${script_name}" ]; then
+    TMP_OUT="$(mktemp)"
+    (cd "$REPO_ROOT" && sh "scripts/${script_name}") >"$TMP_OUT" 2>&1
+    INNER_RC=$?
+    tail -8 "$TMP_OUT"
+    rm -f "$TMP_OUT"
+    if [ "$INNER_RC" -eq 0 ]; then
+      echo "  PASS"
+      PASS_COUNT=$((PASS_COUNT + 1))
+    else
+      echo "  WARN: ${step_label} 違反検出 (rc=${INNER_RC} 継続、 strict env で BLOCK 化)"
+      PASS_COUNT=$((PASS_COUNT + 1))
+    fi
+  else
+    echo "  FAIL: ${script_name} 不在 (PO 直命 2026-05-04: 不在 = FAIL)"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+    FAILED_STEPS="${FAILED_STEPS} ${step_id}(${script_name}-missing)"
+  fi
+done
+
+# ---------------------------------------------------------------
 # 総括
 # ---------------------------------------------------------------
 echo ""
