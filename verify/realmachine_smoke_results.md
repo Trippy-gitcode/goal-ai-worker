@@ -59,3 +59,22 @@
 - `/Users/futoshi/Desktop/goal-ai-worker/scripts/impl_only_check.sh` (新設)
 - `/Users/futoshi/Desktop/goal-ai-worker/scripts/adv_pre_push_quality_gate.sh` step l 追加 (WARN-only)
 
+
+---
+
+## 2026-05-04 SUBAGENT-DEVSYS-WORKFLOW-INVERSION-CHECK-V1 — workflow inversion 機械強制 配備 (Lais)
+
+**実機 invoke (cmd-realworld)**:
+
+- `[WORKFLOW-INVERSION-CHECK-LAIS] violations=0 件、 signin_success=true` (= post-disable 状態、 cf_cpu_quota_check / incident_reminder / synthetic-monitor / vendor_outage_check を `.disabled-until-self-tests-green/` 移動 後、 active = deploy.yml workflow_dispatch のみ)
+- `[WORKFLOW-INVERSION-CHECK-LAIS-PRE-DISABLE] violations=4 件、 signin_success=true` (= 移動 前 状態、 schedule trigger 4 file 検出 = 違反 #54 状態 立証)
+
+**配備物**:
+- `/Users/futoshi/Desktop/goal-ai-worker/scripts/workflow_inversion_check.sh` (新設、 chmod +x、 bash -n PASS)
+- `/Users/futoshi/Desktop/goal-ai-worker/scripts/adv_pre_push_quality_gate.sh` step m 追加 (= 結線 強制)
+- `/Users/futoshi/Desktop/goal-ai-worker/.github/workflows/.disabled-until-self-tests-green/` 配置 (cf_cpu_quota_check / incident_reminder / synthetic-monitor / vendor_outage_check 4 file 移動)
+
+**根拠**:
+- PO 指摘 (2026-05-04): 「自社テスト完了するまではGitテストかけないはず」 + 「機械的に防げるようにしていたはず、なんでそれが実現できたの？」
+- core_spec.md §2.25.21 Primary Quality Gate Inversion (= ADV 主、 GitHub CI 副)
+- 違反 #54 同型 再生産 禁止 = 構造的 close

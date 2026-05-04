@@ -59,7 +59,9 @@ echo "[step a] vitest unit test 全 PASS"
 echo "─────────────────────────────────"
 # PO 直命 (2026-05-04): SKIP_VITEST bypass 物理削除、 strict mode 完全化。
 if [ -f "${REPO_ROOT}/vitest.config.js" ] || [ -f "${REPO_ROOT}/vitest.config.ts" ]; then
-  if (cd "$REPO_ROOT" && npx vitest run --reporter=basic 2>&1 | tail -20); then
+  # vitest 新 version で `--reporter=basic` invalid (Failed to load custom Reporter from basic)
+  # → reporter 引数 削除 (= default reporter) に 変更。
+  if (cd "$REPO_ROOT" && npx vitest run 2>&1 | tail -20); then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -360,6 +362,29 @@ if [ -x "${REPO_ROOT}/scripts/performance_check.sh" ]; then
   fi
 else
   echo "  SKIP (performance_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
+# step m: workflow_inversion_check (SUBAGENT-DEVSYS-WORKFLOW-INVERSION-CHECK-V1)
+# ---------------------------------------------------------------
+# core_spec.md §2.25.21 mechanical_enforcement の workflow_inversion_check 配線 強制 row
+# 違反 #54 (= 自社 a-e PASS 前 に GitHub workflow 起動 を 機械強制 で 防止せず) 同型 再生産 禁止
+# .github/workflows/*.yml で `on: schedule` / `on: push` / `on: pull_request` trigger 検出 = BLOCK
+echo ""
+echo "[step m] workflow_inversion_check (.github/workflows trigger 検査)"
+echo "─────────────────────────────────"
+if [ -x "${REPO_ROOT}/scripts/workflow_inversion_check.sh" ]; then
+  if (cd "$REPO_ROOT" && sh scripts/workflow_inversion_check.sh 2>&1 | tail -15); then
+    echo "  PASS"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  FAIL: workflow_inversion_check 違反 trigger 検出"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+    FAILED_STEPS="${FAILED_STEPS} m(workflow-inversion)"
+  fi
+else
+  echo "  SKIP (workflow_inversion_check.sh 不在)"
   SKIP_COUNT=$((SKIP_COUNT + 1))
 fi
 
