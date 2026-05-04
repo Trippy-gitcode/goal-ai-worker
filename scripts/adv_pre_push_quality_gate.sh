@@ -231,6 +231,31 @@ else
 fi
 
 # ---------------------------------------------------------------
+# step f: spec ↔ 実装 drift detector (SUBAGENT-SPEC-IMPL-DRIFT-DETECTOR-V1)
+# ---------------------------------------------------------------
+# 仕様書言及の scripts/*.sh / /api/<endpoint> / commit SHA が真に存在するかを機械検証
+# 「やったフリ」 (spec に書いただけで code 未反映) を 構造的に block
+echo ""
+echo "[step f] spec ↔ 実装 drift detector"
+echo "─────────────────────────────────"
+if [ "${SKIP_SPEC_IMPL_DRIFT:-0}" = "1" ]; then
+  echo "  SKIP (SKIP_SPEC_IMPL_DRIFT=1)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+elif [ -x "${REPO_ROOT}/scripts/spec_impl_drift_check.sh" ]; then
+  if (cd "$REPO_ROOT" && bash scripts/spec_impl_drift_check.sh 2>&1 | tail -20); then
+    echo "  PASS"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  FAIL: spec ↔ 実装 drift 検出"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+    FAILED_STEPS="${FAILED_STEPS} f(spec_impl_drift)"
+  fi
+else
+  echo "  SKIP (spec_impl_drift_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
 # 総括
 # ---------------------------------------------------------------
 echo ""
