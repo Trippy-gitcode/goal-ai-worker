@@ -120,6 +120,12 @@ export async function installApiMocks(page: Page) {
     }
     // /api/* の dispatcher
     if (/\/api\//.test(url)) {
+      // /api/chat/* と /api/voice/* は spec 個別 mock (= installChatMock) に 譲る。
+      // dispatcher で 触らず route.fallback() で 次 (= 後 登録) handler に 委譲。
+      // 旧版 (空 200 dispatch) で AI response 出なかった root cause。
+      if (/\/api\/chat\//.test(url) || /\/api\/voice\//.test(url)) {
+        return route.fallback();
+      }
       if (/\/api\/version$/.test(url)) {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ version: 'mock-1.0.0' }) });
       }

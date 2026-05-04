@@ -44,7 +44,8 @@ import * as path from 'path';
 import { setupGuards, checkGuards } from '../helpers/test-guards';
 import { loadAppReady } from '../helpers/test-setup';
 
-const BASE = process.env.FRONTEND_BASE || 'http://localhost:4173';
+// SUBAGENT-LAIS-PLAYWRIGHT-FAIL-SPEC-FIX-V1 (2026-05-04): port 4173 -> 5173 (config 整合)
+const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
 const WORKER = process.env.WORKER_BASE || 'https://goal-ai-worker.goalai-futoshi.workers.dev';
 const SCREENSHOT_DIR = path.resolve(__dirname, '../screenshots/critical_02');
 
@@ -66,13 +67,33 @@ async function goTab(page: Page, tab: 'today' | 'talk' | 'goals' | 'me') {
 function installChatMock(page: Page) {
   return Promise.all([
     page.route('**/api/chat/stream', route => {
+      // OPTIONS (CORS preflight + warmup) も 200 で 即返す = chat.js:1362 warmup fetch 通す
+      if (route.request().method() === 'OPTIONS') {
+        return route.fulfill({ status: 200, body: '' });
+      }
+      // Webkit の reader.read() で 全 body 一括取得しても 256byte 蓄積が 効くよう、
+      // payload を 256byte 以上に padding。 また data: の前に space (line 514 startsWith 'data: ' 整合)
+      const padding = '\n'.repeat(300);  // 300 bytes
       route.fulfill({
         status: 200,
         contentType: 'text/event-stream',
         headers: { 'X-Model-Used': 'mock-critical-02' },
         body:
+          padding +
           'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"text":"こんにちは。クリティカル ジャーニー 02 のテスト応答です。"}}\n\n' +
           'event: message_stop\ndata: {"type":"message_stop"}\n\n',
+      });
+    }),
+    // chat.js:1313 routeMessage → /api/chat/gpt-simple で route 判定。 mock しないと
+    // res.ok=false で 'claude' fallback、 でも fallback 後の chat/stream が dispatcher fallback
+    // で 受け取った後 vite 502 fall-through で エラー表示の race。
+    page.route('**/api/chat/gpt-simple', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          choices: [{ message: { content: JSON.stringify({ route: 'claude', confidence: 100 }) } }],
+        }),
       });
     }),
     page.route('**/api/chat', route => {
@@ -112,12 +133,16 @@ test.describe('Critical Journey 2: Chat (message -> AI response -> history)', ()
   test.describe.configure({ timeout: 45000 });
   test.beforeEach(async ({ page }) => {
     setupGuards(page);
-    await installChatMock(page);
+    // SUBAGENT-LAIS-PLAYWRIGHT-FAIL-SPEC-FIX-V1 (2026-05-04):
+    // installChatMock を loadAppReady の 後 (test 内 個別) に 移動。
+    // 旧: beforeEach で chat mock を 先に 登録、 その後 loadAppReady の installApiMocks (**/*) が
+    //     LIFO 上 最優先になり chat mock が shadow されて AI response 出ない。
   });
   test.afterEach(async ({ page }) => { await checkGuards(page); });
 
   test('2-a: TALK tab navigation works post-signin', async ({ page }) => {
     await loadAppReady(page, BASE);
+    await installChatMock(page);
     await goTab(page, 'talk');
     const input = page.locator('#home-msg-in');
     await expect(input).toBeVisible();
@@ -126,6 +151,7 @@ test.describe('Critical Journey 2: Chat (message -> AI response -> history)', ()
 
   test('2-b: chat input -> send -> AI response visible', async ({ page }) => {
     await loadAppReady(page, BASE);
+    await installChatMock(page);
     await goTab(page, 'talk');
     const input = page.locator('#home-msg-in');
     await expect(input).toBeVisible();
@@ -148,6 +174,7 @@ test.describe('Critical Journey 2: Chat (message -> AI response -> history)', ()
 
   test('2-c: chat input is re-editable after AI response (UX recover)', async ({ page }) => {
     await loadAppReady(page, BASE);
+    await installChatMock(page);
     await goTab(page, 'talk');
     const input = page.locator('#home-msg-in');
     await input.fill('再editable確認テスト');
@@ -181,6 +208,7 @@ test.describe('Critical Journey 2: Chat (message -> AI response -> history)', ()
 
   test('2-e: chat history fetch -> messages appear in DOM', async ({ page }) => {
     await loadAppReady(page, BASE);
+    await installChatMock(page);
     await goTab(page, 'talk');
     // mock /api/history が messages 返すので reload 後 DOM に append される想定
     await page.reload({ waitUntil: 'domcontentloaded' });
@@ -196,6 +224,7 @@ test.describe('Critical Journey 2: Chat (message -> AI response -> history)', ()
 
   test('2-f: chat with multiline input -> AI response still visible', async ({ page }) => {
     await loadAppReady(page, BASE);
+    await installChatMock(page);
     await goTab(page, 'talk');
     const input = page.locator('#home-msg-in');
     // 多行入力 (改行含む) でも送信できる UX 確認
@@ -213,6 +242,7 @@ test.describe('Critical Journey 2: Chat (message -> AI response -> history)', ()
 
   test('2-g: chat input clears after send (UX consistency)', async ({ page }) => {
     await loadAppReady(page, BASE);
+    await installChatMock(page);
     await goTab(page, 'talk');
     const input = page.locator('#home-msg-in');
     await input.fill('clear テスト');
