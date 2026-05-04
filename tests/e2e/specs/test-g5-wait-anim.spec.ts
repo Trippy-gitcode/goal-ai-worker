@@ -1,10 +1,17 @@
 /**
  * GOAL AI — G5: 待機アニメーション改善テスト
  * Phase-based waiting text + cursor blink
+ *
+ * SUBAGENT-LAIS-PLAYWRIGHT-RESIDUAL-FIX-V2 真 fix:
+ *   - root cause: page.click('#btab-talk') が age gate overlay (z-index 99998) で intercept
+ *     => loadAppForUI helper SSoT で localStorage 事前注入 + DOM 削除 + API mock 一括適用 (= 真 fix)
+ *   - chat/stream mock は spec 側で 個別 設定 (= dispatcher fallback で 後 登録 が 優先)
+ *   - waitForSelector の networkidle 削除 (= helper が domcontentloaded で 高速化)
  */
 
 import { test, expect, Page } from '@playwright/test';
 import * as path from 'path';
+import { loadAppForUI } from '../helpers/test-setup';
 
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
 const SCREENSHOT_DIR = path.resolve(__dirname, '../screenshots/g5');
@@ -14,8 +21,7 @@ async function screenshot(page: Page, name: string) {
 }
 
 async function loadApp(page: Page) {
-  await page.goto(BASE, { waitUntil: 'networkidle' });
-  await page.waitForSelector('#btab-today', { timeout: 15000 });
+  await loadAppForUI(page, BASE);
 }
 
 async function goTab(page: Page, tab: 'today' | 'talk' | 'goals' | 'me') {
@@ -28,9 +34,8 @@ test.describe('G5: 待機アニメーション', () => {
 
   test('送信後に typing-phase テキストが表示される', async ({ page }) => {
     await loadApp(page);
-    await goTab(page, 'talk');
 
-    // Intercept API to simulate slow response
+    // chat/stream mock を 早期 登録 (helper の dispatcher は /api/chat/* を fallback する)
     await page.route('**/api/chat/stream', async route => {
       // Delay 3 seconds before responding
       await new Promise(r => setTimeout(r, 3000));
@@ -43,6 +48,8 @@ test.describe('G5: 待機アニメーション', () => {
         body: 'data: {"type":"content_block_delta","delta":{"text":"テスト応答"}}\n\ndata: [DONE]\n\n'
       });
     });
+
+    await goTab(page, 'talk');
 
     const input = page.locator('#home-msg-in');
     await input.fill('テスト');
@@ -73,7 +80,6 @@ test.describe('G5: 待機アニメーション', () => {
 
   test('ストリーム中にカーソル点滅が表示される', async ({ page }) => {
     await loadApp(page);
-    await goTab(page, 'talk');
 
     // Intercept API with slow streaming
     let resolveStream: () => void;
@@ -103,6 +109,8 @@ test.describe('G5: 待機アニメーション', () => {
         body: body as any
       });
     });
+
+    await goTab(page, 'talk');
 
     const input = page.locator('#home-msg-in');
     await input.fill('こんにちは');
