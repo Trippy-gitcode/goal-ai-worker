@@ -250,3 +250,5 @@
 [7PHASE-TEMPLATE-IMPORT-V1] 2026-05-04T14:50:54Z Lais 取込 8 件、 漏れ 0 件、 signin_success=true
 
 2026-05-04T14:52Z [BASELINE-PROPAGATION-RESOLVE-V1] 12 件 転記、 残 漏れ 0 件、 signin_success=true cmd_unit=12files_chmod+x_bash_n_PASS cmd_e2e=12files_placeholder_0hit_detector_hook_keyword_4hits cmd_realworld=detector_真_invoke_漏れ_15→0_PROPAGATE_STRICT=1_exit0_ALL_GREEN ratchet_path_開通
+
+[P2-MECHANICAL-ENFORCEMENT-DEPLOY-V1] 2026-05-04T14:57Z 10 script 全 真 invoke、 violations=baseline (devs_three_layer_role=53 hardcode_baseline / 他 9 件 violation=0)、 signin_success=true cmd_unit=30files_chmod+x_bash_n_PASS_size≥87lines cmd_e2e=10dev-system+10template+10lais=30 hook_step_keyword_4+_hits §_keyword_3+_hits cmd_realworld=10dev-system_真_invoke_exit0_+10lais_真_invoke_exit0_=20件_全_PASS_strict_env_path_開通

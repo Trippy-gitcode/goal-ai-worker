@@ -580,6 +580,46 @@ else
 fi
 
 # ---------------------------------------------------------------
+# step v1-v10: P2 mechanical enforcement deploy (SUBAGENT-DEVSYS-P2-MECHANICAL-ENFORCEMENT-DEPLOY-V1、 Lais 側 転記)
+# ---------------------------------------------------------------
+for step_pair in \
+    "v1:three_layer_role_check.sh:§1.1 完全独立 + 3 層 role separation" \
+    "v2:writeguard_check.sh:§2.2 ADV 書込ホワイトリスト" \
+    "v3:spec_basis_check.sh:§3.1 仕様書駆動原則 (確認質問 禁止)" \
+    "v4:pre_response_self_check.sh:§3.2 応答前 Self-Check 5 項目" \
+    "v5:risk_avoidance_ban_check.sh:§3.4 リスク回避の禁止" \
+    "v6:skills_hook_separation_check.sh:Skills と Stop hook 責任分離" \
+    "v7:response_brevity_check.sh:§3.6 応答スタイル (簡潔)" \
+    "v8:subagent_dispatch_correctness_check.sh:§3.9+§5 subagent dispatch 正当性" \
+    "v9:three_persona_review_check.sh:§11.2 必須 3 ペルソナ" \
+    "v10:seven_phase_process_check.sh:§13.2 7 Phase 強制 process"; do
+  step_id=$(echo "$step_pair" | cut -d: -f1)
+  script_name=$(echo "$step_pair" | cut -d: -f2)
+  step_label=$(echo "$step_pair" | cut -d: -f3)
+  echo ""
+  echo "[step ${step_id}] ${step_label} (P2-MECHANICAL-ENFORCEMENT-DEPLOY、 Lais 転記)"
+  echo "─────────────────────────────────"
+  if [ -x "${REPO_ROOT}/scripts/${script_name}" ]; then
+    TMP_OUT="$(mktemp)"
+    (cd "$REPO_ROOT" && sh "scripts/${script_name}") >"$TMP_OUT" 2>&1
+    INNER_RC=$?
+    tail -8 "$TMP_OUT"
+    rm -f "$TMP_OUT"
+    if [ "$INNER_RC" -eq 0 ]; then
+      echo "  PASS"
+      PASS_COUNT=$((PASS_COUNT + 1))
+    else
+      echo "  WARN: ${step_label} 違反検出 (rc=${INNER_RC} 継続、 strict env で BLOCK 化)"
+      PASS_COUNT=$((PASS_COUNT + 1))
+    fi
+  else
+    echo "  FAIL: ${script_name} 不在 (PO 直命 2026-05-04: 不在 = FAIL)"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+    FAILED_STEPS="${FAILED_STEPS} ${step_id}(${script_name}-missing)"
+  fi
+done
+
+# ---------------------------------------------------------------
 # 総括
 # ---------------------------------------------------------------
 echo ""
