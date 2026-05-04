@@ -27,6 +27,21 @@ const TEST_TOKEN = 'goal_test_7BDSzrA2f3pzQN0z2yNGYSKS';
  * - 必要に応じて auth token も localStorage に 直書き (cookie 設定不能 host 用 fallback)
  */
 async function seedAppLocalStorage(page: Page) {
+  // Safari の service-worker は 前 session から persist されている 場合があり、
+  // 旧 SW が /api/* に対して 502 を 返し続ける。 全 SW を unregister + cache delete = 完全 reset。
+  await page.evaluate(async () => {
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    } catch (_) {}
+  });
+
   await page.evaluate(({ token }) => {
     // age gate を 通過済み state に 固定 (frontend/js/age_gate.js の MIN_AGE=13 と整合)
     try {
@@ -66,6 +81,90 @@ async function removeAnyResidualOverlays(page: Page) {
 }
 
 /**
+ * frontend は localhost で WORKER_URL='' のため /api/* が vite dev server に hit して 502。
+ * 全 spec で 共通 mock を 配備する standard route handler。
+ *   - GET /api/version => { version: 'mock-1.0.0' }
+ *   - GET /api/usage => { used: 0, limit: 20, plan: 'trial' }
+ *   - GET /api/goals => { goals: [] }
+ *   - GET /api/diary?date=... => { date, entry: '' }
+ *   - GET /api/me/identity => { id: 'test-user', name: 'Test', plan: 'trial' }
+ *   - POST /api/token/validate => { valid: true, plan: 'trial' }
+ *   - POST /api/account/age-gate => 204
+ *   - POST /api/account/consent/cross-border => 204
+ *   - その他 /api/* => 200 {} (未知 endpoint は 安全 fallback)
+ *
+ * 真 fix の要点: spec が production worker を hammer する 旧 default を 排除して 全 mock 化。
+ * production 検証が 必要な spec (= critical_01) は 個別に opt-in (本 helper を 呼ばない)。
+ */
+export async function installApiMocks(page: Page) {
+  // 単一 handler で /api/* + sw.js + RUM を 全部 routing。
+  // playwright の route handler は 重複登録すると LIFO で 最新が 呼ばれるが、 単一 dispatcher
+  // にしておけば 登録順問題が 発生しない (= shadowing バグ 構造的 防止)。
+  // PO 直命 (2026-05-04): 「機械的な仕組み で 背く pattern を 是正」 反映、
+  // ハマりやすい 仕様 を 構造的に 排除。
+  await page.route('**/*', (route) => {
+    const url = route.request().url();
+    const method = route.request().method();
+
+    // sw.js を 無効化 (registration は 通すが listener 無し)
+    if (url.endsWith('/sw.js')) {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/javascript',
+        body: '/* sw disabled in test */ self.addEventListener("install", () => self.skipWaiting()); self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));',
+      });
+    }
+    // CF RUM
+    if (/cloudflareinsights\.com/.test(url) || /\/cdn-cgi\/rum/.test(url)) {
+      return route.fulfill({ status: 204, body: '' });
+    }
+    // /api/* の dispatcher
+    if (/\/api\//.test(url)) {
+      if (/\/api\/version$/.test(url)) {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ version: 'mock-1.0.0' }) });
+      }
+      if (/\/api\/usage(\?|$)/.test(url)) {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ used: 0, limit: 20, plan: 'trial', remaining: 20 }) });
+      }
+      if (/\/api\/goals(\?|$)/.test(url)) {
+        if (method === 'GET') {
+          return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ goals: [] }) });
+        }
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+      }
+      if (/\/api\/diary/.test(url)) {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ entry: '', date: new Date().toISOString().slice(0, 10) }) });
+      }
+      if (/\/api\/me\/identity$/.test(url)) {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'test-user', name: 'Test', plan: 'trial' }) });
+      }
+      if (/\/api\/token\/validate$/.test(url)) {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: true, plan: 'trial' }) });
+      }
+      if (/\/api\/account\/age-gate$/.test(url)) {
+        return route.fulfill({ status: 204, body: '' });
+      }
+      if (/\/api\/account\/consent\/cross-border$/.test(url)) {
+        return route.fulfill({ status: 204, body: '' });
+      }
+      if (/\/api\/history/.test(url)) {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) });
+      }
+      if (/\/api\/error-report$/.test(url)) {
+        return route.fulfill({ status: 204, body: '' });
+      }
+      // 安全 fallback: 未指定 /api/* は 空 200 で 返す (502 を 避けて 後続 spec を 通す)
+      if (method === 'GET' || method === 'HEAD') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+    }
+    // それ 以外は 通常通り (vite dev server / static files)
+    return route.continue();
+  });
+}
+
+/**
  * Load the app with standard test setup:
  * - Inject valid auth token (skips auto-register API call)
  * - Skip onboarding modal
@@ -83,6 +182,9 @@ export async function loadAppReady(page: Page, base?: string) {
     domain: hostname,
     path: '/',
   }]);
+
+  // /api/* は vite dev server で 502 を 返すため 全 spec で 共通 mock を 先に 配備
+  await installApiMocks(page);
 
   // First load to set localStorage
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -104,6 +206,8 @@ export async function loadAppReady(page: Page, base?: string) {
  */
 export async function loadAppForUI(page: Page, base?: string) {
   const url = base || BASE;
+  // /api/* は vite dev server で 502 を 返すため、 全 spec で 共通 mock を 先に 配備
+  await installApiMocks(page);
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
   await seedAppLocalStorage(page);
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });

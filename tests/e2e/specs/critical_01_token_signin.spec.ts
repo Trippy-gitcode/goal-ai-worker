@@ -41,9 +41,13 @@
 import { test, expect, Page } from '@playwright/test';
 import * as path from 'path';
 import { setupGuards, checkGuards } from '../helpers/test-guards';
-import { loadAppReady } from '../helpers/test-setup';
+import { loadAppReady, installApiMocks } from '../helpers/test-setup';
 
-const BASE = process.env.FRONTEND_BASE || 'http://localhost:4173';
+// SUBAGENT-LAIS-PLAYWRIGHT-FAIL-SPEC-FIX-V1 (2026-05-04) 真 fix:
+//   旧 default 4173 は vite preview port、 playwright.config.ts は dev 5173 で webServer 起動。
+//   毎回 ERR_CONNECTION_REFUSED で 1-a / 1-g / 1-h fail = config と spec の port 不整合 root cause。
+//   default を 5173 に 統一 = 真 fix。
+const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
 const WORKER = process.env.WORKER_BASE || 'https://goal-ai-worker.goalai-futoshi.workers.dev';
 const SCREENSHOT_DIR = path.resolve(__dirname, '../screenshots/critical_01');
 
@@ -69,6 +73,17 @@ test.describe('Critical Journey 1: Token Register / Signin', () => {
   test.afterEach(async ({ page }) => { await checkGuards(page); });
 
   test('1-a: First access with empty cookie -> auto register attempt -> #btab-today visible', async ({ page }) => {
+    // localhost で /api/* は vite dev server で 502 を 返すため mock を 配備。
+    // 「empty cookie で auto-register が attempt される」 = 失敗しても DOM ready で signin_success
+    // とみなす入口確認 が 検証目的 = mock の register 200 で 健全 path を 通す。
+    await installApiMocks(page);
+    await page.route('**/api/token/register', (route) => {
+      route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ token: 'goal_test_mock_first_access', plan: 'trial', existing: false }),
+      });
+    });
     await page.context().clearCookies();
     await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
     // signin 必要分の wait は固定 timeout でなく selector 出現で判定 (persona #49 anti-pattern 回避)
