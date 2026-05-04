@@ -6,7 +6,7 @@
 import { test, expect, Page } from '@playwright/test';
 import * as path from 'path';
 
-const BASE = process.env.FRONTEND_BASE || 'http://localhost:4173';
+const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
 const SCREENSHOT_DIR = path.resolve(__dirname, '../screenshots/g5');
 
 async function screenshot(page: Page, name: string) {

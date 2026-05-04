@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { setupGuards, checkGuards } from '../helpers/test-guards';
 
-const BASE = process.env.FRONTEND_BASE || 'http://localhost:4173';
+const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
 const SCREENSHOT_DIR = 'tests/e2e/screenshots/test01-cl';
 const ROOT = path.resolve(__dirname, '../../..');
 

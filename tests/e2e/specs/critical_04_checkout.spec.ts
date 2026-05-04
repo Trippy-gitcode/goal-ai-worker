@@ -44,7 +44,7 @@ import * as path from 'path';
 import { setupGuards, checkGuards } from '../helpers/test-guards';
 import { loadAppReady } from '../helpers/test-setup';
 
-const BASE = process.env.FRONTEND_BASE || 'http://localhost:4173';
+const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
 const WORKER = process.env.WORKER_BASE || 'https://goal-ai-worker.goalai-futoshi.workers.dev';
 const SCREENSHOT_DIR = path.resolve(__dirname, '../screenshots/critical_04');
 const TEST_TOKEN = process.env.E2E_TEST_TOKEN_A || 'goal_test_7BDSzrA2f3pzQN0z2yNGYSKS';

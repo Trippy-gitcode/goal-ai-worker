@@ -12,7 +12,7 @@ import * as path from 'path';
 import { setupGuards, checkGuards } from '../helpers/test-guards';
 import { loadAppReady } from '../helpers/test-setup';
 
-const BASE = process.env.FRONTEND_BASE || 'http://localhost:4173';
+const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
 const SCREENSHOT_DIR = path.resolve(__dirname, '../screenshots/test01');
 
 // ---------------------------------------------------------------------------
