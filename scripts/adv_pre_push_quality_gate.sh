@@ -198,22 +198,34 @@ else
 fi
 
 # ---------------------------------------------------------------
-# step e: AI 視点 review marker (§3.14 (b))
+# step e: AI 視点 review (§3.14 (b)) — 中身 仕組み 配備 (やったフリ marker 排除)
 # ---------------------------------------------------------------
+# 旧: AI_REVIEW_OK env marker のみ (= 自分で marker set すれば bypass = やったフリ)
+# 新: marker 不在時 自動で adv_ai_review_runner.sh invoke、 5 persona 並列 review、
+#     critical 0 件のみ marker 自動付与、 SUBAGENT-DEVSYS-AI-REVIEW-MECHANISM-V1
 echo ""
-echo "[step e] AI 視点 code review (env AI_REVIEW_OK=1 必須)"
+echo "[step e] AI 視点 code review (5 persona 並列 review = 中身 仕組み)"
 echo "─────────────────────────────────"
 if [ "${SKIP_AI_REVIEW:-0}" = "1" ]; then
   echo "  SKIP (SKIP_AI_REVIEW=1)"
   SKIP_COUNT=$((SKIP_COUNT + 1))
 elif [ "${AI_REVIEW_OK:-0}" = "1" ]; then
-  echo "  PASS (AI_REVIEW_OK=1 marker present)"
+  echo "  PASS (AI_REVIEW_OK=1 marker present、 上流 review PASS 済 想定)"
   PASS_COUNT=$((PASS_COUNT + 1))
+elif [ -x "${REPO_ROOT}/scripts/adv_ai_review_runner.sh" ]; then
+  echo "  AI_REVIEW_OK 不在、 adv_ai_review_runner.sh 自動 invoke (HEAD~1..HEAD review)"
+  if (cd "$REPO_ROOT" && sh scripts/adv_ai_review_runner.sh 2>&1 | tail -30); then
+    echo "  PASS (5 persona review critical=0)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  FAIL: AI 視点 review で critical issue 検出、 push BLOCK"
+    echo "        対処: 上記 report 参照、 critical を 0 件 にしてから 再 push"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+    FAILED_STEPS="${FAILED_STEPS} e(ai_review)"
+  fi
 else
-  echo "  FAIL: AI_REVIEW_OK env marker 未 set"
-  echo "        対処: ADV 自身 + 並列 subagent (Review Persona / vote_dispatcher) で"
-  echo "             設計妥当性 / 仕様整合 / セマンティック / 命名整合 / 違和感 detection を完走、"
-  echo "             critical 0 件 を確認後、 AI_REVIEW_OK=1 git push を実行"
+  echo "  FAIL: AI_REVIEW_OK env marker 未 set + adv_ai_review_runner.sh 不在"
+  echo "        対処: scripts/adv_ai_review_runner.sh 配置 後 再走"
   FAIL_COUNT=$((FAIL_COUNT + 1))
   FAILED_STEPS="${FAILED_STEPS} e(ai_review)"
 fi
