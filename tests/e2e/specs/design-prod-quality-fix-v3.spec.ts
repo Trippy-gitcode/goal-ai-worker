@@ -1,13 +1,19 @@
 // SUBAGENT-LAIS-DESIGN-PROD-QUALITY-FIX-V3 — design regression spec.ts
 // Validates 11 critical design observation axes for production readiness.
 // Mission: ensure user-test-quality across critical design layers.
+//
+// SUBAGENT-LAIS-PLAYWRIGHT-RESIDUAL-FIX-V2 真 fix:
+//   - root cause: BASE default が production URL = playwright.config.ts (localhost:5173) と 不整合
+//     => default を localhost:5173 に 揃える + helper SSoT で age gate / cbc / mock 一括適用
+//   - 検証目的 = design 12 観点 が CSS 変数 / DOM で 設計 通り 配備されている を 維持
 import { test, expect } from '@playwright/test';
+import { loadAppForUI } from '../helpers/test-setup';
 
-const BASE = process.env.FRONTEND_BASE || 'https://goal-ai-frontend.pages.dev';
+const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
 
 test.describe('DQF-V3: Design Production Quality', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'networkidle', timeout: 30000 });
+    await loadAppForUI(page, BASE);
   });
 
   // DQF-01: safe-area-inset
