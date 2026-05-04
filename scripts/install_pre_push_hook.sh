@@ -29,14 +29,8 @@ cat > "$HOOK_PATH" <<'HOOK_EOF'
 #   2. verify_hooks.sh   — pre-commit hook 発火確認（§2.24 θG13 / G13、PATCH-19 Bug E）
 #   3. adv_pre_push_quality_gate.sh — ADV 押す前 a-e 5 chain 必須 (§3.14 + §2.25.21)
 #
-# 緊急 skip:
-#   SKIP_PRE_PUSH=1 で 全 check skip
-#   ADV_PRE_PUSH_SKIP=1 で step 3 のみ skip (違反記録される)
-
-if [ "${SKIP_PRE_PUSH:-0}" = "1" ]; then
-  echo "[pre-push] SKIP_PRE_PUSH=1 検出、 全 check skip (非推奨)"
-  exit 0
-fi
+# PO 直命 (2026-05-04): SKIP_PRE_PUSH + ADV_PRE_PUSH_SKIP env bypass 物理削除、 strict mode 完全化。
+# 旧 = env 1 で 全 hook skip 可 = やったフリ default。 新 = bypass 経路 0、 真の修正必須。
 
 FAIL=0
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
@@ -67,10 +61,7 @@ fi
 
 if [ $FAIL -ne 0 ]; then
   echo ""
-  echo "Pre-push check FAILED. 上記 fail step を修正後 再走。"
-  echo "緊急 skip:"
-  echo "  全 hook skip: SKIP_PRE_PUSH=1 git push origin main"
-  echo "  step 3 のみ skip (違反記録): ADV_PRE_PUSH_SKIP=1 git push origin main"
+  echo "Pre-push check FAILED. 上記 fail step を修正後 再走。 bypass 経路 0 = 真の修正必須。"
   exit 1
 fi
 

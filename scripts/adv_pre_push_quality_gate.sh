@@ -57,10 +57,8 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo "[step a] vitest unit test 全 PASS"
 echo "─────────────────────────────────"
-if [ "DISABLED_BYPASS" = "1" ]; then
-  echo "  SKIP (SKIP_VITEST=1)"
-  SKIP_COUNT=$((SKIP_COUNT + 1))
-elif [ -f "${REPO_ROOT}/vitest.config.js" ] || [ -f "${REPO_ROOT}/vitest.config.ts" ]; then
+# PO 直命 (2026-05-04): SKIP_VITEST bypass 物理削除、 strict mode 完全化。
+if [ -f "${REPO_ROOT}/vitest.config.js" ] || [ -f "${REPO_ROOT}/vitest.config.ts" ]; then
   if (cd "$REPO_ROOT" && npx vitest run --reporter=basic 2>&1 | tail -20); then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
@@ -80,10 +78,8 @@ fi
 echo ""
 echo "[step b] playwright e2e (4 persona × 全 spec) 全 PASS"
 echo "─────────────────────────────────"
-if [ "DISABLED_BYPASS" = "1" ]; then
-  echo "  SKIP (SKIP_PLAYWRIGHT=1)"
-  SKIP_COUNT=$((SKIP_COUNT + 1))
-elif [ -f "${REPO_ROOT}/playwright.config.ts" ] || [ -f "${REPO_ROOT}/playwright.config.js" ]; then
+# PO 直命 (2026-05-04): SKIP_PLAYWRIGHT bypass 物理削除、 strict mode 完全化。
+if [ -f "${REPO_ROOT}/playwright.config.ts" ] || [ -f "${REPO_ROOT}/playwright.config.js" ]; then
   # 注: 既存 e2e は production frontend (https://goal-ai-frontend.pages.dev) 対象
   # local dev server 起動は不要、 直接 npx playwright test 実行
   if (cd "$REPO_ROOT" && npx playwright test --reporter=list 2>&1 | tail -30); then
@@ -105,10 +101,8 @@ fi
 echo ""
 echo "[step c] g50 production 三点照合"
 echo "─────────────────────────────────"
-if [ "${SKIP_G50:-0}" = "1" ]; then
-  echo "  SKIP (SKIP_G50=1)"
-  SKIP_COUNT=$((SKIP_COUNT + 1))
-elif [ -x "${REPO_ROOT}/scripts/g50_prod_source_triple_verify.sh" ]; then
+# PO 直命 (2026-05-04): SKIP_G50 bypass 物理削除、 strict mode 完全化。
+if [ -x "${REPO_ROOT}/scripts/g50_prod_source_triple_verify.sh" ]; then
   if (cd "$REPO_ROOT" && sh scripts/g50_prod_source_triple_verify.sh 2>&1 | tail -10); then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
@@ -128,61 +122,57 @@ fi
 echo ""
 echo "[step d] lint (bash -n + changeable_policy + spec_lint) + gitleaks"
 echo "─────────────────────────────────"
-if [ "DISABLED_BYPASS" = "1" ]; then
-  echo "  SKIP (SKIP_LINT=1)"
-  SKIP_COUNT=$((SKIP_COUNT + 1))
-else
-  STEP_D_FAIL=0
+# PO 直命 (2026-05-04): SKIP_LINT bypass 物理削除、 strict mode 完全化。
+STEP_D_FAIL=0
 
-  # bash -n: 全 .sh 構文 check
-  for f in "${REPO_ROOT}/scripts/"*.sh; do
-    [ -f "$f" ] || continue
-    if ! bash -n "$f" 2>/dev/null; then
-      echo "  FAIL: bash -n $f"
-      STEP_D_FAIL=1
+# bash -n: 全 .sh 構文 check
+for f in "${REPO_ROOT}/scripts/"*.sh; do
+  [ -f "$f" ] || continue
+  if ! bash -n "$f" 2>/dev/null; then
+    echo "  FAIL: bash -n $f"
+    STEP_D_FAIL=1
+  fi
+done
+
+# changeable_policy_lint
+if [ -x "${REPO_ROOT}/scripts/changeable_policy_lint.sh" ]; then
+  if ! (cd "$REPO_ROOT" && bash scripts/changeable_policy_lint.sh >/dev/null 2>&1); then
+    echo "  WARN: changeable_policy_lint FAIL (継続)"
+  fi
+fi
+
+# spec_lint_extended (lais/core_spec.md or core_spec.md)
+if [ -x "${REPO_ROOT}/scripts/spec_lint_extended.sh" ]; then
+  SPEC_TARGET=""
+  for cand in "lais/core_spec.md" "core_spec.md"; do
+    if [ -f "${REPO_ROOT}/${cand}" ]; then
+      SPEC_TARGET="$cand"
+      break
     fi
   done
-
-  # changeable_policy_lint
-  if [ -x "${REPO_ROOT}/scripts/changeable_policy_lint.sh" ]; then
-    if ! (cd "$REPO_ROOT" && bash scripts/changeable_policy_lint.sh >/dev/null 2>&1); then
-      echo "  WARN: changeable_policy_lint FAIL (継続)"
+  if [ -n "$SPEC_TARGET" ]; then
+    if ! (cd "$REPO_ROOT" && bash scripts/spec_lint_extended.sh "$SPEC_TARGET" >/dev/null 2>&1); then
+      echo "  WARN: spec_lint_extended FAIL (継続)"
     fi
   fi
+fi
 
-  # spec_lint_extended (lais/core_spec.md or core_spec.md)
-  if [ -x "${REPO_ROOT}/scripts/spec_lint_extended.sh" ]; then
-    SPEC_TARGET=""
-    for cand in "lais/core_spec.md" "core_spec.md"; do
-      if [ -f "${REPO_ROOT}/${cand}" ]; then
-        SPEC_TARGET="$cand"
-        break
-      fi
-    done
-    if [ -n "$SPEC_TARGET" ]; then
-      if ! (cd "$REPO_ROOT" && bash scripts/spec_lint_extended.sh "$SPEC_TARGET" >/dev/null 2>&1); then
-        echo "  WARN: spec_lint_extended FAIL (継続)"
-      fi
+# gitleaks (HEAD scan)
+if command -v gitleaks >/dev/null 2>&1; then
+  if [ -f "${REPO_ROOT}/.gitleaks.toml" ]; then
+    if ! gitleaks detect --no-git --redact --config="${REPO_ROOT}/.gitleaks.toml" >/dev/null 2>&1; then
+      echo "  FAIL: gitleaks 検出"
+      STEP_D_FAIL=1
     fi
   fi
+fi
 
-  # gitleaks (HEAD scan)
-  if command -v gitleaks >/dev/null 2>&1; then
-    if [ -f "${REPO_ROOT}/.gitleaks.toml" ]; then
-      if ! gitleaks detect --no-git --redact --config="${REPO_ROOT}/.gitleaks.toml" >/dev/null 2>&1; then
-        echo "  FAIL: gitleaks 検出"
-        STEP_D_FAIL=1
-      fi
-    fi
-  fi
-
-  if [ "$STEP_D_FAIL" -eq 0 ]; then
-    echo "  PASS"
-    PASS_COUNT=$((PASS_COUNT + 1))
-  else
-    FAIL_COUNT=$((FAIL_COUNT + 1))
-    FAILED_STEPS="${FAILED_STEPS} d(lint)"
-  fi
+if [ "$STEP_D_FAIL" -eq 0 ]; then
+  echo "  PASS"
+  PASS_COUNT=$((PASS_COUNT + 1))
+else
+  FAIL_COUNT=$((FAIL_COUNT + 1))
+  FAILED_STEPS="${FAILED_STEPS} d(lint)"
 fi
 
 # ---------------------------------------------------------------
@@ -194,13 +184,10 @@ fi
 echo ""
 echo "[step e] AI 視点 code review (5 persona 並列 review = 中身 仕組み)"
 echo "─────────────────────────────────"
-if [ "DISABLED_BYPASS" = "1" ]; then
-  echo "  SKIP (SKIP_AI_REVIEW=1)"
-  SKIP_COUNT=$((SKIP_COUNT + 1))
-# PO 直命 (2026-05-04): AI_REVIEW_OK env marker bypass 物理削除。
+# PO 直命 (2026-05-04): SKIP_AI_REVIEW + AI_REVIEW_OK env marker bypass 物理削除、 strict mode 完全化。
 # 旧 design = env 1 で skip 可 = 自分で marker set して bypass = やったフリ default。
 # 新 design = adv_ai_review_runner.sh 自動 invoke のみ、 env override 経路 排除。
-elif [ -x "${REPO_ROOT}/scripts/adv_ai_review_runner.sh" ]; then
+if [ -x "${REPO_ROOT}/scripts/adv_ai_review_runner.sh" ]; then
   echo "  AI_REVIEW_OK 不在、 adv_ai_review_runner.sh 自動 invoke (HEAD~1..HEAD review)"
   if (cd "$REPO_ROOT" && sh scripts/adv_ai_review_runner.sh 2>&1 | tail -30); then
     echo "  PASS (5 persona review critical=0)"
@@ -226,10 +213,8 @@ fi
 echo ""
 echo "[step f] spec ↔ 実装 drift detector"
 echo "─────────────────────────────────"
-if [ "DISABLED_BYPASS" = "1" ]; then
-  echo "  SKIP (SKIP_SPEC_IMPL_DRIFT=1)"
-  SKIP_COUNT=$((SKIP_COUNT + 1))
-elif [ -x "${REPO_ROOT}/scripts/spec_impl_drift_check.sh" ]; then
+# PO 直命 (2026-05-04): SKIP_SPEC_IMPL_DRIFT bypass 物理削除、 strict mode 完全化。
+if [ -x "${REPO_ROOT}/scripts/spec_impl_drift_check.sh" ]; then
   if (cd "$REPO_ROOT" && bash scripts/spec_impl_drift_check.sh 2>&1 | tail -20); then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
@@ -251,17 +236,16 @@ fi
 echo ""
 echo "[step j] docs ↔ 実装 drift detector (Lais docs/)"
 echo "─────────────────────────────────"
-if [ "DISABLED_BYPASS" = "1" ]; then
-  echo "  SKIP (SKIP_DOCS_IMPL_DRIFT=1)"
-  SKIP_COUNT=$((SKIP_COUNT + 1))
-elif [ -x "${REPO_ROOT}/scripts/docs_impl_drift_check.sh" ]; then
-  # baseline 多数 件 drift 既存 (= docs 整理 別 mission)、 当面 DRIFT_REPORT_ONLY=1 で 結果 のみ 記録
-  if (cd "$REPO_ROOT" && DRIFT_REPORT_ONLY=1 bash scripts/docs_impl_drift_check.sh 2>&1 | tail -10); then
-    echo "  PASS (report mode)"
+# PO 直命 (2026-05-04): SKIP_DOCS_IMPL_DRIFT + DRIFT_REPORT_ONLY=1 強制 bypass 物理削除、 strict mode 完全化。
+# 旧 = report-only で常時 PASS = やったフリ。 新 = 真 fail で push BLOCK、 docs 整理 mission 推進 trigger。
+if [ -x "${REPO_ROOT}/scripts/docs_impl_drift_check.sh" ]; then
+  if (cd "$REPO_ROOT" && bash scripts/docs_impl_drift_check.sh 2>&1 | tail -10); then
+    echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
-    echo "  WARN: docs ↔ 実装 drift 検出 (継続、 別 mission で 解消)"
-    PASS_COUNT=$((PASS_COUNT + 1))
+    echo "  FAIL: docs ↔ 実装 drift 検出、 push BLOCK"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+    FAILED_STEPS="${FAILED_STEPS} j(docs_impl_drift)"
   fi
 else
   echo "  SKIP (docs_impl_drift_check.sh 不在)"
@@ -276,10 +260,8 @@ fi
 echo ""
 echo "[step h] design 9 観点 機械 verify (Lais frontend/)"
 echo "─────────────────────────────────"
-if [ "DISABLED_BYPASS" = "1" ]; then
-  echo "  SKIP (SKIP_DESIGN_CHECK=1)"
-  SKIP_COUNT=$((SKIP_COUNT + 1))
-elif [ -x "${REPO_ROOT}/scripts/design_check_runner.sh" ]; then
+# PO 直命 (2026-05-04): SKIP_DESIGN_CHECK bypass 物理削除、 strict mode 完全化。
+if [ -x "${REPO_ROOT}/scripts/design_check_runner.sh" ]; then
   TMP_DC="$(mktemp)"
   (cd "$REPO_ROOT" && sh scripts/design_check_runner.sh) >"$TMP_DC" 2>&1
   DC_RC=$?
@@ -306,10 +288,8 @@ fi
 echo ""
 echo "[step i] F テスト (ふとし チェックリスト 20 観点)"
 echo "─────────────────────────────────"
-if [ "${SKIP_F_TEST:-0}" = "1" ]; then
-  echo "  SKIP (SKIP_F_TEST=1)"
-  SKIP_COUNT=$((SKIP_COUNT + 1))
-elif [ -x "${REPO_ROOT}/scripts/f_test_runner.sh" ]; then
+# PO 直命 (2026-05-04): SKIP_F_TEST bypass 物理削除、 strict mode 完全化。
+if [ -x "${REPO_ROOT}/scripts/f_test_runner.sh" ]; then
   TMP_FT="$(mktemp)"
   (cd "$REPO_ROOT" && sh scripts/f_test_runner.sh) >"$TMP_FT" 2>&1
   FT_RC=$?
@@ -335,10 +315,8 @@ fi
 echo ""
 echo "[step k] 性能 機械強制 動作テスト (LCP / FID / TTFB / CLS)"
 echo "─────────────────────────────────"
-if [ "${SKIP_PERFORMANCE:-0}" = "1" ]; then
-  echo "  SKIP (SKIP_PERFORMANCE=1)"
-  SKIP_COUNT=$((SKIP_COUNT + 1))
-elif [ -x "${REPO_ROOT}/scripts/performance_check.sh" ]; then
+# PO 直命 (2026-05-04): SKIP_PERFORMANCE bypass 物理削除、 strict mode 完全化。
+if [ -x "${REPO_ROOT}/scripts/performance_check.sh" ]; then
   TMP_PERF="$(mktemp)"
   (cd "$REPO_ROOT" && SKIP_REALMACHINE_APPEND=1 sh scripts/performance_check.sh) >"$TMP_PERF" 2>&1
   PERF_RC=$?
@@ -374,8 +352,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo ""
-  echo "PUSH BLOCKED: 上記 fail step を修正後 再走。"
-  echo "緊急 skip (記録付): ADV_PRE_PUSH_SKIP=1 git push origin main"
+  echo "PUSH BLOCKED: 上記 fail step を修正後 再走。 bypass 経路 0 = 真の修正必須。"
   exit 1
 fi
 

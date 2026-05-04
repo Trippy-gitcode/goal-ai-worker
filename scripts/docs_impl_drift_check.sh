@@ -220,10 +220,8 @@ echo "================================================================"
 } >> "$LOG_FILE" 2>/dev/null || true
 
 if [ "$DRIFT_TOTAL" -gt 0 ]; then
-  if [ "${DRIFT_REPORT_ONLY:-0}" = "1" ]; then
-    echo "DRIFT_REPORT_ONLY=1 検出、 exit 0 (report のみ)"
-    exit 0
-  fi
+  # PO 直命 (2026-05-04): DRIFT_REPORT_ONLY=1 bypass 物理削除、 strict mode 完全化。
+  # drift 検出時は 必ず exit 1 = push BLOCK
   echo ""
   echo "DRIFT 検出: docs ↔ 実装 ずれ ${DRIFT_TOTAL} 件、 push BLOCK"
   echo "対処:"
