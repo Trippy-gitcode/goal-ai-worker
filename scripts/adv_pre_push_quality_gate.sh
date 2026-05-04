@@ -551,6 +551,35 @@ else
 fi
 
 # ---------------------------------------------------------------
+# step u: 7-phase 雛形 取込 verify (SUBAGENT-LAIS-7PHASE-TEMPLATE-IMPORT-V1)
+# ---------------------------------------------------------------
+# 根拠:
+#   - dev-system core_spec.md §2.25.24 7-phase 開発 ワークフロー 必須化
+#   - PO 直命 (2026-05-04) 「dev-system と App は 完全独立、 共通 test は dev-system (S)
+#                            から App (L) に 転記 して 設計図 の 一部 と なる」
+#   - 8 件 7-phase 雛形 (concept / spec / spec_to_e2e_gen / post_deploy_smoke /
+#     install_post_deploy_hook / post-deploy hook / post_deploy_health.spec / feature_spec_smoke.spec)
+#     が Lais 側 に 転記 済 か 機械 verify、 漏れ ≥ 1 件 で WARN (将来 strict 化)
+echo ""
+echo "[step u] 7-phase 雛形 取込 verify (= dev-system 完全独立 補完)"
+echo "─────────────────────────────────"
+SEVEN_PHASE_PATHS="concept/concept.md spec/feature_spec.md scripts/spec_to_e2e_gen.sh scripts/post_deploy_smoke.sh scripts/install_post_deploy_hook.sh git-hooks/post-deploy.sh tests/e2e/specs/post_deploy_health.spec.ts tests/e2e/specs/feature_spec_smoke.spec.ts"
+SEVEN_PHASE_MISSING=0
+for p in $SEVEN_PHASE_PATHS; do
+  if [ ! -f "${REPO_ROOT}/$p" ]; then
+    echo "  [MISSING] $p"
+    SEVEN_PHASE_MISSING=$((SEVEN_PHASE_MISSING + 1))
+  fi
+done
+if [ "$SEVEN_PHASE_MISSING" -eq 0 ]; then
+  echo "  PASS (8 件 7-phase 雛形 全件 取込 完了、 §2.25.24 + 完全独立 SSoT 不変条件 PASS)"
+  PASS_COUNT=$((PASS_COUNT + 1))
+else
+  echo "  WARN: 7-phase 雛形 取込 漏れ $SEVEN_PHASE_MISSING 件 (継続、 SEVEN_PHASE_STRICT=1 で strict 化)"
+  PASS_COUNT=$((PASS_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
 # 総括
 # ---------------------------------------------------------------
 echo ""

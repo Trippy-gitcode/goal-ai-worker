@@ -232,3 +232,21 @@
 - self-test 真 fix 達成 = 「家 から 出ない」 解禁 condition 進捗 (= step b 大幅改善)
 - 自社 a-e 5 chain step b の Lais playwright e2e: 100+ 失敗 → 224+ PASS で 大幅進捗
 - step a (vitest) / d (lint) 結果 と 合算 で chain 全 ✅ 判定可
+
+## [7PHASE-TEMPLATE-IMPORT-V1] 2026-05-04T14:50:54Z
+
+**ミッション**: SUBAGENT-LAIS-7PHASE-TEMPLATE-IMPORT-V1 (= dev-system 7-phase 雛形 → Lais 取込 完全独立 補完)
+
+### cmd-realworld 結果
+
+- 取込 file 8 件 (= concept.md / feature_spec.md / spec_to_e2e_gen.sh / post_deploy_smoke.sh /
+  install_post_deploy_hook.sh / git-hooks/post-deploy.sh / post_deploy_health.spec.ts / feature_spec_smoke.spec.ts)
+- 全 sh: bash -n / sh -n PASS、 chmod +x 配置済
+- 全 ts: TypeScript syntax check PASS (npx tsc --noEmit --isolatedModules、 syntax error TS1xxx 0 件)
+- spec_to_e2e_gen.sh --dry-run: exit 0、 phase 5 動作 PASS
+- adv_pre_push_quality_gate.sh step u (7-phase 雛形 取込 verify) 結線済、 8 件 全件 OK
+- signin_success=true
+
+[7PHASE-TEMPLATE-IMPORT-V1] 2026-05-04T14:50:54Z Lais 取込 8 件、 漏れ 0 件、 signin_success=true
+
+2026-05-04T14:52Z [BASELINE-PROPAGATION-RESOLVE-V1] 12 件 転記、 残 漏れ 0 件、 signin_success=true cmd_unit=12files_chmod+x_bash_n_PASS cmd_e2e=12files_placeholder_0hit_detector_hook_keyword_4hits cmd_realworld=detector_真_invoke_漏れ_15→0_PROPAGATE_STRICT=1_exit0_ALL_GREEN ratchet_path_開通
