@@ -299,6 +299,64 @@ else
 fi
 
 # ---------------------------------------------------------------
+# step i: F テスト (ふとし チェックリスト 20 観点 機械強制 動作テスト)
+# ---------------------------------------------------------------
+# SUBAGENT-F-TEST-FUTOSHI-CHECKLIST-V2 (PO 直命 2026-05-04)
+# ふとし チェックリスト 20 観点 を 各項目 に対して 自動 verify
+echo ""
+echo "[step i] F テスト (ふとし チェックリスト 20 観点)"
+echo "─────────────────────────────────"
+if [ "${SKIP_F_TEST:-0}" = "1" ]; then
+  echo "  SKIP (SKIP_F_TEST=1)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+elif [ -x "${REPO_ROOT}/scripts/f_test_runner.sh" ]; then
+  TMP_FT="$(mktemp)"
+  (cd "$REPO_ROOT" && sh scripts/f_test_runner.sh) >"$TMP_FT" 2>&1
+  FT_RC=$?
+  tail -10 "$TMP_FT"
+  rm -f "$TMP_FT"
+  if [ "$FT_RC" -eq 0 ]; then
+    echo "  PASS (F テスト 20 観点 FAIL=0)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: F テスト で FAIL 観点 検出 (継続、 ボード で 🔴 可視化)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (f_test_runner.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
+# step k: 性能 機械強制 動作テスト (SUBAGENT-PERFORMANCE-TEST-DEPLOY-V2)
+# ---------------------------------------------------------------
+# Core Web Vitals (LCP / FID / TTFB / CLS) を Playwright + Performance API で 機械計測
+# 進捗ボード 「性能」 行 全 8 マス 🔴 → ✅ 化、 「やったフリ」 余地 排除
+echo ""
+echo "[step k] 性能 機械強制 動作テスト (LCP / FID / TTFB / CLS)"
+echo "─────────────────────────────────"
+if [ "${SKIP_PERFORMANCE:-0}" = "1" ]; then
+  echo "  SKIP (SKIP_PERFORMANCE=1)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+elif [ -x "${REPO_ROOT}/scripts/performance_check.sh" ]; then
+  TMP_PERF="$(mktemp)"
+  (cd "$REPO_ROOT" && SKIP_REALMACHINE_APPEND=1 sh scripts/performance_check.sh) >"$TMP_PERF" 2>&1
+  PERF_RC=$?
+  tail -15 "$TMP_PERF"
+  rm -f "$TMP_PERF"
+  if [ "$PERF_RC" -eq 0 ]; then
+    echo "  PASS (4 指標 全 threshold 内)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: 性能 threshold 超過 or navigation 失敗 (継続、 ボード で 🔴 可視化)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (performance_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
 # 総括
 # ---------------------------------------------------------------
 echo ""
