@@ -389,6 +389,168 @@ else
 fi
 
 # ---------------------------------------------------------------
+# step n: 完全独立 + 転記 SSoT 不変条件 self-verify (SUBAGENT-DEVSYS-COMPLETE-INDEPENDENCE-PROPAGATION-CHECK-V1)
+# ---------------------------------------------------------------
+# core_spec.md §1.1 完全独立モデル + §3.12 propagate と整合
+# App 自身が dev-system 雛形と整合してるか自己 verify (= 完全独立 = App 単独で 検証 可能 path)
+# 違反 #54 派生 系 (= ADV 4 回 連続 「dev-system 雛形 配備 のみ で OK」 錯覚) の構造的close
+echo ""
+echo "[step n] 完全独立 + 転記 self-verify (template propagation check)"
+echo "─────────────────────────────────"
+if [ -x "${REPO_ROOT}/scripts/template_propagation_check.sh" ]; then
+  if (cd "$REPO_ROOT" && sh scripts/template_propagation_check.sh 2>&1 | tail -15); then
+    echo "  PASS"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: 完全独立 整合 不一致 (継続、 baseline 解消後 PROPAGATE_STRICT=1 で strict 化)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (template_propagation_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
+# step t1: §3.5 violation self-report check (SUBAGENT-DEVSYS-P1-MECHANICAL-ENFORCEMENT-DEPLOY-V1 P1-1)
+# ---------------------------------------------------------------
+# core_spec.md §3.5 違反自己申告義務 (= 隠蔽 = 二重違反) を pre-push hook で 機械強制
+echo ""
+echo "[step t1] §3.5 violation self-report check"
+echo "─────────────────────────────────"
+if [ -x "${REPO_ROOT}/scripts/violation_self_report_check.sh" ]; then
+  if (cd "$REPO_ROOT" && sh scripts/violation_self_report_check.sh 2>&1 | tail -15); then
+    echo "  PASS"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: §3.5 違反検出 (継続、 VIOLATION_SELF_REPORT_STRICT=1 で strict 化)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (violation_self_report_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
+# step t2: §3.7 full implementation check (P1-2)
+# ---------------------------------------------------------------
+# core_spec.md §3.7 (= 「全件 削除」 直命 部分実行 禁止) を pre-push hook で 機械強制
+echo ""
+echo "[step t2] §3.7 full implementation check (= 部分実行 禁止)"
+echo "─────────────────────────────────"
+if [ -x "${REPO_ROOT}/scripts/full_implementation_check.sh" ]; then
+  if (cd "$REPO_ROOT" && sh scripts/full_implementation_check.sh 2>&1 | tail -15); then
+    echo "  PASS"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: §3.7 部分実行 検出 (継続、 FULL_IMPL_STRICT=1 で strict 化)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (full_implementation_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
+# step t3: §3.10 end-to-end ownership check (P1-3)
+# ---------------------------------------------------------------
+# core_spec.md §3.10 end-to-end ownership (= dispatch ≠ 完了) を pre-push hook で 機械強制
+echo ""
+echo "[step t3] §3.10 end-to-end ownership check"
+echo "─────────────────────────────────"
+if [ -x "${REPO_ROOT}/scripts/end_to_end_ownership_check.sh" ]; then
+  if (cd "$REPO_ROOT" && sh scripts/end_to_end_ownership_check.sh 2>&1 | tail -15); then
+    echo "  PASS"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: §3.10 ownership 違反 (継続、 E2E_OWNERSHIP_STRICT=1 で strict 化)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (end_to_end_ownership_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
+# step t4: §4.2 即時仕様改定 trigger check (P1-4)
+# ---------------------------------------------------------------
+# core_spec.md §4.2 (= 同型違反 2 回以上 → 即時仕様改定) を pre-push hook で 機械強制
+echo ""
+echo "[step t4] §4.2 即時仕様改定 trigger check"
+echo "─────────────────────────────────"
+if [ -x "${REPO_ROOT}/scripts/section42_auto_fire_check.sh" ]; then
+  if (cd "$REPO_ROOT" && sh scripts/section42_auto_fire_check.sh 2>&1 | tail -15); then
+    echo "  PASS"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: §4.2 自動発火 skip 検出 (継続、 SECTION_42_STRICT=1 で strict 化)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (section42_auto_fire_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
+# step t5: §2.25.18 subagent result verify-first check (P1-5)
+# ---------------------------------------------------------------
+# core_spec.md §2.25.18 (= G48 行動ベース ADV 自律性 gate) を pre-push hook で 機械強制
+echo ""
+echo "[step t5] §2.25.18 subagent result verify-first check"
+echo "─────────────────────────────────"
+if [ -x "${REPO_ROOT}/scripts/subagent_result_verify_check.sh" ]; then
+  if (cd "$REPO_ROOT" && sh scripts/subagent_result_verify_check.sh 2>&1 | tail -15); then
+    echo "  PASS"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: §2.25.18 verify-first skip 検出 (継続、 SUBAGENT_VERIFY_STRICT=1 で strict 化)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (subagent_result_verify_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
+# step t6: §2.25.19 active monitoring check (P1-6)
+# ---------------------------------------------------------------
+# core_spec.md §2.25.19 (= G49 言行一致 + active monitoring) を pre-push hook で 機械強制
+echo ""
+echo "[step t6] §2.25.19 active monitoring check (stall 検知)"
+echo "─────────────────────────────────"
+if [ -x "${REPO_ROOT}/scripts/active_monitoring_check.sh" ]; then
+  if (cd "$REPO_ROOT" && sh scripts/active_monitoring_check.sh 2>&1 | tail -15); then
+    echo "  PASS"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: §2.25.19 active monitoring 違反 (継続、 ACTIVE_MONITORING_STRICT=1 で strict 化)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (active_monitoring_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
+# step t7: §2.25.22 ADV Autonomy Loop check (P1-7)
+# ---------------------------------------------------------------
+# core_spec.md §2.25.22 (= ADV Autonomy Loop 必須化) を pre-push hook で 機械強制
+echo ""
+echo "[step t7] §2.25.22 ADV Autonomy Loop check (a-c 3 chain)"
+echo "─────────────────────────────────"
+if [ -x "${REPO_ROOT}/scripts/autonomy_loop_check.sh" ]; then
+  if (cd "$REPO_ROOT" && sh scripts/autonomy_loop_check.sh 2>&1 | tail -15); then
+    echo "  PASS"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: §2.25.22 Autonomy Loop 違反 (継続、 AUTONOMY_LOOP_STRICT=1 で strict 化)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (autonomy_loop_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
 # 総括
 # ---------------------------------------------------------------
 echo ""

@@ -78,3 +78,52 @@
 - PO 指摘 (2026-05-04): 「自社テスト完了するまではGitテストかけないはず」 + 「機械的に防げるようにしていたはず、なんでそれが実現できたの？」
 - core_spec.md §2.25.21 Primary Quality Gate Inversion (= ADV 主、 GitHub CI 副)
 - 違反 #54 同型 再生産 禁止 = 構造的 close
+
+---
+
+## [TEMPLATE-PROPAGATION-CHECK-V1] 2026-05-04 App 自己 verify (Lais 側)
+
+**実行**: `sh /Users/futoshi/Desktop/goal-ai-worker/scripts/template_propagation_check.sh`
+**TS**: 2026-05-04T14:29:14Z
+**DEVSYS_ROOT**: /Users/futoshi/Desktop/dev-system
+**雛形 件数 (dev-system 側)**: 49
+**App 側 転記 漏れ 件数**: 15
+**signin_success**: true (= invoke 成功、 真値 取得 完了)
+**WARN-only mode (PROPAGATE_STRICT=0、 default)**: exit 0 (= baseline 段階)
+
+**配備 file**:
+- `/Users/futoshi/Desktop/goal-ai-worker/scripts/template_propagation_check.sh` (新設、 134 行、 bash -n PASS、 chmod +x)
+- `/Users/futoshi/Desktop/goal-ai-worker/scripts/adv_pre_push_quality_gate.sh` step n 追加 (= 結線)
+
+**根拠**:
+- PO 直命 (2026-05-04): 「dev-system と App は 完全独立、 共通 test は dev-system (S) から App (L) に **転記** して 設計図 の 一部 と なる」
+- core_spec.md §1.1 完全独立モデル + §3.12 + §3.16 (新設)
+- SUBAGENT-DEVSYS-COMPLETE-INDEPENDENCE-PROPAGATION-CHECK-V1
+
+## 2026-05-04T15:00Z — [RECENT-WORK-AI-REVIEW-V1] Lais 直近 10 commit 5 persona AI review 完了
+
+**source**: `SUBAGENT-DEVSYS-RECENT-WORK-AI-REVIEW-V1` (PO 直命 2026-05-04 「修正 や 追記 が 適切 か どうか レビュー も 忘れず に」)
+**spec**: `core_spec.md` §3.14 (b) AI 視点 code review + §2.25.21 Primary Quality Gate Inversion
+
+**実 invoke** (= Lais 直近 10 commit 真 取得 + 5 persona 視点 解析):
+- `git log --oneline -10` (goal-ai-worker) で SHA 取得 (= dd9711ec / 0abc07d3 / 4dd25d41 / 959461aa / 8c5daae1 / f7df7d78 / 44055e6f / ec311d99 / d777761e / f8cbfff6)
+- 各 commit `git show <SHA>` 真 取得 → /tmp/recent-work-review/lais-*.diff 配置 (= 2753 行)
+- 5 persona (P1 設計 妥当性 / P2 仕様 整合 / P3 セキュリティ semantic / P4 命名 整合 / P5 セマンティック 違和感) で 各 commit 解析
+
+**結果 (Lais 単独 集計)**:
+- [RECENT-WORK-AI-REVIEW-V1] Lais 10 commit review 完了、 critical=1 件、 high=3 件、 medium=12 件、 low=19 件、 total=35 件 finding、 signin_success=true
+- critical 1: Lais 0abc07d3 (dev-system devs_* prefix vs Lais bare name 命名 mismatch)
+- high 3: dd9711ec TEST_TOKEN source 直書き、 8c5daae1 警報装置 復活 (訂正 path)、 f7df7d78 過剰 disable
+
+**配備物**:
+- 4-part report (dev-system 側 配置): `/Users/futoshi/Desktop/dev-system/instructions/persona_review/2026-05-04/RECENT-WORK-AI-REVIEW__results.md`
+- dev-system + Lais 統合 集計 = critical=2 / high=5 / medium=22 / low=45 / total=74
+
+**ADV 後追い fix 推奨 path (Lais 該当)**:
+- P0: SUBAGENT-DEVSYS-NAMING-CONVENTION-AUDIT-V1 (= 命名 alias 統一)
+- P2: SUBAGENT-LAIS-TEST-TOKEN-ENV-MIGRATION-V1 (= source 直書き 6 spec env 強制)
+
+**根拠**:
+- PO 直命 (2026-05-04): 「修正 や 追記 が 適切 か どうか レビュー も 忘れず に」
+- core_spec.md §3.14 (b) AI 視点 code review
+- 違反 #54 同型 再生産 検知 + 即時 fix path 提示
