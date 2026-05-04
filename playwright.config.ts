@@ -16,12 +16,24 @@ export default defineConfig({
     ['html', { open: 'never', outputFolder: 'tests/e2e/playwright-report' }],
     ['json', { outputFile: 'tests/e2e/playwright-report/results.json' }],
   ],
+  // PO 直命 (2026-05-04): 「ローカル テストで バグを潰した 後に 本番 テスト 1 回 すれば 良くない？」 = 完全正解。
+  // 旧 default = 本番 URL = テスト走らせる たび Cloudflare 大量消費 (= 91% 警報 root cause)。
+  // 新 default = ローカル (http://localhost:5173 = vite dev server) = Cloudflare 0 消費。
+  // 本番 test 1 回 mode: `FRONTEND_BASE=https://goal-ai-frontend.pages.dev npx playwright test` で env 切替。
   use: {
-    baseURL: process.env.FRONTEND_BASE || 'https://goal-ai-frontend.pages.dev',
+    baseURL: process.env.FRONTEND_BASE || 'http://localhost:5173',
     headless: true,
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
+  },
+  // webServer: ローカル mode で test 開始時 自動で vite dev server 起動 + ready 待ち + test 終了時 停止
+  // 本番 mode (FRONTEND_BASE 指定時) は webServer skip (= 本物の本番 hit)
+  webServer: process.env.FRONTEND_BASE ? undefined : {
+    command: 'cd frontend && npm run dev -- --port 5173',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !process.env.CI,
+    timeout: 60000,
   },
   projects: [
     // P1: iPhone Safari (375x667 iOS 16 縦)
