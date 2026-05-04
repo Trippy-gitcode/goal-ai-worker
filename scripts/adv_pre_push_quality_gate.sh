@@ -308,6 +308,35 @@ else
 fi
 
 # ---------------------------------------------------------------
+# step l: phase 4 逆方向 drift detector (impl-only check、 §2.25.24)
+# ---------------------------------------------------------------
+# dev-system core_spec.md §2.25.24 7-phase ワークフロー phase 4 逆方向 (= 実装 → spec 言及)
+# scripts/<name>.sh が core_spec.md / lais/core_spec_v4.md で 言及 0 件 = impl-only drift
+# spec-first 原則 違反 を 構造的 検出
+# 注: Lais は 既存 91 scripts、 一斉 strict は 困難 = WARN-only mode (継続)、
+# strict 化 は 別 mission で 段階 移行 (= drift 解消 後 strict 結線)
+echo ""
+echo "[step l] phase 4 逆方向 drift detector (impl-only check、 WARN-only)"
+echo "─────────────────────────────────"
+if [ -x "${REPO_ROOT}/scripts/impl_only_check.sh" ]; then
+  TMP_IO="$(mktemp)"
+  (cd "$REPO_ROOT" && bash scripts/impl_only_check.sh) >"$TMP_IO" 2>&1
+  IO_RC=$?
+  tail -20 "$TMP_IO"
+  rm -f "$TMP_IO"
+  if [ "$IO_RC" -eq 0 ]; then
+    echo "  PASS (impl-only drift 0 件)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: phase 4 逆方向 drift 検出 (継続、 段階 strict 化 別 mission)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (impl_only_check.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
 # step k: 性能 機械強制 動作テスト (SUBAGENT-PERFORMANCE-TEST-DEPLOY-V2)
 # ---------------------------------------------------------------
 # Core Web Vitals (LCP / FID / TTFB / CLS) を Playwright + Performance API で 機械計測

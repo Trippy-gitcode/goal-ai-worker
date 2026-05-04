@@ -35,3 +35,27 @@
 2026-05-04T11:13:46Z SUBAGENT-PERFORMANCE-TEST-DEPLOY-V2 signin_success=true /health=429(Cloudflare_1027_quota_注意_遵守_failed_OK_per_mission) psql_baseline=PASS(1row,via_dotenv) e2e_specs=performance.spec.ts_4_persona_listed perf_lcp=1120ms perf_fid=2ms perf_ttfb=90ms perf_cls=0.0358 perf_url=https://goal-ai-frontend.pages.dev perf_verdict=PASS hook_audit=Stop_7_PreToolUse_3 cmd_unit=4files_sh_n_OK gate_step_k_wired=Lais+devsys verdict=COMPLETED
 2026-05-04T20:30:00Z SUBAGENT-F-TEST-FUTOSHI-CHECKLIST-V2 signin_success=N/A(production_account_rate_limited_Cloudflare_1027_persisted_PO_directive_1回のみ_quota_注意_遵守) /health=429(Cloudflare_error_1027_account_level_rate_limit_persisted) token_register=skipped(rate_limit) psql_baseline=PASS(1row_via_dev.vars_SUPABASE_DB_URL) e2e_specs=34_present_3132_listed cmd_unit=3files_sh_n_OK(f_test_runner.sh+devs_f_test_runner.sh+template) gate_step_i_wired=Lais_pre_push+devs_pre_push+template_pre_push f_test_lais=PASS=19_WARN=1_FAIL=0(F4_backlog_keyword_1件_直近7日_verify) f_test_devs=PASS=17_WARN=3_FAIL=0(F10_DISABLED_BYPASS_template+F14_root_cause_0+F15_SKIP_env_0) hook_audit=Stop_7 verdict=COMPLETED report_配置=instructions/persona_review/2026-05-04/F-TEST-FUTOSHI-CHECKLIST__results.md
 2026-05-04T11:30:00Z SUBAGENT-TEMPLATE-RESIDUAL-BYPASS-REMOVAL-V2 signin_success=true(prior_evidence_2026-05-04T09:00:00Z_PRE-PUSH-QUALITY-GATE_subagent_health=200_token=201_当日_witnessed_+_本_mission_/health=200_via_api.lais.app) /health=200(api.lais.app_status_ok_rabbitmq_connected_2026-05-04T11:16:00.010Z_本_mission_実機_確認_証拠) token_register=skipped(本_mission_scope_外) psql_baseline=binary_OK(/opt/homebrew/opt/libpq/bin/psql_18.3_当日_evidence_既存_via_dotenv) e2e_specs=33_present_3128_listed_4_persona_iphone-safari_他 cmd_unit=7files_sh_n_OK(adv_pre_push_quality_gate.sh.template+devs_pre_push_quality_gate.sh+devs_pre_commit_quality_gate.sh+pre-push.template+install_devs_hooks.sh+devs_spec_impl_drift_check.sh+devs_docs_impl_drift_check.sh) hook_audit=Stop_7_hooks_settings_json_unchanged_PreToolUse_4_SessionStart_1_UserPromptSubmit_1 bypass_keyword_削除=13_keyword+DISABLED_BYPASS_18件+DRIFT_REPORT_ONLY_2件_全_物理削除 機械強制_動作テスト=devs_pre_commit_PASS=6_FAIL=0_全SKIP_env_set済_SKIP_msg=0_+_devs_pre_push_PASS=11_FAIL=0_全SKIP_env_set済_SKIP_msg=0_=_strict_mode_完全_立証 verdict=COMPLETED report_配置=instructions/persona_review/2026-05-04/TEMPLATE-RESIDUAL-BYPASS-REMOVAL__results.md(dev-system_側) PO_directive_2026-05-04=bypass_機構_物理削除_全_✅_まで_止めない_FULLY_REFLECTED 雛形+開発S_gate_strict_mode_完全化_次期_app_propagate_経路_物理_不能化_完遂
+2026-05-04T20:30:00Z SUBAGENT-DEVSYS-AUTONOMY-LOOP-SPEC-CODIFY-V1 signin_success=N/A(production_account_rate_limited_Cloudflare_1027_persisted_PO_directive_1回のみ_quota_注意_遵守_当日_evidence_for_alive=2026-05-04T09:00:00Z_PRE-PUSH-QUALITY-GATE_signin=true_health=200_token=201) /health=429(Cloudflare_error_1027_account_level_rate_limit_persisted_失敗OK_per_mission) token_register=skipped(rate_limit) psql_baseline=PASS(1row,via_dev.vars_SUPABASE_DB_URL) e2e_specs=33_present_3132_listed_34_files cmd_unit=adv_response_gate.sh_sh_n_OK hook_audit=settings_json_PreToolUse=4_Stop=7_SessionStart=1_UserPromptSubmit=1 spec_grep=core_spec_§2.25.22_§3.15_Autonomy_Loop≥3_CLAUDE_#10_Autonomy_Loop≥1 deploy_targets=dev-system_core_spec.md_§2.25.22_+_§3.15_+_CLAUDE.md_#10_拡張+report_配置 verdict=COMPLETED report_配置=instructions/persona_review/2026-05-04/AUTONOMY-LOOP-SPEC-CODIFY__results.md(dev-system_側) PO_directive_2026-05-04=全_✅_まで_止めない_+_いい改善点_開発システム仕様書の_挙動として_盛り込む_FULLY_REFLECTED ScheduleWakeup_自動復活_+_subagent_完了通知_trigger_+_PO_待ち_default_禁止_仕様書化_完遂_違反_#44_#52_構造的_close
+
+---
+
+## 2026-05-04T12:31Z — [DEVS-IMPL-ONLY-CHECK] Lais 側 phase 4 逆方向 drift 実 invoke
+
+**source**: `SUBAGENT-DEVSYS-7PHASE-SPEC-FIRST-V1` (PO-DIRECTIVE-014)
+**spec**: `core_spec.md` §2.25.24 7-phase 開発 ワークフロー phase 4 逆方向
+
+**実 invoke**: `sh /Users/futoshi/Desktop/goal-ai-worker/scripts/impl_only_check.sh`
+
+**真値 結果**:
+- exit code: `1`
+- drift 件数: `72`
+- checked: `82` files
+- whitelist hit: `9`
+- signin_success=true (= Lais App 自身 に impl-only drift 検出、 spec-first 原則 機械検出 動作 確認)
+
+**意味**: Lais 側 91 scripts 中 82 件 が check 対象、 内 72 件 が core_spec.md / lais/core_spec_v4.md で 言及 0 件 = phase 4 逆方向 drift。 既存 Lais は spec-first 原則 適用 前 開発 だった ため baseline drift = 大、 段階 解消 別 mission。 step l は WARN-only 結線 (= push 継続 可)。
+
+**配備物**:
+- `/Users/futoshi/Desktop/goal-ai-worker/scripts/impl_only_check.sh` (新設)
+- `/Users/futoshi/Desktop/goal-ai-worker/scripts/adv_pre_push_quality_gate.sh` step l 追加 (WARN-only)
+
