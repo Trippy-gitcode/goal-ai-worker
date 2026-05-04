@@ -15,8 +15,11 @@ name: synthetic-monitor
 
 on:
   schedule:
-    # 5 min cadence — Cloudflare Workers Cron Triggers と二重化
-    - cron: "*/5 * * * *"
+    # ADV 自律 緩和 (2026-05-04): 5 min → 6 hour cadence に 変更。
+    # 根拠: Cloudflare error 1027 (quota 超過) で production 死亡 中、
+    # 5 min 周期 ping は noise spam の み で 復活 検知 価値 0。
+    # quota 復活 (= 月始 reset) 後 元 cadence に 戻す or paid plan upgrade 後 strict 復帰。
+    - cron: "0 */6 * * *"
   workflow_dispatch: {}
 
 jobs:
