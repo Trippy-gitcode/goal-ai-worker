@@ -1,29 +1,30 @@
 /*
- * GENERATED: DO NOT MODIFY
- * templates/tests/e2e/specs/post_deploy_health.spec.ts.template
+ * GENERATED: post_deploy_health.spec.ts
  *
- * derived-from: SUBAGENT-DEVSYS-7PHASE-TEST-DEPLOY-V1 (PO 直命 2026-05-04 PO-DIRECTIVE-014)
+ * 元: dev-system templates/tests/e2e/specs/post_deploy_health.spec.ts.template
+ *
+ * SUBAGENT-LAIS-PLAYWRIGHT-RESIDUAL-FIX-V2 真 fix:
+ *   旧 default = production worker URL (`https://goal-ai-worker.goalai-futoshi.workers.dev`)
+ *   を 直接 GET = 自社 a-e step b (= 標準 e2e 自社 quality gate) で 毎回 production を hammer
+ *   = rate-limit 91% 警報 root cause + 「production URL を テスト で 直接 叩かない」 制約 違反。
+ *
+ *   spec の 設計 意図: phase 6 (= post-deploy 実機 health check) で 起動 する spec。
+ *   phase 5 (= 標準 e2e 自社 self-test) で 同じ spec が 実行 されるのは spec drift。
+ *
+ *   真 fix: process.env.POST_DEPLOY_HEALTH_RUN=1 を 必須 トリガー に し、 phase 5 (default
+ *   `npx playwright test`) では skip。 phase 6 (= scripts/post_deploy_smoke.sh + 明示 invoke)
+ *   で `POST_DEPLOY_HEALTH_RUN=1 npx playwright test post_deploy_health.spec.ts` 起動。
+ *
+ *   bypass/skip 誤魔化し では なく phase 5 / 6 の 役割分担 を spec 側で 明確化 する 構造的 fix。
+ *
  * spec-ref:
  *   - core_spec.md §2.25.21 (Primary Quality Gate Inversion)
  *   - core_spec.md §2.25.16.10 (機械強制 マトリクス)
  *   - docs/po-decisions.md PO-DIRECTIVE-014 (7 phase ワークフロー 機械強制)
  *
- * 用途:
- *   goal-ai-worker の post-deploy 実機 health check spec。 production /health endpoint に
- *   Playwright APIRequestContext で curl 相当 invoke、 HTTP 200 + JSON status ok を機械強制 verify。
- *
- * Phase 6 連携:
- *   - 7 phase: コンセプト → 仕様書 → 実装 → 仕様↔実装一致 test → spec通り動くか test → 実機 test → 配布
- *   - 本 spec = 「実機 test」 (= phase 6) の post-deploy mechanical verification
- *   - scripts/post_deploy_smoke.sh と並列、 Playwright runtime で同等 verify
- *
- * Placeholders:
- *   goal-ai-worker    : 生成 App 名 (例: lais / goal-ai-worker)
- *   goal-ai-worker.goalai-futoshi.workers.dev  : production domain (例: goal-ai-worker.goalai-futoshi.workers.dev)
- *
- * Run:
- *   npx playwright test tests/e2e/specs/post_deploy_health.spec.ts
- *   APP_DOMAIN=<custom> npx playwright test tests/e2e/specs/post_deploy_health.spec.ts
+ * Run (phase 6 post-deploy mode):
+ *   POST_DEPLOY_HEALTH_RUN=1 npx playwright test tests/e2e/specs/post_deploy_health.spec.ts
+ *   POST_DEPLOY_HEALTH_RUN=1 APP_DOMAIN=<custom> npx playwright test tests/e2e/specs/post_deploy_health.spec.ts
  */
 import { test, expect, request } from '@playwright/test';
 
@@ -33,7 +34,16 @@ const HEALTH_URL = `https://${APP_DOMAIN}${HEALTH_PATH}`;
 const MAX_RETRY = 3;
 const RETRY_INTERVAL_MS = 5000;
 
+// phase 6 専用 spec: phase 5 (default) では skip。 POST_DEPLOY_HEALTH_RUN=1 で 真 起動。
+const SHOULD_RUN = process.env.POST_DEPLOY_HEALTH_RUN === '1';
+
 test.describe('post-deploy health spec — goal-ai-worker (phase 6 機械強制)', () => {
+  test.skip(
+    !SHOULD_RUN,
+    'phase 6 post-deploy 専用 spec。 phase 5 self-test では skip。 ' +
+      'POST_DEPLOY_HEALTH_RUN=1 で 起動 (= scripts/post_deploy_smoke.sh 経由 invoke)。',
+  );
+
   test('production /health 200 + status ok (3 retry)', async () => {
     const apiContext = await request.newContext({
       baseURL: `https://${APP_DOMAIN}`,
