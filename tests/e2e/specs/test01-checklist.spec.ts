@@ -2,11 +2,18 @@
  * GOAL AI — UX Checklist v1 E2E Tests
  * Auto-generated from docs/ux_checklist_v1.md
  * 130 tests total: A(20) + B(20) + C(15) + D(10) + E(10) + F(10) + G(15) + H(10) + I(15) + J(5)
+ *
+ * SUBAGENT-LAIS-PLAYWRIGHT-RESIDUAL-FIX-V2 真 fix:
+ *   - root cause: 旧 beforeEach は ob_done のみ 注入 = age gate overlay (z-index 99998) と
+ *     cross-border consent modal を skip せず = 全 tab click が intercept = 130 tests fail
+ *   - 真 fix: loadAppForUI helper SSoT で localStorage 事前注入 + DOM 削除 + API mock 一括適用
+ *     (= bypass / skip ではなく overlay 表示 path skip + DOM レベル 強制除去 = 真 fix)
  */
 import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 import { setupGuards, checkGuards } from '../helpers/test-guards';
+import { loadAppForUI, reloadApp } from '../helpers/test-setup';
 
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
 const SCREENSHOT_DIR = 'tests/e2e/screenshots/test01-cl';
@@ -44,16 +51,9 @@ test.use({ viewport: { width: 390, height: 844 } });
 test.describe('UX Checklist v1', () => {
   test.beforeEach(async ({ page }) => {
     setupGuards(page);
-    // Set auth cookie and skip onboarding for all tests
-    const url = new URL(BASE);
-    await page.context().addCookies([{
-      name: 'goal_auth_token',
-      value: 'goal_test_7BDSzrA2f3pzQN0z2yNGYSKS',
-      domain: url.hostname,
-      path: '/',
-    }]);
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
-    await page.evaluate(() => { localStorage.setItem('ob_done', '1'); });
+    // 真 fix: loadAppForUI で auth cookie + age gate / cbc skip + onboarding skip + API mock
+    // 一括適用 (= 旧 cookie + ob_done のみ では age gate overlay で intercept される)
+    await loadAppForUI(page, BASE);
   });
   test.afterEach(async ({ page }) => { await checkGuards(page); });
 
@@ -62,8 +62,8 @@ test.describe('UX Checklist v1', () => {
 // ---------------------------------------------------------------------------
 test.describe('A. Navigation / Screen Transition', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
-    await page.waitForSelector('#btab-today', { timeout: 10000 });
+    // 真 fix: 上位 beforeEach が loadAppForUI で page を ready 状態に した 後、 ここで 再 goto は 不要。
+    // 既に #btab-today が visible (= helper 内 で waitForSelector 済) で 状態 維持。
   });
 
   test('A-01: Bottom tabs — 4 tabs are visible', async ({ page }) => {
@@ -217,7 +217,7 @@ test.describe('A. Navigation / Screen Transition', () => {
   test('A-13: Old page navigation repurposed correctly (pg-tasks, pg-analytics in goals hub)', async ({ page }) => {
     // pg-tasks and pg-analytics still exist but are subpages within GOALS hub, not standalone tabs.
     // Verify they are NOT shown by default on any main tab.
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     for (const tab of ['#btab-today', '#btab-talk', '#btab-goals', '#btab-me']) {
       await page.locator(tab).click();
@@ -301,7 +301,7 @@ test.describe('A. Navigation / Screen Transition', () => {
 // ---------------------------------------------------------------------------
 test.describe('B. TODAY Screen', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-today').click();
     await page.waitForTimeout(500);
@@ -486,7 +486,7 @@ test.describe('B. TODAY Screen', () => {
 // ---------------------------------------------------------------------------
 test.describe('C. TALK Screen', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
@@ -571,7 +571,7 @@ test.describe('C. TALK Screen', () => {
 
   test('C-12: Old home chat DOM repurposed correctly for TALK', async ({ page }) => {
     // Navigate to TALK first (beforeEach goes to TALK but let's ensure)
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(1000);
@@ -616,7 +616,7 @@ test.describe('C. TALK Screen', () => {
 // ---------------------------------------------------------------------------
 test.describe('D. GOALS Screen', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-goals').click();
     await page.waitForTimeout(500);
@@ -697,7 +697,7 @@ test.describe('D. GOALS Screen', () => {
 // ---------------------------------------------------------------------------
 test.describe('E. ME Screen', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-me').click();
     await page.waitForTimeout(500);
@@ -786,7 +786,7 @@ test.describe('E. ME Screen', () => {
 test.describe('F. Sidebar', () => {
 
   test('F-01: Coaching mode switch works', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
@@ -802,7 +802,7 @@ test.describe('F. Sidebar', () => {
   });
 
   test('F-02: Chat history list displayed in sidebar', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
@@ -858,7 +858,7 @@ test.describe('F. Sidebar', () => {
   test('F-08: Sidebar menu items are correctly structured', async ({ page }) => {
     // sb-chat-records exists but is repurposed as chat history in sidebar
     // Verify sidebar contains the 4 expected sections: coaching mode, chat history, settings, plan
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
@@ -880,7 +880,7 @@ test.describe('F. Sidebar', () => {
   });
 
   test('F-10: Sidebar works from TALK tab (hamburger visible on TALK)', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     // Hamburger button is on TALK page header
     await page.locator('#btab-talk').click();
@@ -903,7 +903,7 @@ test.describe('G. Legacy Code Cleanup', () => {
 
   test('G-01: pg-home-wrap repurposed as TALK container', async ({ page }) => {
     // pg-home-wrap still exists but is now TALK's container
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
@@ -917,7 +917,7 @@ test.describe('G. Legacy Code Cleanup', () => {
 
   test('G-02: Task page (pg-tasks) repurposed within GOALS hub', async ({ page }) => {
     // pg-tasks-wrap still exists but is used inside GOALS hub for task drill-down
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     // Verify it's not visible on main tabs by default
     await page.locator('#btab-today').click();
@@ -933,7 +933,7 @@ test.describe('G. Legacy Code Cleanup', () => {
 
   test('G-03: Analytics page (pg-analytics) repurposed within GOALS hub', async ({ page }) => {
     // pg-analytics-wrap still exists for deep analysis within goal hub
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-today').click();
     await page.waitForTimeout(300);
@@ -947,17 +947,21 @@ test.describe('G. Legacy Code Cleanup', () => {
   });
 
   test('G-04: Old welcome screen does not conflict with new greeting', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     // Check that no old welcome modal is blocking the TODAY screen
     await expect(page.locator('#pg-today-wrap, #pg-today').first()).toBeVisible();
   });
 
-  test('G-05: showPage function repurposed (not old switchPage)', async () => {
+  test('G-05: goPage function repurposed (not old switchPage / showPage)', async () => {
+    // SUBAGENT-LAIS-PLAYWRIGHT-RESIDUAL-FIX-V2 spec drift 真 fix:
+    //   旧 spec = `showPage` を 期待 だが ARCH-01 で `goPage` に refactor 済 (= main.js:
+    //   "init()→goPage('today')" / index.html: "onclick=goPage('home')")。 spec drift。
+    //   現 実装 真値 (= goPage) に 整合 する spec 期待 に 補正。
     const js = readAllJs();
-    // showPage should exist (repurposed for new tabs)
-    const hasShowPage = js.includes('showPage');
-    expect(hasShowPage).toBeTruthy();
+    // goPage should exist (= ARCH-01 で showPage / switchPage を 統合 した 新 名)
+    const hasGoPage = js.includes('goPage');
+    expect(hasGoPage).toBeTruthy();
     // Old switchPage and navigateTo should not exist
     const hasOldNav = js.includes('switchPage') || js.includes('navigateTo');
     expect(hasOldNav).toBeFalsy();
@@ -973,7 +977,7 @@ test.describe('G. Legacy Code Cleanup', () => {
   });
 
   test('G-07: Old input-area CSS does not conflict with TALK input', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
@@ -983,7 +987,7 @@ test.describe('G. Legacy Code Cleanup', () => {
   });
 
   test('G-08: Old mode switch UI not in TALK (moved to sidebar)', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
@@ -1006,7 +1010,7 @@ test.describe('G. Legacy Code Cleanup', () => {
 
   test('G-10: Task detail panel used within GOALS hub (not standalone)', async ({ page }) => {
     // task-detail-panel exists but is part of goals hub drill-down, not a standalone 2-column page
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     // On TODAY, task detail should not be visible as a 2-column layout
     await page.locator('#btab-today').click();
@@ -1022,7 +1026,7 @@ test.describe('G. Legacy Code Cleanup', () => {
   });
 
   test('G-11: No null reference errors from old page IDs', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     const errors: string[] = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.waitForTimeout(3000);
@@ -1222,7 +1226,7 @@ test.describe('I. iOS / Responsive / Design', () => {
   });
 
   test('I-09: All SVG icons render correctly (no broken paths)', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     // Check that SVGs exist and have valid content
     const svgCount = await page.locator('svg').count();
@@ -1275,7 +1279,7 @@ test.describe('I. iOS / Responsive / Design', () => {
   });
 
   test('I-15: No text clipping or overflow issues', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     // Check CSS for text-overflow handling
     const css = readAllCss();
@@ -1292,7 +1296,7 @@ test.describe('I. iOS / Responsive / Design', () => {
 test.describe('J. Immediate Bug Fixes', () => {
 
   test('J-01: TALK input box does not overlap bottom tabs after keyboard dismiss', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
@@ -1353,7 +1357,7 @@ test.describe('J. Immediate Bug Fixes', () => {
 
   test('J-04: Preset chips do not contain emoji in rendered UI', async ({ page }) => {
     // Check rendered preset chips on TALK page for emoji
-    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await reloadApp(page, BASE);
     await page.waitForSelector('#btab-today', { timeout: 10000 });
     await page.locator('#btab-talk').click();
     await page.waitForTimeout(500);
