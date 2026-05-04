@@ -256,6 +256,36 @@ else
 fi
 
 # ---------------------------------------------------------------
+# step h: design 9 観点 機械 verify (SUBAGENT-DESIGN-9ROW-ADD-MECHANICAL-VERIFY-V1)
+# ---------------------------------------------------------------
+# WCAG / 44x44 / safe-area / dark mode / clamp / reduced-motion / CLS / visual / PWA
+# 「やったつもり」 (DQF / Cat-K spec 配備のみ で 真値 verify 不在) を 構造的 close
+echo ""
+echo "[step h] design 9 観点 機械 verify (Lais frontend/)"
+echo "─────────────────────────────────"
+if [ "${SKIP_DESIGN_CHECK:-0}" = "1" ]; then
+  echo "  SKIP (SKIP_DESIGN_CHECK=1)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+elif [ -x "${REPO_ROOT}/scripts/design_check_runner.sh" ]; then
+  TMP_DC="$(mktemp)"
+  (cd "$REPO_ROOT" && sh scripts/design_check_runner.sh) >"$TMP_DC" 2>&1
+  DC_RC=$?
+  tail -15 "$TMP_DC"
+  DC_FAIL=$(grep -cE "FAIL=[1-9]" "$TMP_DC" 2>/dev/null || echo 0)
+  rm -f "$TMP_DC"
+  if [ "$DC_RC" -eq 0 ] && [ "${DC_FAIL:-0}" -eq 0 ]; then
+    echo "  PASS (9 観点 全 PASS)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    echo "  WARN: design_check 一部 FAIL (継続、 cell 表示で 🔴 可視化)"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  fi
+else
+  echo "  SKIP (design_check_runner.sh 不在)"
+  SKIP_COUNT=$((SKIP_COUNT + 1))
+fi
+
+# ---------------------------------------------------------------
 # 総括
 # ---------------------------------------------------------------
 echo ""
