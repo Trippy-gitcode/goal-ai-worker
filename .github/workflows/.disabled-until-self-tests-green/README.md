@@ -7,19 +7,28 @@ PO 直命 (2026-05-04): 「自社 テスト 完了 する まで は Git テス�
 = 自社 a-e 5 chain (vitest / playwright / g50 / lint / ai_review) PASS = origin push = GitHub CI 起動
 = 自社 test PASS 前 に GitHub workflow が 起動 する のは 設計 違反
 
-## disable 対象 (5 file)
+## disable 対象 (1 file = ci.yml のみ、 PO 指摘 2026-05-04 反映)
 
 | workflow | 旧 trigger | disable 理由 |
 |---|---|---|
-| `cf_cpu_quota_check.yml` | schedule cron 6 hour | Cloudflare quota 超過 = 検知 価値 0 |
-| `ci.yml` | on push / pull_request | 自社 a-e PASS 後 のみ origin 到達 = redundant |
-| `incident_reminder.yml` | schedule cron 4 hour | incident 0 件 = noise のみ |
-| `synthetic-monitor.yml` | schedule cron 5 min | Cloudflare error 1027 で 5 分 周期 spam |
-| `vendor_outage_check.yml` | schedule cron 15 min | 同 |
+| `ci.yml` | on push / pull_request | 自社 a-e PASS 後 のみ origin 到達 = 自社 PASS まで Git test 不要 |
 
-## 残 active
+## 残 active (= 本番 監視 + 配布 = 起動 し続ける べき)
 
-- `deploy.yml` (workflow_dispatch のみ = 手動起動 のみ、 schedule 0、 push trigger 0 = 安全)
+| workflow | trigger | 理由 |
+|---|---|---|
+| `cf_cpu_quota_check.yml` | schedule cron 6 hour | Cloudflare quota 監視 = 警報 として 必要 |
+| `incident_reminder.yml` | schedule cron 4 hour | incident escalation = 警報 として 必要 |
+| `synthetic-monitor.yml` | schedule cron 5 min | 本番 production 死活 監視 = 警報 として 必要 |
+| `vendor_outage_check.yml` | schedule cron 15 min | 外部 vendor 障害 監視 = 警報 として 必要 |
+| `deploy.yml` | workflow_dispatch | 手動 配布 |
+
+## PO 直命 訂正 (2026-05-04)
+
+旧 解釈 (= 過剰 disable): 「自社 PASS まで Git テスト かけない」 → 5 workflow 全 disable
+真の 解釈 (= PO 指摘): 「Git **テスト** (= push 時 走る ci.yml) のみ disable、 **本番 監視 (= 警報装置)** は 起動 していて 問題ない」
+
+= **警報装置 (synthetic-monitor 等) は 起動 維持、 警報 鳴った ら production 復活 path で 解決** が 正しい 設計。 警報 自体 を 止める = 火災報知器 を 止める のと 同じ ミス。
 
 ## 復活 条件
 
