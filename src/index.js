@@ -5,6 +5,8 @@ import { jsonRes, safeCompare } from './utils/helpers.js';
 import { APP_VERSION } from './utils/constants.js';
 // SUBAGENT-LAIS-WAVE1-H-AUTO-FIX-V1 (2026-05-01) — structured logger global rollout
 import { safeError, safeLog } from './utils/safeLog.js';
+// TASK-LAIS-PHASE5-RPC-PROBE (2026-05-07) — startup-time fail-closed RPC gate
+import { ensureRpcReady, rpcProbeFailureResponse } from './utils/rpc_probe.js';
 
 // Route handlers
 import { handleChat, handleChatStream, handleGptSimple } from './routes/chat.js';
@@ -588,7 +590,31 @@ async function scheduledHandler(event, env, ctx) {
 //   Hono の `app` を default export していたが、scheduled handler 結線のため
 //   `{ fetch, scheduled }` 形式に切替。Cloudflare Workers のモジュール ESM
 //   contract を満たす。後方互換: fetch handler は Hono の app.fetch をそのまま使う。
+//
+// TASK-LAIS-PHASE5-RPC-PROBE (2026-05-07):
+//   Wrap app.fetch with a startup-time RPC existence gate. On the first
+//   request after a cold isolate start, ensureRpcReady() probes every
+//   required Supabase RPC. If any RPC is missing the Worker returns
+//   503 Service Unavailable + structured log "RPC missing" — fail-closed.
+//   /health and /api/version bypass the gate so external uptime monitors
+//   keep working even when a backend RPC is missing (the gate is for
+//   protecting *user* requests, not basic liveness probes).
+async function fetchWithRpcGate(req, env, ctx) {
+  const url = new URL(req.url);
+  const path = url.pathname;
+  // Bypass gate for liveness endpoints + OPTIONS preflight (CORS).
+  const bypass = path === '/health' || path === '/api/version' || req.method === 'OPTIONS';
+  if (!bypass) {
+    const probe = await ensureRpcReady(env);
+    if (!probe.ok) {
+      // 503 + fail-closed: structured log emits "RPC missing" for log search.
+      return rpcProbeFailureResponse(probe);
+    }
+  }
+  return app.fetch(req, env, ctx);
+}
+
 export default {
-  fetch: app.fetch,
+  fetch: fetchWithRpcGate,
   scheduled: scheduledHandler,
 };
