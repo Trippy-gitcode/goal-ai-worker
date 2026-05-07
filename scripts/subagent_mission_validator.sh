@@ -304,7 +304,7 @@ Phase A 完走|realmachine_smoke_results|category_phase_complete
 Phase 通過|realmachine_smoke_results|category_phase_complete
 PreToolUse|settings\.json|category_hook
 Stop hook|settings\.json|category_hook
-hook|settings\.json|category_hook
+hook.*(設定|config|settings|wiring|配線)|settings\.json|category_hook
 機械強制|sh -n|category_machine_enforce
 機械強制|動作テスト|category_machine_enforce
 機械検証|動作テスト|category_machine_verify
