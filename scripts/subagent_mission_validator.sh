@@ -304,7 +304,7 @@ Phase A 完走|realmachine_smoke_results|category_phase_complete
 Phase 通過|realmachine_smoke_results|category_phase_complete
 PreToolUse|settings\.json|category_hook
 Stop hook|settings\.json|category_hook
-hook.*(設定|config|settings|wiring|配線)|settings\.json|category_hook
+hook|settings\.json|category_hook
 機械強制|sh -n|category_machine_enforce
 機械強制|動作テスト|category_machine_enforce
 機械検証|動作テスト|category_machine_verify
@@ -352,6 +352,26 @@ rm -f /tmp/_sv_mismatch_$$ 2>/dev/null
 # 完了条件にコマンド一切なし → WARN（PASS 維持、観測ログのみ）
 if [ "$COMPLETION_HIT" = "1" ] && [ "$COMPLETION_HAS_COMMAND" = "0" ]; then
   log "[WARN] completion block has no measurable command (grep/find/tail/sh等不在) but pass"
+fi
+
+# §3.4.3 dispatch pre-gate: タスクが remote に push 済か検証
+# prompt から TASK-DEVSYS-* ID を抽出し、dispatch_pre_gate.sh で remote 確認
+DISPATCH_GATE="${HOME}/Desktop/dev-system/scripts/devs_dispatch_pre_gate.sh"
+if [ -x "$DISPATCH_GATE" ]; then
+  TASK_ID_EXTRACTED=$(printf '%s' "$PROMPT_TEXT" | grep -oE 'TASK-DEVSYS-[A-Z0-9_-]+' | head -1) || TASK_ID_EXTRACTED=""
+  if [ -n "$TASK_ID_EXTRACTED" ]; then
+    log "[dispatch-pre-gate] checking task=${TASK_ID_EXTRACTED} on remote"
+    if ! sh "$DISPATCH_GATE" --task-id "$TASK_ID_EXTRACTED" >/dev/null 2>&1; then
+      REASON="§3.4.3 dispatch pre-gate FAIL: タスク '${TASK_ID_EXTRACTED}' が remote に IN_PROGRESS で登録されていません。先に Mission Queue 登録 + push を実行してください"
+      printf 'BLOCK\tdispatch_pre_gate\t%s\n' "$REASON" 1>&2
+      log "[BLOCK] dispatch_pre_gate task=${TASK_ID_EXTRACTED}"
+      cat <<JSONOUT
+{"decision":"block","reason":"${REASON}"}
+JSONOUT
+      exit 2
+    fi
+    log "[dispatch-pre-gate] PASS task=${TASK_ID_EXTRACTED}"
+  fi
 fi
 
 log "[PASS] purpose=${PURPOSE_HIT} completion=${COMPLETION_HIT} cmd=${COMPLETION_HAS_COMMAND} prompt_len=${PROMPT_LEN}"
