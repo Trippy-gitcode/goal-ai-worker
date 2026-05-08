@@ -23,7 +23,7 @@ const ENV_BASE = {
   NODE_ENV: 'test',
 };
 
-// fetch interceptor that records calls and routes Supabase RPC URLs
+// fetch interceptor that records calls and serves the Supabase OpenAPI schema
 // through a controllable fixture, while letting any other URLs return 200.
 function installFetchMock({ missing = [], errorOn = [] } = {}) {
   const calls = [];
@@ -31,13 +31,13 @@ function installFetchMock({ missing = [], errorOn = [] } = {}) {
   globalThis.fetch = vi.fn(async (url, init) => {
     const u = String(url);
     calls.push({ url: u, method: init?.method });
-    if (u.includes('/rest/v1/rpc/')) {
-      const name = u.split('/rest/v1/rpc/')[1];
-      if (errorOn.includes(name)) throw new Error(`network failure for ${name}`);
-      if (missing.includes(name)) {
-        return new Response(JSON.stringify({ code: 'PGRST202', message: 'function not found' }), { status: 404 });
+    if (u.endsWith('/rest/v1/')) {
+      if (errorOn.includes('__openapi_schema__')) throw new Error('schema fetch failed');
+      const paths = {};
+      for (const rpc of REQUIRED_RPCS) {
+        if (!missing.includes(rpc)) paths[`/rpc/${rpc}`] = {};
       }
-      return new Response('{}', { status: 200 });
+      return new Response(JSON.stringify({ paths }), { status: 200 });
     }
     return new Response('{}', { status: 200 });
   });
@@ -146,16 +146,16 @@ describe('Worker fetchWithRpcGate (E2E)', () => {
     mock = installFetchMock({});
     const worker = (await import('../../src/index.js')).default;
     const env = { ...ENV_BASE };
-    // First non-bypass request runs the probe (REQUIRED_RPCS.length fetches
-    // to /rest/v1/rpc/*).
+    // First non-bypass request runs the probe (one side-effect-free OpenAPI
+    // schema fetch to /rest/v1/).
     const req1 = new Request('https://worker.test/api/error-report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: '{}',
     });
     await worker.fetch(req1, env, {});
-    const probeCalls1 = mock.calls.filter((c) => c.url.includes('/rest/v1/rpc/')).length;
-    expect(probeCalls1).toBe(REQUIRED_RPCS.length);
+    const probeCalls1 = mock.calls.filter((c) => c.url.endsWith('/rest/v1/')).length;
+    expect(probeCalls1).toBe(1);
 
     // Second request — probe is cached on env, so no extra RPC pings.
     const req2 = new Request('https://worker.test/api/error-report', {
@@ -164,7 +164,7 @@ describe('Worker fetchWithRpcGate (E2E)', () => {
       body: '{}',
     });
     await worker.fetch(req2, env, {});
-    const probeCalls2 = mock.calls.filter((c) => c.url.includes('/rest/v1/rpc/')).length;
-    expect(probeCalls2).toBe(REQUIRED_RPCS.length); // unchanged
+    const probeCalls2 = mock.calls.filter((c) => c.url.endsWith('/rest/v1/')).length;
+    expect(probeCalls2).toBe(1); // unchanged
   });
 });

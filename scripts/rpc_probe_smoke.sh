@@ -1,9 +1,10 @@
 #!/bin/bash
 # scripts/rpc_probe_smoke.sh — TASK-LAIS-PHASE5-RPC-PROBE (2026-05-07)
 #
-# Realworld smoke: ping every RPC listed in REQUIRED_RPCS against the live
-# Supabase project that the deployed Worker uses. Exits 0 when every RPC is
-# present, non-zero when any RPC is missing.
+# Realworld smoke: verify every RPC listed in REQUIRED_RPCS is exposed in the
+# live Supabase PostgREST OpenAPI schema. This does not execute the RPCs, so
+# side-effecting handlers such as increment counters and account deletion are
+# safe to verify.
 #
 # Usage:
 #   SUPABASE_URL=...     SUPABASE_SERVICE_KEY=...  bash scripts/rpc_probe_smoke.sh
@@ -41,33 +42,57 @@ echo "[rpc_probe_smoke] required rpcs: ${#REQUIRED_RPCS[@]}"
 MISSING=()
 EXISTS=()
 ERRORED=()
+SCHEMA_FILE="$(mktemp /tmp/lais-rpc-schema.XXXXXX.json)"
+
+schema_status=$(curl -sS -o "$SCHEMA_FILE" -w "%{http_code}" \
+  -X GET \
+  -H "apikey: ${SUPABASE_SERVICE_KEY}" \
+  -H "Authorization: Bearer ${SUPABASE_SERVICE_KEY}" \
+  -H "Accept: application/openapi+json, application/json" \
+  --max-time 10 \
+  "${SUPABASE_URL}/rest/v1/" 2>/dev/null) || schema_status="000"
+
+case "$schema_status" in
+  2??) ;;
+  *)
+    echo "  ERROR   openapi schema fetch (${schema_status})"
+    ERRORED+=("__openapi_schema__")
+    ;;
+esac
 
 for rpc in "${REQUIRED_RPCS[@]}"; do
-  url="${SUPABASE_URL}/rest/v1/rpc/${rpc}"
-  status=$(curl -sS -o /dev/null -w "%{http_code}" \
-    -X POST \
-    -H "apikey: ${SUPABASE_SERVICE_KEY}" \
-    -H "Authorization: Bearer ${SUPABASE_SERVICE_KEY}" \
-    -H "Content-Type: application/json" \
-    --max-time 10 \
-    -d '{}' \
-    "$url" 2>/dev/null) || status="000"
-
-  case "$status" in
-    404)
-      echo "  MISSING $rpc (404)"
-      MISSING+=("$rpc")
-      ;;
-    000|"")
-      echo "  ERROR   $rpc (network failure / timeout)"
+  if [[ "$schema_status" != 2?? ]]; then
+    echo "  ERROR   $rpc (schema unavailable)"
+    ERRORED+=("$rpc")
+    continue
+  fi
+  if node - "$SCHEMA_FILE" "$rpc" <<'NODE'
+const fs = require('fs');
+const file = process.argv[2];
+const rpc = process.argv[3];
+try {
+  const schema = JSON.parse(fs.readFileSync(file, 'utf8'));
+  process.exit(schema?.paths && Object.prototype.hasOwnProperty.call(schema.paths, `/rpc/${rpc}`) ? 0 : 1);
+} catch (_) {
+  process.exit(2);
+}
+NODE
+  then
+    echo "  OK      $rpc (openapi)"
+    EXISTS+=("$rpc")
+  else
+    rc=$?
+    if [[ "$rc" -eq 2 ]]; then
+      echo "  ERROR   $rpc (schema parse failure)"
       ERRORED+=("$rpc")
-      ;;
-    *)
-      echo "  OK      $rpc ($status)"
-      EXISTS+=("$rpc")
-      ;;
-  esac
+    else
+      echo "  MISSING $rpc (openapi path absent)"
+      MISSING+=("$rpc")
+    fi
+  fi
 done
+
+rm -f "$SCHEMA_FILE"
 
 echo ""
 echo "[rpc_probe_smoke] summary:"

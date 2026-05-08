@@ -10,11 +10,11 @@
 //
 // Strategy:
 //   - REQUIRED_RPCS is the single source of truth grep'd from src/.
-//   - probeRpcEndpoints(env) issues one HTTP HEAD-equivalent POST per RPC.
-//     Supabase RPC accepts an empty JSON body and replies with:
-//       * 200 / 204 / 4xx (e.g. 400 invalid args) → RPC EXISTS
-//       * 404 → RPC MISSING (handler not deployed)
-//   - Any 404 response causes probeRpcEndpoints() to resolve with
+//   - probeRpcEndpoints(env) fetches the PostgREST OpenAPI schema once and
+//     checks whether `/rpc/<name>` paths are exposed. This is intentionally
+//     side-effect free: some required RPCs mutate counters or delete data and
+//     must not be executed by a startup probe.
+//   - Any missing OpenAPI path causes probeRpcEndpoints() to resolve with
 //     { ok: false, missing: [...] }. The Worker fetch handler maps that to
 //     a 503 Service Unavailable, satisfying the fail-closed contract.
 //   - A successful probe is cached on the env object (Workers reuse env
@@ -50,42 +50,51 @@ function shouldSkipProbeForEnv(env) {
   return mode === 'test' || mode === 'development' || mode === 'preview';
 }
 
-// Internal: probe a single RPC endpoint. Returns { name, exists, status, error }.
-async function _probeOne(env, name, fetchImpl) {
-  const url = `${env.SUPABASE_URL}/rest/v1/rpc/${name}`;
+// Internal: fetch the OpenAPI schema that PostgREST serves at /rest/v1/.
+// Returns one detail entry per required RPC without executing any RPC.
+async function _probeOpenApiSchema(env, list, fetchImpl) {
+  const url = `${env.SUPABASE_URL}/rest/v1/`;
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), PROBE_TIMEOUT_MS);
   try {
     const res = await fetchImpl(url, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'apikey': env.SUPABASE_SERVICE_KEY,
         'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
-        'Content-Type': 'application/json',
+        'Accept': 'application/openapi+json, application/json',
       },
-      body: '{}',
       signal: ctrl.signal,
     });
     clearTimeout(t);
-    // Supabase returns 404 only when the RPC handler is genuinely missing.
-    // 200/204 = success, 4xx (400/401/403/422) = exists but rejected (auth,
-    // bad args), all of which prove the handler is deployed. We treat any
-    // response other than 404 as "exists".
-    return {
-      name,
-      exists: res.status !== 404,
-      status: res.status,
-      error: null,
-    };
+    if (!res.ok) {
+      return list.map((name) => ({
+        name,
+        exists: false,
+        status: res.status,
+        error: `openapi schema fetch failed: status=${res.status}`,
+      }));
+    }
+    const schema = await res.json();
+    const paths = schema?.paths || {};
+    return list.map((name) => {
+      const path = `/rpc/${name}`;
+      return {
+        name,
+        exists: Object.prototype.hasOwnProperty.call(paths, path),
+        status: res.status,
+        error: null,
+      };
+    });
   } catch (err) {
     clearTimeout(t);
-    // Network / timeout / abort = treat as missing (fail-closed).
-    return {
+    // Network / timeout / malformed JSON = treat all as missing (fail-closed).
+    return list.map((name) => ({
       name,
       exists: false,
       status: 0,
       error: err?.message || String(err),
-    };
+    }));
   }
 }
 
@@ -126,7 +135,7 @@ export async function probeRpcEndpoints(env, opts = {}) {
     };
   }
   const list = opts.required || REQUIRED_RPCS;
-  const details = await Promise.all(list.map((n) => _probeOne(env, n, fetchImpl)));
+  const details = await _probeOpenApiSchema(env, list, fetchImpl);
   const missing = details.filter((d) => !d.exists).map((d) => d.name);
   return {
     ok: missing.length === 0,

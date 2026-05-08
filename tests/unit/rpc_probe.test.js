@@ -2,8 +2,8 @@
 //
 // Verifies the startup-time fail-closed Supabase RPC gate:
 //   * REQUIRED_RPCS lists every RPC actually called from src/.
-//   * probeRpcEndpoints() returns ok=true when every probe gets a non-404 response.
-//   * probeRpcEndpoints() returns ok=false + the missing list when any probe is 404.
+//   * probeRpcEndpoints() returns ok=true when the OpenAPI schema exposes every RPC path.
+//   * probeRpcEndpoints() returns ok=false + the missing list when any RPC path is absent.
 //   * ensureRpcReady() caches the success result (1 round-trip per cold start).
 //   * ensureRpcReady() does NOT cache failure (re-probes until fixed).
 //   * rpcProbeFailureResponse() returns a 503 with reason "RPC missing".
@@ -22,22 +22,23 @@ const ENV_BASE = {
   SUPABASE_SERVICE_KEY: 'TEST_SERVICE_KEY',
 };
 
-function makeFetchMock({ existing = [], missing = [], errorOn = [] } = {}) {
+function makeFetchMock({ missing = [], throwSchema = false, schemaStatus = 200 } = {}) {
   return vi.fn(async (url) => {
     const u = String(url);
-    const name = u.split('/rest/v1/rpc/')[1];
-    if (errorOn.includes(name)) {
-      throw new Error(`network failure for ${name}`);
+    if (!u.endsWith('/rest/v1/')) {
+      throw new Error(`unexpected probe URL: ${u}`);
     }
-    if (missing.includes(name)) {
-      return new Response('{"code":"PGRST202","message":"function not found"}', { status: 404 });
+    if (throwSchema) {
+      throw new Error('schema fetch failed');
     }
-    if (existing.includes(name)) {
-      // Empty body POST -> 400 invalid args is a normal "exists" path.
-      return new Response('{"code":"42883","message":"missing arguments"}', { status: 400 });
+    if (schemaStatus !== 200) {
+      return new Response('{}', { status: schemaStatus });
     }
-    // Default: treat as exists with 200.
-    return new Response('{}', { status: 200 });
+    const paths = {};
+    for (const rpc of REQUIRED_RPCS) {
+      if (!missing.includes(rpc)) paths[`/rpc/${rpc}`] = {};
+    }
+    return new Response(JSON.stringify({ paths }), { status: 200 });
   });
 }
 
@@ -58,16 +59,16 @@ describe('REQUIRED_RPCS', () => {
 });
 
 describe('probeRpcEndpoints', () => {
-  it('returns ok=true when every RPC responds with non-404', async () => {
-    const fetchMock = makeFetchMock({ existing: [...REQUIRED_RPCS] });
+  it('returns ok=true when the OpenAPI schema exposes every RPC path', async () => {
+    const fetchMock = makeFetchMock({});
     const result = await probeRpcEndpoints(ENV_BASE, { fetch: fetchMock });
     expect(result.ok).toBe(true);
     expect(result.missing).toEqual([]);
     expect(result.skipped).toBe(false);
-    expect(fetchMock).toHaveBeenCalledTimes(REQUIRED_RPCS.length);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('returns ok=false with the missing names when any RPC is 404', async () => {
+  it('returns ok=false with the missing names when any RPC path is absent', async () => {
     const fetchMock = makeFetchMock({ missing: ['account_atomic_delete'] });
     const result = await probeRpcEndpoints(ENV_BASE, { fetch: fetchMock });
     expect(result.ok).toBe(false);
@@ -75,14 +76,21 @@ describe('probeRpcEndpoints', () => {
     expect(result.missing).toHaveLength(1);
     const detail = result.details.find((d) => d.name === 'account_atomic_delete');
     expect(detail.exists).toBe(false);
-    expect(detail.status).toBe(404);
+    expect(detail.status).toBe(200);
   });
 
-  it('treats network errors as missing (fail-closed)', async () => {
-    const fetchMock = makeFetchMock({ errorOn: ['match_embeddings'] });
+  it('treats schema fetch network errors as missing (fail-closed)', async () => {
+    const fetchMock = makeFetchMock({ throwSchema: true });
     const result = await probeRpcEndpoints(ENV_BASE, { fetch: fetchMock });
     expect(result.ok).toBe(false);
-    expect(result.missing).toContain('match_embeddings');
+    expect(result.missing.sort()).toEqual([...REQUIRED_RPCS].sort());
+  });
+
+  it('treats schema fetch non-2xx as missing (fail-closed)', async () => {
+    const fetchMock = makeFetchMock({ schemaStatus: 503 });
+    const result = await probeRpcEndpoints(ENV_BASE, { fetch: fetchMock });
+    expect(result.ok).toBe(false);
+    expect(result.missing.sort()).toEqual([...REQUIRED_RPCS].sort());
   });
 
   it('reports multiple missing RPCs in one pass', async () => {
@@ -94,14 +102,16 @@ describe('probeRpcEndpoints', () => {
     expect(result.missing.sort()).toEqual(['account_atomic_delete', 'increment_turn_usage']);
   });
 
-  it('sends the SERVICE_KEY in apikey + Authorization headers', async () => {
+  it('fetches the OpenAPI schema with SERVICE_KEY auth and no RPC execution', async () => {
     const fetchMock = makeFetchMock({});
     await probeRpcEndpoints(ENV_BASE, { fetch: fetchMock });
     const call = fetchMock.mock.calls[0];
     expect(call[1].headers.apikey).toBe('TEST_SERVICE_KEY');
     expect(call[1].headers.Authorization).toBe('Bearer TEST_SERVICE_KEY');
-    expect(call[1].method).toBe('POST');
-    expect(call[1].body).toBe('{}');
+    expect(call[1].headers.Accept).toContain('application/openapi+json');
+    expect(call[1].method).toBe('GET');
+    expect(call[1].body).toBeUndefined();
+    expect(String(call[0])).toBe('https://supabase.test/rest/v1/');
   });
 
   it('skips probing when SUPABASE_URL is missing in test mode', async () => {
@@ -137,11 +147,11 @@ describe('ensureRpcReady', () => {
     const fetchMock = makeFetchMock({});
     const r1 = await ensureRpcReady(env, { fetch: fetchMock });
     expect(r1.ok).toBe(true);
-    expect(fetchMock).toHaveBeenCalledTimes(REQUIRED_RPCS.length);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
     // Second call — must hit cache, not fetch again.
     const r2 = await ensureRpcReady(env, { fetch: fetchMock });
     expect(r2.ok).toBe(true);
-    expect(fetchMock).toHaveBeenCalledTimes(REQUIRED_RPCS.length); // unchanged
+    expect(fetchMock).toHaveBeenCalledTimes(1); // unchanged
   });
 
   it('does NOT cache failure — re-probes until missing RPC is fixed', async () => {
@@ -151,8 +161,8 @@ describe('ensureRpcReady', () => {
     expect(r1.ok).toBe(false);
     const r2 = await ensureRpcReady(env, { fetch: fetchMock });
     expect(r2.ok).toBe(false);
-    // Should have called fetch twice * REQUIRED_RPCS.length (no cache).
-    expect(fetchMock).toHaveBeenCalledTimes(REQUIRED_RPCS.length * 2);
+    // Should have fetched the schema twice (no cache on failure).
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it('force=true bypasses the success cache', async () => {
@@ -161,7 +171,7 @@ describe('ensureRpcReady', () => {
     await ensureRpcReady(env, { fetch: fetchMock });
     const baseCalls = fetchMock.mock.calls.length;
     await ensureRpcReady(env, { fetch: fetchMock, force: true });
-    expect(fetchMock.mock.calls.length).toBe(baseCalls + REQUIRED_RPCS.length);
+    expect(fetchMock.mock.calls.length).toBe(baseCalls + 1);
   });
 
   it('returns ok=false when env is null', async () => {
