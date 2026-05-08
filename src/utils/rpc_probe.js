@@ -45,6 +45,11 @@ export const REQUIRED_RPCS = Object.freeze([
 
 const PROBE_TIMEOUT_MS = 5000;
 
+function shouldSkipProbeForEnv(env) {
+  const mode = String(env?.NODE_ENV || env?.ENVIRONMENT || '').toLowerCase();
+  return mode === 'test' || mode === 'development' || mode === 'preview';
+}
+
 // Internal: probe a single RPC endpoint. Returns { name, exists, status, error }.
 async function _probeOne(env, name, fetchImpl) {
   const url = `${env.SUPABASE_URL}/rest/v1/rpc/${name}`;
@@ -95,6 +100,23 @@ async function _probeOne(env, name, fetchImpl) {
 export async function probeRpcEndpoints(env, opts = {}) {
   const fetchImpl = opts.fetch || globalThis.fetch;
   if (!env || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_KEY) {
+    if (!env || !shouldSkipProbeForEnv(env)) {
+      const missing = [];
+      if (!env) missing.push('__env__');
+      if (env && !env.SUPABASE_URL) missing.push('SUPABASE_URL');
+      if (env && !env.SUPABASE_SERVICE_KEY) missing.push('SUPABASE_SERVICE_KEY');
+      return {
+        ok: false,
+        missing,
+        details: missing.map((name) => ({
+          name,
+          exists: false,
+          status: 0,
+          error: 'required runtime config missing',
+        })),
+        skipped: false,
+      };
+    }
     return {
       ok: true,
       missing: [],

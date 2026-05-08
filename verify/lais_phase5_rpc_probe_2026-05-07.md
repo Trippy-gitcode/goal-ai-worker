@@ -103,3 +103,37 @@ Local commit + push of the 6 files above: pending (parent ADV will assemble the 
 - Failures are NOT cached — once the missing RPC is added in Supabase, the next request re-probes and unblocks traffic with no Worker redeploy needed.
 - `/health`, `/api/version`, and `OPTIONS` (CORS preflight) bypass the gate so external uptime monitors and CORS preflight keep working even during a degraded backend window.
 - The realworld 4-missing-RPC finding should be escalated to PO via a separate mission — it indicates production migrations are missing.
+
+## Codex review follow-up (2026-05-08)
+
+Codex found one fail-open edge case before official DONE promotion: when `SUPABASE_URL` or `SUPABASE_SERVICE_KEY` was missing, `probeRpcEndpoints()` skipped probing regardless of runtime environment. That was safe for tests, but unsafe for production because `wrangler.toml` does not set `NODE_ENV=production` explicitly and a secret binding regression would bypass the gate.
+
+Fix applied:
+
+- `src/utils/rpc_probe.js`: config-missing skip is now allowed only for `NODE_ENV` / `ENVIRONMENT` equal to `test`, `development`, or `preview`.
+- Outside those modes, missing `SUPABASE_URL` / `SUPABASE_SERVICE_KEY` returns `ok=false` with missing config names and the Worker responds 503 through the same fail-closed path.
+- `tests/unit/rpc_probe.test.js` and `tests/unit/rpc_probe_e2e.test.js`: added regression coverage for production/default config-missing fail-closed.
+
+Codex verification:
+
+```
+$ node -c src/utils/rpc_probe.js && node -c src/index.js
+PASS
+
+$ rg -o '/rest/v1/rpc/[A-Za-z0-9_]+' src | sed 's#.*/rpc/##' | sort -u
+account_atomic_delete
+delete_old_audit_log
+increment_counter
+increment_turn_usage
+match_embeddings
+
+$ npm test -- tests/unit/rpc_probe.test.js tests/unit/rpc_probe_e2e.test.js
+Test Files  2 passed (2)
+Tests       25 passed (25)
+
+$ npm test
+Test Files  40 passed (40)
+Tests       678 passed (678)
+```
+
+Realworld smoke still detects the same four missing production RPCs and exits 1, which is the intended fail-closed signal for the separate migration/deploy remediation task.

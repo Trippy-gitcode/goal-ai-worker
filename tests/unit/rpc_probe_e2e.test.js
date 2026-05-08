@@ -126,6 +126,22 @@ describe('Worker fetchWithRpcGate (E2E)', () => {
     expect(res.status).toBe(200);
   });
 
+  it('returns 503 when SUPABASE config is missing outside test/dev/preview', async () => {
+    mock = installFetchMock({});
+    const worker = (await import('../../src/index.js')).default;
+    const env = { NODE_ENV: 'production' }; // no SUPABASE_URL / SERVICE_KEY
+    const req = new Request('https://worker.test/api/error-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+    const res = await worker.fetch(req, env, {});
+    expect(res.status).toBe(503);
+    const body = await res.json();
+    expect(body.reason).toBe('RPC missing');
+    expect(body.missing.sort()).toEqual(['SUPABASE_SERVICE_KEY', 'SUPABASE_URL']);
+  });
+
   it('caches a successful probe across requests in the same isolate', async () => {
     mock = installFetchMock({});
     const worker = (await import('../../src/index.js')).default;

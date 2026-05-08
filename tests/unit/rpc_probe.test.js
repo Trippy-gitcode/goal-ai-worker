@@ -104,20 +104,29 @@ describe('probeRpcEndpoints', () => {
     expect(call[1].body).toBe('{}');
   });
 
-  it('skips probing when SUPABASE_URL is missing', async () => {
+  it('skips probing when SUPABASE_URL is missing in test mode', async () => {
     const fetchMock = vi.fn();
-    const result = await probeRpcEndpoints({}, { fetch: fetchMock });
+    const result = await probeRpcEndpoints({ NODE_ENV: 'test' }, { fetch: fetchMock });
     expect(result.ok).toBe(true);
     expect(result.skipped).toBe(true);
     expect(result.skipReason).toBe('supabase_not_configured');
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('skips probing when SUPABASE_SERVICE_KEY is missing', async () => {
+  it('skips probing when SUPABASE_SERVICE_KEY is missing in test mode', async () => {
     const fetchMock = vi.fn();
-    const result = await probeRpcEndpoints({ SUPABASE_URL: 'https://x' }, { fetch: fetchMock });
+    const result = await probeRpcEndpoints({ NODE_ENV: 'test', SUPABASE_URL: 'https://x' }, { fetch: fetchMock });
     expect(result.ok).toBe(true);
     expect(result.skipped).toBe(true);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when SUPABASE config is missing outside test/dev/preview', async () => {
+    const fetchMock = vi.fn();
+    const result = await probeRpcEndpoints({ NODE_ENV: 'production' }, { fetch: fetchMock });
+    expect(result.ok).toBe(false);
+    expect(result.skipped).toBe(false);
+    expect(result.missing.sort()).toEqual(['SUPABASE_SERVICE_KEY', 'SUPABASE_URL']);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

@@ -32,7 +32,7 @@ for f in $TARGETS; do
     }
   ' "$f" || true)
   if [ -n "$MIX" ]; then
-    echo "WARN: G10/§C1.5 terminology mix in $f（§C1.5 参照欠落）:" >&2
+    echo "WARN: G10/§C1.5 terminology mix in ${f}（§C1.5 参照欠落）:" >&2
     printf '%s\n' "$MIX" | head -5 >&2
     WARN_COUNT=$((WARN_COUNT + 1))
   fi
