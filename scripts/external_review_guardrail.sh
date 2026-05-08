@@ -65,7 +65,7 @@ except Exception:
       || date -u -d "$_cg_paused_until" +%s 2>/dev/null \
       || echo 0)
     if [ "$_cg_now_epoch" -lt "$_cg_paused_epoch" ]; then
-      echo "external_review: paused until $_cg_paused_until（3 連続失敗で 1h 停止中）" >&2
+      echo "external_review: paused until ${_cg_paused_until}（3 連続失敗で 1h 停止中）" >&2
       return 1
     fi
   fi

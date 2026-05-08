@@ -13,6 +13,7 @@ import { test, expect } from '@playwright/test';
 import { loadAppForUI } from '../helpers/test-setup';
 
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
+const MOCK_WORKER_ORIGIN = process.env.WORKER_BASE || 'http://127.0.0.1:8787';
 // Worker URL 検証は 自社 worker そのものを 直接 test する spec の 責務 (critical_01_*)。
 // ここは UI smoke なので /health は mock 化して production hammering を 避ける (CF 91% 警報 root cause)。
 
@@ -94,14 +95,14 @@ test.describe('Baseline: API Health', () => {
   // mock route で worker endpoint を local-only に 切替。
   // production の rate-limit (429) に 依存しない 真 fix = local CI でも safely 通る。
   test.beforeEach(async ({ context }) => {
-    await context.route('**/goal-ai-worker.goalai-futoshi.workers.dev/health', (route) => {
+    await context.route(`${MOCK_WORKER_ORIGIN}/health`, (route) => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ ok: true, ts: Date.now() }),
       });
     });
-    await context.route('**/goal-ai-worker.goalai-futoshi.workers.dev/api/version', (route) => {
+    await context.route(`${MOCK_WORKER_ORIGIN}/api/version`, (route) => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -113,29 +114,29 @@ test.describe('Baseline: API Health', () => {
   test('worker health endpoint responds', async ({ request, context }) => {
     // request fixture は context route を 共有しないため、 page.evaluate(fetch) で 検証する。
     const page = await context.newPage();
-    const ok = await page.evaluate(async () => {
+    const ok = await page.evaluate(async (workerOrigin) => {
       try {
-        const r = await fetch('https://goal-ai-worker.goalai-futoshi.workers.dev/health');
+        const r = await fetch(`${workerOrigin}/health`);
         return r.ok;
       } catch (_) {
         return false;
       }
-    });
+    }, MOCK_WORKER_ORIGIN);
     await page.close();
     expect(ok).toBeTruthy();
   });
 
   test('worker version endpoint responds', async ({ context }) => {
     const page = await context.newPage();
-    const body = await page.evaluate(async () => {
+    const body = await page.evaluate(async (workerOrigin) => {
       try {
-        const r = await fetch('https://goal-ai-worker.goalai-futoshi.workers.dev/api/version');
+        const r = await fetch(`${workerOrigin}/api/version`);
         if (!r.ok) return null;
         return await r.json();
       } catch (_) {
         return null;
       }
-    });
+    }, MOCK_WORKER_ORIGIN);
     await page.close();
     expect(body).toBeTruthy();
     expect(body.version || body).toBeTruthy();

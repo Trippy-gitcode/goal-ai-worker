@@ -5,7 +5,7 @@ import { test, expect, Page } from '@playwright/test';
 import * as path from 'path';
 import { loadAppReady } from '../helpers/test-setup';
 
-const BASE = process.env.FRONTEND_BASE || 'https://goal-ai-frontend.pages.dev';
+const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
 const SHOT_DIR = path.resolve(__dirname, '../screenshots/arch-08');
 
 async function shot(page: Page, name: string) {

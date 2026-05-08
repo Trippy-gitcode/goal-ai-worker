@@ -34,6 +34,10 @@ const TEST_TOKEN = 'goal_test_7BDSzrA2f3pzQN0z2yNGYSKS';
  * Set the test user's plan via Supabase REST API
  */
 export async function setTestUserPlan(plan: 'free' | 'light' | 'pro' | 'max' | 'ultra'): Promise<void> {
+  if (process.env.E2E_KV_SAFE_LANE === '1' && process.env.SUPABASE_TEST_WRITE !== '1') {
+    console.warn('KV-safe E2E lane: skipping Supabase test-user write (set SUPABASE_TEST_WRITE=1 for explicit write smoke)');
+    return;
+  }
   loadEnv();
   if (!_supabaseUrl || !_supabaseKey) {
     console.warn('Supabase credentials not configured, skipping plan change');

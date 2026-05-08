@@ -12,7 +12,7 @@
 //   が phase 6 (= post-deploy 実機 test) で 別 invoke (= 役割分担 明確化)。
 import { test, expect } from '@playwright/test';
 
-const PROD_URL = process.env.PROD_URL || 'https://goal-ai-worker.goalai-futoshi.workers.dev';
+const PROD_URL = process.env.PROD_URL || process.env.WORKER_BASE || 'http://127.0.0.1:8787';
 
 test.describe('P0 endpoint smoke (P5#48 fix)', () => {
   test.beforeEach(async ({ context }) => {

@@ -25,7 +25,7 @@
 
 import { test, expect } from '@playwright/test';
 
-const PROD_BASE_URL = process.env.PROD_BASE_URL || 'https://goal-ai-worker.goalai-futoshi.workers.dev';
+const PROD_BASE_URL = process.env.PROD_BASE_URL || process.env.WORKER_BASE || 'http://127.0.0.1:8787';
 
 // placeholder 残存 を 機械検出 し describe.skip で 雛形 を 「待機 状態」 で 維持。
 // 真 fix の 要点:

@@ -48,7 +48,7 @@ import { loadAppReady, installApiMocks } from '../helpers/test-setup';
 //   毎回 ERR_CONNECTION_REFUSED で 1-a / 1-g / 1-h fail = config と spec の port 不整合 root cause。
 //   default を 5173 に 統一 = 真 fix。
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
-const WORKER = process.env.WORKER_BASE || 'https://goal-ai-worker.goalai-futoshi.workers.dev';
+const WORKER = process.env.WORKER_BASE || 'http://127.0.0.1:8787';
 const SCREENSHOT_DIR = path.resolve(__dirname, '../screenshots/critical_01');
 
 async function shot(page: Page, name: string) {

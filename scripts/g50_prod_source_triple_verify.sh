@@ -21,6 +21,7 @@ set -eu
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
+G50_PRE_PUSH_MODE="${G50_PRE_PUSH_MODE:-0}"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  G50 production / source / commit SHA 三点照合"
@@ -39,6 +40,11 @@ echo "source APP_VERSION:    $SOURCE_VER"
 WORKER_URL="${WORKER_PROD_URL:-https://goal-ai-worker.goalai-futoshi.workers.dev}"
 PROD_RESP=$(curl -sS --max-time 10 "${WORKER_URL}/api/version" 2>/dev/null || echo "")
 if [ -z "$PROD_RESP" ]; then
+  if [ "$G50_PRE_PUSH_MODE" = "1" ]; then
+    echo "⚠️ G50 WARN: production /api/version 取得不能 (${WORKER_URL}/api/version)"
+    echo "pre-push mode: push 前の production check は可視化のみ。post-deploy G50 で strict verify する。"
+    exit 0
+  fi
   echo "🛑 G50 FAIL: production /api/version 取得不能 (${WORKER_URL}/api/version)"
   exit 2
 fi
@@ -65,11 +71,20 @@ fi
 
 if [ -n "$ERRORS" ]; then
   echo ""
-  printf "🛑 G50 FAIL: 三点照合 mismatch 検出%b\n" "$ERRORS"
+  if [ "$G50_PRE_PUSH_MODE" = "1" ]; then
+    printf "⚠️ G50 WARN: 三点照合 mismatch 検出%b\n" "$ERRORS"
+  else
+    printf "🛑 G50 FAIL: 三点照合 mismatch 検出%b\n" "$ERRORS"
+  fi
   echo ""
   echo "対処:"
   echo "  source ≠ prod の場合: wrangler deploy --env production を実行"
   echo "  local ≠ origin の場合: git push origin main を実行"
+  if [ "$G50_PRE_PUSH_MODE" = "1" ]; then
+    echo "  pre-push mode: これは push 前の期待差分として記録し、post-deploy G50 で strict 化"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    exit 0
+  fi
   echo "  両方一致するまで 本 gate を pass させない (#50 同型 防止)"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   exit 2

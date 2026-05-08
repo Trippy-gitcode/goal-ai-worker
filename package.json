@@ -12,6 +12,8 @@
     "deploy:staging": "wrangler deploy --env staging",
     "deploy:production": "wrangler deploy --env production",
     "deploy:frontend": "vite build && npx wrangler pages deploy frontend-dist --project-name goal-ai-frontend",
+    "test:e2e:local": "sh scripts/e2e_local_safe.sh",
+    "test:e2e:prod-readonly": "sh scripts/e2e_prod_readonly_smoke.sh",
     "test": "vitest run --config vitest.config.js",
     "test:watch": "vitest --config vitest.config.js",
     "token:create": "node scripts/create-token.js",

@@ -46,7 +46,7 @@ import { loadAppReady } from '../helpers/test-setup';
 
 // SUBAGENT-LAIS-PLAYWRIGHT-FAIL-SPEC-FIX-V1 (2026-05-04): port 4173 -> 5173 (config 整合)
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
-const WORKER = process.env.WORKER_BASE || 'https://goal-ai-worker.goalai-futoshi.workers.dev';
+const WORKER = process.env.WORKER_BASE || 'http://127.0.0.1:8787';
 const SCREENSHOT_DIR = path.resolve(__dirname, '../screenshots/critical_02');
 
 async function shot(page: Page, name: string) {

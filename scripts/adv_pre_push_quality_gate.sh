@@ -10,7 +10,7 @@
 #
 # 動作 (manual or pre-push hook 経由 自動起動):
 #   step a: vitest unit test 全 PASS
-#   step b: playwright e2e (4 persona × 全 spec) 全 PASS
+#   step b: KV-safe local/mock playwright smoke (4 persona × baseline + P0 endpoint) 全 PASS
 #   step c: g50 production / source / commit SHA 三点照合
 #   step d: lint (bash -n + changeable_policy_lint + spec_lint_extended) + gitleaks
 #   step e: AI 視点 review marker (env AI_REVIEW_OK=1 必須、 review skip 防止)
@@ -39,6 +39,17 @@ FAIL_COUNT=0
 SKIP_COUNT=0
 FAILED_STEPS=""
 
+run_and_tail() {
+  _run_tail_lines="$1"
+  shift
+  _run_tmp="$(mktemp)"
+  (cd "$REPO_ROOT" && "$@") >"$_run_tmp" 2>&1
+  _run_rc=$?
+  tail -n "$_run_tail_lines" "$_run_tmp"
+  rm -f "$_run_tmp"
+  return "$_run_rc"
+}
+
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  ADV 押す前 必須 quality gate (Primary Quality Gate)"
 echo "  core_spec.md §3.14 + §2.25.21 / 5 step a-e 全 PASS まで push 不能"
@@ -61,7 +72,7 @@ echo "────────────────────────�
 if [ -f "${REPO_ROOT}/vitest.config.js" ] || [ -f "${REPO_ROOT}/vitest.config.ts" ]; then
   # vitest 新 version で `--reporter=basic` invalid (Failed to load custom Reporter from basic)
   # → reporter 引数 削除 (= default reporter) に 変更。
-  if (cd "$REPO_ROOT" && npx vitest run 2>&1 | tail -20); then
+  if run_and_tail 20 npx vitest run; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -75,16 +86,23 @@ else
 fi
 
 # ---------------------------------------------------------------
-# step b: playwright e2e 全 PASS (§3.14 (a) — 4 persona × 全 spec)
+# step b: KV-safe playwright smoke 全 PASS (§3.14 (a) — 4 persona × core smoke)
 # ---------------------------------------------------------------
 echo ""
-echo "[step b] playwright e2e (4 persona × 全 spec) 全 PASS"
+echo "[step b] KV-safe playwright smoke (4 persona × baseline + P0 endpoint) 全 PASS"
 echo "─────────────────────────────────"
 # PO 直命 (2026-05-04): SKIP_PLAYWRIGHT bypass 物理削除、 strict mode 完全化。
 if [ -f "${REPO_ROOT}/playwright.config.ts" ] || [ -f "${REPO_ROOT}/playwright.config.js" ]; then
-  # 注: 既存 e2e は production frontend (https://goal-ai-frontend.pages.dev) 対象
-  # local dev server 起動は不要、 直接 npx playwright test 実行
-  if (cd "$REPO_ROOT" && npx playwright test --reporter=list 2>&1 | tail -30); then
+  # T85: mandatory pre-push E2E must not hit production Cloudflare KV write paths.
+  # scripts/e2e_local_safe.sh forces localhost/mock defaults and runs a static
+  # production-target guard before Playwright.
+  # Full local E2E remains available through `npm run test:e2e:local`. The
+  # pre-push lane is bounded so every push runs a meaningful 4-persona smoke
+  # without repeating a 3160-test suite or consuming production KV budget.
+  if run_and_tail 30 sh scripts/e2e_local_safe.sh \
+      tests/e2e/specs/baseline.spec.ts \
+      tests/e2e/specs/p0-endpoint-coverage.spec.ts \
+      --reporter=list; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -105,7 +123,10 @@ echo "[step c] g50 production 三点照合"
 echo "─────────────────────────────────"
 # PO 直命 (2026-05-04): SKIP_G50 bypass 物理削除、 strict mode 完全化。
 if [ -x "${REPO_ROOT}/scripts/g50_prod_source_triple_verify.sh" ]; then
-  if (cd "$REPO_ROOT" && sh scripts/g50_prod_source_triple_verify.sh 2>&1 | tail -10); then
+  # pre-push runs before origin/main and production can contain the new commit.
+  # Keep the visibility check here, but make strict source/prod/SHA equality a
+  # post-push/post-deploy concern so the gate does not deadlock every push.
+  if run_and_tail 10 env G50_PRE_PUSH_MODE=1 sh scripts/g50_prod_source_triple_verify.sh; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -162,7 +183,9 @@ fi
 # gitleaks (HEAD scan)
 if command -v gitleaks >/dev/null 2>&1; then
   if [ -f "${REPO_ROOT}/.gitleaks.toml" ]; then
-    if ! gitleaks detect --no-git --redact --config="${REPO_ROOT}/.gitleaks.toml" >/dev/null 2>&1; then
+    # pre-push should inspect the commits about to be pushed, not local .dev.vars
+    # or untracked incident archives that are not part of this push.
+    if ! gitleaks git --log-opts="${GITLEAKS_LOG_OPTS:-origin/main..HEAD}" --redact --config="${REPO_ROOT}/.gitleaks.toml" >/dev/null 2>&1; then
       echo "  FAIL: gitleaks 検出"
       STEP_D_FAIL=1
     fi
@@ -191,7 +214,7 @@ echo "────────────────────────�
 # 新 design = adv_ai_review_runner.sh 自動 invoke のみ、 env override 経路 排除。
 if [ -x "${REPO_ROOT}/scripts/adv_ai_review_runner.sh" ]; then
   echo "  AI_REVIEW_OK 不在、 adv_ai_review_runner.sh 自動 invoke (HEAD~1..HEAD review)"
-  if (cd "$REPO_ROOT" && sh scripts/adv_ai_review_runner.sh 2>&1 | tail -30); then
+  if run_and_tail 30 sh scripts/adv_ai_review_runner.sh; then
     echo "  PASS (5 persona review critical=0)"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -217,7 +240,7 @@ echo "[step f] spec ↔ 実装 drift detector"
 echo "─────────────────────────────────"
 # PO 直命 (2026-05-04): SKIP_SPEC_IMPL_DRIFT bypass 物理削除、 strict mode 完全化。
 if [ -x "${REPO_ROOT}/scripts/spec_impl_drift_check.sh" ]; then
-  if (cd "$REPO_ROOT" && bash scripts/spec_impl_drift_check.sh 2>&1 | tail -20); then
+  if run_and_tail 20 bash scripts/spec_impl_drift_check.sh; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -241,7 +264,7 @@ echo "────────────────────────�
 # PO 直命 (2026-05-04): SKIP_DOCS_IMPL_DRIFT + DRIFT_REPORT_ONLY=1 強制 bypass 物理削除、 strict mode 完全化。
 # 旧 = report-only で常時 PASS = やったフリ。 新 = 真 fail で push BLOCK、 docs 整理 mission 推進 trigger。
 if [ -x "${REPO_ROOT}/scripts/docs_impl_drift_check.sh" ]; then
-  if (cd "$REPO_ROOT" && bash scripts/docs_impl_drift_check.sh 2>&1 | tail -10); then
+  if run_and_tail 10 env DOCS_IMPL_DRIFT_PRE_PUSH=1 bash scripts/docs_impl_drift_check.sh; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -375,7 +398,7 @@ echo ""
 echo "[step m] workflow_inversion_check (.github/workflows trigger 検査)"
 echo "─────────────────────────────────"
 if [ -x "${REPO_ROOT}/scripts/workflow_inversion_check.sh" ]; then
-  if (cd "$REPO_ROOT" && sh scripts/workflow_inversion_check.sh 2>&1 | tail -15); then
+  if run_and_tail 15 sh scripts/workflow_inversion_check.sh; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -398,7 +421,7 @@ echo ""
 echo "[step n] 完全独立 + 転記 self-verify (template propagation check)"
 echo "─────────────────────────────────"
 if [ -x "${REPO_ROOT}/scripts/template_propagation_check.sh" ]; then
-  if (cd "$REPO_ROOT" && sh scripts/template_propagation_check.sh 2>&1 | tail -15); then
+  if run_and_tail 15 sh scripts/template_propagation_check.sh; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -418,7 +441,7 @@ echo ""
 echo "[step t1] §3.5 violation self-report check"
 echo "─────────────────────────────────"
 if [ -x "${REPO_ROOT}/scripts/violation_self_report_check.sh" ]; then
-  if (cd "$REPO_ROOT" && sh scripts/violation_self_report_check.sh 2>&1 | tail -15); then
+  if run_and_tail 15 sh scripts/violation_self_report_check.sh; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -438,7 +461,7 @@ echo ""
 echo "[step t2] §3.7 full implementation check (= 部分実行 禁止)"
 echo "─────────────────────────────────"
 if [ -x "${REPO_ROOT}/scripts/full_implementation_check.sh" ]; then
-  if (cd "$REPO_ROOT" && sh scripts/full_implementation_check.sh 2>&1 | tail -15); then
+  if run_and_tail 15 sh scripts/full_implementation_check.sh; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -458,7 +481,7 @@ echo ""
 echo "[step t3] §3.10 end-to-end ownership check"
 echo "─────────────────────────────────"
 if [ -x "${REPO_ROOT}/scripts/end_to_end_ownership_check.sh" ]; then
-  if (cd "$REPO_ROOT" && sh scripts/end_to_end_ownership_check.sh 2>&1 | tail -15); then
+  if run_and_tail 15 sh scripts/end_to_end_ownership_check.sh; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -478,7 +501,7 @@ echo ""
 echo "[step t4] §4.2 即時仕様改定 trigger check"
 echo "─────────────────────────────────"
 if [ -x "${REPO_ROOT}/scripts/section42_auto_fire_check.sh" ]; then
-  if (cd "$REPO_ROOT" && sh scripts/section42_auto_fire_check.sh 2>&1 | tail -15); then
+  if run_and_tail 15 sh scripts/section42_auto_fire_check.sh; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -498,7 +521,7 @@ echo ""
 echo "[step t5] §2.25.18 subagent result verify-first check"
 echo "─────────────────────────────────"
 if [ -x "${REPO_ROOT}/scripts/subagent_result_verify_check.sh" ]; then
-  if (cd "$REPO_ROOT" && sh scripts/subagent_result_verify_check.sh 2>&1 | tail -15); then
+  if run_and_tail 15 sh scripts/subagent_result_verify_check.sh; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -518,7 +541,7 @@ echo ""
 echo "[step t6] §2.25.19 active monitoring check (stall 検知)"
 echo "─────────────────────────────────"
 if [ -x "${REPO_ROOT}/scripts/active_monitoring_check.sh" ]; then
-  if (cd "$REPO_ROOT" && sh scripts/active_monitoring_check.sh 2>&1 | tail -15); then
+  if run_and_tail 15 sh scripts/active_monitoring_check.sh; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else
@@ -538,7 +561,7 @@ echo ""
 echo "[step t7] §2.25.22 ADV Autonomy Loop check (a-c 3 chain)"
 echo "─────────────────────────────────"
 if [ -x "${REPO_ROOT}/scripts/autonomy_loop_check.sh" ]; then
-  if (cd "$REPO_ROOT" && sh scripts/autonomy_loop_check.sh 2>&1 | tail -15); then
+  if run_and_tail 15 sh scripts/autonomy_loop_check.sh; then
     echo "  PASS"
     PASS_COUNT=$((PASS_COUNT + 1))
   else

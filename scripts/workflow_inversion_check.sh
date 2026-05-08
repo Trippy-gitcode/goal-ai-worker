@@ -54,7 +54,22 @@ if [ ! -d "${SCAN_DIR}" ]; then
 fi
 
 # .yml file 列挙 (.disabled-* dir は 除外)
-YML_LIST=$(find "${SCAN_DIR}" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) 2>/dev/null | sort)
+# pre-push は「今回 push される repository content」を検査する gate。
+# 未追跡 workflow は push 対象外なので、作業ツリーに残っていてもここでは block しない。
+YML_LIST_ALL=$(find "${SCAN_DIR}" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) 2>/dev/null | sort)
+YML_LIST=""
+UNTRACKED_SKIPPED=0
+for CANDIDATE_YML in ${YML_LIST_ALL}; do
+  if git -C "$REPO_ROOT" ls-files --error-unmatch "$CANDIDATE_YML" >/dev/null 2>&1; then
+    YML_LIST="${YML_LIST} ${CANDIDATE_YML}"
+  else
+    UNTRACKED_SKIPPED=$((UNTRACKED_SKIPPED + 1))
+  fi
+done
+
+if [ "$UNTRACKED_SKIPPED" -gt 0 ]; then
+  echo "  untracked workflow skipped (not part of this push): ${UNTRACKED_SKIPPED} 件"
+fi
 
 if [ -z "${YML_LIST}" ]; then
   echo "  active .yml file 0 件 = workflow inversion 違反 0 = OK"

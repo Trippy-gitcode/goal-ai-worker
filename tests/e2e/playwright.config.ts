@@ -8,7 +8,7 @@ export default defineConfig({
   fullyParallel: true,
   workers: 4,
   use: {
-    baseURL: process.env.FRONTEND_BASE || 'https://goal-ai-frontend.pages.dev',
+    baseURL: process.env.FRONTEND_BASE || 'http://localhost:5173',
     headless: true,
     viewport: { width: 390, height: 844 }, // iPhone 14
     screenshot: 'only-on-failure',

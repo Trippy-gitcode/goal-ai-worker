@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
 import { loadAppForUI } from '../helpers/test-setup';
 
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
-const WORKER_PROD = 'https://goal-ai-worker.goalai-futoshi.workers.dev';
+const WORKER_PROD = process.env.WORKER_BASE || 'http://127.0.0.1:8787';
 
 test.describe('Plan Modal', () => {
   test('plan modal opens with 5 plans', async ({ page }) => {

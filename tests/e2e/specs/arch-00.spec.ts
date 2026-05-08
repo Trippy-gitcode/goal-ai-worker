@@ -6,7 +6,7 @@ import { test, expect, Page } from '@playwright/test';
 import * as path from 'path';
 import { loadAppReady } from '../helpers/test-setup';
 
-const BASE = process.env.FRONTEND_BASE || 'https://goal-ai-frontend.pages.dev';
+const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
 const SHOT_DIR = path.resolve(__dirname, '../screenshots/arch-00');
 
 async function shot(page: Page, name: string) {
@@ -14,16 +14,7 @@ async function shot(page: Page, name: string) {
 }
 async function loadApp(page: Page) {
   // ARCH-00: Preact画面を有効化するため ?preact=1 付きで読み込む
-  await page.context().addCookies([{
-    name: 'goal_auth_token',
-    value: 'goal_test_7BDSzrA2f3pzQN0z2yNGYSKS',
-    domain: new URL(BASE).hostname,
-    path: '/',
-  }]);
-  await page.goto(BASE + '/?preact=1', { waitUntil: 'domcontentloaded', timeout: 15000 });
-  await page.evaluate(() => { localStorage.setItem('ob_done', '1'); });
-  await page.goto(BASE + '/?preact=1', { waitUntil: 'domcontentloaded', timeout: 15000 });
-  await page.waitForSelector('#btab-today', { timeout: 10000 });
+  await loadAppReady(page, BASE + '/?preact=1');
 }
 async function goTab(page: Page, tab: 'today' | 'talk' | 'goals' | 'me') {
   const id = { today: '#btab-today', talk: '#btab-talk', goals: '#btab-goals', me: '#btab-me' }[tab];

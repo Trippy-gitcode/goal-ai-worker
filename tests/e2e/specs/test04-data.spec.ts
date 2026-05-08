@@ -13,7 +13,7 @@ import { setupGuards, checkGuards } from '../helpers/test-guards';
 import { loadAppReady } from '../helpers/test-setup';
 
 const BASE = process.env.FRONTEND_BASE || 'http://localhost:5173';
-const WORKER = 'https://goal-ai-worker.goalai-futoshi.workers.dev';
+const WORKER = process.env.WORKER_BASE || 'http://127.0.0.1:8787';
 const SCREENSHOT_DIR = path.resolve(__dirname, '../screenshots/test04');
 const AI_TIMEOUT = 45000;
 

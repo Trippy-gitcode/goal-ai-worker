@@ -280,3 +280,5 @@
 
 [MECHANICAL-ENFORCEMENT-RESIDUAL-DEPLOY-V1] 2026-05-04T22:14Z Lais 転記 15 件、 漏れ 0 件、 signin_success=true cmd_unit=15files_chmod+x_bash_n_PASS cmd_e2e=15dev-system_転記_完全独立_dispatch=0 cmd_realworld=15script_真_invoke_exit0
 
+
+[POST-DEPLOY-SMOKE][goal-ai-worker] 2026-05-08T03:34:44Z HTTP 200 + status ok、 url=�� signin_success=true
